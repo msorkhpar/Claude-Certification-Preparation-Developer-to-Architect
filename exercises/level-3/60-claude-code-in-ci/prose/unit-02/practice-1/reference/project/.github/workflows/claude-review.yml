@@ -1,0 +1,25 @@
+name: Claude review
+on:
+  pull_request:
+    types: [opened, synchronize]
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Review the pull request
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          git diff origin/${{ github.base_ref }}...HEAD | claude --bare -p "Review the change on standard input." \
+            --append-system-prompt-file CLAUDE.md \
+            --output-format json \
+            --json-schema "$(cat review-schema.json)" \
+            --max-turns 8 \
+            --allowedTools "Read,Grep,Glob" > review.json

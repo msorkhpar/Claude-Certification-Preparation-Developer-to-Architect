@@ -1,0 +1,157 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "29-context-engineering"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 5,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Citations, the Files API and the practice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A request enables citations on one document and includes `output_config.format` with a JSON schema. What happens?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A 400 error comes back, because the features conflict",
+            "correct": true,
+            "says": "The page says \"Citations and structured outputs are incompatible\", and \"the API returns a 400 error\"."
+          },
+          {
+            "id": "b",
+            "text": "The reply is JSON with the citations inside the schema's fields",
+            "correct": false,
+            "says": "Ruled out because \"citations require interleaving citation blocks with text output, which is incompatible with the strict JSON schema constraints of structured outputs.\""
+          },
+          {
+            "id": "c",
+            "text": "The citations are dropped, and the schema is applied alone",
+            "correct": false,
+            "says": "Ruled out because the request does not run at all: \"the API returns a 400 error\"."
+          },
+          {
+            "id": "d",
+            "text": "The schema is dropped, and the citations come back alone",
+            "correct": false,
+            "says": "Ruled out because \"the API returns a 400 error\", so a rejected request returns no citations."
+          }
+        ],
+        "origin": {
+          "path": "course/29-context-engineering/03-citations-the-files-api-and-the-practice.md",
+          "section": "The one combination that fails"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "An application sends the id of an uploaded file straight from a web form into a Messages request. What is the risk?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Someone could read another customer's material in the same workspace",
+            "correct": true,
+            "says": "The page says \"a user-supplied file ID would let one user of your application read content that another user uploaded.\""
+          },
+          {
+            "id": "b",
+            "text": "The file would be deleted as soon as the request had been read",
+            "correct": false,
+            "says": "Ruled out because \"Files persist until you delete them\"."
+          },
+          {
+            "id": "c",
+            "text": "The request would be billed at twice the usual input price",
+            "correct": false,
+            "says": "Ruled out because \"File content used in Messages requests is priced as input tokens\", at the usual rate."
+          },
+          {
+            "id": "d",
+            "text": "The file would be moved to the account of the user who sent the id",
+            "correct": false,
+            "says": "Ruled out because the page describes read access in a shared space, since files are \"accessible to your entire workspace\", and says nothing of moving them."
+          }
+        ],
+        "origin": {
+          "path": "course/29-context-engineering/03-citations-the-files-api-and-the-practice.md",
+          "section": "The Files API"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A citation reports a span from character 40 to character 30 in a document of 100 characters. Which problem does the practice's check name?",
+        "options": [
+          {
+            "id": "a",
+            "text": "`unknown_document`, since the index is outside the list",
+            "correct": false,
+            "says": "Ruled out because `unknown_document` means \"the document index is outside the list\", and this citation names a range."
+          },
+          {
+            "id": "b",
+            "text": "`text_mismatch`, since the cited text is not in the document",
+            "correct": false,
+            "says": "Ruled out because the checks run \"in this order of checks\", and the range check comes before the text comparison."
+          },
+          {
+            "id": "c",
+            "text": "`bad_range`, since the end is not after the start",
+            "correct": true,
+            "says": "The page lists `bad_range` as \"start below 0, end not after start, or end past the text\"."
+          },
+          {
+            "id": "d",
+            "text": "`unsupported_type`, since the citation is not a character range",
+            "correct": false,
+            "says": "Ruled out because `unsupported_type` means \"the citation is not a `char_location`\", and a character range is one."
+          }
+        ],
+        "origin": {
+          "path": "course/29-context-engineering/03-citations-the-files-api-and-the-practice.md",
+          "section": "Check a citation yourself"
+        }
+      }
+    ],
+    "concepts": [
+      "Check a citation yourself, as the page teaches it",
+      "Citations, the Files API and the practice, as the page teaches it",
+      "The Files API, as the page teaches it",
+      "The one combination that fails, as the page teaches it"
+    ]
+  }
+}

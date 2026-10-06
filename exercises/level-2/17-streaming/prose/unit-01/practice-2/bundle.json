@@ -1,0 +1,78 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "17-streaming"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 2,
+  "title": "Practice: assemble a streamed message (TypeScript)",
+  "lang": "typescript",
+  "main_file": "assemble.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "assemble.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-2/17-streaming/prose/unit-01/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-2/17-streaming/prose/unit-01/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-2/17-streaming/prose/unit-01/practice-2/assemble.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 text deltas are joined and the message is complete",
+      "kind": "main",
+      "says": "Text deltas are joined and the message is complete"
+    },
+    {
+      "id": "e1 tool input is the fragments joined then parsed and empty input is an empty object",
+      "kind": "edge",
+      "says": "Tool input is the fragments joined, then parsed; empty input is {}"
+    },
+    {
+      "id": "e2 ping and unknown event types are ignored",
+      "kind": "edge",
+      "says": "ping and unknown event types are ignored"
+    },
+    {
+      "id": "e3 an error event raises with its type and message",
+      "kind": "edge",
+      "says": "An error event raises with its type and message"
+    },
+    {
+      "id": "e4 a stream that ends before message stop is an error not a short message",
+      "kind": "edge",
+      "says": "A stream that ends before message_stop is an error, not a short message"
+    },
+    {
+      "id": "e5 usage takes input tokens from the start and the cumulative output from the end",
+      "kind": "edge",
+      "says": "Usage: input tokens from the start, the cumulative output tokens from the end"
+    },
+    {
+      "id": "e6 blocks keep their index order and thinking fields are assembled",
+      "kind": "edge",
+      "says": "Blocks keep their index order; thinking fields are assembled"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/17-streaming/01-events-and-assembling-a-message.md"
+}

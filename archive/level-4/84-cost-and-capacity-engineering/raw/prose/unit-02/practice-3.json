@@ -1,0 +1,281 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "84-cost-and-capacity-engineering"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: the decisions of an internal gateway (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: the decisions of an internal gateway"
+    },
+    {
+      "type": "para",
+      "text": "Four product teams call Claude through one internal gateway that holds the credentials, so that the platform team can route requests, enforce budgets, show each team what it spent and protect callers that cannot wait. In this practice you write the four decisions that gateway makes: the model a request is sent to, whether a request is admitted against the team's budget, the cost table that each team sees, and whether a caller gets its answer on the same connection or through accept-and-poll. The model is not called: the tests give you requests, policies and usage rows. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`route`, `admit`, `showback`, `delivery`); TypeScript has the same names; Java has the same names as static methods of `GatewayBudget` and Kotlin has top-level functions. Numbers are whole numbers (money in cents, tokens, seconds, percent), so that every language gives the same figures. Maps and lists are JSON-like, as the starters show. A refusal is `ValueError` (TypeScript: an `Error`; Java and Kotlin: `IllegalArgumentException`)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working gateway with six gaps cut out of it. Everything that is plumbing is written and correct: the grouping of rows by team, the ordering of the showback and the rows of the result. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value (`None`, `null`, `0`), so the starter runs and fails every case on an assertion. Debug a gap by logging its input with the `log` line at the top of the file (the starter already logs the input of one function; add your own `log.debug` lines the same way); a run shows the lines you logged under the failing case. Write the gaps in this order (the Java and Kotlin names are the camel-case forms, TypeScript has no leading underscore):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_chosen_model` unlocks `m1` and `e6`: the model the policy picks for a request, with a pin honoured only when allowed.",
+        "`route` unlocks `e1`: the model once the budget status is known (refused when blocked, cheaper when warned).",
+        "`admit` unlocks `e2`: allow, warn or block against the budget.",
+        "`_cost` unlocks `e3`: what one row of tokens costs, and the refusal of a model without a price.",
+        "`_to_cents` unlocks `e4`: a team's total rounded to a cent, once.",
+        "`delivery` unlocks `e5`: sync or accept-and-poll."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About fifteen lines in all. The sections below describe the whole gateway."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`route(request, policy, status)`: `request` is `{task, model}` (`model` is an optional pin), `policy` is `{allowed, routes, default, cheaper}`, `status` is the result of `admit`.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`block` gives `None` (null): the request is refused.",
+              "A pinned model is used only when it is in `policy.allowed`; otherwise the model is `policy.routes[task]`, or `policy.default` for a task the table does not know.",
+              "On `warn` the model is replaced by `policy.cheaper[model]` when it has an entry, and kept when it has none."
+            ]
+          }
+        ],
+        "`admit(spend, budget, estimate)`: one more request that is estimated to cost `estimate` cents, for a team that has spent `spend` of `budget`. `block` when the budget is not positive or when `spend + estimate` is **more than** the budget; `warn` when it reaches 80 percent of the budget (80 percent itself warns) and is not over; otherwise `allow`.",
+        "`showback(rows, prices)`: a row is `{team, model, input, cache_read, output}` (token counts), `prices[model]` has `input`, `cache_read` and `output` in cents per million tokens. For each team add up tokens times price over all of its rows, divide by one million and round **once**, to the nearest cent with halves up. Return `[{team, cents}]`, most expensive first and by team name among equals. A row whose model has no price is refused with `unknown model: <name>`: a gateway never guesses a price.",
+        "`delivery(p95_seconds, timeout_seconds, margin_percent)`: `sync` when `p95_seconds` plus the margin (in percent) fits within `timeout_seconds`, with an exact fit allowed; otherwise `accept-and-poll`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**The gateway owns the model choice.** One table beats each team's habit. *You should see* each task go to its model and an unknown task to the default.",
+        "**A budget degrades before it stops.** *You should see* the cheaper model for a team near its limit and a refusal for a team over it.",
+        "**Admission is exact at the edges.** *You should see* 80 percent warn, 100 percent warn and one cent over block, and a team without a budget blocked.",
+        "**Showback prices every token kind.** Cache reads are cheap and output is dear; a bill that ignores either is wrong. *You should see* 450 and 700 cents.",
+        "**Rounding happens once.** Rounding each row first loses or gains cents. *You should see* two rows of 0.4 cent become 1 cent.",
+        "**A hard latency limit changes the shape of the call.** *You should see* `accept-and-poll` as soon as the slow case, with its margin, no longer fits.",
+        "**A pin is a request, not a right.** *You should see* a pin outside the allowed list ignored."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A request follows the route table of the gateway"
+        ],
+        [
+          "`e1`",
+          "A team near its budget is moved to a cheaper model, and a team over it is refused"
+        ],
+        [
+          "`e2`",
+          "A request is admitted, warned or blocked against the budget"
+        ],
+        [
+          "`e3`",
+          "Showback adds each team's tokens at the price of the model and refuses an unknown model"
+        ],
+        [
+          "`e4`",
+          "Showback rounds each team's total to a cent once"
+        ],
+        [
+          "`e5`",
+          "A caller with a hard latency limit gets accept-and-poll when the slow case does not fit"
+        ],
+        [
+          "`e6`",
+          "A model pinned by a team is honoured only when the policy allows it"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.Comparator;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/** The decisions of an internal gateway: route a request, admit it against a budget, show back what each team spent and choose sync or accept-and-poll. See ../../statement.md. Requests, policies and rows are JSON-like maps. */\nfinal class GatewayBudget {\n    private static final System.Logger LOG = System.getLogger(GatewayBudget.class.getName());\n    private GatewayBudget() {}\n\n    @SuppressWarnings(\"unchecked\")\n    private static Map<String, Object> asMap(Object value) {\n        return (Map<String, Object>) value;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static List<String> asList(Object value) {\n        return (List<String>) value;\n    }\n\n    private static long n(Map<String, Object> map, String key) {\n        return ((Number) map.get(key)).longValue();\n    }\n\n    private static String chosenModel(Map<String, Object> request, Map<String, Object> policy) {\n        Object wanted = request.get(\"model\");\n        return wanted != null && asList(policy.get(\"allowed\")).contains(wanted) ? (String) wanted\n                : (String) asMap(policy.get(\"routes\")).getOrDefault(request.get(\"task\"), policy.get(\"default\"));\n    }\n\n    static String route(Map<String, Object> request, Map<String, Object> policy, String status) {\n        LOG.log(System.Logger.Level.DEBUG, \"route input: {0}\", request);\n        if (status.equals(\"block\")) return null;\n        String model = chosenModel(request, policy);\n        return status.equals(\"warn\") ? (String) asMap(policy.get(\"cheaper\")).getOrDefault(model, model) : model;\n    }\n\n    static String admit(long spend, long budget, long estimate) {\n        if (budget <= 0) return \"block\";\n        long after = spend + estimate;\n        if (after > budget) return \"block\";\n        if (after * 100 >= budget * 80) return \"warn\";\n        return \"allow\";\n    }\n\n    private static long cost(Map<String, Object> row, Map<String, Object> prices) {\n        if (!prices.containsKey(row.get(\"model\"))) throw new IllegalArgumentException(\"unknown model: \" + row.get(\"model\"));\n        Map<String, Object> p = asMap(prices.get(row.get(\"model\")));\n        return n(row, \"input\") * n(p, \"input\") + n(row, \"cache_read\") * n(p, \"cache_read\") + n(row, \"output\") * n(p, \"output\");\n    }\n\n    private static long toCents(long value) {\n        return (value + 500_000) / 1_000_000;\n    }\n\n    static List<Map<String, Object>> showback(List<Map<String, Object>> rows, Map<String, Object> prices) {\n        Map<String, Long> totals = new LinkedHashMap<>();\n        for (Map<String, Object> r : rows) totals.merge((String) r.get(\"team\"), cost(r, prices), Long::sum);\n        List<Map<String, Object>> result = new ArrayList<>();\n        for (Map.Entry<String, Long> e : totals.entrySet()) {\n            Map<String, Object> row = new LinkedHashMap<>();\n            row.put(\"team\", e.getKey());\n            row.put(\"cents\", toCents(e.getValue()));\n            result.add(row);\n        }\n        result.sort(Comparator.comparingLong((Map<String, Object> x) -> -(Long) x.get(\"cents\")).thenComparing(x -> (String) x.get(\"team\")));\n        return result;\n    }\n\n    static String delivery(long p95Seconds, long timeoutSeconds, long marginPercent) {\n        return p95Seconds * (100 + marginPercent) <= timeoutSeconds * 100 ? \"sync\" : \"accept-and-poll\";\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.*;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        Map<String, Object> policy = Map.of(\"allowed\", List.of(\"haiku\", \"sonnet\"), \"routes\", Map.of(\"classify\", \"haiku\", \"draft\", \"sonnet\", \"review\", \"opus\"),\n            \"default\", \"sonnet\", \"cheaper\", Map.of(\"opus\", \"sonnet\", \"sonnet\", \"haiku\"));\n\n        // The gateway first checks the team's budget, then routes the request: near the limit it picks a cheaper model.\n        for (long spend : new long[] {0, 850, 990}) {\n            String status = GatewayBudget.admit(spend, 1000, 100);\n            System.out.println(\"spend \" + spend + \"/1000 -> \" + status + \": a review request goes to \" + GatewayBudget.route(Map.of(\"task\", \"review\"), policy, status));\n        }\n\n        // A delivery check: does a 95th-percentile latency of 40 s leave 20 percent of margin under a 60 s timeout?\n        System.out.println(\"delivery: \" + GatewayBudget.delivery(40, 60, 20));\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.ArrayList;\nimport java.util.Comparator;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/** The decisions of an internal gateway: route a request, admit it against a budget, show back what each team spent and choose sync or accept-and-poll. See ../../statement.md. Requests, policies and rows are JSON-like maps. */\nfinal class GatewayBudget {\n    private static final System.Logger LOG = System.getLogger(GatewayBudget.class.getName());\n    private GatewayBudget() {}\n\n    @SuppressWarnings(\"unchecked\")\n    private static Map<String, Object> asMap(Object value) {\n        return (Map<String, Object>) value;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static List<String> asList(Object value) {\n        return (List<String>) value;\n    }\n\n    private static long n(Map<String, Object> map, String key) {\n        return ((Number) map.get(key)).longValue();\n    }\n\n    private static String chosenModel(Map<String, Object> request, Map<String, Object> policy) {\n        // TODO 1 of 6 (unlocks m1 and e6): the model the policy picks for a request.\n        // Receives the request (`task`, and perhaps `model`, a pin) and the policy (`allowed`, `routes`, `default`; use `asList` and `asMap`). Returns the pinned model\n        // when it is in the `allowed` list; otherwise the model `routes` names for the task, or `default` for a task that is not listed.\n        // Example: task \"review\" with no pin -> \"opus\"; task \"classify\" pinned to \"opus\" (not allowed) -> \"haiku\"\n        return null;\n    }\n\n    static String route(Map<String, Object> request, Map<String, Object> policy, String status) {\n        LOG.log(System.Logger.Level.DEBUG, \"route input: {0}\", request);\n        // TODO 2 of 6 (unlocks e1): the model for the request once the budget status is known.\n        // Receives the request, the policy and the budget status (\"allow\", \"warn\" or \"block\"). Returns null when the status is \"block\"; the model from\n        // `chosenModel` when it is \"allow\"; for \"warn\" the cheaper model that the policy's `cheaper` map names for it (the model itself when none is named).\n        // Example: status \"warn\", chosen model \"opus\", cheaper {opus: sonnet} -> \"sonnet\"\n        return null;\n    }\n\n    static String admit(long spend, long budget, long estimate) {\n        // TODO 3 of 6 (unlocks e2): admit one more request against the budget.\n        // Receives what the team has spent, its budget and the estimated cost of the request, all in cents. Returns \"block\" when the budget is not positive or\n        // `spend + estimate` is more than the budget; \"warn\" when it reaches 80 percent of the budget (80 percent itself warns) and is not over; else \"allow\".\n        // Example: admit(700, 1000, 100) -> \"warn\", admit(900, 1000, 101) -> \"block\"\n        return null;\n    }\n\n    private static long cost(Map<String, Object> row, Map<String, Object> prices) {\n        // TODO 4 of 6 (unlocks e3): what one row of tokens costs.\n        // Receives a row (`model`, `input`, `cache_read`, `output`: token counts) and `prices`, which maps a model to cents per million tokens for the same three\n        // kinds (`n(map, key)` reads a number). Returns tokens times price, summed over the three kinds (not yet divided by a million). Throws\n        // IllegalArgumentException(\"unknown model: \" + name) for a model without a price.\n        // Example: input 1_000_000 at price 200 and nothing else -> 200_000_000\n        return 0;\n    }\n\n    private static long toCents(long value) {\n        // TODO 5 of 6 (unlocks e4): a team's total in whole cents.\n        // Receives a total in cents times a million. Returns it divided by one million and rounded to the nearest cent, halves up, with integer arithmetic.\n        // Example: toCents(500_000) -> 1, toCents(499_999) -> 0\n        return 0;\n    }\n\n    static List<Map<String, Object>> showback(List<Map<String, Object>> rows, Map<String, Object> prices) {\n        Map<String, Long> totals = new LinkedHashMap<>();\n        for (Map<String, Object> r : rows) totals.merge((String) r.get(\"team\"), cost(r, prices), Long::sum);\n        List<Map<String, Object>> result = new ArrayList<>();\n        for (Map.Entry<String, Long> e : totals.entrySet()) {\n            Map<String, Object> row = new LinkedHashMap<>();\n            row.put(\"team\", e.getKey());\n            row.put(\"cents\", toCents(e.getValue()));\n            result.add(row);\n        }\n        result.sort(Comparator.comparingLong((Map<String, Object> x) -> -(Long) x.get(\"cents\")).thenComparing(x -> (String) x.get(\"team\")));\n        return result;\n    }\n\n    static String delivery(long p95Seconds, long timeoutSeconds, long marginPercent) {\n        // TODO 6 of 6 (unlocks e5): sync or accept-and-poll.\n        // Receives the p95 latency and the caller's timeout in seconds and a safety margin in percent. Returns \"sync\" when the p95 plus the margin fits within the\n        // timeout (an exact fit counts), otherwise \"accept-and-poll\". Compare p95 * (100 + margin) with timeout * 100.\n        // Example: delivery(8, 10, 25) -> \"sync\", delivery(8, 10, 26) -> \"accept-and-poll\"\n        return null;\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.*;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        Map<String, Object> policy = Map.of(\"allowed\", List.of(\"haiku\", \"sonnet\"), \"routes\", Map.of(\"classify\", \"haiku\", \"draft\", \"sonnet\", \"review\", \"opus\"),\n            \"default\", \"sonnet\", \"cheaper\", Map.of(\"opus\", \"sonnet\", \"sonnet\", \"haiku\"));\n\n        // The gateway first checks the team's budget, then routes the request: near the limit it picks a cheaper model.\n        for (long spend : new long[] {0, 850, 990}) {\n            String status = GatewayBudget.admit(spend, 1000, 100);\n            System.out.println(\"spend \" + spend + \"/1000 -> \" + status + \": a review request goes to \" + GatewayBudget.route(Map.of(\"task\", \"review\"), policy, status));\n        }\n\n        // A delivery check: does a 95th-percentile latency of 40 s leave 20 percent of margin under a 60 s timeout?\n        System.out.println(\"delivery: \" + GatewayBudget.delivery(40, 60, 20));\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "8487fbe6d50b45a747f95dfb3e9eed3d10c3557a180ea60accc7337f89edfe12",
+  "starting_code": "import java.util.ArrayList;\nimport java.util.Comparator;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/** The decisions of an internal gateway: route a request, admit it against a budget, show back what each team spent and choose sync or accept-and-poll. See ../../statement.md. Requests, policies and rows are JSON-like maps. */\nfinal class GatewayBudget {\n    private static final System.Logger LOG = System.getLogger(GatewayBudget.class.getName());\n    private GatewayBudget() {}\n\n    @SuppressWarnings(\"unchecked\")\n    private static Map<String, Object> asMap(Object value) {\n        return (Map<String, Object>) value;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static List<String> asList(Object value) {\n        return (List<String>) value;\n    }\n\n    private static long n(Map<String, Object> map, String key) {\n        return ((Number) map.get(key)).longValue();\n    }\n\n    private static String chosenModel(Map<String, Object> request, Map<String, Object> policy) {\n        // TODO 1 of 6 (unlocks m1 and e6): the model the policy picks for a request.\n        // Receives the request (`task`, and perhaps `model`, a pin) and the policy (`allowed`, `routes`, `default`; use `asList` and `asMap`). Returns the pinned model\n        // when it is in the `allowed` list; otherwise the model `routes` names for the task, or `default` for a task that is not listed.\n        // Example: task \"review\" with no pin -> \"opus\"; task \"classify\" pinned to \"opus\" (not allowed) -> \"haiku\"\n        return null;\n    }\n\n    static String route(Map<String, Object> request, Map<String, Object> policy, String status) {\n        LOG.log(System.Logger.Level.DEBUG, \"route input: {0}\", request);\n        // TODO 2 of 6 (unlocks e1): the model for the request once the budget status is known.\n        // Receives the request, the policy and the budget status (\"allow\", \"warn\" or \"block\"). Returns null when the status is \"block\"; the model from\n        // `chosenModel` when it is \"allow\"; for \"warn\" the cheaper model that the policy's `cheaper` map names for it (the model itself when none is named).\n        // Example: status \"warn\", chosen model \"opus\", cheaper {opus: sonnet} -> \"sonnet\"\n        return null;\n    }\n\n    static String admit(long spend, long budget, long estimate) {\n        // TODO 3 of 6 (unlocks e2): admit one more request against the budget.\n        // Receives what the team has spent, its budget and the estimated cost of the request, all in cents. Returns \"block\" when the budget is not positive or\n        // `spend + estimate` is more than the budget; \"warn\" when it reaches 80 percent of the budget (80 percent itself warns) and is not over; else \"allow\".\n        // Example: admit(700, 1000, 100) -> \"warn\", admit(900, 1000, 101) -> \"block\"\n        return null;\n    }\n\n    private static long cost(Map<String, Object> row, Map<String, Object> prices) {\n        // TODO 4 of 6 (unlocks e3): what one row of tokens costs.\n        // Receives a row (`model`, `input`, `cache_read`, `output`: token counts) and `prices`, which maps a model to cents per million tokens for the same three\n        // kinds (`n(map, key)` reads a number). Returns tokens times price, summed over the three kinds (not yet divided by a million). Throws\n        // IllegalArgumentException(\"unknown model: \" + name) for a model without a price.\n        // Example: input 1_000_000 at price 200 and nothing else -> 200_000_000\n        return 0;\n    }\n\n    private static long toCents(long value) {\n        // TODO 5 of 6 (unlocks e4): a team's total in whole cents.\n        // Receives a total in cents times a million. Returns it divided by one million and rounded to the nearest cent, halves up, with integer arithmetic.\n        // Example: toCents(500_000) -> 1, toCents(499_999) -> 0\n        return 0;\n    }\n\n    static List<Map<String, Object>> showback(List<Map<String, Object>> rows, Map<String, Object> prices) {\n        Map<String, Long> totals = new LinkedHashMap<>();\n        for (Map<String, Object> r : rows) totals.merge((String) r.get(\"team\"), cost(r, prices), Long::sum);\n        List<Map<String, Object>> result = new ArrayList<>();\n        for (Map.Entry<String, Long> e : totals.entrySet()) {\n            Map<String, Object> row = new LinkedHashMap<>();\n            row.put(\"team\", e.getKey());\n            row.put(\"cents\", toCents(e.getValue()));\n            result.add(row);\n        }\n        result.sort(Comparator.comparingLong((Map<String, Object> x) -> -(Long) x.get(\"cents\")).thenComparing(x -> (String) x.get(\"team\")));\n        return result;\n    }\n\n    static String delivery(long p95Seconds, long timeoutSeconds, long marginPercent) {\n        // TODO 6 of 6 (unlocks e5): sync or accept-and-poll.\n        // Receives the p95 latency and the caller's timeout in seconds and a safety margin in percent. Returns \"sync\" when the p95 plus the margin fits within the\n        // timeout (an exact fit counts), otherwise \"accept-and-poll\". Compare p95 * (100 + margin) with timeout * 100.\n        // Example: delivery(8, 10, 25) -> \"sync\", delivery(8, 10, 26) -> \"accept-and-poll\"\n        return null;\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-4/84-cost-and-capacity-engineering/prose/unit-02/practice-3/src/main/java/GatewayBudget.java",
+    "test_path": "practice/level-4/84-cost-and-capacity-engineering/prose/unit-02/practice-3/src/test/java/GatewayBudgetTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-4/84-cost-and-capacity-engineering/prose/unit-02/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-4/84-cost-and-capacity-engineering/prose/unit-02/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_aRequestFollowsTheRouteTableOfTheGateway()",
+        "kind": "main",
+        "says": "A request follows the route table of the gateway"
+      },
+      {
+        "id": "e1_aTeamNearItsBudgetIsMovedToACheaperModelAndATeamOverItIsRefused()",
+        "kind": "edge",
+        "says": "A team near its budget is moved to a cheaper model, and a team over it is refused"
+      },
+      {
+        "id": "e2_aRequestIsAdmittedWarnedOrBlockedAgainstTheBudget()",
+        "kind": "edge",
+        "says": "A request is admitted, warned or blocked against the budget"
+      },
+      {
+        "id": "e3_showbackAddsEachTeamsTokensAtThePriceOfTheModelAndRefusesAnUnknownModel()",
+        "kind": "edge",
+        "says": "Showback adds each team's tokens at the price of the model and refuses an unknown model"
+      },
+      {
+        "id": "e4_showbackRoundsEachTeamsTotalToACentOnce()",
+        "kind": "edge",
+        "says": "Showback rounds each team's total to a cent once"
+      },
+      {
+        "id": "e5_aCallerWithAHardLatencyLimitGetsAcceptAndPollWhenTheSlowCaseDoesNotFit()",
+        "kind": "edge",
+        "says": "A caller with a hard latency limit gets accept-and-poll when the slow case does not fit"
+      },
+      {
+        "id": "e6_aModelPinnedByATeamIsHonouredOnlyWhenThePolicyAllowsIt()",
+        "kind": "edge",
+        "says": "A model pinned by a team is honoured only when the policy allows it"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-4/84-cost-and-capacity-engineering/prose/unit-02/practice-3/target/test-results/test"
+    },
+    "origin": "course/84-cost-and-capacity-engineering/02-the-gateway-budgets-and-callers-that-cannot-wait.md",
+    "concepts": [
+      "the practice of The gateway, budgets and callers that cannot wait is solved"
+    ],
+    "files": [
+      "practice/level-4/84-cost-and-capacity-engineering/prose/unit-02/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "cost-and-capacity-engineering-u2"
+}

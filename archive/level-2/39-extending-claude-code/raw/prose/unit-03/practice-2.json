@@ -1,0 +1,377 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "39-extending-claude-code"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: a release plugin with a guard hook (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a release plugin with a guard hook"
+    },
+    {
+      "type": "para",
+      "text": "A team wants to share one set of extensions: a skill that drafts release notes, a skill that publishes a release, a subagent that reviews the changelog, and a hook that stops destructive commands. Claude Code packages these as a plugin. In this practice you write the plugin's files for a plugin called `release-kit`, and the team's settings that install it. Tests read the files, and run your hook script the way Claude Code does, as a process that reads one JSON event on standard input."
+    },
+    {
+      "type": "para",
+      "text": "The tests are the same in all four languages, and the hook script is a Python file in all of them: a hook is a separate program, and Python is the one runtime every editor has here, so the Java and Kotlin tests start it as a process too. The rest are files, not code in your language. The checks use the course's own models of the documented rules (`examples/39-hook-gate`, in your language); the Java and Kotlin tests read JSON with Jackson and the YAML front matter with its YAML module. Nothing here starts Claude Code or touches the network."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is the working plugin with ten gaps cut out. The structure of every file is written; the hook script keeps its parsing of shell commands, chaining, `sh -c` and the structured answer. Each gap is marked: a small function in `scripts/guard.py` with its signature, a comment that says what it receives and returns with one example and the cases it unlocks, or a `TODO` value or comment in a file. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. The hook script has a logger: `log` at the top of the file, and a `log.debug` of the command it checks. A run of the tests shows the lines under a failing case, so debug a gap by logging its input with that line. Write them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`is_forced_recursive_rm` in `scripts/guard.py` unlocks `m1`: which `rm` calls are recursive and forced.",
+        "`pipes_download_into_shell` unlocks `m1`: a download piped into a shell.",
+        "`protected_pattern` unlocks `e1`: which protected pattern a path contains.",
+        "`read_event` unlocks `e2`: reading the event, or None for an event that cannot be read.",
+        "`hooks/hooks.json` unlocks `e3`: the `matcher` and the `command` of the one handler.",
+        "`skills/release-notes/SKILL.md` unlocks `e4`: `description`, `allowed-tools` and the instructions.",
+        "`skills/publish/SKILL.md` unlocks `e4`: the invocation rule, `allowed-tools` and the body with `$ARGUMENTS`.",
+        "`agents/changelog-reviewer.md` unlocks `e5`: the front matter and the instructions.",
+        "`.claude-plugin/plugin.json` unlocks `e6`: `version`, `description` and the dependency.",
+        "`.claude/settings.json` unlocks `e7`: the marketplace and the enabled plugin."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The list below describes the whole plugin; the parts you do not write are there so you can see how your parts are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`scripts/guard.py`, a `PreToolUse` hook. It reads one event, a JSON object with `tool_name` and `tool_input`.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "For `Bash`, it looks at the command in every spelling and refuses with the structured answer: exit code 0, and a JSON object on standard output whose `hookSpecificOutput` has `hookEventName` `PreToolUse`, `permissionDecision` `deny` and a non-empty `permissionDecisionReason`. It refuses `git push` (also with options before the subcommand such as `git -C . push`, behind an environment assignment, a path to `git`, `&&`, `;` or `sh -c`), a recursive forced `rm` (`-rf`, `-fr`, `-r -f`, a path to `rm`, inside `sh -c`), and a download piped into a shell (`curl ... | sh`, `wget ... | bash`). It gives no opinion on `git status`, `git pull`, `echo push`, `rm x.txt`, `rm -r build`, a download written to a file, or a pipe into `grep`. No opinion is exit code 0 with nothing printed.",
+              "For `Edit`, `Write` and `MultiEdit`, it blocks a path that contains `.env`, `package-lock.json`, `.git/` or `secrets/`, after turning backslashes into `/`. Blocking is exit code 2, nothing on standard output and the reason on standard error.",
+              "Any other tool gets no opinion. An event that is not valid JSON, is empty, is not an object or has no `tool_name` blocks with exit code 2 and a reason on standard error. A `Bash` event with no command gives no opinion."
+            ]
+          }
+        ],
+        "`hooks/hooks.json`: one `PreToolUse` group with the matcher `Bash|Edit|Write` and one `command` handler that runs the script through `${CLAUDE_PLUGIN_ROOT}`, so it works wherever the plugin is installed.",
+        "`skills/release-notes/SKILL.md`: `name` is `release-notes`. Its `description` says what it does and starts a sentence with `Use when`. Claude may start it. `allowed-tools` pre-approves `Read`, `Grep` and the pattern `Bash(git log *)`, and no bare `Bash`.",
+        "`skills/publish/SKILL.md`: `name` is `publish`. Only a person may start it (`disable-model-invocation: true`). Its `allowed-tools` pre-approves the patterns `Bash(git tag *)` and `Bash(gh release create *)`. Its body uses `$ARGUMENTS`.",
+        "`agents/changelog-reviewer.md`: a subagent named `changelog-reviewer` with a `description`. It reads and does not edit or run commands: `tools` lists only `Read`, `Grep` and `Glob`. It has `memory: project`, a `maxTurns` between 1 and 10, and a `model`. A plugin's agents ignore `permissionMode`, `hooks` and `mcpServers`, so leave them out. The body is the agent's instructions.",
+        "`.claude-plugin/plugin.json`: `name` `release-kit`, a semantic `version`, a `description`, and one dependency, `secrets-vault` at `~2.1.0`, which takes patch updates only. Use the object form `{\"name\", \"version\"}`. No other keys than the ones the manifest documents for this purpose (`author`, `license` and `keywords` are allowed).",
+        "`.claude/settings.json` (the team's file): register a marketplace from a GitHub repository (`owner/name`) under `extraKnownMarketplaces`, and turn the plugin on under `enabledPlugins` as `release-kit@<that marketplace>`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "The guard refuses pushes, forced recursive deletes and piped downloads in every spelling, with a reason, and leaves safe commands alone"
+        ],
+        [
+          "`e1`",
+          "Edits to protected paths stop with exit code 2 and a reason, in any of three tools and with Windows separators"
+        ],
+        [
+          "`e2`",
+          "An unreadable event blocks the call, while other tools and a Bash event with no command are left alone"
+        ],
+        [
+          "`e3`",
+          "The hook is registered once for the three tools it guards and found through the plugin root"
+        ],
+        [
+          "`e4`",
+          "The skills have the right invocation rules, approve only patterns and say when to use them"
+        ],
+        [
+          "`e5`",
+          "The subagent only reads, is bounded, and uses only fields a plugin agent honours"
+        ],
+        [
+          "`e6`",
+          "The manifest names the plugin and pins the dependency to patch updates"
+        ],
+        [
+          "`e7`",
+          "The team settings register a marketplace and enable the plugin from it"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "#!/usr/bin/env python3\n\"\"\"A PreToolUse hook: reads one event from standard input and answers with its exit code, standard output and standard error.\"\"\"\nimport json\nimport logging\nimport re\nimport shlex\nimport sys\n\nlog = logging.getLogger(__name__)\n\nSHELLS = (\"sh\", \"bash\", \"zsh\")\nPROTECTED = (\".env\", \"package-lock.json\", \".git/\", \"secrets/\")\n\n\ndef git_subcommand(args):\n    i = 0\n    while i < len(args):\n        if args[i] in (\"-C\", \"-c\", \"--git-dir\", \"--work-tree\"):\n            i += 2\n        elif args[i].startswith(\"-\"):\n            i += 1\n        else:\n            return args[i]\n    return None\n\n\ndef is_forced_recursive_rm(program, args):\n    short = \"\".join(a[1:] for a in args if a.startswith(\"-\") and not a.startswith(\"--\"))\n    return program == \"rm\" and (\"r\" in short or \"R\" in short or \"--recursive\" in args) and (\"f\" in short or \"--force\" in args)\n\n\ndef pipes_download_into_shell(program, args, position, stages):\n    if program not in SHELLS or position == 0 or \"-c\" in args:\n        return False\n    first = shlex.split(stages[0]) if stages[0].strip() else [\"\"]\n    return first[0].rsplit(\"/\", 1)[-1] in (\"curl\", \"wget\")\n\n\ndef protected_pattern(path):\n    for pattern in PROTECTED:\n        if pattern in path:\n            return pattern\n    return None\n\n\ndef read_event(raw):\n    try:\n        event = json.loads(raw)\n        return event[\"tool_name\"], event.get(\"tool_input\") or {}\n    except (ValueError, KeyError, TypeError):\n        return None\n\n\ndef reason_to_refuse(command):\n    log.debug(\"reason_to_refuse input: %r\", command)\n    parts = re.split(r\"&&|\\|\\||;|&|\\n\", command)\n    for part in parts:\n        stages = part.split(\"|\")\n        for position, stage in enumerate(stages):\n            try:\n                words = shlex.split(stage)\n            except ValueError:\n                return \"a command that cannot be parsed is not run unreviewed\"\n            while words and re.fullmatch(r\"\\w+=\\S*\", words[0]):\n                words = words[1:]\n            if not words:\n                continue\n            program, args = words[0].rsplit(\"/\", 1)[-1], words[1:]\n            if program in SHELLS and \"-c\" in args and args.index(\"-c\") + 1 < len(args):\n                inner = reason_to_refuse(args[args.index(\"-c\") + 1])\n                if inner:\n                    return inner\n            if pipes_download_into_shell(program, args, position, stages):\n                return \"a download piped into a shell is not run\"\n            if program == \"git\" and git_subcommand(args) == \"push\":\n                return \"nothing is pushed from an agent\"\n            if is_forced_recursive_rm(program, args):\n                return \"a recursive forced delete is not run from an agent\"\n    return None\n\n\ndef main():\n    event = read_event(sys.stdin.read())\n    if event is None:\n        sys.stderr.write(\"Blocked: the hook event could not be read\")\n        return 2\n    tool, tool_input = event\n    if tool == \"Bash\":\n        reason = reason_to_refuse(str(tool_input.get(\"command\", \"\")))\n        if reason:\n            print(json.dumps({\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"deny\", \"permissionDecisionReason\": reason}}))\n        return 0\n    if tool in (\"Edit\", \"Write\", \"MultiEdit\"):\n        path = str(tool_input.get(\"file_path\", \"\")).replace(\"\\\\\", \"/\")\n        pattern = protected_pattern(path)\n        if pattern:\n            sys.stderr.write(f\"Blocked: {path} is protected ({pattern})\")\n            return 2\n    return 0\n\n\nif __name__ == \"__main__\":\n    sys.exit(main())\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.claude/settings.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"extraKnownMarketplaces\": {\n    \"acme-tools\": {\n      \"source\": { \"source\": \"github\", \"repo\": \"acme-corp/claude-plugins\" }\n    }\n  },\n  \"enabledPlugins\": {\n    \"release-kit@acme-tools\": true\n  }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.claude-plugin/plugin.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"name\": \"release-kit\",\n  \"version\": \"1.0.0\",\n  \"description\": \"Release notes, a publish command, a changelog reviewer and a guard hook for the release team\",\n  \"dependencies\": [\n    { \"name\": \"secrets-vault\", \"version\": \"~2.1.0\" }\n  ]\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/agents/changelog-reviewer.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "---\nname: changelog-reviewer\ndescription: Reviews a changelog entry for missing items and unclear wording. Use after release notes are drafted.\ntools: Read, Grep, Glob\nmodel: sonnet\nmemory: project\nmaxTurns: 8\n---\nYou review changelog entries. Compare the entry with the merged pull requests, list what is missing, and mark any line a customer could not understand.\nUpdate your memory with wording conventions that this team prefers.\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/hooks/hooks.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"hooks\": {\n    \"PreToolUse\": [\n      {\n        \"matcher\": \"Bash|Edit|Write\",\n        \"hooks\": [\n          {\n            \"type\": \"command\",\n            \"command\": \"python3 \\\"${CLAUDE_PLUGIN_ROOT}/scripts/guard.py\\\"\"\n          }\n        ]\n      }\n    ]\n  }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/skills/publish/SKILL.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "---\nname: publish\ndescription: Tag the release and create the GitHub release from the notes\ndisable-model-invocation: true\nallowed-tools: Bash(git tag *) Bash(gh release create *)\n---\nCreate the tag `v$ARGUMENTS`, then create the GitHub release from the latest release notes.\nReport the URL of the release and nothing else.\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/skills/release-notes/SKILL.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "---\nname: release-notes\ndescription: Write release notes from the merged pull requests since the last tag. Use when asked for release notes, a changelog entry or a summary of what shipped.\nallowed-tools: Read Grep Bash(git log *)\n---\nCollect the merged pull requests with `git log --merges --oneline <last-tag>..HEAD`.\nGroup them under Added, Changed and Fixed, one line each, and link the pull request number.\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "#!/usr/bin/env python3\n\"\"\"A PreToolUse hook: reads one event from standard input and answers with its exit code, standard output and standard error.\"\"\"\nimport json\nimport logging\nimport re\nimport shlex\nimport sys\n\nlog = logging.getLogger(__name__)\n\nSHELLS = (\"sh\", \"bash\", \"zsh\")\nPROTECTED = (\".env\", \"package-lock.json\", \".git/\", \"secrets/\")\n\n\ndef git_subcommand(args):\n    i = 0\n    while i < len(args):\n        if args[i] in (\"-C\", \"-c\", \"--git-dir\", \"--work-tree\"):\n            i += 2\n        elif args[i].startswith(\"-\"):\n            i += 1\n        else:\n            return args[i]\n    return None\n\n\ndef is_forced_recursive_rm(program, args):\n    \"\"\"TODO 1 of 4 (unlocks m1): is this a recursive AND forced rm?\n\n    Receives the program name (no directory) and its list of arguments. Returns True for rm with a recursive flag (-r, -R, --recursive,\n    also inside a group such as -rf or -fr) and a force flag (-f, --force); False otherwise (`rm -r build` and `rm x.txt` are fine).\n    Example: is_forced_recursive_rm(\"rm\", [\"-r\", \"-f\", \"x\"]) -> True, is_forced_recursive_rm(\"rm\", [\"-r\", \"build\"]) -> False\n    \"\"\"\n    return False\n\n\ndef pipes_download_into_shell(program, args, position, stages):\n    \"\"\"TODO 2 of 4 (unlocks m1): is this stage a shell that a download is piped into?\n\n    Receives the stage's program name, its arguments, its position in the pipeline (0 is the first stage) and the list of all stage\n    texts. Returns True when the program is sh, bash or zsh, it is not the first stage, it has no -c, and the first stage starts\n    curl or wget (a path to either counts). Example: for `curl x | sh` the stage `sh` at position 1 -> True; `cat a | sh` -> False\n    \"\"\"\n    return False\n\n\ndef protected_pattern(path):\n    \"\"\"TODO 3 of 4 (unlocks e1): which protected pattern does this path contain?\n\n    Receives a path with `/` separators and uses PROTECTED. Returns the first pattern of PROTECTED that occurs in the path, else None.\n    Example: protected_pattern(\"/w/app/.git/config\") -> \".git/\", protected_pattern(\"/w/src/main.py\") -> None\n    \"\"\"\n    return None\n\n\ndef read_event(raw):\n    \"\"\"TODO 4 of 4 (unlocks e2): read the hook event from its raw text.\n\n    Receives the text of standard input. Returns the pair (tool_name, tool_input) where tool_input is the object under that key or {}\n    when it is missing or empty. Returns None for text that is not JSON, is empty, is not an object or has no tool_name.\n    Example: read_event('{\"tool_name\": \"Bash\", \"tool_input\": {\"command\": \"ls\"}}') -> (\"Bash\", {\"command\": \"ls\"}); read_event(\"[]\") -> None\n    \"\"\"\n    return None\n\n\ndef reason_to_refuse(command):\n    log.debug(\"reason_to_refuse input: %r\", command)\n    parts = re.split(r\"&&|\\|\\||;|&|\\n\", command)\n    for part in parts:\n        stages = part.split(\"|\")\n        for position, stage in enumerate(stages):\n            try:\n                words = shlex.split(stage)\n            except ValueError:\n                return \"a command that cannot be parsed is not run unreviewed\"\n            while words and re.fullmatch(r\"\\w+=\\S*\", words[0]):\n                words = words[1:]\n            if not words:\n                continue\n            program, args = words[0].rsplit(\"/\", 1)[-1], words[1:]\n            if program in SHELLS and \"-c\" in args and args.index(\"-c\") + 1 < len(args):\n                inner = reason_to_refuse(args[args.index(\"-c\") + 1])\n                if inner:\n                    return inner\n            if pipes_download_into_shell(program, args, position, stages):\n                return \"a download piped into a shell is not run\"\n            if program == \"git\" and git_subcommand(args) == \"push\":\n                return \"nothing is pushed from an agent\"\n            if is_forced_recursive_rm(program, args):\n                return \"a recursive forced delete is not run from an agent\"\n    return None\n\n\ndef main():\n    event = read_event(sys.stdin.read())\n    if event is None:\n        sys.stderr.write(\"Blocked: the hook event could not be read\")\n        return 2\n    tool, tool_input = event\n    if tool == \"Bash\":\n        reason = reason_to_refuse(str(tool_input.get(\"command\", \"\")))\n        if reason:\n            print(json.dumps({\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"deny\", \"permissionDecisionReason\": reason}}))\n        return 0\n    if tool in (\"Edit\", \"Write\", \"MultiEdit\"):\n        path = str(tool_input.get(\"file_path\", \"\")).replace(\"\\\\\", \"/\")\n        pattern = protected_pattern(path)\n        if pattern:\n            sys.stderr.write(f\"Blocked: {path} is protected ({pattern})\")\n            return 2\n    return 0\n\n\nif __name__ == \"__main__\":\n    sys.exit(main())\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.claude/settings.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"extraKnownMarketplaces\": {},\n  \"enabledPlugins\": {}\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.claude-plugin/plugin.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"name\": \"release-kit\",\n  \"version\": \"\",\n  \"description\": \"\",\n  \"dependencies\": []\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/agents/changelog-reviewer.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "---\nname: changelog-reviewer\ndescription: TODO\ntools: TODO\nmodel: TODO\nmemory: TODO\nmaxTurns: 0\n---\n<!-- TODO 8 of 10 (unlocks e5): fill the front matter and replace this line with the agent's instructions. Receives nothing, returns the file.\n     Example: `tools: Read, Grep, Glob`, `memory: project`, `maxTurns: 8`, `model: sonnet`, and no permissionMode, hooks or mcpServers. -->\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/hooks/hooks.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"hooks\": {\n    \"PreToolUse\": [\n      {\n        \"matcher\": \"\",\n        \"hooks\": [\n          {\n            \"type\": \"command\",\n            \"command\": \"\"\n          }\n        ]\n      }\n    ]\n  }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/skills/publish/SKILL.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "---\nname: publish\ndescription: TODO\nallowed-tools: TODO\n---\n<!-- TODO 7 of 10 (unlocks e4): make this a skill only a person can start, with two pattern approvals, and use $ARGUMENTS in the body.\n     Example: `disable-model-invocation: true` and `allowed-tools: Bash(git tag *) Bash(gh release create *)`. -->\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/skills/release-notes/SKILL.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "---\nname: release-notes\ndescription: TODO\nallowed-tools: TODO\n---\n<!-- TODO 6 of 10 (unlocks e4): fill description and allowed-tools and write the instructions. Receives nothing, returns the file.\n     Example: `allowed-tools: Read Grep Bash(git log *)`; the description says what the skill does and has a sentence that starts `Use when`. -->\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 7,
+    "paras": 10,
+    "code": 7,
+    "tables": 1,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "4d879961a29b20427f601b40a423f32c1b63cac196940334a6442a3d5149848e",
+  "starting_code": "#!/usr/bin/env python3\n\"\"\"A PreToolUse hook: reads one event from standard input and answers with its exit code, standard output and standard error.\"\"\"\nimport json\nimport logging\nimport re\nimport shlex\nimport sys\n\nlog = logging.getLogger(__name__)\n\nSHELLS = (\"sh\", \"bash\", \"zsh\")\nPROTECTED = (\".env\", \"package-lock.json\", \".git/\", \"secrets/\")\n\n\ndef git_subcommand(args):\n    i = 0\n    while i < len(args):\n        if args[i] in (\"-C\", \"-c\", \"--git-dir\", \"--work-tree\"):\n            i += 2\n        elif args[i].startswith(\"-\"):\n            i += 1\n        else:\n            return args[i]\n    return None\n\n\ndef is_forced_recursive_rm(program, args):\n    \"\"\"TODO 1 of 4 (unlocks m1): is this a recursive AND forced rm?\n\n    Receives the program name (no directory) and its list of arguments. Returns True for rm with a recursive flag (-r, -R, --recursive,\n    also inside a group such as -rf or -fr) and a force flag (-f, --force); False otherwise (`rm -r build` and `rm x.txt` are fine).\n    Example: is_forced_recursive_rm(\"rm\", [\"-r\", \"-f\", \"x\"]) -> True, is_forced_recursive_rm(\"rm\", [\"-r\", \"build\"]) -> False\n    \"\"\"\n    return False\n\n\ndef pipes_download_into_shell(program, args, position, stages):\n    \"\"\"TODO 2 of 4 (unlocks m1): is this stage a shell that a download is piped into?\n\n    Receives the stage's program name, its arguments, its position in the pipeline (0 is the first stage) and the list of all stage\n    texts. Returns True when the program is sh, bash or zsh, it is not the first stage, it has no -c, and the first stage starts\n    curl or wget (a path to either counts). Example: for `curl x | sh` the stage `sh` at position 1 -> True; `cat a | sh` -> False\n    \"\"\"\n    return False\n\n\ndef protected_pattern(path):\n    \"\"\"TODO 3 of 4 (unlocks e1): which protected pattern does this path contain?\n\n    Receives a path with `/` separators and uses PROTECTED. Returns the first pattern of PROTECTED that occurs in the path, else None.\n    Example: protected_pattern(\"/w/app/.git/config\") -> \".git/\", protected_pattern(\"/w/src/main.py\") -> None\n    \"\"\"\n    return None\n\n\ndef read_event(raw):\n    \"\"\"TODO 4 of 4 (unlocks e2): read the hook event from its raw text.\n\n    Receives the text of standard input. Returns the pair (tool_name, tool_input) where tool_input is the object under that key or {}\n    when it is missing or empty. Returns None for text that is not JSON, is empty, is not an object or has no tool_name.\n    Example: read_event('{\"tool_name\": \"Bash\", \"tool_input\": {\"command\": \"ls\"}}') -> (\"Bash\", {\"command\": \"ls\"}); read_event(\"[]\") -> None\n    \"\"\"\n    return None\n\n\ndef reason_to_refuse(command):\n    log.debug(\"reason_to_refuse input: %r\", command)\n    parts = re.split(r\"&&|\\|\\||;|&|\\n\", command)\n    for part in parts:\n        stages = part.split(\"|\")\n        for position, stage in enumerate(stages):\n            try:\n                words = shlex.split(stage)\n            except ValueError:\n                return \"a command that cannot be parsed is not run unreviewed\"\n            while words and re.fullmatch(r\"\\w+=\\S*\", words[0]):\n                words = words[1:]\n            if not words:\n                continue\n            program, args = words[0].rsplit(\"/\", 1)[-1], words[1:]\n            if program in SHELLS and \"-c\" in args and args.index(\"-c\") + 1 < len(args):\n                inner = reason_to_refuse(args[args.index(\"-c\") + 1])\n                if inner:\n                    return inner\n            if pipes_download_into_shell(program, args, position, stages):\n                return \"a download piped into a shell is not run\"\n            if program == \"git\" and git_subcommand(args) == \"push\":\n                return \"nothing is pushed from an agent\"\n            if is_forced_recursive_rm(program, args):\n                return \"a recursive forced delete is not run from an agent\"\n    return None\n\n\ndef main():\n    event = read_event(sys.stdin.read())\n    if event is None:\n        sys.stderr.write(\"Blocked: the hook event could not be read\")\n        return 2\n    tool, tool_input = event\n    if tool == \"Bash\":\n        reason = reason_to_refuse(str(tool_input.get(\"command\", \"\")))\n        if reason:\n            print(json.dumps({\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"deny\", \"permissionDecisionReason\": reason}}))\n        return 0\n    if tool in (\"Edit\", \"Write\", \"MultiEdit\"):\n        path = str(tool_input.get(\"file_path\", \"\")).replace(\"\\\\\", \"/\")\n        pattern = protected_pattern(path)\n        if pattern:\n            sys.stderr.write(f\"Blocked: {path} is protected ({pattern})\")\n            return 2\n    return 0\n\n\nif __name__ == \"__main__\":\n    sys.exit(main())\n",
+  "exercise": {
+    "main_path": "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/project/scripts/guard.py",
+    "test_path": "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/tests/pluginSetup.test.ts",
+    "run_command": [
+      "python3",
+      "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/check_files.py",
+      "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/project/.claude-plugin/plugin.json",
+      "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/project/.claude/settings.json",
+      "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/project/agents/changelog-reviewer.md",
+      "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/project/hooks/hooks.json",
+      "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/project/scripts/guard.py",
+      "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/project/skills/publish/SKILL.md",
+      "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/project/skills/release-notes/SKILL.md"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/tests/pluginSetup.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 the hook script blocks pushes deletes and piped downloads in any spelling",
+        "kind": "main",
+        "says": "The guard refuses pushes, forced recursive deletes and piped downloads in every spelling, with a reason, and leaves safe commands alone"
+      },
+      {
+        "id": "e1 edits to protected paths stop with exit two and a reason",
+        "kind": "edge",
+        "says": "Edits to protected paths stop with exit code 2 and a reason, in any of three tools and with Windows separators"
+      },
+      {
+        "id": "e2 an event it cannot read blocks the call and other tools are left alone",
+        "kind": "edge",
+        "says": "An unreadable event blocks the call, while other tools and a Bash event with no command are left alone"
+      },
+      {
+        "id": "e3 the hook is registered for every tool it guards and found through the plugin root",
+        "kind": "edge",
+        "says": "The hook is registered once for the three tools it guards and found through the plugin root"
+      },
+      {
+        "id": "e4 the skills set the right invocation rules and approve only patterns",
+        "kind": "edge",
+        "says": "The skills have the right invocation rules, approve only patterns and say when to use them"
+      },
+      {
+        "id": "e5 the subagent only reads is bounded and uses only fields a plugin agent honours",
+        "kind": "edge",
+        "says": "The subagent only reads, is bounded, and uses only fields a plugin agent honours"
+      },
+      {
+        "id": "e6 the manifest names the plugin and pins its dependency to patch updates",
+        "kind": "edge",
+        "says": "The manifest names the plugin and pins the dependency to patch updates"
+      },
+      {
+        "id": "e7 the team settings register the marketplace the enabled plugin comes from",
+        "kind": "edge",
+        "says": "The team settings register a marketplace and enable the plugin from it"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/target/report.xml"
+    },
+    "origin": "course/39-extending-claude-code/03-plugins-sharing-and-the-practice.md",
+    "concepts": [
+      "the practice of Plugins, dependencies, sharing and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/project/.claude/settings.json",
+      "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/project/.claude-plugin/plugin.json",
+      "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/project/agents/changelog-reviewer.md",
+      "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/project/hooks/hooks.json",
+      "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/project/skills/publish/SKILL.md",
+      "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/project/skills/release-notes/SKILL.md"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "extending-claude-code-u3"
+}

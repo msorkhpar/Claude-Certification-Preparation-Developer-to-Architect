@@ -1,0 +1,125 @@
+{
+  "gates_api": 1,
+  "inputs": [
+    {
+      "role": "statement",
+      "path": "statement.md",
+      "digest": "sha256:0369a71ab5a82a9cbe770273d0601844f3218e230d32bef4ffbf9f390e76e769"
+    },
+    {
+      "role": "starter",
+      "path": "starter/harness.ts",
+      "digest": "sha256:049a00699e0498e780138e2575115e90ca624a5796b54471a847c91346b6273f"
+    },
+    {
+      "role": "reference",
+      "path": "reference/harness.ts",
+      "digest": "sha256:66e5772db6e5bb28da534d5fab5429578a0c98f04a7436a7412da51c96ac4f29"
+    },
+    {
+      "role": "starter:try-it.ts",
+      "path": "starter/try-it.ts",
+      "digest": "sha256:227f07e37ce2d63bb4a7f7b51e46360803dbb87c4cd813271a8078db070dd8e1"
+    },
+    {
+      "role": "reference:try-it.ts",
+      "path": "reference/try-it.ts",
+      "digest": "sha256:227f07e37ce2d63bb4a7f7b51e46360803dbb87c4cd813271a8078db070dd8e1"
+    },
+    {
+      "role": "tests",
+      "path": "tests/harness.test.ts",
+      "digest": "sha256:5c54149d444b16ab11c1619faa1601d85aa00f4abb82080e01cac493c0cc88a7"
+    },
+    {
+      "role": "plant:e1 an exact check ignores case and spacing but nothing else",
+      "path": "plants/edge-1/harness.ts.plant.json",
+      "digest": "sha256:68a28617b177558db9374599326685da1fead14c886d674d0d512e7675a1f283"
+    },
+    {
+      "role": "plant:e2 a json field check needs a json object with the field and the same typed value",
+      "path": "plants/edge-2/harness.ts.plant.json",
+      "digest": "sha256:1f6b4173edfddd5ac49d658cdd2931d337408bd1e2c7431f01ecfd4427edf813"
+    },
+    {
+      "role": "plant:e3 a judge check sends the rubric prompt and accepts only a bare score at the threshold",
+      "path": "plants/edge-3/harness.ts.plant.json",
+      "digest": "sha256:ce145ed148bc20b5f325a1efe7c213f7484a3e55bb51f7ae1ef7ea08e1785875"
+    },
+    {
+      "role": "plant:e4 a model that fails on one case does not stop the run",
+      "path": "plants/edge-4/harness.ts.plant.json",
+      "digest": "sha256:96d9812add1cc49e59ab479850cb806f1c8a79c1c8d4b8cd76783017ad4a4d89"
+    },
+    {
+      "role": "plant:e5 tags report their own rates and success criteria judge each dimension",
+      "path": "plants/edge-5/harness.ts.plant.json",
+      "digest": "sha256:99b400aedaad190281e42b5f985c894a6aef19cfa18bf4b12dea3bce67ecff14"
+    },
+    {
+      "role": "plant:e6 a regression run names what broke what was fixed and what went missing",
+      "path": "plants/edge-6/harness.ts.plant.json",
+      "digest": "sha256:b782d0ef1c2789c46c8b7866afa28d622e29f73fd76cd1e85f4c3ffe53851e62"
+    },
+    {
+      "role": "plant:e7 repeated runs expose flaky cases and a case passes only if every run does",
+      "path": "plants/edge-7/harness.ts.plant.json",
+      "digest": "sha256:a3ccf63c4d8bb50eebf92335a26fcaf22b78498d0bd0df5b7b7590bf2440e7e2"
+    },
+    {
+      "role": "build:junit-file.mjs",
+      "path": "build/junit-file.mjs",
+      "digest": "sha256:eebbfd3bebdf18b0d715903d01abac0b7199da78c76c588b50c0c40352614cef"
+    },
+    {
+      "role": "build:logger.ts",
+      "path": "build/logger.ts",
+      "digest": "sha256:ee4ada918729a2eb77f3d514a0acf59bad03b63ca373a3a7b92f86d95f23197d"
+    }
+  ],
+  "origins": [
+    {
+      "role": "origin",
+      "path": "course/42-evaluation/03-refining-against-a-set-and-regression-runs.md",
+      "section": null,
+      "digest": "sha256:9a15b27e9fc6d8279c2dc4dbac887da07759a6196d352153c1cf123c69e0a8e4"
+    }
+  ],
+  "gates": [
+    {
+      "id": "G1",
+      "family": "code",
+      "held": true,
+      "says": "all 8 cases passed on the reference, on two runs alike",
+      "recorded": {}
+    },
+    {
+      "id": "G2",
+      "family": "code",
+      "held": true,
+      "says": "none of the 8 cases passed on the starter",
+      "recorded": {}
+    },
+    {
+      "id": "G3",
+      "family": "code",
+      "held": true,
+      "says": "each of the 7 edge cases was caught by its own plant",
+      "recorded": {}
+    },
+    {
+      "id": "G4",
+      "family": "code",
+      "held": true,
+      "says": "every test the report named mapped to one of the 8 cases, and every case was named",
+      "recorded": {}
+    },
+    {
+      "id": "G5",
+      "family": "code",
+      "held": true,
+      "says": "the cited passage of 'course/42-evaluation/03-refining-against-a-set-and-regression-runs.md' still matches the ledger",
+      "recorded": {}
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "63-batch-and-multi-pass-review"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: a review pipeline that picks the right interface, resubmits only what failed and combines independent passes (Python)",
+  "lang": "python",
+  "main_file": "batch_review.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_batch_review.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/63-batch-and-multi-pass-review/prose/unit-02/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-3/63-batch-and-multi-pass-review/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-3/63-batch-and-multi-pass-review/prose/unit-02/practice-1/test_batch_review.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_the_interval_between_submissions_leaves_room_for_the_window_and_the_handling",
+      "kind": "main",
+      "says": "The interval leaves room for the window and the handling"
+    },
+    {
+      "id": "test_e1_an_sla_without_room_for_a_batch_is_refused",
+      "kind": "edge",
+      "says": "An SLA with no room for a batch is refused"
+    },
+    {
+      "id": "test_e2_a_blocking_check_or_a_tool_loop_needs_the_synchronous_api",
+      "kind": "edge",
+      "says": "A blocking check or a tool loop needs the synchronous API"
+    },
+    {
+      "id": "test_e3_only_the_items_that_did_not_succeed_are_resubmitted_by_custom_id",
+      "kind": "edge",
+      "says": "Only the entries that did not succeed are resubmitted, by custom_id"
+    },
+    {
+      "id": "test_e4_an_item_over_the_limit_is_chunked_and_a_rejected_request_is_fixed_first",
+      "kind": "edge",
+      "says": "An entry over the limit is chunked and a rejected request is fixed first"
+    },
+    {
+      "id": "test_e5_a_multi_file_review_gets_a_local_pass_per_file_and_one_integration_pass",
+      "kind": "edge",
+      "says": "A multi-file review gets a local pass per file and one integration pass"
+    },
+    {
+      "id": "test_e6_the_same_finding_from_two_passes_is_one_finding_with_the_highest_severity_and_the_lowest_confidence",
+      "kind": "edge",
+      "says": "The same finding from two passes is one finding with the highest severity and the lowest confidence"
+    },
+    {
+      "id": "test_e7_a_finding_is_accepted_only_when_two_independent_passes_agree_with_confidence",
+      "kind": "edge",
+      "says": "A finding is accepted only when two independent passes agree with confidence"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/63-batch-and-multi-pass-review/02-independent-passes-combined-verdicts-and-the-practice.md"
+}

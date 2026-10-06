@@ -1,0 +1,156 @@
+{
+  "practice": "40-claude-in-the-software-life-cycle/unit-01/practice-1",
+  "name": "pipeline_setup",
+  "tests": {
+    "java": "PipelineSetupTest",
+    "kotlin": "PipelineSetupTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_the_mention_workflow_answers_only_claude_comments_and_holds_no_key",
+      "typescript": "m1 the mention workflow answers only claude comments and holds no key",
+      "java": "m1_theMentionWorkflowAnswersOnlyClaudeCommentsAndHoldsNoKey",
+      "kotlin": "m1_theMentionWorkflowAnswersOnlyClaudeCommentsAndHoldsNoKey"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_the_review_workflow_reads_the_code_and_posts_the_review",
+      "typescript": "e1 the review workflow reads the code and posts the review",
+      "java": "e1_theReviewWorkflowReadsTheCodeAndPostsTheReview",
+      "kotlin": "e1_theReviewWorkflowReadsTheCodeAndPostsTheReview"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_each_prompt_file_carries_a_version_that_its_changelog_explains",
+      "typescript": "e2 each prompt file carries a version that its changelog explains",
+      "java": "e2_eachPromptFileCarriesAVersionThatItsChangelogExplains",
+      "kotlin": "e2_eachPromptFileCarriesAVersionThatItsChangelogExplains"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_the_review_guidance_and_the_git_workflow_are_files_the_reviewer_and_claude_read",
+      "typescript": "e3 the review guidance and the git workflow are files the reviewer and claude read",
+      "java": "e3_theReviewGuidanceAndTheGitWorkflowAreFilesTheReviewerAndClaudeRead",
+      "kotlin": "e3_theReviewGuidanceAndTheGitWorkflowAreFilesTheReviewerAndClaudeRead"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_every_run_is_bounded_by_turns_time_and_concurrency",
+      "typescript": "e4 every run is bounded by turns time and concurrency",
+      "java": "e4_everyRunIsBoundedByTurnsTimeAndConcurrency",
+      "kotlin": "e4_everyRunIsBoundedByTurnsTimeAndConcurrency"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_no_file_holds_a_key_a_personal_path_or_an_address",
+      "typescript": "e5 no file holds a key a personal path or an address",
+      "java": "e5_noFileHoldsAKeyAPersonalPathOrAnAddress",
+      "kotlin": "e5_noFileHoldsAKeyAPersonalPathOrAnAddress"
+    }
+  },
+  "plants": {
+    "wrong-mention-unguarded": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "starts a runner on every comment instead of only on @claude mentions"
+    },
+    "wrong-mention-beta": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "uses the beta action instead of v1"
+    },
+    "wrong-review-writes": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "gives the review job write access to the contents"
+    },
+    "wrong-review-no-comment": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "runs the review without --comment, so nothing is posted"
+    },
+    "wrong-review-no-checkout": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "runs the review skill without checking the repository out"
+    },
+    "wrong-review-types": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "reviews only opened and updated pull requests, not reopened or ready ones"
+    },
+    "wrong-review-no-plugin": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "names the review skill but never installs the plugin that provides it"
+    },
+    "wrong-prompt-version-mismatch": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "leaves the changelog on an older version than the prompt"
+    },
+    "wrong-prompt-no-version": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "drops the version from the prompt file"
+    },
+    "wrong-review-no-skip": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "has no Skip section in the review guidance"
+    },
+    "wrong-main-allowed": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "leaves out the rule never to commit to main"
+    },
+    "wrong-timeout-too-long": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "gives the mention job a timeout of an hour"
+    },
+    "wrong-turns-too-many": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "allows 25 turns per mention run"
+    },
+    "wrong-review-no-cancel": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "lets a running review finish after a new push"
+    },
+    "wrong-key-in-notes": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "writes an API key into the git workflow notes"
+    },
+    "wrong-home-path": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "writes a personal home path into the changelog"
+    },
+    "wrong-email-address": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "writes a real looking email address into the review guidance"
+    }
+  }
+}

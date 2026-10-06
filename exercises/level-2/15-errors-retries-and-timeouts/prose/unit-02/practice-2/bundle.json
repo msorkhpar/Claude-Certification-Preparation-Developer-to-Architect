@@ -1,0 +1,78 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "15-errors-retries-and-timeouts"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: a retry policy, graded on scripted failures (TypeScript)",
+  "lang": "typescript",
+  "main_file": "retry.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "retry.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-2/15-errors-retries-and-timeouts/prose/unit-02/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-2/15-errors-retries-and-timeouts/prose/unit-02/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-2/15-errors-retries-and-timeouts/prose/unit-02/practice-2/retry.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 overloaded twice then success returns the good reply after two waits",
+      "kind": "main",
+      "says": "Overloaded twice, then success: the good reply comes back after waits of 0.5 and 1.0"
+    },
+    {
+      "id": "e1 client errors are not retried",
+      "kind": "edge",
+      "says": "400, 401, 404 and 413 are not retried"
+    },
+    {
+      "id": "e2 retry after is a floor for the wait",
+      "kind": "edge",
+      "says": "retry-after is a floor for the wait"
+    },
+    {
+      "id": "e3 delay doubles up to the cap and the jitter is applied last",
+      "kind": "edge",
+      "says": "The delay doubles up to the cap, and the jitter is applied last"
+    },
+    {
+      "id": "e4 a spend cap 429 is not retried",
+      "kind": "edge",
+      "says": "A spend-cap 429 is not retried"
+    },
+    {
+      "id": "e5 connection errors are retried like server errors",
+      "kind": "edge",
+      "says": "Connection errors are retried like server errors, and give connection_error at the end"
+    },
+    {
+      "id": "e6 giving up reports the last reply and does not wait after the last attempt",
+      "kind": "edge",
+      "says": "Giving up reports the last reply, makes exactly max_attempts calls and waits one time fewer"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/15-errors-retries-and-timeouts/02-retry-back-off-and-idempotency.md"
+}

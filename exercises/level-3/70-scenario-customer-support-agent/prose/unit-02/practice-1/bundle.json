@@ -1,0 +1,78 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "70-scenario-customer-support-agent"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: audit a support agent's sessions and name the first fix (Python)",
+  "lang": "python",
+  "main_file": "audit.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_audit.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-1/test_audit.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_a_mixed_set_of_sessions_gets_every_rate_and_the_first_fix",
+      "kind": "main",
+      "says": "A mixed set of six sessions gets every field right and the first fix"
+    },
+    {
+      "id": "test_e1_no_sessions_give_zero_rates_and_no_diagnosis",
+      "kind": "edge",
+      "says": "No sessions: zero everywhere, a rate of 0, no diagnosis"
+    },
+    {
+      "id": "test_e2_a_protected_call_before_a_successful_identity_check_is_a_skipped_prerequisite",
+      "kind": "edge",
+      "says": "The prerequisite is the order of the steps, and a failed identity check does not open the gate"
+    },
+    {
+      "id": "test_e3_a_refund_over_the_limit_counts_only_when_it_was_made",
+      "kind": "edge",
+      "says": "Only a refund that was made counts as over the limit"
+    },
+    {
+      "id": "test_e4_money_first_then_tool_descriptions_then_escalation_criteria",
+      "kind": "edge",
+      "says": "The order of fixes: code, then descriptions (a tie goes to descriptions), then criteria"
+    },
+    {
+      "id": "test_e5_the_target_boundary_and_rounding_of_the_first_contact_rate",
+      "kind": "edge",
+      "says": "The rate at exactly 0.8 meets the target, 0.6 does not, 2 of 3 is 0.667, and over- and under-escalation are counted apart"
+    },
+    {
+      "id": "test_e6_a_wrong_tool_counts_sessions_and_ignores_steps_with_no_known_right_tool",
+      "kind": "edge",
+      "says": "The wrong tool counts sessions and ignores steps whose right tool is not known"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/70-scenario-customer-support-agent/02-audit-the-sessions-and-the-practice.md"
+}

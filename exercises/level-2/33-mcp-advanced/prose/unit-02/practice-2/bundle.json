@@ -1,0 +1,83 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "33-mcp-advanced"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: an MCP server's side of a multi round-trip request (TypeScript)",
+  "lang": "typescript",
+  "main_file": "mrtr.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "mrtr.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-2/33-mcp-advanced/prose/unit-02/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-2/33-mcp-advanced/prose/unit-02/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-2/33-mcp-advanced/prose/unit-02/practice-2/mrtr.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 a production deploy takes three round trips and keeps no state",
+      "kind": "main",
+      "says": "A production deploy takes three round trips and keeps no state"
+    },
+    {
+      "id": "e1 a staging deploy and a status call finish at once and the tool list is cacheable",
+      "kind": "edge",
+      "says": "A staging deploy and a status call finish at once, and the tool list is cacheable"
+    },
+    {
+      "id": "e2 the server only asks what the client declared it can answer",
+      "kind": "edge",
+      "says": "The server only asks what the client declared it can answer"
+    },
+    {
+      "id": "e3 a no or a missing answer is handled without an error",
+      "kind": "edge",
+      "says": "A no or a missing answer is handled without an error"
+    },
+    {
+      "id": "e4 a state the server did not sign is refused",
+      "kind": "edge",
+      "says": "A state the server did not sign is refused"
+    },
+    {
+      "id": "e5 a state works only for the same user the same call and before it expires",
+      "kind": "edge",
+      "says": "A state works only for the same user, the same call and before it expires"
+    },
+    {
+      "id": "e6 a request the server cannot serve is a protocol error with a code",
+      "kind": "edge",
+      "says": "A request the server cannot serve is a protocol error with a code"
+    },
+    {
+      "id": "e7 the state carries the whole context and an answer alone never skips a step",
+      "kind": "edge",
+      "says": "The state carries the whole context, and an answer alone never skips a step"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/33-mcp-advanced/02-streamable-http-state-and-authorization.md"
+}

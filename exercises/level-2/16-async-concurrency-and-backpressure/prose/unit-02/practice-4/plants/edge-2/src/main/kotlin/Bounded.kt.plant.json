@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/kotlin/Bounded.kt",
+      "old": "    return results.map { it!! }",
+      "new": "    results.firstOrNull { !it!!.ok }?.let { throw RuntimeException(it.error) }\n    return results.map { it!! }"
+    }
+  ]
+}

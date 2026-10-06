@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/java/Router.java",
+      "old": "n(usage, \"output_tokens\") * d(model, \"output\");\n        return Math.round(applyBatch(total, batch) * 1e6) / 1e6;",
+      "new": "n(usage, \"output_tokens\") * d(model, \"output\") * (batch ? 0.5 : 1.0);\n        return Math.round(total * 1e6) / 1e6;"
+    }
+  ]
+}

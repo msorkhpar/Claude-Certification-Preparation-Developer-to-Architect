@@ -1,0 +1,293 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "89-migration-and-model-upgrades-at-scale"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: a roll-out gate (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a roll-out gate"
+    },
+    {
+      "type": "para",
+      "text": "A team moves its product to a newer model the week before the old one retires. It runs the regression suite once, reads the overall score, switches all traffic at midnight and finds out at noon that refunds regressed, that the bill is a third higher and that three request settings now return an error. In this practice you write the pieces that replace that: the calendar of retirements with its urgency, the migration of a request to the settings a new model accepts, the gate that a regression suite must pass, and the step of a staged roll-out with its way back. The model is not called: the tests give you cases, costs, timings, requests and counts. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`retirement_status`, `migrate_request`, `gate`, `rollout_step`); TypeScript has the camel-case names (`retirementStatus`, `migrateRequest`, `rolloutStep`); Java has the same camel-case names as static methods of `Rollout`; Kotlin has top-level functions. A case is `Case(id, segment, must_pass, old_ok, new_ok, old_cost, new_cost, new_ms)` and a request is `Request(model, temperature, top_p, top_k, thinking, tool_choice, strict, prefill)`; the starter shows both in each language, with `days_until` and `percentile` (nearest rank) already written. A model is a `(name, retirement date, tentative)` triple, where the date is ISO text (`2026-11-30`) and tentative says that the date may still move later."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working kit with nine small gaps cut out of it. The plumbing is written: the data types, `days_until`, `percentile`, the sorting of the calendar, the sampling and tool-choice parts of the migration and the assembly of the gate from its checks. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks; a gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_status_line` unlocks `e7`: one calendar line, with its level and the tentative mark.",
+        "`_migrate_thinking` unlocks `e8`: the thinking setting and the change that names it.",
+        "`_must_pass` unlocks `e1`: the failed must-pass ids, sorted.",
+        "`_protected` unlocks `e2`: the protected segments that lost answers.",
+        "`_net_loss` unlocks `e3`: more losses than gains, with both counts.",
+        "`_cost` unlocks `e4`: the cost rise in whole percent against the limit.",
+        "`_latency` unlocks `e5`: the 95th percentile against the limit.",
+        "`_decision` unlocks `m1`: go with no reasons, no-go otherwise.",
+        "`rollout_step` unlocks `e6`: hold, roll back, complete or advance."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole kit."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`retirement_status(models, today)` returns one line per model, `<name>: <days> days, <level>`, with ` (tentative)` added when the date is tentative. Days come from `days_until(today, date)` and are negative once the date has passed. The level is `retired` below zero, `urgent` up to 14 days, `migrate now` up to 60 days and `watch` beyond. The lines run from the fewest days left to the most, ties by name.",
+        "`migrate_request(request)` returns the request for `claude-sonnet-5-5` and the list of changes, in this order: `model set to claude-sonnet-5-5` when the model differs; `removed temperature`, `removed top_p` and `removed top_k` for each of them that is present; a thinking setting of `budget` becomes `adaptive` (`thinking budget replaced by adaptive thinking; sweep the effort`) and `disabled` becomes `between_tools` (`thinking disabled replaced by between_tools`), anything else is kept; a forced tool choice (`any` or `tool`) becomes `auto` with `strict` set (`forced tool choice replaced by auto with strict tools`); an assistant prefill is dropped (`assistant prefill removed; state the format in the instructions`). The new request has no sampling settings and no prefill. A request that needs nothing comes back equal, with no changes.",
+        "`gate(cases, protected, max_cost_up, max_p95)` returns a `decision` (`go` or `no-go`) and a list of `reasons`, one for each check that fails, in this order. `must-pass failed: <ids>` lists, sorted, the cases marked must pass that the new model fails. `protected segment lost answers: <segments>` lists, sorted and distinct, the protected segments with a case the old model got right and the new one did not. `net loss: lost N, gained M` appears when the cases lost outnumber the cases gained. `cost up X% over the Y% limit` appears when the total new cost exceeds the total old cost by more than `max_cost_up` percent (X is the rise in whole percent, rounded down; no rise is 0). `p95 latency X ms over the Y ms limit` appears when the nearest-rank 95th percentile of the new timings is over `max_p95`. The decision is `go` only when there is no reason.",
+        "`rollout_step(stage, requests, errors, min_requests, max_errors_per_1000)` takes the stages 1, 5, 25 and 100 percent of traffic and returns `hold at <stage>` when the stage has fewer than `min_requests` requests, `rollback to 0` when errors per thousand requests (whole number, rounded down) are over the limit, `complete` at stage 100 when healthy, and `advance to <next stage>` otherwise."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**A go with no reasons.** *You should see* a change inside every limit get an empty list of reasons.",
+        "**A case that must pass.** *You should see* a change refused for one broken must-pass case, whatever the average says.",
+        "**A protected segment.** *You should see* a change refused when a protected segment lost answers although the gains elsewhere match the losses.",
+        "**A net loss.** *You should see* both counts named when the losses win.",
+        "**A budget for cost.** *You should see* a rise exactly at the limit pass and a rise one point over it refused.",
+        "**The tail, not the worst case.** *You should see* one slow case in forty not block the change and three slow cases block it.",
+        "**Small steps and a way back.** *You should see* a stage wait for enough requests, then advance, or go back to zero when errors pass the limit.",
+        "**A calendar that ranks.** *You should see* the nearest retirement first, and exactly fourteen days left called urgent.",
+        "**Settings a new model refuses.** *You should see* the sampling settings, the forced tool choice, the prefill and the disabled thinking replaced or removed, each one named."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A change that regresses nothing and stays inside its limits gets a go with no reasons"
+        ],
+        [
+          "`e1`",
+          "A must-pass case that fails blocks the change and the ids are listed in order"
+        ],
+        [
+          "`e2`",
+          "A protected segment that lost answers blocks the change even when gains elsewhere match the losses"
+        ],
+        [
+          "`e3`",
+          "More losses than gains blocks the change and both counts are named"
+        ],
+        [
+          "`e4`",
+          "A cost rise over the limit blocks the change and a rise exactly at the limit does not"
+        ],
+        [
+          "`e5`",
+          "The tail is the nearest-rank 95th percentile and a single slow case does not block"
+        ],
+        [
+          "`e6`",
+          "A roll-out advances when healthy, holds with too few requests and rolls back to zero when errors pass the limit"
+        ],
+        [
+          "`e7`",
+          "The retirement calendar counts days, ranks the nearest first and names the level"
+        ],
+        [
+          "`e8`",
+          "Migration removes the settings the new model refuses and names each change"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.time.LocalDate\nimport java.time.temporal.ChronoUnit\n\nprivate val log = System.getLogger(\"rollout\")\n\n/** Rollout kit: the retirement calendar, the settings a new model refuses, a gate on a regression suite and a staged roll-out. See ../../statement.md. */\n\n/** One case of the regression suite, run on the old and the new model. */\ndata class Case(val id: String, val segment: String, val mustPass: Boolean, val oldOk: Boolean, val newOk: Boolean, val oldCost: Int, val newCost: Int, val newMs: Int)\n\n/** The settings of a request that matter to a migration; null means the setting is absent. */\ndata class Request(val model: String, val temperature: Double?, val topP: Double?, val topK: Double?, val thinking: String, val toolChoice: String, val strict: Boolean, val prefill: Boolean)\n\n/** A model, the date of its retirement (ISO) and whether that date may still move later. */\ndata class Model(val name: String, val date: String, val tentative: Boolean)\n\n/** The migrated request and the changes made to it. */\ndata class Migration(val request: Request, val changes: List<String>)\n\n/** The gate's decision (go or no-go) and its reasons. */\ndata class Verdict(val decision: String, val reasons: List<String>)\n\nval STAGES = listOf(1, 5, 25, 100)\nconst val TARGET = \"claude-sonnet-5-5\"\n\n/** Whole days from one ISO date to another, negative when it has passed (written for you). */\nfun daysUntil(today: String, date: String): Long = ChronoUnit.DAYS.between(LocalDate.parse(today), LocalDate.parse(date))\n\n/** Nearest-rank percentile, 0 for no values (written for you). */\nfun percentile(values: List<Int>, p: Int): Int {\n    if (values.isEmpty()) return 0\n    val ordered = values.sorted()\n    return ordered[(p * ordered.size + 99) / 100 - 1]\n}\n\nprivate fun statusLine(days: Long, name: String, tentative: Boolean): String {\n    val level = if (days < 0) \"retired\" else if (days <= 14) \"urgent\" else if (days <= 60) \"migrate now\" else \"watch\"\n    return \"$name: $days days, $level${if (tentative) \" (tentative)\" else \"\"}\"\n}\n\nfun retirementStatus(models: List<Model>, today: String): List<String> {\n    log.log(System.Logger.Level.DEBUG, \"retirementStatus input: {0}\", models)\n    return models.sortedWith(compareBy<Model>({ daysUntil(today, it.date) }, { it.name }, { it.tentative })).map { statusLine(daysUntil(today, it.date), it.name, it.tentative) }\n}\n\nprivate fun migrateThinking(thinking: String, changes: MutableList<String>): String {\n    if (thinking == \"budget\") {\n        changes.add(\"thinking budget replaced by adaptive thinking; sweep the effort\")\n        return \"adaptive\"\n    }\n    if (thinking == \"disabled\") {\n        changes.add(\"thinking disabled replaced by between_tools\")\n        return \"between_tools\"\n    }\n    return thinking\n}\n\nfun migrateRequest(request: Request): Migration {\n    val changes = mutableListOf<String>()\n    if (request.model != TARGET) changes.add(\"model set to $TARGET\")\n    if (request.temperature != null) changes.add(\"removed temperature\")\n    if (request.topP != null) changes.add(\"removed top_p\")\n    if (request.topK != null) changes.add(\"removed top_k\")\n    val thinking = migrateThinking(request.thinking, changes)\n    var toolChoice = request.toolChoice\n    var strict = request.strict\n    if (toolChoice == \"any\" || toolChoice == \"tool\") {\n        toolChoice = \"auto\"\n        strict = true\n        changes.add(\"forced tool choice replaced by auto with strict tools\")\n    }\n    if (request.prefill) changes.add(\"assistant prefill removed; state the format in the instructions\")\n    return Migration(Request(TARGET, null, null, null, thinking, toolChoice, strict, false), changes)\n}\n\nprivate fun mustPass(cases: List<Case>): List<String> {\n    val failed = cases.filter { it.mustPass && !it.newOk }.map { it.id }.sorted()\n    return if (failed.isNotEmpty()) listOf(\"must-pass failed: \" + failed.joinToString(\", \")) else emptyList()\n}\n\nprivate fun protectedLost(cases: List<Case>, protectedSegments: Set<String>): List<String> {\n    val hit = cases.filter { it.oldOk && !it.newOk && it.segment in protectedSegments }.map { it.segment }.toSortedSet().toList()\n    return if (hit.isNotEmpty()) listOf(\"protected segment lost answers: \" + hit.joinToString(\", \")) else emptyList()\n}\n\nprivate fun netLoss(cases: List<Case>): List<String> {\n    val lost = cases.count { it.oldOk && !it.newOk }\n    val gained = cases.count { it.newOk && !it.oldOk }\n    return if (lost > gained) listOf(\"net loss: lost $lost, gained $gained\") else emptyList()\n}\n\nprivate fun costRise(cases: List<Case>, maxCostUp: Int): List<String> {\n    val oldTotal = cases.sumOf { it.oldCost }\n    val newTotal = cases.sumOf { it.newCost }\n    val up = if (oldTotal > 0 && newTotal > oldTotal) (newTotal - oldTotal) * 100 / oldTotal else 0\n    return if (up > maxCostUp) listOf(\"cost up $up% over the $maxCostUp% limit\") else emptyList()\n}\n\nprivate fun latency(cases: List<Case>, maxP95: Int): List<String> {\n    val p95 = percentile(cases.map { it.newMs }, 95)\n    return if (p95 > maxP95) listOf(\"p95 latency $p95 ms over the $maxP95 ms limit\") else emptyList()\n}\n\nprivate fun decision(reasons: List<String>): String = if (reasons.isEmpty()) \"go\" else \"no-go\"\n\nfun gate(cases: List<Case>, protectedSegments: Set<String>, maxCostUp: Int, maxP95: Int): Verdict {\n    val reasons = mustPass(cases) + protectedLost(cases, protectedSegments) + netLoss(cases) + costRise(cases, maxCostUp) + latency(cases, maxP95)\n    return Verdict(decision(reasons), reasons)\n}\n\nfun rolloutStep(stage: Int, requests: Int, errors: Int, minRequests: Int, maxErrorsPer1000: Int): String {\n    if (requests < minRequests) return \"hold at $stage\"\n    if (errors * 1000L / requests > maxErrorsPer1000) return \"rollback to 0\"\n    if (stage == STAGES.last()) return \"complete\"\n    return \"advance to ${STAGES[STAGES.indexOf(stage) + 1]}\"\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // The retirement calendar: days left per model, nearest first, with the level of urgency.\n    val models = listOf(Model(\"claude-old-a\", \"2026-10-18\", true), Model(\"claude-old-b\", \"2026-11-30\", false), Model(\"claude-old-c\", \"2027-01-01\", false))\n    println(\"calendar: ${retirementStatus(models, \"2026-10-04\").joinToString(\"; \")}\")\n\n    // A request written for an older model, and what the migration changes in it.\n    val old = Request(\"claude-sonnet-4-5-20250929\", 0.7, 0.9, 40.0, \"disabled\", \"any\", false, true)\n    val migration = migrateRequest(old)\n    println(\"migrated model: ${migration.request.model}\")\n    println(\"changes: ${migration.changes.joinToString(\"; \")}\")\n\n    // A staged rollout: one decision per stage from the traffic and the errors seen so far.\n    println(\"stage 1: ${rolloutStep(1, 2000, 6, 1000, 5)}\")\n    println(\"stage 25: ${rolloutStep(25, 50000, 400, 1000, 5)}\")\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.time.LocalDate\nimport java.time.temporal.ChronoUnit\n\nprivate val log = System.getLogger(\"rollout\")\n\n/** Rollout kit: the retirement calendar, the settings a new model refuses, a gate on a regression suite and a staged roll-out. See ../../statement.md. */\n\n/** One case of the regression suite, run on the old and the new model. */\ndata class Case(val id: String, val segment: String, val mustPass: Boolean, val oldOk: Boolean, val newOk: Boolean, val oldCost: Int, val newCost: Int, val newMs: Int)\n\n/** The settings of a request that matter to a migration; null means the setting is absent. */\ndata class Request(val model: String, val temperature: Double?, val topP: Double?, val topK: Double?, val thinking: String, val toolChoice: String, val strict: Boolean, val prefill: Boolean)\n\n/** A model, the date of its retirement (ISO) and whether that date may still move later. */\ndata class Model(val name: String, val date: String, val tentative: Boolean)\n\n/** The migrated request and the changes made to it. */\ndata class Migration(val request: Request, val changes: List<String>)\n\n/** The gate's decision (go or no-go) and its reasons. */\ndata class Verdict(val decision: String, val reasons: List<String>)\n\nval STAGES = listOf(1, 5, 25, 100)\nconst val TARGET = \"claude-sonnet-5-5\"\n\n/** Whole days from one ISO date to another, negative when it has passed (written for you). */\nfun daysUntil(today: String, date: String): Long = ChronoUnit.DAYS.between(LocalDate.parse(today), LocalDate.parse(date))\n\n/** Nearest-rank percentile, 0 for no values (written for you). */\nfun percentile(values: List<Int>, p: Int): Int {\n    if (values.isEmpty()) return 0\n    val ordered = values.sorted()\n    return ordered[(p * ordered.size + 99) / 100 - 1]\n}\n\n/**\n * TODO 1 of 9 (unlocks e7): one line of the retirement calendar.\n * Receives the days left, the model name and whether the date is tentative. Returns `<name>: <days> days, <level>` with ` (tentative)`\n * added when it is tentative; the level is `retired` below 0, `urgent` up to 14, `migrate now` up to 60, else `watch`.\n * Example: statusLine(14, \"a\", true) -> \"a: 14 days, urgent (tentative)\"\n */\nprivate fun statusLine(days: Long, name: String, tentative: Boolean): String {\n    return \"\"\n}\n\nfun retirementStatus(models: List<Model>, today: String): List<String> {\n    log.log(System.Logger.Level.DEBUG, \"retirementStatus input: {0}\", models)\n    return models.sortedWith(compareBy<Model>({ daysUntil(today, it.date) }, { it.name }, { it.tentative })).map { statusLine(daysUntil(today, it.date), it.name, it.tentative) }\n}\n\n/**\n * TODO 2 of 9 (unlocks e8): migrate the thinking setting.\n * Receives the thinking setting and the list of changes so far. `budget` becomes `adaptive` and `disabled` becomes `between_tools`, each\n * adding its sentence from the statement to `changes`; anything else is kept. Returns the new setting.\n * Example: migrateThinking(\"disabled\", changes) -> \"between_tools\", and changes gains \"thinking disabled replaced by between_tools\"\n */\nprivate fun migrateThinking(thinking: String, changes: MutableList<String>): String {\n    return thinking\n}\n\nfun migrateRequest(request: Request): Migration {\n    val changes = mutableListOf<String>()\n    if (request.model != TARGET) changes.add(\"model set to $TARGET\")\n    if (request.temperature != null) changes.add(\"removed temperature\")\n    if (request.topP != null) changes.add(\"removed top_p\")\n    if (request.topK != null) changes.add(\"removed top_k\")\n    val thinking = migrateThinking(request.thinking, changes)\n    var toolChoice = request.toolChoice\n    var strict = request.strict\n    if (toolChoice == \"any\" || toolChoice == \"tool\") {\n        toolChoice = \"auto\"\n        strict = true\n        changes.add(\"forced tool choice replaced by auto with strict tools\")\n    }\n    if (request.prefill) changes.add(\"assistant prefill removed; state the format in the instructions\")\n    return Migration(Request(TARGET, null, null, null, thinking, toolChoice, strict, false), changes)\n}\n\n/**\n * TODO 3 of 9 (unlocks e1): the reasons for failed must-pass cases.\n * Receives the cases. Returns a list with `must-pass failed: <ids>` (sorted, joined by `, `) for the cases marked must pass that the new\n * model fails, or an empty list. Example: one failing must-pass case a1 -> [\"must-pass failed: a1\"]\n */\nprivate fun mustPass(cases: List<Case>): List<String> {\n    return emptyList()\n}\n\n/**\n * TODO 4 of 9 (unlocks e2): the reason for a protected segment that lost answers.\n * Receives the cases and the protected segments. Returns a list with `protected segment lost answers: <segments>` (sorted, distinct)\n * for the protected segments with a case the old model got right and the new one did not, or an empty list.\n * Example: refund lost b3 -> [\"protected segment lost answers: refund\"]\n */\nprivate fun protectedLost(cases: List<Case>, protectedSegments: Set<String>): List<String> {\n    return emptyList()\n}\n\n/**\n * TODO 5 of 9 (unlocks e3): the reason for more losses than gains.\n * Receives the cases. Returns a list with `net loss: lost N, gained M` when the cases lost (old right, new wrong) outnumber the cases\n * gained (the opposite), or an empty list. Example: 2 lost and 1 gained -> [\"net loss: lost 2, gained 1\"]\n */\nprivate fun netLoss(cases: List<Case>): List<String> {\n    return emptyList()\n}\n\n/**\n * TODO 6 of 9 (unlocks e4): the reason for a cost rise over the limit.\n * Receives the cases and the largest allowed rise in whole percent. The rise is the new total cost over the old one, rounded down, 0 when\n * the old total is 0 or the cost fell. Returns a list with `cost up X% over the Y% limit` when X is above Y, or an empty list.\n * Example: costs 40 -> 50 with a limit of 20 -> [\"cost up 25% over the 20% limit\"]; costs 40 -> 48 with a limit of 20 -> []\n */\nprivate fun costRise(cases: List<Case>, maxCostUp: Int): List<String> {\n    return emptyList()\n}\n\n/**\n * TODO 7 of 9 (unlocks e5): the reason for a slow tail.\n * Receives the cases and the largest allowed 95th-percentile time in ms. Uses `percentile` over the `newMs` of the cases. Returns a list\n * with `p95 latency X ms over the Y ms limit` when X is above Y, or an empty list. Example: p95 3000 with a limit of 2000 -> one reason\n */\nprivate fun latency(cases: List<Case>, maxP95: Int): List<String> {\n    return emptyList()\n}\n\n/**\n * TODO 8 of 9 (unlocks m1): the decision of the gate.\n * Receives the list of reasons. Returns \"no-go\" when there is any reason, \"go\" when there is none. Example: decision(emptyList()) -> \"go\"\n */\nprivate fun decision(reasons: List<String>): String {\n    return \"\"\n}\n\nfun gate(cases: List<Case>, protectedSegments: Set<String>, maxCostUp: Int, maxP95: Int): Verdict {\n    val reasons = mustPass(cases) + protectedLost(cases, protectedSegments) + netLoss(cases) + costRise(cases, maxCostUp) + latency(cases, maxP95)\n    return Verdict(decision(reasons), reasons)\n}\n\n/**\n * TODO 9 of 9 (unlocks e6): the step of a staged roll-out.\n * Receives the stage (1, 5, 25 or 100), the requests and errors seen, the fewest requests to judge and the most errors per 1000.\n * Returns \"hold at <stage>\" with too few requests, \"rollback to 0\" when errors per 1000 (rounded down) pass the limit, \"complete\" at\n * stage 100 when healthy, else \"advance to <next stage>\". Example: rolloutStep(1, 2000, 6, 1000, 5) -> \"advance to 5\"\n */\nfun rolloutStep(stage: Int, requests: Int, errors: Int, minRequests: Int, maxErrorsPer1000: Int): String {\n    return \"\"\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // The retirement calendar: days left per model, nearest first, with the level of urgency.\n    val models = listOf(Model(\"claude-old-a\", \"2026-10-18\", true), Model(\"claude-old-b\", \"2026-11-30\", false), Model(\"claude-old-c\", \"2027-01-01\", false))\n    println(\"calendar: ${retirementStatus(models, \"2026-10-04\").joinToString(\"; \")}\")\n\n    // A request written for an older model, and what the migration changes in it.\n    val old = Request(\"claude-sonnet-4-5-20250929\", 0.7, 0.9, 40.0, \"disabled\", \"any\", false, true)\n    val migration = migrateRequest(old)\n    println(\"migrated model: ${migration.request.model}\")\n    println(\"changes: ${migration.changes.joinToString(\"; \")}\")\n\n    // A staged rollout: one decision per stage from the traffic and the errors seen so far.\n    println(\"stage 1: ${rolloutStep(1, 2000, 6, 1000, 5)}\")\n    println(\"stage 25: ${rolloutStep(25, 50000, 400, 1000, 5)}\")\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "e4e0f584a12385e4cf4fc601ddedd78c63f39bcfd11d658c405282f56eb9c7a4",
+  "starting_code": "import java.time.LocalDate\nimport java.time.temporal.ChronoUnit\n\nprivate val log = System.getLogger(\"rollout\")\n\n/** Rollout kit: the retirement calendar, the settings a new model refuses, a gate on a regression suite and a staged roll-out. See ../../statement.md. */\n\n/** One case of the regression suite, run on the old and the new model. */\ndata class Case(val id: String, val segment: String, val mustPass: Boolean, val oldOk: Boolean, val newOk: Boolean, val oldCost: Int, val newCost: Int, val newMs: Int)\n\n/** The settings of a request that matter to a migration; null means the setting is absent. */\ndata class Request(val model: String, val temperature: Double?, val topP: Double?, val topK: Double?, val thinking: String, val toolChoice: String, val strict: Boolean, val prefill: Boolean)\n\n/** A model, the date of its retirement (ISO) and whether that date may still move later. */\ndata class Model(val name: String, val date: String, val tentative: Boolean)\n\n/** The migrated request and the changes made to it. */\ndata class Migration(val request: Request, val changes: List<String>)\n\n/** The gate's decision (go or no-go) and its reasons. */\ndata class Verdict(val decision: String, val reasons: List<String>)\n\nval STAGES = listOf(1, 5, 25, 100)\nconst val TARGET = \"claude-sonnet-5-5\"\n\n/** Whole days from one ISO date to another, negative when it has passed (written for you). */\nfun daysUntil(today: String, date: String): Long = ChronoUnit.DAYS.between(LocalDate.parse(today), LocalDate.parse(date))\n\n/** Nearest-rank percentile, 0 for no values (written for you). */\nfun percentile(values: List<Int>, p: Int): Int {\n    if (values.isEmpty()) return 0\n    val ordered = values.sorted()\n    return ordered[(p * ordered.size + 99) / 100 - 1]\n}\n\n/**\n * TODO 1 of 9 (unlocks e7): one line of the retirement calendar.\n * Receives the days left, the model name and whether the date is tentative. Returns `<name>: <days> days, <level>` with ` (tentative)`\n * added when it is tentative; the level is `retired` below 0, `urgent` up to 14, `migrate now` up to 60, else `watch`.\n * Example: statusLine(14, \"a\", true) -> \"a: 14 days, urgent (tentative)\"\n */\nprivate fun statusLine(days: Long, name: String, tentative: Boolean): String {\n    return \"\"\n}\n\nfun retirementStatus(models: List<Model>, today: String): List<String> {\n    log.log(System.Logger.Level.DEBUG, \"retirementStatus input: {0}\", models)\n    return models.sortedWith(compareBy<Model>({ daysUntil(today, it.date) }, { it.name }, { it.tentative })).map { statusLine(daysUntil(today, it.date), it.name, it.tentative) }\n}\n\n/**\n * TODO 2 of 9 (unlocks e8): migrate the thinking setting.\n * Receives the thinking setting and the list of changes so far. `budget` becomes `adaptive` and `disabled` becomes `between_tools`, each\n * adding its sentence from the statement to `changes`; anything else is kept. Returns the new setting.\n * Example: migrateThinking(\"disabled\", changes) -> \"between_tools\", and changes gains \"thinking disabled replaced by between_tools\"\n */\nprivate fun migrateThinking(thinking: String, changes: MutableList<String>): String {\n    return thinking\n}\n\nfun migrateRequest(request: Request): Migration {\n    val changes = mutableListOf<String>()\n    if (request.model != TARGET) changes.add(\"model set to $TARGET\")\n    if (request.temperature != null) changes.add(\"removed temperature\")\n    if (request.topP != null) changes.add(\"removed top_p\")\n    if (request.topK != null) changes.add(\"removed top_k\")\n    val thinking = migrateThinking(request.thinking, changes)\n    var toolChoice = request.toolChoice\n    var strict = request.strict\n    if (toolChoice == \"any\" || toolChoice == \"tool\") {\n        toolChoice = \"auto\"\n        strict = true\n        changes.add(\"forced tool choice replaced by auto with strict tools\")\n    }\n    if (request.prefill) changes.add(\"assistant prefill removed; state the format in the instructions\")\n    return Migration(Request(TARGET, null, null, null, thinking, toolChoice, strict, false), changes)\n}\n\n/**\n * TODO 3 of 9 (unlocks e1): the reasons for failed must-pass cases.\n * Receives the cases. Returns a list with `must-pass failed: <ids>` (sorted, joined by `, `) for the cases marked must pass that the new\n * model fails, or an empty list. Example: one failing must-pass case a1 -> [\"must-pass failed: a1\"]\n */\nprivate fun mustPass(cases: List<Case>): List<String> {\n    return emptyList()\n}\n\n/**\n * TODO 4 of 9 (unlocks e2): the reason for a protected segment that lost answers.\n * Receives the cases and the protected segments. Returns a list with `protected segment lost answers: <segments>` (sorted, distinct)\n * for the protected segments with a case the old model got right and the new one did not, or an empty list.\n * Example: refund lost b3 -> [\"protected segment lost answers: refund\"]\n */\nprivate fun protectedLost(cases: List<Case>, protectedSegments: Set<String>): List<String> {\n    return emptyList()\n}\n\n/**\n * TODO 5 of 9 (unlocks e3): the reason for more losses than gains.\n * Receives the cases. Returns a list with `net loss: lost N, gained M` when the cases lost (old right, new wrong) outnumber the cases\n * gained (the opposite), or an empty list. Example: 2 lost and 1 gained -> [\"net loss: lost 2, gained 1\"]\n */\nprivate fun netLoss(cases: List<Case>): List<String> {\n    return emptyList()\n}\n\n/**\n * TODO 6 of 9 (unlocks e4): the reason for a cost rise over the limit.\n * Receives the cases and the largest allowed rise in whole percent. The rise is the new total cost over the old one, rounded down, 0 when\n * the old total is 0 or the cost fell. Returns a list with `cost up X% over the Y% limit` when X is above Y, or an empty list.\n * Example: costs 40 -> 50 with a limit of 20 -> [\"cost up 25% over the 20% limit\"]; costs 40 -> 48 with a limit of 20 -> []\n */\nprivate fun costRise(cases: List<Case>, maxCostUp: Int): List<String> {\n    return emptyList()\n}\n\n/**\n * TODO 7 of 9 (unlocks e5): the reason for a slow tail.\n * Receives the cases and the largest allowed 95th-percentile time in ms. Uses `percentile` over the `newMs` of the cases. Returns a list\n * with `p95 latency X ms over the Y ms limit` when X is above Y, or an empty list. Example: p95 3000 with a limit of 2000 -> one reason\n */\nprivate fun latency(cases: List<Case>, maxP95: Int): List<String> {\n    return emptyList()\n}\n\n/**\n * TODO 8 of 9 (unlocks m1): the decision of the gate.\n * Receives the list of reasons. Returns \"no-go\" when there is any reason, \"go\" when there is none. Example: decision(emptyList()) -> \"go\"\n */\nprivate fun decision(reasons: List<String>): String {\n    return \"\"\n}\n\nfun gate(cases: List<Case>, protectedSegments: Set<String>, maxCostUp: Int, maxP95: Int): Verdict {\n    val reasons = mustPass(cases) + protectedLost(cases, protectedSegments) + netLoss(cases) + costRise(cases, maxCostUp) + latency(cases, maxP95)\n    return Verdict(decision(reasons), reasons)\n}\n\n/**\n * TODO 9 of 9 (unlocks e6): the step of a staged roll-out.\n * Receives the stage (1, 5, 25 or 100), the requests and errors seen, the fewest requests to judge and the most errors per 1000.\n * Returns \"hold at <stage>\" with too few requests, \"rollback to 0\" when errors per 1000 (rounded down) pass the limit, \"complete\" at\n * stage 100 when healthy, else \"advance to <next stage>\". Example: rolloutStep(1, 2000, 6, 1000, 5) -> \"advance to 5\"\n */\nfun rolloutStep(stage: Int, requests: Int, errors: Int, minRequests: Int, maxErrorsPer1000: Int): String {\n    return \"\"\n}\n",
+  "exercise": {
+    "main_path": "practice/level-4/89-migration-and-model-upgrades-at-scale/prose/unit-02/practice-4/src/main/kotlin/Rollout.kt",
+    "test_path": "practice/level-4/89-migration-and-model-upgrades-at-scale/prose/unit-02/practice-4/src/test/kotlin/RolloutTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-4/89-migration-and-model-upgrades-at-scale/prose/unit-02/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-4/89-migration-and-model-upgrades-at-scale/prose/unit-02/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_aChangeThatRegressesNothingAndStaysInsideItsLimitsGetsAGoWithNoReasons()",
+        "kind": "main",
+        "says": "A change that regresses nothing and stays inside its limits gets a go with no reasons"
+      },
+      {
+        "id": "e1_aMustPassCaseThatFailsBlocksTheChangeAndTheIdsAreListedInOrder()",
+        "kind": "edge",
+        "says": "A must-pass case that fails blocks the change and the ids are listed in order"
+      },
+      {
+        "id": "e2_aProtectedSegmentThatLostAnswersBlocksTheChangeEvenWhenGainsElsewhereMatchTheLosses()",
+        "kind": "edge",
+        "says": "A protected segment that lost answers blocks the change even when gains elsewhere match the losses"
+      },
+      {
+        "id": "e3_moreLossesThanGainsBlocksTheChangeAndBothCountsAreNamed()",
+        "kind": "edge",
+        "says": "More losses than gains blocks the change and both counts are named"
+      },
+      {
+        "id": "e4_aCostRiseOverTheLimitBlocksTheChangeAndARiseExactlyAtTheLimitDoesNot()",
+        "kind": "edge",
+        "says": "A cost rise over the limit blocks the change and a rise exactly at the limit does not"
+      },
+      {
+        "id": "e5_theTailIsTheNearestRank95thPercentileAndASingleSlowCaseDoesNotBlock()",
+        "kind": "edge",
+        "says": "The tail is the nearest-rank 95th percentile and a single slow case does not block"
+      },
+      {
+        "id": "e6_aRollOutAdvancesWhenHealthyHoldsWithTooFewRequestsAndRollsBackToZeroWhenErrorsPassTheLimit()",
+        "kind": "edge",
+        "says": "A roll-out advances when healthy, holds with too few requests and rolls back to zero when errors pass the limit"
+      },
+      {
+        "id": "e7_theRetirementCalendarCountsDaysRanksTheNearestFirstAndNamesTheLevel()",
+        "kind": "edge",
+        "says": "The retirement calendar counts days, ranks the nearest first and names the level"
+      },
+      {
+        "id": "e8_migrationRemovesTheSettingsTheNewModelRefusesAndNamesEachChange()",
+        "kind": "edge",
+        "says": "Migration removes the settings the new model refuses and names each change"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-4/89-migration-and-model-upgrades-at-scale/prose/unit-02/practice-4/target/test-results/test"
+    },
+    "origin": "course/89-migration-and-model-upgrades-at-scale/02-the-gate-the-roll-out-and-the-way-back.md",
+    "concepts": [
+      "the practice of The gate, the roll-out and the way back is solved"
+    ],
+    "files": [
+      "practice/level-4/89-migration-and-model-upgrades-at-scale/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "migration-and-model-upgrades-at-scale-u2"
+}

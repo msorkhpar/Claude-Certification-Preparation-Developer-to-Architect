@@ -1,0 +1,368 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "85-retrieval-pipelines-at-design-level"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Where to cut, what a chunk carries and which mechanism answers",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Where to cut, what a chunk carries and which mechanism answers"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Architect Professional · **Module 85:** Retrieval pipelines at design level · **Page 1 of 2** **Exams:** P3"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** choose where to cut a document from the structure of the data, make every chunk carry the context it needs to be found and read alone, keep a reader's access rules inside the retrieval step, match the retrieval mechanism to the shape of the data and the pattern of the question, and say when no pipeline is needed at all."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-04 against the Anthropic engineering post \"Introducing Contextual Retrieval\" (published 2024-09-19), the Claude documentation page \"Embeddings\", the Claude Certified Architect - Professional exam guide (version 1.0, domain 3 and its sample item 3), and by running the example offline in the course container. Nothing here called a model, and the \"semantic\" rankings in the example are scripted: they stand in for an embedding index, which the course does not build. This page deepens module 28 (BM25, embeddings, rank fusion, reranking and recall) and does not repeat those mechanisms. The question here is design: what to cut, what to carry and which mechanism to use for which question. Freshness, measurement and the question of weights against prompt are the second page."
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "**Exam guide and current product.** *What the guide states, and so what the exam keys:* domain 3 asks the candidate to \"Design a RAG pipeline with appropriate chunking and indexing strategies\" and to \"Apply retrieval strategies matched to data shape and query pattern\". Its sample item 3 treats the retrieval and indexing step as the first suspect when answers turn confident and wrong after a document refresh. It reads as one pipeline of chunks, embeddings and an index. *What the current product does (documentation read 2026-10-04):* \"Anthropic does not offer its own embedding model\", so the embedding half of a pipeline is a provider's service that the team chooses and versions, and Claude's part is to answer from what it is given. When the source is small, Anthropic's post says that below about 200,000 tokens \"you can just include the entire knowledge base in the prompt\". On the exam, answer inside the guide's pipeline. In a design review, name the embedding provider and the small-corpus shortcut as part of the design."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "A retailer's support assistant answers from 40,000 policy pages. Four complaints arrive in one week. It said that a final-sale item cannot be returned and left out that damaged items are an exception. Asked how to cancel the annual plan, it quoted the monthly plan's rule. A lookup of error code E-7310 returned a page about error codes in general. And a franchise partner saw a sentence from another partner's contract in an answer. The model wrote fluent text every time. Each failure was decided earlier: where to cut, what a chunk carries, which index answers which question, and who may see what. Domain 3 of the Professional exam asks you to name that decision from the symptom."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The pipeline is a list of decisions"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Decision",
+        "Options",
+        "What decides it"
+      ],
+      "rows": [
+        [
+          "Where to cut",
+          "Fixed windows, headings or clauses, one record per row",
+          "The structure of the data"
+        ],
+        [
+          "What a chunk carries",
+          "Its text alone, title and section, a model-written context sentence",
+          "Whether the text names its own subject"
+        ],
+        [
+          "Who may see it",
+          "A filter before ranking, a filter after, none",
+          "The reader's rights, enforced in code"
+        ],
+        [
+          "Which mechanism answers",
+          "Cached prompt, structured query, keyword index, embedding index, both, an agent that searches",
+          "Corpus size, data shape and query pattern"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Each row has a cheap default and an expensive correction. The architect's work is to pick the row from the data before the symptom arrives."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Cut where the data has joints"
+    },
+    {
+      "type": "para",
+      "text": "A fixed-size cut ignores what the words mean. The example's refund policy holds a rule and its exception in one sentence: \"Items marked final sale cannot be returned, except when they arrive damaged.\" Cut every 12 words, the policy becomes 4 chunks and the sentence falls across two of them, so no chunk holds the whole rule and an answer built from the first half is wrong. Cut at the headings, the policy becomes 3 chunks and the sentence stays whole."
+    },
+    {
+      "type": "para",
+      "text": "Three common repairs leave the cause alone. A smaller window cuts in more places and separates more sentences from their neighbours. Returning more chunks per question does not help either, because no chunk holds the whole rule. And changing the index changes how the pieces are scored, not where they were cut."
+    },
+    {
+      "type": "para",
+      "text": "A heading, a clause number, a function, a table row and a support ticket are the joints of their kinds of data. A contract is cut by clause, a spreadsheet by row, source code by function and a transcript by speaker turn. When a unit is longer than the limit, split it at sentence ends and repeat the same prefix on every part, as the practice does. Size then follows from the unit. Anthropic's post says that \"chunk size, chunk boundary, and chunk overlap\" can affect retrieval performance and recommends experimenting, which in practice means choosing by measurement on your own questions (page 2)."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "A chunk has to stand alone"
+    },
+    {
+      "type": "para",
+      "text": "Retrieval hands the model a chunk without its document. The post's example is a chunk that reads \"The company's revenue grew by 3% over the previous quarter.\" It names neither the company nor the quarter, so it is hard to find and hard to use. Anthropic's fix is \"prepending chunk-specific explanatory context to each chunk\" before the embedding is made and before the keyword index is built. There are two ways to get that context."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "**From the structure.** The pipeline already knows the document title and the section name, so the chunk text starts with \"Annual plan > Cancellation.\" This costs nothing, is the same on every run and can be audited.",
+        "**From a model.** For text whose structure does not name the subject, a model writes a short context sentence for each chunk with the whole document in view. The post says the result is \"usually 50-100 tokens\" and shows that prompt caching keeps the one-time cost low."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The example has two plans, each with a section called Cancellation. For the question \"cancel the annual plan\", the bare chunks tie on the word cancel and the monthly plan's chunk comes first, because it is first in the index. With the title and section in front of each chunk, only one chunk matches the words annual and plan as well, and the annual plan's chunk comes first. Anthropic reports the effect as a drop in the failure rate of the top 20 chunks from 5.7% to 3.7% with contextual embeddings, to 2.9% with contextual keyword scoring added, and to 1.9% with reranking on top. Those are figures from the post's own datasets, an order of magnitude and not a promise for your data."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Access control belongs in the retrieval step"
+    },
+    {
+      "type": "para",
+      "text": "Chunks carry metadata: the document, its owner or tenant, its version, its date. The reader's rights are applied before the ranking, so that a chunk the reader may not see is never a candidate, cannot win a place and cannot reach the prompt. Filtering after the best k results are taken fails in a quiet way: a reader with access to only a few documents gets fewer than k results although many visible chunks matched, because the top places went to chunks that were then removed. An instruction in the system prompt to ignore other tenants' text is a request to the model and not a control. The practice's `allowed_docs` argument is the control: documents outside it are skipped before any scoring."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Match the mechanism to the data and the question"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Situation",
+        "Mechanism",
+        "Why",
+        "What goes wrong otherwise"
+      ],
+      "rows": [
+        [
+          "The whole corpus is under about 200,000 tokens",
+          "The corpus in a cached prompt",
+          "No stage can fail and nothing can be missed",
+          "A pipeline adds stages that each can fail"
+        ],
+        [
+          "The answer lives in a table or a database",
+          "A structured query run by a tool",
+          "Exact, and able to total or filter",
+          "The table is cut into chunks and the model adds numbers by eye"
+        ],
+        [
+          "The question names an identifier such as an error code",
+          "A keyword index",
+          "It matches the exact string",
+          "An embedding index \"can miss crucial exact matches\""
+        ],
+        [
+          "The question paraphrases the document",
+          "An embedding index",
+          "It matches meaning",
+          "A keyword index finds nothing for \"reimbursed\" when the document says \"refund\""
+        ],
+        [
+          "Both kinds of question arrive",
+          "Both indexes, merged by rank",
+          "Each covers the other's blind spot",
+          "One index's misses are never seen"
+        ],
+        [
+          "The answer needs several linked lookups",
+          "An agent that searches, one query after another",
+          "The next query depends on the last result",
+          "A single top-k list that cannot follow a chain"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Module 28 taught how the two indexes score and how fusion merges them. The point here is the choice, and the table is the one the example prints."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "para",
+      "text": "The example is four short documents: two plans, the refund policy and a page of error codes. It cuts the refund policy in two ways, shows the effect of the context prefix on the plan question, compares a keyword index, scripted embedding ranks and their fusion on one identifier question and one paraphrase question, and prints the mechanism chosen for six situations. In every language it ran offline in the container, and the output is the same."
+    },
+    {
+      "type": "example",
+      "id": "m85-chunking-and-recall",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/85-chunking-and-recall/python/chunking_and_recall.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/85-chunking-and-recall/typescript/chunkingAndRecall.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/85-chunking-and-recall/java/ChunkingAndRecall.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/85-chunking-and-recall/kotlin/ChunkingAndRecall.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Design decisions around a retrieval pipeline: where a document is cut, what a chunk carries, which index answers which query, and what a re-index must remove.\n\nThe corpus is four short documents. The \"semantic\" rankings are scripted: they stand in for an embedding index, which this course does not build (the Claude documentation says Anthropic\noffers no embedding model and points to a provider). What the code shows is the design around that index. Read on 2026-10-04 against the Anthropic post on contextual retrieval and the Claude\ndocumentation page \"Embeddings\". Nothing here calls a model.\n\"\"\"\nimport logging\nimport re\n\nlog = logging.getLogger(__name__)\n\nSTOP = {\"a\", \"an\", \"the\", \"is\", \"are\", \"can\", \"i\", \"what\", \"does\", \"do\", \"how\", \"my\", \"it\", \"of\", \"to\", \"for\", \"and\", \"or\", \"in\", \"when\", \"will\", \"be\", \"that\", \"this\", \"with\", \"by\", \"at\"}\nDOCS = {\n    \"monthly\": \"# Monthly plan\\n## Cancellation\\nYou can cancel at any time and the current month is not refunded.\",\n    \"annual\": \"# Annual plan\\n## Cancellation\\nYou can cancel within 14 days for a full refund.\",\n    \"refunds\": \"# Refund policy\\n## Eligibility\\nCustomers may return items within 30 days of delivery.\\n## Exceptions\\nItems marked final sale cannot be returned, except when they arrive damaged.\\n## Process\\nRefunds go back to the original payment method within 5 business days.\",\n    \"errors\": \"# Error codes\\n## E-7310\\nThe warehouse could not reserve stock. Retry after the next stock sync.\\n## E-4021\\nThe payment gateway rejected the card. Ask for another card.\",\n}\n\n\ndef tokens(text):\n    return [t for t in re.findall(r\"[a-z0-9]+(?:-[a-z0-9]+)*\", text.lower()) if t not in STOP]\n\n\ndef chunk_fixed(doc_id, text, size):\n    \"\"\"Cut every `size` words, whatever the words mean.\"\"\"\n    words = text.split()\n    return [(f\"{doc_id}#{i // size}\", \" \".join(words[i:i + size])) for i in range(0, len(words), size)]\n\n\ndef chunk_sections(doc_id, text, context):\n    \"\"\"Cut at the headings; with context, each chunk starts with the document title and its section name, so it can be found and read alone.\"\"\"\n    log.debug(\"chunk_sections input: %r\", text)\n    head, *sections = text.split(\"\\n## \")\n    title = head.removeprefix(\"# \")\n    chunks = []\n    for section in sections:\n        name, body = section.split(\"\\n\", 1)\n        chunks.append((f\"{doc_id}/{name}\", (f\"{title} > {name}. \" if context else \"\") + body))\n    return chunks\n\n\ndef index(docs, context):\n    return [chunk for doc_id, text in docs.items() for chunk in chunk_sections(doc_id, text, context)]\n\n\ndef lexical(chunks, query, k=3):\n    \"\"\"Words that appear in the chunk score one, a token with a digit (a code or an id) scores three; ties keep the index order.\"\"\"\n    wanted = set(tokens(query))\n    scored = []\n    for n, (chunk_id, text) in enumerate(chunks):\n        have = set(tokens(text))\n        score = sum(3 if any(c.isdigit() for c in t) else 1 for t in wanted if t in have)\n        if score:\n            scored.append((-score, n, chunk_id))\n    return [chunk_id for _, _, chunk_id in sorted(scored)[:k]]\n\n\ndef fuse(rankings, k=60):\n    \"\"\"Reciprocal rank fusion, in integers so that every language ranks the same: each list adds 1000000 // (k + rank) to a chunk.\"\"\"\n    score = {}\n    for ranking in rankings:\n        for rank, chunk_id in enumerate(ranking, 1):\n            score[chunk_id] = score.get(chunk_id, 0) + 1000000 // (k + rank)\n    return sorted(score, key=lambda chunk_id: (-score[chunk_id], chunk_id))\n\n\ndef holds(chunks, chunk_ids, answer):\n    \"\"\"True when one retrieved chunk holds the whole answer sentence.\"\"\"\n    texts = dict(chunks)\n    return any(answer in texts[chunk_id] for chunk_id in chunk_ids)\n\n\ndef reindex_additive(chunks, doc_id, text):\n    \"\"\"The shortcut: add the new chunks and leave the old ones where they are.\"\"\"\n    return chunks + chunk_sections(doc_id, text, True)\n\n\ndef reindex_replace(chunks, doc_id, text):\n    \"\"\"Drop every chunk of the document first, then add the new ones.\"\"\"\n    return [c for c in chunks if not c[0].startswith(doc_id + \"/\")] + chunk_sections(doc_id, text, True)\n\n\ndef stale(chunks, docs):\n    \"\"\"Chunks that no longer match what their source says now.\"\"\"\n    current = {chunk for doc_id, text in docs.items() for chunk in chunk_sections(doc_id, text, True)}\n    return [chunk_id for chunk_id, text in chunks if (chunk_id, text) not in current]\n\n\ndef choose_retrieval(corpus_tokens, shape, pattern):\n    \"\"\"The cheapest mechanism that fits: a corpus under 200,000 tokens fits a cached prompt; a table is queried; several hops need an agent that searches; otherwise the query pattern picks the index.\"\"\"\n    if corpus_tokens < 200000:\n        return \"cached prompt\"\n    if shape == \"table\":\n        return \"structured query\"\n    if pattern == \"multi-hop\":\n        return \"agentic search\"\n    return {\"identifier\": \"keyword index\", \"paraphrase\": \"embedding index\"}.get(pattern, \"hybrid index\")\n\n\ndef layer(evidence_retrieved, answer_correct):\n    \"\"\"Where a question went wrong, judged by retrieval and by generation separately; a right answer without its evidence is a risk of its own.\"\"\"\n    if answer_correct:\n        return \"ok\" if evidence_retrieved else \"unsupported\"\n    return \"generation\" if evidence_retrieved else \"retrieval\"\n\n\ndef yes(flag):\n    return \"yes\" if flag else \"no\"\n\n\ndef names(items):\n    return \", \".join(items) if items else \"none\"\n\n\ndef main():\n    answer = \"Items marked final sale cannot be returned, except when they arrive damaged.\"\n    fixed = chunk_fixed(\"refunds\", DOCS[\"refunds\"], 12)\n    sections = chunk_sections(\"refunds\", DOCS[\"refunds\"], False)\n    print(f\"cut every 12 words: {len(fixed)} chunks, the whole rule in one chunk: {yes(holds(fixed, [c for c, _ in fixed], answer))}\")\n    print(f\"cut at headings:    {len(sections)} chunks, the whole rule in one chunk: {yes(holds(sections, [c for c, _ in sections], answer))}\")\n    for context in (False, True):\n        print(f\"query 'cancel the annual plan', chunks {'with' if context else 'without'} context: top chunk {lexical(index(DOCS, context), 'cancel the annual plan', 1)[0]}\")\n    chunks = index(DOCS, True)\n    semantic = {\n        \"what does E-7310 mean\": [\"errors/E-4021\", \"errors/E-7310\", \"refunds/Process\"],\n        \"when will I be reimbursed\": [\"refunds/Process\", \"annual/Cancellation\", \"monthly/Cancellation\"],\n    }\n    answers = {\"what does E-7310 mean\": \"The warehouse could not reserve stock.\", \"when will I be reimbursed\": \"Refunds go back to the original payment method within 5 business days.\"}\n    print(f\"{'query':<28}{'lexical':<9}{'semantic':<10}hybrid\")\n    for query, ranking in semantic.items():\n        lex = lexical(chunks, query)\n        tops = [lex[:1], ranking[:1], fuse([lex, ranking])[:1]]\n        print(f\"{query:<28}\" + \"\".join(f\"{yes(holds(chunks, t, answers[query])):<{w}}\" for t, w in zip(tops, (9, 10, 1))))\n    print(\"mechanism by corpus size, data shape and query pattern:\")\n    for size, shape, pattern in [(50000, \"text\", \"identifier\"), (5000000, \"table\", \"paraphrase\"), (5000000, \"text\", \"multi-hop\"), (5000000, \"text\", \"identifier\"), (5000000, \"text\", \"paraphrase\"), (5000000, \"text\", \"mixed\")]:\n        print(f\"  {size:>8} tokens  {shape:<6}{pattern:<11}-> {choose_retrieval(size, shape, pattern)}\")\n    edited = DOCS[\"refunds\"].replace(\"within 30 days\", \"within 60 days\")\n    live = {**DOCS, \"refunds\": edited}\n    for name, fn in ((\"add the new chunks only\", reindex_additive), (\"replace the document's chunks\", reindex_replace)):\n        after = fn(chunks, \"refunds\", edited)\n        print(f\"after the window changes from 30 to 60 days, {name}: {len(after)} chunks, stale {names(stale(after, live))}\")\n    outcomes = [(True, True)] * 4 + [(True, False), (False, False), (False, False), (False, True)]\n    counts = {}\n    for retrieved, correct in outcomes:\n        counts[layer(retrieved, correct)] = counts.get(layer(retrieved, correct), 0) + 1\n    print(f\"8 questions: evidence retrieved for {sum(r for r, _ in outcomes)}, answers correct {sum(c for _, c in outcomes)}, by layer {', '.join(f'{k} {v}' for k, v in sorted(counts.items()))}\")\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "cut every 12 words: 4 chunks, the whole rule in one chunk: no\ncut at headings:    3 chunks, the whole rule in one chunk: yes\nquery 'cancel the annual plan', chunks without context: top chunk monthly/Cancellation\nquery 'cancel the annual plan', chunks with context: top chunk annual/Cancellation\nquery                       lexical  semantic  hybrid\nwhat does E-7310 mean       yes      no        yes\nwhen will I be reimbursed   no       yes       yes\nmechanism by corpus size, data shape and query pattern:\n     50000 tokens  text  identifier -> cached prompt\n   5000000 tokens  table paraphrase -> structured query\n   5000000 tokens  text  multi-hop  -> agentic search\n   5000000 tokens  text  identifier -> keyword index\n   5000000 tokens  text  paraphrase -> embedding index\n   5000000 tokens  text  mixed      -> hybrid index\nafter the window changes from 30 to 60 days, add the new chunks only: 10 chunks, stale refunds/Eligibility\nafter the window changes from 30 to 60 days, replace the document's chunks: 7 chunks, stale none\n8 questions: evidence retrieved for 5, answers correct 5, by layer generation 1, ok 4, retrieval 2, unsupported 1"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "import { logger } from \"./logger.ts\";\nconst log = logger(\"chunking_and_recall\");\n\n/**\n * Design decisions around a retrieval pipeline: where a document is cut, what a chunk carries, which index answers which query, and what a re-index must remove.\n *\n * The corpus is four short documents. The \"semantic\" rankings are scripted: they stand in for an embedding index, which this course does not build (the Claude documentation says Anthropic\n * offers no embedding model and points to a provider). What the code shows is the design around that index. Read on 2026-10-04 against the Anthropic post on contextual retrieval and the Claude\n * documentation page \"Embeddings\". Nothing here calls a model.\n */\nexport type Chunk = [string, string];\n\nconst STOP = new Set([\"a\", \"an\", \"the\", \"is\", \"are\", \"can\", \"i\", \"what\", \"does\", \"do\", \"how\", \"my\", \"it\", \"of\", \"to\", \"for\", \"and\", \"or\", \"in\", \"when\", \"will\", \"be\", \"that\", \"this\", \"with\", \"by\", \"at\"]);\nexport const DOCS: Record<string, string> = {\n  monthly: \"# Monthly plan\\n## Cancellation\\nYou can cancel at any time and the current month is not refunded.\",\n  annual: \"# Annual plan\\n## Cancellation\\nYou can cancel within 14 days for a full refund.\",\n  refunds: \"# Refund policy\\n## Eligibility\\nCustomers may return items within 30 days of delivery.\\n## Exceptions\\nItems marked final sale cannot be returned, except when they arrive damaged.\\n## Process\\nRefunds go back to the original payment method within 5 business days.\",\n  errors: \"# Error codes\\n## E-7310\\nThe warehouse could not reserve stock. Retry after the next stock sync.\\n## E-4021\\nThe payment gateway rejected the card. Ask for another card.\",\n};\n\nexport function tokens(text: string): string[] {\n  return (text.toLowerCase().match(/[a-z0-9]+(?:-[a-z0-9]+)*/g) ?? []).filter((t) => !STOP.has(t));\n}\n\n/** Cut every `size` words, whatever the words mean. */\nexport function chunkFixed(docId: string, text: string, size: number): Chunk[] {\n  const words = text.split(/\\s+/).filter((w) => w !== \"\");\n  const out: Chunk[] = [];\n  for (let i = 0; i < words.length; i += size) out.push([`${docId}#${Math.floor(i / size)}`, words.slice(i, i + size).join(\" \")]);\n  return out;\n}\n\n/** Cut at the headings; with context, each chunk starts with the document title and its section name, so it can be found and read alone. */\nexport function chunkSections(docId: string, text: string, context: boolean): Chunk[] {\n  log.debug(\"chunkSections input\", text);\n  const [head, ...sections] = text.split(\"\\n## \");\n  const title = head.replace(/^# /, \"\");\n  return sections.map((section) => {\n    const cut = section.indexOf(\"\\n\");\n    const name = section.slice(0, cut);\n    return [`${docId}/${name}`, (context ? `${title} > ${name}. ` : \"\") + section.slice(cut + 1)] as Chunk;\n  });\n}\n\nexport function index(docs: Record<string, string>, context: boolean): Chunk[] {\n  return Object.entries(docs).flatMap(([docId, text]) => chunkSections(docId, text, context));\n}\n\n/** Words that appear in the chunk score one, a token with a digit (a code or an id) scores three; ties keep the index order. */\nexport function lexical(chunks: Chunk[], query: string, k = 3): string[] {\n  const wanted = new Set(tokens(query));\n  const scored: Array<[number, number, string]> = [];\n  chunks.forEach(([chunkId, text], n) => {\n    const have = new Set(tokens(text));\n    let score = 0;\n    for (const t of wanted) if (have.has(t)) score += /[0-9]/.test(t) ? 3 : 1;\n    if (score) scored.push([-score, n, chunkId]);\n  });\n  scored.sort((a, b) => a[0] - b[0] || a[1] - b[1]);\n  return scored.slice(0, k).map((s) => s[2]);\n}\n\n/** Reciprocal rank fusion, in integers so that every language ranks the same: each list adds 1000000 // (k + rank) to a chunk. */\nexport function fuse(rankings: string[][], k = 60): string[] {\n  const score = new Map<string, number>();\n  for (const ranking of rankings) ranking.forEach((chunkId, i) => score.set(chunkId, (score.get(chunkId) ?? 0) + Math.floor(1000000 / (k + i + 1))));\n  return [...score.keys()].sort((a, b) => score.get(b)! - score.get(a)! || (a < b ? -1 : a > b ? 1 : 0));\n}\n\n/** True when one retrieved chunk holds the whole answer sentence. */\nexport function holds(chunks: Chunk[], chunkIds: string[], answer: string): boolean {\n  const texts = new Map(chunks);\n  return chunkIds.some((id) => texts.get(id)!.includes(answer));\n}\n\n/** The shortcut: add the new chunks and leave the old ones where they are. */\nexport function reindexAdditive(chunks: Chunk[], docId: string, text: string): Chunk[] {\n  return [...chunks, ...chunkSections(docId, text, true)];\n}\n\n/** Drop every chunk of the document first, then add the new ones. */\nexport function reindexReplace(chunks: Chunk[], docId: string, text: string): Chunk[] {\n  return [...chunks.filter((c) => !c[0].startsWith(docId + \"/\")), ...chunkSections(docId, text, true)];\n}\n\n/** Chunks that no longer match what their source says now. */\nexport function stale(chunks: Chunk[], docs: Record<string, string>): string[] {\n  const current = new Set(index(docs, true).map((c) => JSON.stringify(c)));\n  return chunks.filter((c) => !current.has(JSON.stringify(c))).map((c) => c[0]);\n}\n\n/** The cheapest mechanism that fits: a corpus under 200,000 tokens fits a cached prompt; a table is queried; several hops need an agent that searches; otherwise the query pattern picks the index. */\nexport function chooseRetrieval(corpusTokens: number, shape: string, pattern: string): string {\n  if (corpusTokens < 200000) return \"cached prompt\";\n  if (shape === \"table\") return \"structured query\";\n  if (pattern === \"multi-hop\") return \"agentic search\";\n  return ({ identifier: \"keyword index\", paraphrase: \"embedding index\" } as Record<string, string>)[pattern] ?? \"hybrid index\";\n}\n\n/** Where a question went wrong, judged by retrieval and by generation separately; a right answer without its evidence is a risk of its own. */\nexport function layer(evidenceRetrieved: boolean, answerCorrect: boolean): string {\n  if (answerCorrect) return evidenceRetrieved ? \"ok\" : \"unsupported\";\n  return evidenceRetrieved ? \"generation\" : \"retrieval\";\n}\n\nconst yes = (flag: boolean) => (flag ? \"yes\" : \"no\");\nconst names = (items: string[]) => (items.length ? items.join(\", \") : \"none\");\n\nfunction main() {\n  const answer = \"Items marked final sale cannot be returned, except when they arrive damaged.\";\n  const fixed = chunkFixed(\"refunds\", DOCS.refunds, 12);\n  const sections = chunkSections(\"refunds\", DOCS.refunds, false);\n  console.log(`cut every 12 words: ${fixed.length} chunks, the whole rule in one chunk: ${yes(holds(fixed, fixed.map((c) => c[0]), answer))}`);\n  console.log(`cut at headings:    ${sections.length} chunks, the whole rule in one chunk: ${yes(holds(sections, sections.map((c) => c[0]), answer))}`);\n  for (const context of [false, true]) {\n    console.log(`query 'cancel the annual plan', chunks ${context ? \"with\" : \"without\"} context: top chunk ${lexical(index(DOCS, context), \"cancel the annual plan\", 1)[0]}`);\n  }\n  const chunks = index(DOCS, true);\n  const semantic: Record<string, string[]> = {\n    \"what does E-7310 mean\": [\"errors/E-4021\", \"errors/E-7310\", \"refunds/Process\"],\n    \"when will I be reimbursed\": [\"refunds/Process\", \"annual/Cancellation\", \"monthly/Cancellation\"],\n  };\n  const answers: Record<string, string> = { \"what does E-7310 mean\": \"The warehouse could not reserve stock.\", \"when will I be reimbursed\": \"Refunds go back to the original payment method within 5 business days.\" };\n  console.log(`${\"query\".padEnd(28)}${\"lexical\".padEnd(9)}${\"semantic\".padEnd(10)}hybrid`);\n  for (const [query, ranking] of Object.entries(semantic)) {\n    const lex = lexical(chunks, query);\n    const tops = [lex.slice(0, 1), ranking.slice(0, 1), fuse([lex, ranking]).slice(0, 1)];\n    console.log(query.padEnd(28) + tops.map((t, i) => yes(holds(chunks, t, answers[query])).padEnd([9, 10, 1][i])).join(\"\"));\n  }\n  console.log(\"mechanism by corpus size, data shape and query pattern:\");\n  const rows: Array<[number, string, string]> = [[50000, \"text\", \"identifier\"], [5000000, \"table\", \"paraphrase\"], [5000000, \"text\", \"multi-hop\"], [5000000, \"text\", \"identifier\"], [5000000, \"text\", \"paraphrase\"], [5000000, \"text\", \"mixed\"]];\n  for (const [size, shape, pattern] of rows) console.log(`  ${String(size).padStart(8)} tokens  ${shape.padEnd(6)}${pattern.padEnd(11)}-> ${chooseRetrieval(size, shape, pattern)}`);\n  const edited = DOCS.refunds.replace(\"within 30 days\", \"within 60 days\");\n  const live = { ...DOCS, refunds: edited };\n  const strategies: Array<[string, (c: Chunk[], d: string, t: string) => Chunk[]]> = [[\"add the new chunks only\", reindexAdditive], [\"replace the document's chunks\", reindexReplace]];\n  for (const [name, fn] of strategies) {\n    const after = fn(chunks, \"refunds\", edited);\n    console.log(`after the window changes from 30 to 60 days, ${name}: ${after.length} chunks, stale ${names(stale(after, live))}`);\n  }\n  const outcomes: Array<[boolean, boolean]> = [[true, true], [true, true], [true, true], [true, true], [true, false], [false, false], [false, false], [false, true]];\n  const counts = new Map<string, number>();\n  for (const [retrieved, correct] of outcomes) counts.set(layer(retrieved, correct), (counts.get(layer(retrieved, correct)) ?? 0) + 1);\n  const byLayer = [...counts.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1)).map(([k, v]) => `${k} ${v}`).join(\", \");\n  console.log(`8 questions: evidence retrieved for ${outcomes.filter((o) => o[0]).length}, answers correct ${outcomes.filter((o) => o[1]).length}, by layer ${byLayer}`);\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "cut every 12 words: 4 chunks, the whole rule in one chunk: no\ncut at headings:    3 chunks, the whole rule in one chunk: yes\nquery 'cancel the annual plan', chunks without context: top chunk monthly/Cancellation\nquery 'cancel the annual plan', chunks with context: top chunk annual/Cancellation\nquery                       lexical  semantic  hybrid\nwhat does E-7310 mean       yes      no        yes\nwhen will I be reimbursed   no       yes       yes\nmechanism by corpus size, data shape and query pattern:\n     50000 tokens  text  identifier -> cached prompt\n   5000000 tokens  table paraphrase -> structured query\n   5000000 tokens  text  multi-hop  -> agentic search\n   5000000 tokens  text  identifier -> keyword index\n   5000000 tokens  text  paraphrase -> embedding index\n   5000000 tokens  text  mixed      -> hybrid index\nafter the window changes from 30 to 60 days, add the new chunks only: 10 chunks, stale refunds/Eligibility\nafter the window changes from 30 to 60 days, replace the document's chunks: 7 chunks, stale none\n8 questions: evidence retrieved for 5, answers correct 5, by layer generation 1, ok 4, retrieval 2, unsupported 1"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.Arrays;\nimport java.util.HashMap;\nimport java.util.HashSet;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\nimport java.util.TreeMap;\nimport java.util.regex.Matcher;\nimport java.util.regex.Pattern;\n\n/**\n * Design decisions around a retrieval pipeline: where a document is cut, what a chunk carries, which index answers which query, and what a re-index must remove.\n *\n * <p>The corpus is four short documents. The \"semantic\" rankings are scripted: they stand in for an embedding index, which this course does not build (the Claude documentation says Anthropic\n * offers no embedding model and points to a provider). What the code shows is the design around that index. Read on 2026-10-04 against the Anthropic post on contextual retrieval and the Claude\n * documentation page \"Embeddings\". Nothing here calls a model.\n */\npublic final class ChunkingAndRecall {\n    private static final System.Logger LOG = System.getLogger(ChunkingAndRecall.class.getName());\n    private ChunkingAndRecall() {}\n\n    /** A chunk: its id and its text. */\n    record Chunk(String id, String text) {}\n\n    static final Set<String> STOP = Set.of(\"a\", \"an\", \"the\", \"is\", \"are\", \"can\", \"i\", \"what\", \"does\", \"do\", \"how\", \"my\", \"it\", \"of\", \"to\", \"for\", \"and\", \"or\", \"in\", \"when\", \"will\", \"be\", \"that\", \"this\", \"with\", \"by\", \"at\");\n    static final Map<String, String> DOCS = new LinkedHashMap<>();\n\n    static {\n        DOCS.put(\"monthly\", \"# Monthly plan\\n## Cancellation\\nYou can cancel at any time and the current month is not refunded.\");\n        DOCS.put(\"annual\", \"# Annual plan\\n## Cancellation\\nYou can cancel within 14 days for a full refund.\");\n        DOCS.put(\"refunds\", \"# Refund policy\\n## Eligibility\\nCustomers may return items within 30 days of delivery.\\n## Exceptions\\nItems marked final sale cannot be returned, except when they arrive damaged.\\n## Process\\nRefunds go back to the original payment method within 5 business days.\");\n        DOCS.put(\"errors\", \"# Error codes\\n## E-7310\\nThe warehouse could not reserve stock. Retry after the next stock sync.\\n## E-4021\\nThe payment gateway rejected the card. Ask for another card.\");\n    }\n\n    private static final Pattern TOKEN = Pattern.compile(\"[a-z0-9]+(?:-[a-z0-9]+)*\");\n\n    static List<String> tokens(String text) {\n        List<String> out = new ArrayList<>();\n        Matcher m = TOKEN.matcher(text.toLowerCase());\n        while (m.find()) if (!STOP.contains(m.group())) out.add(m.group());\n        return out;\n    }\n\n    /** Cut every `size` words, whatever the words mean. */\n    static List<Chunk> chunkFixed(String docId, String text, int size) {\n        String[] words = text.trim().split(\"\\\\s+\");\n        List<Chunk> out = new ArrayList<>();\n        for (int i = 0; i < words.length; i += size) out.add(new Chunk(docId + \"#\" + i / size, String.join(\" \", Arrays.copyOfRange(words, i, Math.min(i + size, words.length)))));\n        return out;\n    }\n\n    /** Cut at the headings; with context, each chunk starts with the document title and its section name, so it can be found and read alone. */\n    static List<Chunk> chunkSections(String docId, String text, boolean context) {\n        LOG.log(System.Logger.Level.DEBUG, \"chunkSections input: {0}\", text);\n        String[] parts = text.split(\"\\n## \");\n        String title = parts[0].startsWith(\"# \") ? parts[0].substring(2) : parts[0];\n        List<Chunk> out = new ArrayList<>();\n        for (int i = 1; i < parts.length; i++) {\n            int cut = parts[i].indexOf('\\n');\n            String name = parts[i].substring(0, cut);\n            out.add(new Chunk(docId + \"/\" + name, (context ? title + \" > \" + name + \". \" : \"\") + parts[i].substring(cut + 1)));\n        }\n        return out;\n    }\n\n    static List<Chunk> index(Map<String, String> docs, boolean context) {\n        List<Chunk> out = new ArrayList<>();\n        docs.forEach((docId, text) -> out.addAll(chunkSections(docId, text, context)));\n        return out;\n    }\n\n    private static boolean hasDigit(String t) {\n        return t.chars().anyMatch(Character::isDigit);\n    }\n\n    /** Words that appear in the chunk score one, a token with a digit (a code or an id) scores three; ties keep the index order. */\n    static List<String> lexical(List<Chunk> chunks, String query, int k) {\n        Set<String> wanted = new HashSet<>(tokens(query));\n        List<int[]> scored = new ArrayList<>();\n        for (int n = 0; n < chunks.size(); n++) {\n            Set<String> have = new HashSet<>(tokens(chunks.get(n).text()));\n            int score = 0;\n            for (String t : wanted) if (have.contains(t)) score += hasDigit(t) ? 3 : 1;\n            if (score > 0) scored.add(new int[] {-score, n});\n        }\n        scored.sort((a, b) -> a[0] != b[0] ? Integer.compare(a[0], b[0]) : Integer.compare(a[1], b[1]));\n        List<String> out = new ArrayList<>();\n        for (int i = 0; i < Math.min(k, scored.size()); i++) out.add(chunks.get(scored.get(i)[1]).id());\n        return out;\n    }\n\n    static List<String> lexical(List<Chunk> chunks, String query) {\n        return lexical(chunks, query, 3);\n    }\n\n    /** Reciprocal rank fusion, in integers so that every language ranks the same: each list adds 1000000 // (k + rank) to a chunk. */\n    static List<String> fuse(List<List<String>> rankings, int k) {\n        Map<String, Integer> score = new HashMap<>();\n        for (List<String> ranking : rankings) for (int i = 0; i < ranking.size(); i++) score.merge(ranking.get(i), 1000000 / (k + i + 1), Integer::sum);\n        List<String> ids = new ArrayList<>(score.keySet());\n        ids.sort((a, b) -> score.get(a).equals(score.get(b)) ? a.compareTo(b) : Integer.compare(score.get(b), score.get(a)));\n        return ids;\n    }\n\n    static List<String> fuse(List<List<String>> rankings) {\n        return fuse(rankings, 60);\n    }\n\n    /** True when one retrieved chunk holds the whole answer sentence. */\n    static boolean holds(List<Chunk> chunks, List<String> chunkIds, String answer) {\n        Map<String, String> texts = new HashMap<>();\n        for (Chunk c : chunks) texts.put(c.id(), c.text());\n        return chunkIds.stream().anyMatch(id -> texts.get(id).contains(answer));\n    }\n\n    /** The shortcut: add the new chunks and leave the old ones where they are. */\n    static List<Chunk> reindexAdditive(List<Chunk> chunks, String docId, String text) {\n        List<Chunk> out = new ArrayList<>(chunks);\n        out.addAll(chunkSections(docId, text, true));\n        return out;\n    }\n\n    /** Drop every chunk of the document first, then add the new ones. */\n    static List<Chunk> reindexReplace(List<Chunk> chunks, String docId, String text) {\n        List<Chunk> out = new ArrayList<>();\n        for (Chunk c : chunks) if (!c.id().startsWith(docId + \"/\")) out.add(c);\n        out.addAll(chunkSections(docId, text, true));\n        return out;\n    }\n\n    /** Chunks that no longer match what their source says now. */\n    static List<String> stale(List<Chunk> chunks, Map<String, String> docs) {\n        Set<Chunk> current = new HashSet<>(index(docs, true));\n        List<String> out = new ArrayList<>();\n        for (Chunk c : chunks) if (!current.contains(c)) out.add(c.id());\n        return out;\n    }\n\n    /** The cheapest mechanism that fits: a corpus under 200,000 tokens fits a cached prompt; a table is queried; several hops need an agent that searches; otherwise the query pattern picks the index. */\n    static String chooseRetrieval(int corpusTokens, String shape, String pattern) {\n        if (corpusTokens < 200000) return \"cached prompt\";\n        if (shape.equals(\"table\")) return \"structured query\";\n        if (pattern.equals(\"multi-hop\")) return \"agentic search\";\n        return switch (pattern) {\n            case \"identifier\" -> \"keyword index\";\n            case \"paraphrase\" -> \"embedding index\";\n            default -> \"hybrid index\";\n        };\n    }\n\n    /** Where a question went wrong, judged by retrieval and by generation separately; a right answer without its evidence is a risk of its own. */\n    static String layer(boolean evidenceRetrieved, boolean answerCorrect) {\n        if (answerCorrect) return evidenceRetrieved ? \"ok\" : \"unsupported\";\n        return evidenceRetrieved ? \"generation\" : \"retrieval\";\n    }\n\n    private static String yes(boolean flag) {\n        return flag ? \"yes\" : \"no\";\n    }\n\n    private static String names(List<String> items) {\n        return items.isEmpty() ? \"none\" : String.join(\", \", items);\n    }\n\n    private static List<String> ids(List<Chunk> chunks) {\n        return chunks.stream().map(Chunk::id).toList();\n    }\n\n    public static void main(String[] args) {\n        String answer = \"Items marked final sale cannot be returned, except when they arrive damaged.\";\n        List<Chunk> fixed = chunkFixed(\"refunds\", DOCS.get(\"refunds\"), 12);\n        List<Chunk> sections = chunkSections(\"refunds\", DOCS.get(\"refunds\"), false);\n        System.out.println(\"cut every 12 words: \" + fixed.size() + \" chunks, the whole rule in one chunk: \" + yes(holds(fixed, ids(fixed), answer)));\n        System.out.println(\"cut at headings:    \" + sections.size() + \" chunks, the whole rule in one chunk: \" + yes(holds(sections, ids(sections), answer)));\n        for (boolean context : new boolean[] {false, true}) {\n            System.out.println(\"query 'cancel the annual plan', chunks \" + (context ? \"with\" : \"without\") + \" context: top chunk \" + lexical(index(DOCS, context), \"cancel the annual plan\", 1).get(0));\n        }\n        List<Chunk> chunks = index(DOCS, true);\n        Map<String, List<String>> semantic = new LinkedHashMap<>();\n        semantic.put(\"what does E-7310 mean\", List.of(\"errors/E-4021\", \"errors/E-7310\", \"refunds/Process\"));\n        semantic.put(\"when will I be reimbursed\", List.of(\"refunds/Process\", \"annual/Cancellation\", \"monthly/Cancellation\"));\n        Map<String, String> answers = Map.of(\"what does E-7310 mean\", \"The warehouse could not reserve stock.\", \"when will I be reimbursed\", \"Refunds go back to the original payment method within 5 business days.\");\n        System.out.println(String.format(\"%-28s%-9s%-10s%s\", \"query\", \"lexical\", \"semantic\", \"hybrid\"));\n        semantic.forEach((query, ranking) -> {\n            List<String> lex = lexical(chunks, query);\n            List<String> hybrid = fuse(List.of(lex, ranking));\n            System.out.println(String.format(\"%-28s%-9s%-10s%s\", query, yes(holds(chunks, lex.subList(0, Math.min(1, lex.size())), answers.get(query))),\n                yes(holds(chunks, ranking.subList(0, 1), answers.get(query))), yes(holds(chunks, hybrid.subList(0, 1), answers.get(query)))));\n        });\n        System.out.println(\"mechanism by corpus size, data shape and query pattern:\");\n        Object[][] rows = {{50000, \"text\", \"identifier\"}, {5000000, \"table\", \"paraphrase\"}, {5000000, \"text\", \"multi-hop\"}, {5000000, \"text\", \"identifier\"}, {5000000, \"text\", \"paraphrase\"}, {5000000, \"text\", \"mixed\"}};\n        for (Object[] r : rows) System.out.println(String.format(\"  %8d tokens  %-6s%-11s-> %s\", (int) r[0], r[1], r[2], chooseRetrieval((int) r[0], (String) r[1], (String) r[2])));\n        String edited = DOCS.get(\"refunds\").replace(\"within 30 days\", \"within 60 days\");\n        Map<String, String> live = new LinkedHashMap<>(DOCS);\n        live.put(\"refunds\", edited);\n        List<Chunk> additive = reindexAdditive(chunks, \"refunds\", edited);\n        List<Chunk> replaced = reindexReplace(chunks, \"refunds\", edited);\n        System.out.println(\"after the window changes from 30 to 60 days, add the new chunks only: \" + additive.size() + \" chunks, stale \" + names(stale(additive, live)));\n        System.out.println(\"after the window changes from 30 to 60 days, replace the document's chunks: \" + replaced.size() + \" chunks, stale \" + names(stale(replaced, live)));\n        boolean[][] outcomes = {{true, true}, {true, true}, {true, true}, {true, true}, {true, false}, {false, false}, {false, false}, {false, true}};\n        Map<String, Integer> counts = new TreeMap<>();\n        int retrieved = 0, correct = 0;\n        for (boolean[] o : outcomes) {\n            counts.merge(layer(o[0], o[1]), 1, Integer::sum);\n            if (o[0]) retrieved++;\n            if (o[1]) correct++;\n        }\n        StringBuilder byLayer = new StringBuilder();\n        counts.forEach((k, v) -> byLayer.append(byLayer.length() == 0 ? \"\" : \", \").append(k).append(' ').append(v));\n        System.out.println(\"8 questions: evidence retrieved for \" + retrieved + \", answers correct \" + correct + \", by layer \" + byLayer);\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "cut every 12 words: 4 chunks, the whole rule in one chunk: no\ncut at headings:    3 chunks, the whole rule in one chunk: yes\nquery 'cancel the annual plan', chunks without context: top chunk monthly/Cancellation\nquery 'cancel the annual plan', chunks with context: top chunk annual/Cancellation\nquery                       lexical  semantic  hybrid\nwhat does E-7310 mean       yes      no        yes\nwhen will I be reimbursed   no       yes       yes\nmechanism by corpus size, data shape and query pattern:\n     50000 tokens  text  identifier -> cached prompt\n   5000000 tokens  table paraphrase -> structured query\n   5000000 tokens  text  multi-hop  -> agentic search\n   5000000 tokens  text  identifier -> keyword index\n   5000000 tokens  text  paraphrase -> embedding index\n   5000000 tokens  text  mixed      -> hybrid index\nafter the window changes from 30 to 60 days, add the new chunks only: 10 chunks, stale refunds/Eligibility\nafter the window changes from 30 to 60 days, replace the document's chunks: 7 chunks, stale none\n8 questions: evidence retrieved for 5, answers correct 5, by layer generation 1, ok 4, retrieval 2, unsupported 1"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "private val log = System.getLogger(\"chunking_and_recall\")\n\n/**\n * Design decisions around a retrieval pipeline: where a document is cut, what a chunk carries, which index answers which query, and what a re-index must remove.\n *\n * The corpus is four short documents. The \"semantic\" rankings are scripted: they stand in for an embedding index, which this course does not build (the Claude documentation says Anthropic\n * offers no embedding model and points to a provider). What the code shows is the design around that index. Read on 2026-10-04 against the Anthropic post on contextual retrieval and the Claude\n * documentation page \"Embeddings\". Nothing here calls a model.\n */\n\n/** A chunk: its id and its text. */\ndata class Chunk(val id: String, val text: String)\n\nval STOP = setOf(\"a\", \"an\", \"the\", \"is\", \"are\", \"can\", \"i\", \"what\", \"does\", \"do\", \"how\", \"my\", \"it\", \"of\", \"to\", \"for\", \"and\", \"or\", \"in\", \"when\", \"will\", \"be\", \"that\", \"this\", \"with\", \"by\", \"at\")\nval DOCS = linkedMapOf(\n    \"monthly\" to \"# Monthly plan\\n## Cancellation\\nYou can cancel at any time and the current month is not refunded.\",\n    \"annual\" to \"# Annual plan\\n## Cancellation\\nYou can cancel within 14 days for a full refund.\",\n    \"refunds\" to \"# Refund policy\\n## Eligibility\\nCustomers may return items within 30 days of delivery.\\n## Exceptions\\nItems marked final sale cannot be returned, except when they arrive damaged.\\n## Process\\nRefunds go back to the original payment method within 5 business days.\",\n    \"errors\" to \"# Error codes\\n## E-7310\\nThe warehouse could not reserve stock. Retry after the next stock sync.\\n## E-4021\\nThe payment gateway rejected the card. Ask for another card.\",\n)\n\nprivate val TOKEN = Regex(\"[a-z0-9]+(?:-[a-z0-9]+)*\")\n\nfun tokens(text: String): List<String> = TOKEN.findAll(text.lowercase()).map { it.value }.filter { it !in STOP }.toList()\n\n/** Cut every `size` words, whatever the words mean. */\nfun chunkFixed(docId: String, text: String, size: Int): List<Chunk> =\n    text.trim().split(Regex(\"\\\\s+\")).chunked(size).mapIndexed { i, words -> Chunk(\"$docId#$i\", words.joinToString(\" \")) }\n\n/** Cut at the headings; with context, each chunk starts with the document title and its section name, so it can be found and read alone. */\nfun chunkSections(docId: String, text: String, context: Boolean): List<Chunk> {\n    log.log(System.Logger.Level.DEBUG, \"chunkSections input: {0}\", text)\n    val parts = text.split(\"\\n## \")\n    val title = parts[0].removePrefix(\"# \")\n    return parts.drop(1).map { section ->\n        val cut = section.indexOf('\\n')\n        val name = section.substring(0, cut)\n        Chunk(\"$docId/$name\", (if (context) \"$title > $name. \" else \"\") + section.substring(cut + 1))\n    }\n}\n\nfun index(docs: Map<String, String>, context: Boolean): List<Chunk> = docs.flatMap { (docId, text) -> chunkSections(docId, text, context) }\n\n/** Words that appear in the chunk score one, a token with a digit (a code or an id) scores three; ties keep the index order. */\nfun lexical(chunks: List<Chunk>, query: String, k: Int = 3): List<String> {\n    val wanted = tokens(query).toSet()\n    val scored = chunks.mapIndexedNotNull { n, chunk ->\n        val have = tokens(chunk.text).toSet()\n        val score = wanted.filter { it in have }.map { t -> if (t.any { c -> c.isDigit() }) 3 else 1 }.sum()\n        if (score > 0) Triple(-score, n, chunk.id) else null\n    }\n    return scored.sortedWith(compareBy({ it.first }, { it.second })).take(k).map { it.third }\n}\n\n/** Reciprocal rank fusion, in integers so that every language ranks the same: each list adds 1000000 // (k + rank) to a chunk. */\nfun fuse(rankings: List<List<String>>, k: Int = 60): List<String> {\n    val score = HashMap<String, Int>()\n    for (ranking in rankings) ranking.forEachIndexed { i, id -> score[id] = (score[id] ?: 0) + 1000000 / (k + i + 1) }\n    return score.keys.sortedWith(compareBy({ -score.getValue(it) }, { it }))\n}\n\n/** True when one retrieved chunk holds the whole answer sentence. */\nfun holds(chunks: List<Chunk>, chunkIds: List<String>, answer: String): Boolean {\n    val texts = chunks.associate { it.id to it.text }\n    return chunkIds.any { answer in texts.getValue(it) }\n}\n\n/** The shortcut: add the new chunks and leave the old ones where they are. */\nfun reindexAdditive(chunks: List<Chunk>, docId: String, text: String): List<Chunk> = chunks + chunkSections(docId, text, true)\n\n/** Drop every chunk of the document first, then add the new ones. */\nfun reindexReplace(chunks: List<Chunk>, docId: String, text: String): List<Chunk> = chunks.filter { !it.id.startsWith(\"$docId/\") } + chunkSections(docId, text, true)\n\n/** Chunks that no longer match what their source says now. */\nfun stale(chunks: List<Chunk>, docs: Map<String, String>): List<String> {\n    val current = index(docs, true).toSet()\n    return chunks.filter { it !in current }.map { it.id }\n}\n\n/** The cheapest mechanism that fits: a corpus under 200,000 tokens fits a cached prompt; a table is queried; several hops need an agent that searches; otherwise the query pattern picks the index. */\nfun chooseRetrieval(corpusTokens: Int, shape: String, pattern: String): String = when {\n    corpusTokens < 200000 -> \"cached prompt\"\n    shape == \"table\" -> \"structured query\"\n    pattern == \"multi-hop\" -> \"agentic search\"\n    pattern == \"identifier\" -> \"keyword index\"\n    pattern == \"paraphrase\" -> \"embedding index\"\n    else -> \"hybrid index\"\n}\n\n/** Where a question went wrong, judged by retrieval and by generation separately; a right answer without its evidence is a risk of its own. */\nfun layer(evidenceRetrieved: Boolean, answerCorrect: Boolean): String =\n    if (answerCorrect) (if (evidenceRetrieved) \"ok\" else \"unsupported\") else (if (evidenceRetrieved) \"generation\" else \"retrieval\")\n\nprivate fun yes(flag: Boolean) = if (flag) \"yes\" else \"no\"\n\nprivate fun names(items: List<String>) = if (items.isEmpty()) \"none\" else items.joinToString(\", \")\n\nprivate fun ids(chunks: List<Chunk>) = chunks.map { it.id }\n\nfun main() {\n    val answer = \"Items marked final sale cannot be returned, except when they arrive damaged.\"\n    val fixed = chunkFixed(\"refunds\", DOCS.getValue(\"refunds\"), 12)\n    val sections = chunkSections(\"refunds\", DOCS.getValue(\"refunds\"), false)\n    println(\"cut every 12 words: ${fixed.size} chunks, the whole rule in one chunk: ${yes(holds(fixed, ids(fixed), answer))}\")\n    println(\"cut at headings:    ${sections.size} chunks, the whole rule in one chunk: ${yes(holds(sections, ids(sections), answer))}\")\n    for (context in listOf(false, true)) {\n        println(\"query 'cancel the annual plan', chunks ${if (context) \"with\" else \"without\"} context: top chunk ${lexical(index(DOCS, context), \"cancel the annual plan\", 1)[0]}\")\n    }\n    val chunks = index(DOCS, true)\n    val semantic = linkedMapOf(\n        \"what does E-7310 mean\" to listOf(\"errors/E-4021\", \"errors/E-7310\", \"refunds/Process\"),\n        \"when will I be reimbursed\" to listOf(\"refunds/Process\", \"annual/Cancellation\", \"monthly/Cancellation\"),\n    )\n    val answers = mapOf(\"what does E-7310 mean\" to \"The warehouse could not reserve stock.\", \"when will I be reimbursed\" to \"Refunds go back to the original payment method within 5 business days.\")\n    println(\"%-28s%-9s%-10s%s\".format(\"query\", \"lexical\", \"semantic\", \"hybrid\"))\n    for ((query, ranking) in semantic) {\n        val lex = lexical(chunks, query)\n        val hybrid = fuse(listOf(lex, ranking))\n        println(\"%-28s%-9s%-10s%s\".format(query, yes(holds(chunks, lex.take(1), answers.getValue(query))), yes(holds(chunks, ranking.take(1), answers.getValue(query))), yes(holds(chunks, hybrid.take(1), answers.getValue(query)))))\n    }\n    println(\"mechanism by corpus size, data shape and query pattern:\")\n    for ((size, shape, pattern) in listOf(Triple(50000, \"text\", \"identifier\"), Triple(5000000, \"table\", \"paraphrase\"), Triple(5000000, \"text\", \"multi-hop\"), Triple(5000000, \"text\", \"identifier\"), Triple(5000000, \"text\", \"paraphrase\"), Triple(5000000, \"text\", \"mixed\"))) {\n        println(\"  %8d tokens  %-6s%-11s-> %s\".format(size, shape, pattern, chooseRetrieval(size, shape, pattern)))\n    }\n    val edited = DOCS.getValue(\"refunds\").replace(\"within 30 days\", \"within 60 days\")\n    val live = DOCS + (\"refunds\" to edited)\n    val additive = reindexAdditive(chunks, \"refunds\", edited)\n    val replaced = reindexReplace(chunks, \"refunds\", edited)\n    println(\"after the window changes from 30 to 60 days, add the new chunks only: ${additive.size} chunks, stale ${names(stale(additive, live))}\")\n    println(\"after the window changes from 30 to 60 days, replace the document's chunks: ${replaced.size} chunks, stale ${names(stale(replaced, live))}\")\n    val outcomes = listOf(true to true, true to true, true to true, true to true, true to false, false to false, false to false, false to true)\n    val counts = outcomes.groupingBy { layer(it.first, it.second) }.eachCount().toSortedMap()\n    println(\"8 questions: evidence retrieved for ${outcomes.count { it.first }}, answers correct ${outcomes.count { it.second }}, by layer ${counts.entries.joinToString(\", \") { \"${it.key} ${it.value}\" }}\")\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "cut every 12 words: 4 chunks, the whole rule in one chunk: no\ncut at headings:    3 chunks, the whole rule in one chunk: yes\nquery 'cancel the annual plan', chunks without context: top chunk monthly/Cancellation\nquery 'cancel the annual plan', chunks with context: top chunk annual/Cancellation\nquery                       lexical  semantic  hybrid\nwhat does E-7310 mean       yes      no        yes\nwhen will I be reimbursed   no       yes       yes\nmechanism by corpus size, data shape and query pattern:\n     50000 tokens  text  identifier -> cached prompt\n   5000000 tokens  table paraphrase -> structured query\n   5000000 tokens  text  multi-hop  -> agentic search\n   5000000 tokens  text  identifier -> keyword index\n   5000000 tokens  text  paraphrase -> embedding index\n   5000000 tokens  text  mixed      -> hybrid index\nafter the window changes from 30 to 60 days, add the new chunks only: 10 chunks, stale refunds/Eligibility\nafter the window changes from 30 to 60 days, replace the document's chunks: 7 chunks, stale none\n8 questions: evidence retrieved for 5, answers correct 5, by layer generation 1, ok 4, retrieval 2, unsupported 1"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Read the output as four findings. The fixed cut finds no chunk with the whole rule, and the heading cut does. The context prefix moves the right plan's chunk from second to first. On the question that names E-7310 the keyword index is right and the scripted embedding ranking is wrong, since it puts the other code first. On the paraphrase \"when will I be reimbursed\" it is the other way round: the keyword index finds nothing, because the word reimbursed is in no chunk, and the embedding ranking is right. The fused ranking is right on both, which is the argument for running both. The last block is the decision table as code: a corpus under 200,000 tokens goes into a cached prompt before any index is considered."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**\"Use one chunk size for every kind of document.\"** It is tempting because one setting is easy to run and to explain. The exam rejects it: the cut follows the structure of the data, so a rule stays with its exception, and a length limit only applies to the units that exceed it.",
+        "**\"Embeddings capture meaning, so the keyword index is redundant.\"** It is tempting because meaning sounds like a superset of words. The exam rejects it: embedding models \"can miss crucial exact matches\", and a question that names an identifier is the case where the keyword index is right and the embedding ranking is wrong.",
+        "**\"Check the reader's rights on the results, after retrieval.\"** It is tempting because the retrieval code stays shared between customers. The exam rejects it: the filter belongs before the ranking, otherwise the visible results shrink while hidden chunks take the top places."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A returns policy states a rule and, two lines later, its exception. The pipeline indexes windows of fixed length, and the assistant gives the rule without the exception. Which change addresses the cause?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Break the text at section boundaries so related sentences stay together",
+              "**b**: Shrink each window so that every single sentence is indexed entirely on its own",
+              "**c**: Return more windows for each question so that both halves can arrive together",
+              "**d**: Swap the keyword index for an embedding index to match the meaning of the text"
+            ]
+          }
+        ],
+        [
+          "A platform serves several customers from one index. An employee of one customer, cleared for two contracts, asks a question that matches fifty passages across all customers, yet the application returns a single result. Which fault explains the single result?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: It keeps one index for every customer instead of one index for each",
+              "**b**: It lets the system prompt ask the model to ignore the other tenants",
+              "**c**: It trims the list to the person's rights after taking the best few",
+              "**d**: It stores each contract twice, so that duplicate passages fill the list"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**a**. The cut ignored the structure of the data, and a heading is a joint at which a rule and its exception stay together. *b* is ruled out because \"A smaller window cuts in more places and separates more sentences from their neighbours\". *c* is ruled out because returning more chunks \"does not help either, because no chunk holds the whole rule\". *d* is ruled out because changing the index \"changes how the pieces are scored, not where they were cut\".",
+            "**c**. The filter ran after the cut, so passages the person may not see took the top places and were removed afterwards. *a* is ruled out because \"Chunks carry metadata: the document, its owner or tenant, its version, its date\" and that is how one index serves many customers. *b* is ruled out because the shortfall arises \"because the top places went to chunks that were then removed\", and a prompt instruction has no part in it. *d* is ruled out because a reader gets \"fewer than k results although many visible chunks matched\", which is the signature of a late filter and not of duplicates."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 11,
+    "paras": 14,
+    "code": 0,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 1,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "649662a4bfe2e300acdd3d70095df54c68c707a0db5ad131b1eb1e89488bb1d6"
+}

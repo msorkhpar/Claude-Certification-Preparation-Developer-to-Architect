@@ -1,0 +1,314 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "31-computer-use"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: the loop around the computer use tool (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: the loop around the computer use tool"
+    },
+    {
+      "type": "para",
+      "text": "The computer use tool turns Claude into someone who looks at a screenshot and decides on a click, a keystroke or a scroll. Claude runs nothing: your code takes each action, performs it, and answers with the new screenshot. Three things make that loop hard. The screen is usually larger than the picture the model may be sent, so every coordinate has to be scaled both ways. A model that reads a page can be pushed into clicking something it should not, so a risky click needs a person. And an action that fails must not let the rest of its batch run on a screen that no longer looks as expected. Write the executor and the loop, against a toy screen, and prune the screenshots that fill the context. The tool, the actions, the scaling rule and the safety advice come from the Claude documentation on the computer use tool and on vision, read on 2026-10-03; the lesson pages explain them. Nothing here touches a real desktop or the network: the screen is a map in memory and the model is a function that you call."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "screen",
+          "`{\"width\", \"height\", \"cursor\": [x, y], \"typed\", \"log\", \"elements\"}`; the log gets one entry per action that changes it (a click is `[name, element id or null]`, a typed text is `[\"type\", text]`, a key press is `[\"key\", text]`, a scroll is `[\"scroll\", direction]`); `elements` are `{\"id\", \"x\", \"y\", \"w\", \"h\", \"risk\"}` rectangles in real screen pixels, where `risk` is `\"none\"` or a reason such as `\"payment\"`; when elements overlap the later one wins"
+        ],
+        [
+          "`render(screen, width, height)`",
+          "the screenshot of the screen at that size, as the base64 text of a picture; it changes with every logged action"
+        ],
+        [
+          "`ask(request)`",
+          "the model: takes `{\"model\", \"max_tokens\", \"tools\", \"messages\"}` and returns `{\"content\": [blocks], \"stop_reason\"}`"
+        ],
+        [
+          "`confirm(action)`",
+          "a person's answer: takes `{\"action\", \"element\", \"risk\"}` and returns true or false; it may be missing"
+        ],
+        [
+          "`TOOLSET`",
+          "`computer_toolset_20260801`, the tool type of the current computer use toolset"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "A `tool_use` block of the toolset looks like `{\"type\": \"tool_use\", \"id\", \"name\": \"left_click\", \"toolset_name\": \"computer\", \"input\": {\"coordinate\": [x, y]}}`. Coordinates in `input` are pixels on the screenshot the model was sent."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working executor and loop with nine small gaps cut out of it. The plumbing is written and correct: the `render` stub, the element lookup, the click, `type`, `wait`, `mouse_move` and `cursor_position` handling, the batch that stops after a failed action, the copying of the conversation and the loop itself. Each gap is one small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To see what a gap receives, log its input with the `log` line at the top of the file (the starter's `perform` already logs its input); a run shows the logged lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`scale_for` unlocks `e1`, `e7` and `m1`: the factor that shrinks the screen.",
+        "`scaled_size` unlocks `e7` and `m1`: the size of the screenshot the model is sent.",
+        "`to_screen` unlocks `e1`, `e2` and `m1`: scale a point back, round half to even, clamp.",
+        "`_risk_error` unlocks `e2`: the confirmation a risky click needs.",
+        "`_valid_region` unlocks `e4`: which zoom regions are valid.",
+        "`_valid_key` unlocks `e4`: the text and the repeat of a key press.",
+        "`_valid_scroll` unlocks `e4`: the direction and the amount of a scroll.",
+        "`_to_replace` unlocks `e6`: which screenshots become a note (Java and Kotlin: `removeCount`, how many).",
+        "`_final_status` unlocks `e5`: the status each stop reason ends the loop with."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all (Python and TypeScript fewer). The section below describes the whole executor and loop; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`scale_for(width, height)`: `min(1, 1568 / longest side, sqrt(1,150,000 / (width * height)))`. `scaled_size(width, height)` is `(int(width * scale), int(height * scale))`. This is the documentation's example for models with the 1568 px and about 1.15 megapixel limits, so it is safe for every model. A model in the high-resolution tier accepts up to 2576 px on the long edge and 4784 visual tokens, and the lesson explains how that changes the scale.",
+        "`to_screen(x, y, scale, screen)`: divide by the scale, round half to even, and clamp into `0 .. width - 1` and `0 .. height - 1`.",
+        [
+          "`perform(screen, name, args, scale, confirm)` returns `(content, is_error)`. The content is a string, or for `screenshot` and `zoom` a list holding one block `{\"type\": \"image\", \"source\": {\"type\": \"base64\", \"media_type\": \"image/png\", \"data\": render(...)}}`. A coordinate is valid when it lies inside the scaled screenshot (`0 <= x < scaled width`, the same for y); an invalid one is an error `Coordinate <the value> is outside the screenshot`. All actions below change the screen only when they succeed.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`screenshot`: the picture at the scaled size. `zoom` with `region` `[x0, y0, x1, y1]` (scaled coordinates, `x0 < x1`, `y0 < y1`, the corner `x0, y0` valid, `x1` and `y1` within the scaled size and above 0): the picture at the size of the region on the real screen (`to_screen` of both corners, subtracted); otherwise the error `Invalid zoom region: <region>`.",
+              "`left_click`, `right_click`, `middle_click`, `double_click` and `triple_click`: with a `coordinate` use it; without one use the current cursor (real pixels). Find the element under the real point. When it has a `risk` other than `none`, ask `confirm` with `{\"action\": name, \"element\": id, \"risk\": risk}`; with no `confirm` or an answer of false the result is the error `Declined: <id> needs a person's confirmation (<risk>)` and nothing changes. A click moves the cursor, adds its log entry and returns `Clicked <id>` or `Clicked nothing`.",
+              "`type` with a string `text`: appends to `typed`, logs, returns `Typed <n> characters`; a missing text is an error.",
+              "`key` with a non-empty `text` and `repeat` (default 1, an integer from 1 to 100): logs, returns `Pressed <text>`; otherwise an error.",
+              "`wait` with a `duration` from 0 to 300 seconds: returns `Waited <duration>s`; otherwise an error. `scroll` with `scroll_direction` (`up`, `down`, `left`, `right`) and an integer `scroll_amount` of at least 1: logs, returns `Scrolled <direction> <amount>`; otherwise an error.",
+              "`mouse_move` with a valid `coordinate`: moves the cursor, returns `Moved`. `cursor_position`: returns `X=<x>,Y=<y>`, the cursor in scaled coordinates (multiply by the scale, round half to even).",
+              "Any other name: the error `Unknown action: <name>`."
+            ]
+          }
+        ],
+        "`prune_screenshots(messages, keep=3)`: a copy of the conversation in which every image inside a `tool_result` content list is replaced by the text block `{\"type\": \"text\", \"text\": \"[screenshot removed]\"}`, except the newest `keep` images. The input is not changed. With `keep` of 0 every screenshot goes; with `keep` above the number of screenshots none does.",
+        "`run_computer_loop(ask, screen, model=\"claude-sonnet-5-5\", max_turns=10, confirm=None)` returns `{\"status\", \"turns\", \"messages\"}`. The first message is the user text `Do the task on the screen.` Each request carries `model`, `max_tokens` 4096, `tools` `[{\"type\": \"computer_toolset_20260801\"}]` and a snapshot of the messages. After each reply, append it as an assistant message. Stop reason `tool_use`: run the `tool_use` blocks in order and append ONE user message with one `tool_result` per call (`tool_use_id`, the `toolset_name` of the call when it has one, `content`, and `is_error: true` only on an error). When an action fails, every later call of that reply is not run and gets the error result `Not executed: an earlier computer action in this turn failed.` `end_turn` or `stop_sequence`: status `done`. `refusal`: status `refused`. `pause_turn`: call again with the assistant message appended and no user message. Any other stop reason: status `truncated`. After `max_turns` model calls without an end: status `max_turns`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "The loop runs scaled actions and sends every result in one message"
+        ],
+        [
+          "`e1`",
+          "The screen is scaled to what the model may see, and clicks are scaled back"
+        ],
+        [
+          "`e2`",
+          "A click on a risky element needs a person's confirmation"
+        ],
+        [
+          "`e3`",
+          "A failed action stops the rest of its batch"
+        ],
+        [
+          "`e4`",
+          "Invalid actions come back as error results with a reason"
+        ],
+        [
+          "`e5`",
+          "The loop ends on a stop reason or at the turn limit"
+        ],
+        [
+          "`e6`",
+          "Old screenshots are replaced so the context does not fill up"
+        ],
+        [
+          "`e7`",
+          "Screenshots and zooms are sent at the size the model may see"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import kotlin.math.max\nimport kotlin.math.min\nimport kotlin.math.sqrt\n\nprivate val log = System.getLogger(\"computer\")\n\n/** The loop around the computer use tool, against a toy screen. See ../../statement.md. Screens, messages and replies are JSON-like maps. */\n\nconst val TOOLSET = \"computer_toolset_20260801\"\nval CLICKS = listOf(\"left_click\", \"right_click\", \"middle_click\", \"double_click\", \"triple_click\")\nconst val NOT_EXECUTED = \"Not executed: an earlier computer action in this turn failed.\"\n\ntypealias Ask = (Map<String, Any?>) -> Map<String, Any?>\ntypealias Confirm = (Map<String, Any?>) -> Boolean\n\nprivate fun num(o: Any?) = (o as Number).toInt()\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun actionLog(screen: Map<String, Any?>) = screen[\"log\"] as MutableList<Any?>\n\n/** Given: the screenshot of the toy screen at width x height, as the base64 text of a picture. It changes after every logged action. */\nfun render(screen: Map<String, Any?>, width: Int, height: Int): String = \"png:${width}x$height:${actionLog(screen).size}\"\n\n/** The factor that shrinks a screen to what the model may be sent. */\nfun scaleFor(width: Int, height: Int): Double = min(1.0, min(1568.0 / max(width, height), sqrt(1_150_000.0 / (width.toDouble() * height))))\n\n/** The size of the screenshot the model is sent, as a pair of width and height. */\nfun scaledSize(width: Int, height: Int): Pair<Int, Int> {\n    val scale = scaleFor(width, height)\n    return Pair((width * scale).toInt(), (height * scale).toInt())\n}\n\n/** A point on the (scaled) screenshot as a point on the real screen, clamped into the screen. */\nfun toScreen(x: Double, y: Double, scale: Double, screen: Map<String, Any?>): Pair<Int, Int> =\n    Pair(min(max(Math.rint(x / scale), 0.0), (num(screen[\"width\"]) - 1).toDouble()).toInt(), min(max(Math.rint(y / scale), 0.0), (num(screen[\"height\"]) - 1).toDouble()).toInt())\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun elementAt(screen: Map<String, Any?>, x: Int, y: Int): Map<String, Any?>? {\n    var hit: Map<String, Any?>? = null\n    for (e in screen[\"elements\"] as List<Map<String, Any?>>) {\n        if (num(e[\"x\"]) <= x && x < num(e[\"x\"]) + num(e[\"w\"]) && num(e[\"y\"]) <= y && y < num(e[\"y\"]) + num(e[\"h\"])) hit = e\n    }\n    return hit\n}\n\nprivate fun inside(shot: Pair<Int, Int>, point: Any?): Boolean {\n    if (point !is List<*> || point.size != 2) return false\n    val a = point[0] as? Number ?: return false\n    val b = point[1] as? Number ?: return false\n    return a.toDouble() >= 0 && a.toDouble() < shot.first && b.toDouble() >= 0 && b.toDouble() < shot.second\n}\n\nprivate fun image(data: String): Pair<Any?, Boolean> = Pair(listOf(mapOf(\"type\" to \"image\", \"source\" to mapOf(\"type\" to \"base64\", \"media_type\" to \"image/png\", \"data\" to data))), false)\n\nprivate fun isInt(o: Any?) = o is Int || o is Long\n\nprivate fun pt(p: Any?): Pair<Double, Double> = Pair((p as List<*>)[0].let { (it as Number).toDouble() }, p[1].let { (it as Number).toDouble() })\n\n/** The error text when a click on this element needs a person and does not get one, else null. */\nfun riskError(name: String, element: Map<String, Any?>?, confirm: Confirm?): String? {\n    if (element == null || (element[\"risk\"] ?: \"none\") == \"none\") return null\n    if (confirm == null || !confirm(mapOf(\"action\" to name, \"element\" to element[\"id\"], \"risk\" to element[\"risk\"]))) return \"Declined: ${element[\"id\"]} needs a person's confirmation (${element[\"risk\"]})\"\n    return null\n}\n\n/** Is this zoom region four numbers inside the scaled screenshot, with x0 < x1 and y0 < y1? */\nfun validRegion(shot: Pair<Int, Int>, r: Any?): Boolean =\n    r is List<*> && r.size == 4 && inside(shot, r.subList(0, 2)) && r[2] is Number && r[3] is Number &&\n        (r[2] as Number).toDouble() > 0 && (r[2] as Number).toDouble() <= shot.first && (r[3] as Number).toDouble() > 0 && (r[3] as Number).toDouble() <= shot.second &&\n        (r[0] as Number).toDouble() < (r[2] as Number).toDouble() && (r[1] as Number).toDouble() < (r[3] as Number).toDouble()\n\n/** Is this the input of a key press: a non-empty text and a repeat that is an integer from 1 to 100? */\nfun validKey(args: Map<String, Any?>): Boolean {\n    val repeat = args[\"repeat\"] ?: 1\n    return !(args[\"text\"] as? String).isNullOrEmpty() && isInt(repeat) && num(repeat) >= 1 && num(repeat) <= 100\n}\n\n/** Is this the input of a scroll: a direction of up, down, left or right and an integer amount of at least 1? */\nfun validScroll(args: Map<String, Any?>): Boolean =\n    args[\"scroll_direction\"] in listOf(\"up\", \"down\", \"left\", \"right\") && isInt(args[\"scroll_amount\"]) && num(args[\"scroll_amount\"]) >= 1\n\n/** How many of the oldest images to replace by a note: all but the newest keep (all of them when keep is 0). */\nfun removeCount(total: Int, keep: Int): Int = if (keep > 0) max(total - keep, 0) else total\n\n/** The status the loop ends with for a stop reason, or null when the loop goes on (pause_turn). */\nfun finalStatus(stop: Any?): String? {\n    if (stop == \"pause_turn\") return null\n    if (stop == \"refusal\") return \"refused\"\n    return if (stop == \"end_turn\" || stop == \"stop_sequence\") \"done\" else \"truncated\"\n}\n\n/** Run one action. Returns the content for the result and whether it failed. */\n@Suppress(\"UNCHECKED_CAST\")\nfun perform(screen: MutableMap<String, Any?>, name: String, args: Map<String, Any?>, scale: Double, confirm: Confirm? = null): Pair<Any?, Boolean> {\n    log.log(System.Logger.Level.DEBUG, \"perform input: {0}\", \"$name $args\")\n    val shot = scaledSize(num(screen[\"width\"]), num(screen[\"height\"]))\n    if (name == \"screenshot\") return image(render(screen, shot.first, shot.second))\n    if (name == \"zoom\") {\n        val r = args[\"region\"]\n        if (!validRegion(shot, r)) return Pair(\"Invalid zoom region: $r\", true)\n        val l = r as List<*>\n        val a = toScreen((l[0] as Number).toDouble(), (l[1] as Number).toDouble(), scale, screen)\n        val b = toScreen((l[2] as Number).toDouble(), (l[3] as Number).toDouble(), scale, screen)\n        return image(render(screen, b.first - a.first, b.second - a.second))\n    }\n    if (name in CLICKS) {\n        val point = args[\"coordinate\"]\n        val sx: Int\n        val sy: Int\n        if (point == null) {\n            val cursor = screen[\"cursor\"] as List<Any?>\n            sx = num(cursor[0])\n            sy = num(cursor[1])\n        } else if (!inside(shot, point)) {\n            return Pair(\"Coordinate $point is outside the screenshot\", true)\n        } else {\n            val (px, py) = pt(point)\n            val s = toScreen(px, py, scale, screen)\n            sx = s.first\n            sy = s.second\n        }\n        val element = elementAt(screen, sx, sy)\n        val declined = riskError(name, element, confirm)\n        if (declined != null) return Pair(declined, true)\n        val cursor = screen[\"cursor\"] as MutableList<Any?>\n        cursor[0] = sx\n        cursor[1] = sy\n        actionLog(screen).add(listOf(name, element?.get(\"id\")))\n        return Pair(\"Clicked ${element?.get(\"id\") ?: \"nothing\"}\", false)\n    }\n    when (name) {\n        \"type\" -> {\n            val text = args[\"text\"] as? String ?: return Pair(\"type needs a text\", true)\n            screen[\"typed\"] = (screen[\"typed\"] as String) + text\n            actionLog(screen).add(listOf(\"type\", text))\n            return Pair(\"Typed ${text.codePointCount(0, text.length)} characters\", false)\n        }\n        \"key\" -> {\n            if (!validKey(args)) return Pair(\"key needs a text and a repeat from 1 to 100\", true)\n            val text = args[\"text\"] as String\n            actionLog(screen).add(listOf(\"key\", text))\n            return Pair(\"Pressed $text\", false)\n        }\n        \"wait\" -> {\n            val d = args[\"duration\"]\n            if (d !is Number || d.toDouble() < 0 || d.toDouble() > 300) return Pair(\"wait needs a duration from 0 to 300 seconds\", true)\n            return Pair(\"Waited ${if (isInt(d)) d.toLong().toString() else d.toDouble().toString()}s\", false)\n        }\n        \"scroll\" -> {\n            val direction = args[\"scroll_direction\"]\n            val amount = args[\"scroll_amount\"]\n            if (!validScroll(args)) return Pair(\"scroll needs a direction and a positive amount\", true)\n            actionLog(screen).add(listOf(\"scroll\", direction))\n            return Pair(\"Scrolled $direction $amount\", false)\n        }\n        \"mouse_move\" -> {\n            if (!inside(shot, args[\"coordinate\"])) return Pair(\"Coordinate ${args[\"coordinate\"]} is outside the screenshot\", true)\n            val (px, py) = pt(args[\"coordinate\"])\n            val s = toScreen(px, py, scale, screen)\n            val cursor = screen[\"cursor\"] as MutableList<Any?>\n            cursor[0] = s.first\n            cursor[1] = s.second\n            return Pair(\"Moved\", false)\n        }\n        \"cursor_position\" -> {\n            val cursor = screen[\"cursor\"] as List<Any?>\n            return Pair(\"X=${Math.rint(num(cursor[0]) * scale).toLong()},Y=${Math.rint(num(cursor[1]) * scale).toLong()}\", false)\n        }\n        else -> return Pair(\"Unknown action: $name\", true)\n    }\n}\n\nprivate fun deepCopy(v: Any?): Any? = when (v) {\n    is Map<*, *> -> v.entries.associateTo(LinkedHashMap<String, Any?>()) { (it.key as String) to deepCopy(it.value) }\n    is List<*> -> v.mapTo(ArrayList<Any?>()) { deepCopy(it) }\n    else -> v\n}\n\n/** A copy of the conversation in which every screenshot except the newest keep is replaced by a text note. */\n@Suppress(\"UNCHECKED_CAST\")\nfun pruneScreenshots(messages: List<Map<String, Any?>>, keep: Int = 3): List<Map<String, Any?>> {\n    val out = deepCopy(messages) as List<Map<String, Any?>>\n    val images = mutableListOf<Pair<MutableList<Any?>, Int>>()\n    for (m in out) {\n        val blocks = m[\"content\"] as? List<Map<String, Any?>> ?: continue\n        for (block in blocks) {\n            val inner = block[\"content\"] as? MutableList<Any?> ?: continue\n            if (block[\"type\"] != \"tool_result\") continue\n            inner.forEachIndexed { i, c -> if ((c as Map<String, Any?>)[\"type\"] == \"image\") images.add(Pair(inner, i)) }\n        }\n    }\n    val upTo = removeCount(images.size, keep)\n    for ((list, i) in images.take(upTo)) list[i] = mapOf(\"type\" to \"text\", \"text\" to \"[screenshot removed]\")\n    return out\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun runComputerLoop(ask: Ask, screen: MutableMap<String, Any?>, model: String = \"claude-sonnet-5-5\", maxTurns: Int = 10, confirm: Confirm? = null): Map<String, Any?> {\n    val scale = scaleFor(num(screen[\"width\"]), num(screen[\"height\"]))\n    val messages = mutableListOf<Map<String, Any?>>(mapOf(\"role\" to \"user\", \"content\" to \"Do the task on the screen.\"))\n    for (turn in 1..maxTurns) {\n        val reply = ask(mapOf(\"model\" to model, \"max_tokens\" to 4096, \"tools\" to listOf(mapOf(\"type\" to TOOLSET)), \"messages\" to deepCopy(messages)))\n        val content = reply[\"content\"] as List<Map<String, Any?>>\n        messages.add(mapOf(\"role\" to \"assistant\", \"content\" to content))\n        val stop = reply[\"stop_reason\"]\n        if (stop == \"tool_use\") {\n            val results = mutableListOf<Map<String, Any?>>()\n            var failed = false\n            for (block in content) {\n                if (block[\"type\"] != \"tool_use\") continue\n                val result = linkedMapOf<String, Any?>(\"type\" to \"tool_result\", \"tool_use_id\" to block[\"id\"])\n                if (block.containsKey(\"toolset_name\")) result[\"toolset_name\"] = block[\"toolset_name\"]\n                if (failed) {\n                    result[\"content\"] = NOT_EXECUTED\n                    result[\"is_error\"] = true\n                } else {\n                    val (out, isError) = perform(screen, block[\"name\"] as String, block[\"input\"] as Map<String, Any?>, scale, confirm)\n                    result[\"content\"] = out\n                    if (isError) {\n                        result[\"is_error\"] = true\n                        failed = true\n                    }\n                }\n                results.add(result)\n            }\n            messages.add(mapOf(\"role\" to \"user\", \"content\" to results))\n        } else if (finalStatus(stop) != null) {\n            return mapOf(\"status\" to finalStatus(stop), \"turns\" to turn, \"messages\" to messages)\n        }\n    }\n    return mapOf(\"status\" to \"max_turns\", \"turns\" to maxTurns, \"messages\" to messages)\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    fun use(id: String, name: String, vararg input: Pair<String, Any?>): Map<String, Any?> =\n        mapOf(\"type\" to \"tool_use\", \"id\" to id, \"name\" to name, \"toolset_name\" to \"computer\", \"input\" to linkedMapOf(*input))\n\n    // A toy screen in memory: a search box and a payment button.\n    val screen: MutableMap<String, Any?> = linkedMapOf(\n        \"width\" to 1920, \"height\" to 1080, \"cursor\" to mutableListOf<Any?>(0, 0), \"typed\" to \"\", \"log\" to mutableListOf<Any?>(),\n        \"elements\" to listOf(mapOf(\"id\" to \"search\", \"x\" to 1000, \"y\" to 200, \"w\" to 400, \"h\" to 40, \"risk\" to \"none\"),\n            mapOf(\"id\" to \"pay\", \"x\" to 800, \"y\" to 600, \"w\" to 200, \"h\" to 60, \"risk\" to \"payment\")))\n\n    // The model is a function that returns scripted replies in order, like the one the tests use.\n    val replies = mutableListOf<Map<String, Any?>>(\n        mapOf(\"content\" to listOf(use(\"t1\", \"screenshot\")), \"stop_reason\" to \"tool_use\"),\n        mapOf(\"content\" to listOf(use(\"t2\", \"left_click\", \"coordinate\" to listOf(894, 164)), use(\"t3\", \"type\", \"text\" to \"weather\"), use(\"t4\", \"screenshot\")), \"stop_reason\" to \"tool_use\"),\n        mapOf(\"content\" to listOf(mapOf(\"type\" to \"text\", \"text\" to \"Typed it.\")), \"stop_reason\" to \"end_turn\"))\n    val requests = mutableListOf<Int>()\n    val ask: Ask = { request ->\n        requests += (request[\"messages\"] as List<*>).size\n        // when the script runs out, the model just ends the conversation\n    if (replies.isEmpty()) mapOf(\"content\" to listOf(mapOf(\"type\" to \"text\", \"text\" to \"script ran out\")), \"stop_reason\" to \"end_turn\") else replies.removeAt(0)\n    }\n\n    val result = runComputerLoop(ask, screen)\n\n    println(\"status and turns: ${result[\"status\"]} ${result[\"turns\"]}\")\n    println(\"messages in each request: $requests\")\n    println(\"actions performed on the screen: ${screen[\"log\"]}\")\n    println(\"typed text: ${screen[\"typed\"]}\")\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import kotlin.math.max\nimport kotlin.math.min\nimport kotlin.math.sqrt\n\nprivate val log = System.getLogger(\"computer\")\n\n/** The loop around the computer use tool, against a toy screen. See ../../statement.md. Screens, messages and replies are JSON-like maps. */\n\nconst val TOOLSET = \"computer_toolset_20260801\"\nval CLICKS = listOf(\"left_click\", \"right_click\", \"middle_click\", \"double_click\", \"triple_click\")\nconst val NOT_EXECUTED = \"Not executed: an earlier computer action in this turn failed.\"\n\ntypealias Ask = (Map<String, Any?>) -> Map<String, Any?>\ntypealias Confirm = (Map<String, Any?>) -> Boolean\n\nprivate fun num(o: Any?) = (o as Number).toInt()\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun actionLog(screen: Map<String, Any?>) = screen[\"log\"] as MutableList<Any?>\n\n/** Given: the screenshot of the toy screen at width x height, as the base64 text of a picture. It changes after every logged action. */\nfun render(screen: Map<String, Any?>, width: Int, height: Int): String = \"png:${width}x$height:${actionLog(screen).size}\"\n\n/**\n * TODO 1 of 9 (unlocks e1, e7 and m1): the factor that shrinks a screen to what the model may be sent.\n * Receives the real width and height. Returns min(1, 1568 / longest side, sqrt(1,150,000 / (width * height))).\n * Example: scaleFor(1280, 800) is 1.0, scaleFor(1920, 1080) is 0.7447...\n */\nfun scaleFor(width: Int, height: Int): Double = 1.0\n\n/**\n * TODO 2 of 9 (unlocks e7 and m1): the size of the screenshot the model is sent, as a pair of width and height.\n * Receives the real width and height. Returns each side times scaleFor, cut to a whole number with toInt().\n * Example: scaledSize(1920, 1080) is Pair(1429, 804)\n */\nfun scaledSize(width: Int, height: Int): Pair<Int, Int> = Pair(width, height)\n\n/**\n * TODO 3 of 9 (unlocks e1, e2 and m1): a point on the (scaled) screenshot as a point on the real screen.\n * Receives x and y on the screenshot, the scale and the screen. Returns Pair(x, y) on the screen: divide by the scale, round half to even\n * (Math.rint), and clamp into 0 .. width - 1 and 0 .. height - 1.\n * Example: toScreen(894.0, 164.0, 0.7447, screen) is Pair(1200, 220); toScreen(-3.0, -3.0, 1.0, screen) is Pair(0, 0)\n */\nfun toScreen(x: Double, y: Double, scale: Double, screen: Map<String, Any?>): Pair<Int, Int> = Pair(0, 0)\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun elementAt(screen: Map<String, Any?>, x: Int, y: Int): Map<String, Any?>? {\n    var hit: Map<String, Any?>? = null\n    for (e in screen[\"elements\"] as List<Map<String, Any?>>) {\n        if (num(e[\"x\"]) <= x && x < num(e[\"x\"]) + num(e[\"w\"]) && num(e[\"y\"]) <= y && y < num(e[\"y\"]) + num(e[\"h\"])) hit = e\n    }\n    return hit\n}\n\nprivate fun inside(shot: Pair<Int, Int>, point: Any?): Boolean {\n    if (point !is List<*> || point.size != 2) return false\n    val a = point[0] as? Number ?: return false\n    val b = point[1] as? Number ?: return false\n    return a.toDouble() >= 0 && a.toDouble() < shot.first && b.toDouble() >= 0 && b.toDouble() < shot.second\n}\n\nprivate fun image(data: String): Pair<Any?, Boolean> = Pair(listOf(mapOf(\"type\" to \"image\", \"source\" to mapOf(\"type\" to \"base64\", \"media_type\" to \"image/png\", \"data\" to data))), false)\n\nprivate fun isInt(o: Any?) = o is Int || o is Long\n\nprivate fun pt(p: Any?): Pair<Double, Double> = Pair((p as List<*>)[0].let { (it as Number).toDouble() }, p[1].let { (it as Number).toDouble() })\n\n/**\n * TODO 4 of 9 (unlocks e2): the error text when a click on this element needs a person and does not get one, else null.\n * Receives the action name, the element under the click (a map with \"id\" and \"risk\", or null) and confirm (a function or null). A risk\n * other than \"none\" is asked of confirm with mapOf(\"action\", \"element\", \"risk\"); with no confirm or an answer of false return\n * \"Declined: <id> needs a person's confirmation (<risk>)\". Example: a \"payment\" element \"pay\", confirm null: \"Declined: pay needs a person's confirmation (payment)\"\n */\nfun riskError(name: String, element: Map<String, Any?>?, confirm: Confirm?): String? {\n    return null\n}\n\n/**\n * TODO 5 of 9 (unlocks e4): is this zoom region valid?\n * Receives the scaled screenshot size as a pair and the region. True for a list of four numbers [x0, y0, x1, y1] where x0, y0 is inside the\n * screenshot (inside), x1 and y1 are above 0 and within the size, x0 < x1 and y0 < y1. Example: Pair(1429, 804), [0, 0, 300, 200] is true\n */\nfun validRegion(shot: Pair<Int, Int>, r: Any?): Boolean = true\n\n/**\n * TODO 6 of 9 (unlocks e4): is this the input of a key press?\n * Receives the input map. True when \"text\" is a non-empty string and \"repeat\" (default 1) is an integer from 1 to 100 (isInt and num are written).\n * Example: mapOf(\"text\" to \"ctrl+s\", \"repeat\" to 2) is true, mapOf(\"text\" to \"Return\", \"repeat\" to 101) is false\n */\nfun validKey(args: Map<String, Any?>): Boolean = true\n\n/**\n * TODO 7 of 9 (unlocks e4): is this the input of a scroll?\n * Receives the input map. True when \"scroll_direction\" is up, down, left or right and \"scroll_amount\" is an integer of at least 1.\n * Example: mapOf(\"scroll_direction\" to \"down\", \"scroll_amount\" to 3) is true, with an amount of 0 it is false\n */\nfun validScroll(args: Map<String, Any?>): Boolean = true\n\n/**\n * TODO 8 of 9 (unlocks e6): how many of the oldest images to replace by a note.\n * Receives the number of images and keep. Returns all but the newest keep, and all of them when keep is 0.\n * Example: removeCount(3, 1) is 2, removeCount(3, 0) is 3, removeCount(3, 9) is 0\n */\nfun removeCount(total: Int, keep: Int): Int = 0\n\n/**\n * TODO 9 of 9 (unlocks e5): the status the loop ends with for a stop reason, or null when it goes on.\n * Receives the stop reason of a reply that is not tool_use. Returns \"refused\" for refusal, \"done\" for end_turn and stop_sequence,\n * null for pause_turn (call again), and \"truncated\" for anything else. Example: \"max_tokens\" gives \"truncated\"\n */\nfun finalStatus(stop: Any?): String? = null\n\n/** Run one action. Returns the content for the result and whether it failed. */\n@Suppress(\"UNCHECKED_CAST\")\nfun perform(screen: MutableMap<String, Any?>, name: String, args: Map<String, Any?>, scale: Double, confirm: Confirm? = null): Pair<Any?, Boolean> {\n    log.log(System.Logger.Level.DEBUG, \"perform input: {0}\", \"$name $args\")\n    val shot = scaledSize(num(screen[\"width\"]), num(screen[\"height\"]))\n    if (name == \"screenshot\") return image(render(screen, shot.first, shot.second))\n    if (name == \"zoom\") {\n        val r = args[\"region\"]\n        if (!validRegion(shot, r)) return Pair(\"Invalid zoom region: $r\", true)\n        val l = r as List<*>\n        val a = toScreen((l[0] as Number).toDouble(), (l[1] as Number).toDouble(), scale, screen)\n        val b = toScreen((l[2] as Number).toDouble(), (l[3] as Number).toDouble(), scale, screen)\n        return image(render(screen, b.first - a.first, b.second - a.second))\n    }\n    if (name in CLICKS) {\n        val point = args[\"coordinate\"]\n        val sx: Int\n        val sy: Int\n        if (point == null) {\n            val cursor = screen[\"cursor\"] as List<Any?>\n            sx = num(cursor[0])\n            sy = num(cursor[1])\n        } else if (!inside(shot, point)) {\n            return Pair(\"Coordinate $point is outside the screenshot\", true)\n        } else {\n            val (px, py) = pt(point)\n            val s = toScreen(px, py, scale, screen)\n            sx = s.first\n            sy = s.second\n        }\n        val element = elementAt(screen, sx, sy)\n        val declined = riskError(name, element, confirm)\n        if (declined != null) return Pair(declined, true)\n        val cursor = screen[\"cursor\"] as MutableList<Any?>\n        cursor[0] = sx\n        cursor[1] = sy\n        actionLog(screen).add(listOf(name, element?.get(\"id\")))\n        return Pair(\"Clicked ${element?.get(\"id\") ?: \"nothing\"}\", false)\n    }\n    when (name) {\n        \"type\" -> {\n            val text = args[\"text\"] as? String ?: return Pair(\"type needs a text\", true)\n            screen[\"typed\"] = (screen[\"typed\"] as String) + text\n            actionLog(screen).add(listOf(\"type\", text))\n            return Pair(\"Typed ${text.codePointCount(0, text.length)} characters\", false)\n        }\n        \"key\" -> {\n            if (!validKey(args)) return Pair(\"key needs a text and a repeat from 1 to 100\", true)\n            val text = args[\"text\"] as String\n            actionLog(screen).add(listOf(\"key\", text))\n            return Pair(\"Pressed $text\", false)\n        }\n        \"wait\" -> {\n            val d = args[\"duration\"]\n            if (d !is Number || d.toDouble() < 0 || d.toDouble() > 300) return Pair(\"wait needs a duration from 0 to 300 seconds\", true)\n            return Pair(\"Waited ${if (isInt(d)) d.toLong().toString() else d.toDouble().toString()}s\", false)\n        }\n        \"scroll\" -> {\n            val direction = args[\"scroll_direction\"]\n            val amount = args[\"scroll_amount\"]\n            if (!validScroll(args)) return Pair(\"scroll needs a direction and a positive amount\", true)\n            actionLog(screen).add(listOf(\"scroll\", direction))\n            return Pair(\"Scrolled $direction $amount\", false)\n        }\n        \"mouse_move\" -> {\n            if (!inside(shot, args[\"coordinate\"])) return Pair(\"Coordinate ${args[\"coordinate\"]} is outside the screenshot\", true)\n            val (px, py) = pt(args[\"coordinate\"])\n            val s = toScreen(px, py, scale, screen)\n            val cursor = screen[\"cursor\"] as MutableList<Any?>\n            cursor[0] = s.first\n            cursor[1] = s.second\n            return Pair(\"Moved\", false)\n        }\n        \"cursor_position\" -> {\n            val cursor = screen[\"cursor\"] as List<Any?>\n            return Pair(\"X=${Math.rint(num(cursor[0]) * scale).toLong()},Y=${Math.rint(num(cursor[1]) * scale).toLong()}\", false)\n        }\n        else -> return Pair(\"Unknown action: $name\", true)\n    }\n}\n\nprivate fun deepCopy(v: Any?): Any? = when (v) {\n    is Map<*, *> -> v.entries.associateTo(LinkedHashMap<String, Any?>()) { (it.key as String) to deepCopy(it.value) }\n    is List<*> -> v.mapTo(ArrayList<Any?>()) { deepCopy(it) }\n    else -> v\n}\n\n/** A copy of the conversation in which every screenshot except the newest keep is replaced by a text note. */\n@Suppress(\"UNCHECKED_CAST\")\nfun pruneScreenshots(messages: List<Map<String, Any?>>, keep: Int = 3): List<Map<String, Any?>> {\n    val out = deepCopy(messages) as List<Map<String, Any?>>\n    val images = mutableListOf<Pair<MutableList<Any?>, Int>>()\n    for (m in out) {\n        val blocks = m[\"content\"] as? List<Map<String, Any?>> ?: continue\n        for (block in blocks) {\n            val inner = block[\"content\"] as? MutableList<Any?> ?: continue\n            if (block[\"type\"] != \"tool_result\") continue\n            inner.forEachIndexed { i, c -> if ((c as Map<String, Any?>)[\"type\"] == \"image\") images.add(Pair(inner, i)) }\n        }\n    }\n    val upTo = removeCount(images.size, keep)\n    for ((list, i) in images.take(upTo)) list[i] = mapOf(\"type\" to \"text\", \"text\" to \"[screenshot removed]\")\n    return out\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun runComputerLoop(ask: Ask, screen: MutableMap<String, Any?>, model: String = \"claude-sonnet-5-5\", maxTurns: Int = 10, confirm: Confirm? = null): Map<String, Any?> {\n    val scale = scaleFor(num(screen[\"width\"]), num(screen[\"height\"]))\n    val messages = mutableListOf<Map<String, Any?>>(mapOf(\"role\" to \"user\", \"content\" to \"Do the task on the screen.\"))\n    for (turn in 1..maxTurns) {\n        val reply = ask(mapOf(\"model\" to model, \"max_tokens\" to 4096, \"tools\" to listOf(mapOf(\"type\" to TOOLSET)), \"messages\" to deepCopy(messages)))\n        val content = reply[\"content\"] as List<Map<String, Any?>>\n        messages.add(mapOf(\"role\" to \"assistant\", \"content\" to content))\n        val stop = reply[\"stop_reason\"]\n        if (stop == \"tool_use\") {\n            val results = mutableListOf<Map<String, Any?>>()\n            var failed = false\n            for (block in content) {\n                if (block[\"type\"] != \"tool_use\") continue\n                val result = linkedMapOf<String, Any?>(\"type\" to \"tool_result\", \"tool_use_id\" to block[\"id\"])\n                if (block.containsKey(\"toolset_name\")) result[\"toolset_name\"] = block[\"toolset_name\"]\n                if (failed) {\n                    result[\"content\"] = NOT_EXECUTED\n                    result[\"is_error\"] = true\n                } else {\n                    val (out, isError) = perform(screen, block[\"name\"] as String, block[\"input\"] as Map<String, Any?>, scale, confirm)\n                    result[\"content\"] = out\n                    if (isError) {\n                        result[\"is_error\"] = true\n                        failed = true\n                    }\n                }\n                results.add(result)\n            }\n            messages.add(mapOf(\"role\" to \"user\", \"content\" to results))\n        } else if (finalStatus(stop) != null) {\n            return mapOf(\"status\" to finalStatus(stop), \"turns\" to turn, \"messages\" to messages)\n        }\n    }\n    return mapOf(\"status\" to \"max_turns\", \"turns\" to maxTurns, \"messages\" to messages)\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    fun use(id: String, name: String, vararg input: Pair<String, Any?>): Map<String, Any?> =\n        mapOf(\"type\" to \"tool_use\", \"id\" to id, \"name\" to name, \"toolset_name\" to \"computer\", \"input\" to linkedMapOf(*input))\n\n    // A toy screen in memory: a search box and a payment button.\n    val screen: MutableMap<String, Any?> = linkedMapOf(\n        \"width\" to 1920, \"height\" to 1080, \"cursor\" to mutableListOf<Any?>(0, 0), \"typed\" to \"\", \"log\" to mutableListOf<Any?>(),\n        \"elements\" to listOf(mapOf(\"id\" to \"search\", \"x\" to 1000, \"y\" to 200, \"w\" to 400, \"h\" to 40, \"risk\" to \"none\"),\n            mapOf(\"id\" to \"pay\", \"x\" to 800, \"y\" to 600, \"w\" to 200, \"h\" to 60, \"risk\" to \"payment\")))\n\n    // The model is a function that returns scripted replies in order, like the one the tests use.\n    val replies = mutableListOf<Map<String, Any?>>(\n        mapOf(\"content\" to listOf(use(\"t1\", \"screenshot\")), \"stop_reason\" to \"tool_use\"),\n        mapOf(\"content\" to listOf(use(\"t2\", \"left_click\", \"coordinate\" to listOf(894, 164)), use(\"t3\", \"type\", \"text\" to \"weather\"), use(\"t4\", \"screenshot\")), \"stop_reason\" to \"tool_use\"),\n        mapOf(\"content\" to listOf(mapOf(\"type\" to \"text\", \"text\" to \"Typed it.\")), \"stop_reason\" to \"end_turn\"))\n    val requests = mutableListOf<Int>()\n    val ask: Ask = { request ->\n        requests += (request[\"messages\"] as List<*>).size\n        // when the script runs out, the model just ends the conversation\n    if (replies.isEmpty()) mapOf(\"content\" to listOf(mapOf(\"type\" to \"text\", \"text\" to \"script ran out\")), \"stop_reason\" to \"end_turn\") else replies.removeAt(0)\n    }\n\n    val result = runComputerLoop(ask, screen)\n\n    println(\"status and turns: ${result[\"status\"]} ${result[\"turns\"]}\")\n    println(\"messages in each request: $requests\")\n    println(\"actions performed on the screen: ${screen[\"log\"]}\")\n    println(\"typed text: ${screen[\"typed\"]}\")\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "41cada07a5ead84602bdfa6fa1b10583d16312406f85b1bb4db3c8fe5845c47c",
+  "starting_code": "import kotlin.math.max\nimport kotlin.math.min\nimport kotlin.math.sqrt\n\nprivate val log = System.getLogger(\"computer\")\n\n/** The loop around the computer use tool, against a toy screen. See ../../statement.md. Screens, messages and replies are JSON-like maps. */\n\nconst val TOOLSET = \"computer_toolset_20260801\"\nval CLICKS = listOf(\"left_click\", \"right_click\", \"middle_click\", \"double_click\", \"triple_click\")\nconst val NOT_EXECUTED = \"Not executed: an earlier computer action in this turn failed.\"\n\ntypealias Ask = (Map<String, Any?>) -> Map<String, Any?>\ntypealias Confirm = (Map<String, Any?>) -> Boolean\n\nprivate fun num(o: Any?) = (o as Number).toInt()\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun actionLog(screen: Map<String, Any?>) = screen[\"log\"] as MutableList<Any?>\n\n/** Given: the screenshot of the toy screen at width x height, as the base64 text of a picture. It changes after every logged action. */\nfun render(screen: Map<String, Any?>, width: Int, height: Int): String = \"png:${width}x$height:${actionLog(screen).size}\"\n\n/**\n * TODO 1 of 9 (unlocks e1, e7 and m1): the factor that shrinks a screen to what the model may be sent.\n * Receives the real width and height. Returns min(1, 1568 / longest side, sqrt(1,150,000 / (width * height))).\n * Example: scaleFor(1280, 800) is 1.0, scaleFor(1920, 1080) is 0.7447...\n */\nfun scaleFor(width: Int, height: Int): Double = 1.0\n\n/**\n * TODO 2 of 9 (unlocks e7 and m1): the size of the screenshot the model is sent, as a pair of width and height.\n * Receives the real width and height. Returns each side times scaleFor, cut to a whole number with toInt().\n * Example: scaledSize(1920, 1080) is Pair(1429, 804)\n */\nfun scaledSize(width: Int, height: Int): Pair<Int, Int> = Pair(width, height)\n\n/**\n * TODO 3 of 9 (unlocks e1, e2 and m1): a point on the (scaled) screenshot as a point on the real screen.\n * Receives x and y on the screenshot, the scale and the screen. Returns Pair(x, y) on the screen: divide by the scale, round half to even\n * (Math.rint), and clamp into 0 .. width - 1 and 0 .. height - 1.\n * Example: toScreen(894.0, 164.0, 0.7447, screen) is Pair(1200, 220); toScreen(-3.0, -3.0, 1.0, screen) is Pair(0, 0)\n */\nfun toScreen(x: Double, y: Double, scale: Double, screen: Map<String, Any?>): Pair<Int, Int> = Pair(0, 0)\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun elementAt(screen: Map<String, Any?>, x: Int, y: Int): Map<String, Any?>? {\n    var hit: Map<String, Any?>? = null\n    for (e in screen[\"elements\"] as List<Map<String, Any?>>) {\n        if (num(e[\"x\"]) <= x && x < num(e[\"x\"]) + num(e[\"w\"]) && num(e[\"y\"]) <= y && y < num(e[\"y\"]) + num(e[\"h\"])) hit = e\n    }\n    return hit\n}\n\nprivate fun inside(shot: Pair<Int, Int>, point: Any?): Boolean {\n    if (point !is List<*> || point.size != 2) return false\n    val a = point[0] as? Number ?: return false\n    val b = point[1] as? Number ?: return false\n    return a.toDouble() >= 0 && a.toDouble() < shot.first && b.toDouble() >= 0 && b.toDouble() < shot.second\n}\n\nprivate fun image(data: String): Pair<Any?, Boolean> = Pair(listOf(mapOf(\"type\" to \"image\", \"source\" to mapOf(\"type\" to \"base64\", \"media_type\" to \"image/png\", \"data\" to data))), false)\n\nprivate fun isInt(o: Any?) = o is Int || o is Long\n\nprivate fun pt(p: Any?): Pair<Double, Double> = Pair((p as List<*>)[0].let { (it as Number).toDouble() }, p[1].let { (it as Number).toDouble() })\n\n/**\n * TODO 4 of 9 (unlocks e2): the error text when a click on this element needs a person and does not get one, else null.\n * Receives the action name, the element under the click (a map with \"id\" and \"risk\", or null) and confirm (a function or null). A risk\n * other than \"none\" is asked of confirm with mapOf(\"action\", \"element\", \"risk\"); with no confirm or an answer of false return\n * \"Declined: <id> needs a person's confirmation (<risk>)\". Example: a \"payment\" element \"pay\", confirm null: \"Declined: pay needs a person's confirmation (payment)\"\n */\nfun riskError(name: String, element: Map<String, Any?>?, confirm: Confirm?): String? {\n    return null\n}\n\n/**\n * TODO 5 of 9 (unlocks e4): is this zoom region valid?\n * Receives the scaled screenshot size as a pair and the region. True for a list of four numbers [x0, y0, x1, y1] where x0, y0 is inside the\n * screenshot (inside), x1 and y1 are above 0 and within the size, x0 < x1 and y0 < y1. Example: Pair(1429, 804), [0, 0, 300, 200] is true\n */\nfun validRegion(shot: Pair<Int, Int>, r: Any?): Boolean = true\n\n/**\n * TODO 6 of 9 (unlocks e4): is this the input of a key press?\n * Receives the input map. True when \"text\" is a non-empty string and \"repeat\" (default 1) is an integer from 1 to 100 (isInt and num are written).\n * Example: mapOf(\"text\" to \"ctrl+s\", \"repeat\" to 2) is true, mapOf(\"text\" to \"Return\", \"repeat\" to 101) is false\n */\nfun validKey(args: Map<String, Any?>): Boolean = true\n\n/**\n * TODO 7 of 9 (unlocks e4): is this the input of a scroll?\n * Receives the input map. True when \"scroll_direction\" is up, down, left or right and \"scroll_amount\" is an integer of at least 1.\n * Example: mapOf(\"scroll_direction\" to \"down\", \"scroll_amount\" to 3) is true, with an amount of 0 it is false\n */\nfun validScroll(args: Map<String, Any?>): Boolean = true\n\n/**\n * TODO 8 of 9 (unlocks e6): how many of the oldest images to replace by a note.\n * Receives the number of images and keep. Returns all but the newest keep, and all of them when keep is 0.\n * Example: removeCount(3, 1) is 2, removeCount(3, 0) is 3, removeCount(3, 9) is 0\n */\nfun removeCount(total: Int, keep: Int): Int = 0\n\n/**\n * TODO 9 of 9 (unlocks e5): the status the loop ends with for a stop reason, or null when it goes on.\n * Receives the stop reason of a reply that is not tool_use. Returns \"refused\" for refusal, \"done\" for end_turn and stop_sequence,\n * null for pause_turn (call again), and \"truncated\" for anything else. Example: \"max_tokens\" gives \"truncated\"\n */\nfun finalStatus(stop: Any?): String? = null\n\n/** Run one action. Returns the content for the result and whether it failed. */\n@Suppress(\"UNCHECKED_CAST\")\nfun perform(screen: MutableMap<String, Any?>, name: String, args: Map<String, Any?>, scale: Double, confirm: Confirm? = null): Pair<Any?, Boolean> {\n    log.log(System.Logger.Level.DEBUG, \"perform input: {0}\", \"$name $args\")\n    val shot = scaledSize(num(screen[\"width\"]), num(screen[\"height\"]))\n    if (name == \"screenshot\") return image(render(screen, shot.first, shot.second))\n    if (name == \"zoom\") {\n        val r = args[\"region\"]\n        if (!validRegion(shot, r)) return Pair(\"Invalid zoom region: $r\", true)\n        val l = r as List<*>\n        val a = toScreen((l[0] as Number).toDouble(), (l[1] as Number).toDouble(), scale, screen)\n        val b = toScreen((l[2] as Number).toDouble(), (l[3] as Number).toDouble(), scale, screen)\n        return image(render(screen, b.first - a.first, b.second - a.second))\n    }\n    if (name in CLICKS) {\n        val point = args[\"coordinate\"]\n        val sx: Int\n        val sy: Int\n        if (point == null) {\n            val cursor = screen[\"cursor\"] as List<Any?>\n            sx = num(cursor[0])\n            sy = num(cursor[1])\n        } else if (!inside(shot, point)) {\n            return Pair(\"Coordinate $point is outside the screenshot\", true)\n        } else {\n            val (px, py) = pt(point)\n            val s = toScreen(px, py, scale, screen)\n            sx = s.first\n            sy = s.second\n        }\n        val element = elementAt(screen, sx, sy)\n        val declined = riskError(name, element, confirm)\n        if (declined != null) return Pair(declined, true)\n        val cursor = screen[\"cursor\"] as MutableList<Any?>\n        cursor[0] = sx\n        cursor[1] = sy\n        actionLog(screen).add(listOf(name, element?.get(\"id\")))\n        return Pair(\"Clicked ${element?.get(\"id\") ?: \"nothing\"}\", false)\n    }\n    when (name) {\n        \"type\" -> {\n            val text = args[\"text\"] as? String ?: return Pair(\"type needs a text\", true)\n            screen[\"typed\"] = (screen[\"typed\"] as String) + text\n            actionLog(screen).add(listOf(\"type\", text))\n            return Pair(\"Typed ${text.codePointCount(0, text.length)} characters\", false)\n        }\n        \"key\" -> {\n            if (!validKey(args)) return Pair(\"key needs a text and a repeat from 1 to 100\", true)\n            val text = args[\"text\"] as String\n            actionLog(screen).add(listOf(\"key\", text))\n            return Pair(\"Pressed $text\", false)\n        }\n        \"wait\" -> {\n            val d = args[\"duration\"]\n            if (d !is Number || d.toDouble() < 0 || d.toDouble() > 300) return Pair(\"wait needs a duration from 0 to 300 seconds\", true)\n            return Pair(\"Waited ${if (isInt(d)) d.toLong().toString() else d.toDouble().toString()}s\", false)\n        }\n        \"scroll\" -> {\n            val direction = args[\"scroll_direction\"]\n            val amount = args[\"scroll_amount\"]\n            if (!validScroll(args)) return Pair(\"scroll needs a direction and a positive amount\", true)\n            actionLog(screen).add(listOf(\"scroll\", direction))\n            return Pair(\"Scrolled $direction $amount\", false)\n        }\n        \"mouse_move\" -> {\n            if (!inside(shot, args[\"coordinate\"])) return Pair(\"Coordinate ${args[\"coordinate\"]} is outside the screenshot\", true)\n            val (px, py) = pt(args[\"coordinate\"])\n            val s = toScreen(px, py, scale, screen)\n            val cursor = screen[\"cursor\"] as MutableList<Any?>\n            cursor[0] = s.first\n            cursor[1] = s.second\n            return Pair(\"Moved\", false)\n        }\n        \"cursor_position\" -> {\n            val cursor = screen[\"cursor\"] as List<Any?>\n            return Pair(\"X=${Math.rint(num(cursor[0]) * scale).toLong()},Y=${Math.rint(num(cursor[1]) * scale).toLong()}\", false)\n        }\n        else -> return Pair(\"Unknown action: $name\", true)\n    }\n}\n\nprivate fun deepCopy(v: Any?): Any? = when (v) {\n    is Map<*, *> -> v.entries.associateTo(LinkedHashMap<String, Any?>()) { (it.key as String) to deepCopy(it.value) }\n    is List<*> -> v.mapTo(ArrayList<Any?>()) { deepCopy(it) }\n    else -> v\n}\n\n/** A copy of the conversation in which every screenshot except the newest keep is replaced by a text note. */\n@Suppress(\"UNCHECKED_CAST\")\nfun pruneScreenshots(messages: List<Map<String, Any?>>, keep: Int = 3): List<Map<String, Any?>> {\n    val out = deepCopy(messages) as List<Map<String, Any?>>\n    val images = mutableListOf<Pair<MutableList<Any?>, Int>>()\n    for (m in out) {\n        val blocks = m[\"content\"] as? List<Map<String, Any?>> ?: continue\n        for (block in blocks) {\n            val inner = block[\"content\"] as? MutableList<Any?> ?: continue\n            if (block[\"type\"] != \"tool_result\") continue\n            inner.forEachIndexed { i, c -> if ((c as Map<String, Any?>)[\"type\"] == \"image\") images.add(Pair(inner, i)) }\n        }\n    }\n    val upTo = removeCount(images.size, keep)\n    for ((list, i) in images.take(upTo)) list[i] = mapOf(\"type\" to \"text\", \"text\" to \"[screenshot removed]\")\n    return out\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun runComputerLoop(ask: Ask, screen: MutableMap<String, Any?>, model: String = \"claude-sonnet-5-5\", maxTurns: Int = 10, confirm: Confirm? = null): Map<String, Any?> {\n    val scale = scaleFor(num(screen[\"width\"]), num(screen[\"height\"]))\n    val messages = mutableListOf<Map<String, Any?>>(mapOf(\"role\" to \"user\", \"content\" to \"Do the task on the screen.\"))\n    for (turn in 1..maxTurns) {\n        val reply = ask(mapOf(\"model\" to model, \"max_tokens\" to 4096, \"tools\" to listOf(mapOf(\"type\" to TOOLSET)), \"messages\" to deepCopy(messages)))\n        val content = reply[\"content\"] as List<Map<String, Any?>>\n        messages.add(mapOf(\"role\" to \"assistant\", \"content\" to content))\n        val stop = reply[\"stop_reason\"]\n        if (stop == \"tool_use\") {\n            val results = mutableListOf<Map<String, Any?>>()\n            var failed = false\n            for (block in content) {\n                if (block[\"type\"] != \"tool_use\") continue\n                val result = linkedMapOf<String, Any?>(\"type\" to \"tool_result\", \"tool_use_id\" to block[\"id\"])\n                if (block.containsKey(\"toolset_name\")) result[\"toolset_name\"] = block[\"toolset_name\"]\n                if (failed) {\n                    result[\"content\"] = NOT_EXECUTED\n                    result[\"is_error\"] = true\n                } else {\n                    val (out, isError) = perform(screen, block[\"name\"] as String, block[\"input\"] as Map<String, Any?>, scale, confirm)\n                    result[\"content\"] = out\n                    if (isError) {\n                        result[\"is_error\"] = true\n                        failed = true\n                    }\n                }\n                results.add(result)\n            }\n            messages.add(mapOf(\"role\" to \"user\", \"content\" to results))\n        } else if (finalStatus(stop) != null) {\n            return mapOf(\"status\" to finalStatus(stop), \"turns\" to turn, \"messages\" to messages)\n        }\n    }\n    return mapOf(\"status\" to \"max_turns\", \"turns\" to maxTurns, \"messages\" to messages)\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/31-computer-use/prose/unit-02/practice-4/src/main/kotlin/Computer.kt",
+    "test_path": "practice/level-2/31-computer-use/prose/unit-02/practice-4/src/test/kotlin/ComputerTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/31-computer-use/prose/unit-02/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/31-computer-use/prose/unit-02/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_theLoopRunsScaledActionsAndSendsEveryResultInOneMessage()",
+        "kind": "main",
+        "says": "The loop runs scaled actions and sends every result in one message"
+      },
+      {
+        "id": "e1_theScreenIsScaledToWhatTheModelMaySeeAndClicksAreScaledBack()",
+        "kind": "edge",
+        "says": "The screen is scaled to what the model may see, and clicks are scaled back"
+      },
+      {
+        "id": "e2_aClickOnARiskyElementNeedsAPersonsConfirmation()",
+        "kind": "edge",
+        "says": "A click on a risky element needs a person's confirmation"
+      },
+      {
+        "id": "e3_aFailedActionStopsTheRestOfItsBatch()",
+        "kind": "edge",
+        "says": "A failed action stops the rest of its batch"
+      },
+      {
+        "id": "e4_invalidActionsComeBackAsErrorResultsWithAReason()",
+        "kind": "edge",
+        "says": "Invalid actions come back as error results with a reason"
+      },
+      {
+        "id": "e5_theLoopEndsOnAStopReasonOrAtTheTurnLimit()",
+        "kind": "edge",
+        "says": "The loop ends on a stop reason or at the turn limit"
+      },
+      {
+        "id": "e6_oldScreenshotsAreReplacedSoTheContextDoesNotFillUp()",
+        "kind": "edge",
+        "says": "Old screenshots are replaced so the context does not fill up"
+      },
+      {
+        "id": "e7_screenshotsAndZoomsAreSentAtTheSizeTheModelMaySee()",
+        "kind": "edge",
+        "says": "Screenshots and zooms are sent at the size the model may see"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/31-computer-use/prose/unit-02/practice-4/target/test-results/test"
+    },
+    "origin": "course/31-computer-use/02-safety-sandboxing-and-the-practice.md",
+    "concepts": [
+      "the practice of Computer use: safety, sandboxing, long loops and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/31-computer-use/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "computer-use-u2"
+}

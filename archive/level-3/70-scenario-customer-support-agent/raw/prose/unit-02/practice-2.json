@@ -1,0 +1,274 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "70-scenario-customer-support-agent"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: audit a support agent's sessions and name the first fix (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: audit a support agent's sessions and name the first fix"
+    },
+    {
+      "type": "para",
+      "text": "A customer support resolution agent has been in production for a month. The team's target is that at least 80 percent of conversations are resolved at first contact, and the agent must escalate the ones a person has to decide. The rate is below target, and each team member blames something else: the prompt, the tools, the model. In this practice you write the audit that ends the argument: it reads the month's recorded sessions, counts what went wrong in each failure shape, and names the one fix to make first. The model is not called: the tests give you recorded sessions. The audit, its failure shapes and its order of fixes are this course's own design for the capstone, not an Anthropic interface. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`audit`); TypeScript has the same name and the same snake-case fields. Java has the static method `Audit.audit` and the records `Step`, `Session` and `Report`; Kotlin has the top-level function `audit` and the data classes of the same names. In Java and Kotlin the fields are camel case (`needsHuman`, `refundCents`, `meetsTarget`, `overEscalated`, `underEscalated`, `skippedPrerequisite`, `wrongTool`, `overLimitRefunds`)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working audit with five gaps cut out of it. The plumbing is written and correct: the session count, the resolved, over- and under-escalated counts, and `audit` itself, which calls the gaps and builds the report. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (Java and Kotlin use the camel-case names):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`skipped_prerequisite` unlocks `e2`: the order of the steps and the failed identity check.",
+        "`has_wrong_tool` unlocks `e6`: a known right tool that differs from the tool used.",
+        "`is_over_limit` unlocks `e3`: a refund that was made above the limit.",
+        "`first_contact_rate` unlocks `e1` and `e5`: the rounded rate, and 0 for no sessions.",
+        "`diagnose` unlocks `e4` and the diagnosis of `m1` and `e1`: the order of the fixes."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About a dozen lines in all. The sections below describe the whole audit."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "A step is one call the agent made: `tool`, `ok` (whether it succeeded) and `right_tool`, the tool it should have used (absent when the right tool is not known). A session has `id`, `steps`, `outcome` (`resolved` or `escalated`), `needs_human` (the ground truth: a person had to decide this case), `refund_cents` (the refund made, 0 for none) and `limit_cents` (the limit above which a person decides)."
+    },
+    {
+      "type": "para",
+      "text": "`audit(sessions)` returns a report with these fields:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`sessions`: how many; `resolved`: how many have the outcome `resolved`.",
+        "`fcr`: `resolved` divided by `sessions`, rounded to three decimals (0 for no sessions); `meets_target`: `fcr` is at least 0.8.",
+        "`over_escalated`: escalated although no person was needed; `under_escalated`: resolved although a person was needed.",
+        "`skipped_prerequisite`: sessions in which a `lookup_order` or `process_refund` call came before the first successful `get_customer` call (a failed `get_customer` does not count as identifying anyone).",
+        "`wrong_tool`: sessions with at least one step whose `right_tool` is known and differs from its `tool`.",
+        "`over_limit_refunds`: sessions with the outcome `resolved` whose `refund_cents` is above `limit_cents`.",
+        "`diagnosis`, the first fix, by this order: `enforce_in_code` when `skipped_prerequisite` or `over_limit_refunds` is above zero (money moves wrongly: nothing else comes first); otherwise `rewrite_tool_descriptions` when `wrong_tool` is above zero and at least `over_escalated` plus `under_escalated`; otherwise `write_escalation_criteria` when `over_escalated` plus `under_escalated` is above zero; otherwise `none`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Measure the target.** The exam gives a rate (55 percent against 80) and asks for the most effective way up. *You should see* the rate rounded and compared at the boundary.",
+        "**A prerequisite is an order.** Calling the order tool is not the fault; calling it before the customer was identified is. *You should see* the order of the steps read, and a failed check not counted as an identification.",
+        "**A refund over the limit is a fact about what happened.** A refund that was refused and handed to a person is the design working. *You should see* only made refunds counted.",
+        "**Failure shapes need different fixes.** Skipped steps and money moved wrongly call for a gate in code; a wrong tool call calls for better descriptions; a miscalibrated escalation calls for explicit criteria with examples. *You should see* the fixes in that order of urgency.",
+        "**Count sessions, not steps.** One confused conversation is one failure however many calls it holds. *You should see* sessions counted for the wrong tool."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A mixed set of six sessions gets every field right and the first fix"
+        ],
+        [
+          "`e1`",
+          "No sessions: zero everywhere, a rate of 0, no diagnosis"
+        ],
+        [
+          "`e2`",
+          "The prerequisite is the order of the steps, and a failed identity check does not open the gate"
+        ],
+        [
+          "`e3`",
+          "Only a refund that was made counts as over the limit"
+        ],
+        [
+          "`e4`",
+          "The order of fixes: code, then descriptions (a tie goes to descriptions), then criteria"
+        ],
+        [
+          "`e5`",
+          "The rate at exactly 0.8 meets the target, 0.6 does not, 2 of 3 is 0.667, and over- and under-escalation are counted apart"
+        ],
+        [
+          "`e6`",
+          "The wrong tool counts sessions and ignores steps whose right tool is not known"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Audit a support agent's recorded sessions: the rates, the failure shapes and the first fix.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"audit\");\n\nexport type Step = { tool: string; ok: boolean; right_tool?: string };\nexport type Session = { id: string; steps: Step[]; outcome: string; needs_human: boolean; refund_cents: number; limit_cents: number };\nexport type Report = {\n  sessions: number; resolved: number; fcr: number; meets_target: boolean; over_escalated: number; under_escalated: number;\n  skipped_prerequisite: number; wrong_tool: number; over_limit_refunds: number; diagnosis: string;\n};\n\nconst PROTECTED = [\"lookup_order\", \"process_refund\"];\nconst TARGET = 0.8;\n\n/** True when an order or refund call came before the first successful get_customer call. */\nexport function skippedPrerequisite(steps: Step[]): boolean {\n  let verified = false;\n  for (const step of steps) {\n    if (step.tool === \"get_customer\" && step.ok) verified = true;\n    else if (PROTECTED.includes(step.tool) && !verified) return true;\n  }\n  return false;\n}\n\n/** True when at least one step has a known right tool that differs from the tool used. */\nexport function hasWrongTool(steps: Step[]): boolean {\n  return steps.some((st) => st.right_tool && st.tool !== st.right_tool);\n}\n\n/** True when the session was resolved with a refund above its limit. */\nexport function isOverLimit(session: Session): boolean {\n  return session.outcome === \"resolved\" && session.refund_cents > session.limit_cents;\n}\n\n/** The resolved share, rounded to three decimals; 0 for no sessions. */\nexport function firstContactRate(resolved: number, n: number): number {\n  return n ? Math.round((resolved / n) * 1000) / 1000 : 0;\n}\n\n/** The first fix, by the order of the statement. */\nexport function diagnose(skipped: number, overLimit: number, wrong: number, over: number, under: number): string {\n  if (skipped || overLimit) return \"enforce_in_code\";\n  if (wrong && wrong >= over + under) return \"rewrite_tool_descriptions\";\n  if (over + under) return \"write_escalation_criteria\";\n  return \"none\";\n}\n\nexport function audit(sessions: Session[]): Report {\n  log.debug(\"audit input\", sessions);\n  const n = sessions.length;\n  const count = (f: (s: Session) => boolean) => sessions.filter(f).length;\n  const resolved = count((s) => s.outcome === \"resolved\");\n  const over = count((s) => s.outcome === \"escalated\" && !s.needs_human);\n  const under = count((s) => s.outcome === \"resolved\" && s.needs_human);\n  const skipped = count((s) => skippedPrerequisite(s.steps));\n  const wrong = count((s) => hasWrongTool(s.steps));\n  const overLimit = count((s) => isOverLimit(s));\n  const fcr = firstContactRate(resolved, n);\n  return { sessions: n, resolved, fcr, meets_target: fcr >= TARGET, over_escalated: over, under_escalated: under, skipped_prerequisite: skipped, wrong_tool: wrong, over_limit_refunds: overLimit, diagnosis: diagnose(skipped, overLimit, wrong, over, under) };\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { audit } from \"./audit.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\nconst step = (tool: string, ok = true, right?: string) => ({ tool, ok, ...(right ? { right_tool: right } : {}) });\nconst session = (steps: any[], outcome = \"resolved\", needs_human = false, refund = 0) =>\n  ({ id: \"s\", steps, outcome, needs_human, refund_cents: refund, limit_cents: 10000 });\n\n// Sessions of a support agent: a clean one, one that skipped the customer check, and one escalated without need.\nconst clean = [step(\"get_customer\"), step(\"lookup_order\"), step(\"process_refund\")];\nconst sessions = [\n  session(clean, \"resolved\", false, 2000),\n  session([step(\"lookup_order\"), step(\"get_customer\"), step(\"process_refund\")]),\n  session([step(\"get_customer\")], \"escalated\"),\n];\nconst report = audit(sessions);\nconsole.log(\"sessions:\", report.sessions, \"| resolved:\", report.resolved, \"| fcr:\", report.fcr, \"| meets target:\", report.meets_target);\nconsole.log(\"over-escalated:\", report.over_escalated, \"| under-escalated:\", report.under_escalated);\nconsole.log(\"skipped prerequisite:\", report.skipped_prerequisite, \"| wrong tool:\", report.wrong_tool, \"| over-limit refunds:\", report.over_limit_refunds);\nconsole.log(\"diagnosis:\", report.diagnosis);\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Audit a support agent's recorded sessions: the rates, the failure shapes and the first fix.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"audit\");\n\nexport type Step = { tool: string; ok: boolean; right_tool?: string };\nexport type Session = { id: string; steps: Step[]; outcome: string; needs_human: boolean; refund_cents: number; limit_cents: number };\nexport type Report = {\n  sessions: number; resolved: number; fcr: number; meets_target: boolean; over_escalated: number; under_escalated: number;\n  skipped_prerequisite: number; wrong_tool: number; over_limit_refunds: number; diagnosis: string;\n};\n\nconst PROTECTED = [\"lookup_order\", \"process_refund\"];\nconst TARGET = 0.8;\n\n/**\n * TODO 1 of 5 (unlocks e2): did an order or refund call come before the first successful get_customer call?\n * Receives a session's steps. Returns true or false; a failed get_customer does not identify anyone.\n * Example: [lookup_order, get_customer] -> true, [get_customer, lookup_order] -> false\n */\nexport function skippedPrerequisite(steps: Step[]): boolean {\n  return false;\n}\n\n/**\n * TODO 2 of 5 (unlocks e6): does a step have a known right tool that differs from the tool used?\n * Receives a session's steps (a step may lack right_tool). Returns true for at least one such step, false otherwise.\n * Example: [{ tool: \"get_customer\", ok: true, right_tool: \"lookup_order\" }] -> true; a step with no right_tool never counts.\n */\nexport function hasWrongTool(steps: Step[]): boolean {\n  return false;\n}\n\n/**\n * TODO 3 of 5 (unlocks e3): was a refund above the limit actually made?\n * Receives one session. Returns true only when its outcome is \"resolved\" and refund_cents is above limit_cents.\n * Example: resolved, refund 10001, limit 10000 -> true; escalated with the same refund -> false\n */\nexport function isOverLimit(session: Session): boolean {\n  return false;\n}\n\n/**\n * TODO 4 of 5 (unlocks e1 and e5): the first contact rate.\n * Receives the resolved count and the session count. Returns resolved / n rounded to three decimals, 0 when n is 0.\n * Example: firstContactRate(2, 3) -> 0.667\n */\nexport function firstContactRate(resolved: number, n: number): number {\n  return 0;\n}\n\n/**\n * TODO 5 of 5 (unlocks e4 and e1): the first fix, by the order in the statement.\n * Receives the counts of skipped prerequisites, over-limit refunds, wrong-tool sessions, over- and under-escalations.\n * Returns \"enforce_in_code\", \"rewrite_tool_descriptions\", \"write_escalation_criteria\" or \"none\".\n * Example: diagnose(0, 0, 2, 1, 0) -> \"rewrite_tool_descriptions\"\n */\nexport function diagnose(skipped: number, overLimit: number, wrong: number, over: number, under: number): string {\n  return \"\";\n}\n\nexport function audit(sessions: Session[]): Report {\n  log.debug(\"audit input\", sessions);\n  const n = sessions.length;\n  const count = (f: (s: Session) => boolean) => sessions.filter(f).length;\n  const resolved = count((s) => s.outcome === \"resolved\");\n  const over = count((s) => s.outcome === \"escalated\" && !s.needs_human);\n  const under = count((s) => s.outcome === \"resolved\" && s.needs_human);\n  const skipped = count((s) => skippedPrerequisite(s.steps));\n  const wrong = count((s) => hasWrongTool(s.steps));\n  const overLimit = count((s) => isOverLimit(s));\n  const fcr = firstContactRate(resolved, n);\n  return { sessions: n, resolved, fcr, meets_target: fcr >= TARGET, over_escalated: over, under_escalated: under, skipped_prerequisite: skipped, wrong_tool: wrong, over_limit_refunds: overLimit, diagnosis: diagnose(skipped, overLimit, wrong, over, under) };\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { audit } from \"./audit.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\nconst step = (tool: string, ok = true, right?: string) => ({ tool, ok, ...(right ? { right_tool: right } : {}) });\nconst session = (steps: any[], outcome = \"resolved\", needs_human = false, refund = 0) =>\n  ({ id: \"s\", steps, outcome, needs_human, refund_cents: refund, limit_cents: 10000 });\n\n// Sessions of a support agent: a clean one, one that skipped the customer check, and one escalated without need.\nconst clean = [step(\"get_customer\"), step(\"lookup_order\"), step(\"process_refund\")];\nconst sessions = [\n  session(clean, \"resolved\", false, 2000),\n  session([step(\"lookup_order\"), step(\"get_customer\"), step(\"process_refund\")]),\n  session([step(\"get_customer\")], \"escalated\"),\n];\nconst report = audit(sessions);\nconsole.log(\"sessions:\", report.sessions, \"| resolved:\", report.resolved, \"| fcr:\", report.fcr, \"| meets target:\", report.meets_target);\nconsole.log(\"over-escalated:\", report.over_escalated, \"| under-escalated:\", report.under_escalated);\nconsole.log(\"skipped prerequisite:\", report.skipped_prerequisite, \"| wrong tool:\", report.wrong_tool, \"| over-limit refunds:\", report.over_limit_refunds);\nconsole.log(\"diagnosis:\", report.diagnosis);\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 7,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "5ed986083da54bbc2c1ff205bfdc2658369f336b2aa533783c0ac3e9a3995a6d",
+  "starting_code": "// Audit a support agent's recorded sessions: the rates, the failure shapes and the first fix.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"audit\");\n\nexport type Step = { tool: string; ok: boolean; right_tool?: string };\nexport type Session = { id: string; steps: Step[]; outcome: string; needs_human: boolean; refund_cents: number; limit_cents: number };\nexport type Report = {\n  sessions: number; resolved: number; fcr: number; meets_target: boolean; over_escalated: number; under_escalated: number;\n  skipped_prerequisite: number; wrong_tool: number; over_limit_refunds: number; diagnosis: string;\n};\n\nconst PROTECTED = [\"lookup_order\", \"process_refund\"];\nconst TARGET = 0.8;\n\n/**\n * TODO 1 of 5 (unlocks e2): did an order or refund call come before the first successful get_customer call?\n * Receives a session's steps. Returns true or false; a failed get_customer does not identify anyone.\n * Example: [lookup_order, get_customer] -> true, [get_customer, lookup_order] -> false\n */\nexport function skippedPrerequisite(steps: Step[]): boolean {\n  return false;\n}\n\n/**\n * TODO 2 of 5 (unlocks e6): does a step have a known right tool that differs from the tool used?\n * Receives a session's steps (a step may lack right_tool). Returns true for at least one such step, false otherwise.\n * Example: [{ tool: \"get_customer\", ok: true, right_tool: \"lookup_order\" }] -> true; a step with no right_tool never counts.\n */\nexport function hasWrongTool(steps: Step[]): boolean {\n  return false;\n}\n\n/**\n * TODO 3 of 5 (unlocks e3): was a refund above the limit actually made?\n * Receives one session. Returns true only when its outcome is \"resolved\" and refund_cents is above limit_cents.\n * Example: resolved, refund 10001, limit 10000 -> true; escalated with the same refund -> false\n */\nexport function isOverLimit(session: Session): boolean {\n  return false;\n}\n\n/**\n * TODO 4 of 5 (unlocks e1 and e5): the first contact rate.\n * Receives the resolved count and the session count. Returns resolved / n rounded to three decimals, 0 when n is 0.\n * Example: firstContactRate(2, 3) -> 0.667\n */\nexport function firstContactRate(resolved: number, n: number): number {\n  return 0;\n}\n\n/**\n * TODO 5 of 5 (unlocks e4 and e1): the first fix, by the order in the statement.\n * Receives the counts of skipped prerequisites, over-limit refunds, wrong-tool sessions, over- and under-escalations.\n * Returns \"enforce_in_code\", \"rewrite_tool_descriptions\", \"write_escalation_criteria\" or \"none\".\n * Example: diagnose(0, 0, 2, 1, 0) -> \"rewrite_tool_descriptions\"\n */\nexport function diagnose(skipped: number, overLimit: number, wrong: number, over: number, under: number): string {\n  return \"\";\n}\n\nexport function audit(sessions: Session[]): Report {\n  log.debug(\"audit input\", sessions);\n  const n = sessions.length;\n  const count = (f: (s: Session) => boolean) => sessions.filter(f).length;\n  const resolved = count((s) => s.outcome === \"resolved\");\n  const over = count((s) => s.outcome === \"escalated\" && !s.needs_human);\n  const under = count((s) => s.outcome === \"resolved\" && s.needs_human);\n  const skipped = count((s) => skippedPrerequisite(s.steps));\n  const wrong = count((s) => hasWrongTool(s.steps));\n  const overLimit = count((s) => isOverLimit(s));\n  const fcr = firstContactRate(resolved, n);\n  return { sessions: n, resolved, fcr, meets_target: fcr >= TARGET, over_escalated: over, under_escalated: under, skipped_prerequisite: skipped, wrong_tool: wrong, over_limit_refunds: overLimit, diagnosis: diagnose(skipped, overLimit, wrong, over, under) };\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-2/audit.ts",
+    "test_path": "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-2/audit.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-2/audit.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 a mixed set of sessions gets every rate and the first fix",
+        "kind": "main",
+        "says": "A mixed set of six sessions gets every field right and the first fix"
+      },
+      {
+        "id": "e1 no sessions give zero rates and no diagnosis",
+        "kind": "edge",
+        "says": "No sessions: zero everywhere, a rate of 0, no diagnosis"
+      },
+      {
+        "id": "e2 a protected call before a successful identity check is a skipped prerequisite",
+        "kind": "edge",
+        "says": "The prerequisite is the order of the steps, and a failed identity check does not open the gate"
+      },
+      {
+        "id": "e3 a refund over the limit counts only when it was made",
+        "kind": "edge",
+        "says": "Only a refund that was made counts as over the limit"
+      },
+      {
+        "id": "e4 money first then tool descriptions then escalation criteria",
+        "kind": "edge",
+        "says": "The order of fixes: code, then descriptions (a tie goes to descriptions), then criteria"
+      },
+      {
+        "id": "e5 the target boundary and rounding of the first contact rate",
+        "kind": "edge",
+        "says": "The rate at exactly 0.8 meets the target, 0.6 does not, 2 of 3 is 0.667, and over- and under-escalation are counted apart"
+      },
+      {
+        "id": "e6 a wrong tool counts sessions and ignores steps with no known right tool",
+        "kind": "edge",
+        "says": "The wrong tool counts sessions and ignores steps whose right tool is not known"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-2/target/report.xml"
+    },
+    "origin": "course/70-scenario-customer-support-agent/02-audit-the-sessions-and-the-practice.md",
+    "concepts": [
+      "the practice of Audit the sessions, order the fixes and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "scenario-customer-support-agent-u2"
+}

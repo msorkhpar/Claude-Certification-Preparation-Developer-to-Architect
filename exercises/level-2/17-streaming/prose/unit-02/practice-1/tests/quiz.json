@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "17-streaming"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Check yourself: Streaming tool use, errors in the middle, and when to stream",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A client prints text as it arrives. Midway, an `error` event with `overloaded_error` appears although the HTTP status was 200. What is the right handling?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Keep the partial text as the final answer and finish the turn without more work",
+            "correct": false,
+            "says": "Ruled out because the partial text is the loss: \"the user may already have read the partial text\" and the answer is cut short, so it is not final."
+          },
+          {
+            "id": "b",
+            "text": "Treat the call as failed, drop the partial output and send the whole request again",
+            "correct": true,
+            "says": "The page says \"discard the partial output first and retry the whole request\"."
+          },
+          {
+            "id": "c",
+            "text": "Ignore the event, since the status line already reported that the call went well",
+            "correct": false,
+            "says": "Ruled out because \"A status check alone cannot tell you a stream succeeded\"."
+          },
+          {
+            "id": "d",
+            "text": "Resume the stream from the last received byte once the service has recovered",
+            "correct": false,
+            "says": "Ruled out because a stream that failed midway \"cannot be resumed from the last byte\"."
+          }
+        ],
+        "origin": {
+          "path": "course/17-streaming/02-tool-use-errors-and-when-to-stream.md",
+          "section": "An error after the 200"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A team streams a long report only because they believe it lowers the bill. According to the page, what is the better reason to stream?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Fewer errors, since a started call cannot fail after its first byte",
+            "correct": false,
+            "says": "Ruled out because \"That is why an error can arrive after the 200 status line\"."
+          },
+          {
+            "id": "b",
+            "text": "A lower price for each of the output tokens",
+            "correct": false,
+            "says": "Ruled out because \"Streaming changes when the bytes arrive, not what the tokens cost\"."
+          },
+          {
+            "id": "c",
+            "text": "An exemption from the limits that apply to other calls",
+            "correct": false,
+            "says": "Ruled out because \"Streamed calls count against the same limits as the others\"."
+          },
+          {
+            "id": "d",
+            "text": "Readers see words while the rest is still being written",
+            "correct": true,
+            "says": "The page's first case is \"A person is waiting for a long answer\", and \"The first words appear at once\"."
+          }
+        ],
+        "origin": {
+          "path": "course/17-streaming/02-tool-use-errors-and-when-to-stream.md",
+          "section": "When to stream"
+        }
+      }
+    ]
+  }
+}

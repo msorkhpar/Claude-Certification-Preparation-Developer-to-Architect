@@ -1,0 +1,305 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "27-choosing-an-extension"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Choosing between similar features and combining them",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Choosing between similar features and combining them"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Developer · **Module 27:** Choosing an extension · **Page 2 of 3** **Exams:** DV5, DV7"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** tell a skill from a subagent, CLAUDE.md from a skill, a hook from a skill, MCP from a skill, and a subagent from a dynamic workflow; say which of them can enforce a rule and which can only request it; and combine features the way the documentation's patterns do."
+    },
+    {
+      "type": "para",
+      "text": "Checked against the Claude Code documentation (Extend Claude Code) on 2026-10-03. This page is reading and quiz only; page 3 closes the module with a practice."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "Several of the features can hold the same instruction, and a reasonable-looking choice can be wrong in a way that shows only later: a guardrail that Claude sometimes forgets, a reference file that fills every request, an MCP server for what was only a procedure. The exam gives a short scenario and asks which feature, and the reason is always a difference in loading, isolation or guarantee."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Skill or subagent"
+    },
+    {
+      "type": "para",
+      "text": "\"Skills are reusable content you can load into any context. Subagents are isolated workers that run separately from your main conversation.\" The deciding questions are about the context window:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Aspect",
+        "Skill",
+        "Subagent"
+      ],
+      "rows": [
+        [
+          "What it is",
+          "reusable instructions, knowledge or workflows",
+          "an isolated worker with its own context"
+        ],
+        [
+          "Key benefit",
+          "\"Share content across contexts\"",
+          "context isolation: \"only summary returns\""
+        ],
+        [
+          "Context window impact",
+          "\"Adds to your main window\"",
+          "\"Uses a separate window with its own input and output tokens\""
+        ],
+        [
+          "Best for",
+          "reference material, invocable workflows",
+          "tasks that read many files, parallel work, specialized workers"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Use a subagent \"when you need context isolation or when your context window is getting full\": it may read dozens of files while the main conversation receives a summary. They also combine: a subagent can preload skills through its `skills:` field, and a skill can run in isolated context with `context: fork`. A skill can be a reference (an API style guide) or an action (`/deploy`)."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "CLAUDE.md or skill"
+    },
+    {
+      "type": "para",
+      "text": "Both store instructions, and they differ in loading. CLAUDE.md loads \"Every session, automatically\"; a skill loads \"On demand\". Only a skill can trigger a workflow \"with `/<name>`\". \"Put it in CLAUDE.md if Claude should always know it: coding conventions, build commands, project structure, \"never do X\" rules.\" \"Put it in a skill if it's reference material Claude needs sometimes (API docs, style guides) or a workflow you trigger with `/<name>`.\" A middle layer exists: `.claude/rules/` files can be \"scoped to file paths\", so that a language-specific guideline loads only when matching files are opened."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Output style or CLAUDE.md"
+    },
+    {
+      "type": "para",
+      "text": "\"CLAUDE.md carries what Claude should know, and an output style sets how Claude responds.\" Facts and rules about the project go in CLAUDE.md. A role, tone or response format that you might want off again goes in an output style, of which one is active at a time. The two combine, and the documentation adds a warning that applies to both: \"Claude follows both as instructions, so neither is enforced.\""
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Hook or skill"
+    },
+    {
+      "type": "para",
+      "text": "A hook and a skill differ in what happens when the event comes. A hook \"Always fires on its event; the trigger is guaranteed\". With a skill, \"Claude interprets the instructions; outcome can vary.\" The documentation's guidance:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "**Use a hook** \"when the action must happen the same way every time and doesn't need Claude to think\": formatting on save, rejecting `rm -rf /`, a Slack message when a session ends.",
+        "**Use a skill** \"when Claude should decide how to apply the steps, or when the content is knowledge rather than a script\".",
+        "\"**Put guardrails in hooks.**\" An instruction such as \"never edit `.env`\" in CLAUDE.md or a skill \"is a request, not a guarantee. A `PreToolUse` hook that blocks the edit is enforcement.\""
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The effects line up: a hook's output lands in context as text Claude reads (a linter's results), and a `/fix-lint` skill tells Claude how to resolve them. The two feed each other."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "MCP or skill"
+    },
+    {
+      "type": "para",
+      "text": "\"MCP connects Claude to external services. Skills extend what Claude knows, including how to use those services effectively.\" They provide different things: MCP provides \"Tools and data access\"; a skill provides \"Knowledge, workflows, reference material\". \"These solve different problems and work well together\": MCP \"gives Claude purpose-built tools for an external system, with the connection and authentication handled by the server\", and a skill can hold the team's database schema and query patterns."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Subagent or dynamic workflow"
+    },
+    {
+      "type": "para",
+      "text": "Both do work outside the main conversation. \"With subagents, Claude decides turn by turn what runs next. In a workflow, the script decides.\" Use a subagent for \"a quick, focused worker\". Use a dynamic workflow when a job \"outgrows a handful of subagents\", or when findings should be cross-checked before you see them, such as a codebase-wide audit or a large migration."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Combine features"
+    },
+    {
+      "type": "para",
+      "text": "\"Each extension solves a different problem: CLAUDE.md handles always-on context, skills handle on-demand knowledge and workflows, MCP handles external connections, subagents handle isolation, and hooks handle automation.\" The patterns from the documentation:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Pattern",
+        "How it works",
+        "Example"
+      ],
+      "rows": [
+        [
+          "Skill + MCP",
+          "MCP provides the connection; a skill teaches how to use it well",
+          "MCP connects to the database, a skill documents the schema"
+        ],
+        [
+          "Skill + Subagent",
+          "a skill spawns subagents for parallel work",
+          "an `/audit` skill starts security, performance and style subagents"
+        ],
+        [
+          "CLAUDE.md + Skills",
+          "always-on rules in one, reference material loaded on demand in the other",
+          "CLAUDE.md says \"follow our API conventions\", a skill holds the guide"
+        ],
+        [
+          "Hook + MCP",
+          "a hook triggers external actions through MCP",
+          "a post-edit hook sends a Slack notification"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "A decision aid"
+    },
+    {
+      "type": "para",
+      "text": "A short chain of questions covers most scenarios:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Must it happen every time, with no judgment? A hook.",
+        "Does Claude need to know it in every session? CLAUDE.md, kept short; a rule file if it depends on paths.",
+        "Is it knowledge or a procedure needed sometimes? A skill.",
+        "Is it a connection to a system outside the machine? MCP, with a skill for how to use it well.",
+        "Would the work flood the conversation? A subagent, or a workflow when it outgrows a few.",
+        "Does another repository need all of it? A plugin."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Guardrail as a prompt.** A sentence in CLAUDE.md or a skill is a request. If the rule must hold, use a hook.",
+        "**A skill where isolation is needed.** A skill \"adds to your main window\". A task that reads dozens of files belongs in a subagent.",
+        "**MCP for knowledge.** An MCP server connects to a system. Procedure and reference material live in a skill."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A team must make sure that Claude never touches a file named `.env`. Which feature gives the guarantee?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: A line in CLAUDE.md that forbids the edit",
+              "**b**: A hook on the `PreToolUse` event that rejects it",
+              "**c**: A skill that explains why the file is private",
+              "**d**: An output style that tells Claude to refuse"
+            ]
+          }
+        ],
+        [
+          "A research task reads dozens of files and only the conclusions matter to the main conversation. Which feature fits?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: A line in CLAUDE.md, which is loaded in full at the launch of each session",
+              "**b**: A skill, which adds everything that it reads to the main window as well",
+              "**c**: A hook, which runs a script once per session when the work starts",
+              "**d**: A subagent, which works in its own window and hands back only a summary"
+            ]
+          }
+        ],
+        [
+          "A team connects Claude to its database and wants the model to use the tables and queries well. What does the page suggest?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Only an MCP server, since it provides everything that the work needs",
+              "**b**: MCP for access, and a skill for the schema and patterns",
+              "**c**: Only a skill, since a skill can run the queries itself",
+              "**d**: A plugin, because plugins replace both of them"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**b**. The page says \"A `PreToolUse` hook that blocks the edit is enforcement.\" *a* is ruled out because such an instruction \"is a request, not a guarantee\". *c* is ruled out because with a skill, \"Claude interprets the instructions; outcome can vary.\" *d* is ruled out because \"Claude follows both as instructions, so neither is enforced.\"",
+            "**d**. The page says to use a subagent \"when you need context isolation or when your context window is getting full\". *b* is ruled out because a skill \"adds to your main window\". *c* is ruled out because a hook is for \"when the action must happen the same way every time and doesn't need Claude to think\". *a* is ruled out because the page says \"Put it in CLAUDE.md if Claude should always know it\", and conclusions of one task are not such a rule.",
+            "**b**. The page says \"These solve different problems and work well together\", with MCP for the connection and a skill that \"can hold the team's database schema and query patterns\". *a* is ruled out because MCP provides \"Tools and data access\", not knowledge of the schema and patterns. *c* is ruled out because a skill provides \"Knowledge, workflows, reference material\", and the connection to the external system comes from MCP. *d* is ruled out because \"Each extension solves a different problem\", and a plugin only packages them."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 13,
+    "paras": 14,
+    "code": 0,
+    "tables": 2,
+    "lists": 4,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "771f607dc2f0d3a9ca1f3db3f3239613a328bd20158ced9926188244150a145a"
+}

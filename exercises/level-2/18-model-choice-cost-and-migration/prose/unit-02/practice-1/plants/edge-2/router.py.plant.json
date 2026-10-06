@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "router.py",
+      "old": "+ usage.get(\"output_tokens\", 0) * model[\"output\"]\n    return round(_apply_batch(total, batch), 6)",
+      "new": "+ usage.get(\"output_tokens\", 0) * model[\"output\"] * (0.5 if batch else 1)\n    return round(total, 6)"
+    }
+  ]
+}

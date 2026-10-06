@@ -1,0 +1,99 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "55-mcp-in-claude-code"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: connect a team's MCP servers to Claude Code (TypeScript)",
+  "lang": "typescript",
+  "main_file": "project/.mcp.json",
+  "files": [
+    "project/.claude/settings.json",
+    "project/docs/mcp-servers.md",
+    "project/docs/tool-descriptions.json",
+    "project/user-scope.example.json"
+  ],
+  "test_file": "tests/mcpSetup.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "tests/examples/55-mcp-config/typescript/mcpConfig.ts",
+    "tests/examples/55-mcp-config/typescript/example-logger.ts",
+    "logger.ts",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-2/check_files.py",
+    "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-2/project/.claude/settings.json",
+    "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-2/project/.mcp.json",
+    "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-2/project/docs/mcp-servers.md",
+    "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-2/project/docs/tool-descriptions.json",
+    "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-2/project/user-scope.example.json"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-2/tests/mcpSetup.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 the shared file declares the four team servers with the right shape",
+      "kind": "main",
+      "says": "The shared file declares the four team servers with the right shape"
+    },
+    {
+      "id": "e1 credentials are read from the environment and never written in the file",
+      "kind": "edge",
+      "says": "Credentials come from the environment, never from the file, and not under a name Claude Code blanks out"
+    },
+    {
+      "id": "e2 endpoints and paths that are not secret have a default so the file works unset",
+      "kind": "edge",
+      "says": "Endpoints and paths that are not secret have a default, so the file works with nothing set"
+    },
+    {
+      "id": "e3 only the small core server is loaded at the start",
+      "kind": "edge",
+      "says": "Only the small core server is loaded at the start"
+    },
+    {
+      "id": "e4 shared servers stay in the project file and personal ones in the user scope file",
+      "kind": "edge",
+      "says": "Shared servers are in the project file and the personal one only in the user-scope example"
+    },
+    {
+      "id": "e5 permissions allow the read only servers by name and deny the destructive tool",
+      "kind": "edge",
+      "says": "Permissions allow the read-only servers by name and deny the destructive tool"
+    },
+    {
+      "id": "e6 the tool description says when to use it instead of grep and fits the limit",
+      "kind": "edge",
+      "says": "The tool description gives the boundary against Grep early and fits the limit"
+    },
+    {
+      "id": "e7 the notes list every server with its scope and read the catalog as a resource",
+      "kind": "edge",
+      "says": "The notes list every server with its scope and read the catalog as a resource"
+    },
+    {
+      "id": "e8 no file holds a personal path an address or a key",
+      "kind": "edge",
+      "says": "No file holds a personal path, an address or a key"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/55-mcp-in-claude-code/02-tools-together-descriptions-resources-and-the-practice.md"
+}

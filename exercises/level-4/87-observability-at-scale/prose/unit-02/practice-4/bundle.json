@@ -1,0 +1,90 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-4",
+    "87-observability-at-scale"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 4,
+  "title": "Practice: trace triage (Kotlin)",
+  "lang": "kotlin",
+  "main_file": "src/main/kotlin/Triage.kt",
+  "files": [
+    "src/main/kotlin/TryIt.kt"
+  ],
+  "test_file": "src/test/kotlin/TriageTest.kt",
+  "build": [
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-4/87-observability-at-scale/prose/unit-02/practice-4",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-4/87-observability-at-scale/prose/unit-02/practice-4",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_everyTraceGetsOneReasonAndAHealthyTraceIsKeptByItsId()",
+      "kind": "main",
+      "says": "Every trace gets one reason and a healthy trace is kept by its id"
+    },
+    {
+      "id": "e1_anErrorOutranksASlowRootWhichOutranksRetriesWhichOutrankAFlag()",
+      "kind": "edge",
+      "says": "An error outranks a slow root, which outranks retries, which outrank a flag"
+    },
+    {
+      "id": "e2_theRootCauseIsTheDeepestFailingSpanAndItsPathStartsAtTheRoot()",
+      "kind": "edge",
+      "says": "The root cause is the deepest failing span and its path starts at the root"
+    },
+    {
+      "id": "e3_aStaleOrEmptyRetrievalIsBlamedOnlyWhenNoSpanFailed()",
+      "kind": "edge",
+      "says": "A stale or empty retrieval is blamed only when no span failed"
+    },
+    {
+      "id": "e4_driftReportsAMoveInEitherDirectionOverTheToleranceAndNeverDividesByZero()",
+      "kind": "edge",
+      "says": "Drift reports a move in either direction over the tolerance and never divides by zero"
+    },
+    {
+      "id": "e5_anAlertNeedsConsecutiveWindowsOverTheThresholdAndADipStartsTheCountAgain()",
+      "kind": "edge",
+      "says": "An alert needs consecutive windows over the threshold and a dip starts the count again"
+    },
+    {
+      "id": "e6_aLogRecordDropsTheContentFieldsUnlessTheyAreAllowedByName()",
+      "kind": "edge",
+      "says": "A log record drops the content fields unless they are allowed by name"
+    },
+    {
+      "id": "e7_aRequestsTrailJoinsTheEventsOfEveryComponentInTimeOrder()",
+      "kind": "edge",
+      "says": "A request's trail joins the events of every component in time order"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/87-observability-at-scale/02-drift-alerts-and-the-practice.md"
+}

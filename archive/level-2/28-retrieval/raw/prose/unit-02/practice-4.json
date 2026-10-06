@@ -1,0 +1,292 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "28-retrieval"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: a retrieval pipeline graded on recall (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a retrieval pipeline graded on recall"
+    },
+    {
+      "type": "para",
+      "text": "A retrieval pipeline cuts documents into chunks, finds the chunks that match a question by two different indexes, merges the two rankings, and optionally lets a second model re-order the best few. You do not judge it by how it reads: you measure it, by recall, over questions whose answers you know. The ideas come from the Claude documentation on embeddings and search results, read on 2026-10-03, and from the Anthropic write-up on contextual retrieval; the lesson pages explain them."
+    },
+    {
+      "type": "para",
+      "text": "**The embedding here is a toy.** Anthropic offers no embedding model, and nothing in this practice touches a network or a vendor. `embed(text)` is given: it counts letter trigrams of the tokenised text into 64 buckets with a fixed hash (FNV-1a over the UTF-8 bytes of the trigram, modulo 64) and scales the vector to length 1. It sees spelling, not meaning, so \"delete\" and \"deleting\" are close and \"delete\" and \"remove\" are not. It stands in for a real embedding model so that the tests are deterministic; the reranker is likewise a function the tests pass in. The fusion, BM25 and recall code you write is the real thing."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`tokenize(text)`",
+          "lower-case words and numbers: the runs of `[a-z0-9]`"
+        ],
+        [
+          "`embed(text)`",
+          "the toy embedding above: 64 numbers of length 1"
+        ],
+        [
+          "chunk",
+          "`{id: \"<doc>#<n>\", doc, text}`"
+        ],
+        [
+          "`scorer(query, text)`",
+          "a reranker: a number, higher is more relevant"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working pipeline with seven gaps cut out of it. Everything that is plumbing is written and correct: `tokenize`, the toy `embed`, the argument check of `chunk`, `build_chunks`, the BM25 bookkeeping (token counts, document frequencies, the average length, the loop over chunks and terms), `bm25_rank`, `embedding_rank`, the ordering helper that sorts scores best first with ties by id, `retrieve` with its modes and its pool, and `evaluate`. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value (an empty list, an empty dict, 0), so the starter runs and fails the cases on an assertion. The names below are Python's; TypeScript, Java and Kotlin have the camel-case forms (`windows`, `termScore`, `dot`, `fuse`, `rerank`, `recallAtK`, `indexedText`). Write them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_windows` unlocks `e1`: the windows over a list of words, ending at the last word.",
+        "`_term_score` unlocks `e2`: the BM25 score of one term in one chunk, with its idf and its length normalisation.",
+        "`_dot` unlocks `m1`: the dot product that `embedding_rank` ranks by.",
+        "`fuse` unlocks `e3`: reciprocal rank fusion, ties by id.",
+        "`rerank` unlocks `e4`: the ids ordered by the scorer, equal scores in input order, cut to `top_n`.",
+        "`recall_at_k` unlocks `e5`: documents found among the first `k` chunks, each counted once.",
+        "`_indexed_text` unlocks `e6`: the context sentence put in front of the chunk's text for indexing."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs all of them. About twenty lines in all. To see what a gap receives, log its input with the `log` line at the top of the file; `retrieve` already logs its own input, and a run shows the lines under the failing case."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`chunk(text, size, overlap)`: split the text on whitespace into words and return windows of `size` words that start `size - overlap` words apart; the windows stop at the first one that reaches the last word, so the last window ends at the last word and no window is repeated. No words gives an empty list. A `size` below 1, or an `overlap` below 0 or not below `size`, is an error (`ValueError` in Python, `RangeError` in TypeScript, `IllegalArgumentException` in Java and Kotlin).",
+        "`build_chunks(corpus, size, overlap)`: every document `{id, text}` becomes its chunks, with ids `<doc>#0`, `<doc>#1` and so on.",
+        "`bm25_rank(chunks, query, index_text=None)`: chunk ids by BM25 with `k1 = 1.5`, `b = 0.75` and `idf = ln(1 + (N - df + 0.5) / (df + 0.5))`; a distinct query term scores `idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * len / avg_len))` and a chunk's score is the sum, adding the terms in the order they first appear in the query. `N` is the number of chunks, `len` a chunk's token count. Best first, ties by id, score 0 left out. When `index_text` maps a chunk id to a string, that string is indexed instead of the chunk's text.",
+        "`embedding_rank(chunks, query, index_text=None)`: chunk ids by the dot product of the `embed` vectors (they have length 1, so it is the cosine), best first, ties by id, a similarity of 0 or less left out; `index_text` as above.",
+        "`fuse(rankings, k=60)`: reciprocal rank fusion. An id's score is the sum, over the lists that hold it, of `1 / (k + rank)`, where rank starts at 1 and a repeat of an id in one list is ignored. Best first, ties by id.",
+        "`rerank(query, ids, texts, scorer, top_n=None)`: the given ids, ordered by `scorer(query, texts[id])` from high to low; ids with equal scores keep their input order; cut to `top_n` when it is given. Only the given ids take part.",
+        "`recall_at_k(ids, doc_of, relevant, k)`: the share of the relevant documents that appear among the documents of the first `k` chunk ids. A document counts once however many of its chunks are there. No relevant documents is an error.",
+        "`retrieve(chunks, query, mode=\"hybrid\", k=3, pool=10, contexts=None, scorer=None)`: the ids of the best `k` chunks. Mode `bm25` and `embedding` use one ranking, `hybrid` fuses both. `contexts` maps chunk ids to a sentence that is indexed in front of the chunk's text (the sentence, a space, the text) for both indexes; the chunk itself is not changed. With a `scorer`, take the first `pool` ids of the ranking and rerank them to `k`.",
+        "`evaluate(chunks, queries, mode, k, ...)`: the mean `recall_at_k` over `[{query, relevant}]`, with the remaining arguments passed on to `retrieve`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Hybrid search finds what each single index misses, measured on a small knowledge base"
+        ],
+        [
+          "`e1`",
+          "Chunks overlap and end at the last word"
+        ],
+        [
+          "`e2`",
+          "A rare word outweighs common ones, and short chunks win"
+        ],
+        [
+          "`e3`",
+          "Fusion rewards agreement between lists and breaks ties by id"
+        ],
+        [
+          "`e4`",
+          "Reranking orders only the pool by the scorer"
+        ],
+        [
+          "`e5`",
+          "Recall counts documents, not chunks"
+        ],
+        [
+          "`e6`",
+          "A context sentence makes a bare chunk findable"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The tests read the knowledge base from `tests/fixture.json`."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import kotlin.math.ln\nimport kotlin.math.min\nimport kotlin.math.sqrt\n\nprivate val log = System.getLogger(\"retrieval\")\n\n/** A retrieval pipeline: chunking, lexical and embedding search, fusion, reranking and recall. See ../../statement.md. */\n\nprivate val WORD = Regex(\"[a-z0-9]+\")\n\n/** Lower-case words and numbers: the runs of [a-z0-9] in the text. */\nfun tokenize(text: String): List<String> = WORD.findAll(text.lowercase()).map { it.value }.toList()\n\n// ---- given: a deterministic toy embedding (not a real model) -----------------------------------------------------------\nconst val DIMS = 64\n\nprivate fun fnv1a(text: String): Long {\n    var h = 2166136261L\n    for (b in text.toByteArray(Charsets.UTF_8)) h = ((h xor (b.toLong() and 0xff)) * 16777619L) and 0xFFFFFFFFL\n    return h\n}\n\n/** 64 numbers: letter-trigram counts of the tokenised text hashed into buckets, scaled to length 1.\n *  It sees spelling, not meaning: \"delete\" and \"deleting\" are close, \"delete\" and \"remove\" are not. */\nfun embed(text: String): DoubleArray {\n    val padded = \" \" + tokenize(text).joinToString(\" \") + \" \"\n    val vector = DoubleArray(DIMS)\n    for (i in 0 until padded.length - 2) vector[(fnv1a(padded.substring(i, i + 3)) % DIMS).toInt()] += 1.0\n    var sum = 0.0\n    for (x in vector) sum += x * x\n    val length = sqrt(sum)\n    if (length != 0.0) for (i in 0 until DIMS) vector[i] /= length\n    return vector\n}\n// ------------------------------------------------------------------------------------------------------------------------\n\n/** Windows of [size] words that start `size - overlap` words apart; the last window ends at the last word. */\nfun chunk(text: String, size: Int, overlap: Int): List<String> {\n    require(size >= 1 && overlap >= 0 && overlap < size) { \"size must be at least 1 and overlap must be in 0 .. size - 1\" }\n    return windows(text.trim().split(Regex(\"\\\\s+\")).filter { it.isNotEmpty() }, size, overlap)\n}\n\nprivate fun windows(words: List<String>, size: Int, overlap: Int): List<String> {\n    val chunks = mutableListOf<String>()\n    var start = 0\n    while (start < words.size) {\n        chunks += words.subList(start, min(start + size, words.size)).joinToString(\" \")\n        if (start + size >= words.size) break\n        start += size - overlap\n    }\n    return chunks\n}\n\n/** A Chunk with id \"doc#n\" for every window of every document, in order. */\nfun buildChunks(corpus: List<Doc>, size: Int, overlap: Int): List<Chunk> =\n    corpus.flatMap { doc -> chunk(doc.text, size, overlap).mapIndexed { n, piece -> Chunk(\"${doc.id}#$n\", doc.id, piece) } }\n\nprivate fun texts(chunks: List<Chunk>, indexText: Map<String, String>?): Map<String, String> =\n    chunks.associate { it.id to (indexText?.get(it.id) ?: it.text) }\n\nprivate fun ordered(scores: Map<String, Double>): List<String> =\n    scores.entries.sortedWith(compareByDescending<Map.Entry<String, Double>> { it.value }.thenBy { it.key }).filter { it.value > 0 }.map { it.key }\n\nprivate fun termScore(tf: Int, df: Int, n: Int, length: Int, average: Double, k1: Double, b: Double): Double {\n    val idf = ln(1 + (n - df + 0.5) / (df + 0.5))\n    return idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * length / average))\n}\n\n/** Chunk ids by BM25 score (k1 = 1.5, b = 0.75), best first, ties by id, chunks with no word in common with the query left out. */\nfun bm25Rank(chunks: List<Chunk>, query: String, indexText: Map<String, String>? = null): List<String> {\n    val k1 = 1.5\n    val b = 0.75\n    val docs = texts(chunks, indexText).mapValues { tokenize(it.value) }\n    val n = docs.size\n    val average = if (n == 0) 0.0 else docs.values.sumOf { it.size.toDouble() } / n\n    val df = mutableMapOf<String, Int>()\n    for (tokens in docs.values) for (term in tokens.toSet()) df[term] = (df[term] ?: 0) + 1\n    val terms = tokenize(query).distinct()\n    val scores = linkedMapOf<String, Double>()\n    for ((id, tokens) in docs) {\n        var score = 0.0\n        for (term in terms) {\n            val tf = tokens.count { it == term }\n            if (tf == 0) continue\n            score += termScore(tf, df.getValue(term), n, tokens.size, average, k1, b)\n        }\n        scores[id] = score\n    }\n    return ordered(scores)\n}\n\nprivate fun dot(a: DoubleArray, b: DoubleArray): Double {\n    var total = 0.0\n    for (i in a.indices) total += a[i] * b[i]\n    return total\n}\n\n/** Chunk ids by cosine similarity of embed() vectors, best first, ties by id, zero similarity left out. */\nfun embeddingRank(chunks: List<Chunk>, query: String, indexText: Map<String, String>? = null): List<String> {\n    val q = embed(query)\n    val scores = linkedMapOf<String, Double>()\n    for ((id, text) in texts(chunks, indexText)) {\n        scores[id] = dot(q, embed(text))\n    }\n    return ordered(scores)\n}\n\n/** Reciprocal rank fusion: each id scores the sum of 1 / (k + rank) over the lists that hold it (rank from 1, a repeat in\n *  one list ignored); best first, ties by id. */\nfun fuse(rankings: List<List<String>>, k: Int = 60): List<String> {\n    val scores = linkedMapOf<String, Double>()\n    for (ranking in rankings) ranking.distinct().forEachIndexed { i, id -> scores[id] = (scores[id] ?: 0.0) + 1.0 / (k + i + 1) }\n    return ordered(scores)\n}\n\n/** The given ids reordered by scorer(query, text) high to low (equal scores keep their input order), cut to [topN]. */\nfun rerank(query: String, ids: List<String>, texts: Map<String, String>, scorer: Scorer, topN: Int? = null): List<String> {\n    val sorted = ids.sortedByDescending { scorer(query, texts.getValue(it)) } // sortedByDescending is stable\n    return if (topN == null) sorted else sorted.take(topN)\n}\n\n/** The share of the relevant documents that appear among the documents of the first k chunk ids. */\nfun recallAtK(ids: List<String>, docOf: Map<String, String>, relevant: List<String>, k: Int): Double {\n    require(relevant.isNotEmpty()) { \"relevant must not be empty\" }\n    val found = ids.take(k).map { docOf.getValue(it) }.toSet()\n    val wanted = relevant.toSet()\n    return wanted.count { it in found }.toDouble() / wanted.size\n}\n\nprivate fun indexedText(chunks: List<Chunk>, contexts: Map<String, String>?): Map<String, String> =\n    chunks.filter { contexts != null && it.id in contexts }.associate { it.id to \"${contexts!![it.id]} ${it.text}\" }\n\n/** The ids of the best k chunks. [mode] is bm25, embedding or hybrid (fusion of both). [contexts] maps chunk ids to a sentence\n *  that is indexed in front of the chunk's text; [scorer] reranks the first [pool] ids of the ranking. */\nfun retrieve(chunks: List<Chunk>, query: String, mode: String = \"hybrid\", k: Int = 3, pool: Int = 10, contexts: Map<String, String>? = null, scorer: Scorer? = null): List<String> {\n    log.log(System.Logger.Level.DEBUG, \"retrieve input: mode={0} k={1} query={2}\", mode, k, query)\n    val indexText = indexedText(chunks, contexts)\n    val lexical = bm25Rank(chunks, query, indexText)\n    val semantic = embeddingRank(chunks, query, indexText)\n    val ranked = when (mode) { \"bm25\" -> lexical; \"embedding\" -> semantic; else -> fuse(listOf(lexical, semantic)) }\n    if (scorer == null) return ranked.take(k)\n    return rerank(query, ranked.take(pool), chunks.associate { it.id to it.text }, scorer, k)\n}\n\n/** The mean recall@k over the queries. */\nfun evaluate(chunks: List<Chunk>, queries: List<Query>, mode: String = \"hybrid\", k: Int = 3, pool: Int = 10, contexts: Map<String, String>? = null, scorer: Scorer? = null): Double {\n    val docOf = chunks.associate { it.id to it.doc }\n    return queries.sumOf { recallAtK(retrieve(chunks, it.query, mode, k, pool, contexts, scorer), docOf, it.relevant, k) } / queries.size\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // A tiny corpus like the test fixture: two documents, cut into windows of 14 words that overlap by 4.\n    val corpus = listOf(\n        Doc(\"refunds\", \"Refund policy: customers may request a refund within 30 days of purchase. Refunds are issued to the \" +\n            \"original payment method within five business days. Digital goods are not refundable after download.\"),\n        Doc(\"shipping\", \"Shipping: orders over 50 euros ship free of charge. Standard delivery takes three to five business \" +\n            \"days, express delivery takes one day.\"),\n    )\n    val chunks = buildChunks(corpus, 14, 4)\n    println(\"chunks: ${chunks.map { it.id }}\")\n\n    val query = \"free shipping threshold\"\n    for (mode in listOf(\"bm25\", \"embedding\", \"hybrid\")) {\n        println(\"$mode top 3: ${retrieve(chunks, query, mode, 3)}\")\n    }\n\n    // Recall@3 over one question whose answer we know.\n    println(\"hybrid recall@3: ${if (chunks.isEmpty()) null else evaluate(chunks, listOf(Query(query, listOf(\"shipping\"))), \"hybrid\", 3)}\")\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import kotlin.math.ln\nimport kotlin.math.min\nimport kotlin.math.sqrt\n\nprivate val log = System.getLogger(\"retrieval\")\n\n/** A retrieval pipeline: chunking, lexical and embedding search, fusion, reranking and recall. See ../../statement.md. */\n\nprivate val WORD = Regex(\"[a-z0-9]+\")\n\n/** Lower-case words and numbers: the runs of [a-z0-9] in the text. */\nfun tokenize(text: String): List<String> = WORD.findAll(text.lowercase()).map { it.value }.toList()\n\n// ---- given: a deterministic toy embedding (not a real model) -----------------------------------------------------------\nconst val DIMS = 64\n\nprivate fun fnv1a(text: String): Long {\n    var h = 2166136261L\n    for (b in text.toByteArray(Charsets.UTF_8)) h = ((h xor (b.toLong() and 0xff)) * 16777619L) and 0xFFFFFFFFL\n    return h\n}\n\n/** 64 numbers: letter-trigram counts of the tokenised text hashed into buckets, scaled to length 1.\n *  It sees spelling, not meaning: \"delete\" and \"deleting\" are close, \"delete\" and \"remove\" are not. */\nfun embed(text: String): DoubleArray {\n    val padded = \" \" + tokenize(text).joinToString(\" \") + \" \"\n    val vector = DoubleArray(DIMS)\n    for (i in 0 until padded.length - 2) vector[(fnv1a(padded.substring(i, i + 3)) % DIMS).toInt()] += 1.0\n    var sum = 0.0\n    for (x in vector) sum += x * x\n    val length = sqrt(sum)\n    if (length != 0.0) for (i in 0 until DIMS) vector[i] /= length\n    return vector\n}\n// ------------------------------------------------------------------------------------------------------------------------\n\n/** Windows of [size] words that start `size - overlap` words apart; the last window ends at the last word. */\nfun chunk(text: String, size: Int, overlap: Int): List<String> {\n    require(size >= 1 && overlap >= 0 && overlap < size) { \"size must be at least 1 and overlap must be in 0 .. size - 1\" }\n    return windows(text.trim().split(Regex(\"\\\\s+\")).filter { it.isNotEmpty() }, size, overlap)\n}\n\nprivate fun windows(words: List<String>, size: Int, overlap: Int): List<String> {\n    // TODO 1 of 7 (finish this to pass e1): the windows over a list of words.\n    // Receives the words, size and overlap (already checked). Returns the windows as strings of the words joined by one space: each holds\n    // size words, the next starts size - overlap words later, and the loop stops at the first window that reaches the last word (so the\n    // last window ends at the last word and none is repeated). No words gives an empty list.\n    // Example: windows(listOf(\"a\", \"b\", \"c\", \"d\", \"e\"), 3, 1) -> [\"a b c\", \"c d e\"]\n    return emptyList()\n}\n\n/** A Chunk with id \"doc#n\" for every window of every document, in order. */\nfun buildChunks(corpus: List<Doc>, size: Int, overlap: Int): List<Chunk> =\n    corpus.flatMap { doc -> chunk(doc.text, size, overlap).mapIndexed { n, piece -> Chunk(\"${doc.id}#$n\", doc.id, piece) } }\n\nprivate fun texts(chunks: List<Chunk>, indexText: Map<String, String>?): Map<String, String> =\n    chunks.associate { it.id to (indexText?.get(it.id) ?: it.text) }\n\nprivate fun ordered(scores: Map<String, Double>): List<String> =\n    scores.entries.sortedWith(compareByDescending<Map.Entry<String, Double>> { it.value }.thenBy { it.key }).filter { it.value > 0 }.map { it.key }\n\nprivate fun termScore(tf: Int, df: Int, n: Int, length: Int, average: Double, k1: Double, b: Double): Double {\n    // TODO 2 of 7 (finish this to pass e2): the BM25 score one query term gives one chunk.\n    // Receives the term's count in the chunk (tf, at least 1), the number of chunks that hold the term (df), the number of chunks (n), the\n    // chunk's length in tokens, the average length, k1 and b. Returns idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * length / average)) with\n    // idf = ln(1 + (n - df + 0.5) / (df + 0.5)). A rare term has a large idf; a short chunk gets a larger score than a long one.\n    // Example: termScore(1, 1, 4, 5, 5.0, 1.5, 0.75) is about 1.2 times ln(1 + 3.5 / 1.5)\n    return 0.0\n}\n\n/** Chunk ids by BM25 score (k1 = 1.5, b = 0.75), best first, ties by id, chunks with no word in common with the query left out. */\nfun bm25Rank(chunks: List<Chunk>, query: String, indexText: Map<String, String>? = null): List<String> {\n    val k1 = 1.5\n    val b = 0.75\n    val docs = texts(chunks, indexText).mapValues { tokenize(it.value) }\n    val n = docs.size\n    val average = if (n == 0) 0.0 else docs.values.sumOf { it.size.toDouble() } / n\n    val df = mutableMapOf<String, Int>()\n    for (tokens in docs.values) for (term in tokens.toSet()) df[term] = (df[term] ?: 0) + 1\n    val terms = tokenize(query).distinct()\n    val scores = linkedMapOf<String, Double>()\n    for ((id, tokens) in docs) {\n        var score = 0.0\n        for (term in terms) {\n            val tf = tokens.count { it == term }\n            if (tf == 0) continue\n            score += termScore(tf, df.getValue(term), n, tokens.size, average, k1, b)\n        }\n        scores[id] = score\n    }\n    return ordered(scores)\n}\n\nprivate fun dot(a: DoubleArray, b: DoubleArray): Double {\n    // TODO 3 of 7 (finish this to pass m1): the dot product of two vectors of the same length.\n    // Receives two arrays of numbers. Returns the sum of the products of the numbers in the same place (the vectors of embed() have length 1,\n    // so this is their cosine). Example: dot(doubleArrayOf(1.0, 2.0), doubleArrayOf(3.0, 4.0)) -> 11.0\n    return 0.0\n}\n\n/** Chunk ids by cosine similarity of embed() vectors, best first, ties by id, zero similarity left out. */\nfun embeddingRank(chunks: List<Chunk>, query: String, indexText: Map<String, String>? = null): List<String> {\n    val q = embed(query)\n    val scores = linkedMapOf<String, Double>()\n    for ((id, text) in texts(chunks, indexText)) {\n        scores[id] = dot(q, embed(text))\n    }\n    return ordered(scores)\n}\n\n/** Reciprocal rank fusion: each id scores the sum of 1 / (k + rank) over the lists that hold it (rank from 1, a repeat in\n *  one list ignored); best first, ties by id. */\nfun fuse(rankings: List<List<String>>, k: Int = 60): List<String> {\n    // TODO 4 of 7 (finish this to pass e3): reciprocal rank fusion of the lists in rankings.\n    // Returns the ids best first: an id scores the sum of 1 / (k + rank) over the lists that hold it (rank starts at 1, a repeat in one list is\n    // ignored); ordered(scores) sorts a map of scores best first, ties by id, and leaves out scores of 0 or less.\n    // Example: fuse(listOf(listOf(\"a\", \"b\"), listOf(\"b\", \"c\"))) -> [\"b\", \"a\", \"c\"]\n    return emptyList()\n}\n\n/** The given ids reordered by scorer(query, text) high to low (equal scores keep their input order), cut to [topN]. */\nfun rerank(query: String, ids: List<String>, texts: Map<String, String>, scorer: Scorer, topN: Int? = null): List<String> {\n    // TODO 5 of 7 (finish this to pass e4): the ids ordered by scorer(query, texts.getValue(id)) high to low.\n    // Equal scores keep their input order (the sort is stable); cut to topN when it is not null. Only the given ids take part.\n    // Example: rerank(\"q\", listOf(\"a\", \"b\"), mapOf(\"a\" to \"x\", \"b\" to \"xx\"), { _, t -> t.length.toDouble() }) -> [\"b\", \"a\"]\n    return ids\n}\n\n/** The share of the relevant documents that appear among the documents of the first k chunk ids. */\nfun recallAtK(ids: List<String>, docOf: Map<String, String>, relevant: List<String>, k: Int): Double {\n    require(relevant.isNotEmpty()) { \"relevant must not be empty\" }\n    // TODO 6 of 7 (finish this to pass e5): the share of the relevant documents found among the documents of the first k chunk ids.\n    // A document counts once however many of its chunks are there; relevant is not empty here. Returns a number from 0 to 1.\n    // Example: recallAtK(listOf(\"a#0\", \"a#1\", \"b#0\"), mapOf(\"a#0\" to \"a\", \"a#1\" to \"a\", \"b#0\" to \"b\"), listOf(\"a\", \"c\"), 3) -> 0.5\n    return 0.0\n}\n\nprivate fun indexedText(chunks: List<Chunk>, contexts: Map<String, String>?): Map<String, String> {\n    // TODO 7 of 7 (finish this to pass e6): the text each chunk is indexed under when it has a context sentence.\n    // Receives the chunks and contexts (null or a map from chunk id to a sentence). Returns a map from chunk id to the sentence, a space\n    // and the chunk's text, for the chunks that have a sentence only; the chunks themselves are not changed.\n    // Example: indexedText(listOf(Chunk(\"a#0\", \"a\", \"x\")), mapOf(\"a#0\" to \"About a.\")) -> {a#0=About a. x}\n    return emptyMap()\n}\n\n/** The ids of the best k chunks. [mode] is bm25, embedding or hybrid (fusion of both). [contexts] maps chunk ids to a sentence\n *  that is indexed in front of the chunk's text; [scorer] reranks the first [pool] ids of the ranking. */\nfun retrieve(chunks: List<Chunk>, query: String, mode: String = \"hybrid\", k: Int = 3, pool: Int = 10, contexts: Map<String, String>? = null, scorer: Scorer? = null): List<String> {\n    log.log(System.Logger.Level.DEBUG, \"retrieve input: mode={0} k={1} query={2}\", mode, k, query)\n    val indexText = indexedText(chunks, contexts)\n    val lexical = bm25Rank(chunks, query, indexText)\n    val semantic = embeddingRank(chunks, query, indexText)\n    val ranked = when (mode) { \"bm25\" -> lexical; \"embedding\" -> semantic; else -> fuse(listOf(lexical, semantic)) }\n    if (scorer == null) return ranked.take(k)\n    return rerank(query, ranked.take(pool), chunks.associate { it.id to it.text }, scorer, k)\n}\n\n/** The mean recall@k over the queries. */\nfun evaluate(chunks: List<Chunk>, queries: List<Query>, mode: String = \"hybrid\", k: Int = 3, pool: Int = 10, contexts: Map<String, String>? = null, scorer: Scorer? = null): Double {\n    val docOf = chunks.associate { it.id to it.doc }\n    return queries.sumOf { recallAtK(retrieve(chunks, it.query, mode, k, pool, contexts, scorer), docOf, it.relevant, k) } / queries.size\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // A tiny corpus like the test fixture: two documents, cut into windows of 14 words that overlap by 4.\n    val corpus = listOf(\n        Doc(\"refunds\", \"Refund policy: customers may request a refund within 30 days of purchase. Refunds are issued to the \" +\n            \"original payment method within five business days. Digital goods are not refundable after download.\"),\n        Doc(\"shipping\", \"Shipping: orders over 50 euros ship free of charge. Standard delivery takes three to five business \" +\n            \"days, express delivery takes one day.\"),\n    )\n    val chunks = buildChunks(corpus, 14, 4)\n    println(\"chunks: ${chunks.map { it.id }}\")\n\n    val query = \"free shipping threshold\"\n    for (mode in listOf(\"bm25\", \"embedding\", \"hybrid\")) {\n        println(\"$mode top 3: ${retrieve(chunks, query, mode, 3)}\")\n    }\n\n    // Recall@3 over one question whose answer we know.\n    println(\"hybrid recall@3: ${if (chunks.isEmpty()) null else evaluate(chunks, listOf(Query(query, listOf(\"shipping\"))), \"hybrid\", 3)}\")\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 6,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "a336a16380f934d7c8820639fb9bd375e6010e9b39252551b23b7b38deb95503",
+  "starting_code": "import kotlin.math.ln\nimport kotlin.math.min\nimport kotlin.math.sqrt\n\nprivate val log = System.getLogger(\"retrieval\")\n\n/** A retrieval pipeline: chunking, lexical and embedding search, fusion, reranking and recall. See ../../statement.md. */\n\nprivate val WORD = Regex(\"[a-z0-9]+\")\n\n/** Lower-case words and numbers: the runs of [a-z0-9] in the text. */\nfun tokenize(text: String): List<String> = WORD.findAll(text.lowercase()).map { it.value }.toList()\n\n// ---- given: a deterministic toy embedding (not a real model) -----------------------------------------------------------\nconst val DIMS = 64\n\nprivate fun fnv1a(text: String): Long {\n    var h = 2166136261L\n    for (b in text.toByteArray(Charsets.UTF_8)) h = ((h xor (b.toLong() and 0xff)) * 16777619L) and 0xFFFFFFFFL\n    return h\n}\n\n/** 64 numbers: letter-trigram counts of the tokenised text hashed into buckets, scaled to length 1.\n *  It sees spelling, not meaning: \"delete\" and \"deleting\" are close, \"delete\" and \"remove\" are not. */\nfun embed(text: String): DoubleArray {\n    val padded = \" \" + tokenize(text).joinToString(\" \") + \" \"\n    val vector = DoubleArray(DIMS)\n    for (i in 0 until padded.length - 2) vector[(fnv1a(padded.substring(i, i + 3)) % DIMS).toInt()] += 1.0\n    var sum = 0.0\n    for (x in vector) sum += x * x\n    val length = sqrt(sum)\n    if (length != 0.0) for (i in 0 until DIMS) vector[i] /= length\n    return vector\n}\n// ------------------------------------------------------------------------------------------------------------------------\n\n/** Windows of [size] words that start `size - overlap` words apart; the last window ends at the last word. */\nfun chunk(text: String, size: Int, overlap: Int): List<String> {\n    require(size >= 1 && overlap >= 0 && overlap < size) { \"size must be at least 1 and overlap must be in 0 .. size - 1\" }\n    return windows(text.trim().split(Regex(\"\\\\s+\")).filter { it.isNotEmpty() }, size, overlap)\n}\n\nprivate fun windows(words: List<String>, size: Int, overlap: Int): List<String> {\n    // TODO 1 of 7 (finish this to pass e1): the windows over a list of words.\n    // Receives the words, size and overlap (already checked). Returns the windows as strings of the words joined by one space: each holds\n    // size words, the next starts size - overlap words later, and the loop stops at the first window that reaches the last word (so the\n    // last window ends at the last word and none is repeated). No words gives an empty list.\n    // Example: windows(listOf(\"a\", \"b\", \"c\", \"d\", \"e\"), 3, 1) -> [\"a b c\", \"c d e\"]\n    return emptyList()\n}\n\n/** A Chunk with id \"doc#n\" for every window of every document, in order. */\nfun buildChunks(corpus: List<Doc>, size: Int, overlap: Int): List<Chunk> =\n    corpus.flatMap { doc -> chunk(doc.text, size, overlap).mapIndexed { n, piece -> Chunk(\"${doc.id}#$n\", doc.id, piece) } }\n\nprivate fun texts(chunks: List<Chunk>, indexText: Map<String, String>?): Map<String, String> =\n    chunks.associate { it.id to (indexText?.get(it.id) ?: it.text) }\n\nprivate fun ordered(scores: Map<String, Double>): List<String> =\n    scores.entries.sortedWith(compareByDescending<Map.Entry<String, Double>> { it.value }.thenBy { it.key }).filter { it.value > 0 }.map { it.key }\n\nprivate fun termScore(tf: Int, df: Int, n: Int, length: Int, average: Double, k1: Double, b: Double): Double {\n    // TODO 2 of 7 (finish this to pass e2): the BM25 score one query term gives one chunk.\n    // Receives the term's count in the chunk (tf, at least 1), the number of chunks that hold the term (df), the number of chunks (n), the\n    // chunk's length in tokens, the average length, k1 and b. Returns idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * length / average)) with\n    // idf = ln(1 + (n - df + 0.5) / (df + 0.5)). A rare term has a large idf; a short chunk gets a larger score than a long one.\n    // Example: termScore(1, 1, 4, 5, 5.0, 1.5, 0.75) is about 1.2 times ln(1 + 3.5 / 1.5)\n    return 0.0\n}\n\n/** Chunk ids by BM25 score (k1 = 1.5, b = 0.75), best first, ties by id, chunks with no word in common with the query left out. */\nfun bm25Rank(chunks: List<Chunk>, query: String, indexText: Map<String, String>? = null): List<String> {\n    val k1 = 1.5\n    val b = 0.75\n    val docs = texts(chunks, indexText).mapValues { tokenize(it.value) }\n    val n = docs.size\n    val average = if (n == 0) 0.0 else docs.values.sumOf { it.size.toDouble() } / n\n    val df = mutableMapOf<String, Int>()\n    for (tokens in docs.values) for (term in tokens.toSet()) df[term] = (df[term] ?: 0) + 1\n    val terms = tokenize(query).distinct()\n    val scores = linkedMapOf<String, Double>()\n    for ((id, tokens) in docs) {\n        var score = 0.0\n        for (term in terms) {\n            val tf = tokens.count { it == term }\n            if (tf == 0) continue\n            score += termScore(tf, df.getValue(term), n, tokens.size, average, k1, b)\n        }\n        scores[id] = score\n    }\n    return ordered(scores)\n}\n\nprivate fun dot(a: DoubleArray, b: DoubleArray): Double {\n    // TODO 3 of 7 (finish this to pass m1): the dot product of two vectors of the same length.\n    // Receives two arrays of numbers. Returns the sum of the products of the numbers in the same place (the vectors of embed() have length 1,\n    // so this is their cosine). Example: dot(doubleArrayOf(1.0, 2.0), doubleArrayOf(3.0, 4.0)) -> 11.0\n    return 0.0\n}\n\n/** Chunk ids by cosine similarity of embed() vectors, best first, ties by id, zero similarity left out. */\nfun embeddingRank(chunks: List<Chunk>, query: String, indexText: Map<String, String>? = null): List<String> {\n    val q = embed(query)\n    val scores = linkedMapOf<String, Double>()\n    for ((id, text) in texts(chunks, indexText)) {\n        scores[id] = dot(q, embed(text))\n    }\n    return ordered(scores)\n}\n\n/** Reciprocal rank fusion: each id scores the sum of 1 / (k + rank) over the lists that hold it (rank from 1, a repeat in\n *  one list ignored); best first, ties by id. */\nfun fuse(rankings: List<List<String>>, k: Int = 60): List<String> {\n    // TODO 4 of 7 (finish this to pass e3): reciprocal rank fusion of the lists in rankings.\n    // Returns the ids best first: an id scores the sum of 1 / (k + rank) over the lists that hold it (rank starts at 1, a repeat in one list is\n    // ignored); ordered(scores) sorts a map of scores best first, ties by id, and leaves out scores of 0 or less.\n    // Example: fuse(listOf(listOf(\"a\", \"b\"), listOf(\"b\", \"c\"))) -> [\"b\", \"a\", \"c\"]\n    return emptyList()\n}\n\n/** The given ids reordered by scorer(query, text) high to low (equal scores keep their input order), cut to [topN]. */\nfun rerank(query: String, ids: List<String>, texts: Map<String, String>, scorer: Scorer, topN: Int? = null): List<String> {\n    // TODO 5 of 7 (finish this to pass e4): the ids ordered by scorer(query, texts.getValue(id)) high to low.\n    // Equal scores keep their input order (the sort is stable); cut to topN when it is not null. Only the given ids take part.\n    // Example: rerank(\"q\", listOf(\"a\", \"b\"), mapOf(\"a\" to \"x\", \"b\" to \"xx\"), { _, t -> t.length.toDouble() }) -> [\"b\", \"a\"]\n    return ids\n}\n\n/** The share of the relevant documents that appear among the documents of the first k chunk ids. */\nfun recallAtK(ids: List<String>, docOf: Map<String, String>, relevant: List<String>, k: Int): Double {\n    require(relevant.isNotEmpty()) { \"relevant must not be empty\" }\n    // TODO 6 of 7 (finish this to pass e5): the share of the relevant documents found among the documents of the first k chunk ids.\n    // A document counts once however many of its chunks are there; relevant is not empty here. Returns a number from 0 to 1.\n    // Example: recallAtK(listOf(\"a#0\", \"a#1\", \"b#0\"), mapOf(\"a#0\" to \"a\", \"a#1\" to \"a\", \"b#0\" to \"b\"), listOf(\"a\", \"c\"), 3) -> 0.5\n    return 0.0\n}\n\nprivate fun indexedText(chunks: List<Chunk>, contexts: Map<String, String>?): Map<String, String> {\n    // TODO 7 of 7 (finish this to pass e6): the text each chunk is indexed under when it has a context sentence.\n    // Receives the chunks and contexts (null or a map from chunk id to a sentence). Returns a map from chunk id to the sentence, a space\n    // and the chunk's text, for the chunks that have a sentence only; the chunks themselves are not changed.\n    // Example: indexedText(listOf(Chunk(\"a#0\", \"a\", \"x\")), mapOf(\"a#0\" to \"About a.\")) -> {a#0=About a. x}\n    return emptyMap()\n}\n\n/** The ids of the best k chunks. [mode] is bm25, embedding or hybrid (fusion of both). [contexts] maps chunk ids to a sentence\n *  that is indexed in front of the chunk's text; [scorer] reranks the first [pool] ids of the ranking. */\nfun retrieve(chunks: List<Chunk>, query: String, mode: String = \"hybrid\", k: Int = 3, pool: Int = 10, contexts: Map<String, String>? = null, scorer: Scorer? = null): List<String> {\n    log.log(System.Logger.Level.DEBUG, \"retrieve input: mode={0} k={1} query={2}\", mode, k, query)\n    val indexText = indexedText(chunks, contexts)\n    val lexical = bm25Rank(chunks, query, indexText)\n    val semantic = embeddingRank(chunks, query, indexText)\n    val ranked = when (mode) { \"bm25\" -> lexical; \"embedding\" -> semantic; else -> fuse(listOf(lexical, semantic)) }\n    if (scorer == null) return ranked.take(k)\n    return rerank(query, ranked.take(pool), chunks.associate { it.id to it.text }, scorer, k)\n}\n\n/** The mean recall@k over the queries. */\nfun evaluate(chunks: List<Chunk>, queries: List<Query>, mode: String = \"hybrid\", k: Int = 3, pool: Int = 10, contexts: Map<String, String>? = null, scorer: Scorer? = null): Double {\n    val docOf = chunks.associate { it.id to it.doc }\n    return queries.sumOf { recallAtK(retrieve(chunks, it.query, mode, k, pool, contexts, scorer), docOf, it.relevant, k) } / queries.size\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/28-retrieval/prose/unit-02/practice-4/src/main/kotlin/Retrieval.kt",
+    "test_path": "practice/level-2/28-retrieval/prose/unit-02/practice-4/src/test/kotlin/RetrievalTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/28-retrieval/prose/unit-02/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/28-retrieval/prose/unit-02/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_hybridSearchFindsWhatEachSingleIndexMisses()",
+        "kind": "main",
+        "says": "Hybrid search finds what each single index misses, measured on a small knowledge base"
+      },
+      {
+        "id": "e1_chunksOverlapAndEndAtTheLastWord()",
+        "kind": "edge",
+        "says": "Chunks overlap and end at the last word"
+      },
+      {
+        "id": "e2_aRareWordOutweighsCommonOnesAndShortChunksWin()",
+        "kind": "edge",
+        "says": "A rare word outweighs common ones, and short chunks win"
+      },
+      {
+        "id": "e3_fusionRewardsAgreementAndBreaksTiesById()",
+        "kind": "edge",
+        "says": "Fusion rewards agreement between lists and breaks ties by id"
+      },
+      {
+        "id": "e4_rerankingOrdersThePoolByTheScorer()",
+        "kind": "edge",
+        "says": "Reranking orders only the pool by the scorer"
+      },
+      {
+        "id": "e5_recallCountsDocumentsNotChunks()",
+        "kind": "edge",
+        "says": "Recall counts documents, not chunks"
+      },
+      {
+        "id": "e6_aContextSentenceMakesABareChunkFindable()",
+        "kind": "edge",
+        "says": "A context sentence makes a bare chunk findable"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/28-retrieval/prose/unit-02/practice-4/target/test-results/test"
+    },
+    "origin": "course/28-retrieval/02-fusion-reranking-context-and-recall.md",
+    "concepts": [
+      "the practice of Fusion, reranking, context and recall is solved"
+    ],
+    "files": [
+      "practice/level-2/28-retrieval/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "retrieval-u2"
+}

@@ -1,0 +1,182 @@
+{
+  "practice": "90-governance-safety-and-risk/unit-01/practice-1",
+  "name": "governance",
+  "tests": {
+    "java": "GovernanceTest",
+    "kotlin": "GovernanceTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_no_control_that_guards_an_input_or_an_action_fails_open",
+      "typescript": "m1 no control that guards an input or an action fails open",
+      "java": "m1_noControlThatGuardsAnInputOrAnActionFailsOpen",
+      "kotlin": "m1_noControlThatGuardsAnInputOrAnActionFailsOpen"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_every_high_consequence_action_has_a_human_step_that_exists_and_holds",
+      "typescript": "e1 every high consequence action has a human step that exists and holds",
+      "java": "e1_everyHighConsequenceActionHasAHumanStepThatExistsAndHolds",
+      "kotlin": "e1_everyHighConsequenceActionHasAHumanStepThatExistsAndHolds"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_the_automatic_threshold_is_at_least_95_and_a_high_consequence_action_is_never_automatic",
+      "typescript": "e2 the automatic threshold is at least 95 and a high consequence action is never automatic",
+      "java": "e2_theAutomaticThresholdIsAtLeast95AndAHighConsequenceActionIsNeverAutomatic",
+      "kotlin": "e2_theAutomaticThresholdIsAtLeast95AndAHighConsequenceActionIsNeverAutomatic"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_retention_keeps_at_least_90_days_within_the_ceiling_and_stores_no_content",
+      "typescript": "e3 retention keeps at least 90 days within the ceiling and stores no content",
+      "java": "e3_retentionKeepsAtLeast90DaysWithinTheCeilingAndStoresNoContent",
+      "kotlin": "e3_retentionKeepsAtLeast90DaysWithinTheCeilingAndStoresNoContent"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_the_risk_register_names_a_control_and_an_owner_for_each_of_four_failure_modes",
+      "typescript": "e4 the risk register names a control and an owner for each of four failure modes",
+      "java": "e4_theRiskRegisterNamesAControlAndAnOwnerForEachOfFourFailureModes",
+      "kotlin": "e4_theRiskRegisterNamesAControlAndAnOwnerForEachOfFourFailureModes"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_users_are_told_that_ai_helped_and_no_file_holds_personal_data",
+      "typescript": "e5 users are told that ai helped and no file holds personal data",
+      "java": "e5_usersAreToldThatAiHelpedAndNoFileHoldsPersonalData",
+      "kotlin": "e5_usersAreToldThatAiHelpedAndNoFileHoldsPersonalData"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_erasure_removes_the_vault_mapping_within_30_days",
+      "typescript": "e6 erasure removes the vault mapping within 30 days",
+      "java": "e6_erasureRemovesTheVaultMappingWithin30Days",
+      "kotlin": "e6_erasureRemovesTheVaultMappingWithin30Days"
+    }
+  },
+  "plants": {
+    "wrong-screen-open": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "lets a request through unscreened when the input screen is down"
+    },
+    "wrong-approval-open": {
+      "caught_by": [
+        "m1",
+        "e1"
+      ],
+      "defect": "lets a refund go ahead when its approval step fails"
+    },
+    "wrong-no-refund-review": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "leaves the refund action with no human review step"
+    },
+    "wrong-review-unknown-control": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "names a review control that is not defined"
+    },
+    "wrong-review-low-tier": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "makes the review control an ordinary tier control and not a high tier one"
+    },
+    "wrong-threshold-94": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "sends an answer out unreviewed at a confidence of 94"
+    },
+    "wrong-high-auto": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "lets a high consequence action run without a person"
+    },
+    "wrong-unsupported-sent": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "sends an answer that the source does not support"
+    },
+    "wrong-floor-89": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "sets the audit floor to 89 days"
+    },
+    "wrong-retain-over-ceiling": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "keeps audit entries one day beyond the ceiling"
+    },
+    "wrong-content-stored": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "stores the text of every prompt in the audit log"
+    },
+    "wrong-no-hold-override": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "lets the ceiling purge an entry under a legal hold"
+    },
+    "wrong-erasure-31": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "allows 31 days to complete an erasure"
+    },
+    "wrong-erasure-keeps-map": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "keeps the map from tokens to people after an erasure"
+    },
+    "wrong-register-three-rows": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "leaves the unfair outcome out of the register"
+    },
+    "wrong-register-ghost-control": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "names a control that is not defined in controls.json"
+    },
+    "wrong-register-no-owner": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "gives a risk no named owner"
+    },
+    "wrong-register-no-mode": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "leaves the privacy leak out of the register"
+    },
+    "wrong-no-disclosure": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "does not say that users are told that AI helped"
+    },
+    "wrong-home-path": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "writes a personal home path into the register"
+    }
+  }
+}

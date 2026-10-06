@@ -1,0 +1,152 @@
+{
+  "practice": "39-extending-claude-code/unit-01/practice-1",
+  "name": "plugin_setup",
+  "tests": {
+    "java": "PluginSetupTest",
+    "kotlin": "PluginSetupTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_the_hook_script_blocks_pushes_deletes_and_piped_downloads_in_any_spelling",
+      "typescript": "m1 the hook script blocks pushes deletes and piped downloads in any spelling",
+      "java": "m1_theHookScriptBlocksPushesDeletesAndPipedDownloadsInAnySpelling",
+      "kotlin": "m1_theHookScriptBlocksPushesDeletesAndPipedDownloadsInAnySpelling"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_edits_to_protected_paths_stop_with_exit_two_and_a_reason",
+      "typescript": "e1 edits to protected paths stop with exit two and a reason",
+      "java": "e1_editsToProtectedPathsStopWithExitTwoAndAReason",
+      "kotlin": "e1_editsToProtectedPathsStopWithExitTwoAndAReason"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_an_event_it_cannot_read_blocks_the_call_and_other_tools_are_left_alone",
+      "typescript": "e2 an event it cannot read blocks the call and other tools are left alone",
+      "java": "e2_anEventItCannotReadBlocksTheCallAndOtherToolsAreLeftAlone",
+      "kotlin": "e2_anEventItCannotReadBlocksTheCallAndOtherToolsAreLeftAlone"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_the_hook_is_registered_for_every_tool_it_guards_and_found_through_the_plugin_root",
+      "typescript": "e3 the hook is registered for every tool it guards and found through the plugin root",
+      "java": "e3_theHookIsRegisteredForEveryToolItGuardsAndFoundThroughThePluginRoot",
+      "kotlin": "e3_theHookIsRegisteredForEveryToolItGuardsAndFoundThroughThePluginRoot"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_the_skills_set_the_right_invocation_rules_and_approve_only_patterns",
+      "typescript": "e4 the skills set the right invocation rules and approve only patterns",
+      "java": "e4_theSkillsSetTheRightInvocationRulesAndApproveOnlyPatterns",
+      "kotlin": "e4_theSkillsSetTheRightInvocationRulesAndApproveOnlyPatterns"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_the_subagent_only_reads_is_bounded_and_uses_only_fields_a_plugin_agent_honours",
+      "typescript": "e5 the subagent only reads is bounded and uses only fields a plugin agent honours",
+      "java": "e5_theSubagentOnlyReadsIsBoundedAndUsesOnlyFieldsAPluginAgentHonours",
+      "kotlin": "e5_theSubagentOnlyReadsIsBoundedAndUsesOnlyFieldsAPluginAgentHonours"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_the_manifest_names_the_plugin_and_pins_its_dependency_to_patch_updates",
+      "typescript": "e6 the manifest names the plugin and pins its dependency to patch updates",
+      "java": "e6_theManifestNamesThePluginAndPinsItsDependencyToPatchUpdates",
+      "kotlin": "e6_theManifestNamesThePluginAndPinsItsDependencyToPatchUpdates"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_the_team_settings_register_the_marketplace_the_enabled_plugin_comes_from",
+      "typescript": "e7 the team settings register the marketplace the enabled plugin comes from",
+      "java": "e7_theTeamSettingsRegisterTheMarketplaceTheEnabledPluginComesFrom",
+      "kotlin": "e7_theTeamSettingsRegisterTheMarketplaceTheEnabledPluginComesFrom"
+    }
+  },
+  "plants": {
+    "wrong-push-prefix": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "refuses git push only when push is the first word after git, so git -C . push passes"
+    },
+    "wrong-rm-literal": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "refuses only the exact flag spelling -rf"
+    },
+    "wrong-pipe-shell-allowed": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "lets a download be piped into a shell"
+    },
+    "wrong-edit-exit-one": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "exits 1 on a protected path, which does not block the call"
+    },
+    "wrong-no-reason": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "blocks a protected path without saying why"
+    },
+    "wrong-bad-json-allowed": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "lets a call through when the event cannot be read"
+    },
+    "wrong-matcher-bash-only": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "registers the hook for Bash only, so edits are not guarded"
+    },
+    "wrong-relative-path": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "finds the script by a path relative to the working directory instead of the plugin root"
+    },
+    "wrong-publish-auto": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "lets Claude start the publish skill on its own"
+    },
+    "wrong-bare-bash": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "pre-approves every shell command for the publish skill"
+    },
+    "wrong-agent-writes": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "gives the reviewer the Edit tool"
+    },
+    "wrong-agent-bypass": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "sets a permission mode that a plugin agent ignores"
+    },
+    "wrong-dependency-unpinned": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "depends on secrets-vault with no version range"
+    },
+    "wrong-marketplace-mismatch": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "enables the plugin from a marketplace that the file does not register"
+    }
+  }
+}

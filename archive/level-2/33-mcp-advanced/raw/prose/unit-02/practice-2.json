@@ -1,0 +1,320 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "33-mcp-advanced"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: an MCP server's side of a multi round-trip request (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an MCP server's side of a multi round-trip request"
+    },
+    {
+      "type": "para",
+      "text": "In the MCP revision of 2026-07-28 a server no longer calls the client in the middle of a request. When a tool needs a person's answer or a model completion, it ends the call with an `input_required` result that lists what it needs, and the client retries the same call with the answers. The server keeps nothing between the two calls, so whatever it needs to remember travels in an opaque `requestState` that the client echoes back. That state crosses a client the server does not trust, so it must be signed, bound to the user and the call, and given an expiry. Write the tool handler that does this. The message shapes, the rules for `requestState`, the error codes and the capability checks come from the MCP specification of revision 2026-07-28 (the multi round-trip requests, tools, elicitation and sampling pages), read on 2026-10-03; the lesson pages explain them. Nothing here uses a network or an MCP SDK: the handler is a function from the parameters of a request to the result, which is what the SDKs call underneath."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "request",
+          "the parameters of a `tools/call`: `{\"name\", \"arguments\", \"_meta\", optionally \"inputResponses\" and \"requestState\"}`; `_meta` holds the protocol version under `io.modelcontextprotocol/protocolVersion` and the capabilities the client declares under `io.modelcontextprotocol/clientCapabilities`"
+        ],
+        [
+          "`TOOLS`, `VERSION`, `TTL_SECONDS`",
+          "the two tool definitions (`deploy` and `status`), the one protocol version served, and the lifetime of a state: 300 seconds"
+        ],
+        [
+          "`mint_state(secret, payload)`",
+          "a `requestState` for the payload, signed with the secret"
+        ],
+        [
+          "`read_state(secret, token)`",
+          "the payload of a `requestState`, or nothing when it is not one this secret signed (changed, cut short, signed by another secret, or not a state at all)"
+        ],
+        [
+          "`args_digest(arguments)`",
+          "a fingerprint of the arguments, the same in any key order"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working handler with eight gaps cut out of it. Everything that is plumbing is written and correct: the state signing (`mint_state`, `read_state`, `args_digest`), the error and result builders, the two request messages, the version check, and the order in which `call_tool` runs its steps. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. Debug a gap by logging its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the Java, Kotlin and TypeScript names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_validate` unlocks `e6`: the protocol error for an unknown tool, a missing service or a bad env.",
+        "`_can_elicit` unlocks `e2`: which declared capabilities mean the client can be asked.",
+        "`_confirm_usable` unlocks `m1` and `e3`: which answers count as an answer to the question.",
+        "`_confirmed` unlocks `e3`: only an accept with `confirm` exactly true goes on.",
+        "`_notes_text` unlocks `m1`: the sentence the client wrote for the release notes.",
+        "`_state_error` unlocks `e4` and `e5`: the three checks on a returned state, in order.",
+        "`_new_state` unlocks `e7`: the payload that carries the whole context.",
+        "`_tool_listing` unlocks `e1`: the cacheable tool list."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole handler; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`list_tools(request)`: a request whose version is not `VERSION` is a protocol error (below). Otherwise `{\"resultType\": \"complete\", \"tools\": TOOLS sorted by name, \"ttlMs\": 300000, \"cacheScope\": \"public\"}`.",
+        [
+          "`call_tool(request, secret, principal, now)` where `principal` is the authenticated user and `now` is the time in seconds. It returns a result, or a protocol error `{\"error\": {\"code\", \"message\", optionally \"data\"}}`. Check in this order:",
+          {
+            "type": "list",
+            "ordered": true,
+            "items": [
+              "Version not `VERSION`: code `-32022`, message `Unsupported protocol version`, `data` `{\"supported\": [VERSION]}`.",
+              "A tool name other than `deploy` and `status`: `-32602`, `Unknown tool: NAME`.",
+              "`arguments.service` missing, not a string or only spaces: `-32602`, `Invalid params: service is required`. For `deploy`, an `env` that is not `staging` or `production`: `-32602`, `Invalid params: env must be staging or production`.",
+              "`status` completes with the text `SERVICE: running`. `deploy` to `staging` completes with `Deployed SERVICE to staging`. Both need no input from the client."
+            ]
+          },
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "A complete result is `{\"resultType\": \"complete\", \"content\": [{\"type\": \"text\", \"text\": ...}], \"isError\": false}`.",
+              "`deploy` to `production` needs a person's confirmation by elicitation. The client can be asked only when it declared an `elicitation` capability that is empty (which means form mode) or holds `form`; a capability with only `url`, or none, cannot be asked. Then the result is complete with `isError` true and the text `Deploying to production needs confirmation, and this client cannot be asked.` and nothing is requested.",
+              [
+                "Otherwise there are up to two steps, kept in the signed state, not in the server:",
+                {
+                  "type": "list",
+                  "ordered": false,
+                  "items": [
+                    "Step `confirm`: with no usable answer, return `{\"resultType\": \"input_required\", \"inputRequests\": {\"confirm\": ...}, \"requestState\": ...}`. The request is `{\"method\": \"elicitation/create\", \"params\": {\"mode\": \"form\", \"message\": \"Deploy SERVICE to production?\", \"requestedSchema\": {\"type\": \"object\", \"properties\": {\"confirm\": {\"type\": \"boolean\", \"title\": \"Confirm the deployment\"}}, \"required\": [\"confirm\"]}}}`. An answer is usable when `inputResponses.confirm` is an object whose `action` is `accept`, `decline` or `cancel`; anything else, or a missing answer, is asked again with a fresh state. Only `accept` with `content.confirm` exactly true goes on; every other usable answer completes with `Deployment cancelled` (and `isError` false). After a confirmation, a client that declared a `sampling` capability gets step `notes`; one that did not completes with `Deployed SERVICE to production`.",
+                    "Step `notes`: ask with `{\"notes\": {\"method\": \"sampling/createMessage\", \"params\": {\"messages\": [{\"role\": \"user\", \"content\": {\"type\": \"text\", \"text\": \"Write one sentence of release notes for SERVICE.\"}}], \"maxTokens\": 100}}}`. The answer is usable when `inputResponses.notes.content.text` is a string; the result is then `Deployed SERVICE to production. Release notes: TEXT`. An unusable or missing answer is asked again."
+                  ]
+                }
+              ],
+              "The state payload is `{\"v\": 1, \"tool\", \"digest\": args_digest(arguments), \"sub\": principal, \"exp\": now + TTL_SECONDS, \"step\"}`; `step` is the step that the next call must answer (`confirm` or `notes`).",
+              "A call with no `requestState` starts at step `confirm` and ignores any `inputResponses`: an answer alone never skips the question. A call with a `requestState` is checked in this order, with code `-32602`: a state that `read_state` does not accept: `Invalid requestState`; `now` later than `exp`: `Expired requestState`; a `sub`, `tool` or `digest` that differs from this call: `requestState does not match this request`. A valid state sets the step. Unknown keys in `inputResponses` are ignored."
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A production deploy takes three round trips and keeps no state"
+        ],
+        [
+          "`e1`",
+          "A staging deploy and a status call finish at once, and the tool list is cacheable"
+        ],
+        [
+          "`e2`",
+          "The server only asks what the client declared it can answer"
+        ],
+        [
+          "`e3`",
+          "A no or a missing answer is handled without an error"
+        ],
+        [
+          "`e4`",
+          "A state the server did not sign is refused"
+        ],
+        [
+          "`e5`",
+          "A state works only for the same user, the same call and before it expires"
+        ],
+        [
+          "`e6`",
+          "A request the server cannot serve is a protocol error with a code"
+        ],
+        [
+          "`e7`",
+          "The state carries the whole context, and an answer alone never skips a step"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// An MCP server's side of multi round-trip requests, with no state kept between calls. See ../../statement.md.\nimport { createHash, createHmac, timingSafeEqual } from \"node:crypto\";\nimport { logger } from \"./logger.ts\";\n\nconst log = logger(\"mrtr\");\n\nexport const VERSION = \"2026-07-28\";\nexport const META_VERSION = \"io.modelcontextprotocol/protocolVersion\";\nexport const META_CAPS = \"io.modelcontextprotocol/clientCapabilities\";\nexport const TTL_SECONDS = 300;\n\nexport const TOOLS = [\n  { name: \"deploy\", description: \"Deploy a service to an environment. Production needs a person's confirmation.\",\n    inputSchema: { type: \"object\", properties: { service: { type: \"string\" }, env: { type: \"string\", enum: [\"staging\", \"production\"] } }, required: [\"service\", \"env\"] } },\n  { name: \"status\", description: \"Report whether a service is running.\",\n    inputSchema: { type: \"object\", properties: { service: { type: \"string\" } }, required: [\"service\"] } },\n];\n\n/** JSON with the keys of every object in sorted order. */\nfunction canonical(value: unknown): string {\n  if (Array.isArray(value)) return `[${value.map(canonical).join(\",\")}]`;\n  if (value !== null && typeof value === \"object\") {\n    return `{${Object.keys(value as object).sort().map((k) => `${JSON.stringify(k)}:${canonical((value as any)[k])}`).join(\",\")}}`;\n  }\n  return JSON.stringify(value);\n}\n\nconst b64 = (data: Buffer | string) => Buffer.from(data).toString(\"base64url\");\n\n/** Given: a requestState for `payload`: its JSON, then a HMAC-SHA256 signature of it, both in base64url, joined by a dot. */\nexport function mintState(secret: string, payload: Record<string, unknown>): string {\n  const body = b64(canonical(payload));\n  return body + \".\" + b64(createHmac(\"sha256\", secret).update(body).digest());\n}\n\n/** Given: the payload of a requestState, or null when it is not one this secret signed (tampered, truncated, foreign, garbage). */\nexport function readState(secret: string, token: unknown): Record<string, any> | null {\n  try {\n    if (typeof token !== \"string\") return null;\n    const parts = token.split(\".\");\n    if (parts.length !== 2) return null;\n    const expected = Buffer.from(b64(createHmac(\"sha256\", secret).update(parts[0]).digest()));\n    const given = Buffer.from(parts[1]);\n    if (expected.length !== given.length || !timingSafeEqual(expected, given)) return null;\n    const payload = JSON.parse(Buffer.from(parts[0], \"base64url\").toString(\"utf8\"));\n    return payload !== null && typeof payload === \"object\" && !Array.isArray(payload) ? payload : null;\n  } catch {\n    return null;\n  }\n}\n\n/** Given: a fingerprint of the call's arguments, the same for the same arguments in any key order. */\nexport function argsDigest(args: unknown): string {\n  return createHash(\"sha256\").update(canonical(args)).digest(\"hex\");\n}\n\nconst error = (code: number, message: string, data?: unknown) => ({ error: { code, message, ...(data ? { data } : {}) } });\n\nfunction metaError(request: any) {\n  if (request._meta?.[META_VERSION] !== VERSION) return error(-32022, \"Unsupported protocol version\", { supported: [VERSION] });\n  return null;\n}\n\nfunction toolListing(): Record<string, unknown> {\n  return { resultType: \"complete\", tools: [...TOOLS].sort((a, b) => a.name.localeCompare(b.name)), ttlMs: 300000, cacheScope: \"public\" };\n}\n\nexport function listTools(request: any) {\n  return metaError(request) ?? toolListing();\n}\n\nconst complete = (text: string, isError = false) => ({ resultType: \"complete\", content: [{ type: \"text\", text }], isError });\n\nconst confirmRequest = (service: string) => ({ confirm: { method: \"elicitation/create\", params: { mode: \"form\", message: `Deploy ${service} to production?`, requestedSchema: {\n  type: \"object\", properties: { confirm: { type: \"boolean\", title: \"Confirm the deployment\" } }, required: [\"confirm\"] } } } });\n\nconst notesRequest = (service: string) => ({ notes: { method: \"sampling/createMessage\", params: { messages: [{ role: \"user\", content: { type: \"text\", text: `Write one sentence of release notes for ${service}.` } }], maxTokens: 100 } } });\n\nfunction newState(name: string, args: unknown, principal: string, now: number, step: string): Record<string, unknown> {\n  return { v: 1, tool: name, digest: argsDigest(args), sub: principal, exp: now + TTL_SECONDS, step };\n}\n\nfunction validate(name: unknown, args: Record<string, any>): any {\n  if (name !== \"deploy\" && name !== \"status\") return error(-32602, `Unknown tool: ${name}`);\n  if (typeof args.service !== \"string\" || !args.service.trim()) return error(-32602, \"Invalid params: service is required\");\n  if (name === \"deploy\" && args.env !== \"staging\" && args.env !== \"production\") return error(-32602, \"Invalid params: env must be staging or production\");\n  return null;\n}\n\nfunction canElicit(caps: Record<string, any>): boolean {\n  const elicitation = caps.elicitation;\n  return elicitation !== undefined && elicitation !== null && (Object.keys(elicitation).length === 0 || \"form\" in elicitation);\n}\n\nfunction stateError(secret: string, token: unknown, principal: string, name: string, args: unknown, now: number): any {\n  const state = readState(secret, token);\n  if (state === null) return error(-32602, \"Invalid requestState\");\n  if (now > (state.exp ?? 0)) return error(-32602, \"Expired requestState\");\n  if (state.sub !== principal || state.tool !== name || state.digest !== argsDigest(args)) return error(-32602, \"requestState does not match this request\");\n  return null;\n}\n\nfunction confirmUsable(answer: any): boolean {\n  return answer !== null && typeof answer === \"object\" && [\"accept\", \"decline\", \"cancel\"].includes(answer.action);\n}\n\nfunction confirmed(answer: any): boolean {\n  return answer.action === \"accept\" && (answer.content ?? {}).confirm === true;\n}\n\nfunction notesText(answers: Record<string, any>): string | null {\n  const content = answers.notes !== null && typeof answers.notes === \"object\" ? answers.notes.content : undefined;\n  return content !== null && typeof content === \"object\" && typeof content.text === \"string\" ? content.text : null;\n}\n\nfunction ask(requests: unknown, step: string, secret: string, name: string, args: unknown, principal: string, now: number) {\n  const state = newState(name, args, principal, now, step);\n  return { resultType: \"input_required\", inputRequests: requests, requestState: mintState(secret, state) };\n}\n\nexport function callTool(request: any, secret: string, principal: string, now: number): any {\n  log.debug(\"callTool input\", request);\n  const bad = metaError(request);\n  if (bad) return bad;\n  const name = request.name;\n  const args = request.arguments ?? {};\n  const invalid = validate(name, args);\n  if (invalid) return invalid;\n  const service: string = args.service;\n  if (name === \"status\") return complete(`${service}: running`);\n  if (args.env === \"staging\") return complete(`Deployed ${service} to staging`);\n  const caps = request._meta?.[META_CAPS] ?? {};\n  if (!canElicit(caps)) return complete(\"Deploying to production needs confirmation, and this client cannot be asked.\", true);\n  let step = \"confirm\";\n  const token = request.requestState;\n  if (token !== undefined && token !== null) {\n    const problem = stateError(secret, token, principal, name, args, now);\n    if (problem) return problem;\n    step = readState(secret, token)?.step;\n  }\n  const given = token !== undefined && token !== null ? request.inputResponses : undefined;\n  const answers = given !== null && typeof given === \"object\" && !Array.isArray(given) ? given : {};\n  if (step === \"confirm\") {\n    const answer = answers.confirm;\n    if (!confirmUsable(answer)) return ask(confirmRequest(service), \"confirm\", secret, name, args, principal, now);\n    if (!confirmed(answer)) return complete(\"Deployment cancelled\");\n    if (!(\"sampling\" in caps)) return complete(`Deployed ${service} to production`);\n    return ask(notesRequest(service), \"notes\", secret, name, args, principal, now);\n  }\n  const text = notesText(answers);\n  if (text === null) return ask(notesRequest(service), \"notes\", secret, name, args, principal, now);\n  return complete(`Deployed ${service} to production. Release notes: ${text}`);\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { callTool } from \"./mrtr.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\nconst SECRET = \"s3cret\";\nconst NOW = 1000;\nconst META = { \"io.modelcontextprotocol/protocolVersion\": \"2026-07-28\",\n  \"io.modelcontextprotocol/clientCapabilities\": { elicitation: {}, sampling: {} } };\n\nconst request = (extra: Record<string, unknown> = {}) =>\n  ({ name: \"deploy\", arguments: { service: \"api\", env: \"production\" }, _meta: META, ...extra });\n\n// Round trip 1: the server needs a person's confirmation, so it ends the call with input_required and a signed state.\nconst first = callTool(request(), SECRET, \"alice\", NOW) ?? {};\nconsole.log(\"first call:\", first.resultType, \"| asks for:\", Object.keys(first.inputRequests ?? {}).join(\", \"));\nconsole.log(\"state is a string:\", typeof first.requestState === \"string\");\n\n// Round trip 2: the client retries the same call with the answer and echoes the state back.\nconst answer = { confirm: { action: \"accept\", content: { confirm: true } } };\nconst second = callTool(request({ inputResponses: answer, requestState: first.requestState }), SECRET, \"alice\", NOW + 10) ?? {};\nconsole.log(\"second call:\", second.resultType, \"| asks for:\", Object.keys(second.inputRequests ?? {}).join(\", \"));\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// An MCP server's side of multi round-trip requests, with no state kept between calls. See ../../statement.md.\nimport { createHash, createHmac, timingSafeEqual } from \"node:crypto\";\nimport { logger } from \"./logger.ts\";\n\nconst log = logger(\"mrtr\");\n\nexport const VERSION = \"2026-07-28\";\nexport const META_VERSION = \"io.modelcontextprotocol/protocolVersion\";\nexport const META_CAPS = \"io.modelcontextprotocol/clientCapabilities\";\nexport const TTL_SECONDS = 300;\n\nexport const TOOLS = [\n  { name: \"deploy\", description: \"Deploy a service to an environment. Production needs a person's confirmation.\",\n    inputSchema: { type: \"object\", properties: { service: { type: \"string\" }, env: { type: \"string\", enum: [\"staging\", \"production\"] } }, required: [\"service\", \"env\"] } },\n  { name: \"status\", description: \"Report whether a service is running.\",\n    inputSchema: { type: \"object\", properties: { service: { type: \"string\" } }, required: [\"service\"] } },\n];\n\n/** JSON with the keys of every object in sorted order. */\nfunction canonical(value: unknown): string {\n  if (Array.isArray(value)) return `[${value.map(canonical).join(\",\")}]`;\n  if (value !== null && typeof value === \"object\") {\n    return `{${Object.keys(value as object).sort().map((k) => `${JSON.stringify(k)}:${canonical((value as any)[k])}`).join(\",\")}}`;\n  }\n  return JSON.stringify(value);\n}\n\nconst b64 = (data: Buffer | string) => Buffer.from(data).toString(\"base64url\");\n\n/** Given: a requestState for `payload`: its JSON, then a HMAC-SHA256 signature of it, both in base64url, joined by a dot. */\nexport function mintState(secret: string, payload: Record<string, unknown>): string {\n  const body = b64(canonical(payload));\n  return body + \".\" + b64(createHmac(\"sha256\", secret).update(body).digest());\n}\n\n/** Given: the payload of a requestState, or null when it is not one this secret signed (tampered, truncated, foreign, garbage). */\nexport function readState(secret: string, token: unknown): Record<string, any> | null {\n  try {\n    if (typeof token !== \"string\") return null;\n    const parts = token.split(\".\");\n    if (parts.length !== 2) return null;\n    const expected = Buffer.from(b64(createHmac(\"sha256\", secret).update(parts[0]).digest()));\n    const given = Buffer.from(parts[1]);\n    if (expected.length !== given.length || !timingSafeEqual(expected, given)) return null;\n    const payload = JSON.parse(Buffer.from(parts[0], \"base64url\").toString(\"utf8\"));\n    return payload !== null && typeof payload === \"object\" && !Array.isArray(payload) ? payload : null;\n  } catch {\n    return null;\n  }\n}\n\n/** Given: a fingerprint of the call's arguments, the same for the same arguments in any key order. */\nexport function argsDigest(args: unknown): string {\n  return createHash(\"sha256\").update(canonical(args)).digest(\"hex\");\n}\n\nconst error = (code: number, message: string, data?: unknown) => ({ error: { code, message, ...(data ? { data } : {}) } });\n\nfunction metaError(request: any) {\n  if (request._meta?.[META_VERSION] !== VERSION) return error(-32022, \"Unsupported protocol version\", { supported: [VERSION] });\n  return null;\n}\n\n/**\n * TODO 1 of 8 (unlocks e1): the result of tools/list.\n * Receives nothing and returns the object from the statement: resultType \"complete\", the TOOLS sorted by name, ttlMs 300000, cacheScope \"public\".\n * Example: toolListing().tools[0].name -> \"deploy\"\n */\nfunction toolListing(): Record<string, unknown> {\n  return {};\n}\n\nexport function listTools(request: any) {\n  return metaError(request) ?? toolListing();\n}\n\nconst complete = (text: string, isError = false) => ({ resultType: \"complete\", content: [{ type: \"text\", text }], isError });\n\nconst confirmRequest = (service: string) => ({ confirm: { method: \"elicitation/create\", params: { mode: \"form\", message: `Deploy ${service} to production?`, requestedSchema: {\n  type: \"object\", properties: { confirm: { type: \"boolean\", title: \"Confirm the deployment\" } }, required: [\"confirm\"] } } } });\n\nconst notesRequest = (service: string) => ({ notes: { method: \"sampling/createMessage\", params: { messages: [{ role: \"user\", content: { type: \"text\", text: `Write one sentence of release notes for ${service}.` } }], maxTokens: 100 } } });\n\n/**\n * TODO 2 of 8 (unlocks e7): the payload of a requestState.\n * Receives the tool name, the arguments, the user, the time in seconds and the step. Returns the object from the statement: v, tool, digest, sub, exp, step.\n * Example: newState(\"deploy\", { service: \"api\" }, \"alice\", 1000, \"confirm\").exp -> 1300\n */\nfunction newState(name: string, args: unknown, principal: string, now: number, step: string): Record<string, unknown> {\n  return {};\n}\n\n/**\n * TODO 3 of 8 (unlocks e6): the protocol error for a call that cannot be served, in the order of the statement.\n * Receives the tool name and the arguments. Returns error(-32602, ...) for an unknown tool, a missing or blank service, or (for deploy) an env\n * that is not staging or production; null when the call is valid.\n * Example: validate(\"deploy\", { service: \"api\", env: \"dev\" }) -> error(-32602, \"Invalid params: env must be staging or production\")\n */\nfunction validate(name: unknown, args: Record<string, any>): any {\n  return null;\n}\n\n/**\n * TODO 4 of 8 (unlocks e2): can the client be asked for a confirmation?\n * Receives the client capabilities object. Returns true when `elicitation` is present and is empty or holds `form`; false for none or only `url`.\n * Example: canElicit({ elicitation: {} }) -> true, canElicit({ elicitation: { url: {} } }) -> false\n */\nfunction canElicit(caps: Record<string, any>): boolean {\n  return false;\n}\n\n/**\n * TODO 5 of 8 (unlocks e4 and e5): the error for a requestState that cannot be used.\n * Receives the secret, the token, the user, the tool name, the arguments and the time. Returns error(-32602, ...) with `Invalid requestState`\n * (readState gives null), `Expired requestState` (now after exp) or `requestState does not match this request` (sub, tool or digest differ), checked in\n * that order; null when the state is good.\n * Example: a state minted for \"alice\" and read for \"bob\" -> error(-32602, \"requestState does not match this request\")\n */\nfunction stateError(secret: string, token: unknown, principal: string, name: string, args: unknown, now: number): any {\n  return null;\n}\n\n/**\n * TODO 6 of 8 (unlocks m1 and e3): is this an answer to the confirmation question?\n * Receives inputResponses.confirm (anything, or undefined). Returns true when it is an object whose `action` is accept, decline or cancel.\n * Example: confirmUsable({ action: \"decline\" }) -> true, confirmUsable(\"yes\") -> false\n */\nfunction confirmUsable(answer: any): boolean {\n  return false;\n}\n\n/**\n * TODO 7 of 8 (unlocks e3): did the person accept?\n * Receives a usable answer. Returns true only for action \"accept\" with content.confirm exactly true.\n * Example: confirmed({ action: \"accept\", content: { confirm: false } }) -> false\n */\nfunction confirmed(answer: any): boolean {\n  return false;\n}\n\n/**\n * TODO 8 of 8 (unlocks m1): the release notes the client wrote.\n * Receives the inputResponses object. Returns answers.notes.content.text when that is a string; null for anything else.\n * Example: notesText({ notes: { content: { type: \"text\", text: \"Faster.\" } } }) -> \"Faster.\"\n */\nfunction notesText(answers: Record<string, any>): string | null {\n  return null;\n}\n\nfunction ask(requests: unknown, step: string, secret: string, name: string, args: unknown, principal: string, now: number) {\n  const state = newState(name, args, principal, now, step);\n  return { resultType: \"input_required\", inputRequests: requests, requestState: mintState(secret, state) };\n}\n\nexport function callTool(request: any, secret: string, principal: string, now: number): any {\n  log.debug(\"callTool input\", request);\n  const bad = metaError(request);\n  if (bad) return bad;\n  const name = request.name;\n  const args = request.arguments ?? {};\n  const invalid = validate(name, args);\n  if (invalid) return invalid;\n  const service: string = args.service;\n  if (name === \"status\") return complete(`${service}: running`);\n  if (args.env === \"staging\") return complete(`Deployed ${service} to staging`);\n  const caps = request._meta?.[META_CAPS] ?? {};\n  if (!canElicit(caps)) return complete(\"Deploying to production needs confirmation, and this client cannot be asked.\", true);\n  let step = \"confirm\";\n  const token = request.requestState;\n  if (token !== undefined && token !== null) {\n    const problem = stateError(secret, token, principal, name, args, now);\n    if (problem) return problem;\n    step = readState(secret, token)?.step;\n  }\n  const given = token !== undefined && token !== null ? request.inputResponses : undefined;\n  const answers = given !== null && typeof given === \"object\" && !Array.isArray(given) ? given : {};\n  if (step === \"confirm\") {\n    const answer = answers.confirm;\n    if (!confirmUsable(answer)) return ask(confirmRequest(service), \"confirm\", secret, name, args, principal, now);\n    if (!confirmed(answer)) return complete(\"Deployment cancelled\");\n    if (!(\"sampling\" in caps)) return complete(`Deployed ${service} to production`);\n    return ask(notesRequest(service), \"notes\", secret, name, args, principal, now);\n  }\n  const text = notesText(answers);\n  if (text === null) return ask(notesRequest(service), \"notes\", secret, name, args, principal, now);\n  return complete(`Deployed ${service} to production. Release notes: ${text}`);\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { callTool } from \"./mrtr.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\nconst SECRET = \"s3cret\";\nconst NOW = 1000;\nconst META = { \"io.modelcontextprotocol/protocolVersion\": \"2026-07-28\",\n  \"io.modelcontextprotocol/clientCapabilities\": { elicitation: {}, sampling: {} } };\n\nconst request = (extra: Record<string, unknown> = {}) =>\n  ({ name: \"deploy\", arguments: { service: \"api\", env: \"production\" }, _meta: META, ...extra });\n\n// Round trip 1: the server needs a person's confirmation, so it ends the call with input_required and a signed state.\nconst first = callTool(request(), SECRET, \"alice\", NOW) ?? {};\nconsole.log(\"first call:\", first.resultType, \"| asks for:\", Object.keys(first.inputRequests ?? {}).join(\", \"));\nconsole.log(\"state is a string:\", typeof first.requestState === \"string\");\n\n// Round trip 2: the client retries the same call with the answer and echoes the state back.\nconst answer = { confirm: { action: \"accept\", content: { confirm: true } } };\nconst second = callTool(request({ inputResponses: answer, requestState: first.requestState }), SECRET, \"alice\", NOW + 10) ?? {};\nconsole.log(\"second call:\", second.resultType, \"| asks for:\", Object.keys(second.inputRequests ?? {}).join(\", \"));\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 4,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "c19ce68414bd9a98b1667a13e6d83ade8f809db0894c9eeea282d6f7aae27958",
+  "starting_code": "// An MCP server's side of multi round-trip requests, with no state kept between calls. See ../../statement.md.\nimport { createHash, createHmac, timingSafeEqual } from \"node:crypto\";\nimport { logger } from \"./logger.ts\";\n\nconst log = logger(\"mrtr\");\n\nexport const VERSION = \"2026-07-28\";\nexport const META_VERSION = \"io.modelcontextprotocol/protocolVersion\";\nexport const META_CAPS = \"io.modelcontextprotocol/clientCapabilities\";\nexport const TTL_SECONDS = 300;\n\nexport const TOOLS = [\n  { name: \"deploy\", description: \"Deploy a service to an environment. Production needs a person's confirmation.\",\n    inputSchema: { type: \"object\", properties: { service: { type: \"string\" }, env: { type: \"string\", enum: [\"staging\", \"production\"] } }, required: [\"service\", \"env\"] } },\n  { name: \"status\", description: \"Report whether a service is running.\",\n    inputSchema: { type: \"object\", properties: { service: { type: \"string\" } }, required: [\"service\"] } },\n];\n\n/** JSON with the keys of every object in sorted order. */\nfunction canonical(value: unknown): string {\n  if (Array.isArray(value)) return `[${value.map(canonical).join(\",\")}]`;\n  if (value !== null && typeof value === \"object\") {\n    return `{${Object.keys(value as object).sort().map((k) => `${JSON.stringify(k)}:${canonical((value as any)[k])}`).join(\",\")}}`;\n  }\n  return JSON.stringify(value);\n}\n\nconst b64 = (data: Buffer | string) => Buffer.from(data).toString(\"base64url\");\n\n/** Given: a requestState for `payload`: its JSON, then a HMAC-SHA256 signature of it, both in base64url, joined by a dot. */\nexport function mintState(secret: string, payload: Record<string, unknown>): string {\n  const body = b64(canonical(payload));\n  return body + \".\" + b64(createHmac(\"sha256\", secret).update(body).digest());\n}\n\n/** Given: the payload of a requestState, or null when it is not one this secret signed (tampered, truncated, foreign, garbage). */\nexport function readState(secret: string, token: unknown): Record<string, any> | null {\n  try {\n    if (typeof token !== \"string\") return null;\n    const parts = token.split(\".\");\n    if (parts.length !== 2) return null;\n    const expected = Buffer.from(b64(createHmac(\"sha256\", secret).update(parts[0]).digest()));\n    const given = Buffer.from(parts[1]);\n    if (expected.length !== given.length || !timingSafeEqual(expected, given)) return null;\n    const payload = JSON.parse(Buffer.from(parts[0], \"base64url\").toString(\"utf8\"));\n    return payload !== null && typeof payload === \"object\" && !Array.isArray(payload) ? payload : null;\n  } catch {\n    return null;\n  }\n}\n\n/** Given: a fingerprint of the call's arguments, the same for the same arguments in any key order. */\nexport function argsDigest(args: unknown): string {\n  return createHash(\"sha256\").update(canonical(args)).digest(\"hex\");\n}\n\nconst error = (code: number, message: string, data?: unknown) => ({ error: { code, message, ...(data ? { data } : {}) } });\n\nfunction metaError(request: any) {\n  if (request._meta?.[META_VERSION] !== VERSION) return error(-32022, \"Unsupported protocol version\", { supported: [VERSION] });\n  return null;\n}\n\n/**\n * TODO 1 of 8 (unlocks e1): the result of tools/list.\n * Receives nothing and returns the object from the statement: resultType \"complete\", the TOOLS sorted by name, ttlMs 300000, cacheScope \"public\".\n * Example: toolListing().tools[0].name -> \"deploy\"\n */\nfunction toolListing(): Record<string, unknown> {\n  return {};\n}\n\nexport function listTools(request: any) {\n  return metaError(request) ?? toolListing();\n}\n\nconst complete = (text: string, isError = false) => ({ resultType: \"complete\", content: [{ type: \"text\", text }], isError });\n\nconst confirmRequest = (service: string) => ({ confirm: { method: \"elicitation/create\", params: { mode: \"form\", message: `Deploy ${service} to production?`, requestedSchema: {\n  type: \"object\", properties: { confirm: { type: \"boolean\", title: \"Confirm the deployment\" } }, required: [\"confirm\"] } } } });\n\nconst notesRequest = (service: string) => ({ notes: { method: \"sampling/createMessage\", params: { messages: [{ role: \"user\", content: { type: \"text\", text: `Write one sentence of release notes for ${service}.` } }], maxTokens: 100 } } });\n\n/**\n * TODO 2 of 8 (unlocks e7): the payload of a requestState.\n * Receives the tool name, the arguments, the user, the time in seconds and the step. Returns the object from the statement: v, tool, digest, sub, exp, step.\n * Example: newState(\"deploy\", { service: \"api\" }, \"alice\", 1000, \"confirm\").exp -> 1300\n */\nfunction newState(name: string, args: unknown, principal: string, now: number, step: string): Record<string, unknown> {\n  return {};\n}\n\n/**\n * TODO 3 of 8 (unlocks e6): the protocol error for a call that cannot be served, in the order of the statement.\n * Receives the tool name and the arguments. Returns error(-32602, ...) for an unknown tool, a missing or blank service, or (for deploy) an env\n * that is not staging or production; null when the call is valid.\n * Example: validate(\"deploy\", { service: \"api\", env: \"dev\" }) -> error(-32602, \"Invalid params: env must be staging or production\")\n */\nfunction validate(name: unknown, args: Record<string, any>): any {\n  return null;\n}\n\n/**\n * TODO 4 of 8 (unlocks e2): can the client be asked for a confirmation?\n * Receives the client capabilities object. Returns true when `elicitation` is present and is empty or holds `form`; false for none or only `url`.\n * Example: canElicit({ elicitation: {} }) -> true, canElicit({ elicitation: { url: {} } }) -> false\n */\nfunction canElicit(caps: Record<string, any>): boolean {\n  return false;\n}\n\n/**\n * TODO 5 of 8 (unlocks e4 and e5): the error for a requestState that cannot be used.\n * Receives the secret, the token, the user, the tool name, the arguments and the time. Returns error(-32602, ...) with `Invalid requestState`\n * (readState gives null), `Expired requestState` (now after exp) or `requestState does not match this request` (sub, tool or digest differ), checked in\n * that order; null when the state is good.\n * Example: a state minted for \"alice\" and read for \"bob\" -> error(-32602, \"requestState does not match this request\")\n */\nfunction stateError(secret: string, token: unknown, principal: string, name: string, args: unknown, now: number): any {\n  return null;\n}\n\n/**\n * TODO 6 of 8 (unlocks m1 and e3): is this an answer to the confirmation question?\n * Receives inputResponses.confirm (anything, or undefined). Returns true when it is an object whose `action` is accept, decline or cancel.\n * Example: confirmUsable({ action: \"decline\" }) -> true, confirmUsable(\"yes\") -> false\n */\nfunction confirmUsable(answer: any): boolean {\n  return false;\n}\n\n/**\n * TODO 7 of 8 (unlocks e3): did the person accept?\n * Receives a usable answer. Returns true only for action \"accept\" with content.confirm exactly true.\n * Example: confirmed({ action: \"accept\", content: { confirm: false } }) -> false\n */\nfunction confirmed(answer: any): boolean {\n  return false;\n}\n\n/**\n * TODO 8 of 8 (unlocks m1): the release notes the client wrote.\n * Receives the inputResponses object. Returns answers.notes.content.text when that is a string; null for anything else.\n * Example: notesText({ notes: { content: { type: \"text\", text: \"Faster.\" } } }) -> \"Faster.\"\n */\nfunction notesText(answers: Record<string, any>): string | null {\n  return null;\n}\n\nfunction ask(requests: unknown, step: string, secret: string, name: string, args: unknown, principal: string, now: number) {\n  const state = newState(name, args, principal, now, step);\n  return { resultType: \"input_required\", inputRequests: requests, requestState: mintState(secret, state) };\n}\n\nexport function callTool(request: any, secret: string, principal: string, now: number): any {\n  log.debug(\"callTool input\", request);\n  const bad = metaError(request);\n  if (bad) return bad;\n  const name = request.name;\n  const args = request.arguments ?? {};\n  const invalid = validate(name, args);\n  if (invalid) return invalid;\n  const service: string = args.service;\n  if (name === \"status\") return complete(`${service}: running`);\n  if (args.env === \"staging\") return complete(`Deployed ${service} to staging`);\n  const caps = request._meta?.[META_CAPS] ?? {};\n  if (!canElicit(caps)) return complete(\"Deploying to production needs confirmation, and this client cannot be asked.\", true);\n  let step = \"confirm\";\n  const token = request.requestState;\n  if (token !== undefined && token !== null) {\n    const problem = stateError(secret, token, principal, name, args, now);\n    if (problem) return problem;\n    step = readState(secret, token)?.step;\n  }\n  const given = token !== undefined && token !== null ? request.inputResponses : undefined;\n  const answers = given !== null && typeof given === \"object\" && !Array.isArray(given) ? given : {};\n  if (step === \"confirm\") {\n    const answer = answers.confirm;\n    if (!confirmUsable(answer)) return ask(confirmRequest(service), \"confirm\", secret, name, args, principal, now);\n    if (!confirmed(answer)) return complete(\"Deployment cancelled\");\n    if (!(\"sampling\" in caps)) return complete(`Deployed ${service} to production`);\n    return ask(notesRequest(service), \"notes\", secret, name, args, principal, now);\n  }\n  const text = notesText(answers);\n  if (text === null) return ask(notesRequest(service), \"notes\", secret, name, args, principal, now);\n  return complete(`Deployed ${service} to production. Release notes: ${text}`);\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/33-mcp-advanced/prose/unit-02/practice-2/mrtr.ts",
+    "test_path": "practice/level-2/33-mcp-advanced/prose/unit-02/practice-2/mrtr.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-2/33-mcp-advanced/prose/unit-02/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-2/33-mcp-advanced/prose/unit-02/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-2/33-mcp-advanced/prose/unit-02/practice-2/mrtr.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 a production deploy takes three round trips and keeps no state",
+        "kind": "main",
+        "says": "A production deploy takes three round trips and keeps no state"
+      },
+      {
+        "id": "e1 a staging deploy and a status call finish at once and the tool list is cacheable",
+        "kind": "edge",
+        "says": "A staging deploy and a status call finish at once, and the tool list is cacheable"
+      },
+      {
+        "id": "e2 the server only asks what the client declared it can answer",
+        "kind": "edge",
+        "says": "The server only asks what the client declared it can answer"
+      },
+      {
+        "id": "e3 a no or a missing answer is handled without an error",
+        "kind": "edge",
+        "says": "A no or a missing answer is handled without an error"
+      },
+      {
+        "id": "e4 a state the server did not sign is refused",
+        "kind": "edge",
+        "says": "A state the server did not sign is refused"
+      },
+      {
+        "id": "e5 a state works only for the same user the same call and before it expires",
+        "kind": "edge",
+        "says": "A state works only for the same user, the same call and before it expires"
+      },
+      {
+        "id": "e6 a request the server cannot serve is a protocol error with a code",
+        "kind": "edge",
+        "says": "A request the server cannot serve is a protocol error with a code"
+      },
+      {
+        "id": "e7 the state carries the whole context and an answer alone never skips a step",
+        "kind": "edge",
+        "says": "The state carries the whole context, and an answer alone never skips a step"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/33-mcp-advanced/prose/unit-02/practice-2/target/report.xml"
+    },
+    "origin": "course/33-mcp-advanced/02-streamable-http-state-and-authorization.md",
+    "concepts": [
+      "the practice of MCP advanced: Streamable HTTP, state and authorization is solved"
+    ],
+    "files": [
+      "practice/level-2/33-mcp-advanced/prose/unit-02/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "mcp-advanced-u2"
+}

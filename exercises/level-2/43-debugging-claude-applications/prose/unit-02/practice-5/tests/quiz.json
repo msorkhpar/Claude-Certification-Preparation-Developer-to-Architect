@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "43-debugging-claude-applications"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 5,
+  "title": "Check yourself: Reading a trace, isolating the origin and the practice",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "In a trace, the final user entry carried a tool's output and then a line of commentary. The reply came back as `end_turn` with an empty content list. Which diagnosis fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The model chose to stop, so add a user message asking it to continue",
+            "correct": false,
+            "says": "Ruled out because that is the answer only when no text followed: the table gives \"The model: add a new user message that asks it to continue\" for \"If no\"."
+          },
+          {
+            "id": "b",
+            "text": "The request layout is at fault, so return the result unaccompanied",
+            "correct": true,
+            "says": "The table says that when text follows the tool result the origin is \"The integration: send the tool result alone\", and the routine's step 4 says \"An `end_turn` with no content blocks is an empty reply. Look at the request before it.\""
+          },
+          {
+            "id": "c",
+            "text": "The account reached a limit, so raise the quota before anything else",
+            "correct": false,
+            "says": "Ruled out because a limit arrives as an error: \"An `error` event has one, and the table of page 1 gives its origin and recovery\"."
+          },
+          {
+            "id": "d",
+            "text": "The service dropped the output, so retry the same call unchanged",
+            "correct": false,
+            "says": "Ruled out because \"A dropped connection has none: it is the network, and it belongs to the service side\", while here a response arrived with a stop reason."
+          }
+        ],
+        "origin": {
+          "path": "course/43-debugging-claude-applications/02-reading-a-trace-and-the-practice.md",
+          "section": "Integration or model: the question that decides"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A team's code could not read this reply: \"Sure! Here is the answer: {\"label\": \"spam\"} Hope it helps.\" What does the routine conclude?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The account lacks access to structured output, so request it",
+            "correct": false,
+            "says": "Ruled out because an access failure arrives as an error status: \"An `error` event has one, and the table of page 1 gives its origin and recovery\"."
+          },
+          {
+            "id": "b",
+            "text": "The model failed to produce JSON, so validate and ask it again",
+            "correct": false,
+            "says": "Ruled out because \"The model: it did not produce JSON, so validate and ask again\" applies only when no object is in the text, and here one is."
+          },
+          {
+            "id": "c",
+            "text": "The service truncated the body, so retry the call with back-off",
+            "correct": false,
+            "says": "Ruled out because a cut-off arrives as a stop reason: \"A refusal, a `max_tokens` stop, a context-window stop or a pause is a failure of a successful response\"."
+          },
+          {
+            "id": "d",
+            "text": "The parser was too strict, so pull out the object first",
+            "correct": true,
+            "says": "The table says that an object in the text makes it \"The integration: the parser was too strict, so extract the object first\"."
+          }
+        ],
+        "origin": {
+          "path": "course/43-debugging-claude-applications/02-reading-a-trace-and-the-practice.md",
+          "section": "Integration or model: the question that decides"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A trace holds a 529, then a retry that returns a good response, then nothing else. What is the finding?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A service failure, which ended without recovery",
+            "correct": false,
+            "says": "Ruled out because \"A later good response means the failure was survived\", so the trace did recover."
+          },
+          {
+            "id": "b",
+            "text": "A service failure, which the application survived",
+            "correct": true,
+            "says": "The page says \"A 529 is retried and succeeds, so the application recovered\", and \"A later good response means the failure was survived\"."
+          },
+          {
+            "id": "c",
+            "text": "A model failure, which the application survived",
+            "correct": false,
+            "says": "Ruled out because \"Trace B's 529 is the service's\", and a 529 is not model output."
+          },
+          {
+            "id": "d",
+            "text": "An integration failure, which needs a fix in code",
+            "correct": false,
+            "says": "Ruled out because \"a bug in your request fails the same way each time\", while this request succeeded on the retry."
+          }
+        ],
+        "origin": {
+          "path": "course/43-debugging-claude-applications/02-reading-a-trace-and-the-practice.md",
+          "section": "Cascades and the first failure"
+        }
+      }
+    ]
+  }
+}

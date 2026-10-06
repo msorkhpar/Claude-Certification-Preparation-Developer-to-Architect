@@ -1,0 +1,78 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "18-model-choice-cost-and-migration"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: a cost model and a model router, graded on a cost table (TypeScript)",
+  "lang": "typescript",
+  "main_file": "router.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "router.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-2/18-model-choice-cost-and-migration/prose/unit-02/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-2/18-model-choice-cost-and-migration/prose/unit-02/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-2/18-model-choice-cost-and-migration/prose/unit-02/practice-2/router.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 cost of a plain request and the cheapest model that meets the tier",
+      "kind": "main",
+      "says": "A plain request is priced from input and output, and the router returns the cheapest model at or above the tier"
+    },
+    {
+      "id": "e1 cache reads and writes are priced by their own multipliers",
+      "kind": "edge",
+      "says": "Cache writes cost 1.25 and 2 times input, reads use the model's own multiplier, and an unsplit write is the 5-minute kind"
+    },
+    {
+      "id": "e2 the batch discount halves every part of the cost",
+      "kind": "edge",
+      "says": "The batch discount halves every part of the cost, cache parts included"
+    },
+    {
+      "id": "e3 the router picks by cost and tier not by the order of the catalog",
+      "kind": "edge",
+      "says": "The router picks by cost and tier, whatever the order of the catalog"
+    },
+    {
+      "id": "e4 a model whose context or output limit is too small is skipped",
+      "kind": "edge",
+      "says": "A model with too small a context window or output limit is skipped"
+    },
+    {
+      "id": "e5 deprecated models are skipped and an empty choice raises",
+      "kind": "edge",
+      "says": "Deprecated models are skipped, and a choice with no model raises NoModelError"
+    },
+    {
+      "id": "e6 a tie goes to the lower tier",
+      "kind": "edge",
+      "says": "A cost tie goes to the lower tier"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/18-model-choice-cost-and-migration/02-usage-token-counting-and-a-cost-model.md"
+}

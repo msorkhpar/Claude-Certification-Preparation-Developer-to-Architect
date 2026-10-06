@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "13-one-rest-api-under-every-sdk"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 5,
+  "title": "Check yourself: What the SDK does for you, and a raw client",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "Verbose diagnostics are on in a deployed service. Credentials look masked in the output, but customers' messages show up in it. What should the team do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Keep it on, because the SDK masks sensitive data in request and response bodies",
+            "correct": false,
+            "says": "Ruled out because \"sensitive data in request and response bodies may still be visible\"."
+          },
+          {
+            "id": "b",
+            "text": "Switch that mode off for live traffic and record request ids instead",
+            "correct": true,
+            "says": "The page says that \"customer text does not belong in a log by default\", and request ids are the safe handle for a support ticket."
+          },
+          {
+            "id": "c",
+            "text": "Redact the headers further so that the output holds no credentials at all",
+            "correct": false,
+            "says": "Ruled out because \"headers are partly redacted, bodies are not\", and the leak is in the bodies."
+          },
+          {
+            "id": "d",
+            "text": "Log only the failing calls so that less customer text reaches the output",
+            "correct": false,
+            "says": "Ruled out because failing calls carry customer text too, and \"customer text does not belong in a log by default\"."
+          }
+        ],
+        "origin": {
+          "path": "course/13-one-rest-api-under-every-sdk/02-what-the-sdk-does-for-you.md",
+          "section": "Traps"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A service sets nothing on its SDK client and calls the API in a month where the organisation has already reached its monthly spend cap. What happens to each call?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It is attempted once, because the SDK reads the cap and stops early",
+            "correct": false,
+            "says": "Ruled out because \"two retries is a default for a generic caller\" and the SDK does not inspect the cap."
+          },
+          {
+            "id": "b",
+            "text": "It is attempted once, because a 429 is never retried by the SDK",
+            "correct": false,
+            "says": "Ruled out because \"certain errors are automatically retried 2 times by default\"."
+          },
+          {
+            "id": "c",
+            "text": "It is attempted three times, and the third attempt succeeds after a pause",
+            "correct": false,
+            "says": "Ruled out because the cap \"stays in force until the next month begins\", so no pause helps."
+          },
+          {
+            "id": "d",
+            "text": "It is attempted three times in all, and every attempt fails",
+            "correct": true,
+            "says": "Two retries after the first attempt make three, and a spend-cap 429 \"stays in force until the next month begins\"."
+          }
+        ],
+        "origin": {
+          "path": "course/13-one-rest-api-under-every-sdk/02-what-the-sdk-does-for-you.md",
+          "section": "What the SDK does not do"
+        }
+      }
+    ]
+  }
+}

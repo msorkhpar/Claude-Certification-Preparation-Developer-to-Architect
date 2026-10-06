@@ -1,0 +1,322 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "60-claude-code-in-ci"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "A headless run, its JSON and the job status",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "A headless run, its JSON and the job status"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Architect · **Module 60:** Claude Code in CI · **Page 1 of 3** **Exams:** A3.6; S5"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** run Claude Code without a person with `-p`, ask for one machine-readable object with `--output-format json` and `--json-schema`, read the answer from `structured_output`, give the run a turn limit and read-only tools, and write the gate that fails the job whenever the run did not produce a valid answer."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-03 against the Claude Code documentation pages \"Run Claude Code programmatically\", \"CLI reference\", \"Claude Code GitHub Actions\" and the Agent SDK pages on structured outputs, documenting behaviour up to Claude Code v2.1.286. Nothing here ran the real binary, needed a key or touched the network: the example builds the command and decides the job from sample output shaped like the documented result message. This page deepens module 38 (headless runs and the flags that bound them) and module 40 (Claude in the software life cycle) and does not repeat them. What the run knows, and the criteria, are the second page."
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "**Exam guide and current product.** *What the guide states (task statement 3.6), and so what the exam keys:* for CI/CD integration it names the `-p` (or `--print`) flag for non-interactive mode, `--output-format json` together with `--json-schema` to produce structured findings that can be posted as inline comments, and CLAUDE.md as the way to give the CI run project context. *What the current product does (documentation checked 2026-10-03):* all of it. `-p` runs a prompt non-interactively; with `--output-format json` the output is one object, and with `--json-schema` it \"includes metadata about the request (session ID, usage, etc.) with the structured output in the `structured_output` field\". An invalid schema is an error: \"`claude` exits with `Error: --json-schema is not a valid JSON Schema`\". The `format` keyword is accepted but only as an annotation. `--max-turns` \"Exits with an error when the limit is reached\". `--bare` is recommended for scripted calls, and a bare run skips CLAUDE.md. On the exam, the guide's three items are the answer; for a real pipeline add the failure handling on this page."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "A team adds a review step to its pull requests. The first version runs `claude -p \"review this\"` and writes the prose to a file; it exits with status 0 whatever happened. One night the run hits its turn limit and prints an error, the job stays green, and a pull request with an unchecked `None` is merged under a green check. Scenario S5 asks which design makes the step trustworthy, and the exam's answer has two halves: make the output machine-readable so it can be checked, and make every kind of failure visible in the job status."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The command"
+    },
+    {
+      "type": "para",
+      "text": "A CI review step has seven parts, and each one answers a question:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Part",
+        "Flag",
+        "The question it answers"
+      ],
+      "rows": [
+        [
+          "Non-interactive",
+          "`-p`",
+          "Who answers prompts? Nobody: the run starts, works and exits"
+        ],
+        [
+          "One object out",
+          "`--output-format json`",
+          "How does a script read the result? As one JSON object"
+        ],
+        [
+          "A checked answer",
+          "`--json-schema '<schema>'`",
+          "What shape must the answer have? The schema's, validated before the run ends"
+        ],
+        [
+          "A bounded run",
+          "`--max-turns 8`",
+          "What stops a loop? The run exits with an error at the limit"
+        ],
+        [
+          "Least privilege",
+          "`--allowedTools \"Read,Grep,Glob\"`",
+          "What may it do without asking? Read and search only"
+        ],
+        [
+          "A reproducible start",
+          "`--bare`",
+          "Which machine's settings apply? None: no hooks, skills, MCP servers, memory or CLAUDE.md"
+        ],
+        [
+          "The context",
+          "`--append-system-prompt-file CLAUDE.md`",
+          "Where do the criteria come from? The file, passed on purpose"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "A bare run needs `ANTHROPIC_API_KEY` in the environment, because it does not use a subscription login; in the workflow that is a secret reference, never a literal. The diff goes in on standard input or in the prompt. In a headless run nobody can approve a prompt, so the tool list must be complete and minimal: read tools for a review, and no bare `Bash`, which would let the run execute anything."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What the run prints"
+    },
+    {
+      "type": "para",
+      "text": "With `--json-schema`, the object has the answer in `structured_output` beside the run's metadata: the result text, the session id, the cost. The documented result message also carries a `subtype`: `success`, or an error such as `error_max_turns` or `error_max_structured_output_retries` (\"No valid output remained after multiple attempts\"), with `is_error` set for the failures. One more case is documented on purpose: \"A result can also end with subtype `success` but no `structured_output` value ... Treat that case as a failure as well.\""
+    },
+    {
+      "type": "para",
+      "text": "The JSON shape of the command-line output follows the SDK's result message; the command-line pages document `result`, `structured_output`, `session_id` and the cost fields, and the SDK pages document the subtypes. The course's model uses the SDK's field names and was not compared with the binary's output."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The gate"
+    },
+    {
+      "type": "para",
+      "text": "A job's status is a decision, and a decision made on prose is a guess. The gate reads the exit status of `claude` and the JSON, and fails the job in every case where no valid answer exists:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`claude` exited with a non-zero status;",
+        "the output is not a JSON object;",
+        "`is_error` is set, or the `subtype` is not `success`;",
+        "there is no `structured_output`;",
+        "the answer breaks the schema."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "A job never passes by saying nothing. Retrying inside the job repeats cost with no reason to expect a different result, so the failure is reported and a person or a scheduled run decides. Only an answer that clears all five is read for findings, and then policy decides what a finding does: findings below a floor are dropped, categories the team disabled are dropped, and a kept finding at a failing severity (`high`, say) fails the job while lower ones only comment. This is the same fail-closed rule that module 48 applies to a workflow's gates."
+    },
+    {
+      "type": "para",
+      "text": "The schema has two jobs. It makes the answer checkable, and with closed enums for category and severity it makes the policy computable: a severity that is free text cannot be compared with a floor. Keep to the features structured outputs support (types, `enum`, `required`, nested objects and arrays); make a field optional only when the value can really be absent."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "example",
+      "id": "m60-ci-gate",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/60-ci-gate/python/ci_gate.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/60-ci-gate/typescript/ciGate.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/60-ci-gate/java/CiGate.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/60-ci-gate/kotlin/CiGate.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"A Claude Code review step in CI, from the command line to the exit status: build the headless command, lint a command someone wrote, and gate on the JSON the run prints.\n\nFacts checked on the Claude Code pages \"Run Claude Code programmatically\" and \"CLI reference\" and the Agent SDK pages on structured outputs and the result message\n(read on 2026-10-03, Claude Code v2.1.286): `-p` runs without a prompt for input; `--output-format json` prints one JSON object whose `structured_output` field holds the\nanswer when `--json-schema` is given; a run can end with `is_error` true and a subtype such as `error_max_turns` or `error_max_structured_output_retries`; `--max-turns` exits with an error\nwhen the limit is reached; `--bare` skips CLAUDE.md, hooks, skills, MCP servers and auto memory, so the context is passed with `--append-system-prompt-file`. The envelope below is\nthe shape the SDK documents for its result message; nothing here ran the real binary, needed a key or touched the network.\n\"\"\"\nimport json\nimport re\nimport logging\n\nlog = logging.getLogger(__name__)\n\nSEVERITIES = [\"low\", \"medium\", \"high\"]\nREVIEW_SCHEMA = {\n    \"type\": \"object\",\n    \"properties\": {\"findings\": {\"type\": \"array\", \"items\": {\"type\": \"object\", \"properties\": {\n        \"file\": {\"type\": \"string\"}, \"line\": {\"type\": \"integer\"}, \"category\": {\"type\": \"string\", \"enum\": [\"bug\", \"security\", \"style\", \"other\"]},\n        \"severity\": {\"type\": \"string\", \"enum\": SEVERITIES}, \"issue\": {\"type\": \"string\"}, \"suggested_fix\": {\"type\": \"string\"}, \"detected_pattern\": {\"type\": \"string\"}},\n        \"required\": [\"file\", \"line\", \"category\", \"severity\", \"issue\", \"suggested_fix\", \"detected_pattern\"], \"additionalProperties\": False}}},\n    \"required\": [\"findings\"], \"additionalProperties\": False,\n}\n\n\ndef build_command(prompt, schema, max_turns=8, tools=(\"Read\", \"Grep\", \"Glob\", \"Bash(git diff *)\"), context_file=\"CLAUDE.md\"):\n    \"\"\"The argument list of a review run: headless, one JSON object out, the answer checked against a schema, a turn limit, read-only tools, and the project context passed by hand.\"\"\"\n    return [\"claude\", \"--bare\", \"-p\", prompt, \"--append-system-prompt-file\", context_file, \"--output-format\", \"json\", \"--json-schema\", json.dumps(schema, separators=(\",\", \":\")),\n            \"--max-turns\", str(max_turns), \"--allowedTools\", \",\".join(tools)]\n\n\ndef lint_command(text):\n    \"\"\"Findings (rule ids) for the text of a shell step that runs `claude`: what a CI run needs and what it must not be allowed.\"\"\"\n    text = re.sub(r\"\\\\\\n\\s*\", \" \", text)\n    found = []\n    if not re.search(r\"\\sclaude\\b\", \" \" + text):\n        return [\"no-claude-command\"]\n    if not re.search(r\"\\s(-p|--print)\\b\", text):\n        found.append(\"no-print\")\n    if not re.search(r\"--output-format[ =]json\\b\", text):\n        found.append(\"no-json\")\n    if not re.search(r\"--json-schema\\b\", text):\n        found.append(\"no-schema\")\n    turns = re.search(r\"--max-turns[ =](\\d+)\", text)\n    if not turns or int(turns.group(1)) > 20:\n        found.append(\"no-turn-limit\")\n    allowed = re.search(r\"--allowed[Tt]ools[ =](\\\"[^\\\"]*\\\"|'[^']*'|\\S+)\", text)\n    names = re.findall(r\"[^\\s,(]+(?:\\([^)]*\\))?\", allowed.group(1).strip(\"\\\"'\")) if allowed else []\n    if not allowed:\n        found.append(\"no-tool-list\")\n    elif any(n in (\"Bash\", \"Edit\", \"Write\", \"MultiEdit\", \"NotebookEdit\") for n in names):\n        found.append(\"wide-tools\")\n    if \"--bare\" not in text:\n        found.append(\"no-bare\")\n    elif not re.search(r\"--append-system-prompt(-file)?\\b\", text):\n        found.append(\"bare-without-context\")\n    return found\n\n\ndef schema_check(value, schema, path=\"$\"):\n    \"\"\"Errors of a value against the JSON Schema subset the structured outputs support: type, enum, required, properties, items and additionalProperties false.\"\"\"\n    kinds = {\"object\": dict, \"array\": list, \"string\": str, \"boolean\": bool, \"null\": type(None)}\n    want = schema.get(\"type\")\n    wants = want if isinstance(want, list) else [want] if want else []\n    ok = not wants\n    for kind in wants:\n        if kind == \"integer\":\n            ok = ok or (isinstance(value, int) and not isinstance(value, bool))\n        elif kind == \"number\":\n            ok = ok or (isinstance(value, (int, float)) and not isinstance(value, bool))\n        else:\n            ok = ok or isinstance(value, kinds[kind])\n    if not ok:\n        return [f\"{path}: expected {' or '.join(wants)}\"]\n    errors = []\n    if \"enum\" in schema and value not in schema[\"enum\"]:\n        errors.append(f\"{path}: {value!r} is not one of {schema['enum']}\")\n    if isinstance(value, dict):\n        errors += [f\"{path}.{k}: is required\" for k in schema.get(\"required\", []) if k not in value]\n        if schema.get(\"additionalProperties\") is False:\n            errors += [f\"{path}.{k}: is not allowed\" for k in value if k not in schema.get(\"properties\", {})]\n        for k, sub in schema.get(\"properties\", {}).items():\n            if k in value:\n                errors += schema_check(value[k], sub, f\"{path}.{k}\")\n    if isinstance(value, list) and \"items\" in schema:\n        for i, item in enumerate(value):\n            errors += schema_check(item, schema[\"items\"], f\"{path}[{i}]\")\n    return errors\n\n\ndef gate(stdout, exit_code, schema, policy):\n    \"\"\"Decide a review job from what `claude -p --output-format json --json-schema ...` printed. A run that failed in any way fails the job: it never passes by saying nothing.\"\"\"\n    problems = []\n    if exit_code != 0:\n        problems.append(f\"claude exited with status {exit_code}\")\n    try:\n        envelope = json.loads(stdout)\n    except ValueError:\n        envelope = None\n    if not isinstance(envelope, dict):\n        return {\"exit\": 1, \"comments\": [], \"problems\": problems + [\"the output is not a JSON object\"]}\n    if envelope.get(\"is_error\") or envelope.get(\"subtype\") != \"success\":\n        problems.append(f\"the run ended with {envelope.get('subtype')}\")\n    output = envelope.get(\"structured_output\")\n    if output is None:\n        problems.append(\"the result has no structured_output\")\n    else:\n        problems += [f\"schema {e}\" for e in schema_check(output, schema)]\n    if problems:\n        return {\"exit\": 1, \"comments\": [], \"problems\": problems}\n    floor = SEVERITIES.index(policy[\"min_severity\"])\n    comments = [{\"file\": f[\"file\"], \"line\": f[\"line\"], \"severity\": f[\"severity\"], \"body\": f\"{f['issue']} Suggested fix: {f['suggested_fix']}\"}\n                for f in output[\"findings\"] if f[\"category\"] not in policy[\"disabled_categories\"] and SEVERITIES.index(f[\"severity\"]) >= floor]\n    blocked = any(c[\"severity\"] in policy[\"fail_on\"] for c in comments)\n    return {\"exit\": 1 if blocked else 0, \"comments\": comments, \"problems\": []}\n\n\ndef envelope(**over):\n    return json.dumps({\"type\": \"result\", \"subtype\": \"success\", \"is_error\": False, \"result\": \"done\", \"num_turns\": 3, \"total_cost_usd\": 0.05, \"session_id\": \"s-1\", **over})\n\n\ndef main():\n    command = build_command(\"Review the diff on standard input.\", {\"type\": \"object\", \"properties\": {\"findings\": {\"type\": \"array\"}}}, tools=(\"Read\", \"Grep\"))\n    print(\"command:\", \" \".join(command[:5]), \"...\", command[-4:])\n    print(\"lint, the good step:\", lint_command(\"git diff main | claude --bare -p 'Review.' --append-system-prompt-file CLAUDE.md --output-format json --json-schema '{}' --max-turns 8 --allowedTools 'Read,Grep'\"))\n    print(\"lint, a careless step:\", lint_command(\"claude 'Review the change' --allowedTools Bash,Edit\"))\n    policy = {\"min_severity\": \"medium\", \"disabled_categories\": [\"style\"], \"fail_on\": [\"high\"]}\n    findings = [{\"file\": \"api.py\", \"line\": 12, \"category\": \"bug\", \"severity\": \"high\", \"issue\": \"Unchecked None.\", \"suggested_fix\": \"Return early.\", \"detected_pattern\": \"missing-none-check\"},\n                {\"file\": \"api.py\", \"line\": 40, \"category\": \"style\", \"severity\": \"high\", \"issue\": \"Long line.\", \"suggested_fix\": \"Wrap it.\", \"detected_pattern\": \"line-length\"},\n                {\"file\": \"ui.py\", \"line\": 3, \"category\": \"bug\", \"severity\": \"low\", \"issue\": \"Odd name.\", \"suggested_fix\": \"Rename.\", \"detected_pattern\": \"naming\"}]\n    runs = {\"a finding that blocks\": (envelope(structured_output={\"findings\": findings}), 0), \"no findings\": (envelope(structured_output={\"findings\": []}), 0),\n            \"turn limit\": (envelope(subtype=\"error_max_turns\", is_error=True), 1), \"success without output\": (envelope(), 0), \"not JSON\": (\"Error: no key\", 1),\n            \"wrong shape\": (envelope(structured_output={\"findings\": [{\"file\": \"a.py\"}]}), 0)}\n    for label, (out, code) in runs.items():\n        result = gate(out, code, REVIEW_SCHEMA, policy)\n        print(f\"{label}: exit {result['exit']}, {len(result['comments'])} comment(s){', ' + result['problems'][0] if result['problems'] else ''}\")\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "command: claude --bare -p Review the diff on standard input. --append-system-prompt-file ... ['--max-turns', '8', '--allowedTools', 'Read,Grep']\nlint, the good step: []\nlint, a careless step: ['no-print', 'no-json', 'no-schema', 'no-turn-limit', 'wide-tools', 'no-bare']\na finding that blocks: exit 1, 1 comment(s)\nno findings: exit 0, 0 comment(s)\nturn limit: exit 1, 0 comment(s), claude exited with status 1\nsuccess without output: exit 1, 0 comment(s), the result has no structured_output\nnot JSON: exit 1, 0 comment(s), claude exited with status 1\nwrong shape: exit 1, 0 comment(s), schema $.findings[0].line: is required"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "import { logger } from \"./logger.ts\";\nconst log = logger(\"ci_gate\");\n/**\n * A Claude Code review step in CI, from the command line to the exit status: build the headless command, lint a command someone wrote, and gate on the JSON the run prints.\n *\n * Facts checked on the Claude Code pages \"Run Claude Code programmatically\" and \"CLI reference\" and the Agent SDK pages on structured outputs and the result message\n * (read on 2026-10-03, Claude Code v2.1.286): `-p` runs without a prompt for input; `--output-format json` prints one JSON object whose `structured_output` field holds the\n * answer when `--json-schema` is given; a run can end with `is_error` true and a subtype such as `error_max_turns` or `error_max_structured_output_retries`; `--max-turns` exits with an error\n * when the limit is reached; `--bare` skips CLAUDE.md, hooks, skills, MCP servers and auto memory, so the context is passed with `--append-system-prompt-file`. The envelope below is\n * the shape the SDK documents for its result message; nothing here ran the real binary, needed a key or touched the network.\n */\nexport const SEVERITIES = [\"low\", \"medium\", \"high\"];\nexport type Schema = { [key: string]: any };\nexport const REVIEW_SCHEMA: Schema = {\n  type: \"object\",\n  properties: { findings: { type: \"array\", items: { type: \"object\", properties: {\n    file: { type: \"string\" }, line: { type: \"integer\" }, category: { type: \"string\", enum: [\"bug\", \"security\", \"style\", \"other\"] },\n    severity: { type: \"string\", enum: SEVERITIES }, issue: { type: \"string\" }, suggested_fix: { type: \"string\" }, detected_pattern: { type: \"string\" } },\n    required: [\"file\", \"line\", \"category\", \"severity\", \"issue\", \"suggested_fix\", \"detected_pattern\"], additionalProperties: false } } },\n  required: [\"findings\"], additionalProperties: false,\n};\n\n/** The argument list of a review run: headless, one JSON object out, the answer checked against a schema, a turn limit, read-only tools, and the project context passed by hand. */\nexport function buildCommand(prompt: string, schema: Schema, maxTurns = 8, tools = [\"Read\", \"Grep\", \"Glob\", \"Bash(git diff *)\"], contextFile = \"CLAUDE.md\"): string[] {\n  return [\"claude\", \"--bare\", \"-p\", prompt, \"--append-system-prompt-file\", contextFile, \"--output-format\", \"json\", \"--json-schema\", JSON.stringify(schema),\n    \"--max-turns\", String(maxTurns), \"--allowedTools\", tools.join(\",\")];\n}\n\n/** Findings (rule ids) for the text of a shell step that runs `claude`: what a CI run needs and what it must not be allowed. */\nexport function lintCommand(raw: string): string[] {\n  const text = raw.replace(/\\\\\\n\\s*/g, \" \");\n  if (!/\\sclaude\\b/.test(\" \" + text)) return [\"no-claude-command\"];\n  const found: string[] = [];\n  if (!/\\s(-p|--print)\\b/.test(text)) found.push(\"no-print\");\n  if (!/--output-format[ =]json\\b/.test(text)) found.push(\"no-json\");\n  if (!/--json-schema\\b/.test(text)) found.push(\"no-schema\");\n  const turns = /--max-turns[ =](\\d+)/.exec(text);\n  if (!turns || Number(turns[1]) > 20) found.push(\"no-turn-limit\");\n  const allowed = /--allowed[Tt]ools[ =](\"[^\"]*\"|'[^']*'|\\S+)/.exec(text);\n  const names = allowed ? allowed[1].replace(/^[\"']|[\"']$/g, \"\").match(/[^\\s,(]+(?:\\([^)]*\\))?/g) ?? [] : [];\n  if (!allowed) found.push(\"no-tool-list\");\n  else if (names.some((n) => [\"Bash\", \"Edit\", \"Write\", \"MultiEdit\", \"NotebookEdit\"].includes(n))) found.push(\"wide-tools\");\n  if (!text.includes(\"--bare\")) found.push(\"no-bare\");\n  else if (!/--append-system-prompt(-file)?\\b/.test(text)) found.push(\"bare-without-context\");\n  return found;\n}\n\nconst isKind = (kind: string, value: unknown): boolean =>\n  kind === \"object\" ? typeof value === \"object\" && value !== null && !Array.isArray(value)\n    : kind === \"array\" ? Array.isArray(value)\n    : kind === \"string\" ? typeof value === \"string\"\n    : kind === \"boolean\" ? typeof value === \"boolean\"\n    : kind === \"null\" ? value === null\n    : kind === \"integer\" ? typeof value === \"number\" && Number.isInteger(value)\n    : kind === \"number\" ? typeof value === \"number\" : false;\n\n/** Errors of a value against the JSON Schema subset the structured outputs support: type, enum, required, properties, items and additionalProperties false. */\nexport function schemaCheck(value: any, schema: Schema, path = \"$\"): string[] {\n  const wants: string[] = Array.isArray(schema.type) ? schema.type : schema.type ? [schema.type] : [];\n  if (wants.length > 0 && !wants.some((k) => isKind(k, value))) return [`${path}: expected ${wants.join(\" or \")}`];\n  const errors: string[] = [];\n  if (schema.enum && !schema.enum.includes(value)) errors.push(`${path}: ${JSON.stringify(value)} is not one of ${JSON.stringify(schema.enum)}`);\n  if (isKind(\"object\", value)) {\n    for (const k of schema.required ?? []) if (!(k in value)) errors.push(`${path}.${k}: is required`);\n    if (schema.additionalProperties === false) for (const k of Object.keys(value)) if (!(k in (schema.properties ?? {}))) errors.push(`${path}.${k}: is not allowed`);\n    for (const [k, sub] of Object.entries(schema.properties ?? {})) if (k in value) errors.push(...schemaCheck(value[k], sub as Schema, `${path}.${k}`));\n  }\n  if (Array.isArray(value) && schema.items) value.forEach((item, i) => errors.push(...schemaCheck(item, schema.items, `${path}[${i}]`)));\n  return errors;\n}\n\nexport type Policy = { min_severity: string; disabled_categories: string[]; fail_on: string[] };\nexport type Gate = { exit: number; comments: Array<{ file: string; line: number; severity: string; body: string }>; problems: string[] };\n\n/** Decide a review job from what `claude -p --output-format json --json-schema ...` printed. A run that failed in any way fails the job: it never passes by saying nothing. */\nexport function gate(stdout: string, exitCode: number, schema: Schema, policy: Policy): Gate {\n  const problems: string[] = [];\n  if (exitCode !== 0) problems.push(`claude exited with status ${exitCode}`);\n  let envelope: any = null;\n  try {\n    envelope = JSON.parse(stdout);\n  } catch {\n    envelope = null;\n  }\n  if (!isKind(\"object\", envelope)) return { exit: 1, comments: [], problems: [...problems, \"the output is not a JSON object\"] };\n  if (envelope.is_error || envelope.subtype !== \"success\") problems.push(`the run ended with ${envelope.subtype}`);\n  const output = envelope.structured_output;\n  if (output === undefined || output === null) problems.push(\"the result has no structured_output\");\n  else problems.push(...schemaCheck(output, schema).map((e) => `schema ${e}`));\n  if (problems.length > 0) return { exit: 1, comments: [], problems };\n  const floor = SEVERITIES.indexOf(policy.min_severity);\n  const comments = output.findings\n    .filter((f: any) => !policy.disabled_categories.includes(f.category) && SEVERITIES.indexOf(f.severity) >= floor)\n    .map((f: any) => ({ file: f.file, line: f.line, severity: f.severity, body: `${f.issue} Suggested fix: ${f.suggested_fix}` }));\n  const blocked = comments.some((c: any) => policy.fail_on.includes(c.severity));\n  return { exit: blocked ? 1 : 0, comments, problems: [] };\n}\n\nexport function envelope(over: Record<string, unknown> = {}): string {\n  return JSON.stringify({ type: \"result\", subtype: \"success\", is_error: false, result: \"done\", num_turns: 3, total_cost_usd: 0.05, session_id: \"s-1\", ...over });\n}\n\nfunction main() {\n  const command = buildCommand(\"Review the diff on standard input.\", { type: \"object\", properties: { findings: { type: \"array\" } } }, 8, [\"Read\", \"Grep\"]);\n  console.log(\"command:\", command.slice(0, 5).join(\" \"), \"...\", JSON.stringify(command.slice(-4)));\n  console.log(\"lint, the good step:\", JSON.stringify(lintCommand(\"git diff main | claude --bare -p 'Review.' --append-system-prompt-file CLAUDE.md --output-format json --json-schema '{}' --max-turns 8 --allowedTools 'Read,Grep'\")));\n  console.log(\"lint, a careless step:\", JSON.stringify(lintCommand(\"claude 'Review the change' --allowedTools Bash,Edit\")));\n  const policy: Policy = { min_severity: \"medium\", disabled_categories: [\"style\"], fail_on: [\"high\"] };\n  const findings = [\n    { file: \"api.py\", line: 12, category: \"bug\", severity: \"high\", issue: \"Unchecked None.\", suggested_fix: \"Return early.\", detected_pattern: \"missing-none-check\" },\n    { file: \"api.py\", line: 40, category: \"style\", severity: \"high\", issue: \"Long line.\", suggested_fix: \"Wrap it.\", detected_pattern: \"line-length\" },\n    { file: \"ui.py\", line: 3, category: \"bug\", severity: \"low\", issue: \"Odd name.\", suggested_fix: \"Rename.\", detected_pattern: \"naming\" },\n  ];\n  const runs: Record<string, [string, number]> = {\n    \"a finding that blocks\": [envelope({ structured_output: { findings } }), 0], \"no findings\": [envelope({ structured_output: { findings: [] } }), 0],\n    \"turn limit\": [envelope({ subtype: \"error_max_turns\", is_error: true }), 1], \"success without output\": [envelope(), 0], \"not JSON\": [\"Error: no key\", 1],\n    \"wrong shape\": [envelope({ structured_output: { findings: [{ file: \"a.py\" }] } }), 0],\n  };\n  for (const [label, [out, code]] of Object.entries(runs)) {\n    const result = gate(out, code, REVIEW_SCHEMA, policy);\n    console.log(`${label}: exit ${result.exit}, ${result.comments.length} comment(s)${result.problems.length ? \", \" + result.problems[0] : \"\"}`);\n  }\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "command: claude --bare -p Review the diff on standard input. --append-system-prompt-file ... [\"--max-turns\",\"8\",\"--allowedTools\",\"Read,Grep\"]\nlint, the good step: []\nlint, a careless step: [\"no-print\",\"no-json\",\"no-schema\",\"no-turn-limit\",\"wide-tools\",\"no-bare\"]\na finding that blocks: exit 1, 1 comment(s)\nno findings: exit 0, 0 comment(s)\nturn limit: exit 1, 0 comment(s), claude exited with status 1\nsuccess without output: exit 1, 0 comment(s), the result has no structured_output\nnot JSON: exit 1, 0 comment(s), claude exited with status 1\nwrong shape: exit 1, 0 comment(s), schema $.findings[0].line: is required"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import static harness.Show.py;\n\nimport com.fasterxml.jackson.databind.JsonNode;\nimport com.fasterxml.jackson.databind.ObjectMapper;\nimport java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.regex.Matcher;\nimport java.util.regex.Pattern;\nimport java.util.stream.Collectors;\n\n/**\n * A Claude Code review step in CI, from the command line to the exit status: build the headless command, lint a command someone wrote, and gate on the JSON the run prints.\n *\n * <p>Facts checked on the Claude Code pages \"Run Claude Code programmatically\" and \"CLI reference\" and the Agent SDK pages on structured outputs and the result message\n * (read on 2026-10-03, Claude Code v2.1.286): `-p` runs without a prompt for input; `--output-format json` prints one JSON object whose `structured_output` field holds the\n * answer when `--json-schema` is given; a run can end with `is_error` true and a subtype such as `error_max_turns` or `error_max_structured_output_retries`; `--max-turns` exits with an error\n * when the limit is reached; `--bare` skips CLAUDE.md, hooks, skills, MCP servers and auto memory, so the context is passed with `--append-system-prompt-file`. The envelope below is\n * the shape the SDK documents for its result message; nothing here ran the real binary, needed a key or touched the network. The JSON is read with Jackson.\n */\npublic final class CiGate {\n    private static final System.Logger LOG = System.getLogger(CiGate.class.getName());\n    static final List<String> SEVERITIES = List.of(\"low\", \"medium\", \"high\");\n    private static final ObjectMapper JSON = new ObjectMapper();\n\n    static JsonNode json(String text) {\n        try {\n            return JSON.readTree(text);\n        } catch (Exception e) {\n            throw new IllegalArgumentException(e);\n        }\n    }\n\n    static final JsonNode REVIEW_SCHEMA = json(\"\"\"\n        {\"type\": \"object\",\n         \"properties\": {\"findings\": {\"type\": \"array\", \"items\": {\"type\": \"object\", \"properties\": {\n           \"file\": {\"type\": \"string\"}, \"line\": {\"type\": \"integer\"}, \"category\": {\"type\": \"string\", \"enum\": [\"bug\", \"security\", \"style\", \"other\"]},\n           \"severity\": {\"type\": \"string\", \"enum\": [\"low\", \"medium\", \"high\"]}, \"issue\": {\"type\": \"string\"}, \"suggested_fix\": {\"type\": \"string\"}, \"detected_pattern\": {\"type\": \"string\"}},\n           \"required\": [\"file\", \"line\", \"category\", \"severity\", \"issue\", \"suggested_fix\", \"detected_pattern\"], \"additionalProperties\": false}}},\n         \"required\": [\"findings\"], \"additionalProperties\": false}\"\"\");\n\n    /** What a team decides about review findings: the lowest severity to post, the categories to drop and the severities that fail the job. */\n    record Policy(String minSeverity, List<String> disabledCategories, List<String> failOn) {}\n\n    /** One review comment to post. */\n    record Comment(String file, int line, String severity, String body) {}\n\n    /** The decision: the exit status, the comments to post and what went wrong. */\n    record Decision(int exit, List<Comment> comments, List<String> problems) {}\n\n    /** The argument list of a review run: headless, one JSON object out, the answer checked against a schema, a turn limit, read-only tools, and the project context passed by hand. */\n    static List<String> buildCommand(String prompt, JsonNode schema, int maxTurns, List<String> tools, String contextFile) {\n        return List.of(\"claude\", \"--bare\", \"-p\", prompt, \"--append-system-prompt-file\", contextFile, \"--output-format\", \"json\", \"--json-schema\", schema.toString(),\n            \"--max-turns\", String.valueOf(maxTurns), \"--allowedTools\", String.join(\",\", tools));\n    }\n\n    static List<String> buildCommand(String prompt, JsonNode schema) {\n        return buildCommand(prompt, schema, 8, List.of(\"Read\", \"Grep\", \"Glob\", \"Bash(git diff *)\"), \"CLAUDE.md\");\n    }\n\n    private static String stripQuotes(String s) {\n        int from = 0, to = s.length();\n        while (from < to && (s.charAt(from) == '\"' || s.charAt(from) == '\\'')) from++;\n        while (to > from && (s.charAt(to - 1) == '\"' || s.charAt(to - 1) == '\\'')) to--;\n        return s.substring(from, to);\n    }\n\n    private static boolean has(String regex, String text) {\n        return Pattern.compile(regex).matcher(text).find();\n    }\n\n    /** Findings (rule ids) for the text of a shell step that runs `claude`: what a CI run needs and what it must not be allowed. */\n    static List<String> lintCommand(String text) {\n        text = text.replaceAll(\"\\\\\\\\\\\\n\\\\s*\", \" \");\n        List<String> found = new ArrayList<>();\n        if (!has(\"\\\\sclaude\\\\b\", \" \" + text)) return List.of(\"no-claude-command\");\n        if (!has(\"\\\\s(-p|--print)\\\\b\", text)) found.add(\"no-print\");\n        if (!has(\"--output-format[ =]json\\\\b\", text)) found.add(\"no-json\");\n        if (!has(\"--json-schema\\\\b\", text)) found.add(\"no-schema\");\n        Matcher turns = Pattern.compile(\"--max-turns[ =](\\\\d+)\").matcher(text);\n        if (!turns.find() || Integer.parseInt(turns.group(1)) > 20) found.add(\"no-turn-limit\");\n        Matcher allowed = Pattern.compile(\"--allowed[Tt]ools[ =](\\\"[^\\\"]*\\\"|'[^']*'|\\\\S+)\").matcher(text);\n        boolean given = allowed.find();\n        List<String> names = new ArrayList<>();\n        if (given) {\n            Matcher n = Pattern.compile(\"[^\\\\s,(]+(?:\\\\([^)]*\\\\))?\").matcher(stripQuotes(allowed.group(1).strip()));\n            while (n.find()) names.add(n.group());\n        }\n        if (!given) found.add(\"no-tool-list\");\n        else if (names.stream().anyMatch(n -> List.of(\"Bash\", \"Edit\", \"Write\", \"MultiEdit\", \"NotebookEdit\").contains(n))) found.add(\"wide-tools\");\n        if (!text.contains(\"--bare\")) found.add(\"no-bare\");\n        else if (!has(\"--append-system-prompt(-file)?\\\\b\", text)) found.add(\"bare-without-context\");\n        return found;\n    }\n\n    private static boolean isType(JsonNode value, String kind) {\n        return switch (kind) {\n            case \"object\" -> value.isObject();\n            case \"array\" -> value.isArray();\n            case \"string\" -> value.isTextual();\n            case \"boolean\" -> value.isBoolean();\n            case \"null\" -> value.isNull();\n            case \"integer\" -> value.isIntegralNumber();\n            case \"number\" -> value.isNumber();\n            default -> throw new IllegalArgumentException(kind);\n        };\n    }\n\n    /** Errors of a value against the JSON Schema subset the structured outputs support: type, enum, required, properties, items and additionalProperties false. */\n    static List<String> schemaCheck(JsonNode value, JsonNode schema, String path) {\n        List<String> wants = new ArrayList<>();\n        JsonNode want = schema.get(\"type\");\n        if (want != null) {\n            if (want.isArray()) want.forEach(w -> wants.add(w.asText()));\n            else wants.add(want.asText());\n        }\n        boolean ok = wants.isEmpty() || wants.stream().anyMatch(k -> isType(value, k));\n        if (!ok) return List.of(path + \": expected \" + String.join(\" or \", wants));\n        List<String> errors = new ArrayList<>();\n        JsonNode enumeration = schema.get(\"enum\");\n        if (enumeration != null) {\n            boolean found = false;\n            for (JsonNode e : enumeration) found |= e.equals(value);\n            if (!found) errors.add(path + \": \" + py(value) + \" is not one of \" + py(enumeration));\n        }\n        if (value.isObject()) {\n            JsonNode required = schema.get(\"required\");\n            if (required != null) for (JsonNode k : required) if (!value.has(k.asText())) errors.add(path + \".\" + k.asText() + \": is required\");\n            JsonNode extra = schema.get(\"additionalProperties\");\n            JsonNode properties = schema.has(\"properties\") ? schema.get(\"properties\") : JSON.createObjectNode();\n            if (extra != null && extra.isBoolean() && !extra.asBoolean()) {\n                for (var it = value.fieldNames(); it.hasNext();) {\n                    String k = it.next();\n                    if (!properties.has(k)) errors.add(path + \".\" + k + \": is not allowed\");\n                }\n            }\n            for (var it = properties.fields(); it.hasNext();) {\n                var sub = it.next();\n                if (value.has(sub.getKey())) errors.addAll(schemaCheck(value.get(sub.getKey()), sub.getValue(), path + \".\" + sub.getKey()));\n            }\n        }\n        if (value.isArray() && schema.has(\"items\")) {\n            for (int i = 0; i < value.size(); i++) errors.addAll(schemaCheck(value.get(i), schema.get(\"items\"), path + \"[\" + i + \"]\"));\n        }\n        return errors;\n    }\n\n    static List<String> schemaCheck(JsonNode value, JsonNode schema) {\n        return schemaCheck(value, schema, \"$\");\n    }\n\n    private static String text(JsonNode n) {\n        return n.asText();\n    }\n\n    /** Decide a review job from what `claude -p --output-format json --json-schema ...` printed. A run that failed in any way fails the job: it never passes by saying nothing. */\n    static Decision gate(String stdout, int exitCode, JsonNode schema, Policy policy) {\n        List<String> problems = new ArrayList<>();\n        if (exitCode != 0) problems.add(\"claude exited with status \" + exitCode);\n        JsonNode envelope;\n        try {\n            envelope = JSON.readTree(stdout);\n        } catch (Exception e) {\n            envelope = null;\n        }\n        if (envelope == null || !envelope.isObject()) {\n            problems.add(\"the output is not a JSON object\");\n            return new Decision(1, List.of(), problems);\n        }\n        JsonNode subtype = envelope.get(\"subtype\");\n        if (envelope.path(\"is_error\").asBoolean(false) || subtype == null || !subtype.isTextual() || !subtype.asText().equals(\"success\")) {\n            problems.add(\"the run ended with \" + (subtype == null || subtype.isNull() ? \"None\" : subtype.asText()));\n        }\n        JsonNode output = envelope.get(\"structured_output\");\n        if (output == null || output.isNull()) problems.add(\"the result has no structured_output\");\n        else for (String e : schemaCheck(output, schema)) problems.add(\"schema \" + e);\n        if (!problems.isEmpty()) return new Decision(1, List.of(), problems);\n        int floor = SEVERITIES.indexOf(policy.minSeverity());\n        List<Comment> comments = new ArrayList<>();\n        for (JsonNode f : output.get(\"findings\")) {\n            if (policy.disabledCategories().contains(text(f.get(\"category\"))) || SEVERITIES.indexOf(text(f.get(\"severity\"))) < floor) continue;\n            comments.add(new Comment(text(f.get(\"file\")), f.get(\"line\").asInt(), text(f.get(\"severity\")), text(f.get(\"issue\")) + \" Suggested fix: \" + text(f.get(\"suggested_fix\"))));\n        }\n        boolean blocked = comments.stream().anyMatch(c -> policy.failOn().contains(c.severity()));\n        return new Decision(blocked ? 1 : 0, comments, List.of());\n    }\n\n    static String envelope(Map<String, Object> over) {\n        Map<String, Object> body = new LinkedHashMap<>();\n        body.put(\"type\", \"result\");\n        body.put(\"subtype\", \"success\");\n        body.put(\"is_error\", false);\n        body.put(\"result\", \"done\");\n        body.put(\"num_turns\", 3);\n        body.put(\"total_cost_usd\", 0.05);\n        body.put(\"session_id\", \"s-1\");\n        body.putAll(over);\n        try {\n            return JSON.writeValueAsString(body);\n        } catch (Exception e) {\n            throw new IllegalStateException(e);\n        }\n    }\n\n    static String envelope() {\n        return envelope(Map.of());\n    }\n\n    /** Python's shlex.quote for one word. */\n    static String quote(String s) {\n        if (s.isEmpty()) return \"''\";\n        return s.matches(\"[\\\\w@%+=:,./-]+\") ? s : \"'\" + s.replace(\"'\", \"'\\\"'\\\"'\") + \"'\";\n    }\n\n    static String join(List<String> words) {\n        return words.stream().map(CiGate::quote).collect(Collectors.joining(\" \"));\n    }\n\n    static Map<String, Object> finding(String file, int line, String category, String severity, String issue, String fix, String pattern) {\n        Map<String, Object> f = new LinkedHashMap<>();\n        f.put(\"file\", file);\n        f.put(\"line\", line);\n        f.put(\"category\", category);\n        f.put(\"severity\", severity);\n        f.put(\"issue\", issue);\n        f.put(\"suggested_fix\", fix);\n        f.put(\"detected_pattern\", pattern);\n        return f;\n    }\n\n    public static void main(String[] args) {\n        List<String> command = buildCommand(\"Review the diff on standard input.\", json(\"{\\\"type\\\": \\\"object\\\", \\\"properties\\\": {\\\"findings\\\": {\\\"type\\\": \\\"array\\\"}}}\"), 8, List.of(\"Read\", \"Grep\"), \"CLAUDE.md\");\n        System.out.println(\"command: \" + String.join(\" \", command.subList(0, 5)) + \" ... \" + py(command.subList(command.size() - 4, command.size())));\n        System.out.println(\"lint, the good step: \" + py(lintCommand(\"git diff main | claude --bare -p 'Review.' --append-system-prompt-file CLAUDE.md --output-format json --json-schema '{}' --max-turns 8 --allowedTools 'Read,Grep'\")));\n        System.out.println(\"lint, a careless step: \" + py(lintCommand(\"claude 'Review the change' --allowedTools Bash,Edit\")));\n        Policy policy = new Policy(\"medium\", List.of(\"style\"), List.of(\"high\"));\n        List<Map<String, Object>> findings = List.of(\n            finding(\"api.py\", 12, \"bug\", \"high\", \"Unchecked None.\", \"Return early.\", \"missing-none-check\"),\n            finding(\"api.py\", 40, \"style\", \"high\", \"Long line.\", \"Wrap it.\", \"line-length\"),\n            finding(\"ui.py\", 3, \"bug\", \"low\", \"Odd name.\", \"Rename.\", \"naming\"));\n        Map<String, String[]> runs = new LinkedHashMap<>();\n        runs.put(\"a finding that blocks\", new String[] {envelope(Map.of(\"structured_output\", Map.of(\"findings\", findings))), \"0\"});\n        runs.put(\"no findings\", new String[] {envelope(Map.of(\"structured_output\", Map.of(\"findings\", List.of()))), \"0\"});\n        runs.put(\"turn limit\", new String[] {envelope(Map.of(\"subtype\", \"error_max_turns\", \"is_error\", true)), \"1\"});\n        runs.put(\"success without output\", new String[] {envelope(), \"0\"});\n        runs.put(\"not JSON\", new String[] {\"Error: no key\", \"1\"});\n        runs.put(\"wrong shape\", new String[] {envelope(Map.of(\"structured_output\", Map.of(\"findings\", List.of(Map.of(\"file\", \"a.py\"))))), \"0\"});\n        runs.forEach((label, run) -> {\n            Decision d = gate(run[0], Integer.parseInt(run[1]), REVIEW_SCHEMA, policy);\n            System.out.println(label + \": exit \" + d.exit() + \", \" + d.comments().size() + \" comment(s)\" + (d.problems().isEmpty() ? \"\" : \", \" + d.problems().get(0)));\n        });\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "command: claude --bare -p Review the diff on standard input. --append-system-prompt-file ... ['--max-turns', '8', '--allowedTools', 'Read,Grep']\nlint, the good step: []\nlint, a careless step: ['no-print', 'no-json', 'no-schema', 'no-turn-limit', 'wide-tools', 'no-bare']\na finding that blocks: exit 1, 1 comment(s)\nno findings: exit 0, 0 comment(s)\nturn limit: exit 1, 0 comment(s), claude exited with status 1\nsuccess without output: exit 1, 0 comment(s), the result has no structured_output\nnot JSON: exit 1, 0 comment(s), claude exited with status 1\nwrong shape: exit 1, 0 comment(s), schema $.findings[0].line: is required"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import com.fasterxml.jackson.databind.JsonNode\nimport com.fasterxml.jackson.databind.ObjectMapper\nimport harness.Show.py\n\nprivate val log = System.getLogger(\"ci_gate\")\n\n/**\n * A Claude Code review step in CI, from the command line to the exit status: build the headless command, lint a command someone wrote, and gate on the JSON the run prints.\n *\n * Facts checked on the Claude Code pages \"Run Claude Code programmatically\" and \"CLI reference\" and the Agent SDK pages on structured outputs and the result message\n * (read on 2026-10-03, Claude Code v2.1.286): `-p` runs without a prompt for input; `--output-format json` prints one JSON object whose `structured_output` field holds the\n * answer when `--json-schema` is given; a run can end with `is_error` true and a subtype such as `error_max_turns` or `error_max_structured_output_retries`; `--max-turns` exits with an error\n * when the limit is reached; `--bare` skips CLAUDE.md, hooks, skills, MCP servers and auto memory, so the context is passed with `--append-system-prompt-file`. The envelope below is\n * the shape the SDK documents for its result message; nothing here ran the real binary, needed a key or touched the network. The JSON is read with Jackson.\n */\nval SEVERITIES = listOf(\"low\", \"medium\", \"high\")\nprivate val JSON = ObjectMapper()\n\nfun json(text: String): JsonNode = JSON.readTree(text)\n\nval REVIEW_SCHEMA: JsonNode = json(\n    \"\"\"\n    {\"type\": \"object\",\n     \"properties\": {\"findings\": {\"type\": \"array\", \"items\": {\"type\": \"object\", \"properties\": {\n       \"file\": {\"type\": \"string\"}, \"line\": {\"type\": \"integer\"}, \"category\": {\"type\": \"string\", \"enum\": [\"bug\", \"security\", \"style\", \"other\"]},\n       \"severity\": {\"type\": \"string\", \"enum\": [\"low\", \"medium\", \"high\"]}, \"issue\": {\"type\": \"string\"}, \"suggested_fix\": {\"type\": \"string\"}, \"detected_pattern\": {\"type\": \"string\"}},\n       \"required\": [\"file\", \"line\", \"category\", \"severity\", \"issue\", \"suggested_fix\", \"detected_pattern\"], \"additionalProperties\": false}}},\n     \"required\": [\"findings\"], \"additionalProperties\": false}\n    \"\"\",\n)\n\n/** What a team decides about review findings: the lowest severity to post, the categories to drop and the severities that fail the job. */\ndata class Policy(val minSeverity: String, val disabledCategories: List<String>, val failOn: List<String>)\n\n/** One review comment to post. */\ndata class Comment(val file: String, val line: Int, val severity: String, val body: String)\n\n/** The decision: the exit status, the comments to post and what went wrong. */\ndata class Decision(val exit: Int, val comments: List<Comment>, val problems: List<String>)\n\n/** The argument list of a review run: headless, one JSON object out, the answer checked against a schema, a turn limit, read-only tools, and the project context passed by hand. */\nfun buildCommand(\n    prompt: String,\n    schema: JsonNode,\n    maxTurns: Int = 8,\n    tools: List<String> = listOf(\"Read\", \"Grep\", \"Glob\", \"Bash(git diff *)\"),\n    contextFile: String = \"CLAUDE.md\",\n): List<String> = listOf(\n    \"claude\", \"--bare\", \"-p\", prompt, \"--append-system-prompt-file\", contextFile, \"--output-format\", \"json\", \"--json-schema\", schema.toString(),\n    \"--max-turns\", maxTurns.toString(), \"--allowedTools\", tools.joinToString(\",\"),\n)\n\n/** Findings (rule ids) for the text of a shell step that runs `claude`: what a CI run needs and what it must not be allowed. */\nfun lintCommand(raw: String): List<String> {\n    val text = raw.replace(Regex(\"\"\"\\\\\\n\\s*\"\"\"), \" \")\n    val found = mutableListOf<String>()\n    if (!Regex(\"\"\"\\sclaude\\b\"\"\").containsMatchIn(\" $text\")) return listOf(\"no-claude-command\")\n    if (!Regex(\"\"\"\\s(-p|--print)\\b\"\"\").containsMatchIn(text)) found += \"no-print\"\n    if (!Regex(\"\"\"--output-format[ =]json\\b\"\"\").containsMatchIn(text)) found += \"no-json\"\n    if (!Regex(\"\"\"--json-schema\\b\"\"\").containsMatchIn(text)) found += \"no-schema\"\n    val turns = Regex(\"\"\"--max-turns[ =](\\d+)\"\"\").find(text)\n    if (turns == null || turns.groupValues[1].toInt() > 20) found += \"no-turn-limit\"\n    val allowed = Regex(\"\"\"--allowed[Tt]ools[ =](\"[^\"]*\"|'[^']*'|\\S+)\"\"\").find(text)\n    val names = if (allowed != null) Regex(\"\"\"[^\\s,(]+(?:\\([^)]*\\))?\"\"\").findAll(allowed.groupValues[1].trim().trim('\"', '\\'')).map { it.value }.toList() else emptyList()\n    if (allowed == null) found += \"no-tool-list\"\n    else if (names.any { it in listOf(\"Bash\", \"Edit\", \"Write\", \"MultiEdit\", \"NotebookEdit\") }) found += \"wide-tools\"\n    if (\"--bare\" !in text) found += \"no-bare\"\n    else if (!Regex(\"\"\"--append-system-prompt(-file)?\\b\"\"\").containsMatchIn(text)) found += \"bare-without-context\"\n    return found\n}\n\nprivate fun isType(value: JsonNode, kind: String): Boolean = when (kind) {\n    \"object\" -> value.isObject\n    \"array\" -> value.isArray\n    \"string\" -> value.isTextual\n    \"boolean\" -> value.isBoolean\n    \"null\" -> value.isNull\n    \"integer\" -> value.isIntegralNumber\n    \"number\" -> value.isNumber\n    else -> throw IllegalArgumentException(kind)\n}\n\n/** Errors of a value against the JSON Schema subset the structured outputs support: type, enum, required, properties, items and additionalProperties false. */\nfun schemaCheck(value: JsonNode, schema: JsonNode, path: String = \"$\"): List<String> {\n    val want = schema.get(\"type\")\n    val wants = when {\n        want == null -> emptyList()\n        want.isArray -> want.map { it.asText() }\n        else -> listOf(want.asText())\n    }\n    if (wants.isNotEmpty() && wants.none { isType(value, it) }) return listOf(\"$path: expected ${wants.joinToString(\" or \")}\")\n    val errors = mutableListOf<String>()\n    val enumeration = schema.get(\"enum\")\n    if (enumeration != null && enumeration.none { it == value }) errors += \"$path: ${py(value)} is not one of ${py(enumeration)}\"\n    if (value.isObject) {\n        schema.get(\"required\")?.forEach { k -> if (!value.has(k.asText())) errors += \"$path.${k.asText()}: is required\" }\n        val properties = schema.get(\"properties\")\n        val extra = schema.get(\"additionalProperties\")\n        if (extra != null && extra.isBoolean && !extra.asBoolean()) value.fieldNames().forEach { k -> if (properties == null || !properties.has(k)) errors += \"$path.$k: is not allowed\" }\n        properties?.fields()?.forEach { (k, sub) -> if (value.has(k)) errors += schemaCheck(value.get(k), sub, \"$path.$k\") }\n    }\n    if (value.isArray && schema.has(\"items\")) value.forEachIndexed { i, item -> errors += schemaCheck(item, schema.get(\"items\"), \"$path[$i]\") }\n    return errors\n}\n\n/** Decide a review job from what `claude -p --output-format json --json-schema ...` printed. A run that failed in any way fails the job: it never passes by saying nothing. */\nfun gate(stdout: String, exitCode: Int, schema: JsonNode, policy: Policy): Decision {\n    val problems = mutableListOf<String>()\n    if (exitCode != 0) problems += \"claude exited with status $exitCode\"\n    val envelope = try { JSON.readTree(stdout) } catch (e: Exception) { null }\n    if (envelope == null || !envelope.isObject) return Decision(1, emptyList(), problems + \"the output is not a JSON object\")\n    val subtype = envelope.get(\"subtype\")\n    if (envelope.path(\"is_error\").asBoolean(false) || subtype == null || !subtype.isTextual || subtype.asText() != \"success\") {\n        problems += \"the run ended with ${if (subtype == null || subtype.isNull) \"None\" else subtype.asText()}\"\n    }\n    val output = envelope.get(\"structured_output\")\n    if (output == null || output.isNull) problems += \"the result has no structured_output\" else problems += schemaCheck(output, schema).map { \"schema $it\" }\n    if (problems.isNotEmpty()) return Decision(1, emptyList(), problems)\n    val floor = SEVERITIES.indexOf(policy.minSeverity)\n    val comments = output!!.get(\"findings\")\n        .filter { it.get(\"category\").asText() !in policy.disabledCategories && SEVERITIES.indexOf(it.get(\"severity\").asText()) >= floor }\n        .map { Comment(it.get(\"file\").asText(), it.get(\"line\").asInt(), it.get(\"severity\").asText(), \"${it.get(\"issue\").asText()} Suggested fix: ${it.get(\"suggested_fix\").asText()}\") }\n    val blocked = comments.any { it.severity in policy.failOn }\n    return Decision(if (blocked) 1 else 0, comments, emptyList())\n}\n\nfun envelope(over: Map<String, Any?> = emptyMap()): String =\n    JSON.writeValueAsString(linkedMapOf<String, Any?>(\"type\" to \"result\", \"subtype\" to \"success\", \"is_error\" to false, \"result\" to \"done\", \"num_turns\" to 3, \"total_cost_usd\" to 0.05, \"session_id\" to \"s-1\") + over)\n\n/** Python's shlex.quote for one word. */\nfun quote(s: String): String = if (s.isEmpty()) \"''\" else if (Regex(\"\"\"[\\w@%+=:,./-]+\"\"\").matches(s)) s else \"'\" + s.replace(\"'\", \"'\\\"'\\\"'\") + \"'\"\n\nfun join(words: List<String>): String = words.joinToString(\" \") { quote(it) }\n\nfun finding(file: String = \"api.py\", line: Int = 12, category: String = \"bug\", severity: String = \"medium\", issue: String = \"Unchecked None.\", fix: String = \"Return early.\", pattern: String = \"missing-none-check\"): MutableMap<String, Any?> =\n    linkedMapOf(\"file\" to file, \"line\" to line, \"category\" to category, \"severity\" to severity, \"issue\" to issue, \"suggested_fix\" to fix, \"detected_pattern\" to pattern)\n\nfun main() {\n    val command = buildCommand(\"Review the diff on standard input.\", json(\"\"\"{\"type\": \"object\", \"properties\": {\"findings\": {\"type\": \"array\"}}}\"\"\"), tools = listOf(\"Read\", \"Grep\"))\n    println(\"command: ${command.take(5).joinToString(\" \")} ... ${py(command.takeLast(4))}\")\n    println(\"lint, the good step: ${py(lintCommand(\"git diff main | claude --bare -p 'Review.' --append-system-prompt-file CLAUDE.md --output-format json --json-schema '{}' --max-turns 8 --allowedTools 'Read,Grep'\"))}\")\n    println(\"lint, a careless step: ${py(lintCommand(\"claude 'Review the change' --allowedTools Bash,Edit\"))}\")\n    val policy = Policy(\"medium\", listOf(\"style\"), listOf(\"high\"))\n    val findings = listOf(\n        finding(severity = \"high\", issue = \"Unchecked None.\", fix = \"Return early.\", pattern = \"missing-none-check\"),\n        finding(line = 40, category = \"style\", severity = \"high\", issue = \"Long line.\", fix = \"Wrap it.\", pattern = \"line-length\"),\n        finding(file = \"ui.py\", line = 3, severity = \"low\", issue = \"Odd name.\", fix = \"Rename.\", pattern = \"naming\"),\n    )\n    val runs = linkedMapOf(\n        \"a finding that blocks\" to (envelope(mapOf(\"structured_output\" to mapOf(\"findings\" to findings))) to 0),\n        \"no findings\" to (envelope(mapOf(\"structured_output\" to mapOf(\"findings\" to emptyList<Any>()))) to 0),\n        \"turn limit\" to (envelope(mapOf(\"subtype\" to \"error_max_turns\", \"is_error\" to true)) to 1),\n        \"success without output\" to (envelope() to 0),\n        \"not JSON\" to (\"Error: no key\" to 1),\n        \"wrong shape\" to (envelope(mapOf(\"structured_output\" to mapOf(\"findings\" to listOf(mapOf(\"file\" to \"a.py\"))))) to 0),\n    )\n    for ((label, run) in runs) {\n        val d = gate(run.first, run.second, REVIEW_SCHEMA, policy)\n        println(\"$label: exit ${d.exit}, ${d.comments.size} comment(s)${if (d.problems.isNotEmpty()) \", \" + d.problems[0] else \"\"}\")\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "command: claude --bare -p Review the diff on standard input. --append-system-prompt-file ... ['--max-turns', '8', '--allowedTools', 'Read,Grep']\nlint, the good step: []\nlint, a careless step: ['no-print', 'no-json', 'no-schema', 'no-turn-limit', 'wide-tools', 'no-bare']\na finding that blocks: exit 1, 1 comment(s)\nno findings: exit 0, 0 comment(s)\nturn limit: exit 1, 0 comment(s), claude exited with status 1\nsuccess without output: exit 1, 0 comment(s), the result has no structured_output\nnot JSON: exit 1, 0 comment(s), claude exited with status 1\nwrong shape: exit 1, 0 comment(s), schema $.findings[0].line: is required"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**\"Run `claude -p` and treat exit status 0 as a passed review.\"** It is tempting because the step ran. The exam rejects it: a run can end in a limit, an error subtype or an empty result, so the job must read the JSON and fail unless a valid answer is present.",
+        "**\"Ask for prose and parse the findings with a regular expression.\"** It is tempting because it needs no schema. The exam rejects it: `--output-format json` with `--json-schema` returns a validated object in `structured_output`, which is what inline comments are built from.",
+        "**\"Allow `Bash` so the review can run `git diff`.\"** It is tempting because the review needs the diff. The exam rejects it: a bare `Bash` allows any command in an unattended run. Pass the diff in, or list a narrow pattern such as `Bash(git diff *)`.",
+        "**\"A `success` subtype means the findings are there.\"** It is tempting because success sounds final. The documentation rejects it: a run can end with `success` and no `structured_output`, and that is a failure."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A CI step runs Claude Code unattended, and each issue it reports must be posted as an inline note. Which flags make the reply usable for that?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: `--output-format text` with a prompt asking for a bulleted list",
+              "**b**: `--max-turns` with a high limit so that the list is complete",
+              "**c**: `--output-format json` with `--json-schema`",
+              "**d**: `--bare` alone, which formats replies for scripts"
+            ]
+          }
+        ],
+        [
+          "A review run ends with the subtype `success`, yet the object holds no `structured_output`. What should the job do?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Fail, because no valid answer exists",
+              "**b**: Pass, since the run reports success",
+              "**c**: Retry the same request until a value appears",
+              "**d**: Pass, with a note that nothing was reported"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**c**. The schema makes the answer a validated object in `structured_output`. *a* is ruled out because text leaves the entries to be parsed from prose, and \"a decision made on prose is a guess\". *b* is ruled out because a limit bounds the loop and does not shape the answer: \"The run exits with an error at the limit\". *d* is ruled out because the flag controls what the run loads, with \"no hooks, skills, MCP servers, memory or CLAUDE.md\", and formats nothing.",
+            "**a**. A run without a valid answer is a failure whatever its subtype says. *b* is ruled out because the documentation says \"Treat that case as a failure as well\". *c* is ruled out because \"Retrying inside the job repeats cost with no reason to expect a different result\". *d* is ruled out because \"A job never passes by saying nothing\", and a silent pass cannot be told from a failed run."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Adapted from the Claude Certified Architect - Foundations exam preparation guide by Daron Yondem (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/), changed for this course."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 12,
+    "code": 0,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 1,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "932efb9b15d388847232ff76591819249a8b75204b61fc416586e8934e3887e8"
+}

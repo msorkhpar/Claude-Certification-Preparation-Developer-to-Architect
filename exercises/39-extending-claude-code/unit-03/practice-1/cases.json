@@ -1,0 +1,152 @@
+{
+  "practice": "39-extending-claude-code/unit-03/practice-1",
+  "name": "personal_setup",
+  "tests": {
+    "java": "PersonalSetupTest",
+    "kotlin": "PersonalSetupTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_the_user_level_holds_a_style_a_status_line_and_a_keybindings_file_that_fit_together",
+      "typescript": "m1 the user level holds a style a status line and a keybindings file that fit together",
+      "java": "m1_theUserLevelHoldsAStyleAStatusLineAndAKeybindingsFileThatFitTogether",
+      "kotlin": "m1_theUserLevelHoldsAStyleAStatusLineAndAKeybindingsFileThatFitTogether"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_the_style_file_keeps_the_coding_instructions_and_carries_only_documented_fields",
+      "typescript": "e1 the style file keeps the coding instructions and carries only documented fields",
+      "java": "e1_theStyleFileKeepsTheCodingInstructionsAndCarriesOnlyDocumentedFields",
+      "kotlin": "e1_theStyleFileKeepsTheCodingInstructionsAndCarriesOnlyDocumentedFields"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_the_status_line_reads_only_fields_the_session_sends_and_refreshes_no_faster_than_every_second",
+      "typescript": "e2 the status line reads only fields the session sends and refreshes no faster than every second",
+      "java": "e2_theStatusLineReadsOnlyFieldsTheSessionSendsAndRefreshesNoFasterThanEverySecond",
+      "kotlin": "e2_theStatusLineReadsOnlyFieldsTheSessionSendsAndRefreshesNoFasterThanEverySecond"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_the_keybindings_use_real_contexts_and_actions_free_keys_and_a_null_to_unbind",
+      "typescript": "e3 the keybindings use real contexts and actions free keys and a null to unbind",
+      "java": "e3_theKeybindingsUseRealContextsAndActionsFreeKeysAndANullToUnbind",
+      "kotlin": "e3_theKeybindingsUseRealContextsAndActionsFreeKeysAndANullToUnbind"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_personal_settings_stay_in_the_user_files_and_the_project_file_stays_shared",
+      "typescript": "e4 personal settings stay in the user files and the project file stays shared",
+      "java": "e4_personalSettingsStayInTheUserFilesAndTheProjectFileStaysShared",
+      "kotlin": "e4_personalSettingsStayInTheUserFilesAndTheProjectFileStaysShared"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_the_local_settings_file_is_kept_out_of_git",
+      "typescript": "e5 the local settings file is kept out of git",
+      "java": "e5_theLocalSettingsFileIsKeptOutOfGit",
+      "kotlin": "e5_theLocalSettingsFileIsKeptOutOfGit"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_no_file_holds_a_personal_path_an_address_a_key_or_an_unfinished_marker",
+      "typescript": "e6 no file holds a personal path an address a key or an unfinished marker",
+      "java": "e6_noFileHoldsAPersonalPathAnAddressAKeyOrAnUnfinishedMarker",
+      "kotlin": "e6_noFileHoldsAPersonalPathAnAddressAKeyOrAnUnfinishedMarker"
+    }
+  },
+  "plants": {
+    "wrong-style-name-case": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "selects the style by a name that differs from the style file in its capitals, which silently gives the default style"
+    },
+    "wrong-status-command-outside-user-folder": {
+      "caught_by": [
+        "m1",
+        "e2"
+      ],
+      "defect": "points the status line at a script that is not in the .claude folder of the user"
+    },
+    "wrong-style-drops-coding": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "turns off the coding instructions of a style that only changes how replies read"
+    },
+    "wrong-style-field-misspelled": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "misspells a front matter field, which Claude Code ignores without an error"
+    },
+    "wrong-status-field-unknown": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "reads a field that the session JSON does not carry"
+    },
+    "wrong-status-refresh-zero": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "sets a refresh interval below the one second minimum"
+    },
+    "wrong-key-reserved": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "rebinds Ctrl+C, which cannot be rebound"
+    },
+    "wrong-key-context-case": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "writes a context name in lower case"
+    },
+    "wrong-key-modifier-typo": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "misspells a modifier in a keystroke"
+    },
+    "wrong-no-unbind": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "frees no default key with a null binding"
+    },
+    "wrong-style-in-project-file": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "puts the personal style in the shared project file"
+    },
+    "wrong-local-style-lowercase": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "overrides the style locally with a name in lower case"
+    },
+    "wrong-local-file-tracked": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "leaves the local settings file out of the ignore file"
+    },
+    "wrong-home-path-in-script": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "writes a home folder path into the status line script"
+    },
+    "wrong-address-in-style": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "writes an e-mail address into the style description"
+    }
+  }
+}

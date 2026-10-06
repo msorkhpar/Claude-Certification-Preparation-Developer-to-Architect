@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/kotlin/Decompose.kt",
+      "old": "val chunk = lines.subList(part * maxLines, minOf(lines.size, (part + 1) * maxLines)).joinToString(\"\\n\")",
+      "new": "val chunk = (if (maxLines == 40) files.map { it.getValue(\"text\") } else lines.subList(part * maxLines, minOf(lines.size, (part + 1) * maxLines))).joinToString(\"\\n\")"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "router.ts",
+      "old": "(usage.output_tokens ?? 0) * model.output;\n  return Math.round(applyBatch(total, batch) * 1e6) / 1e6;",
+      "new": "(usage.output_tokens ?? 0) * model.output * (batch ? 0.5 : 1);\n  return Math.round(total * 1e6) / 1e6;"
+    }
+  ]
+}

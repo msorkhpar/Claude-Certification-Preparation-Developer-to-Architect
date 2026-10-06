@@ -1,0 +1,122 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "60-claude-code-in-ci"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 5,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: What the run knows: context, independence and the practice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A review job runs on every push and keeps posting remarks that the author has already fixed. What fixes it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Raise the turn limit so that the run can compare with earlier comments",
+            "correct": false,
+            "says": "Ruled out because \"A CI run does not remember the last one\", and a longer loop does not change that."
+          },
+          {
+            "id": "b",
+            "text": "Put earlier reports in the prompt and ask for new issues only",
+            "correct": true,
+            "says": "A run has no memory of the last one, so what was reported must be in the prompt."
+          },
+          {
+            "id": "c",
+            "text": "Tell the reviewer to be more conservative about what it reports",
+            "correct": false,
+            "says": "Ruled out because such wording does not change what a reviewer reports, since vague instructions \"leave the threshold unstated\"."
+          },
+          {
+            "id": "d",
+            "text": "Run the review inside the session that wrote the change",
+            "correct": false,
+            "says": "Ruled out because the writing session is \"less effective at reviewing its own changes\" and still would not know what was said on earlier pushes."
+          }
+        ],
+        "origin": {
+          "path": "course/60-claude-code-in-ci/02-context-independence-and-the-practice.md",
+          "section": "A re-run needs memory it does not have"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A job that drafts additional checks keeps proposing situations that are already exercised. What belongs in its prompt?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A request for many more checks so that coverage becomes certain",
+            "correct": false,
+            "says": "Ruled out because more proposals add duplicates, while the aim is \"so that suggestions do not duplicate covered scenarios\"."
+          },
+          {
+            "id": "b",
+            "text": "The production code alone, to keep the whole prompt short",
+            "correct": false,
+            "says": "Ruled out because without the tests the run cannot see what is covered: \"put the existing tests in the prompt\"."
+          },
+          {
+            "id": "c",
+            "text": "A lower turn limit, so that fewer proposals come back at all",
+            "correct": false,
+            "says": "Ruled out because a record of earlier work carried by the prompt \"is the only state the pipeline has\", and a turn limit adds none."
+          },
+          {
+            "id": "d",
+            "text": "The test files that exist, plus a request to skip covered cases",
+            "correct": true,
+            "says": "The remedy is to show the run what the suite already covers."
+          }
+        ],
+        "origin": {
+          "path": "course/60-claude-code-in-ci/02-context-independence-and-the-practice.md",
+          "section": "What the run knows: context, independence and the practice"
+        }
+      }
+    ],
+    "concepts": [
+      "A re-run needs memory it does not have, as the page teaches it",
+      "The criteria live in a file, as the page teaches it",
+      "What the run knows: context, independence and the practice, as the page teaches it"
+    ]
+  }
+}

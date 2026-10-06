@@ -1,0 +1,307 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "45-the-agentic-loop-in-depth"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: an agent loop that is driven by the stop reason (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an agent loop that is driven by the stop reason"
+    },
+    {
+      "type": "para",
+      "text": "The loop of module 26 ran until the model stopped asking for tools. This practice builds the loop an architect would ship: one that ends only when the model's own stop reason says so, treats the turn limit as a backstop and not as the way a run normally ends, and keeps the conversation in a state the API accepts. Nothing here touches the network: the model is a function that the tests script."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`model`",
+          "a function from the list of messages so far to one reply: `{\"stop_reason\": ..., \"content\": [blocks]}`; a block is `{\"type\": \"text\", \"text\": ...}` or `{\"type\": \"tool_use\", \"id\": ..., \"name\": ..., \"input\": {...}}`"
+        ],
+        [
+          "`tools`",
+          "a map from a tool name to a handler: a function from the input map to a string; it may throw"
+        ],
+        [
+          "`task`",
+          "the first user message, a string"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working loop with six small gaps cut out. The loop itself, the tool runner and the outcome are written and correct; each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_text` unlocks `m1` and `e5`: the text blocks of a reply joined together.",
+        "`_calls` unlocks `e2` and `e6`: the `tool_use` blocks of a reply, in order.",
+        "`_tool_result` unlocks `m1`, `e2` and `e3`: one result block, with `is_error` only when flagged.",
+        "`_status_for` unlocks `m1`, `e5` and `e6`: the status for each stop reason that ends the run, including `malformed` for `tool_use` with no call.",
+        "`_at_limit` unlocks `e4`: whether the turn limit has been reached before the next model call.",
+        "`_snapshot` unlocks `m1`: the copy of the messages the model is handed."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About ten lines in all. The sections below describe the whole loop."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "`run_agent(model, tools, task, max_turns=8)` (`runAgent` in TypeScript, Java and Kotlin) returns `{\"status\", \"text\", \"turns\", \"messages\"}`."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Start with the one user message `{\"role\": \"user\", \"content\": task}`. One **turn** is one call of `model`. Hand the model a copy of the messages so far (a list with the same items), so that later changes do not rewrite what it was given.",
+        "Keep every reply exactly as it came: add `{\"role\": \"assistant\", \"content\": <the reply's content list>}`. `text` is always the text blocks of the latest reply joined together (empty when it has none).",
+        [
+          "Decide what happens next from `stop_reason` and from nothing else. Words in the text, such as \"done\" or \"I will call a tool\", never decide anything.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`tool_use`: run every `tool_use` block of the reply, in order, and answer all of them in **one** user message whose content is the list of results and nothing else: `{\"type\": \"tool_result\", \"tool_use_id\": <the call's id>, \"content\": <the handler's string>}`. A handler that throws, or a name that is not in `tools`, still gets a result, with `\"is_error\": true` added: the content is the exception's message, or `Unknown tool: NAME`. The run goes on. A result without an error has no `is_error` key.",
+              "`end_turn` or `stop_sequence`: status `done`.",
+              "`max_tokens`: status `truncated`. `refusal`: status `refused`.",
+              "any other value: status `unexpected`. The loop does not guess what a stop reason it has never seen means.",
+              "`tool_use` with no `tool_use` block in the reply: status `malformed`. There is nothing to answer, and an empty user message would be refused by the API, so nothing more is sent."
+            ]
+          }
+        ],
+        "`max_turns` is a backstop. Check it **before** each model call: when `turns` already equals `max_turns` and the model has not ended its turn, return status `max_turns` with the messages as they stand (they end with the last tool results, so the run can be resumed). A reply that ends the turn on the last allowed call is still `done`. `turns` is the number of model calls made."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each step is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Keep the conversation as the model's memory** (steps 1 and 2). The exam expects the results of the tools to be appended to the history so that the model can reason about its next action, and the replies to be kept as they came. *You should see* the second model call receive the first reply and its tool results, and a change that you make to your own list leave an earlier call's input as it was.",
+        "**Decide on the stop reason alone** (step 3, first part). The exam names reading the text for a completion signal as an anti-pattern, because a reply can say \"done\" and call a tool in the same breath. *You should see* a reply that says \"done\" with a tool call continue, and a reply that says \"I will call a tool\" with the end of its turn stop.",
+        "**Answer every call, once, in one message** (step 3, `tool_use`). The API needs a result for every call of a turn, and a failure is information for the model, not a reason to stop. *You should see* all the results of a turn together, in order, with the failing or unknown tool flagged and the run going on.",
+        "**Give the turn limit its proper job** (step 4). The exam rejects an arbitrary cap as the main stopper and accepts it as a backstop. *You should see* an endless run end with its own status and the messages intact, and a run that finishes on the last allowed call still report `done`.",
+        "**Give every other value a status** (step 3, the rest). A cut-off, a refusal and a value you have never seen are different events. *You should see* `truncated`, `refused` and `unexpected` come out as themselves, and nothing more sent after a malformed reply."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A run alternates model and tools until the model ends its turn, and the model sees the growing conversation"
+        ],
+        [
+          "`e1`",
+          "The stop reason decides: a reply that says \"done\" but calls a tool continues, and one that announces a tool but ends its turn ends"
+        ],
+        [
+          "`e2`",
+          "Every call of a turn is answered in one user message, in order, with the assistant turn kept as it came"
+        ],
+        [
+          "`e3`",
+          "A failing or unknown tool becomes an error result and the run goes on"
+        ],
+        [
+          "`e4`",
+          "The turn limit is a backstop: it ends an endless run with its own status and does not cut off a run that ends on the last turn"
+        ],
+        [
+          "`e5`",
+          "A cut-off, refused, stop-sequence or never-seen stop reason ends the run with the right status"
+        ],
+        [
+          "`e6`",
+          "A `tool_use` reply with no tool call is malformed and nothing more is sent"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.function.Function;\n\n/** The agent loop, driven by the stop reason. See ../../statement.md. Messages and replies are JSON-like maps. */\nfinal class AgentLoop {\n    private static final System.Logger LOG = System.getLogger(AgentLoop.class.getName());\n    private AgentLoop() {}\n\n    private static Map<String, Object> map(Object... kv) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);\n        return m;\n    }\n\n    private static String textOf(List<Map<String, Object>> content) {\n        StringBuilder sb = new StringBuilder();\n        for (Map<String, Object> block : content) if (\"text\".equals(block.get(\"type\"))) sb.append(block.getOrDefault(\"text\", \"\"));\n        return sb.toString();\n    }\n\n    private static List<Map<String, Object>> callsOf(List<Map<String, Object>> content) {\n        List<Map<String, Object>> calls = new ArrayList<>();\n        for (Map<String, Object> block : content) if (\"tool_use\".equals(block.get(\"type\"))) calls.add(block);\n        return calls;\n    }\n\n    private static Map<String, Object> toolResult(Map<String, Object> block, String content, boolean isError) {\n        Map<String, Object> result = map(\"type\", \"tool_result\", \"tool_use_id\", block.get(\"id\"), \"content\", content);\n        if (isError) result.put(\"is_error\", true);\n        return result;\n    }\n\n    private static String statusFor(String reason, List<Map<String, Object>> calls) {\n        if (reason.equals(\"tool_use\") && calls.isEmpty()) return \"malformed\";\n        return switch (reason) {\n            case \"end_turn\", \"stop_sequence\" -> \"done\";\n            case \"max_tokens\" -> \"truncated\";\n            case \"refusal\" -> \"refused\";\n            default -> \"unexpected\";\n        };\n    }\n\n    private static boolean atLimit(int turns, int maxTurns) {\n        return turns >= maxTurns;\n    }\n\n    private static List<Map<String, Object>> snapshot(List<Map<String, Object>> messages) {\n        return new ArrayList<>(messages);\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static Map<String, Object> runTool(Map<String, Object> block, Map<String, Function<Map<String, Object>, String>> tools) {\n        String name = (String) block.get(\"name\");\n        Function<Map<String, Object>, String> handler = tools.get(name);\n        if (handler == null) return toolResult(block, \"Unknown tool: \" + name, true);\n        try {\n            Object input = block.get(\"input\");\n            return toolResult(block, handler.apply(input == null ? Map.of() : (Map<String, Object>) input), false);\n        } catch (RuntimeException error) { // a failing tool is a result for the model, not a crash of the loop\n            return toolResult(block, String.valueOf(error.getMessage()), true);\n        }\n    }\n\n    private static Map<String, Object> outcome(String status, String text, int turns, List<Map<String, Object>> messages) {\n        return map(\"status\", status, \"text\", text, \"turns\", turns, \"messages\", messages);\n    }\n\n    static Map<String, Object> runAgent(Function<List<Map<String, Object>>, Map<String, Object>> model, Map<String, Function<Map<String, Object>, String>> tools, String task) {\n        return runAgent(model, tools, task, 8);\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> runAgent(Function<List<Map<String, Object>>, Map<String, Object>> model, Map<String, Function<Map<String, Object>, String>> tools, String task, int maxTurns) {\n        LOG.log(System.Logger.Level.DEBUG, \"runAgent input: {0}\", task);\n        List<Map<String, Object>> messages = new ArrayList<>();\n        messages.add(map(\"role\", \"user\", \"content\", task));\n        int turns = 0;\n        String lastText = \"\";\n        while (true) {\n            if (atLimit(turns, maxTurns)) return outcome(\"max_turns\", lastText, turns, messages); // the count is a backstop: it only ends a run the model has not ended itself\n            turns++;\n            Map<String, Object> reply = model.apply(snapshot(messages));\n            List<Map<String, Object>> content = (List<Map<String, Object>>) reply.get(\"content\");\n            lastText = textOf(content);\n            messages.add(map(\"role\", \"assistant\", \"content\", content));\n            String reason = (String) reply.get(\"stop_reason\");\n            List<Map<String, Object>> calls = callsOf(content);\n            if (!\"tool_use\".equals(reason) || calls.isEmpty()) return outcome(statusFor(reason, calls), lastText, turns, messages);\n            List<Map<String, Object>> results = new ArrayList<>();\n            for (Map<String, Object> block : calls) results.add(runTool(block, tools));\n            messages.add(map(\"role\", \"user\", \"content\", results));\n        }\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.List;\nimport java.util.function.Function;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // A scripted model, like the one the tests use: it asks for one tool call, then ends its turn.\n        List<Map<String, Object>> replies = new ArrayList<>(List.of(\n            Map.of(\"stop_reason\", \"tool_use\", \"content\", List.of(Map.of(\"type\", \"text\", \"text\", \"Looking.\"),\n                Map.of(\"type\", \"tool_use\", \"id\", \"t1\", \"name\", \"lookup\", \"input\", Map.of(\"n\", 1)))),\n            Map.of(\"stop_reason\", \"end_turn\", \"content\", List.of(Map.of(\"type\", \"text\", \"text\", \"Record 1 found.\")))));\n        Function<List<Map<String, Object>>, Map<String, Object>> model = messages -> {\n            System.out.println(\"model called with \" + messages.size() + \" messages\");\n            return replies.isEmpty()\n                ? Map.of(\"stop_reason\", \"end_turn\", \"content\", List.of(Map.of(\"type\", \"text\", \"text\", \"script ran out\")))\n                : replies.remove(0);\n        };\n        Map<String, Function<Map<String, Object>, String>> tools = Map.of(\"lookup\", arguments -> \"record \" + arguments.get(\"n\"));\n\n        Map<String, Object> result = AgentLoop.runAgent(model, tools, \"find record 1\");\n\n        System.out.println(\"status: \" + (result == null ? null : result.get(\"status\")) + \" | turns: \" + (result == null ? null : result.get(\"turns\")));\n        System.out.println(\"final text: \" + (result == null ? null : result.get(\"text\")));\n        System.out.println(\"roles: \" + (result == null || !(result.get(\"messages\") instanceof List<?> ms) ? null : ms.stream().map(m -> ((Map<?, ?>) m).get(\"role\")).toList()));\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.function.Function;\n\n/** The agent loop, driven by the stop reason. See ../../statement.md. Messages and replies are JSON-like maps. */\nfinal class AgentLoop {\n    private static final System.Logger LOG = System.getLogger(AgentLoop.class.getName());\n    private AgentLoop() {}\n\n    private static Map<String, Object> map(Object... kv) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);\n        return m;\n    }\n\n    /**\n     * TODO 1 of 6 (unlocks m1 and e5): the text of a reply.\n     * Receives a reply's content list of blocks. Returns the \"text\" of every block whose type is \"text\", joined with nothing between.\n     * Example: [text \"Hi \", tool_use, text \"there\"] -> \"Hi there\"\n     */\n    private static String textOf(List<Map<String, Object>> content) {\n        return \"\";\n    }\n\n    /**\n     * TODO 2 of 6 (unlocks e2 and e6): the tool calls of a reply.\n     * Receives a reply's content list. Returns its tool_use blocks, in order; an empty list when there are none.\n     * Example: [text \"x\", tool_use a] -> [tool_use a]\n     */\n    private static List<Map<String, Object>> callsOf(List<Map<String, Object>> content) {\n        return new ArrayList<>();\n    }\n\n    /**\n     * TODO 3 of 6 (unlocks m1, e2 and e3): one tool_result block.\n     * Receives the tool_use block, the result text and a flag. Returns {type: tool_result, tool_use_id: the block's id, content: the text},\n     * with is_error true added only when the flag is set (a good result has no is_error key). Use map(...) to build it.\n     * Example: (block with id t1, \"boom\", true) -> {type: tool_result, tool_use_id: t1, content: boom, is_error: true}\n     */\n    private static Map<String, Object> toolResult(Map<String, Object> block, String content, boolean isError) {\n        return map();\n    }\n\n    /**\n     * TODO 4 of 6 (unlocks m1, e5 and e6): the status a stop reason ends the run with (the loop only gets here when it cannot go on).\n     * Receives the stop reason and the tool calls of the reply. Returns \"malformed\" for tool_use with no calls, \"done\" for end_turn and\n     * stop_sequence, \"truncated\" for max_tokens, \"refused\" for refusal and \"unexpected\" for anything else.\n     * Example: (\"max_tokens\", no calls) -> \"truncated\", (\"tool_use\", no calls) -> \"malformed\", (\"brand_new\", no calls) -> \"unexpected\"\n     */\n    private static String statusFor(String reason, List<Map<String, Object>> calls) {\n        return \"\";\n    }\n\n    /**\n     * TODO 5 of 6 (unlocks e4): has the turn limit been reached before the next model call?\n     * Receives the model calls made so far and the limit. Returns true when no call is left. Example: (3, 3) -> true, (2, 3) -> false\n     */\n    private static boolean atLimit(int turns, int maxTurns) {\n        return false;\n    }\n\n    /**\n     * TODO 6 of 6 (unlocks m1): the copy of the messages that the model is handed.\n     * Receives the list of messages so far. Returns a new list with the same items, so later changes do not rewrite what the model saw.\n     * Example: [a, b] -> a new list [a, b]\n     */\n    private static List<Map<String, Object>> snapshot(List<Map<String, Object>> messages) {\n        return messages;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static Map<String, Object> runTool(Map<String, Object> block, Map<String, Function<Map<String, Object>, String>> tools) {\n        String name = (String) block.get(\"name\");\n        Function<Map<String, Object>, String> handler = tools.get(name);\n        if (handler == null) return toolResult(block, \"Unknown tool: \" + name, true);\n        try {\n            Object input = block.get(\"input\");\n            return toolResult(block, handler.apply(input == null ? Map.of() : (Map<String, Object>) input), false);\n        } catch (RuntimeException error) { // a failing tool is a result for the model, not a crash of the loop\n            return toolResult(block, String.valueOf(error.getMessage()), true);\n        }\n    }\n\n    private static Map<String, Object> outcome(String status, String text, int turns, List<Map<String, Object>> messages) {\n        return map(\"status\", status, \"text\", text, \"turns\", turns, \"messages\", messages);\n    }\n\n    static Map<String, Object> runAgent(Function<List<Map<String, Object>>, Map<String, Object>> model, Map<String, Function<Map<String, Object>, String>> tools, String task) {\n        return runAgent(model, tools, task, 8);\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> runAgent(Function<List<Map<String, Object>>, Map<String, Object>> model, Map<String, Function<Map<String, Object>, String>> tools, String task, int maxTurns) {\n        LOG.log(System.Logger.Level.DEBUG, \"runAgent input: {0}\", task);\n        List<Map<String, Object>> messages = new ArrayList<>();\n        messages.add(map(\"role\", \"user\", \"content\", task));\n        int turns = 0;\n        String lastText = \"\";\n        while (true) {\n            if (atLimit(turns, maxTurns)) return outcome(\"max_turns\", lastText, turns, messages); // the count is a backstop: it only ends a run the model has not ended itself\n            turns++;\n            Map<String, Object> reply = model.apply(snapshot(messages));\n            List<Map<String, Object>> content = (List<Map<String, Object>>) reply.get(\"content\");\n            lastText = textOf(content);\n            messages.add(map(\"role\", \"assistant\", \"content\", content));\n            String reason = (String) reply.get(\"stop_reason\");\n            List<Map<String, Object>> calls = callsOf(content);\n            if (!\"tool_use\".equals(reason) || calls.isEmpty()) return outcome(statusFor(reason, calls), lastText, turns, messages);\n            List<Map<String, Object>> results = new ArrayList<>();\n            for (Map<String, Object> block : calls) results.add(runTool(block, tools));\n            messages.add(map(\"role\", \"user\", \"content\", results));\n        }\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.ArrayList;\nimport java.util.List;\nimport java.util.function.Function;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // A scripted model, like the one the tests use: it asks for one tool call, then ends its turn.\n        List<Map<String, Object>> replies = new ArrayList<>(List.of(\n            Map.of(\"stop_reason\", \"tool_use\", \"content\", List.of(Map.of(\"type\", \"text\", \"text\", \"Looking.\"),\n                Map.of(\"type\", \"tool_use\", \"id\", \"t1\", \"name\", \"lookup\", \"input\", Map.of(\"n\", 1)))),\n            Map.of(\"stop_reason\", \"end_turn\", \"content\", List.of(Map.of(\"type\", \"text\", \"text\", \"Record 1 found.\")))));\n        Function<List<Map<String, Object>>, Map<String, Object>> model = messages -> {\n            System.out.println(\"model called with \" + messages.size() + \" messages\");\n            return replies.isEmpty()\n                ? Map.of(\"stop_reason\", \"end_turn\", \"content\", List.of(Map.of(\"type\", \"text\", \"text\", \"script ran out\")))\n                : replies.remove(0);\n        };\n        Map<String, Function<Map<String, Object>, String>> tools = Map.of(\"lookup\", arguments -> \"record \" + arguments.get(\"n\"));\n\n        Map<String, Object> result = AgentLoop.runAgent(model, tools, \"find record 1\");\n\n        System.out.println(\"status: \" + (result == null ? null : result.get(\"status\")) + \" | turns: \" + (result == null ? null : result.get(\"turns\")));\n        System.out.println(\"final text: \" + (result == null ? null : result.get(\"text\")));\n        System.out.println(\"roles: \" + (result == null || !(result.get(\"messages\") instanceof List<?> ms) ? null : ms.stream().map(m -> ((Map<?, ?>) m).get(\"role\")).toList()));\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 5,
+    "code": 2,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "0f6579f4d146ad6fc72954705687938ea5f034995410f710491934ff60b5abb1",
+  "starting_code": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.function.Function;\n\n/** The agent loop, driven by the stop reason. See ../../statement.md. Messages and replies are JSON-like maps. */\nfinal class AgentLoop {\n    private static final System.Logger LOG = System.getLogger(AgentLoop.class.getName());\n    private AgentLoop() {}\n\n    private static Map<String, Object> map(Object... kv) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);\n        return m;\n    }\n\n    /**\n     * TODO 1 of 6 (unlocks m1 and e5): the text of a reply.\n     * Receives a reply's content list of blocks. Returns the \"text\" of every block whose type is \"text\", joined with nothing between.\n     * Example: [text \"Hi \", tool_use, text \"there\"] -> \"Hi there\"\n     */\n    private static String textOf(List<Map<String, Object>> content) {\n        return \"\";\n    }\n\n    /**\n     * TODO 2 of 6 (unlocks e2 and e6): the tool calls of a reply.\n     * Receives a reply's content list. Returns its tool_use blocks, in order; an empty list when there are none.\n     * Example: [text \"x\", tool_use a] -> [tool_use a]\n     */\n    private static List<Map<String, Object>> callsOf(List<Map<String, Object>> content) {\n        return new ArrayList<>();\n    }\n\n    /**\n     * TODO 3 of 6 (unlocks m1, e2 and e3): one tool_result block.\n     * Receives the tool_use block, the result text and a flag. Returns {type: tool_result, tool_use_id: the block's id, content: the text},\n     * with is_error true added only when the flag is set (a good result has no is_error key). Use map(...) to build it.\n     * Example: (block with id t1, \"boom\", true) -> {type: tool_result, tool_use_id: t1, content: boom, is_error: true}\n     */\n    private static Map<String, Object> toolResult(Map<String, Object> block, String content, boolean isError) {\n        return map();\n    }\n\n    /**\n     * TODO 4 of 6 (unlocks m1, e5 and e6): the status a stop reason ends the run with (the loop only gets here when it cannot go on).\n     * Receives the stop reason and the tool calls of the reply. Returns \"malformed\" for tool_use with no calls, \"done\" for end_turn and\n     * stop_sequence, \"truncated\" for max_tokens, \"refused\" for refusal and \"unexpected\" for anything else.\n     * Example: (\"max_tokens\", no calls) -> \"truncated\", (\"tool_use\", no calls) -> \"malformed\", (\"brand_new\", no calls) -> \"unexpected\"\n     */\n    private static String statusFor(String reason, List<Map<String, Object>> calls) {\n        return \"\";\n    }\n\n    /**\n     * TODO 5 of 6 (unlocks e4): has the turn limit been reached before the next model call?\n     * Receives the model calls made so far and the limit. Returns true when no call is left. Example: (3, 3) -> true, (2, 3) -> false\n     */\n    private static boolean atLimit(int turns, int maxTurns) {\n        return false;\n    }\n\n    /**\n     * TODO 6 of 6 (unlocks m1): the copy of the messages that the model is handed.\n     * Receives the list of messages so far. Returns a new list with the same items, so later changes do not rewrite what the model saw.\n     * Example: [a, b] -> a new list [a, b]\n     */\n    private static List<Map<String, Object>> snapshot(List<Map<String, Object>> messages) {\n        return messages;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static Map<String, Object> runTool(Map<String, Object> block, Map<String, Function<Map<String, Object>, String>> tools) {\n        String name = (String) block.get(\"name\");\n        Function<Map<String, Object>, String> handler = tools.get(name);\n        if (handler == null) return toolResult(block, \"Unknown tool: \" + name, true);\n        try {\n            Object input = block.get(\"input\");\n            return toolResult(block, handler.apply(input == null ? Map.of() : (Map<String, Object>) input), false);\n        } catch (RuntimeException error) { // a failing tool is a result for the model, not a crash of the loop\n            return toolResult(block, String.valueOf(error.getMessage()), true);\n        }\n    }\n\n    private static Map<String, Object> outcome(String status, String text, int turns, List<Map<String, Object>> messages) {\n        return map(\"status\", status, \"text\", text, \"turns\", turns, \"messages\", messages);\n    }\n\n    static Map<String, Object> runAgent(Function<List<Map<String, Object>>, Map<String, Object>> model, Map<String, Function<Map<String, Object>, String>> tools, String task) {\n        return runAgent(model, tools, task, 8);\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> runAgent(Function<List<Map<String, Object>>, Map<String, Object>> model, Map<String, Function<Map<String, Object>, String>> tools, String task, int maxTurns) {\n        LOG.log(System.Logger.Level.DEBUG, \"runAgent input: {0}\", task);\n        List<Map<String, Object>> messages = new ArrayList<>();\n        messages.add(map(\"role\", \"user\", \"content\", task));\n        int turns = 0;\n        String lastText = \"\";\n        while (true) {\n            if (atLimit(turns, maxTurns)) return outcome(\"max_turns\", lastText, turns, messages); // the count is a backstop: it only ends a run the model has not ended itself\n            turns++;\n            Map<String, Object> reply = model.apply(snapshot(messages));\n            List<Map<String, Object>> content = (List<Map<String, Object>>) reply.get(\"content\");\n            lastText = textOf(content);\n            messages.add(map(\"role\", \"assistant\", \"content\", content));\n            String reason = (String) reply.get(\"stop_reason\");\n            List<Map<String, Object>> calls = callsOf(content);\n            if (!\"tool_use\".equals(reason) || calls.isEmpty()) return outcome(statusFor(reason, calls), lastText, turns, messages);\n            List<Map<String, Object>> results = new ArrayList<>();\n            for (Map<String, Object> block : calls) results.add(runTool(block, tools));\n            messages.add(map(\"role\", \"user\", \"content\", results));\n        }\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/45-the-agentic-loop-in-depth/prose/unit-02/practice-3/src/main/java/AgentLoop.java",
+    "test_path": "practice/level-3/45-the-agentic-loop-in-depth/prose/unit-02/practice-3/src/test/java/AgentLoopTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/45-the-agentic-loop-in-depth/prose/unit-02/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/45-the-agentic-loop-in-depth/prose/unit-02/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_aRunAlternatesModelAndToolsUntilTheModelEndsItsTurn()",
+        "kind": "main",
+        "says": "A run alternates model and tools until the model ends its turn, and the model sees the growing conversation"
+      },
+      {
+        "id": "e1_theStopReasonDecidesAndTheWordsOfTheTextDoNot()",
+        "kind": "edge",
+        "says": "The stop reason decides: a reply that says \"done\" but calls a tool continues, and one that announces a tool but ends its turn ends"
+      },
+      {
+        "id": "e2_everyCallOfATurnIsAnsweredInOneUserMessageInOrder()",
+        "kind": "edge",
+        "says": "Every call of a turn is answered in one user message, in order, with the assistant turn kept as it came"
+      },
+      {
+        "id": "e3_aFailingOrUnknownToolBecomesAnErrorResultAndTheRunGoesOn()",
+        "kind": "edge",
+        "says": "A failing or unknown tool becomes an error result and the run goes on"
+      },
+      {
+        "id": "e4_theTurnLimitIsABackstopThatEndsOnlyARunTheModelHasNotEnded()",
+        "kind": "edge",
+        "says": "The turn limit is a backstop: it ends an endless run with its own status and does not cut off a run that ends on the last turn"
+      },
+      {
+        "id": "e5_aCutOffOrRefusedReplyEndsTheRunWithItsOwnStatus()",
+        "kind": "edge",
+        "says": "A cut-off, refused, stop-sequence or never-seen stop reason ends the run with the right status"
+      },
+      {
+        "id": "e6_aToolUseReplyWithoutAToolCallIsMalformedAndSendsNothingMore()",
+        "kind": "edge",
+        "says": "A tool_use reply with no tool call is malformed and nothing more is sent"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/45-the-agentic-loop-in-depth/prose/unit-02/practice-3/target/test-results/test"
+    },
+    "origin": "course/45-the-agentic-loop-in-depth/02-results-parallel-calls-context-and-the-practice.md",
+    "concepts": [
+      "the practice of Results, parallel calls, growing context and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/45-the-agentic-loop-in-depth/prose/unit-02/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "the-agentic-loop-in-depth-u2"
+}

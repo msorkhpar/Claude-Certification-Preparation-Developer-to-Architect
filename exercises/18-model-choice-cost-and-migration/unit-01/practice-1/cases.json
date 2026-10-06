@@ -1,0 +1,125 @@
+{
+  "practice": "18-model-choice-cost-and-migration/unit-01/practice-1",
+  "name": "router",
+  "tests": {
+    "java": "RouterTest",
+    "kotlin": "RouterTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_cost_of_a_plain_request_and_the_cheapest_model_that_meets_the_tier",
+      "typescript": "m1 cost of a plain request and the cheapest model that meets the tier",
+      "java": "m1_costOfAPlainRequestAndTheCheapestModelThatMeetsTheTier",
+      "kotlin": "m1_costOfAPlainRequestAndTheCheapestModelThatMeetsTheTier"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_cache_reads_and_writes_are_priced_by_their_own_multipliers",
+      "typescript": "e1 cache reads and writes are priced by their own multipliers",
+      "java": "e1_cacheReadsAndWritesArePricedByTheirOwnMultipliers",
+      "kotlin": "e1_cacheReadsAndWritesArePricedByTheirOwnMultipliers"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_the_batch_discount_halves_every_part_of_the_cost",
+      "typescript": "e2 the batch discount halves every part of the cost",
+      "java": "e2_theBatchDiscountHalvesEveryPartOfTheCost",
+      "kotlin": "e2_theBatchDiscountHalvesEveryPartOfTheCost"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_the_router_picks_by_cost_and_tier_not_by_the_order_of_the_catalog",
+      "typescript": "e3 the router picks by cost and tier not by the order of the catalog",
+      "java": "e3_theRouterPicksByCostAndTierNotByTheOrderOfTheCatalog",
+      "kotlin": "e3_theRouterPicksByCostAndTierNotByTheOrderOfTheCatalog"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_a_model_whose_context_or_output_limit_is_too_small_is_skipped",
+      "typescript": "e4 a model whose context or output limit is too small is skipped",
+      "java": "e4_aModelWhoseContextOrOutputLimitIsTooSmallIsSkipped",
+      "kotlin": "e4_aModelWhoseContextOrOutputLimitIsTooSmallIsSkipped"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_deprecated_models_are_skipped_and_an_empty_choice_raises",
+      "typescript": "e5 deprecated models are skipped and an empty choice raises",
+      "java": "e5_deprecatedModelsAreSkippedAndAnEmptyChoiceRaises",
+      "kotlin": "e5_deprecatedModelsAreSkippedAndAnEmptyChoiceRaises"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_a_tie_goes_to_the_lower_tier",
+      "typescript": "e6 a tie goes to the lower tier",
+      "java": "e6_aTieGoesToTheLowerTier",
+      "kotlin": "e6_aTieGoesToTheLowerTier"
+    }
+  },
+  "plants": {
+    "wrong-flat-cache-read": {
+      "caught_by": [
+        "e1",
+        "e2",
+        "e6"
+      ],
+      "defect": "prices every cache read at a tenth of the input price, whatever the model"
+    },
+    "wrong-batch-output-only": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "applies the batch discount to the output tokens only"
+    },
+    "wrong-first-eligible": {
+      "caught_by": [
+        "e3",
+        "e6"
+      ],
+      "defect": "returns the first eligible model of the catalog instead of the cheapest"
+    },
+    "wrong-ignore-context": {
+      "caught_by": [
+        "e4",
+        "e5"
+      ],
+      "defect": "never checks the context window or the output limit"
+    },
+    "wrong-tie-high-tier": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "breaks a cost tie towards the higher tier"
+    },
+    "wrong-unsplit-write-ignored": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "prices a cache write that has no 5-minute and 1-hour split at zero"
+    },
+    "wrong-batch-picks-priciest": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "takes the most expensive model instead of the cheapest when the task is a batch"
+    },
+    "wrong-ignore-output-limit": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "never checks the output limit of a model, only its context window"
+    },
+    "wrong-deprecated-allowed": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "treats a deprecated model as eligible"
+    },
+    "wrong-empty-choice-allowed": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "returns an empty answer instead of raising when no model can take the task"
+    }
+  }
+}

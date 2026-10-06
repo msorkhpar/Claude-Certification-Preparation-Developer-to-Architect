@@ -1,0 +1,103 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "39-extending-claude-code"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 4,
+  "title": "Practice: a release plugin with a guard hook (Kotlin)",
+  "lang": "kotlin",
+  "main_file": "project/scripts/guard.py",
+  "files": [
+    "project/.claude/settings.json",
+    "project/.claude-plugin/plugin.json",
+    "project/agents/changelog-reviewer.md",
+    "project/hooks/hooks.json",
+    "project/skills/publish/SKILL.md",
+    "project/skills/release-notes/SKILL.md"
+  ],
+  "test_file": "src/test/kotlin/PluginSetupTest.kt",
+  "build": [
+    "libs/harness/build.gradle.kts",
+    "libs/harness/src/main/java/harness/Show.java",
+    "libs/39-hook-gate/build.gradle.kts",
+    "libs/39-hook-gate/src/main/kotlin/HookGate.kt",
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-4/check_files.py",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-4/project/.claude-plugin/plugin.json",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-4/project/.claude/settings.json",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-4/project/agents/changelog-reviewer.md",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-4/project/hooks/hooks.json",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-4/project/scripts/guard.py",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-4/project/skills/publish/SKILL.md",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-4/project/skills/release-notes/SKILL.md"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-4",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_theHookScriptBlocksPushesDeletesAndPipedDownloadsInAnySpelling()",
+      "kind": "main",
+      "says": "The guard refuses pushes, forced recursive deletes and piped downloads in every spelling, with a reason, and leaves safe commands alone"
+    },
+    {
+      "id": "e1_editsToProtectedPathsStopWithExitTwoAndAReason()",
+      "kind": "edge",
+      "says": "Edits to protected paths stop with exit code 2 and a reason, in any of three tools and with Windows separators"
+    },
+    {
+      "id": "e2_anEventItCannotReadBlocksTheCallAndOtherToolsAreLeftAlone()",
+      "kind": "edge",
+      "says": "An unreadable event blocks the call, while other tools and a Bash event with no command are left alone"
+    },
+    {
+      "id": "e3_theHookIsRegisteredForEveryToolItGuardsAndFoundThroughThePluginRoot()",
+      "kind": "edge",
+      "says": "The hook is registered once for the three tools it guards and found through the plugin root"
+    },
+    {
+      "id": "e4_theSkillsSetTheRightInvocationRulesAndApproveOnlyPatterns()",
+      "kind": "edge",
+      "says": "The skills have the right invocation rules, approve only patterns and say when to use them"
+    },
+    {
+      "id": "e5_theSubagentOnlyReadsIsBoundedAndUsesOnlyFieldsAPluginAgentHonours()",
+      "kind": "edge",
+      "says": "The subagent only reads, is bounded, and uses only fields a plugin agent honours"
+    },
+    {
+      "id": "e6_theManifestNamesThePluginAndPinsItsDependencyToPatchUpdates()",
+      "kind": "edge",
+      "says": "The manifest names the plugin and pins the dependency to patch updates"
+    },
+    {
+      "id": "e7_theTeamSettingsRegisterTheMarketplaceTheEnabledPluginComesFrom()",
+      "kind": "edge",
+      "says": "The team settings register a marketplace and enable the plugin from it"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/39-extending-claude-code/03-plugins-sharing-and-the-practice.md"
+}

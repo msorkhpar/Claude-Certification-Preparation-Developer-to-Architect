@@ -1,0 +1,162 @@
+{
+  "practice": "53-tool-errors-agents-can-act-on/unit-01/practice-1",
+  "name": "errors",
+  "tests": {
+    "java": "ErrorsTest",
+    "kotlin": "ErrorsTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_failed_call_becomes_a_structured_error_with_a_category_a_retry_flag_and_an_error_flag",
+      "typescript": "m1 a failed call becomes a structured error with a category a retry flag and an error flag",
+      "java": "m1_aFailedCallBecomesAStructuredErrorWithACategoryARetryFlagAndAnErrorFlag",
+      "kotlin": "m1_aFailedCallBecomesAStructuredErrorWithACategoryARetryFlagAndAnErrorFlag"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_generic_message_or_an_unknown_category_is_refused",
+      "typescript": "e1 a generic message or an unknown category is refused",
+      "java": "e1_aGenericMessageOrAnUnknownCategoryIsRefused",
+      "kotlin": "e1_aGenericMessageOrAnUnknownCategoryIsRefused"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_only_transient_failures_are_retried_with_growing_waits_and_the_other_kinds_return_at_once",
+      "typescript": "e2 only transient failures are retried with growing waits and the other kinds return at once",
+      "java": "e2_onlyTransientFailuresAreRetriedWithGrowingWaitsAndTheOtherKindsReturnAtOnce",
+      "kotlin": "e2_onlyTransientFailuresAreRetriedWithGrowingWaitsAndTheOtherKindsReturnAtOnce"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_the_retries_are_bounded_and_a_wait_the_service_asks_for_is_honoured",
+      "typescript": "e3 the retries are bounded and a wait the service asks for is honoured",
+      "java": "e3_theRetriesAreBoundedAndAWaitTheServiceAsksForIsHonoured",
+      "kotlin": "e3_theRetriesAreBoundedAndAWaitTheServiceAsksForIsHonoured"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_a_valid_empty_result_is_a_success_and_not_an_error",
+      "typescript": "e4 a valid empty result is a success and not an error",
+      "java": "e4_aValidEmptyResultIsASuccessAndNotAnError",
+      "kotlin": "e4_aValidEmptyResultIsASuccessAndNotAnError"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_timeout_on_a_write_is_an_unknown_outcome_and_is_retried_only_when_repeating_it_is_safe",
+      "typescript": "e5 a timeout on a write is an unknown outcome and is retried only when repeating it is safe",
+      "java": "e5_aTimeoutOnAWriteIsAnUnknownOutcomeAndIsRetriedOnlyWhenRepeatingItIsSafe",
+      "kotlin": "e5_aTimeoutOnAWriteIsAnUnknownOutcomeAndIsRetriedOnlyWhenRepeatingItIsSafe"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_the_next_action_follows_the_category",
+      "typescript": "e6 the next action follows the category",
+      "java": "e6_theNextActionFollowsTheCategory",
+      "kotlin": "e6_theNextActionFollowsTheCategory"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_an_unexpected_exception_becomes_an_internal_error_and_the_run_goes_on",
+      "typescript": "e7 an unexpected exception becomes an internal error and the run goes on",
+      "java": "e7_anUnexpectedExceptionBecomesAnInternalErrorAndTheRunGoesOn",
+      "kotlin": "e7_anUnexpectedExceptionBecomesAnInternalErrorAndTheRunGoesOn"
+    }
+  },
+  "plants": {
+    "wrong-flag-missing": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "reports a failed call as a tool result without the error flag"
+    },
+    "wrong-business-retryable": {
+      "caught_by": [
+        "e2",
+        "m1"
+      ],
+      "defect": "marks a business rule violation as worth retrying"
+    },
+    "wrong-generic-message": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "accepts a message such as Operation failed"
+    },
+    "wrong-unknown-kind-accepted": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "accepts a category that is not one of the six"
+    },
+    "wrong-retries-validation": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "retries a call that failed validation"
+    },
+    "wrong-flat-wait": {
+      "caught_by": [
+        "e2",
+        "e3",
+        "e5"
+      ],
+      "defect": "waits the same time before every retry"
+    },
+    "wrong-extra-retry": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "makes one attempt more than the retry limit allows"
+    },
+    "wrong-ignores-retry-after": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "sleeps its own backoff when the service named a wait"
+    },
+    "wrong-empty-is-error": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "reports a valid empty result as a failure"
+    },
+    "wrong-timeout-retried": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "retries a timed out write that has no key"
+    },
+    "wrong-key-dropped": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "leaves the idempotency key out of the arguments it retries with"
+    },
+    "wrong-mutates-args": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "writes the idempotency key into the caller's own arguments"
+    },
+    "wrong-permission-retry-later": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "tells the loop to retry later after a permission error"
+    },
+    "wrong-internal-retryable": {
+      "caught_by": [
+        "e7",
+        "m1"
+      ],
+      "defect": "marks an unexpected failure as retryable"
+    },
+    "wrong-internal-no-detail": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "leaves the exception's message out of the internal error"
+    }
+  }
+}

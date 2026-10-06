@@ -1,0 +1,303 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "46-coordinator-and-subagents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: a coordinator that delegates to isolated subagents (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a coordinator that delegates to isolated subagents"
+    },
+    {
+      "type": "para",
+      "text": "A research system has one coordinator and several subagents. The coordinator splits the question, hands each subagent a brief, reads what comes back, asks for more where there are gaps, and writes one answer. A subagent knows only its brief: it does not see the conversation, the plan or the other subagents' findings. Most of the failures of such a system are in the coordinator's code, not in the model: duplicated work, a vague brief, one failure that stops the team, a review that sends everyone out again, and a team built for a question that one agent could answer. Write the coordinator. Nothing here touches the network: the four model roles are functions that the tests script."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`planner(question)`",
+          "returns the plan: `{\"delegate\": bool, \"answer\": text or null, \"subtasks\": [{\"scope\": text, \"brief\": text}]}`"
+        ],
+        [
+          "`subagent(brief)`",
+          "runs one subagent and returns its final report as text; it may throw"
+        ],
+        [
+          "`reviewer(question, findings)`",
+          "returns the list of gap descriptions (texts) still to be researched; an empty list means nothing is missing"
+        ],
+        [
+          "`synthesizer(question, findings)`",
+          "returns the final answer as text"
+        ],
+        [
+          "a finding",
+          "`{\"scope\": text, \"text\": the subagent's report}`"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working coordinator with eight small gaps cut out of it. The plan, the calls to the planner, subagent, reviewer and synthesizer, the failure handling and the result shapes are written and correct. Each gap is one function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the Java, Kotlin and TypeScript names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_wants_team` unlocks `e1`: does the plan ask for subagents.",
+        "`_drop_reason` unlocks `e3`: why a subtask is dropped (empty brief, duplicate scope, over limit), or none.",
+        "`_report_problem` unlocks `e4`: a report that is not text or is blank is an `empty report`.",
+        "`_clean_gaps` unlocks `e5` and `e6`: the reviewer's gaps stripped, deduplicated and capped.",
+        "`_follow_up` unlocks `e5`: the brief for one gap.",
+        "`_may_refine` unlocks `e5` and `e6`: gaps left and rounds below the limit.",
+        "`_final_status` unlocks `m1` and `e6`: `complete` or `partial`.",
+        "`_brief_of` unlocks `m1` and `e2`: the text a subagent is handed, which is its own brief and nothing else."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About a dozen lines in all. The sections below describe the whole coordinator."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "`coordinate(planner, subagent, reviewer, synthesizer, question, max_agents=4, max_rounds=2)` (`coordinate` in every language, with the same arguments) returns `{\"status\", \"answer\", \"findings\", \"failed\", \"dropped\", \"gaps\", \"rounds\", \"subagent_calls\"}`."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Call `planner` once. When `delegate` is false, return status `direct` with the planner's `answer`, no findings, and no subagent, reviewer or synthesizer call at all: a question that the coordinator can answer itself is not worth a team.",
+        "Clean the subtasks, in order. A subtask whose brief is empty or only spaces is dropped with the reason `empty brief`. A subtask whose scope (compared stripped and in lower case) was already kept is dropped with `duplicate scope`. Once `max_agents` subtasks are kept, every further one is dropped with `over limit`. A dropped entry is `{\"scope\": the scope as given, \"reason\"}`.",
+        "Call `subagent` once per kept subtask, in order, with **exactly its brief**: nothing from the plan, from the question or from another subagent's report is added. A report that is a non-blank string becomes a finding `{\"scope\", \"text\"}`. A call that throws, or a report that is blank, becomes a `failed` entry `{\"scope\", \"error\"}`: the exception's message, or `empty report`. The others still run. `subagent_calls` counts every call, successful or not.",
+        "When no subtask produced a finding (all failed, or none was kept), return status `failed`, answer null, and call neither the reviewer nor the synthesizer.",
+        "Review. Call `reviewer` with copies of the findings. Clean its answer: strip each gap, drop empty ones and repeats (the first stays) and keep at most `max_agents`. While gaps remain and fewer than `max_rounds` rounds were run: count a round, call `subagent` once per gap with the brief `Follow up: {gap}\\nQuestion: {question}` (the scope of the new finding is the gap text), and call `reviewer` again. Subtasks that already have findings are not run again.",
+        "Call `synthesizer` once with copies of all findings, in the order they arrived. Status is `complete` when no gaps remain and nothing failed, otherwise `partial`. `gaps` is what the last review still reported (empty when complete), `rounds` the number of refinement rounds."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each step is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Delegate only when it pays** (step 1). The exam expects a coordinator that chooses its subagents from the complexity of the query and does not send everything through the full pipeline. *You should see* a question the planner answers itself finish with no subagent call.",
+        "**Partition the scope** (step 2). The exam asks for distinct subtopics or sources to minimise duplicated work, and a cap on the team. *You should see* the empty and the repeated subtasks listed as dropped with their reasons, and the team no larger than `max_agents`.",
+        "**Send each subagent its own brief and nothing else** (step 3). Subagents work in isolated context and do not inherit what the coordinator knows. *You should see* the briefs received equal the briefs planned, whatever the other subagents found, and one failing subagent leave the others' findings in place.",
+        "**Do not synthesize from nothing** (step 4). An error message is not evidence. *You should see* status `failed` with no reviewer or synthesizer call when no subagent returned a finding.",
+        "**Refine where the gaps are** (step 5). The exam describes a loop in which the coordinator finds gaps, re-delegates targeted queries and stops when coverage is enough. *You should see* only the gaps sent out again, cleaned and capped, and the first-round subtasks left alone.",
+        "**End with an honest status** (step 6). *You should see* `complete` only when nothing failed and no gap is left, and `partial` with the remaining gaps when the round limit stopped the loop."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A hub sends one brief to each spoke, in order, and synthesizes what comes back"
+        ],
+        [
+          "`e1`",
+          "A question the planner answers itself starts no team"
+        ],
+        [
+          "`e2`",
+          "A subagent receives exactly its own brief"
+        ],
+        [
+          "`e3`",
+          "Empty briefs and duplicate scopes are dropped, the team is capped, a plan with nothing usable fails without calls"
+        ],
+        [
+          "`e4`",
+          "One failing subagent does not stop the others; a run with no findings neither reviews nor synthesizes"
+        ],
+        [
+          "`e5`",
+          "A review sends only the gaps out again, cleaned, and stops when none are left"
+        ],
+        [
+          "`e6`",
+          "The rounds are capped, the gaps that remain are reported and the status is `partial`"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// A coordinator that delegates to isolated subagents, reviews what comes back and synthesizes. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"coordinator\");\ntype Finding = { scope: string; text: string };\n\nfunction dropReason(brief: string, key: string, seen: Set<string>, keptCount: number, maxAgents: number): string | null {\n  if (brief.trim() === \"\") return \"empty brief\";\n  if (seen.has(key)) return \"duplicate scope\";\n  if (keptCount >= maxAgents) return \"over limit\";\n  return null;\n}\n\nfunction reportProblem(report: unknown): string | null {\n  return typeof report !== \"string\" || report.trim() === \"\" ? \"empty report\" : null;\n}\n\nfunction followUp(gap: string, question: string): string {\n  return `Follow up: ${gap}\\nQuestion: ${question}`;\n}\n\nfunction mayRefine(gaps: string[], rounds: number, maxRounds: number): boolean {\n  return gaps.length > 0 && rounds < maxRounds;\n}\n\nfunction finalStatus(gaps: string[], failed: unknown[]): string {\n  return gaps.length === 0 && failed.length === 0 ? \"complete\" : \"partial\";\n}\n\nfunction wantsTeam(plan: any): boolean {\n  return Boolean(plan.delegate);\n}\n\nfunction clean(subtasks: Array<{ scope?: unknown; brief?: unknown }>, maxAgents: number) {\n  const kept: Array<{ scope: string; brief: string }> = [];\n  const dropped: Array<{ scope: string; reason: string }> = [];\n  const seen = new Set<string>();\n  for (const task of subtasks) {\n    const scope = String(task.scope ?? \"\");\n    const brief = String(task.brief ?? \"\");\n    const key = scope.trim().toLowerCase();\n    const reason = dropReason(brief, key, seen, kept.length, maxAgents);\n    if (reason) dropped.push({ scope, reason });\n    else {\n      seen.add(key);\n      kept.push({ scope, brief });\n    }\n  }\n  return { kept, dropped };\n}\n\nfunction cleanGaps(gaps: unknown, maxAgents: number): string[] {\n  const out: string[] = [];\n  for (const gap of Array.isArray(gaps) ? gaps : []) {\n    const text = String(gap).trim();\n    if (text !== \"\" && !out.includes(text)) out.push(text);\n  }\n  return out.slice(0, maxAgents);\n}\n\n/** What a subagent is told: its own brief and nothing the others found. */\nfunction briefOf(brief: string): string {\n  return brief;\n}\n\nexport function coordinate(\n  planner: (question: string) => any,\n  subagent: (brief: string) => string,\n  reviewer: (question: string, findings: Finding[]) => string[],\n  synthesizer: (question: string, findings: Finding[]) => string,\n  question: string,\n  maxAgents = 4,\n  maxRounds = 2,\n): any {\n  log.debug(\"coordinate input\", question);\n  const plan = planner(question);\n  if (!wantsTeam(plan)) { // a question the coordinator can answer itself is not worth a team\n    return { status: \"direct\", answer: plan.answer ?? null, findings: [], failed: [], dropped: [], gaps: [], rounds: 0, subagent_calls: 0 };\n  }\n  const { kept, dropped } = clean(plan.subtasks ?? [], maxAgents);\n  const findings: Finding[] = [];\n  const failed: Array<{ scope: string; error: string }> = [];\n  let calls = 0;\n\n  const run = (scope: string, brief: string) => {\n    calls += 1;\n    let report: unknown;\n    try {\n      report = subagent(brief); // the brief is everything the subagent knows\n    } catch (error) { // one subagent failing must not stop the others\n      failed.push({ scope, error: error instanceof Error ? error.message : String(error) });\n      return;\n    }\n    const problem = reportProblem(report);\n    if (problem) failed.push({ scope, error: problem });\n    else findings.push({ scope, text: report });\n  };\n\n  for (const task of kept) run(task.scope, briefOf(task.brief));\n  if (findings.length === 0) return { status: \"failed\", answer: null, findings: [], failed, dropped, gaps: [], rounds: 0, subagent_calls: calls };\n  let rounds = 0;\n  let gaps = cleanGaps(reviewer(question, findings.map((f) => ({ ...f }))), maxAgents);\n  while (mayRefine(gaps, rounds, maxRounds)) {\n    rounds += 1;\n    for (const gap of gaps) run(gap, followUp(gap, question));\n    gaps = cleanGaps(reviewer(question, findings.map((f) => ({ ...f }))), maxAgents);\n  }\n  const answer = synthesizer(question, findings.map((f) => ({ ...f })));\n  const status = finalStatus(gaps, failed);\n  return { status, answer, findings, failed, dropped, gaps, rounds, subagent_calls: calls };\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { coordinate } from \"./coordinator.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// The four model roles are plain functions, like the ones the tests script.\n// Splits the question into three subtasks, each with the brief its subagent will get.\nconst planner = (_question: string) => ({ delegate: true, answer: null, subtasks: [\n  { scope: \"chips\", brief: \"chips: find 2024 chip supply news\" },\n  { scope: \"cars\", brief: \"cars: find 2024 car output news\" },\n  { scope: \"rates\", brief: \"rates: find 2024 interest rates\" }] });\n// A subagent knows only its brief: here it just reports on the topic that starts it.\nconst subagent = (brief: string) => brief.split(\":\")[0] + \" report\";\nconst reviewer = (_question: string, _findings: any[]) => [] as string[]; // no gaps: nothing more to ask\nconst synthesizer = (_question: string, findings: any[]) => findings.map((f) => f.text).join(\" | \");\n\nconst result: any = coordinate(planner, subagent, reviewer, synthesizer, \"How did supply change?\") ?? {};\n\nconsole.log(\"status:\", result.status, \"| subagent calls:\", result.subagent_calls, \"| rounds:\", result.rounds);\nconsole.log(\"findings:\", JSON.stringify(result.findings));\nconsole.log(\"answer:\", result.answer);\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// A coordinator that delegates to isolated subagents, reviews what comes back and synthesizes. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"coordinator\");\ntype Finding = { scope: string; text: string };\n\n// TODO 1 of 8 (unlocks e3): why a subtask is dropped, or null to keep it.\n// Receives the brief, the lower-cased scope key, the keys already kept, how many are kept and the limit. Returns \"empty brief\" for a blank\n// brief, else \"duplicate scope\" for a key already seen, else \"over limit\" when keptCount has reached maxAgents, else null.\n// Example: dropReason(\"  \", \"a\", new Set(), 0, 3) -> \"empty brief\"\nfunction dropReason(brief: string, key: string, seen: Set<string>, keptCount: number, maxAgents: number): string | null {\n  return null;\n}\n\n// TODO 2 of 8 (unlocks e4): what is wrong with a subagent's report, or null.\n// Receives whatever the subagent returned. Returns \"empty report\" when it is not a string or only blank, else null.\n// Example: reportProblem(\"   \") -> \"empty report\"\nfunction reportProblem(report: unknown): string | null {\n  return null;\n}\n\n// TODO 3 of 8 (unlocks e5): the brief for a follow-up on one gap.\n// Returns \"Follow up: <gap>\" then a newline then \"Question: <question>\". Example: followUp(\"2023\", \"q\") -> \"Follow up: 2023\\nQuestion: q\"\nfunction followUp(gap: string, question: string): string {\n  return gap;\n}\n\n// TODO 4 of 8 (unlocks e5 and e6): is another refinement round allowed?\n// True while there are gaps and fewer than maxRounds rounds have run. Example: mayRefine([\"x\"], 2, 2) -> false\nfunction mayRefine(gaps: string[], rounds: number, maxRounds: number): boolean {\n  return false;\n}\n\n// TODO 5 of 8 (unlocks m1 and e6): the status of a run that has an answer.\n// \"complete\" when no gaps remain and nothing failed, else \"partial\". Example: finalStatus([\"x\"], []) -> \"partial\"\nfunction finalStatus(gaps: string[], failed: unknown[]): string {\n  return \"complete\";\n}\n\n// TODO 6 of 8 (unlocks e1): does the plan ask for subagents?\n// Receives the planner's object. True when its delegate value is truthy, else false. Example: wantsTeam({ delegate: false }) -> false\nfunction wantsTeam(plan: any): boolean {\n  return true;\n}\n\nfunction clean(subtasks: Array<{ scope?: unknown; brief?: unknown }>, maxAgents: number) {\n  const kept: Array<{ scope: string; brief: string }> = [];\n  const dropped: Array<{ scope: string; reason: string }> = [];\n  const seen = new Set<string>();\n  for (const task of subtasks) {\n    const scope = String(task.scope ?? \"\");\n    const brief = String(task.brief ?? \"\");\n    const key = scope.trim().toLowerCase();\n    const reason = dropReason(brief, key, seen, kept.length, maxAgents);\n    if (reason) dropped.push({ scope, reason });\n    else {\n      seen.add(key);\n      kept.push({ scope, brief });\n    }\n  }\n  return { kept, dropped };\n}\n\n// TODO 7 of 8 (unlocks e5 and e6): the reviewer's gaps, tidied.\n// Receives the reviewer's list (or anything else) and the limit. Returns the gaps trimmed, without empty or repeated ones, in order, at most\n// maxAgents of them. Example: cleanGaps([\" a \", \"\", \"a\", \"b\"], 1) -> [\"a\"]\nfunction cleanGaps(gaps: unknown, maxAgents: number): string[] {\n  return Array.isArray(gaps) ? gaps.map(String) : [];\n}\n\n// TODO 8 of 8 (unlocks m1 and e2): the text a subagent is handed.\n// Receives the subtask's brief. Returns exactly what the subagent is told: that brief and nothing else (no scope list, no earlier findings).\n// Example: briefOf(\"cars: find 2024 car output news\") -> \"cars: find 2024 car output news\"\nfunction briefOf(brief: string): string {\n  return \"\";\n}\n\nexport function coordinate(\n  planner: (question: string) => any,\n  subagent: (brief: string) => string,\n  reviewer: (question: string, findings: Finding[]) => string[],\n  synthesizer: (question: string, findings: Finding[]) => string,\n  question: string,\n  maxAgents = 4,\n  maxRounds = 2,\n): any {\n  log.debug(\"coordinate input\", question);\n  const plan = planner(question);\n  if (!wantsTeam(plan)) { // a question the coordinator can answer itself is not worth a team\n    return { status: \"direct\", answer: plan.answer ?? null, findings: [], failed: [], dropped: [], gaps: [], rounds: 0, subagent_calls: 0 };\n  }\n  const { kept, dropped } = clean(plan.subtasks ?? [], maxAgents);\n  const findings: Finding[] = [];\n  const failed: Array<{ scope: string; error: string }> = [];\n  let calls = 0;\n\n  const run = (scope: string, brief: string) => {\n    calls += 1;\n    let report: unknown;\n    try {\n      report = subagent(brief); // the brief is everything the subagent knows\n    } catch (error) { // one subagent failing must not stop the others\n      failed.push({ scope, error: error instanceof Error ? error.message : String(error) });\n      return;\n    }\n    const problem = reportProblem(report);\n    if (problem) failed.push({ scope, error: problem });\n    else findings.push({ scope, text: report });\n  };\n\n  for (const task of kept) run(task.scope, briefOf(task.brief));\n  if (findings.length === 0) return { status: \"failed\", answer: null, findings: [], failed, dropped, gaps: [], rounds: 0, subagent_calls: calls };\n  let rounds = 0;\n  let gaps = cleanGaps(reviewer(question, findings.map((f) => ({ ...f }))), maxAgents);\n  while (mayRefine(gaps, rounds, maxRounds)) {\n    rounds += 1;\n    for (const gap of gaps) run(gap, followUp(gap, question));\n    gaps = cleanGaps(reviewer(question, findings.map((f) => ({ ...f }))), maxAgents);\n  }\n  const answer = synthesizer(question, findings.map((f) => ({ ...f })));\n  const status = finalStatus(gaps, failed);\n  return { status, answer, findings, failed, dropped, gaps, rounds, subagent_calls: calls };\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { coordinate } from \"./coordinator.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// The four model roles are plain functions, like the ones the tests script.\n// Splits the question into three subtasks, each with the brief its subagent will get.\nconst planner = (_question: string) => ({ delegate: true, answer: null, subtasks: [\n  { scope: \"chips\", brief: \"chips: find 2024 chip supply news\" },\n  { scope: \"cars\", brief: \"cars: find 2024 car output news\" },\n  { scope: \"rates\", brief: \"rates: find 2024 interest rates\" }] });\n// A subagent knows only its brief: here it just reports on the topic that starts it.\nconst subagent = (brief: string) => brief.split(\":\")[0] + \" report\";\nconst reviewer = (_question: string, _findings: any[]) => [] as string[]; // no gaps: nothing more to ask\nconst synthesizer = (_question: string, findings: any[]) => findings.map((f) => f.text).join(\" | \");\n\nconst result: any = coordinate(planner, subagent, reviewer, synthesizer, \"How did supply change?\") ?? {};\n\nconsole.log(\"status:\", result.status, \"| subagent calls:\", result.subagent_calls, \"| rounds:\", result.rounds);\nconsole.log(\"findings:\", JSON.stringify(result.findings));\nconsole.log(\"answer:\", result.answer);\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 5,
+    "code": 2,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "54e6eda6fefd6faa846ac9c293322eddf5e07570f44a2f3e4938fda05c6b31c5",
+  "starting_code": "// A coordinator that delegates to isolated subagents, reviews what comes back and synthesizes. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"coordinator\");\ntype Finding = { scope: string; text: string };\n\n// TODO 1 of 8 (unlocks e3): why a subtask is dropped, or null to keep it.\n// Receives the brief, the lower-cased scope key, the keys already kept, how many are kept and the limit. Returns \"empty brief\" for a blank\n// brief, else \"duplicate scope\" for a key already seen, else \"over limit\" when keptCount has reached maxAgents, else null.\n// Example: dropReason(\"  \", \"a\", new Set(), 0, 3) -> \"empty brief\"\nfunction dropReason(brief: string, key: string, seen: Set<string>, keptCount: number, maxAgents: number): string | null {\n  return null;\n}\n\n// TODO 2 of 8 (unlocks e4): what is wrong with a subagent's report, or null.\n// Receives whatever the subagent returned. Returns \"empty report\" when it is not a string or only blank, else null.\n// Example: reportProblem(\"   \") -> \"empty report\"\nfunction reportProblem(report: unknown): string | null {\n  return null;\n}\n\n// TODO 3 of 8 (unlocks e5): the brief for a follow-up on one gap.\n// Returns \"Follow up: <gap>\" then a newline then \"Question: <question>\". Example: followUp(\"2023\", \"q\") -> \"Follow up: 2023\\nQuestion: q\"\nfunction followUp(gap: string, question: string): string {\n  return gap;\n}\n\n// TODO 4 of 8 (unlocks e5 and e6): is another refinement round allowed?\n// True while there are gaps and fewer than maxRounds rounds have run. Example: mayRefine([\"x\"], 2, 2) -> false\nfunction mayRefine(gaps: string[], rounds: number, maxRounds: number): boolean {\n  return false;\n}\n\n// TODO 5 of 8 (unlocks m1 and e6): the status of a run that has an answer.\n// \"complete\" when no gaps remain and nothing failed, else \"partial\". Example: finalStatus([\"x\"], []) -> \"partial\"\nfunction finalStatus(gaps: string[], failed: unknown[]): string {\n  return \"complete\";\n}\n\n// TODO 6 of 8 (unlocks e1): does the plan ask for subagents?\n// Receives the planner's object. True when its delegate value is truthy, else false. Example: wantsTeam({ delegate: false }) -> false\nfunction wantsTeam(plan: any): boolean {\n  return true;\n}\n\nfunction clean(subtasks: Array<{ scope?: unknown; brief?: unknown }>, maxAgents: number) {\n  const kept: Array<{ scope: string; brief: string }> = [];\n  const dropped: Array<{ scope: string; reason: string }> = [];\n  const seen = new Set<string>();\n  for (const task of subtasks) {\n    const scope = String(task.scope ?? \"\");\n    const brief = String(task.brief ?? \"\");\n    const key = scope.trim().toLowerCase();\n    const reason = dropReason(brief, key, seen, kept.length, maxAgents);\n    if (reason) dropped.push({ scope, reason });\n    else {\n      seen.add(key);\n      kept.push({ scope, brief });\n    }\n  }\n  return { kept, dropped };\n}\n\n// TODO 7 of 8 (unlocks e5 and e6): the reviewer's gaps, tidied.\n// Receives the reviewer's list (or anything else) and the limit. Returns the gaps trimmed, without empty or repeated ones, in order, at most\n// maxAgents of them. Example: cleanGaps([\" a \", \"\", \"a\", \"b\"], 1) -> [\"a\"]\nfunction cleanGaps(gaps: unknown, maxAgents: number): string[] {\n  return Array.isArray(gaps) ? gaps.map(String) : [];\n}\n\n// TODO 8 of 8 (unlocks m1 and e2): the text a subagent is handed.\n// Receives the subtask's brief. Returns exactly what the subagent is told: that brief and nothing else (no scope list, no earlier findings).\n// Example: briefOf(\"cars: find 2024 car output news\") -> \"cars: find 2024 car output news\"\nfunction briefOf(brief: string): string {\n  return \"\";\n}\n\nexport function coordinate(\n  planner: (question: string) => any,\n  subagent: (brief: string) => string,\n  reviewer: (question: string, findings: Finding[]) => string[],\n  synthesizer: (question: string, findings: Finding[]) => string,\n  question: string,\n  maxAgents = 4,\n  maxRounds = 2,\n): any {\n  log.debug(\"coordinate input\", question);\n  const plan = planner(question);\n  if (!wantsTeam(plan)) { // a question the coordinator can answer itself is not worth a team\n    return { status: \"direct\", answer: plan.answer ?? null, findings: [], failed: [], dropped: [], gaps: [], rounds: 0, subagent_calls: 0 };\n  }\n  const { kept, dropped } = clean(plan.subtasks ?? [], maxAgents);\n  const findings: Finding[] = [];\n  const failed: Array<{ scope: string; error: string }> = [];\n  let calls = 0;\n\n  const run = (scope: string, brief: string) => {\n    calls += 1;\n    let report: unknown;\n    try {\n      report = subagent(brief); // the brief is everything the subagent knows\n    } catch (error) { // one subagent failing must not stop the others\n      failed.push({ scope, error: error instanceof Error ? error.message : String(error) });\n      return;\n    }\n    const problem = reportProblem(report);\n    if (problem) failed.push({ scope, error: problem });\n    else findings.push({ scope, text: report });\n  };\n\n  for (const task of kept) run(task.scope, briefOf(task.brief));\n  if (findings.length === 0) return { status: \"failed\", answer: null, findings: [], failed, dropped, gaps: [], rounds: 0, subagent_calls: calls };\n  let rounds = 0;\n  let gaps = cleanGaps(reviewer(question, findings.map((f) => ({ ...f }))), maxAgents);\n  while (mayRefine(gaps, rounds, maxRounds)) {\n    rounds += 1;\n    for (const gap of gaps) run(gap, followUp(gap, question));\n    gaps = cleanGaps(reviewer(question, findings.map((f) => ({ ...f }))), maxAgents);\n  }\n  const answer = synthesizer(question, findings.map((f) => ({ ...f })));\n  const status = finalStatus(gaps, failed);\n  return { status, answer, findings, failed, dropped, gaps, rounds, subagent_calls: calls };\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-2/coordinator.ts",
+    "test_path": "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-2/coordinator.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-2/coordinator.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 a hub sends one brief to each spoke and synthesizes what comes back",
+        "kind": "main",
+        "says": "A hub sends one brief to each spoke, in order, and synthesizes what comes back"
+      },
+      {
+        "id": "e1 a question the coordinator can answer itself is answered without any subagent",
+        "kind": "edge",
+        "says": "A question the planner answers itself starts no team"
+      },
+      {
+        "id": "e2 a subagent sees its own brief and nothing the others found",
+        "kind": "main",
+        "says": "A subagent receives exactly its own brief"
+      },
+      {
+        "id": "e3 the plan is cleaned of empty briefs and duplicate scopes and capped",
+        "kind": "edge",
+        "says": "Empty briefs and duplicate scopes are dropped, the team is capped, a plan with nothing usable fails without calls"
+      },
+      {
+        "id": "e4 a failing subagent does not stop the others and a run with no findings does not synthesize",
+        "kind": "edge",
+        "says": "One failing subagent does not stop the others; a run with no findings neither reviews nor synthesizes"
+      },
+      {
+        "id": "e5 a review sends only the gaps back out and stops when none are left",
+        "kind": "edge",
+        "says": "A review sends only the gaps out again, cleaned, and stops when none are left"
+      },
+      {
+        "id": "e6 the rounds are capped and the gaps that remain are reported",
+        "kind": "edge",
+        "says": "The rounds are capped, the gaps that remain are reported and the status is partial"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-2/target/report.xml"
+    },
+    "origin": "course/46-coordinator-and-subagents/02-review-iteration-failures-and-the-practice.md",
+    "concepts": [
+      "the practice of Review, iteration, failures and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "coordinator-and-subagents-u2"
+}

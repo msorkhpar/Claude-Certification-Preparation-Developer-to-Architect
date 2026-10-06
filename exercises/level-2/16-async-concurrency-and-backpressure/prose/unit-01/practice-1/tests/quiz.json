@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "16-async-concurrency-and-backpressure"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: Async calls and bounded concurrency",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A web service handles each request in an async function that calls the synchronous SDK client, and under load every endpoint, including those that never ask the model anything, becomes slow together. What is the cause?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A blocking wait holds the event loop, so other tasks cannot run until it returns",
+            "correct": true,
+            "says": "The page says a call that waits \"without yielding stops the loop, and every other task waits with it\"."
+          },
+          {
+            "id": "b",
+            "text": "The model slows down for every caller whenever one caller is waiting for a reply from it",
+            "correct": false,
+            "says": "Ruled out because \"one thread with an event loop overlaps thousands of waits\", so callers do not hold each other up at the model."
+          },
+          {
+            "id": "c",
+            "text": "The client retries too many times, and those retries delay the unrelated endpoints as well",
+            "correct": false,
+            "says": "Ruled out because the page names the cause as \"an async web handler that calls the synchronous client\", not the retry count."
+          },
+          {
+            "id": "d",
+            "text": "The async function needs a larger connection pool for each endpoint that it serves",
+            "correct": false,
+            "says": "Ruled out because a bigger pool does not make a waiting call yield: \"a call that waits without yielding stops the loop\"."
+          }
+        ],
+        "origin": {
+          "path": "course/16-async-concurrency-and-backpressure/01-async-calls-and-bounded-concurrency.md",
+          "section": "What blocks an event loop"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A nightly job starts one call for each of 8,000 tickets at once with a bare gather. It sees a wave of 429 errors and loses the labels of the tickets that succeeded because the gather raised. Which change is best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Split the tickets into two gathers of 4,000 and run them in turn, one after the other",
+            "correct": false,
+            "says": "Ruled out because two gathers of 4,000 are still two bursts, and in the page's words \"Promise.all and a bare gather give up on the others when one fails\", so each half repeats the loss."
+          },
+          {
+            "id": "b",
+            "text": "Rerun the whole gather until it comes back without raising an exception at all",
+            "correct": false,
+            "says": "Ruled out because a bare gather over a queue \"turns a batch into a burst\", and a rerun repeats the burst."
+          },
+          {
+            "id": "c",
+            "text": "Cap the work in flight, and record each outcome in its slot, failures included",
+            "correct": true,
+            "says": "The page asks to \"bound the calls in flight\" and to \"collect every outcome, in input order, and decide about the failures afterwards\"."
+          },
+          {
+            "id": "d",
+            "text": "Lower the timeout on each request so that the failing calls give up much sooner",
+            "correct": false,
+            "says": "Ruled out because \"the bound costs a little latency and protects the connection pool and the rate limit\", and a shorter timeout does neither."
+          }
+        ],
+        "origin": {
+          "path": "course/16-async-concurrency-and-backpressure/01-async-calls-and-bounded-concurrency.md",
+          "section": "Traps"
+        }
+      }
+    ]
+  }
+}

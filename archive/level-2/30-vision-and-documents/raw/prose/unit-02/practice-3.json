@@ -1,0 +1,309 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "30-vision-and-documents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: planning a request with images and PDFs (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: planning a request with images and PDFs"
+    },
+    {
+      "type": "para",
+      "text": "An image or a PDF is cheap to attach and easy to get wrong: a format the API refuses, a screenshot that is silently shrunk so that every coordinate Claude returns is off, a request with more images than the model accepts, a PDF placed after the question. Write the planner that checks all of it before a request is sent, and builds the user content in the order Claude reads best. The limits and the sizing rule come from the Claude documentation on vision, coordinates and bounding boxes, and PDF support, read on 2026-10-03; the lesson pages explain them. Nothing here touches the network: the planner only builds and checks a request."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`MODELS`",
+          "model id to its resolution tier, its context window and its input price in dollars per million tokens"
+        ],
+        [
+          "`TIERS`",
+          "tier to the longest edge in pixels and the visual token budget"
+        ],
+        [
+          "`RequestError`",
+          "what your code throws, before any call, for a request the API would reject; `field` names the part"
+        ],
+        [
+          "item",
+          "`{\"kind\": \"image\" or \"pdf\", \"name\", \"media_type\", \"size\", \"source\": \"base64\", \"url\" or \"file\", \"value\"}`; an image also has `width` and `height` in pixels, a PDF has `pages`. `size` is the payload size in bytes. `value` is the base64 text, the URL or the file id"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working planner with eight gaps cut out of it. Everything that is plumbing is written and correct: the tables, the `RequestError`, `resized_size` with its search, and the whole of `plan_request` with its checks in order. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file (`log.debug(...)`); a run shows the lines under the failing case. Write them in this order (the other languages use the camel-case forms, and TypeScript, Java and Kotlin keep the helpers private to the file):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`visual_tokens` unlocks `e1` and `e7`: one token per 28 x 28 pixel patch.",
+        "`image_cost_usd` unlocks `e7`: tokens times the model's price per million, rounded.",
+        "`to_original_coordinates` unlocks `e7`: clamp into the resized size, then scale onto the original.",
+        "`_max_count` unlocks `e2` and `e5`: 100 or 600 images or PDF pages, by the context window.",
+        "`_max_image_size` unlocks `e2` and `e6`: 10 MiB, or 5 MiB on bedrock and vertex.",
+        "`_many` unlocks `e3`: more than twenty image blocks, PDFs counted on bedrock and vertex.",
+        "`_image_blocks` unlocks `m1` and `e4`: the `Image n:` label and the image block, with the `transformations` entry when `exact`.",
+        "`_source` unlocks `m1`, `e5` and `e6`: the base64, url or file source of an item."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About ten lines in all. The list below describes the whole planner; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`visual_tokens(width, height)`: one visual token per 28 by 28 pixel patch, so `ceil(width / 28) * ceil(height / 28)`.",
+        "`resized_size(width, height, tier)`: the size the model sees. An image that fits is unchanged. It fits when each side rounded up to a multiple of 28 is at most the tier's edge limit **and** its visual tokens are at most the tier's budget. Otherwise it is scaled, keeping its aspect ratio, to the largest size that fits (the long edge is searched downward; the short edge is `long edge / aspect ratio` rounded half to even, and at least 1). A portrait image is handled as its landscape twin with the sides swapped back.",
+        "`image_cost_usd(model, tokens)`: `tokens * price / 1,000,000`, rounded to 6 decimals.",
+        "`to_original_coordinates(x, y, width, height, model)`: Claude returned a point for the image it saw, which is the resized image (never the padded one). Clamp the point into the resized size, then scale it onto the original `width` by `height` image.",
+        [
+          "`plan_request(model, items, question, exact=False, platform=\"api\")` returns `{\"content\", \"image_tokens\", \"resized\", \"pdf_pages\"}`. Check in this order and throw `RequestError` with the field named here, at the first problem:",
+          {
+            "type": "list",
+            "ordered": true,
+            "items": [
+              "`model` is not in `MODELS`: field `model`. 2. `question` is empty or only spaces: field `question`.",
+              "More images than the model accepts, 100 for a model whose context window is under 1,000,000 tokens and 600 otherwise: field `items`. 4. More PDF pages in total than the same limit: field `items`. 5. The `size` of all items together is more than 32 MiB (32 * 1,048,576 bytes): field `items`.",
+              "Then each item in order, at its index `i`: on `platform` `bedrock` or `vertex` a source other than `base64`: `items[i].source`. A PDF whose `media_type` is not `application/pdf`: `items[i].media_type`. An image whose `media_type` is not one of the four in `IMAGE_TYPES`: `items[i].media_type`. A side above 8000 pixels: `items[i].dimensions`. A `size` above 10 MiB, or 5 MiB on `bedrock` and `vertex`: `items[i].size`. When the request holds **more than 20** image blocks (on `bedrock` and `vertex` the PDFs count as well), a side above 2000 pixels: `items[i].dimensions`. When `exact` is true and the image would be resized for this model's tier: `items[i].dimensions`."
+            ]
+          },
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`image_tokens` is the sum of the visual tokens of every image at the size the model sees. `resized` lists the names of the images that would be resized (an empty list when none). `pdf_pages` is the total number of PDF pages.",
+              "`content` keeps the order of `items`, one block per item, and ends with the question as a text block. An image is `{\"type\": \"image\", \"source\": ...}` and a PDF is `{\"type\": \"document\", \"source\": ...}`; the source is `{\"type\": \"base64\", \"media_type\", \"data\"}`, `{\"type\": \"url\", \"url\"}` or `{\"type\": \"file\", \"file_id\"}`. When there are two or more images, each one is preceded by a text block `Image n:` (n counts the images from 1; PDFs get no label). When `exact` is true each image block also carries `\"transformations\": {\"oversized_image\": \"error\"}`."
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Images come first with labels, and the question comes last"
+        ],
+        [
+          "`e1`",
+          "The token cost follows the model's resolution tier"
+        ],
+        [
+          "`e2`",
+          "Formats, dimensions, sizes and counts are checked before any call"
+        ],
+        [
+          "`e3`",
+          "More than twenty images lower the side limit to 2000 pixels"
+        ],
+        [
+          "`e4`",
+          "An image whose size matters is rejected instead of resized"
+        ],
+        [
+          "`e5`",
+          "PDFs become document blocks in order and are limited by pages"
+        ],
+        [
+          "`e6`",
+          "Bedrock and Vertex take only base64 sources and smaller images"
+        ],
+        [
+          "`e7`",
+          "Coordinates map back to the original, and cost follows the price"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/** Planning a request that carries images and PDFs. See ../../statement.md. Items, blocks and results are JSON-like maps. */\nfinal class Vision {\n    private static final System.Logger LOG = System.getLogger(Vision.class.getName());\n    private Vision() {}\n\n    static final int MIB = 1024 * 1024;\n    static final List<String> IMAGE_TYPES = List.of(\"image/jpeg\", \"image/png\", \"image/gif\", \"image/webp\");\n\n    /** Given: model id to {tier, context window in tokens, input price in dollars per million tokens}. */\n    static final Map<String, Object[]> MODELS = Map.of(\n            \"claude-fable-5-1\", new Object[] {\"high\", 1_000_000, 10.0},\n            \"claude-opus-5-5\", new Object[] {\"high\", 1_000_000, 4.0},\n            \"claude-sonnet-5-5\", new Object[] {\"high\", 1_000_000, 2.0},\n            \"claude-haiku-4-5\", new Object[] {\"standard\", 200_000, 1.0},\n            \"claude-haiku-4-5-20251001\", new Object[] {\"standard\", 200_000, 1.0});\n    /** Given: tier to {longest edge in pixels, visual token budget}. */\n    static final Map<String, int[]> TIERS = Map.of(\"standard\", new int[] {1568, 1568}, \"high\", new int[] {2576, 4784});\n\n    static int visualTokens(int width, int height) {\n        return Math.ceilDiv(width, 28) * Math.ceilDiv(height, 28);\n    }\n\n    private static boolean fits(int w, int h, int maxEdge, int maxTokens) {\n        return Math.ceilDiv(w, 28) * 28 <= maxEdge && Math.ceilDiv(h, 28) * 28 <= maxEdge && visualTokens(w, h) <= maxTokens;\n    }\n\n    /** The {width, height} the model sees: the largest aspect-preserving size within the tier's edge and token limits. */\n    static int[] resizedSize(int width, int height, String tier) {\n        int maxEdge = TIERS.get(tier)[0], maxTokens = TIERS.get(tier)[1];\n        if (fits(width, height, maxEdge, maxTokens)) return new int[] {width, height};\n        if (height > width) {\n            int[] r = resizedSize(height, width, tier);\n            return new int[] {r[1], r[0]};\n        }\n        double ratio = (double) width / height;\n        for (int longEdge = width - 1; longEdge > 0; longEdge--) {\n            int shortEdge = Math.max((int) Math.rint(longEdge / ratio), 1); // half to even, like the API\n            if (fits(longEdge, shortEdge, maxEdge, maxTokens)) return new int[] {longEdge, shortEdge};\n        }\n        return new int[] {1, 1};\n    }\n\n    static double imageCostUsd(String model, int tokens) {\n        double price = (Double) MODELS.get(model)[2];\n        return Math.rint(tokens * price / 1_000_000 * 1e6) / 1e6;\n    }\n\n    static double[] toOriginalCoordinates(double x, double y, int width, int height, String model) {\n        int[] r = resizedSize(width, height, (String) MODELS.get(model)[0]);\n        double cx = Math.min(Math.max(x, 0), r[0]);\n        double cy = Math.min(Math.max(y, 0), r[1]);\n        return new double[] {cx / r[0] * width, cy / r[1] * height};\n    }\n\n    private static Map<String, Object> map(Object... kv) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);\n        return m;\n    }\n\n    private static Map<String, Object> sourceOf(Map<String, Object> item) {\n        String kind = (String) item.get(\"source\");\n        Object value = item.get(\"value\");\n        if (kind.equals(\"base64\")) return map(\"type\", \"base64\", \"media_type\", item.get(\"media_type\"), \"data\", value);\n        return kind.equals(\"url\") ? map(\"type\", \"url\", \"url\", value) : map(\"type\", \"file\", \"file_id\", value);\n    }\n\n    private static int maxCount(int context) {\n        return context < 1_000_000 ? 100 : 600;\n    }\n\n    private static int maxImageSize(boolean cloud) {\n        return (cloud ? 5 : 10) * MIB;\n    }\n\n    private static boolean isMany(int images, int pdfs, boolean cloud) {\n        return images + (cloud ? pdfs : 0) > 20;\n    }\n\n    private static List<Object> imageBlocks(Map<String, Object> item, int n, int imageCount, boolean exact) {\n        List<Object> blocks = new ArrayList<>();\n        if (imageCount > 1) blocks.add(map(\"type\", \"text\", \"text\", \"Image \" + n + \":\"));\n        Map<String, Object> block = map(\"type\", \"image\", \"source\", sourceOf(item));\n        if (exact) block.put(\"transformations\", map(\"oversized_image\", \"error\"));\n        blocks.add(block);\n        return blocks;\n    }\n\n    private static int num(Map<String, Object> item, String key) {\n        return ((Number) item.get(key)).intValue();\n    }\n\n    static Map<String, Object> planRequest(String model, List<Map<String, Object>> items, String question) {\n        return planRequest(model, items, question, false, \"api\");\n    }\n\n    static Map<String, Object> planRequest(String model, List<Map<String, Object>> items, String question, boolean exact, String platform) {\n        LOG.log(System.Logger.Level.DEBUG, \"planRequest input: {0}\", items);\n        if (!MODELS.containsKey(model)) throw new RequestError(\"model\", \"unknown model \" + model);\n        String tier = (String) MODELS.get(model)[0];\n        int context = (Integer) MODELS.get(model)[1];\n        if (question == null || question.isBlank()) throw new RequestError(\"question\", \"the question must be a non-empty string\");\n        boolean cloud = platform.equals(\"bedrock\") || platform.equals(\"vertex\");\n        int images = 0, pdfs = 0, pages = 0;\n        long total = 0;\n        for (Map<String, Object> it : items) {\n            if (it.get(\"kind\").equals(\"image\")) images++;\n            else {\n                pdfs++;\n                pages += num(it, \"pages\");\n            }\n            total += num(it, \"size\");\n        }\n        int limit = maxCount(context);\n        if (images > limit) throw new RequestError(\"items\", \"too many images for \" + model);\n        if (pages > limit) throw new RequestError(\"items\", \"too many PDF pages for \" + model);\n        if (total > 32L * MIB) throw new RequestError(\"items\", \"the request would be larger than 32 MiB\");\n        boolean many = isMany(images, pdfs, cloud);\n        int tokens = 0;\n        List<Object> resized = new ArrayList<>();\n        for (int i = 0; i < items.size(); i++) {\n            Map<String, Object> it = items.get(i);\n            if (cloud && !it.get(\"source\").equals(\"base64\")) throw new RequestError(\"items[\" + i + \"].source\", platform + \" accepts base64 sources only\");\n            if (it.get(\"kind\").equals(\"pdf\")) {\n                if (!\"application/pdf\".equals(it.get(\"media_type\"))) throw new RequestError(\"items[\" + i + \"].media_type\", \"a PDF must be application/pdf\");\n                continue;\n            }\n            int w = num(it, \"width\"), h = num(it, \"height\");\n            if (!IMAGE_TYPES.contains(it.get(\"media_type\"))) throw new RequestError(\"items[\" + i + \"].media_type\", it.get(\"media_type\") + \" is not a supported image format\");\n            if (w > 8000 || h > 8000) throw new RequestError(\"items[\" + i + \"].dimensions\", \"an image may not exceed 8000 x 8000 pixels\");\n            if (num(it, \"size\") > maxImageSize(cloud)) throw new RequestError(\"items[\" + i + \"].size\", \"the image is too large\");\n            if (many && Math.max(w, h) > 2000) throw new RequestError(\"items[\" + i + \"].dimensions\", \"with more than 20 images, no side may exceed 2000 pixels\");\n            int[] seen = resizedSize(w, h, tier);\n            if (seen[0] != w || seen[1] != h) {\n                if (exact) throw new RequestError(\"items[\" + i + \"].dimensions\", \"would be resized to \" + seen[0] + \"x\" + seen[1]);\n                resized.add(it.get(\"name\"));\n            }\n            tokens += visualTokens(seen[0], seen[1]);\n        }\n        List<Object> content = new ArrayList<>();\n        int n = 0;\n        for (Map<String, Object> it : items) {\n            if (it.get(\"kind\").equals(\"image\")) {\n                n++;\n                content.addAll(imageBlocks(it, n, images, exact));\n            } else {\n                content.add(map(\"type\", \"document\", \"source\", sourceOf(it)));\n            }\n        }\n        content.add(map(\"type\", \"text\", \"text\", question));\n        return map(\"content\", content, \"image_tokens\", tokens, \"resized\", resized, \"pdf_pages\", pages);\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // Two images and a question: the planner puts the images first, each labelled, and the question last.\n        List<Map<String, Object>> items = List.of(\n            img(\"chart\", 1000, 1000, \"image/png\", \"base64\", \"AAAA\"),\n            img(\"photo\", 200, 200, \"image/jpeg\", \"url\", \"https://example.invalid/p.jpg\"));\n        try {\n            Map<String, Object> plan = Vision.planRequest(\"claude-opus-5-5\", items, \"What changed?\");\n            if (plan != null && plan.get(\"content\") instanceof List<?> content) {\n                java.util.List<Object> blocks = new java.util.ArrayList<>();\n                for (Object block : content) {\n                    Map<?, ?> b = (Map<?, ?>) block;\n                    blocks.add(b.get(\"text\") == null ? b.get(\"type\") : b.get(\"text\"));\n                }\n                System.out.println(\"blocks: \" + blocks);\n            }\n            System.out.println(\"image tokens: \" + (plan == null ? null : plan.get(\"image_tokens\")));\n            System.out.println(\"resized: \" + (plan == null ? null : plan.get(\"resized\")));\n        } catch (RequestError err) {\n            System.out.println(\"refused: \" + err.getMessage());\n        }\n    }\n\n    private static Map<String, Object> img(String name, int w, int h, String mediaType, String source, String value) {\n        return Map.of(\"kind\", \"image\", \"name\", name, \"media_type\", mediaType, \"width\", w, \"height\", h, \"size\", 1000, \"source\", source, \"value\", value);\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/** Planning a request that carries images and PDFs. See ../../statement.md. Items, blocks and results are JSON-like maps. */\nfinal class Vision {\n    private static final System.Logger LOG = System.getLogger(Vision.class.getName());\n    private Vision() {}\n\n    static final int MIB = 1024 * 1024;\n    static final List<String> IMAGE_TYPES = List.of(\"image/jpeg\", \"image/png\", \"image/gif\", \"image/webp\");\n\n    /** Given: model id to {tier, context window in tokens, input price in dollars per million tokens}. */\n    static final Map<String, Object[]> MODELS = Map.of(\n            \"claude-fable-5-1\", new Object[] {\"high\", 1_000_000, 10.0},\n            \"claude-opus-5-5\", new Object[] {\"high\", 1_000_000, 4.0},\n            \"claude-sonnet-5-5\", new Object[] {\"high\", 1_000_000, 2.0},\n            \"claude-haiku-4-5\", new Object[] {\"standard\", 200_000, 1.0},\n            \"claude-haiku-4-5-20251001\", new Object[] {\"standard\", 200_000, 1.0});\n    /** Given: tier to {longest edge in pixels, visual token budget}. */\n    static final Map<String, int[]> TIERS = Map.of(\"standard\", new int[] {1568, 1568}, \"high\", new int[] {2576, 4784});\n\n    static int visualTokens(int width, int height) {\n        // TODO 1 of 8 (unlocks e1 and e7): the visual tokens of an image of this size.\n        // Receives the width and height in pixels. Returns one token per 28 x 28 pixel patch, each side rounded up to whole patches.\n        // Example: visualTokens(29, 28) -> 2\n        return 0;\n    }\n\n    private static boolean fits(int w, int h, int maxEdge, int maxTokens) {\n        return Math.ceilDiv(w, 28) * 28 <= maxEdge && Math.ceilDiv(h, 28) * 28 <= maxEdge && visualTokens(w, h) <= maxTokens;\n    }\n\n    /** The {width, height} the model sees: the largest aspect-preserving size within the tier's edge and token limits. */\n    static int[] resizedSize(int width, int height, String tier) {\n        int maxEdge = TIERS.get(tier)[0], maxTokens = TIERS.get(tier)[1];\n        if (fits(width, height, maxEdge, maxTokens)) return new int[] {width, height};\n        if (height > width) {\n            int[] r = resizedSize(height, width, tier);\n            return new int[] {r[1], r[0]};\n        }\n        double ratio = (double) width / height;\n        for (int longEdge = width - 1; longEdge > 0; longEdge--) {\n            int shortEdge = Math.max((int) Math.rint(longEdge / ratio), 1); // half to even, like the API\n            if (fits(longEdge, shortEdge, maxEdge, maxTokens)) return new int[] {longEdge, shortEdge};\n        }\n        return new int[] {1, 1};\n    }\n\n    static double imageCostUsd(String model, int tokens) {\n        // TODO 2 of 8 (unlocks e7): the input cost in dollars of that many tokens for the model.\n        // Receives a model id and a token count. Returns tokens * price / 1,000,000 rounded to 6 decimals (Math.rint); the price is\n        // ((Double) MODELS.get(model)[2]). Example: imageCostUsd(\"claude-haiku-4-5\", 1000) -> 0.001\n        return 0.0;\n    }\n\n    static double[] toOriginalCoordinates(double x, double y, int width, int height, String model) {\n        int[] r = resizedSize(width, height, (String) MODELS.get(model)[0]);\n        // TODO 3 of 8 (unlocks e7): a point Claude returned for the image it saw, as a point on the original width x height image.\n        // Clamp x and y into the resized size r[0] x r[1], then scale them onto the original size. Example: a 3000 x 2000 image on a\n        // \"high\" model is seen as 2576 x 1717 (not padded), so the point (1288, 0) becomes about {1500.0, 0.0}.\n        return new double[] {x, y};\n    }\n\n    private static Map<String, Object> map(Object... kv) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);\n        return m;\n    }\n\n    private static Map<String, Object> sourceOf(Map<String, Object> item) {\n        // TODO 8 of 8 (unlocks m1, e5 and e6): the \"source\" object of an item.\n        // Returns {type: base64, media_type, data} for source \"base64\", {type: url, url} for \"url\" and {type: file, file_id} for\n        // \"file\"; the text is item.get(\"value\"). Build it with map(...).\n        // Example: source \"url\", value \"https://example.invalid/a.png\" -> {type=url, url=https://example.invalid/a.png}\n        return new LinkedHashMap<>();\n    }\n\n    private static int maxCount(int context) {\n        // TODO 4 of 8 (unlocks e2 and e5): how many images, and how many PDF pages, a request may hold.\n        // Receives the model's context window in tokens. Returns 100 when it is under 1,000,000 and 600 otherwise.\n        // Example: maxCount(200_000) -> 100\n        return Integer.MAX_VALUE;\n    }\n\n    private static int maxImageSize(boolean cloud) {\n        // TODO 5 of 8 (unlocks e2 and e6): the largest image payload in bytes.\n        // Receives true on bedrock and vertex. Returns 10 MiB, or 5 MiB when it is true.\n        // Example: maxImageSize(true) -> 5 * MIB\n        return Integer.MAX_VALUE;\n    }\n\n    private static boolean isMany(int images, int pdfs, boolean cloud) {\n        // TODO 6 of 8 (unlocks e3): does the request hold more than 20 image blocks?\n        // Receives the image count, the PDF count and the cloud flag; on bedrock and vertex the PDFs count as well.\n        // Example: isMany(18, 3, true) -> true, isMany(18, 3, false) -> false\n        return false;\n    }\n\n    private static List<Object> imageBlocks(Map<String, Object> item, int n, int imageCount, boolean exact) {\n        // TODO 7 of 8 (unlocks m1 and e4): the content blocks of the n-th image (counting from 1).\n        // Returns a text block \"Image n:\" first when there are two or more images, then the image block {type: image, source:\n        // sourceOf(item)}, which also carries transformations: {oversized_image: error} when exact is true (use map(...)).\n        // Example: imageBlocks(item, 2, 2, false) -> [{type=text, text=Image 2:}, {type=image, source={...}}]\n        return new ArrayList<>();\n    }\n\n    private static int num(Map<String, Object> item, String key) {\n        return ((Number) item.get(key)).intValue();\n    }\n\n    static Map<String, Object> planRequest(String model, List<Map<String, Object>> items, String question) {\n        return planRequest(model, items, question, false, \"api\");\n    }\n\n    static Map<String, Object> planRequest(String model, List<Map<String, Object>> items, String question, boolean exact, String platform) {\n        LOG.log(System.Logger.Level.DEBUG, \"planRequest input: {0}\", items);\n        if (!MODELS.containsKey(model)) throw new RequestError(\"model\", \"unknown model \" + model);\n        String tier = (String) MODELS.get(model)[0];\n        int context = (Integer) MODELS.get(model)[1];\n        if (question == null || question.isBlank()) throw new RequestError(\"question\", \"the question must be a non-empty string\");\n        boolean cloud = platform.equals(\"bedrock\") || platform.equals(\"vertex\");\n        int images = 0, pdfs = 0, pages = 0;\n        long total = 0;\n        for (Map<String, Object> it : items) {\n            if (it.get(\"kind\").equals(\"image\")) images++;\n            else {\n                pdfs++;\n                pages += num(it, \"pages\");\n            }\n            total += num(it, \"size\");\n        }\n        int limit = maxCount(context);\n        if (images > limit) throw new RequestError(\"items\", \"too many images for \" + model);\n        if (pages > limit) throw new RequestError(\"items\", \"too many PDF pages for \" + model);\n        if (total > 32L * MIB) throw new RequestError(\"items\", \"the request would be larger than 32 MiB\");\n        boolean many = isMany(images, pdfs, cloud);\n        int tokens = 0;\n        List<Object> resized = new ArrayList<>();\n        for (int i = 0; i < items.size(); i++) {\n            Map<String, Object> it = items.get(i);\n            if (cloud && !it.get(\"source\").equals(\"base64\")) throw new RequestError(\"items[\" + i + \"].source\", platform + \" accepts base64 sources only\");\n            if (it.get(\"kind\").equals(\"pdf\")) {\n                if (!\"application/pdf\".equals(it.get(\"media_type\"))) throw new RequestError(\"items[\" + i + \"].media_type\", \"a PDF must be application/pdf\");\n                continue;\n            }\n            int w = num(it, \"width\"), h = num(it, \"height\");\n            if (!IMAGE_TYPES.contains(it.get(\"media_type\"))) throw new RequestError(\"items[\" + i + \"].media_type\", it.get(\"media_type\") + \" is not a supported image format\");\n            if (w > 8000 || h > 8000) throw new RequestError(\"items[\" + i + \"].dimensions\", \"an image may not exceed 8000 x 8000 pixels\");\n            if (num(it, \"size\") > maxImageSize(cloud)) throw new RequestError(\"items[\" + i + \"].size\", \"the image is too large\");\n            if (many && Math.max(w, h) > 2000) throw new RequestError(\"items[\" + i + \"].dimensions\", \"with more than 20 images, no side may exceed 2000 pixels\");\n            int[] seen = resizedSize(w, h, tier);\n            if (seen[0] != w || seen[1] != h) {\n                if (exact) throw new RequestError(\"items[\" + i + \"].dimensions\", \"would be resized to \" + seen[0] + \"x\" + seen[1]);\n                resized.add(it.get(\"name\"));\n            }\n            tokens += visualTokens(seen[0], seen[1]);\n        }\n        List<Object> content = new ArrayList<>();\n        int n = 0;\n        for (Map<String, Object> it : items) {\n            if (it.get(\"kind\").equals(\"image\")) {\n                n++;\n                content.addAll(imageBlocks(it, n, images, exact));\n            } else {\n                content.add(map(\"type\", \"document\", \"source\", sourceOf(it)));\n            }\n        }\n        content.add(map(\"type\", \"text\", \"text\", question));\n        return map(\"content\", content, \"image_tokens\", tokens, \"resized\", resized, \"pdf_pages\", pages);\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // Two images and a question: the planner puts the images first, each labelled, and the question last.\n        List<Map<String, Object>> items = List.of(\n            img(\"chart\", 1000, 1000, \"image/png\", \"base64\", \"AAAA\"),\n            img(\"photo\", 200, 200, \"image/jpeg\", \"url\", \"https://example.invalid/p.jpg\"));\n        try {\n            Map<String, Object> plan = Vision.planRequest(\"claude-opus-5-5\", items, \"What changed?\");\n            if (plan != null && plan.get(\"content\") instanceof List<?> content) {\n                java.util.List<Object> blocks = new java.util.ArrayList<>();\n                for (Object block : content) {\n                    Map<?, ?> b = (Map<?, ?>) block;\n                    blocks.add(b.get(\"text\") == null ? b.get(\"type\") : b.get(\"text\"));\n                }\n                System.out.println(\"blocks: \" + blocks);\n            }\n            System.out.println(\"image tokens: \" + (plan == null ? null : plan.get(\"image_tokens\")));\n            System.out.println(\"resized: \" + (plan == null ? null : plan.get(\"resized\")));\n        } catch (RequestError err) {\n            System.out.println(\"refused: \" + err.getMessage());\n        }\n    }\n\n    private static Map<String, Object> img(String name, int w, int h, String mediaType, String source, String value) {\n        return Map.of(\"kind\", \"image\", \"name\", name, \"media_type\", mediaType, \"width\", w, \"height\", h, \"size\", 1000, \"source\", source, \"value\", value);\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 4,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "15a75ad67cde817089dfd9bb8861822f7b07b30d16e3843f38e5b40adbd040fc",
+  "starting_code": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/** Planning a request that carries images and PDFs. See ../../statement.md. Items, blocks and results are JSON-like maps. */\nfinal class Vision {\n    private static final System.Logger LOG = System.getLogger(Vision.class.getName());\n    private Vision() {}\n\n    static final int MIB = 1024 * 1024;\n    static final List<String> IMAGE_TYPES = List.of(\"image/jpeg\", \"image/png\", \"image/gif\", \"image/webp\");\n\n    /** Given: model id to {tier, context window in tokens, input price in dollars per million tokens}. */\n    static final Map<String, Object[]> MODELS = Map.of(\n            \"claude-fable-5-1\", new Object[] {\"high\", 1_000_000, 10.0},\n            \"claude-opus-5-5\", new Object[] {\"high\", 1_000_000, 4.0},\n            \"claude-sonnet-5-5\", new Object[] {\"high\", 1_000_000, 2.0},\n            \"claude-haiku-4-5\", new Object[] {\"standard\", 200_000, 1.0},\n            \"claude-haiku-4-5-20251001\", new Object[] {\"standard\", 200_000, 1.0});\n    /** Given: tier to {longest edge in pixels, visual token budget}. */\n    static final Map<String, int[]> TIERS = Map.of(\"standard\", new int[] {1568, 1568}, \"high\", new int[] {2576, 4784});\n\n    static int visualTokens(int width, int height) {\n        // TODO 1 of 8 (unlocks e1 and e7): the visual tokens of an image of this size.\n        // Receives the width and height in pixels. Returns one token per 28 x 28 pixel patch, each side rounded up to whole patches.\n        // Example: visualTokens(29, 28) -> 2\n        return 0;\n    }\n\n    private static boolean fits(int w, int h, int maxEdge, int maxTokens) {\n        return Math.ceilDiv(w, 28) * 28 <= maxEdge && Math.ceilDiv(h, 28) * 28 <= maxEdge && visualTokens(w, h) <= maxTokens;\n    }\n\n    /** The {width, height} the model sees: the largest aspect-preserving size within the tier's edge and token limits. */\n    static int[] resizedSize(int width, int height, String tier) {\n        int maxEdge = TIERS.get(tier)[0], maxTokens = TIERS.get(tier)[1];\n        if (fits(width, height, maxEdge, maxTokens)) return new int[] {width, height};\n        if (height > width) {\n            int[] r = resizedSize(height, width, tier);\n            return new int[] {r[1], r[0]};\n        }\n        double ratio = (double) width / height;\n        for (int longEdge = width - 1; longEdge > 0; longEdge--) {\n            int shortEdge = Math.max((int) Math.rint(longEdge / ratio), 1); // half to even, like the API\n            if (fits(longEdge, shortEdge, maxEdge, maxTokens)) return new int[] {longEdge, shortEdge};\n        }\n        return new int[] {1, 1};\n    }\n\n    static double imageCostUsd(String model, int tokens) {\n        // TODO 2 of 8 (unlocks e7): the input cost in dollars of that many tokens for the model.\n        // Receives a model id and a token count. Returns tokens * price / 1,000,000 rounded to 6 decimals (Math.rint); the price is\n        // ((Double) MODELS.get(model)[2]). Example: imageCostUsd(\"claude-haiku-4-5\", 1000) -> 0.001\n        return 0.0;\n    }\n\n    static double[] toOriginalCoordinates(double x, double y, int width, int height, String model) {\n        int[] r = resizedSize(width, height, (String) MODELS.get(model)[0]);\n        // TODO 3 of 8 (unlocks e7): a point Claude returned for the image it saw, as a point on the original width x height image.\n        // Clamp x and y into the resized size r[0] x r[1], then scale them onto the original size. Example: a 3000 x 2000 image on a\n        // \"high\" model is seen as 2576 x 1717 (not padded), so the point (1288, 0) becomes about {1500.0, 0.0}.\n        return new double[] {x, y};\n    }\n\n    private static Map<String, Object> map(Object... kv) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);\n        return m;\n    }\n\n    private static Map<String, Object> sourceOf(Map<String, Object> item) {\n        // TODO 8 of 8 (unlocks m1, e5 and e6): the \"source\" object of an item.\n        // Returns {type: base64, media_type, data} for source \"base64\", {type: url, url} for \"url\" and {type: file, file_id} for\n        // \"file\"; the text is item.get(\"value\"). Build it with map(...).\n        // Example: source \"url\", value \"https://example.invalid/a.png\" -> {type=url, url=https://example.invalid/a.png}\n        return new LinkedHashMap<>();\n    }\n\n    private static int maxCount(int context) {\n        // TODO 4 of 8 (unlocks e2 and e5): how many images, and how many PDF pages, a request may hold.\n        // Receives the model's context window in tokens. Returns 100 when it is under 1,000,000 and 600 otherwise.\n        // Example: maxCount(200_000) -> 100\n        return Integer.MAX_VALUE;\n    }\n\n    private static int maxImageSize(boolean cloud) {\n        // TODO 5 of 8 (unlocks e2 and e6): the largest image payload in bytes.\n        // Receives true on bedrock and vertex. Returns 10 MiB, or 5 MiB when it is true.\n        // Example: maxImageSize(true) -> 5 * MIB\n        return Integer.MAX_VALUE;\n    }\n\n    private static boolean isMany(int images, int pdfs, boolean cloud) {\n        // TODO 6 of 8 (unlocks e3): does the request hold more than 20 image blocks?\n        // Receives the image count, the PDF count and the cloud flag; on bedrock and vertex the PDFs count as well.\n        // Example: isMany(18, 3, true) -> true, isMany(18, 3, false) -> false\n        return false;\n    }\n\n    private static List<Object> imageBlocks(Map<String, Object> item, int n, int imageCount, boolean exact) {\n        // TODO 7 of 8 (unlocks m1 and e4): the content blocks of the n-th image (counting from 1).\n        // Returns a text block \"Image n:\" first when there are two or more images, then the image block {type: image, source:\n        // sourceOf(item)}, which also carries transformations: {oversized_image: error} when exact is true (use map(...)).\n        // Example: imageBlocks(item, 2, 2, false) -> [{type=text, text=Image 2:}, {type=image, source={...}}]\n        return new ArrayList<>();\n    }\n\n    private static int num(Map<String, Object> item, String key) {\n        return ((Number) item.get(key)).intValue();\n    }\n\n    static Map<String, Object> planRequest(String model, List<Map<String, Object>> items, String question) {\n        return planRequest(model, items, question, false, \"api\");\n    }\n\n    static Map<String, Object> planRequest(String model, List<Map<String, Object>> items, String question, boolean exact, String platform) {\n        LOG.log(System.Logger.Level.DEBUG, \"planRequest input: {0}\", items);\n        if (!MODELS.containsKey(model)) throw new RequestError(\"model\", \"unknown model \" + model);\n        String tier = (String) MODELS.get(model)[0];\n        int context = (Integer) MODELS.get(model)[1];\n        if (question == null || question.isBlank()) throw new RequestError(\"question\", \"the question must be a non-empty string\");\n        boolean cloud = platform.equals(\"bedrock\") || platform.equals(\"vertex\");\n        int images = 0, pdfs = 0, pages = 0;\n        long total = 0;\n        for (Map<String, Object> it : items) {\n            if (it.get(\"kind\").equals(\"image\")) images++;\n            else {\n                pdfs++;\n                pages += num(it, \"pages\");\n            }\n            total += num(it, \"size\");\n        }\n        int limit = maxCount(context);\n        if (images > limit) throw new RequestError(\"items\", \"too many images for \" + model);\n        if (pages > limit) throw new RequestError(\"items\", \"too many PDF pages for \" + model);\n        if (total > 32L * MIB) throw new RequestError(\"items\", \"the request would be larger than 32 MiB\");\n        boolean many = isMany(images, pdfs, cloud);\n        int tokens = 0;\n        List<Object> resized = new ArrayList<>();\n        for (int i = 0; i < items.size(); i++) {\n            Map<String, Object> it = items.get(i);\n            if (cloud && !it.get(\"source\").equals(\"base64\")) throw new RequestError(\"items[\" + i + \"].source\", platform + \" accepts base64 sources only\");\n            if (it.get(\"kind\").equals(\"pdf\")) {\n                if (!\"application/pdf\".equals(it.get(\"media_type\"))) throw new RequestError(\"items[\" + i + \"].media_type\", \"a PDF must be application/pdf\");\n                continue;\n            }\n            int w = num(it, \"width\"), h = num(it, \"height\");\n            if (!IMAGE_TYPES.contains(it.get(\"media_type\"))) throw new RequestError(\"items[\" + i + \"].media_type\", it.get(\"media_type\") + \" is not a supported image format\");\n            if (w > 8000 || h > 8000) throw new RequestError(\"items[\" + i + \"].dimensions\", \"an image may not exceed 8000 x 8000 pixels\");\n            if (num(it, \"size\") > maxImageSize(cloud)) throw new RequestError(\"items[\" + i + \"].size\", \"the image is too large\");\n            if (many && Math.max(w, h) > 2000) throw new RequestError(\"items[\" + i + \"].dimensions\", \"with more than 20 images, no side may exceed 2000 pixels\");\n            int[] seen = resizedSize(w, h, tier);\n            if (seen[0] != w || seen[1] != h) {\n                if (exact) throw new RequestError(\"items[\" + i + \"].dimensions\", \"would be resized to \" + seen[0] + \"x\" + seen[1]);\n                resized.add(it.get(\"name\"));\n            }\n            tokens += visualTokens(seen[0], seen[1]);\n        }\n        List<Object> content = new ArrayList<>();\n        int n = 0;\n        for (Map<String, Object> it : items) {\n            if (it.get(\"kind\").equals(\"image\")) {\n                n++;\n                content.addAll(imageBlocks(it, n, images, exact));\n            } else {\n                content.add(map(\"type\", \"document\", \"source\", sourceOf(it)));\n            }\n        }\n        content.add(map(\"type\", \"text\", \"text\", question));\n        return map(\"content\", content, \"image_tokens\", tokens, \"resized\", resized, \"pdf_pages\", pages);\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/30-vision-and-documents/prose/unit-02/practice-3/src/main/java/Vision.java",
+    "test_path": "practice/level-2/30-vision-and-documents/prose/unit-02/practice-3/src/test/java/VisionTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/30-vision-and-documents/prose/unit-02/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/30-vision-and-documents/prose/unit-02/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_imagesComeFirstWithLabelsAndTheQuestionLast()",
+        "kind": "main",
+        "says": "Images come first with labels, and the question comes last"
+      },
+      {
+        "id": "e1_theTokenCostFollowsTheModelsResolutionTier()",
+        "kind": "edge",
+        "says": "The token cost follows the model's resolution tier"
+      },
+      {
+        "id": "e2_formatsDimensionsSizesAndCountsAreCheckedBeforeAnyCall()",
+        "kind": "edge",
+        "says": "Formats, dimensions, sizes and counts are checked before any call"
+      },
+      {
+        "id": "e3_moreThanTwentyImagesLowerTheSideLimitTo2000Pixels()",
+        "kind": "edge",
+        "says": "More than twenty images lower the side limit to 2000 pixels"
+      },
+      {
+        "id": "e4_anImageWhoseSizeMattersIsRejectedInsteadOfResized()",
+        "kind": "edge",
+        "says": "An image whose size matters is rejected instead of resized"
+      },
+      {
+        "id": "e5_pdfsBecomeDocumentBlocksInOrderAndAreLimitedByPages()",
+        "kind": "edge",
+        "says": "PDFs become document blocks in order and are limited by pages"
+      },
+      {
+        "id": "e6_bedrockAndVertexTakeOnlyBase64SourcesAndSmallerImages()",
+        "kind": "edge",
+        "says": "Bedrock and Vertex take only base64 sources and smaller images"
+      },
+      {
+        "id": "e7_coordinatesMapBackToTheOriginalAndCostFollowsThePrice()",
+        "kind": "edge",
+        "says": "Coordinates map back to the original, and cost follows the price"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/30-vision-and-documents/prose/unit-02/practice-3/target/test-results/test"
+    },
+    "origin": "course/30-vision-and-documents/02-pdfs-documents-and-the-practice.md",
+    "concepts": [
+      "the practice of PDFs and documents: limits, cost and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/30-vision-and-documents/prose/unit-02/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "vision-and-documents-u2"
+}

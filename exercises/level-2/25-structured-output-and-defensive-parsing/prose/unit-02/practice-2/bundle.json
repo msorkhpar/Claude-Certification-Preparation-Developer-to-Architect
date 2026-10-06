@@ -1,0 +1,78 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "25-structured-output-and-defensive-parsing"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: an extractor with validation and a re-prompt (TypeScript)",
+  "lang": "typescript",
+  "main_file": "extractor.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "extractor.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-2/extractor.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 a valid reply is returned after one call",
+      "kind": "main",
+      "says": "A valid reply is returned after one call"
+    },
+    {
+      "id": "e1 json is found in fences and prose and bad text is retried",
+      "kind": "edge",
+      "says": "JSON is found inside fences and prose, and text with no JSON is retried"
+    },
+    {
+      "id": "e2 every schema violation is listed and sent back to the model",
+      "kind": "edge",
+      "says": "Every schema violation is listed and sent back to the model"
+    },
+    {
+      "id": "e3 the number of attempts is bounded",
+      "kind": "edge",
+      "says": "The number of attempts is bounded"
+    },
+    {
+      "id": "e4 a refusal or a cut off reply is not retried",
+      "kind": "edge",
+      "says": "A refusal or a cut-off reply is not retried"
+    },
+    {
+      "id": "e5 a quote that is not in the document is rejected",
+      "kind": "edge",
+      "says": "A quotation that is not in the document is rejected"
+    },
+    {
+      "id": "e6 types are exact booleans are not numbers and integers have no fraction",
+      "kind": "edge",
+      "says": "Types are exact: booleans are not numbers and integers have no fraction"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/25-structured-output-and-defensive-parsing/02-defensive-parsing-validation-and-the-re-prompt.md"
+}

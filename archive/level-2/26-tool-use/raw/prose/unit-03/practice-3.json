@@ -1,0 +1,286 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "26-tool-use"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: a tool loop against a scripted model (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a tool loop against a scripted model"
+    },
+    {
+      "type": "para",
+      "text": "Claude never runs your tools. It answers a request with `stop_reason` of `tool_use` and one or more `tool_use` blocks; your code runs them, sends the results back in a single user message, and asks again until the model ends its turn. Write that loop, with the limits and the error handling that keep it from hanging or lying. The rules come from the Claude documentation on tool use, handling tool calls, parallel tool use, stop reasons and forced tool use, read on 2026-10-03; the lesson pages explain them. Nothing here touches the network: the model is a function that you call, and the tests give it scripted replies in the shape of a Messages API response."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given types"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`ask(request)`",
+          "the model: takes a request `{\"model\", \"max_tokens\", \"messages\", \"tools\", optionally \"tool_choice\"}` and returns a reply `{\"content\": [blocks], \"stop_reason\": ...}`"
+        ],
+        [
+          "tool",
+          "a name, a description, an `input_schema` and a handler that takes the input map and returns a string or any JSON value"
+        ],
+        [
+          "`ToolError`",
+          "a handler may throw it (or any other error) to say it failed"
+        ],
+        [
+          "`RequestError`",
+          "what your code throws, before any call, for a request the API would reject with a 400; `field` names the part"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working tool loop with seven small gaps cut out of it. Everything that is plumbing is written and correct: the types, the request that is built for every turn, the assistant message that is appended after every reply, the error results for an unknown tool and for a handler that throws, the `pause_turn` continue and the `max_turns` result. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails every case on an assertion. The TypeScript, Java and Kotlin names are the camel-case forms (`checkChoice`, `missingInputs`, `resultContent`, ...); `_turn_numbers` is `lastTurn` there. Write them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_check_choice` unlocks `e5`: the `RequestError` for a `tool_choice` the API would reject.",
+        "`_missing_inputs` unlocks `e2`: the required keys that a call leaves out.",
+        "`_result_content` unlocks `e6`: a string as it is, any other value as JSON text.",
+        "`_tool_results` unlocks `m1` and `e1`: one result per `tool_use` block, in order, none for a server tool block.",
+        "`_final_status` unlocks `e4`: `done`, `refused` or `truncated` from the stop reason.",
+        "`_turn_numbers` unlocks `e3`: the turns the loop may use, so that `max_turns` calls are made and no more.",
+        "`_sent_choice` unlocks `e5`: a forced choice on the first request only."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs the fourth gap. About fifteen lines in all. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. `run_agent` already logs the user text it receives."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "`run_agent(ask, tools, user_text, model=\"claude-sonnet-5-5\", max_turns=8, tool_choice=None)` returns `{\"status\", \"text\", \"turns\", \"messages\"}`: the final status, the text of the last reply, the number of model calls, and the conversation."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "The first message has role `user` and the text. Each request lists the tools without their handlers, and carries `model`, `max_tokens` (1024) and a snapshot of the messages so far.",
+        "After each reply, append it as an `assistant` message with its content blocks unchanged (text blocks and server tool blocks included).",
+        "Stop reason `tool_use`: run every `tool_use` block, in order, and append ONE `user` message that holds one `tool_result` block per call (`tool_use_id` of the call, `content`, and `is_error` only on an error result), nothing else. Blocks of type `server_tool_use` are Anthropic's to run and get no result. A handler's string is sent as it is and any other value as JSON text.",
+        "A call becomes a result with `is_error: true` and a message, and the loop goes on, when: the tool name is unknown (`Unknown tool: NAME`); a key listed in the schema's `required` is missing from the input (the handler is not called, and the message is `Missing required input: KEY`, with several missing keys joined by `, ` in the order of `required`); or the handler throws (the error's message).",
+        "`end_turn` or `stop_sequence`: status `done`. `refusal`: status `refused`. `max_tokens` or any other stop reason: status `truncated`. `pause_turn` (a server tool's turn that was paused): call again with the assistant message appended and no user message.",
+        "After `max_turns` model calls without an end, status `max_turns`.",
+        "`tool_choice` is a map such as `{\"type\": \"auto\", \"disable_parallel_tool_use\": true}`. Check it before the first call and throw `RequestError`: field `tool_choice.type` unless the type is `auto`, `any`, `tool` or `none`; `tool_choice.disable_parallel_tool_use` if that key is present and is not a boolean; `tool_choice` for type `any` or `tool` on `claude-opus-5-5`, `claude-sonnet-5-5`, `claude-fable-5-1` or `claude-mythos-5-1`, which reject forced tool use; and `tool_choice.name` for type `tool` when no tool has that name. Send the choice as given on the first request. A forced choice (`any` or `tool`) must not repeat, or the model could never give a final answer: from the second request on, send `{\"type\": \"auto\"}` instead. `auto` and `none` are sent unchanged every time. With no `tool_choice`, send none."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A tool call is run and its result sent back until the model ends its turn"
+        ],
+        [
+          "`e1`",
+          "Parallel calls get one user message with every result in order"
+        ],
+        [
+          "`e2`",
+          "A failing, unknown or malformed call becomes an error result and the loop goes on"
+        ],
+        [
+          "`e3`",
+          "The number of turns is bounded"
+        ],
+        [
+          "`e4`",
+          "Refusal and truncation end the loop, and a paused turn continues"
+        ],
+        [
+          "`e5`",
+          "`tool_choice` is validated for the model, and a forced choice applies to the first request only"
+        ],
+        [
+          "`e6`",
+          "Results that are not text are sent as JSON text"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\nimport java.util.function.Function;\n\n/** A tool loop against a scripted model. See ../../statement.md. Messages and replies are JSON-like maps. */\nfinal class ToolLoop {\n    private static final System.Logger LOG = System.getLogger(ToolLoop.class.getName());\n    private ToolLoop() {}\n\n    private static final Set<String> FORCED_UNSUPPORTED = Set.of(\"claude-opus-5-5\", \"claude-sonnet-5-5\", \"claude-fable-5-1\", \"claude-mythos-5-1\");\n    private static final Set<String> CHOICE_TYPES = Set.of(\"auto\", \"any\", \"tool\", \"none\");\n\n    private static Map<String, Object> map(Object... kv) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);\n        return m;\n    }\n\n    /** Refuse a tool_choice the API would reject. */\n    private static void checkChoice(List<Tool> tools, String model, Map<String, Object> choice) {\n        Object kind = choice.get(\"type\");\n        if (!CHOICE_TYPES.contains(kind)) throw new RequestError(\"tool_choice.type\", \"must be auto, any, tool or none\");\n        if (choice.containsKey(\"disable_parallel_tool_use\") && !(choice.get(\"disable_parallel_tool_use\") instanceof Boolean)) {\n            throw new RequestError(\"tool_choice.disable_parallel_tool_use\", \"must be a boolean\");\n        }\n        if ((\"any\".equals(kind) || \"tool\".equals(kind)) && FORCED_UNSUPPORTED.contains(model)) throw new RequestError(\"tool_choice\", model + \" does not support forced tool use\");\n        if (\"tool\".equals(kind) && tools.stream().noneMatch(t -> t.name().equals(choice.get(\"name\")))) throw new RequestError(\"tool_choice.name\", \"names no tool in the request\");\n    }\n\n    /** The keys listed in the tool's required list that the input lacks. */\n    @SuppressWarnings(\"unchecked\")\n    private static List<String> missingInputs(Tool tool, Map<String, Object> input) {\n        List<String> missing = new ArrayList<>();\n        for (Object key : (List<Object>) tool.inputSchema().getOrDefault(\"required\", List.of())) if (!input.containsKey(key)) missing.add((String) key);\n        return missing;\n    }\n\n    /** The content of a tool result: a string as it is, any other value as JSON text. */\n    private static String resultContent(Object out) {\n        return out instanceof String s ? s : Json.stringify(out);\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static Map<String, Object> runOne(List<Tool> tools, Map<String, Object> block) {\n        Map<String, Object> result = map(\"type\", \"tool_result\", \"tool_use_id\", block.get(\"id\"));\n        Tool tool = tools.stream().filter(t -> t.name().equals(block.get(\"name\"))).findFirst().orElse(null);\n        if (tool == null) {\n            result.put(\"content\", \"Unknown tool: \" + block.get(\"name\"));\n            result.put(\"is_error\", true);\n            return result;\n        }\n        Map<String, Object> input = (Map<String, Object>) block.get(\"input\");\n        List<String> missing = missingInputs(tool, input);\n        if (!missing.isEmpty()) {\n            result.put(\"content\", \"Missing required input: \" + String.join(\", \", missing));\n            result.put(\"is_error\", true);\n            return result;\n        }\n        try {\n            Object out = tool.handler().apply(input);\n            result.put(\"content\", resultContent(out));\n        } catch (RuntimeException e) { // a tool that fails must not end the loop\n            result.put(\"content\", e.getMessage());\n            result.put(\"is_error\", true);\n        }\n        return result;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static String textOf(List<Map<String, Object>> content) {\n        StringBuilder out = new StringBuilder();\n        for (Map<String, Object> b : content) if (\"text\".equals(b.get(\"type\"))) out.append(b.get(\"text\"));\n        return out.toString();\n    }\n\n    /** One tool_result per tool_use block of the reply, in order. */\n    private static List<Object> toolResults(List<Tool> tools, List<Map<String, Object>> content) {\n        List<Object> results = new ArrayList<>();\n        for (Map<String, Object> b : content) if (\"tool_use\".equals(b.get(\"type\"))) results.add(runOne(tools, b));\n        return results;\n    }\n\n    /** The status of a reply that ends the loop: done, refused or truncated. */\n    private static String finalStatus(String stop) {\n        if (stop.equals(\"end_turn\") || stop.equals(\"stop_sequence\")) return \"done\";\n        if (stop.equals(\"refusal\")) return \"refused\";\n        return \"truncated\"; // max_tokens, model_context_window_exceeded: the answer is cut off\n    }\n\n    /** The last turn number the loop may use. */\n    private static int lastTurn(int maxTurns) {\n        return maxTurns;\n    }\n\n    /** The tool_choice to send on this turn: a forced choice only on the first request. */\n    private static Map<String, Object> sentChoice(Map<String, Object> toolChoice, int turn) {\n        boolean forced = \"any\".equals(toolChoice.get(\"type\")) || \"tool\".equals(toolChoice.get(\"type\"));\n        return forced && turn > 1 ? map(\"type\", \"auto\") : toolChoice;\n    }\n\n    private static Map<String, Object> outcome(String status, String text, int turns, List<Map<String, Object>> messages) {\n        return map(\"status\", status, \"text\", text, \"turns\", turns, \"messages\", messages);\n    }\n\n    static Map<String, Object> runAgent(Function<Map<String, Object>, Map<String, Object>> ask, List<Tool> tools, String userText) {\n        return runAgent(ask, tools, userText, \"claude-sonnet-5-5\", 8, null);\n    }\n\n    /** Call the model, run every tool it asks for, send the results back, until it ends its turn or a limit is hit. */\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> runAgent(Function<Map<String, Object>, Map<String, Object>> ask, List<Tool> tools, String userText, String model, int maxTurns,\n            Map<String, Object> toolChoice) {\n        LOG.log(System.Logger.Level.DEBUG, \"runAgent input: {0}\", userText);\n        if (toolChoice != null) checkChoice(tools, model, toolChoice);\n        List<Object> definitions = new ArrayList<>();\n        for (Tool t : tools) definitions.add(map(\"name\", t.name(), \"description\", t.description(), \"input_schema\", t.inputSchema()));\n        List<Map<String, Object>> messages = new ArrayList<>(List.of(map(\"role\", \"user\", \"content\", userText)));\n        String text = \"\";\n        int calls = 0;\n        for (int turn = 1; turn <= lastTurn(maxTurns); turn++) {\n            Map<String, Object> request = map(\"model\", model, \"max_tokens\", 1024, \"messages\", new ArrayList<>(messages), \"tools\", definitions);\n            if (toolChoice != null) request.put(\"tool_choice\", sentChoice(toolChoice, turn));\n            Map<String, Object> reply = ask.apply(request);\n            calls = turn;\n            List<Map<String, Object>> content = (List<Map<String, Object>>) reply.get(\"content\");\n            messages.add(map(\"role\", \"assistant\", \"content\", content));\n            text = textOf(content);\n            String stop = (String) reply.get(\"stop_reason\");\n            if (stop.equals(\"tool_use\")) {\n                messages.add(map(\"role\", \"user\", \"content\", toolResults(tools, content)));\n            } else if (stop.equals(\"pause_turn\")) {\n                continue;\n            } else {\n                return outcome(finalStatus(stop), text, calls, messages);\n            }\n        }\n        return outcome(\"max_turns\", text, calls, messages);\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        Map<String, Object> schema = Map.of(\"type\", \"object\", \"properties\", Map.of(\"city\", Map.of(\"type\", \"string\")), \"required\", List.of(\"city\"));\n        List<Tool> tools = List.of(new Tool(\"get_weather\", \"Current weather for a city.\", schema, input -> input.get(\"city\") + \": 18 C\"));\n\n        // A stand-in for the model, like the one the tests use: it asks for one tool call, then ends its turn.\n        List<Map<String, Object>> replies = new ArrayList<>(List.of(\n            Map.of(\"content\", List.of(Map.of(\"type\", \"text\", \"text\", \"Let me check.\"),\n                    Map.of(\"type\", \"tool_use\", \"id\", \"tu_1\", \"name\", \"get_weather\", \"input\", Map.of(\"city\", \"Oslo\"))),\n                \"stop_reason\", \"tool_use\"),\n            Map.of(\"content\", List.of(Map.of(\"type\", \"text\", \"text\", \"It is 18 C in Oslo.\")), \"stop_reason\", \"end_turn\")));\n\n        Map<String, Object> result = ToolLoop.runAgent(request -> replies.remove(0), tools, \"Weather in Oslo?\");\n\n        System.out.println(\"status: \" + result.get(\"status\"));\n        System.out.println(\"text: \" + result.get(\"text\"));\n        System.out.println(\"model calls: \" + result.get(\"turns\"));\n        System.out.println(\"messages: \" + Json.stringify(result.get(\"messages\")));\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\nimport java.util.function.Function;\n\n/** A tool loop against a scripted model. See ../../statement.md. Messages and replies are JSON-like maps. */\nfinal class ToolLoop {\n    private static final System.Logger LOG = System.getLogger(ToolLoop.class.getName());\n    private ToolLoop() {}\n\n    private static final Set<String> FORCED_UNSUPPORTED = Set.of(\"claude-opus-5-5\", \"claude-sonnet-5-5\", \"claude-fable-5-1\", \"claude-mythos-5-1\");\n    private static final Set<String> CHOICE_TYPES = Set.of(\"auto\", \"any\", \"tool\", \"none\");\n\n    private static Map<String, Object> map(Object... kv) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);\n        return m;\n    }\n\n    /** Refuse a tool_choice the API would reject. */\n    private static void checkChoice(List<Tool> tools, String model, Map<String, Object> choice) {\n        // TODO 1 of 7 (finish this to pass e5): refuse a tool_choice the API would reject.\n        // Receives the tools, the model id and the tool_choice map. Throws RequestError, in this order: field \"tool_choice.type\" unless the type is in\n        // CHOICE_TYPES; \"tool_choice.disable_parallel_tool_use\" when that key is present and not a Boolean; \"tool_choice\" for type \"any\" or \"tool\" on a\n        // model in FORCED_UNSUPPORTED; \"tool_choice.name\" for type \"tool\" when no tool has that name. Returns normally otherwise.\n        // Example: checkChoice(List.of(), \"claude-opus-5-5\", Map.of(\"type\", \"any\")) throws a RequestError with field \"tool_choice\"\n    }\n\n    /** The keys listed in the tool's required list that the input lacks. */\n    @SuppressWarnings(\"unchecked\")\n    private static List<String> missingInputs(Tool tool, Map<String, Object> input) {\n        // TODO 2 of 7 (finish this to pass e2): the required keys a call leaves out.\n        // Receives a tool and the input map of the call. Returns the keys in the tool's inputSchema \"required\" list that the input lacks, in the\n        // order of that list; an empty list when none is missing.\n        // Example: a tool whose inputSchema requires \"city\", with an empty input -> [city]\n        return new ArrayList<>();\n    }\n\n    /** The content of a tool result: a string as it is, any other value as JSON text. */\n    private static String resultContent(Object out) {\n        // TODO 3 of 7 (finish this to pass e6): the content of a tool_result.\n        // Receives what a handler returned. Returns a String as it is and any other value as JSON text (use Json.stringify).\n        // Example: resultContent(Map.of(\"city\", \"Oslo\")) -> {\"city\":\"Oslo\"}\n        return String.valueOf(out);\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static Map<String, Object> runOne(List<Tool> tools, Map<String, Object> block) {\n        Map<String, Object> result = map(\"type\", \"tool_result\", \"tool_use_id\", block.get(\"id\"));\n        Tool tool = tools.stream().filter(t -> t.name().equals(block.get(\"name\"))).findFirst().orElse(null);\n        if (tool == null) {\n            result.put(\"content\", \"Unknown tool: \" + block.get(\"name\"));\n            result.put(\"is_error\", true);\n            return result;\n        }\n        Map<String, Object> input = (Map<String, Object>) block.get(\"input\");\n        List<String> missing = missingInputs(tool, input);\n        if (!missing.isEmpty()) {\n            result.put(\"content\", \"Missing required input: \" + String.join(\", \", missing));\n            result.put(\"is_error\", true);\n            return result;\n        }\n        try {\n            Object out = tool.handler().apply(input);\n            result.put(\"content\", resultContent(out));\n        } catch (RuntimeException e) { // a tool that fails must not end the loop\n            result.put(\"content\", e.getMessage());\n            result.put(\"is_error\", true);\n        }\n        return result;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static String textOf(List<Map<String, Object>> content) {\n        StringBuilder out = new StringBuilder();\n        for (Map<String, Object> b : content) if (\"text\".equals(b.get(\"type\"))) out.append(b.get(\"text\"));\n        return out.toString();\n    }\n\n    /** One tool_result per tool_use block of the reply, in order. */\n    private static List<Object> toolResults(List<Tool> tools, List<Map<String, Object>> content) {\n        // TODO 4 of 7 (finish this to pass m1 and e1): run every tool call of a reply.\n        // Receives the tools and the content blocks of the reply. Returns one tool_result (from runOne) per block of type \"tool_use\", in the\n        // order of the blocks; blocks of any other type, such as \"server_tool_use\", get no result.\n        // Example: [a text block, a tool_use block] -> a list with one tool_result\n        return new ArrayList<>();\n    }\n\n    /** The status of a reply that ends the loop: done, refused or truncated. */\n    private static String finalStatus(String stop) {\n        // TODO 5 of 7 (finish this to pass e4): the status of a reply that ends the loop.\n        // Receives the stop_reason. Returns \"done\" for \"end_turn\" and \"stop_sequence\", \"refused\" for \"refusal\" and \"truncated\" for any other.\n        // Example: finalStatus(\"max_tokens\") -> \"truncated\"\n        return \"done\";\n    }\n\n    /** The last turn number the loop may use. */\n    private static int lastTurn(int maxTurns) {\n        // TODO 6 of 7 (finish this to pass e3): the last turn number the loop may use.\n        // Receives maxTurns. Returns the highest turn number, so that at most maxTurns calls are made.\n        // Example: lastTurn(3) -> 3\n        return 1;\n    }\n\n    /** The tool_choice to send on this turn: a forced choice only on the first request. */\n    private static Map<String, Object> sentChoice(Map<String, Object> toolChoice, int turn) {\n        // TODO 7 of 7 (finish this to pass e5): the tool_choice to send on a turn.\n        // Receives the tool_choice map and the turn number (1 for the first request). A forced choice (type \"any\" or \"tool\") is sent as given on\n        // turn 1 and as {type: auto} from turn 2 on; \"auto\" and \"none\" are sent unchanged every turn.\n        // Example: sentChoice(Map.of(\"type\", \"any\"), 2) -> {type=auto}\n        return toolChoice;\n    }\n\n    private static Map<String, Object> outcome(String status, String text, int turns, List<Map<String, Object>> messages) {\n        return map(\"status\", status, \"text\", text, \"turns\", turns, \"messages\", messages);\n    }\n\n    static Map<String, Object> runAgent(Function<Map<String, Object>, Map<String, Object>> ask, List<Tool> tools, String userText) {\n        return runAgent(ask, tools, userText, \"claude-sonnet-5-5\", 8, null);\n    }\n\n    /** Call the model, run every tool it asks for, send the results back, until it ends its turn or a limit is hit. */\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> runAgent(Function<Map<String, Object>, Map<String, Object>> ask, List<Tool> tools, String userText, String model, int maxTurns,\n            Map<String, Object> toolChoice) {\n        LOG.log(System.Logger.Level.DEBUG, \"runAgent input: {0}\", userText);\n        if (toolChoice != null) checkChoice(tools, model, toolChoice);\n        List<Object> definitions = new ArrayList<>();\n        for (Tool t : tools) definitions.add(map(\"name\", t.name(), \"description\", t.description(), \"input_schema\", t.inputSchema()));\n        List<Map<String, Object>> messages = new ArrayList<>(List.of(map(\"role\", \"user\", \"content\", userText)));\n        String text = \"\";\n        int calls = 0;\n        for (int turn = 1; turn <= lastTurn(maxTurns); turn++) {\n            Map<String, Object> request = map(\"model\", model, \"max_tokens\", 1024, \"messages\", new ArrayList<>(messages), \"tools\", definitions);\n            if (toolChoice != null) request.put(\"tool_choice\", sentChoice(toolChoice, turn));\n            Map<String, Object> reply = ask.apply(request);\n            calls = turn;\n            List<Map<String, Object>> content = (List<Map<String, Object>>) reply.get(\"content\");\n            messages.add(map(\"role\", \"assistant\", \"content\", content));\n            text = textOf(content);\n            String stop = (String) reply.get(\"stop_reason\");\n            if (stop.equals(\"tool_use\")) {\n                messages.add(map(\"role\", \"user\", \"content\", toolResults(tools, content)));\n            } else if (stop.equals(\"pause_turn\")) {\n                continue;\n            } else {\n                return outcome(finalStatus(stop), text, calls, messages);\n            }\n        }\n        return outcome(\"max_turns\", text, calls, messages);\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.ArrayList;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        Map<String, Object> schema = Map.of(\"type\", \"object\", \"properties\", Map.of(\"city\", Map.of(\"type\", \"string\")), \"required\", List.of(\"city\"));\n        List<Tool> tools = List.of(new Tool(\"get_weather\", \"Current weather for a city.\", schema, input -> input.get(\"city\") + \": 18 C\"));\n\n        // A stand-in for the model, like the one the tests use: it asks for one tool call, then ends its turn.\n        List<Map<String, Object>> replies = new ArrayList<>(List.of(\n            Map.of(\"content\", List.of(Map.of(\"type\", \"text\", \"text\", \"Let me check.\"),\n                    Map.of(\"type\", \"tool_use\", \"id\", \"tu_1\", \"name\", \"get_weather\", \"input\", Map.of(\"city\", \"Oslo\"))),\n                \"stop_reason\", \"tool_use\"),\n            Map.of(\"content\", List.of(Map.of(\"type\", \"text\", \"text\", \"It is 18 C in Oslo.\")), \"stop_reason\", \"end_turn\")));\n\n        Map<String, Object> result = ToolLoop.runAgent(request -> replies.remove(0), tools, \"Weather in Oslo?\");\n\n        System.out.println(\"status: \" + result.get(\"status\"));\n        System.out.println(\"text: \" + result.get(\"text\"));\n        System.out.println(\"model calls: \" + result.get(\"turns\"));\n        System.out.println(\"messages: \" + Json.stringify(result.get(\"messages\")));\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "b70dfbee09559d35a0b97c26bacc2582d67226e0cbf551c788207edb8fa66d8c",
+  "starting_code": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\nimport java.util.function.Function;\n\n/** A tool loop against a scripted model. See ../../statement.md. Messages and replies are JSON-like maps. */\nfinal class ToolLoop {\n    private static final System.Logger LOG = System.getLogger(ToolLoop.class.getName());\n    private ToolLoop() {}\n\n    private static final Set<String> FORCED_UNSUPPORTED = Set.of(\"claude-opus-5-5\", \"claude-sonnet-5-5\", \"claude-fable-5-1\", \"claude-mythos-5-1\");\n    private static final Set<String> CHOICE_TYPES = Set.of(\"auto\", \"any\", \"tool\", \"none\");\n\n    private static Map<String, Object> map(Object... kv) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);\n        return m;\n    }\n\n    /** Refuse a tool_choice the API would reject. */\n    private static void checkChoice(List<Tool> tools, String model, Map<String, Object> choice) {\n        // TODO 1 of 7 (finish this to pass e5): refuse a tool_choice the API would reject.\n        // Receives the tools, the model id and the tool_choice map. Throws RequestError, in this order: field \"tool_choice.type\" unless the type is in\n        // CHOICE_TYPES; \"tool_choice.disable_parallel_tool_use\" when that key is present and not a Boolean; \"tool_choice\" for type \"any\" or \"tool\" on a\n        // model in FORCED_UNSUPPORTED; \"tool_choice.name\" for type \"tool\" when no tool has that name. Returns normally otherwise.\n        // Example: checkChoice(List.of(), \"claude-opus-5-5\", Map.of(\"type\", \"any\")) throws a RequestError with field \"tool_choice\"\n    }\n\n    /** The keys listed in the tool's required list that the input lacks. */\n    @SuppressWarnings(\"unchecked\")\n    private static List<String> missingInputs(Tool tool, Map<String, Object> input) {\n        // TODO 2 of 7 (finish this to pass e2): the required keys a call leaves out.\n        // Receives a tool and the input map of the call. Returns the keys in the tool's inputSchema \"required\" list that the input lacks, in the\n        // order of that list; an empty list when none is missing.\n        // Example: a tool whose inputSchema requires \"city\", with an empty input -> [city]\n        return new ArrayList<>();\n    }\n\n    /** The content of a tool result: a string as it is, any other value as JSON text. */\n    private static String resultContent(Object out) {\n        // TODO 3 of 7 (finish this to pass e6): the content of a tool_result.\n        // Receives what a handler returned. Returns a String as it is and any other value as JSON text (use Json.stringify).\n        // Example: resultContent(Map.of(\"city\", \"Oslo\")) -> {\"city\":\"Oslo\"}\n        return String.valueOf(out);\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static Map<String, Object> runOne(List<Tool> tools, Map<String, Object> block) {\n        Map<String, Object> result = map(\"type\", \"tool_result\", \"tool_use_id\", block.get(\"id\"));\n        Tool tool = tools.stream().filter(t -> t.name().equals(block.get(\"name\"))).findFirst().orElse(null);\n        if (tool == null) {\n            result.put(\"content\", \"Unknown tool: \" + block.get(\"name\"));\n            result.put(\"is_error\", true);\n            return result;\n        }\n        Map<String, Object> input = (Map<String, Object>) block.get(\"input\");\n        List<String> missing = missingInputs(tool, input);\n        if (!missing.isEmpty()) {\n            result.put(\"content\", \"Missing required input: \" + String.join(\", \", missing));\n            result.put(\"is_error\", true);\n            return result;\n        }\n        try {\n            Object out = tool.handler().apply(input);\n            result.put(\"content\", resultContent(out));\n        } catch (RuntimeException e) { // a tool that fails must not end the loop\n            result.put(\"content\", e.getMessage());\n            result.put(\"is_error\", true);\n        }\n        return result;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static String textOf(List<Map<String, Object>> content) {\n        StringBuilder out = new StringBuilder();\n        for (Map<String, Object> b : content) if (\"text\".equals(b.get(\"type\"))) out.append(b.get(\"text\"));\n        return out.toString();\n    }\n\n    /** One tool_result per tool_use block of the reply, in order. */\n    private static List<Object> toolResults(List<Tool> tools, List<Map<String, Object>> content) {\n        // TODO 4 of 7 (finish this to pass m1 and e1): run every tool call of a reply.\n        // Receives the tools and the content blocks of the reply. Returns one tool_result (from runOne) per block of type \"tool_use\", in the\n        // order of the blocks; blocks of any other type, such as \"server_tool_use\", get no result.\n        // Example: [a text block, a tool_use block] -> a list with one tool_result\n        return new ArrayList<>();\n    }\n\n    /** The status of a reply that ends the loop: done, refused or truncated. */\n    private static String finalStatus(String stop) {\n        // TODO 5 of 7 (finish this to pass e4): the status of a reply that ends the loop.\n        // Receives the stop_reason. Returns \"done\" for \"end_turn\" and \"stop_sequence\", \"refused\" for \"refusal\" and \"truncated\" for any other.\n        // Example: finalStatus(\"max_tokens\") -> \"truncated\"\n        return \"done\";\n    }\n\n    /** The last turn number the loop may use. */\n    private static int lastTurn(int maxTurns) {\n        // TODO 6 of 7 (finish this to pass e3): the last turn number the loop may use.\n        // Receives maxTurns. Returns the highest turn number, so that at most maxTurns calls are made.\n        // Example: lastTurn(3) -> 3\n        return 1;\n    }\n\n    /** The tool_choice to send on this turn: a forced choice only on the first request. */\n    private static Map<String, Object> sentChoice(Map<String, Object> toolChoice, int turn) {\n        // TODO 7 of 7 (finish this to pass e5): the tool_choice to send on a turn.\n        // Receives the tool_choice map and the turn number (1 for the first request). A forced choice (type \"any\" or \"tool\") is sent as given on\n        // turn 1 and as {type: auto} from turn 2 on; \"auto\" and \"none\" are sent unchanged every turn.\n        // Example: sentChoice(Map.of(\"type\", \"any\"), 2) -> {type=auto}\n        return toolChoice;\n    }\n\n    private static Map<String, Object> outcome(String status, String text, int turns, List<Map<String, Object>> messages) {\n        return map(\"status\", status, \"text\", text, \"turns\", turns, \"messages\", messages);\n    }\n\n    static Map<String, Object> runAgent(Function<Map<String, Object>, Map<String, Object>> ask, List<Tool> tools, String userText) {\n        return runAgent(ask, tools, userText, \"claude-sonnet-5-5\", 8, null);\n    }\n\n    /** Call the model, run every tool it asks for, send the results back, until it ends its turn or a limit is hit. */\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> runAgent(Function<Map<String, Object>, Map<String, Object>> ask, List<Tool> tools, String userText, String model, int maxTurns,\n            Map<String, Object> toolChoice) {\n        LOG.log(System.Logger.Level.DEBUG, \"runAgent input: {0}\", userText);\n        if (toolChoice != null) checkChoice(tools, model, toolChoice);\n        List<Object> definitions = new ArrayList<>();\n        for (Tool t : tools) definitions.add(map(\"name\", t.name(), \"description\", t.description(), \"input_schema\", t.inputSchema()));\n        List<Map<String, Object>> messages = new ArrayList<>(List.of(map(\"role\", \"user\", \"content\", userText)));\n        String text = \"\";\n        int calls = 0;\n        for (int turn = 1; turn <= lastTurn(maxTurns); turn++) {\n            Map<String, Object> request = map(\"model\", model, \"max_tokens\", 1024, \"messages\", new ArrayList<>(messages), \"tools\", definitions);\n            if (toolChoice != null) request.put(\"tool_choice\", sentChoice(toolChoice, turn));\n            Map<String, Object> reply = ask.apply(request);\n            calls = turn;\n            List<Map<String, Object>> content = (List<Map<String, Object>>) reply.get(\"content\");\n            messages.add(map(\"role\", \"assistant\", \"content\", content));\n            text = textOf(content);\n            String stop = (String) reply.get(\"stop_reason\");\n            if (stop.equals(\"tool_use\")) {\n                messages.add(map(\"role\", \"user\", \"content\", toolResults(tools, content)));\n            } else if (stop.equals(\"pause_turn\")) {\n                continue;\n            } else {\n                return outcome(finalStatus(stop), text, calls, messages);\n            }\n        }\n        return outcome(\"max_turns\", text, calls, messages);\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/26-tool-use/prose/unit-03/practice-3/src/main/java/ToolLoop.java",
+    "test_path": "practice/level-2/26-tool-use/prose/unit-03/practice-3/src/test/java/ToolLoopTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/26-tool-use/prose/unit-03/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/26-tool-use/prose/unit-03/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_aToolCallIsRunAndItsResultSentBackUntilTheModelEndsItsTurn()",
+        "kind": "main",
+        "says": "A tool call is run and its result sent back until the model ends its turn"
+      },
+      {
+        "id": "e1_parallelCallsGetOneUserMessageWithEveryResultInOrder()",
+        "kind": "edge",
+        "says": "Parallel calls get one user message with every result in order"
+      },
+      {
+        "id": "e2_aFailingUnknownOrMalformedCallBecomesAnErrorResultAndTheLoopGoesOn()",
+        "kind": "edge",
+        "says": "A failing, unknown or malformed call becomes an error result and the loop goes on"
+      },
+      {
+        "id": "e3_theNumberOfTurnsIsBounded()",
+        "kind": "edge",
+        "says": "The number of turns is bounded"
+      },
+      {
+        "id": "e4_refusalAndTruncationEndTheLoopAndAPausedTurnContinues()",
+        "kind": "edge",
+        "says": "Refusal and truncation end the loop, and a paused turn continues"
+      },
+      {
+        "id": "e5_toolChoiceIsValidatedForTheModelAndAForcedChoiceAppliesToTheFirstRequestOnly()",
+        "kind": "edge",
+        "says": "tool_choice is validated for the model, and a forced choice applies to the first request only"
+      },
+      {
+        "id": "e6_resultsThatAreNotTextAreSentAsJsonText()",
+        "kind": "edge",
+        "says": "Results that are not text are sent as JSON text"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/26-tool-use/prose/unit-03/practice-3/target/test-results/test"
+    },
+    "origin": "course/26-tool-use/03-parallel-calls-the-tool-runner-and-the-practice.md",
+    "concepts": [
+      "the practice of Parallel calls, the tool runner and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/26-tool-use/prose/unit-03/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "tool-use-u3"
+}

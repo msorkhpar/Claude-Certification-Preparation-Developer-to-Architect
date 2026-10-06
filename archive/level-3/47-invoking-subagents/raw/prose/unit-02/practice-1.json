@@ -1,0 +1,301 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "47-invoking-subagents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: invoking subagents with the Agent SDK (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: invoking subagents with the Agent SDK"
+    },
+    {
+      "type": "para",
+      "text": "A coordinator built on the Agent SDK does not call subagents directly. It lists them in the options, the model starts one by calling the `Agent` tool, and the SDK gives you the messages of the whole tree. The code that you write is everything around that call: the definitions you register, the limits that bound the team, how a spawn is recognised in the stream, how the messages that ran inside a subagent are told from the coordinator's own, the brief that carries the facts a subagent cannot get any other way, and findings that keep their sources. Write those parts. The practice is in Python and TypeScript only, because it needs the Agent SDK; a Java or Kotlin team runs the Claude Code command line as a subprocess, or builds the team on the Messages API as the examples of module 46 do. The tests never call a model: the last case starts the SDK against the course's stand-in for the Claude Code binary, so the SDK code that you call is the real one."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is the working module with nine small gaps cut out. The `build_options`, `spawned`, `by_subagent`, `make_brief`, `package_finding`, `merge_findings` and `run_team` functions are written and call the gaps. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks; it returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file (`log.debug(...)`); a run shows the lines under the failing case. Names are Python's; the TypeScript names are in camel case. Write them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_valid_name` unlocks `e2`: which names are legal.",
+        "`_complete` unlocks `e2`: a description and a prompt that are not blank.",
+        "`_agent_tools` unlocks `e1`: the read-only default, no `Agent`, an empty list stays empty.",
+        "`_limit_env` unlocks `e3`: the depth and concurrency variables.",
+        "`_is_spawn` unlocks `e4` (and `e8`): the two tool names that start a subagent.",
+        "`_note_tools` unlocks `e5` (and `e8`): each inner tool once, in order.",
+        "`_section` unlocks `e6`: one section of the brief.",
+        "`_source` unlocks `e7`: only the parts of a source that were given.",
+        "`_add_source` unlocks `e7`: every different source of a merged claim."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About ten lines in all. The sections below describe the whole module; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's; the TypeScript names are in camel case (`buildOptions`, `bySubagent`, `makeBrief`, `packageFinding`, `mergeFindings`, `runTeam`), and `cli_path`, `max_budget_usd`, `max_turns` and `max_concurrent` are the arguments `cliPath`, `maxBudgetUsd`, `maxTurns` and `maxConcurrent`."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`build_options(agents, cwd, cli_path=None, max_budget_usd=2.0, max_turns=20, max_concurrent=5)` returns the SDK's options. `agents` is a map from a name to `{\"description\", \"prompt\", \"tools\" (optional), \"model\" (optional)}`.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "A name must be lower-case letters, digits and hyphens, starting with a letter; a description or a prompt that is missing or blank is refused. Refuse by raising `ValueError` (TypeScript: throw an `Error`).",
+              "Register each as an agent definition with its description, prompt, tools and model. A definition with no `tools` gets the read-only tools `Read`, `Grep` and `Glob`, never \"every tool\" (that is what an omitted list means to the SDK). The tool `Agent` is removed from every subagent's list, so that only the coordinator spawns. An explicitly empty list stays empty. A missing model is `inherit`.",
+              "The options auto-approve the spawn and the read-only tools (`allowed_tools` is `Agent`, `Read`, `Grep`, `Glob`), run in `cwd` with the permission mode `default` and no setting sources, and carry the turn and budget limits. The environment limits the depth of nesting to `1` (`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`) and the number of subagents at once to `max_concurrent` (`CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS`, as a string). In TypeScript the SDK replaces the child's environment with `env`, so keep the current `process.env` in it. When `cli_path` is given, set it (`cli_path` in Python, `pathToClaudeCodeExecutable` in TypeScript)."
+            ]
+          }
+        ],
+        "`spawned(messages)` returns one `{\"id\", \"subagent_type\", \"description\", \"prompt\"}` for each call of the tool that starts a subagent, in order. The tool is called `Agent`, and `Task` before Claude Code v2.1.63, so match both. `subagent_type` is `general-purpose` when the call gives none. Other tool calls and text blocks are not spawns.",
+        "`by_subagent(messages)` returns a map from the id of each spawn to `{\"subagent_type\", \"messages\", \"tools\"}`: how many messages carry that id as their `parent_tool_use_id`, and the names of the tools used in them (each once, in order). Messages that belong to the coordinator, with no parent, count for nobody.",
+        "`make_brief(task, files=None, facts=None, output=None)` writes the prompt: `Task: {task}` (stripped), then `Files:` with one `- item` line per file, then `Known:` with one line per fact, then `Return: {output}`. Items are stripped, blank ones are dropped, and a section with no item or no output is left out. A blank task is refused as above.",
+        "`package_finding(claim, url=None, title=None, page=None)` returns `{\"claim\": the stripped claim, \"source\": {...}}`: the source holds only the parts that were given, and is null when none was. The source is never written into the claim.",
+        "`merge_findings(findings)` merges findings whose claims are equal once case and spacing are ignored, in order of first appearance. Each result is `{\"claim\": the first spelling, \"sources\": every different source, in order, \"attributed\": whether there is any}`.",
+        "`run_team(prompt, options)` (async) collects every message of a single-shot run and returns `{\"messages\", \"error\"}`. The SDK raises after an error result, so the messages received so far are kept and the error text is returned, or null when the run ended well."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each step is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**`build_options`: the definition and the limits.** The exam expects each subagent type to have a description, a system prompt and a tool restriction, and a coordinator whose team is bounded. A definition with no tool list inherits every tool, which is why the practice defaults to the read-only set. *You should see* the options carry every agent with its tools and model, no subagent able to spawn, and the depth, concurrency, budget and turn limits on the options and in the environment.",
+        "**`spawned`: recognise delegation.** The exam's tool is called Task and the current one Agent, so a detector has to know both. *You should see* both names found, the default `general-purpose` type filled in, and no other tool call counted.",
+        "**`by_subagent`: attribute the messages.** A message that ran inside a subagent carries the id of the call that started it. *You should see* the inner messages counted under their spawn and the coordinator's own messages counted for nobody.",
+        "**`make_brief`: pass the context in the prompt.** Subagents do not inherit the coordinator's context, so the prompt is the only channel. *You should see* the task, the files, the known facts and the return format in a fixed layout, and blank items left out.",
+        "**`package_finding` and `merge_findings`: keep content apart from metadata.** The exam asks for structured data that separates a claim from its source, so that attribution survives the merge. *You should see* the source held beside the claim and never written into it, and two sources for one claim both kept.",
+        "**`run_team` and the SDK case.** *You should see* the real SDK, driven by the course's stand-in for the binary, show the spawn, the inner messages and the agents that were sent, and the messages received before an error kept."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "The options register each agent with its description, prompt, tools and model, and auto-approve the spawn"
+        ],
+        [
+          "`e1`",
+          "A subagent gets read-only tools by default and never the right to spawn another"
+        ],
+        [
+          "`e2`",
+          "A bad name, a blank description or a missing prompt is refused"
+        ],
+        [
+          "`e3`",
+          "Depth, concurrency, budget and turn limits are set on the options"
+        ],
+        [
+          "`e4`",
+          "A spawn is recognised under both tool names, and nothing else is"
+        ],
+        [
+          "`e5`",
+          "Messages from inside a subagent are grouped under the call that started it"
+        ],
+        [
+          "`e6`",
+          "A brief holds the task and every fact in a fixed layout"
+        ],
+        [
+          "`e7`",
+          "A finding keeps its source apart, and merging keeps every source"
+        ],
+        [
+          "`e8`",
+          "A run through the SDK shows the spawn, the inner messages and the agents sent to the binary"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Invoking subagents with the Agent SDK: definitions, limits, detecting a spawn, grouping inner messages, briefs and findings. See ../../statement.md.\"\"\"\nimport logging\nimport re\n\nfrom claude_agent_sdk import AgentDefinition, ClaudeAgentOptions, query\n\nlog = logging.getLogger(__name__)\n\nREAD_ONLY = [\"Read\", \"Grep\", \"Glob\"]\nSPAWN_TOOLS = (\"Agent\", \"Task\")  # current and old name of the tool that starts a subagent\n\n\ndef _valid_name(name):\n    return re.fullmatch(r\"[a-z][a-z0-9-]*\", name) is not None\n\n\ndef _complete(spec):\n    return bool(str(spec.get(\"description\", \"\")).strip()) and bool(str(spec.get(\"prompt\", \"\")).strip())\n\n\ndef _agent_tools(listed):\n    if listed is None:\n        return list(READ_ONLY)  # read-only unless told otherwise\n    return [t for t in listed if t != \"Agent\"]  # and no spawning from below\n\n\ndef _limit_env(max_concurrent):\n    return {\"CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH\": \"1\", \"CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS\": str(max_concurrent)}\n\n\ndef build_options(agents, cwd, cli_path=None, max_budget_usd=2.0, max_turns=20, max_concurrent=5):\n    log.debug(\"build_options input: %r\", agents)\n    definitions = {}\n    for name, spec in agents.items():\n        if not _valid_name(name):\n            raise ValueError(f\"bad agent name: {name}\")\n        if not _complete(spec):\n            raise ValueError(f\"agent {name} needs a description and a prompt\")\n        tools = _agent_tools(spec.get(\"tools\"))\n        definitions[name] = AgentDefinition(description=spec[\"description\"], prompt=spec[\"prompt\"], tools=tools, model=spec.get(\"model\") or \"inherit\")\n    extra = {\"cli_path\": cli_path} if cli_path else {}\n    return ClaudeAgentOptions(\n        agents=definitions, allowed_tools=[\"Agent\", *READ_ONLY], max_turns=max_turns, max_budget_usd=max_budget_usd, cwd=cwd,\n        env=_limit_env(max_concurrent),\n        permission_mode=\"default\", setting_sources=[], **extra)\n\n\ndef _blocks(message):\n    content = getattr(message, \"content\", None)\n    return content if isinstance(content, list) else []\n\n\ndef _is_spawn(block):\n    return getattr(block, \"name\", None) in SPAWN_TOOLS and hasattr(block, \"input\")\n\n\ndef spawned(messages):\n    found = []\n    for message in messages:\n        for block in _blocks(message):\n            if _is_spawn(block):\n                call = block.input or {}\n                found.append({\"id\": block.id, \"subagent_type\": call.get(\"subagent_type\") or \"general-purpose\", \"description\": call.get(\"description\", \"\"), \"prompt\": call.get(\"prompt\", \"\")})\n    return found\n\n\ndef _note_tools(group, blocks):\n    for block in blocks:\n        name = getattr(block, \"name\", None)\n        if name and name not in group[\"tools\"]:\n            group[\"tools\"].append(name)\n\n\ndef by_subagent(messages):\n    groups = {call[\"id\"]: {\"subagent_type\": call[\"subagent_type\"], \"messages\": 0, \"tools\": []} for call in spawned(messages)}\n    for message in messages:\n        parent = getattr(message, \"parent_tool_use_id\", None)\n        if parent in groups:\n            groups[parent][\"messages\"] += 1\n            _note_tools(groups[parent], _blocks(message))\n    return groups\n\n\ndef _section(title, items):\n    kept = [str(item).strip() for item in items or [] if str(item).strip()]\n    return [f\"{title}:\", *(f\"- {item}\" for item in kept)] if kept else []\n\n\ndef make_brief(task, files=None, facts=None, output=None):\n    if not str(task or \"\").strip():\n        raise ValueError(\"a brief needs a task\")\n    lines = [f\"Task: {task.strip()}\"]\n    for title, items in ((\"Files\", files), (\"Known\", facts)):\n        lines.extend(_section(title, items))\n    if output and output.strip():\n        lines.append(f\"Return: {output.strip()}\")\n    return \"\\n\".join(lines)\n\n\ndef _source(url, title, page):\n    return {k: v for k, v in ((\"url\", url), (\"title\", title), (\"page\", page)) if v is not None}\n\n\ndef package_finding(claim, url=None, title=None, page=None):\n    source = _source(url, title, page)\n    return {\"claim\": claim.strip(), \"source\": source or None}\n\n\ndef _add_source(entry, source):\n    if source is not None and source not in entry[\"sources\"]:\n        entry[\"sources\"].append(source)\n\n\ndef merge_findings(findings):\n    merged = {}\n    for finding in findings:\n        key = \" \".join(finding[\"claim\"].lower().split())\n        entry = merged.setdefault(key, {\"claim\": finding[\"claim\"], \"sources\": []})\n        _add_source(entry, finding[\"source\"])\n    return [{\"claim\": e[\"claim\"], \"sources\": e[\"sources\"], \"attributed\": bool(e[\"sources\"])} for e in merged.values()]\n\n\nasync def run_team(prompt, options):\n    \"\"\"Collect every message of a single-shot run. The SDK raises after an error result: what was received is kept.\"\"\"\n    messages, error = [], None\n    try:\n        async for message in query(prompt=prompt, options=options):\n            messages.append(message)\n    except Exception as exc:  # the error result, if there was one, is already in `messages`\n        error = str(exc)\n    return {\"messages\": messages, \"error\": error}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom subagents import build_options, make_brief, merge_findings, package_finding\n\n# The options register each named subagent the model may start with the Agent tool.\nspecs = {\"reviewer\": {\"description\": \"Reviews one module for security problems.\", \"prompt\": \"You review code.\",\n                      \"tools\": [\"Read\", \"Grep\"], \"model\": \"sonnet\"}}\noptions = build_options(specs, \"/proj\")\nprint(\"registered agents:\", sorted(options.agents) if options else None)\nprint(\"allowed tools:\", options.allowed_tools if options else None)\n\n# The brief carries the facts a subagent cannot get any other way: it does not see the conversation.\ntry:\n    brief = make_brief(\"Review the payment module for security problems\",\n                       files=[\"src/payments.py\"], facts=[\"Amounts are in cents\"], output=\"a list of findings, one per line\")\n    print(brief)\nexcept ValueError as err:\n    print(\"brief refused:\", err)\n\n# Findings keep their sources; the same claim from two subagents is merged and keeps both.\na = package_finding(\"Refunds take 5 days\", url=\"https://example.invalid/refunds\", title=\"Refund policy\")\nb = package_finding(\"refunds take 5 days\", url=\"https://example.invalid/faq\", page=3)\nc = package_finding(\"Shipping is free over 50 euros\")\nprint(\"merged:\", merge_findings([a, b, c]))\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Invoking subagents with the Agent SDK: definitions, limits, detecting a spawn, grouping inner messages, briefs and findings. See ../../statement.md.\"\"\"\nimport logging\nimport re\n\nfrom claude_agent_sdk import AgentDefinition, ClaudeAgentOptions, query\n\nlog = logging.getLogger(__name__)\n\nREAD_ONLY = [\"Read\", \"Grep\", \"Glob\"]\nSPAWN_TOOLS = (\"Agent\", \"Task\")  # current and old name of the tool that starts a subagent\n\n\ndef _valid_name(name):\n    \"\"\"TODO 1 of 9 (unlocks e2): is this a legal agent name?\n\n    Receives a name. Returns True for lower-case letters, digits and hyphens that start with a letter, False otherwise.\n    Example: _valid_name(\"ok-name-2\") -> True, _valid_name(\"under_score\") -> False\n    \"\"\"\n    return True\n\n\ndef _complete(spec):\n    \"\"\"TODO 2 of 9 (unlocks e2): does the spec have a description and a prompt?\n\n    Receives a spec dict. Returns True only when both \"description\" and \"prompt\" are present and not blank.\n    Example: _complete({\"prompt\": \"p\"}) -> False, _complete({\"description\": \"d\", \"prompt\": \"p\"}) -> True\n    \"\"\"\n    return True\n\n\ndef _agent_tools(listed):\n    \"\"\"TODO 3 of 9 (unlocks e1): the tool list of one subagent.\n\n    Receives the spec's \"tools\" (a list, or None when it gave none). Returns READ_ONLY (a copy) for None, else the list without \"Agent\"\n    (an empty list stays empty).\n    Example: _agent_tools([\"Read\", \"Agent\", \"Bash\"]) -> [\"Read\", \"Bash\"], _agent_tools(None) -> [\"Read\", \"Grep\", \"Glob\"]\n    \"\"\"\n    return []\n\n\ndef _limit_env(max_concurrent):\n    \"\"\"TODO 4 of 9 (unlocks e3): the environment that bounds the team.\n\n    Receives the number of subagents allowed at once. Returns a dict with CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH as \"1\" and\n    CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS as the number written as a string.\n    Example: _limit_env(3) -> {\"CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH\": \"1\", \"CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS\": \"3\"}\n    \"\"\"\n    return {}\n\n\ndef build_options(agents, cwd, cli_path=None, max_budget_usd=2.0, max_turns=20, max_concurrent=5):\n    log.debug(\"build_options input: %r\", agents)\n    definitions = {}\n    for name, spec in agents.items():\n        if not _valid_name(name):\n            raise ValueError(f\"bad agent name: {name}\")\n        if not _complete(spec):\n            raise ValueError(f\"agent {name} needs a description and a prompt\")\n        tools = _agent_tools(spec.get(\"tools\"))\n        definitions[name] = AgentDefinition(description=spec[\"description\"], prompt=spec[\"prompt\"], tools=tools, model=spec.get(\"model\") or \"inherit\")\n    extra = {\"cli_path\": cli_path} if cli_path else {}\n    return ClaudeAgentOptions(\n        agents=definitions, allowed_tools=[\"Agent\", *READ_ONLY], max_turns=max_turns, max_budget_usd=max_budget_usd, cwd=cwd,\n        env=_limit_env(max_concurrent),\n        permission_mode=\"default\", setting_sources=[], **extra)\n\n\ndef _blocks(message):\n    content = getattr(message, \"content\", None)\n    return content if isinstance(content, list) else []\n\n\ndef _is_spawn(block):\n    \"\"\"TODO 5 of 9 (unlocks e4): does this content block start a subagent?\n\n    Receives a block. Returns True for a tool call (it has an `input`) whose name is in SPAWN_TOOLS, False for anything else.\n    Example: a ToolUseBlock named \"Task\" -> True, a ToolUseBlock named \"Read\" -> False, a TextBlock -> False\n    \"\"\"\n    return False\n\n\ndef spawned(messages):\n    found = []\n    for message in messages:\n        for block in _blocks(message):\n            if _is_spawn(block):\n                call = block.input or {}\n                found.append({\"id\": block.id, \"subagent_type\": call.get(\"subagent_type\") or \"general-purpose\", \"description\": call.get(\"description\", \"\"), \"prompt\": call.get(\"prompt\", \"\")})\n    return found\n\n\ndef _note_tools(group, blocks):\n    \"\"\"TODO 6 of 9 (unlocks e5): record the tools used in one inner message.\n\n    Receives a group dict (with a \"tools\" list) and the blocks of one message. Appends the name of each block that has one, once, in order.\n    Example: blocks named Read, Read, Grep added to a group whose tools are [] -> [\"Read\", \"Grep\"]\n    \"\"\"\n    return None\n\n\ndef by_subagent(messages):\n    groups = {call[\"id\"]: {\"subagent_type\": call[\"subagent_type\"], \"messages\": 0, \"tools\": []} for call in spawned(messages)}\n    for message in messages:\n        parent = getattr(message, \"parent_tool_use_id\", None)\n        if parent in groups:\n            groups[parent][\"messages\"] += 1\n            _note_tools(groups[parent], _blocks(message))\n    return groups\n\n\ndef _section(title, items):\n    \"\"\"TODO 7 of 9 (unlocks e6): the lines of one section of a brief.\n\n    Receives a title and a list of items (or None). Returns [] when no item is left after stripping and dropping blanks, else\n    `Title:` followed by one `- item` line per item.\n    Example: _section(\"Known\", [\"a\", \" \"]) -> [\"Known:\", \"- a\"], _section(\"Files\", None) -> []\n    \"\"\"\n    return []\n\n\ndef make_brief(task, files=None, facts=None, output=None):\n    if not str(task or \"\").strip():\n        raise ValueError(\"a brief needs a task\")\n    lines = [f\"Task: {task.strip()}\"]\n    for title, items in ((\"Files\", files), (\"Known\", facts)):\n        lines.extend(_section(title, items))\n    if output and output.strip():\n        lines.append(f\"Return: {output.strip()}\")\n    return \"\\n\".join(lines)\n\n\ndef _source(url, title, page):\n    \"\"\"TODO 8 of 9 (unlocks e7): the source of a finding.\n\n    Receives url, title and page (each may be None). Returns a dict with only the parts that were given, keys in that order.\n    Example: _source(\"https://example.com/b\", None, None) -> {\"url\": \"https://example.com/b\"}, _source(None, None, None) -> {}\n    \"\"\"\n    return {}\n\n\ndef package_finding(claim, url=None, title=None, page=None):\n    source = _source(url, title, page)\n    return {\"claim\": claim.strip(), \"source\": source or None}\n\n\ndef _add_source(entry, source):\n    \"\"\"TODO 9 of 9 (unlocks e7): keep every different source of a merged claim.\n\n    Receives the merged entry (with a \"sources\" list) and one source (a dict or None). Appends it unless it is None or already there.\n    Example: sources [A], add B -> [A, B]; add A again -> [A, B]\n    \"\"\"\n    return None\n\n\ndef merge_findings(findings):\n    merged = {}\n    for finding in findings:\n        key = \" \".join(finding[\"claim\"].lower().split())\n        entry = merged.setdefault(key, {\"claim\": finding[\"claim\"], \"sources\": []})\n        _add_source(entry, finding[\"source\"])\n    return [{\"claim\": e[\"claim\"], \"sources\": e[\"sources\"], \"attributed\": bool(e[\"sources\"])} for e in merged.values()]\n\n\nasync def run_team(prompt, options):\n    \"\"\"Collect every message of a single-shot run. The SDK raises after an error result: what was received is kept.\"\"\"\n    messages, error = [], None\n    try:\n        async for message in query(prompt=prompt, options=options):\n            messages.append(message)\n    except Exception as exc:  # the error result, if there was one, is already in `messages`\n        error = str(exc)\n    return {\"messages\": messages, \"error\": error}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom subagents import build_options, make_brief, merge_findings, package_finding\n\n# The options register each named subagent the model may start with the Agent tool.\nspecs = {\"reviewer\": {\"description\": \"Reviews one module for security problems.\", \"prompt\": \"You review code.\",\n                      \"tools\": [\"Read\", \"Grep\"], \"model\": \"sonnet\"}}\noptions = build_options(specs, \"/proj\")\nprint(\"registered agents:\", sorted(options.agents) if options else None)\nprint(\"allowed tools:\", options.allowed_tools if options else None)\n\n# The brief carries the facts a subagent cannot get any other way: it does not see the conversation.\ntry:\n    brief = make_brief(\"Review the payment module for security problems\",\n                       files=[\"src/payments.py\"], facts=[\"Amounts are in cents\"], output=\"a list of findings, one per line\")\n    print(brief)\nexcept ValueError as err:\n    print(\"brief refused:\", err)\n\n# Findings keep their sources; the same claim from two subagents is merged and keeps both.\na = package_finding(\"Refunds take 5 days\", url=\"https://example.invalid/refunds\", title=\"Refund policy\")\nb = package_finding(\"refunds take 5 days\", url=\"https://example.invalid/faq\", page=3)\nc = package_finding(\"Shipping is free over 50 euros\")\nprint(\"merged:\", merge_findings([a, b, c]))\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "b883b4f0151f1cc3710d98467c75c89bbfecc76f2a525efb176c5a0ba5c8dead",
+  "starting_code": "\"\"\"Invoking subagents with the Agent SDK: definitions, limits, detecting a spawn, grouping inner messages, briefs and findings. See ../../statement.md.\"\"\"\nimport logging\nimport re\n\nfrom claude_agent_sdk import AgentDefinition, ClaudeAgentOptions, query\n\nlog = logging.getLogger(__name__)\n\nREAD_ONLY = [\"Read\", \"Grep\", \"Glob\"]\nSPAWN_TOOLS = (\"Agent\", \"Task\")  # current and old name of the tool that starts a subagent\n\n\ndef _valid_name(name):\n    \"\"\"TODO 1 of 9 (unlocks e2): is this a legal agent name?\n\n    Receives a name. Returns True for lower-case letters, digits and hyphens that start with a letter, False otherwise.\n    Example: _valid_name(\"ok-name-2\") -> True, _valid_name(\"under_score\") -> False\n    \"\"\"\n    return True\n\n\ndef _complete(spec):\n    \"\"\"TODO 2 of 9 (unlocks e2): does the spec have a description and a prompt?\n\n    Receives a spec dict. Returns True only when both \"description\" and \"prompt\" are present and not blank.\n    Example: _complete({\"prompt\": \"p\"}) -> False, _complete({\"description\": \"d\", \"prompt\": \"p\"}) -> True\n    \"\"\"\n    return True\n\n\ndef _agent_tools(listed):\n    \"\"\"TODO 3 of 9 (unlocks e1): the tool list of one subagent.\n\n    Receives the spec's \"tools\" (a list, or None when it gave none). Returns READ_ONLY (a copy) for None, else the list without \"Agent\"\n    (an empty list stays empty).\n    Example: _agent_tools([\"Read\", \"Agent\", \"Bash\"]) -> [\"Read\", \"Bash\"], _agent_tools(None) -> [\"Read\", \"Grep\", \"Glob\"]\n    \"\"\"\n    return []\n\n\ndef _limit_env(max_concurrent):\n    \"\"\"TODO 4 of 9 (unlocks e3): the environment that bounds the team.\n\n    Receives the number of subagents allowed at once. Returns a dict with CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH as \"1\" and\n    CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS as the number written as a string.\n    Example: _limit_env(3) -> {\"CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH\": \"1\", \"CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS\": \"3\"}\n    \"\"\"\n    return {}\n\n\ndef build_options(agents, cwd, cli_path=None, max_budget_usd=2.0, max_turns=20, max_concurrent=5):\n    log.debug(\"build_options input: %r\", agents)\n    definitions = {}\n    for name, spec in agents.items():\n        if not _valid_name(name):\n            raise ValueError(f\"bad agent name: {name}\")\n        if not _complete(spec):\n            raise ValueError(f\"agent {name} needs a description and a prompt\")\n        tools = _agent_tools(spec.get(\"tools\"))\n        definitions[name] = AgentDefinition(description=spec[\"description\"], prompt=spec[\"prompt\"], tools=tools, model=spec.get(\"model\") or \"inherit\")\n    extra = {\"cli_path\": cli_path} if cli_path else {}\n    return ClaudeAgentOptions(\n        agents=definitions, allowed_tools=[\"Agent\", *READ_ONLY], max_turns=max_turns, max_budget_usd=max_budget_usd, cwd=cwd,\n        env=_limit_env(max_concurrent),\n        permission_mode=\"default\", setting_sources=[], **extra)\n\n\ndef _blocks(message):\n    content = getattr(message, \"content\", None)\n    return content if isinstance(content, list) else []\n\n\ndef _is_spawn(block):\n    \"\"\"TODO 5 of 9 (unlocks e4): does this content block start a subagent?\n\n    Receives a block. Returns True for a tool call (it has an `input`) whose name is in SPAWN_TOOLS, False for anything else.\n    Example: a ToolUseBlock named \"Task\" -> True, a ToolUseBlock named \"Read\" -> False, a TextBlock -> False\n    \"\"\"\n    return False\n\n\ndef spawned(messages):\n    found = []\n    for message in messages:\n        for block in _blocks(message):\n            if _is_spawn(block):\n                call = block.input or {}\n                found.append({\"id\": block.id, \"subagent_type\": call.get(\"subagent_type\") or \"general-purpose\", \"description\": call.get(\"description\", \"\"), \"prompt\": call.get(\"prompt\", \"\")})\n    return found\n\n\ndef _note_tools(group, blocks):\n    \"\"\"TODO 6 of 9 (unlocks e5): record the tools used in one inner message.\n\n    Receives a group dict (with a \"tools\" list) and the blocks of one message. Appends the name of each block that has one, once, in order.\n    Example: blocks named Read, Read, Grep added to a group whose tools are [] -> [\"Read\", \"Grep\"]\n    \"\"\"\n    return None\n\n\ndef by_subagent(messages):\n    groups = {call[\"id\"]: {\"subagent_type\": call[\"subagent_type\"], \"messages\": 0, \"tools\": []} for call in spawned(messages)}\n    for message in messages:\n        parent = getattr(message, \"parent_tool_use_id\", None)\n        if parent in groups:\n            groups[parent][\"messages\"] += 1\n            _note_tools(groups[parent], _blocks(message))\n    return groups\n\n\ndef _section(title, items):\n    \"\"\"TODO 7 of 9 (unlocks e6): the lines of one section of a brief.\n\n    Receives a title and a list of items (or None). Returns [] when no item is left after stripping and dropping blanks, else\n    `Title:` followed by one `- item` line per item.\n    Example: _section(\"Known\", [\"a\", \" \"]) -> [\"Known:\", \"- a\"], _section(\"Files\", None) -> []\n    \"\"\"\n    return []\n\n\ndef make_brief(task, files=None, facts=None, output=None):\n    if not str(task or \"\").strip():\n        raise ValueError(\"a brief needs a task\")\n    lines = [f\"Task: {task.strip()}\"]\n    for title, items in ((\"Files\", files), (\"Known\", facts)):\n        lines.extend(_section(title, items))\n    if output and output.strip():\n        lines.append(f\"Return: {output.strip()}\")\n    return \"\\n\".join(lines)\n\n\ndef _source(url, title, page):\n    \"\"\"TODO 8 of 9 (unlocks e7): the source of a finding.\n\n    Receives url, title and page (each may be None). Returns a dict with only the parts that were given, keys in that order.\n    Example: _source(\"https://example.com/b\", None, None) -> {\"url\": \"https://example.com/b\"}, _source(None, None, None) -> {}\n    \"\"\"\n    return {}\n\n\ndef package_finding(claim, url=None, title=None, page=None):\n    source = _source(url, title, page)\n    return {\"claim\": claim.strip(), \"source\": source or None}\n\n\ndef _add_source(entry, source):\n    \"\"\"TODO 9 of 9 (unlocks e7): keep every different source of a merged claim.\n\n    Receives the merged entry (with a \"sources\" list) and one source (a dict or None). Appends it unless it is None or already there.\n    Example: sources [A], add B -> [A, B]; add A again -> [A, B]\n    \"\"\"\n    return None\n\n\ndef merge_findings(findings):\n    merged = {}\n    for finding in findings:\n        key = \" \".join(finding[\"claim\"].lower().split())\n        entry = merged.setdefault(key, {\"claim\": finding[\"claim\"], \"sources\": []})\n        _add_source(entry, finding[\"source\"])\n    return [{\"claim\": e[\"claim\"], \"sources\": e[\"sources\"], \"attributed\": bool(e[\"sources\"])} for e in merged.values()]\n\n\nasync def run_team(prompt, options):\n    \"\"\"Collect every message of a single-shot run. The SDK raises after an error result: what was received is kept.\"\"\"\n    messages, error = [], None\n    try:\n        async for message in query(prompt=prompt, options=options):\n            messages.append(message)\n    except Exception as exc:  # the error result, if there was one, is already in `messages`\n        error = str(exc)\n    return {\"messages\": messages, \"error\": error}\n",
+  "exercise": {
+    "main_path": "practice/level-3/47-invoking-subagents/prose/unit-02/practice-1/subagents.py",
+    "test_path": "practice/level-3/47-invoking-subagents/prose/unit-02/practice-1/test_subagents.py",
+    "run_command": [
+      "python3",
+      "practice/level-3/47-invoking-subagents/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-3/47-invoking-subagents/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-3/47-invoking-subagents/prose/unit-02/practice-1/test_subagents.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_the_options_register_each_named_agent_with_its_description_prompt_tools_and_model",
+        "kind": "main",
+        "says": "The options register each agent with its description, prompt, tools and model, and auto-approve the spawn"
+      },
+      {
+        "id": "test_e1_a_subagent_gets_read_only_tools_by_default_and_never_the_right_to_spawn_another",
+        "kind": "edge",
+        "says": "A subagent gets read-only tools by default and never the right to spawn another"
+      },
+      {
+        "id": "test_e2_a_definition_with_a_bad_name_or_no_description_or_no_prompt_is_refused",
+        "kind": "edge",
+        "says": "A bad name, a blank description or a missing prompt is refused"
+      },
+      {
+        "id": "test_e3_depth_concurrency_budget_and_turn_limits_are_set_on_the_options",
+        "kind": "edge",
+        "says": "Depth, concurrency, budget and turn limits are set on the options"
+      },
+      {
+        "id": "test_e4_a_spawn_is_recognised_under_the_new_and_the_old_tool_name_and_nothing_else_is",
+        "kind": "edge",
+        "says": "A spawn is recognised under both tool names, and nothing else is"
+      },
+      {
+        "id": "test_e5_messages_from_inside_a_subagent_are_grouped_under_the_call_that_started_it",
+        "kind": "edge",
+        "says": "Messages from inside a subagent are grouped under the call that started it"
+      },
+      {
+        "id": "test_e6_a_brief_carries_the_task_and_every_fact_the_subagent_needs_in_a_fixed_layout",
+        "kind": "edge",
+        "says": "A brief holds the task and every fact in a fixed layout"
+      },
+      {
+        "id": "test_e7_findings_keep_the_claim_apart_from_its_source_and_merging_keeps_every_source",
+        "kind": "edge",
+        "says": "A finding keeps its source apart, and merging keeps every source"
+      },
+      {
+        "id": "test_e8_a_run_through_the_sdk_shows_the_spawn_the_inner_messages_and_the_agents_sent_to_the_binary",
+        "kind": "edge",
+        "says": "A run through the SDK shows the spawn, the inner messages and the agents sent to the binary"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/47-invoking-subagents/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/47-invoking-subagents/02-context-parallel-subagents-and-the-practice.md",
+    "concepts": [
+      "the practice of Passing context, running subagents in parallel and keeping sources is solved"
+    ],
+    "files": [
+      "practice/level-3/47-invoking-subagents/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "invoking-subagents-u2"
+}

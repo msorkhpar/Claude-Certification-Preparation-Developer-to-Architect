@@ -1,0 +1,321 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "23-setting-up-claude-on-the-cloud-platforms"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Least privilege for Bedrock and Vertex",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Least privilege for Bedrock and Vertex"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Developer · **Module 23:** Setting up Claude on the cloud platforms · **Page 1 of 2** **Exams:** DV2"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** read an AWS IAM policy for Claude on Bedrock and find what it allows beyond its job, write a policy that names one action and one model, choose a custom role over a predefined one on Google Cloud, and review both with a few checks that a program can run."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-02 against the Claude API documentation (Claude in Amazon Bedrock, Claude on Google Cloud), the Amazon Bedrock User Guide page on identity-based policy examples, the Google Cloud documentation on Agent Platform access control with IAM and on Claude models, and by running the example offline in the course container (Python and TypeScript). Every name in the example is a placeholder: no real account, project or key appears."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "The first thing a cloud team sets up for Claude is not a prompt but a permission: which identity may call which model. A policy that says \"everything on everything\" works on the first try and is the one a security review rejects. The exam asks what a least-privilege policy for model access looks like on each platform and which of two similar-looking policies is the safer one."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The rule behind both platforms"
+    },
+    {
+      "type": "para",
+      "text": "AWS states least privilege in one line in the Bedrock guide: \"Apply least-privilege permissions\". It continues: \"When you set permissions with IAM policies, grant only the permissions required to perform a task.\" You do this by \"defining the actions that can be taken on specific resources under specific conditions\". The starting point is closed: \"By default, users and roles don't have permission to create or modify Amazon Bedrock resources.\" So a policy adds what a job needs and nothing more."
+    },
+    {
+      "type": "para",
+      "text": "Google says the same of its roles. Predefined roles are convenient, \"but custom roles are recommended because you create them, so you can limit their access to only the permissions that are required\". The reason is plain: \"Predefined roles often contain more permissions than you need.\""
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "An AWS policy, piece by piece"
+    },
+    {
+      "type": "para",
+      "text": "An IAM policy is a JSON document with a `Version` and a list of statements. Each statement has an `Effect` (`Allow` or `Deny`), an `Action` (or list of actions) and a `Resource` (or list). Anthropic's Bedrock page describes the role for federated access: \"Create an IAM role scoped to your Claude models. The trust policy names your identity provider (SAML, OIDC, or AWS Identity Center). The permissions policy grants `bedrock-mantle:CreateInference` only on the allowed model ARNs.\" The AWS examples use two older invoke actions, `bedrock:InvokeModel` and `bedrock:InvokeModelWithResponseStream`. The current version string in every AWS example is `2012-10-17`."
+    },
+    {
+      "type": "para",
+      "text": "A policy to invoke one model has this shape. The account-free ARN is a placeholder for the form `arn:aws:bedrock:<region>::foundation-model/<model id>`, with the Bedrock model id `anthropic.claude-sonnet-5-5`:"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Effect\": \"Allow\",\n      \"Action\": [\"bedrock-mantle:CreateInference\"],\n      \"Resource\": [\"arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-5-5\"]\n    }\n  ]\n}"
+    },
+    {
+      "type": "para",
+      "text": "One caution is part of the lesson. AWS documents the `foundation-model` ARN shape for the `bedrock:InvokeModel` actions. The resource type to use with the `bedrock-mantle` action is something to confirm in AWS's service authorization reference before real use. The course checks the shape and nothing else about the ARN, and it did not verify the resource type for the `bedrock-mantle` action."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What goes wrong in a policy"
+    },
+    {
+      "type": "para",
+      "text": "Four findings cover most reviews, and a program can find each one:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Finding",
+        "Why it is wrong"
+      ],
+      "rows": [
+        [
+          "An action with a wildcard, such as `bedrock:*`",
+          "it grants every Bedrock action, including ones that manage resources"
+        ],
+        [
+          "A resource of `*`",
+          "it names every model, including ones the application should not call"
+        ],
+        [
+          "An `Effect` other than `Allow` in an allow-list policy",
+          "a `Deny` statement belongs in a separate guardrail"
+        ],
+        [
+          "`NotAction` or `NotResource`",
+          "they allow everything except a list, the opposite of least privilege"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "AWS shows wildcards in a deny policy: \"To deny inference access to all foundation models, use * for the model ID.\" That is the legitimate use, as a guardrail that blocks, and it explains why the same character is a defect in an allow. The page also notes that a deny on `InvokeModel` is enough for the neighbours: \"Other actions, such as Converse and StartAsyncInvoke, are blocked automatically when InvokeModel is denied.\""
+    },
+    {
+      "type": "para",
+      "text": "AWS adds two refinements. \"Use conditions in IAM policies to further restrict access\", for instance to require SSL. And \"IAM Access Analyzer validates new and existing policies so that the policies adhere to the IAM policy language (JSON) and IAM best practices\". Both come after the basics: the right action on the right resource."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Google Cloud: a custom role that can only predict"
+    },
+    {
+      "type": "para",
+      "text": "A Google Cloud caller is a service account, and what it may do comes from the role it holds. The page names the permission that matches the job: \"you can create a custom role with the aiplatform.endpoints.predict permission, and then assign the role to a service account on an endpoint\". It spells out the effect: \"This grants the service account the ability to call the endpoint for predictions, but not the ability of controlling the endpoint.\""
+    },
+    {
+      "type": "para",
+      "text": "The page puts it this way: \"You grant access by assigning IAM roles to principals.\" There are three kinds of role. **Basic** roles (Owner, Editor, Viewer) \"provide access control to your Agent Platform resources at the project level, and are common to all Google Cloud services\". **Predefined** roles bundle related permissions at the project level. **Custom** roles hold exactly the permissions you list. A predefined role such as `roles/aiplatform.user` is easy to assign and carries more than a caller needs. One warning: \"granting the aiplatform.endpoints.deploy permission might allow a user to export other deployed or deployable models from the project\", so an invoker role should not carry it."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "para",
+      "text": "The example is a small reviewer. It checks a policy for wildcard actions, wildcard resources and a non-Allow effect, and a role for a predefined id and for extra permissions. It runs on four configurations: a broad AWS policy, a narrow one, a predefined Google role and a custom one. The configurations are written for the page."
+    },
+    {
+      "type": "example",
+      "id": "m23-policy-review",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/23-policy-review/python/policy_review.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/23-policy-review/typescript/policyReview.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/23-policy-review/java/PolicyReview.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/23-policy-review/kotlin/PolicyReview.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Reading a platform configuration the way a reviewer would: two IAM policies and one Vertex role, with findings.\n\nThe policies are written for this page (placeholder account-free ARNs and names). The checks are the ones the module teaches:\nnamed actions instead of wildcards, one model resource instead of `*`, an Allow-only policy, and a role that holds only the\npredict permission (Google's IAM documentation, read 2026-10-02).\n\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\nBROAD = {\"Version\": \"2012-10-17\", \"Statement\": [{\"Effect\": \"Allow\", \"Action\": \"bedrock:*\", \"Resource\": \"*\"}]}\nNARROW = {\"Version\": \"2012-10-17\", \"Statement\": [{\"Effect\": \"Allow\", \"Action\": [\"bedrock-mantle:CreateInference\"],\n                                                   \"Resource\": [\"arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-5-5\"]}]}\nROLES = {\"predefined\": {\"id\": \"roles/aiplatform.user\", \"permissions\": [\"aiplatform.endpoints.predict\", \"aiplatform.endpoints.deploy\"]},\n         \"custom\": {\"id\": \"projects/example-project/roles/claudeInvoker\", \"permissions\": [\"aiplatform.endpoints.predict\"]}}\n\n\ndef as_list(value):\n    return value if isinstance(value, list) else [value]\n\n\ndef review_policy(policy):\n    findings = []\n    for number, statement in enumerate(as_list(policy[\"Statement\"]), start=1):\n        for action in as_list(statement.get(\"Action\", [])):\n            if \"*\" in action:\n                findings.append(f\"statement {number}: action {action} is a wildcard\")\n        for resource in as_list(statement.get(\"Resource\", [])):\n            if \"*\" in resource:\n                findings.append(f\"statement {number}: resource {resource} names more than one model\")\n        if statement.get(\"Effect\") != \"Allow\":\n            findings.append(f\"statement {number}: effect is {statement.get('Effect')}\")\n    return findings\n\n\ndef review_role(role):\n    findings = []\n    if role[\"id\"].startswith(\"roles/\"):\n        findings.append(f\"{role['id']} is a predefined role, which carries more than the caller needs\")\n    extra = [p for p in role[\"permissions\"] if p != \"aiplatform.endpoints.predict\"]\n    if extra:\n        findings.append(\"extra permissions: \" + \", \".join(extra))\n    return findings\n\n\ndef main():\n    for name, policy in ((\"broad policy\", BROAD), (\"narrow policy\", NARROW)):\n        found = review_policy(policy)\n        print(f\"{name}: {len(found)} finding(s)\")\n        for item in found:\n            print(\"  -\", item)\n    for name, role in ROLES.items():\n        found = review_role(role)\n        print(f\"{name} role: {len(found)} finding(s)\")\n        for item in found:\n            print(\"  -\", item)\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "broad policy: 2 finding(s)\n  - statement 1: action bedrock:* is a wildcard\n  - statement 1: resource * names more than one model\nnarrow policy: 0 finding(s)\npredefined role: 2 finding(s)\n  - roles/aiplatform.user is a predefined role, which carries more than the caller needs\n  - extra permissions: aiplatform.endpoints.deploy\ncustom role: 0 finding(s)"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Reading a platform configuration the way a reviewer would: two IAM policies and one Vertex role, with findings.\n// The policies are written for this page (placeholder account-free ARNs and names). The checks are the ones the module teaches:\n// named actions instead of wildcards, one model resource instead of `*`, an Allow-only policy, and a role that holds only the\n// predict permission (Google's IAM documentation, read 2026-10-02).\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"policy_review\");\nexport const BROAD = { Version: \"2012-10-17\", Statement: [{ Effect: \"Allow\", Action: \"bedrock:*\", Resource: \"*\" }] };\nexport const NARROW = {\n  Version: \"2012-10-17\",\n  Statement: [{ Effect: \"Allow\", Action: [\"bedrock-mantle:CreateInference\"], Resource: [\"arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-5-5\"] }],\n};\nexport const ROLES: Record<string, { id: string; permissions: string[] }> = {\n  predefined: { id: \"roles/aiplatform.user\", permissions: [\"aiplatform.endpoints.predict\", \"aiplatform.endpoints.deploy\"] },\n  custom: { id: \"projects/example-project/roles/claudeInvoker\", permissions: [\"aiplatform.endpoints.predict\"] },\n};\n\nconst asList = (value: any): any[] => (Array.isArray(value) ? value : [value]);\n\nexport function reviewPolicy(policy: any): string[] {\n  const findings: string[] = [];\n  asList(policy.Statement).forEach((statement, i) => {\n    const number = i + 1;\n    for (const action of asList(statement.Action ?? [])) if (action.includes(\"*\")) findings.push(`statement ${number}: action ${action} is a wildcard`);\n    for (const resource of asList(statement.Resource ?? [])) if (resource.includes(\"*\")) findings.push(`statement ${number}: resource ${resource} names more than one model`);\n    if (statement.Effect !== \"Allow\") findings.push(`statement ${number}: effect is ${statement.Effect}`);\n  });\n  return findings;\n}\n\nexport function reviewRole(role: { id: string; permissions: string[] }): string[] {\n  const findings: string[] = [];\n  if (role.id.startsWith(\"roles/\")) findings.push(`${role.id} is a predefined role, which carries more than the caller needs`);\n  const extra = role.permissions.filter((p) => p !== \"aiplatform.endpoints.predict\");\n  if (extra.length) findings.push(\"extra permissions: \" + extra.join(\", \"));\n  return findings;\n}\n\nfunction main() {\n  for (const [name, policy] of [[\"broad policy\", BROAD], [\"narrow policy\", NARROW]] as const) {\n    const found = reviewPolicy(policy);\n    console.log(`${name}: ${found.length} finding(s)`);\n    for (const item of found) console.log(\"  -\", item);\n  }\n  for (const [name, role] of Object.entries(ROLES)) {\n    const found = reviewRole(role);\n    console.log(`${name} role: ${found.length} finding(s)`);\n    for (const item of found) console.log(\"  -\", item);\n  }\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "broad policy: 2 finding(s)\n  - statement 1: action bedrock:* is a wildcard\n  - statement 1: resource * names more than one model\nnarrow policy: 0 finding(s)\npredefined role: 2 finding(s)\n  - roles/aiplatform.user is a predefined role, which carries more than the caller needs\n  - extra permissions: aiplatform.endpoints.deploy\ncustom role: 0 finding(s)"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import com.fasterxml.jackson.databind.ObjectMapper;\nimport java.util.ArrayList;\nimport java.util.List;\nimport java.util.Map;\n\n/**\n * Reading a platform configuration the way a reviewer would: two IAM policies and one Vertex role, with findings.\n *\n * <p>The policies are written for this page (placeholder account-free ARNs and names). The checks are the ones the module teaches:\n * named actions instead of wildcards, one model resource instead of `*`, an Allow-only policy, and a role that holds only the\n * predict permission (Google's IAM documentation, read 2026-10-02).\n */\npublic final class PolicyReview {\n    private static final System.Logger LOG = System.getLogger(PolicyReview.class.getName());\n    static final String BROAD = \"\"\"\n        {\"Version\": \"2012-10-17\", \"Statement\": [{\"Effect\": \"Allow\", \"Action\": \"bedrock:*\", \"Resource\": \"*\"}]}\"\"\";\n    static final String NARROW = \"\"\"\n        {\"Version\": \"2012-10-17\", \"Statement\": [{\"Effect\": \"Allow\", \"Action\": [\"bedrock-mantle:CreateInference\"],\n          \"Resource\": [\"arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-5-5\"]}]}\"\"\";\n    static final Map<String, String> ROLES = Map.of(\n        \"predefined\", \"\"\"\n            {\"id\": \"roles/aiplatform.user\", \"permissions\": [\"aiplatform.endpoints.predict\", \"aiplatform.endpoints.deploy\"]}\"\"\",\n        \"custom\", \"\"\"\n            {\"id\": \"projects/example-project/roles/claudeInvoker\", \"permissions\": [\"aiplatform.endpoints.predict\"]}\"\"\");\n\n    private static final ObjectMapper JSON = new ObjectMapper();\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> parse(String json) {\n        try {\n            return JSON.readValue(json, Map.class);\n        } catch (Exception e) {\n            throw new IllegalArgumentException(e);\n        }\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static List<Object> asList(Object value) {\n        if (value == null) return List.of();\n        return value instanceof List<?> l ? (List<Object>) l : List.of(value);\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static List<String> reviewPolicy(Map<String, Object> policy) {\n        List<String> findings = new ArrayList<>();\n        int number = 0;\n        for (Object item : asList(policy.get(\"Statement\"))) {\n            Map<String, Object> statement = (Map<String, Object>) item;\n            number++;\n            for (Object action : asList(statement.get(\"Action\"))) {\n                if (((String) action).contains(\"*\")) findings.add(\"statement \" + number + \": action \" + action + \" is a wildcard\");\n            }\n            for (Object resource : asList(statement.get(\"Resource\"))) {\n                if (((String) resource).contains(\"*\")) findings.add(\"statement \" + number + \": resource \" + resource + \" names more than one model\");\n            }\n            if (!\"Allow\".equals(statement.get(\"Effect\"))) findings.add(\"statement \" + number + \": effect is \" + statement.get(\"Effect\"));\n        }\n        return findings;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static List<String> reviewRole(Map<String, Object> role) {\n        List<String> findings = new ArrayList<>();\n        String id = (String) role.get(\"id\");\n        if (id.startsWith(\"roles/\")) findings.add(id + \" is a predefined role, which carries more than the caller needs\");\n        List<String> extra = new ArrayList<>();\n        for (Object p : (List<Object>) role.get(\"permissions\")) if (!\"aiplatform.endpoints.predict\".equals(p)) extra.add((String) p);\n        if (!extra.isEmpty()) findings.add(\"extra permissions: \" + String.join(\", \", extra));\n        return findings;\n    }\n\n    private static void show(String name, List<String> found) {\n        System.out.println(name + \": \" + found.size() + \" finding(s)\");\n        for (String item : found) System.out.println(\"  - \" + item);\n    }\n\n    public static void main(String[] args) {\n        show(\"broad policy\", reviewPolicy(parse(BROAD)));\n        show(\"narrow policy\", reviewPolicy(parse(NARROW)));\n        for (String name : List.of(\"predefined\", \"custom\")) show(name + \" role\", reviewRole(parse(ROLES.get(name))));\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "broad policy: 2 finding(s)\n  - statement 1: action bedrock:* is a wildcard\n  - statement 1: resource * names more than one model\nnarrow policy: 0 finding(s)\npredefined role: 2 finding(s)\n  - roles/aiplatform.user is a predefined role, which carries more than the caller needs\n  - extra permissions: aiplatform.endpoints.deploy\ncustom role: 0 finding(s)"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import com.fasterxml.jackson.databind.ObjectMapper\n\nprivate val log = System.getLogger(\"policy_review\")\n\n/**\n * Reading a platform configuration the way a reviewer would: two IAM policies and one Vertex role, with findings.\n *\n * The policies are written for this page (placeholder account-free ARNs and names). The checks are the ones the module teaches:\n * named actions instead of wildcards, one model resource instead of `*`, an Allow-only policy, and a role that holds only the\n * predict permission (Google's IAM documentation, read 2026-10-02).\n */\nval BROAD = \"\"\"{\"Version\": \"2012-10-17\", \"Statement\": [{\"Effect\": \"Allow\", \"Action\": \"bedrock:*\", \"Resource\": \"*\"}]}\"\"\"\nval NARROW = \"\"\"\n    {\"Version\": \"2012-10-17\", \"Statement\": [{\"Effect\": \"Allow\", \"Action\": [\"bedrock-mantle:CreateInference\"],\n      \"Resource\": [\"arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-5-5\"]}]}\"\"\"\nval ROLES = mapOf(\n    \"predefined\" to \"\"\"{\"id\": \"roles/aiplatform.user\", \"permissions\": [\"aiplatform.endpoints.predict\", \"aiplatform.endpoints.deploy\"]}\"\"\",\n    \"custom\" to \"\"\"{\"id\": \"projects/example-project/roles/claudeInvoker\", \"permissions\": [\"aiplatform.endpoints.predict\"]}\"\"\",\n)\n\n@Suppress(\"UNCHECKED_CAST\")\nfun parse(json: String): Map<String, Any?> = ObjectMapper().readValue(json, Map::class.java) as Map<String, Any?>\n\nfun asList(value: Any?): List<Any?> = when (value) {\n    null -> emptyList()\n    is List<*> -> value\n    else -> listOf(value)\n}\n\nfun reviewPolicy(policy: Map<String, Any?>): List<String> {\n    val findings = mutableListOf<String>()\n    for ((index, item) in asList(policy[\"Statement\"]).withIndex()) {\n        val number = index + 1\n        @Suppress(\"UNCHECKED_CAST\") val statement = item as Map<String, Any?>\n        for (action in asList(statement[\"Action\"])) if (\"*\" in action as String) findings += \"statement $number: action $action is a wildcard\"\n        for (resource in asList(statement[\"Resource\"])) if (\"*\" in resource as String) findings += \"statement $number: resource $resource names more than one model\"\n        if (statement[\"Effect\"] != \"Allow\") findings += \"statement $number: effect is ${statement[\"Effect\"]}\"\n    }\n    return findings\n}\n\nfun reviewRole(role: Map<String, Any?>): List<String> {\n    val findings = mutableListOf<String>()\n    val id = role[\"id\"] as String\n    if (id.startsWith(\"roles/\")) findings += \"$id is a predefined role, which carries more than the caller needs\"\n    val extra = asList(role[\"permissions\"]).filter { it != \"aiplatform.endpoints.predict\" }\n    if (extra.isNotEmpty()) findings += \"extra permissions: \" + extra.joinToString(\", \")\n    return findings\n}\n\nprivate fun show(name: String, found: List<String>) {\n    println(\"$name: ${found.size} finding(s)\")\n    for (item in found) println(\"  - $item\")\n}\n\nfun main() {\n    show(\"broad policy\", reviewPolicy(parse(BROAD)))\n    show(\"narrow policy\", reviewPolicy(parse(NARROW)))\n    for (name in listOf(\"predefined\", \"custom\")) show(\"$name role\", reviewRole(parse(ROLES.getValue(name))))\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "broad policy: 2 finding(s)\n  - statement 1: action bedrock:* is a wildcard\n  - statement 1: resource * names more than one model\nnarrow policy: 0 finding(s)\npredefined role: 2 finding(s)\n  - roles/aiplatform.user is a predefined role, which carries more than the caller needs\n  - extra permissions: aiplatform.endpoints.deploy\ncustom role: 0 finding(s)"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Read the output. The broad policy has two findings, a wildcard action and a resource that names more than one model. The narrow policy has none. The predefined role has two: it is predefined, and it carries `aiplatform.endpoints.deploy` besides predict. The custom role has none. A reviewer that returns a list of findings is easy to test, which is the idea of this module's practice."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Using `bedrock:*` and `*` because it works on the first try.** It grants every action on every model. Name the invoke action and the model.",
+        "**Choosing the predefined role to save time.** It carries permissions the application never uses, and one of them can export models.",
+        "**Treating a `Deny` with `*` as the same defect as an `Allow` with `*`.** In a guardrail, the wildcard is the point. In an allow-list it is the defect."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A policy allows bedrock:* on * for an application's role. A reviewer asks for least privilege. Which rewrite fits?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Keep the policy as written and add a condition that requires SSL",
+              "**b**: Keep the wildcard action but name the single model's ARN in the resource",
+              "**c**: Replace the wildcard with a deny statement for every other model",
+              "**d**: List the one invoke action and name the single model's ARN"
+            ]
+          }
+        ],
+        [
+          "A service account must only call a Claude endpoint on Google Cloud. The team compares a ready-made grant bundle with one it authors. What does the page favour?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The tailored role with just the predict permission",
+              "**b**: A predefined role, since the platform maintains it for the team",
+              "**c**: A basic role such as Editor, since it covers every service at once",
+              "**d**: No role at all, since a service account works without any grant"
+            ]
+          }
+        ],
+        [
+          "A team adds the deploy permission to its invoker role just in case. What does the Google page warn?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: It blocks the predict permission until the deploy one is removed",
+              "**b**: It makes every prediction slower on the endpoint that holds it",
+              "**c**: It opens a route to exporting other models held in the project",
+              "**d**: It has no effect at all, because deploy only adds serving capacity"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**d**. The page says to \"grant only the permissions required to perform a task\", by \"defining the actions that can be taken on specific resources\". *b* is ruled out because a wildcard action still grants more than \"the permissions required to perform a task\". *c* is ruled out because \"By default, users and roles don't have permission to create or modify Amazon Bedrock resources\", so a policy should add what is needed and not rely on denies. *a* is ruled out because conditions come after the basics: \"defining the actions that can be taken on specific resources under specific conditions\".",
+            "**a**. The page says \"custom roles are recommended because you create them, so you can limit their access to only the permissions that are required\". *b* is ruled out because \"Predefined roles often contain more permissions than you need.\" *c* is ruled out because basic roles \"provide access control to your Agent Platform resources at the project level, and are common to all Google Cloud services\", which is broad. *d* is ruled out because \"You grant access by assigning IAM roles to principals.\"",
+            "**c**. The page warns that the deploy permission \"might allow a user to export other deployed or deployable models from the project\". *b* is ruled out because the predict permission \"grants the service account the ability to call the endpoint for predictions\", and the page says nothing of speed. *a* is ruled out because the same sentence shows the predict permission grants \"the ability to call the endpoint for predictions\" on its own. *d* is ruled out because the warning is that it \"might allow a user to export other deployed or deployable models from the project\"."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 10,
+    "paras": 16,
+    "code": 1,
+    "tables": 1,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "db2e4a97bc47c2a3e552fa6ffd2db6ff8ee54344f30da86889c6f6e3a1169c2b"
+}

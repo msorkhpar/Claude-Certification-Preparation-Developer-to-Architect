@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "13-one-rest-api-under-every-sdk"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 1,
+  "title": "Check yourself: Server-sent events, websockets and connection basics",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A team's report generator sets a very large `max_tokens` on a non-streaming call and now fails intermittently on the office network after several minutes without any reply. Which change is best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Open a websocket so that the server can push the report when it is ready",
+            "correct": false,
+            "says": "Ruled out because \"there is no client-to-server traffic to carry\" in a model call, and a websocket is \"not what the API sends\"."
+          },
+          {
+            "id": "b",
+            "text": "Turn on server-sent events so that data keeps flowing while the long text is produced",
+            "correct": true,
+            "says": "Streaming keeps data moving: \"Bytes keep flowing, and the connection is not idle\"."
+          },
+          {
+            "id": "c",
+            "text": "Raise the client timeout so that the call may stay silent for longer",
+            "correct": false,
+            "says": "Ruled out because \"Some networks may drop idle connections after a variable period of time\", so a longer timeout on your side does not help."
+          },
+          {
+            "id": "d",
+            "text": "Split the report into three prompts and send them over three connections",
+            "correct": false,
+            "says": "Ruled out because \"the call is silent for as long as the generation takes\", and each of three connections would be silent while its own part is written."
+          }
+        ],
+        "origin": {
+          "path": "course/13-one-rest-api-under-every-sdk/03-streaming-transport-and-connections.md",
+          "section": "Connection basics for long requests"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A developer proposes a websocket between a web page and the model API so that the page can send a stop signal during a long answer. What does the page say is the better design?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Add a second HTTP request that tells the model to stop generating",
+            "correct": false,
+            "says": "Ruled out because the page documents \"breaking out of the loop or calling stream.controller.abort()\", not a second request."
+          },
+          {
+            "id": "b",
+            "text": "Keep the single HTTP request and poll it every second for the next words",
+            "correct": false,
+            "says": "Ruled out because \"the server answers with a normal HTTP response whose body is a stream of server-sent events\", so the words arrive without polling."
+          },
+          {
+            "id": "c",
+            "text": "Switch to the websocket, because only that protocol allows a cancel",
+            "correct": false,
+            "says": "Ruled out because \"a websocket adds an upgrade, a session to restore and trouble at every proxy, and gives nothing in return\"."
+          },
+          {
+            "id": "d",
+            "text": "Keep the single HTTP request and stream, and cancel by closing the connection",
+            "correct": true,
+            "says": "The page says the client cancels \"by closing the connection\", with the stream running on one ordinary HTTP request."
+          }
+        ],
+        "origin": {
+          "path": "course/13-one-rest-api-under-every-sdk/03-streaming-transport-and-connections.md",
+          "section": "Why not a websocket"
+        }
+      }
+    ]
+  }
+}

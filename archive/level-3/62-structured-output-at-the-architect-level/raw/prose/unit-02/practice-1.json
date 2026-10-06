@@ -1,0 +1,314 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "62-structured-output-at-the-architect-level"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: an extraction pipeline that admits absence, checks what a schema cannot, retries with feedback and is measured on every document (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an extraction pipeline that admits absence, checks what a schema cannot, retries with feedback and is measured on every document"
+    },
+    {
+      "type": "para",
+      "text": "A team extracts the vendor, the currency and the totals from invoices. The schema makes every field required, so when an invoice names no vendor the model invents one; a retry loop repeats the same request ten times for a value the document never contained; the accuracy report counts only the documents that passed validation and says 99 percent. In this practice you write the pipeline's decisions: the validation of a record (what a schema cannot check), the extraction loop with retries that carry feedback, the merge of the chunks of a long document, the accuracy measured on every document, and the tool choice of the request. The model is not called: the tests give you documents, scripted model replies and labels. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`validate`, `extract_document`, `merge_chunks`, `accuracy`, `request_choice`); TypeScript has the camel-case names (`extractDocument`, `mergeChunks`, `requestChoice`); Java has the same camel-case names as static methods of `Extraction`; Kotlin has top-level functions. Results are maps and lists, as the starters show. The model reply is a function `call_model(document, feedback)`."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working pipeline with ten gaps cut out of it. Everything that is plumbing is written and correct: the type and enum checks of `validate`, the loop of `extract_document` with its retry limit and feedback, the chunk merge, the counting of `accuracy` and the model list. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_quote_found` unlocks `e1`: a quote supports a value only when it is a non-empty string found in the document.",
+        "`_currency_ok` unlocks `e6`: the currency values the schema allows.",
+        "`_detail_missing` unlocks `e6`: `other` needs a detail.",
+        "`_retryable` unlocks `e2`, `e3` and `e4`: which errors a second look can fix.",
+        "`_status` unlocks `m1`, `e3` and `e5`: `valid`, `needs_review` or `failed`.",
+        "`_is_unset` unlocks `e7`: a merged field with no real value yet.",
+        "`_is_conflict` unlocks `e7`: two chunks that disagree, recorded once.",
+        "`_report` unlocks `e8`: accuracy over every document and over the validated ones.",
+        "`_forced_choice` unlocks `e9`: the tool choice for a model that accepts a forced one.",
+        "`_check_semantics` unlocks `e5`: the sum of the line items and the stated total."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About fifteen lines in all. The sections below describe the whole pipeline, so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "A record has the keys `vendor` (a string or `null`), `currency` (`USD`, `EUR`, `GBP`, `other` or `unclear`), `currency_detail` (a string, required when the currency is `other`), `line_items` (a list of numbers), `stated_total` (a number or `null`), `calculated_total` (a number), `conflict_detected` (a boolean) and `provenance` (an object that maps a field to the quote of the document that supports it)."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`validate(record, document, required=())` returns a list of `{kind, field, message}`:",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`syntax`: a missing key (return those alone), or a value of the wrong type or outside its enum, a missing detail for `other`, a `provenance` that is not an object;",
+              "`semantic`: `calculated_total` is not the sum of the line items (to half a cent), or `stated_total` differs from `calculated_total` while `conflict_detected` is false;",
+              "`ungrounded`: `vendor`, `currency` or `stated_total` has a value (not `null`, not `unclear`) and no non-empty quote in `provenance` that appears in the document;",
+              "`absent`: a field in `required` is `null` or `unclear`. A value that is `null` or `unclear` needs no quote, and a conflict the model flagged is information and not an error."
+            ]
+          }
+        ],
+        "`extract_document(document, call_model, required=(), max_retries=2)` calls the model with `(document, None)`, validates, and retries with `(document, {\"previous\": record, \"errors\": [...]})` only for errors a second look can fix (`syntax`, `semantic`, `ungrounded`), never for `absent`. It stops after `max_retries` retries. It returns `{\"status\", \"record\", \"attempts\", \"errors\"}`: `valid` with no errors and no conflict, `needs_review` when the only errors are `absent` or the model flagged a conflict (neither is retried), and `failed` otherwise.",
+        "`merge_chunks(records)` merges the records of the chunks of one document: for `vendor`, `currency` and `stated_total` keep the first value that is neither `null` nor `unclear` together with its quote (and the detail for the currency), record a field in `conflicts` once when a later chunk disagrees, concatenate the line items, recompute `calculated_total` (two decimals), and set `conflict_detected` when any chunk flagged one or a conflict was found.",
+        "`accuracy(results, labels)` returns `{\"all_documents\", \"validated_only\", \"validated\", \"total\"}`: a document is correct when it is `valid` and its vendor and stated total equal the label's. `all_documents` divides by every labelled document and `validated_only` by the valid ones (two decimals; zero when the denominator is zero).",
+        "`request_choice(model, tools, forced=None)` returns `{\"tool_choice\", \"strict\", \"verify_reply\"}` with `strict` always true. On the models in `NO_FORCING` use `auto` and set `verify_reply` to true. Elsewhere use the forced tool when `forced` is given, `any` when there are several tools, and the one tool by name otherwise; `verify_reply` is false."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Nullable fields.** A required field invites an invented value; a nullable one lets the model say the document does not give it. *You should see* an invoice with no vendor validate with `vendor` null and no quote, and an invented vendor fail as ungrounded.",
+        "**Provenance.** A quote that must appear in the document is a check the schema cannot make. *You should see* a made-up quote refused.",
+        "**Retry only what can improve.** Feedback names the errors a second look can fix; a value the document does not contain stays absent however often it is asked for. *You should see* one retry with the document, the failed record and the errors, and no retry for an absent value.",
+        "**Conflicts are information.** A total that differs from the line items and is flagged goes to review. *You should see* `needs_review` after one attempt.",
+        "**Honest measurement.** Accuracy on the validated documents alone is higher than the truth because the failures leave the denominator. *You should see* 0.5 on all documents and 0.83 on the validated ones for the same results.",
+        "**The tool choice.** A forced tool call is rejected by some current models and changing `tool_choice` invalidates cached message blocks. *You should see* a forced tool where the model allows it and `auto` with a reply check where it does not."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A document with every value present and quoted comes back valid on the first attempt"
+        ],
+        [
+          "`e1`",
+          "A value the document does not give is null and needs no quote, while an invented value fails as ungrounded"
+        ],
+        [
+          "`e2`",
+          "A retry carries the document, the failed record and only the errors a second look can fix"
+        ],
+        [
+          "`e3`",
+          "A required value reported as absent is not retried and goes to review"
+        ],
+        [
+          "`e4`",
+          "Retries stop after the limit and the document is marked failed"
+        ],
+        [
+          "`e5`",
+          "A total that differs from the line items is a semantic error; a flagged conflict goes to review without a retry"
+        ],
+        [
+          "`e6`",
+          "Currency takes `unclear` and `other` with a detail, and anything else is a syntax error"
+        ],
+        [
+          "`e7`",
+          "Chunk results merge by keeping the first value and recording a conflict when two chunks disagree"
+        ],
+        [
+          "`e8`",
+          "Accuracy counts every document and not only the validated ones"
+        ],
+        [
+          "`e9`",
+          "The request forces a tool where the model allows it and falls back to `auto` with a reply check where it does not"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"An extraction pipeline that admits absence, checks what a schema cannot, retries with feedback and is measured on every document. See ../../statement.md.\"\"\"\n\nimport logging\n\nlog = logging.getLogger(__name__)\nCURRENCIES = (\"USD\", \"EUR\", \"GBP\", \"other\", \"unclear\")\nKEYS = (\"vendor\", \"currency\", \"currency_detail\", \"line_items\", \"stated_total\", \"calculated_total\", \"conflict_detected\", \"provenance\")\nRETRYABLE = (\"syntax\", \"semantic\", \"ungrounded\")\nNO_FORCING = {\"claude-opus-5-5\", \"claude-sonnet-5-5\", \"claude-fable-5-1\", \"claude-mythos-5-1\"}  # models whose API rejects tool_choice any and tool, as read on 2026-10-03\n\n\ndef _number(value):\n    return isinstance(value, (int, float)) and not isinstance(value, bool)\n\n\ndef _quote_found(quote, document):\n    return isinstance(quote, str) and quote != \"\" and quote in document\n\n\ndef _currency_ok(currency):\n    return currency in CURRENCIES\n\n\ndef _detail_missing(currency, detail):\n    return currency == \"other\" and not (isinstance(detail, str) and detail.strip())\n\n\ndef _check_semantics(record, err):\n    items = record[\"line_items\"]\n    if abs(sum(items) - record[\"calculated_total\"]) > 0.005:\n        err(\"semantic\", \"calculated_total\", f\"{record['calculated_total']} is not the sum of the line items, {sum(items)}\")\n    stated = record[\"stated_total\"]\n    if stated is not None and abs(stated - record[\"calculated_total\"]) > 0.005 and not record[\"conflict_detected\"]:\n        err(\"semantic\", \"stated_total\", f\"the stated total {stated} differs from the calculated total {record['calculated_total']} but conflict_detected is false\")\n\n\ndef validate(record, document, required=()):\n    log.debug(\"validate input: %r\", record)\n    errors = []\n\n    def err(kind, field, message):\n        errors.append({\"kind\": kind, \"field\": field, \"message\": message})\n\n    if not isinstance(record, dict):\n        return [{\"kind\": \"syntax\", \"field\": \"$\", \"message\": \"the record is not an object\"}]\n    for key in KEYS:\n        if key not in record:\n            err(\"syntax\", key, \"is missing\")\n    if errors:\n        return errors\n    if record[\"vendor\"] is not None and not isinstance(record[\"vendor\"], str):\n        err(\"syntax\", \"vendor\", \"must be a string or null\")\n    if not _currency_ok(record[\"currency\"]):\n        err(\"syntax\", \"currency\", f\"{record['currency']!r} is not one of {list(CURRENCIES)}\")\n    detail = record[\"currency_detail\"]\n    if _detail_missing(record[\"currency\"], detail):\n        err(\"syntax\", \"currency_detail\", \"is required when the currency is other\")\n    items = record[\"line_items\"]\n    if not (isinstance(items, list) and all(_number(i) for i in items)):\n        err(\"syntax\", \"line_items\", \"must be a list of numbers\")\n    if record[\"stated_total\"] is not None and not _number(record[\"stated_total\"]):\n        err(\"syntax\", \"stated_total\", \"must be a number or null\")\n    if not _number(record[\"calculated_total\"]):\n        err(\"syntax\", \"calculated_total\", \"must be a number\")\n    if not isinstance(record[\"conflict_detected\"], bool):\n        err(\"syntax\", \"conflict_detected\", \"must be true or false\")\n    if not isinstance(record[\"provenance\"], dict):\n        err(\"syntax\", \"provenance\", \"must be an object\")\n    if errors:\n        return errors\n    _check_semantics(record, err)\n    for field in (\"vendor\", \"currency\", \"stated_total\"):\n        value = record[field]\n        if value is None or value == \"unclear\":\n            continue\n        quote = record[\"provenance\"].get(field)\n        if not _quote_found(quote, document):\n            err(\"ungrounded\", field, f\"{field} has no quote that appears in the document\")\n    for field in required:\n        if record.get(field) is None or record.get(field) == \"unclear\":\n            err(\"absent\", field, \"the document gave no value\")\n    return errors\n\n\ndef _retryable(errors):\n    return [e for e in errors if e[\"kind\"] in RETRYABLE]\n\n\ndef _status(errors, record):\n    if errors:\n        status = \"needs_review\" if all(e[\"kind\"] == \"absent\" for e in errors) else \"failed\"\n    elif record[\"conflict_detected\"]:\n        status = \"needs_review\"\n    else:\n        status = \"valid\"\n    return status\n\n\ndef extract_document(document, call_model, required=(), max_retries=2):\n    feedback = None\n    attempts = 0\n    while True:\n        attempts += 1\n        record = call_model(document, feedback)\n        errors = validate(record, document, required)\n        if not errors:\n            break\n        retryable = _retryable(errors)\n        if not retryable:\n            break\n        if attempts > max_retries:\n            break\n        feedback = {\"previous\": record, \"errors\": retryable}\n    status = _status(errors, record)\n    return {\"status\": status, \"record\": record, \"attempts\": attempts, \"errors\": errors}\n\n\ndef _is_unset(value):\n    return value is None or value == \"unclear\"\n\n\ndef _is_conflict(current, value, field, conflicts):\n    return current != value and field not in conflicts\n\n\ndef merge_chunks(records):\n    merged = {\"vendor\": None, \"currency\": \"unclear\", \"currency_detail\": None, \"line_items\": [], \"stated_total\": None, \"calculated_total\": 0, \"conflict_detected\": False, \"provenance\": {}, \"conflicts\": []}\n    for record in records:\n        for field in (\"vendor\", \"currency\", \"stated_total\"):\n            value = record.get(field)\n            if value is None or value == \"unclear\":\n                continue\n            current = merged[field]\n            if _is_unset(current):\n                merged[field] = value\n                merged[\"provenance\"][field] = record[\"provenance\"].get(field)\n                if field == \"currency\":\n                    merged[\"currency_detail\"] = record.get(\"currency_detail\")\n            elif _is_conflict(current, value, field, merged[\"conflicts\"]):\n                merged[\"conflicts\"].append(field)\n        merged[\"line_items\"] += record.get(\"line_items\", [])\n        if record.get(\"conflict_detected\"):\n            merged[\"conflict_detected\"] = True\n    merged[\"calculated_total\"] = round(sum(merged[\"line_items\"]), 2)\n    if merged[\"conflicts\"]:\n        merged[\"conflict_detected\"] = True\n    return merged\n\n\ndef _report(correct, valid, total):\n    return {\"all_documents\": round(correct / total, 2) if total else 0.0, \"validated_only\": round(correct / valid, 2) if valid else 0.0, \"validated\": valid, \"total\": total}\n\n\ndef accuracy(results, labels):\n    valid = correct = 0\n    for doc_id, label in labels.items():\n        result = results.get(doc_id)\n        is_valid = result is not None and result[\"status\"] == \"valid\"\n        valid += 1 if is_valid else 0\n        if is_valid and result[\"record\"][\"vendor\"] == label[\"vendor\"] and result[\"record\"][\"stated_total\"] == label[\"stated_total\"]:\n            correct += 1\n    total = len(labels)\n    return _report(correct, valid, total)\n\n\ndef _forced_choice(tools, forced):\n    if forced is not None:\n        return {\"tool_choice\": {\"type\": \"tool\", \"name\": forced}, \"strict\": True, \"verify_reply\": False}\n    if len(tools) > 1:\n        return {\"tool_choice\": {\"type\": \"any\"}, \"strict\": True, \"verify_reply\": False}\n    return {\"tool_choice\": {\"type\": \"tool\", \"name\": tools[0]}, \"strict\": True, \"verify_reply\": False}\n\n\ndef request_choice(model, tools, forced=None):\n    if model in NO_FORCING:\n        return {\"tool_choice\": {\"type\": \"auto\"}, \"strict\": True, \"verify_reply\": True}\n    return _forced_choice(tools, forced)\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom extraction import extract_document, validate\n\nDOC = \"Invoice from Acme Tools.\\nItems: 100.00 + 20.50\\nTotal due: 120.50 EUR\\nThank you.\"\nGOOD = {\"vendor\": \"Acme Tools\", \"currency\": \"EUR\", \"currency_detail\": None, \"line_items\": [100.0, 20.5], \"stated_total\": 120.5,\n        \"calculated_total\": 120.5, \"conflict_detected\": False,\n        \"provenance\": {\"vendor\": \"Invoice from Acme Tools\", \"currency\": \"120.50 EUR\", \"stated_total\": \"Total due: 120.50 EUR\"}}\n\n\ndef call_model(document, feedback):\n    \"\"\"A stand-in for the model, like the tests use: it always answers with the same record.\"\"\"\n    print(\"model called, feedback:\", feedback)\n    return dict(GOOD)\n\n\nresult = extract_document(DOC, call_model)\nprint(\"status:\", result[\"status\"] if result else result)\nprint(\"attempts:\", result[\"attempts\"] if result else result)\n\n# validate() on its own: a record whose calculated total disagrees with its line items.\nbad = {**GOOD, \"calculated_total\": 99.0}\nprint(\"errors:\", validate(bad, DOC))\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"An extraction pipeline that admits absence, checks what a schema cannot, retries with feedback and is measured on every document. See ../../statement.md.\"\"\"\n\nimport logging\n\nlog = logging.getLogger(__name__)\nCURRENCIES = (\"USD\", \"EUR\", \"GBP\", \"other\", \"unclear\")\nKEYS = (\"vendor\", \"currency\", \"currency_detail\", \"line_items\", \"stated_total\", \"calculated_total\", \"conflict_detected\", \"provenance\")\nRETRYABLE = (\"syntax\", \"semantic\", \"ungrounded\")\nNO_FORCING = {\"claude-opus-5-5\", \"claude-sonnet-5-5\", \"claude-fable-5-1\", \"claude-mythos-5-1\"}  # models whose API rejects tool_choice any and tool, as read on 2026-10-03\n\n\ndef _number(value):\n    return isinstance(value, (int, float)) and not isinstance(value, bool)\n\n\ndef _quote_found(quote, document):\n    \"\"\"TODO 1 of 10 (finish this to pass e1): is a provenance quote real?\n\n    Receives the quote the model gave for a field and the document text. Returns True only when the quote is a non-empty string that\n    appears in the document, so an invented value cannot be supported by an invented quote.\n    Example: _quote_found(\"Acme Ltd\", \"Invoice from Acme Ltd\") -> True, _quote_found(\"Zed Corp\", \"Invoice from Acme Ltd\") -> False\n    \"\"\"\n    return True\n\n\ndef _currency_ok(currency):\n    \"\"\"TODO 2 of 10 (finish this to pass e6): is this a currency the schema allows?\n\n    Receives the value of `currency`. Returns True when it is one of CURRENCIES (`unclear` and `other` count, anything else does not).\n    Example: _currency_ok(\"unclear\") -> True, _currency_ok(\"dollars\") -> False\n    \"\"\"\n    return True\n\n\ndef _detail_missing(currency, detail):\n    \"\"\"TODO 3 of 10 (finish this to pass e6): is a required currency detail missing?\n\n    Receives `currency` and `currency_detail`. Returns True when the currency is `other` and the detail is not a non-blank string.\n    Example: _detail_missing(\"other\", \"  \") -> True, _detail_missing(\"other\", \"CHF\") -> False, _detail_missing(\"USD\", None) -> False\n    \"\"\"\n    return False\n\n\ndef _check_semantics(record, err):\n    \"\"\"TODO 10 of 10 (finish this to pass e5): report what a schema cannot check about the numbers.\n\n    Receives a record whose types are already valid and `err(kind, field, message)`, which records one error. Call `err(\"semantic\",\n    \"calculated_total\", ...)` when `calculated_total` is not the sum of `line_items` (to half a cent), and `err(\"semantic\",\n    \"stated_total\", ...)` when `stated_total` is not None, differs from `calculated_total` (by more than half a cent) and\n    `conflict_detected` is False; a conflict the model flagged is information, not an error. It returns nothing.\n    Example: line_items [10, 5], calculated_total 15, stated_total 20, conflict_detected False -> one semantic error on stated_total\n    \"\"\"\n\n\ndef validate(record, document, required=()):\n    log.debug(\"validate input: %r\", record)\n    errors = []\n\n    def err(kind, field, message):\n        errors.append({\"kind\": kind, \"field\": field, \"message\": message})\n\n    if not isinstance(record, dict):\n        return [{\"kind\": \"syntax\", \"field\": \"$\", \"message\": \"the record is not an object\"}]\n    for key in KEYS:\n        if key not in record:\n            err(\"syntax\", key, \"is missing\")\n    if errors:\n        return errors\n    if record[\"vendor\"] is not None and not isinstance(record[\"vendor\"], str):\n        err(\"syntax\", \"vendor\", \"must be a string or null\")\n    if not _currency_ok(record[\"currency\"]):\n        err(\"syntax\", \"currency\", f\"{record['currency']!r} is not one of {list(CURRENCIES)}\")\n    detail = record[\"currency_detail\"]\n    if _detail_missing(record[\"currency\"], detail):\n        err(\"syntax\", \"currency_detail\", \"is required when the currency is other\")\n    items = record[\"line_items\"]\n    if not (isinstance(items, list) and all(_number(i) for i in items)):\n        err(\"syntax\", \"line_items\", \"must be a list of numbers\")\n    if record[\"stated_total\"] is not None and not _number(record[\"stated_total\"]):\n        err(\"syntax\", \"stated_total\", \"must be a number or null\")\n    if not _number(record[\"calculated_total\"]):\n        err(\"syntax\", \"calculated_total\", \"must be a number\")\n    if not isinstance(record[\"conflict_detected\"], bool):\n        err(\"syntax\", \"conflict_detected\", \"must be true or false\")\n    if not isinstance(record[\"provenance\"], dict):\n        err(\"syntax\", \"provenance\", \"must be an object\")\n    if errors:\n        return errors\n    _check_semantics(record, err)\n    for field in (\"vendor\", \"currency\", \"stated_total\"):\n        value = record[field]\n        if value is None or value == \"unclear\":\n            continue\n        quote = record[\"provenance\"].get(field)\n        if not _quote_found(quote, document):\n            err(\"ungrounded\", field, f\"{field} has no quote that appears in the document\")\n    for field in required:\n        if record.get(field) is None or record.get(field) == \"unclear\":\n            err(\"absent\", field, \"the document gave no value\")\n    return errors\n\n\ndef _retryable(errors):\n    \"\"\"TODO 4 of 10 (finish this to pass e2, e3 and e4): keep the errors a second look can fix.\n\n    Receives a list of {\"kind\", \"field\", \"message\"} errors. Returns those whose kind is in RETRYABLE (syntax, semantic, ungrounded),\n    in order; an `absent` error is never retried. Example: [{\"kind\": \"absent\", ...}, {\"kind\": \"syntax\", ...}] -> [{\"kind\": \"syntax\", ...}]\n    \"\"\"\n    return []\n\n\ndef _status(errors, record):\n    \"\"\"TODO 5 of 10 (finish this to pass m1, e3 and e5): the status of a finished extraction.\n\n    Receives the errors left after the last attempt and the last record. Returns `needs_review` when the only errors are `absent` ones,\n    or when there are no errors and the model flagged a conflict (`conflict_detected`); `failed` for any other error; `valid` otherwise.\n    Example: no errors and conflict_detected false -> \"valid\"; one `absent` error -> \"needs_review\"; one `syntax` error -> \"failed\"\n    \"\"\"\n    return \"failed\"\n\n\ndef extract_document(document, call_model, required=(), max_retries=2):\n    feedback = None\n    attempts = 0\n    while True:\n        attempts += 1\n        record = call_model(document, feedback)\n        errors = validate(record, document, required)\n        if not errors:\n            break\n        retryable = _retryable(errors)\n        if not retryable:\n            break\n        if attempts > max_retries:\n            break\n        feedback = {\"previous\": record, \"errors\": retryable}\n    status = _status(errors, record)\n    return {\"status\": status, \"record\": record, \"attempts\": attempts, \"errors\": errors}\n\n\ndef _is_unset(value):\n    \"\"\"TODO 6 of 10 (finish this to pass e7): has a merged field no real value yet?\n\n    Receives a value. Returns True for None and for \"unclear\", so the first real value from a later chunk is kept.\n    Example: _is_unset(None) -> True, _is_unset(\"unclear\") -> True, _is_unset(\"Acme Ltd\") -> False\n    \"\"\"\n    return False\n\n\ndef _is_conflict(current, value, field, conflicts):\n    \"\"\"TODO 7 of 10 (finish this to pass e7): do two chunks disagree about a field, not yet recorded?\n\n    Receives the value kept so far, a later chunk's value, the field name and the list of fields already in `conflicts`. Returns True when\n    the values differ and the field is not yet in that list, so a conflict is recorded once. Example: (\"A\", \"B\", \"vendor\", []) -> True\n    \"\"\"\n    return False\n\n\ndef merge_chunks(records):\n    merged = {\"vendor\": None, \"currency\": \"unclear\", \"currency_detail\": None, \"line_items\": [], \"stated_total\": None, \"calculated_total\": 0, \"conflict_detected\": False, \"provenance\": {}, \"conflicts\": []}\n    for record in records:\n        for field in (\"vendor\", \"currency\", \"stated_total\"):\n            value = record.get(field)\n            if value is None or value == \"unclear\":\n                continue\n            current = merged[field]\n            if _is_unset(current):\n                merged[field] = value\n                merged[\"provenance\"][field] = record[\"provenance\"].get(field)\n                if field == \"currency\":\n                    merged[\"currency_detail\"] = record.get(\"currency_detail\")\n            elif _is_conflict(current, value, field, merged[\"conflicts\"]):\n                merged[\"conflicts\"].append(field)\n        merged[\"line_items\"] += record.get(\"line_items\", [])\n        if record.get(\"conflict_detected\"):\n            merged[\"conflict_detected\"] = True\n    merged[\"calculated_total\"] = round(sum(merged[\"line_items\"]), 2)\n    if merged[\"conflicts\"]:\n        merged[\"conflict_detected\"] = True\n    return merged\n\n\ndef _report(correct, valid, total):\n    \"\"\"TODO 8 of 10 (finish this to pass e8): the accuracy report, on every document and on the validated ones.\n\n    Receives the number of correct documents, the number of valid documents and the number of labelled documents. Returns\n    {\"all_documents\", \"validated_only\", \"validated\", \"total\"}: correct over total and correct over valid, each rounded to two decimals\n    and 0.0 when the denominator is zero; `validated` is `valid`. Example: _report(3, 6, 6)[\"all_documents\"] -> 0.5, [\"validated_only\"] -> 0.5\n    \"\"\"\n    return {\"all_documents\": 0.0, \"validated_only\": 0.0, \"validated\": valid, \"total\": total}\n\n\ndef accuracy(results, labels):\n    valid = correct = 0\n    for doc_id, label in labels.items():\n        result = results.get(doc_id)\n        is_valid = result is not None and result[\"status\"] == \"valid\"\n        valid += 1 if is_valid else 0\n        if is_valid and result[\"record\"][\"vendor\"] == label[\"vendor\"] and result[\"record\"][\"stated_total\"] == label[\"stated_total\"]:\n            correct += 1\n    total = len(labels)\n    return _report(correct, valid, total)\n\n\ndef _forced_choice(tools, forced):\n    \"\"\"TODO 9 of 10 (finish this to pass e9): the tool_choice for a model that accepts a forced choice.\n\n    Receives the list of tool names and the name to force, or None. Returns {\"tool_choice\", \"strict\", \"verify_reply\"} with strict True and\n    verify_reply False: the forced tool when `forced` is given (`{\"type\": \"tool\", \"name\": forced}`), `{\"type\": \"any\"}` when there are several\n    tools, otherwise the one tool by name. Example: ([\"a\", \"b\"], None) -> {\"tool_choice\": {\"type\": \"any\"}, \"strict\": True, \"verify_reply\": False}\n    \"\"\"\n    return {\"tool_choice\": {\"type\": \"auto\"}, \"strict\": True, \"verify_reply\": False}\n\n\ndef request_choice(model, tools, forced=None):\n    if model in NO_FORCING:\n        return {\"tool_choice\": {\"type\": \"auto\"}, \"strict\": True, \"verify_reply\": True}\n    return _forced_choice(tools, forced)\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom extraction import extract_document, validate\n\nDOC = \"Invoice from Acme Tools.\\nItems: 100.00 + 20.50\\nTotal due: 120.50 EUR\\nThank you.\"\nGOOD = {\"vendor\": \"Acme Tools\", \"currency\": \"EUR\", \"currency_detail\": None, \"line_items\": [100.0, 20.5], \"stated_total\": 120.5,\n        \"calculated_total\": 120.5, \"conflict_detected\": False,\n        \"provenance\": {\"vendor\": \"Invoice from Acme Tools\", \"currency\": \"120.50 EUR\", \"stated_total\": \"Total due: 120.50 EUR\"}}\n\n\ndef call_model(document, feedback):\n    \"\"\"A stand-in for the model, like the tests use: it always answers with the same record.\"\"\"\n    print(\"model called, feedback:\", feedback)\n    return dict(GOOD)\n\n\nresult = extract_document(DOC, call_model)\nprint(\"status:\", result[\"status\"] if result else result)\nprint(\"attempts:\", result[\"attempts\"] if result else result)\n\n# validate() on its own: a record whose calculated total disagrees with its line items.\nbad = {**GOOD, \"calculated_total\": 99.0}\nprint(\"errors:\", validate(bad, DOC))\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 6,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "a4bdb149d088f3db32cf4e872e236b2a07998116c89a59225ac7998fbfef3ebc",
+  "starting_code": "\"\"\"An extraction pipeline that admits absence, checks what a schema cannot, retries with feedback and is measured on every document. See ../../statement.md.\"\"\"\n\nimport logging\n\nlog = logging.getLogger(__name__)\nCURRENCIES = (\"USD\", \"EUR\", \"GBP\", \"other\", \"unclear\")\nKEYS = (\"vendor\", \"currency\", \"currency_detail\", \"line_items\", \"stated_total\", \"calculated_total\", \"conflict_detected\", \"provenance\")\nRETRYABLE = (\"syntax\", \"semantic\", \"ungrounded\")\nNO_FORCING = {\"claude-opus-5-5\", \"claude-sonnet-5-5\", \"claude-fable-5-1\", \"claude-mythos-5-1\"}  # models whose API rejects tool_choice any and tool, as read on 2026-10-03\n\n\ndef _number(value):\n    return isinstance(value, (int, float)) and not isinstance(value, bool)\n\n\ndef _quote_found(quote, document):\n    \"\"\"TODO 1 of 10 (finish this to pass e1): is a provenance quote real?\n\n    Receives the quote the model gave for a field and the document text. Returns True only when the quote is a non-empty string that\n    appears in the document, so an invented value cannot be supported by an invented quote.\n    Example: _quote_found(\"Acme Ltd\", \"Invoice from Acme Ltd\") -> True, _quote_found(\"Zed Corp\", \"Invoice from Acme Ltd\") -> False\n    \"\"\"\n    return True\n\n\ndef _currency_ok(currency):\n    \"\"\"TODO 2 of 10 (finish this to pass e6): is this a currency the schema allows?\n\n    Receives the value of `currency`. Returns True when it is one of CURRENCIES (`unclear` and `other` count, anything else does not).\n    Example: _currency_ok(\"unclear\") -> True, _currency_ok(\"dollars\") -> False\n    \"\"\"\n    return True\n\n\ndef _detail_missing(currency, detail):\n    \"\"\"TODO 3 of 10 (finish this to pass e6): is a required currency detail missing?\n\n    Receives `currency` and `currency_detail`. Returns True when the currency is `other` and the detail is not a non-blank string.\n    Example: _detail_missing(\"other\", \"  \") -> True, _detail_missing(\"other\", \"CHF\") -> False, _detail_missing(\"USD\", None) -> False\n    \"\"\"\n    return False\n\n\ndef _check_semantics(record, err):\n    \"\"\"TODO 10 of 10 (finish this to pass e5): report what a schema cannot check about the numbers.\n\n    Receives a record whose types are already valid and `err(kind, field, message)`, which records one error. Call `err(\"semantic\",\n    \"calculated_total\", ...)` when `calculated_total` is not the sum of `line_items` (to half a cent), and `err(\"semantic\",\n    \"stated_total\", ...)` when `stated_total` is not None, differs from `calculated_total` (by more than half a cent) and\n    `conflict_detected` is False; a conflict the model flagged is information, not an error. It returns nothing.\n    Example: line_items [10, 5], calculated_total 15, stated_total 20, conflict_detected False -> one semantic error on stated_total\n    \"\"\"\n\n\ndef validate(record, document, required=()):\n    log.debug(\"validate input: %r\", record)\n    errors = []\n\n    def err(kind, field, message):\n        errors.append({\"kind\": kind, \"field\": field, \"message\": message})\n\n    if not isinstance(record, dict):\n        return [{\"kind\": \"syntax\", \"field\": \"$\", \"message\": \"the record is not an object\"}]\n    for key in KEYS:\n        if key not in record:\n            err(\"syntax\", key, \"is missing\")\n    if errors:\n        return errors\n    if record[\"vendor\"] is not None and not isinstance(record[\"vendor\"], str):\n        err(\"syntax\", \"vendor\", \"must be a string or null\")\n    if not _currency_ok(record[\"currency\"]):\n        err(\"syntax\", \"currency\", f\"{record['currency']!r} is not one of {list(CURRENCIES)}\")\n    detail = record[\"currency_detail\"]\n    if _detail_missing(record[\"currency\"], detail):\n        err(\"syntax\", \"currency_detail\", \"is required when the currency is other\")\n    items = record[\"line_items\"]\n    if not (isinstance(items, list) and all(_number(i) for i in items)):\n        err(\"syntax\", \"line_items\", \"must be a list of numbers\")\n    if record[\"stated_total\"] is not None and not _number(record[\"stated_total\"]):\n        err(\"syntax\", \"stated_total\", \"must be a number or null\")\n    if not _number(record[\"calculated_total\"]):\n        err(\"syntax\", \"calculated_total\", \"must be a number\")\n    if not isinstance(record[\"conflict_detected\"], bool):\n        err(\"syntax\", \"conflict_detected\", \"must be true or false\")\n    if not isinstance(record[\"provenance\"], dict):\n        err(\"syntax\", \"provenance\", \"must be an object\")\n    if errors:\n        return errors\n    _check_semantics(record, err)\n    for field in (\"vendor\", \"currency\", \"stated_total\"):\n        value = record[field]\n        if value is None or value == \"unclear\":\n            continue\n        quote = record[\"provenance\"].get(field)\n        if not _quote_found(quote, document):\n            err(\"ungrounded\", field, f\"{field} has no quote that appears in the document\")\n    for field in required:\n        if record.get(field) is None or record.get(field) == \"unclear\":\n            err(\"absent\", field, \"the document gave no value\")\n    return errors\n\n\ndef _retryable(errors):\n    \"\"\"TODO 4 of 10 (finish this to pass e2, e3 and e4): keep the errors a second look can fix.\n\n    Receives a list of {\"kind\", \"field\", \"message\"} errors. Returns those whose kind is in RETRYABLE (syntax, semantic, ungrounded),\n    in order; an `absent` error is never retried. Example: [{\"kind\": \"absent\", ...}, {\"kind\": \"syntax\", ...}] -> [{\"kind\": \"syntax\", ...}]\n    \"\"\"\n    return []\n\n\ndef _status(errors, record):\n    \"\"\"TODO 5 of 10 (finish this to pass m1, e3 and e5): the status of a finished extraction.\n\n    Receives the errors left after the last attempt and the last record. Returns `needs_review` when the only errors are `absent` ones,\n    or when there are no errors and the model flagged a conflict (`conflict_detected`); `failed` for any other error; `valid` otherwise.\n    Example: no errors and conflict_detected false -> \"valid\"; one `absent` error -> \"needs_review\"; one `syntax` error -> \"failed\"\n    \"\"\"\n    return \"failed\"\n\n\ndef extract_document(document, call_model, required=(), max_retries=2):\n    feedback = None\n    attempts = 0\n    while True:\n        attempts += 1\n        record = call_model(document, feedback)\n        errors = validate(record, document, required)\n        if not errors:\n            break\n        retryable = _retryable(errors)\n        if not retryable:\n            break\n        if attempts > max_retries:\n            break\n        feedback = {\"previous\": record, \"errors\": retryable}\n    status = _status(errors, record)\n    return {\"status\": status, \"record\": record, \"attempts\": attempts, \"errors\": errors}\n\n\ndef _is_unset(value):\n    \"\"\"TODO 6 of 10 (finish this to pass e7): has a merged field no real value yet?\n\n    Receives a value. Returns True for None and for \"unclear\", so the first real value from a later chunk is kept.\n    Example: _is_unset(None) -> True, _is_unset(\"unclear\") -> True, _is_unset(\"Acme Ltd\") -> False\n    \"\"\"\n    return False\n\n\ndef _is_conflict(current, value, field, conflicts):\n    \"\"\"TODO 7 of 10 (finish this to pass e7): do two chunks disagree about a field, not yet recorded?\n\n    Receives the value kept so far, a later chunk's value, the field name and the list of fields already in `conflicts`. Returns True when\n    the values differ and the field is not yet in that list, so a conflict is recorded once. Example: (\"A\", \"B\", \"vendor\", []) -> True\n    \"\"\"\n    return False\n\n\ndef merge_chunks(records):\n    merged = {\"vendor\": None, \"currency\": \"unclear\", \"currency_detail\": None, \"line_items\": [], \"stated_total\": None, \"calculated_total\": 0, \"conflict_detected\": False, \"provenance\": {}, \"conflicts\": []}\n    for record in records:\n        for field in (\"vendor\", \"currency\", \"stated_total\"):\n            value = record.get(field)\n            if value is None or value == \"unclear\":\n                continue\n            current = merged[field]\n            if _is_unset(current):\n                merged[field] = value\n                merged[\"provenance\"][field] = record[\"provenance\"].get(field)\n                if field == \"currency\":\n                    merged[\"currency_detail\"] = record.get(\"currency_detail\")\n            elif _is_conflict(current, value, field, merged[\"conflicts\"]):\n                merged[\"conflicts\"].append(field)\n        merged[\"line_items\"] += record.get(\"line_items\", [])\n        if record.get(\"conflict_detected\"):\n            merged[\"conflict_detected\"] = True\n    merged[\"calculated_total\"] = round(sum(merged[\"line_items\"]), 2)\n    if merged[\"conflicts\"]:\n        merged[\"conflict_detected\"] = True\n    return merged\n\n\ndef _report(correct, valid, total):\n    \"\"\"TODO 8 of 10 (finish this to pass e8): the accuracy report, on every document and on the validated ones.\n\n    Receives the number of correct documents, the number of valid documents and the number of labelled documents. Returns\n    {\"all_documents\", \"validated_only\", \"validated\", \"total\"}: correct over total and correct over valid, each rounded to two decimals\n    and 0.0 when the denominator is zero; `validated` is `valid`. Example: _report(3, 6, 6)[\"all_documents\"] -> 0.5, [\"validated_only\"] -> 0.5\n    \"\"\"\n    return {\"all_documents\": 0.0, \"validated_only\": 0.0, \"validated\": valid, \"total\": total}\n\n\ndef accuracy(results, labels):\n    valid = correct = 0\n    for doc_id, label in labels.items():\n        result = results.get(doc_id)\n        is_valid = result is not None and result[\"status\"] == \"valid\"\n        valid += 1 if is_valid else 0\n        if is_valid and result[\"record\"][\"vendor\"] == label[\"vendor\"] and result[\"record\"][\"stated_total\"] == label[\"stated_total\"]:\n            correct += 1\n    total = len(labels)\n    return _report(correct, valid, total)\n\n\ndef _forced_choice(tools, forced):\n    \"\"\"TODO 9 of 10 (finish this to pass e9): the tool_choice for a model that accepts a forced choice.\n\n    Receives the list of tool names and the name to force, or None. Returns {\"tool_choice\", \"strict\", \"verify_reply\"} with strict True and\n    verify_reply False: the forced tool when `forced` is given (`{\"type\": \"tool\", \"name\": forced}`), `{\"type\": \"any\"}` when there are several\n    tools, otherwise the one tool by name. Example: ([\"a\", \"b\"], None) -> {\"tool_choice\": {\"type\": \"any\"}, \"strict\": True, \"verify_reply\": False}\n    \"\"\"\n    return {\"tool_choice\": {\"type\": \"auto\"}, \"strict\": True, \"verify_reply\": False}\n\n\ndef request_choice(model, tools, forced=None):\n    if model in NO_FORCING:\n        return {\"tool_choice\": {\"type\": \"auto\"}, \"strict\": True, \"verify_reply\": True}\n    return _forced_choice(tools, forced)\n",
+  "exercise": {
+    "main_path": "practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-1/extraction.py",
+    "test_path": "practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-1/test_extraction.py",
+    "run_command": [
+      "python3",
+      "practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-1/test_extraction.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_a_document_with_every_value_present_and_quoted_comes_back_valid_on_the_first_attempt",
+        "kind": "main",
+        "says": "A document with every value present and quoted comes back valid on the first attempt"
+      },
+      {
+        "id": "test_e1_a_value_the_document_does_not_give_is_null_and_needs_no_quote_while_an_invented_value_fails_as_ungrounded",
+        "kind": "edge",
+        "says": "A value the document does not give is null and needs no quote, while an invented value fails as ungrounded"
+      },
+      {
+        "id": "test_e2_a_retry_carries_the_original_document_the_failed_record_and_only_the_errors_a_second_look_can_fix",
+        "kind": "edge",
+        "says": "A retry carries the document, the failed record and only the errors a second look can fix"
+      },
+      {
+        "id": "test_e3_a_required_value_that_the_model_reports_as_absent_is_not_retried_and_goes_to_review",
+        "kind": "edge",
+        "says": "A required value reported as absent is not retried and goes to review"
+      },
+      {
+        "id": "test_e4_retries_stop_after_the_limit_and_the_document_is_marked_failed",
+        "kind": "edge",
+        "says": "Retries stop after the limit and the document is marked failed"
+      },
+      {
+        "id": "test_e5_a_total_that_differs_from_the_line_items_is_a_semantic_error_and_a_flagged_conflict_goes_to_review_without_a_retry",
+        "kind": "edge",
+        "says": "A total that differs from the line items is a semantic error; a flagged conflict goes to review without a retry"
+      },
+      {
+        "id": "test_e6_currency_takes_unclear_and_other_with_a_detail_and_rejects_anything_else_as_a_syntax_error",
+        "kind": "edge",
+        "says": "Currency takes unclear and other with a detail, and anything else is a syntax error"
+      },
+      {
+        "id": "test_e7_chunk_results_merge_by_keeping_the_first_value_and_recording_a_conflict_when_two_chunks_disagree",
+        "kind": "edge",
+        "says": "Chunk results merge by keeping the first value and recording a conflict when two chunks disagree"
+      },
+      {
+        "id": "test_e8_accuracy_counts_every_document_and_not_only_the_validated_ones",
+        "kind": "edge",
+        "says": "Accuracy counts every document and not only the validated ones"
+      },
+      {
+        "id": "test_e9_the_request_forces_a_tool_where_the_model_allows_it_and_falls_back_to_auto_with_a_reply_check_where_it_does_not",
+        "kind": "edge",
+        "says": "The request forces a tool where the model allows it and falls back to auto with a reply check where it does not"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/62-structured-output-at-the-architect-level/02-retries-conflicts-chunks-and-the-practice.md",
+    "concepts": [
+      "the practice of Retries, conflicts, chunks, honest accuracy and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "structured-output-at-the-architect-level-u2"
+}

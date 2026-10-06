@@ -1,0 +1,108 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "57-memory-files-and-rules"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: split one oversized memory file into a root file, scoped rules and personal files (TypeScript)",
+  "lang": "typescript",
+  "main_file": "project/CLAUDE.md",
+  "files": [
+    "project/.claude/rules/api.md",
+    "project/.claude/rules/terraform.md",
+    "project/.claude/rules/testing.md",
+    "project/.claude/settings.json",
+    "project/.gitignore",
+    "project/CLAUDE.local.example.md",
+    "project/user-memory.example.md"
+  ],
+  "test_file": "tests/memorySetup.test.ts",
+  "build": [
+    "project/docs/standards/architecture.md",
+    "junit-file.mjs",
+    "tests/examples/57-memory-loading/typescript/memoryLoading.ts",
+    "tests/examples/56-builtin-tools/typescript/builtinTools.ts",
+    "tests/examples/39-hook-gate/typescript/hookGate.ts",
+    "tests/examples/39-hook-gate/typescript/miniyaml.ts",
+    "tests/examples/38-settings-layers/typescript/settingsLayers.ts",
+    "tests/examples/38-settings-layers/typescript/example-logger.ts",
+    "tests/examples/39-hook-gate/typescript/example-logger.ts",
+    "tests/examples/56-builtin-tools/typescript/example-logger.ts",
+    "tests/examples/57-memory-loading/typescript/example-logger.ts",
+    "logger.ts",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/check_files.py",
+    "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/.claude/rules/api.md",
+    "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/.claude/rules/terraform.md",
+    "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/.claude/rules/testing.md",
+    "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/.claude/settings.json",
+    "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/.gitignore",
+    "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/CLAUDE.local.example.md",
+    "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/CLAUDE.md",
+    "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/user-memory.example.md"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/tests/memorySetup.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 the conventions of each area load for exactly the files that area governs",
+      "kind": "main",
+      "says": "Seven touched files each bring in exactly the right conventions, and the root rules every time"
+    },
+    {
+      "id": "e1 the root file is short and holds only what every task needs",
+      "kind": "edge",
+      "says": "The root file is at most 50 lines, keeps the universal rules and carries no area convention, not even through an import"
+    },
+    {
+      "id": "e2 the testing rule follows the file type and not the folder",
+      "kind": "edge",
+      "says": "The testing rule covers test files in three different folders and no other file"
+    },
+    {
+      "id": "e3 the import names a file that exists and loads at launch",
+      "kind": "edge",
+      "says": "The import names a file that exists and is expanded"
+    },
+    {
+      "id": "e4 personal lines sit in personal files and the local file is ignored",
+      "kind": "edge",
+      "says": "Personal lines are in the personal files, absent from shared ones, and CLAUDE.local.md is ignored"
+    },
+    {
+      "id": "e5 a rule that must always hold is a permission rule and not a sentence",
+      "kind": "edge",
+      "says": "Edits under db/migrations/ are denied and other edits are not"
+    },
+    {
+      "id": "e6 every rule scopes itself with paths that are valid and match something",
+      "kind": "edge",
+      "says": "Every rule has a list of valid paths, and each pattern matches a file"
+    },
+    {
+      "id": "e7 no file holds a personal path an address or a key",
+      "kind": "edge",
+      "says": "No file holds a personal path, an address or a key"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/57-memory-files-and-rules/02-path-scoped-rules-size-and-the-practice.md"
+}

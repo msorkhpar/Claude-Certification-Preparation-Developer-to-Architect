@@ -1,0 +1,305 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "34-workflows-and-agents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: four workflow patterns around a model (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: four workflow patterns around a model"
+    },
+    {
+      "type": "para",
+      "text": "A workflow is code that decides the steps and calls the model inside them, as opposed to an agent, where the model decides the steps. Most production systems that \"use agents\" are workflows, and the patterns are small enough to write by hand: an orchestrator that splits a task and hands the pieces to workers, an evaluator that sends a draft back until it is good enough, a router that picks a path, and a vote that asks the same question several times. Each has a failure that the plain version hides: a plan the model wrote badly, a worker that fails, a judge that answers in prose, a tie. Write all four, with those failures handled. The patterns come from the Claude documentation and Anthropic's engineering write-up on building effective agents; the lesson pages explain them and what the course checked. Nothing here touches the network: the model is a function from a prompt (text) to a reply (text) that the tests script."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`ask`, `write`, `judge`",
+          "the model: a function that takes the prompt text and returns the reply text; it may throw"
+        ],
+        [
+          "`routes`",
+          "a map from a label to a handler, a function of the text that returns text; its key order is the label order"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working set of four workflows with nine small gaps cut out of it. The plumbing is written and correct: the two defensive readers (`_slice`, `parse_plan`, `read_judgement`), the loops, the counting of calls and the results of `orchestrate`, `refine`, `route` and `vote`. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms, `cleanSteps` and so on):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_clean_steps` unlocks `e1`: the string subtasks of the plan, stripped, without empty ones or repeats.",
+        "`_run_worker` unlocks `m1` and `e2`: one worker call that never raises and reports `ok` or `failed`.",
+        "`_combine_prompt` unlocks `m1`: the combine prompt with one line per subtask.",
+        "`_score_ok` unlocks `e4`: which judge scores count (a number from 0 to 10, never a boolean).",
+        "`_writer_prompt` unlocks `e3`: the first prompt, and the revision prompt with the previous draft and the feedback.",
+        "`_is_better` unlocks `e4`: when a draft replaces the best one (strictly higher, so the earliest wins a tie).",
+        "`_error_result` unlocks `e7`: the result when the writer raises.",
+        "`_normalise_label` unlocks `e5`: the label read from the classifier's reply.",
+        "`_pick_winner` unlocks `e6`: the most frequent answer, the first seen on a tie."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About a dozen lines in all. The sections below describe the whole workflows; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "Prompts are part of the contract, so that a test can answer by the start of a prompt. Write them exactly; `\\n` is a newline."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`orchestrate(ask, task, max_subtasks=5)` returns `{\"status\", \"plan\", \"fallback\", \"results\", \"answer\", \"calls\"}`.",
+          {
+            "type": "list",
+            "ordered": true,
+            "items": [
+              "Plan with one call: `Plan: split the task into at most {max_subtasks} independent subtasks. Reply with a JSON array of strings only.\\nTask: {task}`. Read the reply defensively: take the text from the first `[` to the last `]` and parse it. Keep the string items, stripped, dropping empty ones and repeats (the first of a repeat stays), then keep at most `max_subtasks`. When nothing is usable (no array, bad JSON, no string items) the plan is just `[task]` and `fallback` is true.",
+              "Run one worker call per subtask, in order: `Subtask: {subtask}\\nTask: {task}`. A reply that is empty or only spaces, or a call that throws, makes that subtask `{\"subtask\", \"status\": \"failed\", \"error\"}` (the error text is the exception's message, or `empty reply`) and the others still run. A good one is `{\"subtask\", \"status\": \"ok\", \"output\"}`.",
+              "When every subtask failed, do not combine: status `failed`, `answer` null. Otherwise combine with one call, `Combine: write one answer to the task from the results.\\nTask: {task}` followed by one line per subtask in plan order, `\\n{i}. {subtask} -> {output}` or `\\n{i}. {subtask} -> FAILED` (i from 1), and return status `done`, or `partial` when some failed, with the reply as `answer`. `calls` counts every model call made."
+            ]
+          }
+        ],
+        [
+          "`refine(write, judge, task, max_rounds=3, threshold=8)` returns `{\"status\", \"draft\", \"score\", \"rounds\", \"history\"}` and, on an error, `\"error\"`. Each round, the writer prompt is `Task: {task}` in round 1 and afterwards `Task: {task}\\nPrevious draft: {draft}\\nFeedback: {feedback}\\nRevise the draft.` (the latest draft and the judge's latest feedback). Then judge the draft with `Judge: score the draft from 0 to 10 and reply with JSON {\"score\": n, \"feedback\": \"...\"}.\\nTask: {task}\\nDraft: {draft}`. Read the judge's reply the same defensive way, from the first `{` to the last `}`: it is readable when it is an object whose `score` is a number from 0 to 10 (a boolean is not a number); `feedback` is its text, or empty when missing. An unreadable reply scores 0 with the feedback `The judge reply could not be read.` and the loop goes on. Every round adds `{\"round\", \"score\", \"feedback\"}` to `history`.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "A score at or above `threshold` ends the loop: status `accepted`, the current draft, its score, the round number.",
+              "After `max_rounds` without that: status `max_rounds`, the best-scoring draft (the earliest on a tie), its score, `rounds` equal to `max_rounds`.",
+              "When the writer throws, stop at once: status `error`, the best draft so far and its score (both null before any draft was judged), `rounds` is the number of rounds completed, and `error` is the exception's message."
+            ]
+          }
+        ],
+        "`route(ask, text, routes, default)` returns `{\"label\", \"output\", \"fallback\"}`. Classify with one call, `Classify: {text}\\nLabels: {labels joined by \", \"}`. The label is the reply stripped of spaces, then of the punctuation `.,;:!\"'` and the backtick at both ends, then of spaces again, in lower case. When it is not a key of `routes`, use `default` and set `fallback` to true. `output` is the handler's result for the text.",
+        "`vote(ask, prompt, n=5)` returns `{\"answer\", \"votes\", \"agreement\"}`: ask the same prompt `n` times, count the replies stripped and in lower case (in order of first appearance), and answer with the most frequent one; on a tie the one seen first. `agreement` is the winner's count divided by `n`. With `n` of 0 the answer is null, the votes are empty and `agreement` is 0."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "An orchestrator plans, runs a worker per subtask and combines"
+        ],
+        [
+          "`e1`",
+          "The plan is read from prose, cleaned, capped, and replaced when unusable"
+        ],
+        [
+          "`e2`",
+          "One failing worker does not stop the others or the answer"
+        ],
+        [
+          "`e3`",
+          "A draft is revised with the feedback until the judge accepts it"
+        ],
+        [
+          "`e4`",
+          "When the rounds run out the best draft wins, and an unreadable judge scores zero"
+        ],
+        [
+          "`e5`",
+          "A label is read from the reply, and anything else takes the default route"
+        ],
+        [
+          "`e6`",
+          "The majority answer wins, and a tie goes to the one seen first"
+        ],
+        [
+          "`e7`",
+          "A writer that fails ends the loop with the best draft so far"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Workflow patterns around a model: orchestrator and workers, evaluator and optimiser, routing and voting. See ../../statement.md.\"\"\"\nimport json\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef _slice(text, open_char, close_char):\n    first, last = text.find(open_char), text.rfind(close_char)\n    return text[first:last + 1] if first != -1 and last > first else \"\"\n\n\ndef _clean_steps(data):\n    steps = []\n    if isinstance(data, list):\n        for item in data:\n            if isinstance(item, str) and item.strip() and item.strip() not in steps:\n                steps.append(item.strip())\n    return steps\n\n\ndef parse_plan(text, task, max_subtasks):\n    \"\"\"Subtasks from the planner's reply, or ([task], True) when the reply cannot be used.\"\"\"\n    try:\n        data = json.loads(_slice(text, \"[\", \"]\"))\n    except ValueError:\n        data = None\n    steps = _clean_steps(data)\n    if not steps:\n        return [task], True\n    return steps[:max_subtasks], False\n\n\ndef _run_worker(ask, subtask, task):\n    log.debug(\"_run_worker input: %r\", subtask)\n    try:\n        output = ask(f\"Subtask: {subtask}\\nTask: {task}\")\n        if not isinstance(output, str) or not output.strip():\n            raise ValueError(\"empty reply\")\n        return {\"subtask\": subtask, \"status\": \"ok\", \"output\": output}\n    except Exception as err:  # noqa: BLE001 - one worker failing must not stop the others\n        return {\"subtask\": subtask, \"status\": \"failed\", \"error\": str(err)}\n\n\ndef _combine_prompt(task, results):\n    lines = [f\"{i}. {r['subtask']} -> {r['output'] if r['status'] == 'ok' else 'FAILED'}\" for i, r in enumerate(results, start=1)]\n    return \"Combine: write one answer to the task from the results.\\nTask: \" + task + \"\\n\" + \"\\n\".join(lines)\n\n\ndef orchestrate(ask, task, max_subtasks=5):\n    calls = 1\n    plan, fallback = parse_plan(ask(f\"Plan: split the task into at most {max_subtasks} independent subtasks. Reply with a JSON array of strings only.\\nTask: {task}\"), task, max_subtasks)\n    results = []\n    for subtask in plan:\n        calls += 1\n        results.append(_run_worker(ask, subtask, task))\n    ok = [r for r in results if r[\"status\"] == \"ok\"]\n    if not ok:\n        return {\"status\": \"failed\", \"plan\": plan, \"fallback\": fallback, \"results\": results, \"answer\": None, \"calls\": calls}\n    answer = ask(_combine_prompt(task, results))\n    return {\"status\": \"done\" if len(ok) == len(results) else \"partial\", \"plan\": plan, \"fallback\": fallback, \"results\": results, \"answer\": answer, \"calls\": calls + 1}\n\n\ndef _score_ok(score):\n    return not isinstance(score, bool) and isinstance(score, (int, float)) and 0 <= score <= 10\n\n\ndef read_judgement(text):\n    \"\"\"(score, feedback) from the judge's reply; (0, a fixed note) when the reply cannot be read.\"\"\"\n    try:\n        data = json.loads(_slice(text, \"{\", \"}\"))\n    except ValueError:\n        data = None\n    score = data.get(\"score\") if isinstance(data, dict) else None\n    if not _score_ok(score):\n        return 0, \"The judge reply could not be read.\"\n    feedback = data.get(\"feedback\")\n    return score, feedback if isinstance(feedback, str) else \"\"\n\n\ndef _writer_prompt(task, draft, feedback, round_number):\n    return f\"Task: {task}\" if round_number == 1 else f\"Task: {task}\\nPrevious draft: {draft}\\nFeedback: {feedback}\\nRevise the draft.\"\n\n\ndef _is_better(score, best_score):\n    return best_score is None or score > best_score\n\n\ndef _error_result(best, best_score, rounds, history, err):\n    return {\"status\": \"error\", \"draft\": best, \"score\": best_score, \"rounds\": rounds, \"history\": history, \"error\": str(err)}\n\n\ndef refine(write, judge, task, max_rounds=3, threshold=8):\n    history, best, best_score, draft, feedback = [], None, None, None, \"\"\n    for round_number in range(1, max_rounds + 1):\n        prompt = _writer_prompt(task, draft, feedback, round_number)\n        try:\n            draft = write(prompt)\n        except Exception as err:  # noqa: BLE001\n            return _error_result(best, best_score, round_number - 1, history, err)\n        score, feedback = read_judgement(judge(f'Judge: score the draft from 0 to 10 and reply with JSON {{\"score\": n, \"feedback\": \"...\"}}.\\nTask: {task}\\nDraft: {draft}'))\n        history.append({\"round\": round_number, \"score\": score, \"feedback\": feedback})\n        if _is_better(score, best_score):\n            best, best_score = draft, score\n        if score >= threshold:\n            return {\"status\": \"accepted\", \"draft\": draft, \"score\": score, \"rounds\": round_number, \"history\": history}\n    return {\"status\": \"max_rounds\", \"draft\": best, \"score\": best_score, \"rounds\": max_rounds, \"history\": history}\n\n\ndef _normalise_label(reply):\n    return reply.strip().strip(\".,;:!\\\"'`\").strip().lower() if isinstance(reply, str) else \"\"\n\n\ndef route(ask, text, routes, default):\n    \"\"\"Classify the text with one model call, then run the handler of the label. `routes` maps label to a function of the text.\"\"\"\n    reply = ask(f\"Classify: {text}\\nLabels: {', '.join(routes)}\")\n    label = _normalise_label(reply)\n    fallback = label not in routes\n    if fallback:\n        label = default\n    return {\"label\": label, \"output\": routes[label](text), \"fallback\": fallback}\n\n\ndef _pick_winner(counts, top):\n    return next(a for a, c in counts.items() if c == top)\n\n\ndef vote(ask, prompt, n=5):\n    counts = {}\n    for _ in range(n):\n        answer = ask(prompt).strip().lower()\n        counts[answer] = counts.get(answer, 0) + 1\n    if not counts:\n        return {\"answer\": None, \"votes\": {}, \"agreement\": 0.0}\n    top = max(counts.values())\n    winner = _pick_winner(counts, top)\n    return {\"answer\": winner, \"votes\": counts, \"agreement\": top / n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom workflows import orchestrate\n\nPLAN = '[\"research the topic\", \"draft the outline\", \"check the facts\"]'\n\n\ndef model(prompt):\n    \"\"\"A stand-in for the model, like the one the tests script: the start of the prompt says which step is asking.\"\"\"\n    if prompt.startswith(\"Plan\"):\n        return PLAN\n    if prompt.startswith(\"Subtask\"):\n        return \"done: \" + prompt.split(\"\\n\")[0][len(\"Subtask: \"):]\n    return \"FINAL\"\n\n\n# The orchestrator asks for a plan, runs one worker per subtask, then combines the results.\nresult = orchestrate(model, \"Write a guide\") or {}\n\nprint(\"status:\", result.get(\"status\"), \"| fallback:\", result.get(\"fallback\"), \"| calls:\", result.get(\"calls\"))\nprint(\"plan:\", result.get(\"plan\"))\nprint(\"results:\", [(r[\"subtask\"], r[\"status\"]) for r in result.get(\"results\", [])])\nprint(\"answer:\", result.get(\"answer\"))\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Workflow patterns around a model: orchestrator and workers, evaluator and optimiser, routing and voting. See ../../statement.md.\"\"\"\nimport json\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef _slice(text, open_char, close_char):\n    first, last = text.find(open_char), text.rfind(close_char)\n    return text[first:last + 1] if first != -1 and last > first else \"\"\n\n\ndef _clean_steps(data):\n    \"\"\"TODO 1 of 9 (unlocks e1): the usable subtasks from the parsed plan.\n\n    Receives whatever `json.loads` gave (a list, or anything else) and returns the string items of a list, stripped, with empty\n    ones and repeats dropped (the first of a repeat stays), in order; anything that is not a list gives [].\n    Example: _clean_steps([\"a\", \" a \", \"\", 3, \"b\"]) -> [\"a\", \"b\"]\n    \"\"\"\n    return []\n\n\ndef parse_plan(text, task, max_subtasks):\n    \"\"\"Subtasks from the planner's reply, or ([task], True) when the reply cannot be used.\"\"\"\n    try:\n        data = json.loads(_slice(text, \"[\", \"]\"))\n    except ValueError:\n        data = None\n    steps = _clean_steps(data)\n    if not steps:\n        return [task], True\n    return steps[:max_subtasks], False\n\n\ndef _run_worker(ask, subtask, task):\n    \"\"\"TODO 2 of 9 (unlocks m1 and e2): run one worker call for one subtask.\n\n    Receives `ask`, the subtask and the task. Calls `ask` with `Subtask: {subtask}\\\\nTask: {task}` and returns\n    {\"subtask\", \"status\": \"ok\", \"output\"} for a good reply, or {\"subtask\", \"status\": \"failed\", \"error\"} when the reply is empty or\n    only spaces (error `empty reply`) or the call raises (error: the exception's message). It never raises.\n    Example: a worker that replies \"  \" -> {\"subtask\": \"s\", \"status\": \"failed\", \"error\": \"empty reply\"}\n    \"\"\"\n    log.debug(\"_run_worker input: %r\", subtask)\n    return {\"subtask\": subtask, \"status\": \"failed\", \"error\": \"\"}\n\n\ndef _combine_prompt(task, results):\n    \"\"\"TODO 3 of 9 (unlocks m1): the prompt of the combine call.\n\n    Receives the task and the results in plan order. Returns `Combine: write one answer to the task from the results.\\\\nTask: {task}`\n    followed by one line per result, `\\\\n{i}. {subtask} -> {output}` or `\\\\n{i}. {subtask} -> FAILED` (i from 1).\n    Example: task \"T\", one ok result \"a\" with output \"x\" -> \"Combine: write one answer to the task from the results.\\\\nTask: T\\\\n1. a -> x\"\n    \"\"\"\n    return \"\"\n\n\ndef orchestrate(ask, task, max_subtasks=5):\n    calls = 1\n    plan, fallback = parse_plan(ask(f\"Plan: split the task into at most {max_subtasks} independent subtasks. Reply with a JSON array of strings only.\\nTask: {task}\"), task, max_subtasks)\n    results = []\n    for subtask in plan:\n        calls += 1\n        results.append(_run_worker(ask, subtask, task))\n    ok = [r for r in results if r[\"status\"] == \"ok\"]\n    if not ok:\n        return {\"status\": \"failed\", \"plan\": plan, \"fallback\": fallback, \"results\": results, \"answer\": None, \"calls\": calls}\n    answer = ask(_combine_prompt(task, results))\n    return {\"status\": \"done\" if len(ok) == len(results) else \"partial\", \"plan\": plan, \"fallback\": fallback, \"results\": results, \"answer\": answer, \"calls\": calls + 1}\n\n\ndef _score_ok(score):\n    \"\"\"TODO 4 of 9 (unlocks e4): is this a usable judge score?\n\n    Receives the `score` field of the judge's JSON (any value, or None). Returns True for a number from 0 to 10 and False for\n    anything else, a boolean included.\n    Example: _score_ok(7.5) -> True, _score_ok(True) -> False, _score_ok(11) -> False\n    \"\"\"\n    return isinstance(score, (int, float))  # a number of any size; add the range and the boolean exclusion\n\n\ndef read_judgement(text):\n    \"\"\"(score, feedback) from the judge's reply; (0, a fixed note) when the reply cannot be read.\"\"\"\n    try:\n        data = json.loads(_slice(text, \"{\", \"}\"))\n    except ValueError:\n        data = None\n    score = data.get(\"score\") if isinstance(data, dict) else None\n    if not _score_ok(score):\n        return 0, \"The judge reply could not be read.\"\n    feedback = data.get(\"feedback\")\n    return score, feedback if isinstance(feedback, str) else \"\"\n\n\ndef _writer_prompt(task, draft, feedback, round_number):\n    \"\"\"TODO 5 of 9 (unlocks e3): the prompt for the writer in one round.\n\n    Receives the task, the latest draft, the judge's latest feedback and the round number (from 1). Returns `Task: {task}` in round 1\n    and afterwards `Task: {task}\\\\nPrevious draft: {draft}\\\\nFeedback: {feedback}\\\\nRevise the draft.`\n    Example: _writer_prompt(\"T\", \"d\", \"f\", 2) -> \"Task: T\\\\nPrevious draft: d\\\\nFeedback: f\\\\nRevise the draft.\"\n    \"\"\"\n    return f\"Task: {task}\"\n\n\ndef _is_better(score, best_score):\n    \"\"\"TODO 6 of 9 (unlocks e4): does this draft replace the best one so far?\n\n    Receives the new score and the best score so far (None before any draft was judged). Returns True when there is no best yet or\n    the new score is strictly higher (so the earliest wins a tie).\n    Example: _is_better(5, None) -> True, _is_better(5, 5) -> False\n    \"\"\"\n    return False\n\n\ndef _error_result(best, best_score, rounds, history, err):\n    \"\"\"TODO 7 of 9 (unlocks e7): the result when the writer raised.\n\n    Receives the best draft and score so far (None, None before any), the rounds completed, the history and the exception. Returns the\n    dict {\"status\": \"error\", \"draft\", \"score\", \"rounds\", \"history\", \"error\": <the exception's message>}.\n    Example: _error_result(\"d\", 4, 1, [], RuntimeError(\"boom\"))[\"error\"] -> \"boom\"\n    \"\"\"\n    return {}\n\n\ndef refine(write, judge, task, max_rounds=3, threshold=8):\n    history, best, best_score, draft, feedback = [], None, None, None, \"\"\n    for round_number in range(1, max_rounds + 1):\n        prompt = _writer_prompt(task, draft, feedback, round_number)\n        try:\n            draft = write(prompt)\n        except Exception as err:  # noqa: BLE001\n            return _error_result(best, best_score, round_number - 1, history, err)\n        score, feedback = read_judgement(judge(f'Judge: score the draft from 0 to 10 and reply with JSON {{\"score\": n, \"feedback\": \"...\"}}.\\nTask: {task}\\nDraft: {draft}'))\n        history.append({\"round\": round_number, \"score\": score, \"feedback\": feedback})\n        if _is_better(score, best_score):\n            best, best_score = draft, score\n        if score >= threshold:\n            return {\"status\": \"accepted\", \"draft\": draft, \"score\": score, \"rounds\": round_number, \"history\": history}\n    return {\"status\": \"max_rounds\", \"draft\": best, \"score\": best_score, \"rounds\": max_rounds, \"history\": history}\n\n\ndef _normalise_label(reply):\n    \"\"\"TODO 8 of 9 (unlocks e5): the label in a classifier's reply.\n\n    Receives the reply (a string, or anything else). Returns it stripped of spaces, then of the punctuation `.,;:!\"'` and the backtick\n    at both ends, then of spaces again, in lower case; \"\" when the reply is not a string.\n    Example: _normalise_label('  \"Billing.\" ') -> \"billing\"\n    \"\"\"\n    return \"\"\n\n\ndef route(ask, text, routes, default):\n    \"\"\"Classify the text with one model call, then run the handler of the label. `routes` maps label to a function of the text.\"\"\"\n    reply = ask(f\"Classify: {text}\\nLabels: {', '.join(routes)}\")\n    label = _normalise_label(reply)\n    fallback = label not in routes\n    if fallback:\n        label = default\n    return {\"label\": label, \"output\": routes[label](text), \"fallback\": fallback}\n\n\ndef _pick_winner(counts, top):\n    \"\"\"TODO 9 of 9 (unlocks e6): the answer that wins the vote.\n\n    Receives the counts (answer -> count, in order of first appearance) and the highest count. Returns the first answer whose count\n    is that highest count, so a tie goes to the one seen first.\n    Example: _pick_winner({\"a\": 2, \"b\": 2}, 2) -> \"a\"\n    \"\"\"\n    return \"\"\n\n\ndef vote(ask, prompt, n=5):\n    counts = {}\n    for _ in range(n):\n        answer = ask(prompt).strip().lower()\n        counts[answer] = counts.get(answer, 0) + 1\n    if not counts:\n        return {\"answer\": None, \"votes\": {}, \"agreement\": 0.0}\n    top = max(counts.values())\n    winner = _pick_winner(counts, top)\n    return {\"answer\": winner, \"votes\": counts, \"agreement\": top / n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom workflows import orchestrate\n\nPLAN = '[\"research the topic\", \"draft the outline\", \"check the facts\"]'\n\n\ndef model(prompt):\n    \"\"\"A stand-in for the model, like the one the tests script: the start of the prompt says which step is asking.\"\"\"\n    if prompt.startswith(\"Plan\"):\n        return PLAN\n    if prompt.startswith(\"Subtask\"):\n        return \"done: \" + prompt.split(\"\\n\")[0][len(\"Subtask: \"):]\n    return \"FINAL\"\n\n\n# The orchestrator asks for a plan, runs one worker per subtask, then combines the results.\nresult = orchestrate(model, \"Write a guide\") or {}\n\nprint(\"status:\", result.get(\"status\"), \"| fallback:\", result.get(\"fallback\"), \"| calls:\", result.get(\"calls\"))\nprint(\"plan:\", result.get(\"plan\"))\nprint(\"results:\", [(r[\"subtask\"], r[\"status\"]) for r in result.get(\"results\", [])])\nprint(\"answer:\", result.get(\"answer\"))\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "15b9fb1e33ed58a4bef4c9f46c4d661c3557261a24f3a3b83dc72ac1c005c3c6",
+  "starting_code": "\"\"\"Workflow patterns around a model: orchestrator and workers, evaluator and optimiser, routing and voting. See ../../statement.md.\"\"\"\nimport json\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef _slice(text, open_char, close_char):\n    first, last = text.find(open_char), text.rfind(close_char)\n    return text[first:last + 1] if first != -1 and last > first else \"\"\n\n\ndef _clean_steps(data):\n    \"\"\"TODO 1 of 9 (unlocks e1): the usable subtasks from the parsed plan.\n\n    Receives whatever `json.loads` gave (a list, or anything else) and returns the string items of a list, stripped, with empty\n    ones and repeats dropped (the first of a repeat stays), in order; anything that is not a list gives [].\n    Example: _clean_steps([\"a\", \" a \", \"\", 3, \"b\"]) -> [\"a\", \"b\"]\n    \"\"\"\n    return []\n\n\ndef parse_plan(text, task, max_subtasks):\n    \"\"\"Subtasks from the planner's reply, or ([task], True) when the reply cannot be used.\"\"\"\n    try:\n        data = json.loads(_slice(text, \"[\", \"]\"))\n    except ValueError:\n        data = None\n    steps = _clean_steps(data)\n    if not steps:\n        return [task], True\n    return steps[:max_subtasks], False\n\n\ndef _run_worker(ask, subtask, task):\n    \"\"\"TODO 2 of 9 (unlocks m1 and e2): run one worker call for one subtask.\n\n    Receives `ask`, the subtask and the task. Calls `ask` with `Subtask: {subtask}\\\\nTask: {task}` and returns\n    {\"subtask\", \"status\": \"ok\", \"output\"} for a good reply, or {\"subtask\", \"status\": \"failed\", \"error\"} when the reply is empty or\n    only spaces (error `empty reply`) or the call raises (error: the exception's message). It never raises.\n    Example: a worker that replies \"  \" -> {\"subtask\": \"s\", \"status\": \"failed\", \"error\": \"empty reply\"}\n    \"\"\"\n    log.debug(\"_run_worker input: %r\", subtask)\n    return {\"subtask\": subtask, \"status\": \"failed\", \"error\": \"\"}\n\n\ndef _combine_prompt(task, results):\n    \"\"\"TODO 3 of 9 (unlocks m1): the prompt of the combine call.\n\n    Receives the task and the results in plan order. Returns `Combine: write one answer to the task from the results.\\\\nTask: {task}`\n    followed by one line per result, `\\\\n{i}. {subtask} -> {output}` or `\\\\n{i}. {subtask} -> FAILED` (i from 1).\n    Example: task \"T\", one ok result \"a\" with output \"x\" -> \"Combine: write one answer to the task from the results.\\\\nTask: T\\\\n1. a -> x\"\n    \"\"\"\n    return \"\"\n\n\ndef orchestrate(ask, task, max_subtasks=5):\n    calls = 1\n    plan, fallback = parse_plan(ask(f\"Plan: split the task into at most {max_subtasks} independent subtasks. Reply with a JSON array of strings only.\\nTask: {task}\"), task, max_subtasks)\n    results = []\n    for subtask in plan:\n        calls += 1\n        results.append(_run_worker(ask, subtask, task))\n    ok = [r for r in results if r[\"status\"] == \"ok\"]\n    if not ok:\n        return {\"status\": \"failed\", \"plan\": plan, \"fallback\": fallback, \"results\": results, \"answer\": None, \"calls\": calls}\n    answer = ask(_combine_prompt(task, results))\n    return {\"status\": \"done\" if len(ok) == len(results) else \"partial\", \"plan\": plan, \"fallback\": fallback, \"results\": results, \"answer\": answer, \"calls\": calls + 1}\n\n\ndef _score_ok(score):\n    \"\"\"TODO 4 of 9 (unlocks e4): is this a usable judge score?\n\n    Receives the `score` field of the judge's JSON (any value, or None). Returns True for a number from 0 to 10 and False for\n    anything else, a boolean included.\n    Example: _score_ok(7.5) -> True, _score_ok(True) -> False, _score_ok(11) -> False\n    \"\"\"\n    return isinstance(score, (int, float))  # a number of any size; add the range and the boolean exclusion\n\n\ndef read_judgement(text):\n    \"\"\"(score, feedback) from the judge's reply; (0, a fixed note) when the reply cannot be read.\"\"\"\n    try:\n        data = json.loads(_slice(text, \"{\", \"}\"))\n    except ValueError:\n        data = None\n    score = data.get(\"score\") if isinstance(data, dict) else None\n    if not _score_ok(score):\n        return 0, \"The judge reply could not be read.\"\n    feedback = data.get(\"feedback\")\n    return score, feedback if isinstance(feedback, str) else \"\"\n\n\ndef _writer_prompt(task, draft, feedback, round_number):\n    \"\"\"TODO 5 of 9 (unlocks e3): the prompt for the writer in one round.\n\n    Receives the task, the latest draft, the judge's latest feedback and the round number (from 1). Returns `Task: {task}` in round 1\n    and afterwards `Task: {task}\\\\nPrevious draft: {draft}\\\\nFeedback: {feedback}\\\\nRevise the draft.`\n    Example: _writer_prompt(\"T\", \"d\", \"f\", 2) -> \"Task: T\\\\nPrevious draft: d\\\\nFeedback: f\\\\nRevise the draft.\"\n    \"\"\"\n    return f\"Task: {task}\"\n\n\ndef _is_better(score, best_score):\n    \"\"\"TODO 6 of 9 (unlocks e4): does this draft replace the best one so far?\n\n    Receives the new score and the best score so far (None before any draft was judged). Returns True when there is no best yet or\n    the new score is strictly higher (so the earliest wins a tie).\n    Example: _is_better(5, None) -> True, _is_better(5, 5) -> False\n    \"\"\"\n    return False\n\n\ndef _error_result(best, best_score, rounds, history, err):\n    \"\"\"TODO 7 of 9 (unlocks e7): the result when the writer raised.\n\n    Receives the best draft and score so far (None, None before any), the rounds completed, the history and the exception. Returns the\n    dict {\"status\": \"error\", \"draft\", \"score\", \"rounds\", \"history\", \"error\": <the exception's message>}.\n    Example: _error_result(\"d\", 4, 1, [], RuntimeError(\"boom\"))[\"error\"] -> \"boom\"\n    \"\"\"\n    return {}\n\n\ndef refine(write, judge, task, max_rounds=3, threshold=8):\n    history, best, best_score, draft, feedback = [], None, None, None, \"\"\n    for round_number in range(1, max_rounds + 1):\n        prompt = _writer_prompt(task, draft, feedback, round_number)\n        try:\n            draft = write(prompt)\n        except Exception as err:  # noqa: BLE001\n            return _error_result(best, best_score, round_number - 1, history, err)\n        score, feedback = read_judgement(judge(f'Judge: score the draft from 0 to 10 and reply with JSON {{\"score\": n, \"feedback\": \"...\"}}.\\nTask: {task}\\nDraft: {draft}'))\n        history.append({\"round\": round_number, \"score\": score, \"feedback\": feedback})\n        if _is_better(score, best_score):\n            best, best_score = draft, score\n        if score >= threshold:\n            return {\"status\": \"accepted\", \"draft\": draft, \"score\": score, \"rounds\": round_number, \"history\": history}\n    return {\"status\": \"max_rounds\", \"draft\": best, \"score\": best_score, \"rounds\": max_rounds, \"history\": history}\n\n\ndef _normalise_label(reply):\n    \"\"\"TODO 8 of 9 (unlocks e5): the label in a classifier's reply.\n\n    Receives the reply (a string, or anything else). Returns it stripped of spaces, then of the punctuation `.,;:!\"'` and the backtick\n    at both ends, then of spaces again, in lower case; \"\" when the reply is not a string.\n    Example: _normalise_label('  \"Billing.\" ') -> \"billing\"\n    \"\"\"\n    return \"\"\n\n\ndef route(ask, text, routes, default):\n    \"\"\"Classify the text with one model call, then run the handler of the label. `routes` maps label to a function of the text.\"\"\"\n    reply = ask(f\"Classify: {text}\\nLabels: {', '.join(routes)}\")\n    label = _normalise_label(reply)\n    fallback = label not in routes\n    if fallback:\n        label = default\n    return {\"label\": label, \"output\": routes[label](text), \"fallback\": fallback}\n\n\ndef _pick_winner(counts, top):\n    \"\"\"TODO 9 of 9 (unlocks e6): the answer that wins the vote.\n\n    Receives the counts (answer -> count, in order of first appearance) and the highest count. Returns the first answer whose count\n    is that highest count, so a tie goes to the one seen first.\n    Example: _pick_winner({\"a\": 2, \"b\": 2}, 2) -> \"a\"\n    \"\"\"\n    return \"\"\n\n\ndef vote(ask, prompt, n=5):\n    counts = {}\n    for _ in range(n):\n        answer = ask(prompt).strip().lower()\n        counts[answer] = counts.get(answer, 0) + 1\n    if not counts:\n        return {\"answer\": None, \"votes\": {}, \"agreement\": 0.0}\n    top = max(counts.values())\n    winner = _pick_winner(counts, top)\n    return {\"answer\": winner, \"votes\": counts, \"agreement\": top / n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/34-workflows-and-agents/prose/unit-02/practice-1/workflows.py",
+    "test_path": "practice/level-2/34-workflows-and-agents/prose/unit-02/practice-1/test_workflows.py",
+    "run_command": [
+      "python3",
+      "practice/level-2/34-workflows-and-agents/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-2/34-workflows-and-agents/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-2/34-workflows-and-agents/prose/unit-02/practice-1/test_workflows.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_an_orchestrator_plans_runs_a_worker_per_subtask_and_combines",
+        "kind": "main",
+        "says": "An orchestrator plans, runs a worker per subtask and combines"
+      },
+      {
+        "id": "test_e1_the_plan_is_read_from_prose_cleaned_capped_and_replaced_when_unusable",
+        "kind": "edge",
+        "says": "The plan is read from prose, cleaned, capped, and replaced when unusable"
+      },
+      {
+        "id": "test_e2_one_failing_worker_does_not_stop_the_others_or_the_answer",
+        "kind": "edge",
+        "says": "One failing worker does not stop the others or the answer"
+      },
+      {
+        "id": "test_e3_a_draft_is_revised_with_the_feedback_until_the_judge_accepts_it",
+        "kind": "edge",
+        "says": "A draft is revised with the feedback until the judge accepts it"
+      },
+      {
+        "id": "test_e4_when_the_rounds_run_out_the_best_draft_wins_and_an_unreadable_judge_scores_zero",
+        "kind": "edge",
+        "says": "When the rounds run out the best draft wins, and an unreadable judge scores zero"
+      },
+      {
+        "id": "test_e5_a_label_is_read_from_the_reply_and_anything_else_takes_the_default_route",
+        "kind": "edge",
+        "says": "A label is read from the reply, and anything else takes the default route"
+      },
+      {
+        "id": "test_e6_the_majority_answer_wins_and_a_tie_goes_to_the_one_seen_first",
+        "kind": "edge",
+        "says": "The majority answer wins, and a tie goes to the one seen first"
+      },
+      {
+        "id": "test_e7_a_writer_that_fails_ends_the_loop_with_the_best_draft_so_far",
+        "kind": "edge",
+        "says": "A writer that fails ends the loop with the best draft so far"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/34-workflows-and-agents/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/34-workflows-and-agents/02-orchestrators-evaluators-agents-and-the-practice.md",
+    "concepts": [
+      "the practice of Orchestrators, evaluators, agents and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/34-workflows-and-agents/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "workflows-and-agents-u2"
+}

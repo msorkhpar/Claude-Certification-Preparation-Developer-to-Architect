@@ -1,0 +1,93 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-4",
+    "92-enabling-teams-and-operations"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 4,
+  "title": "Practice: rolling Claude Code out to an organisation (Kotlin)",
+  "lang": "kotlin",
+  "main_file": "project/managed/managed-settings.json",
+  "files": [
+    "project/.claude/settings.json",
+    "project/docs/rollout.md"
+  ],
+  "test_file": "src/test/kotlin/RolloutTest.kt",
+  "build": [
+    "libs/harness/build.gradle.kts",
+    "libs/harness/src/main/java/harness/Show.java",
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-4/92-enabling-teams-and-operations/prose/unit-01/practice-4/check_files.py",
+    "practice/level-4/92-enabling-teams-and-operations/prose/unit-01/practice-4/project/.claude/settings.json",
+    "practice/level-4/92-enabling-teams-and-operations/prose/unit-01/practice-4/project/docs/rollout.md",
+    "practice/level-4/92-enabling-teams-and-operations/prose/unit-01/practice-4/project/managed/managed-settings.json"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-4/92-enabling-teams-and-operations/prose/unit-01/practice-4",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_theManagedFileLocksPermissionsAndProtectsTheEnvironmentFile()",
+      "kind": "main",
+      "says": "The managed file locks permission rules, turns off bypass mode and denies Read(./.env)"
+    },
+    {
+      "id": "e1_keysOnlyAnOrganisationCanSetLiveInTheManagedFileAndNeverInTheProjectFile()",
+      "kind": "edge",
+      "says": "The managed-only keys are absent from the project file and allowManagedHooksOnly is true in the managed file"
+    },
+    {
+      "id": "e2_pluginsComeOnlyFromTheCompanysMarketplaceAndCannotBeSideloaded()",
+      "kind": "edge",
+      "says": "strictKnownMarketplaces lists only sources the company owns and disableSideloadFlags is true"
+    },
+    {
+      "id": "e3_onlyTheManagedMcpAllowlistAppliesAndAServerIsNeverAllowedAndDenied()",
+      "kind": "edge",
+      "says": "The managed MCP allowlist is exclusive, well formed and disjoint from the denylist"
+    },
+    {
+      "id": "e4_theModelChoiceIsLockedByAListAndTheEffortCapIsAtMostHigh()",
+      "kind": "edge",
+      "says": "availableModels is set, the default model is in it and the effort cap is at most high (exactly high is allowed)"
+    },
+    {
+      "id": "e5_theGroupSpendLimitsAddUpToTheOrganisationLimitAndNoMore()",
+      "kind": "edge",
+      "says": "The group limits add up to the organisation limit or less (exactly equal is allowed) and a member's limit is within the smallest group's"
+    },
+    {
+      "id": "e6_adoptionIsMeasuredByOutcomesAgainstABaselineOfAtLeast4Weeks()",
+      "kind": "edge",
+      "says": "The baseline is at least 4 weeks (exactly 4 is allowed) and the outcome targets are outcomes"
+    },
+    {
+      "id": "e7_thePrecedenceTableIsInTheDocumentedOrderAndNoFileHoldsPersonalData()",
+      "kind": "edge",
+      "says": "The precedence table has the documented order, the group note is present and no file holds personal data"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/92-enabling-teams-and-operations/01-one-setting-in-five-places-precedence-locks-and-managed-only-keys.md"
+}

@@ -1,0 +1,258 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "20-prompt-caching"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: order a request for cache hits (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: order a request for cache hits"
+    },
+    {
+      "type": "para",
+      "text": "A prompt cache stores a **prefix** of the request: the tools first, then the system prompt, then the messages, up to a breakpoint. Anything that changes inside the prefix, a timestamp for instance, starts the cache over. Write the function that puts a request's blocks in the order that keeps the prefix stable and places the breakpoints the cache needs. The rules come from the Claude documentation on prompt caching, read on 2026-10-02; the lesson pages explain them."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given data"
+    },
+    {
+      "type": "para",
+      "text": "A **block** is a map with `id`, `section` (`tools`, `system` or `messages`), `tokens`, and optional `volatile` (true when the content changes on every request, such as the current time), `breakpoint` (true when the author wants the cache to end here) and `ttl` (`5m`, the default, or `1h`). The function returns a list, one entry per block, as maps `{\"id\": ..., \"cache\": null | \"5m\" | \"1h\"}`; a `cache` value stands for a `cache_control` marker on that block."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working planner with six gaps cut out of it. Everything that is plumbing is written and correct: the constants, `PlanError`, the walk over the blocks with the running token total, the building of the plan entries and the collecting of the breakpoints. Each gap is a small function with its signature, a comment that says what it receives and returns, one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. Python names them with a leading underscore; TypeScript, Java and Kotlin use the same names without it, in camel case (`checkTools`, `wantsBreakpoint`). Write them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_check_tools` unlocks `e5`: a volatile tool definition is refused.",
+        "`_ordered` unlocks `m1`, `e1` and `e6`: the prefix order, the volatile blocks last, and a new list.",
+        "`_wants_breakpoint` unlocks `e2` and `e5`: the prefix must reach the minimum, and a volatile block never carries a breakpoint.",
+        "`_marker` unlocks `m1`: the lifetime a breakpoint carries, `5m` by default.",
+        "`_check_count` unlocks `e3`: at most four breakpoints.",
+        "`_check_lifetimes` unlocks `e4`: a `1h` breakpoint never follows a `5m` one."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About a dozen lines in all. To see what a gap receives, log its input with the `log` line at the top of the file: `plan_request` already logs its input at debug level, and a run shows the logged lines under the failing case."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "`plan_request(blocks, min_tokens=1024)` (TypeScript `planRequest`, Java `CachePlan.planRequest`, Kotlin `planRequest`)"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Order.** The sections come in the order `tools`, `system`, `messages`; blocks of one section keep the order they were given in. Then every volatile block moves to the very end, in its given order, so that nothing volatile sits inside the prefix. A volatile block in `tools` cannot move there: raise `PlanError`.",
+        "**Breakpoints.** A block with `breakpoint` gets its `ttl` as `cache` only if it is not volatile and the stable tokens from the start of the request up to and including that block add up to at least `min_tokens`. A block that does not reach the minimum gets `null` (the API would ignore the marker and return no error, so there is nothing to raise).",
+        "**At most four** breakpoints may remain after rule 2; more is a `PlanError` (the API answers 400).",
+        "**Lifetimes.** A `1h` breakpoint must come before every `5m` breakpoint; the other order is a `PlanError`.",
+        "Every input block appears once in the result, and the input list and its maps are left unchanged."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Stable content comes first, the volatile date goes last, and the breakpoints sit on the stable blocks"
+        ],
+        [
+          "`e1`",
+          "Sections follow the prefix order and keep their own order"
+        ],
+        [
+          "`e2`",
+          "A breakpoint needs the stable prefix up to it to reach the minimum"
+        ],
+        [
+          "`e3`",
+          "At most four breakpoints are sent, counting only those that reach the minimum"
+        ],
+        [
+          "`e4`",
+          "A one-hour breakpoint may not follow a five-minute one"
+        ],
+        [
+          "`e5`",
+          "A volatile block never carries a breakpoint, and tools cannot be volatile"
+        ],
+        [
+          "`e6`",
+          "Every block comes out once and the input is not changed"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.lang.System.Logger.Level\n\nprivate val log = System.getLogger(\"cacheplan\")\n\n/** Order a request for cache hits and place its breakpoints. See ../../statement.md for the contract. Blocks are JSON-like maps. */\n\n/** The request cannot be cached as asked (the API would answer 400, or the plan can never hit). */\nclass PlanError(message: String) : RuntimeException(message)\n\nprivate val SECTIONS = mapOf(\"tools\" to 0, \"system\" to 1, \"messages\" to 2)\nprivate const val MAX_BREAKPOINTS = 4\n\nprivate fun checkTools(blocks: List<Map<String, Any?>>) {\n    for (b in blocks) {\n        if (b[\"volatile\"] == true && b[\"section\"] == \"tools\") throw PlanError(\"tool definition ${b[\"id\"]} cannot be volatile: tools come first\")\n    }\n}\n\nprivate fun ordered(blocks: List<Map<String, Any?>>): List<Map<String, Any?>> {\n    val bySection = blocks.sortedBy { SECTIONS.getValue(it[\"section\"] as String) } // sortedBy is stable\n    return bySection.filter { it[\"volatile\"] != true } + bySection.filter { it[\"volatile\"] == true }\n}\n\nprivate fun wantsBreakpoint(block: Map<String, Any?>, total: Long, minTokens: Int): Boolean =\n    block[\"breakpoint\"] == true && block[\"volatile\"] != true && total >= minTokens\n\nprivate fun marker(block: Map<String, Any?>): Any = block[\"ttl\"] ?: \"5m\"\n\nprivate fun checkCount(marked: List<Any>) {\n    if (marked.size > MAX_BREAKPOINTS) throw PlanError(\"${marked.size} breakpoints: at most $MAX_BREAKPOINTS\")\n}\n\nprivate fun checkLifetimes(marked: List<Any>) {\n    var seenFive = false\n    for (cache in marked) {\n        if (cache == \"5m\") seenFive = true\n        else if (seenFive) throw PlanError(\"a 1h breakpoint must come before every 5m breakpoint\")\n    }\n}\n\nfun planRequest(blocks: List<Map<String, Any?>>, minTokens: Int = 1024): List<Map<String, Any?>> {\n    log.log(Level.DEBUG, \"planRequest input: {0}\", blocks)\n    checkTools(blocks)\n    val plan = mutableListOf<Map<String, Any?>>()\n    val marked = mutableListOf<Any>()\n    var total = 0L\n    for (b in ordered(blocks)) {\n        if (b[\"volatile\"] != true) total += (b[\"tokens\"] as Number).toLong()\n        val cache = if (wantsBreakpoint(b, total, minTokens)) marker(b) else null\n        plan.add(mapOf(\"id\" to b[\"id\"], \"cache\" to cache))\n        if (cache != null) marked.add(cache)\n    }\n    checkCount(marked)\n    checkLifetimes(marked)\n    return plan\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    fun block(id: String, section: String, tokens: Int, vararg extra: Pair<String, Any?>): Map<String, Any?> =\n        mapOf(\"id\" to id, \"section\" to section, \"tokens\" to tokens) + extra\n\n    // A request whose blocks arrive in the wrong order: the volatile date sits first, in the system prompt.\n    val blocks = listOf(\n        block(\"date\", \"system\", 20, \"volatile\" to true),\n        block(\"tools\", \"tools\", 2000),\n        block(\"rules\", \"system\", 3000, \"breakpoint\" to true),\n        block(\"manual\", \"messages\", 6000, \"breakpoint\" to true),\n        block(\"question\", \"messages\", 40),\n    )\n    try {\n        val plan = planRequest(blocks, 1024)\n        println(\"order: ${plan.map { it[\"id\"] }}\")\n        println(\"cache per block: ${plan.map { \"${it[\"id\"]}=${it[\"cache\"]}\" }}\")\n        println(\"breakpoints at: ${plan.filter { it[\"cache\"] != null }.map { it[\"id\"] }}\")\n    } catch (err: PlanError) {\n        println(\"plan error: ${err.message}\")\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.lang.System.Logger.Level\n\nprivate val log = System.getLogger(\"cacheplan\")\n\n/** Order a request for cache hits and place its breakpoints. See ../../statement.md for the contract. Blocks are JSON-like maps. */\n\n/** The request cannot be cached as asked (the API would answer 400, or the plan can never hit). */\nclass PlanError(message: String) : RuntimeException(message)\n\nprivate val SECTIONS = mapOf(\"tools\" to 0, \"system\" to 1, \"messages\" to 2)\nprivate const val MAX_BREAKPOINTS = 4\n\nprivate fun checkTools(blocks: List<Map<String, Any?>>) {\n    // TODO 1 of 6 (finish this to pass e5): refuse a volatile tool definition.\n    // Receives the blocks. Throws PlanError when a block in the \"tools\" section is volatile (tools come first, nothing volatile may sit\n    // in the prefix); returns nothing otherwise. Example: a tools block with \"volatile\" true makes it throw\n}\n\nprivate fun ordered(blocks: List<Map<String, Any?>>): List<Map<String, Any?>> {\n    // TODO 2 of 6 (finish this to pass m1, e1 and e6): the blocks in cache-friendly order, as a new list.\n    // Receives the blocks. Returns a new list: sections in the order of SECTIONS (tools, system, messages), blocks of one section in the\n    // order given, then every volatile block moved to the very end in its given order. The input list is left unchanged.\n    // Example: ids of [m (messages), s (system, volatile), t (tools)] come out as t, m, s\n    return emptyList()\n}\n\nprivate fun wantsBreakpoint(block: Map<String, Any?>, total: Long, minTokens: Int): Boolean {\n    // TODO 3 of 6 (finish this to pass e2 and e5): does this block carry a breakpoint?\n    // Receives the block, total (the stable tokens from the start up to and including this block) and minTokens. Returns true when the\n    // block asks for a breakpoint, is not volatile and total is at least minTokens. Example: a breakpoint block at 500 of 1024 -> false\n    return false\n}\n\nprivate fun marker(block: Map<String, Any?>): Any {\n    // TODO 4 of 6 (finish this to pass m1): the cache lifetime a breakpoint carries.\n    // Receives the block. Returns its \"ttl\" (\"5m\" or \"1h\"), \"5m\" when it has none. Example: a block with ttl \"1h\" -> \"1h\"\n    return \"5m\"\n}\n\nprivate fun checkCount(marked: List<Any>) {\n    // TODO 5 of 6 (finish this to pass e3): at most MAX_BREAKPOINTS breakpoints.\n    // Receives the lifetimes of the blocks that kept a breakpoint. Throws PlanError when there are more than MAX_BREAKPOINTS.\n    // Example: five \"5m\" entries make it throw\n}\n\nprivate fun checkLifetimes(marked: List<Any>) {\n    // TODO 6 of 6 (finish this to pass e4): a 1h breakpoint must come before every 5m one.\n    // Receives the lifetimes of the kept breakpoints in request order. Throws PlanError when a \"1h\" follows a \"5m\".\n    // Example: [\"5m\", \"1h\"] throws, [\"1h\", \"5m\"] does not\n}\n\nfun planRequest(blocks: List<Map<String, Any?>>, minTokens: Int = 1024): List<Map<String, Any?>> {\n    log.log(Level.DEBUG, \"planRequest input: {0}\", blocks)\n    checkTools(blocks)\n    val plan = mutableListOf<Map<String, Any?>>()\n    val marked = mutableListOf<Any>()\n    var total = 0L\n    for (b in ordered(blocks)) {\n        if (b[\"volatile\"] != true) total += (b[\"tokens\"] as Number).toLong()\n        val cache = if (wantsBreakpoint(b, total, minTokens)) marker(b) else null\n        plan.add(mapOf(\"id\" to b[\"id\"], \"cache\" to cache))\n        if (cache != null) marked.add(cache)\n    }\n    checkCount(marked)\n    checkLifetimes(marked)\n    return plan\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    fun block(id: String, section: String, tokens: Int, vararg extra: Pair<String, Any?>): Map<String, Any?> =\n        mapOf(\"id\" to id, \"section\" to section, \"tokens\" to tokens) + extra\n\n    // A request whose blocks arrive in the wrong order: the volatile date sits first, in the system prompt.\n    val blocks = listOf(\n        block(\"date\", \"system\", 20, \"volatile\" to true),\n        block(\"tools\", \"tools\", 2000),\n        block(\"rules\", \"system\", 3000, \"breakpoint\" to true),\n        block(\"manual\", \"messages\", 6000, \"breakpoint\" to true),\n        block(\"question\", \"messages\", 40),\n    )\n    try {\n        val plan = planRequest(blocks, 1024)\n        println(\"order: ${plan.map { it[\"id\"] }}\")\n        println(\"cache per block: ${plan.map { \"${it[\"id\"]}=${it[\"cache\"]}\" }}\")\n        println(\"breakpoints at: ${plan.filter { it[\"cache\"] != null }.map { it[\"id\"] }}\")\n    } catch (err: PlanError) {\n        println(\"plan error: ${err.message}\")\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 1,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "ad11d45737c05274d4cc870cd4b5b741a044782ced29c291034c692d9aa22ae0",
+  "starting_code": "import java.lang.System.Logger.Level\n\nprivate val log = System.getLogger(\"cacheplan\")\n\n/** Order a request for cache hits and place its breakpoints. See ../../statement.md for the contract. Blocks are JSON-like maps. */\n\n/** The request cannot be cached as asked (the API would answer 400, or the plan can never hit). */\nclass PlanError(message: String) : RuntimeException(message)\n\nprivate val SECTIONS = mapOf(\"tools\" to 0, \"system\" to 1, \"messages\" to 2)\nprivate const val MAX_BREAKPOINTS = 4\n\nprivate fun checkTools(blocks: List<Map<String, Any?>>) {\n    // TODO 1 of 6 (finish this to pass e5): refuse a volatile tool definition.\n    // Receives the blocks. Throws PlanError when a block in the \"tools\" section is volatile (tools come first, nothing volatile may sit\n    // in the prefix); returns nothing otherwise. Example: a tools block with \"volatile\" true makes it throw\n}\n\nprivate fun ordered(blocks: List<Map<String, Any?>>): List<Map<String, Any?>> {\n    // TODO 2 of 6 (finish this to pass m1, e1 and e6): the blocks in cache-friendly order, as a new list.\n    // Receives the blocks. Returns a new list: sections in the order of SECTIONS (tools, system, messages), blocks of one section in the\n    // order given, then every volatile block moved to the very end in its given order. The input list is left unchanged.\n    // Example: ids of [m (messages), s (system, volatile), t (tools)] come out as t, m, s\n    return emptyList()\n}\n\nprivate fun wantsBreakpoint(block: Map<String, Any?>, total: Long, minTokens: Int): Boolean {\n    // TODO 3 of 6 (finish this to pass e2 and e5): does this block carry a breakpoint?\n    // Receives the block, total (the stable tokens from the start up to and including this block) and minTokens. Returns true when the\n    // block asks for a breakpoint, is not volatile and total is at least minTokens. Example: a breakpoint block at 500 of 1024 -> false\n    return false\n}\n\nprivate fun marker(block: Map<String, Any?>): Any {\n    // TODO 4 of 6 (finish this to pass m1): the cache lifetime a breakpoint carries.\n    // Receives the block. Returns its \"ttl\" (\"5m\" or \"1h\"), \"5m\" when it has none. Example: a block with ttl \"1h\" -> \"1h\"\n    return \"5m\"\n}\n\nprivate fun checkCount(marked: List<Any>) {\n    // TODO 5 of 6 (finish this to pass e3): at most MAX_BREAKPOINTS breakpoints.\n    // Receives the lifetimes of the blocks that kept a breakpoint. Throws PlanError when there are more than MAX_BREAKPOINTS.\n    // Example: five \"5m\" entries make it throw\n}\n\nprivate fun checkLifetimes(marked: List<Any>) {\n    // TODO 6 of 6 (finish this to pass e4): a 1h breakpoint must come before every 5m one.\n    // Receives the lifetimes of the kept breakpoints in request order. Throws PlanError when a \"1h\" follows a \"5m\".\n    // Example: [\"5m\", \"1h\"] throws, [\"1h\", \"5m\"] does not\n}\n\nfun planRequest(blocks: List<Map<String, Any?>>, minTokens: Int = 1024): List<Map<String, Any?>> {\n    log.log(Level.DEBUG, \"planRequest input: {0}\", blocks)\n    checkTools(blocks)\n    val plan = mutableListOf<Map<String, Any?>>()\n    val marked = mutableListOf<Any>()\n    var total = 0L\n    for (b in ordered(blocks)) {\n        if (b[\"volatile\"] != true) total += (b[\"tokens\"] as Number).toLong()\n        val cache = if (wantsBreakpoint(b, total, minTokens)) marker(b) else null\n        plan.add(mapOf(\"id\" to b[\"id\"], \"cache\" to cache))\n        if (cache != null) marked.add(cache)\n    }\n    checkCount(marked)\n    checkLifetimes(marked)\n    return plan\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/20-prompt-caching/prose/unit-02/practice-4/src/main/kotlin/CachePlan.kt",
+    "test_path": "practice/level-2/20-prompt-caching/prose/unit-02/practice-4/src/test/kotlin/CachePlanTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/20-prompt-caching/prose/unit-02/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/20-prompt-caching/prose/unit-02/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_stableContentComesFirstAndTheVolatileDateGoesLast()",
+        "kind": "main",
+        "says": "Stable content comes first, the volatile date goes last, and the breakpoints sit on the stable blocks"
+      },
+      {
+        "id": "e1_sectionsFollowThePrefixOrderAndKeepTheirOwnOrder()",
+        "kind": "edge",
+        "says": "Sections follow the prefix order and keep their own order"
+      },
+      {
+        "id": "e2_aBreakpointNeedsTheStablePrefixToReachTheMinimum()",
+        "kind": "edge",
+        "says": "A breakpoint needs the stable prefix up to it to reach the minimum"
+      },
+      {
+        "id": "e3_atMostFourBreakpointsAreSent()",
+        "kind": "edge",
+        "says": "At most four breakpoints are sent, counting only those that reach the minimum"
+      },
+      {
+        "id": "e4_aOneHourBreakpointMayNotFollowAFiveMinuteOne()",
+        "kind": "edge",
+        "says": "A one-hour breakpoint may not follow a five-minute one"
+      },
+      {
+        "id": "e5_volatileBlocksNeverCarryABreakpointAndToolsCannotBeVolatile()",
+        "kind": "edge",
+        "says": "A volatile block never carries a breakpoint, and tools cannot be volatile"
+      },
+      {
+        "id": "e6_everyBlockComesOutOnceAndTheInputIsNotChanged()",
+        "kind": "edge",
+        "says": "Every block comes out once and the input is not changed"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/20-prompt-caching/prose/unit-02/practice-4/target/test-results/test"
+    },
+    "origin": "course/20-prompt-caching/02-prices-lifetimes-lookback-and-invalidation.md",
+    "concepts": [
+      "the practice of Prices, lifetimes, the lookback and what breaks a cache is solved"
+    ],
+    "files": [
+      "practice/level-2/20-prompt-caching/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "prompt-caching-u2"
+}

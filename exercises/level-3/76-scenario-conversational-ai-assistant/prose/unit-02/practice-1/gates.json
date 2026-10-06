@@ -1,0 +1,130 @@
+{
+  "gates_api": 1,
+  "inputs": [
+    {
+      "role": "statement",
+      "path": "statement.md",
+      "digest": "sha256:1672359f60bf2f6c873b82443e530846859cb288455e5b4d073d6daef395c0be"
+    },
+    {
+      "role": "starter",
+      "path": "starter/conversation_review.py",
+      "digest": "sha256:a232bc72ea5a74f72cd9acfd4a4e7e9692ff6a1d8fd20ea05e48b1961bb85974"
+    },
+    {
+      "role": "reference",
+      "path": "reference/conversation_review.py",
+      "digest": "sha256:eea141759fb67680f507aee24cd256ed2981a746423a905fdae3e572bf13079b"
+    },
+    {
+      "role": "starter:try_it.py",
+      "path": "starter/try_it.py",
+      "digest": "sha256:e3f891f83d58d8e104489013b94376374f76c3ba22b77f5daa59af2ae477d5f3"
+    },
+    {
+      "role": "reference:try_it.py",
+      "path": "reference/try_it.py",
+      "digest": "sha256:e3f891f83d58d8e104489013b94376374f76c3ba22b77f5daa59af2ae477d5f3"
+    },
+    {
+      "role": "tests",
+      "path": "tests/test_conversation_review.py",
+      "digest": "sha256:baa02584e20efe5c893aed5a39e18b23b9887aec4b3b021fc0e0f5349bb838d8"
+    },
+    {
+      "role": "plant:test_e1_an_empty_batch_has_zero_figures_and_is_held_for_lack_of_data",
+      "path": "plants/edge-1/conversation_review.py.plant.json",
+      "digest": "sha256:0dc6ac235e8897ae027f4984742544836563070fb1df81ad472938cb947831e9"
+    },
+    {
+      "role": "plant:test_e2_a_safety_signal_counts_as_missed_unless_it_went_to_a_person_as_a_safety_hand_off",
+      "path": "plants/edge-2/conversation_review.py.plant.json",
+      "digest": "sha256:0923a1d6e9f4da982e4c7e73e2dc61f61ccf678c54a370330a0a2f8c8c6ce67d"
+    },
+    {
+      "role": "plant:test_e3_a_conversation_is_overlong_only_above_the_turn_limit_and_only_when_nobody_took_over",
+      "path": "plants/edge-3/conversation_review.py.plant.json",
+      "digest": "sha256:a95bdbe97fe7adac457ece77e851909ee4a77cc52fd4d6914cddb70c724452c6"
+    },
+    {
+      "role": "plant:test_e4_repeated_questions_are_acceptable_at_exactly_the_limit_and_not_above_it",
+      "path": "plants/edge-4/conversation_review.py.plant.json",
+      "digest": "sha256:f1eeb15d4ad5ced2093e3af15557711afe2d5a5b7222ec3aa4acf6ae5605daeb"
+    },
+    {
+      "role": "plant:test_e5_a_segment_is_weak_only_below_the_resolution_floor_and_not_at_it",
+      "path": "plants/edge-5/conversation_review.py.plant.json",
+      "digest": "sha256:e105fd34e38da6f9d11fad4c439ff7a8ca156ee3a59a086cfe8392cd5f29eb05"
+    },
+    {
+      "role": "plant:test_e6_a_segment_needs_the_minimum_number_of_conversations_before_it_can_be_called_weak",
+      "path": "plants/edge-6/conversation_review.py.plant.json",
+      "digest": "sha256:be827f11b6e13b8603a0326045cca1acb641306243db2687722db2adf07bc99e"
+    },
+    {
+      "role": "plant:test_e7_a_hand_off_is_over_escalation_only_when_no_person_was_needed_and_no_safety_signal_was_present",
+      "path": "plants/edge-7/conversation_review.py.plant.json",
+      "digest": "sha256:14a0c78d790828a4851d696d90c4f63f4d2d264d2166b32bf8093888a51da26c"
+    },
+    {
+      "role": "plant:test_e8_only_conversations_the_assistant_settled_alone_count_as_resolved",
+      "path": "plants/edge-8/conversation_review.py.plant.json",
+      "digest": "sha256:289bbf0713b25d7eb57f6634e4a008cea7b9fbe6d243ae977917f3b55d94eea2"
+    },
+    {
+      "role": "plant:test_e9_percentages_are_whole_numbers_rounded_half_up",
+      "path": "plants/edge-9/conversation_review.py.plant.json",
+      "digest": "sha256:1ce711ce23e7201ba8f013c45df837b5bb5e308af27892f7aa26b71ffcd4db72"
+    },
+    {
+      "role": "build:pytest.ini",
+      "path": "build/pytest.ini",
+      "digest": "sha256:78b695b449e8bb92c850493180f73fc8d1122b2b99925d12dddab5c285e8d026"
+    }
+  ],
+  "origins": [
+    {
+      "role": "origin",
+      "path": "course/76-scenario-conversational-ai-assistant/02-sensitive-talk-hand-offs-and-judging-a-conversation.md",
+      "section": null,
+      "digest": "sha256:9b49e251ca18cf34af3cb7c62d4ef3eb720707b3f9436a4de8d4a70b59d8b11b"
+    }
+  ],
+  "gates": [
+    {
+      "id": "G1",
+      "family": "code",
+      "held": true,
+      "says": "all 10 cases passed on the reference, on two runs alike",
+      "recorded": {}
+    },
+    {
+      "id": "G2",
+      "family": "code",
+      "held": true,
+      "says": "none of the 10 cases passed on the starter",
+      "recorded": {}
+    },
+    {
+      "id": "G3",
+      "family": "code",
+      "held": true,
+      "says": "each of the 9 edge cases was caught by its own plant",
+      "recorded": {}
+    },
+    {
+      "id": "G4",
+      "family": "code",
+      "held": true,
+      "says": "every test the report named mapped to one of the 10 cases, and every case was named",
+      "recorded": {}
+    },
+    {
+      "id": "G5",
+      "family": "code",
+      "held": true,
+      "says": "the cited passage of 'course/76-scenario-conversational-ai-assistant/02-sensitive-talk-hand-offs-and-judging-a-conversation.md' still matches the ledger",
+      "recorded": {}
+    }
+  ]
+}

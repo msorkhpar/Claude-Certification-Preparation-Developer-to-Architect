@@ -1,0 +1,83 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "53-tool-errors-agents-can-act-on"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: tool errors that an agent can act on (Python)",
+  "lang": "python",
+  "main_file": "errors.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_errors.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/53-tool-errors-agents-can-act-on/prose/unit-02/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-3/53-tool-errors-agents-can-act-on/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-3/53-tool-errors-agents-can-act-on/prose/unit-02/practice-1/test_errors.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_a_failed_call_becomes_a_structured_error_with_a_category_a_retry_flag_and_an_error_flag",
+      "kind": "main",
+      "says": "A failed call becomes an error with a category, a retry flag and a message, and an error result with the error flag"
+    },
+    {
+      "id": "test_e1_a_generic_message_or_an_unknown_category_is_refused",
+      "kind": "edge",
+      "says": "A generic message and an unknown category are refused"
+    },
+    {
+      "id": "test_e2_only_transient_failures_are_retried_with_growing_waits_and_the_other_kinds_return_at_once",
+      "kind": "edge",
+      "says": "Only transient failures are retried, with doubling waits; the other kinds return at once, with their message and explanation"
+    },
+    {
+      "id": "test_e3_the_retries_are_bounded_and_a_wait_the_service_asks_for_is_honoured",
+      "kind": "edge",
+      "says": "The retries are bounded, the wait a service asks for is honoured and the give-up message names the attempts"
+    },
+    {
+      "id": "test_e4_a_valid_empty_result_is_a_success_and_not_an_error",
+      "kind": "edge",
+      "says": "A valid empty result is a success, not an error"
+    },
+    {
+      "id": "test_e5_a_timeout_on_a_write_is_an_unknown_outcome_and_is_retried_only_when_repeating_it_is_safe",
+      "kind": "edge",
+      "says": "A timed out write is an unknown outcome and is retried only with a key or when read only, with the same key each time and the caller's map untouched"
+    },
+    {
+      "id": "test_e6_the_next_action_follows_the_category",
+      "kind": "edge",
+      "says": "The next action follows the category"
+    },
+    {
+      "id": "test_e7_an_unexpected_exception_becomes_an_internal_error_and_the_run_goes_on",
+      "kind": "edge",
+      "says": "An unexpected exception becomes an internal error and the run goes on"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/53-tool-errors-agents-can-act-on/02-a-call-with-an-unknown-outcome-retries-and-the-practice.md"
+}

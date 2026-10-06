@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/kotlin/Retrieval.kt",
+      "old": "    val found = ids.take(k).map { docOf.getValue(it) }.toSet()\n    val wanted = relevant.toSet()\n    return wanted.count { it in found }.toDouble() / wanted.size\n",
+      "new": "    val wanted = relevant.toSet()\n    return minOf(1.0, ids.take(k).count { docOf.getValue(it) in wanted }.toDouble() / wanted.size)\n"
+    }
+  ]
+}

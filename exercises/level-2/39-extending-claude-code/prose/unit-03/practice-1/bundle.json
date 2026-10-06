@@ -1,0 +1,98 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "39-extending-claude-code"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 1,
+  "title": "Practice: a release plugin with a guard hook (Python)",
+  "lang": "python",
+  "main_file": "project/scripts/guard.py",
+  "files": [
+    "project/.claude/settings.json",
+    "project/.claude-plugin/plugin.json",
+    "project/agents/changelog-reviewer.md",
+    "project/hooks/hooks.json",
+    "project/skills/publish/SKILL.md",
+    "project/skills/release-notes/SKILL.md"
+  ],
+  "test_file": "tests/test_plugin_setup.py",
+  "build": [
+    "tests/examples/39-hook-gate/python/hook_gate.py",
+    "tests/examples/39-hook-gate/python/miniyaml.py",
+    "pytest.ini",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-1/check_files.py",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-1/project/.claude-plugin/plugin.json",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-1/project/.claude/settings.json",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-1/project/agents/changelog-reviewer.md",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-1/project/hooks/hooks.json",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-1/project/scripts/guard.py",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-1/project/skills/publish/SKILL.md",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-1/project/skills/release-notes/SKILL.md"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-2/39-extending-claude-code/prose/unit-03/practice-1/target/report.xml",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-1/tests/test_plugin_setup.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_the_hook_script_blocks_pushes_deletes_and_piped_downloads_in_any_spelling",
+      "kind": "main",
+      "says": "The guard refuses pushes, forced recursive deletes and piped downloads in every spelling, with a reason, and leaves safe commands alone"
+    },
+    {
+      "id": "test_e1_edits_to_protected_paths_stop_with_exit_two_and_a_reason",
+      "kind": "edge",
+      "says": "Edits to protected paths stop with exit code 2 and a reason, in any of three tools and with Windows separators"
+    },
+    {
+      "id": "test_e2_an_event_it_cannot_read_blocks_the_call_and_other_tools_are_left_alone",
+      "kind": "edge",
+      "says": "An unreadable event blocks the call, while other tools and a Bash event with no command are left alone"
+    },
+    {
+      "id": "test_e3_the_hook_is_registered_for_every_tool_it_guards_and_found_through_the_plugin_root",
+      "kind": "edge",
+      "says": "The hook is registered once for the three tools it guards and found through the plugin root"
+    },
+    {
+      "id": "test_e4_the_skills_set_the_right_invocation_rules_and_approve_only_patterns",
+      "kind": "edge",
+      "says": "The skills have the right invocation rules, approve only patterns and say when to use them"
+    },
+    {
+      "id": "test_e5_the_subagent_only_reads_is_bounded_and_uses_only_fields_a_plugin_agent_honours",
+      "kind": "edge",
+      "says": "The subagent only reads, is bounded, and uses only fields a plugin agent honours"
+    },
+    {
+      "id": "test_e6_the_manifest_names_the_plugin_and_pins_its_dependency_to_patch_updates",
+      "kind": "edge",
+      "says": "The manifest names the plugin and pins the dependency to patch updates"
+    },
+    {
+      "id": "test_e7_the_team_settings_register_the_marketplace_the_enabled_plugin_comes_from",
+      "kind": "edge",
+      "says": "The team settings register a marketplace and enable the plugin from it"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/39-extending-claude-code/03-plugins-sharing-and-the-practice.md"
+}

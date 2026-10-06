@@ -1,0 +1,78 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "21-message-batches"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: submit a batch and handle its results (Python)",
+  "lang": "python",
+  "main_file": "batches.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_batches.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-2/21-message-batches/prose/unit-02/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-2/21-message-batches/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-2/21-message-batches/prose/unit-02/practice-1/test_batches.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_results_are_matched_to_requests_by_custom_id_not_by_position",
+      "kind": "main",
+      "says": "Results are matched to requests by custom id, not by position"
+    },
+    {
+      "id": "test_e1_a_custom_id_is_1_to_64_safe_characters_and_unique",
+      "kind": "edge",
+      "says": "A custom id is 1 to 64 safe characters and unique"
+    },
+    {
+      "id": "test_e2_parameters_a_batch_cannot_take_are_refused",
+      "kind": "edge",
+      "says": "Parameters a batch cannot take are refused"
+    },
+    {
+      "id": "test_e3_a_big_job_is_cut_in_order_by_request_count_and_by_size",
+      "kind": "edge",
+      "says": "A big job is cut in order by request count and by size"
+    },
+    {
+      "id": "test_e4_invalid_requests_are_fixed_and_the_rest_are_retried",
+      "kind": "edge",
+      "says": "Invalid requests are fixed, the other failures are retried"
+    },
+    {
+      "id": "test_e5_a_request_with_no_result_is_missing_and_a_stranger_is_reported",
+      "kind": "edge",
+      "says": "A request with no result is missing and retried, and a stranger id is reported"
+    },
+    {
+      "id": "test_e6_only_requests_that_succeeded_count_toward_usage",
+      "kind": "edge",
+      "says": "Only succeeded requests count toward usage"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/21-message-batches/02-polling-results-and-retries.md"
+}

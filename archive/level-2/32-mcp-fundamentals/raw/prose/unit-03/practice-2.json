@@ -1,0 +1,264 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "32-mcp-fundamentals"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: a notes server for the Model Context Protocol (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a notes server for the Model Context Protocol"
+    },
+    {
+      "type": "para",
+      "text": "An MCP server is a program that a client starts and talks to over its standard input and output (the `stdio` transport), or reaches over HTTP. It offers three kinds of things: tools that a model can call, resources that a person or an application can read, and prompts that a person can pick. The official SDKs do the protocol work (the handshake, the JSON-RPC framing, the schema validation); you write what the server offers. Write a small notes server and prove it the way a real client would: the tests start your server as a separate process and connect the SDK's own client to it. Edit the file (`notes_server.py`, `notes_server.ts`, `NotesServer.java` or `NotesServer.kt`). The server uses the official SDK of its language at the versions in `docs/VERSIONS.md`; the lesson pages explain the SDK calls and what the course checked. Nothing here touches a network: the client and the server talk through pipes."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What the server offers"
+    },
+    {
+      "type": "para",
+      "text": "The server is named `notes`, version `1.0.0`, and keeps its notes in memory. The id of a note is its position, counting from 1. It declares the tools, resources and prompts capabilities."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Tool `add_note(title, text)`, with a description. Both arguments are required strings. It strips the spaces around both, then refuses: an empty title (`title is required`), an empty text (`text is required`), a text longer than 500 characters (`text is too long (max 500)`). A refusal is a **tool error**: an ordinary result whose `isError` is true and whose text says why, so the model can read it and try again (it is not a protocol error). Otherwise it saves the note and answers `Saved note {id}: {title}`. A refused call does not use an id. The tool is annotated as not read-only, not destructive and not idempotent.",
+        "Tool `search_notes(query, limit)`, with a description. `query` is a required string, `limit` an optional integer with the default 5 that the tool's input schema states. The query is stripped; an empty one is the tool error `query is required`; a limit outside 1 to 20 is the tool error `limit must be between 1 and 20`. A note matches when its title or its text contains the query, in any letter case. The answer is one line per match, `{id}. {title}`, in id order, at most `limit` lines; with no match it is `No notes match \"{query}\"` (the stripped query), which is not an error. The tool is annotated as read-only.",
+        "Resource `notes://count` (plain text): `0 notes`, `1 note`, `2 notes`, and so on.",
+        "Resource template `notes://note/{id}` (plain text): the note as `{title}`, an empty line, then `{text}`. An id that is not a whole number of an existing note (`0`, `3` of two notes, `abc`) is a protocol error whose message says `No note {id}`.",
+        "Prompt `review_notes` with one optional argument `tone` (default `brief`): one user message. With no notes it says `There are no notes to review.`; otherwise `Review these notes in a {tone} tone:` followed by one line `- {title}` per note."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "A message you write for a tool error may arrive with a prefix that the SDK adds (some SDKs prepend the tool name); the tests look for your text inside the result."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working notes server with nine gaps cut out of it. Everything that is plumbing is written and correct: the server name and version, the capabilities, the tool, resource and prompt registrations with their descriptions, schemas and annotations, the stripping of the inputs, the saving of a note and the answer to `add_note`. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks; it returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file (the starter already logs the input of `add_note` this way); a run shows the logged lines under the failing case. Write them in this order (the names are the Python forms; TypeScript, Java and Kotlin use camel case, `validateNote` is `noteError` there and returns the message or `null` instead of raising):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`validate_note` unlocks `e2` and `e7`: the three refusals of a bad note, in order.",
+        "`validate_search` unlocks `e2`: the query and the limit checks.",
+        "`find_hits` unlocks `m1` and `e3`: the matching notes as `{id}. {title}` lines, ignoring letter case.",
+        "`format_hits` unlocks `e3`: the limit and the no-match sentence.",
+        "`count_text` unlocks `e5`: `0 notes`, `1 note`, `2 notes`.",
+        "`note_text` unlocks `m1` and `e5`: the note as text, or the `No note {id}` error.",
+        "`review_text` unlocks `e6`: the prompt text, with and without notes.",
+        "`default_limit` unlocks `e1`: the limit a search uses when none is given, also advertised in the input schema (`defaultLimit` in the other languages).",
+        "`search_annotations` unlocks `e4`: the read-only annotation of `search_notes` (`searchAnnotations` in the other languages)."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About fifteen lines in all. The rest of the registration is written."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A client can save a note, find it and read it back"
+        ],
+        [
+          "`e1`",
+          "The server declares tools, resources and prompts, and names its tools"
+        ],
+        [
+          "`e2`",
+          "Bad input comes back as a tool error the model can read"
+        ],
+        [
+          "`e3`",
+          "Search ignores case, keeps id order, honours the limit and says when nothing matches"
+        ],
+        [
+          "`e4`",
+          "Tool annotations tell a client which tool only reads"
+        ],
+        [
+          "`e5`",
+          "Resources give the count, a note by id and an error for a missing one"
+        ],
+        [
+          "`e6`",
+          "The prompt lists the notes and defaults the tone"
+        ],
+        [
+          "`e7`",
+          "Ids are sequential and a failed call does not use one"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The Java and Kotlin tests start the server with `java -cp`, using the class path that the build file hands them."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// A notes server for the Model Context Protocol, over stdio. See ../../statement.md.\nimport { McpServer, ResourceTemplate } from \"@modelcontextprotocol/sdk/server/mcp.js\";\nimport { StdioServerTransport } from \"@modelcontextprotocol/sdk/server/stdio.js\";\nimport { ErrorCode, McpError } from \"@modelcontextprotocol/sdk/types.js\";\nimport { z } from \"zod\";\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"notes_server\");\n\nconst MAX_TEXT = 500;\nconst server = new McpServer({ name: \"notes\", version: \"1.0.0\" });\nconst notes: { title: string; text: string }[] = []; // the id of a note is its position, counting from 1\n\nconst fail = (message: string) => ({ isError: true, content: [{ type: \"text\" as const, text: message }] });\nconst ok = (text: string) => ({ content: [{ type: \"text\" as const, text }] });\n\n/** Refuse a bad note: the error message, or null when the (stripped) title and text are fine. */\nfunction noteError(title: string, text: string): string | null {\n  if (!title) return \"title is required\";\n  if (!text) return \"text is required\";\n  if (text.length > MAX_TEXT) return `text is too long (max ${MAX_TEXT})`;\n  return null;\n}\n\n/** Refuse a bad search: the error message, or null when the (stripped) query and the limit are fine. */\nfunction searchError(query: string, limit: number): string | null {\n  if (!query) return \"query is required\";\n  if (limit < 1 || limit > 20) return \"limit must be between 1 and 20\";\n  return null;\n}\n\n/** The lines `{id}. {title}` of the notes whose title or text contains the query, in any letter case, in id order. */\nfunction findHits(query: string): string[] {\n  const needle = query.toLowerCase();\n  return notes.flatMap((n, i) => (n.title.toLowerCase().includes(needle) || n.text.toLowerCase().includes(needle) ? [`${i + 1}. ${n.title}`] : []));\n}\n\n/** The answer of a search: at most `limit` hit lines joined by newlines, or the no-match sentence. */\nfunction formatHits(hits: string[], limit: number, query: string): string {\n  return hits.length ? hits.slice(0, limit).join(\"\\n\") : `No notes match \"${query}\"`;\n}\n\n/** The text of the count resource: 0 notes, 1 note, 2 notes. */\nfunction countText(count: number): string {\n  return `${count} note${count === 1 ? \"\" : \"s\"}`;\n}\n\n/** The text of one note, or an McpError \"No note {id}\" when the id is not a whole number of an existing note. */\nfunction noteText(id: string): string {\n  if (!/^\\d+$/.test(id) || Number(id) < 1 || Number(id) > notes.length) throw new McpError(ErrorCode.InvalidParams, `No note ${id}`);\n  const n = notes[Number(id) - 1];\n  return `${n.title}\\n\\n${n.text}`;\n}\n\n/** The text of the review prompt. */\nfunction reviewText(tone: string): string {\n  if (!notes.length) return \"There are no notes to review.\";\n  return `Review these notes in a ${tone} tone:\\n` + notes.map((n) => `- ${n.title}`).join(\"\\n\");\n}\n\n/** How many hits a search returns when the caller gives no limit. */\nfunction defaultLimit(): number {\n  return 5;\n}\n\n/** The annotations that tell a client search_notes only reads. */\nfunction searchAnnotations(): { readOnlyHint: boolean } | undefined {\n  return { readOnlyHint: true };\n}\n\nserver.registerTool(\n  \"add_note\",\n  { description: \"Save a note with a title and a text.\", inputSchema: { title: z.string(), text: z.string() }, annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false } },\n  async ({ title, text }) => {\n    log.debug(\"add_note input\", { title, text });\n    title = title.trim();\n    text = text.trim();\n    const error = noteError(title, text);\n    if (error) return fail(error);\n    notes.push({ title, text });\n    return ok(`Saved note ${notes.length}: ${title}`);\n  },\n);\n\nserver.registerTool(\n  \"search_notes\",\n  { description: \"Find notes whose title or text contains the query.\", inputSchema: { query: z.string(), limit: z.number().int().default(defaultLimit()) }, annotations: searchAnnotations() },\n  async ({ query, limit }) => {\n    const error = searchError(query.trim(), limit);\n    if (error) return fail(error);\n    return ok(formatHits(findHits(query.trim()), limit, query.trim()));\n  },\n);\n\nserver.registerResource(\"count\", \"notes://count\", { description: \"How many notes there are.\", mimeType: \"text/plain\" }, async (uri) => ({\n  contents: [{ uri: uri.href, mimeType: \"text/plain\", text: countText(notes.length) }],\n}));\n\nserver.registerResource(\"note\", new ResourceTemplate(\"notes://note/{id}\", { list: undefined }), { description: \"One note by id.\", mimeType: \"text/plain\" }, async (uri, { id }) => ({\n  contents: [{ uri: uri.href, mimeType: \"text/plain\", text: noteText(String(id)) }],\n}));\n\nserver.registerPrompt(\"review_notes\", { description: \"Ask for a review of the notes.\", argsSchema: { tone: z.string().optional() } }, ({ tone }) => ({\n  messages: [{ role: \"user\" as const, content: { type: \"text\" as const, text: reviewText(tone ?? \"brief\") } }],\n}));\n\nawait server.connect(new StdioServerTransport());\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { Client } from \"@modelcontextprotocol/sdk/client/index.js\";\nimport { StdioClientTransport } from \"@modelcontextprotocol/sdk/client/stdio.js\";\nimport { dirname, resolve } from \"node:path\";\nimport { fileURLToPath } from \"node:url\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// Start your server as a separate process over stdio and connect the SDK's own client to it, as the tests do.\n// (The server's stdout is the protocol channel, so its log lines cannot show here.)\nconst server = resolve(dirname(fileURLToPath(import.meta.url)), \"notes_server.ts\");\nconst transport = new StdioClientTransport({ command: process.execPath, args: [server], env: process.env as Record<string, string>, stderr: \"ignore\" });\nconst client = new Client({ name: \"try-it\", version: \"1.0.0\" });\nconst text = (result: any) => (result?.content ?? []).map((c: any) => c.text ?? \"\").join(\"\");\n\ntry {\n  await client.connect(transport);\n  console.log(\"add_note:\", text(await client.callTool({ name: \"add_note\", arguments: { title: \"Plan\", text: \"ship it\" } })));\n  console.log(\"search_notes:\", text(await client.callTool({ name: \"search_notes\", arguments: { query: \"ship\" } })));\n  const counted: any = await client.readResource({ uri: \"notes://count\" });\n  console.log(\"count resource:\", counted.contents?.[0]?.text);\n  const read: any = await client.readResource({ uri: \"notes://note/1\" });\n  console.log(\"note 1 resource:\", JSON.stringify(read.contents?.[0]?.text));\n} catch (err) {\n  console.log(\"raised:\", String(err));\n} finally {\n  await client.close();\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// A notes server for the Model Context Protocol, over stdio. See ../../statement.md.\nimport { McpServer, ResourceTemplate } from \"@modelcontextprotocol/sdk/server/mcp.js\";\nimport { StdioServerTransport } from \"@modelcontextprotocol/sdk/server/stdio.js\";\nimport { ErrorCode, McpError } from \"@modelcontextprotocol/sdk/types.js\";\nimport { z } from \"zod\";\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"notes_server\");\n\nconst MAX_TEXT = 500;\nconst server = new McpServer({ name: \"notes\", version: \"1.0.0\" });\nconst notes: { title: string; text: string }[] = []; // the id of a note is its position, counting from 1\n\nconst fail = (message: string) => ({ isError: true, content: [{ type: \"text\" as const, text: message }] });\nconst ok = (text: string) => ({ content: [{ type: \"text\" as const, text }] });\n\n// GAP 1 of 9 (unlocks e2 and e7): refuse a bad note.\n// Receives the title and the text, both already stripped. Returns the error message, or null when they are fine: \"title is required\" for an empty title,\n// \"text is required\" for an empty text and `text is too long (max ${MAX_TEXT})` for a text longer than MAX_TEXT, checked in that order.\n// Example: noteError(\"\", \"x\") -> \"title is required\"; noteError(\"T\", \"x\") -> null\nfunction noteError(title: string, text: string): string | null {\n  return null;\n}\n\n// GAP 2 of 9 (unlocks e2): refuse a bad search.\n// Receives the stripped query and the limit. Returns the error message, or null when they are fine: \"query is required\" for an empty query and\n// \"limit must be between 1 and 20\" for a limit outside 1 to 20, in that order.\n// Example: searchError(\"x\", 21) -> \"limit must be between 1 and 20\"\nfunction searchError(query: string, limit: number): string | null {\n  return null;\n}\n\n// GAP 3 of 9 (unlocks m1 and e3): the notes that match a search.\n// Receives the stripped query. Returns the lines `{id}. {title}` of the notes (ids count from 1) whose title or text contains the query in any\n// letter case, in id order.\n// Example: with notes (\"Alpha\", \"x\") and (\"beta\", \"ALPHA again\"), findHits(\"alpha\") -> [\"1. Alpha\", \"2. beta\"]\nfunction findHits(query: string): string[] {\n  return [];\n}\n\n// GAP 4 of 9 (unlocks e3): the answer of a search.\n// Receives the hit lines, the limit and the stripped query. Returns at most `limit` lines joined by newlines; with no hits the sentence\n// No notes match \"<query>\".\n// Example: formatHits([\"1. A\", \"2. B\"], 1, \"a\") -> \"1. A\"; formatHits([], 5, \"zeta\") -> 'No notes match \"zeta\"'\nfunction formatHits(hits: string[], limit: number, query: string): string {\n  return \"\";\n}\n\n// GAP 5 of 9 (unlocks e5): the text of the count resource.\n// Receives the number of notes. Returns \"0 notes\", \"1 note\", \"2 notes\" and so on.\n// Example: countText(1) -> \"1 note\"\nfunction countText(count: number): string {\n  return \"\";\n}\n\n// GAP 6 of 9 (unlocks m1 and e5): the text of one note.\n// Receives the id from the URI as a string. Returns the title, an empty line, then the text. An id that is not a whole number of an existing note\n// (\"0\", \"3\" of two notes, \"abc\") throws new McpError(ErrorCode.InvalidParams, `No note ${id}`).\n// Example: with one note (\"Plan\", \"ship it\"), noteText(\"1\") -> \"Plan\\n\\nship it\"\nfunction noteText(id: string): string {\n  return \"\";\n}\n\n// GAP 7 of 9 (unlocks e6): the text of the review prompt.\n// With no notes it is \"There are no notes to review.\"; otherwise \"Review these notes in a <tone> tone:\" and one line \"- <title>\" per note,\n// each after a newline.\n// Example: with one note titled \"Plan\", reviewText(\"brief\") -> \"Review these notes in a brief tone:\\n- Plan\"\nfunction reviewText(tone: string): string {\n  return \"\";\n}\n\n// GAP 8 of 9 (unlocks e1): how many hits a search returns when the caller gives no limit.\n// Takes nothing; returns that number, which is also the default the tool's input schema advertises.\n// Example: defaultLimit() -> 5\nfunction defaultLimit(): number {\n  return 0;\n}\n\n// GAP 9 of 9 (unlocks e4): the annotations that tell a client search_notes only reads.\n// Takes nothing; returns an object with readOnlyHint true.\n// Example: searchAnnotations()?.readOnlyHint -> true\nfunction searchAnnotations(): { readOnlyHint: boolean } | undefined {\n  return undefined;\n}\n\nserver.registerTool(\n  \"add_note\",\n  { description: \"Save a note with a title and a text.\", inputSchema: { title: z.string(), text: z.string() }, annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false } },\n  async ({ title, text }) => {\n    log.debug(\"add_note input\", { title, text });\n    title = title.trim();\n    text = text.trim();\n    const error = noteError(title, text);\n    if (error) return fail(error);\n    notes.push({ title, text });\n    return ok(`Saved note ${notes.length}: ${title}`);\n  },\n);\n\nserver.registerTool(\n  \"search_notes\",\n  { description: \"Find notes whose title or text contains the query.\", inputSchema: { query: z.string(), limit: z.number().int().default(defaultLimit()) }, annotations: searchAnnotations() },\n  async ({ query, limit }) => {\n    const error = searchError(query.trim(), limit);\n    if (error) return fail(error);\n    return ok(formatHits(findHits(query.trim()), limit, query.trim()));\n  },\n);\n\nserver.registerResource(\"count\", \"notes://count\", { description: \"How many notes there are.\", mimeType: \"text/plain\" }, async (uri) => ({\n  contents: [{ uri: uri.href, mimeType: \"text/plain\", text: countText(notes.length) }],\n}));\n\nserver.registerResource(\"note\", new ResourceTemplate(\"notes://note/{id}\", { list: undefined }), { description: \"One note by id.\", mimeType: \"text/plain\" }, async (uri, { id }) => ({\n  contents: [{ uri: uri.href, mimeType: \"text/plain\", text: noteText(String(id)) }],\n}));\n\nserver.registerPrompt(\"review_notes\", { description: \"Ask for a review of the notes.\", argsSchema: { tone: z.string().optional() } }, ({ tone }) => ({\n  messages: [{ role: \"user\" as const, content: { type: \"text\" as const, text: reviewText(tone ?? \"brief\") } }],\n}));\n\nawait server.connect(new StdioServerTransport());\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { Client } from \"@modelcontextprotocol/sdk/client/index.js\";\nimport { StdioClientTransport } from \"@modelcontextprotocol/sdk/client/stdio.js\";\nimport { dirname, resolve } from \"node:path\";\nimport { fileURLToPath } from \"node:url\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// Start your server as a separate process over stdio and connect the SDK's own client to it, as the tests do.\n// (The server's stdout is the protocol channel, so its log lines cannot show here.)\nconst server = resolve(dirname(fileURLToPath(import.meta.url)), \"notes_server.ts\");\nconst transport = new StdioClientTransport({ command: process.execPath, args: [server], env: process.env as Record<string, string>, stderr: \"ignore\" });\nconst client = new Client({ name: \"try-it\", version: \"1.0.0\" });\nconst text = (result: any) => (result?.content ?? []).map((c: any) => c.text ?? \"\").join(\"\");\n\ntry {\n  await client.connect(transport);\n  console.log(\"add_note:\", text(await client.callTool({ name: \"add_note\", arguments: { title: \"Plan\", text: \"ship it\" } })));\n  console.log(\"search_notes:\", text(await client.callTool({ name: \"search_notes\", arguments: { query: \"ship\" } })));\n  const counted: any = await client.readResource({ uri: \"notes://count\" });\n  console.log(\"count resource:\", counted.contents?.[0]?.text);\n  const read: any = await client.readResource({ uri: \"notes://note/1\" });\n  console.log(\"note 1 resource:\", JSON.stringify(read.contents?.[0]?.text));\n} catch (err) {\n  console.log(\"raised:\", String(err));\n} finally {\n  await client.close();\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 7,
+    "paras": 7,
+    "code": 2,
+    "tables": 1,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "ecda40ebb062ed8691287d3be405becfc48f2995116101d40d41981214f5e7e0",
+  "starting_code": "// A notes server for the Model Context Protocol, over stdio. See ../../statement.md.\nimport { McpServer, ResourceTemplate } from \"@modelcontextprotocol/sdk/server/mcp.js\";\nimport { StdioServerTransport } from \"@modelcontextprotocol/sdk/server/stdio.js\";\nimport { ErrorCode, McpError } from \"@modelcontextprotocol/sdk/types.js\";\nimport { z } from \"zod\";\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"notes_server\");\n\nconst MAX_TEXT = 500;\nconst server = new McpServer({ name: \"notes\", version: \"1.0.0\" });\nconst notes: { title: string; text: string }[] = []; // the id of a note is its position, counting from 1\n\nconst fail = (message: string) => ({ isError: true, content: [{ type: \"text\" as const, text: message }] });\nconst ok = (text: string) => ({ content: [{ type: \"text\" as const, text }] });\n\n// GAP 1 of 9 (unlocks e2 and e7): refuse a bad note.\n// Receives the title and the text, both already stripped. Returns the error message, or null when they are fine: \"title is required\" for an empty title,\n// \"text is required\" for an empty text and `text is too long (max ${MAX_TEXT})` for a text longer than MAX_TEXT, checked in that order.\n// Example: noteError(\"\", \"x\") -> \"title is required\"; noteError(\"T\", \"x\") -> null\nfunction noteError(title: string, text: string): string | null {\n  return null;\n}\n\n// GAP 2 of 9 (unlocks e2): refuse a bad search.\n// Receives the stripped query and the limit. Returns the error message, or null when they are fine: \"query is required\" for an empty query and\n// \"limit must be between 1 and 20\" for a limit outside 1 to 20, in that order.\n// Example: searchError(\"x\", 21) -> \"limit must be between 1 and 20\"\nfunction searchError(query: string, limit: number): string | null {\n  return null;\n}\n\n// GAP 3 of 9 (unlocks m1 and e3): the notes that match a search.\n// Receives the stripped query. Returns the lines `{id}. {title}` of the notes (ids count from 1) whose title or text contains the query in any\n// letter case, in id order.\n// Example: with notes (\"Alpha\", \"x\") and (\"beta\", \"ALPHA again\"), findHits(\"alpha\") -> [\"1. Alpha\", \"2. beta\"]\nfunction findHits(query: string): string[] {\n  return [];\n}\n\n// GAP 4 of 9 (unlocks e3): the answer of a search.\n// Receives the hit lines, the limit and the stripped query. Returns at most `limit` lines joined by newlines; with no hits the sentence\n// No notes match \"<query>\".\n// Example: formatHits([\"1. A\", \"2. B\"], 1, \"a\") -> \"1. A\"; formatHits([], 5, \"zeta\") -> 'No notes match \"zeta\"'\nfunction formatHits(hits: string[], limit: number, query: string): string {\n  return \"\";\n}\n\n// GAP 5 of 9 (unlocks e5): the text of the count resource.\n// Receives the number of notes. Returns \"0 notes\", \"1 note\", \"2 notes\" and so on.\n// Example: countText(1) -> \"1 note\"\nfunction countText(count: number): string {\n  return \"\";\n}\n\n// GAP 6 of 9 (unlocks m1 and e5): the text of one note.\n// Receives the id from the URI as a string. Returns the title, an empty line, then the text. An id that is not a whole number of an existing note\n// (\"0\", \"3\" of two notes, \"abc\") throws new McpError(ErrorCode.InvalidParams, `No note ${id}`).\n// Example: with one note (\"Plan\", \"ship it\"), noteText(\"1\") -> \"Plan\\n\\nship it\"\nfunction noteText(id: string): string {\n  return \"\";\n}\n\n// GAP 7 of 9 (unlocks e6): the text of the review prompt.\n// With no notes it is \"There are no notes to review.\"; otherwise \"Review these notes in a <tone> tone:\" and one line \"- <title>\" per note,\n// each after a newline.\n// Example: with one note titled \"Plan\", reviewText(\"brief\") -> \"Review these notes in a brief tone:\\n- Plan\"\nfunction reviewText(tone: string): string {\n  return \"\";\n}\n\n// GAP 8 of 9 (unlocks e1): how many hits a search returns when the caller gives no limit.\n// Takes nothing; returns that number, which is also the default the tool's input schema advertises.\n// Example: defaultLimit() -> 5\nfunction defaultLimit(): number {\n  return 0;\n}\n\n// GAP 9 of 9 (unlocks e4): the annotations that tell a client search_notes only reads.\n// Takes nothing; returns an object with readOnlyHint true.\n// Example: searchAnnotations()?.readOnlyHint -> true\nfunction searchAnnotations(): { readOnlyHint: boolean } | undefined {\n  return undefined;\n}\n\nserver.registerTool(\n  \"add_note\",\n  { description: \"Save a note with a title and a text.\", inputSchema: { title: z.string(), text: z.string() }, annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false } },\n  async ({ title, text }) => {\n    log.debug(\"add_note input\", { title, text });\n    title = title.trim();\n    text = text.trim();\n    const error = noteError(title, text);\n    if (error) return fail(error);\n    notes.push({ title, text });\n    return ok(`Saved note ${notes.length}: ${title}`);\n  },\n);\n\nserver.registerTool(\n  \"search_notes\",\n  { description: \"Find notes whose title or text contains the query.\", inputSchema: { query: z.string(), limit: z.number().int().default(defaultLimit()) }, annotations: searchAnnotations() },\n  async ({ query, limit }) => {\n    const error = searchError(query.trim(), limit);\n    if (error) return fail(error);\n    return ok(formatHits(findHits(query.trim()), limit, query.trim()));\n  },\n);\n\nserver.registerResource(\"count\", \"notes://count\", { description: \"How many notes there are.\", mimeType: \"text/plain\" }, async (uri) => ({\n  contents: [{ uri: uri.href, mimeType: \"text/plain\", text: countText(notes.length) }],\n}));\n\nserver.registerResource(\"note\", new ResourceTemplate(\"notes://note/{id}\", { list: undefined }), { description: \"One note by id.\", mimeType: \"text/plain\" }, async (uri, { id }) => ({\n  contents: [{ uri: uri.href, mimeType: \"text/plain\", text: noteText(String(id)) }],\n}));\n\nserver.registerPrompt(\"review_notes\", { description: \"Ask for a review of the notes.\", argsSchema: { tone: z.string().optional() } }, ({ tone }) => ({\n  messages: [{ role: \"user\" as const, content: { type: \"text\" as const, text: reviewText(tone ?? \"brief\") } }],\n}));\n\nawait server.connect(new StdioServerTransport());\n",
+  "exercise": {
+    "main_path": "practice/level-2/32-mcp-fundamentals/prose/unit-03/practice-2/notes_server.ts",
+    "test_path": "practice/level-2/32-mcp-fundamentals/prose/unit-03/practice-2/notes.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-2/32-mcp-fundamentals/prose/unit-03/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "practice/level-2/32-mcp-fundamentals/prose/unit-03/practice-2/run-tests.mjs"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 a client can save a note find it and read it back",
+        "kind": "main",
+        "says": "A client can save a note, find it and read it back"
+      },
+      {
+        "id": "e1 the server declares tools resources and prompts and names its tools",
+        "kind": "edge",
+        "says": "The server declares tools, resources and prompts, and names its tools"
+      },
+      {
+        "id": "e2 bad input comes back as a tool error the model can read",
+        "kind": "edge",
+        "says": "Bad input comes back as a tool error the model can read"
+      },
+      {
+        "id": "e3 search ignores case keeps id order honours the limit and says when nothing matches",
+        "kind": "edge",
+        "says": "Search ignores case, keeps id order, honours the limit and says when nothing matches"
+      },
+      {
+        "id": "e4 tool annotations tell a client which tool only reads",
+        "kind": "edge",
+        "says": "Tool annotations tell a client which tool only reads"
+      },
+      {
+        "id": "e5 resources give the count a note by id and an error for a missing one",
+        "kind": "edge",
+        "says": "Resources give the count, a note by id and an error for a missing one"
+      },
+      {
+        "id": "e6 the prompt lists the notes and defaults the tone",
+        "kind": "edge",
+        "says": "The prompt lists the notes and defaults the tone"
+      },
+      {
+        "id": "e7 ids are sequential and a failed call does not use one",
+        "kind": "edge",
+        "says": "Ids are sequential and a failed call does not use one"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/32-mcp-fundamentals/prose/unit-03/practice-2/target/report.xml"
+    },
+    "origin": "course/32-mcp-fundamentals/03-clients-testing-and-debugging.md",
+    "concepts": [
+      "the practice of MCP clients, testing a server and debugging it is solved"
+    ],
+    "files": [
+      "practice/level-2/32-mcp-fundamentals/prose/unit-03/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "mcp-fundamentals-u3"
+}

@@ -1,0 +1,337 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "41-security-and-safety"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Layered guardrails, monitoring and the practice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Layered guardrails, monitoring and the practice"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Developer · **Module 41:** Security and safety · **Page 3 of 3** **Exams:** DV6; A2.3"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** layer input guardrails, structural controls and output guardrails around an agent, reduce prompt leaks without hurting the task, record identity and decisions so that abuse is noticed, say what Claude Code's telemetry and `ConfigChange` hook add, and finish the module's practice, an injection-resistant tool gate."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-03 against the Claude API documentation pages \"Mitigate jailbreaks and prompt injections\" and \"Reduce prompt leak\", the Claude Code security, hooks guide and monitoring pages. Nothing here was run against a live service. The practice runs offline in Python, TypeScript, Java and Kotlin."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "No single control stops an attack, so the exam asks how controls combine and where each sits in the path of a request. It also asks the operational questions: what you log, who gets alerted and what you do about a user who keeps trying. A design that has only a prevention layer learns nothing from an attack that gets through."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Layers around the model"
+    },
+    {
+      "type": "para",
+      "text": "The documentation ends its list with a section on chaining: \"Combine strategies for robust protection.\" Read the path of one request and put a control at each step."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Layer",
+        "Control",
+        "Source of the idea"
+      ],
+      "rows": [
+        [
+          "Input",
+          "A harmlessness screen on user text; validation of known patterns",
+          "The user is the adversary"
+        ],
+        [
+          "Structure",
+          "Untrusted content only in tool results, JSON-encoded, with its source named and the policy in the system prompt",
+          "Page 1"
+        ],
+        [
+          "Privilege",
+          "Narrow tools, data and actions; a stricter gate after untrusted text was read",
+          "Page 2"
+        ],
+        [
+          "Tool output",
+          "A small-model screen on what a tool returns, before Claude acts on it",
+          "The documentation's screen pattern"
+        ],
+        [
+          "Action",
+          "A hook or gate that decides each call, failing closed",
+          "Page 2"
+        ],
+        [
+          "Output",
+          "Redaction of keys, addresses and card numbers; keyword filtering for leaks",
+          "Prompt-leak page"
+        ],
+        [
+          "Record",
+          "An audit of every decision, and alerts on repeated denials",
+          "This page"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The screen of tool output works like this: \"Run each tool, pass its raw output to a small classifier call with Claude Haiku 4.5, and only return the content as a `tool_result` block if the screen reports no injection attempt.\" If the verdict is positive, \"return an error or a stripped summary in the `tool_result` block instead of the raw content, and consider surfacing the attempt to the user.\" A structured-output schema makes the verdict a value your code can branch on. The pattern screen of page 1 is the cheap first pass, and the classifier is the second."
+    },
+    {
+      "type": "para",
+      "text": "Two cautions. First, each layer adds cost and latency, and a false positive blocks real work, so measure both. Second, the documentation advises to \"Red-team your own agent\": test with documents, emails and tool outputs that deliberately contain injection attempts, and confirm that \"Claude ignores them and that your screening and confirmation steps catch the rest.\" A control you have not attacked is a control you have only hoped for."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Reducing prompt leaks"
+    },
+    {
+      "type": "para",
+      "text": "A prompt leak exposes what you expected to keep hidden in the prompt. The documentation is modest about it: \"While no method is foolproof, the strategies below can significantly reduce the risk\", and it warns that leak-proofing \"can add complexity that may degrade performance\". So the first advice is to try monitoring before prompt engineering: \"output screening and post-processing, to try to catch instances of prompt leak.\" The strategies are to separate context from queries, to filter Claude's outputs with regular expressions, keyword filtering or a prompted model, to avoid unnecessary proprietary details (\"If Claude doesn't need it to perform the task, don't include it\"), and to audit regularly. The cheapest to apply is the third, because it adds no complexity. A secret that is not in the prompt cannot leak from it, which is also the logic of least privilege."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Monitoring: identity and access"
+    },
+    {
+      "type": "para",
+      "text": "A control that blocks should also record. For every gate decision keep the actor (a user, a session or an agent), the tool, the decision, the reason and the arguments with secrets redacted, because a log that holds a raw key has become a leak of its own. From the record you can answer the questions that matter: who tried what, which denials repeat, which sessions were tainted. The documentation names the response to repeat offenders: \"Adjust responses and consider throttling or banning users who repeatedly attempt to circumvent your application's guardrails.\" That needs a threshold. The practice uses three denials by one actor, which raises an alert, and treats a question to a person (`ask`) as a normal event and not a denial."
+    },
+    {
+      "type": "para",
+      "text": "Claude Code adds its own monitoring for teams. \"Track Claude Code usage, costs, and tool activity across your organization by exporting telemetry data through OpenTelemetry (OTel).\" Metrics are time series, and events carry tool activity. A `ConfigChange` hook fires when a settings file changes, with matchers for the user, project, local and policy settings, and \"To block a change from taking effect, exit with code 2\". Together with managed settings, it lets an organisation notice or refuse a change to the permission rules, which is access monitoring applied to the configuration itself."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The practice"
+    },
+    {
+      "type": "para",
+      "text": "The practice is the code layer, an injection-resistant tool gate. It is a design the course proposes from the documented advice, and not a product feature. You write, in your language of choice (Python, TypeScript, Java or Kotlin):"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`screen`, which names the injection signals in a text, in a fixed order, ignoring letter case;",
+        "`wrap_untrusted`, which returns a tool result holding one line of compact JSON with the source and `\"trust\": \"untrusted\"`, or an error that names the signals and shows none of the text;",
+        "`redact`, which replaces keys, addresses and Luhn-valid card numbers with fixed markers;",
+        "a `Gate`, which decides `read_file`, `write_file`, `bash`, `fetch` and `send_email` calls as `allow`, `ask` or `deny` with a fixed reason. It keeps paths inside the project, refuses secret files and protected folders, limits `bash` to read-only commands and refuses chaining, checks hosts and recipient domains exactly, and gets stricter once `mark_untrusted` has been called;",
+        "an audit with redacted arguments, `alerts` for actors with three denials, and `hook_response`, which shapes a decision as a `PreToolUse` hook answer."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The Java and Kotlin folders give you a small `Json` helper, because those two have no JSON library in the course's offline image. The statement lists every rule and every reason string. The starter fails every test, the reference passes, and each planted wrong solution fails on an assertion."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Relying on one layer.** A screen alone misses paraphrases, a prompt alone is not a grant, and a sandbox alone does not cover file tools.",
+        "**Logging raw arguments.** A key in an audit line is a leak. Redact before writing.",
+        "**Failing open.** A gate that allows what it cannot parse has an attacker's favourite hole.",
+        "**Counting questions as attacks.** An `ask` is the gate working, and alerts on it bury the real ones."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A team wants to spot a user who keeps probing the application's guardrails. Which monitoring rule fits?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Alert on every question put to a person, since each may be an attack",
+              "**b**: Add up denials across all actors, and alert on the total",
+              "**c**: Count denials for each actor, and alert at a threshold",
+              "**d**: Tighten the system prompt, so the model refuses harder next time"
+            ]
+          }
+        ],
+        [
+          "A team wants to cut the risk of a prompt leak without hurting the work. Which step adds no complexity?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Screen every reply with a prompted model that looks for leaked text",
+              "**b**: Add many rules that forbid repeating text from the instructions",
+              "**c**: Rewrite the prompt with tighter wording before any monitoring",
+              "**d**: Leave out proprietary details that the task does not need"
+            ]
+          }
+        ],
+        [
+          "A gate writes each decision to an audit with the call's inputs, one of which is an API key. What should it record?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The arguments, with the secret replaced by a fixed marker",
+              "**b**: The raw arguments, since an audit wants the full detail",
+              "**c**: No entry for a call that happens to carry a secret value",
+              "**d**: The tool and the decision, with the arguments left out entirely"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**c**. The page says the response to repeat offenders \"needs a threshold\", and \"The practice uses three denials by one actor, which raises an alert\". *a* is ruled out because \"An `ask` is the gate working, and alerts on it bury the real ones.\" *b* is ruled out because the alert is per actor: \"three denials by one actor\", and a pooled total names nobody. *d* is ruled out because \"A control that blocks should also record\", and a stricter prompt records nothing.",
+            "**d**. The page says \"If Claude doesn't need it to perform the task, don't include it\", and that a secret not in the prompt \"cannot leak from it\". *a* is ruled out because the page ranks it behind the cheapest step: \"The cheapest to apply is the third, because it adds no complexity.\" *b* is ruled out because leak-proofing \"can add complexity that may degrade performance\". *c* is ruled out because the first advice is to \"try monitoring before prompt engineering\".",
+            "**a**. The page says to record \"the arguments with secrets redacted, because a log that holds a raw key has become a leak of its own\". *b* is ruled out because the audit keeps \"the arguments with secrets redacted\" and not the raw ones. *c* is ruled out because the audit exists to answer \"who tried what, which denials repeat, which sessions were tainted\", and a call that carries a secret is one worth recording. *d* is ruled out because the record holds \"the tool, the decision, the reason and the arguments with secrets redacted\", so the arguments stay in it."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Module quiz"
+    },
+    {
+      "type": "para",
+      "text": "This quiz covers all three pages of the module."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A mail assistant reads inbound messages. Which combination gives the best protection against a hostile message?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: A pattern list, a firm tone in the prompt and a larger context window",
+              "**b**: Encoded results, narrow tools and a gate that tightens after outside text",
+              "**c**: Encoded results, a pattern list and broad tools kept for convenience",
+              "**d**: Narrow tools and a gate, with the message text placed in the system prompt"
+            ]
+          }
+        ],
+        [
+          "After an agent has read an untrusted web page, which request should be refused or escalated?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Reading a file inside the project folder",
+              "**b**: Fetching a plain address with no query string and no fragment",
+              "**c**: Sending mail to an outside recipient",
+              "**d**: Running a read-only command such as `git status`"
+            ]
+          }
+        ],
+        [
+          "A team builds a hook to stop recursive forced deletes. Which design choice should the hook follow?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Parse the line into parts, fail closed, and stay silent on safe ones",
+              "**b**: Match the text `rm -rf` and allow whatever it cannot parse",
+              "**c**: Match the text `rm -rf` and rely on the model's caution for the rest",
+              "**d**: Answer `allow` on every safe command so the call goes straight through"
+            ]
+          }
+        ],
+        [
+          "A team's key is stored in the environment for a CI job. Which practice fits both CI and an agent in production?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Track the `.env` file so every runner receives the same value",
+              "**b**: Pass it to the agent's sandbox as an ordinary environment variable",
+              "**c**: Log the value once at the start so later checks can compare it",
+              "**d**: Keep the value out of the model's reach, and redact it in logs"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**b**. The layers table puts structure (JSON encoding), privilege (narrow tools, \"a stricter gate after untrusted text was read\") and a decision gate in the path of one request. *a* is ruled out because a pattern list \"catches the phrasing someone thought of and misses the paraphrase\", and \"Whatever the injected text asks for, the agent can do only what its grants allow\", so tone adds no grant. *c* is ruled out because \"An agent that can read a file, send mail to anyone and has the production key can leak.\" *d* is ruled out because the page says untrusted content goes \"never in `system` prompts or plain user `text` blocks\".",
+            "**c**. The page says that in a tainted session \"Sending mail is refused until a person does it\". *a* is ruled out because \"Reads stay allowed, since they change nothing\". *b* is ruled out because only a network call \"that carries data in its URL, a query string or a fragment asks\", so a plain address stays allowed. *d* is ruled out because the practice gate \"limits `bash` to read-only commands and refuses chaining\", so a read-only command stays allowed.",
+            "**a**. The page says a hook can \"parse the command into its parts\", should \"fail closed\", and that a command \"that cannot be parsed, or an event the hook cannot read, is blocked and not waved through\". *b* is ruled out because \"A guard that exits 0 on a parse error is a guard an attacker can walk through\". *c* is ruled out because \"A memory line asks, and a hook enforces\", and the model's caution is not a control. *d* is ruled out because the hook \"should answer the safe case with no opinion and not with an allow, so that it never overrides a stricter rule elsewhere\".",
+            "**d**. The page says \"a secret never enters anything the model can read or a file anyone can commit\", and \"In logs and results, redact before writing.\" *a* is ruled out because keys are \"loaded from an untracked file such as `.env`\", and a secret never enters \"a file anyone can commit\". *b* is ruled out because for production agents, \"keep the value out of the sandbox\". *c* is ruled out because \"A key that appears in a tool result or an audit line has left your control.\""
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 10,
+    "paras": 13,
+    "code": 0,
+    "tables": 1,
+    "lists": 4,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 2
+  },
+  "content_sha256": "bcc7c7ca61b4a91a95590ec3ed4317173e95f534a775bf98617e57a32d51fa0f"
+}

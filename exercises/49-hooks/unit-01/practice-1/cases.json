@@ -1,0 +1,151 @@
+{
+  "practice": "49-hooks/unit-01/practice-1",
+  "name": "hooks",
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_the_gate_allows_a_small_refund_asks_about_a_middle_one_and_denies_a_large_one",
+      "typescript": "m1 the gate allows a small refund asks about a middle one and denies a large one"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_each_limit_belongs_to_the_lower_tier_and_the_next_cent_goes_up",
+      "typescript": "e1 each limit belongs to the lower tier and the next cent goes up"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_missing_or_invalid_amount_is_denied_and_other_tools_are_left_alone",
+      "typescript": "e2 a missing or invalid amount is denied and other tools are left alone"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_the_output_gets_a_date_a_status_word_and_a_decimal_amount",
+      "typescript": "e3 the output gets a date a status word and a decimal amount"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_output_that_is_not_json_or_is_already_readable_is_left_alone",
+      "typescript": "e4 output that is not json or is already readable is left alone"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_the_hooks_are_registered_on_tool_name_matchers_with_a_timeout",
+      "typescript": "e5 the hooks are registered on tool name matchers with a timeout"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_a_command_hook_blocks_with_exit_two_and_a_reason_and_fails_closed_on_bad_input",
+      "typescript": "e6 a command hook blocks with exit two and a reason and fails closed on bad input"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_the_settings_block_runs_the_command_hook_on_bash_with_a_timeout",
+      "typescript": "e7 the settings block runs the command hook on bash with a timeout"
+    },
+    "e8": {
+      "kind": "edge",
+      "python": "test_e8_a_run_through_the_sdk_denies_the_large_refund_and_shows_the_model_a_readable_order",
+      "typescript": "e8 a run through the sdk denies the large refund and shows the model a readable order"
+    }
+  },
+  "plants": {
+    "wrong-200-asks": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "asks a person about a refund of exactly the automatic limit"
+    },
+    "wrong-500-denied": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "denies a refund of exactly the upper limit"
+    },
+    "wrong-missing-amount-allowed": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "lets a refund with no amount through"
+    },
+    "wrong-coerces-amount": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "turns a text or a boolean amount into a number"
+    },
+    "wrong-gates-every-tool": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "applies the refund limits to a tool that is not a refund"
+    },
+    "wrong-always-milliseconds": {
+      "caught_by": [
+        "e3",
+        "e8"
+      ],
+      "defect": "reads every epoch as milliseconds"
+    },
+    "wrong-cents-kept": {
+      "caught_by": [
+        "e3",
+        "e8"
+      ],
+      "defect": "leaves amount_cents beside the new amount"
+    },
+    "wrong-rewrites-plain-text": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "answers a replacement for output that is not json"
+    },
+    "wrong-not-idempotent": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "reports a change for output that is already readable"
+    },
+    "wrong-no-matcher": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "registers the refund gate for every tool"
+    },
+    "wrong-no-timeout": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "registers the hooks without a timeout"
+    },
+    "wrong-exit-one": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "blocks with exit code 1, which does not block"
+    },
+    "wrong-bad-input-passes": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "lets a call through when the hook input is not json"
+    },
+    "wrong-settings-no-timeout": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "writes the settings hook without a timeout"
+    },
+    "wrong-turn-limit-too-low": {
+      "caught_by": [
+        "e8"
+      ],
+      "defect": "limits the run to two turns, so the second refund is never reached"
+    },
+    "wrong-unknown-status-blank": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "leaves the status word empty for a code it does not know"
+    }
+  }
+}

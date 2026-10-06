@@ -1,0 +1,85 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "70-scenario-customer-support-agent"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 4,
+  "title": "Practice: audit a support agent's sessions and name the first fix (Kotlin)",
+  "lang": "kotlin",
+  "main_file": "src/main/kotlin/Audit.kt",
+  "files": [
+    "src/main/kotlin/TryIt.kt"
+  ],
+  "test_file": "src/test/kotlin/AuditTest.kt",
+  "build": [
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-4",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-4",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_aMixedSetOfSessionsGetsEveryRateAndTheFirstFix()",
+      "kind": "main",
+      "says": "A mixed set of six sessions gets every field right and the first fix"
+    },
+    {
+      "id": "e1_noSessionsGiveZeroRatesAndNoDiagnosis()",
+      "kind": "edge",
+      "says": "No sessions: zero everywhere, a rate of 0, no diagnosis"
+    },
+    {
+      "id": "e2_aProtectedCallBeforeASuccessfulIdentityCheckIsASkippedPrerequisite()",
+      "kind": "edge",
+      "says": "The prerequisite is the order of the steps, and a failed identity check does not open the gate"
+    },
+    {
+      "id": "e3_aRefundOverTheLimitCountsOnlyWhenItWasMade()",
+      "kind": "edge",
+      "says": "Only a refund that was made counts as over the limit"
+    },
+    {
+      "id": "e4_moneyFirstThenToolDescriptionsThenEscalationCriteria()",
+      "kind": "edge",
+      "says": "The order of fixes: code, then descriptions (a tie goes to descriptions), then criteria"
+    },
+    {
+      "id": "e5_theTargetBoundaryAndRoundingOfTheFirstContactRate()",
+      "kind": "edge",
+      "says": "The rate at exactly 0.8 meets the target, 0.6 does not, 2 of 3 is 0.667, and over- and under-escalation are counted apart"
+    },
+    {
+      "id": "e6_aWrongToolCountsSessionsAndIgnoresStepsWithNoKnownRightTool()",
+      "kind": "edge",
+      "says": "The wrong tool counts sessions and ignores steps whose right tool is not known"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/70-scenario-customer-support-agent/02-audit-the-sessions-and-the-practice.md"
+}

@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "53-tool-errors-agents-can-act-on"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 5,
+  "title": "Check yourself: A call with an unknown outcome, safe retries and the practice",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "After a timeout, an agent's wrapper sends the same call again at once. Which call may it repeat without any check first?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Issuing a refund that has no idempotency key",
+            "correct": false,
+            "says": "Ruled out because \"a refund sent twice refunds twice\"."
+          },
+          {
+            "id": "b",
+            "text": "Emailing the customer a confirmation of the refund",
+            "correct": false,
+            "says": "Ruled out because \"an email that left the outbox cannot be called back\"."
+          },
+          {
+            "id": "c",
+            "text": "Creating a support ticket for the case",
+            "correct": false,
+            "says": "Ruled out because \"a ticket created twice is two tickets\"."
+          },
+          {
+            "id": "d",
+            "text": "Looking up the order record by its order number",
+            "correct": true,
+            "says": "A read changes nothing when it is repeated."
+          }
+        ],
+        "origin": {
+          "path": "course/53-tool-errors-agents-can-act-on/02-a-call-with-an-unknown-outcome-retries-and-the-practice.md",
+          "section": "When a retry is safe"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A refund call times out, and the tool reports that its outcome is unknown. What should the agent do next?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Read the records kept for the order, then decide whether any work remains",
+            "correct": true,
+            "says": "A write that may have happened is followed by a read."
+          },
+          {
+            "id": "b",
+            "text": "Send the payment again under a fresh key straight away",
+            "correct": false,
+            "says": "Ruled out because a new key defeats the protection that a key gives: \"The tool sends the same key on every attempt\"."
+          },
+          {
+            "id": "c",
+            "text": "Tell the customer that the attempt failed and invite them to begin a new request",
+            "correct": false,
+            "says": "Ruled out because the agent would state something unknown as a fact: \"the money may have moved, and the agent will say the opposite of what happened\"."
+          },
+          {
+            "id": "d",
+            "text": "Mark the case as resolved and assume the service processed it",
+            "correct": false,
+            "says": "Ruled out because a guess is not news: \"it is the absence of news\"."
+          }
+        ],
+        "origin": {
+          "path": "course/53-tool-errors-agents-can-act-on/02-a-call-with-an-unknown-outcome-retries-and-the-practice.md",
+          "section": "When a retry is safe"
+        }
+      }
+    ]
+  }
+}

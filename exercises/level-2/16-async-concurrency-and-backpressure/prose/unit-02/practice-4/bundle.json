@@ -1,0 +1,81 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "16-async-concurrency-and-backpressure"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 4,
+  "title": "Practice: bounded concurrency with backpressure (Kotlin)",
+  "lang": "kotlin",
+  "main_file": "src/main/kotlin/Bounded.kt",
+  "files": [
+    "src/main/kotlin/TryIt.kt"
+  ],
+  "test_file": "src/test/kotlin/BoundedTest.kt",
+  "build": [
+    "src/main/kotlin/Outcome.kt",
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/16-async-concurrency-and-backpressure/prose/unit-02/practice-4",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/16-async-concurrency-and-backpressure/prose/unit-02/practice-4",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_resultsComeBackForEveryItemAndNeverMoreThanLimitRunAtOnce()",
+      "kind": "main",
+      "says": "Every item is processed, and never more than limit run at once"
+    },
+    {
+      "id": "e1_resultsKeepTheInputOrderEvenWhenLaterItemsFinishFirst()",
+      "kind": "edge",
+      "says": "Results keep the input order even when later items finish first"
+    },
+    {
+      "id": "e2_aFailingItemIsReportedAndTheOthersStillFinish()",
+      "kind": "edge",
+      "says": "A failing item is reported and the others still finish"
+    },
+    {
+      "id": "e3_aLimitAboveTheItemCountAndAnEmptyInputBothWork()",
+      "kind": "edge",
+      "says": "A limit above the item count and an empty input both work"
+    },
+    {
+      "id": "e4_aLimitBelowOneIsRefused()",
+      "kind": "edge",
+      "says": "A limit below one is refused"
+    },
+    {
+      "id": "e5_itemsArePulledLazilySoASlowConsumerHoldsTheProducerBack()",
+      "kind": "edge",
+      "says": "Items are pulled lazily: while all workers are blocked, only limit items have been taken"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/16-async-concurrency-and-backpressure/02-rate-limits-and-backpressure.md"
+}

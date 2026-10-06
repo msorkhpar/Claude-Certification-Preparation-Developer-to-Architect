@@ -1,0 +1,227 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "39-extending-claude-code"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Plugins, dependencies, sharing and the practice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Plugins, dependencies, sharing and the practice"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Developer · **Module 39:** Extending Claude Code · **Page 3 of 5** **Exams:** DV1, DV7; A3.2"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** package skills, agents and hooks as a plugin, declare a dependency with a version range, share a plugin with a team through the repository's settings, say what a plugin may and may not configure, and finish the module's practice."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-03 against the Claude Code documentation (plugins: create, manifest, dependencies, install, security and components; the settings reference), which mention behaviour up to Claude Code v2.1.286. No plugin was installed in the course environment. The practice tests read the files you write and run your hook script offline."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "A skill in one repository helps one team. A plugin makes the same set installable everywhere, versioned, with its dependencies. The exam asks what goes into a plugin, how a version range behaves, and how a team gets a plugin without each person installing it by hand. It also asks the careful question: a plugin runs code with your privileges, so who decides to trust it?"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What a plugin is"
+    },
+    {
+      "type": "para",
+      "text": "\"A plugin is a directory of skills, agents, hooks, and MCP servers, plus a `plugin.json` file, called the manifest, that names the plugin. Claude Code loads the directory as one unit, so you can share it with teammates, install it in several projects, or publish it to a marketplace.\""
+    },
+    {
+      "type": "para",
+      "text": "The layout is fixed. The manifest sits in `.claude-plugin/plugin.json`, and \"Only `plugin.json` goes inside `.claude-plugin/`.\" Everything else goes at the plugin root, next to that folder: `skills/<name>/SKILL.md`, `agents/<name>.md`, `hooks/hooks.json` and `.mcp.json`. A plugin may hold any mix of these, and none is required. Only `name` is required in the manifest. Add `version` and `description` so that updates and listings make sense."
+    },
+    {
+      "type": "para",
+      "text": "To test one without installing, start Claude Code with `--plugin-dir <path>`, which \"loads a plugin for one session without installing it\". Run `claude plugin validate` on the folder to check the manifest and the skill frontmatter before you run anything."
+    },
+    {
+      "type": "para",
+      "text": "Two details matter for correctness. A hook script in a plugin cannot assume where the plugin was installed, so the command in `hooks/hooks.json` reaches it through `${CLAUDE_PLUGIN_ROOT}`. And a plugin is more restricted than a project: the agents it ships do not support `permissionMode`, `hooks` or `mcpServers`, and \"These fields are ignored when loading agents from a plugin.\" A plugin author who needs hooks or an MCP server ships them in the plugin's own `hooks/hooks.json` and `.mcp.json`, where they \"apply whenever the plugin is enabled rather than only inside the subagent.\""
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Dependencies"
+    },
+    {
+      "type": "para",
+      "text": "A plugin can depend on another one, such as one whose skill or MCP server it calls. List dependencies in the `dependencies` array of `plugin.json`. An entry is a plugin name as a string, which tracks whatever version the marketplace offers, or an object with a `name` and a `version`, which is a semantic-version range such as `~2.1.0`, `^2.0`, `>=1.4` or `=2.1.0`."
+    },
+    {
+      "type": "para",
+      "text": "The range exists for a reason the documentation states: \"Without a version constraint, a dependency moves to each new release its marketplace publishes the next time users update. If that release renames an MCP tool your plugin calls, your plugin breaks for everyone who updates.\" With `~2.1.0`, \"users who have your plugin installed keep receiving `2.1.x` patches of the dependency and never move to `2.2`.\" You then upgrade on your own schedule: test against the newer release, change the range and publish a new version of your plugin."
+    },
+    {
+      "type": "para",
+      "text": "For a dependency from a git-backed source, resolution is by git tag: \"The dependency installs at the highest git tag that satisfies this range, so the dependency's maintainer must tag releases.\" A range does not match pre-release versions such as `2.0.0-beta.1` unless you opt in. By default Claude Code does not install a dependency from a different marketplace than the declaring plugin's own. The root marketplace must list the other one in `allowCrossMarketplaceDependenciesOn`, so one marketplace cannot silently install from a source the user never chose."
+    },
+    {
+      "type": "para",
+      "text": "A plugin with only a `name` and a `dependencies` array is a valid plugin, and installing it installs everything in the array. Platform teams use that to publish a bundle such as a standard set for backend engineers."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Sharing across a team"
+    },
+    {
+      "type": "para",
+      "text": "A marketplace is the catalog Claude Code fetches plugins from. To give a repository's contributors a plugin without each of them installing it, set two keys in the repository's `.claude/settings.json`: \"Add the marketplace under `extraKnownMarketplaces`, keyed by the marketplace's own `name`\" from its `marketplace.json`, and then \"add each plugin under `enabledPlugins` as `plugin-name@marketplace-name`.\" Each marketplace entry carries a `source` object, such as a GitHub repository written as `owner/name`. For a whole organisation, the same two keys go in managed settings."
+    },
+    {
+      "type": "para",
+      "text": "The safeguard is trust: \"The `extraKnownMarketplaces` entries apply only in a folder the contributor has trusted, and in an untrusted folder Claude Code ignores them without a message.\" A repository cannot install code on a machine that has not trusted it."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Trust"
+    },
+    {
+      "type": "para",
+      "text": "\"A Claude Code plugin you install can execute arbitrary code on your machine with your user privileges.\" A marketplace's name tells you who publishes the catalog and not what each plugin does. Review a plugin's hooks and scripts before you enable it, prefer a pinned dependency range, and use managed settings to restrict which marketplaces an organisation allows."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Choosing between a skill folder and a plugin"
+    },
+    {
+      "type": "para",
+      "text": "Keep a skill in `.claude/skills/` while one repository uses it. Make a plugin when more than one project needs it, when it bundles a hook with the skill that depends on it, or when it needs a version and a dependency. The skill then travels with its hook script and its subagent, and one `enabledPlugins` line turns the set on."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The practice"
+    },
+    {
+      "type": "para",
+      "text": "The practice builds a plugin called `release-kit` and the team settings that enable it. It holds a guard hook script that refuses pushes, forced recursive deletes and piped downloads in every spelling, and blocks edits of protected paths. It also holds two skills, one that Claude may start and one that only a person may start, a read-only subagent with project memory, a manifest with a dependency pinned to patch updates, and the repository settings. Tests run your script as a process on events, and read the other files. The files are language-neutral, so the module has the same test suites in Python, TypeScript, Java and Kotlin: the Java and Kotlin ones read the JSON with Jackson and the YAML front matter with its YAML module. The hook script is a Python file in every edition, because a hook is a separate program, and the Java and Kotlin tests start it as a process."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Leaving a dependency unpinned.** The next release of the dependency reaches every user of your plugin, and a rename breaks them.",
+        "**Hard-coding the plugin's install path in a hook.** Use `${CLAUDE_PLUGIN_ROOT}`. The path differs on every machine.",
+        "**Putting `permissionMode` in a plugin's agent.** The loader ignores it. Ship the guard in `hooks/hooks.json`.",
+        "**Assuming a repository's `extraKnownMarketplaces` applies before trust.** In an untrusted folder it is ignored without a message."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A plugin declares a dependency on `~2.1.0`, and the dependency's maintainer publishes 2.1.4 and then 2.2.0. Which version do the plugin's users receive?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: 2.2.0, because a range always follows the newest release that exists",
+              "**b**: 2.1.0, because a range freezes the first version that it matched once",
+              "**c**: Neither, because ranges are resolved only for plugins that carry no version",
+              "**d**: 2.1.4, because the range takes patch updates and not the 2.2 line"
+            ]
+          }
+        ],
+        [
+          "A team wants contributors to get a plugin when they open the repository, with no manual install step. Where does the configuration go?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The `plugin.json` manifest, in its `dependencies` array",
+              "**b**: The project's `.claude/settings.json`, under two named keys",
+              "**c**: The `marketplace.json` catalog, in the entry for that bundle",
+              "**d**: Each person's launch command, using the `--plugin-dir` flag"
+            ]
+          }
+        ],
+        [
+          "An agent file shipped inside a plugin sets `permissionMode: bypassPermissions` to run quietly. What happens?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The value is dropped at load time, because the loader skips such fields",
+              "**b**: The plugin fails to load, because the loader rejects the whole file",
+              "**c**: The agent skips every prompt, exactly as the value says it should",
+              "**d**: The agent runs quietly, but only in a folder that the person has trusted"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**d**. The page says with `~2.1.0` \"users who have your plugin installed keep receiving `2.1.x` patches of the dependency and never move to `2.2`.\" *a* is ruled out because a pinned range does not follow the newest release: \"Without a version constraint, a dependency moves to each new release its marketplace publishes\". *b* is ruled out because the dependency \"installs at the highest git tag that satisfies this range\", which is 2.1.4 and not the first match. *c* is ruled out because \"resolution is by git tag\" for a git-backed dependency, and the object form with a `version` range is how a dependency is constrained.",
+            "**b**. The page says to \"set two keys in the repository's `.claude/settings.json`\", so that the marketplace and the enabled plugin reach every contributor. *a* is ruled out because the manifest is \"called the manifest, that names the plugin\", so it describes the plugin and does not reach contributors who have not installed it. *c* is ruled out because the catalog is only where plugins are listed, and the page has the repository name it: \"Add the marketplace under `extraKnownMarketplaces`, keyed by the marketplace's own `name`\". *d* is ruled out because `--plugin-dir` \"loads a plugin for one session without installing it\", so it is neither shared nor lasting.",
+            "**a**. The page says \"These fields are ignored when loading agents from a plugin.\" *c* is ruled out because the fields are \"ignored when loading agents from a plugin\", so the agent keeps its normal prompts. *b* is ruled out because \"These fields are ignored when loading agents from a plugin\", so the file still loads. *d* is ruled out because the fields are \"ignored\" whatever the folder, and trust only decides whether `extraKnownMarketplaces` applies. The page names the fix: \"Ship the guard in `hooks/hooks.json`.\""
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 11,
+    "paras": 17,
+    "code": 0,
+    "tables": 0,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "3a0fa57b083e53b5a86f92c6283f98c5bf9fef75c1ed3b65e08237d64ee90997"
+}

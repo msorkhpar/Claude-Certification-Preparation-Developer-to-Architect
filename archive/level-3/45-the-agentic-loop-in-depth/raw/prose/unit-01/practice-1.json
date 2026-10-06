@@ -1,0 +1,121 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "45-the-agentic-loop-in-depth"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: What ends a run: control flow on the stop reason",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A support agent's loop ends when the reply text contains \"Case closed\", a phrase the prompt tells the model to write last. In testing, some refunds are never issued, because the model writes the phrase in the same reply as the refund call. Which redesign fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Let the stop value of each response decide, and run every tool request it holds",
+            "correct": true,
+            "says": "The model ends its turn by not asking for a tool, and the stop reason reports exactly that, so a reply that holds a tool call is not the end whatever its text says."
+          },
+          {
+            "id": "b",
+            "text": "Tell the model in the prompt to write its closing phrase only in a final message",
+            "correct": false,
+            "says": "Ruled out because a closing phrase in the prompt keeps the control flow in the text: a control flow that needs a particular word \"moves the loop's logic into the prompt, where nobody tests it.\""
+          },
+          {
+            "id": "c",
+            "text": "Search the text for more completion phrases, such as \"finished\" and \"complete\"",
+            "correct": false,
+            "says": "Ruled out because more phrases do not make the text a protocol: \"It changes with the model, the prompt, the language and the day.\""
+          },
+          {
+            "id": "d",
+            "text": "Call the model a fixed number of times, large enough for the longest case",
+            "correct": false,
+            "says": "Ruled out because a fixed count is the second anti-pattern: \"A task that needs six steps is cut off in the middle\"."
+          }
+        ],
+        "origin": {
+          "path": "course/45-the-agentic-loop-in-depth/01-what-ends-a-run.md",
+          "section": "Anti-pattern one: stopping on the words"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "An insurance agent stops after ten model calls and files every run that reaches that cap as cut off. Auditors find complete answers filed this way whenever a case needed exactly ten calls. Which change fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Raise the cap by one for these particular cases",
+            "correct": false,
+            "says": "Ruled out because the page says to leave the number alone: \"When the status `max_turns` shows up often, the count is not the thing to change.\""
+          },
+          {
+            "id": "b",
+            "text": "Drop the cap and let every run continue",
+            "correct": false,
+            "says": "Ruled out because a run that never converges needs something to stop it: \"A count is added so that a run that does not converge is stopped.\""
+          },
+          {
+            "id": "c",
+            "text": "Compare the tally with the limit before each new request",
+            "correct": true,
+            "says": "The page says the count \"is checked before the next call, so that a reply that ends the turn on the very last allowed call is still `done`\"."
+          },
+          {
+            "id": "d",
+            "text": "Report `done` for any run whose last reply holds some text",
+            "correct": false,
+            "says": "Ruled out because text alone does not show an ending: \"the text in front of a `tool_use` block is narration, and only the reply that ends the turn holds the answer.\""
+          }
+        ],
+        "origin": {
+          "path": "course/45-the-agentic-loop-in-depth/01-what-ends-a-run.md",
+          "section": "Anti-pattern two: the count as the loop"
+        }
+      }
+    ],
+    "concepts": [
+      "Anti-pattern one: stopping on the words, as the page teaches it",
+      "Anti-pattern two: the count as the loop, as the page teaches it"
+    ]
+  }
+}

@@ -1,0 +1,169 @@
+{
+  "practice": "38-claude-code-for-developers/unit-01/practice-1",
+  "name": "project_setup",
+  "tests": {
+    "java": "ProjectSetupTest",
+    "kotlin": "ProjectSetupTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_the_memory_file_is_short_concrete_and_pulls_in_the_architecture_notes",
+      "typescript": "m1 the memory file is short concrete and pulls in the architecture notes",
+      "java": "m1_theMemoryFileIsShortConcreteAndPullsInTheArchitectureNotes",
+      "kotlin": "m1_theMemoryFileIsShortConcreteAndPullsInTheArchitectureNotes"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_the_permission_rules_allow_the_daily_commands_ask_before_commits_and_deny_secrets_and_pushes",
+      "typescript": "e1 the permission rules allow the daily commands ask before commits and deny secrets and pushes",
+      "java": "e1_thePermissionRulesAllowTheDailyCommandsAskBeforeCommitsAndDenySecretsAndPushes",
+      "kotlin": "e1_thePermissionRulesAllowTheDailyCommandsAskBeforeCommitsAndDenySecretsAndPushes"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_the_shared_file_sets_a_mode_it_may_set_and_uses_only_rules_that_are_consulted",
+      "typescript": "e2 the shared file sets a mode it may set and uses only rules that are consulted",
+      "java": "e2_theSharedFileSetsAModeItMaySetAndUsesOnlyRulesThatAreConsulted",
+      "kotlin": "e2_theSharedFileSetsAModeItMaySetAndUsesOnlyRulesThatAreConsulted"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_personal_settings_stay_local_and_the_local_file_wins",
+      "typescript": "e3 personal settings stay local and the local file wins",
+      "java": "e3_personalSettingsStayLocalAndTheLocalFileWins",
+      "kotlin": "e3_personalSettingsStayLocalAndTheLocalFileWins"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_the_custom_command_is_a_skill_that_only_a_person_can_start",
+      "typescript": "e4 the custom command is a skill that only a person can start",
+      "java": "e4_theCustomCommandIsASkillThatOnlyAPersonCanStart",
+      "kotlin": "e4_theCustomCommandIsASkillThatOnlyAPersonCanStart"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_the_headless_script_is_bounded_and_does_not_skip_permissions",
+      "typescript": "e5 the headless script is bounded and does not skip permissions",
+      "java": "e5_theHeadlessScriptIsBoundedAndDoesNotSkipPermissions",
+      "kotlin": "e5_theHeadlessScriptIsBoundedAndDoesNotSkipPermissions"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_no_file_holds_a_personal_path_an_address_or_a_key",
+      "typescript": "e6 no file holds a personal path an address or a key",
+      "java": "e6_noFileHoldsAPersonalPathAnAddressOrAKey",
+      "kotlin": "e6_noFileHoldsAPersonalPathAnAddressOrAKey"
+    }
+  },
+  "plants": {
+    "wrong-bloated-memory": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "lets CLAUDE.md grow past 200 lines"
+    },
+    "wrong-no-import": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "names the architecture file without the @ that imports it"
+    },
+    "wrong-push-ask-only": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "asks before a push instead of denying it"
+    },
+    "wrong-commit-allowed": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "allows git commit without asking"
+    },
+    "wrong-env-readable": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "leaves the .env file out of the deny rules"
+    },
+    "wrong-write-rule": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "adds a path rule for the Write tool, which no check consults"
+    },
+    "wrong-extra-permission-key": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "adds a permissions key that the shared file may not hold"
+    },
+    "wrong-local-not-ignored": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "leaves settings.local.json out of .gitignore"
+    },
+    "wrong-local-md-not-ignored": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "leaves CLAUDE.local.md out of .gitignore"
+    },
+    "wrong-local-env": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "puts an env block in the personal file"
+    },
+    "wrong-skill-auto": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "lets Claude start the fix-issue command on its own"
+    },
+    "wrong-skill-no-hint": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "leaves the argument hint out of the command"
+    },
+    "wrong-headless-bypass": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "skips permissions in the headless run"
+    },
+    "wrong-headless-unbounded": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "leaves the headless run without a turn limit"
+    },
+    "wrong-headless-no-budget": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "leaves the headless run without a dollar cap"
+    },
+    "wrong-headless-bash-tool": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "pre-approves the whole Bash tool in the headless run"
+    },
+    "wrong-key-in-script": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "writes an API key into the script"
+    },
+    "wrong-path-in-memory": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "writes a personal home path into CLAUDE.md"
+    }
+  }
+}

@@ -1,0 +1,281 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "29-context-engineering"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: trimming, compacting and citing (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: trimming, compacting and citing"
+    },
+    {
+      "type": "para",
+      "text": "A long conversation outgrows its window, and the cheapest cure is code you control: clear the tool output nobody needs again, drop whole old turns, or replace the old part with a summary. The answer that comes out of a long document should also be checked: a citation is a claim about where text came from, and a claim can be wrong. Write both halves. The shapes come from the Claude documentation on context windows, context editing, compaction and citations, read on 2026-10-03; the lesson pages explain them. Nothing here touches the network: the messages are recorded or hand-written in the shape of the Messages API, and the summariser is a function that the tests pass in."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "message",
+          "`{\"role\", \"content\"}`; the content is a string or a list of blocks: `text`, `tool_use` (`id`, `name`, `input`), `tool_result` (`tool_use_id`, `content` as a string, optional `is_error`)"
+        ],
+        [
+          "`count_tokens(messages)`",
+          "a rough size, so that budgets are exact in the tests: 4 for every message, plus 1 for every 4 characters (rounded up) of text and of tool result content, plus 10 for every tool call"
+        ],
+        [
+          "`summarise(messages)`",
+          "a function from the older messages to the summary text"
+        ],
+        [
+          "citation",
+          "`{\"type\": \"char_location\", \"cited_text\", \"document_index\", \"start_char_index\", \"end_char_index\"}`; the span is `text[start:end]` of that document, end excluded"
+        ],
+        [
+          "document",
+          "`{\"title\", \"text\"}`"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is the working module with seven gaps cut out of it. Everything else is written and correct: the token count, the turn test, the cloning, the citation walk and the footnote text. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file (`split_turns` already logs its input at debug level); a run shows the logged lines under the failing case. Write them in this order (the Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`split_turns` unlocks `m1`, `e2` and `e3`: group the messages into turns.",
+        "`_clear_oldest` unlocks `e1`: replace the content of every result but the newest `keep`.",
+        "`_trim` unlocks `e2`: drop the oldest turns while the conversation is over budget, never the last.",
+        "`_leave_alone` unlocks `e3`: when compaction has nothing to do.",
+        "`_with_summary` unlocks `m1` and `e4`: put the summary block first in the first kept message.",
+        "`_span_problem` unlocks `e5`: `bad_range` or `text_mismatch` for a citation whose document exists.",
+        "`_number_for` unlocks `e6`: give a new span the next number."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole module; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`split_turns(messages)`: the messages as a list of turns. A turn starts at a user message that is not made only of tool result blocks (a string, or any other blocks) and runs up to the next such message, so a tool call and its result are always in one turn.",
+        "`clear_tool_results(messages, keep=2, exclude=(), placeholder=\"[cleared]\")`: a copy in which the content of every tool result is replaced by the placeholder, except the newest `keep` results. Results of a tool named in `exclude` are never cleared and do not count toward `keep` (the tool's name comes from the `tool_use` block with the same id). Calls, ids and `is_error` flags stay, and the input is not changed.",
+        "`window(messages, budget, pin=False)`: drop the oldest whole turns until `count_tokens` fits the budget. The newest turn always stays, even when it alone is over budget. With `pin` the first turn stays too and the next oldest turns are dropped.",
+        "`compact(messages, budget, summarise, keep_turns=1)`: when `count_tokens` is within the budget, or there are no more turns than `keep_turns`, return the messages unchanged and do not call `summarise`. Otherwise call `summarise` once with every message that comes before the newest `keep_turns` turns (an earlier summary is among them), and return the kept messages with the summary placed first in the first kept message: a text block `<summary>\\n` + the summary + `\\n</summary>`, followed by that message's own blocks (a string content becomes one text block). The roles keep alternating, and there is exactly one summary block in the result.",
+        "`verify_citations(blocks, documents)`: for every citation of every text block, in order, report `{\"block\", \"citation\", \"problem\"}` when it cannot be trusted: `unsupported_type` (not `char_location`), `unknown_document` (index outside the list), `bad_range` (start below 0, end not after start, or end past the text), `text_mismatch` (the span is not the cited text). Check in that order.",
+        "`footnotes(blocks, documents)`: the text blocks joined, with `[n]` right after the block of each citation, where `n` numbers the distinct cited spans (same document and offsets) from 1 in the order they first appear; then, if there are any, a blank line, `Sources:`, and one line `[n] <title>: \"<cited text>\"` per number. No citations gives just the text."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "An over-budget conversation becomes a summary and the newest turn"
+        ],
+        [
+          "`e1`",
+          "Old tool results are cleared, but their calls and flags stay"
+        ],
+        [
+          "`e2`",
+          "The window drops whole turns and never splits a tool call from its result"
+        ],
+        [
+          "`e3`",
+          "A conversation within budget, or with nothing older, is left alone"
+        ],
+        [
+          "`e4`",
+          "A second compaction folds the earlier summary into the new one"
+        ],
+        [
+          "`e5`",
+          "A citation that does not match its document is reported"
+        ],
+        [
+          "`e6`",
+          "Footnotes number each distinct source once, in order of appearance"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Keeping a conversation inside its budget, and checking the citations in an answer. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"context\");\nexport type Block = Record<string, any>;\nexport type Message = { role: \"user\" | \"assistant\"; content: string | Block[] };\nexport type Problem = { block: number; citation: number; problem: string };\nexport type Doc = { title: string; text: string };\n\nconst SUMMARY_OPEN = \"<summary>\\n\";\nconst SUMMARY_CLOSE = \"\\n</summary>\";\n\nconst tokens = (text: string) => Math.floor((text.length + 3) / 4);\n\n/** Given: a rough size of a conversation. 4 per message, plus 1 per 4 characters of text and of tool result text, plus 10 per tool call. */\nexport function countTokens(messages: Message[]): number {\n  let total = 0;\n  for (const message of messages) {\n    total += 4;\n    if (typeof message.content === \"string\") {\n      total += tokens(message.content);\n      continue;\n    }\n    for (const block of message.content) {\n      if (block.type === \"text\") total += tokens(block.text);\n      else if (block.type === \"tool_result\") total += tokens(block.content ?? \"\");\n      else if (block.type === \"tool_use\") total += 10;\n    }\n  }\n  return total;\n}\n\nconst blocksOf = (message: Message): Block[] => (typeof message.content === \"string\" ? [{ type: \"text\", text: message.content }] : structuredClone(message.content));\n\n/** A user message that is not made only of tool results begins a turn. */\nfunction startsTurn(message: Message): boolean {\n  if (message.role !== \"user\") return false;\n  return typeof message.content === \"string\" || message.content.some((b) => b.type !== \"tool_result\");\n}\n\n/** The messages as a list of turns: each turn is a user message that is not a tool result, and everything up to the next one. */\nexport function splitTurns(messages: Message[]): Message[][] {\n  log.debug(\"splitTurns input\", messages);\n  const turns: Message[][] = [];\n  for (const message of messages) {\n    if (startsTurn(message) || turns.length === 0) turns.push([]);\n    turns[turns.length - 1].push(message);\n  }\n  return turns;\n}\n\n/** Replace the content of every result but the newest `keep` with the placeholder. */\nfunction clearOldest(results: Block[], keep: number, placeholder: string): void {\n  for (const b of results.slice(0, Math.max(results.length - keep, 0))) b.content = placeholder;\n}\n\n/** Copy of the conversation in which every tool result but the newest `keep` has its content replaced by the placeholder. */\nexport function clearToolResults(messages: Message[], keep = 2, exclude: string[] = [], placeholder = \"[cleared]\"): Message[] {\n  const out: Message[] = structuredClone(messages);\n  const names = new Map<string, string>();\n  for (const m of out) if (Array.isArray(m.content)) for (const b of m.content) if (b.type === \"tool_use\") names.set(b.id, b.name);\n  const results: Block[] = [];\n  for (const m of out) if (Array.isArray(m.content)) for (const b of m.content) if (b.type === \"tool_result\" && !exclude.includes(names.get(b.tool_use_id) ?? \"\")) results.push(b);\n  clearOldest(results, keep, placeholder);\n  return out;\n}\n\n/** The turns of `rest` that remain: the oldest are dropped while the conversation is over budget, the newest always stays. */\nfunction trim(pinned: Message[][], rest: Message[][], budget: number): Message[][] {\n  while (rest.length > 1 && countTokens([...pinned, ...rest].flat()) > budget) rest = rest.slice(1);\n  return rest;\n}\n\n/** Drop the oldest whole turns until the conversation fits; the newest turn always stays. With pin, the first turn stays too. */\nexport function window(messages: Message[], budget: number, pin = false): Message[] {\n  const turns = splitTurns(messages);\n  const pinned = pin ? turns.slice(0, 1) : [];\n  const rest = trim(pinned, pin ? turns.slice(1) : turns, budget);\n  return [...pinned, ...rest].flat();\n}\n\n/** Whether compaction has nothing to do: the conversation fits, or there are no more turns than `keepTurns`. */\nfunction leaveAlone(messages: Message[], turns: Message[][], budget: number, keepTurns: number): boolean {\n  return countTokens(messages) <= budget || turns.length <= keepTurns;\n}\n\n/** The first kept message with the summary block placed before its own blocks. */\nfunction withSummary(kept: Message[], summary: string): Message {\n  return { role: kept[0].role, content: [{ type: \"text\", text: `${SUMMARY_OPEN}${summary}${SUMMARY_CLOSE}` }, ...blocksOf(kept[0])] };\n}\n\n/** When the conversation is over budget, replace everything before the newest `keepTurns` turns by one summary. */\nexport function compact(messages: Message[], budget: number, summarise: (older: Message[]) => string, keepTurns = 1): Message[] {\n  const turns = splitTurns(messages);\n  if (leaveAlone(messages, turns, budget, keepTurns)) return [...messages];\n  const older = turns.slice(0, -keepTurns).flat();\n  const kept = turns.slice(-keepTurns).flat();\n  const summary = summarise(older);\n  return [withSummary(kept, summary), ...kept.slice(1)];\n}\n\n/** The problem of a citation whose document exists, or null when it can be trusted. */\nfunction spanProblem(text: string, cite: Block): string | null {\n  const start = cite.start_char_index;\n  const end = cite.end_char_index;\n  if (start < 0 || end <= start || end > text.length) return \"bad_range\";\n  if (text.slice(start, end) !== cite.cited_text) return \"text_mismatch\";\n  return null;\n}\n\n/** One problem per citation that cannot be trusted, in order. */\nexport function verifyCitations(blocks: Block[], documents: Doc[]): Problem[] {\n  const problems: Problem[] = [];\n  blocks.forEach((block, i) => {\n    (block.citations ?? []).forEach((cite: Block, j: number) => {\n      let problem: string | null = null;\n      if (cite.type !== \"char_location\") problem = \"unsupported_type\";\n      else if (!(cite.document_index >= 0 && cite.document_index < documents.length)) problem = \"unknown_document\";\n      else problem = spanProblem(documents[cite.document_index].text, cite);\n      if (problem) problems.push({ block: i, citation: j, problem });\n    });\n  });\n  return problems;\n}\n\n/** Give a new key the next number; true when the key was new. */\nfunction numberFor(numbers: Map<string, number>, key: string): boolean {\n  if (!numbers.has(key)) {\n    numbers.set(key, numbers.size + 1);\n    return true;\n  }\n  return false;\n}\n\n/** The answer text with a [n] after each cited block and a Sources list; one number per distinct cited span, in order. */\nexport function footnotes(blocks: Block[], documents: Doc[]): string {\n  const numbers = new Map<string, number>();\n  const sources: string[] = [];\n  let out = \"\";\n  for (const block of blocks) {\n    out += block.text;\n    for (const cite of block.citations ?? []) {\n      const key = `${cite.document_index}:${cite.start_char_index}:${cite.end_char_index}`;\n      if (numberFor(numbers, key)) {\n        sources.push(`[${numbers.get(key)}] ${documents[cite.document_index].title}: \"${cite.cited_text}\"`);\n      }\n      out += `[${numbers.get(key)}]`;\n    }\n  }\n  return out + (sources.length ? \"\\n\\nSources:\\n\" + sources.join(\"\\n\") : \"\");\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { compact, countTokens } from \"./context.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\nconst user = (text: string) => ({ role: \"user\" as const, content: text });\nconst said = (text: string) => ({ role: \"assistant\" as const, content: [{ type: \"text\", text }] });\nconst call = (id: string, name: string) => ({ role: \"assistant\" as const, content: [{ type: \"tool_use\", id, name, input: {} }] });\nconst result = (id: string, text: string) => ({ role: \"user\" as const, content: [{ type: \"tool_result\", tool_use_id: id, content: text }] });\n\n// A conversation of four turns, like the one the tests compact.\nconst messages = [user(\"first question\"), said(\"first answer \" + \"x\".repeat(80)),\n  user(\"second question\"), call(\"a1\", \"search\"), result(\"a1\", \"R\".repeat(300)), said(\"second answer\"),\n  user(\"third question\"), said(\"third answer \" + \"y\".repeat(60)),\n  user(\"fourth question\"), call(\"a2\", \"search\"), result(\"a2\", \"S\".repeat(100)), said(\"fourth answer\")];\n\n// A stand-in for the summariser model: it is told what to fold away and answers with a fixed text.\nconst summarise = (older: unknown[]) => {\n  console.log(\"summariser asked to fold\", older.length, \"messages\");\n  return \"The user asked three things.\";\n};\n\nconst budget = Math.floor(countTokens(messages) / 2);\nconst done = compact(messages, budget, summarise, 1) ?? [];\n\nconsole.log(\"tokens before:\", countTokens(messages), \"| budget:\", budget);\nconsole.log(\"messages before and after:\", messages.length, \"->\", done.length);\nconsole.log(\"roles after:\", done.map((m) => m.role).join(\", \"));\nconsole.log(\"first message:\", JSON.stringify(done[0]?.content));\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Keeping a conversation inside its budget, and checking the citations in an answer. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"context\");\nexport type Block = Record<string, any>;\nexport type Message = { role: \"user\" | \"assistant\"; content: string | Block[] };\nexport type Problem = { block: number; citation: number; problem: string };\nexport type Doc = { title: string; text: string };\n\nconst SUMMARY_OPEN = \"<summary>\\n\";\nconst SUMMARY_CLOSE = \"\\n</summary>\";\n\nconst tokens = (text: string) => Math.floor((text.length + 3) / 4);\n\n/** Given: a rough size of a conversation. 4 per message, plus 1 per 4 characters of text and of tool result text, plus 10 per tool call. */\nexport function countTokens(messages: Message[]): number {\n  let total = 0;\n  for (const message of messages) {\n    total += 4;\n    if (typeof message.content === \"string\") {\n      total += tokens(message.content);\n      continue;\n    }\n    for (const block of message.content) {\n      if (block.type === \"text\") total += tokens(block.text);\n      else if (block.type === \"tool_result\") total += tokens(block.content ?? \"\");\n      else if (block.type === \"tool_use\") total += 10;\n    }\n  }\n  return total;\n}\n\nconst blocksOf = (message: Message): Block[] => (typeof message.content === \"string\" ? [{ type: \"text\", text: message.content }] : structuredClone(message.content));\n\n/** A user message that is not made only of tool results begins a turn. */\nfunction startsTurn(message: Message): boolean {\n  if (message.role !== \"user\") return false;\n  return typeof message.content === \"string\" || message.content.some((b) => b.type !== \"tool_result\");\n}\n\n/** The messages as a list of turns: each turn is a user message that is not a tool result, and everything up to the next one. */\nexport function splitTurns(messages: Message[]): Message[][] {\n  log.debug(\"splitTurns input\", messages);\n  // TODO 1 of 7 (unlocks m1, e2, e3): group the messages into turns.\n  // Receives the list of messages (`startsTurn(message)` says whether one begins a turn; the first message always does).\n  // Returns a list of turns, each a list of messages, in order.\n  // Example: [user \"q\", assistant tool_use, user tool_result, assistant \"a\", user \"q2\"] -> [[q, tool_use, tool_result, a], [q2]]\n  return [[...messages]];\n}\n\n// TODO 2 of 7 (unlocks e1): replace the content of every result but the newest `keep` with the placeholder.\n// Receives the tool_result blocks in conversation order, `keep` and the placeholder; changes the blocks in place, returns nothing.\n// Example: three results with keep = 2 -> the first one's content becomes \"[cleared]\".\nfunction clearOldest(results: Block[], keep: number, placeholder: string): void {\n}\n\n/** Copy of the conversation in which every tool result but the newest `keep` has its content replaced by the placeholder. */\nexport function clearToolResults(messages: Message[], keep = 2, exclude: string[] = [], placeholder = \"[cleared]\"): Message[] {\n  const out: Message[] = structuredClone(messages);\n  const names = new Map<string, string>();\n  for (const m of out) if (Array.isArray(m.content)) for (const b of m.content) if (b.type === \"tool_use\") names.set(b.id, b.name);\n  const results: Block[] = [];\n  for (const m of out) if (Array.isArray(m.content)) for (const b of m.content) if (b.type === \"tool_result\" && !exclude.includes(names.get(b.tool_use_id) ?? \"\")) results.push(b);\n  clearOldest(results, keep, placeholder);\n  return out;\n}\n\n// TODO 3 of 7 (unlocks e2): the turns of `rest` that remain.\n// Receives the pinned turns, the other turns oldest first, and the budget. Drops the oldest turn of `rest` while `countTokens` of\n// pinned + rest is over the budget, but never the last one. Returns the remaining turns.\n// Example: three turns that are over budget by one turn's size -> the last two.\nfunction trim(pinned: Message[][], rest: Message[][], budget: number): Message[][] {\n  return rest;\n}\n\n/** Drop the oldest whole turns until the conversation fits; the newest turn always stays. With pin, the first turn stays too. */\nexport function window(messages: Message[], budget: number, pin = false): Message[] {\n  const turns = splitTurns(messages);\n  const pinned = pin ? turns.slice(0, 1) : [];\n  const rest = trim(pinned, pin ? turns.slice(1) : turns, budget);\n  return [...pinned, ...rest].flat();\n}\n\n// TODO 4 of 7 (unlocks e3): whether compaction has nothing to do.\n// Receives the messages, their turns, the budget and keepTurns. True when the conversation fits the budget or there are no more\n// turns than `keepTurns`. Example: a conversation of 40 tokens with budget 50 -> true.\nfunction leaveAlone(messages: Message[], turns: Message[][], budget: number, keepTurns: number): boolean {\n  return false;\n}\n\n// TODO 5 of 7 (unlocks m1, e4): the first kept message with the summary block placed before its own blocks.\n// Receives the kept messages and the summary text. Returns one message with the role of `kept[0]` and as content the text block\n// `SUMMARY_OPEN + summary + SUMMARY_CLOSE` followed by `blocksOf(kept[0])`.\n// Example: kept[0] = user \"q2\", summary \"S\" -> { role: \"user\", content: [<summary block>, { type: \"text\", text: \"q2\" }] }\nfunction withSummary(kept: Message[], summary: string): Message {\n  return { role: kept[0].role, content: [] };\n}\n\n/** When the conversation is over budget, replace everything before the newest `keepTurns` turns by one summary. */\nexport function compact(messages: Message[], budget: number, summarise: (older: Message[]) => string, keepTurns = 1): Message[] {\n  const turns = splitTurns(messages);\n  if (leaveAlone(messages, turns, budget, keepTurns)) return [...messages];\n  const older = turns.slice(0, -keepTurns).flat();\n  const kept = turns.slice(-keepTurns).flat();\n  const summary = summarise(older);\n  return [withSummary(kept, summary), ...kept.slice(1)];\n}\n\n// TODO 6 of 7 (unlocks e5): the problem of a citation whose document exists, or null when it can be trusted.\n// Receives the document text and the citation. Returns \"bad_range\" (start below 0, end not after start, or end past the text),\n// else \"text_mismatch\" (`text.slice(start, end)` is not the cited text, end excluded), else null.\n// Example: text \"abcdef\", span 1 to 3, cited_text \"bc\" -> null; cited_text \"cd\" -> \"text_mismatch\"\nfunction spanProblem(text: string, cite: Block): string | null {\n  return null;\n}\n\n/** One problem per citation that cannot be trusted, in order. */\nexport function verifyCitations(blocks: Block[], documents: Doc[]): Problem[] {\n  const problems: Problem[] = [];\n  blocks.forEach((block, i) => {\n    (block.citations ?? []).forEach((cite: Block, j: number) => {\n      let problem: string | null = null;\n      if (cite.type !== \"char_location\") problem = \"unsupported_type\";\n      else if (!(cite.document_index >= 0 && cite.document_index < documents.length)) problem = \"unknown_document\";\n      else problem = spanProblem(documents[cite.document_index].text, cite);\n      if (problem) problems.push({ block: i, citation: j, problem });\n    });\n  });\n  return problems;\n}\n\n// TODO 7 of 7 (unlocks e6): give a new key the next number; true when the key was new.\n// Receives the map of numbers so far and a key. A key not in it gets `numbers.size + 1` and the answer is true; a known key keeps\n// its number and the answer is false. Example: empty map and \"a\" -> true, map is {a: 1}; then \"a\" again -> false\nfunction numberFor(numbers: Map<string, number>, key: string): boolean {\n  return false;\n}\n\n/** The answer text with a [n] after each cited block and a Sources list; one number per distinct cited span, in order. */\nexport function footnotes(blocks: Block[], documents: Doc[]): string {\n  const numbers = new Map<string, number>();\n  const sources: string[] = [];\n  let out = \"\";\n  for (const block of blocks) {\n    out += block.text;\n    for (const cite of block.citations ?? []) {\n      const key = `${cite.document_index}:${cite.start_char_index}:${cite.end_char_index}`;\n      if (numberFor(numbers, key)) {\n        sources.push(`[${numbers.get(key)}] ${documents[cite.document_index].title}: \"${cite.cited_text}\"`);\n      }\n      out += `[${numbers.get(key)}]`;\n    }\n  }\n  return out + (sources.length ? \"\\n\\nSources:\\n\" + sources.join(\"\\n\") : \"\");\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { compact, countTokens } from \"./context.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\nconst user = (text: string) => ({ role: \"user\" as const, content: text });\nconst said = (text: string) => ({ role: \"assistant\" as const, content: [{ type: \"text\", text }] });\nconst call = (id: string, name: string) => ({ role: \"assistant\" as const, content: [{ type: \"tool_use\", id, name, input: {} }] });\nconst result = (id: string, text: string) => ({ role: \"user\" as const, content: [{ type: \"tool_result\", tool_use_id: id, content: text }] });\n\n// A conversation of four turns, like the one the tests compact.\nconst messages = [user(\"first question\"), said(\"first answer \" + \"x\".repeat(80)),\n  user(\"second question\"), call(\"a1\", \"search\"), result(\"a1\", \"R\".repeat(300)), said(\"second answer\"),\n  user(\"third question\"), said(\"third answer \" + \"y\".repeat(60)),\n  user(\"fourth question\"), call(\"a2\", \"search\"), result(\"a2\", \"S\".repeat(100)), said(\"fourth answer\")];\n\n// A stand-in for the summariser model: it is told what to fold away and answers with a fixed text.\nconst summarise = (older: unknown[]) => {\n  console.log(\"summariser asked to fold\", older.length, \"messages\");\n  return \"The user asked three things.\";\n};\n\nconst budget = Math.floor(countTokens(messages) / 2);\nconst done = compact(messages, budget, summarise, 1) ?? [];\n\nconsole.log(\"tokens before:\", countTokens(messages), \"| budget:\", budget);\nconsole.log(\"messages before and after:\", messages.length, \"->\", done.length);\nconsole.log(\"roles after:\", done.map((m) => m.role).join(\", \"));\nconsole.log(\"first message:\", JSON.stringify(done[0]?.content));\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 4,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "54609a698dd89c32daad3c729fef6c76a0e305de2c45698f5a447b3c657a1abe",
+  "starting_code": "// Keeping a conversation inside its budget, and checking the citations in an answer. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"context\");\nexport type Block = Record<string, any>;\nexport type Message = { role: \"user\" | \"assistant\"; content: string | Block[] };\nexport type Problem = { block: number; citation: number; problem: string };\nexport type Doc = { title: string; text: string };\n\nconst SUMMARY_OPEN = \"<summary>\\n\";\nconst SUMMARY_CLOSE = \"\\n</summary>\";\n\nconst tokens = (text: string) => Math.floor((text.length + 3) / 4);\n\n/** Given: a rough size of a conversation. 4 per message, plus 1 per 4 characters of text and of tool result text, plus 10 per tool call. */\nexport function countTokens(messages: Message[]): number {\n  let total = 0;\n  for (const message of messages) {\n    total += 4;\n    if (typeof message.content === \"string\") {\n      total += tokens(message.content);\n      continue;\n    }\n    for (const block of message.content) {\n      if (block.type === \"text\") total += tokens(block.text);\n      else if (block.type === \"tool_result\") total += tokens(block.content ?? \"\");\n      else if (block.type === \"tool_use\") total += 10;\n    }\n  }\n  return total;\n}\n\nconst blocksOf = (message: Message): Block[] => (typeof message.content === \"string\" ? [{ type: \"text\", text: message.content }] : structuredClone(message.content));\n\n/** A user message that is not made only of tool results begins a turn. */\nfunction startsTurn(message: Message): boolean {\n  if (message.role !== \"user\") return false;\n  return typeof message.content === \"string\" || message.content.some((b) => b.type !== \"tool_result\");\n}\n\n/** The messages as a list of turns: each turn is a user message that is not a tool result, and everything up to the next one. */\nexport function splitTurns(messages: Message[]): Message[][] {\n  log.debug(\"splitTurns input\", messages);\n  // TODO 1 of 7 (unlocks m1, e2, e3): group the messages into turns.\n  // Receives the list of messages (`startsTurn(message)` says whether one begins a turn; the first message always does).\n  // Returns a list of turns, each a list of messages, in order.\n  // Example: [user \"q\", assistant tool_use, user tool_result, assistant \"a\", user \"q2\"] -> [[q, tool_use, tool_result, a], [q2]]\n  return [[...messages]];\n}\n\n// TODO 2 of 7 (unlocks e1): replace the content of every result but the newest `keep` with the placeholder.\n// Receives the tool_result blocks in conversation order, `keep` and the placeholder; changes the blocks in place, returns nothing.\n// Example: three results with keep = 2 -> the first one's content becomes \"[cleared]\".\nfunction clearOldest(results: Block[], keep: number, placeholder: string): void {\n}\n\n/** Copy of the conversation in which every tool result but the newest `keep` has its content replaced by the placeholder. */\nexport function clearToolResults(messages: Message[], keep = 2, exclude: string[] = [], placeholder = \"[cleared]\"): Message[] {\n  const out: Message[] = structuredClone(messages);\n  const names = new Map<string, string>();\n  for (const m of out) if (Array.isArray(m.content)) for (const b of m.content) if (b.type === \"tool_use\") names.set(b.id, b.name);\n  const results: Block[] = [];\n  for (const m of out) if (Array.isArray(m.content)) for (const b of m.content) if (b.type === \"tool_result\" && !exclude.includes(names.get(b.tool_use_id) ?? \"\")) results.push(b);\n  clearOldest(results, keep, placeholder);\n  return out;\n}\n\n// TODO 3 of 7 (unlocks e2): the turns of `rest` that remain.\n// Receives the pinned turns, the other turns oldest first, and the budget. Drops the oldest turn of `rest` while `countTokens` of\n// pinned + rest is over the budget, but never the last one. Returns the remaining turns.\n// Example: three turns that are over budget by one turn's size -> the last two.\nfunction trim(pinned: Message[][], rest: Message[][], budget: number): Message[][] {\n  return rest;\n}\n\n/** Drop the oldest whole turns until the conversation fits; the newest turn always stays. With pin, the first turn stays too. */\nexport function window(messages: Message[], budget: number, pin = false): Message[] {\n  const turns = splitTurns(messages);\n  const pinned = pin ? turns.slice(0, 1) : [];\n  const rest = trim(pinned, pin ? turns.slice(1) : turns, budget);\n  return [...pinned, ...rest].flat();\n}\n\n// TODO 4 of 7 (unlocks e3): whether compaction has nothing to do.\n// Receives the messages, their turns, the budget and keepTurns. True when the conversation fits the budget or there are no more\n// turns than `keepTurns`. Example: a conversation of 40 tokens with budget 50 -> true.\nfunction leaveAlone(messages: Message[], turns: Message[][], budget: number, keepTurns: number): boolean {\n  return false;\n}\n\n// TODO 5 of 7 (unlocks m1, e4): the first kept message with the summary block placed before its own blocks.\n// Receives the kept messages and the summary text. Returns one message with the role of `kept[0]` and as content the text block\n// `SUMMARY_OPEN + summary + SUMMARY_CLOSE` followed by `blocksOf(kept[0])`.\n// Example: kept[0] = user \"q2\", summary \"S\" -> { role: \"user\", content: [<summary block>, { type: \"text\", text: \"q2\" }] }\nfunction withSummary(kept: Message[], summary: string): Message {\n  return { role: kept[0].role, content: [] };\n}\n\n/** When the conversation is over budget, replace everything before the newest `keepTurns` turns by one summary. */\nexport function compact(messages: Message[], budget: number, summarise: (older: Message[]) => string, keepTurns = 1): Message[] {\n  const turns = splitTurns(messages);\n  if (leaveAlone(messages, turns, budget, keepTurns)) return [...messages];\n  const older = turns.slice(0, -keepTurns).flat();\n  const kept = turns.slice(-keepTurns).flat();\n  const summary = summarise(older);\n  return [withSummary(kept, summary), ...kept.slice(1)];\n}\n\n// TODO 6 of 7 (unlocks e5): the problem of a citation whose document exists, or null when it can be trusted.\n// Receives the document text and the citation. Returns \"bad_range\" (start below 0, end not after start, or end past the text),\n// else \"text_mismatch\" (`text.slice(start, end)` is not the cited text, end excluded), else null.\n// Example: text \"abcdef\", span 1 to 3, cited_text \"bc\" -> null; cited_text \"cd\" -> \"text_mismatch\"\nfunction spanProblem(text: string, cite: Block): string | null {\n  return null;\n}\n\n/** One problem per citation that cannot be trusted, in order. */\nexport function verifyCitations(blocks: Block[], documents: Doc[]): Problem[] {\n  const problems: Problem[] = [];\n  blocks.forEach((block, i) => {\n    (block.citations ?? []).forEach((cite: Block, j: number) => {\n      let problem: string | null = null;\n      if (cite.type !== \"char_location\") problem = \"unsupported_type\";\n      else if (!(cite.document_index >= 0 && cite.document_index < documents.length)) problem = \"unknown_document\";\n      else problem = spanProblem(documents[cite.document_index].text, cite);\n      if (problem) problems.push({ block: i, citation: j, problem });\n    });\n  });\n  return problems;\n}\n\n// TODO 7 of 7 (unlocks e6): give a new key the next number; true when the key was new.\n// Receives the map of numbers so far and a key. A key not in it gets `numbers.size + 1` and the answer is true; a known key keeps\n// its number and the answer is false. Example: empty map and \"a\" -> true, map is {a: 1}; then \"a\" again -> false\nfunction numberFor(numbers: Map<string, number>, key: string): boolean {\n  return false;\n}\n\n/** The answer text with a [n] after each cited block and a Sources list; one number per distinct cited span, in order. */\nexport function footnotes(blocks: Block[], documents: Doc[]): string {\n  const numbers = new Map<string, number>();\n  const sources: string[] = [];\n  let out = \"\";\n  for (const block of blocks) {\n    out += block.text;\n    for (const cite of block.citations ?? []) {\n      const key = `${cite.document_index}:${cite.start_char_index}:${cite.end_char_index}`;\n      if (numberFor(numbers, key)) {\n        sources.push(`[${numbers.get(key)}] ${documents[cite.document_index].title}: \"${cite.cited_text}\"`);\n      }\n      out += `[${numbers.get(key)}]`;\n    }\n  }\n  return out + (sources.length ? \"\\n\\nSources:\\n\" + sources.join(\"\\n\") : \"\");\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/29-context-engineering/prose/unit-03/practice-2/context.ts",
+    "test_path": "practice/level-2/29-context-engineering/prose/unit-03/practice-2/context.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-2/29-context-engineering/prose/unit-03/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-2/29-context-engineering/prose/unit-03/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-2/29-context-engineering/prose/unit-03/practice-2/context.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 an over budget conversation becomes a summary and the newest turn",
+        "kind": "main",
+        "says": "An over-budget conversation becomes a summary and the newest turn"
+      },
+      {
+        "id": "e1 old tool results are cleared but their calls and flags stay",
+        "kind": "edge",
+        "says": "Old tool results are cleared, but their calls and flags stay"
+      },
+      {
+        "id": "e2 the window drops whole turns and never splits a tool call from its result",
+        "kind": "edge",
+        "says": "The window drops whole turns and never splits a tool call from its result"
+      },
+      {
+        "id": "e3 a conversation within budget or with nothing older is left alone",
+        "kind": "edge",
+        "says": "A conversation within budget, or with nothing older, is left alone"
+      },
+      {
+        "id": "e4 a second compaction folds the earlier summary into the new one",
+        "kind": "main",
+        "says": "A second compaction folds the earlier summary into the new one"
+      },
+      {
+        "id": "e5 a citation that does not match its document is reported",
+        "kind": "edge",
+        "says": "A citation that does not match its document is reported"
+      },
+      {
+        "id": "e6 footnotes number each distinct source once in order of appearance",
+        "kind": "edge",
+        "says": "Footnotes number each distinct source once, in order of appearance"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/29-context-engineering/prose/unit-03/practice-2/target/report.xml"
+    },
+    "origin": "course/29-context-engineering/03-citations-the-files-api-and-the-practice.md",
+    "concepts": [
+      "the practice of Citations, the Files API and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/29-context-engineering/prose/unit-03/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "context-engineering-u3"
+}

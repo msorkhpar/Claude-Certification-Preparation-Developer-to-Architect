@@ -1,0 +1,101 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "56-the-built-in-tools"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 4,
+  "title": "Practice: set up a read-mostly explorer for an unfamiliar codebase (Kotlin)",
+  "lang": "kotlin",
+  "main_file": "project/.claude/settings.json",
+  "files": [
+    "project/.claude/agents/explorer.md",
+    "project/agent-options.json",
+    "project/docs/exploration-plan.md"
+  ],
+  "test_file": "src/test/kotlin/ExplorerSetupTest.kt",
+  "build": [
+    "libs/harness/build.gradle.kts",
+    "libs/harness/src/main/java/harness/Show.java",
+    "libs/38-settings-layers/build.gradle.kts",
+    "libs/38-settings-layers/src/main/kotlin/SettingsLayers.kt",
+    "libs/39-hook-gate/build.gradle.kts",
+    "libs/39-hook-gate/src/main/kotlin/HookGate.kt",
+    "libs/56-builtin-tools/build.gradle.kts",
+    "libs/56-builtin-tools/src/main/kotlin/BuiltinTools.kt",
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-4/check_files.py",
+    "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-4/project/.claude/agents/explorer.md",
+    "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-4/project/.claude/settings.json",
+    "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-4/project/agent-options.json",
+    "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-4/project/docs/exploration-plan.md"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-4",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_thePermissionRulesLetAnExplorerReadSearchAndTakeNotesButNotChangeTheSource()",
+      "kind": "main",
+      "says": "Thirteen sample calls get the right answer from your rules: read and search freely, notes yes, source no"
+    },
+    {
+      "id": "e1_aReadRuleProtectsSecretsFromReadingSearchingAndWriting()",
+      "kind": "edge",
+      "says": "A read rule protects secrets from reading, searching and writing"
+    },
+    {
+      "id": "e2_onlyRuleFormsThatAreConsultedAreUsedAndNoWholeToolThatChangesThingsIsAllowed()",
+      "kind": "edge",
+      "says": "Only rule forms that are consulted, and no whole tool that changes things allowed"
+    },
+    {
+      "id": "e3_theExplorerAgentReadsAndSearchesAndSaysWhenToUseIt()",
+      "kind": "edge",
+      "says": "The explorer agent reads and searches, says when to use it and is bounded"
+    },
+    {
+      "id": "e4_theSdkOptionsMakeTheSearchToolsAvailableAndRemoveTheToolsThatChangeThings()",
+      "kind": "edge",
+      "says": "The SDK options make the search tools available and remove the tools that change things"
+    },
+    {
+      "id": "e5_theExplorationPlanStartsWithASearchThenReadsAndNeverReadsEverythingFirst()",
+      "kind": "edge",
+      "says": "The plan starts with a search, then reads, and never reads everything first"
+    },
+    {
+      "id": "e6_theEditFallbackWidensTheAnchorThenReplacesAllThenRewritesTheFile()",
+      "kind": "edge",
+      "says": "The edit remedies come in order: longer anchor, replace_all, whole-file rewrite"
+    },
+    {
+      "id": "e7_noFileHoldsAPersonalPathAnAddressOrAKey()",
+      "kind": "edge",
+      "says": "No file holds a personal path, an address or a key"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/56-the-built-in-tools/02-permissions-exploring-a-codebase-and-the-practice.md"
+}

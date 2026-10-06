@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "18-model-choice-cost-and-migration"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 5,
+  "title": "Check yourself: Reading usage, counting tokens before sending, and modelling cost",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A response reports 120 `input_tokens`, 4,000 `cache_creation_input_tokens` and 340 `output_tokens`. A team adds them up as 460 tokens in and out. What does the page say they missed?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The output tokens are priced from the cache multiplier",
+            "correct": false,
+            "says": "Ruled out because output tokens are \"Tokens generated, thinking included\" and the table prices them at the output price, while the cache multipliers apply to input."
+          },
+          {
+            "id": "b",
+            "text": "The cache write has its own price above the base input price",
+            "correct": true,
+            "says": "The page prices a 5-minute cache write at \"1.25 times input\", so 4,000 written tokens are not ordinary input."
+          },
+          {
+            "id": "c",
+            "text": "The count in `input_tokens` already includes the written tokens",
+            "correct": false,
+            "says": "Ruled out because `input_tokens` is \"Input tokens that were not read from or written to a cache\"."
+          },
+          {
+            "id": "d",
+            "text": "The batch discount applies to cache writes before anything else",
+            "correct": false,
+            "says": "Ruled out because the batch discount is \"50 percent on input and output\" and halves the sum, and it is not an ordering of charges."
+          }
+        ],
+        "origin": {
+          "path": "course/18-model-choice-cost-and-migration/02-usage-token-counting-and-a-cost-model.md",
+          "section": "The usage object"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "Before sending a long prompt, an application wants to know whether it fits a budget. Which tool does the page back, and with what caveat?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The pricing page, whose figures give the token count of any prompt",
+            "correct": false,
+            "says": "Ruled out because the pricing page gives prices per million tokens, while the endpoint \"takes the same structured input as a Messages request\" and counts it."
+          },
+          {
+            "id": "b",
+            "text": "A trial request with a tiny `max_tokens`, whose usage is exact and free of charge",
+            "correct": false,
+            "says": "Ruled out because a trial request is a billed Messages call (the page calls counting \"free to use\"), while the page offers counting as a separate call with \"separate and independent rate limits\"."
+          },
+          {
+            "id": "c",
+            "text": "The `input_tokens` of the previous response, which always predicts the next one",
+            "correct": false,
+            "says": "Ruled out because the page says \"to decide before paying\" with counting on the new prompt, and an earlier response predicts nothing about it."
+          },
+          {
+            "id": "d",
+            "text": "The token counting endpoint, whose figure is an estimate and is free to request",
+            "correct": true,
+            "says": "The page says \"The token count is an estimate\" and \"Token counting is free to use but subject to requests per minute rate limits based on your usage tier.\""
+          }
+        ],
+        "origin": {
+          "path": "course/18-model-choice-cost-and-migration/02-usage-token-counting-and-a-cost-model.md",
+          "section": "Counting tokens before you send"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A router must pick between two models whose costs for a cache-heavy request are equal. What does the practice's rule do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It takes the first model in the catalog, since order is the only signal left",
+            "correct": false,
+            "says": "Ruled out because a router that breaks ties by list order gives \"an answer that depends on how the catalog was written\"."
+          },
+          {
+            "id": "b",
+            "text": "It takes the lower tier, so the answer does not depend on the catalog",
+            "correct": true,
+            "says": "The practice's rule is \"A cost tie goes to the lower tier\", and the order of the catalog never matters."
+          },
+          {
+            "id": "c",
+            "text": "It takes the larger window, since room is worth keeping in reserve",
+            "correct": false,
+            "says": "Ruled out because the rule is \"A cost tie goes to the lower tier\" and never ranks windows once the limits are met."
+          },
+          {
+            "id": "d",
+            "text": "It takes the higher tier, since quality is worth the extra spend",
+            "correct": false,
+            "says": "Ruled out because the statement says \"goes to the lower tier\"."
+          }
+        ],
+        "origin": {
+          "path": "course/18-model-choice-cost-and-migration/02-usage-token-counting-and-a-cost-model.md",
+          "section": "The practice: a router and a cost model"
+        }
+      }
+    ]
+  }
+}

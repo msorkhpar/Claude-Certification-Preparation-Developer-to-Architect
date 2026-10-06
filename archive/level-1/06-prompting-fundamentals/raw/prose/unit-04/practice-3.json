@@ -1,0 +1,321 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-1",
+    "06-prompting-fundamentals"
+  ],
+  "variant": "prose",
+  "unit": 4,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: a prompt template builder, graded on structure (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a prompt template builder, graded on structure"
+    },
+    {
+      "type": "para",
+      "text": "Write `build_prompt` (Python), `buildPrompt` (TypeScript), `PromptBuilder.build` (Java) or `buildPrompt` (Kotlin): it turns a prompt **spec** into one prompt string. The tests check the structure of the string, exactly, so the format below is the contract."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working prompt builder with eight gaps cut out of it. The plumbing is written and correct: the spec handling, the order of the sections, the placeholder pass, the block helper and the numbering loops. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To see what a gap receives, debug it by logging its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (Python names, with a leading underscore; the TypeScript, Java and Kotlin names are the camel-case forms, `renderDocument` for `_render_document`, and so on):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_join` unlocks every case: the sections separated by one blank line.",
+        "`_present` unlocks `e1`: an absent, empty or whitespace-only text is not there.",
+        "`_lookup` unlocks `e2`: a placeholder's value, or an error that names the variable.",
+        "`_escape` unlocks `e4`: `&`, `<` and `>` made harmless.",
+        "`_render_document` unlocks `e4`, `e5` and `e6`: one document, escaped and never filled.",
+        "`_render_example` unlocks `m1` and `e6`: one example with its input and output blocks.",
+        "`_constraint_lines` unlocks `m1`: one `- ` line per constraint.",
+        "`_check_task` unlocks `e3`: a blank task is refused."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gaps 1, 2, 3, 5, 6 and 7. A few lines each, about ten in all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The spec"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Field",
+        "Type",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`task`",
+          "text",
+          "The ask. **Required.**"
+        ],
+        [
+          "`role`",
+          "text, optional",
+          "Who Claude is for this task"
+        ],
+        [
+          "`context`",
+          "text, optional",
+          "Why and for whom"
+        ],
+        [
+          "`documents`",
+          "list of `name` and `text`, optional",
+          "Source material (untrusted data)"
+        ],
+        [
+          "`examples`",
+          "list of `input` and `output`, optional",
+          "Worked examples"
+        ],
+        [
+          "`constraints`",
+          "list of text, optional",
+          "Rules the answer must obey"
+        ],
+        [
+          "`output_format`",
+          "text, optional",
+          "The shape of the answer"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Plus a `variables` map from names to text. (TypeScript, Java and Kotlin name the field `outputFormat`.)"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The output"
+    },
+    {
+      "type": "para",
+      "text": "Sections appear in this order, separated by one blank line, with no trailing newline. A section is **omitted entirely** when its field is absent, `null`, empty or only whitespace; `task` is never omitted."
+    },
+    {
+      "type": "code",
+      "lang": "text",
+      "text": "<role>\n{role}\n</role>\n\n<documents>\n<document index=\"1\" name=\"{name}\">\n{text}\n</document>\n<document index=\"2\" name=\"{name}\">\n{text}\n</document>\n</documents>\n\n<context>\n{context}\n</context>\n\n<examples>\n<example index=\"1\">\n<input>\n{input}\n</input>\n<output>\n{output}\n</output>\n</example>\n</examples>\n\n<constraints>\n- {first constraint}\n- {second constraint}\n</constraints>\n\n<output_format>\n{output_format}\n</output_format>\n\n<task>\n{task}\n</task>"
+    },
+    {
+      "type": "para",
+      "text": "Documents and examples keep the order they were given, numbered from 1."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Rules"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Variables.** `{{name}}` in `role`, `context`, `constraints`, `output_format`, `task`, and the `input` and `output` of examples is replaced by the variable's value, in one pass: a value that itself contains `{{other}}` is inserted as it is. A placeholder with no value is an error that names the variable (Python `ValueError`, TypeScript `Error`, Java and Kotlin `IllegalArgumentException`; the message contains the variable's name).",
+        "**Documents are data.** In a document's `text` and `name`, replace `&` with `&amp;`, `<` with `&lt;` and `>` with `&gt;`, and in the `name` also `\"` with `&quot;`, so a document can never close its own tag. Placeholders inside documents are **not** replaced.",
+        "**A blank task is refused** with the same error type: missing, empty or only whitespace."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A full spec renders every section in the order above"
+        ],
+        [
+          "`e1`",
+          "Absent, empty and whitespace-only optional sections are omitted, not rendered empty"
+        ],
+        [
+          "`e2`",
+          "Variables are filled in one pass; a missing variable is named in the error"
+        ],
+        [
+          "`e3`",
+          "A missing, empty or whitespace-only task is refused"
+        ],
+        [
+          "`e4`",
+          "Document text and names are escaped, so a document cannot close its own tag"
+        ],
+        [
+          "`e5`",
+          "Placeholders inside document text stay literal"
+        ],
+        [
+          "`e6`",
+          "Documents and examples keep their order and their numbering"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.*;\nimport java.util.regex.*;\nimport java.util.stream.*;\n\n/** Build a structured prompt from a spec. See ../../statement.md for the exact format. */\nfinal class PromptBuilder {\n    private static final System.Logger LOG = System.getLogger(PromptBuilder.class.getName());\n    private static final Pattern VAR = Pattern.compile(\"\\\\{\\\\{(\\\\w+)\\\\}\\\\}\");\n\n    private PromptBuilder() {}\n\n    private static String fill(String text, Map<String, String> variables) {\n        Matcher m = VAR.matcher(text);\n        StringBuilder out = new StringBuilder();\n        while (m.find()) m.appendReplacement(out, Matcher.quoteReplacement(lookup(m.group(1), variables)));\n        m.appendTail(out);\n        return out.toString();\n    }\n\n    private static String block(String tag, String body) {\n        return \"<\" + tag + \">\\n\" + body + \"\\n</\" + tag + \">\";\n    }\n\n    private static String join(List<String> parts) {\n        return String.join(\"\\n\\n\", parts);\n    }\n\n    private static boolean present(String value) {\n        return value != null && !value.isBlank();\n    }\n\n    private static String lookup(String name, Map<String, String> variables) {\n        if (!variables.containsKey(name)) throw new IllegalArgumentException(\"missing variable: \" + name);\n        return variables.get(name);\n    }\n\n    private static String escape(String text) {\n        return text.replace(\"&\", \"&amp;\").replace(\"<\", \"&lt;\").replace(\">\", \"&gt;\");\n    }\n\n    private static String renderDocument(int index, Doc doc) {\n        String name = escape(doc.name()).replace(\"\\\"\", \"&quot;\");\n        return \"<document index=\\\"\" + index + \"\\\" name=\\\"\" + name + \"\\\">\\n\" + escape(doc.text()) + \"\\n</document>\";\n    }\n\n    private static String renderExample(int index, Example ex, Map<String, String> variables) {\n        return \"<example index=\\\"\" + index + \"\\\">\\n\"\n            + block(\"input\", fill(ex.input(), variables)) + \"\\n\"\n            + block(\"output\", fill(ex.output(), variables)) + \"\\n</example>\";\n    }\n\n    private static String constraintLines(List<String> constraints, Map<String, String> variables) {\n        return constraints.stream().map(c -> \"- \" + fill(c, variables)).collect(Collectors.joining(\"\\n\"));\n    }\n\n    private static void checkTask(String task) {\n        if (!present(task)) throw new IllegalArgumentException(\"task is required\");\n    }\n\n    static String build(Spec spec, Map<String, String> variables) {\n        LOG.log(System.Logger.Level.DEBUG, \"build input: {0} {1}\", spec, variables);\n        checkTask(spec.task());\n        List<String> parts = new ArrayList<>();\n        if (present(spec.role())) parts.add(block(\"role\", fill(spec.role(), variables)));\n        if (spec.documents() != null && !spec.documents().isEmpty()) {\n            List<String> rendered = new ArrayList<>();\n            int i = 1;\n            for (Doc doc : spec.documents()) rendered.add(renderDocument(i++, doc));\n            parts.add(block(\"documents\", String.join(\"\\n\", rendered)));\n        }\n        if (present(spec.context())) parts.add(block(\"context\", fill(spec.context(), variables)));\n        if (spec.examples() != null && !spec.examples().isEmpty()) {\n            List<String> rendered = new ArrayList<>();\n            int i = 1;\n            for (Example ex : spec.examples()) rendered.add(renderExample(i++, ex, variables));\n            parts.add(block(\"examples\", String.join(\"\\n\", rendered)));\n        }\n        if (spec.constraints() != null && !spec.constraints().isEmpty()) {\n            parts.add(block(\"constraints\", constraintLines(spec.constraints(), variables)));\n        }\n        if (present(spec.outputFormat())) parts.add(block(\"output_format\", fill(spec.outputFormat(), variables)));\n        parts.add(block(\"task\", fill(spec.task(), variables)));\n        return join(parts);\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // A small spec like the first main test case: a role, one document, one constraint and a task with a placeholder.\n        Spec spec = new Spec(\n            \"Classify the message about {{topic}}.\",\n            \"You are a careful support analyst for {{company}}.\",\n            null,\n            List.of(new Doc(\"policy.txt\", \"Refunds within 30 days.\")),\n            null,\n            List.of(\"Answer in one word.\"),\n            null);\n        String prompt = PromptBuilder.build(spec, Map.of(\"company\", \"Acme\", \"topic\", \"delivery\"));\n\n        System.out.println(\"prompt length: \" + prompt.length());\n        System.out.println(\"starts with: \" + prompt.substring(0, Math.min(20, prompt.length())).replace(\"\\n\", \"\\\\n\"));\n        System.out.println(\"has task block: \" + prompt.contains(\"<task>\\nClassify the message about delivery.\\n</task>\"));\n        System.out.println(prompt);\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.*;\nimport java.util.regex.*;\nimport java.util.stream.*;\n\n/** Build a structured prompt from a spec. See ../../statement.md for the exact format. */\nfinal class PromptBuilder {\n    private static final System.Logger LOG = System.getLogger(PromptBuilder.class.getName());\n    private static final Pattern VAR = Pattern.compile(\"\\\\{\\\\{(\\\\w+)\\\\}\\\\}\");\n\n    private PromptBuilder() {}\n\n    private static String fill(String text, Map<String, String> variables) {\n        Matcher m = VAR.matcher(text);\n        StringBuilder out = new StringBuilder();\n        while (m.find()) m.appendReplacement(out, Matcher.quoteReplacement(lookup(m.group(1), variables)));\n        m.appendTail(out);\n        return out.toString();\n    }\n\n    private static String block(String tag, String body) {\n        return \"<\" + tag + \">\\n\" + body + \"\\n</\" + tag + \">\";\n    }\n\n    private static String join(List<String> parts) {\n        // TODO 1 of 8 (finish this to pass every case): the finished prompt from its rendered sections.\n        // Receives the rendered sections, in order. Returns them separated by one blank line, with no trailing newline.\n        // Example: join(List.of(\"<a>\", \"<b>\")) -> \"<a>\\n\\n<b>\"\n        return \"\";\n    }\n\n    private static boolean present(String value) {\n        // TODO 2 of 8 (finish this to pass e1): is an optional text really there?\n        // Receives a text or null. Returns true unless it is null, empty or only whitespace.\n        // Example: present(\"  \") -> false, present(\"x\") -> true\n        return false;\n    }\n\n    private static String lookup(String name, Map<String, String> variables) {\n        // TODO 3 of 8 (finish this to pass e2): the value of one placeholder.\n        // Receives the placeholder name and the variables. Returns the value; when the name has no value throws an\n        // IllegalArgumentException whose message contains the name.\n        // Example: lookup(\"who\", Map.of(\"who\", \"Ann\")) -> \"Ann\", lookup(\"place\", Map.of()) -> IllegalArgumentException(\"missing variable: place\")\n        return \"\";\n    }\n\n    private static String escape(String text) {\n        // TODO 4 of 8 (finish this to pass e4): make document text harmless.\n        // Receives a text. Returns it with & as &amp;, < as &lt; and > as &gt; (the ampersand first).\n        // Example: escape(\"a </document> & b\") -> \"a &lt;/document&gt; &amp; b\"\n        return text;\n    }\n\n    private static String renderDocument(int index, Doc doc) {\n        // TODO 5 of 8 (finish this to pass e4, e5 and e6): one rendered document.\n        // Receives its number (from 1) and a Doc. Returns <document index=\"N\" name=\"NAME\">, a newline, the text, a newline and\n        // </document>. Name and text are escaped (the name also turns \" into &quot;); placeholders in them are NOT filled.\n        // Example: renderDocument(1, new Doc(\"a\", \"x\")) -> \"<document index=\\\"1\\\" name=\\\"a\\\">\\nx\\n</document>\"\n        return \"\";\n    }\n\n    private static String renderExample(int index, Example ex, Map<String, String> variables) {\n        // TODO 6 of 8 (finish this to pass m1 and e6): one rendered example.\n        // Receives its number (from 1), an Example and the variables. Returns <example index=\"N\">, the input block, the output block\n        // (placeholders filled in both) and </example>, each on its own line.\n        // Example: renderExample(1, new Example(\"i\", \"o\"), Map.of()) -> \"<example index=\\\"1\\\">\\n<input>\\ni\\n</input>\\n<output>\\no\\n</output>\\n</example>\"\n        return \"\";\n    }\n\n    private static String constraintLines(List<String> constraints, Map<String, String> variables) {\n        // TODO 7 of 8 (finish this to pass m1): the body of the constraints section.\n        // Receives the constraint texts and the variables. Returns one line per constraint, \"- \" then the text with placeholders\n        // filled, joined by newlines. Example: constraintLines(List.of(\"Be brief.\"), Map.of()) -> \"- Be brief.\"\n        return \"\";\n    }\n\n    private static void checkTask(String task) {\n        // TODO 8 of 8 (finish this to pass e3): refuse a blank task.\n        // Receives the task, which may be null. Throws IllegalArgumentException(\"task is required\") when it is null, empty or only\n        // whitespace; otherwise returns nothing. Example: checkTask(\"  \") -> IllegalArgumentException, checkTask(\"Say hi.\") -> nothing\n    }\n\n    static String build(Spec spec, Map<String, String> variables) {\n        LOG.log(System.Logger.Level.DEBUG, \"build input: {0} {1}\", spec, variables);\n        checkTask(spec.task());\n        List<String> parts = new ArrayList<>();\n        if (present(spec.role())) parts.add(block(\"role\", fill(spec.role(), variables)));\n        if (spec.documents() != null && !spec.documents().isEmpty()) {\n            List<String> rendered = new ArrayList<>();\n            int i = 1;\n            for (Doc doc : spec.documents()) rendered.add(renderDocument(i++, doc));\n            parts.add(block(\"documents\", String.join(\"\\n\", rendered)));\n        }\n        if (present(spec.context())) parts.add(block(\"context\", fill(spec.context(), variables)));\n        if (spec.examples() != null && !spec.examples().isEmpty()) {\n            List<String> rendered = new ArrayList<>();\n            int i = 1;\n            for (Example ex : spec.examples()) rendered.add(renderExample(i++, ex, variables));\n            parts.add(block(\"examples\", String.join(\"\\n\", rendered)));\n        }\n        if (spec.constraints() != null && !spec.constraints().isEmpty()) {\n            parts.add(block(\"constraints\", constraintLines(spec.constraints(), variables)));\n        }\n        if (present(spec.outputFormat())) parts.add(block(\"output_format\", fill(spec.outputFormat(), variables)));\n        parts.add(block(\"task\", fill(spec.task(), variables)));\n        return join(parts);\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // A small spec like the first main test case: a role, one document, one constraint and a task with a placeholder.\n        Spec spec = new Spec(\n            \"Classify the message about {{topic}}.\",\n            \"You are a careful support analyst for {{company}}.\",\n            null,\n            List.of(new Doc(\"policy.txt\", \"Refunds within 30 days.\")),\n            null,\n            List.of(\"Answer in one word.\"),\n            null);\n        String prompt = PromptBuilder.build(spec, Map.of(\"company\", \"Acme\", \"topic\", \"delivery\"));\n\n        System.out.println(\"prompt length: \" + prompt.length());\n        System.out.println(\"starts with: \" + prompt.substring(0, Math.min(20, prompt.length())).replace(\"\\n\", \"\\\\n\"));\n        System.out.println(\"has task block: \" + prompt.contains(\"<task>\\nClassify the message about delivery.\\n</task>\"));\n        System.out.println(prompt);\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 7,
+    "code": 3,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "a7b96e06654a293da423c392c458c8e6e82c5fcd6b3959f228301dd172a7c559",
+  "starting_code": "import java.util.*;\nimport java.util.regex.*;\nimport java.util.stream.*;\n\n/** Build a structured prompt from a spec. See ../../statement.md for the exact format. */\nfinal class PromptBuilder {\n    private static final System.Logger LOG = System.getLogger(PromptBuilder.class.getName());\n    private static final Pattern VAR = Pattern.compile(\"\\\\{\\\\{(\\\\w+)\\\\}\\\\}\");\n\n    private PromptBuilder() {}\n\n    private static String fill(String text, Map<String, String> variables) {\n        Matcher m = VAR.matcher(text);\n        StringBuilder out = new StringBuilder();\n        while (m.find()) m.appendReplacement(out, Matcher.quoteReplacement(lookup(m.group(1), variables)));\n        m.appendTail(out);\n        return out.toString();\n    }\n\n    private static String block(String tag, String body) {\n        return \"<\" + tag + \">\\n\" + body + \"\\n</\" + tag + \">\";\n    }\n\n    private static String join(List<String> parts) {\n        // TODO 1 of 8 (finish this to pass every case): the finished prompt from its rendered sections.\n        // Receives the rendered sections, in order. Returns them separated by one blank line, with no trailing newline.\n        // Example: join(List.of(\"<a>\", \"<b>\")) -> \"<a>\\n\\n<b>\"\n        return \"\";\n    }\n\n    private static boolean present(String value) {\n        // TODO 2 of 8 (finish this to pass e1): is an optional text really there?\n        // Receives a text or null. Returns true unless it is null, empty or only whitespace.\n        // Example: present(\"  \") -> false, present(\"x\") -> true\n        return false;\n    }\n\n    private static String lookup(String name, Map<String, String> variables) {\n        // TODO 3 of 8 (finish this to pass e2): the value of one placeholder.\n        // Receives the placeholder name and the variables. Returns the value; when the name has no value throws an\n        // IllegalArgumentException whose message contains the name.\n        // Example: lookup(\"who\", Map.of(\"who\", \"Ann\")) -> \"Ann\", lookup(\"place\", Map.of()) -> IllegalArgumentException(\"missing variable: place\")\n        return \"\";\n    }\n\n    private static String escape(String text) {\n        // TODO 4 of 8 (finish this to pass e4): make document text harmless.\n        // Receives a text. Returns it with & as &amp;, < as &lt; and > as &gt; (the ampersand first).\n        // Example: escape(\"a </document> & b\") -> \"a &lt;/document&gt; &amp; b\"\n        return text;\n    }\n\n    private static String renderDocument(int index, Doc doc) {\n        // TODO 5 of 8 (finish this to pass e4, e5 and e6): one rendered document.\n        // Receives its number (from 1) and a Doc. Returns <document index=\"N\" name=\"NAME\">, a newline, the text, a newline and\n        // </document>. Name and text are escaped (the name also turns \" into &quot;); placeholders in them are NOT filled.\n        // Example: renderDocument(1, new Doc(\"a\", \"x\")) -> \"<document index=\\\"1\\\" name=\\\"a\\\">\\nx\\n</document>\"\n        return \"\";\n    }\n\n    private static String renderExample(int index, Example ex, Map<String, String> variables) {\n        // TODO 6 of 8 (finish this to pass m1 and e6): one rendered example.\n        // Receives its number (from 1), an Example and the variables. Returns <example index=\"N\">, the input block, the output block\n        // (placeholders filled in both) and </example>, each on its own line.\n        // Example: renderExample(1, new Example(\"i\", \"o\"), Map.of()) -> \"<example index=\\\"1\\\">\\n<input>\\ni\\n</input>\\n<output>\\no\\n</output>\\n</example>\"\n        return \"\";\n    }\n\n    private static String constraintLines(List<String> constraints, Map<String, String> variables) {\n        // TODO 7 of 8 (finish this to pass m1): the body of the constraints section.\n        // Receives the constraint texts and the variables. Returns one line per constraint, \"- \" then the text with placeholders\n        // filled, joined by newlines. Example: constraintLines(List.of(\"Be brief.\"), Map.of()) -> \"- Be brief.\"\n        return \"\";\n    }\n\n    private static void checkTask(String task) {\n        // TODO 8 of 8 (finish this to pass e3): refuse a blank task.\n        // Receives the task, which may be null. Throws IllegalArgumentException(\"task is required\") when it is null, empty or only\n        // whitespace; otherwise returns nothing. Example: checkTask(\"  \") -> IllegalArgumentException, checkTask(\"Say hi.\") -> nothing\n    }\n\n    static String build(Spec spec, Map<String, String> variables) {\n        LOG.log(System.Logger.Level.DEBUG, \"build input: {0} {1}\", spec, variables);\n        checkTask(spec.task());\n        List<String> parts = new ArrayList<>();\n        if (present(spec.role())) parts.add(block(\"role\", fill(spec.role(), variables)));\n        if (spec.documents() != null && !spec.documents().isEmpty()) {\n            List<String> rendered = new ArrayList<>();\n            int i = 1;\n            for (Doc doc : spec.documents()) rendered.add(renderDocument(i++, doc));\n            parts.add(block(\"documents\", String.join(\"\\n\", rendered)));\n        }\n        if (present(spec.context())) parts.add(block(\"context\", fill(spec.context(), variables)));\n        if (spec.examples() != null && !spec.examples().isEmpty()) {\n            List<String> rendered = new ArrayList<>();\n            int i = 1;\n            for (Example ex : spec.examples()) rendered.add(renderExample(i++, ex, variables));\n            parts.add(block(\"examples\", String.join(\"\\n\", rendered)));\n        }\n        if (spec.constraints() != null && !spec.constraints().isEmpty()) {\n            parts.add(block(\"constraints\", constraintLines(spec.constraints(), variables)));\n        }\n        if (present(spec.outputFormat())) parts.add(block(\"output_format\", fill(spec.outputFormat(), variables)));\n        parts.add(block(\"task\", fill(spec.task(), variables)));\n        return join(parts);\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-3/src/main/java/PromptBuilder.java",
+    "test_path": "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-3/src/test/java/PromptBuilderTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_fullPromptHasEverySectionInOrder()",
+        "kind": "main",
+        "says": "A full spec renders every section in the order above"
+      },
+      {
+        "id": "e1_absentOptionalSectionsAreOmittedNotEmpty()",
+        "kind": "edge",
+        "says": "Absent, empty and whitespace-only optional sections are omitted, not rendered empty"
+      },
+      {
+        "id": "e2_variablesFillOnceAndAMissingOneIsNamed()",
+        "kind": "edge",
+        "says": "Variables are filled in one pass; a missing variable is named in the error"
+      },
+      {
+        "id": "e3_blankTaskIsRefused()",
+        "kind": "edge",
+        "says": "A missing, empty or whitespace-only task is refused"
+      },
+      {
+        "id": "e4_documentTextCannotCloseItsOwnTag()",
+        "kind": "edge",
+        "says": "Document text and names are escaped, so a document cannot close its own tag"
+      },
+      {
+        "id": "e5_placeholdersInsideDocumentsStayLiteral()",
+        "kind": "edge",
+        "says": "Placeholders inside document text stay literal"
+      },
+      {
+        "id": "e6_documentsAndExamplesKeepTheirOrderAndIndex()",
+        "kind": "edge",
+        "says": "Documents and examples keep their order and their numbering"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-3/target/test-results/test"
+    },
+    "origin": "course/06-prompting-fundamentals/04-diagnosing-a-weak-output.md",
+    "concepts": [
+      "the practice of Diagnosing a weak output, and a template builder is solved"
+    ],
+    "files": [
+      "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "prompting-fundamentals-u4"
+}

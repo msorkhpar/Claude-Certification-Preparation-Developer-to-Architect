@@ -1,0 +1,92 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "23-setting-up-claude-on-the-cloud-platforms"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 3,
+  "title": "Practice: platform access as configuration, graded by tests (Java)",
+  "lang": "java",
+  "main_file": "project/bedrock-policy.json",
+  "files": [
+    "project/quotas.json",
+    "project/vertex.json"
+  ],
+  "test_file": "src/test/java/PlatformConfigTest.java",
+  "build": [
+    "src/test/java/Json.java",
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-3/check_files.py",
+    "practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-3/project/bedrock-policy.json",
+    "practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-3/project/quotas.json",
+    "practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-3/project/vertex.json"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-3",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_thePolicyAllowsInvokingOneModelInOneRegionAndNothingElse()",
+      "kind": "main",
+      "says": "The policy has one statement that allows an invoke action on the one model in the one region"
+    },
+    {
+      "id": "e1_noActionIsAWildcardAndEveryActionIsAnInvokeAction()",
+      "kind": "edge",
+      "says": "No action is a wildcard and every action is an invoke action, so nothing else is allowed"
+    },
+    {
+      "id": "e2_everyResourceArnNamesOneDocumentedRegionAndOneModel()",
+      "kind": "edge",
+      "says": "Every resource is a Bedrock model ARN with a documented region and no wildcard"
+    },
+    {
+      "id": "e3_everyStatementAllowsAndThePolicyUsesTheCurrentVersion()",
+      "kind": "edge",
+      "says": "Every statement allows, and the policy uses the current version"
+    },
+    {
+      "id": "e4_theVertexRoleIsACustomRoleThatCanOnlyPredict()",
+      "kind": "edge",
+      "says": "The Vertex role is a custom role that can only predict"
+    },
+    {
+      "id": "e5_theVertexEndpointKeepsTheDataWhereResidencySaysAndServesTheModel()",
+      "kind": "edge",
+      "says": "The Vertex endpoint keeps the data where residency says and serves the model"
+    },
+    {
+      "id": "e6_modelIdsUseEachPlatformsOwnForm()",
+      "kind": "edge",
+      "says": "Model ids use each platform's own form: anthropic. on Bedrock, a Vertex id on Vertex"
+    },
+    {
+      "id": "e7_theQuotaRequestStaysUnderTheSelfServiceCeiling()",
+      "kind": "edge",
+      "says": "The quota request stays under the self-service ceiling"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/23-setting-up-claude-on-the-cloud-platforms/02-residency-quotas-logging-and-the-configuration-practice.md"
+}

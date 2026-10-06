@@ -1,0 +1,308 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "59-plan-mode-and-iterative-refinement"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Plan mode or direct execution",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Plan mode or direct execution"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Architect · **Module 59:** Plan mode and iterative refinement · **Page 1 of 2** **Exams:** A3.4; S2"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** decide whether a code-generation task needs plan mode or can be done directly, say what plan mode does and does not stop, enter it and approve or reject a plan, and follow the explore, plan, implement, commit order."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-03 against the Claude Code documentation pages \"Choose a permission mode\" (plan mode) and \"Best practices for Claude Code\" (explore first, then plan, then code), documenting behaviour up to Claude Code v2.1.286. Nothing here was run against a live session: the example is a model of the documented decision rules, written as plain code over task descriptions. This page deepens module 38 (permission modes) and does not repeat it. Iterating on the result is the second page."
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "**Exam guide and current product.** *What the guide states (task statement 3.4), and so what the exam keys:* plan mode is for complex tasks, large-scale changes, several valid approaches, architectural decisions and multi-file modifications; direct execution is for simple, well-scoped changes such as a single-file bug fix with a clear stack trace or a date-validation check. *What the current product does (documentation checked 2026-10-03):* the same split, with a rule of thumb: \"If you could describe the diff in one sentence, skip the plan.\" Plan mode \"tells Claude to research and propose changes without making them\": Claude reads files, runs shell commands to explore, and writes a plan, \"but does not edit your source\". Edits stay blocked until you approve the plan, with one exception: in an interactive terminal session where bypass permissions are available the blocks are not enforced, and Claude is only instructed to plan. On the exam, the question is almost always which of two tasks needs a plan; answer from the size and the number of valid approaches, not from how important the task sounds."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "Two requests arrive on the same morning. One asks to add a date-validation check to a single handler. The other asks to migrate a library used in forty-five files, with two plausible target designs. If Claude starts coding the second without a plan, it can change a dozen files in one direction before anyone notices that the other design was the one the team wanted, and undoing it costs more than planning would have. If Claude is made to plan the first, the plan is longer than the change. Scenario S2 asks which gets which, and the documentation's warning is symmetrical: \"Plan mode is useful, but also adds overhead.\""
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What plan mode does"
+    },
+    {
+      "type": "para",
+      "text": "In plan mode Claude researches and proposes, and does not change your source. Reading is free, and shell commands are controlled by the session: where auto mode is available a classifier reviews them, otherwise commands outside the read-only set ask for approval. You enter it by pressing `Shift+Tab` until the status bar shows plan mode, by prefixing one prompt with `/plan`, or by starting the session with `claude --permission-mode plan`. A project can make it the default with `defaultMode: plan` in its settings. In a headless run with `-p`, or in an Agent SDK session, \"Plan mode keeps its blocks wherever Claude Code runs without an interactive terminal\"."
+    },
+    {
+      "type": "para",
+      "text": "When the plan is ready Claude presents it and asks how to proceed: approve and start editing (in auto mode, or auto-accepting edits, or approving each edit by hand), or \"No, keep planning\" and tell Claude what to change. Approving \"exits plan mode and switches the session to the permission mode each approve option describes\". `Ctrl+G` opens the plan in your editor so you can change it before Claude proceeds."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "When a plan earns its cost"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "The task",
+        "Plan first",
+        "Why"
+      ],
+      "rows": [
+        [
+          "Fix a typo, add a log line, rename a variable",
+          "No",
+          "The diff fits in one sentence"
+        ],
+        [
+          "A bug with a clear stack trace in one function",
+          "No",
+          "One file, one approach"
+        ],
+        [
+          "Add a date check to one handler",
+          "No",
+          "Well scoped, one valid approach"
+        ],
+        [
+          "Migrate a library used in many files",
+          "Yes",
+          "Many files, and a wrong pattern is repeated everywhere"
+        ],
+        [
+          "Split a service into two",
+          "Yes",
+          "Architectural, several valid approaches"
+        ],
+        [
+          "Add a feature in code you do not know",
+          "Yes",
+          "The first need is to learn the code"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Two signals decide it: the number of files and the number of valid approaches. One of them being high is enough. The documentation lists three triggers: an uncertain approach, a change to several files and unfamiliar code; the first two are these signals and the third is the last row of the table. Importance is not a signal: a one-line change in a payment module is still a one-sentence diff."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The four phases"
+    },
+    {
+      "type": "para",
+      "text": "The documentation's recommended workflow separates research from implementation so that the work solves the right problem:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Explore.** In plan mode, read the relevant code and ask questions. Nothing changes.",
+        "**Plan.** Ask for a detailed plan: which files change, in which order, and how the result will be checked. Edit the plan if it is wrong.",
+        "**Implement.** Approve, and let Claude write the code \"verifying against its plan\", with tests.",
+        "**Commit.** Ask for a commit message and a pull request."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "A hybrid is normal: explore and plan for the large change, then run the implementation of each small step directly. The decision is per task, and a session can contain both."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "example",
+      "id": "m59-refinement",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/59-refinement/python/refinement.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/59-refinement/typescript/refinement.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/59-refinement/java/Refinement.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/59-refinement/kotlin/Refinement.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Three decisions of a Claude Code session on a code-generation task: plan mode or direct execution, one message or several for a list of problems, and what a failing test run must say.\n\nThe rules are the ones the exam guide states for tasks 3.4 and 3.5 and the best-practices page confirms (read on 2026-10-03): plan when the change is large, architectural,\ntouches many files or has more than one valid approach; execute directly when you could describe the diff in one sentence; send interacting problems in one message and\nindependent problems one after another; and give the model the failing tests, with input and expected output, as the target. No model is called.\n\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef choose_mode(task):\n    \"\"\"Phases of the work: `plan` first when the change is large, architectural, spread over files or has several valid approaches.\"\"\"\n    small = task[\"diff_in_one_sentence\"] and task[\"files\"] <= 1 and not task[\"architectural\"]\n    if small:\n        return [\"implement\"]\n    if task[\"architectural\"] or task[\"approaches\"] > 1 or task[\"files\"] > 1:\n        return [\"explore\", \"plan\", \"implement\"]\n    return [\"implement\"]\n\n\ndef group_feedback(issues):\n    \"\"\"Messages to send, in order: problems that interact travel together, independent ones go one at a time. issues: [{\"id\", \"interacts_with\": [ids]}].\"\"\"\n    parent = {i[\"id\"]: i[\"id\"] for i in issues}\n\n    def find(x):\n        while parent[x] != x:\n            parent[x] = parent[parent[x]]\n            x = parent[x]\n        return x\n\n    for issue in issues:\n        for other in issue.get(\"interacts_with\", []):\n            if other in parent:\n                parent[find(issue[\"id\"])] = find(other)\n    groups = {}\n    for issue in issues:\n        groups.setdefault(find(issue[\"id\"]), []).append(issue[\"id\"])\n    return list(groups.values())\n\n\ndef failure_report(results):\n    \"\"\"The message that closes the loop: each failing test with its input, the expected output and the actual one; nothing about the passing tests.\"\"\"\n    failing = [r for r in results if r[\"actual\"] != r[\"expected\"]]\n    if not failing:\n        return \"All tests pass.\"\n    lines = [f\"{len(failing)} of {len(results)} tests fail:\"]\n    lines += [f\"- {r['name']}: input {r['input']!r}, expected {r['expected']!r}, got {r['actual']!r}\" for r in failing]\n    return \"\\n\".join(lines)\n\n\ndef main():\n    tasks = {\n        \"rename a variable in one function\": {\"diff_in_one_sentence\": True, \"files\": 1, \"architectural\": False, \"approaches\": 1},\n        \"add a date check to one handler\": {\"diff_in_one_sentence\": True, \"files\": 1, \"architectural\": False, \"approaches\": 1},\n        \"split a monolith into services\": {\"diff_in_one_sentence\": False, \"files\": 60, \"architectural\": True, \"approaches\": 3},\n        \"migrate a library used in 45 files\": {\"diff_in_one_sentence\": False, \"files\": 45, \"architectural\": False, \"approaches\": 1},\n    }\n    for name, task in tasks.items():\n        print(f\"{name}: {' > '.join(choose_mode(task))}\")\n    issues = [{\"id\": \"sort-order\", \"interacts_with\": [\"pagination\"]}, {\"id\": \"pagination\", \"interacts_with\": [\"sort-order\"]}, {\"id\": \"typo-in-label\", \"interacts_with\": []}, {\"id\": \"null-date\", \"interacts_with\": []}]\n    print(\"messages:\", group_feedback(issues))\n    results = [{\"name\": \"keeps order\", \"input\": [3, 1, 2], \"expected\": [1, 2, 3], \"actual\": [1, 2, 3]}, {\"name\": \"empty list\", \"input\": [], \"expected\": [], \"actual\": None},\n               {\"name\": \"null entry\", \"input\": [2, None], \"expected\": [2], \"actual\": [2, None]}]\n    print(failure_report(results))\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "rename a variable in one function: implement\nadd a date check to one handler: implement\nsplit a monolith into services: explore > plan > implement\nmigrate a library used in 45 files: explore > plan > implement\nmessages: [['sort-order', 'pagination'], ['typo-in-label'], ['null-date']]\n2 of 3 tests fail:\n- empty list: input [], expected [], got None\n- null entry: input [2, None], expected [2], got [2, None]"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "import { logger } from \"./logger.ts\";\nconst log = logger(\"refinement\");\n/**\n * Three decisions of a Claude Code session on a code-generation task: plan mode or direct execution, one message or several for a list of problems, and what a failing test run must say.\n *\n * The rules are the ones the exam guide states for tasks 3.4 and 3.5 and the best-practices page confirms (read on 2026-10-03): plan when the change is large, architectural,\n * touches many files or has more than one valid approach; execute directly when you could describe the diff in one sentence; send interacting problems in one message and\n * independent problems one after another; and give the model the failing tests, with input and expected output, as the target. No model is called.\n */\nexport type Task = { diff_in_one_sentence: boolean; files: number; architectural: boolean; approaches: number };\nexport type Issue = { id: string; interacts_with?: string[] };\nexport type Result = { name: string; input: unknown; expected: unknown; actual: unknown };\n\n/** Phases of the work: `plan` first when the change is large, architectural, spread over files or has several valid approaches. */\nexport function chooseMode(task: Task): string[] {\n  const small = task.diff_in_one_sentence && task.files <= 1 && !task.architectural;\n  if (small) return [\"implement\"];\n  if (task.architectural || task.approaches > 1 || task.files > 1) return [\"explore\", \"plan\", \"implement\"];\n  return [\"implement\"];\n}\n\n/** Messages to send, in order: problems that interact travel together, independent ones go one at a time. */\nexport function groupFeedback(issues: Issue[]): string[][] {\n  const parent = new Map(issues.map((i) => [i.id, i.id]));\n  const find = (x: string): string => {\n    while (parent.get(x) !== x) {\n      parent.set(x, parent.get(parent.get(x) as string) as string);\n      x = parent.get(x) as string;\n    }\n    return x;\n  };\n  for (const issue of issues) {\n    for (const other of issue.interacts_with ?? []) if (parent.has(other)) parent.set(find(issue.id), find(other));\n  }\n  const groups = new Map<string, string[]>();\n  for (const issue of issues) {\n    const root = find(issue.id);\n    groups.set(root, [...(groups.get(root) ?? []), issue.id]);\n  }\n  return [...groups.values()];\n}\n\nconst show = (v: unknown): string => (v === undefined ? \"None\" : v === null ? \"null\" : JSON.stringify(v));\n\n/** The message that closes the loop: each failing test with its input, the expected output and the actual one; nothing about the passing tests. */\nexport function failureReport(results: Result[]): string {\n  const failing = results.filter((r) => JSON.stringify(r.actual) !== JSON.stringify(r.expected));\n  if (failing.length === 0) return \"All tests pass.\";\n  const lines = [`${failing.length} of ${results.length} tests fail:`];\n  for (const r of failing) lines.push(`- ${r.name}: input ${show(r.input)}, expected ${show(r.expected)}, got ${show(r.actual)}`);\n  return lines.join(\"\\n\");\n}\n\nfunction main() {\n  const tasks: Record<string, Task> = {\n    \"rename a variable in one function\": { diff_in_one_sentence: true, files: 1, architectural: false, approaches: 1 },\n    \"add a date check to one handler\": { diff_in_one_sentence: true, files: 1, architectural: false, approaches: 1 },\n    \"split a monolith into services\": { diff_in_one_sentence: false, files: 60, architectural: true, approaches: 3 },\n    \"migrate a library used in 45 files\": { diff_in_one_sentence: false, files: 45, architectural: false, approaches: 1 },\n  };\n  for (const [name, task] of Object.entries(tasks)) console.log(`${name}: ${chooseMode(task).join(\" > \")}`);\n  const issues: Issue[] = [{ id: \"sort-order\", interacts_with: [\"pagination\"] }, { id: \"pagination\", interacts_with: [\"sort-order\"] }, { id: \"typo-in-label\", interacts_with: [] }, { id: \"null-date\", interacts_with: [] }];\n  console.log(\"messages:\", JSON.stringify(groupFeedback(issues)));\n  const results: Result[] = [{ name: \"keeps order\", input: [3, 1, 2], expected: [1, 2, 3], actual: [1, 2, 3] }, { name: \"empty list\", input: [], expected: [], actual: null }, { name: \"null entry\", input: [2, null], expected: [2], actual: [2, null] }];\n  console.log(failureReport(results));\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "rename a variable in one function: implement\nadd a date check to one handler: implement\nsplit a monolith into services: explore > plan > implement\nmigrate a library used in 45 files: explore > plan > implement\nmessages: [[\"sort-order\",\"pagination\"],[\"typo-in-label\"],[\"null-date\"]]\n2 of 3 tests fail:\n- empty list: input [], expected [], got null\n- null entry: input [2,null], expected [2], got [2,null]"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import static harness.Show.py;\n\nimport java.util.ArrayList;\nimport java.util.Arrays;\nimport java.util.HashMap;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Objects;\n\n/**\n * Three decisions of a Claude Code session on a code-generation task: plan mode or direct execution, one message or several for a list of problems, and what a failing test run must say.\n *\n * <p>The rules are the ones the exam guide states for tasks 3.4 and 3.5 and the best-practices page confirms (read on 2026-10-03): plan when the change is large, architectural,\n * touches many files or has more than one valid approach; execute directly when you could describe the diff in one sentence; send interacting problems in one message and\n * independent problems one after another; and give the model the failing tests, with input and expected output, as the target. No model is called.\n */\npublic final class Refinement {\n    private static final System.Logger LOG = System.getLogger(Refinement.class.getName());\n    /** What decides the mode of a task. */\n    record Task(boolean diffInOneSentence, int files, boolean architectural, int approaches) {}\n\n    /** A problem found in review and the ids of the problems it interacts with. */\n    record Issue(String id, List<String> interactsWith) {\n        Issue(String id) {\n            this(id, List.of());\n        }\n    }\n\n    /** One test run: the test's name, its input, the expected output and the actual one. */\n    record Result(String name, Object input, Object expected, Object actual) {}\n\n    /** Phases of the work: `plan` first when the change is large, architectural, spread over files or has several valid approaches. */\n    static List<String> chooseMode(Task task) {\n        boolean small = task.diffInOneSentence() && task.files() <= 1 && !task.architectural();\n        if (small) return List.of(\"implement\");\n        if (task.architectural() || task.approaches() > 1 || task.files() > 1) return List.of(\"explore\", \"plan\", \"implement\");\n        return List.of(\"implement\");\n    }\n\n    private static String find(Map<String, String> parent, String x) {\n        while (!parent.get(x).equals(x)) {\n            parent.put(x, parent.get(parent.get(x)));\n            x = parent.get(x);\n        }\n        return x;\n    }\n\n    /** Messages to send, in order: problems that interact travel together, independent ones go one at a time. */\n    static List<List<String>> groupFeedback(List<Issue> issues) {\n        Map<String, String> parent = new HashMap<>();\n        for (Issue i : issues) parent.put(i.id(), i.id());\n        for (Issue issue : issues) {\n            for (String other : issue.interactsWith()) {\n                if (parent.containsKey(other)) parent.put(find(parent, issue.id()), find(parent, other));\n            }\n        }\n        Map<String, List<String>> groups = new LinkedHashMap<>();\n        for (Issue issue : issues) groups.computeIfAbsent(find(parent, issue.id()), k -> new ArrayList<>()).add(issue.id());\n        return new ArrayList<>(groups.values());\n    }\n\n    /** The message that closes the loop: each failing test with its input, the expected output and the actual one; nothing about the passing tests. */\n    static String failureReport(List<Result> results) {\n        List<Result> failing = results.stream().filter(r -> !Objects.equals(r.actual(), r.expected())).toList();\n        if (failing.isEmpty()) return \"All tests pass.\";\n        List<String> lines = new ArrayList<>();\n        lines.add(failing.size() + \" of \" + results.size() + \" tests fail:\");\n        for (Result r : failing) lines.add(\"- \" + r.name() + \": input \" + py(r.input()) + \", expected \" + py(r.expected()) + \", got \" + py(r.actual()));\n        return String.join(\"\\n\", lines);\n    }\n\n    public static void main(String[] args) {\n        Map<String, Task> tasks = new LinkedHashMap<>();\n        tasks.put(\"rename a variable in one function\", new Task(true, 1, false, 1));\n        tasks.put(\"add a date check to one handler\", new Task(true, 1, false, 1));\n        tasks.put(\"split a monolith into services\", new Task(false, 60, true, 3));\n        tasks.put(\"migrate a library used in 45 files\", new Task(false, 45, false, 1));\n        tasks.forEach((name, task) -> System.out.println(name + \": \" + String.join(\" > \", chooseMode(task))));\n        List<Issue> issues = List.of(new Issue(\"sort-order\", List.of(\"pagination\")), new Issue(\"pagination\", List.of(\"sort-order\")), new Issue(\"typo-in-label\"), new Issue(\"null-date\"));\n        System.out.println(\"messages: \" + py(groupFeedback(issues)));\n        List<Result> results = List.of(\n            new Result(\"keeps order\", List.of(3, 1, 2), List.of(1, 2, 3), List.of(1, 2, 3)),\n            new Result(\"empty list\", List.of(), List.of(), null),\n            new Result(\"null entry\", Arrays.asList(2, null), List.of(2), Arrays.asList(2, null)));\n        System.out.println(failureReport(results));\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "rename a variable in one function: implement\nadd a date check to one handler: implement\nsplit a monolith into services: explore > plan > implement\nmigrate a library used in 45 files: explore > plan > implement\nmessages: [['sort-order', 'pagination'], ['typo-in-label'], ['null-date']]\n2 of 3 tests fail:\n- empty list: input [], expected [], got None\n- null entry: input [2, None], expected [2], got [2, None]"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import harness.Show.py\n\nprivate val log = System.getLogger(\"refinement\")\n\n/**\n * Three decisions of a Claude Code session on a code-generation task: plan mode or direct execution, one message or several for a list of problems, and what a failing test run must say.\n *\n * The rules are the ones the exam guide states for tasks 3.4 and 3.5 and the best-practices page confirms (read on 2026-10-03): plan when the change is large, architectural,\n * touches many files or has more than one valid approach; execute directly when you could describe the diff in one sentence; send interacting problems in one message and\n * independent problems one after another; and give the model the failing tests, with input and expected output, as the target. No model is called.\n */\n\n/** What decides the mode of a task. */\ndata class Task(val diffInOneSentence: Boolean, val files: Int, val architectural: Boolean, val approaches: Int)\n\n/** A problem found in review and the ids of the problems it interacts with. */\ndata class Issue(val id: String, val interactsWith: List<String> = emptyList())\n\n/** One test run: the test's name, its input, the expected output and the actual one. */\ndata class Result(val name: String, val input: Any?, val expected: Any?, val actual: Any?)\n\n/** Phases of the work: `plan` first when the change is large, architectural, spread over files or has several valid approaches. */\nfun chooseMode(task: Task): List<String> {\n    val small = task.diffInOneSentence && task.files <= 1 && !task.architectural\n    if (small) return listOf(\"implement\")\n    if (task.architectural || task.approaches > 1 || task.files > 1) return listOf(\"explore\", \"plan\", \"implement\")\n    return listOf(\"implement\")\n}\n\n/** Messages to send, in order: problems that interact travel together, independent ones go one at a time. */\nfun groupFeedback(issues: List<Issue>): List<List<String>> {\n    val parent = issues.associate { it.id to it.id }.toMutableMap()\n    fun find(start: String): String {\n        var x = start\n        while (parent.getValue(x) != x) {\n            parent[x] = parent.getValue(parent.getValue(x))\n            x = parent.getValue(x)\n        }\n        return x\n    }\n    for (issue in issues) for (other in issue.interactsWith) if (other in parent) parent[find(issue.id)] = find(other)\n    val groups = linkedMapOf<String, MutableList<String>>()\n    for (issue in issues) groups.getOrPut(find(issue.id)) { mutableListOf() }.add(issue.id)\n    return groups.values.toList()\n}\n\n/** The message that closes the loop: each failing test with its input, the expected output and the actual one; nothing about the passing tests. */\nfun failureReport(results: List<Result>): String {\n    val failing = results.filter { it.actual != it.expected }\n    if (failing.isEmpty()) return \"All tests pass.\"\n    return (listOf(\"${failing.size} of ${results.size} tests fail:\") + failing.map { \"- ${it.name}: input ${py(it.input)}, expected ${py(it.expected)}, got ${py(it.actual)}\" }).joinToString(\"\\n\")\n}\n\nfun main() {\n    val tasks = linkedMapOf(\n        \"rename a variable in one function\" to Task(true, 1, false, 1),\n        \"add a date check to one handler\" to Task(true, 1, false, 1),\n        \"split a monolith into services\" to Task(false, 60, true, 3),\n        \"migrate a library used in 45 files\" to Task(false, 45, false, 1),\n    )\n    for ((name, task) in tasks) println(\"$name: ${chooseMode(task).joinToString(\" > \")}\")\n    val issues = listOf(Issue(\"sort-order\", listOf(\"pagination\")), Issue(\"pagination\", listOf(\"sort-order\")), Issue(\"typo-in-label\"), Issue(\"null-date\"))\n    println(\"messages: ${py(groupFeedback(issues))}\")\n    val results = listOf(\n        Result(\"keeps order\", listOf(3, 1, 2), listOf(1, 2, 3), listOf(1, 2, 3)),\n        Result(\"empty list\", emptyList<Int>(), emptyList<Int>(), null),\n        Result(\"null entry\", listOf(2, null), listOf(2), listOf(2, null)),\n    )\n    println(failureReport(results))\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "rename a variable in one function: implement\nadd a date check to one handler: implement\nsplit a monolith into services: explore > plan > implement\nmigrate a library used in 45 files: explore > plan > implement\nmessages: [['sort-order', 'pagination'], ['typo-in-label'], ['null-date']]\n2 of 3 tests fail:\n- empty list: input [], expected [], got None\n- null entry: input [2, None], expected [2], got [2, None]"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**\"Always start in plan mode; planning can only help.\"** It is tempting because a plan sounds careful. The exam rejects it: plan mode \"adds overhead\", and for a change whose diff fits in a sentence the plan is longer than the work.",
+        "**\"The change is critical, so plan first, however small.\"** It is tempting because the stakes are high. The exam rejects it: the signal is scope and the number of valid approaches, not stakes; a one-function fix with a clear trace is executed directly and checked by its tests.",
+        "**\"Start coding the migration and rework the design if it goes wrong.\"** It is tempting because Claude is fast. The exam rejects it for a many-file change with several approaches, where a wrong early choice is repeated across the codebase.",
+        "**\"Plan mode makes Claude's shell commands harmless.\"** It is tempting because edits are blocked. The product is more careful: Claude does run commands to explore, and what happens to a command depends on the session, from a classifier review to an approval prompt to no check at all when bypass permissions are available interactively."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A developer must replace a logging library that appears in forty-five source files, and two target designs would both work. How should the session begin?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Straight to editing, starting with a few of the files",
+              "**b**: Plan mode first, with the approach settled before any edit",
+              "**c**: Straight to editing, then a plan once ten files are done",
+              "**d**: Plan mode only if the library is security-sensitive"
+            ]
+          }
+        ],
+        [
+          "A stack trace points at one function that divides by zero when a list is empty. How should the fix be handled?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: In plan mode, with a plan approved before any bug fix",
+              "**b**: In plan mode, with the division reviewed as a risky operation",
+              "**c**: After an interview about the feature that owns the function",
+              "**d**: Directly, then confirm with a test of that edge case"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**b**. Many files and several valid approaches both argue for planning first. *a* is ruled out because the table says of a many-file change that \"a wrong pattern is repeated everywhere\", so the first files would commit the whole codebase. *c* is ruled out because the documented workflow \"separates research from implementation so that the work solves the right problem\", which a late plan cannot do. *d* is ruled out because \"Importance is not a signal\", and the signals are scope and the number of approaches.",
+            "**d**. One file with a clear trace is the guide's example of direct execution. *a* is ruled out because \"Plan mode is useful, but also adds overhead\", and a small clear fix does not repay it. *b* is ruled out because \"Two signals decide it: the number of files and the number of valid approaches\", and risk is neither. *c* is ruled out because an interview suits a large unclear feature, and here \"If you could describe the diff in one sentence, skip the plan\"."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Adapted from the Claude Certified Architect - Foundations exam preparation guide by Daron Yondem (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/), changed for this course."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 10,
+    "code": 0,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 1,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "b32356a81d3a37fc151d54d60768a0d3736c9f5384ccb51d0bd6207e5463703c"
+}

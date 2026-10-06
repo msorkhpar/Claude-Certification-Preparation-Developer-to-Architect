@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-4",
+    "83-deployment-architecture-and-data-handling"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 5,
+  "title": "Check yourself: The identifier boundary, the audit log and the practice",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "Scenario: Fennel Health's drafting assistant receives claim notes with patient names, contact details and policy numbers. Which design best keeps these away from the model provider?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A system prompt that instructs the model to ignore any personal details it comes across",
+            "correct": false,
+            "says": "Ruled out because \"the data has already crossed the boundary\"."
+          },
+          {
+            "id": "b",
+            "text": "A review step that checks the model's reply for personal details after it has been returned",
+            "correct": false,
+            "says": "Ruled out because a check on the reply, like an instruction, \"acts after the data has already crossed the boundary\"."
+          },
+          {
+            "id": "c",
+            "text": "A larger model that is better at noticing which parts of a note are sensitive ones",
+            "correct": false,
+            "says": "Ruled out because the model would still receive the data, and the point is to keep the identifier out of the request: \"It cannot leak what it never had\"."
+          },
+          {
+            "id": "d",
+            "text": "A layer that tokenises identifiers before the call and restores them afterwards",
+            "correct": true,
+            "says": "A layer before the call means the provider sees tokens and never the values, and the layer can be tested."
+          }
+        ],
+        "origin": {
+          "path": "course/83-deployment-architecture-and-data-handling/02-the-identifier-boundary-the-audit-log-and-the-practice.md",
+          "section": "The identifier boundary, the audit log and the practice"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "Scenario: Rook Mutual's auditors ask for proof of each model call. The team proposes logging every full prompt and reply for ten years. What should the architect say?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Log request identifiers, sizes and outcomes, and keep content in the system of record",
+            "correct": true,
+            "says": "The log proves what happened without becoming a second copy of the data."
+          },
+          {
+            "id": "b",
+            "text": "Accept the proposal, since a complete record is the strongest evidence that a regulator can ask to see",
+            "correct": false,
+            "says": "Ruled out because \"the log becomes a second store of sensitive data with its own obligations\"."
+          },
+          {
+            "id": "c",
+            "text": "Log full content, but encrypt the log, which removes the obligations that a data store has",
+            "correct": false,
+            "says": "Ruled out because encryption protects a store and does not remove it: the log would still be \"a store of health or personal data, with all the obligations of one\"."
+          },
+          {
+            "id": "d",
+            "text": "Log nothing from the calls, since any stored record of a call becomes a risk in itself",
+            "correct": false,
+            "says": "Ruled out because an audit log must record \"who, when, which request and what size\"."
+          }
+        ],
+        "origin": {
+          "path": "course/83-deployment-architecture-and-data-handling/02-the-identifier-boundary-the-audit-log-and-the-practice.md",
+          "section": "Traps"
+        }
+      }
+    ]
+  }
+}

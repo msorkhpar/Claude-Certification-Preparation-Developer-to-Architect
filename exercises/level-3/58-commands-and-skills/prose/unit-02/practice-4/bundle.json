@@ -1,0 +1,99 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "58-commands-and-skills"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 4,
+  "title": "Practice: write a forked review skill, a manual release skill and a command, and place the rest of the guidance (Kotlin)",
+  "lang": "kotlin",
+  "main_file": "project/.claude/skills/review-pr/SKILL.md",
+  "files": [
+    "project/.claude/commands/standup.md",
+    "project/.claude/skills/release-tag/SKILL.md",
+    "project/docs/placement.md",
+    "project/personal/review-pr-mine/SKILL.md"
+  ],
+  "test_file": "src/test/kotlin/SkillSetupTest.kt",
+  "build": [
+    "libs/harness/build.gradle.kts",
+    "libs/harness/src/main/java/harness/Show.java",
+    "libs/58-skill-model/build.gradle.kts",
+    "libs/58-skill-model/src/main/kotlin/SkillModel.kt",
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/58-commands-and-skills/prose/unit-02/practice-4/check_files.py",
+    "practice/level-3/58-commands-and-skills/prose/unit-02/practice-4/project/.claude/commands/standup.md",
+    "practice/level-3/58-commands-and-skills/prose/unit-02/practice-4/project/.claude/skills/release-tag/SKILL.md",
+    "practice/level-3/58-commands-and-skills/prose/unit-02/practice-4/project/.claude/skills/review-pr/SKILL.md",
+    "practice/level-3/58-commands-and-skills/prose/unit-02/practice-4/project/docs/placement.md",
+    "practice/level-3/58-commands-and-skills/prose/unit-02/practice-4/project/personal/review-pr-mine/SKILL.md"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/58-commands-and-skills/prose/unit-02/practice-4",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_theReviewSkillIsAForkedSkillWithAnExplicitTaskAndAnArgument()",
+      "kind": "main",
+      "says": "The review skill is forked, uses general-purpose, has numbered steps with $0, and an argument-hint"
+    },
+    {
+      "id": "e1_theReleaseSkillIsStartedOnlyByAPersonAndPreApprovesPatterns()",
+      "kind": "edge",
+      "says": "The release skill is manual, takes $version, and pre-approves only the two patterns"
+    },
+    {
+      "id": "e2_toolsAreTakenAwayWithDisallowedToolsAndAllowedToolsOnlyPreApproves()",
+      "kind": "edge",
+      "says": "disallowed-tools removes Edit and Write from the review, and allowed-tools is patterns only, so nothing is mistaken for a restriction"
+    },
+    {
+      "id": "e3_argumentsFillThePlaceholdersOfEveryFile()",
+      "kind": "edge",
+      "says": "Arguments fill the placeholders of all three files, and the command receives $ARGUMENTS"
+    },
+    {
+      "id": "e4_everyFileCreatesItsOwnSlashCommandAndThePersonalVariantHasANewName()",
+      "kind": "edge",
+      "says": "Every file creates its own slash command and the personal variant has a new name"
+    },
+    {
+      "id": "e5_eachPieceOfGuidanceLivesWhereItLoadsTheWayItIsUsed()",
+      "kind": "edge",
+      "says": "Each of the five pieces of guidance sits where it loads the way it is used"
+    },
+    {
+      "id": "e6_everySkillSaysWhenToUseItAndStaysInsideTheListingBudget()",
+      "kind": "edge",
+      "says": "Every skill says when to use it and stays inside the listing budget"
+    },
+    {
+      "id": "e7_noFileHoldsAPersonalPathAnAddressOrAKey()",
+      "kind": "edge",
+      "says": "No file holds a personal path, an address or a key"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/58-commands-and-skills/02-tools-arguments-forked-skills-and-the-practice.md"
+}

@@ -1,0 +1,508 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "27-choosing-an-extension"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: choose the extension a situation calls for, and say why (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: choose the extension a situation calls for, and say why"
+    },
+    {
+      "type": "para",
+      "text": "A team adds an instruction file for a rule that must never be broken, a skill for a database that needs a connection, a loop for work that must run while the laptop is closed, and a response style for a status bar. Each choice looks reasonable and fails in its own way. In this practice you write the decision function of the page \"Choosing in practice\": a situation described by a few features goes in, and the mechanism that fits and a reason code come out. The model is not called and nothing is installed. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Python has `choose(situation)` in `extension_choice.py`; TypeScript has `choose` in `extensionChoice.ts`; Java has the static method `ExtensionChoice.choose` and the record `Choice`; Kotlin has the top-level function `choose` and the data class `Choice`. Python and TypeScript take a plain object, and Java and Kotlin take a map from the key to its value. The keys are the same strings in every language, and a missing key has the default shown below. The page lists the twenty-eight situations of the scenario bank in words; the tests hold the same twenty-eight as features."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working chooser with eight gaps cut out of it. Everything that is plumbing is written and correct: the constants, the checks of the five named values (`surface`, `knowledge`, `timing`, `presence`, `personal`), the reading of the defaults, the rhythm rules for a pipeline, a condition and a background command, and the order in which the answers are tried. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value (nothing, so the chooser falls back to `builtin-tool`), so the starter runs and fails the cases on an assertion. The names below are Python's; TypeScript, Java and Kotlin have the camel-case forms (`checkCounts`, `apiChoice`, `priorityChoice`, `eventChoice`, `intervalChoice`, `personalChoice`, `knowledgeChoice`, `packageChoice`). Write them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_check_counts` unlocks `e6`: `repos` or `lasts_days` below 1, and `presence` `away` with `local_files`, are errors.",
+        "`_api_choice` unlocks `e5`: the platform's tool, the remote server, or nothing (the caller answers `api-tool`).",
+        "`_priority_choice` unlocks `e1` and `e2`: a guarantee, an outside system and noisy work, in that order.",
+        "`_event_choice` unlocks `e7`: an event is a routine when nobody is there, a monitor otherwise.",
+        "`_interval_choice` unlocks `e8`: a loop, a routine or a desktop task for work that repeats.",
+        "`_personal_choice` unlocks `e9`: a voice, a display or a key binding.",
+        "`_knowledge_choice` unlocks `e3`: the instruction file, the path rule or the skill that loads the knowledge at the right time.",
+        "`_package` unlocks `e4`: a plugin from the second repository onward, for what a plugin can carry."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs all eight. About twenty-five lines in all. To see what a gap receives, log its input with the `log` line at the top of the file; a run shows the lines under the failing case."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "`choose(situation)` returns `{mechanism, reason}`. A situation has these keys:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Key",
+        "Meaning",
+        "Default"
+      ],
+      "rows": [
+        [
+          "`surface`",
+          "`code` for a Claude Code session, `api` for an application that calls the Messages API",
+          "`code`"
+        ],
+        [
+          "`guarantee`",
+          "the action must happen, or be blocked, every time, with no judgment",
+          "false"
+        ],
+        [
+          "`external_system`",
+          "the work needs a system outside the machine, such as a database or a ticketing service",
+          "false"
+        ],
+        [
+          "`builtin_covers`",
+          "on `api`, the platform already supplies a tool with its own schema for the job",
+          "false"
+        ],
+        [
+          "`remote_server`",
+          "on `api`, a hosted server that speaks the protocol for the external system already exists",
+          "false"
+        ],
+        [
+          "`knowledge`",
+          "what Claude must be told: `none`, `convention`, `reference` or `procedure`",
+          "`none`"
+        ],
+        [
+          "`path_scoped`",
+          "the knowledge applies only to some files",
+          "false"
+        ],
+        [
+          "`noisy`",
+          "the work reads or prints a lot that nobody needs afterwards, only its conclusion",
+          "false"
+        ],
+        [
+          "`repos`",
+          "how many repositories need the same setup, at least 1",
+          "1"
+        ],
+        [
+          "`timing`",
+          "when the work runs: `none`, `interval` (every so often), `event` (when something happens), `condition` (until a check holds) or `background` (a long command Claude does not wait for)",
+          "`none`"
+        ],
+        [
+          "`presence`",
+          "who is there: `session` (a Claude Code session stays open), `pipeline` (a CI job, nobody to answer a prompt) or `away` (the computer may be off)",
+          "`session`"
+        ],
+        [
+          "`lasts_days`",
+          "how long a timed job must keep running, at least 1",
+          "1"
+        ],
+        [
+          "`local_files`",
+          "the job needs files on this machine, uncommitted changes included",
+          "false"
+        ],
+        [
+          "`personal`",
+          "a preference of one person: `none`, `voice` (how every reply is written), `display` (what the bottom bar shows) or `keys` (a keyboard shortcut)",
+          "`none`"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The mechanisms, with their reason codes:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Mechanism",
+        "Reason code",
+        "When"
+      ],
+      "rows": [
+        [
+          "`hook`",
+          "`must-hold-every-time`",
+          "`guarantee`"
+        ],
+        [
+          "`mcp`",
+          "`external-system`",
+          "an outside system, in a Claude Code session"
+        ],
+        [
+          "`subagent`",
+          "`isolate-context`",
+          "noisy work"
+        ],
+        [
+          "`path-rule`",
+          "`scoped-convention`",
+          "a convention for some files"
+        ],
+        [
+          "`claude-md`",
+          "`always-known`",
+          "a convention for the whole project"
+        ],
+        [
+          "`skill`",
+          "`on-demand-reference`",
+          "reference material needed sometimes"
+        ],
+        [
+          "`skill`",
+          "`repeatable-procedure`",
+          "a procedure someone starts by name"
+        ],
+        [
+          "`builtin-tool`",
+          "`built-in-covers`",
+          "nothing is needed beyond what Claude Code has"
+        ],
+        [
+          "`plugin`",
+          "`shared-setup`",
+          "a skill, hook, subagent or server wanted in a second repository"
+        ],
+        [
+          "`api-tool`",
+          "`own-schema-and-code`",
+          "an application that defines the tool and runs its code"
+        ],
+        [
+          "`builtin-tool`",
+          "`provided-schema`",
+          "an application whose platform supplies the schema"
+        ],
+        [
+          "`mcp`",
+          "`remote-server`",
+          "an application that reaches an existing remote server"
+        ],
+        [
+          "`loop`",
+          "`session-rhythm`",
+          "an interval job in an open session that lasts up to seven days"
+        ],
+        [
+          "`routine`",
+          "`runs-unattended`",
+          "an interval or event job that must run with the computer off, or an interval job of more than seven days that needs no local files"
+        ],
+        [
+          "`desktop-task`",
+          "`durable-and-local`",
+          "an interval job of more than seven days that needs local files"
+        ],
+        [
+          "`monitor`",
+          "`push-not-poll`",
+          "react to each line of an event stream in the session"
+        ],
+        [
+          "`background-task`",
+          "`work-while-it-runs`",
+          "a long command Claude starts and does not wait for"
+        ],
+        [
+          "`headless-ci`",
+          "`no-person-present`",
+          "a job in a pipeline"
+        ],
+        [
+          "`goal`",
+          "`until-condition-holds`",
+          "keep working until a check holds"
+        ],
+        [
+          "`output-style`",
+          "`response-voice`",
+          "a person wants every reply in a voice, length or format"
+        ],
+        [
+          "`status-line`",
+          "`personal-display`",
+          "a person wants something shown in the bottom bar"
+        ],
+        [
+          "`keybinding`",
+          "`personal-keys`",
+          "a person wants a different keyboard shortcut"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The rules apply in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "An unknown `surface`, `knowledge`, `timing`, `presence` or `personal` value, `repos` or `lasts_days` below 1, or `presence` `away` together with `local_files` (a cloud run starts from a fresh clone) is an error, on either surface. Say so with the language's usual argument error (`ValueError` in Python, `Error` in TypeScript, `IllegalArgumentException` in Java and Kotlin).",
+        "On `api`, nothing else about Claude Code applies, and the first match wins: `builtin_covers` gives `builtin-tool`; `external_system` together with `remote_server` gives `mcp`; anything else gives `api-tool`.",
+        "On `code`, the first match wins: `guarantee` gives `hook`; `external_system` gives `mcp`; `noisy` gives `subagent`; then work that runs without a person or on a rhythm: `presence` `pipeline` gives `headless-ci`; `timing` `condition` gives `goal`; `background` gives `background-task`; `event` gives `monitor`, or `routine` when `presence` is `away`; `interval` gives `routine` when `presence` is `away`, then `desktop-task` when `lasts_days` is above 7 and `local_files`, `routine` when `lasts_days` is above 7, and `loop` otherwise; then `personal` `voice` gives `output-style`, `display` gives `status-line` and `keys` gives `keybinding`; then `knowledge` `convention` gives `path-rule` when `path_scoped` and `claude-md` when not; `reference` gives `skill` with `on-demand-reference`; `procedure` gives `skill` with `repeatable-procedure`; otherwise `builtin-tool`.",
+        "Then, when `repos` is 2 or more and the mechanism is a skill, a hook, a subagent or an MCP server, the answer becomes `plugin` with `shared-setup`. An instruction file and a path rule stay as they are, because a plugin cannot carry one, and a built-in tool has nothing to package. The new mechanisms of rule 3 (loops, routines, tasks, goals, styles, the status line and key bindings) are not packaged by this function."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**A guarantee outranks everything.** A sentence in an instruction file or a skill is a request. *You should see* `hook` even when the rule also comes with a convention, an outside system and noisy work.",
+        "**Access is not knowledge.** An outside system needs a connection, which a skill cannot hold. *You should see* `mcp` whatever else is true, and `subagent` only when nothing else claims the work.",
+        "**Load time decides the file.** A convention for everything is paid for on every request; one for some files is loaded when those files are used; reference and procedure wait until used. *You should see* the four answers, and a path scope ignored for anything that is not a convention.",
+        "**A plugin is for carrying.** *You should see* `plugin` from the second repository onward for the four kinds a plugin bundles, and never for an instruction file.",
+        "**An application is not Claude Code.** *You should see* the API branch ignore every Claude Code feature, and a plugin never appear there.",
+        "**Time is a feature of its own.** A pipeline job, a condition, a long command and an event are not intervals, and an interval is a loop only while a session stays open and for seven days. *You should see* `headless-ci`, `goal`, `background-task`, `monitor`, then `loop`, `routine` or `desktop-task` for an interval, and the hook, server and subagent rules still ahead of all of them.",
+        "**A preference is personal.** How replies are written, what the bar shows and which key does what belong to one person's setup, not to knowledge. *You should see* `output-style`, `status-line` and `keybinding`, and a convention still going to the instruction file when there is no preference.",
+        "**Unknown means error.** *You should see* an error for a value that is not in the table, and the default for a key that is missing."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Each of the twenty-eight situations of the scenario bank gets its mechanism and its reason code"
+        ],
+        [
+          "`e1`",
+          "A rule that must hold goes to a hook whatever else is true"
+        ],
+        [
+          "`e2`",
+          "An outside system needs a server, and noisy work alone needs a subagent"
+        ],
+        [
+          "`e3`",
+          "Knowledge goes to the file or skill that loads it at the right time"
+        ],
+        [
+          "`e4`",
+          "A plugin carries a skill, hook, subagent or server to a second repository and nothing else"
+        ],
+        [
+          "`e5`",
+          "In an application the platform may supply the schema, and only a remote server replaces your own tool"
+        ],
+        [
+          "`e6`",
+          "An unknown value is an error and a missing key takes its default"
+        ],
+        [
+          "`e7`",
+          "A pipeline, a condition, a long command and an event are not intervals"
+        ],
+        [
+          "`e8`",
+          "An interval is a loop in the session, and a routine or desktop task when it must outlive it"
+        ],
+        [
+          "`e9`",
+          "A personal preference goes to a style, a status line or a key binding, and knowledge keeps its own rules"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "/** Which Claude Code extension (or API tool) a situation calls for, and why. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\n\nconst log = logger(\"extension_choice\");\n\nconst SURFACES = [\"code\", \"api\"];\nconst KNOWLEDGE = [\"none\", \"convention\", \"reference\", \"procedure\"];\nconst CARRIED = [\"skill\", \"hook\", \"subagent\", \"mcp\"]; // what a plugin can bundle\nconst TIMINGS = [\"none\", \"interval\", \"event\", \"condition\", \"background\"];\nconst PRESENCE = [\"session\", \"pipeline\", \"away\"];\nconst PERSONAL = [\"none\", \"voice\", \"display\", \"keys\"];\nconst LOOP_EXPIRY_DAYS = 7; // a recurring task of a session expires after seven days\n\ntype Choice = { mechanism: string; reason: string };\ntype Situation = Record<string, any>;\n\nfunction pick(mechanism: string, reason: string): Choice {\n  return { mechanism, reason };\n}\n\nfunction checkCounts(repos: number, lastsDays: number, presence: string, localFiles: boolean): void {\n  if (repos < 1 || lastsDays < 1 || (presence === \"away\" && localFiles)) throw new Error(\"repos and lasts_days start at 1, and a cloud run starts from a fresh clone and sees no local files\");\n}\n\nfunction apiChoice(s: Situation): Choice | null {\n  if (s.builtin_covers ?? false) return pick(\"builtin-tool\", \"provided-schema\");\n  if ((s.external_system ?? false) && (s.remote_server ?? false)) return pick(\"mcp\", \"remote-server\");\n  return null;\n}\n\nfunction priorityChoice(s: Situation): Choice | null {\n  if (s.guarantee ?? false) return pick(\"hook\", \"must-hold-every-time\");\n  if (s.external_system ?? false) return pick(\"mcp\", \"external-system\");\n  if (s.noisy ?? false) return pick(\"subagent\", \"isolate-context\");\n  return null;\n}\n\nfunction eventChoice(presence: string): Choice | null {\n  return presence === \"away\" ? pick(\"routine\", \"runs-unattended\") : pick(\"monitor\", \"push-not-poll\");\n}\n\nfunction intervalChoice(s: Situation): Choice | null {\n  if ((s.presence ?? \"session\") === \"away\") return pick(\"routine\", \"runs-unattended\");\n  if ((s.lasts_days ?? 1) > LOOP_EXPIRY_DAYS) return (s.local_files ?? false) ? pick(\"desktop-task\", \"durable-and-local\") : pick(\"routine\", \"runs-unattended\");\n  return pick(\"loop\", \"session-rhythm\");\n}\n\n/** The pick for work that runs without a person, on a rhythm or on an event, or null when the situation has none of these. */\nfunction rhythm(s: Situation): Choice | null {\n  const timing = s.timing ?? \"none\";\n  const presence = s.presence ?? \"session\";\n  if (presence === \"pipeline\") return pick(\"headless-ci\", \"no-person-present\");\n  if (timing === \"condition\") return pick(\"goal\", \"until-condition-holds\");\n  if (timing === \"background\") return pick(\"background-task\", \"work-while-it-runs\");\n  if (timing === \"event\") return eventChoice(presence);\n  if (timing === \"interval\") return intervalChoice(s);\n  return null;\n}\n\nfunction personalChoice(personal: string): Choice | null {\n  if (personal === \"voice\") return pick(\"output-style\", \"response-voice\");\n  if (personal === \"display\") return pick(\"status-line\", \"personal-display\");\n  if (personal === \"keys\") return pick(\"keybinding\", \"personal-keys\");\n  return null;\n}\n\nfunction knowledgeChoice(knowledge: string, pathScoped: boolean): Choice | null {\n  if (knowledge === \"convention\") return pathScoped ? pick(\"path-rule\", \"scoped-convention\") : pick(\"claude-md\", \"always-known\");\n  if (knowledge === \"reference\") return pick(\"skill\", \"on-demand-reference\");\n  if (knowledge === \"procedure\") return pick(\"skill\", \"repeatable-procedure\");\n  return null;\n}\n\nfunction packageChoice(choice: Choice, repos: number): Choice {\n  if (repos >= 2 && CARRIED.includes(choice.mechanism)) return pick(\"plugin\", \"shared-setup\");\n  return choice;\n}\n\nexport function choose(s: Situation): Choice {\n  log.debug(\"choose input\", s);\n  const surface = s.surface ?? \"code\";\n  const knowledge = s.knowledge ?? \"none\";\n  const repos = s.repos ?? 1;\n  if (!SURFACES.includes(surface)) throw new Error(`unknown surface: ${surface}`);\n  if (!KNOWLEDGE.includes(knowledge)) throw new Error(`unknown knowledge kind: ${knowledge}`);\n  if (!TIMINGS.includes(s.timing ?? \"none\")) throw new Error(`unknown timing: ${s.timing}`);\n  if (!PRESENCE.includes(s.presence ?? \"session\")) throw new Error(`unknown presence: ${s.presence}`);\n  if (!PERSONAL.includes(s.personal ?? \"none\")) throw new Error(`unknown personal preference: ${s.personal}`);\n  checkCounts(repos, s.lasts_days ?? 1, s.presence ?? \"session\", s.local_files ?? false);\n  if (surface === \"api\") return apiChoice(s) ?? pick(\"api-tool\", \"own-schema-and-code\");\n  const choice =\n    priorityChoice(s) ??\n    rhythm(s) ??\n    personalChoice(s.personal ?? \"none\") ??\n    knowledgeChoice(knowledge, s.path_scoped ?? false) ??\n    pick(\"builtin-tool\", \"built-in-covers\");\n  return packageChoice(choice, repos);\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { choose } from \"./extensionChoice.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// Three situations from the scenario bank, described by a few features.\nconst situations: Record<string, any> = {\n  \"a rule that must never be broken\": { guarantee: true, knowledge: \"convention\" },\n  \"a database that needs a connection\": { external_system: true },\n  \"work that must run while the laptop is closed\": { timing: \"interval\", presence: \"away\" },\n};\nfor (const [name, features] of Object.entries(situations)) {\n  console.log(`${name}:`, JSON.stringify(choose(features)));\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "/** Which Claude Code extension (or API tool) a situation calls for, and why. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\n\nconst log = logger(\"extension_choice\");\n\nconst SURFACES = [\"code\", \"api\"];\nconst KNOWLEDGE = [\"none\", \"convention\", \"reference\", \"procedure\"];\nconst CARRIED = [\"skill\", \"hook\", \"subagent\", \"mcp\"]; // what a plugin can bundle\nconst TIMINGS = [\"none\", \"interval\", \"event\", \"condition\", \"background\"];\nconst PRESENCE = [\"session\", \"pipeline\", \"away\"];\nconst PERSONAL = [\"none\", \"voice\", \"display\", \"keys\"];\nconst LOOP_EXPIRY_DAYS = 7; // a recurring task of a session expires after seven days\n\ntype Choice = { mechanism: string; reason: string };\ntype Situation = Record<string, any>;\n\nfunction pick(mechanism: string, reason: string): Choice {\n  return { mechanism, reason };\n}\n\nfunction checkCounts(repos: number, lastsDays: number, presence: string, localFiles: boolean): void {\n  // TODO 1 of 8 (finish this to pass e6): refuse numbers and a combination that make no sense.\n  // Receives repos, lastsDays, presence and localFiles (already defaulted). Throws an Error when repos or lastsDays is below 1, or when\n  // presence is \"away\" and localFiles is true (a cloud run starts from a fresh clone). Returns nothing otherwise.\n  // Example: checkCounts(0, 1, \"session\", false) throws; checkCounts(1, 1, \"away\", true) throws; checkCounts(2, 30, \"away\", false) returns\n}\n\nfunction apiChoice(s: Situation): Choice | null {\n  // TODO 2 of 8 (finish this to pass e5): the pick of an application on the Messages API, or null for the default own tool.\n  // Receives the situation. Returns builtin-tool / provided-schema when builtin_covers is true, else mcp / remote-server when external_system\n  // and remote_server are both true, else null (the caller then answers api-tool / own-schema-and-code).\n  // Example: apiChoice({ builtin_covers: true, remote_server: true }) -> builtin-tool; apiChoice({ external_system: true }) -> null\n  return null;\n}\n\nfunction priorityChoice(s: Situation): Choice | null {\n  // TODO 3 of 8 (finish this to pass e1 and e2): the pick for a rule that must hold, an outside system or noisy work.\n  // Receives the situation. The first match wins: guarantee gives hook / must-hold-every-time; external_system gives mcp / external-system;\n  // noisy gives subagent / isolate-context; otherwise null. Whatever else is in the situation (timing, knowledge) does not matter here.\n  // Example: priorityChoice({ guarantee: true, noisy: true }) -> hook; priorityChoice({ timing: \"event\" }) -> null\n  return null;\n}\n\nfunction eventChoice(presence: string): Choice | null {\n  // TODO 4 of 8 (finish this to pass e7): the pick for work that reacts to an event.\n  // Receives presence. Returns routine / runs-unattended when presence is \"away\", else monitor / push-not-poll.\n  // Example: eventChoice(\"session\") -> monitor / push-not-poll\n  return null;\n}\n\nfunction intervalChoice(s: Situation): Choice | null {\n  // TODO 5 of 8 (finish this to pass e8): the pick for work that repeats every so often.\n  // Receives the situation. Returns routine / runs-unattended when presence is \"away\"; else, when lasts_days is above LOOP_EXPIRY_DAYS,\n  // desktop-task / durable-and-local if local_files is true and routine / runs-unattended if not; else loop / session-rhythm.\n  // Example: intervalChoice({ lasts_days: 8, local_files: true }) -> desktop-task; intervalChoice({ lasts_days: 7 }) -> loop\n  return null;\n}\n\n/** The pick for work that runs without a person, on a rhythm or on an event, or null when the situation has none of these. */\nfunction rhythm(s: Situation): Choice | null {\n  const timing = s.timing ?? \"none\";\n  const presence = s.presence ?? \"session\";\n  if (presence === \"pipeline\") return pick(\"headless-ci\", \"no-person-present\");\n  if (timing === \"condition\") return pick(\"goal\", \"until-condition-holds\");\n  if (timing === \"background\") return pick(\"background-task\", \"work-while-it-runs\");\n  if (timing === \"event\") return eventChoice(presence);\n  if (timing === \"interval\") return intervalChoice(s);\n  return null;\n}\n\nfunction personalChoice(personal: string): Choice | null {\n  // TODO 6 of 8 (finish this to pass e9): the pick for a preference of one person, or null.\n  // Receives the personal value. Returns output-style / response-voice for \"voice\", status-line / personal-display for \"display\",\n  // keybinding / personal-keys for \"keys\", and null for \"none\".\n  // Example: personalChoice(\"keys\") -> keybinding / personal-keys; personalChoice(\"none\") -> null\n  return null;\n}\n\nfunction knowledgeChoice(knowledge: string, pathScoped: boolean): Choice | null {\n  // TODO 7 of 8 (finish this to pass e3): the pick for what Claude must be told, or null when nothing needs telling.\n  // Receives knowledge and pathScoped. \"convention\" gives path-rule / scoped-convention when pathScoped, else claude-md / always-known;\n  // \"reference\" gives skill / on-demand-reference; \"procedure\" gives skill / repeatable-procedure; anything else gives null. pathScoped\n  // matters only for a convention.\n  // Example: knowledgeChoice(\"reference\", true) -> skill / on-demand-reference; knowledgeChoice(\"none\", true) -> null\n  return null;\n}\n\nfunction packageChoice(choice: Choice, repos: number): Choice {\n  // TODO 8 of 8 (finish this to pass e4): a plugin carries a skill, a hook, a subagent or a server to a second repository.\n  // Receives the pick and repos. Returns plugin / shared-setup when repos is 2 or more and the pick's mechanism is in CARRIED; otherwise\n  // returns the pick unchanged (an instruction file, a path rule and a built-in tool are never packaged).\n  // Example: packageChoice(pick(\"hook\", \"must-hold-every-time\"), 2) -> plugin; packageChoice(pick(\"claude-md\", \"always-known\"), 2) -> unchanged\n  return choice;\n}\n\nexport function choose(s: Situation): Choice {\n  log.debug(\"choose input\", s);\n  const surface = s.surface ?? \"code\";\n  const knowledge = s.knowledge ?? \"none\";\n  const repos = s.repos ?? 1;\n  if (!SURFACES.includes(surface)) throw new Error(`unknown surface: ${surface}`);\n  if (!KNOWLEDGE.includes(knowledge)) throw new Error(`unknown knowledge kind: ${knowledge}`);\n  if (!TIMINGS.includes(s.timing ?? \"none\")) throw new Error(`unknown timing: ${s.timing}`);\n  if (!PRESENCE.includes(s.presence ?? \"session\")) throw new Error(`unknown presence: ${s.presence}`);\n  if (!PERSONAL.includes(s.personal ?? \"none\")) throw new Error(`unknown personal preference: ${s.personal}`);\n  checkCounts(repos, s.lasts_days ?? 1, s.presence ?? \"session\", s.local_files ?? false);\n  if (surface === \"api\") return apiChoice(s) ?? pick(\"api-tool\", \"own-schema-and-code\");\n  const choice =\n    priorityChoice(s) ??\n    rhythm(s) ??\n    personalChoice(s.personal ?? \"none\") ??\n    knowledgeChoice(knowledge, s.path_scoped ?? false) ??\n    pick(\"builtin-tool\", \"built-in-covers\");\n  return packageChoice(choice, repos);\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { choose } from \"./extensionChoice.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// Three situations from the scenario bank, described by a few features.\nconst situations: Record<string, any> = {\n  \"a rule that must never be broken\": { guarantee: true, knowledge: \"convention\" },\n  \"a database that needs a connection\": { external_system: true },\n  \"work that must run while the laptop is closed\": { timing: \"interval\", presence: \"away\" },\n};\nfor (const [name, features] of Object.entries(situations)) {\n  console.log(`${name}:`, JSON.stringify(choose(features)));\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 8,
+    "code": 2,
+    "tables": 3,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "81507ad7a6aa83ac77a2954c9d6021ad14d5b339d0bf85a39fec33d1fcfddeb2",
+  "starting_code": "/** Which Claude Code extension (or API tool) a situation calls for, and why. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\n\nconst log = logger(\"extension_choice\");\n\nconst SURFACES = [\"code\", \"api\"];\nconst KNOWLEDGE = [\"none\", \"convention\", \"reference\", \"procedure\"];\nconst CARRIED = [\"skill\", \"hook\", \"subagent\", \"mcp\"]; // what a plugin can bundle\nconst TIMINGS = [\"none\", \"interval\", \"event\", \"condition\", \"background\"];\nconst PRESENCE = [\"session\", \"pipeline\", \"away\"];\nconst PERSONAL = [\"none\", \"voice\", \"display\", \"keys\"];\nconst LOOP_EXPIRY_DAYS = 7; // a recurring task of a session expires after seven days\n\ntype Choice = { mechanism: string; reason: string };\ntype Situation = Record<string, any>;\n\nfunction pick(mechanism: string, reason: string): Choice {\n  return { mechanism, reason };\n}\n\nfunction checkCounts(repos: number, lastsDays: number, presence: string, localFiles: boolean): void {\n  // TODO 1 of 8 (finish this to pass e6): refuse numbers and a combination that make no sense.\n  // Receives repos, lastsDays, presence and localFiles (already defaulted). Throws an Error when repos or lastsDays is below 1, or when\n  // presence is \"away\" and localFiles is true (a cloud run starts from a fresh clone). Returns nothing otherwise.\n  // Example: checkCounts(0, 1, \"session\", false) throws; checkCounts(1, 1, \"away\", true) throws; checkCounts(2, 30, \"away\", false) returns\n}\n\nfunction apiChoice(s: Situation): Choice | null {\n  // TODO 2 of 8 (finish this to pass e5): the pick of an application on the Messages API, or null for the default own tool.\n  // Receives the situation. Returns builtin-tool / provided-schema when builtin_covers is true, else mcp / remote-server when external_system\n  // and remote_server are both true, else null (the caller then answers api-tool / own-schema-and-code).\n  // Example: apiChoice({ builtin_covers: true, remote_server: true }) -> builtin-tool; apiChoice({ external_system: true }) -> null\n  return null;\n}\n\nfunction priorityChoice(s: Situation): Choice | null {\n  // TODO 3 of 8 (finish this to pass e1 and e2): the pick for a rule that must hold, an outside system or noisy work.\n  // Receives the situation. The first match wins: guarantee gives hook / must-hold-every-time; external_system gives mcp / external-system;\n  // noisy gives subagent / isolate-context; otherwise null. Whatever else is in the situation (timing, knowledge) does not matter here.\n  // Example: priorityChoice({ guarantee: true, noisy: true }) -> hook; priorityChoice({ timing: \"event\" }) -> null\n  return null;\n}\n\nfunction eventChoice(presence: string): Choice | null {\n  // TODO 4 of 8 (finish this to pass e7): the pick for work that reacts to an event.\n  // Receives presence. Returns routine / runs-unattended when presence is \"away\", else monitor / push-not-poll.\n  // Example: eventChoice(\"session\") -> monitor / push-not-poll\n  return null;\n}\n\nfunction intervalChoice(s: Situation): Choice | null {\n  // TODO 5 of 8 (finish this to pass e8): the pick for work that repeats every so often.\n  // Receives the situation. Returns routine / runs-unattended when presence is \"away\"; else, when lasts_days is above LOOP_EXPIRY_DAYS,\n  // desktop-task / durable-and-local if local_files is true and routine / runs-unattended if not; else loop / session-rhythm.\n  // Example: intervalChoice({ lasts_days: 8, local_files: true }) -> desktop-task; intervalChoice({ lasts_days: 7 }) -> loop\n  return null;\n}\n\n/** The pick for work that runs without a person, on a rhythm or on an event, or null when the situation has none of these. */\nfunction rhythm(s: Situation): Choice | null {\n  const timing = s.timing ?? \"none\";\n  const presence = s.presence ?? \"session\";\n  if (presence === \"pipeline\") return pick(\"headless-ci\", \"no-person-present\");\n  if (timing === \"condition\") return pick(\"goal\", \"until-condition-holds\");\n  if (timing === \"background\") return pick(\"background-task\", \"work-while-it-runs\");\n  if (timing === \"event\") return eventChoice(presence);\n  if (timing === \"interval\") return intervalChoice(s);\n  return null;\n}\n\nfunction personalChoice(personal: string): Choice | null {\n  // TODO 6 of 8 (finish this to pass e9): the pick for a preference of one person, or null.\n  // Receives the personal value. Returns output-style / response-voice for \"voice\", status-line / personal-display for \"display\",\n  // keybinding / personal-keys for \"keys\", and null for \"none\".\n  // Example: personalChoice(\"keys\") -> keybinding / personal-keys; personalChoice(\"none\") -> null\n  return null;\n}\n\nfunction knowledgeChoice(knowledge: string, pathScoped: boolean): Choice | null {\n  // TODO 7 of 8 (finish this to pass e3): the pick for what Claude must be told, or null when nothing needs telling.\n  // Receives knowledge and pathScoped. \"convention\" gives path-rule / scoped-convention when pathScoped, else claude-md / always-known;\n  // \"reference\" gives skill / on-demand-reference; \"procedure\" gives skill / repeatable-procedure; anything else gives null. pathScoped\n  // matters only for a convention.\n  // Example: knowledgeChoice(\"reference\", true) -> skill / on-demand-reference; knowledgeChoice(\"none\", true) -> null\n  return null;\n}\n\nfunction packageChoice(choice: Choice, repos: number): Choice {\n  // TODO 8 of 8 (finish this to pass e4): a plugin carries a skill, a hook, a subagent or a server to a second repository.\n  // Receives the pick and repos. Returns plugin / shared-setup when repos is 2 or more and the pick's mechanism is in CARRIED; otherwise\n  // returns the pick unchanged (an instruction file, a path rule and a built-in tool are never packaged).\n  // Example: packageChoice(pick(\"hook\", \"must-hold-every-time\"), 2) -> plugin; packageChoice(pick(\"claude-md\", \"always-known\"), 2) -> unchanged\n  return choice;\n}\n\nexport function choose(s: Situation): Choice {\n  log.debug(\"choose input\", s);\n  const surface = s.surface ?? \"code\";\n  const knowledge = s.knowledge ?? \"none\";\n  const repos = s.repos ?? 1;\n  if (!SURFACES.includes(surface)) throw new Error(`unknown surface: ${surface}`);\n  if (!KNOWLEDGE.includes(knowledge)) throw new Error(`unknown knowledge kind: ${knowledge}`);\n  if (!TIMINGS.includes(s.timing ?? \"none\")) throw new Error(`unknown timing: ${s.timing}`);\n  if (!PRESENCE.includes(s.presence ?? \"session\")) throw new Error(`unknown presence: ${s.presence}`);\n  if (!PERSONAL.includes(s.personal ?? \"none\")) throw new Error(`unknown personal preference: ${s.personal}`);\n  checkCounts(repos, s.lasts_days ?? 1, s.presence ?? \"session\", s.local_files ?? false);\n  if (surface === \"api\") return apiChoice(s) ?? pick(\"api-tool\", \"own-schema-and-code\");\n  const choice =\n    priorityChoice(s) ??\n    rhythm(s) ??\n    personalChoice(s.personal ?? \"none\") ??\n    knowledgeChoice(knowledge, s.path_scoped ?? false) ??\n    pick(\"builtin-tool\", \"built-in-covers\");\n  return packageChoice(choice, repos);\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/27-choosing-an-extension/prose/unit-03/practice-2/extensionChoice.ts",
+    "test_path": "practice/level-2/27-choosing-an-extension/prose/unit-03/practice-2/extensionChoice.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-2/27-choosing-an-extension/prose/unit-03/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-2/27-choosing-an-extension/prose/unit-03/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-2/27-choosing-an-extension/prose/unit-03/practice-2/extensionChoice.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 every situation of the bank gets its mechanism and its reason",
+        "kind": "main",
+        "says": "Each of the twenty-eight situations of the scenario bank gets its mechanism and its reason code"
+      },
+      {
+        "id": "e1 a rule that must hold goes to a hook whatever else is true",
+        "kind": "edge",
+        "says": "A rule that must hold goes to a hook whatever else is true"
+      },
+      {
+        "id": "e2 an outside system needs a server and noisy work alone needs a subagent",
+        "kind": "edge",
+        "says": "An outside system needs a server, and noisy work alone needs a subagent"
+      },
+      {
+        "id": "e3 knowledge goes to the file or skill that loads it at the right time",
+        "kind": "edge",
+        "says": "Knowledge goes to the file or skill that loads it at the right time"
+      },
+      {
+        "id": "e4 a plugin carries a skill hook subagent or server to a second repository and nothing else",
+        "kind": "edge",
+        "says": "A plugin carries a skill, hook, subagent or server to a second repository and nothing else"
+      },
+      {
+        "id": "e5 in an application the platform may supply the schema and only a remote server replaces your own tool",
+        "kind": "edge",
+        "says": "In an application the platform may supply the schema, and only a remote server replaces your own tool"
+      },
+      {
+        "id": "e6 an unknown value is an error and a missing key takes its default",
+        "kind": "edge",
+        "says": "An unknown value is an error and a missing key takes its default"
+      },
+      {
+        "id": "e7 a pipeline a condition a long command and an event are not intervals",
+        "kind": "edge",
+        "says": "A pipeline, a condition, a long command and an event are not intervals"
+      },
+      {
+        "id": "e8 an interval is a loop in the session and a routine or desktop task when it must outlive it",
+        "kind": "edge",
+        "says": "An interval is a loop in the session, and a routine or desktop task when it must outlive it"
+      },
+      {
+        "id": "e9 a personal preference goes to a style a status line or a key binding and knowledge keeps its own rules",
+        "kind": "edge",
+        "says": "A personal preference goes to a style, a status line or a key binding, and knowledge keeps its own rules"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/27-choosing-an-extension/prose/unit-03/practice-2/target/report.xml"
+    },
+    "origin": "course/27-choosing-an-extension/03-choosing-in-practice-scenarios-reasons-and-the-practice.md",
+    "concepts": [
+      "the practice of Choosing in practice: scenarios, reasons and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/27-choosing-an-extension/prose/unit-03/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "choosing-an-extension-u3"
+}

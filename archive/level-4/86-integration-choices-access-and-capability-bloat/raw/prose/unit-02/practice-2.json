@@ -1,0 +1,280 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "86-integration-choices-access-and-capability-bloat"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: a capability review and a gateway (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a capability review and a gateway"
+    },
+    {
+      "type": "para",
+      "text": "A platform team gives every agent every tool, lets all of them load at once, connects capabilities by whatever was quickest, checks only the user's rights when a tool is called, and has no single place that sees the traffic. In this practice you write the pieces that replace that: the audit that says which tools a role must lose, the plan that loads a few tools up front and defers the rest, the choice of mechanism, the check that a call is covered by both the user's and the agent's rights, and a gateway that authenticates, checks the model, the tool and the rate, routes an allowed request and records every decision. The example of the module's first page builds a smaller gateway, which checks the credential, the model and the rate; the practice's gateway adds a check of the tool between the model and the rate. Nothing calls a model: the tests give you tools, scopes and requests. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`audit`, `plan_loading`, `choose_mechanism`, `authorize`, `gateway`); TypeScript has the camel-case names (`planLoading`, `chooseMechanism`); Java has the same camel-case names as static methods of the practice's class `Capability` (the example's class is `CapabilityAudit`); Kotlin has top-level functions. The starter shows the types of each language: Python and TypeScript use plain dictionaries and objects, Java and Kotlin use records and data classes (`Agent`, `Tool`, `AuditResult`, `Plan`, `Request`, `Policy`, `Outcome`)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working capability design with ten small gaps cut out of it. Everything that is plumbing is written and correct: the assembly of the audit, the plan of what loads up front, and the gateway that looks up the team and builds its answer. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value (an empty list, the input unchanged, `None`), so the starter runs and fails every case on an assertion. Debug a gap by logging its input with the `log` line at the top of the file (the starter already logs the input of one function; add your own `log.debug` lines the same way); a run shows the lines you logged under the failing case. Write the gaps in this order (the Java and Kotlin names are the camel-case forms, TypeScript has no leading underscore):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_remove` and 2. `_risky` unlock `m1`: the tools to take away and the risky ones among them.",
+        "`_dormant` unlocks `e1`: held, needed tools nobody used.",
+        "`_clamp` unlocks `e3`: the number of tools kept loaded, between three and five.",
+        "`_defers` unlocks `e2`: whether the definitions are deferred (ten tools, or over ten thousand tokens).",
+        "`_ranked` unlocks `e3`: the tools to load first, the most used first and by name among equals.",
+        "`choose_mechanism` unlocks `e4`: the mechanism by counterpart, path and number of clients.",
+        "`authorize` unlocks `e5`: whose rights a tool call uses.",
+        "`_verdict` unlocks `e6`: the decision and reason, checking credential, model, tool and rate in that order.",
+        "`_record` unlocks `e7`: the record of a decision, with no content."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole design."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`audit(agent, catalog)` compares what an agent holds with what its role needs. `agent` has `holds` (a list of tool names), `needs` (a list) and `used` (tool name to the number of calls). `catalog` maps each tool to its `access` class (`read`, `draft`, `money` or `destroy`). Return `remove` (the held tools that are not needed, in the order held), `risky` (those of them whose access is `money` or `destroy`), `missing` (the needed tools that are not held, in the order needed) and `dormant` (the held tools that are needed and have no calls). A dormant tool is reported and never removed.",
+        "`plan_loading(tools, usage, keep=4, search_tokens=350)` decides what loads up front. `tools` maps a tool to the tokens of its definition and `usage` maps it to its calls. A set of fewer than 10 tools whose definitions total at most 10,000 tokens loads whole: `search` is false, `load_now` lists every tool, `deferred` is empty and `tokens` is the total. Otherwise `search` is true, `keep` is first held between 3 and 5, `load_now` is that many tools ordered by calls (most first, ties by name), `deferred` is the others in the order given, and `tokens` is the loaded tools plus `search_tokens`.",
+        "`choose_mechanism(consumers, counterpart, path)` returns `agent-to-agent` when the counterpart is an `agent`, `direct call in code` when the path is `fixed`, `MCP server` when more than one client uses the capability, and `custom tool` otherwise, checked in that order.",
+        "`authorize(tool, user_scopes, agent_scopes, required)` looks the tool up in `required` (tool to the scope it needs). An unknown tool is `deny: unknown tool`; a scope the user lacks is `deny: user lacks <scope>`; a scope the agent lacks is `deny: agent lacks <scope>`; otherwise `allow`.",
+        "`gateway(request, policy)` decides one request. The request has a `credential` (possibly none), a `model`, a `tool` (possibly none) and `recent`, the requests the team sent this minute. The policy maps credentials to teams and holds, per team, the models and tools it may use and its limit, plus `routes` from a model name to the model it is sent to. Check in this order: the credential (`unauthenticated`), the model (`model not allowed`), the tool when there is one (`tool not allowed`) and the rate (`rate limited`, when `recent` has reached the limit). A request that passes is `allow` with the reason `routed to <model>` (the route, or the name itself when none is listed). Return the decision, the reason and an `audit` record with the `team` (or `unknown`), the `model`, the `tool` (or `none`) and the `decision`. Every request has a record, denied ones included, and the record holds no content."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Remove, do not watch.** *You should see* the refund and delete tools in the list to remove, named as risky.",
+        "**A tool the role needs is reviewed, not removed.** *You should see* an unused needed tool in `dormant` and not in `remove`.",
+        "**Definitions have a cost.** *You should see* a small set loaded whole and a large one deferred, by count or by size.",
+        "**A few tools stay loaded.** *You should see* the number of tools kept loaded stay between 3 and 5 and ties settled by name, not by the order they were listed.",
+        "**The mechanism follows the counterpart and the path.** *You should see* an agent peer reached agent to agent, a fixed path in code, and a shared capability in an MCP server.",
+        "**Two sets of rights.** *You should see* a call refused when the agent lacks a scope the user holds.",
+        "**One place decides, in a fixed order.** *You should see* an unknown caller denied before anything else is looked at.",
+        "**Every decision leaves a record.** *You should see* a denied request recorded with the team, the model, the tool and the decision."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "An agent loses the tools its role does not need and the risky ones among them are named"
+        ],
+        [
+          "`e1`",
+          "A tool that is held and needed but never used is reported as dormant and never removed"
+        ],
+        [
+          "`e2`",
+          "A small set loads whole and a large one defers when it has ten tools or over ten thousand tokens"
+        ],
+        [
+          "`e3`",
+          "The number of tools kept loaded stays between three and five and ties are broken by name"
+        ],
+        [
+          "`e4`",
+          "The mechanism follows the counterpart, then the path, then the number of clients"
+        ],
+        [
+          "`e5`",
+          "A call needs the user's scope and the agent's scope and an unknown tool is refused"
+        ],
+        [
+          "`e6`",
+          "The gateway checks the credential, then the model, then the tool, then the rate"
+        ],
+        [
+          "`e7`",
+          "The gateway keeps a record of every decision with the team or unknown and no content"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "/** Capability design: what a role keeps, which tool definitions load up front, which mechanism connects a capability, whose rights a tool call uses and what a gateway decides. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"capability\");\n\nexport type Agent = { holds: string[]; needs: string[]; used: Record<string, number> };\nexport type Catalog = Record<string, { access: string; tokens: number }>;\nexport type Request = { credential: string | null; model: string; tool: string | null; recent: number };\nexport type Policy = { credentials: Record<string, string>; models: Record<string, string[]>; tools: Record<string, string[]>; limits: Record<string, number>; routes: Record<string, string> };\nconst RISKY = new Set([\"money\", \"destroy\"]);\n\nfunction remove(agent: Agent): string[] {\n  return agent.holds.filter((t) => !agent.needs.includes(t));\n}\n\nfunction risky(toRemove: string[], catalog: Catalog): string[] {\n  return toRemove.filter((t) => RISKY.has(catalog[t].access));\n}\n\nfunction dormant(agent: Agent): string[] {\n  return agent.holds.filter((t) => agent.needs.includes(t) && (agent.used[t] ?? 0) === 0);\n}\n\nexport function audit(agent: Agent, catalog: Catalog) {\n  log.debug(\"audit input\", agent);\n  const gone = remove(agent);\n  return { remove: gone, risky: risky(gone, catalog), missing: agent.needs.filter((t) => !agent.holds.includes(t)), dormant: dormant(agent) };\n}\n\nfunction clamp(keep: number): number {\n  return Math.max(3, Math.min(5, keep));\n}\n\nfunction defers(tools: Record<string, number>): boolean {\n  return Object.keys(tools).length >= 10 || Object.values(tools).reduce((a, t) => a + t, 0) > 10000;\n}\n\nfunction ranked(tools: Record<string, number>, usage: Record<string, number>, keep: number): string[] {\n  return Object.keys(tools).sort((a, b) => (usage[b] ?? 0) - (usage[a] ?? 0) || (a < b ? -1 : 1)).slice(0, keep);\n}\n\nexport function planLoading(tools: Record<string, number>, usage: Record<string, number>, keep = 4, searchTokens = 350) {\n  log.debug(\"planLoading input\", tools);\n  const names = Object.keys(tools);\n  if (!defers(tools)) return { search: false, load_now: names, deferred: [] as string[], tokens: names.reduce((a, t) => a + tools[t], 0) };\n  const first = ranked(tools, usage, clamp(keep));\n  return { search: true, load_now: first, deferred: names.filter((t) => !first.includes(t)), tokens: first.reduce((a, t) => a + tools[t], 0) + searchTokens };\n}\n\nexport function chooseMechanism(consumers: number, counterpart: string, path: string): string | null {\n  if (counterpart === \"agent\") return \"agent-to-agent\";\n  if (path === \"fixed\") return \"direct call in code\";\n  return consumers > 1 ? \"MCP server\" : \"custom tool\";\n}\n\nexport function authorize(tool: string, userScopes: string[], agentScopes: string[], required: Record<string, string>): string | null {\n  if (!(tool in required)) return \"deny: unknown tool\";\n  const scope = required[tool];\n  if (!userScopes.includes(scope)) return `deny: user lacks ${scope}`;\n  if (!agentScopes.includes(scope)) return `deny: agent lacks ${scope}`;\n  return \"allow\";\n}\n\nfunction verdict(team: string | undefined, request: Request, policy: Policy): [string, string] {\n  if (team === undefined) return [\"deny\", \"unauthenticated\"];\n  if (!policy.models[team].includes(request.model)) return [\"deny\", \"model not allowed\"];\n  if (request.tool !== null && !policy.tools[team].includes(request.tool)) return [\"deny\", \"tool not allowed\"];\n  if (request.recent >= policy.limits[team]) return [\"deny\", \"rate limited\"];\n  return [\"allow\", `routed to ${policy.routes[request.model] ?? request.model}`];\n}\n\nfunction record(team: string | undefined, request: Request, decision: string): Record<string, string> {\n  return { team: team ?? \"unknown\", model: request.model, tool: request.tool ?? \"none\", decision };\n}\n\nexport function gateway(request: Request, policy: Policy) {\n  log.debug(\"gateway input\", request);\n  const team = request.credential === null ? undefined : policy.credentials[request.credential];\n  const [decision, reason] = verdict(team, request, policy);\n  return { decision, reason, audit: record(team, request, decision) };\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { audit, gateway, planLoading } from \"./capability.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\nconst catalog = {\n  read_ticket: { access: \"read\", tokens: 160 },\n  draft_reply: { access: \"draft\", tokens: 220 },\n  issue_refund: { access: \"money\", tokens: 240 },\n  export_report: { access: \"read\", tokens: 300 },\n};\n\n// An agent holds more tools than its role needs: the audit names what to remove and which of them are risky.\nconst agent = { holds: Object.keys(catalog), needs: [\"read_ticket\", \"draft_reply\"], used: { read_ticket: 12, draft_reply: 9 } };\nconsole.log(\"audit:\", JSON.stringify(audit(agent, catalog)));\n\n// Loading a long tool list: the most used tools load now, the rest wait behind a search tool.\nconst tools: Record<string, number> = {};\nfor (let i = 1; i <= 12; i++) tools[`t${String(i).padStart(2, \"0\")}`] = 100;\nconsole.log(\"loading plan:\", JSON.stringify(planLoading(tools, { t01: 9, t02: 5 }, 3)));\n\n// The gateway checks one request against the policy.\nconst policy = { credentials: { k1: \"support\" }, models: { support: [\"standard\"] }, tools: { support: [\"read_ticket\", \"draft_reply\"] },\n  limits: { support: 2 }, routes: { standard: \"claude-sonnet-5-5\" } };\nconsole.log(\"allowed:\", JSON.stringify(gateway({ credential: \"k1\", model: \"standard\", tool: \"read_ticket\", recent: 0 }, policy)));\nconsole.log(\"over the limit:\", JSON.stringify(gateway({ credential: \"k1\", model: \"standard\", tool: \"read_ticket\", recent: 2 }, policy)));\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "/** Capability design: what a role keeps, which tool definitions load up front, which mechanism connects a capability, whose rights a tool call uses and what a gateway decides. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"capability\");\n\nexport type Agent = { holds: string[]; needs: string[]; used: Record<string, number> };\nexport type Catalog = Record<string, { access: string; tokens: number }>;\nexport type Request = { credential: string | null; model: string; tool: string | null; recent: number };\nexport type Policy = { credentials: Record<string, string>; models: Record<string, string[]>; tools: Record<string, string[]>; limits: Record<string, number>; routes: Record<string, string> };\nconst RISKY = new Set([\"money\", \"destroy\"]);\n\nfunction remove(agent: Agent): string[] {\n  // TODO 1 of 10 (unlocks m1): the tools to take away.\n  // Receives the agent (`holds`, `needs`, `used`). Returns the held tools that the role does not need, in the order they are held.\n  // Example: holds [\"read\", \"refund\"], needs [\"read\"] -> [\"refund\"]\n  return [];\n}\n\nfunction risky(toRemove: string[], catalog: Catalog): string[] {\n  // TODO 2 of 10 (unlocks m1): the risky tools among those to remove.\n  // Receives the tools to remove and the catalog (tool to { access, tokens }). Returns those whose access class is in RISKY, in the same order.\n  // Example: remove [\"refund\", \"export\"], refund has access \"money\" and export has \"read\" -> [\"refund\"]\n  return [];\n}\n\nfunction dormant(agent: Agent): string[] {\n  // TODO 3 of 10 (unlocks e1): the tools that are kept but never used.\n  // Receives the agent. Returns the held tools that the role needs and that have no calls in `used` (a tool missing from `used` has none), in the order held. They are\n  // reported and never removed.\n  // Example: holds [\"a\", \"b\"], needs [\"a\", \"b\"], used { a: 5, b: 0 } -> [\"b\"]\n  return [];\n}\n\nexport function audit(agent: Agent, catalog: Catalog) {\n  log.debug(\"audit input\", agent);\n  const gone = remove(agent);\n  return { remove: gone, risky: risky(gone, catalog), missing: agent.needs.filter((t) => !agent.holds.includes(t)), dormant: dormant(agent) };\n}\n\nfunction clamp(keep: number): number {\n  // TODO 4 of 10 (unlocks e3): how many tools to keep loaded.\n  // Receives the number asked for. Returns it limited to the range from 3 to 5.\n  // Example: clamp(1) -> 3, clamp(8) -> 5, clamp(4) -> 4\n  return keep;\n}\n\nfunction defers(tools: Record<string, number>): boolean {\n  // TODO 5 of 10 (unlocks e2): must the definitions be deferred?\n  // Receives the tools (name to the tokens of its definition). Returns true when there are 10 tools or more, or the definitions together are over 10000 tokens (10000 itself is fine).\n  // Example: 9 tools of 100 tokens -> false; 10 tools -> true; two tools of 5000 and 5001 -> true\n  return false;\n}\n\nfunction ranked(tools: Record<string, number>, usage: Record<string, number>, keep: number): string[] {\n  // TODO 6 of 10 (unlocks e3): the tools to load first.\n  // Receives the tools, the usage counts (a tool missing from `usage` has 0) and how many to keep. Returns that many tool names, the most used first and by name among equals.\n  // Example: usage { b: 9, a: 9, c: 1 }, keep 2 -> [\"a\", \"b\"]\n  return Object.keys(tools).slice(0, keep);\n}\n\nexport function planLoading(tools: Record<string, number>, usage: Record<string, number>, keep = 4, searchTokens = 350) {\n  log.debug(\"planLoading input\", tools);\n  const names = Object.keys(tools);\n  if (!defers(tools)) return { search: false, load_now: names, deferred: [] as string[], tokens: names.reduce((a, t) => a + tools[t], 0) };\n  const first = ranked(tools, usage, clamp(keep));\n  return { search: true, load_now: first, deferred: names.filter((t) => !first.includes(t)), tokens: first.reduce((a, t) => a + tools[t], 0) + searchTokens };\n}\n\nexport function chooseMechanism(consumers: number, counterpart: string, path: string): string | null {\n  // TODO 7 of 10 (unlocks e4): how a capability is connected.\n  // Receives the number of clients that will use it, the counterpart (\"agent\" or \"tool\") and the path (\"fixed\" or \"model-chosen\"). Decide in this order:\n  // a counterpart that is an agent gives \"agent-to-agent\"; a fixed path gives \"direct call in code\"; otherwise \"MCP server\" for more than one client and \"custom tool\" for one.\n  // Example: chooseMechanism(4, \"tool\", \"model-chosen\") -> \"MCP server\"\n  return null;\n}\n\nexport function authorize(tool: string, userScopes: string[], agentScopes: string[], required: Record<string, string>): string | null {\n  // TODO 8 of 10 (unlocks e5): whose rights a tool call uses.\n  // Receives the tool name, the scopes of the user, the scopes of the agent and `required` (tool to the scope it needs). Returns \"deny: unknown tool\" for a tool\n  // that is not in `required`; then \"deny: user lacks <scope>\"; then \"deny: agent lacks <scope>\"; otherwise \"allow\". Both the user and the agent must hold the scope.\n  // Example: scope \"refunds:write\" held by the agent only -> \"deny: user lacks refunds:write\"\n  return null;\n}\n\nfunction verdict(team: string | undefined, request: Request, policy: Policy): [string, string] {\n  // TODO 9 of 10 (unlocks e6): the decision and its reason.\n  // Receives the team (undefined when the credential is unknown), the request (`model`, `tool` or null, `recent`) and the policy (`models`, `tools` and `limits` per team,\n  // `routes`). Checks in this order and stops at the first that fails, returning [\"deny\", reason]: \"unauthenticated\" when there is no team; \"model not allowed\";\n  // \"tool not allowed\" (only when a tool is named); \"rate limited\" when `recent` is at or over the team's limit. Otherwise [\"allow\", \"routed to <name>\"], where the name is\n  // `policy.routes` for the model, or the model itself when it has no route.\n  // Example: team \"support\", model \"standard\", no tool, recent 1, limit 2 -> [\"allow\", \"routed to claude-sonnet-5-5\"]\n  return [\"allow\", \"\"];\n}\n\nfunction record(team: string | undefined, request: Request, decision: string): Record<string, string> {\n  // TODO 10 of 10 (unlocks e7): the record kept of a decision.\n  // Receives the team (undefined when unknown), the request and the decision. Returns { team, model, tool, decision }: the team or \"unknown\", the model, the tool or\n  // \"none\", and the decision. Nothing else: no prompt and no credential.\n  // Example: team undefined, model \"deep\", tool null, \"deny\" -> { team: \"unknown\", model: \"deep\", tool: \"none\", decision: \"deny\" }\n  return {};\n}\n\nexport function gateway(request: Request, policy: Policy) {\n  log.debug(\"gateway input\", request);\n  const team = request.credential === null ? undefined : policy.credentials[request.credential];\n  const [decision, reason] = verdict(team, request, policy);\n  return { decision, reason, audit: record(team, request, decision) };\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { audit, gateway, planLoading } from \"./capability.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\nconst catalog = {\n  read_ticket: { access: \"read\", tokens: 160 },\n  draft_reply: { access: \"draft\", tokens: 220 },\n  issue_refund: { access: \"money\", tokens: 240 },\n  export_report: { access: \"read\", tokens: 300 },\n};\n\n// An agent holds more tools than its role needs: the audit names what to remove and which of them are risky.\nconst agent = { holds: Object.keys(catalog), needs: [\"read_ticket\", \"draft_reply\"], used: { read_ticket: 12, draft_reply: 9 } };\nconsole.log(\"audit:\", JSON.stringify(audit(agent, catalog)));\n\n// Loading a long tool list: the most used tools load now, the rest wait behind a search tool.\nconst tools: Record<string, number> = {};\nfor (let i = 1; i <= 12; i++) tools[`t${String(i).padStart(2, \"0\")}`] = 100;\nconsole.log(\"loading plan:\", JSON.stringify(planLoading(tools, { t01: 9, t02: 5 }, 3)));\n\n// The gateway checks one request against the policy.\nconst policy = { credentials: { k1: \"support\" }, models: { support: [\"standard\"] }, tools: { support: [\"read_ticket\", \"draft_reply\"] },\n  limits: { support: 2 }, routes: { standard: \"claude-sonnet-5-5\" } };\nconsole.log(\"allowed:\", JSON.stringify(gateway({ credential: \"k1\", model: \"standard\", tool: \"read_ticket\", recent: 0 }, policy)));\nconsole.log(\"over the limit:\", JSON.stringify(gateway({ credential: \"k1\", model: \"standard\", tool: \"read_ticket\", recent: 2 }, policy)));\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "97c4c1fca52bd47cd63c1028e28f1cf29db73b38ac8775f0491d8b57048a624c",
+  "starting_code": "/** Capability design: what a role keeps, which tool definitions load up front, which mechanism connects a capability, whose rights a tool call uses and what a gateway decides. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"capability\");\n\nexport type Agent = { holds: string[]; needs: string[]; used: Record<string, number> };\nexport type Catalog = Record<string, { access: string; tokens: number }>;\nexport type Request = { credential: string | null; model: string; tool: string | null; recent: number };\nexport type Policy = { credentials: Record<string, string>; models: Record<string, string[]>; tools: Record<string, string[]>; limits: Record<string, number>; routes: Record<string, string> };\nconst RISKY = new Set([\"money\", \"destroy\"]);\n\nfunction remove(agent: Agent): string[] {\n  // TODO 1 of 10 (unlocks m1): the tools to take away.\n  // Receives the agent (`holds`, `needs`, `used`). Returns the held tools that the role does not need, in the order they are held.\n  // Example: holds [\"read\", \"refund\"], needs [\"read\"] -> [\"refund\"]\n  return [];\n}\n\nfunction risky(toRemove: string[], catalog: Catalog): string[] {\n  // TODO 2 of 10 (unlocks m1): the risky tools among those to remove.\n  // Receives the tools to remove and the catalog (tool to { access, tokens }). Returns those whose access class is in RISKY, in the same order.\n  // Example: remove [\"refund\", \"export\"], refund has access \"money\" and export has \"read\" -> [\"refund\"]\n  return [];\n}\n\nfunction dormant(agent: Agent): string[] {\n  // TODO 3 of 10 (unlocks e1): the tools that are kept but never used.\n  // Receives the agent. Returns the held tools that the role needs and that have no calls in `used` (a tool missing from `used` has none), in the order held. They are\n  // reported and never removed.\n  // Example: holds [\"a\", \"b\"], needs [\"a\", \"b\"], used { a: 5, b: 0 } -> [\"b\"]\n  return [];\n}\n\nexport function audit(agent: Agent, catalog: Catalog) {\n  log.debug(\"audit input\", agent);\n  const gone = remove(agent);\n  return { remove: gone, risky: risky(gone, catalog), missing: agent.needs.filter((t) => !agent.holds.includes(t)), dormant: dormant(agent) };\n}\n\nfunction clamp(keep: number): number {\n  // TODO 4 of 10 (unlocks e3): how many tools to keep loaded.\n  // Receives the number asked for. Returns it limited to the range from 3 to 5.\n  // Example: clamp(1) -> 3, clamp(8) -> 5, clamp(4) -> 4\n  return keep;\n}\n\nfunction defers(tools: Record<string, number>): boolean {\n  // TODO 5 of 10 (unlocks e2): must the definitions be deferred?\n  // Receives the tools (name to the tokens of its definition). Returns true when there are 10 tools or more, or the definitions together are over 10000 tokens (10000 itself is fine).\n  // Example: 9 tools of 100 tokens -> false; 10 tools -> true; two tools of 5000 and 5001 -> true\n  return false;\n}\n\nfunction ranked(tools: Record<string, number>, usage: Record<string, number>, keep: number): string[] {\n  // TODO 6 of 10 (unlocks e3): the tools to load first.\n  // Receives the tools, the usage counts (a tool missing from `usage` has 0) and how many to keep. Returns that many tool names, the most used first and by name among equals.\n  // Example: usage { b: 9, a: 9, c: 1 }, keep 2 -> [\"a\", \"b\"]\n  return Object.keys(tools).slice(0, keep);\n}\n\nexport function planLoading(tools: Record<string, number>, usage: Record<string, number>, keep = 4, searchTokens = 350) {\n  log.debug(\"planLoading input\", tools);\n  const names = Object.keys(tools);\n  if (!defers(tools)) return { search: false, load_now: names, deferred: [] as string[], tokens: names.reduce((a, t) => a + tools[t], 0) };\n  const first = ranked(tools, usage, clamp(keep));\n  return { search: true, load_now: first, deferred: names.filter((t) => !first.includes(t)), tokens: first.reduce((a, t) => a + tools[t], 0) + searchTokens };\n}\n\nexport function chooseMechanism(consumers: number, counterpart: string, path: string): string | null {\n  // TODO 7 of 10 (unlocks e4): how a capability is connected.\n  // Receives the number of clients that will use it, the counterpart (\"agent\" or \"tool\") and the path (\"fixed\" or \"model-chosen\"). Decide in this order:\n  // a counterpart that is an agent gives \"agent-to-agent\"; a fixed path gives \"direct call in code\"; otherwise \"MCP server\" for more than one client and \"custom tool\" for one.\n  // Example: chooseMechanism(4, \"tool\", \"model-chosen\") -> \"MCP server\"\n  return null;\n}\n\nexport function authorize(tool: string, userScopes: string[], agentScopes: string[], required: Record<string, string>): string | null {\n  // TODO 8 of 10 (unlocks e5): whose rights a tool call uses.\n  // Receives the tool name, the scopes of the user, the scopes of the agent and `required` (tool to the scope it needs). Returns \"deny: unknown tool\" for a tool\n  // that is not in `required`; then \"deny: user lacks <scope>\"; then \"deny: agent lacks <scope>\"; otherwise \"allow\". Both the user and the agent must hold the scope.\n  // Example: scope \"refunds:write\" held by the agent only -> \"deny: user lacks refunds:write\"\n  return null;\n}\n\nfunction verdict(team: string | undefined, request: Request, policy: Policy): [string, string] {\n  // TODO 9 of 10 (unlocks e6): the decision and its reason.\n  // Receives the team (undefined when the credential is unknown), the request (`model`, `tool` or null, `recent`) and the policy (`models`, `tools` and `limits` per team,\n  // `routes`). Checks in this order and stops at the first that fails, returning [\"deny\", reason]: \"unauthenticated\" when there is no team; \"model not allowed\";\n  // \"tool not allowed\" (only when a tool is named); \"rate limited\" when `recent` is at or over the team's limit. Otherwise [\"allow\", \"routed to <name>\"], where the name is\n  // `policy.routes` for the model, or the model itself when it has no route.\n  // Example: team \"support\", model \"standard\", no tool, recent 1, limit 2 -> [\"allow\", \"routed to claude-sonnet-5-5\"]\n  return [\"allow\", \"\"];\n}\n\nfunction record(team: string | undefined, request: Request, decision: string): Record<string, string> {\n  // TODO 10 of 10 (unlocks e7): the record kept of a decision.\n  // Receives the team (undefined when unknown), the request and the decision. Returns { team, model, tool, decision }: the team or \"unknown\", the model, the tool or\n  // \"none\", and the decision. Nothing else: no prompt and no credential.\n  // Example: team undefined, model \"deep\", tool null, \"deny\" -> { team: \"unknown\", model: \"deep\", tool: \"none\", decision: \"deny\" }\n  return {};\n}\n\nexport function gateway(request: Request, policy: Policy) {\n  log.debug(\"gateway input\", request);\n  const team = request.credential === null ? undefined : policy.credentials[request.credential];\n  const [decision, reason] = verdict(team, request, policy);\n  return { decision, reason, audit: record(team, request, decision) };\n}\n",
+  "exercise": {
+    "main_path": "practice/level-4/86-integration-choices-access-and-capability-bloat/prose/unit-02/practice-2/capability.ts",
+    "test_path": "practice/level-4/86-integration-choices-access-and-capability-bloat/prose/unit-02/practice-2/capability.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-4/86-integration-choices-access-and-capability-bloat/prose/unit-02/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-4/86-integration-choices-access-and-capability-bloat/prose/unit-02/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-4/86-integration-choices-access-and-capability-bloat/prose/unit-02/practice-2/capability.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 an agent loses the tools its role does not need and the risky ones among them are named",
+        "kind": "main",
+        "says": "An agent loses the tools its role does not need and the risky ones among them are named"
+      },
+      {
+        "id": "e1 a tool that is held and needed but never used is reported as dormant and never removed",
+        "kind": "edge",
+        "says": "A tool that is held and needed but never used is reported as dormant and never removed"
+      },
+      {
+        "id": "e2 a small set loads whole and a large one defers when it has ten tools or over ten thousand tokens",
+        "kind": "edge",
+        "says": "A small set loads whole and a large one defers when it has ten tools or over ten thousand tokens"
+      },
+      {
+        "id": "e3 the number of tools kept loaded stays between three and five and ties are broken by name",
+        "kind": "edge",
+        "says": "The number of tools kept loaded stays between three and five and ties are broken by name"
+      },
+      {
+        "id": "e4 the mechanism follows the counterpart then the path then the number of clients",
+        "kind": "edge",
+        "says": "The mechanism follows the counterpart, then the path, then the number of clients"
+      },
+      {
+        "id": "e5 a call needs the users scope and the agents scope and an unknown tool is refused",
+        "kind": "edge",
+        "says": "A call needs the user's scope and the agent's scope and an unknown tool is refused"
+      },
+      {
+        "id": "e6 the gateway checks the credential then the model then the tool then the rate",
+        "kind": "edge",
+        "says": "The gateway checks the credential, then the model, then the tool, then the rate"
+      },
+      {
+        "id": "e7 the gateway keeps a record of every decision with the team or unknown and no content",
+        "kind": "edge",
+        "says": "The gateway keeps a record of every decision with the team or unknown and no content"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-4/86-integration-choices-access-and-capability-bloat/prose/unit-02/practice-2/target/report.xml"
+    },
+    "origin": "course/86-integration-choices-access-and-capability-bloat/02-capability-bloat-progressive-discovery-and-the-practice.md",
+    "concepts": [
+      "the practice of Capability bloat, progressive discovery and the practice is solved"
+    ],
+    "files": [
+      "practice/level-4/86-integration-choices-access-and-capability-bloat/prose/unit-02/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "integration-choices-access-and-capability-bloat-u2"
+}

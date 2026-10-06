@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "77-scenario-agentic-tool-builder"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: The tool builder: what the agent may write",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A generated tool declares that it reads files, and its code fetches a web page. What does the gate in this module's practice do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Approves it, since reading and fetching are both low-risk effects here",
+            "correct": false,
+            "says": "Ruled out because the difference is the finding: \"the gate compares what the code does with what was declared and refuses the difference\"."
+          },
+          {
+            "id": "b",
+            "text": "Refuses it, since the proposal never mentioned that effect",
+            "correct": true,
+            "says": "Code that does more than it declared is refused."
+          },
+          {
+            "id": "c",
+            "text": "Sends it back for a better description, since the declaration was incomplete",
+            "correct": false,
+            "says": "Ruled out because the finding is a refusal and not a request for a better description: \"Compare what the code does with the permissions declared, and refuse the difference\"."
+          },
+          {
+            "id": "d",
+            "text": "Holds it for a person to approve, since a fetch is a risky effect",
+            "correct": false,
+            "says": "Ruled out because the network is denied by policy and not held for a person: \"The third asks for the network, which the policy denies, so it is refused whatever its code says.\""
+          }
+        ],
+        "origin": {
+          "path": "course/77-scenario-agentic-tool-builder/01-the-tool-builder-what-the-agent-may-write.md",
+          "section": "Traps"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A team runs generated tools in a container that has no network access, no secrets and a short lifetime. A colleague says that the code scan is therefore unnecessary. What is the best reply?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It is a cheap first check for the obvious, and the surroundings hold back the rest",
+            "correct": true,
+            "says": "The scan is the cheap first check."
+          },
+          {
+            "id": "b",
+            "text": "It is unnecessary only when the container is also given the secrets it needs to work",
+            "correct": false,
+            "says": "Ruled out because the container holds no secrets: \"The lesson for a team that runs generated code itself is the same, and it is a list of absences: no network, no secrets, no shared state, a short life and limits on time and memory.\""
+          },
+          {
+            "id": "c",
+            "text": "It is the real protection, and the container only adds some speed to each run",
+            "correct": false,
+            "says": "Ruled out because the scan finds only what its authors thought of: \"A scan finds what its authors thought of: a call spelled differently, built from strings or imported by name slips past it.\""
+          },
+          {
+            "id": "d",
+            "text": "It is unnecessary, and the container alone makes generated tools safe whatever their code does",
+            "correct": false,
+            "says": "Ruled out because the scan still does useful work: \"The scan is useful for what it does well: it refuses the obvious\"."
+          }
+        ],
+        "origin": {
+          "path": "course/77-scenario-agentic-tool-builder/01-the-tool-builder-what-the-agent-may-write.md",
+          "section": "A text scan is not a sandbox"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "In the example, a tool that was approved by the reviewer returns a result without the field that its schema promised. What happens to the result?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It is passed to the agent with a warning attached to the front of it",
+            "correct": false,
+            "says": "Ruled out because a result that does not match is not passed on: \"a result that does not match its schema is rejected before the agent sees it\"."
+          },
+          {
+            "id": "b",
+            "text": "It is filled with a default and passed on to let the run continue",
+            "correct": false,
+            "says": "Ruled out because the check does not repair data: \"Treat the result as data and check it against its schema\"."
+          },
+          {
+            "id": "c",
+            "text": "It is refused before the agent ever sees it",
+            "correct": true,
+            "says": "A result is checked before the agent uses it."
+          },
+          {
+            "id": "d",
+            "text": "It is rejected, and the reviewer's approval is withdrawn for every later tool in the run",
+            "correct": false,
+            "says": "Ruled out because the approval covers one proposal: \"the approval covers the proposal that was reviewed and not a later version\"."
+          }
+        ],
+        "origin": {
+          "path": "course/77-scenario-agentic-tool-builder/01-the-tool-builder-what-the-agent-may-write.md",
+          "section": "The example"
+        }
+      }
+    ]
+  }
+}

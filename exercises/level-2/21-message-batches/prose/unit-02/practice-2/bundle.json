@@ -1,0 +1,78 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "21-message-batches"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: submit a batch and handle its results (TypeScript)",
+  "lang": "typescript",
+  "main_file": "batches.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "batches.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-2/21-message-batches/prose/unit-02/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-2/21-message-batches/prose/unit-02/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-2/21-message-batches/prose/unit-02/practice-2/batches.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 results are matched to requests by custom id not by position",
+      "kind": "main",
+      "says": "Results are matched to requests by custom id, not by position"
+    },
+    {
+      "id": "e1 a custom id is 1 to 64 safe characters and unique",
+      "kind": "edge",
+      "says": "A custom id is 1 to 64 safe characters and unique"
+    },
+    {
+      "id": "e2 parameters a batch cannot take are refused",
+      "kind": "edge",
+      "says": "Parameters a batch cannot take are refused"
+    },
+    {
+      "id": "e3 a big job is cut in order by request count and by size",
+      "kind": "edge",
+      "says": "A big job is cut in order by request count and by size"
+    },
+    {
+      "id": "e4 invalid requests are fixed and the rest are retried",
+      "kind": "edge",
+      "says": "Invalid requests are fixed, the other failures are retried"
+    },
+    {
+      "id": "e5 a request with no result is missing and a stranger is reported",
+      "kind": "edge",
+      "says": "A request with no result is missing and retried, and a stranger id is reported"
+    },
+    {
+      "id": "e6 only requests that succeeded count toward usage",
+      "kind": "edge",
+      "says": "Only succeeded requests count toward usage"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/21-message-batches/02-polling-results-and-retries.md"
+}

@@ -1,0 +1,121 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "68-human-review-and-calibrated-confidence"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Measuring accuracy by segment, sampling, and making a confidence score honest",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "Scenario S6, structured data extraction. A pipeline gets 97% of extracted values right across a validation set that is mostly typed invoices, and the team plans to drop human checks on all of them. What should happen first?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Break the results down by document kind and by field name before relaxing oversight",
+            "correct": true,
+            "says": "The overall figure is an average that the large easy segment dominates, so each document type and field is measured on its own before any review is removed."
+          },
+          {
+            "id": "b",
+            "text": "Confirm that the model reports high confidence on most of the validation set",
+            "correct": false,
+            "says": "Ruled out because \"the model wrote the number, and only a labelled validation set says how often that score is right\"."
+          },
+          {
+            "id": "c",
+            "text": "Double the validation set and confirm that the overall figure holds up",
+            "correct": false,
+            "says": "Ruled out because \"A bigger validation set of the same mix gives the same hidden figure\"."
+          },
+          {
+            "id": "d",
+            "text": "Ask the reviewers to confirm the model's answers on a handful of randomly chosen documents",
+            "correct": false,
+            "says": "Ruled out because \"a handful of random documents are mostly typed invoices, because random samples reflect the mix\"."
+          }
+        ],
+        "origin": {
+          "path": "course/68-human-review-and-calibrated-confidence/01-measuring-accuracy-by-segment-and-calibrating-confidence.md",
+          "section": "Traps"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "Scenario S6, structured data extraction. Everything scored 90 or above is accepted untouched. The team wants the true wrong-rate of that stream and an early warning when a supplier changes its layout. Which sampling fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Pull random documents from the whole stream in a single draw, with no regard to kind",
+            "correct": false,
+            "says": "Ruled out because \"A single random pull from the whole stream is mostly easy cases\"."
+          },
+          {
+            "id": "b",
+            "text": "Pull the documents that scored just under the cut-off every week",
+            "correct": false,
+            "says": "Ruled out because \"Everything below it goes to a person\", so those documents are reviewed already."
+          },
+          {
+            "id": "c",
+            "text": "Pull random documents of each kind that passed with no human look",
+            "correct": true,
+            "says": "A random draw inside every stratum of the unreviewed stream measures the wrong-rate of automation and exposes a new pattern, as the page puts it: \"Drawing the same number per stratum means a rare segment is checked as often as a common one\"."
+          },
+          {
+            "id": "d",
+            "text": "Pull one fixed set of old documents on a regular schedule",
+            "correct": false,
+            "says": "Ruled out because \"new kinds of error appear when document formats change\", and a fixed set only repeats what is known."
+          }
+        ],
+        "origin": {
+          "path": "course/68-human-review-and-calibrated-confidence/01-measuring-accuracy-by-segment-and-calibrating-confidence.md",
+          "section": "Sample the accepted items by stratum"
+        }
+      }
+    ],
+    "concepts": [
+      "Sample the accepted items by stratum, as the page teaches it",
+      "Traps, as the page teaches it"
+    ]
+  }
+}

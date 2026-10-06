@@ -1,0 +1,72 @@
+/* Flashcards: a card's two sides, the marks, and the controls, over the quiz's own look.
+
+   ⭐ Written beside `page.css`, never inside it, and ONLY for a corpus that has a deck: a corpus with
+   none carries no byte of it. The section is a quiz section (`data-practice-quiz`), so its measure
+   and tokens are the quiz's; this adds what only a card has. ⛔ No colour and no measure of its
+   own: every value is a palette token. ⚠️ Phone first: the controls wrap and the buttons are as wide
+   as the page needs. */
+
+section[data-deck] p[data-deck-part="progress"] {
+  margin: 0 0 .75rem;
+  color: var(--fg-soft);
+  font-size: .9rem;
+}
+
+section[data-deck] ol[data-deck-part="cards"] {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: .75rem;
+}
+
+section[data-deck] li[data-deck-card] {
+  padding: .75rem 1rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+}
+
+section[data-deck] li[data-deck-card][hidden],
+section[data-deck] [data-deck-part="back"][hidden],
+section[data-deck] [data-deck-part="offline"][hidden],
+section[data-deck] [data-deck-part="controls"][hidden],
+section[data-deck] [data-deck-label][hidden] {
+  display: none;
+}
+
+section[data-deck] li[data-deck-card][data-deck-state="known"] {
+  border-left: 3px solid var(--done);
+}
+
+section[data-deck] li[data-deck-card][data-deck-state="again"] {
+  border-left: 3px solid var(--accent);
+}
+
+section[data-deck] [data-deck-label] {
+  margin: 0 0 .25rem;
+  color: var(--muted);
+  font-size: .8rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+section[data-deck] [data-deck-part="back"] {
+  margin-top: .5rem;
+  padding-top: .5rem;
+  border-top: 1px solid var(--rule);
+}
+
+section[data-deck] [data-deck-part="actions"],
+section[data-deck] p[data-deck-part="controls"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
+  margin: .5rem 0 0;
+}
+
+section[data-deck] [data-deck-part="mark"] {
+  color: var(--fg-soft);
+  font-size: .9rem;
+}

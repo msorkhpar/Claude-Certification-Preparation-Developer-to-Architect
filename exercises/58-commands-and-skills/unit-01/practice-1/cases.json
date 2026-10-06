@@ -1,0 +1,183 @@
+{
+  "practice": "58-commands-and-skills/unit-01/practice-1",
+  "name": "skill_setup",
+  "tests": {
+    "java": "SkillSetupTest",
+    "kotlin": "SkillSetupTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_the_review_skill_is_a_forked_skill_with_an_explicit_task_and_an_argument",
+      "typescript": "m1 the review skill is a forked skill with an explicit task and an argument",
+      "java": "m1_theReviewSkillIsAForkedSkillWithAnExplicitTaskAndAnArgument",
+      "kotlin": "m1_theReviewSkillIsAForkedSkillWithAnExplicitTaskAndAnArgument"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_the_release_skill_is_started_only_by_a_person_and_pre_approves_patterns",
+      "typescript": "e1 the release skill is started only by a person and pre approves patterns",
+      "java": "e1_theReleaseSkillIsStartedOnlyByAPersonAndPreApprovesPatterns",
+      "kotlin": "e1_theReleaseSkillIsStartedOnlyByAPersonAndPreApprovesPatterns"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_tools_are_taken_away_with_disallowed_tools_and_allowed_tools_only_pre_approves",
+      "typescript": "e2 tools are taken away with disallowed tools and allowed tools only pre approves",
+      "java": "e2_toolsAreTakenAwayWithDisallowedToolsAndAllowedToolsOnlyPreApproves",
+      "kotlin": "e2_toolsAreTakenAwayWithDisallowedToolsAndAllowedToolsOnlyPreApproves"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_arguments_fill_the_placeholders_of_every_file",
+      "typescript": "e3 arguments fill the placeholders of every file",
+      "java": "e3_argumentsFillThePlaceholdersOfEveryFile",
+      "kotlin": "e3_argumentsFillThePlaceholdersOfEveryFile"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_every_file_creates_its_own_slash_command_and_the_personal_variant_has_a_new_name",
+      "typescript": "e4 every file creates its own slash command and the personal variant has a new name",
+      "java": "e4_everyFileCreatesItsOwnSlashCommandAndThePersonalVariantHasANewName",
+      "kotlin": "e4_everyFileCreatesItsOwnSlashCommandAndThePersonalVariantHasANewName"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_each_piece_of_guidance_lives_where_it_loads_the_way_it_is_used",
+      "typescript": "e5 each piece of guidance lives where it loads the way it is used",
+      "java": "e5_eachPieceOfGuidanceLivesWhereItLoadsTheWayItIsUsed",
+      "kotlin": "e5_eachPieceOfGuidanceLivesWhereItLoadsTheWayItIsUsed"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_every_skill_says_when_to_use_it_and_stays_inside_the_listing_budget",
+      "typescript": "e6 every skill says when to use it and stays inside the listing budget",
+      "java": "e6_everySkillSaysWhenToUseItAndStaysInsideTheListingBudget",
+      "kotlin": "e6_everySkillSaysWhenToUseItAndStaysInsideTheListingBudget"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_no_file_holds_a_personal_path_an_address_or_a_key",
+      "typescript": "e7 no file holds a personal path an address or a key",
+      "java": "e7_noFileHoldsAPersonalPathAnAddressOrAKey",
+      "kotlin": "e7_noFileHoldsAPersonalPathAnAddressOrAKey"
+    }
+  },
+  "plants": {
+    "wrong-fork-guidelines-only": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "writes guidelines instead of numbered steps in a forked skill"
+    },
+    "wrong-no-fork": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "runs the review in the conversation instead of a forked context"
+    },
+    "wrong-no-agent": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "leaves the subagent type out of the forked skill"
+    },
+    "wrong-no-hint": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "leaves the argument hint out of the review skill"
+    },
+    "wrong-no-placeholder": {
+      "caught_by": [
+        "e3",
+        "m1"
+      ],
+      "defect": "never uses the pull request number in the steps"
+    },
+    "wrong-allowed-restricts": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "relies on allowed tools to keep the review from editing"
+    },
+    "wrong-disallow-scoped": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "writes scoped rules in disallowed tools, which leave Edit and Write in place"
+    },
+    "wrong-review-bare-bash": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "pre approves the whole Bash tool in the review skill"
+    },
+    "wrong-tag-bare-bash": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "pre approves the whole Bash tool in the release skill"
+    },
+    "wrong-tag-auto": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "lets Claude start the release skill on its own"
+    },
+    "wrong-tag-no-arguments": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "uses a named argument without declaring it"
+    },
+    "wrong-name-collision": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "gives the personal variant the name of the release skill"
+    },
+    "wrong-mine-shadows": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "gives the personal variant the name of the team skill, so it replaces it for you"
+    },
+    "wrong-standup-no-hint": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "leaves the hint out of the standup command"
+    },
+    "wrong-placement-rule-in-memory": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "places the test file conventions in the always loaded file"
+    },
+    "wrong-placement-personal-in-project": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "places the personal variant in the shared project folder"
+    },
+    "wrong-no-use-when": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "describes the review skill without saying when to use it"
+    },
+    "wrong-long-description": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "writes a description longer than the listing keeps"
+    },
+    "wrong-home-path": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "writes a personal home path into the placement notes"
+    }
+  }
+}

@@ -1,0 +1,372 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "20-prompt-caching"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "The prefix, the breakpoint and the usage fields",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "The prefix, the breakpoint and the usage fields"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Developer · **Module 20:** Prompt caching · **Page 1 of 2** **Exams:** DV2"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** say what a prompt cache stores, place `cache_control` so that requests share it, read the three usage fields to tell a write from a read from a miss, and explain why a request that was marked for caching can still return no cache hit."
+    },
+    {
+      "type": "para",
+      "text": "Checked against the Claude API documentation (Prompt caching, Pricing) on 2026-10-02, and by running the example offline in the course container (`anthropic` 1.11.0, `@anthropic-ai/sdk` 0.131.0). The server in the example is an illustrative, hand-written stand-in that applies the documented prefix rule, not a capture of the real service."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "Most Claude applications send the same large block of text again and again: a system prompt, tool definitions, a document, the history of a conversation. Without caching, every request pays full input price and full processing time for it. With caching, the repeated part is read at a fraction of the price. The exam asks where the breakpoint goes, what a response's usage fields mean, and why a cache that should hit does not."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "A cache stores a prefix"
+    },
+    {
+      "type": "para",
+      "text": "The documentation describes what is stored in one sentence:"
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "Prompt caching references the entire prompt: `tools`, `system`, and `messages` (in that order), up to and including the block designated with `cache_control`."
+        }
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Source: Prompt caching."
+    },
+    {
+      "type": "para",
+      "text": "Read it as a hierarchy. The cache key is a hash of everything from the start of the request up to the marked block, in the order tools, then system, then messages. A change anywhere inside that span gives a different hash, and the request starts over. The page says \"Cache hits require 100% identical prompt segments\". That is why stable content goes first, and why anything that varies from request to request, a timestamp for instance, goes after the last breakpoint."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Two ways to mark it"
+    },
+    {
+      "type": "para",
+      "text": "**Automatic caching** is one `cache_control` field at the top level of the request: `{\"type\": \"ephemeral\"}`. The system places the breakpoint on the last cacheable block and moves it forward as a conversation grows. It suits multi-turn chats."
+    },
+    {
+      "type": "para",
+      "text": "**Explicit breakpoints** put `cache_control` on individual blocks. They suit prompts whose sections change at different rates: tools rarely, the system prompt daily, the question every time. You can place up to four. An automatic breakpoint uses one of those four slots, and a request with four explicit ones already placed returns a 400 when it also asks for automatic caching."
+    },
+    {
+      "type": "para",
+      "text": "Marking costs nothing by itself: \"Cache breakpoints themselves don't add any cost.\" You pay for what is written, what is read and what is neither."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Three usage fields"
+    },
+    {
+      "type": "para",
+      "text": "Every response reports what the cache did, inside `usage`:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Field",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`cache_creation_input_tokens`",
+          "tokens written to the cache by this request"
+        ],
+        [
+          "`cache_read_input_tokens`",
+          "tokens read from the cache by this request"
+        ],
+        [
+          "`input_tokens`",
+          "tokens after the last breakpoint, which are not cached"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The last row is the one people get wrong. `input_tokens` is not the size of the prompt when caching is on. The page gives the sum:"
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "total_input_tokens = cache_read_input_tokens + cache_creation_input_tokens + input_tokens"
+        }
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Source: Prompt caching."
+    },
+    {
+      "type": "para",
+      "text": "Its worked example has 100,000 cached tokens read, none written and 50 after the breakpoint, for 100,050 in all. A dashboard that plots only `input_tokens` shows a number that falls as caching succeeds, and a bill that does not match it. The three fields are also the test of whether caching worked: \"if both `cache_creation_input_tokens` and `cache_read_input_tokens` are 0, the prompt was not cached\"."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The minimum"
+    },
+    {
+      "type": "para",
+      "text": "A prefix shorter than the model's minimum is not cached, and nothing says so. The page lists the minimum per model, the same on every platform where the model is available. For the course models:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Model",
+        "Minimum cacheable prompt"
+      ],
+      "rows": [
+        [
+          "Claude Fable 5.1",
+          "512 tokens"
+        ],
+        [
+          "Claude Opus 5.5",
+          "512 tokens"
+        ],
+        [
+          "Claude Sonnet 5.5",
+          "512 tokens"
+        ],
+        [
+          "Claude Haiku 4.5",
+          "4,096 tokens"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The page says: \"Any requests to cache fewer than this number of tokens will be processed without caching, and no error is returned.\" You find out only by the two zeros in the usage fields. If the prompt falls just short, the page advises that \"expanding the cached content to reach the threshold is often worthwhile\", since reads are much cheaper than ordinary input."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Where the breakpoint goes"
+    },
+    {
+      "type": "para",
+      "text": "Put it on the last block that is identical across the requests you want to share a cache. The page names the common mistake: a large static system prompt followed by one block that carries a timestamp and the user's message. With the breakpoint on that last block, the hash includes the timestamp, so request 2 never matches request 1: \"You pay for a fresh cache write on every request and never get a read.\" The fix is to move the breakpoint to the last stable block. The lookback, the backward search described on the next page, does not rescue you, because it \"only finds entries that earlier requests wrote at their own breakpoints\"."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "para",
+      "text": "The example sends a 600-token policy as the system prompt to a scripted server that applies the prefix rule, a five-minute lifetime and a minimum of 512 tokens (the figure for `claude-sonnet-5-5`). It runs seven requests and prints the three usage fields. Rows 1 to 3 show a stable prefix and a lapse. Rows 4 to 7 compare a timestamp placed before the policy with one placed after it."
+    },
+    {
+      "type": "example",
+      "id": "m20-cache-hits",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/20-cache-hits/python/cache_hits.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/20-cache-hits/typescript/cacheHits.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/20-cache-hits/java/CacheHits.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/20-cache-hits/kotlin/CacheHits.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Prompt caching seen through the usage object, against a scripted server that applies the documented prefix rule.\n\nThe server (CacheSim) is an illustrative, hand-written stand-in, not a capture: it counts a token as four characters,\ncaches the prefix up to a block that carries cache_control when that prefix reaches the minimum size, keeps it for five\nminutes from its last use, and reports `cache_creation_input_tokens`, `cache_read_input_tokens` and `input_tokens` (the\ntokens after the last breakpoint) as the prompt caching page describes them (claude-sonnet-5-5, minimum 512 tokens).\n\"\"\"\nimport logging\nimport json\nimport math\n\nfrom harness import scripted_client\nfrom harness.scripted import message, text\n\nlog = logging.getLogger(__name__)\n\nMODEL = \"claude-sonnet-5-5\"\nPOLICY = \"Refund policy clause: items may be returned within 14 days. \" * 40  # about 600 tokens\nMARK = {\"type\": \"ephemeral\"}\n\n\ndef tokens(piece):\n    return math.ceil(len(piece) / 4)\n\n\ndef blocks_of(body):\n    \"\"\"The request flattened in prefix order: tools, then system, then messages, each with its cache_control.\"\"\"\n    out = [(json.dumps(tool, sort_keys=True), tool.get(\"cache_control\")) for tool in body.get(\"tools\", [])]\n    system = body.get(\"system\", [])\n    out += [(b[\"text\"], b.get(\"cache_control\")) for b in ([{\"text\": system}] if isinstance(system, str) else system)]\n    for m in body[\"messages\"]:\n        content = m[\"content\"] if isinstance(m[\"content\"], list) else [{\"text\": m[\"content\"]}]\n        out += [(m[\"role\"] + \": \" + b[\"text\"], b.get(\"cache_control\")) for b in content]\n    return out\n\n\nclass CacheSim:\n    def __init__(self, minimum=512, ttl=300):\n        self.minimum, self.ttl, self.clock, self.entries = minimum, ttl, 0, {}\n\n    def __call__(self, body):\n        blocks = blocks_of(body)\n        marks = [i for i, (_, mark) in enumerate(blocks) if mark]\n        key = lambda i: \"\\x00\".join(t for t, _ in blocks[: i + 1])  # noqa: E731\n        size = lambda i: sum(tokens(t) for t, _ in blocks[: i + 1])  # noqa: E731\n        read = written = 0\n        hit = None\n        for i in reversed(marks):\n            if self.entries.get(key(i), -1) > self.clock:\n                read, hit = size(i), i\n                self.entries[key(i)] = self.clock + self.ttl  # a hit refreshes the entry\n                break\n        if marks and hit != marks[-1] and size(marks[-1]) >= self.minimum:\n            written = size(marks[-1]) - read\n            self.entries[key(marks[-1])] = self.clock + self.ttl\n        fresh = size(len(blocks) - 1) - read - written\n        usage = {\"input_tokens\": fresh, \"output_tokens\": 20, \"cache_read_input_tokens\": read, \"cache_creation_input_tokens\": written,\n                 \"cache_creation\": {\"ephemeral_5m_input_tokens\": written, \"ephemeral_1h_input_tokens\": 0}}\n        return message([text(\"ok\")], usage=usage)\n\n\ndef request(system, question):\n    return dict(model=MODEL, max_tokens=50, system=system, messages=[{\"role\": \"user\", \"content\": question}])\n\n\ndef stable(question):\n    return request([{\"type\": \"text\", \"text\": POLICY, \"cache_control\": MARK}], question)\n\n\ndef stamp_first(clock_label, question):\n    return request([{\"type\": \"text\", \"text\": f\"Current time: {clock_label}\"}, {\"type\": \"text\", \"text\": POLICY, \"cache_control\": MARK}], question)\n\n\ndef stamp_last(clock_label, question):\n    return request([{\"type\": \"text\", \"text\": POLICY, \"cache_control\": MARK}, {\"type\": \"text\", \"text\": f\"Current time: {clock_label}\"}], question)\n\n\ndef run(sim, label, body, wait=0):\n    sim.clock += wait\n    client, _ = scripted_client(sim)\n    usage = client.messages.create(**body).usage\n    print(f\"{label:34} write {usage.cache_creation_input_tokens:4}  read {usage.cache_read_input_tokens:4}  fresh {usage.input_tokens:4}\")\n    return usage\n\n\ndef main():\n    sim = CacheSim()\n    run(sim, \"1 stable system, first call\", stable(\"Can I return a lamp?\"))\n    run(sim, \"2 same system, new question\", stable(\"Can I return a chair?\"), wait=60)\n    run(sim, \"3 six minutes of silence\", stable(\"Can I return a desk?\"), wait=360)\n    sim = CacheSim()\n    run(sim, \"4 timestamp first, 10:01\", stamp_first(\"10:01\", \"Can I return a lamp?\"))\n    run(sim, \"5 timestamp first, 10:02\", stamp_first(\"10:02\", \"Can I return a lamp?\"), wait=60)\n    run(sim, \"6 timestamp last, 10:03\", stamp_last(\"10:03\", \"Can I return a lamp?\"), wait=60)\n    run(sim, \"7 timestamp last, 10:04\", stamp_last(\"10:04\", \"Can I return a lamp?\"), wait=60)\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "1 stable system, first call        write  600  read    0  fresh    7\n2 same system, new question        write    0  read  600  fresh    7\n3 six minutes of silence           write  600  read    0  fresh    7\n4 timestamp first, 10:01           write  605  read    0  fresh    7\n5 timestamp first, 10:02           write  605  read    0  fresh    7\n6 timestamp last, 10:03            write  600  read    0  fresh   12\n7 timestamp last, 10:04            write    0  read  600  fresh   12"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Prompt caching seen through the usage object, against a scripted server that applies the documented prefix rule.\n// The server (CacheSim) is an illustrative, hand-written stand-in, not a capture: it counts a token as four characters,\n// caches the prefix up to a block that carries cache_control when that prefix reaches the minimum size, keeps it for five\n// minutes from its last use, and reports `cache_creation_input_tokens`, `cache_read_input_tokens` and `input_tokens` (the\n// tokens after the last breakpoint) as the prompt caching page describes them (claude-sonnet-5-5, minimum 512 tokens).\nimport Anthropic from \"@anthropic-ai/sdk\";\nimport { message, scriptedFetch, text } from \"../../../harness/ts/scriptedFetch.ts\";\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"cache_hits\");\n\nexport const MODEL = \"claude-sonnet-5-5\";\nexport const POLICY = \"Refund policy clause: items may be returned within 14 days. \".repeat(40); // about 600 tokens\nconst MARK = { type: \"ephemeral\" };\n\nexport const tokens = (piece: string) => Math.ceil(piece.length / 4);\n\ntype Piece = [string, unknown];\n\nfunction blocksOf(body: any): Piece[] {\n  const out: Piece[] = (body.tools ?? []).map((t: any): Piece => [JSON.stringify(t), t.cache_control]);\n  const system = typeof body.system === \"string\" ? [{ text: body.system }] : (body.system ?? []);\n  for (const b of system) out.push([b.text, b.cache_control]);\n  for (const m of body.messages) {\n    const content = Array.isArray(m.content) ? m.content : [{ text: m.content }];\n    for (const b of content) out.push([`${m.role}: ${b.text}`, b.cache_control]);\n  }\n  return out;\n}\n\nexport class CacheSim {\n  clock = 0;\n  entries = new Map<string, number>();\n  minimum: number;\n  ttl: number;\n  constructor(minimum = 512, ttl = 300) {\n    this.minimum = minimum;\n    this.ttl = ttl;\n  }\n\n  reply(body: any) {\n    const blocks = blocksOf(body);\n    const marks = blocks.flatMap(([, mark], i) => (mark ? [i] : []));\n    const key = (i: number) => blocks.slice(0, i + 1).map(([t]) => t).join(\"\\0\");\n    const size = (i: number) => blocks.slice(0, i + 1).reduce((n, [t]) => n + tokens(t), 0);\n    let read = 0;\n    let written = 0;\n    let hit: number | null = null;\n    for (const i of [...marks].reverse()) {\n      if ((this.entries.get(key(i)) ?? -1) > this.clock) {\n        read = size(i);\n        hit = i;\n        this.entries.set(key(i), this.clock + this.ttl); // a hit refreshes the entry\n        break;\n      }\n    }\n    const last = marks.length ? marks[marks.length - 1] : null;\n    if (last !== null && hit !== last && size(last) >= this.minimum) {\n      written = size(last) - read;\n      this.entries.set(key(last), this.clock + this.ttl);\n    }\n    const fresh = size(blocks.length - 1) - read - written;\n    const usage = {\n      input_tokens: fresh, output_tokens: 20, cache_read_input_tokens: read, cache_creation_input_tokens: written,\n      cache_creation: { ephemeral_5m_input_tokens: written, ephemeral_1h_input_tokens: 0 },\n    };\n    return { body: message([text(\"ok\")], \"end_turn\", usage as any) };\n  }\n}\n\nconst request = (system: unknown[], question: string) => ({ model: MODEL, max_tokens: 50, system, messages: [{ role: \"user\" as const, content: question }] });\nconst policyBlock = { type: \"text\", text: POLICY, cache_control: MARK };\n\nexport const stable = (question: string) => request([policyBlock], question);\nexport const stampFirst = (label: string, question: string) => request([{ type: \"text\", text: `Current time: ${label}` }, policyBlock], question);\nexport const stampLast = (label: string, question: string) => request([policyBlock, { type: \"text\", text: `Current time: ${label}` }], question);\n\nexport async function usageOf(sim: CacheSim, body: any, wait = 0): Promise<any> {\n  sim.clock += wait;\n  const fake = scriptedFetch([(sent: any) => sim.reply(sent)]);\n  const client = new Anthropic({ apiKey: \"placeholder\", maxRetries: 0, fetch: fake.fetch });\n  return (await client.messages.create(body)).usage;\n}\n\nasync function run(sim: CacheSim, label: string, body: any, wait = 0) {\n  const u = await usageOf(sim, body, wait);\n  console.log(`${label.padEnd(34)} write ${String(u.cache_creation_input_tokens).padStart(4)}  read ${String(u.cache_read_input_tokens).padStart(4)}  fresh ${String(u.input_tokens).padStart(4)}`);\n}\n\nasync function main() {\n  let sim = new CacheSim();\n  await run(sim, \"1 stable system, first call\", stable(\"Can I return a lamp?\"));\n  await run(sim, \"2 same system, new question\", stable(\"Can I return a chair?\"), 60);\n  await run(sim, \"3 six minutes of silence\", stable(\"Can I return a desk?\"), 360);\n  sim = new CacheSim();\n  await run(sim, \"4 timestamp first, 10:01\", stampFirst(\"10:01\", \"Can I return a lamp?\"));\n  await run(sim, \"5 timestamp first, 10:02\", stampFirst(\"10:02\", \"Can I return a lamp?\"), 60);\n  await run(sim, \"6 timestamp last, 10:03\", stampLast(\"10:03\", \"Can I return a lamp?\"), 60);\n  await run(sim, \"7 timestamp last, 10:04\", stampLast(\"10:04\", \"Can I return a lamp?\"), 60);\n}\n\nif (import.meta.main) await main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "1 stable system, first call        write  600  read    0  fresh    7\n2 same system, new question        write    0  read  600  fresh    7\n3 six minutes of silence           write  600  read    0  fresh    7\n4 timestamp first, 10:01           write  605  read    0  fresh    7\n5 timestamp first, 10:02           write  605  read    0  fresh    7\n6 timestamp last, 10:03            write  600  read    0  fresh   12\n7 timestamp last, 10:04            write    0  read  600  fresh   12"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import static harness.Scripted.map;\nimport static harness.Scripted.message;\nimport static harness.Scripted.text;\n\nimport com.anthropic.models.messages.CacheControlEphemeral;\nimport com.anthropic.models.messages.MessageCreateParams;\nimport com.anthropic.models.messages.Model;\nimport com.anthropic.models.messages.TextBlockParam;\nimport com.anthropic.models.messages.Usage;\nimport com.fasterxml.jackson.databind.JsonNode;\nimport harness.Scripted;\nimport java.util.ArrayList;\nimport java.util.HashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.function.Function;\n\n/**\n * Prompt caching seen through the usage object, against a scripted server that applies the documented prefix rule.\n *\n * <p>The server (CacheSim) is an illustrative, hand-written stand-in, not a capture: it counts a token as four characters,\n * caches the prefix up to a block that carries cache_control when that prefix reaches the minimum size, keeps it for five\n * minutes from its last use, and reports `cache_creation_input_tokens`, `cache_read_input_tokens` and `input_tokens` (the\n * tokens after the last breakpoint) as the prompt caching page describes them (claude-sonnet-5-5, minimum 512 tokens).\n */\npublic final class CacheHits {\n    private static final System.Logger LOG = System.getLogger(CacheHits.class.getName());\n    static final String MODEL = \"claude-sonnet-5-5\";\n    static final String POLICY = \"Refund policy clause: items may be returned within 14 days. \".repeat(40); // about 600 tokens\n\n    static int tokens(String piece) {\n        return (piece.length() + 3) / 4; // ceil(length / 4)\n    }\n\n    /** One block of the prompt with the text it holds and whether it carries a cache_control breakpoint. */\n    record Block(String text, boolean mark) {}\n\n    /** The request flattened in prefix order: tools, then system, then messages, each with its cache_control. */\n    static List<Block> blocksOf(JsonNode body) {\n        List<Block> out = new ArrayList<>();\n        for (JsonNode tool : body.path(\"tools\")) out.add(new Block(tool.toString(), tool.has(\"cache_control\")));\n        JsonNode system = body.path(\"system\");\n        if (system.isTextual()) out.add(new Block(system.asText(), false));\n        else for (JsonNode b : system) out.add(new Block(b.get(\"text\").asText(), b.has(\"cache_control\")));\n        for (JsonNode m : body.get(\"messages\")) {\n            String role = m.get(\"role\").asText();\n            if (m.get(\"content\").isTextual()) out.add(new Block(role + \": \" + m.get(\"content\").asText(), false));\n            else for (JsonNode b : m.get(\"content\")) out.add(new Block(role + \": \" + b.get(\"text\").asText(), b.has(\"cache_control\")));\n        }\n        return out;\n    }\n\n    /** The scripted server: a reply function of the request body, with a clock the program moves. */\n    static final class CacheSim implements Function<JsonNode, Object> {\n        final int minimum, ttl;\n        int clock = 0;\n        final Map<String, Integer> entries = new HashMap<>();\n\n        CacheSim() {\n            this(512, 300);\n        }\n\n        CacheSim(int minimum, int ttl) {\n            this.minimum = minimum;\n            this.ttl = ttl;\n        }\n\n        private static String key(List<Block> blocks, int i) {\n            StringBuilder k = new StringBuilder();\n            for (int j = 0; j <= i; j++) k.append(j == 0 ? \"\" : \"\\u0000\").append(blocks.get(j).text());\n            return k.toString();\n        }\n\n        private static int size(List<Block> blocks, int i) {\n            int total = 0;\n            for (int j = 0; j <= i; j++) total += tokens(blocks.get(j).text());\n            return total;\n        }\n\n        @Override\n        public Object apply(JsonNode body) {\n            List<Block> blocks = blocksOf(body);\n            List<Integer> marks = new ArrayList<>();\n            for (int i = 0; i < blocks.size(); i++) if (blocks.get(i).mark()) marks.add(i);\n            int read = 0, written = 0;\n            Integer hit = null;\n            for (int n = marks.size() - 1; n >= 0; n--) {\n                int i = marks.get(n);\n                if (entries.getOrDefault(key(blocks, i), -1) > clock) {\n                    read = size(blocks, i);\n                    hit = i;\n                    entries.put(key(blocks, i), clock + ttl); // a hit refreshes the entry\n                    break;\n                }\n            }\n            if (!marks.isEmpty()) {\n                int last = marks.get(marks.size() - 1);\n                if (!Integer.valueOf(last).equals(hit) && size(blocks, last) >= minimum) {\n                    written = size(blocks, last) - read;\n                    entries.put(key(blocks, last), clock + ttl);\n                }\n            }\n            int fresh = size(blocks, blocks.size() - 1) - read - written;\n            Map<String, Object> usage = map(\"input_tokens\", fresh, \"output_tokens\", 20, \"cache_read_input_tokens\", read, \"cache_creation_input_tokens\", written,\n                \"cache_creation\", map(\"ephemeral_5m_input_tokens\", written, \"ephemeral_1h_input_tokens\", 0));\n            return message(List.of(text(\"ok\")), \"end_turn\", MODEL, usage, null);\n        }\n    }\n\n    static MessageCreateParams request(List<Block> system, String question) {\n        List<TextBlockParam> blocks = new ArrayList<>();\n        for (Block b : system) {\n            TextBlockParam.Builder block = TextBlockParam.builder().text(b.text());\n            if (b.mark()) block.cacheControl(CacheControlEphemeral.builder().build());\n            blocks.add(block.build());\n        }\n        return MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(50).systemOfTextBlockParams(blocks).addUserMessage(question).build();\n    }\n\n    static MessageCreateParams stable(String question) {\n        return request(List.of(new Block(POLICY, true)), question);\n    }\n\n    static MessageCreateParams stampFirst(String clockLabel, String question) {\n        return request(List.of(new Block(\"Current time: \" + clockLabel, false), new Block(POLICY, true)), question);\n    }\n\n    static MessageCreateParams stampLast(String clockLabel, String question) {\n        return request(List.of(new Block(POLICY, true), new Block(\"Current time: \" + clockLabel, false)), question);\n    }\n\n    /** Move the clock, send the request through the SDK to the simulated server and read the usage back. */\n    static Usage send(CacheSim sim, MessageCreateParams body, int wait) {\n        sim.clock += wait;\n        return Scripted.client(sim).client().messages().create(body).usage();\n    }\n\n    static Usage run(CacheSim sim, String label, MessageCreateParams body, int wait) {\n        Usage usage = send(sim, body, wait);\n        System.out.println(String.format(\"%-34s write %4d  read %4d  fresh %4d\", label, usage.cacheCreationInputTokens().get(), usage.cacheReadInputTokens().get(), usage.inputTokens()));\n        return usage;\n    }\n\n    public static void main(String[] args) {\n        CacheSim sim = new CacheSim();\n        run(sim, \"1 stable system, first call\", stable(\"Can I return a lamp?\"), 0);\n        run(sim, \"2 same system, new question\", stable(\"Can I return a chair?\"), 60);\n        run(sim, \"3 six minutes of silence\", stable(\"Can I return a desk?\"), 360);\n        sim = new CacheSim();\n        run(sim, \"4 timestamp first, 10:01\", stampFirst(\"10:01\", \"Can I return a lamp?\"), 0);\n        run(sim, \"5 timestamp first, 10:02\", stampFirst(\"10:02\", \"Can I return a lamp?\"), 60);\n        run(sim, \"6 timestamp last, 10:03\", stampLast(\"10:03\", \"Can I return a lamp?\"), 60);\n        run(sim, \"7 timestamp last, 10:04\", stampLast(\"10:04\", \"Can I return a lamp?\"), 60);\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "1 stable system, first call        write  600  read    0  fresh    7\n2 same system, new question        write    0  read  600  fresh    7\n3 six minutes of silence           write  600  read    0  fresh    7\n4 timestamp first, 10:01           write  605  read    0  fresh    7\n5 timestamp first, 10:02           write  605  read    0  fresh    7\n6 timestamp last, 10:03            write  600  read    0  fresh   12\n7 timestamp last, 10:04            write    0  read  600  fresh   12"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import com.anthropic.models.messages.CacheControlEphemeral\nimport com.anthropic.models.messages.MessageCreateParams\nimport com.anthropic.models.messages.Model\nimport com.anthropic.models.messages.TextBlockParam\nimport com.anthropic.models.messages.Usage\nimport com.fasterxml.jackson.databind.JsonNode\nimport harness.Scripted\nimport harness.Scripted.map\nimport harness.Scripted.message\nimport harness.Scripted.text\nimport java.util.function.Function\n\nprivate val log = System.getLogger(\"cache_hits\")\n\n/**\n * Prompt caching seen through the usage object, against a scripted server that applies the documented prefix rule.\n *\n * The server (CacheSim) is an illustrative, hand-written stand-in, not a capture: it counts a token as four characters,\n * caches the prefix up to a block that carries cache_control when that prefix reaches the minimum size, keeps it for five\n * minutes from its last use, and reports `cache_creation_input_tokens`, `cache_read_input_tokens` and `input_tokens` (the\n * tokens after the last breakpoint) as the prompt caching page describes them (claude-sonnet-5-5, minimum 512 tokens).\n */\nconst val MODEL = \"claude-sonnet-5-5\"\nval POLICY = \"Refund policy clause: items may be returned within 14 days. \".repeat(40) // about 600 tokens\n\nfun tokens(piece: String) = (piece.length + 3) / 4 // ceil(length / 4)\n\n/** One block of the prompt with the text it holds and whether it carries a cache_control breakpoint. */\ndata class Block(val text: String, val mark: Boolean)\n\n/** The request flattened in prefix order: tools, then system, then messages, each with its cache_control. */\nfun blocksOf(body: JsonNode): List<Block> {\n    val out = mutableListOf<Block>()\n    for (tool in body.path(\"tools\")) out += Block(tool.toString(), tool.has(\"cache_control\"))\n    val system = body.path(\"system\")\n    if (system.isTextual) out += Block(system.asText(), false) else for (b in system) out += Block(b[\"text\"].asText(), b.has(\"cache_control\"))\n    for (m in body[\"messages\"]) {\n        val role = m[\"role\"].asText()\n        if (m[\"content\"].isTextual) out += Block(\"$role: ${m[\"content\"].asText()}\", false)\n        else for (b in m[\"content\"]) out += Block(\"$role: ${b[\"text\"].asText()}\", b.has(\"cache_control\"))\n    }\n    return out\n}\n\n/** The scripted server: a reply function of the request body, with a clock the program moves. */\nclass CacheSim(private val minimum: Int = 512, private val ttl: Int = 300) : Function<JsonNode, Any> {\n    var clock = 0\n    private val entries = HashMap<String, Int>()\n\n    private fun key(blocks: List<Block>, i: Int) = blocks.take(i + 1).joinToString(\"\\u0000\") { it.text }\n\n    private fun size(blocks: List<Block>, i: Int) = blocks.take(i + 1).sumOf { tokens(it.text) }\n\n    override fun apply(body: JsonNode): Any {\n        val blocks = blocksOf(body)\n        val marks = blocks.indices.filter { blocks[it].mark }\n        var read = 0\n        var written = 0\n        var hit: Int? = null\n        for (i in marks.reversed()) {\n            if ((entries[key(blocks, i)] ?: -1) > clock) {\n                read = size(blocks, i)\n                hit = i\n                entries[key(blocks, i)] = clock + ttl // a hit refreshes the entry\n                break\n            }\n        }\n        if (marks.isNotEmpty() && hit != marks.last() && size(blocks, marks.last()) >= minimum) {\n            written = size(blocks, marks.last()) - read\n            entries[key(blocks, marks.last())] = clock + ttl\n        }\n        val fresh = size(blocks, blocks.size - 1) - read - written\n        val usage = map(\n            \"input_tokens\", fresh, \"output_tokens\", 20, \"cache_read_input_tokens\", read, \"cache_creation_input_tokens\", written,\n            \"cache_creation\", map(\"ephemeral_5m_input_tokens\", written, \"ephemeral_1h_input_tokens\", 0),\n        )\n        return message(listOf(text(\"ok\")), \"end_turn\", MODEL, usage, null)\n    }\n}\n\nfun request(system: List<Block>, question: String): MessageCreateParams {\n    val blocks = system.map { b ->\n        TextBlockParam.builder().text(b.text).apply { if (b.mark) cacheControl(CacheControlEphemeral.builder().build()) }.build()\n    }\n    return MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(50).systemOfTextBlockParams(blocks).addUserMessage(question).build()\n}\n\nfun stable(question: String) = request(listOf(Block(POLICY, true)), question)\n\nfun stampFirst(clockLabel: String, question: String) = request(listOf(Block(\"Current time: $clockLabel\", false), Block(POLICY, true)), question)\n\nfun stampLast(clockLabel: String, question: String) = request(listOf(Block(POLICY, true), Block(\"Current time: $clockLabel\", false)), question)\n\n/** Move the clock, send the request through the SDK to the simulated server and read the usage back. */\nfun send(sim: CacheSim, body: MessageCreateParams, wait: Int = 0): Usage {\n    sim.clock += wait\n    return Scripted.client(sim).client().messages().create(body).usage()\n}\n\nfun run(sim: CacheSim, label: String, body: MessageCreateParams, wait: Int = 0): Usage {\n    val usage = send(sim, body, wait)\n    println(\"%-34s write %4d  read %4d  fresh %4d\".format(label, usage.cacheCreationInputTokens().get(), usage.cacheReadInputTokens().get(), usage.inputTokens()))\n    return usage\n}\n\nfun main() {\n    var sim = CacheSim()\n    run(sim, \"1 stable system, first call\", stable(\"Can I return a lamp?\"))\n    run(sim, \"2 same system, new question\", stable(\"Can I return a chair?\"), wait = 60)\n    run(sim, \"3 six minutes of silence\", stable(\"Can I return a desk?\"), wait = 360)\n    sim = CacheSim()\n    run(sim, \"4 timestamp first, 10:01\", stampFirst(\"10:01\", \"Can I return a lamp?\"))\n    run(sim, \"5 timestamp first, 10:02\", stampFirst(\"10:02\", \"Can I return a lamp?\"), wait = 60)\n    run(sim, \"6 timestamp last, 10:03\", stampLast(\"10:03\", \"Can I return a lamp?\"), wait = 60)\n    run(sim, \"7 timestamp last, 10:04\", stampLast(\"10:04\", \"Can I return a lamp?\"), wait = 60)\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "1 stable system, first call        write  600  read    0  fresh    7\n2 same system, new question        write    0  read  600  fresh    7\n3 six minutes of silence           write  600  read    0  fresh    7\n4 timestamp first, 10:01           write  605  read    0  fresh    7\n5 timestamp first, 10:02           write  605  read    0  fresh    7\n6 timestamp last, 10:03            write  600  read    0  fresh   12\n7 timestamp last, 10:04            write    0  read  600  fresh   12"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Read the output row by row. Row 1 writes the 600 tokens. Row 2, a minute later, reads them and pays for only the new question (7 fresh tokens). Row 3 comes six minutes later: the five-minute entry has lapsed, so it writes again. Rows 4 and 5 put the timestamp first: the prefix differs each time, so each request writes 605 tokens and reads nothing. Rows 6 and 7 move the timestamp after the breakpoint: row 6 writes once, row 7 reads, and the 12 fresh tokens are the question plus the timestamp. The two usage patterns are the whole diagnosis: writes without reads mean the prefix keeps changing."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Reading `input_tokens` as the prompt size.** It counts only what follows the last breakpoint. Add the read and write fields to get the total.",
+        "**Expecting an error when the prompt is too short.** Below the minimum nothing is cached and nothing is raised. Check for the two zeros. Note that Haiku 4.5 needs 4,096 tokens where the others need 512.",
+        "**Marking the last block when it varies.** Automatic caching puts the breakpoint on the last cacheable block, which in a prompt that ends with a timestamp is the block that changes every time. Mark the end of the stable prefix explicitly."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A response reports `cache_read_input_tokens` of 8,000, `cache_creation_input_tokens` of 0 and `input_tokens` of 40. How many input tokens did the request carry?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: 7,960",
+              "**b**: 8,000",
+              "**c**: 40",
+              "**d**: 8,040"
+            ]
+          }
+        ],
+        [
+          "A team marks a 1,500-token system prompt with `cache_control` on Claude Haiku 4.5 and sees both cache fields at 0, with no error. What explains it?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The text is under that model's 4,096 minimum, so it was handled as ordinary input",
+              "**b**: The text is over that model's minimum, so the API is quietly returning stored answers",
+              "**c**: The marker was ignored because system prompts are outside what the cache can hold",
+              "**d**: The five-minute lifetime had lapsed before the first request was even sent"
+            ]
+          }
+        ],
+        [
+          "A request puts a block with the current clock reading ahead of a large stable policy, with the marker on the policy. Every call writes everything and never reads. Why?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The clock block counts as a second marker, which triggers a fresh write on each turn",
+              "**b**: The hash covers the marked block, so the policy is compared by itself and the clock is ignored",
+              "**c**: All content before the boundary feeds the hash, so a changing line gives a new one",
+              "**d**: The hash is rebuilt from the user question, which differs on each turn of the chat"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**d**. The page gives \"total_input_tokens = cache_read_input_tokens + cache_creation_input_tokens + input_tokens\", so 8,000 + 0 + 40. *b* is ruled out because the page sum adds a third term, and \"total_input_tokens = cache_read_input_tokens + cache_creation_input_tokens + input_tokens\" includes the 40. *c* is ruled out because that field holds only \"tokens after the last breakpoint, which are not cached\". *a* is ruled out because the sum \"total_input_tokens = cache_read_input_tokens + cache_creation_input_tokens + input_tokens\" has no subtraction.",
+            "**a**. The page says \"Any requests to cache fewer than this number of tokens will be processed without caching\" and gives 4,096 for Claude Haiku 4.5. *b* is ruled out because 1,500 is below the minimum, and \"the prompt was not cached\" is what two zeros mean. *c* is ruled out because the page's hierarchy runs \"up to and including the block designated with\" the marker, and a system block can be that block. *d* is ruled out because \"Row 1 writes the 600 tokens\" on a first request, so there is no earlier entry to lapse.",
+            "**c**. The page says \"The cache key is a hash of everything from the start of the request up to the marked block\", so a changing block before it gives a new key. *b* is ruled out because that same sentence says the key is \"a hash of everything from the start of the request\", not of one block. *a* is ruled out because \"Explicit breakpoints put `cache_control` on individual blocks\", and the clock block carries none, so it is no second marker. *d* is ruled out because \"Row 2, a minute later, reads them and pays for only the new question\"."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 11,
+    "paras": 19,
+    "code": 0,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 2,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "18eb62bc913c541db90deb8a0f3d27702664d23403ca6723bd928f7ba8b5f57a"
+}

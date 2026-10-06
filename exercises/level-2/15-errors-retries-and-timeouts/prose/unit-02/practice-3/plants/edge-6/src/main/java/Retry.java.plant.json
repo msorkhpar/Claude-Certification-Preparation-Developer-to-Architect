@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/java/Retry.java",
+      "old": "                if (!retryable(response) || attempt >= policy.maxAttempts()) throw failure(response, attempt);",
+      "new": "                if (!retryable(response)) throw failure(response, attempt);\n                if (attempt >= policy.maxAttempts()) {\n                    sleep.sleep(policy.baseDelay());\n                    throw failure(response, attempt);\n                }"
+    }
+  ]
+}

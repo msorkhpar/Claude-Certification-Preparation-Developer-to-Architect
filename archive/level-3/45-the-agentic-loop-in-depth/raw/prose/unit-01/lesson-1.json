@@ -1,0 +1,369 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "45-the-agentic-loop-in-depth"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "What ends a run: control flow on the stop reason",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "What ends a run: control flow on the stop reason"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Architect · **Module 45:** The agentic loop, in depth · **Page 1 of 2** **Exams:** A1.1 (A1)"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** say which decisions in an agent loop belong to the model and which to your code, write the loop so that the stop reason alone ends a run, recognise the two loop anti-patterns that the Architect exam describes (stopping on words in the text, and stopping on an iteration count), and give the iteration count its proper job as a backstop with a status of its own."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-03 against the Claude Code documentation page \"How the agent loop works\", the Claude API pages \"Handle tool calls\" and \"Stop reasons and fallback\", and Anthropic's engineering article on building effective agents. The example runs offline in Python (`anthropic` 1.11.0) and TypeScript (`@anthropic-ai/sdk` 0.131.0) against scripted replies in the shape of the Messages API, so it shows no live output. This page deepens module 26, page 2, where the loop was first written, and module 35, page 1, where the Agent SDK ran it for you."
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "**Exam guide and current product.** *What the guide states, and so what the exam keys:* the loop continues while the stop reason is `tool_use` and ends when it is `end_turn`; the results of the tools are added to the conversation between iterations so that the model can reason about its next action; and three anti-patterns are named, which are reading natural-language signals to decide when to stop, an arbitrary iteration cap as the main stopping mechanism, and treating the presence of assistant text as a sign of completion. *What the current product does (documentation checked 2026-10-03):* the pair is the common case, but the API documents more values (`stop_sequence`, `max_tokens`, `refusal`, and `pause_turn` for server tools), so a loop written for two values mishandles a cut-off or refused reply; and an iteration limit is a documented control (`max_turns` in the Agent SDK, with its own result subtype) whose proper job is the backstop described on this page. On the exam, pick the option that continues on `tool_use` and ends on `end_turn`; in your own code, give every other value a status of its own."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "The first Architect domain is agentic architecture, and its first task is the loop. The exam does not ask you to write one. It shows a loop that looks reasonable and asks what will go wrong: a loop that stops when the model says it is finished, a loop that runs \"at most five\" times. In production the same mistakes are quieter. A run is cut off in the middle of a task and reported as complete, a tool never runs because the model said \"done\" a sentence too early, a runaway run is stopped only by the bill. All three come from asking the wrong thing to end the loop."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "One loop, two owners"
+    },
+    {
+      "type": "para",
+      "text": "The documentation describes the loop in the same terms on both its pages. The Claude Code page: \"Turns continue until Claude produces output with no tool calls, at which point the loop ends and the final result is delivered.\" The API page: a response with `stop_reason` of `tool_use` carries one or more `tool_use` blocks, you run them, and you send the results back in a user message. The model sends back a reply that has no tool call when it has decided that the task is done. So the loop has one natural end, and the model owns it."
+    },
+    {
+      "type": "para",
+      "text": "Your code owns everything around that end. The split is the first thing to be able to say:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Decision",
+        "Who owns it",
+        "Where it lives in the loop"
+      ],
+      "rows": [
+        [
+          "Is the task finished?",
+          "The model",
+          "The stop reason of its reply (`end_turn`, or no tool call in the Agent SDK)"
+        ],
+        [
+          "Does this tool call run?",
+          "Your code",
+          "Permissions and hooks, before the tool executes"
+        ],
+        [
+          "What does the model learn from a failure?",
+          "Your code and the model",
+          "An error result with a message that says what to try next"
+        ],
+        [
+          "How long may the run go on?",
+          "Your code",
+          "A turn limit and a budget, as a backstop"
+        ],
+        [
+          "What do you do when the run did not finish normally?",
+          "Your code",
+          "A status for each way out (truncated, refused, over the limit)"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "A well-built loop never asks the model to hand back control in a second channel, such as a magic word, a count or a flag in the text. The stop reason is the channel."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The values that end a run"
+    },
+    {
+      "type": "para",
+      "text": "The \"Stop reasons and fallback\" page lists what a reply can end with. The loop continues on one of them and leaves on all the others."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "`stop_reason`",
+        "The page's meaning",
+        "What the loop does"
+      ],
+      "rows": [
+        [
+          "`tool_use`",
+          "\"Claude is calling a tool.\"",
+          "Run the calls and send the results; this is the only value that continues"
+        ],
+        [
+          "`end_turn`",
+          "\"Claude finished its response naturally.\"",
+          "Leave: the run is done"
+        ],
+        [
+          "`stop_sequence`",
+          "\"Claude emitted one of your `stop_sequences`.\"",
+          "Leave: done, and read which sequence fired if it matters"
+        ],
+        [
+          "`max_tokens`",
+          "\"The response reached your `max_tokens` limit.\"",
+          "Leave with a status of its own: the reply is cut off, and raising the limit is a decision for your code"
+        ],
+        [
+          "`refusal`",
+          "\"Claude declined to respond.\"",
+          "Leave with a status of its own; a retry on a fallback model is a separate option (module 43)"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "A value the loop has never seen must not be guessed at. The practice of this module returns the status `unexpected` for it, which a log line and an alert can find, instead of calling the model again or calling the run done. (Module 26 also covers `pause_turn`, for a server-tool loop that hit its own limit.)"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Anti-pattern one: stopping on the words"
+    },
+    {
+      "type": "para",
+      "text": "A loop that reads the assistant's text to decide whether the work is finished looks natural, because the text is the thing the user will read. It fails in both directions, and the documentation's own example response shows how. A reply can carry text and a tool call together: \"I'll check the current weather in San Francisco for you.\" sits in front of a `tool_use` block, and the `stop_reason` is `tool_use`. If the model writes \"All done with the analysis. Saving it now.\" in front of a `save_file` call, a loop that looks for \"done\" stops and the file is never saved. The opposite also happens: a reply that ends its turn can say \"Next I will call the lookup tool.\" and still be the model's last word, and a loop that looks for \"I will call\" waits for something that never comes."
+    },
+    {
+      "type": "para",
+      "text": "The text is for the person. It changes with the model, the prompt, the language and the day. The stop reason is part of the protocol: a documented set of values, set by the model's own decision to ask for a tool or not. A control flow that needs the text to contain a particular word also moves the loop's logic into the prompt, where nobody tests it."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Anti-pattern two: the count as the loop"
+    },
+    {
+      "type": "para",
+      "text": "The other mistake is a loop of fixed length: `for _ in range(5)`, or \"call the model up to five times and return the last reply\". It is easy to write and it has two faults. A task that needs six steps is cut off in the middle, and the code returns whatever the fifth reply held as though it were an answer. A task that needs two steps is fine, which is why the loop passes its tests and fails in production on the first long task."
+    },
+    {
+      "type": "para",
+      "text": "The engineering article keeps the count in its proper place: \"It's also common to include stopping conditions (such as a maximum number of iterations) to maintain control.\" The words are *include* and *maintain control*. The loop ends because the model ended it. A count is added so that a run that does not converge is stopped. The count therefore needs three properties that the fixed loop lacks:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "It is **generous**: set above what real tasks need (in this course's advice, taken from the number of turns your evaluation set actually uses, with room above it), so that a normal run never meets it.",
+        "It has **its own status**. A run that meets the count reports `max_turns`, and the caller can tell it from `done`. The Agent SDK does the same: its `max_turns` \"counts tool-use turns only\", and a run that reaches it ends with the result subtype `error_max_turns`, which has no `result` text.",
+        "It is **checked before the next call**, so that a reply that ends the turn on the very last allowed call is still `done`."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "When the status `max_turns` shows up often, the count is not the thing to change. A run that does not converge usually has a tool that keeps failing, a description the model cannot use or a task that is too big. The status is a signal to read the conversation, which the practice keeps whole for that reason."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "para",
+      "text": "The example runs three loops over the same scripted replies. In scenario A the first reply says \"All done\" in its text and also calls `save_file`. In scenario B a task needs four lookups before the model ends its turn. The stop-reason loop is run with two backstops: a generous one and one that is too small."
+    },
+    {
+      "type": "example",
+      "id": "m45-loop-control-flow",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/45-loop-control-flow/python/loops.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/45-loop-control-flow/typescript/loops.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/45-loop-control-flow/java/Loops.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/45-loop-control-flow/kotlin/Loops.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Three loops over the same scripted replies: one ends on stop_reason, one on a word in the text, one after a fixed count.\n\nThe replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.\nOnly the first loop is right; the other two show what the two anti-patterns of the Architect exam do to a run.\n\"\"\"\nimport logging\nfrom harness import scripted_client\nfrom harness.scripted import message, text, tool_use\n\nlog = logging.getLogger(__name__)\n\nMODEL = \"claude-sonnet-5-5\"\nTOOLS = [\n    {\"name\": \"save_file\", \"description\": \"Save the report under a file name. Use it once the report is written.\",\n     \"input_schema\": {\"type\": \"object\", \"properties\": {\"file\": {\"type\": \"string\"}}, \"required\": [\"file\"]}},\n    {\"name\": \"lookup\", \"description\": \"Look up item number n and return its record.\",\n     \"input_schema\": {\"type\": \"object\", \"properties\": {\"n\": {\"type\": \"integer\"}}, \"required\": [\"n\"]}},\n]\n\n\ndef run_tools(reply, ran):\n    results = []\n    for block in reply.content:\n        if block.type == \"tool_use\":\n            ran.append(block.name)\n            results.append({\"type\": \"tool_result\", \"tool_use_id\": block.id, \"content\": f\"{block.name} ok\"})\n    return results\n\n\ndef text_of(reply):\n    return \"\".join(b.text for b in reply.content if b.type == \"text\")\n\n\ndef by_stop_reason(client, task, backstop=10):\n    \"\"\"Right: the model's own stop_reason decides. The count is only a backstop with a status of its own.\"\"\"\n    messages, ran = [{\"role\": \"user\", \"content\": task}], []\n    for call in range(1, backstop + 1):\n        reply = client.messages.create(model=MODEL, max_tokens=500, tools=TOOLS, messages=messages)\n        messages.append({\"role\": \"assistant\", \"content\": reply.content})\n        if reply.stop_reason != \"tool_use\":\n            return \"done\", call, ran, text_of(reply)\n        messages.append({\"role\": \"user\", \"content\": run_tools(reply, ran)})\n    return \"max_turns\", backstop, ran, text_of(reply)\n\n\ndef by_text_marker(client, task):\n    \"\"\"Wrong: it reads the words. A reply that says 'done' ends the run, even with a tool call in the same reply.\"\"\"\n    messages, ran, call = [{\"role\": \"user\", \"content\": task}], [], 0\n    while True:\n        call += 1\n        reply = client.messages.create(model=MODEL, max_tokens=500, tools=TOOLS, messages=messages)\n        messages.append({\"role\": \"assistant\", \"content\": reply.content})\n        if \"done\" in text_of(reply).lower():\n            return \"done\", call, ran, text_of(reply)\n        messages.append({\"role\": \"user\", \"content\": run_tools(reply, ran)})\n\n\ndef by_fixed_count(client, task, turns=3):\n    \"\"\"Wrong: the count is the loop. Whatever the third reply holds is returned as the answer.\"\"\"\n    messages, ran = [{\"role\": \"user\", \"content\": task}], []\n    for call in range(1, turns + 1):\n        reply = client.messages.create(model=MODEL, max_tokens=500, tools=TOOLS, messages=messages)\n        messages.append({\"role\": \"assistant\", \"content\": reply.content})\n        if reply.stop_reason == \"tool_use\":\n            messages.append({\"role\": \"user\", \"content\": run_tools(reply, ran)})\n    return \"done\", turns, ran, text_of(reply)\n\n\ndef scenario_a():\n    return [message([text(\"All done with the analysis. Saving it now.\"), tool_use(\"toolu_01\", \"save_file\", file=\"report.txt\")], stop_reason=\"tool_use\", model=MODEL),\n            message([text(\"Saved report.txt.\")], model=MODEL)]\n\n\ndef scenario_b():\n    return [message([tool_use(f\"toolu_0{n}\", \"lookup\", n=n)], stop_reason=\"tool_use\", model=MODEL) for n in range(1, 5)] + [message([text(\"Looked up 4 items.\")], model=MODEL)]\n\n\ndef show(label, outcome):\n    status, calls, ran, answer = outcome\n    print(f\"  {label:<26} status={status:<9} model calls={calls}  tools run={len(ran)}  text={answer!r}\")\n\n\ndef main():\n    print(\"A: the reply says 'All done' and also calls save_file\")\n    show(\"stop_reason loop\", by_stop_reason(scripted_client(*scenario_a())[0], \"Write and save the report.\"))\n    show(\"text-marker loop\", by_text_marker(scripted_client(*scenario_a())[0], \"Write and save the report.\"))\n    print(\"B: the task needs four lookups, then the model ends its turn\")\n    show(\"stop_reason loop, cap 10\", by_stop_reason(scripted_client(*scenario_b())[0], \"Look up items 1 to 4.\"))\n    show(\"stop_reason loop, cap 3\", by_stop_reason(scripted_client(*scenario_b())[0], \"Look up items 1 to 4.\", backstop=3))\n    show(\"fixed-count loop of 3\", by_fixed_count(scripted_client(*scenario_b())[0], \"Look up items 1 to 4.\"))\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "A: the reply says 'All done' and also calls save_file\n  stop_reason loop           status=done      model calls=2  tools run=1  text='Saved report.txt.'\n  text-marker loop           status=done      model calls=1  tools run=0  text='All done with the analysis. Saving it now.'\nB: the task needs four lookups, then the model ends its turn\n  stop_reason loop, cap 10   status=done      model calls=5  tools run=4  text='Looked up 4 items.'\n  stop_reason loop, cap 3    status=max_turns model calls=3  tools run=3  text=''\n  fixed-count loop of 3      status=done      model calls=3  tools run=3  text=''"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Three loops over the same scripted replies: one ends on stop_reason, one on a word in the text, one after a fixed count.\n//\n// The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.\n// Only the first loop is right; the other two show what the two anti-patterns of the Architect exam do to a run.\nimport Anthropic from \"@anthropic-ai/sdk\";\nimport { message, scriptedFetch, text } from \"../../../harness/ts/scriptedFetch.ts\";\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"loops\");\n\nexport const MODEL = \"claude-sonnet-5-5\";\nconst TOOLS: Anthropic.Tool[] = [\n  { name: \"save_file\", description: \"Save the report under a file name. Use it once the report is written.\",\n    input_schema: { type: \"object\", properties: { file: { type: \"string\" } }, required: [\"file\"] } },\n  { name: \"lookup\", description: \"Look up item number n and return its record.\",\n    input_schema: { type: \"object\", properties: { n: { type: \"integer\" } }, required: [\"n\"] } },\n];\n\ntype Outcome = [status: string, calls: number, ran: string[], answer: string];\n\nfunction runTools(reply: Anthropic.Message, ran: string[]): Anthropic.ToolResultBlockParam[] {\n  const results: Anthropic.ToolResultBlockParam[] = [];\n  for (const block of reply.content) {\n    if (block.type === \"tool_use\") {\n      ran.push(block.name);\n      results.push({ type: \"tool_result\", tool_use_id: block.id, content: `${block.name} ok` });\n    }\n  }\n  return results;\n}\n\nconst textOf = (reply: Anthropic.Message) => reply.content.map((b) => (b.type === \"text\" ? b.text : \"\")).join(\"\");\nconst ask = (client: Anthropic, messages: Anthropic.MessageParam[]) => client.messages.create({ model: MODEL, max_tokens: 500, tools: TOOLS, messages });\n\n/** Right: the model's own stop_reason decides. The count is only a backstop with a status of its own. */\nexport async function byStopReason(client: Anthropic, task: string, backstop = 10): Promise<Outcome> {\n  const messages: Anthropic.MessageParam[] = [{ role: \"user\", content: task }];\n  const ran: string[] = [];\n  let reply!: Anthropic.Message;\n  for (let call = 1; call <= backstop; call++) {\n    reply = await ask(client, messages);\n    messages.push({ role: \"assistant\", content: reply.content });\n    if (reply.stop_reason !== \"tool_use\") return [\"done\", call, ran, textOf(reply)];\n    messages.push({ role: \"user\", content: runTools(reply, ran) });\n  }\n  return [\"max_turns\", backstop, ran, textOf(reply)];\n}\n\n/** Wrong: it reads the words. A reply that says 'done' ends the run, even with a tool call in the same reply. */\nexport async function byTextMarker(client: Anthropic, task: string): Promise<Outcome> {\n  const messages: Anthropic.MessageParam[] = [{ role: \"user\", content: task }];\n  const ran: string[] = [];\n  for (let call = 1; ; call++) {\n    const reply = await ask(client, messages);\n    messages.push({ role: \"assistant\", content: reply.content });\n    if (textOf(reply).toLowerCase().includes(\"done\")) return [\"done\", call, ran, textOf(reply)];\n    messages.push({ role: \"user\", content: runTools(reply, ran) });\n  }\n}\n\n/** Wrong: the count is the loop. Whatever the third reply holds is returned as the answer. */\nexport async function byFixedCount(client: Anthropic, task: string, turns = 3): Promise<Outcome> {\n  const messages: Anthropic.MessageParam[] = [{ role: \"user\", content: task }];\n  const ran: string[] = [];\n  let reply!: Anthropic.Message;\n  for (let call = 1; call <= turns; call++) {\n    reply = await ask(client, messages);\n    messages.push({ role: \"assistant\", content: reply.content });\n    if (reply.stop_reason === \"tool_use\") messages.push({ role: \"user\", content: runTools(reply, ran) });\n  }\n  return [\"done\", turns, ran, textOf(reply)];\n}\n\nconst usage = { input_tokens: 1, output_tokens: 1 };\nexport const scenarioA = () => [\n  { body: message([text(\"All done with the analysis. Saving it now.\"), { type: \"tool_use\", id: \"toolu_01\", name: \"save_file\", input: { file: \"report.txt\" } }], \"tool_use\", usage, MODEL) },\n  { body: message([text(\"Saved report.txt.\")], \"end_turn\", usage, MODEL) },\n];\nexport const scenarioB = () => [1, 2, 3, 4].map((n) => ({ body: message([{ type: \"tool_use\", id: `toolu_0${n}`, name: \"lookup\", input: { n } }], \"tool_use\", usage, MODEL) }))\n  .concat([{ body: message([text(\"Looked up 4 items.\")], \"end_turn\", usage, MODEL) }]);\n\nexport function clientFor(replies: Array<Record<string, unknown>>) {\n  const fake = scriptedFetch(replies as any);\n  return { fake, client: new Anthropic({ apiKey: \"placeholder\", maxRetries: 0, fetch: fake.fetch }) };\n}\n\n/** Python's repr of a string, so that both languages print the same lines. */\nconst py = (s: string) => (s.includes(\"'\") && !s.includes('\"') ? `\"${s}\"` : `'${s}'`);\n\nfunction show(label: string, [status, calls, ran, answer]: Outcome) {\n  console.log(`  ${label.padEnd(26)} status=${status.padEnd(9)} model calls=${calls}  tools run=${ran.length}  text=${py(answer)}`);\n}\n\nasync function main() {\n  console.log(\"A: the reply says 'All done' and also calls save_file\");\n  show(\"stop_reason loop\", await byStopReason(clientFor(scenarioA()).client, \"Write and save the report.\"));\n  show(\"text-marker loop\", await byTextMarker(clientFor(scenarioA()).client, \"Write and save the report.\"));\n  console.log(\"B: the task needs four lookups, then the model ends its turn\");\n  show(\"stop_reason loop, cap 10\", await byStopReason(clientFor(scenarioB()).client, \"Look up items 1 to 4.\"));\n  show(\"stop_reason loop, cap 3\", await byStopReason(clientFor(scenarioB()).client, \"Look up items 1 to 4.\", 3));\n  show(\"fixed-count loop of 3\", await byFixedCount(clientFor(scenarioB()).client, \"Look up items 1 to 4.\"));\n}\n\nif (import.meta.main) await main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "A: the reply says 'All done' and also calls save_file\n  stop_reason loop           status=done      model calls=2  tools run=1  text='Saved report.txt.'\n  text-marker loop           status=done      model calls=1  tools run=0  text='All done with the analysis. Saving it now.'\nB: the task needs four lookups, then the model ends its turn\n  stop_reason loop, cap 10   status=done      model calls=5  tools run=4  text='Looked up 4 items.'\n  stop_reason loop, cap 3    status=max_turns model calls=3  tools run=3  text=''\n  fixed-count loop of 3      status=done      model calls=3  tools run=3  text=''"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import static harness.Scripted.map;\nimport static harness.Scripted.message;\nimport static harness.Scripted.text;\nimport static harness.Scripted.toolUse;\nimport static harness.Show.py;\n\nimport com.anthropic.client.AnthropicClient;\nimport com.anthropic.core.JsonValue;\nimport com.anthropic.models.messages.ContentBlock;\nimport com.anthropic.models.messages.ContentBlockParam;\nimport com.anthropic.models.messages.Message;\nimport com.anthropic.models.messages.MessageCreateParams;\nimport com.anthropic.models.messages.MessageParam;\nimport com.anthropic.models.messages.Model;\nimport com.anthropic.models.messages.Tool;\nimport com.anthropic.models.messages.ToolResultBlockParam;\nimport harness.Scripted;\nimport java.util.ArrayList;\nimport java.util.List;\nimport java.util.Map;\n\n/**\n * Three loops over the same scripted replies: one ends on stop_reason, one on a word in the text, one after a fixed count.\n *\n * <p>The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.\n * Only the first loop is right; the other two show what the two anti-patterns of the Architect exam do to a run.\n */\npublic final class Loops {\n    private static final System.Logger LOG = System.getLogger(Loops.class.getName());\n    static final String MODEL = \"claude-sonnet-5-5\";\n\n    static Tool tool(String name, String description, String property, String type) {\n        return Tool.builder().name(name).description(description)\n            .inputSchema(Tool.InputSchema.builder().properties(JsonValue.from(map(property, map(\"type\", type)))).required(List.of(property)).build())\n            .build();\n    }\n\n    static final List<Tool> TOOLS = List.of(\n        tool(\"save_file\", \"Save the report under a file name. Use it once the report is written.\", \"file\", \"string\"),\n        tool(\"lookup\", \"Look up item number n and return its record.\", \"n\", \"integer\"));\n\n    /** What a loop returns: the status, the number of model calls, the tools that ran, and the last reply's text. */\n    record Outcome(String status, int calls, List<String> ran, String answer) {}\n\n    static Message call(AnthropicClient client, List<MessageParam> messages) {\n        MessageCreateParams.Builder request = MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(500).messages(messages);\n        TOOLS.forEach(request::addTool);\n        Message reply = client.messages().create(request.build());\n        messages.add(reply.toParam());\n        return reply;\n    }\n\n    static List<ContentBlockParam> runTools(Message reply, List<String> ran) {\n        List<ContentBlockParam> results = new ArrayList<>();\n        for (ContentBlock b : reply.content()) {\n            if (!b.isToolUse()) continue;\n            ran.add(b.asToolUse().name());\n            results.add(ContentBlockParam.ofToolResult(ToolResultBlockParam.builder().toolUseId(b.asToolUse().id()).content(b.asToolUse().name() + \" ok\").build()));\n        }\n        return results;\n    }\n\n    static String textOf(Message reply) {\n        StringBuilder out = new StringBuilder();\n        for (ContentBlock b : reply.content()) if (b.isText()) out.append(b.asText().text());\n        return out.toString();\n    }\n\n    static MessageParam user(String task) {\n        return MessageParam.builder().role(MessageParam.Role.USER).content(task).build();\n    }\n\n    static MessageParam results(List<ContentBlockParam> blocks) {\n        return MessageParam.builder().role(MessageParam.Role.USER).contentOfBlockParams(blocks).build();\n    }\n\n    /** Right: the model's own stop_reason decides. The count is only a backstop with a status of its own. */\n    static Outcome byStopReason(AnthropicClient client, String task, int backstop) {\n        List<MessageParam> messages = new ArrayList<>(List.of(user(task)));\n        List<String> ran = new ArrayList<>();\n        Message reply = null;\n        for (int call = 1; call <= backstop; call++) {\n            reply = call(client, messages);\n            if (!reply.stopReason().get().asString().equals(\"tool_use\")) return new Outcome(\"done\", call, ran, textOf(reply));\n            messages.add(results(runTools(reply, ran)));\n        }\n        return new Outcome(\"max_turns\", backstop, ran, textOf(reply));\n    }\n\n    static Outcome byStopReason(AnthropicClient client, String task) {\n        return byStopReason(client, task, 10);\n    }\n\n    /** Wrong: it reads the words. A reply that says 'done' ends the run, even with a tool call in the same reply. */\n    static Outcome byTextMarker(AnthropicClient client, String task) {\n        List<MessageParam> messages = new ArrayList<>(List.of(user(task)));\n        List<String> ran = new ArrayList<>();\n        int call = 0;\n        while (true) {\n            call++;\n            Message reply = call(client, messages);\n            if (textOf(reply).toLowerCase().contains(\"done\")) return new Outcome(\"done\", call, ran, textOf(reply));\n            messages.add(results(runTools(reply, ran)));\n        }\n    }\n\n    /** Wrong: the count is the loop. Whatever the third reply holds is returned as the answer. */\n    static Outcome byFixedCount(AnthropicClient client, String task, int turns) {\n        List<MessageParam> messages = new ArrayList<>(List.of(user(task)));\n        List<String> ran = new ArrayList<>();\n        Message reply = null;\n        for (int call = 1; call <= turns; call++) {\n            reply = call(client, messages);\n            if (reply.stopReason().get().asString().equals(\"tool_use\")) messages.add(results(runTools(reply, ran)));\n        }\n        return new Outcome(\"done\", turns, ran, textOf(reply));\n    }\n\n    static Outcome byFixedCount(AnthropicClient client, String task) {\n        return byFixedCount(client, task, 3);\n    }\n\n    static Object[] scenarioA() {\n        return new Object[] {\n            message(List.of(text(\"All done with the analysis. Saving it now.\"), toolUse(\"toolu_01\", \"save_file\", map(\"file\", \"report.txt\"))), \"tool_use\"),\n            message(List.of(text(\"Saved report.txt.\")))};\n    }\n\n    static Object[] scenarioB() {\n        List<Object> replies = new ArrayList<>();\n        for (int n = 1; n <= 4; n++) replies.add(message(List.of(toolUse(\"toolu_0\" + n, \"lookup\", map(\"n\", n))), \"tool_use\"));\n        replies.add(message(List.of(text(\"Looked up 4 items.\"))));\n        return replies.toArray();\n    }\n\n    static void show(String label, Outcome o) {\n        System.out.println(String.format(\"  %-26s status=%-9s model calls=%d  tools run=%d  text=%s\", label, o.status(), o.calls(), o.ran().size(), py(o.answer())));\n    }\n\n    public static void main(String[] args) {\n        System.out.println(\"A: the reply says 'All done' and also calls save_file\");\n        show(\"stop_reason loop\", byStopReason(Scripted.client(scenarioA()).client(), \"Write and save the report.\"));\n        show(\"text-marker loop\", byTextMarker(Scripted.client(scenarioA()).client(), \"Write and save the report.\"));\n        System.out.println(\"B: the task needs four lookups, then the model ends its turn\");\n        show(\"stop_reason loop, cap 10\", byStopReason(Scripted.client(scenarioB()).client(), \"Look up items 1 to 4.\"));\n        show(\"stop_reason loop, cap 3\", byStopReason(Scripted.client(scenarioB()).client(), \"Look up items 1 to 4.\", 3));\n        show(\"fixed-count loop of 3\", byFixedCount(Scripted.client(scenarioB()).client(), \"Look up items 1 to 4.\"));\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "A: the reply says 'All done' and also calls save_file\n  stop_reason loop           status=done      model calls=2  tools run=1  text='Saved report.txt.'\n  text-marker loop           status=done      model calls=1  tools run=0  text='All done with the analysis. Saving it now.'\nB: the task needs four lookups, then the model ends its turn\n  stop_reason loop, cap 10   status=done      model calls=5  tools run=4  text='Looked up 4 items.'\n  stop_reason loop, cap 3    status=max_turns model calls=3  tools run=3  text=''\n  fixed-count loop of 3      status=done      model calls=3  tools run=3  text=''"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import com.anthropic.client.AnthropicClient\nimport com.anthropic.core.JsonValue\nimport com.anthropic.models.messages.ContentBlockParam\nimport com.anthropic.models.messages.Message\nimport com.anthropic.models.messages.MessageCreateParams\nimport com.anthropic.models.messages.MessageParam\nimport com.anthropic.models.messages.Model\nimport com.anthropic.models.messages.Tool\nimport com.anthropic.models.messages.ToolResultBlockParam\nimport harness.Scripted\nimport harness.Scripted.map\nimport harness.Scripted.message\nimport harness.Scripted.text\nimport harness.Scripted.toolUse\nimport harness.Show.py\n\nprivate val log = System.getLogger(\"loops\")\n\n/**\n * Three loops over the same scripted replies: one ends on stop_reason, one on a word in the text, one after a fixed count.\n *\n * The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures.\n * Only the first loop is right; the other two show what the two anti-patterns of the Architect exam do to a run.\n */\nconst val MODEL = \"claude-sonnet-5-5\"\n\nfun tool(name: String, description: String, property: String, type: String): Tool = Tool.builder().name(name).description(description)\n    .inputSchema(Tool.InputSchema.builder().properties(JsonValue.from(map(property, map(\"type\", type)))).required(listOf(property)).build()).build()\n\nval TOOLS = listOf(\n    tool(\"save_file\", \"Save the report under a file name. Use it once the report is written.\", \"file\", \"string\"),\n    tool(\"lookup\", \"Look up item number n and return its record.\", \"n\", \"integer\"),\n)\n\n/** What a loop returns: the status, the number of model calls, the tools that ran, and the last reply's text. */\ndata class Outcome(val status: String, val calls: Int, val ran: List<String>, val answer: String)\n\nfun ask(client: AnthropicClient, messages: MutableList<MessageParam>): Message {\n    val request = MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(500).messages(messages.toList()).apply { TOOLS.forEach { addTool(it) } }\n    val reply = client.messages().create(request.build())\n    messages += reply.toParam()\n    return reply\n}\n\nfun runTools(reply: Message, ran: MutableList<String>): List<ContentBlockParam> = reply.content().filter { it.isToolUse() }.map {\n    val use = it.asToolUse()\n    ran += use.name()\n    ContentBlockParam.ofToolResult(ToolResultBlockParam.builder().toolUseId(use.id()).content(\"${use.name()} ok\").build())\n}\n\nfun textOf(reply: Message): String = reply.content().filter { it.isText() }.joinToString(\"\") { it.asText().text() }\n\nfun user(task: String): MessageParam = MessageParam.builder().role(MessageParam.Role.USER).content(task).build()\n\nfun results(blocks: List<ContentBlockParam>): MessageParam = MessageParam.builder().role(MessageParam.Role.USER).contentOfBlockParams(blocks).build()\n\n/** Right: the model's own stop_reason decides. The count is only a backstop with a status of its own. */\nfun byStopReason(client: AnthropicClient, task: String, backstop: Int = 10): Outcome {\n    val messages = mutableListOf(user(task))\n    val ran = mutableListOf<String>()\n    var reply: Message? = null\n    for (call in 1..backstop) {\n        reply = ask(client, messages)\n        if (reply.stopReason().get().asString() != \"tool_use\") return Outcome(\"done\", call, ran, textOf(reply))\n        messages += results(runTools(reply, ran))\n    }\n    return Outcome(\"max_turns\", backstop, ran, textOf(reply!!))\n}\n\n/** Wrong: it reads the words. A reply that says 'done' ends the run, even with a tool call in the same reply. */\nfun byTextMarker(client: AnthropicClient, task: String): Outcome {\n    val messages = mutableListOf(user(task))\n    val ran = mutableListOf<String>()\n    var call = 0\n    while (true) {\n        call++\n        val reply = ask(client, messages)\n        if (\"done\" in textOf(reply).lowercase()) return Outcome(\"done\", call, ran, textOf(reply))\n        messages += results(runTools(reply, ran))\n    }\n}\n\n/** Wrong: the count is the loop. Whatever the third reply holds is returned as the answer. */\nfun byFixedCount(client: AnthropicClient, task: String, turns: Int = 3): Outcome {\n    val messages = mutableListOf(user(task))\n    val ran = mutableListOf<String>()\n    var reply: Message? = null\n    for (call in 1..turns) {\n        reply = ask(client, messages)\n        if (reply.stopReason().get().asString() == \"tool_use\") messages += results(runTools(reply, ran))\n    }\n    return Outcome(\"done\", turns, ran, textOf(reply!!))\n}\n\nfun scenarioA(): Array<Any> = arrayOf(\n    message(listOf(text(\"All done with the analysis. Saving it now.\"), toolUse(\"toolu_01\", \"save_file\", map(\"file\", \"report.txt\"))), \"tool_use\"),\n    message(listOf(text(\"Saved report.txt.\"))),\n)\n\nfun scenarioB(): Array<Any> = (1..4).map<Int, Any> { n -> message(listOf(toolUse(\"toolu_0$n\", \"lookup\", map(\"n\", n))), \"tool_use\") }\n    .plus(message(listOf(text(\"Looked up 4 items.\")))).toTypedArray()\n\nfun show(label: String, o: Outcome) {\n    println(\"  %-26s status=%-9s model calls=%d  tools run=%d  text=%s\".format(label, o.status, o.calls, o.ran.size, py(o.answer)))\n}\n\nfun main() {\n    println(\"A: the reply says 'All done' and also calls save_file\")\n    show(\"stop_reason loop\", byStopReason(Scripted.client(*scenarioA()).client(), \"Write and save the report.\"))\n    show(\"text-marker loop\", byTextMarker(Scripted.client(*scenarioA()).client(), \"Write and save the report.\"))\n    println(\"B: the task needs four lookups, then the model ends its turn\")\n    show(\"stop_reason loop, cap 10\", byStopReason(Scripted.client(*scenarioB()).client(), \"Look up items 1 to 4.\"))\n    show(\"stop_reason loop, cap 3\", byStopReason(Scripted.client(*scenarioB()).client(), \"Look up items 1 to 4.\", backstop = 3))\n    show(\"fixed-count loop of 3\", byFixedCount(Scripted.client(*scenarioB()).client(), \"Look up items 1 to 4.\"))\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "A: the reply says 'All done' and also calls save_file\n  stop_reason loop           status=done      model calls=2  tools run=1  text='Saved report.txt.'\n  text-marker loop           status=done      model calls=1  tools run=0  text='All done with the analysis. Saving it now.'\nB: the task needs four lookups, then the model ends its turn\n  stop_reason loop, cap 10   status=done      model calls=5  tools run=4  text='Looked up 4 items.'\n  stop_reason loop, cap 3    status=max_turns model calls=3  tools run=3  text=''\n  fixed-count loop of 3      status=done      model calls=3  tools run=3  text=''"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Read the output line by line. In scenario A the stop-reason loop makes two model calls and runs the tool, and the text-marker loop stops after one call with no tool run, having reported `done` for work it never did. In scenario B the stop-reason loop finishes in five calls under a generous cap. With a cap of three it stops with `max_turns` and an empty text, which tells the caller that it is not an answer. The fixed-count loop of three also stops after three calls, but it says `done`, and its text is empty: nothing in its report says that it was cut off. All four languages print the same lines."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "para",
+      "text": "These are the wrong answers that the exam's options for this task statement offer, each with the reason it is rejected."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**\"Stop when the reply says it is done.\"** It is tempting because the text is what the user reads. The exam rejects it: a reply can say \"done\" in front of a tool call, and a reply that ends the turn can say \"next I will call a tool\". Decide on `stop_reason`, and run every tool call the reply holds.",
+        "**\"Loop at most five times and return the last reply.\"** It is tempting because it cannot run away. The exam rejects a count as the primary stopper: a long task is cut off half done and a partial reply is reported as the answer. Keep the count as a backstop, above the real need, with a status that is not `done`.",
+        "**\"Return the text of the reply as the answer.\"** It is tempting because every reply has text. The exam rejects it: the text in front of a `tool_use` block is narration, and only the reply that ends the turn holds the answer."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A support agent's loop ends when the reply text contains \"Case closed\", a phrase the prompt tells the model to write last. In testing, some refunds are never issued, because the model writes the phrase in the same reply as the refund call. Which redesign fits best?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Let the stop value of each response decide, and run every tool request it holds",
+              "**b**: Tell the model in the prompt to write its closing phrase only in a final message",
+              "**c**: Search the text for more completion phrases, such as \"finished\" and \"complete\"",
+              "**d**: Call the model a fixed number of times, large enough for the longest case"
+            ]
+          }
+        ],
+        [
+          "An insurance agent stops after ten model calls and files every run that reaches that cap as cut off. Auditors find complete answers filed this way whenever a case needed exactly ten calls. Which change fits best?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Raise the cap by one for these particular cases",
+              "**b**: Drop the cap and let every run continue",
+              "**c**: Compare the tally with the limit before each new request",
+              "**d**: Report `done` for any run whose last reply holds some text"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**a**. The model ends its turn by not asking for a tool, and the stop reason reports exactly that, so a reply that holds a tool call is not the end whatever its text says. *b* is ruled out because a closing phrase in the prompt keeps the control flow in the text: a control flow that needs a particular word \"moves the loop's logic into the prompt, where nobody tests it.\" *c* is ruled out because more phrases do not make the text a protocol: \"It changes with the model, the prompt, the language and the day.\" *d* is ruled out because a fixed count is the second anti-pattern: \"A task that needs six steps is cut off in the middle\".",
+            "**c**. The page says the count \"is checked before the next call, so that a reply that ends the turn on the very last allowed call is still `done`\". *a* is ruled out because the page says to leave the number alone: \"When the status `max_turns` shows up often, the count is not the thing to change.\" *b* is ruled out because a run that never converges needs something to stop it: \"A count is added so that a run that does not converge is stopped.\" *d* is ruled out because text alone does not show an ending: \"the text in front of a `tool_use` block is narration, and only the reply that ends the turn holds the answer.\""
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 10,
+    "paras": 17,
+    "code": 0,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 1,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "2c18b4824998e4f494153a1ff0658bb7b9de2bacec6326c2e5782fbfcff35d6f"
+}

@@ -1,0 +1,95 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "58-commands-and-skills"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: write a forked review skill, a manual release skill and a command, and place the rest of the guidance (Python)",
+  "lang": "python",
+  "main_file": "project/.claude/skills/review-pr/SKILL.md",
+  "files": [
+    "project/.claude/commands/standup.md",
+    "project/.claude/skills/release-tag/SKILL.md",
+    "project/docs/placement.md",
+    "project/personal/review-pr-mine/SKILL.md"
+  ],
+  "test_file": "tests/test_skill_setup.py",
+  "build": [
+    "tests/examples/58-skill-model/python/skill_model.py",
+    "tests/examples/40-workflow-lint/python/miniyaml.py",
+    "tests/examples/40-workflow-lint/python/workflow_lint.py",
+    "pytest.ini",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/58-commands-and-skills/prose/unit-02/practice-1/check_files.py",
+    "practice/level-3/58-commands-and-skills/prose/unit-02/practice-1/project/.claude/commands/standup.md",
+    "practice/level-3/58-commands-and-skills/prose/unit-02/practice-1/project/.claude/skills/release-tag/SKILL.md",
+    "practice/level-3/58-commands-and-skills/prose/unit-02/practice-1/project/.claude/skills/review-pr/SKILL.md",
+    "practice/level-3/58-commands-and-skills/prose/unit-02/practice-1/project/docs/placement.md",
+    "practice/level-3/58-commands-and-skills/prose/unit-02/practice-1/project/personal/review-pr-mine/SKILL.md"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-3/58-commands-and-skills/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-3/58-commands-and-skills/prose/unit-02/practice-1/tests/test_skill_setup.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_the_review_skill_is_a_forked_skill_with_an_explicit_task_and_an_argument",
+      "kind": "main",
+      "says": "The review skill is forked, uses general-purpose, has numbered steps with $0, and an argument-hint"
+    },
+    {
+      "id": "test_e1_the_release_skill_is_started_only_by_a_person_and_pre_approves_patterns",
+      "kind": "edge",
+      "says": "The release skill is manual, takes $version, and pre-approves only the two patterns"
+    },
+    {
+      "id": "test_e2_tools_are_taken_away_with_disallowed_tools_and_allowed_tools_only_pre_approves",
+      "kind": "edge",
+      "says": "disallowed-tools removes Edit and Write from the review, and allowed-tools is patterns only, so nothing is mistaken for a restriction"
+    },
+    {
+      "id": "test_e3_arguments_fill_the_placeholders_of_every_file",
+      "kind": "edge",
+      "says": "Arguments fill the placeholders of all three files, and the command receives $ARGUMENTS"
+    },
+    {
+      "id": "test_e4_every_file_creates_its_own_slash_command_and_the_personal_variant_has_a_new_name",
+      "kind": "edge",
+      "says": "Every file creates its own slash command and the personal variant has a new name"
+    },
+    {
+      "id": "test_e5_each_piece_of_guidance_lives_where_it_loads_the_way_it_is_used",
+      "kind": "edge",
+      "says": "Each of the five pieces of guidance sits where it loads the way it is used"
+    },
+    {
+      "id": "test_e6_every_skill_says_when_to_use_it_and_stays_inside_the_listing_budget",
+      "kind": "edge",
+      "says": "Every skill says when to use it and stays inside the listing budget"
+    },
+    {
+      "id": "test_e7_no_file_holds_a_personal_path_an_address_or_a_key",
+      "kind": "edge",
+      "says": "No file holds a personal path, an address or a key"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/58-commands-and-skills/02-tools-arguments-forked-skills-and-the-practice.md"
+}

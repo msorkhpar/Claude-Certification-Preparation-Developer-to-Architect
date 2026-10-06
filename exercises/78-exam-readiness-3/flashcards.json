@@ -1,0 +1,2067 @@
+{
+  "level": 3,
+  "format": 1,
+  "title": "Level 3 flashcards",
+  "cards": [
+    {
+      "id": "fc-001",
+      "module": 45,
+      "page": "course/45-the-agentic-loop-in-depth/01-what-ends-a-run.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "What ends a run of the agentic loop in the SDK, and what does a reply that holds a tool request mean?",
+      "back": "The model's own stop value ends a normal run. A reply that holds a tool request is not the end, whatever its text says: run the tools and continue."
+    },
+    {
+      "id": "fc-002",
+      "module": 45,
+      "page": "course/45-the-agentic-loop-in-depth/01-what-ends-a-run.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "What is a turn ceiling for, and how should a run that reaches it be reported?",
+      "back": "It is a backstop against runaway loops, set roomy so it rarely fires. A run that stops at it has its own outcome, a status that is not done."
+    },
+    {
+      "id": "fc-003",
+      "module": 45,
+      "page": "course/45-the-agentic-loop-in-depth/02-results-parallel-calls-context-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "If two tool calls depend on each other, how should the loop handle them?",
+      "back": "Put them in two turns. The model decides in one turn what to ask for, and the SDK promises no order between calls made together."
+    },
+    {
+      "id": "fc-004",
+      "module": 45,
+      "page": "course/45-the-agentic-loop-in-depth/02-results-parallel-calls-context-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "Does the usage figure on a result cover the whole tree of subagents?",
+      "back": "No. It counts one loop only. The documentation names a separate field for the whole tree, so use that for cost accounting."
+    },
+    {
+      "id": "fc-005",
+      "module": 45,
+      "page": "course/45-the-agentic-loop-in-depth/02-results-parallel-calls-context-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "A run keeps failing to converge and ends with a stuck status. Where do you look first?",
+      "back": "At the saved conversation. The status signals a run that does not converge, and the conversation shows why, often a helper's weak description or error message."
+    },
+    {
+      "id": "fc-006",
+      "module": 45,
+      "page": "course/45-the-agentic-loop-in-depth/02-results-parallel-calls-context-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "What does a session that crashed return in place of a normal result?",
+      "back": "An error result of the kind error_during_execution. Its cost fields may be zeroed and its stop reason may be null, so a pipeline must not trust its figures."
+    },
+    {
+      "id": "fc-007",
+      "module": 46,
+      "page": "course/46-coordinator-and-subagents/01-hub-and-spoke-and-what-the-coordinator-owns.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "Why must a coordinator put what it knows into a subagent's prompt?",
+      "back": "The subagent's context starts fresh. The brief is the only channel for facts the coordinator already found, such as paths, messages and earlier decisions."
+    },
+    {
+      "id": "fc-008",
+      "module": 46,
+      "page": "course/46-coordinator-and-subagents/01-hub-and-spoke-and-what-the-coordinator-owns.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "When is one single conversation better than a team of subagents?",
+      "back": "When the phases depend on one shared context and on steering, which a team cannot give."
+    },
+    {
+      "id": "fc-009",
+      "module": 46,
+      "page": "course/46-coordinator-and-subagents/02-review-iteration-failures-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "One of four research scopes fails. What does the coordinator do?",
+      "back": "It records that scope as failed and tells the user what is missing, since a failure belongs to its scope. The other scopes continue."
+    },
+    {
+      "id": "fc-010",
+      "module": 46,
+      "page": "course/46-coordinator-and-subagents/02-review-iteration-failures-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "How does a coordinator close gaps its review found?",
+      "back": "It sends follow-ups for the flagged gaps alone, within a fixed number of rounds, so the loop is bounded."
+    },
+    {
+      "id": "fc-011",
+      "module": 46,
+      "page": "course/46-coordinator-and-subagents/02-review-iteration-failures-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "Two subagents return overlapping work. Where is the cause?",
+      "back": "In the briefs. They did not divide the scope or say what each part must leave out, and subagents cannot see each other."
+    },
+    {
+      "id": "fc-012",
+      "module": 46,
+      "page": "course/46-coordinator-and-subagents/02-review-iteration-failures-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "How should the size of a team follow the question?",
+      "back": "Scale it to what is asked. A plain fact needs one agent with a few tool calls, and only a wide question justifies a larger team."
+    },
+    {
+      "id": "fc-013",
+      "module": 47,
+      "page": "course/47-invoking-subagents/01-the-agent-tool-definitions-and-permissions.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "The model rarely delegates to a specialist subagent. What do you change first?",
+      "back": "The description. The model reads it to decide whether to delegate, so it must say when the agent applies."
+    },
+    {
+      "id": "fc-014",
+      "module": 47,
+      "page": "course/47-invoking-subagents/01-the-agent-tool-definitions-and-permissions.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "Why match two tool names when reading subagent calls in the stream?",
+      "back": "Older versions named the delegating tool Task in the call blocks, and current versions use another name, so code that reads both works on either."
+    },
+    {
+      "id": "fc-015",
+      "module": 47,
+      "page": "course/47-invoking-subagents/02-context-parallel-subagents-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "When does delegated work run in the foreground?",
+      "back": "Only when the call asks for it. The documented default is a background launch, so a coordinator that needs the result first has to ask for a foreground run."
+    },
+    {
+      "id": "fc-016",
+      "module": 47,
+      "page": "course/47-invoking-subagents/02-context-parallel-subagents-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "How should subagents return claims so that a merge keeps every source?",
+      "back": "As separate fields for the claim and its origin, so the merge can recognise one claim from two sources and keep both."
+    },
+    {
+      "id": "fc-017",
+      "module": 47,
+      "page": "course/47-invoking-subagents/02-context-parallel-subagents-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "What decides which tools a subagent can call?",
+      "back": "Its own capability set. A tool left out is absent from its session and cannot be called, whatever the permission mode."
+    },
+    {
+      "id": "fc-018",
+      "module": 47,
+      "page": "course/47-invoking-subagents/02-context-parallel-subagents-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "A parent summarizes a subagent's report and loses exact wording. What are two fixes?",
+      "back": "Tell the parent to keep the report verbatim, or read the tool result directly. The parent may summarize otherwise."
+    },
+    {
+      "id": "fc-019",
+      "module": 48,
+      "page": "course/48-multi-step-workflows-with-guarantees/01-prompt-or-code-where-a-guarantee-lives.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "A protected step is attempted before its prerequisite. What should the gate return?",
+      "back": "A flagged failure result that names the missing step, so the model can do it and try again. Every tool call needs an answer."
+    },
+    {
+      "id": "fc-020",
+      "module": 48,
+      "page": "course/48-multi-step-workflows-with-guarantees/01-prompt-or-code-where-a-guarantee-lives.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "Why does forcing a tool choice not enforce an order across a session?",
+      "back": "A forced choice applies to the request that sets it. Nothing carries it to later calls, so later turns are unconstrained."
+    },
+    {
+      "id": "fc-021",
+      "module": 48,
+      "page": "course/48-multi-step-workflows-with-guarantees/02-prerequisite-chains-limits-hand-offs-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "Why must the route to a human not sit behind the same prerequisite as a risky step?",
+      "back": "An escape route must not depend on a safeguard that may be what failed, or the customer is stuck."
+    },
+    {
+      "id": "fc-022",
+      "module": 48,
+      "page": "course/48-multi-step-workflows-with-guarantees/02-prerequisite-chains-limits-hand-offs-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "What should a hand-off to a person contain, and who writes it?",
+      "back": "A record built from the gate's own state, with the agent's reason as one field. The gate holds the facts, and a fixed record answers the reviewer's questions."
+    },
+    {
+      "id": "fc-023",
+      "module": 48,
+      "page": "course/48-multi-step-workflows-with-guarantees/02-prerequisite-chains-limits-hand-offs-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "After a verification check fails, what is cleared?",
+      "back": "No one is cleared. Every protected step is refused again until a check passes."
+    },
+    {
+      "id": "fc-024",
+      "module": 48,
+      "page": "course/48-multi-step-workflows-with-guarantees/02-prerequisite-chains-limits-hand-offs-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "How do you divide work between the model and the gate?",
+      "back": "Let the model judge conditions, and keep steps, amounts and limits as rules, since rules with a right answer belong to code."
+    },
+    {
+      "id": "fc-025",
+      "module": 48,
+      "page": "course/48-multi-step-workflows-with-guarantees/02-prerequisite-chains-limits-hand-offs-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "How do you test a gate?",
+      "back": "With direct checks that make the forbidden call and assert that it never reaches the backend, since the gate is code."
+    },
+    {
+      "id": "fc-026",
+      "module": 49,
+      "page": "course/49-hooks/01-what-a-hook-decides-and-what-it-cannot-undo.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "Where must a hook's decision sit in its answer?",
+      "back": "In the documented place of the answer structure. A value outside it is not honoured."
+    },
+    {
+      "id": "fc-027",
+      "module": 49,
+      "page": "course/49-hooks/01-what-a-hook-decides-and-what-it-cannot-undo.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "A matcher on a hook sees what?",
+      "back": "Only the name of the tool. To act on a path, attach the hook to the file-editing tools and test the path inside the callback."
+    },
+    {
+      "id": "fc-028",
+      "module": 49,
+      "page": "course/49-hooks/02-normalising-results-command-hooks-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "What can a PostToolUse hook do that a prompt cannot?",
+      "back": "Replace the tool's output with one readable format, once, in code, before the model reads the result, for any tool."
+    },
+    {
+      "id": "fc-029",
+      "module": 49,
+      "page": "course/49-hooks/02-normalising-results-command-hooks-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "Why does the SDK ignore shell hooks in a checked-in settings file?",
+      "back": "With no setting sources, the SDK collects only the callbacks passed in code, so nothing reads that file."
+    },
+    {
+      "id": "fc-030",
+      "module": 49,
+      "page": "course/49-hooks/02-normalising-results-command-hooks-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "Why is a PostToolUse hook the wrong place to stop a payment?",
+      "back": "It runs after the effect, so the money has already moved. The control belongs in a hook ahead of the call."
+    },
+    {
+      "id": "fc-031",
+      "module": 49,
+      "page": "course/49-hooks/02-normalising-results-command-hooks-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "A gate hook gets no reply before its deadline. What should happen?",
+      "back": "The operation is withheld and the model is told, since a timed-out gate is the safe case."
+    },
+    {
+      "id": "fc-032",
+      "module": 50,
+      "page": "course/50-task-decomposition/01-fixed-chain-or-adaptive-plan.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "How do you review a change that touches many files?",
+      "back": "Examine each file on its own in a separate context, then run a pass over the findings for relations between them."
+    },
+    {
+      "id": "fc-033",
+      "module": 50,
+      "page": "course/50-task-decomposition/01-fixed-chain-or-adaptive-plan.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "How is an open-ended task decomposed?",
+      "back": "Map the structure first, rank the areas by impact, then re-plan as dependencies appear."
+    },
+    {
+      "id": "fc-034",
+      "module": 50,
+      "page": "course/50-task-decomposition/02-per-item-passes-adaptive-guards-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "What should a planning loop do when it repeats a task?",
+      "back": "Halt with a stuck status that names the repeated task. A repeat is a lack of progress."
+    },
+    {
+      "id": "fc-035",
+      "module": 50,
+      "page": "course/50-task-decomposition/02-per-item-passes-adaptive-guards-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "What are the summaries between passes?",
+      "back": "The interface between the passes: a name and a short account of what each part offers and expects."
+    },
+    {
+      "id": "fc-036",
+      "module": 50,
+      "page": "course/50-task-decomposition/02-per-item-passes-adaptive-guards-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "When are plain sequential steps the right shape?",
+      "back": "When the steps are known in advance and none affects another. Use the simplest shape that works."
+    },
+    {
+      "id": "fc-037",
+      "module": 50,
+      "page": "course/50-task-decomposition/02-per-item-passes-adaptive-guards-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "What does a re-planning step need as input?",
+      "back": "The output of each action so far, such as a test run or a file listing, so the plan rests on ground truth."
+    },
+    {
+      "id": "fc-038",
+      "module": 51,
+      "page": "course/51-session-state/01-continue-resume-and-fork-what-a-session-keeps.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "How do you branch a session without disturbing the original?",
+      "back": "Resume with the saved id and set the fork option. The fork is a copy, and the original stays usable."
+    },
+    {
+      "id": "fc-039",
+      "module": 51,
+      "page": "course/51-session-state/01-continue-resume-and-fork-what-a-session-keeps.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "Where does the id needed to resume a session come from?",
+      "back": "From the result message, which carries the session id on every result."
+    },
+    {
+      "id": "fc-040",
+      "module": 51,
+      "page": "course/51-session-state/02-stale-results-the-notice-the-summary-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "Two files changed since a saved analysis. What do you tell a resumed session?",
+      "back": "The two changed paths and a request to re-read them, which keeps everything still true."
+    },
+    {
+      "id": "fc-041",
+      "module": 51,
+      "page": "course/51-session-state/02-stale-results-the-notice-the-summary-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "When most earlier results are stale, how do you start again?",
+      "back": "A new run that opens with a structured summary of the conclusions and their state, not a resume."
+    },
+    {
+      "id": "fc-042",
+      "module": 51,
+      "page": "course/51-session-state/02-stale-results-the-notice-the-summary-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "Why is the first request after a long pause slower and dearer?",
+      "back": "The prompt cache expires after a pause, so the history is read again once."
+    },
+    {
+      "id": "fc-043",
+      "module": 51,
+      "page": "course/51-session-state/02-stale-results-the-notice-the-summary-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "What returns files to an earlier state after an agent's edits?",
+      "back": "Checkpointing, which snapshots the edits and reverts them. Conversation resume does not restore files."
+    },
+    {
+      "id": "fc-044",
+      "module": 52,
+      "page": "course/52-designing-tool-interfaces/01-descriptions-names-and-boundaries.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "An agent picks the wrong one of two tools with one-line summaries. What is the first fix?",
+      "back": "Rewrite both descriptions so each says what it takes, with input shapes and sample requests, and where it stops."
+    },
+    {
+      "id": "fc-045",
+      "module": 52,
+      "page": "course/52-designing-tool-interfaces/01-descriptions-names-and-boundaries.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "A system prompt rule pulls the agent toward one tool because of a keyword. What do you change?",
+      "back": "The rule. Rephrase it so no keyword ties it to one function, since the keyword in the rule drives the choice."
+    },
+    {
+      "id": "fc-046",
+      "module": 52,
+      "page": "course/52-designing-tool-interfaces/02-results-annotations-large-tool-sets-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "How should a tool return a very large result set?",
+      "back": "One page with a cursor and a note on how to narrow the search, so the result is bounded and the agent knows how to go on."
+    },
+    {
+      "id": "fc-047",
+      "module": 52,
+      "page": "course/52-designing-tool-interfaces/02-results-annotations-large-tool-sets-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "What should a search tool return for the step that follows?",
+      "back": "Each hit with a stable identifier and only the fields the next step needs, in a trimmed result."
+    },
+    {
+      "id": "fc-048",
+      "module": 52,
+      "page": "course/52-designing-tool-interfaces/02-results-annotations-large-tool-sets-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "An agent keeps choosing wrongly among several tools, even after rewording. What does that signal?",
+      "back": "A design fault: the texts cannot separate the options, so the tool surface needs redesign rather than more prose."
+    },
+    {
+      "id": "fc-049",
+      "module": 52,
+      "page": "course/52-designing-tool-interfaces/02-results-annotations-large-tool-sets-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "At what point does tool search defer loading definitions under the auto setting?",
+      "back": "At 10 percent of the context window. Below it, all definitions load at the start."
+    },
+    {
+      "id": "fc-050",
+      "module": 53,
+      "page": "course/53-tool-errors-agents-can-act-on/01-the-error-result-and-what-the-loop-does-with-it.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "What should an error reply from a tool contain so an agent can recover?",
+      "back": "The kind of problem, whether another try is useful, and the next step. Without the kind, the agent cannot choose a recovery."
+    },
+    {
+      "id": "fc-051",
+      "module": 53,
+      "page": "course/53-tool-errors-agents-can-act-on/01-the-error-result-and-what-the-loop-does-with-it.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "Which of three failures is a protocol error?",
+      "back": "Only a request with nothing to run, since it has nowhere to be routed. The other two reached the tool."
+    },
+    {
+      "id": "fc-052",
+      "module": 53,
+      "page": "course/53-tool-errors-agents-can-act-on/02-a-call-with-an-unknown-outcome-retries-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "Why is looking up an order by number safe to repeat?",
+      "back": "A read changes nothing when repeated, so a retry after a timeout is harmless."
+    },
+    {
+      "id": "fc-053",
+      "module": 53,
+      "page": "course/53-tool-errors-agents-can-act-on/02-a-call-with-an-unknown-outcome-retries-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "A write timed out and may have happened. What should the agent do next?",
+      "back": "Read the records kept for the order, then decide whether any work remains. Do not repeat the write blindly."
+    },
+    {
+      "id": "fc-054",
+      "module": 53,
+      "page": "course/53-tool-errors-agents-can-act-on/02-a-call-with-an-unknown-outcome-retries-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "How is a business-rule refusal reported?",
+      "back": "As a flagged failure that is not worth repeating, with a sentence the agent can pass on to the customer."
+    },
+    {
+      "id": "fc-055",
+      "module": 53,
+      "page": "course/53-tool-errors-agents-can-act-on/02-a-call-with-an-unknown-outcome-retries-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "What should a failure from a search subagent carry to its coordinator?",
+      "back": "The kind of failure, the query that ran, any partial findings and other routes to try, so the coordinator can choose a recovery."
+    },
+    {
+      "id": "fc-056",
+      "module": 54,
+      "page": "course/54-distributing-tools-across-agents/01-scoped-tool-sets-per-agent.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "How do you serve a frequent simple case without giving a subagent a broad tool?",
+      "back": "Give it a small verifier tool for the quick cases and route the hard ones through the coordinator's hub."
+    },
+    {
+      "id": "fc-057",
+      "module": 54,
+      "page": "course/54-distributing-tools-across-agents/01-scoped-tool-sets-per-agent.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "A fetch tool is too wide for a job. What holds the limit regardless of the model's decision?",
+      "back": "A constraint inside the tool, such as a loader that takes only the job's links and refuses the rest with a reason."
+    },
+    {
+      "id": "fc-058",
+      "module": 54,
+      "page": "course/54-distributing-tools-across-agents/02-tool-choice-the-call-that-must-happen-caps-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "Why does changing tool definitions between runs cost more than the change itself?",
+      "back": "It changes the first layer of the prompt cache and every layer after it, so the whole cached prefix is processed again."
+    },
+    {
+      "id": "fc-059",
+      "module": 54,
+      "page": "course/54-distributing-tools-across-agents/02-tool-choice-the-call-that-must-happen-caps-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "A subagent calls a tool it does not hold. How is it handled?",
+      "back": "Treat it as a miss and ask once more. If it recurs, hand the case to a person."
+    },
+    {
+      "id": "fc-060",
+      "module": 54,
+      "page": "course/54-distributing-tools-across-agents/02-tool-choice-the-call-that-must-happen-caps-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "Where does a limit that the model cannot talk its way around live?",
+      "back": "In code: authorisation and scope enforced regardless of what the caller asks."
+    },
+    {
+      "id": "fc-061",
+      "module": 54,
+      "page": "course/54-distributing-tools-across-agents/02-tool-choice-the-call-that-must-happen-caps-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "An irreversible call is under the spending cap. Does it still wait for a person?",
+      "back": "Yes. A flagged refusal waits for a human sign-off on that very request, because an irreversible call is not cleared by a cap."
+    },
+    {
+      "id": "fc-062",
+      "module": 55,
+      "page": "course/55-mcp-in-claude-code/01-scopes-the-project-file-and-environment-expansion.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "A remote server's headers read ANTHROPIC_API_KEY from the environment. What does the server receive?",
+      "back": "An empty value. In a remote server's url and headers Claude Code reads its own credentials, such as ANTHROPIC_API_KEY, and cloud credentials as empty, so a repository file cannot send them out."
+    },
+    {
+      "id": "fc-063",
+      "module": 55,
+      "page": "course/55-mcp-in-claude-code/01-scopes-the-project-file-and-environment-expansion.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "Which MCP scope is the default for a newly added server?",
+      "back": "Local scope, which belongs to its owner and that one project. User scope is for personal servers, and project scope is the one for a shared repository."
+    },
+    {
+      "id": "fc-064",
+      "module": 55,
+      "page": "course/55-mcp-in-claude-code/02-tools-together-descriptions-resources-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "What should a tool's description say so the model prefers it over pattern matching?",
+      "back": "When it beats pattern matching and what comes back, with the main point first."
+    },
+    {
+      "id": "fc-065",
+      "module": 55,
+      "page": "course/55-mcp-in-claude-code/02-tools-together-descriptions-resources-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "How do you give an agent a schema catalog before work starts, with no discovery calls?",
+      "back": "Expose it as a resource that can be mentioned in the prompt."
+    },
+    {
+      "id": "fc-066",
+      "module": 55,
+      "page": "course/55-mcp-in-claude-code/02-tools-together-descriptions-resources-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "Why is one do-everything tool hard to scope?",
+      "back": "A permission rule allows or denies a tool by name, so one entry point that covers every task leaves nothing to narrow."
+    },
+    {
+      "id": "fc-067",
+      "module": 55,
+      "page": "course/55-mcp-in-claude-code/02-tools-together-descriptions-resources-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "What does the alwaysLoad setting do to deferral?",
+      "back": "It brings every definition of that server into the initial context at launch, undoing deferral."
+    },
+    {
+      "id": "fc-068",
+      "module": 56,
+      "page": "course/56-the-built-in-tools/01-what-each-tool-is-for-and-how-edit-fails.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "Which built-in tool finds files by a name pattern such as a test-file glob?",
+      "back": "Glob. The job is matching names, which is what a name pattern search is for."
+    },
+    {
+      "id": "fc-069",
+      "module": 56,
+      "page": "course/56-the-built-in-tools/01-what-each-tool-is-for-and-how-edit-fails.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "An edit fails because the target string is not unique and no anchor exists. What does the guide key?",
+      "back": "Read the file and write the whole content again with the one change. The product's own remedies are a longer unique string or replace-all."
+    },
+    {
+      "id": "fc-070",
+      "module": 56,
+      "page": "course/56-the-built-in-tools/01-what-each-tool-is-for-and-how-edit-fails.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "Which Grep output mode should an explorer start with when it needs only locations?",
+      "back": "The default mode that returns paths only. Ask for matching lines when the lines are needed."
+    },
+    {
+      "id": "fc-071",
+      "module": 56,
+      "page": "course/56-the-built-in-tools/02-permissions-exploring-a-codebase-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "Does a read denial block edits at the same path?",
+      "back": "Yes. A read denial also covers the tools that change content at that path, so a write is refused."
+    },
+    {
+      "id": "fc-072",
+      "module": 56,
+      "page": "course/56-the-built-in-tools/02-permissions-exploring-a-codebase-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "Why might a deny rule on Grep not stop searches done on Linux?",
+      "back": "The default tool set has no Grep there, and its job runs through the shell tool, so only a Bash entry sees those lookups."
+    },
+    {
+      "id": "fc-073",
+      "module": 56,
+      "page": "course/56-the-built-in-tools/02-permissions-exploring-a-codebase-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "What stops reading, searching and writing under a secrets folder?",
+      "back": "A single deny rule on reading that folder, which also blocks writes at the same path."
+    },
+    {
+      "id": "fc-074",
+      "module": 57,
+      "page": "course/57-memory-files-and-rules/01-where-instructions-live-and-what-loads-when.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "Where do personal notes for one project go?",
+      "back": "In a git-ignored local note beside the root instruction file, personal to the project and out of version control."
+    },
+    {
+      "id": "fc-075",
+      "module": 57,
+      "page": "course/57-memory-files-and-rules/01-where-instructions-live-and-what-loads-when.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "When do instruction files below the starting directory load?",
+      "back": "On demand, once Claude opens something beneath that directory."
+    },
+    {
+      "id": "fc-076",
+      "module": 57,
+      "page": "course/57-memory-files-and-rules/02-path-scoped-rules-size-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "How do you scope a rule to a file type across all folders?",
+      "back": "A rule whose glob matches by extension at any depth, which loads when a matching file is read or edited."
+    },
+    {
+      "id": "fc-077",
+      "module": 57,
+      "page": "course/57-memory-files-and-rules/02-path-scoped-rules-size-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "What happens when a rule file's frontmatter is invalid YAML?",
+      "back": "The scoping is dropped and the rule is treated as unscoped, so it loads always."
+    },
+    {
+      "id": "fc-078",
+      "module": 57,
+      "page": "course/57-memory-files-and-rules/02-path-scoped-rules-size-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "When is AGENTS.md read in place of CLAUDE.md?",
+      "back": "Only when no CLAUDE.md exists in the working directory or above. A local note counts as an instruction file and cancels the fallback."
+    },
+    {
+      "id": "fc-079",
+      "module": 57,
+      "page": "course/57-memory-files-and-rules/02-path-scoped-rules-size-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "Does moving text into an import reduce what loads at launch?",
+      "back": "No. An import changes where text is kept and not how much loads, since imported material still arrives at launch."
+    },
+    {
+      "id": "fc-080",
+      "module": 58,
+      "page": "course/58-commands-and-skills/01-commands-and-skills-are-one-mechanism.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "A command file and a skill share a name. Which one wins?",
+      "back": "The skill. The product merged the two formats and gives the skill precedence over a command file of the same name."
+    },
+    {
+      "id": "fc-081",
+      "module": 58,
+      "page": "course/58-commands-and-skills/01-commands-and-skills-are-one-mechanism.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "When does a skill in a nested folder load?",
+      "back": "The first time Claude reads or edits a file in that location."
+    },
+    {
+      "id": "fc-082",
+      "module": 58,
+      "page": "course/58-commands-and-skills/02-tools-arguments-forked-skills-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "What does the allowed-tools field of a skill restrict?",
+      "back": "Nothing. It pre-approves those tools while the skill is active, and other tools stay under the usual permission settings."
+    },
+    {
+      "id": "fc-083",
+      "module": 58,
+      "page": "course/58-commands-and-skills/02-tools-arguments-forked-skills-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "Why does a forked skill with only guidelines return nothing useful?",
+      "back": "The body of a forked skill is the helper's prompt. Guidelines without a task give it nothing to do."
+    },
+    {
+      "id": "fc-084",
+      "module": 58,
+      "page": "course/58-commands-and-skills/02-tools-arguments-forked-skills-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "How do you hide a skill from the person while leaving it available to Claude?",
+      "back": "Set user-invocable to false, which suits background knowledge."
+    },
+    {
+      "id": "fc-085",
+      "module": 58,
+      "page": "course/58-commands-and-skills/02-tools-arguments-forked-skills-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "How do you take tools away while a skill is active?",
+      "back": "List the bare names in the disallowed-tools field, which removes them from the pool for that time."
+    },
+    {
+      "id": "fc-086",
+      "module": 59,
+      "page": "course/59-plan-mode-and-iterative-refinement/01-plan-mode-or-direct-execution.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "When is plan mode the right start?",
+      "back": "When many files are involved or several valid approaches exist, so the approach is settled before any edit."
+    },
+    {
+      "id": "fc-087",
+      "module": 59,
+      "page": "course/59-plan-mode-and-iterative-refinement/01-plan-mode-or-direct-execution.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "When is direct execution right?",
+      "back": "For a small, clearly traced change such as one file, followed by a test of the edge case."
+    },
+    {
+      "id": "fc-088",
+      "module": 59,
+      "page": "course/59-plan-mode-and-iterative-refinement/02-examples-tests-the-interview-and-feedback.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "How do you remove ambiguity in an instruction that is read inconsistently?",
+      "back": "Give two or three exact inputs paired with the outputs required."
+    },
+    {
+      "id": "fc-089",
+      "module": 59,
+      "page": "course/59-plan-mode-and-iterative-refinement/02-examples-tests-the-interview-and-feedback.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "How do you use an interview before a large feature?",
+      "back": "Let Claude question you, then record a spec for a fresh session, so requirements are surfaced before any code."
+    },
+    {
+      "id": "fc-090",
+      "module": 59,
+      "page": "course/59-plan-mode-and-iterative-refinement/02-examples-tests-the-interview-and-feedback.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "Does plan mode's restriction hold in a run with no terminal?",
+      "back": "Yes. Plan mode keeps its blocks in runs that have no interactive terminal."
+    },
+    {
+      "id": "fc-091",
+      "module": 59,
+      "page": "course/59-plan-mode-and-iterative-refinement/02-examples-tests-the-interview-and-feedback.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "After more than two failed corrections, what is the documented fix?",
+      "back": "Clear the context and write a better first prompt that carries the failed checks and what was learned."
+    },
+    {
+      "id": "fc-092",
+      "module": 60,
+      "page": "course/60-claude-code-in-ci/01-a-headless-run-its-json-and-the-job-status.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "How do you get a validated object from a headless run?",
+      "back": "Use the JSON output format with a schema, so the answer arrives as a validated object in the structured output field."
+    },
+    {
+      "id": "fc-093",
+      "module": 60,
+      "page": "course/60-claude-code-in-ci/01-a-headless-run-its-json-and-the-job-status.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "A headless run has no valid answer but a success subtype. How should the job treat it?",
+      "back": "As a failure. A run without a valid answer fails whatever its subtype says."
+    },
+    {
+      "id": "fc-094",
+      "module": 60,
+      "page": "course/60-claude-code-in-ci/02-context-independence-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "How do you stop a review from repeating earlier findings on a new push?",
+      "back": "Put the earlier reports in the prompt and ask for new issues only, since a run has no memory of the last."
+    },
+    {
+      "id": "fc-095",
+      "module": 60,
+      "page": "course/60-claude-code-in-ci/02-context-independence-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "How do you stop a test generator from proposing duplicates?",
+      "back": "Show it the test files that exist and ask it to skip covered cases."
+    },
+    {
+      "id": "fc-096",
+      "module": 60,
+      "page": "course/60-claude-code-in-ci/02-context-independence-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "How do you get an independent review of a change?",
+      "back": "Start a separate run that receives only the diff and the criteria, without the reasoning that produced the change."
+    },
+    {
+      "id": "fc-097",
+      "module": 60,
+      "page": "course/60-claude-code-in-ci/02-context-independence-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "Bare mode skips CLAUDE.md. How do you still supply the review criteria?",
+      "back": "Pass them in by hand with the append-system-prompt-file option."
+    },
+    {
+      "id": "fc-098",
+      "module": 61,
+      "page": "course/61-criteria-and-examples/01-explicit-criteria-and-the-trust-in-a-category.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "What turns a vague instruction such as be conservative into a useful one?",
+      "back": "Spell out which patterns to flag and which to leave alone. Naming both is what changes the output."
+    },
+    {
+      "id": "fc-099",
+      "module": 61,
+      "page": "course/61-criteria-and-examples/01-explicit-criteria-and-the-trust-in-a-category.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "A review category has many false positives. What restores trust in the rest?",
+      "back": "Switch that category off while its prompt and examples improve."
+    },
+    {
+      "id": "fc-100",
+      "module": 61,
+      "page": "course/61-criteria-and-examples/02-examples-asking-and-the-practice.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "How do you settle a borderline case with examples?",
+      "back": "Show a flagged sample and a skipped sample side by side, each with its reason."
+    },
+    {
+      "id": "fc-101",
+      "module": 61,
+      "page": "course/61-criteria-and-examples/02-examples-asking-and-the-practice.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "An unattended run lacks a required field and no default exists. What does it do?",
+      "back": "Stops with a plain failure that lists the absent field. It cannot ask and must not assume."
+    },
+    {
+      "id": "fc-102",
+      "module": 61,
+      "page": "course/61-criteria-and-examples/02-examples-asking-and-the-practice.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "How do you make severity levels comparable with a floor?",
+      "back": "Give each level a worked sample and close the field to a fixed list of values."
+    },
+    {
+      "id": "fc-103",
+      "module": 61,
+      "page": "course/61-criteria-and-examples/02-examples-asking-and-the-practice.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "Developers dismiss many findings from one source. What do you change?",
+      "back": "Fix the criteria for that one source of noise and keep the other categories enabled."
+    },
+    {
+      "id": "fc-104",
+      "module": 62,
+      "page": "course/62-structured-output-at-the-architect-level/01-what-a-schema-guarantees-and-what-it-does-not.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "How do you keep a schema from pushing the model to invent a value?",
+      "back": "Make the field nullable when the source may not give it, so the model can return null and is not pushed to fabricate."
+    },
+    {
+      "id": "fc-105",
+      "module": 62,
+      "page": "course/62-structured-output-at-the-architect-level/01-what-a-schema-guarantees-and-what-it-does-not.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "Does a strict schema catch a line-item total that disagrees with the document total?",
+      "back": "No. Shape is promised, meaning is not. Strict schemas do not prevent semantic errors, so a sum is checked in code."
+    },
+    {
+      "id": "fc-106",
+      "module": 62,
+      "page": "course/62-structured-output-at-the-architect-level/02-retries-conflicts-chunks-and-the-practice.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "What does a retry do with a conflict flagged between two values in the source?",
+      "back": "Nothing useful: route it to a person with the discrepancy noted, since a second look finds the same difference."
+    },
+    {
+      "id": "fc-107",
+      "module": 62,
+      "page": "course/62-structured-output-at-the-architect-level/02-retries-conflicts-chunks-and-the-practice.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "Why is accuracy measured only on validated records flattering?",
+      "back": "The denominator is filtered by the pipeline's own verdict, which drops the documents most likely to be wrong."
+    },
+    {
+      "id": "fc-108",
+      "module": 62,
+      "page": "course/62-structured-output-at-the-architect-level/02-retries-conflicts-chunks-and-the-practice.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "Two chunks of one document give different values for a field. What happens?",
+      "back": "Keep the first value, note the clash and send it to a person. A disagreement between chunks is recorded, not chosen silently."
+    },
+    {
+      "id": "fc-109",
+      "module": 62,
+      "page": "course/62-structured-output-at-the-architect-level/02-retries-conflicts-chunks-and-the-practice.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "Of an error that a second look can fix and a value absent from the source, which is retried?",
+      "back": "The fixable error is sent back with its error message. The value absent from the source goes to review untried."
+    },
+    {
+      "id": "fc-110",
+      "module": 62,
+      "page": "course/62-structured-output-at-the-architect-level/02-retries-conflicts-chunks-and-the-practice.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "Why does switching the tool choice mode mid-conversation cost more?",
+      "back": "Changing the mode invalidates cached message blocks, so the stored conversation content is processed again."
+    },
+    {
+      "id": "fc-111",
+      "module": 63,
+      "page": "course/63-batch-and-multi-pass-review/01-when-a-batch-fits-and-what-to-resubmit.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "A merge verdict and a weekly scan are both extraction-style jobs. Which goes through a batch?",
+      "back": "The weekly scan, which can wait. The merge verdict blocks a person and needs an answer without a latency guarantee, so it stays on the immediate API."
+    },
+    {
+      "id": "fc-112",
+      "module": 63,
+      "page": "course/63-batch-and-multi-pass-review/01-when-a-batch-fits-and-what-to-resubmit.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "A job needs results within 30 hours, batches take up to 24, and handling takes 2. What interval fits?",
+      "back": "Four hours at most: the worst case is the interval plus the window plus handling, so 30 minus 24 minus 2 leaves 4."
+    },
+    {
+      "id": "fc-113",
+      "module": 63,
+      "page": "course/63-batch-and-multi-pass-review/02-independent-passes-combined-verdicts-and-the-practice.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "Why does a second review in the same session miss what the first missed?",
+      "back": "The reasoning that justified the code is still in context. Give a new instance the diff and the criteria without the notes."
+    },
+    {
+      "id": "fc-114",
+      "module": 63,
+      "page": "course/63-batch-and-multi-pass-review/02-independent-passes-combined-verdicts-and-the-practice.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "How do you use a confidence score from the same pass that made the claim?",
+      "back": "Do not trust it alone. A separate instance that tries to refute each claim gives independent evidence."
+    },
+    {
+      "id": "fc-115",
+      "module": 63,
+      "page": "course/63-batch-and-multi-pass-review/02-independent-passes-combined-verdicts-and-the-practice.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "A two-step review runs as two batches in sequence, each 24 hours with 1 hour of handling. What is the worst case?",
+      "back": "50 hours, because the integration pass reads the first batch's results: 24 plus 1 plus 24 plus 1."
+    },
+    {
+      "id": "fc-116",
+      "module": 63,
+      "page": "course/63-batch-and-multi-pass-review/02-independent-passes-combined-verdicts-and-the-practice.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "Where do you test a prompt before sending a whole corpus to a batch?",
+      "back": "On a varied sample run synchronously, including long and incomplete documents, so the answer comes at once and the discount is spent on volume."
+    },
+    {
+      "id": "fc-117",
+      "module": 64,
+      "page": "course/64-keeping-what-matters-in-long-conversations/01-case-facts-trimmed-results-and-position.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "How do you stop exact amounts and dates from being rounded off by summaries?",
+      "back": "Keep them in a structured block sent on every request, outside the text that gets condensed."
+    },
+    {
+      "id": "fc-118",
+      "module": 64,
+      "page": "course/64-keeping-what-matters-in-long-conversations/01-case-facts-trimmed-results-and-position.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "A tool returns far more fields than a decision needs. What do you keep?",
+      "back": "The handful the decision uses, word for word, plus an identifier, and drop the rest before it accumulates in context."
+    },
+    {
+      "id": "fc-119",
+      "module": 64,
+      "page": "course/64-keeping-what-matters-in-long-conversations/02-long-sessions-stale-facts-isolation-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "Two sources give different values and the older one arrives late. Which is current?",
+      "back": "The date decides. The updated value stays current, and the late older one goes to the history."
+    },
+    {
+      "id": "fc-120",
+      "module": 64,
+      "page": "course/64-keeping-what-matters-in-long-conversations/02-long-sessions-stale-facts-isolation-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "How do you make sure one customer's records never reach another's session?",
+      "back": "Take the key from the authenticated session and filter where the context is built, in code, before the model sees anything."
+    },
+    {
+      "id": "fc-121",
+      "module": 64,
+      "page": "course/64-keeping-what-matters-in-long-conversations/02-long-sessions-stale-facts-isolation-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "A fact is past its freshness limit. What does the agent do?",
+      "back": "Reads the value again from the system of record and says which date it is going by."
+    },
+    {
+      "id": "fc-122",
+      "module": 64,
+      "page": "course/64-keeping-what-matters-in-long-conversations/02-long-sessions-stale-facts-isolation-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "How should a long report open?",
+      "back": "With a short digest of the key points first, then the detail under explicit headers."
+    },
+    {
+      "id": "fc-123",
+      "module": 64,
+      "page": "course/64-keeping-what-matters-in-long-conversations/02-long-sessions-stale-facts-isolation-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "How do you track several matters in one long conversation?",
+      "back": "A separate entry per matter with figures and dates, kept until the case closes."
+    },
+    {
+      "id": "fc-124",
+      "module": 65,
+      "page": "course/65-escalation-and-ambiguity/01-when-to-escalate-and-when-not-to.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "A customer asks for a person. What does the agent do?",
+      "back": "Hands over at once, before touching the account. An explicit request for a person is honoured with no investigation first."
+    },
+    {
+      "id": "fc-125",
+      "module": 65,
+      "page": "course/65-escalation-and-ambiguity/01-when-to-escalate-and-when-not-to.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "The policy says nothing about the request. What does the agent do?",
+      "back": "Routes it to a colleague authorised to rule on the exception, since a silent policy is a gap."
+    },
+    {
+      "id": "fc-126",
+      "module": 65,
+      "page": "course/65-escalation-and-ambiguity/02-ambiguous-matches-hand-offs-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "A name matches several accounts. How does the agent resolve it?",
+      "back": "Asks for an identifier that tells them apart, such as the email on the account, and leaves the choice to the answer."
+    },
+    {
+      "id": "fc-127",
+      "module": 65,
+      "page": "course/65-escalation-and-ambiguity/02-ambiguous-matches-hand-offs-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "Which comes first when a person is requested and the account is unclear?",
+      "back": "The handover. An explicit request for a person comes first, because nothing may delay it."
+    },
+    {
+      "id": "fc-128",
+      "module": 65,
+      "page": "course/65-escalation-and-ambiguity/02-ambiguous-matches-hand-offs-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "What belongs in escalation criteria, and what carries the judgement?",
+      "back": "Properties of the case, such as a request for a person, a gap in the policy or stalled work, with examples carrying the judgement."
+    },
+    {
+      "id": "fc-129",
+      "module": 65,
+      "page": "course/65-escalation-and-ambiguity/02-ambiguous-matches-hand-offs-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "An angry customer has a problem the agent can fix. What is the right response?",
+      "back": "Acknowledge the anger and offer to fix the problem itself. Frustration alone is not a trigger when the issue is within reach."
+    },
+    {
+      "id": "fc-130",
+      "module": 65,
+      "page": "course/65-escalation-and-ambiguity/02-ambiguous-matches-hand-offs-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "After two attempts with no progress, what does the agent do?",
+      "back": "Stops at the attempt limit and hands over a short account of what was tried."
+    },
+    {
+      "id": "fc-131",
+      "module": 66,
+      "page": "course/66-errors-across-agents/01-where-a-failure-is-handled-and-what-travels-up.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "Who handles a transient fault inside a subagent?",
+      "back": "The subagent itself. It holds the query and the work done, so it retries what is transient and passes up only what survives."
+    },
+    {
+      "id": "fc-132",
+      "module": 66,
+      "page": "course/66-errors-across-agents/01-where-a-failure-is-handled-and-what-travels-up.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "Why must a subagent be told to close with a structured account of what it read and missed?",
+      "back": "Only its final message reaches the parent, so the structure has to be requested there."
+    },
+    {
+      "id": "fc-133",
+      "module": 66,
+      "page": "course/66-errors-across-agents/02-plans-partial-results-coverage-notes-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "How do you separate a timeout from a search that found nothing?",
+      "back": "Mark the timeout as a typed failure, distinct from a genuine absence of matches. They are different values with different handling."
+    },
+    {
+      "id": "fc-134",
+      "module": 66,
+      "page": "course/66-errors-across-agents/02-plans-partial-results-coverage-notes-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "What does a coverage note compare?",
+      "back": "What was planned with what happened, topic by topic, sorting subjects into evidenced and unevidenced with the cause of each gap."
+    },
+    {
+      "id": "fc-135",
+      "module": 66,
+      "page": "course/66-errors-across-agents/02-plans-partial-results-coverage-notes-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "One of four topics is closed to the agent. What should the run do?",
+      "back": "Carry on with the other three and log the closed topic as a gap with a way to reopen it, not terminate on one failure."
+    },
+    {
+      "id": "fc-136",
+      "module": 66,
+      "page": "course/66-errors-across-agents/02-plans-partial-results-coverage-notes-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "What does a subagent that fails halfway return?",
+      "back": "The output so far, flagged as partial, and the option to resume it later."
+    },
+    {
+      "id": "fc-137",
+      "module": 67,
+      "page": "course/67-exploring-a-large-codebase/01-why-explorations-degrade-and-where-findings-live.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "How does an agent keep specifics across a long exploration?",
+      "back": "By writing findings to a notes file and consulting it for later questions. The file outlives the window."
+    },
+    {
+      "id": "fc-138",
+      "module": 67,
+      "page": "course/67-exploring-a-large-codebase/01-why-explorations-degrade-and-where-findings-live.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "How do you explore without flooding the lead's context?",
+      "back": "Give each question to a read-only exploring helper and keep only the summaries."
+    },
+    {
+      "id": "fc-139",
+      "module": 67,
+      "page": "course/67-exploring-a-large-codebase/02-compaction-crash-recovery-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "How do you steer automatic compaction toward what exploration needs?",
+      "back": "Add a sentence on what to preserve to the project's instructions file."
+    },
+    {
+      "id": "fc-140",
+      "module": 67,
+      "page": "course/67-exploring-a-large-codebase/02-compaction-crash-recovery-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "After a crash, some agents have notes files and some do not. What happens?",
+      "back": "Those with files continue from them and the others start over. The file outranks the status."
+    },
+    {
+      "id": "fc-141",
+      "module": 67,
+      "page": "course/67-exploring-a-large-codebase/02-compaction-crash-recovery-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "What does a restart prompt carry for a helper that must continue?",
+      "back": "Its assignment, the exported state lines and one instruction: continue from the first unfinished step."
+    },
+    {
+      "id": "fc-142",
+      "module": 67,
+      "page": "course/67-exploring-a-large-codebase/02-compaction-crash-recovery-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "Which kind of subagent can be resumed with its own history?",
+      "back": "A custom subagent. The built-in one cannot be continued that way."
+    },
+    {
+      "id": "fc-143",
+      "module": 68,
+      "page": "course/68-human-review-and-calibrated-confidence/01-measuring-accuracy-by-segment-and-calibrating-confidence.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "Before relaxing review because the overall figure is high, what do you do?",
+      "back": "Break the results down by document kind and by field. The overall figure is an average dominated by the large easy segment."
+    },
+    {
+      "id": "fc-144",
+      "module": 68,
+      "page": "course/68-human-review-and-calibrated-confidence/01-measuring-accuracy-by-segment-and-calibrating-confidence.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "How do you measure how wrong the automated stream is?",
+      "back": "Draw random documents of each kind that passed with no human look. Drawing the same number per stratum checks a rare segment as often as a common one."
+    },
+    {
+      "id": "fc-145",
+      "module": 68,
+      "page": "course/68-human-review-and-calibrated-confidence/02-routing-review-checkpoints-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "With limited reviewers, what is read first?",
+      "back": "Conflicts and the lowest-confidence items, with the overflow kept visibly as a backlog."
+    },
+    {
+      "id": "fc-146",
+      "module": 68,
+      "page": "course/68-human-review-and-calibrated-confidence/02-routing-review-checkpoints-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "Where must approval for an irreversible action be enforced?",
+      "back": "In a code-level gate that holds the action until a person approves. A confidence score never clears an irreversible step."
+    },
+    {
+      "id": "fc-147",
+      "module": 68,
+      "page": "course/68-human-review-and-calibrated-confidence/02-routing-review-checkpoints-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "How is a confidence cut-off chosen from labelled records?",
+      "back": "At the lowest threshold whose admitted items reach the precision target on those records."
+    },
+    {
+      "id": "fc-148",
+      "module": 68,
+      "page": "course/68-human-review-and-calibrated-confidence/02-routing-review-checkpoints-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "When may a segment be automated?",
+      "back": "Only with a minimum number of labelled examples and a minimum accuracy, so thin evidence never qualifies."
+    },
+    {
+      "id": "fc-149",
+      "module": 69,
+      "page": "course/69-provenance-and-uncertainty/01-keeping-claims-tied-to-their-sources-conflicts-and-dates.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "Two sources give different values. What goes in the report?",
+      "back": "Both values with the name of each source and a note that they disagree, rather than choosing one silently."
+    },
+    {
+      "id": "fc-150",
+      "module": 69,
+      "page": "course/69-provenance-and-uncertainty/01-keeping-claims-tied-to-their-sources-conflicts-and-dates.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "Why require a date beside every value?",
+      "back": "To prevent a temporal difference from being misread as a contradiction, since the date shows whether two numbers describe the same moment."
+    },
+    {
+      "id": "fc-151",
+      "module": 69,
+      "page": "course/69-provenance-and-uncertainty/02-coverage-report-structure-rendering-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "How should different content types be rendered in a report?",
+      "back": "Financial figures as tables, news as prose and technical findings as structured lists, each in the form that suits it."
+    },
+    {
+      "id": "fc-152",
+      "module": 69,
+      "page": "course/69-provenance-and-uncertainty/02-coverage-report-structure-rendering-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "How do you present contested results?",
+      "back": "Give the established and the contested results sections of their own, so a reader sees which is which."
+    },
+    {
+      "id": "fc-153",
+      "module": 69,
+      "page": "course/69-provenance-and-uncertainty/02-coverage-report-structure-rendering-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "How do claims keep their origin through summarising stages?",
+      "back": "Pair each claim with its origin as structured data at every exchange between the stages, so compression keeps them together."
+    },
+    {
+      "id": "fc-154",
+      "module": 69,
+      "page": "course/69-provenance-and-uncertainty/02-coverage-report-structure-rendering-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "Two findings for a claim have different values and the same date. What are they?",
+      "back": "A conflict, reported with both values and their publishers."
+    },
+    {
+      "id": "fc-155",
+      "module": 70,
+      "page": "course/70-scenario-customer-support-agent/01-the-scenario-the-layers-and-the-first-fix.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "A support agent wrongly moves money because tools can be called in any order. What is the first fix?",
+      "back": "Enforce the call sequence in the dispatcher. Money that moved wrongly cannot be recalled, so the cause is fixed first, in code."
+    },
+    {
+      "id": "fc-156",
+      "module": 70,
+      "page": "course/70-scenario-customer-support-agent/01-the-scenario-the-layers-and-the-first-fix.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "An agent asks for an order that belongs to someone else. How is it refused?",
+      "back": "As order_not_owned, and the message does not say whose order it is, so no other customer's data leaks."
+    },
+    {
+      "id": "fc-157",
+      "module": 70,
+      "page": "course/70-scenario-customer-support-agent/01-the-scenario-the-layers-and-the-first-fix.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "A lookup finds several customers with the same name. What does the agent set as verified?",
+      "back": "Nobody. Several matches are a question for the customer, so the agent asks for something that tells them apart."
+    },
+    {
+      "id": "fc-158",
+      "module": 70,
+      "page": "course/70-scenario-customer-support-agent/02-audit-the-sessions-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "A lower escalation rate: when is it a success?",
+      "back": "Only if the sessions settled alone although a human was needed did not increase."
+    },
+    {
+      "id": "fc-159",
+      "module": 70,
+      "page": "course/70-scenario-customer-support-agent/02-audit-the-sessions-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "Why is a success target counted per conversation?",
+      "back": "A conversation fails once however often it errs, so the target is a share of conversations, not of calls."
+    },
+    {
+      "id": "fc-160",
+      "module": 70,
+      "page": "course/70-scenario-customer-support-agent/02-audit-the-sessions-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "A state that belongs to one support case must not reach another. How?",
+      "back": "Create a new agent instance for each ticket so nothing outlives it."
+    },
+    {
+      "id": "fc-161",
+      "module": 70,
+      "page": "course/70-scenario-customer-support-agent/02-audit-the-sessions-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "How do you stop an agent repeating the same call in a loop?",
+      "back": "A check for identical consecutive calls that stops the loop and transfers the case to staff."
+    },
+    {
+      "id": "fc-162",
+      "module": 71,
+      "page": "course/71-scenario-code-generation-with-claude-code/01-the-team-setup-where-each-instruction-lives.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "Where does a team's shared command file live?",
+      "back": "In the project's own configuration folder, committed with the sources, so it reaches every clone."
+    },
+    {
+      "id": "fc-163",
+      "module": 71,
+      "page": "course/71-scenario-code-generation-with-claude-code/01-the-team-setup-where-each-instruction-lives.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "A spec file beside a handler gets two sets of conventions. Why?",
+      "back": "Both its area's rule and the testing rule have globs that match its path, so both load."
+    },
+    {
+      "id": "fc-164",
+      "module": 71,
+      "page": "course/71-scenario-code-generation-with-claude-code/02-plan-or-direct-a-target-to-iterate-on-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "How is a safe, read-only skill granted its tools?",
+      "back": "With a tools line such as Read, Grep, Glob and a pattern for git diff, and no write tools."
+    },
+    {
+      "id": "fc-165",
+      "module": 71,
+      "page": "course/71-scenario-code-generation-with-claude-code/02-plan-or-direct-a-target-to-iterate-on-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "Which deny rule keeps secrets out of a project?",
+      "back": "A deny rule for reading the environment file, with allow rules limited to specific commands and never to a whole tool."
+    },
+    {
+      "id": "fc-166",
+      "module": 71,
+      "page": "course/71-scenario-code-generation-with-claude-code/02-plan-or-direct-a-target-to-iterate-on-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "A rule's paths entry is a bare folder name. What is wrong?",
+      "back": "A bare folder name is not a glob. Write it as a pattern such as src/api/** so it matches files beneath."
+    },
+    {
+      "id": "fc-167",
+      "module": 71,
+      "page": "course/71-scenario-code-generation-with-claude-code/02-plan-or-direct-a-target-to-iterate-on-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "Which task suits plan mode and which direct execution?",
+      "back": "A typo fix is direct, and restructuring a monolith is plan, since small clear work is direct and open design is plan."
+    },
+    {
+      "id": "fc-168",
+      "module": 72,
+      "page": "course/72-scenario-multi-agent-research-system/01-the-research-system-who-owns-coverage.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "A research report misses a topic though every subagent worked correctly. What do you check?",
+      "back": "The coordinator's plan against the question's scopes, before any delegation. The subagents did what they were assigned."
+    },
+    {
+      "id": "fc-169",
+      "module": 72,
+      "page": "course/72-scenario-multi-agent-research-system/01-the-research-system-who-owns-coverage.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "How should a run's status be derived?",
+      "back": "From the scopes that were covered. A run is complete only when every scope is covered, and partial otherwise."
+    },
+    {
+      "id": "fc-170",
+      "module": 72,
+      "page": "course/72-scenario-multi-agent-research-system/02-failures-conflicts-the-coverage-note-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "A search fails and a substitute query exists. What happens?",
+      "back": "Retry with the suggested substitute once, then report the scope as not covered."
+    },
+    {
+      "id": "fc-171",
+      "module": 72,
+      "page": "course/72-scenario-multi-agent-research-system/02-failures-conflicts-the-coverage-note-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "Two sources give different values with dates. What does the report show?",
+      "back": "Both values with their sources and dates, and gives neither as the answer."
+    },
+    {
+      "id": "fc-172",
+      "module": 72,
+      "page": "course/72-scenario-multi-agent-research-system/02-failures-conflicts-the-coverage-note-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "What happens to partial findings from a failed scope?",
+      "back": "They are kept and flagged as incomplete, and the topic still counts as a gap."
+    },
+    {
+      "id": "fc-173",
+      "module": 72,
+      "page": "course/72-scenario-multi-agent-research-system/02-failures-conflicts-the-coverage-note-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "A scope that no result names. Where is the fault?",
+      "back": "In the decomposition. A scope that no subtask named was never planned, and the fix is in the plan."
+    },
+    {
+      "id": "fc-174",
+      "module": 73,
+      "page": "course/73-scenario-developer-productivity/01-two-subagents-and-the-tools-each-one-gets.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "How is write access limited to a generated folder?",
+      "back": "Replace a whole-tool allow rule with an Edit rule limited to that folder. A path keeps the rule to one folder."
+    },
+    {
+      "id": "fc-175",
+      "module": 73,
+      "page": "course/73-scenario-developer-productivity/01-two-subagents-and-the-tools-each-one-gets.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "A team wants agents to read tickets but not create or delete them. What is the rule?",
+      "back": "Allow the get tool by name and deny the create and delete tools by name."
+    },
+    {
+      "id": "fc-176",
+      "module": 73,
+      "page": "course/73-scenario-developer-productivity/02-sessions-variables-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "Why must a team note list every variable the MCP servers use?",
+      "back": "Because every variable that appears in the project's server file has to appear in the note, so a missing one is visible."
+    },
+    {
+      "id": "fc-177",
+      "module": 73,
+      "page": "course/73-scenario-developer-productivity/02-sessions-variables-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "What does an audit say about a header named Authorization with a literal token value?",
+      "back": "It is a secret-looking name whose value has no reference, so the secret sits in a committed file. Use a variable reference instead."
+    },
+    {
+      "id": "fc-178",
+      "module": 73,
+      "page": "course/73-scenario-developer-productivity/02-sessions-variables-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "What makes a read-only explorer subagent definition pass?",
+      "back": "A description that starts with Use when, a tools line that exists and lists only read-type tools."
+    },
+    {
+      "id": "fc-179",
+      "module": 73,
+      "page": "course/73-scenario-developer-productivity/02-sessions-variables-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "Why is a default value for a token variable a fault?",
+      "back": "A default for a token puts a usable credential into a committed file."
+    },
+    {
+      "id": "fc-180",
+      "module": 74,
+      "page": "course/74-scenario-claude-code-in-ci/01-the-calls-that-wait-and-the-calls-that-do-not.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "A pipeline step hangs waiting for input. What is the fix?",
+      "back": "Add the print flag so the run answers and exits. It is the documented way to run without a person."
+    },
+    {
+      "id": "fc-181",
+      "module": 74,
+      "page": "course/74-scenario-claude-code-in-ci/01-the-calls-that-wait-and-the-calls-that-do-not.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "Two jobs: a digest nobody waits on and a gate a developer waits on. Which goes to a batch?",
+      "back": "Only the digest. Nobody waits for it, while the gate stays in real time."
+    },
+    {
+      "id": "fc-182",
+      "module": 74,
+      "page": "course/74-scenario-claude-code-in-ci/02-review-passes-criteria-test-generation-and-the-practice.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "What makes a review criteria set pass an audit?",
+      "back": "Two items to report and two to skip, and an example for every severity, with no vague phrase such as be conservative."
+    },
+    {
+      "id": "fc-183",
+      "module": 74,
+      "page": "course/74-scenario-claude-code-in-ci/02-review-passes-criteria-test-generation-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "How is a multi-pass review of a large change structured?",
+      "back": "A pass for each file, then an integration pass that reads the file findings together."
+    },
+    {
+      "id": "fc-184",
+      "module": 74,
+      "page": "course/74-scenario-claude-code-in-ci/02-review-passes-criteria-test-generation-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "What must a CI gate do with a run that returned no valid answer?",
+      "back": "Fail the job, reading the exit status and the JSON, since no valid answer exists."
+    },
+    {
+      "id": "fc-185",
+      "module": 74,
+      "page": "course/74-scenario-claude-code-in-ci/02-review-passes-criteria-test-generation-and-the-practice.md",
+      "domains": [
+        "A3"
+      ],
+      "front": "A review job holds a shell tool but only looks at code. What does an audit say?",
+      "back": "The job holds a means of changing things it does not need. A review needs reading tools only."
+    },
+    {
+      "id": "fc-186",
+      "module": 75,
+      "page": "course/75-scenario-structured-data-extraction/01-the-extraction-system-where-the-pipeline-can-lie.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "A required value is absent from the document. What does the pipeline do?",
+      "back": "Sends the record to a person after one attempt. No retry supplies what the page lacks."
+    },
+    {
+      "id": "fc-187",
+      "module": 75,
+      "page": "course/75-scenario-structured-data-extraction/01-the-extraction-system-where-the-pipeline-can-lie.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "How do you report an extraction run honestly?",
+      "back": "Report the accuracy on everything received and on the accepted ones, with the difference stated."
+    },
+    {
+      "id": "fc-188",
+      "module": 75,
+      "page": "course/75-scenario-structured-data-extraction/01-the-extraction-system-where-the-pipeline-can-lie.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "What happens to a forced tool choice on Opus 5.5, Sonnet 5.5 and Fable 5.1?",
+      "back": "The call fails with a 400 error. The documented replacement is auto with strict schemas or structured outputs."
+    },
+    {
+      "id": "fc-189",
+      "module": 75,
+      "page": "course/75-scenario-structured-data-extraction/01-the-extraction-system-where-the-pipeline-can-lie.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "What are the batch result types other than success?",
+      "back": "Errored, canceled and expired. A batch expires if it does not complete within 24 hours, and each custom id is 1 to 64 characters."
+    },
+    {
+      "id": "fc-190",
+      "module": 75,
+      "page": "course/75-scenario-structured-data-extraction/02-segments-gaps-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "When may a kind of document be automated?",
+      "back": "When it has at least the minimum number of documents and accuracy at least the target. Both comparisons are inclusive."
+    },
+    {
+      "id": "fc-191",
+      "module": 75,
+      "page": "course/75-scenario-structured-data-extraction/02-segments-gaps-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "When does the audit call a figure overstated?",
+      "back": "Only when the gap between the validated and the all-document figure is greater than the policy gap. Reaching the gap is not enough."
+    },
+    {
+      "id": "fc-192",
+      "module": 75,
+      "page": "course/75-scenario-structured-data-extraction/02-segments-gaps-and-the-practice.md",
+      "domains": [
+        "A4"
+      ],
+      "front": "In what order are an extraction run's failure shapes fixed?",
+      "back": "Invented values, then wasted retries, then unchecked totals, then an overstated figure. The order follows the damage downstream."
+    },
+    {
+      "id": "fc-193",
+      "module": 75,
+      "page": "course/75-scenario-structured-data-extraction/02-segments-gaps-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "Why count unchecked totals only among accepted documents?",
+      "back": "A reviewed case was seen by someone, and a failed one never went out, so only an accepted record can carry an unchecked total."
+    },
+    {
+      "id": "fc-194",
+      "module": 76,
+      "page": "course/76-scenario-conversational-ai-assistant/01-the-assistant-persona-memory-and-the-window.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "A message shows a sign of risk. Where does it go first?",
+      "back": "To a safety hand-off. A signal of risk is checked first, before any other handling, and in code."
+    },
+    {
+      "id": "fc-195",
+      "module": 76,
+      "page": "course/76-scenario-conversational-ai-assistant/01-the-assistant-persona-memory-and-the-window.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "A record holds a postal address and a subscription plan marked to verify. How does the assistant treat them?",
+      "back": "Uses the postal address and has the subscription plan confirmed before relying on it."
+    },
+    {
+      "id": "fc-196",
+      "module": 76,
+      "page": "course/76-scenario-conversational-ai-assistant/01-the-assistant-persona-memory-and-the-window.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "How does a file tool stay inside its root?",
+      "back": "It checks every path in every command and refuses whatever resolves outside the root."
+    },
+    {
+      "id": "fc-197",
+      "module": 76,
+      "page": "course/76-scenario-conversational-ai-assistant/02-sensitive-talk-hand-offs-and-judging-a-conversation.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "What does the assistant do on a distress message?",
+      "back": "Acknowledges it, says someone is coming and stops advising. Such messages are routed in code before the model sees them."
+    },
+    {
+      "id": "fc-198",
+      "module": 76,
+      "page": "course/76-scenario-conversational-ai-assistant/02-sensitive-talk-hand-offs-and-judging-a-conversation.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "Two of twenty conversations repeat a question and the limit is ten percent. Is it met?",
+      "back": "Yes. A limit is met at the limit, so exactly ten percent repeated questions pass and twenty percent do not."
+    },
+    {
+      "id": "fc-199",
+      "module": 76,
+      "page": "course/76-scenario-conversational-ai-assistant/02-sensitive-talk-hand-offs-and-judging-a-conversation.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "A stored address is 200 days old and the limit is thirty days. What does the assistant do first?",
+      "back": "Marks it by its age and has the person confirm it before relying on it. An old fact is verified before it is used."
+    },
+    {
+      "id": "fc-200",
+      "module": 77,
+      "page": "course/77-scenario-agentic-tool-builder/01-the-tool-builder-what-the-agent-may-write.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "A generated tool's code fetches a page that its proposal never declared. What happens?",
+      "back": "It is refused, since code that does more than it declared is refused, whatever the rest looks like."
+    },
+    {
+      "id": "fc-201",
+      "module": 77,
+      "page": "course/77-scenario-agentic-tool-builder/01-the-tool-builder-what-the-agent-may-write.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "What is a text scan of generated code good for?",
+      "back": "A cheap first check for the obvious. It is not a sandbox, so the environment holds back the rest."
+    },
+    {
+      "id": "fc-202",
+      "module": 77,
+      "page": "course/77-scenario-agentic-tool-builder/01-the-tool-builder-what-the-agent-may-write.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "A tool's result does not match its schema. What happens?",
+      "back": "It is rejected before the agent uses it, and the audit records the rejection."
+    },
+    {
+      "id": "fc-203",
+      "module": 77,
+      "page": "course/77-scenario-agentic-tool-builder/02-reviewing-a-proposal-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "A proposal has a forbidden call and a weak description. What is the decision?",
+      "back": "A refusal, with the weakness still noted beside it. The most serious outcome wins and the report keeps all findings."
+    },
+    {
+      "id": "fc-204",
+      "module": 77,
+      "page": "course/77-scenario-agentic-tool-builder/02-reviewing-a-proposal-and-the-practice.md",
+      "domains": [
+        "A2"
+      ],
+      "front": "A timeout request equals the policy ceiling. Is it accepted?",
+      "back": "Yes. A limit is inclusive, so a value that equals it is allowed and one more is flagged."
+    },
+    {
+      "id": "fc-205",
+      "module": 77,
+      "page": "course/77-scenario-agentic-tool-builder/02-reviewing-a-proposal-and-the-practice.md",
+      "domains": [
+        "A1"
+      ],
+      "front": "An approved tool is changed. What happens?",
+      "back": "It goes through the gate again as a new proposal, since the person approved what they read."
+    },
+    {
+      "id": "fc-206",
+      "module": 77,
+      "page": "course/77-scenario-agentic-tool-builder/02-reviewing-a-proposal-and-the-practice.md",
+      "domains": [
+        "A5"
+      ],
+      "front": "Where is the audit of tool runs kept?",
+      "back": "One line per decision and per run, written by the gate and runner and kept where the agent has no access."
+    }
+  ]
+}

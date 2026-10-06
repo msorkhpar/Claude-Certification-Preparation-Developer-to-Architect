@@ -1,0 +1,121 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "63-batch-and-multi-pass-review"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: When a batch fits, how to meet an SLA with it, and what to resubmit",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "Scenario S5, Claude Code in CI. A pipeline runs two Claude jobs: a verdict that a pull request needs before it may merge, and a Sunday scan of every service for outdated patterns. A manager wants both moved to the discounted bulk queue. What should the architect do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Keep the first on the immediate API and send the second through a batch",
+            "correct": true,
+            "says": "A merge verdict is a blocking check that cannot wait for a window without a latency guarantee, while the weekly scan can wait."
+          },
+          {
+            "id": "b",
+            "text": "Move both, since half the price outweighs a wait of unknown length",
+            "correct": false,
+            "says": "Ruled out because \"It is not a reason to move work that cannot\" wait, whatever the discount."
+          },
+          {
+            "id": "c",
+            "text": "Put the first through a batch and keep the second on the immediate API",
+            "correct": false,
+            "says": "Ruled out because \"a blocking check cannot wait for a window that has no latency guarantee\", and this option sends exactly that check there."
+          },
+          {
+            "id": "d",
+            "text": "Move both, but submit a batch every hour so that the wait stays short",
+            "correct": false,
+            "says": "Ruled out because \"the window is a ceiling and not a promise of an hour\", so more frequent submissions do not give the verdict a deadline."
+          }
+        ],
+        "origin": {
+          "path": "course/63-batch-and-multi-pass-review/01-when-a-batch-fits-and-what-to-resubmit.md",
+          "section": "Blocking or latency-tolerant"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "Scenario S6, structured data extraction. A contract-intake service promises that every uploaded document is extracted within 30 hours. Extraction runs as batches that finish within 24 hours, and the results take 2 hours to validate and deliver. What is the longest gap, in hours, between batch submissions that still keeps the promise?",
+        "options": [
+          {
+            "id": "a",
+            "text": "28",
+            "correct": false,
+            "says": "Ruled out because \"worst-case wait = submission interval + processing window + handling time\" includes the 24-hour window, which 28 ignores."
+          },
+          {
+            "id": "b",
+            "text": "24",
+            "correct": false,
+            "says": "Ruled out because \"a nightly batch gives a worst wait of 24 + 24 + handling, which is 50 hours\"."
+          },
+          {
+            "id": "c",
+            "text": "4",
+            "correct": true,
+            "says": "The worst case is the interval plus the window plus the handling, so 30 minus 24 minus 2 leaves 4."
+          },
+          {
+            "id": "d",
+            "text": "6",
+            "correct": false,
+            "says": "Ruled out because the arithmetic starts from \"2 hours to read and deliver the results\", which 6 leaves out."
+          }
+        ],
+        "origin": {
+          "path": "course/63-batch-and-multi-pass-review/01-when-a-batch-fits-and-what-to-resubmit.md",
+          "section": "Meeting an SLA with a window"
+        }
+      }
+    ],
+    "concepts": [
+      "Blocking or latency-tolerant, as the page teaches it",
+      "Meeting an SLA with a window, as the page teaches it"
+    ]
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "60-claude-code-in-ci"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: a review job that runs Claude Code in CI and gates on its JSON (TypeScript)",
+  "lang": "typescript",
+  "main_file": "project/reviewGate.ts",
+  "files": [
+    "project/.github/workflows/claude-review.yml",
+    "project/CLAUDE.md",
+    "project/review-schema.json"
+  ],
+  "test_file": "tests/ciReview.test.ts",
+  "build": [
+    "project/schemaCheck.ts",
+    "junit-file.mjs",
+    "tests/examples/60-ci-gate/typescript/ciGate.ts",
+    "tests/examples/40-workflow-lint/typescript/miniyaml.ts",
+    "tests/examples/40-workflow-lint/typescript/workflowLint.ts",
+    "tests/examples/40-workflow-lint/typescript/example-logger.ts",
+    "tests/examples/60-ci-gate/typescript/example-logger.ts",
+    "logger.ts",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-2/check_files.py",
+    "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-2/project/.github/workflows/claude-review.yml",
+    "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-2/project/CLAUDE.md",
+    "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-2/project/review-schema.json",
+    "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-2/project/reviewGate.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-2/tests/ciReview.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 a valid run posts the findings above the floor and outside the disabled categories",
+      "kind": "main",
+      "says": "A valid run produces the comments above the floor and outside the disabled categories"
+    },
+    {
+      "id": "e1 a failed run fails the job instead of passing it silently",
+      "kind": "edge",
+      "says": "A failed run (non-zero status, not JSON, turn limit, no output) fails the job and says why"
+    },
+    {
+      "id": "e2 an answer that breaks the schema fails the job and names the path of the problem",
+      "kind": "edge",
+      "says": "An answer that breaks the schema fails the job and names the path of the problem"
+    },
+    {
+      "id": "e3 a finding at the failing severity blocks the merge and lower ones only comment",
+      "kind": "edge",
+      "says": "A finding at a failing severity blocks, and lower ones only comment"
+    },
+    {
+      "id": "e4 the prompt lists earlier findings and existing tests and asks for new or unaddressed issues only",
+      "kind": "edge",
+      "says": "The prompt lists earlier findings and existing tests, asks for new or unaddressed issues only, and ends with the diff"
+    },
+    {
+      "id": "e5 the schema file is valid draft 07 and requires every field of a finding",
+      "kind": "edge",
+      "says": "The schema file is valid draft-07, requires every field of a finding and keeps enums closed"
+    },
+    {
+      "id": "e6 the workflow runs claude headless with json output a schema a turn limit read only tools and the context file",
+      "kind": "edge",
+      "says": "The workflow runs Claude headless with JSON output, a schema, a turn limit, read-only tools and the context file, with a timeout and a secret key"
+    },
+    {
+      "id": "e7 the project file states what to report and what to skip with a severity example for each level",
+      "kind": "edge",
+      "says": "The criteria file says what to report and skip, and gives a severity example at each level"
+    },
+    {
+      "id": "e8 no file holds a personal path an address or a key",
+      "kind": "edge",
+      "says": "No file holds a personal path, an address or a key"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/60-claude-code-in-ci/02-context-independence-and-the-practice.md"
+}

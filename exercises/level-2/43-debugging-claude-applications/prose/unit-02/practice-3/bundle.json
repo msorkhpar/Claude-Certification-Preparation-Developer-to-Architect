@@ -1,0 +1,91 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "43-debugging-claude-applications"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 3,
+  "title": "Practice: diagnose a failure from a trace (Java)",
+  "lang": "java",
+  "main_file": "src/main/java/Diagnose.java",
+  "files": [
+    "src/main/java/TryIt.java"
+  ],
+  "test_file": "src/test/java/DiagnoseTest.java",
+  "build": [
+    "src/main/java/Json.java",
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/43-debugging-claude-applications/prose/unit-02/practice-3",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/43-debugging-claude-applications/prose/unit-02/practice-3",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_eachDocumentedHttpErrorMapsToATypeAnOriginAndARecovery()",
+      "kind": "main",
+      "says": "Each documented HTTP error maps to its type, origin and recovery"
+    },
+    {
+      "id": "e1_a429IsARateLimitOrASpendCapAndOtherStatusesFallBackByClass()",
+      "kind": "edge",
+      "says": "The two kinds of 429, the 400 spend limit, and the fallback by class for statuses the table does not list"
+    },
+    {
+      "id": "e2_aSuccessfulResponseCanStillFailByItsStopReason()",
+      "kind": "edge",
+      "says": "A 200 response with a failing stop reason, and the stop reasons that are fine"
+    },
+    {
+      "id": "e3_anEmptyEndTurnIsTheIntegrationWhenTextFollowedTheToolResultAndTheModelOtherwise()",
+      "kind": "edge",
+      "says": "An empty end_turn: our message structure or the model, by the last user message's blocks"
+    },
+    {
+      "id": "e4_aParseFailureIsTheIntegrationWhenAJsonObjectIsInTheTextAndTheModelWhenNot()",
+      "kind": "edge",
+      "says": "A parse failure: our parser or the model, by whether a JSON object is in the text"
+    },
+    {
+      "id": "e5_toolFailuresSplitIntoAModelThatCalledAMissingToolAndOurToolThatRaised()",
+      "kind": "edge",
+      "says": "A tool name the model invented against our own tool raising; a tool-reported error is not a failure"
+    },
+    {
+      "id": "e6_theFirstFailureNamesTheCauseAndALaterGoodResponseMarksItRecovered()",
+      "kind": "edge",
+      "says": "The first failure wins, with its index; a later good response means it recovered; a clean or empty trace is ok"
+    },
+    {
+      "id": "e7_aDroppedConnectionHasNoStatusAndBelongsToTheServiceSide()",
+      "kind": "edge",
+      "says": "A dropped connection has no status and belongs to the service side, and may recover"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/43-debugging-claude-applications/02-reading-a-trace-and-the-practice.md"
+}

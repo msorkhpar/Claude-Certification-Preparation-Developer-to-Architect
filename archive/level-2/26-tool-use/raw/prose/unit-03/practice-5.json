@@ -1,0 +1,159 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "26-tool-use"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 5,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Parallel calls, the tool runner and the practice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "An assistant turn holds three `tool_use` blocks and the second handler fails. Which return follows the page?",
+        "options": [
+          {
+            "id": "a",
+            "text": "One user message that carries every result, the middle one flagged as an error",
+            "correct": true,
+            "says": "The page says to \"return one `tool_result` for each `tool_use` block, all together in the next user message\", and to send `is_error: true` for a call that was not run or failed."
+          },
+          {
+            "id": "b",
+            "text": "Two results only, since the failed call has no output that could be sent back",
+            "correct": false,
+            "says": "Ruled out because \"Skipping a result leaves a `tool_use` without its answer\"."
+          },
+          {
+            "id": "c",
+            "text": "A text message that tells the model which of the calls had failed and why",
+            "correct": false,
+            "says": "Ruled out because every result is \"matched by `tool_use_id`, with every result before any text\", and a plain message names no call."
+          },
+          {
+            "id": "d",
+            "text": "A separate user message for each call, so that each one can be checked alone",
+            "correct": false,
+            "says": "Ruled out because the wrong form is \"a separate user message for each tool result\"."
+          }
+        ],
+        "origin": {
+          "path": "course/26-tool-use/03-parallel-calls-the-tool-runner-and-the-practice.md",
+          "section": "Parallel calls"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "Where does `disable_parallel_tool_use` go in a request?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Within the object that selects how functions get called",
+            "correct": true,
+            "says": "The page says \"Set `disable_parallel_tool_use: true` inside the `tool_choice` object.\""
+          },
+          {
+            "id": "b",
+            "text": "Inside each tool definition, next to its name",
+            "correct": false,
+            "says": "Ruled out because \"It is a field of the `tool_choice` object.\""
+          },
+          {
+            "id": "c",
+            "text": "In the system prompt, as a line of instructions",
+            "correct": false,
+            "says": "Ruled out because \"the field is part of the request body\", and a line in a prompt has no such effect."
+          },
+          {
+            "id": "d",
+            "text": "Alongside `max_tokens`, at the top level of the body",
+            "correct": false,
+            "says": "Ruled out because \"It is not a top-level request parameter.\""
+          }
+        ],
+        "origin": {
+          "path": "course/26-tool-use/03-parallel-calls-the-tool-runner-and-the-practice.md",
+          "section": "Turning parallel calls off"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A loop forced `{\"type\": \"tool\", \"name\": \"lookup\"}` on every request. What goes wrong?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The model writes a plan in text before each tool call",
+            "correct": false,
+            "says": "Ruled out because \"the API prefills the assistant message to force a tool to be used\", so no plan in text comes before the call."
+          },
+          {
+            "id": "b",
+            "text": "The model swaps in another tool when it judges one fits better",
+            "correct": false,
+            "says": "Ruled out because the `tool` value \"forces Claude to always use a particular tool\", with a `name`."
+          },
+          {
+            "id": "c",
+            "text": "No final answer in plain text could ever come out",
+            "correct": true,
+            "says": "The page says \"If it were sent again, the model would have to call a tool each time and could never give a final answer.\""
+          },
+          {
+            "id": "d",
+            "text": "Plain-text replies still arrive as usual after the first call",
+            "correct": false,
+            "says": "Ruled out because \"the model would have to call a tool each time\", so a plain-text reply never arrives."
+          }
+        ],
+        "origin": {
+          "path": "course/26-tool-use/03-parallel-calls-the-tool-runner-and-the-practice.md",
+          "section": "Check tool_choice before you send it"
+        }
+      }
+    ],
+    "concepts": [
+      "Check tool_choice before you send it, as the page teaches it",
+      "Parallel calls, as the page teaches it",
+      "Parallel calls, the tool runner and the practice, as the page teaches it",
+      "The tool runner, as the page teaches it",
+      "Tool results are untrusted input, as the page teaches it",
+      "Turning parallel calls off, as the page teaches it"
+    ]
+  }
+}

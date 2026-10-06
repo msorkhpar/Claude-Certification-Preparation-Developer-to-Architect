@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "37-agent-frameworks-compared"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: Graph-based, model-driven and typed frameworks",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A bank's loan flow must always check identity, then credit, then ask a person to approve, and an interrupted application must not repeat the credit check. Which style fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A single prompt, because the order is stated in the text of the call",
+            "correct": false,
+            "says": "Ruled out because a prompt keeps no state, and the page gives the graph, not the prompt, the job of resuming: \"the run resumes from the last checkpoint\"."
+          },
+          {
+            "id": "b",
+            "text": "A model-driven loop, because the model picks each next step on its own",
+            "correct": false,
+            "says": "Ruled out because the table gives the next step to \"The model, at each turn\", and the loan order must always be fixed."
+          },
+          {
+            "id": "c",
+            "text": "A typed agent, because the loan is a record of fixed shape and size",
+            "correct": false,
+            "says": "Ruled out because a typed agent has \"Validated output\" but \"Types guard the edges of the model's freedom. They do not choose the route.\""
+          },
+          {
+            "id": "d",
+            "text": "A graph, because each node saves state and resumes after a stop",
+            "correct": true,
+            "says": "The page says \"Checkpointers persist a thread's graph state as checkpoints\", and a resumed run \"repeats no earlier node\", so the credit check is not paid for twice."
+          }
+        ],
+        "origin": {
+          "path": "course/37-agent-frameworks-compared/01-three-families-of-agent-frameworks.md",
+          "section": "Graph-based: you draw the route"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A support agent starts receiving a kind of request that its authors never listed. Which style copes without anyone adding a path for it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A loop in which the model chooses each next step",
+            "correct": true,
+            "says": "The page says \"The route is whatever the model chooses, so the same code handles a case nobody planned for.\""
+          },
+          {
+            "id": "b",
+            "text": "A graph whose edges pick the next node from the state",
+            "correct": false,
+            "says": "Ruled out because \"a case you did not draw has no path\", and the edges are drawn in advance."
+          },
+          {
+            "id": "c",
+            "text": "A typed agent whose replies must fit an output schema",
+            "correct": false,
+            "says": "Ruled out because \"Types guard the edges of the model's freedom. They do not choose the route.\""
+          },
+          {
+            "id": "d",
+            "text": "A checkpointer that restores the run to its last state",
+            "correct": false,
+            "says": "Ruled out because \"A checkpoint is a copy of the state at a point in the graph.\", which helps a run resume and adds no path."
+          }
+        ],
+        "origin": {
+          "path": "course/37-agent-frameworks-compared/01-three-families-of-agent-frameworks.md",
+          "section": "Model-driven: the model draws the route"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A model-driven loop keeps calling the same tool and never produces a final reply. Which control does the engineering post name for this?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A checkpoint saved after each tool call",
+            "correct": false,
+            "says": "Ruled out because \"A checkpoint is a copy of the state at a point in the graph.\", which saves the state and does not end a loop."
+          },
+          {
+            "id": "b",
+            "text": "A longer context window for the whole conversation",
+            "correct": false,
+            "says": "Ruled out because \"a loop that never ends must be cut off\", and a larger window does not give the loop an end."
+          },
+          {
+            "id": "c",
+            "text": "A ceiling on the number of rounds that it is allowed",
+            "correct": true,
+            "says": "The post lists \"stopping conditions (such as a maximum number of iterations) to maintain control.\""
+          },
+          {
+            "id": "d",
+            "text": "A second model that repeats each call to confirm it",
+            "correct": false,
+            "says": "Ruled out because a repeated call adds cost without a stop, and \"Agentic systems often trade latency and cost for better task performance\"."
+          }
+        ],
+        "origin": {
+          "path": "course/37-agent-frameworks-compared/01-three-families-of-agent-frameworks.md",
+          "section": "Model-driven: the model draws the route"
+        }
+      }
+    ]
+  }
+}

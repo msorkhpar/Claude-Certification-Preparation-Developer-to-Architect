@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "18-model-choice-cost-and-migration"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: Matching a tier to a workload",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A team labels support tickets with one word each, and its tests show the cheapest tier is as accurate as the others. Which choice does the page back?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The newest release, since a later model has the lowest price",
+            "correct": false,
+            "says": "Ruled out because \"A newer model can be cheaper than the one it replaces, and the reverse can happen\"."
+          },
+          {
+            "id": "b",
+            "text": "The most capable tier, because ticket text can always hide a hard case",
+            "correct": false,
+            "says": "Ruled out because a tier above Opus is \"earned by failing an evaluation, not assumed\"."
+          },
+          {
+            "id": "c",
+            "text": "The middle tier, since it balances the tests against the price list",
+            "correct": false,
+            "says": "Ruled out because the method keeps \"the cheapest tier that passes\", not a tier in the middle."
+          },
+          {
+            "id": "d",
+            "text": "The smallest model, since the extra capability above it buys nothing",
+            "correct": true,
+            "says": "The page's method is to move down \"until quality drops, and keep the last tier that held\", and the tests show nothing is lost at the cheapest tier."
+          }
+        ],
+        "origin": {
+          "path": "course/18-model-choice-cost-and-migration/01-matching-a-tier-to-a-workload.md",
+          "section": "Where the documentation starts you"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A job feeds 300,000 tokens to a model and expects a short answer. One model is cheapest by price per million. What rules it out first?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Its context window is smaller than what is sent",
+            "correct": true,
+            "says": "The page says \"a 300,000-token input rules Haiku 4.5 out whatever its price\", because the input must fit the context window."
+          },
+          {
+            "id": "b",
+            "text": "Its latency is the highest of all the models in the table",
+            "correct": false,
+            "says": "Ruled out because the latency column is relative and \"depends on prompt length, output length, and thinking effort\"."
+          },
+          {
+            "id": "c",
+            "text": "Its tokenizer is older than the tokenizers of the others",
+            "correct": false,
+            "says": "Ruled out because \"A tokenizer change moves the count\" and does not block an input."
+          },
+          {
+            "id": "d",
+            "text": "Its output price is higher than its own input price",
+            "correct": false,
+            "says": "Ruled out because the page states \"Output costs five times input on every row\", which is a cost fact and not a limit."
+          }
+        ],
+        "origin": {
+          "path": "course/18-model-choice-cost-and-migration/01-matching-a-tier-to-a-workload.md",
+          "section": "Four tiers, four trade-offs"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A model lists a price 20% lower per token than its predecessor, but its tokenizer produces about 30% more tokens for the same text. What does the page's reasoning give for the cost of one task?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It stays equal, because a tokenizer change moves only the output side",
+            "correct": false,
+            "says": "Ruled out because \"A tokenizer change moves the count.\""
+          },
+          {
+            "id": "b",
+            "text": "It falls by about 20%, because the lower rate applies to the whole bill",
+            "correct": false,
+            "says": "Ruled out because the two facts \"make the price per token a poor proxy for the price per task\"."
+          },
+          {
+            "id": "c",
+            "text": "It rises by about 4%, because 0.8 x 1.3 is 1.04",
+            "correct": true,
+            "says": "The page says the newer tokenizer \"produces approximately 30% more tokens for the same text\", so 0.8 times 1.3 is 1.04 times the cost per task."
+          },
+          {
+            "id": "d",
+            "text": "It falls by about 10%, because the two changes average out",
+            "correct": false,
+            "says": "Ruled out because the page says to \"compare cost per task on a sample, not per million tokens\", and the two factors multiply rather than average."
+          }
+        ],
+        "origin": {
+          "path": "course/18-model-choice-cost-and-migration/01-matching-a-tier-to-a-workload.md",
+          "section": "A price table is read, not guessed"
+        }
+      }
+    ]
+  }
+}

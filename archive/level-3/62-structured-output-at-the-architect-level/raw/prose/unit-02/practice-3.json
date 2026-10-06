@@ -1,0 +1,317 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "62-structured-output-at-the-architect-level"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: an extraction pipeline that admits absence, checks what a schema cannot, retries with feedback and is measured on every document (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an extraction pipeline that admits absence, checks what a schema cannot, retries with feedback and is measured on every document"
+    },
+    {
+      "type": "para",
+      "text": "A team extracts the vendor, the currency and the totals from invoices. The schema makes every field required, so when an invoice names no vendor the model invents one; a retry loop repeats the same request ten times for a value the document never contained; the accuracy report counts only the documents that passed validation and says 99 percent. In this practice you write the pipeline's decisions: the validation of a record (what a schema cannot check), the extraction loop with retries that carry feedback, the merge of the chunks of a long document, the accuracy measured on every document, and the tool choice of the request. The model is not called: the tests give you documents, scripted model replies and labels. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`validate`, `extract_document`, `merge_chunks`, `accuracy`, `request_choice`); TypeScript has the camel-case names (`extractDocument`, `mergeChunks`, `requestChoice`); Java has the same camel-case names as static methods of `Extraction`; Kotlin has top-level functions. Results are maps and lists, as the starters show. The model reply is a function `call_model(document, feedback)`."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working pipeline with ten gaps cut out of it. Everything that is plumbing is written and correct: the type and enum checks of `validate`, the loop of `extract_document` with its retry limit and feedback, the chunk merge, the counting of `accuracy` and the model list. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_quote_found` unlocks `e1`: a quote supports a value only when it is a non-empty string found in the document.",
+        "`_currency_ok` unlocks `e6`: the currency values the schema allows.",
+        "`_detail_missing` unlocks `e6`: `other` needs a detail.",
+        "`_retryable` unlocks `e2`, `e3` and `e4`: which errors a second look can fix.",
+        "`_status` unlocks `m1`, `e3` and `e5`: `valid`, `needs_review` or `failed`.",
+        "`_is_unset` unlocks `e7`: a merged field with no real value yet.",
+        "`_is_conflict` unlocks `e7`: two chunks that disagree, recorded once.",
+        "`_report` unlocks `e8`: accuracy over every document and over the validated ones.",
+        "`_forced_choice` unlocks `e9`: the tool choice for a model that accepts a forced one.",
+        "`_check_semantics` unlocks `e5`: the sum of the line items and the stated total."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About fifteen lines in all. The sections below describe the whole pipeline, so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "A record has the keys `vendor` (a string or `null`), `currency` (`USD`, `EUR`, `GBP`, `other` or `unclear`), `currency_detail` (a string, required when the currency is `other`), `line_items` (a list of numbers), `stated_total` (a number or `null`), `calculated_total` (a number), `conflict_detected` (a boolean) and `provenance` (an object that maps a field to the quote of the document that supports it)."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`validate(record, document, required=())` returns a list of `{kind, field, message}`:",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`syntax`: a missing key (return those alone), or a value of the wrong type or outside its enum, a missing detail for `other`, a `provenance` that is not an object;",
+              "`semantic`: `calculated_total` is not the sum of the line items (to half a cent), or `stated_total` differs from `calculated_total` while `conflict_detected` is false;",
+              "`ungrounded`: `vendor`, `currency` or `stated_total` has a value (not `null`, not `unclear`) and no non-empty quote in `provenance` that appears in the document;",
+              "`absent`: a field in `required` is `null` or `unclear`. A value that is `null` or `unclear` needs no quote, and a conflict the model flagged is information and not an error."
+            ]
+          }
+        ],
+        "`extract_document(document, call_model, required=(), max_retries=2)` calls the model with `(document, None)`, validates, and retries with `(document, {\"previous\": record, \"errors\": [...]})` only for errors a second look can fix (`syntax`, `semantic`, `ungrounded`), never for `absent`. It stops after `max_retries` retries. It returns `{\"status\", \"record\", \"attempts\", \"errors\"}`: `valid` with no errors and no conflict, `needs_review` when the only errors are `absent` or the model flagged a conflict (neither is retried), and `failed` otherwise.",
+        "`merge_chunks(records)` merges the records of the chunks of one document: for `vendor`, `currency` and `stated_total` keep the first value that is neither `null` nor `unclear` together with its quote (and the detail for the currency), record a field in `conflicts` once when a later chunk disagrees, concatenate the line items, recompute `calculated_total` (two decimals), and set `conflict_detected` when any chunk flagged one or a conflict was found.",
+        "`accuracy(results, labels)` returns `{\"all_documents\", \"validated_only\", \"validated\", \"total\"}`: a document is correct when it is `valid` and its vendor and stated total equal the label's. `all_documents` divides by every labelled document and `validated_only` by the valid ones (two decimals; zero when the denominator is zero).",
+        "`request_choice(model, tools, forced=None)` returns `{\"tool_choice\", \"strict\", \"verify_reply\"}` with `strict` always true. On the models in `NO_FORCING` use `auto` and set `verify_reply` to true. Elsewhere use the forced tool when `forced` is given, `any` when there are several tools, and the one tool by name otherwise; `verify_reply` is false."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Nullable fields.** A required field invites an invented value; a nullable one lets the model say the document does not give it. *You should see* an invoice with no vendor validate with `vendor` null and no quote, and an invented vendor fail as ungrounded.",
+        "**Provenance.** A quote that must appear in the document is a check the schema cannot make. *You should see* a made-up quote refused.",
+        "**Retry only what can improve.** Feedback names the errors a second look can fix; a value the document does not contain stays absent however often it is asked for. *You should see* one retry with the document, the failed record and the errors, and no retry for an absent value.",
+        "**Conflicts are information.** A total that differs from the line items and is flagged goes to review. *You should see* `needs_review` after one attempt.",
+        "**Honest measurement.** Accuracy on the validated documents alone is higher than the truth because the failures leave the denominator. *You should see* 0.5 on all documents and 0.83 on the validated ones for the same results.",
+        "**The tool choice.** A forced tool call is rejected by some current models and changing `tool_choice` invalidates cached message blocks. *You should see* a forced tool where the model allows it and `auto` with a reply check where it does not."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A document with every value present and quoted comes back valid on the first attempt"
+        ],
+        [
+          "`e1`",
+          "A value the document does not give is null and needs no quote, while an invented value fails as ungrounded"
+        ],
+        [
+          "`e2`",
+          "A retry carries the document, the failed record and only the errors a second look can fix"
+        ],
+        [
+          "`e3`",
+          "A required value reported as absent is not retried and goes to review"
+        ],
+        [
+          "`e4`",
+          "Retries stop after the limit and the document is marked failed"
+        ],
+        [
+          "`e5`",
+          "A total that differs from the line items is a semantic error; a flagged conflict goes to review without a retry"
+        ],
+        [
+          "`e6`",
+          "Currency takes `unclear` and `other` with a detail, and anything else is a syntax error"
+        ],
+        [
+          "`e7`",
+          "Chunk results merge by keeping the first value and recording a conflict when two chunks disagree"
+        ],
+        [
+          "`e8`",
+          "Accuracy counts every document and not only the validated ones"
+        ],
+        [
+          "`e9`",
+          "The request forces a tool where the model allows it and falls back to `auto` with a reply check where it does not"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Objects;\nimport java.util.Set;\nimport java.util.function.BiFunction;\n\n/** An extraction pipeline that admits absence, checks what a schema cannot, retries with feedback and is measured on every document. See ../../statement.md. Results are JSON-like maps. */\nfinal class Extraction {\n    private static final System.Logger LOG = System.getLogger(Extraction.class.getName());\n    private Extraction() {}\n\n    static final List<String> CURRENCIES = List.of(\"USD\", \"EUR\", \"GBP\", \"other\", \"unclear\");\n    private static final List<String> KEYS = List.of(\"vendor\", \"currency\", \"currency_detail\", \"line_items\", \"stated_total\", \"calculated_total\", \"conflict_detected\", \"provenance\");\n    private static final List<String> RETRYABLE = List.of(\"syntax\", \"semantic\", \"ungrounded\");\n    /** Models whose API rejects tool_choice any and tool, as read on 2026-10-03. */\n    private static final Set<String> NO_FORCING = Set.of(\"claude-opus-5-5\", \"claude-sonnet-5-5\", \"claude-fable-5-1\", \"claude-mythos-5-1\");\n\n    private static Map<String, Object> map(Object... kv) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);\n        return m;\n    }\n\n    private static boolean isNumber(Object value) {\n        return value instanceof Number;\n    }\n\n    private static double round2(double x) {\n        return Math.round(x * 100) / 100.0;\n    }\n\n    private static void err(List<Map<String, Object>> errors, String kind, String field, String message) {\n        errors.add(map(\"kind\", kind, \"field\", field, \"message\", message));\n    }\n\n    private static boolean quoteFound(Object quote, String document) {\n        return quote instanceof String q && !q.isEmpty() && document.contains(q);\n    }\n\n    private static boolean currencyOk(Object currency) {\n        return CURRENCIES.contains(currency);\n    }\n\n    private static boolean detailMissing(Object currency, Object detail) {\n        return \"other\".equals(currency) && !(detail instanceof String d && !d.isBlank());\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static void checkSemantics(Map<String, Object> record, List<Map<String, Object>> errors) {\n        Object items = record.get(\"line_items\");\n        double sum = 0;\n        for (Object n : (List<Object>) items) sum += ((Number) n).doubleValue();\n        double calculated = ((Number) record.get(\"calculated_total\")).doubleValue();\n        if (Math.abs(sum - calculated) > 0.005) err(errors, \"semantic\", \"calculated_total\", calculated + \" is not the sum of the line items, \" + sum);\n        if (record.get(\"stated_total\") != null) {\n            double stated = ((Number) record.get(\"stated_total\")).doubleValue();\n            if (Math.abs(stated - calculated) > 0.005 && !((Boolean) record.get(\"conflict_detected\"))) {\n                err(errors, \"semantic\", \"stated_total\", \"the stated total \" + stated + \" differs from the calculated total \" + calculated + \" but conflict_detected is false\");\n            }\n        }\n    }\n\n    static List<Map<String, Object>> validate(Map<String, Object> record, String document) {\n        LOG.log(System.Logger.Level.DEBUG, \"validate input: {0}\", record);\n        return validate(record, document, List.of());\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static List<Map<String, Object>> validate(Map<String, Object> record, String document, List<String> required) {\n        List<Map<String, Object>> errors = new ArrayList<>();\n        for (String key : KEYS) if (!record.containsKey(key)) err(errors, \"syntax\", key, \"is missing\");\n        if (!errors.isEmpty()) return errors;\n        if (record.get(\"vendor\") != null && !(record.get(\"vendor\") instanceof String)) err(errors, \"syntax\", \"vendor\", \"must be a string or null\");\n        if (!currencyOk(record.get(\"currency\"))) err(errors, \"syntax\", \"currency\", \"'\" + record.get(\"currency\") + \"' is not one of \" + CURRENCIES);\n        Object detail = record.get(\"currency_detail\");\n        if (detailMissing(record.get(\"currency\"), detail)) err(errors, \"syntax\", \"currency_detail\", \"is required when the currency is other\");\n        Object items = record.get(\"line_items\");\n        if (!(items instanceof List<?> list && list.stream().allMatch(Extraction::isNumber))) err(errors, \"syntax\", \"line_items\", \"must be a list of numbers\");\n        if (record.get(\"stated_total\") != null && !isNumber(record.get(\"stated_total\"))) err(errors, \"syntax\", \"stated_total\", \"must be a number or null\");\n        if (!isNumber(record.get(\"calculated_total\"))) err(errors, \"syntax\", \"calculated_total\", \"must be a number\");\n        if (!(record.get(\"conflict_detected\") instanceof Boolean)) err(errors, \"syntax\", \"conflict_detected\", \"must be true or false\");\n        if (!(record.get(\"provenance\") instanceof Map)) err(errors, \"syntax\", \"provenance\", \"must be an object\");\n        if (!errors.isEmpty()) return errors;\n        checkSemantics(record, errors);\n        Map<String, Object> provenance = (Map<String, Object>) record.get(\"provenance\");\n        for (String field : List.of(\"vendor\", \"currency\", \"stated_total\")) {\n            Object value = record.get(field);\n            if (value == null || \"unclear\".equals(value)) continue;\n            Object quote = provenance.get(field);\n            if (!quoteFound(quote, document)) err(errors, \"ungrounded\", field, field + \" has no quote that appears in the document\");\n        }\n        for (String field : required) {\n            Object value = record.get(field);\n            if (value == null || \"unclear\".equals(value)) err(errors, \"absent\", field, \"the document gave no value\");\n        }\n        return errors;\n    }\n\n    private static List<Object> retryableErrors(List<Map<String, Object>> errors) {\n        List<Object> retryable = new ArrayList<>();\n        for (Map<String, Object> e : errors) if (RETRYABLE.contains(e.get(\"kind\"))) retryable.add(e);\n        return retryable;\n    }\n\n    private static String status(List<Map<String, Object>> errors, Map<String, Object> record) {\n        String status;\n        if (!errors.isEmpty()) status = errors.stream().allMatch(e -> \"absent\".equals(e.get(\"kind\"))) ? \"needs_review\" : \"failed\";\n        else if (Boolean.TRUE.equals(record.get(\"conflict_detected\"))) status = \"needs_review\";\n        else status = \"valid\";\n        return status;\n    }\n\n    static Map<String, Object> extractDocument(String document, BiFunction<String, Map<String, Object>, Map<String, Object>> callModel, List<String> required, int maxRetries) {\n        Map<String, Object> feedback = null;\n        int attempts = 0;\n        Map<String, Object> record;\n        List<Map<String, Object>> errors;\n        while (true) {\n            attempts++;\n            record = callModel.apply(document, feedback);\n            errors = validate(record, document, required);\n            if (errors.isEmpty()) break;\n            List<Object> retryable = retryableErrors(errors);\n            if (retryable.isEmpty()) break;\n            if (attempts > maxRetries) break;\n            feedback = map(\"previous\", record, \"errors\", retryable);\n        }\n        String status = status(errors, record);\n        return map(\"status\", status, \"record\", record, \"attempts\", attempts, \"errors\", errors);\n    }\n\n    private static boolean isUnset(Object value) {\n        return value == null || \"unclear\".equals(value);\n    }\n\n    private static boolean isConflict(Object current, Object value, Object field, List<Object> conflicts) {\n        return !current.equals(value) && !conflicts.contains(field);\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> mergeChunks(List<Map<String, Object>> records) {\n        Map<String, Object> provenance = new LinkedHashMap<>();\n        List<Object> lineItems = new ArrayList<>();\n        List<Object> conflicts = new ArrayList<>();\n        Map<String, Object> merged = map(\"vendor\", null, \"currency\", \"unclear\", \"currency_detail\", null, \"line_items\", lineItems, \"stated_total\", null, \"calculated_total\", 0.0,\n                \"conflict_detected\", false, \"provenance\", provenance, \"conflicts\", conflicts);\n        for (Map<String, Object> record : records) {\n            for (String field : List.of(\"vendor\", \"currency\", \"stated_total\")) {\n                Object value = record.get(field);\n                if (value == null || \"unclear\".equals(value)) continue;\n                Object current = merged.get(field);\n                if (isUnset(current)) {\n                    merged.put(field, value);\n                    provenance.put(field, ((Map<String, Object>) record.get(\"provenance\")).get(field));\n                    if (field.equals(\"currency\")) merged.put(\"currency_detail\", record.get(\"currency_detail\"));\n                } else if (isConflict(current, value, field, conflicts)) {\n                    conflicts.add(field);\n                }\n            }\n            if (record.get(\"line_items\") != null) lineItems.addAll((List<Object>) record.get(\"line_items\"));\n            if (Boolean.TRUE.equals(record.get(\"conflict_detected\"))) merged.put(\"conflict_detected\", true);\n        }\n        double sum = 0;\n        for (Object n : lineItems) sum += ((Number) n).doubleValue();\n        merged.put(\"calculated_total\", round2(sum));\n        if (!conflicts.isEmpty()) merged.put(\"conflict_detected\", true);\n        return merged;\n    }\n\n    private static Map<String, Object> report(int correct, int valid, int total) {\n        return map(\"all_documents\", total > 0 ? round2((double) correct / total) : 0.0, \"validated_only\", valid > 0 ? round2((double) correct / valid) : 0.0, \"validated\", valid, \"total\", total);\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> accuracy(Map<String, Map<String, Object>> results, Map<String, Map<String, Object>> labels) {\n        int valid = 0;\n        int correct = 0;\n        for (Map.Entry<String, Map<String, Object>> entry : labels.entrySet()) {\n            Map<String, Object> result = results.get(entry.getKey());\n            boolean isValid = result != null && \"valid\".equals(result.get(\"status\"));\n            if (isValid) valid++;\n            if (isValid) {\n                Map<String, Object> record = (Map<String, Object>) result.get(\"record\");\n                Map<String, Object> label = entry.getValue();\n                if (Objects.equals(record.get(\"vendor\"), label.get(\"vendor\")) && ((Number) record.get(\"stated_total\")).doubleValue() == ((Number) label.get(\"stated_total\")).doubleValue()) correct++;\n            }\n        }\n        int total = labels.size();\n        return report(correct, valid, total);\n    }\n\n    private static Map<String, Object> forcedChoice(List<String> tools, String forced) {\n        if (forced != null) return map(\"tool_choice\", map(\"type\", \"tool\", \"name\", forced), \"strict\", true, \"verify_reply\", false);\n        if (tools.size() > 1) return map(\"tool_choice\", map(\"type\", \"any\"), \"strict\", true, \"verify_reply\", false);\n        return map(\"tool_choice\", map(\"type\", \"tool\", \"name\", tools.get(0)), \"strict\", true, \"verify_reply\", false);\n    }\n\n    static Map<String, Object> requestChoice(String model, List<String> tools, String forced) {\n        if (NO_FORCING.contains(model)) return map(\"tool_choice\", map(\"type\", \"auto\"), \"strict\", true, \"verify_reply\", true);\n        return forcedChoice(tools, forced);\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.*;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        String doc = \"Invoice from Acme Tools.\\nItems: 100.00 + 20.50\\nTotal due: 120.50 EUR\\nThank you.\";\n        Map<String, Object> good = good();\n\n        // A stand-in for the model, like the tests use: it always answers with the same record.\n        Map<String, Object> result = Extraction.extractDocument(doc, (document, feedback) -> {\n            System.out.println(\"model called, feedback: \" + feedback);\n            return good();\n        }, List.of(), 2);\n        System.out.println(\"status: \" + (result == null ? null : result.get(\"status\")));\n        System.out.println(\"attempts: \" + (result == null ? null : result.get(\"attempts\")));\n\n        // validate() on its own: a record whose calculated total disagrees with its line items.\n        Map<String, Object> bad = good();\n        bad.put(\"calculated_total\", 99.0);\n        System.out.println(\"errors: \" + Extraction.validate(bad, doc));\n    }\n\n    static Map<String, Object> good() {\n        Map<String, Object> provenance = new LinkedHashMap<>();\n        provenance.put(\"vendor\", \"Invoice from Acme Tools\");\n        provenance.put(\"currency\", \"120.50 EUR\");\n        provenance.put(\"stated_total\", \"Total due: 120.50 EUR\");\n        Map<String, Object> m = new LinkedHashMap<>();\n        m.put(\"vendor\", \"Acme Tools\");\n        m.put(\"currency\", \"EUR\");\n        m.put(\"currency_detail\", null);\n        m.put(\"line_items\", List.of(100.0, 20.5));\n        m.put(\"stated_total\", 120.5);\n        m.put(\"calculated_total\", 120.5);\n        m.put(\"conflict_detected\", false);\n        m.put(\"provenance\", provenance);\n        return m;\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Objects;\nimport java.util.Set;\nimport java.util.function.BiFunction;\n\n/** An extraction pipeline that admits absence, checks what a schema cannot, retries with feedback and is measured on every document. See ../../statement.md. Results are JSON-like maps. */\nfinal class Extraction {\n    private static final System.Logger LOG = System.getLogger(Extraction.class.getName());\n    private Extraction() {}\n\n    static final List<String> CURRENCIES = List.of(\"USD\", \"EUR\", \"GBP\", \"other\", \"unclear\");\n    private static final List<String> KEYS = List.of(\"vendor\", \"currency\", \"currency_detail\", \"line_items\", \"stated_total\", \"calculated_total\", \"conflict_detected\", \"provenance\");\n    private static final List<String> RETRYABLE = List.of(\"syntax\", \"semantic\", \"ungrounded\");\n    /** Models whose API rejects tool_choice any and tool, as read on 2026-10-03. */\n    private static final Set<String> NO_FORCING = Set.of(\"claude-opus-5-5\", \"claude-sonnet-5-5\", \"claude-fable-5-1\", \"claude-mythos-5-1\");\n\n    private static Map<String, Object> map(Object... kv) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);\n        return m;\n    }\n\n    private static boolean isNumber(Object value) {\n        return value instanceof Number;\n    }\n\n    private static double round2(double x) {\n        return Math.round(x * 100) / 100.0;\n    }\n\n    private static void err(List<Map<String, Object>> errors, String kind, String field, String message) {\n        errors.add(map(\"kind\", kind, \"field\", field, \"message\", message));\n    }\n\n    private static boolean quoteFound(Object quote, String document) {\n        // TODO 1 of 10 (finish this to pass e1): is a provenance quote real?\n        // Receives the quote the model gave for a field and the document text. Returns true only when the quote is a non-empty String that\n        // appears in the document, so an invented value cannot be supported by an invented quote.\n        // Example: quoteFound(\"Acme Ltd\", \"Invoice from Acme Ltd\") -> true, quoteFound(\"Zed Corp\", \"Invoice from Acme Ltd\") -> false\n        return true;\n    }\n\n    private static boolean currencyOk(Object currency) {\n        // TODO 2 of 10 (finish this to pass e6): is this a currency the schema allows?\n        // Receives the value of \"currency\". Returns true when it is one of CURRENCIES (\"unclear\" and \"other\" count, anything else does not).\n        // Example: currencyOk(\"unclear\") -> true, currencyOk(\"dollars\") -> false\n        return true;\n    }\n\n    private static boolean detailMissing(Object currency, Object detail) {\n        // TODO 3 of 10 (finish this to pass e6): is a required currency detail missing?\n        // Receives \"currency\" and \"currency_detail\". Returns true when the currency is \"other\" and the detail is not a non-blank String.\n        // Example: detailMissing(\"other\", \"  \") -> true, detailMissing(\"other\", \"CHF\") -> false, detailMissing(\"USD\", null) -> false\n        return false;\n    }\n\n    private static void checkSemantics(Map<String, Object> record, List<Map<String, Object>> errors) {\n        // TODO 10 of 10 (finish this to pass e5): report what a schema cannot check about the numbers.\n        // Receives a record whose types are already valid and the `errors` list; add errors with err(errors, \"semantic\", field, message).\n        // Add one on \"calculated_total\" when it is not the sum of \"line_items\" (to half a cent), and one on \"stated_total\" when it is not\n        // null, differs from calculated_total (by more than half a cent) and \"conflict_detected\" is false; a conflict the model flagged\n        // is information, not an error. It returns nothing.\n        // Example: line_items [10, 5], calculated_total 15, stated_total 20, conflict_detected false -> one semantic error on stated_total\n    }\n\n    static List<Map<String, Object>> validate(Map<String, Object> record, String document) {\n        LOG.log(System.Logger.Level.DEBUG, \"validate input: {0}\", record);\n        return validate(record, document, List.of());\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static List<Map<String, Object>> validate(Map<String, Object> record, String document, List<String> required) {\n        List<Map<String, Object>> errors = new ArrayList<>();\n        for (String key : KEYS) if (!record.containsKey(key)) err(errors, \"syntax\", key, \"is missing\");\n        if (!errors.isEmpty()) return errors;\n        if (record.get(\"vendor\") != null && !(record.get(\"vendor\") instanceof String)) err(errors, \"syntax\", \"vendor\", \"must be a string or null\");\n        if (!currencyOk(record.get(\"currency\"))) err(errors, \"syntax\", \"currency\", \"'\" + record.get(\"currency\") + \"' is not one of \" + CURRENCIES);\n        Object detail = record.get(\"currency_detail\");\n        if (detailMissing(record.get(\"currency\"), detail)) err(errors, \"syntax\", \"currency_detail\", \"is required when the currency is other\");\n        Object items = record.get(\"line_items\");\n        if (!(items instanceof List<?> list && list.stream().allMatch(Extraction::isNumber))) err(errors, \"syntax\", \"line_items\", \"must be a list of numbers\");\n        if (record.get(\"stated_total\") != null && !isNumber(record.get(\"stated_total\"))) err(errors, \"syntax\", \"stated_total\", \"must be a number or null\");\n        if (!isNumber(record.get(\"calculated_total\"))) err(errors, \"syntax\", \"calculated_total\", \"must be a number\");\n        if (!(record.get(\"conflict_detected\") instanceof Boolean)) err(errors, \"syntax\", \"conflict_detected\", \"must be true or false\");\n        if (!(record.get(\"provenance\") instanceof Map)) err(errors, \"syntax\", \"provenance\", \"must be an object\");\n        if (!errors.isEmpty()) return errors;\n        checkSemantics(record, errors);\n        Map<String, Object> provenance = (Map<String, Object>) record.get(\"provenance\");\n        for (String field : List.of(\"vendor\", \"currency\", \"stated_total\")) {\n            Object value = record.get(field);\n            if (value == null || \"unclear\".equals(value)) continue;\n            Object quote = provenance.get(field);\n            if (!quoteFound(quote, document)) err(errors, \"ungrounded\", field, field + \" has no quote that appears in the document\");\n        }\n        for (String field : required) {\n            Object value = record.get(field);\n            if (value == null || \"unclear\".equals(value)) err(errors, \"absent\", field, \"the document gave no value\");\n        }\n        return errors;\n    }\n\n    private static List<Object> retryableErrors(List<Map<String, Object>> errors) {\n        // TODO 4 of 10 (finish this to pass e2, e3 and e4): keep the errors a second look can fix.\n        // Receives a list of {kind, field, message} errors. Returns those whose kind is in RETRYABLE (syntax, semantic, ungrounded), in\n        // order; an \"absent\" error is never retried. Example: [{kind=absent}, {kind=syntax}] -> [{kind=syntax}]\n        return new ArrayList<>();\n    }\n\n    private static String status(List<Map<String, Object>> errors, Map<String, Object> record) {\n        // TODO 5 of 10 (finish this to pass m1, e3 and e5): the status of a finished extraction.\n        // Receives the errors left after the last attempt and the last record. Returns \"needs_review\" when the only errors are \"absent\"\n        // ones, or when there are no errors and the model flagged a conflict (\"conflict_detected\"); \"failed\" for any other error; \"valid\"\n        // otherwise. Example: no errors and conflict_detected false -> \"valid\"; one absent error -> \"needs_review\"; one syntax error -> \"failed\"\n        return \"failed\";\n    }\n\n    static Map<String, Object> extractDocument(String document, BiFunction<String, Map<String, Object>, Map<String, Object>> callModel, List<String> required, int maxRetries) {\n        Map<String, Object> feedback = null;\n        int attempts = 0;\n        Map<String, Object> record;\n        List<Map<String, Object>> errors;\n        while (true) {\n            attempts++;\n            record = callModel.apply(document, feedback);\n            errors = validate(record, document, required);\n            if (errors.isEmpty()) break;\n            List<Object> retryable = retryableErrors(errors);\n            if (retryable.isEmpty()) break;\n            if (attempts > maxRetries) break;\n            feedback = map(\"previous\", record, \"errors\", retryable);\n        }\n        String status = status(errors, record);\n        return map(\"status\", status, \"record\", record, \"attempts\", attempts, \"errors\", errors);\n    }\n\n    private static boolean isUnset(Object value) {\n        // TODO 6 of 10 (finish this to pass e7): has a merged field no real value yet?\n        // Receives a value. Returns true for null and for \"unclear\", so the first real value from a later chunk is kept.\n        // Example: isUnset(null) -> true, isUnset(\"unclear\") -> true, isUnset(\"Acme Ltd\") -> false\n        return false;\n    }\n\n    private static boolean isConflict(Object current, Object value, Object field, List<Object> conflicts) {\n        // TODO 7 of 10 (finish this to pass e7): do two chunks disagree about a field, not yet recorded?\n        // Receives the value kept so far, a later chunk's value, the field name and the fields already in `conflicts`. Returns true when\n        // the values differ and the field is not yet in that list, so a conflict is recorded once.\n        // Example: isConflict(\"A\", \"B\", \"vendor\", List.of()) -> true\n        return false;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> mergeChunks(List<Map<String, Object>> records) {\n        Map<String, Object> provenance = new LinkedHashMap<>();\n        List<Object> lineItems = new ArrayList<>();\n        List<Object> conflicts = new ArrayList<>();\n        Map<String, Object> merged = map(\"vendor\", null, \"currency\", \"unclear\", \"currency_detail\", null, \"line_items\", lineItems, \"stated_total\", null, \"calculated_total\", 0.0,\n                \"conflict_detected\", false, \"provenance\", provenance, \"conflicts\", conflicts);\n        for (Map<String, Object> record : records) {\n            for (String field : List.of(\"vendor\", \"currency\", \"stated_total\")) {\n                Object value = record.get(field);\n                if (value == null || \"unclear\".equals(value)) continue;\n                Object current = merged.get(field);\n                if (isUnset(current)) {\n                    merged.put(field, value);\n                    provenance.put(field, ((Map<String, Object>) record.get(\"provenance\")).get(field));\n                    if (field.equals(\"currency\")) merged.put(\"currency_detail\", record.get(\"currency_detail\"));\n                } else if (isConflict(current, value, field, conflicts)) {\n                    conflicts.add(field);\n                }\n            }\n            if (record.get(\"line_items\") != null) lineItems.addAll((List<Object>) record.get(\"line_items\"));\n            if (Boolean.TRUE.equals(record.get(\"conflict_detected\"))) merged.put(\"conflict_detected\", true);\n        }\n        double sum = 0;\n        for (Object n : lineItems) sum += ((Number) n).doubleValue();\n        merged.put(\"calculated_total\", round2(sum));\n        if (!conflicts.isEmpty()) merged.put(\"conflict_detected\", true);\n        return merged;\n    }\n\n    private static Map<String, Object> report(int correct, int valid, int total) {\n        // TODO 8 of 10 (finish this to pass e8): the accuracy report, on every document and on the validated ones.\n        // Receives the number of correct documents, the number of valid documents and the number of labelled documents. Returns a map with\n        // all_documents (correct over total), validated_only (correct over valid), validated (= valid) and total; the two rates are rounded\n        // with round2 and are 0.0 when the denominator is zero. Example: report(3, 6, 6) -> all_documents 0.5, validated_only 0.5\n        return map(\"all_documents\", 0.0, \"validated_only\", 0.0, \"validated\", valid, \"total\", total);\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> accuracy(Map<String, Map<String, Object>> results, Map<String, Map<String, Object>> labels) {\n        int valid = 0;\n        int correct = 0;\n        for (Map.Entry<String, Map<String, Object>> entry : labels.entrySet()) {\n            Map<String, Object> result = results.get(entry.getKey());\n            boolean isValid = result != null && \"valid\".equals(result.get(\"status\"));\n            if (isValid) valid++;\n            if (isValid) {\n                Map<String, Object> record = (Map<String, Object>) result.get(\"record\");\n                Map<String, Object> label = entry.getValue();\n                if (Objects.equals(record.get(\"vendor\"), label.get(\"vendor\")) && ((Number) record.get(\"stated_total\")).doubleValue() == ((Number) label.get(\"stated_total\")).doubleValue()) correct++;\n            }\n        }\n        int total = labels.size();\n        return report(correct, valid, total);\n    }\n\n    private static Map<String, Object> forcedChoice(List<String> tools, String forced) {\n        // TODO 9 of 10 (finish this to pass e9): the tool_choice for a model that accepts a forced choice.\n        // Receives the list of tool names and the name to force, or null. Returns a map with tool_choice, strict true and verify_reply false:\n        // the forced tool when `forced` is given (type tool, name forced), type any when there are several tools, otherwise the one tool by name.\n        // Example: (List.of(\"a\", \"b\"), null) -> {tool_choice={type=any}, strict=true, verify_reply=false}\n        return map(\"tool_choice\", map(\"type\", \"auto\"), \"strict\", true, \"verify_reply\", false);\n    }\n\n    static Map<String, Object> requestChoice(String model, List<String> tools, String forced) {\n        if (NO_FORCING.contains(model)) return map(\"tool_choice\", map(\"type\", \"auto\"), \"strict\", true, \"verify_reply\", true);\n        return forcedChoice(tools, forced);\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.*;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        String doc = \"Invoice from Acme Tools.\\nItems: 100.00 + 20.50\\nTotal due: 120.50 EUR\\nThank you.\";\n        Map<String, Object> good = good();\n\n        // A stand-in for the model, like the tests use: it always answers with the same record.\n        Map<String, Object> result = Extraction.extractDocument(doc, (document, feedback) -> {\n            System.out.println(\"model called, feedback: \" + feedback);\n            return good();\n        }, List.of(), 2);\n        System.out.println(\"status: \" + (result == null ? null : result.get(\"status\")));\n        System.out.println(\"attempts: \" + (result == null ? null : result.get(\"attempts\")));\n\n        // validate() on its own: a record whose calculated total disagrees with its line items.\n        Map<String, Object> bad = good();\n        bad.put(\"calculated_total\", 99.0);\n        System.out.println(\"errors: \" + Extraction.validate(bad, doc));\n    }\n\n    static Map<String, Object> good() {\n        Map<String, Object> provenance = new LinkedHashMap<>();\n        provenance.put(\"vendor\", \"Invoice from Acme Tools\");\n        provenance.put(\"currency\", \"120.50 EUR\");\n        provenance.put(\"stated_total\", \"Total due: 120.50 EUR\");\n        Map<String, Object> m = new LinkedHashMap<>();\n        m.put(\"vendor\", \"Acme Tools\");\n        m.put(\"currency\", \"EUR\");\n        m.put(\"currency_detail\", null);\n        m.put(\"line_items\", List.of(100.0, 20.5));\n        m.put(\"stated_total\", 120.5);\n        m.put(\"calculated_total\", 120.5);\n        m.put(\"conflict_detected\", false);\n        m.put(\"provenance\", provenance);\n        return m;\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 6,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "1a324f79bb8997ac6ed014c6b82a263c5b9206a6ca4236e641a73be135ae29bb",
+  "starting_code": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Objects;\nimport java.util.Set;\nimport java.util.function.BiFunction;\n\n/** An extraction pipeline that admits absence, checks what a schema cannot, retries with feedback and is measured on every document. See ../../statement.md. Results are JSON-like maps. */\nfinal class Extraction {\n    private static final System.Logger LOG = System.getLogger(Extraction.class.getName());\n    private Extraction() {}\n\n    static final List<String> CURRENCIES = List.of(\"USD\", \"EUR\", \"GBP\", \"other\", \"unclear\");\n    private static final List<String> KEYS = List.of(\"vendor\", \"currency\", \"currency_detail\", \"line_items\", \"stated_total\", \"calculated_total\", \"conflict_detected\", \"provenance\");\n    private static final List<String> RETRYABLE = List.of(\"syntax\", \"semantic\", \"ungrounded\");\n    /** Models whose API rejects tool_choice any and tool, as read on 2026-10-03. */\n    private static final Set<String> NO_FORCING = Set.of(\"claude-opus-5-5\", \"claude-sonnet-5-5\", \"claude-fable-5-1\", \"claude-mythos-5-1\");\n\n    private static Map<String, Object> map(Object... kv) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);\n        return m;\n    }\n\n    private static boolean isNumber(Object value) {\n        return value instanceof Number;\n    }\n\n    private static double round2(double x) {\n        return Math.round(x * 100) / 100.0;\n    }\n\n    private static void err(List<Map<String, Object>> errors, String kind, String field, String message) {\n        errors.add(map(\"kind\", kind, \"field\", field, \"message\", message));\n    }\n\n    private static boolean quoteFound(Object quote, String document) {\n        // TODO 1 of 10 (finish this to pass e1): is a provenance quote real?\n        // Receives the quote the model gave for a field and the document text. Returns true only when the quote is a non-empty String that\n        // appears in the document, so an invented value cannot be supported by an invented quote.\n        // Example: quoteFound(\"Acme Ltd\", \"Invoice from Acme Ltd\") -> true, quoteFound(\"Zed Corp\", \"Invoice from Acme Ltd\") -> false\n        return true;\n    }\n\n    private static boolean currencyOk(Object currency) {\n        // TODO 2 of 10 (finish this to pass e6): is this a currency the schema allows?\n        // Receives the value of \"currency\". Returns true when it is one of CURRENCIES (\"unclear\" and \"other\" count, anything else does not).\n        // Example: currencyOk(\"unclear\") -> true, currencyOk(\"dollars\") -> false\n        return true;\n    }\n\n    private static boolean detailMissing(Object currency, Object detail) {\n        // TODO 3 of 10 (finish this to pass e6): is a required currency detail missing?\n        // Receives \"currency\" and \"currency_detail\". Returns true when the currency is \"other\" and the detail is not a non-blank String.\n        // Example: detailMissing(\"other\", \"  \") -> true, detailMissing(\"other\", \"CHF\") -> false, detailMissing(\"USD\", null) -> false\n        return false;\n    }\n\n    private static void checkSemantics(Map<String, Object> record, List<Map<String, Object>> errors) {\n        // TODO 10 of 10 (finish this to pass e5): report what a schema cannot check about the numbers.\n        // Receives a record whose types are already valid and the `errors` list; add errors with err(errors, \"semantic\", field, message).\n        // Add one on \"calculated_total\" when it is not the sum of \"line_items\" (to half a cent), and one on \"stated_total\" when it is not\n        // null, differs from calculated_total (by more than half a cent) and \"conflict_detected\" is false; a conflict the model flagged\n        // is information, not an error. It returns nothing.\n        // Example: line_items [10, 5], calculated_total 15, stated_total 20, conflict_detected false -> one semantic error on stated_total\n    }\n\n    static List<Map<String, Object>> validate(Map<String, Object> record, String document) {\n        LOG.log(System.Logger.Level.DEBUG, \"validate input: {0}\", record);\n        return validate(record, document, List.of());\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static List<Map<String, Object>> validate(Map<String, Object> record, String document, List<String> required) {\n        List<Map<String, Object>> errors = new ArrayList<>();\n        for (String key : KEYS) if (!record.containsKey(key)) err(errors, \"syntax\", key, \"is missing\");\n        if (!errors.isEmpty()) return errors;\n        if (record.get(\"vendor\") != null && !(record.get(\"vendor\") instanceof String)) err(errors, \"syntax\", \"vendor\", \"must be a string or null\");\n        if (!currencyOk(record.get(\"currency\"))) err(errors, \"syntax\", \"currency\", \"'\" + record.get(\"currency\") + \"' is not one of \" + CURRENCIES);\n        Object detail = record.get(\"currency_detail\");\n        if (detailMissing(record.get(\"currency\"), detail)) err(errors, \"syntax\", \"currency_detail\", \"is required when the currency is other\");\n        Object items = record.get(\"line_items\");\n        if (!(items instanceof List<?> list && list.stream().allMatch(Extraction::isNumber))) err(errors, \"syntax\", \"line_items\", \"must be a list of numbers\");\n        if (record.get(\"stated_total\") != null && !isNumber(record.get(\"stated_total\"))) err(errors, \"syntax\", \"stated_total\", \"must be a number or null\");\n        if (!isNumber(record.get(\"calculated_total\"))) err(errors, \"syntax\", \"calculated_total\", \"must be a number\");\n        if (!(record.get(\"conflict_detected\") instanceof Boolean)) err(errors, \"syntax\", \"conflict_detected\", \"must be true or false\");\n        if (!(record.get(\"provenance\") instanceof Map)) err(errors, \"syntax\", \"provenance\", \"must be an object\");\n        if (!errors.isEmpty()) return errors;\n        checkSemantics(record, errors);\n        Map<String, Object> provenance = (Map<String, Object>) record.get(\"provenance\");\n        for (String field : List.of(\"vendor\", \"currency\", \"stated_total\")) {\n            Object value = record.get(field);\n            if (value == null || \"unclear\".equals(value)) continue;\n            Object quote = provenance.get(field);\n            if (!quoteFound(quote, document)) err(errors, \"ungrounded\", field, field + \" has no quote that appears in the document\");\n        }\n        for (String field : required) {\n            Object value = record.get(field);\n            if (value == null || \"unclear\".equals(value)) err(errors, \"absent\", field, \"the document gave no value\");\n        }\n        return errors;\n    }\n\n    private static List<Object> retryableErrors(List<Map<String, Object>> errors) {\n        // TODO 4 of 10 (finish this to pass e2, e3 and e4): keep the errors a second look can fix.\n        // Receives a list of {kind, field, message} errors. Returns those whose kind is in RETRYABLE (syntax, semantic, ungrounded), in\n        // order; an \"absent\" error is never retried. Example: [{kind=absent}, {kind=syntax}] -> [{kind=syntax}]\n        return new ArrayList<>();\n    }\n\n    private static String status(List<Map<String, Object>> errors, Map<String, Object> record) {\n        // TODO 5 of 10 (finish this to pass m1, e3 and e5): the status of a finished extraction.\n        // Receives the errors left after the last attempt and the last record. Returns \"needs_review\" when the only errors are \"absent\"\n        // ones, or when there are no errors and the model flagged a conflict (\"conflict_detected\"); \"failed\" for any other error; \"valid\"\n        // otherwise. Example: no errors and conflict_detected false -> \"valid\"; one absent error -> \"needs_review\"; one syntax error -> \"failed\"\n        return \"failed\";\n    }\n\n    static Map<String, Object> extractDocument(String document, BiFunction<String, Map<String, Object>, Map<String, Object>> callModel, List<String> required, int maxRetries) {\n        Map<String, Object> feedback = null;\n        int attempts = 0;\n        Map<String, Object> record;\n        List<Map<String, Object>> errors;\n        while (true) {\n            attempts++;\n            record = callModel.apply(document, feedback);\n            errors = validate(record, document, required);\n            if (errors.isEmpty()) break;\n            List<Object> retryable = retryableErrors(errors);\n            if (retryable.isEmpty()) break;\n            if (attempts > maxRetries) break;\n            feedback = map(\"previous\", record, \"errors\", retryable);\n        }\n        String status = status(errors, record);\n        return map(\"status\", status, \"record\", record, \"attempts\", attempts, \"errors\", errors);\n    }\n\n    private static boolean isUnset(Object value) {\n        // TODO 6 of 10 (finish this to pass e7): has a merged field no real value yet?\n        // Receives a value. Returns true for null and for \"unclear\", so the first real value from a later chunk is kept.\n        // Example: isUnset(null) -> true, isUnset(\"unclear\") -> true, isUnset(\"Acme Ltd\") -> false\n        return false;\n    }\n\n    private static boolean isConflict(Object current, Object value, Object field, List<Object> conflicts) {\n        // TODO 7 of 10 (finish this to pass e7): do two chunks disagree about a field, not yet recorded?\n        // Receives the value kept so far, a later chunk's value, the field name and the fields already in `conflicts`. Returns true when\n        // the values differ and the field is not yet in that list, so a conflict is recorded once.\n        // Example: isConflict(\"A\", \"B\", \"vendor\", List.of()) -> true\n        return false;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> mergeChunks(List<Map<String, Object>> records) {\n        Map<String, Object> provenance = new LinkedHashMap<>();\n        List<Object> lineItems = new ArrayList<>();\n        List<Object> conflicts = new ArrayList<>();\n        Map<String, Object> merged = map(\"vendor\", null, \"currency\", \"unclear\", \"currency_detail\", null, \"line_items\", lineItems, \"stated_total\", null, \"calculated_total\", 0.0,\n                \"conflict_detected\", false, \"provenance\", provenance, \"conflicts\", conflicts);\n        for (Map<String, Object> record : records) {\n            for (String field : List.of(\"vendor\", \"currency\", \"stated_total\")) {\n                Object value = record.get(field);\n                if (value == null || \"unclear\".equals(value)) continue;\n                Object current = merged.get(field);\n                if (isUnset(current)) {\n                    merged.put(field, value);\n                    provenance.put(field, ((Map<String, Object>) record.get(\"provenance\")).get(field));\n                    if (field.equals(\"currency\")) merged.put(\"currency_detail\", record.get(\"currency_detail\"));\n                } else if (isConflict(current, value, field, conflicts)) {\n                    conflicts.add(field);\n                }\n            }\n            if (record.get(\"line_items\") != null) lineItems.addAll((List<Object>) record.get(\"line_items\"));\n            if (Boolean.TRUE.equals(record.get(\"conflict_detected\"))) merged.put(\"conflict_detected\", true);\n        }\n        double sum = 0;\n        for (Object n : lineItems) sum += ((Number) n).doubleValue();\n        merged.put(\"calculated_total\", round2(sum));\n        if (!conflicts.isEmpty()) merged.put(\"conflict_detected\", true);\n        return merged;\n    }\n\n    private static Map<String, Object> report(int correct, int valid, int total) {\n        // TODO 8 of 10 (finish this to pass e8): the accuracy report, on every document and on the validated ones.\n        // Receives the number of correct documents, the number of valid documents and the number of labelled documents. Returns a map with\n        // all_documents (correct over total), validated_only (correct over valid), validated (= valid) and total; the two rates are rounded\n        // with round2 and are 0.0 when the denominator is zero. Example: report(3, 6, 6) -> all_documents 0.5, validated_only 0.5\n        return map(\"all_documents\", 0.0, \"validated_only\", 0.0, \"validated\", valid, \"total\", total);\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> accuracy(Map<String, Map<String, Object>> results, Map<String, Map<String, Object>> labels) {\n        int valid = 0;\n        int correct = 0;\n        for (Map.Entry<String, Map<String, Object>> entry : labels.entrySet()) {\n            Map<String, Object> result = results.get(entry.getKey());\n            boolean isValid = result != null && \"valid\".equals(result.get(\"status\"));\n            if (isValid) valid++;\n            if (isValid) {\n                Map<String, Object> record = (Map<String, Object>) result.get(\"record\");\n                Map<String, Object> label = entry.getValue();\n                if (Objects.equals(record.get(\"vendor\"), label.get(\"vendor\")) && ((Number) record.get(\"stated_total\")).doubleValue() == ((Number) label.get(\"stated_total\")).doubleValue()) correct++;\n            }\n        }\n        int total = labels.size();\n        return report(correct, valid, total);\n    }\n\n    private static Map<String, Object> forcedChoice(List<String> tools, String forced) {\n        // TODO 9 of 10 (finish this to pass e9): the tool_choice for a model that accepts a forced choice.\n        // Receives the list of tool names and the name to force, or null. Returns a map with tool_choice, strict true and verify_reply false:\n        // the forced tool when `forced` is given (type tool, name forced), type any when there are several tools, otherwise the one tool by name.\n        // Example: (List.of(\"a\", \"b\"), null) -> {tool_choice={type=any}, strict=true, verify_reply=false}\n        return map(\"tool_choice\", map(\"type\", \"auto\"), \"strict\", true, \"verify_reply\", false);\n    }\n\n    static Map<String, Object> requestChoice(String model, List<String> tools, String forced) {\n        if (NO_FORCING.contains(model)) return map(\"tool_choice\", map(\"type\", \"auto\"), \"strict\", true, \"verify_reply\", true);\n        return forcedChoice(tools, forced);\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-3/src/main/java/Extraction.java",
+    "test_path": "practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-3/src/test/java/ExtractionTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_aDocumentWithEveryValuePresentAndQuotedComesBackValidOnTheFirstAttempt()",
+        "kind": "main",
+        "says": "A document with every value present and quoted comes back valid on the first attempt"
+      },
+      {
+        "id": "e1_aValueTheDocumentDoesNotGiveIsNullAndNeedsNoQuoteWhileAnInventedValueFailsAsUngrounded()",
+        "kind": "edge",
+        "says": "A value the document does not give is null and needs no quote, while an invented value fails as ungrounded"
+      },
+      {
+        "id": "e2_aRetryCarriesTheOriginalDocumentTheFailedRecordAndOnlyTheErrorsASecondLookCanFix()",
+        "kind": "edge",
+        "says": "A retry carries the document, the failed record and only the errors a second look can fix"
+      },
+      {
+        "id": "e3_aRequiredValueThatTheModelReportsAsAbsentIsNotRetriedAndGoesToReview()",
+        "kind": "edge",
+        "says": "A required value reported as absent is not retried and goes to review"
+      },
+      {
+        "id": "e4_retriesStopAfterTheLimitAndTheDocumentIsMarkedFailed()",
+        "kind": "edge",
+        "says": "Retries stop after the limit and the document is marked failed"
+      },
+      {
+        "id": "e5_aTotalThatDiffersFromTheLineItemsIsASemanticErrorAndAFlaggedConflictGoesToReviewWithoutARetry()",
+        "kind": "edge",
+        "says": "A total that differs from the line items is a semantic error; a flagged conflict goes to review without a retry"
+      },
+      {
+        "id": "e6_currencyTakesUnclearAndOtherWithADetailAndRejectsAnythingElseAsASyntaxError()",
+        "kind": "edge",
+        "says": "Currency takes unclear and other with a detail, and anything else is a syntax error"
+      },
+      {
+        "id": "e7_chunkResultsMergeByKeepingTheFirstValueAndRecordingAConflictWhenTwoChunksDisagree()",
+        "kind": "edge",
+        "says": "Chunk results merge by keeping the first value and recording a conflict when two chunks disagree"
+      },
+      {
+        "id": "e8_accuracyCountsEveryDocumentAndNotOnlyTheValidatedOnes()",
+        "kind": "edge",
+        "says": "Accuracy counts every document and not only the validated ones"
+      },
+      {
+        "id": "e9_theRequestForcesAToolWhereTheModelAllowsItAndFallsBackToAutoWithAReplyCheckWhereItDoesNot()",
+        "kind": "edge",
+        "says": "The request forces a tool where the model allows it and falls back to auto with a reply check where it does not"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-3/target/test-results/test"
+    },
+    "origin": "course/62-structured-output-at-the-architect-level/02-retries-conflicts-chunks-and-the-practice.md",
+    "concepts": [
+      "the practice of Retries, conflicts, chunks, honest accuracy and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "structured-output-at-the-architect-level-u2"
+}

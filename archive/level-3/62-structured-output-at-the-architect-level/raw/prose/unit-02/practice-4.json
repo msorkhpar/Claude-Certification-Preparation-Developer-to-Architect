@@ -1,0 +1,317 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "62-structured-output-at-the-architect-level"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: an extraction pipeline that admits absence, checks what a schema cannot, retries with feedback and is measured on every document (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an extraction pipeline that admits absence, checks what a schema cannot, retries with feedback and is measured on every document"
+    },
+    {
+      "type": "para",
+      "text": "A team extracts the vendor, the currency and the totals from invoices. The schema makes every field required, so when an invoice names no vendor the model invents one; a retry loop repeats the same request ten times for a value the document never contained; the accuracy report counts only the documents that passed validation and says 99 percent. In this practice you write the pipeline's decisions: the validation of a record (what a schema cannot check), the extraction loop with retries that carry feedback, the merge of the chunks of a long document, the accuracy measured on every document, and the tool choice of the request. The model is not called: the tests give you documents, scripted model replies and labels. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`validate`, `extract_document`, `merge_chunks`, `accuracy`, `request_choice`); TypeScript has the camel-case names (`extractDocument`, `mergeChunks`, `requestChoice`); Java has the same camel-case names as static methods of `Extraction`; Kotlin has top-level functions. Results are maps and lists, as the starters show. The model reply is a function `call_model(document, feedback)`."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working pipeline with ten gaps cut out of it. Everything that is plumbing is written and correct: the type and enum checks of `validate`, the loop of `extract_document` with its retry limit and feedback, the chunk merge, the counting of `accuracy` and the model list. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_quote_found` unlocks `e1`: a quote supports a value only when it is a non-empty string found in the document.",
+        "`_currency_ok` unlocks `e6`: the currency values the schema allows.",
+        "`_detail_missing` unlocks `e6`: `other` needs a detail.",
+        "`_retryable` unlocks `e2`, `e3` and `e4`: which errors a second look can fix.",
+        "`_status` unlocks `m1`, `e3` and `e5`: `valid`, `needs_review` or `failed`.",
+        "`_is_unset` unlocks `e7`: a merged field with no real value yet.",
+        "`_is_conflict` unlocks `e7`: two chunks that disagree, recorded once.",
+        "`_report` unlocks `e8`: accuracy over every document and over the validated ones.",
+        "`_forced_choice` unlocks `e9`: the tool choice for a model that accepts a forced one.",
+        "`_check_semantics` unlocks `e5`: the sum of the line items and the stated total."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About fifteen lines in all. The sections below describe the whole pipeline, so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "A record has the keys `vendor` (a string or `null`), `currency` (`USD`, `EUR`, `GBP`, `other` or `unclear`), `currency_detail` (a string, required when the currency is `other`), `line_items` (a list of numbers), `stated_total` (a number or `null`), `calculated_total` (a number), `conflict_detected` (a boolean) and `provenance` (an object that maps a field to the quote of the document that supports it)."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`validate(record, document, required=())` returns a list of `{kind, field, message}`:",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`syntax`: a missing key (return those alone), or a value of the wrong type or outside its enum, a missing detail for `other`, a `provenance` that is not an object;",
+              "`semantic`: `calculated_total` is not the sum of the line items (to half a cent), or `stated_total` differs from `calculated_total` while `conflict_detected` is false;",
+              "`ungrounded`: `vendor`, `currency` or `stated_total` has a value (not `null`, not `unclear`) and no non-empty quote in `provenance` that appears in the document;",
+              "`absent`: a field in `required` is `null` or `unclear`. A value that is `null` or `unclear` needs no quote, and a conflict the model flagged is information and not an error."
+            ]
+          }
+        ],
+        "`extract_document(document, call_model, required=(), max_retries=2)` calls the model with `(document, None)`, validates, and retries with `(document, {\"previous\": record, \"errors\": [...]})` only for errors a second look can fix (`syntax`, `semantic`, `ungrounded`), never for `absent`. It stops after `max_retries` retries. It returns `{\"status\", \"record\", \"attempts\", \"errors\"}`: `valid` with no errors and no conflict, `needs_review` when the only errors are `absent` or the model flagged a conflict (neither is retried), and `failed` otherwise.",
+        "`merge_chunks(records)` merges the records of the chunks of one document: for `vendor`, `currency` and `stated_total` keep the first value that is neither `null` nor `unclear` together with its quote (and the detail for the currency), record a field in `conflicts` once when a later chunk disagrees, concatenate the line items, recompute `calculated_total` (two decimals), and set `conflict_detected` when any chunk flagged one or a conflict was found.",
+        "`accuracy(results, labels)` returns `{\"all_documents\", \"validated_only\", \"validated\", \"total\"}`: a document is correct when it is `valid` and its vendor and stated total equal the label's. `all_documents` divides by every labelled document and `validated_only` by the valid ones (two decimals; zero when the denominator is zero).",
+        "`request_choice(model, tools, forced=None)` returns `{\"tool_choice\", \"strict\", \"verify_reply\"}` with `strict` always true. On the models in `NO_FORCING` use `auto` and set `verify_reply` to true. Elsewhere use the forced tool when `forced` is given, `any` when there are several tools, and the one tool by name otherwise; `verify_reply` is false."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Nullable fields.** A required field invites an invented value; a nullable one lets the model say the document does not give it. *You should see* an invoice with no vendor validate with `vendor` null and no quote, and an invented vendor fail as ungrounded.",
+        "**Provenance.** A quote that must appear in the document is a check the schema cannot make. *You should see* a made-up quote refused.",
+        "**Retry only what can improve.** Feedback names the errors a second look can fix; a value the document does not contain stays absent however often it is asked for. *You should see* one retry with the document, the failed record and the errors, and no retry for an absent value.",
+        "**Conflicts are information.** A total that differs from the line items and is flagged goes to review. *You should see* `needs_review` after one attempt.",
+        "**Honest measurement.** Accuracy on the validated documents alone is higher than the truth because the failures leave the denominator. *You should see* 0.5 on all documents and 0.83 on the validated ones for the same results.",
+        "**The tool choice.** A forced tool call is rejected by some current models and changing `tool_choice` invalidates cached message blocks. *You should see* a forced tool where the model allows it and `auto` with a reply check where it does not."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A document with every value present and quoted comes back valid on the first attempt"
+        ],
+        [
+          "`e1`",
+          "A value the document does not give is null and needs no quote, while an invented value fails as ungrounded"
+        ],
+        [
+          "`e2`",
+          "A retry carries the document, the failed record and only the errors a second look can fix"
+        ],
+        [
+          "`e3`",
+          "A required value reported as absent is not retried and goes to review"
+        ],
+        [
+          "`e4`",
+          "Retries stop after the limit and the document is marked failed"
+        ],
+        [
+          "`e5`",
+          "A total that differs from the line items is a semantic error; a flagged conflict goes to review without a retry"
+        ],
+        [
+          "`e6`",
+          "Currency takes `unclear` and `other` with a detail, and anything else is a syntax error"
+        ],
+        [
+          "`e7`",
+          "Chunk results merge by keeping the first value and recording a conflict when two chunks disagree"
+        ],
+        [
+          "`e8`",
+          "Accuracy counts every document and not only the validated ones"
+        ],
+        [
+          "`e9`",
+          "The request forces a tool where the model allows it and falls back to `auto` with a reply check where it does not"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "private val log = System.getLogger(\"extraction\")\n/** An extraction pipeline that admits absence, checks what a schema cannot, retries with feedback and is measured on every document. See ../../statement.md. Results are JSON-like maps. */\n\nval CURRENCIES = listOf(\"USD\", \"EUR\", \"GBP\", \"other\", \"unclear\")\nprivate val KEYS = listOf(\"vendor\", \"currency\", \"currency_detail\", \"line_items\", \"stated_total\", \"calculated_total\", \"conflict_detected\", \"provenance\")\nprivate val RETRYABLE = listOf(\"syntax\", \"semantic\", \"ungrounded\")\n\n/** Models whose API rejects tool_choice any and tool, as read on 2026-10-03. */\nprivate val NO_FORCING = setOf(\"claude-opus-5-5\", \"claude-sonnet-5-5\", \"claude-fable-5-1\", \"claude-mythos-5-1\")\n\nprivate fun round2(x: Double): Double = Math.round(x * 100) / 100.0\n\nprivate fun err(kind: String, field: String, message: String): Map<String, Any?> = mapOf(\"kind\" to kind, \"field\" to field, \"message\" to message)\n\nprivate fun quoteFound(quote: Any?, document: String): Boolean {\n    return quote is String && quote.isNotEmpty() && document.contains(quote)\n}\n\nprivate fun currencyOk(currency: Any?): Boolean {\n    return currency in CURRENCIES\n}\n\nprivate fun detailMissing(currency: Any?, detail: Any?): Boolean {\n    return currency == \"other\" && !(detail is String && detail.isNotBlank())\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun checkSemantics(record: Map<String, Any?>, errors: MutableList<Map<String, Any?>>) {\n    val items = record[\"line_items\"]\n    val sum = (items as List<Number>).sumOf { it.toDouble() }\n    val calculated = (record[\"calculated_total\"] as Number).toDouble()\n    if (Math.abs(sum - calculated) > 0.005) errors += err(\"semantic\", \"calculated_total\", \"$calculated is not the sum of the line items, $sum\")\n    val stated = (record[\"stated_total\"] as Number?)?.toDouble()\n    if (stated != null && Math.abs(stated - calculated) > 0.005 && record[\"conflict_detected\"] != true) {\n        errors += err(\"semantic\", \"stated_total\", \"the stated total $stated differs from the calculated total $calculated but conflict_detected is false\")\n    }\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun validate(record: Map<String, Any?>, document: String, required: List<String> = emptyList()): List<Map<String, Any?>>? {\n    log.log(System.Logger.Level.DEBUG, \"validate input: {0}\", record)\n    val errors = mutableListOf<Map<String, Any?>>()\n    for (key in KEYS) if (key !in record) errors += err(\"syntax\", key, \"is missing\")\n    if (errors.isNotEmpty()) return errors\n    if (record[\"vendor\"] != null && record[\"vendor\"] !is String) errors += err(\"syntax\", \"vendor\", \"must be a string or null\")\n    if (!currencyOk(record[\"currency\"])) errors += err(\"syntax\", \"currency\", \"'${record[\"currency\"]}' is not one of $CURRENCIES\")\n    val detail = record[\"currency_detail\"]\n    if (detailMissing(record[\"currency\"], detail)) errors += err(\"syntax\", \"currency_detail\", \"is required when the currency is other\")\n    val items = record[\"line_items\"]\n    if (!(items is List<*> && items.all { it is Number })) errors += err(\"syntax\", \"line_items\", \"must be a list of numbers\")\n    if (record[\"stated_total\"] != null && record[\"stated_total\"] !is Number) errors += err(\"syntax\", \"stated_total\", \"must be a number or null\")\n    if (record[\"calculated_total\"] !is Number) errors += err(\"syntax\", \"calculated_total\", \"must be a number\")\n    if (record[\"conflict_detected\"] !is Boolean) errors += err(\"syntax\", \"conflict_detected\", \"must be true or false\")\n    if (record[\"provenance\"] !is Map<*, *>) errors += err(\"syntax\", \"provenance\", \"must be an object\")\n    if (errors.isNotEmpty()) return errors\n    checkSemantics(record, errors)\n    val provenance = record[\"provenance\"] as Map<String, Any?>\n    for (field in listOf(\"vendor\", \"currency\", \"stated_total\")) {\n        val value = record[field]\n        if (value == null || value == \"unclear\") continue\n        val quote = provenance[field]\n        if (!quoteFound(quote, document)) errors += err(\"ungrounded\", field, \"$field has no quote that appears in the document\")\n    }\n    for (field in required) {\n        val value = record[field]\n        if (value == null || value == \"unclear\") errors += err(\"absent\", field, \"the document gave no value\")\n    }\n    return errors\n}\n\nprivate fun retryableErrors(errors: List<Map<String, Any?>>): List<Map<String, Any?>> {\n    return errors.filter { it[\"kind\"] in RETRYABLE }\n}\n\nprivate fun status(errors: List<Map<String, Any?>>, record: Map<String, Any?>): String {\n    return when {\n        errors.isNotEmpty() -> if (errors.all { it[\"kind\"] == \"absent\" }) \"needs_review\" else \"failed\"\n        record[\"conflict_detected\"] == true -> \"needs_review\"\n        else -> \"valid\"\n    }\n}\n\nfun extractDocument(document: String, callModel: (String, Map<String, Any?>?) -> Map<String, Any?>, required: List<String> = emptyList(), maxRetries: Int = 2): Map<String, Any?>? {\n    var feedback: Map<String, Any?>? = null\n    var attempts = 0\n    var record: Map<String, Any?>\n    var errors: List<Map<String, Any?>>\n    while (true) {\n        attempts++\n        record = callModel(document, feedback)\n        errors = validate(record, document, required)!!\n        if (errors.isEmpty()) break\n        val retryable = retryableErrors(errors)\n        if (retryable.isEmpty()) break\n        if (attempts > maxRetries) break\n        feedback = mapOf(\"previous\" to record, \"errors\" to retryable)\n    }\n    val status = status(errors, record)\n    return mapOf(\"status\" to status, \"record\" to record, \"attempts\" to attempts, \"errors\" to errors)\n}\n\nprivate fun isUnset(value: Any?): Boolean {\n    return value == null || value == \"unclear\"\n}\n\nprivate fun isConflict(current: Any?, value: Any?, field: String, conflicts: List<Any?>): Boolean {\n    return current != value && field !in conflicts\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun mergeChunks(records: List<Map<String, Any?>>): Map<String, Any?>? {\n    val provenance = LinkedHashMap<String, Any?>()\n    val lineItems = mutableListOf<Any?>()\n    val conflicts = mutableListOf<Any?>()\n    val merged = linkedMapOf<String, Any?>(\"vendor\" to null, \"currency\" to \"unclear\", \"currency_detail\" to null, \"line_items\" to lineItems, \"stated_total\" to null, \"calculated_total\" to 0.0,\n        \"conflict_detected\" to false, \"provenance\" to provenance, \"conflicts\" to conflicts)\n    for (record in records) {\n        for (field in listOf(\"vendor\", \"currency\", \"stated_total\")) {\n            val value = record[field]\n            if (value == null || value == \"unclear\") continue\n            val current = merged[field]\n            if (isUnset(current)) {\n                merged[field] = value\n                provenance[field] = (record[\"provenance\"] as Map<String, Any?>)[field]\n                if (field == \"currency\") merged[\"currency_detail\"] = record[\"currency_detail\"]\n            } else if (isConflict(current, value, field, conflicts)) {\n                conflicts.add(field)\n            }\n        }\n        (record[\"line_items\"] as List<Any?>?)?.let { lineItems.addAll(it) }\n        if (record[\"conflict_detected\"] == true) merged[\"conflict_detected\"] = true\n    }\n    merged[\"calculated_total\"] = round2(lineItems.sumOf { (it as Number).toDouble() })\n    if (conflicts.isNotEmpty()) merged[\"conflict_detected\"] = true\n    return merged\n}\n\nprivate fun report(correct: Int, valid: Int, total: Int): Map<String, Any?> {\n    return mapOf(\"all_documents\" to if (total > 0) round2(correct.toDouble() / total) else 0.0, \"validated_only\" to if (valid > 0) round2(correct.toDouble() / valid) else 0.0, \"validated\" to valid, \"total\" to total)\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun accuracy(results: Map<String, Map<String, Any?>>, labels: Map<String, Map<String, Any?>>): Map<String, Any?>? {\n    var valid = 0\n    var correct = 0\n    for ((id, label) in labels) {\n        val result = results[id]\n        val isValid = result != null && result[\"status\"] == \"valid\"\n        if (isValid) valid++\n        if (isValid) {\n            val record = result!![\"record\"] as Map<String, Any?>\n            if (record[\"vendor\"] == label[\"vendor\"] && (record[\"stated_total\"] as Number).toDouble() == (label[\"stated_total\"] as Number).toDouble()) correct++\n        }\n    }\n    val total = labels.size\n    return report(correct, valid, total)\n}\n\nprivate fun forcedChoice(tools: List<String>, forced: String?): Map<String, Any?> {\n    return when {\n        forced != null -> mapOf(\"tool_choice\" to mapOf(\"type\" to \"tool\", \"name\" to forced), \"strict\" to true, \"verify_reply\" to false)\n        tools.size > 1 -> mapOf(\"tool_choice\" to mapOf(\"type\" to \"any\"), \"strict\" to true, \"verify_reply\" to false)\n        else -> mapOf(\"tool_choice\" to mapOf(\"type\" to \"tool\", \"name\" to tools[0]), \"strict\" to true, \"verify_reply\" to false)\n    }\n}\n\nfun requestChoice(model: String, tools: List<String>, forced: String? = null): Map<String, Any?>? {\n    if (model in NO_FORCING) return mapOf(\"tool_choice\" to mapOf(\"type\" to \"auto\"), \"strict\" to true, \"verify_reply\" to true)\n    return forcedChoice(tools, forced)\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    val doc = \"Invoice from Acme Tools.\\nItems: 100.00 + 20.50\\nTotal due: 120.50 EUR\\nThank you.\"\n    fun good(): MutableMap<String, Any?> = linkedMapOf(\n        \"vendor\" to \"Acme Tools\", \"currency\" to \"EUR\", \"currency_detail\" to null, \"line_items\" to listOf(100.0, 20.5),\n        \"stated_total\" to 120.5, \"calculated_total\" to 120.5, \"conflict_detected\" to false,\n        \"provenance\" to mapOf(\"vendor\" to \"Invoice from Acme Tools\", \"currency\" to \"120.50 EUR\", \"stated_total\" to \"Total due: 120.50 EUR\"),\n    )\n\n    // A stand-in for the model, like the tests use: it always answers with the same record.\n    val result = extractDocument(doc, { _, feedback ->\n        println(\"model called, feedback: $feedback\")\n        good()\n    })\n    println(\"status: ${result?.get(\"status\")}\")\n    println(\"attempts: ${result?.get(\"attempts\")}\")\n\n    // validate() on its own: a record whose calculated total disagrees with its line items.\n    val bad = good().also { it[\"calculated_total\"] = 99.0 }\n    println(\"errors: ${validate(bad, doc)}\")\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "private val log = System.getLogger(\"extraction\")\n/** An extraction pipeline that admits absence, checks what a schema cannot, retries with feedback and is measured on every document. See ../../statement.md. Results are JSON-like maps. */\n\nval CURRENCIES = listOf(\"USD\", \"EUR\", \"GBP\", \"other\", \"unclear\")\nprivate val KEYS = listOf(\"vendor\", \"currency\", \"currency_detail\", \"line_items\", \"stated_total\", \"calculated_total\", \"conflict_detected\", \"provenance\")\nprivate val RETRYABLE = listOf(\"syntax\", \"semantic\", \"ungrounded\")\n\n/** Models whose API rejects tool_choice any and tool, as read on 2026-10-03. */\nprivate val NO_FORCING = setOf(\"claude-opus-5-5\", \"claude-sonnet-5-5\", \"claude-fable-5-1\", \"claude-mythos-5-1\")\n\nprivate fun round2(x: Double): Double = Math.round(x * 100) / 100.0\n\nprivate fun err(kind: String, field: String, message: String): Map<String, Any?> = mapOf(\"kind\" to kind, \"field\" to field, \"message\" to message)\n\nprivate fun quoteFound(quote: Any?, document: String): Boolean {\n    // TODO 1 of 10 (finish this to pass e1): is a provenance quote real?\n    // Receives the quote the model gave for a field and the document text. Returns true only when the quote is a non-empty String that\n    // appears in the document, so an invented value cannot be supported by an invented quote.\n    // Example: quoteFound(\"Acme Ltd\", \"Invoice from Acme Ltd\") -> true, quoteFound(\"Zed Corp\", \"Invoice from Acme Ltd\") -> false\n    return true\n}\n\nprivate fun currencyOk(currency: Any?): Boolean {\n    // TODO 2 of 10 (finish this to pass e6): is this a currency the schema allows?\n    // Receives the value of \"currency\". Returns true when it is one of CURRENCIES (\"unclear\" and \"other\" count, anything else does not).\n    // Example: currencyOk(\"unclear\") -> true, currencyOk(\"dollars\") -> false\n    return true\n}\n\nprivate fun detailMissing(currency: Any?, detail: Any?): Boolean {\n    // TODO 3 of 10 (finish this to pass e6): is a required currency detail missing?\n    // Receives \"currency\" and \"currency_detail\". Returns true when the currency is \"other\" and the detail is not a non-blank String.\n    // Example: detailMissing(\"other\", \"  \") -> true, detailMissing(\"other\", \"CHF\") -> false, detailMissing(\"USD\", null) -> false\n    return false\n}\n\nprivate fun checkSemantics(record: Map<String, Any?>, errors: MutableList<Map<String, Any?>>) {\n    // TODO 10 of 10 (finish this to pass e5): report what a schema cannot check about the numbers.\n    // Receives a record whose types are already valid and the `errors` list; add errors with errors += err(\"semantic\", field, message).\n    // Add one on \"calculated_total\" when it is not the sum of \"line_items\" (to half a cent), and one on \"stated_total\" when it is not null,\n    // differs from calculated_total (by more than half a cent) and \"conflict_detected\" is false; a conflict the model flagged is\n    // information, not an error. It returns nothing.\n    // Example: line_items [10, 5], calculated_total 15, stated_total 20, conflict_detected false -> one semantic error on stated_total\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun validate(record: Map<String, Any?>, document: String, required: List<String> = emptyList()): List<Map<String, Any?>>? {\n    log.log(System.Logger.Level.DEBUG, \"validate input: {0}\", record)\n    val errors = mutableListOf<Map<String, Any?>>()\n    for (key in KEYS) if (key !in record) errors += err(\"syntax\", key, \"is missing\")\n    if (errors.isNotEmpty()) return errors\n    if (record[\"vendor\"] != null && record[\"vendor\"] !is String) errors += err(\"syntax\", \"vendor\", \"must be a string or null\")\n    if (!currencyOk(record[\"currency\"])) errors += err(\"syntax\", \"currency\", \"'${record[\"currency\"]}' is not one of $CURRENCIES\")\n    val detail = record[\"currency_detail\"]\n    if (detailMissing(record[\"currency\"], detail)) errors += err(\"syntax\", \"currency_detail\", \"is required when the currency is other\")\n    val items = record[\"line_items\"]\n    if (!(items is List<*> && items.all { it is Number })) errors += err(\"syntax\", \"line_items\", \"must be a list of numbers\")\n    if (record[\"stated_total\"] != null && record[\"stated_total\"] !is Number) errors += err(\"syntax\", \"stated_total\", \"must be a number or null\")\n    if (record[\"calculated_total\"] !is Number) errors += err(\"syntax\", \"calculated_total\", \"must be a number\")\n    if (record[\"conflict_detected\"] !is Boolean) errors += err(\"syntax\", \"conflict_detected\", \"must be true or false\")\n    if (record[\"provenance\"] !is Map<*, *>) errors += err(\"syntax\", \"provenance\", \"must be an object\")\n    if (errors.isNotEmpty()) return errors\n    checkSemantics(record, errors)\n    val provenance = record[\"provenance\"] as Map<String, Any?>\n    for (field in listOf(\"vendor\", \"currency\", \"stated_total\")) {\n        val value = record[field]\n        if (value == null || value == \"unclear\") continue\n        val quote = provenance[field]\n        if (!quoteFound(quote, document)) errors += err(\"ungrounded\", field, \"$field has no quote that appears in the document\")\n    }\n    for (field in required) {\n        val value = record[field]\n        if (value == null || value == \"unclear\") errors += err(\"absent\", field, \"the document gave no value\")\n    }\n    return errors\n}\n\nprivate fun retryableErrors(errors: List<Map<String, Any?>>): List<Map<String, Any?>> {\n    // TODO 4 of 10 (finish this to pass e2, e3 and e4): keep the errors a second look can fix.\n    // Receives a list of {kind, field, message} errors. Returns those whose kind is in RETRYABLE (syntax, semantic, ungrounded), in order;\n    // an \"absent\" error is never retried. Example: [{kind=absent}, {kind=syntax}] -> [{kind=syntax}]\n    return emptyList()\n}\n\nprivate fun status(errors: List<Map<String, Any?>>, record: Map<String, Any?>): String {\n    // TODO 5 of 10 (finish this to pass m1, e3 and e5): the status of a finished extraction.\n    // Receives the errors left after the last attempt and the last record. Returns \"needs_review\" when the only errors are \"absent\" ones, or\n    // when there are no errors and the model flagged a conflict (\"conflict_detected\"); \"failed\" for any other error; \"valid\" otherwise.\n    // Example: no errors and conflict_detected false -> \"valid\"; one absent error -> \"needs_review\"; one syntax error -> \"failed\"\n    return \"failed\"\n}\n\nfun extractDocument(document: String, callModel: (String, Map<String, Any?>?) -> Map<String, Any?>, required: List<String> = emptyList(), maxRetries: Int = 2): Map<String, Any?>? {\n    var feedback: Map<String, Any?>? = null\n    var attempts = 0\n    var record: Map<String, Any?>\n    var errors: List<Map<String, Any?>>\n    while (true) {\n        attempts++\n        record = callModel(document, feedback)\n        errors = validate(record, document, required)!!\n        if (errors.isEmpty()) break\n        val retryable = retryableErrors(errors)\n        if (retryable.isEmpty()) break\n        if (attempts > maxRetries) break\n        feedback = mapOf(\"previous\" to record, \"errors\" to retryable)\n    }\n    val status = status(errors, record)\n    return mapOf(\"status\" to status, \"record\" to record, \"attempts\" to attempts, \"errors\" to errors)\n}\n\nprivate fun isUnset(value: Any?): Boolean {\n    // TODO 6 of 10 (finish this to pass e7): has a merged field no real value yet?\n    // Receives a value. Returns true for null and for \"unclear\", so the first real value from a later chunk is kept.\n    // Example: isUnset(null) -> true, isUnset(\"unclear\") -> true, isUnset(\"Acme Ltd\") -> false\n    return false\n}\n\nprivate fun isConflict(current: Any?, value: Any?, field: String, conflicts: List<Any?>): Boolean {\n    // TODO 7 of 10 (finish this to pass e7): do two chunks disagree about a field, not yet recorded?\n    // Receives the value kept so far, a later chunk's value, the field name and the fields already in `conflicts`. Returns true when the\n    // values differ and the field is not yet in that list, so a conflict is recorded once.\n    // Example: isConflict(\"A\", \"B\", \"vendor\", emptyList()) -> true\n    return false\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun mergeChunks(records: List<Map<String, Any?>>): Map<String, Any?>? {\n    val provenance = LinkedHashMap<String, Any?>()\n    val lineItems = mutableListOf<Any?>()\n    val conflicts = mutableListOf<Any?>()\n    val merged = linkedMapOf<String, Any?>(\"vendor\" to null, \"currency\" to \"unclear\", \"currency_detail\" to null, \"line_items\" to lineItems, \"stated_total\" to null, \"calculated_total\" to 0.0,\n        \"conflict_detected\" to false, \"provenance\" to provenance, \"conflicts\" to conflicts)\n    for (record in records) {\n        for (field in listOf(\"vendor\", \"currency\", \"stated_total\")) {\n            val value = record[field]\n            if (value == null || value == \"unclear\") continue\n            val current = merged[field]\n            if (isUnset(current)) {\n                merged[field] = value\n                provenance[field] = (record[\"provenance\"] as Map<String, Any?>)[field]\n                if (field == \"currency\") merged[\"currency_detail\"] = record[\"currency_detail\"]\n            } else if (isConflict(current, value, field, conflicts)) {\n                conflicts.add(field)\n            }\n        }\n        (record[\"line_items\"] as List<Any?>?)?.let { lineItems.addAll(it) }\n        if (record[\"conflict_detected\"] == true) merged[\"conflict_detected\"] = true\n    }\n    merged[\"calculated_total\"] = round2(lineItems.sumOf { (it as Number).toDouble() })\n    if (conflicts.isNotEmpty()) merged[\"conflict_detected\"] = true\n    return merged\n}\n\nprivate fun report(correct: Int, valid: Int, total: Int): Map<String, Any?> {\n    // TODO 8 of 10 (finish this to pass e8): the accuracy report, on every document and on the validated ones.\n    // Receives the number of correct documents, the number of valid documents and the number of labelled documents. Returns a map with\n    // all_documents (correct over total), validated_only (correct over valid), validated (= valid) and total; the two rates are rounded\n    // with round2 and are 0.0 when the denominator is zero. Example: report(3, 6, 6) -> all_documents 0.5, validated_only 0.5\n    return mapOf(\"all_documents\" to 0.0, \"validated_only\" to 0.0, \"validated\" to valid, \"total\" to total)\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun accuracy(results: Map<String, Map<String, Any?>>, labels: Map<String, Map<String, Any?>>): Map<String, Any?>? {\n    var valid = 0\n    var correct = 0\n    for ((id, label) in labels) {\n        val result = results[id]\n        val isValid = result != null && result[\"status\"] == \"valid\"\n        if (isValid) valid++\n        if (isValid) {\n            val record = result!![\"record\"] as Map<String, Any?>\n            if (record[\"vendor\"] == label[\"vendor\"] && (record[\"stated_total\"] as Number).toDouble() == (label[\"stated_total\"] as Number).toDouble()) correct++\n        }\n    }\n    val total = labels.size\n    return report(correct, valid, total)\n}\n\nprivate fun forcedChoice(tools: List<String>, forced: String?): Map<String, Any?> {\n    // TODO 9 of 10 (finish this to pass e9): the tool_choice for a model that accepts a forced choice.\n    // Receives the list of tool names and the name to force, or null. Returns a map with tool_choice, strict true and verify_reply false:\n    // the forced tool when `forced` is given (type tool, name forced), type any when there are several tools, otherwise the one tool by name.\n    // Example: (listOf(\"a\", \"b\"), null) -> {tool_choice={type=any}, strict=true, verify_reply=false}\n    return mapOf(\"tool_choice\" to mapOf(\"type\" to \"auto\"), \"strict\" to true, \"verify_reply\" to false)\n}\n\nfun requestChoice(model: String, tools: List<String>, forced: String? = null): Map<String, Any?>? {\n    if (model in NO_FORCING) return mapOf(\"tool_choice\" to mapOf(\"type\" to \"auto\"), \"strict\" to true, \"verify_reply\" to true)\n    return forcedChoice(tools, forced)\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    val doc = \"Invoice from Acme Tools.\\nItems: 100.00 + 20.50\\nTotal due: 120.50 EUR\\nThank you.\"\n    fun good(): MutableMap<String, Any?> = linkedMapOf(\n        \"vendor\" to \"Acme Tools\", \"currency\" to \"EUR\", \"currency_detail\" to null, \"line_items\" to listOf(100.0, 20.5),\n        \"stated_total\" to 120.5, \"calculated_total\" to 120.5, \"conflict_detected\" to false,\n        \"provenance\" to mapOf(\"vendor\" to \"Invoice from Acme Tools\", \"currency\" to \"120.50 EUR\", \"stated_total\" to \"Total due: 120.50 EUR\"),\n    )\n\n    // A stand-in for the model, like the tests use: it always answers with the same record.\n    val result = extractDocument(doc, { _, feedback ->\n        println(\"model called, feedback: $feedback\")\n        good()\n    })\n    println(\"status: ${result?.get(\"status\")}\")\n    println(\"attempts: ${result?.get(\"attempts\")}\")\n\n    // validate() on its own: a record whose calculated total disagrees with its line items.\n    val bad = good().also { it[\"calculated_total\"] = 99.0 }\n    println(\"errors: ${validate(bad, doc)}\")\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 6,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "05e73c91cfbe7f46ea6a3e9f74a03e9ab38b830f79abd97a737bc5a338c9abde",
+  "starting_code": "private val log = System.getLogger(\"extraction\")\n/** An extraction pipeline that admits absence, checks what a schema cannot, retries with feedback and is measured on every document. See ../../statement.md. Results are JSON-like maps. */\n\nval CURRENCIES = listOf(\"USD\", \"EUR\", \"GBP\", \"other\", \"unclear\")\nprivate val KEYS = listOf(\"vendor\", \"currency\", \"currency_detail\", \"line_items\", \"stated_total\", \"calculated_total\", \"conflict_detected\", \"provenance\")\nprivate val RETRYABLE = listOf(\"syntax\", \"semantic\", \"ungrounded\")\n\n/** Models whose API rejects tool_choice any and tool, as read on 2026-10-03. */\nprivate val NO_FORCING = setOf(\"claude-opus-5-5\", \"claude-sonnet-5-5\", \"claude-fable-5-1\", \"claude-mythos-5-1\")\n\nprivate fun round2(x: Double): Double = Math.round(x * 100) / 100.0\n\nprivate fun err(kind: String, field: String, message: String): Map<String, Any?> = mapOf(\"kind\" to kind, \"field\" to field, \"message\" to message)\n\nprivate fun quoteFound(quote: Any?, document: String): Boolean {\n    // TODO 1 of 10 (finish this to pass e1): is a provenance quote real?\n    // Receives the quote the model gave for a field and the document text. Returns true only when the quote is a non-empty String that\n    // appears in the document, so an invented value cannot be supported by an invented quote.\n    // Example: quoteFound(\"Acme Ltd\", \"Invoice from Acme Ltd\") -> true, quoteFound(\"Zed Corp\", \"Invoice from Acme Ltd\") -> false\n    return true\n}\n\nprivate fun currencyOk(currency: Any?): Boolean {\n    // TODO 2 of 10 (finish this to pass e6): is this a currency the schema allows?\n    // Receives the value of \"currency\". Returns true when it is one of CURRENCIES (\"unclear\" and \"other\" count, anything else does not).\n    // Example: currencyOk(\"unclear\") -> true, currencyOk(\"dollars\") -> false\n    return true\n}\n\nprivate fun detailMissing(currency: Any?, detail: Any?): Boolean {\n    // TODO 3 of 10 (finish this to pass e6): is a required currency detail missing?\n    // Receives \"currency\" and \"currency_detail\". Returns true when the currency is \"other\" and the detail is not a non-blank String.\n    // Example: detailMissing(\"other\", \"  \") -> true, detailMissing(\"other\", \"CHF\") -> false, detailMissing(\"USD\", null) -> false\n    return false\n}\n\nprivate fun checkSemantics(record: Map<String, Any?>, errors: MutableList<Map<String, Any?>>) {\n    // TODO 10 of 10 (finish this to pass e5): report what a schema cannot check about the numbers.\n    // Receives a record whose types are already valid and the `errors` list; add errors with errors += err(\"semantic\", field, message).\n    // Add one on \"calculated_total\" when it is not the sum of \"line_items\" (to half a cent), and one on \"stated_total\" when it is not null,\n    // differs from calculated_total (by more than half a cent) and \"conflict_detected\" is false; a conflict the model flagged is\n    // information, not an error. It returns nothing.\n    // Example: line_items [10, 5], calculated_total 15, stated_total 20, conflict_detected false -> one semantic error on stated_total\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun validate(record: Map<String, Any?>, document: String, required: List<String> = emptyList()): List<Map<String, Any?>>? {\n    log.log(System.Logger.Level.DEBUG, \"validate input: {0}\", record)\n    val errors = mutableListOf<Map<String, Any?>>()\n    for (key in KEYS) if (key !in record) errors += err(\"syntax\", key, \"is missing\")\n    if (errors.isNotEmpty()) return errors\n    if (record[\"vendor\"] != null && record[\"vendor\"] !is String) errors += err(\"syntax\", \"vendor\", \"must be a string or null\")\n    if (!currencyOk(record[\"currency\"])) errors += err(\"syntax\", \"currency\", \"'${record[\"currency\"]}' is not one of $CURRENCIES\")\n    val detail = record[\"currency_detail\"]\n    if (detailMissing(record[\"currency\"], detail)) errors += err(\"syntax\", \"currency_detail\", \"is required when the currency is other\")\n    val items = record[\"line_items\"]\n    if (!(items is List<*> && items.all { it is Number })) errors += err(\"syntax\", \"line_items\", \"must be a list of numbers\")\n    if (record[\"stated_total\"] != null && record[\"stated_total\"] !is Number) errors += err(\"syntax\", \"stated_total\", \"must be a number or null\")\n    if (record[\"calculated_total\"] !is Number) errors += err(\"syntax\", \"calculated_total\", \"must be a number\")\n    if (record[\"conflict_detected\"] !is Boolean) errors += err(\"syntax\", \"conflict_detected\", \"must be true or false\")\n    if (record[\"provenance\"] !is Map<*, *>) errors += err(\"syntax\", \"provenance\", \"must be an object\")\n    if (errors.isNotEmpty()) return errors\n    checkSemantics(record, errors)\n    val provenance = record[\"provenance\"] as Map<String, Any?>\n    for (field in listOf(\"vendor\", \"currency\", \"stated_total\")) {\n        val value = record[field]\n        if (value == null || value == \"unclear\") continue\n        val quote = provenance[field]\n        if (!quoteFound(quote, document)) errors += err(\"ungrounded\", field, \"$field has no quote that appears in the document\")\n    }\n    for (field in required) {\n        val value = record[field]\n        if (value == null || value == \"unclear\") errors += err(\"absent\", field, \"the document gave no value\")\n    }\n    return errors\n}\n\nprivate fun retryableErrors(errors: List<Map<String, Any?>>): List<Map<String, Any?>> {\n    // TODO 4 of 10 (finish this to pass e2, e3 and e4): keep the errors a second look can fix.\n    // Receives a list of {kind, field, message} errors. Returns those whose kind is in RETRYABLE (syntax, semantic, ungrounded), in order;\n    // an \"absent\" error is never retried. Example: [{kind=absent}, {kind=syntax}] -> [{kind=syntax}]\n    return emptyList()\n}\n\nprivate fun status(errors: List<Map<String, Any?>>, record: Map<String, Any?>): String {\n    // TODO 5 of 10 (finish this to pass m1, e3 and e5): the status of a finished extraction.\n    // Receives the errors left after the last attempt and the last record. Returns \"needs_review\" when the only errors are \"absent\" ones, or\n    // when there are no errors and the model flagged a conflict (\"conflict_detected\"); \"failed\" for any other error; \"valid\" otherwise.\n    // Example: no errors and conflict_detected false -> \"valid\"; one absent error -> \"needs_review\"; one syntax error -> \"failed\"\n    return \"failed\"\n}\n\nfun extractDocument(document: String, callModel: (String, Map<String, Any?>?) -> Map<String, Any?>, required: List<String> = emptyList(), maxRetries: Int = 2): Map<String, Any?>? {\n    var feedback: Map<String, Any?>? = null\n    var attempts = 0\n    var record: Map<String, Any?>\n    var errors: List<Map<String, Any?>>\n    while (true) {\n        attempts++\n        record = callModel(document, feedback)\n        errors = validate(record, document, required)!!\n        if (errors.isEmpty()) break\n        val retryable = retryableErrors(errors)\n        if (retryable.isEmpty()) break\n        if (attempts > maxRetries) break\n        feedback = mapOf(\"previous\" to record, \"errors\" to retryable)\n    }\n    val status = status(errors, record)\n    return mapOf(\"status\" to status, \"record\" to record, \"attempts\" to attempts, \"errors\" to errors)\n}\n\nprivate fun isUnset(value: Any?): Boolean {\n    // TODO 6 of 10 (finish this to pass e7): has a merged field no real value yet?\n    // Receives a value. Returns true for null and for \"unclear\", so the first real value from a later chunk is kept.\n    // Example: isUnset(null) -> true, isUnset(\"unclear\") -> true, isUnset(\"Acme Ltd\") -> false\n    return false\n}\n\nprivate fun isConflict(current: Any?, value: Any?, field: String, conflicts: List<Any?>): Boolean {\n    // TODO 7 of 10 (finish this to pass e7): do two chunks disagree about a field, not yet recorded?\n    // Receives the value kept so far, a later chunk's value, the field name and the fields already in `conflicts`. Returns true when the\n    // values differ and the field is not yet in that list, so a conflict is recorded once.\n    // Example: isConflict(\"A\", \"B\", \"vendor\", emptyList()) -> true\n    return false\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun mergeChunks(records: List<Map<String, Any?>>): Map<String, Any?>? {\n    val provenance = LinkedHashMap<String, Any?>()\n    val lineItems = mutableListOf<Any?>()\n    val conflicts = mutableListOf<Any?>()\n    val merged = linkedMapOf<String, Any?>(\"vendor\" to null, \"currency\" to \"unclear\", \"currency_detail\" to null, \"line_items\" to lineItems, \"stated_total\" to null, \"calculated_total\" to 0.0,\n        \"conflict_detected\" to false, \"provenance\" to provenance, \"conflicts\" to conflicts)\n    for (record in records) {\n        for (field in listOf(\"vendor\", \"currency\", \"stated_total\")) {\n            val value = record[field]\n            if (value == null || value == \"unclear\") continue\n            val current = merged[field]\n            if (isUnset(current)) {\n                merged[field] = value\n                provenance[field] = (record[\"provenance\"] as Map<String, Any?>)[field]\n                if (field == \"currency\") merged[\"currency_detail\"] = record[\"currency_detail\"]\n            } else if (isConflict(current, value, field, conflicts)) {\n                conflicts.add(field)\n            }\n        }\n        (record[\"line_items\"] as List<Any?>?)?.let { lineItems.addAll(it) }\n        if (record[\"conflict_detected\"] == true) merged[\"conflict_detected\"] = true\n    }\n    merged[\"calculated_total\"] = round2(lineItems.sumOf { (it as Number).toDouble() })\n    if (conflicts.isNotEmpty()) merged[\"conflict_detected\"] = true\n    return merged\n}\n\nprivate fun report(correct: Int, valid: Int, total: Int): Map<String, Any?> {\n    // TODO 8 of 10 (finish this to pass e8): the accuracy report, on every document and on the validated ones.\n    // Receives the number of correct documents, the number of valid documents and the number of labelled documents. Returns a map with\n    // all_documents (correct over total), validated_only (correct over valid), validated (= valid) and total; the two rates are rounded\n    // with round2 and are 0.0 when the denominator is zero. Example: report(3, 6, 6) -> all_documents 0.5, validated_only 0.5\n    return mapOf(\"all_documents\" to 0.0, \"validated_only\" to 0.0, \"validated\" to valid, \"total\" to total)\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun accuracy(results: Map<String, Map<String, Any?>>, labels: Map<String, Map<String, Any?>>): Map<String, Any?>? {\n    var valid = 0\n    var correct = 0\n    for ((id, label) in labels) {\n        val result = results[id]\n        val isValid = result != null && result[\"status\"] == \"valid\"\n        if (isValid) valid++\n        if (isValid) {\n            val record = result!![\"record\"] as Map<String, Any?>\n            if (record[\"vendor\"] == label[\"vendor\"] && (record[\"stated_total\"] as Number).toDouble() == (label[\"stated_total\"] as Number).toDouble()) correct++\n        }\n    }\n    val total = labels.size\n    return report(correct, valid, total)\n}\n\nprivate fun forcedChoice(tools: List<String>, forced: String?): Map<String, Any?> {\n    // TODO 9 of 10 (finish this to pass e9): the tool_choice for a model that accepts a forced choice.\n    // Receives the list of tool names and the name to force, or null. Returns a map with tool_choice, strict true and verify_reply false:\n    // the forced tool when `forced` is given (type tool, name forced), type any when there are several tools, otherwise the one tool by name.\n    // Example: (listOf(\"a\", \"b\"), null) -> {tool_choice={type=any}, strict=true, verify_reply=false}\n    return mapOf(\"tool_choice\" to mapOf(\"type\" to \"auto\"), \"strict\" to true, \"verify_reply\" to false)\n}\n\nfun requestChoice(model: String, tools: List<String>, forced: String? = null): Map<String, Any?>? {\n    if (model in NO_FORCING) return mapOf(\"tool_choice\" to mapOf(\"type\" to \"auto\"), \"strict\" to true, \"verify_reply\" to true)\n    return forcedChoice(tools, forced)\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-4/src/main/kotlin/Extraction.kt",
+    "test_path": "practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-4/src/test/kotlin/ExtractionTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_aDocumentWithEveryValuePresentAndQuotedComesBackValidOnTheFirstAttempt()",
+        "kind": "main",
+        "says": "A document with every value present and quoted comes back valid on the first attempt"
+      },
+      {
+        "id": "e1_aValueTheDocumentDoesNotGiveIsNullAndNeedsNoQuoteWhileAnInventedValueFailsAsUngrounded()",
+        "kind": "edge",
+        "says": "A value the document does not give is null and needs no quote, while an invented value fails as ungrounded"
+      },
+      {
+        "id": "e2_aRetryCarriesTheOriginalDocumentTheFailedRecordAndOnlyTheErrorsASecondLookCanFix()",
+        "kind": "edge",
+        "says": "A retry carries the document, the failed record and only the errors a second look can fix"
+      },
+      {
+        "id": "e3_aRequiredValueThatTheModelReportsAsAbsentIsNotRetriedAndGoesToReview()",
+        "kind": "edge",
+        "says": "A required value reported as absent is not retried and goes to review"
+      },
+      {
+        "id": "e4_retriesStopAfterTheLimitAndTheDocumentIsMarkedFailed()",
+        "kind": "edge",
+        "says": "Retries stop after the limit and the document is marked failed"
+      },
+      {
+        "id": "e5_aTotalThatDiffersFromTheLineItemsIsASemanticErrorAndAFlaggedConflictGoesToReviewWithoutARetry()",
+        "kind": "edge",
+        "says": "A total that differs from the line items is a semantic error; a flagged conflict goes to review without a retry"
+      },
+      {
+        "id": "e6_currencyTakesUnclearAndOtherWithADetailAndRejectsAnythingElseAsASyntaxError()",
+        "kind": "edge",
+        "says": "Currency takes unclear and other with a detail, and anything else is a syntax error"
+      },
+      {
+        "id": "e7_chunkResultsMergeByKeepingTheFirstValueAndRecordingAConflictWhenTwoChunksDisagree()",
+        "kind": "edge",
+        "says": "Chunk results merge by keeping the first value and recording a conflict when two chunks disagree"
+      },
+      {
+        "id": "e8_accuracyCountsEveryDocumentAndNotOnlyTheValidatedOnes()",
+        "kind": "edge",
+        "says": "Accuracy counts every document and not only the validated ones"
+      },
+      {
+        "id": "e9_theRequestForcesAToolWhereTheModelAllowsItAndFallsBackToAutoWithAReplyCheckWhereItDoesNot()",
+        "kind": "edge",
+        "says": "The request forces a tool where the model allows it and falls back to auto with a reply check where it does not"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-4/target/test-results/test"
+    },
+    "origin": "course/62-structured-output-at-the-architect-level/02-retries-conflicts-chunks-and-the-practice.md",
+    "concepts": [
+      "the practice of Retries, conflicts, chunks, honest accuracy and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "structured-output-at-the-architect-level-u2"
+}

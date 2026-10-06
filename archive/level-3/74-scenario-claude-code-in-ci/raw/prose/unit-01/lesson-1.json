@@ -1,0 +1,342 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "74-scenario-claude-code-in-ci"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "The calls that wait and the calls that do not",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "The calls that wait and the calls that do not"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Architect · **Module 74:** Scenario: Claude Code in CI · **Page 1 of 2** **Exams:** A3.6; S5"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** decide for each job of a pipeline whether it runs in real time or as a batch by asking who waits for it, make a Claude Code run end by itself in a pipeline, bound it with a turn limit and a list of read-only tools, and audit a pipeline description for the mistakes the exam's scenario is built on."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-04 against the Claude Code documentation pages \"Run Claude Code programmatically\" and \"Best practices for Claude Code\" (the pages name Claude Code version 2.1.286), the Claude API documentation page on batch processing, and the Architect exam guide (version 1.0, scenario 5 and its sample questions). The example runs offline in Python, TypeScript, Java and Kotlin and reads two small JSON files; it does not call Claude. This page is a capstone: it uses modules 21, 60 and 61 and puts them in the order the exam asks about."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "Scenario S5 of the Architect exam is Claude Code inside a CI/CD pipeline: automated code review, generated test cases and feedback on pull requests, with prompts that give actionable feedback and few false positives. Its primary domains are Claude Code configuration and workflows, and prompt engineering with structured output. The questions begin with the plumbing and then move to the design. A step hangs because it waits for a person who is not there. A manager wants the discount of batch processing for everything. A review of many files contradicts itself. Each is answered by a rule about where a call sits in the pipeline, and the wrong options are rules that fit another place."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The scenario in plain words"
+    },
+    {
+      "type": "para",
+      "text": "A team runs three Claude jobs. A review of each pull request that has to finish before the merge button works. A report on technical debt that is generated overnight and read the next morning. And the generation of tests for the files a pull request changes. The team wants the bill to fall, the review to be useful instead of noisy, and the pipeline never to hang or to turn green by accident."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The requirement decides the design"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "The requirement",
+        "The design",
+        "Why the tempting choice fails"
+      ],
+      "rows": [
+        [
+          "The step must run with nobody at the keyboard",
+          "`claude -p \"...\"`",
+          "A headless variable, a `--batch` flag and an empty standard input are the routes the exam offers instead; the next section says why none works"
+        ],
+        [
+          "Lower the cost of the overnight report",
+          "The Message Batches API, from a script",
+          "Nothing is wrong with it: nobody waits for the report"
+        ],
+        [
+          "Lower the cost of the check that blocks the merge",
+          "Keep it in real time",
+          "A batch has no latency guarantee, and a developer is waiting"
+        ],
+        [
+          "The run must end whatever the model does",
+          "A turn limit and a list of tools in the command",
+          "A prompt that asks the run to be quick is a request, not a limit"
+        ],
+        [
+          "The job must fail when no valid answer came back",
+          "A gate on the exit status and the JSON (module 60)",
+          "A green job that said nothing is the failure the gate prevents"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Run without a person"
+    },
+    {
+      "type": "para",
+      "text": "In a pipeline nobody can answer a prompt, so a run that would ask a question stops there for ever. The way out is `-p` (or `--print`): it processes the prompt, prints the result and exits. There is no headless environment variable and no `--batch` flag on the command line; `-p` is the documented way to run without a person. Redirecting standard input from an empty file is a Unix workaround that does not change how Claude Code runs. With `-p` the useful companions are `--output-format json`, which prints one object that a script can read, and `--json-schema`, which makes the answer follow a schema (module 60 gives the full command)."
+    },
+    {
+      "type": "para",
+      "text": "A run with no person must end by itself: `--max-turns` stops a loop, and `--allowedTools` lists what runs without asking, because nobody can approve a prompt. A prompt that asks the run to be quick is a request, not a limit. A longer job timeout only lets a loop run longer. When a run fails, re-running it repeats the cost with no reason to expect a different result, so the job reports the failure and a person decides."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Who waits decides the API"
+    },
+    {
+      "type": "para",
+      "text": "The Message Batches API costs half as much and may take up to 24 hours, with no guaranteed latency. That is the whole trade, and it settles which jobs may use it. A check that blocks a merge has a developer waiting, so it cannot depend on a job that may take a day. A technical debt report that is read the next morning has nobody waiting, so it takes the discount. Results of a batch come back matched by `custom_id`, so their order is no reason to avoid it. Polling a batch does not make it finish sooner. A fallback to real time when a batch is slow adds a second path and a second bill, and the simple answer is to match each job to the API that fits it. One more detail of the example: a batch job's command is a script that submits the work, so the `-p` rule applies to commands that start with `claude` and not to a script."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The audit: a checklist that reads the pipeline"
+    },
+    {
+      "type": "para",
+      "text": "The example describes a pipeline in a small JSON file of jobs, with the fields that the checklist needs: who the job's `audience` is (`waiting` or `scheduled`), its `api` (`realtime` or `batch`), its `passes`, its `session`, what it is given as `context`, its `tools` and its `command`. That shape is this course's own, not a product file. The checklist reports, for each job in order:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`no-print-flag`: a command that starts `claude` without `-p` or `--print`.",
+        "`blocking-batch`: a job someone waits for that runs as a batch. `batchable`: a scheduled job that runs in real time and pays full price.",
+        "`single-pass-review`, `shared-session`, `no-prior-findings` and `writes`: the design of a review, which page 2 explains. A `no-existing-tests` finding is the same idea for the test job."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "For a pipeline with no findings the example prints each job with its API and its passes."
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "**Exam guide and current product.** *What the guide states, and so what the exam keys:* the `-p` (or `--print`) flag is the documented way to run non-interactively, the answers that name a headless environment variable or a `--batch` flag describe things that do not exist, and the Message Batches API saves 50% at the cost of a processing time of up to 24 hours with no latency guarantee, which suits overnight jobs and not blocking checks. *What the product does now (documentation checked 2026-10-04):* the same. `claude -p` runs a prompt and exits, `--output-format json` and `--json-schema` shape the output, and a batch is completed within 24 hours with results matched by `custom_id`. So on the exam, choose by who waits; in a real pipeline, also choose by how much the job costs and how soon its result is read, because a fast batch is a bonus and never a promise. Module 63, \"Batch and multi-pass review\", goes further."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "para",
+      "text": "The example loads each pipeline and runs the checklist. It prints one line of facts per pipeline, then the findings for the draft, and for the fixed pipeline each job with its API and passes. The program and its output are the same in all four languages."
+    },
+    {
+      "type": "example",
+      "id": "m74-pipeline-check",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/74-pipeline-check/python/pipeline_check.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/74-pipeline-check/typescript/pipelineCheck.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/74-pipeline-check/java/PipelineCheck.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/74-pipeline-check/kotlin/PipelineCheck.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Check the design of a CI pipeline that uses Claude: which calls wait for a person, how a pull request is reviewed, and what each run is allowed to do.\n\nThe pipelines are two small JSON files, project-before and project-after, beside this example; their shape (job, audience, api, passes, session, context, tools, command) is this\ncourse's own description of a pipeline, not a product file. The checks are the exam's lessons for the scenario, built on the documented behaviour (checked 2026-10-04): claude -p runs\nwithout a person; the Message Batches API gives a discount and may take up to 24 hours with no latency guarantee, so it fits work nobody waits for; a review of many files at once is\nbetter split into a pass per file and one integration pass; a review that runs in the session that wrote the code is biased toward it, so a fresh session reviews. Nothing here calls\nClaude.\n\"\"\"\nimport logging\nimport json\nimport shlex\nfrom pathlib import Path\n\nlog = logging.getLogger(__name__)\n\nHERE = Path(__file__).resolve().parent.parent\nWRITERS = (\"Bash\", \"Edit\", \"Write\")\n\n\ndef load(root):\n    return json.loads((root / \"ci/pipeline.json\").read_text())[\"jobs\"]\n\n\ndef audit(root):\n    found = []\n    for job in load(root):\n        name, kind = job[\"name\"], job[\"kind\"]\n        tokens = shlex.split(job[\"command\"])\n        if tokens[0] == \"claude\" and \"-p\" not in tokens and \"--print\" not in tokens:\n            found.append(f\"no-print-flag: {name}\")\n        if job[\"audience\"] == \"waiting\" and job[\"api\"] == \"batch\":\n            found.append(f\"blocking-batch: {name}\")\n        if job[\"audience\"] == \"scheduled\" and job[\"api\"] == \"realtime\":\n            found.append(f\"batchable: {name}\")\n        if kind == \"review\" and job[\"passes\"] != [\"per-file\", \"integration\"]:\n            found.append(f\"single-pass-review: {name}\")\n        if kind == \"review\" and job[\"session\"] != \"fresh\":\n            found.append(f\"shared-session: {name}\")\n        if kind == \"review\" and \"prior_findings\" not in job[\"context\"]:\n            found.append(f\"no-prior-findings: {name}\")\n        if kind == \"testgen\" and \"existing_tests\" not in job[\"context\"]:\n            found.append(f\"no-existing-tests: {name}\")\n        if kind == \"review\" and any(t in WRITERS for t in job[\"tools\"]):\n            found.append(f\"writes: {name}\")\n    return found\n\n\ndef main():\n    for name in (\"project-before\", \"project-after\"):\n        jobs = load(HERE / name)\n        batch = sum(1 for j in jobs if j[\"api\"] == \"batch\")\n        print(f\"{name}: {len(jobs)} jobs ({len(jobs) - batch} real-time, {batch} batch)\")\n        found = audit(HERE / name)\n        for finding in found:\n            print(f\"  finding: {finding}\")\n        if not found:\n            print(\"  no findings\")\n            for j in jobs:\n                print(f\"  {j['name']}: {j['api']}, passes {'+'.join(j['passes']) or 'none'}\")\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "project-before: 3 jobs (2 real-time, 1 batch)\n  finding: blocking-batch: pre-merge-review\n  finding: single-pass-review: pre-merge-review\n  finding: shared-session: pre-merge-review\n  finding: no-prior-findings: pre-merge-review\n  finding: writes: pre-merge-review\n  finding: batchable: debt-report\n  finding: no-print-flag: test-generation\n  finding: no-existing-tests: test-generation\nproject-after: 3 jobs (2 real-time, 1 batch)\n  no findings\n  pre-merge-review: realtime, passes per-file+integration\n  debt-report: batch, passes none\n  test-generation: realtime, passes none"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Check the design of a CI pipeline that uses Claude: which calls wait for a person, how a pull request is reviewed, and what each run is allowed to do.\n//\n// The pipelines are two small JSON files, project-before and project-after, beside this example; their shape (job, audience, api, passes, session, context, tools, command) is this\n// course's own description of a pipeline, not a product file. The checks are the exam's lessons for the scenario, built on the documented behaviour (checked 2026-10-04): claude -p runs\n// without a person; the Message Batches API gives a discount and may take up to 24 hours with no latency guarantee, so it fits work nobody waits for; a review of many files at once is\n// better split into a pass per file and one integration pass; a review that runs in the session that wrote the code is biased toward it, so a fresh session reviews. Nothing here calls\n// Claude.\nimport { logger } from \"./logger.ts\";\nimport { readFileSync } from \"node:fs\";\nimport { join } from \"node:path\";\nimport { fileURLToPath } from \"node:url\";\nconst log = logger(\"pipeline_check\");\n\n\nexport const HERE = fileURLToPath(new URL(\"..\", import.meta.url));\nconst WRITERS = [\"Bash\", \"Edit\", \"Write\"];\n\nexport type Job = { name: string; kind: string; audience: string; api: string; passes: string[]; session: string; context: string[]; tools: string[]; command: string };\n\nexport const load = (root: string): Job[] => JSON.parse(readFileSync(join(root, \"ci/pipeline.json\"), \"utf8\")).jobs;\n\n/** Split a command line the way a shell does for the quoting this pipeline uses: spaces separate words, double quotes group them and a backslash escapes a quote. */\nexport function words(command: string): string[] {\n  const out: string[] = [];\n  let word = \"\", quoted = false, started = false;\n  for (let i = 0; i < command.length; i++) {\n    const c = command[i];\n    if (c === \"\\\\\" && i + 1 < command.length) { word += command[++i]; started = true; }\n    else if (c === '\"') { quoted = !quoted; started = true; }\n    else if (c === \" \" && !quoted) { if (started) out.push(word); word = \"\"; started = false; }\n    else { word += c; started = true; }\n  }\n  if (started) out.push(word);\n  return out;\n}\n\nexport function audit(root: string): string[] {\n  const found: string[] = [];\n  for (const job of load(root)) {\n    const { name, kind } = job;\n    const tokens = words(job.command);\n    if (tokens[0] === \"claude\" && !tokens.includes(\"-p\") && !tokens.includes(\"--print\")) found.push(`no-print-flag: ${name}`);\n    if (job.audience === \"waiting\" && job.api === \"batch\") found.push(`blocking-batch: ${name}`);\n    if (job.audience === \"scheduled\" && job.api === \"realtime\") found.push(`batchable: ${name}`);\n    if (kind === \"review\" && job.passes.join(\",\") !== \"per-file,integration\") found.push(`single-pass-review: ${name}`);\n    if (kind === \"review\" && job.session !== \"fresh\") found.push(`shared-session: ${name}`);\n    if (kind === \"review\" && !job.context.includes(\"prior_findings\")) found.push(`no-prior-findings: ${name}`);\n    if (kind === \"testgen\" && !job.context.includes(\"existing_tests\")) found.push(`no-existing-tests: ${name}`);\n    if (kind === \"review\" && job.tools.some((t) => WRITERS.includes(t))) found.push(`writes: ${name}`);\n  }\n  return found;\n}\n\nfunction main() {\n  for (const name of [\"project-before\", \"project-after\"]) {\n    const jobs = load(join(HERE, name));\n    const batch = jobs.filter((j) => j.api === \"batch\").length;\n    console.log(`${name}: ${jobs.length} jobs (${jobs.length - batch} real-time, ${batch} batch)`);\n    const found = audit(join(HERE, name));\n    for (const finding of found) console.log(`  finding: ${finding}`);\n    if (found.length === 0) {\n      console.log(\"  no findings\");\n      for (const j of jobs) console.log(`  ${j.name}: ${j.api}, passes ${j.passes.join(\"+\") || \"none\"}`);\n    }\n  }\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "project-before: 3 jobs (2 real-time, 1 batch)\n  finding: blocking-batch: pre-merge-review\n  finding: single-pass-review: pre-merge-review\n  finding: shared-session: pre-merge-review\n  finding: no-prior-findings: pre-merge-review\n  finding: writes: pre-merge-review\n  finding: batchable: debt-report\n  finding: no-print-flag: test-generation\n  finding: no-existing-tests: test-generation\nproject-after: 3 jobs (2 real-time, 1 batch)\n  no findings\n  pre-merge-review: realtime, passes per-file+integration\n  debt-report: batch, passes none\n  test-generation: realtime, passes none"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import com.fasterxml.jackson.databind.JsonNode;\nimport com.fasterxml.jackson.databind.ObjectMapper;\nimport java.io.IOException;\nimport java.nio.file.Files;\nimport java.nio.file.Path;\nimport java.util.ArrayList;\nimport java.util.List;\n\n/**\n * Check the design of a CI pipeline that uses Claude: which calls wait for a person, how a pull request is reviewed, and what each run is allowed to do.\n *\n * <p>The pipelines are two small JSON files, project-before and project-after, beside this example; their shape (job, audience, api, passes, session, context, tools, command) is this\n * course's own description of a pipeline, not a product file. The checks are the exam's lessons for the scenario, built on the documented behaviour (checked 2026-10-04): claude -p runs\n * without a person; the Message Batches API gives a discount and may take up to 24 hours with no latency guarantee, so it fits work nobody waits for; a review of many files at once is\n * better split into a pass per file and one integration pass; a review that runs in the session that wrote the code is biased toward it, so a fresh session reviews. Nothing here calls\n * Claude.\n */\npublic final class PipelineCheck {\n    private static final System.Logger LOG = System.getLogger(PipelineCheck.class.getName());\n    static final Path HERE = Path.of(\"..\").toAbsolutePath().normalize();\n    private static final List<String> WRITERS = List.of(\"Bash\", \"Edit\", \"Write\");\n    private static final ObjectMapper JSON = new ObjectMapper();\n\n    static JsonNode load(Path root) {\n        try {\n            return JSON.readTree(Files.readString(root.resolve(\"ci/pipeline.json\"))).get(\"jobs\");\n        } catch (IOException e) {\n            throw new IllegalStateException(e);\n        }\n    }\n\n    /** Split a command line the way a shell does for the quoting this pipeline uses: spaces separate words, double quotes group them and a backslash escapes a quote. */\n    static List<String> words(String command) {\n        List<String> out = new ArrayList<>();\n        StringBuilder word = new StringBuilder();\n        boolean quoted = false, started = false;\n        for (int i = 0; i < command.length(); i++) {\n            char c = command.charAt(i);\n            if (c == '\\\\' && i + 1 < command.length()) { word.append(command.charAt(++i)); started = true; }\n            else if (c == '\"') { quoted = !quoted; started = true; }\n            else if (c == ' ' && !quoted) { if (started) out.add(word.toString()); word.setLength(0); started = false; }\n            else { word.append(c); started = true; }\n        }\n        if (started) out.add(word.toString());\n        return out;\n    }\n\n    private static List<String> list(JsonNode node) {\n        List<String> out = new ArrayList<>();\n        node.forEach(n -> out.add(n.asText()));\n        return out;\n    }\n\n    static List<String> audit(Path root) {\n        List<String> found = new ArrayList<>();\n        for (JsonNode job : load(root)) {\n            String name = job.get(\"name\").asText(), kind = job.get(\"kind\").asText();\n            List<String> tokens = words(job.get(\"command\").asText());\n            String audience = job.get(\"audience\").asText(), api = job.get(\"api\").asText();\n            if (tokens.get(0).equals(\"claude\") && !tokens.contains(\"-p\") && !tokens.contains(\"--print\")) found.add(\"no-print-flag: \" + name);\n            if (audience.equals(\"waiting\") && api.equals(\"batch\")) found.add(\"blocking-batch: \" + name);\n            if (audience.equals(\"scheduled\") && api.equals(\"realtime\")) found.add(\"batchable: \" + name);\n            if (kind.equals(\"review\") && !String.join(\",\", list(job.get(\"passes\"))).equals(\"per-file,integration\")) found.add(\"single-pass-review: \" + name);\n            if (kind.equals(\"review\") && !job.get(\"session\").asText().equals(\"fresh\")) found.add(\"shared-session: \" + name);\n            if (kind.equals(\"review\") && !list(job.get(\"context\")).contains(\"prior_findings\")) found.add(\"no-prior-findings: \" + name);\n            if (kind.equals(\"testgen\") && !list(job.get(\"context\")).contains(\"existing_tests\")) found.add(\"no-existing-tests: \" + name);\n            if (kind.equals(\"review\") && list(job.get(\"tools\")).stream().anyMatch(WRITERS::contains)) found.add(\"writes: \" + name);\n        }\n        return found;\n    }\n\n    public static void main(String[] args) {\n        for (String name : List.of(\"project-before\", \"project-after\")) {\n            JsonNode jobs = load(HERE.resolve(name));\n            int batch = 0;\n            for (JsonNode j : jobs) if (j.get(\"api\").asText().equals(\"batch\")) batch++;\n            System.out.println(name + \": \" + jobs.size() + \" jobs (\" + (jobs.size() - batch) + \" real-time, \" + batch + \" batch)\");\n            List<String> found = audit(HERE.resolve(name));\n            found.forEach(f -> System.out.println(\"  finding: \" + f));\n            if (found.isEmpty()) {\n                System.out.println(\"  no findings\");\n                for (JsonNode j : jobs) {\n                    String passes = String.join(\"+\", list(j.get(\"passes\")));\n                    System.out.println(\"  \" + j.get(\"name\").asText() + \": \" + j.get(\"api\").asText() + \", passes \" + (passes.isEmpty() ? \"none\" : passes));\n                }\n            }\n        }\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "project-before: 3 jobs (2 real-time, 1 batch)\n  finding: blocking-batch: pre-merge-review\n  finding: single-pass-review: pre-merge-review\n  finding: shared-session: pre-merge-review\n  finding: no-prior-findings: pre-merge-review\n  finding: writes: pre-merge-review\n  finding: batchable: debt-report\n  finding: no-print-flag: test-generation\n  finding: no-existing-tests: test-generation\nproject-after: 3 jobs (2 real-time, 1 batch)\n  no findings\n  pre-merge-review: realtime, passes per-file+integration\n  debt-report: batch, passes none\n  test-generation: realtime, passes none"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import com.fasterxml.jackson.databind.JsonNode\nimport com.fasterxml.jackson.databind.ObjectMapper\nimport java.nio.file.Files\nimport java.nio.file.Path\n\nprivate val log = System.getLogger(\"pipeline_check\")\n\n/**\n * Check the design of a CI pipeline that uses Claude: which calls wait for a person, how a pull request is reviewed, and what each run is allowed to do.\n *\n * The pipelines are two small JSON files, project-before and project-after, beside this example; their shape (job, audience, api, passes, session, context, tools, command) is this\n * course's own description of a pipeline, not a product file. The checks are the exam's lessons for the scenario, built on the documented behaviour (checked 2026-10-04): claude -p runs\n * without a person; the Message Batches API gives a discount and may take up to 24 hours with no latency guarantee, so it fits work nobody waits for; a review of many files at once is\n * better split into a pass per file and one integration pass; a review that runs in the session that wrote the code is biased toward it, so a fresh session reviews. Nothing here calls\n * Claude.\n */\nval HERE: Path = Path.of(\"..\").toAbsolutePath().normalize()\nprivate val WRITERS = listOf(\"Bash\", \"Edit\", \"Write\")\nprivate val JSON = ObjectMapper()\n\nfun load(root: Path): JsonNode = JSON.readTree(Files.readString(root.resolve(\"ci/pipeline.json\"))).get(\"jobs\")\n\n/** Split a command line the way a shell does for the quoting this pipeline uses: spaces separate words, double quotes group them and a backslash escapes a quote. */\nfun words(command: String): List<String> {\n    val out = mutableListOf<String>()\n    val word = StringBuilder()\n    var quoted = false\n    var started = false\n    var i = 0\n    while (i < command.length) {\n        val c = command[i]\n        when {\n            c == '\\\\' && i + 1 < command.length -> { i++; word.append(command[i]); started = true }\n            c == '\"' -> { quoted = !quoted; started = true }\n            c == ' ' && !quoted -> { if (started) out += word.toString(); word.setLength(0); started = false }\n            else -> { word.append(c); started = true }\n        }\n        i++\n    }\n    if (started) out += word.toString()\n    return out\n}\n\nprivate fun list(node: JsonNode): List<String> = node.map { it.asText() }\n\nfun audit(root: Path): List<String> {\n    val found = mutableListOf<String>()\n    for (job in load(root)) {\n        val name = job.get(\"name\").asText()\n        val kind = job.get(\"kind\").asText()\n        val tokens = words(job.get(\"command\").asText())\n        val audience = job.get(\"audience\").asText()\n        val api = job.get(\"api\").asText()\n        if (tokens[0] == \"claude\" && \"-p\" !in tokens && \"--print\" !in tokens) found += \"no-print-flag: $name\"\n        if (audience == \"waiting\" && api == \"batch\") found += \"blocking-batch: $name\"\n        if (audience == \"scheduled\" && api == \"realtime\") found += \"batchable: $name\"\n        if (kind == \"review\" && list(job.get(\"passes\")).joinToString(\",\") != \"per-file,integration\") found += \"single-pass-review: $name\"\n        if (kind == \"review\" && job.get(\"session\").asText() != \"fresh\") found += \"shared-session: $name\"\n        if (kind == \"review\" && \"prior_findings\" !in list(job.get(\"context\"))) found += \"no-prior-findings: $name\"\n        if (kind == \"testgen\" && \"existing_tests\" !in list(job.get(\"context\"))) found += \"no-existing-tests: $name\"\n        if (kind == \"review\" && list(job.get(\"tools\")).any { it in WRITERS }) found += \"writes: $name\"\n    }\n    return found\n}\n\nfun main() {\n    for (name in listOf(\"project-before\", \"project-after\")) {\n        val jobs = load(HERE.resolve(name))\n        val batch = jobs.count { it.get(\"api\").asText() == \"batch\" }\n        println(\"$name: ${jobs.size()} jobs (${jobs.size() - batch} real-time, $batch batch)\")\n        val found = audit(HERE.resolve(name))\n        for (finding in found) println(\"  finding: $finding\")\n        if (found.isEmpty()) {\n            println(\"  no findings\")\n            for (j in jobs) println(\"  ${j.get(\"name\").asText()}: ${j.get(\"api\").asText()}, passes ${list(j.get(\"passes\")).joinToString(\"+\").ifEmpty { \"none\" }}\")\n        }\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "project-before: 3 jobs (2 real-time, 1 batch)\n  finding: blocking-batch: pre-merge-review\n  finding: single-pass-review: pre-merge-review\n  finding: shared-session: pre-merge-review\n  finding: no-prior-findings: pre-merge-review\n  finding: writes: pre-merge-review\n  finding: batchable: debt-report\n  finding: no-print-flag: test-generation\n  finding: no-existing-tests: test-generation\nproject-after: 3 jobs (2 real-time, 1 batch)\n  no findings\n  pre-merge-review: realtime, passes per-file+integration\n  debt-report: batch, passes none\n  test-generation: realtime, passes none"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The draft puts the merge check in a batch, reads all files in one pass in the session that wrote the code, gives it a shell tool, leaves the overnight report in real time, and starts the test job without `-p`. The fixed pipeline has none of those findings."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "para",
+      "text": "These are the wrong answers that the exam's options for this scenario offer, each with the reason it is rejected."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**\"Set an environment variable that turns on headless mode.\"** It is tempting because it sounds like how tools are switched. The exam rejects it: no such variable exists.",
+        "**\"Redirect the input from an empty file so that the run cannot wait.\"** It is tempting because it stops the hang on some programs. The exam rejects it: it is a workaround and does not change how Claude Code runs.",
+        "**\"Move both jobs to batch for the discount, and poll until the check is ready.\"** It is tempting because the saving is real. The exam rejects it for the merge check: polling does not make it finish sooner.",
+        "**\"Keep both in real time, because batch results come back in any order.\"** It is tempting because order sounds like a risk. The exam rejects it: `custom_id` matches the results."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A pipeline step runs `claude \"Analyze this pull request\"` and hangs. What fixes it?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Point its input at an empty file so it cannot wait",
+              "**b**: Export an environment variable that selects headless mode",
+              "**c**: Add a batch flag so the call is queued",
+              "**d**: Add the print flag so that the run answers and exits"
+            ]
+          }
+        ],
+        [
+          "A pipeline has a gate that stops merges until it passes and a dependency digest that people read on Monday. Which calls move to batch?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Just the one nobody waits on, while the other stays in real time",
+              "**b**: Both of them, with polling to find out when the gate is ready",
+              "**c**: Neither of them, since the results of a batch arrive in any order",
+              "**d**: Both of them, with a fallback to real time when a batch is slow"
+            ]
+          }
+        ],
+        [
+          "To which jobs does the audit's `no-print-flag` finding apply?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Any job whose api is batch, whatever its command",
+              "**b**: A command that starts `python` and submits a script without `-p`",
+              "**c**: A command that starts `claude` and has neither `-p` nor `--print`",
+              "**d**: Any job that a developer waits for, whatever its command"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**d**. `-p` is the documented way to run without a person. *b* is ruled out because no such variable exists: \"There is no headless environment variable and no `--batch` flag on the command line\". *c* is ruled out for the same reason: \"There is no headless environment variable and no `--batch` flag on the command line\". *a* is ruled out because it is a workaround: \"Redirecting standard input from an empty file is a Unix workaround that does not change how Claude Code runs.\"",
+            "**a**. Nobody waits for the digest and a developer waits for the gate. *b* is ruled out because waiting is the problem: \"Polling a batch does not make it finish sooner.\" *c* is ruled out because matching exists: \"Results of a batch come back matched by `custom_id`, so their order is no reason to avoid it.\" *d* is ruled out because it adds a path: \"A fallback to real time when a batch is slow adds a second path and a second bill\".",
+            "**c**. The finding is about the command line: \"`no-print-flag`: a command that starts `claude` without `-p` or `--print`.\" *b* is ruled out because a script is not covered: \"the `-p` rule applies to commands that start with `claude` and not to a script\". *a* is ruled out for the same reason: \"the `-p` rule applies to commands that start with `claude` and not to a script\". *d* is ruled out because waiting has its own finding: \"`blocking-batch`: a job someone waits for that runs as a batch.\""
+          ]
+        }
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Adapted from the sample questions of the Claude Certified Architect, Foundations exam guide, version 1.0 (Anthropic), with credit; the questions are Anthropic's. The first question follows the guide's sample question on a pipeline step that hangs, and the second its sample question on moving workflows to batch processing, both rewritten here."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 11,
+    "paras": 14,
+    "code": 0,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 1,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "80795db6b65e376d0d13e93e668065e390387f57f15934dafba9abab7bb1ede1"
+}

@@ -1,0 +1,78 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "45-the-agentic-loop-in-depth"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: an agent loop that is driven by the stop reason (Python)",
+  "lang": "python",
+  "main_file": "agent.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_agent.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/45-the-agentic-loop-in-depth/prose/unit-02/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-3/45-the-agentic-loop-in-depth/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-3/45-the-agentic-loop-in-depth/prose/unit-02/practice-1/test_agent.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_a_run_alternates_model_and_tools_until_the_model_ends_its_turn",
+      "kind": "main",
+      "says": "A run alternates model and tools until the model ends its turn, and the model sees the growing conversation"
+    },
+    {
+      "id": "test_e1_the_stop_reason_decides_and_the_words_of_the_text_do_not",
+      "kind": "edge",
+      "says": "The stop reason decides: a reply that says \"done\" but calls a tool continues, and one that announces a tool but ends its turn ends"
+    },
+    {
+      "id": "test_e2_every_call_of_a_turn_is_answered_in_one_user_message_in_order",
+      "kind": "edge",
+      "says": "Every call of a turn is answered in one user message, in order, with the assistant turn kept as it came"
+    },
+    {
+      "id": "test_e3_a_failing_or_unknown_tool_becomes_an_error_result_and_the_run_goes_on",
+      "kind": "edge",
+      "says": "A failing or unknown tool becomes an error result and the run goes on"
+    },
+    {
+      "id": "test_e4_the_turn_limit_is_a_backstop_that_ends_only_a_run_the_model_has_not_ended",
+      "kind": "edge",
+      "says": "The turn limit is a backstop: it ends an endless run with its own status and does not cut off a run that ends on the last turn"
+    },
+    {
+      "id": "test_e5_a_cut_off_or_refused_reply_ends_the_run_with_its_own_status",
+      "kind": "edge",
+      "says": "A cut-off, refused, stop-sequence or never-seen stop reason ends the run with the right status"
+    },
+    {
+      "id": "test_e6_a_tool_use_reply_without_a_tool_call_is_malformed_and_sends_nothing_more",
+      "kind": "edge",
+      "says": "A tool_use reply with no tool call is malformed and nothing more is sent"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/45-the-agentic-loop-in-depth/02-results-parallel-calls-context-and-the-practice.md"
+}

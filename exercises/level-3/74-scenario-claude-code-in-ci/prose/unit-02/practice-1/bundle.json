@@ -1,0 +1,90 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "74-scenario-claude-code-in-ci"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: the design of a pull request pipeline that uses Claude (Python)",
+  "lang": "python",
+  "main_file": "project/ci/pipeline.json",
+  "files": [
+    "project/ci/review-criteria.md",
+    "project/ci/review.schema.json",
+    "project/ci/testgen-prompt.md"
+  ],
+  "test_file": "tests/test_ci_setup.py",
+  "build": [
+    "pytest.ini",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-1/check_files.py",
+    "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-1/project/ci/pipeline.json",
+    "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-1/project/ci/review-criteria.md",
+    "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-1/project/ci/review.schema.json",
+    "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-1/project/ci/testgen-prompt.md"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-1/tests/test_ci_setup.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_who_waits_decides_between_real_time_and_batch",
+      "kind": "main",
+      "says": "A job a person waits for is real time, a job nobody waits for is a batch"
+    },
+    {
+      "id": "test_e1_a_review_has_a_pass_for_each_file_and_then_an_integration_pass",
+      "kind": "edge",
+      "says": "The review has a pass per file, then an integration pass"
+    },
+    {
+      "id": "test_e2_a_review_runs_in_a_fresh_session_and_is_given_the_earlier_findings",
+      "kind": "edge",
+      "says": "The review runs in a fresh session and is given the earlier findings"
+    },
+    {
+      "id": "test_e3_every_claude_command_is_headless_json_and_bounded",
+      "kind": "edge",
+      "says": "Every claude command is headless, JSON and bounded; the schema has a closed severity and required fields"
+    },
+    {
+      "id": "test_e4_the_review_can_only_read",
+      "kind": "edge",
+      "says": "The review has read tools only, in its list and in its command"
+    },
+    {
+      "id": "test_e5_the_criteria_name_what_to_report_what_to_skip_and_an_example_for_each_severity",
+      "kind": "edge",
+      "says": "The criteria list what to report and skip, give an example for each severity and use no vague phrase"
+    },
+    {
+      "id": "test_e6_the_test_prompt_passes_the_existing_tests_and_says_what_a_useful_test_is",
+      "kind": "edge",
+      "says": "The test prompt passes the changed files and the existing tests and defines a useful test"
+    },
+    {
+      "id": "test_e7_no_file_holds_a_personal_path_an_address_or_a_key",
+      "kind": "edge",
+      "says": "No personal path, address or key in any file"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/74-scenario-claude-code-in-ci/02-review-passes-criteria-test-generation-and-the-practice.md"
+}

@@ -1,0 +1,278 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "70-scenario-customer-support-agent"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: audit a support agent's sessions and name the first fix (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: audit a support agent's sessions and name the first fix"
+    },
+    {
+      "type": "para",
+      "text": "A customer support resolution agent has been in production for a month. The team's target is that at least 80 percent of conversations are resolved at first contact, and the agent must escalate the ones a person has to decide. The rate is below target, and each team member blames something else: the prompt, the tools, the model. In this practice you write the audit that ends the argument: it reads the month's recorded sessions, counts what went wrong in each failure shape, and names the one fix to make first. The model is not called: the tests give you recorded sessions. The audit, its failure shapes and its order of fixes are this course's own design for the capstone, not an Anthropic interface. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`audit`); TypeScript has the same name and the same snake-case fields. Java has the static method `Audit.audit` and the records `Step`, `Session` and `Report`; Kotlin has the top-level function `audit` and the data classes of the same names. In Java and Kotlin the fields are camel case (`needsHuman`, `refundCents`, `meetsTarget`, `overEscalated`, `underEscalated`, `skippedPrerequisite`, `wrongTool`, `overLimitRefunds`)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working audit with five gaps cut out of it. The plumbing is written and correct: the session count, the resolved, over- and under-escalated counts, and `audit` itself, which calls the gaps and builds the report. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (Java and Kotlin use the camel-case names):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`skipped_prerequisite` unlocks `e2`: the order of the steps and the failed identity check.",
+        "`has_wrong_tool` unlocks `e6`: a known right tool that differs from the tool used.",
+        "`is_over_limit` unlocks `e3`: a refund that was made above the limit.",
+        "`first_contact_rate` unlocks `e1` and `e5`: the rounded rate, and 0 for no sessions.",
+        "`diagnose` unlocks `e4` and the diagnosis of `m1` and `e1`: the order of the fixes."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About a dozen lines in all. The sections below describe the whole audit."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "A step is one call the agent made: `tool`, `ok` (whether it succeeded) and `right_tool`, the tool it should have used (absent when the right tool is not known). A session has `id`, `steps`, `outcome` (`resolved` or `escalated`), `needs_human` (the ground truth: a person had to decide this case), `refund_cents` (the refund made, 0 for none) and `limit_cents` (the limit above which a person decides)."
+    },
+    {
+      "type": "para",
+      "text": "`audit(sessions)` returns a report with these fields:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`sessions`: how many; `resolved`: how many have the outcome `resolved`.",
+        "`fcr`: `resolved` divided by `sessions`, rounded to three decimals (0 for no sessions); `meets_target`: `fcr` is at least 0.8.",
+        "`over_escalated`: escalated although no person was needed; `under_escalated`: resolved although a person was needed.",
+        "`skipped_prerequisite`: sessions in which a `lookup_order` or `process_refund` call came before the first successful `get_customer` call (a failed `get_customer` does not count as identifying anyone).",
+        "`wrong_tool`: sessions with at least one step whose `right_tool` is known and differs from its `tool`.",
+        "`over_limit_refunds`: sessions with the outcome `resolved` whose `refund_cents` is above `limit_cents`.",
+        "`diagnosis`, the first fix, by this order: `enforce_in_code` when `skipped_prerequisite` or `over_limit_refunds` is above zero (money moves wrongly: nothing else comes first); otherwise `rewrite_tool_descriptions` when `wrong_tool` is above zero and at least `over_escalated` plus `under_escalated`; otherwise `write_escalation_criteria` when `over_escalated` plus `under_escalated` is above zero; otherwise `none`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Measure the target.** The exam gives a rate (55 percent against 80) and asks for the most effective way up. *You should see* the rate rounded and compared at the boundary.",
+        "**A prerequisite is an order.** Calling the order tool is not the fault; calling it before the customer was identified is. *You should see* the order of the steps read, and a failed check not counted as an identification.",
+        "**A refund over the limit is a fact about what happened.** A refund that was refused and handed to a person is the design working. *You should see* only made refunds counted.",
+        "**Failure shapes need different fixes.** Skipped steps and money moved wrongly call for a gate in code; a wrong tool call calls for better descriptions; a miscalibrated escalation calls for explicit criteria with examples. *You should see* the fixes in that order of urgency.",
+        "**Count sessions, not steps.** One confused conversation is one failure however many calls it holds. *You should see* sessions counted for the wrong tool."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A mixed set of six sessions gets every field right and the first fix"
+        ],
+        [
+          "`e1`",
+          "No sessions: zero everywhere, a rate of 0, no diagnosis"
+        ],
+        [
+          "`e2`",
+          "The prerequisite is the order of the steps, and a failed identity check does not open the gate"
+        ],
+        [
+          "`e3`",
+          "Only a refund that was made counts as over the limit"
+        ],
+        [
+          "`e4`",
+          "The order of fixes: code, then descriptions (a tie goes to descriptions), then criteria"
+        ],
+        [
+          "`e5`",
+          "The rate at exactly 0.8 meets the target, 0.6 does not, 2 of 3 is 0.667, and over- and under-escalation are counted apart"
+        ],
+        [
+          "`e6`",
+          "The wrong tool counts sessions and ignores steps whose right tool is not known"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.List;\n\n/** Audit a support agent's recorded sessions: the rates, the failure shapes and the first fix. */\npublic final class Audit {\n    private static final System.Logger LOG = System.getLogger(Audit.class.getName());\n\n    /** One call the agent made: the tool, whether it succeeded and the tool it should have used (null when not known). */\n    public record Step(String tool, boolean ok, String rightTool) {}\n\n    public record Session(String id, List<Step> steps, String outcome, boolean needsHuman, int refundCents, int limitCents) {}\n\n    public record Report(int sessions, int resolved, double fcr, boolean meetsTarget, int overEscalated, int underEscalated,\n                         int skippedPrerequisite, int wrongTool, int overLimitRefunds, String diagnosis) {}\n\n    static final List<String> PROTECTED = List.of(\"lookup_order\", \"process_refund\");\n    static final double TARGET = 0.8;\n\n    /** True when an order or refund call came before the first successful get_customer call. */\n    static boolean skippedPrerequisite(List<Step> steps) {\n        boolean verified = false;\n        for (Step step : steps) {\n            if (step.tool().equals(\"get_customer\") && step.ok()) verified = true;\n            else if (PROTECTED.contains(step.tool()) && !verified) return true;\n        }\n        return false;\n    }\n\n    /** True when at least one step has a known right tool that differs from the tool used. */\n    static boolean hasWrongTool(List<Step> steps) {\n        return steps.stream().anyMatch(st -> st.rightTool() != null && !st.tool().equals(st.rightTool()));\n    }\n\n    /** True when the session was resolved with a refund above its limit. */\n    static boolean isOverLimit(Session session) {\n        return session.outcome().equals(\"resolved\") && session.refundCents() > session.limitCents();\n    }\n\n    /** The resolved share, rounded to three decimals; 0.0 for no sessions. */\n    static double firstContactRate(int resolved, int n) {\n        return n > 0 ? Math.round((double) resolved / n * 1000) / 1000.0 : 0.0;\n    }\n\n    /** The first fix, by the order of the statement. */\n    static String diagnose(int skipped, int overLimit, int wrong, int over, int under) {\n        if (skipped > 0 || overLimit > 0) return \"enforce_in_code\";\n        if (wrong > 0 && wrong >= over + under) return \"rewrite_tool_descriptions\";\n        if (over + under > 0) return \"write_escalation_criteria\";\n        return \"none\";\n    }\n\n    public static Report audit(List<Session> sessions) {\n        LOG.log(System.Logger.Level.DEBUG, \"audit input: {0}\", sessions);\n        int n = sessions.size();\n        int resolved = (int) sessions.stream().filter(s -> s.outcome().equals(\"resolved\")).count();\n        int over = (int) sessions.stream().filter(s -> s.outcome().equals(\"escalated\") && !s.needsHuman()).count();\n        int under = (int) sessions.stream().filter(s -> s.outcome().equals(\"resolved\") && s.needsHuman()).count();\n        int skipped = (int) sessions.stream().filter(s -> skippedPrerequisite(s.steps())).count();\n        int wrong = (int) sessions.stream().filter(s -> hasWrongTool(s.steps())).count();\n        int overLimit = (int) sessions.stream().filter(Audit::isOverLimit).count();\n        double fcr = firstContactRate(resolved, n);\n        return new Report(n, resolved, fcr, fcr >= TARGET, over, under, skipped, wrong, overLimit, diagnose(skipped, overLimit, wrong, over, under));\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.*;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // Sessions of a support agent: a clean one, one that skipped the customer check, and one escalated without need.\n        List<Audit.Step> clean = List.of(new Audit.Step(\"get_customer\", true, null), new Audit.Step(\"lookup_order\", true, null), new Audit.Step(\"process_refund\", true, null));\n        List<Audit.Session> sessions = List.of(\n            new Audit.Session(\"s\", clean, \"resolved\", false, 2000, 10000),\n            new Audit.Session(\"s\", List.of(new Audit.Step(\"lookup_order\", true, null), new Audit.Step(\"get_customer\", true, null), new Audit.Step(\"process_refund\", true, null)), \"resolved\", false, 0, 10000),\n            new Audit.Session(\"s\", List.of(new Audit.Step(\"get_customer\", true, null)), \"escalated\", false, 0, 10000));\n        Audit.Report report = Audit.audit(sessions);\n        System.out.println(\"sessions: \" + report.sessions() + \" | resolved: \" + report.resolved() + \" | fcr: \" + report.fcr() + \" | meets target: \" + report.meetsTarget());\n        System.out.println(\"over-escalated: \" + report.overEscalated() + \" | under-escalated: \" + report.underEscalated());\n        System.out.println(\"skipped prerequisite: \" + report.skippedPrerequisite() + \" | wrong tool: \" + report.wrongTool() + \" | over-limit refunds: \" + report.overLimitRefunds());\n        System.out.println(\"diagnosis: \" + report.diagnosis());\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.List;\n\n/** Audit a support agent's recorded sessions: the rates, the failure shapes and the first fix. */\npublic final class Audit {\n    private static final System.Logger LOG = System.getLogger(Audit.class.getName());\n\n    /** One call the agent made: the tool, whether it succeeded and the tool it should have used (null when not known). */\n    public record Step(String tool, boolean ok, String rightTool) {}\n\n    public record Session(String id, List<Step> steps, String outcome, boolean needsHuman, int refundCents, int limitCents) {}\n\n    public record Report(int sessions, int resolved, double fcr, boolean meetsTarget, int overEscalated, int underEscalated,\n                         int skippedPrerequisite, int wrongTool, int overLimitRefunds, String diagnosis) {}\n\n    static final List<String> PROTECTED = List.of(\"lookup_order\", \"process_refund\");\n    static final double TARGET = 0.8;\n\n    /**\n     * TODO 1 of 5 (unlocks e2): did an order or refund call come before the first successful get_customer call?\n     * Receives a session's steps. Returns true or false; a failed get_customer does not identify anyone.\n     * Example: [lookup_order, get_customer] -> true, [get_customer, lookup_order] -> false\n     */\n    static boolean skippedPrerequisite(List<Step> steps) {\n        return false;\n    }\n\n    /**\n     * TODO 2 of 5 (unlocks e6): does a step have a known right tool that differs from the tool used?\n     * Receives a session's steps (rightTool is null when not known). Returns true for at least one such step, false otherwise.\n     * Example: [Step(\"get_customer\", true, \"lookup_order\")] -> true; a step with a null rightTool never counts.\n     */\n    static boolean hasWrongTool(List<Step> steps) {\n        return false;\n    }\n\n    /**\n     * TODO 3 of 5 (unlocks e3): was a refund above the limit actually made?\n     * Receives one session. Returns true only when its outcome is \"resolved\" and refundCents is above limitCents.\n     * Example: resolved, refund 10001, limit 10000 -> true; escalated with the same refund -> false\n     */\n    static boolean isOverLimit(Session session) {\n        return false;\n    }\n\n    /**\n     * TODO 4 of 5 (unlocks e1 and e5): the first contact rate.\n     * Receives the resolved count and the session count. Returns resolved / n rounded to three decimals, 0.0 when n is 0.\n     * Example: firstContactRate(2, 3) -> 0.667\n     */\n    static double firstContactRate(int resolved, int n) {\n        return 0.0;\n    }\n\n    /**\n     * TODO 5 of 5 (unlocks e4 and e1): the first fix, by the order in the statement.\n     * Receives the counts of skipped prerequisites, over-limit refunds, wrong-tool sessions, over- and under-escalations.\n     * Returns \"enforce_in_code\", \"rewrite_tool_descriptions\", \"write_escalation_criteria\" or \"none\".\n     * Example: diagnose(0, 0, 2, 1, 0) -> \"rewrite_tool_descriptions\"\n     */\n    static String diagnose(int skipped, int overLimit, int wrong, int over, int under) {\n        return \"\";\n    }\n\n    public static Report audit(List<Session> sessions) {\n        LOG.log(System.Logger.Level.DEBUG, \"audit input: {0}\", sessions);\n        int n = sessions.size();\n        int resolved = (int) sessions.stream().filter(s -> s.outcome().equals(\"resolved\")).count();\n        int over = (int) sessions.stream().filter(s -> s.outcome().equals(\"escalated\") && !s.needsHuman()).count();\n        int under = (int) sessions.stream().filter(s -> s.outcome().equals(\"resolved\") && s.needsHuman()).count();\n        int skipped = (int) sessions.stream().filter(s -> skippedPrerequisite(s.steps())).count();\n        int wrong = (int) sessions.stream().filter(s -> hasWrongTool(s.steps())).count();\n        int overLimit = (int) sessions.stream().filter(Audit::isOverLimit).count();\n        double fcr = firstContactRate(resolved, n);\n        return new Report(n, resolved, fcr, fcr >= TARGET, over, under, skipped, wrong, overLimit, diagnose(skipped, overLimit, wrong, over, under));\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.*;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // Sessions of a support agent: a clean one, one that skipped the customer check, and one escalated without need.\n        List<Audit.Step> clean = List.of(new Audit.Step(\"get_customer\", true, null), new Audit.Step(\"lookup_order\", true, null), new Audit.Step(\"process_refund\", true, null));\n        List<Audit.Session> sessions = List.of(\n            new Audit.Session(\"s\", clean, \"resolved\", false, 2000, 10000),\n            new Audit.Session(\"s\", List.of(new Audit.Step(\"lookup_order\", true, null), new Audit.Step(\"get_customer\", true, null), new Audit.Step(\"process_refund\", true, null)), \"resolved\", false, 0, 10000),\n            new Audit.Session(\"s\", List.of(new Audit.Step(\"get_customer\", true, null)), \"escalated\", false, 0, 10000));\n        Audit.Report report = Audit.audit(sessions);\n        System.out.println(\"sessions: \" + report.sessions() + \" | resolved: \" + report.resolved() + \" | fcr: \" + report.fcr() + \" | meets target: \" + report.meetsTarget());\n        System.out.println(\"over-escalated: \" + report.overEscalated() + \" | under-escalated: \" + report.underEscalated());\n        System.out.println(\"skipped prerequisite: \" + report.skippedPrerequisite() + \" | wrong tool: \" + report.wrongTool() + \" | over-limit refunds: \" + report.overLimitRefunds());\n        System.out.println(\"diagnosis: \" + report.diagnosis());\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 7,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "b63c9eae726e16b19cb09bb9128c11eeed9b96c67ffa087896f25364b95a3c62",
+  "starting_code": "import java.util.List;\n\n/** Audit a support agent's recorded sessions: the rates, the failure shapes and the first fix. */\npublic final class Audit {\n    private static final System.Logger LOG = System.getLogger(Audit.class.getName());\n\n    /** One call the agent made: the tool, whether it succeeded and the tool it should have used (null when not known). */\n    public record Step(String tool, boolean ok, String rightTool) {}\n\n    public record Session(String id, List<Step> steps, String outcome, boolean needsHuman, int refundCents, int limitCents) {}\n\n    public record Report(int sessions, int resolved, double fcr, boolean meetsTarget, int overEscalated, int underEscalated,\n                         int skippedPrerequisite, int wrongTool, int overLimitRefunds, String diagnosis) {}\n\n    static final List<String> PROTECTED = List.of(\"lookup_order\", \"process_refund\");\n    static final double TARGET = 0.8;\n\n    /**\n     * TODO 1 of 5 (unlocks e2): did an order or refund call come before the first successful get_customer call?\n     * Receives a session's steps. Returns true or false; a failed get_customer does not identify anyone.\n     * Example: [lookup_order, get_customer] -> true, [get_customer, lookup_order] -> false\n     */\n    static boolean skippedPrerequisite(List<Step> steps) {\n        return false;\n    }\n\n    /**\n     * TODO 2 of 5 (unlocks e6): does a step have a known right tool that differs from the tool used?\n     * Receives a session's steps (rightTool is null when not known). Returns true for at least one such step, false otherwise.\n     * Example: [Step(\"get_customer\", true, \"lookup_order\")] -> true; a step with a null rightTool never counts.\n     */\n    static boolean hasWrongTool(List<Step> steps) {\n        return false;\n    }\n\n    /**\n     * TODO 3 of 5 (unlocks e3): was a refund above the limit actually made?\n     * Receives one session. Returns true only when its outcome is \"resolved\" and refundCents is above limitCents.\n     * Example: resolved, refund 10001, limit 10000 -> true; escalated with the same refund -> false\n     */\n    static boolean isOverLimit(Session session) {\n        return false;\n    }\n\n    /**\n     * TODO 4 of 5 (unlocks e1 and e5): the first contact rate.\n     * Receives the resolved count and the session count. Returns resolved / n rounded to three decimals, 0.0 when n is 0.\n     * Example: firstContactRate(2, 3) -> 0.667\n     */\n    static double firstContactRate(int resolved, int n) {\n        return 0.0;\n    }\n\n    /**\n     * TODO 5 of 5 (unlocks e4 and e1): the first fix, by the order in the statement.\n     * Receives the counts of skipped prerequisites, over-limit refunds, wrong-tool sessions, over- and under-escalations.\n     * Returns \"enforce_in_code\", \"rewrite_tool_descriptions\", \"write_escalation_criteria\" or \"none\".\n     * Example: diagnose(0, 0, 2, 1, 0) -> \"rewrite_tool_descriptions\"\n     */\n    static String diagnose(int skipped, int overLimit, int wrong, int over, int under) {\n        return \"\";\n    }\n\n    public static Report audit(List<Session> sessions) {\n        LOG.log(System.Logger.Level.DEBUG, \"audit input: {0}\", sessions);\n        int n = sessions.size();\n        int resolved = (int) sessions.stream().filter(s -> s.outcome().equals(\"resolved\")).count();\n        int over = (int) sessions.stream().filter(s -> s.outcome().equals(\"escalated\") && !s.needsHuman()).count();\n        int under = (int) sessions.stream().filter(s -> s.outcome().equals(\"resolved\") && s.needsHuman()).count();\n        int skipped = (int) sessions.stream().filter(s -> skippedPrerequisite(s.steps())).count();\n        int wrong = (int) sessions.stream().filter(s -> hasWrongTool(s.steps())).count();\n        int overLimit = (int) sessions.stream().filter(Audit::isOverLimit).count();\n        double fcr = firstContactRate(resolved, n);\n        return new Report(n, resolved, fcr, fcr >= TARGET, over, under, skipped, wrong, overLimit, diagnose(skipped, overLimit, wrong, over, under));\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-3/src/main/java/Audit.java",
+    "test_path": "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-3/src/test/java/AuditTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_aMixedSetOfSessionsGetsEveryRateAndTheFirstFix()",
+        "kind": "main",
+        "says": "A mixed set of six sessions gets every field right and the first fix"
+      },
+      {
+        "id": "e1_noSessionsGiveZeroRatesAndNoDiagnosis()",
+        "kind": "edge",
+        "says": "No sessions: zero everywhere, a rate of 0, no diagnosis"
+      },
+      {
+        "id": "e2_aProtectedCallBeforeASuccessfulIdentityCheckIsASkippedPrerequisite()",
+        "kind": "edge",
+        "says": "The prerequisite is the order of the steps, and a failed identity check does not open the gate"
+      },
+      {
+        "id": "e3_aRefundOverTheLimitCountsOnlyWhenItWasMade()",
+        "kind": "edge",
+        "says": "Only a refund that was made counts as over the limit"
+      },
+      {
+        "id": "e4_moneyFirstThenToolDescriptionsThenEscalationCriteria()",
+        "kind": "edge",
+        "says": "The order of fixes: code, then descriptions (a tie goes to descriptions), then criteria"
+      },
+      {
+        "id": "e5_theTargetBoundaryAndRoundingOfTheFirstContactRate()",
+        "kind": "edge",
+        "says": "The rate at exactly 0.8 meets the target, 0.6 does not, 2 of 3 is 0.667, and over- and under-escalation are counted apart"
+      },
+      {
+        "id": "e6_aWrongToolCountsSessionsAndIgnoresStepsWithNoKnownRightTool()",
+        "kind": "edge",
+        "says": "The wrong tool counts sessions and ignores steps whose right tool is not known"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-3/target/test-results/test"
+    },
+    "origin": "course/70-scenario-customer-support-agent/02-audit-the-sessions-and-the-practice.md",
+    "concepts": [
+      "the practice of Audit the sessions, order the fixes and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "scenario-customer-support-agent-u2"
+}

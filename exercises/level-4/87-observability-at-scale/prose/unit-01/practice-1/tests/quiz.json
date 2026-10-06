@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-4",
+    "87-observability-at-scale"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: What to keep, where it failed and what must not be logged",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A platform handles two million conversations a day and cannot afford to store every trace. Users report wrong answers that the dashboards do not show. Which rule fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Keep all failures, slow calls and complaints, and sample the rest by id",
+            "correct": true,
+            "says": "Tail-based sampling can look at the outcome, so it retains what failed, what was slow and what a user flagged, and takes a share of the rest by id."
+          },
+          {
+            "id": "b",
+            "text": "Raise the random share from one percent to five, and review that larger share each week",
+            "correct": false,
+            "says": "Ruled out because \"a random share of one percent holds almost none of them, and five percent holds few more\"."
+          },
+          {
+            "id": "c",
+            "text": "Keep only the requests of the largest customers, because their heavy usage dominates",
+            "correct": false,
+            "says": "Ruled out because \"Sampling by customer size covers heavy use and says nothing about which requests failed\"."
+          },
+          {
+            "id": "d",
+            "text": "Store metrics only, and rely on the daily error count, since that costs almost nothing",
+            "correct": false,
+            "says": "Ruled out because a metric \"says that something changed. It never says where or why\"."
+          }
+        ],
+        "origin": {
+          "path": "course/87-observability-at-scale/01-what-to-keep-where-it-failed-and-what-must-not-be-logged.md",
+          "section": "What to keep when you cannot keep everything"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "In one trace, the orchestrator, a researcher agent and a download tool all show an error. The orchestrator's message says the research step failed. Where does the failure originate?",
+        "options": [
+          {
+            "id": "a",
+            "text": "In the orchestrator, because it is the first component the user's request reached",
+            "correct": false,
+            "says": "Ruled out because \"the first span to turn red is not the origin\"."
+          },
+          {
+            "id": "b",
+            "text": "In the researcher, because it is the first agent below the orchestrator to show an error",
+            "correct": false,
+            "says": "Ruled out for the same reason: \"The span that reports an error is often only passing on the error of the span below it\"."
+          },
+          {
+            "id": "c",
+            "text": "In the deepest span that broke, the call at the bottom of the chain",
+            "correct": true,
+            "says": "The deepest failing span is the origin, and the spans above it only relay its error."
+          },
+          {
+            "id": "d",
+            "text": "In the planning model call, because a poor plan would send the researcher to a bad source",
+            "correct": false,
+            "says": "Ruled out because the fix is to \"Read the trace to the deepest failure\", and the deepest failure here is the tool, not a model call."
+          }
+        ],
+        "origin": {
+          "path": "course/87-observability-at-scale/01-what-to-keep-where-it-failed-and-what-must-not-be-logged.md",
+          "section": "Finding the layer that failed"
+        }
+      }
+    ]
+  }
+}

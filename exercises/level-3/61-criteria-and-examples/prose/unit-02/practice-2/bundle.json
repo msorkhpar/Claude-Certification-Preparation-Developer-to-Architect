@@ -1,0 +1,83 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "61-criteria-and-examples"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: a review specification that cuts false positives (TypeScript)",
+  "lang": "typescript",
+  "main_file": "reviewSpec.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "reviewSpec.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-3/61-criteria-and-examples/prose/unit-02/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-3/61-criteria-and-examples/prose/unit-02/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-3/61-criteria-and-examples/prose/unit-02/practice-2/reviewSpec.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 the prompt puts criteria first then examples then the diff last",
+      "kind": "main",
+      "says": "The prompt has criteria first, then examples, then the diff last, in the exact shape above"
+    },
+    {
+      "id": "e1 vague criteria are refused in both the report and the skip text",
+      "kind": "edge",
+      "says": "Vague wording is refused in both the report and the skip text, with vague in the message"
+    },
+    {
+      "id": "e2 a criterion needs report skip and a concrete severity example for high and low",
+      "kind": "edge",
+      "says": "A criterion needs a report, a skip and a severity example for high and low"
+    },
+    {
+      "id": "e3 two to four examples with a report and a skip each carrying a reason",
+      "kind": "edge",
+      "says": "Two to four examples with a report and a skip, each with a reason and a known category"
+    },
+    {
+      "id": "e4 a category with enough reviews and low precision is disabled",
+      "kind": "edge",
+      "says": "A category with enough reviews and low precision is disabled, and the boundaries hold"
+    },
+    {
+      "id": "e5 the most dismissed patterns are listed by count then name and capped at three",
+      "kind": "edge",
+      "says": "The most dismissed patterns are listed by count and then name, capped at three"
+    },
+    {
+      "id": "e6 an attended run asks only what it cannot assume and states its assumptions",
+      "kind": "edge",
+      "says": "An attended run asks only what it cannot assume and states its assumptions"
+    },
+    {
+      "id": "e7 an unattended run never asks it states assumptions or stops",
+      "kind": "edge",
+      "says": "An unattended run never asks: it states assumptions or stops"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/61-criteria-and-examples/02-examples-asking-and-the-practice.md"
+}

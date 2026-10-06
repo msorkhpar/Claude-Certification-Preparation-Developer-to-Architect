@@ -1,0 +1,156 @@
+{
+  "practice": "82-models-prompts-and-context-as-design-choices/unit-01/practice-1",
+  "name": "prompt_plan",
+  "tests": {
+    "java": "PromptPlanTest",
+    "kotlin": "PromptPlanTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_static_modules_come_first_and_the_breakpoint_follows_the_last_one",
+      "typescript": "m1 static modules come first and the breakpoint follows the last one",
+      "java": "m1_staticModulesComeFirstAndTheBreakpointFollowsTheLastOne",
+      "kotlin": "m1_staticModulesComeFirstAndTheBreakpointFollowsTheLastOne"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_variable_in_a_static_module_is_refused",
+      "typescript": "e1 a variable in a static module is refused",
+      "java": "e1_aVariableInAStaticModuleIsRefused",
+      "kotlin": "e1_aVariableInAStaticModuleIsRefused"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_dynamic_variables_are_filled_and_a_missing_one_is_refused",
+      "typescript": "e2 dynamic variables are filled and a missing one is refused",
+      "java": "e2_dynamicVariablesAreFilledAndAMissingOneIsRefused",
+      "kotlin": "e2_dynamicVariablesAreFilledAndAMissingOneIsRefused"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_the_lowest_priority_dynamic_module_is_dropped_first_and_a_tie_drops_the_later_one",
+      "typescript": "e3 the lowest priority dynamic module is dropped first and a tie drops the later one",
+      "java": "e3_theLowestPriorityDynamicModuleIsDroppedFirstAndATieDropsTheLaterOne",
+      "kotlin": "e3_theLowestPriorityDynamicModuleIsDroppedFirstAndATieDropsTheLaterOne"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_static_modules_are_never_dropped_and_a_budget_they_exceed_is_refused",
+      "typescript": "e4 static modules are never dropped and a budget they exceed is refused",
+      "java": "e4_staticModulesAreNeverDroppedAndABudgetTheyExceedIsRefused",
+      "kotlin": "e4_staticModulesAreNeverDroppedAndABudgetTheyExceedIsRefused"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_prefix_under_the_minimum_gets_no_breakpoint",
+      "typescript": "e5 a prefix under the minimum gets no breakpoint",
+      "java": "e5_aPrefixUnderTheMinimumGetsNoBreakpoint",
+      "kotlin": "e5_aPrefixUnderTheMinimumGetsNoBreakpoint"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_the_cheapest_model_that_meets_the_tier_and_the_latency_wins_and_ties_go_by_name",
+      "typescript": "e6 the cheapest model that meets the tier and the latency wins and ties go by name",
+      "java": "e6_theCheapestModelThatMeetsTheTierAndTheLatencyWinsAndTiesGoByName",
+      "kotlin": "e6_theCheapestModelThatMeetsTheTierAndTheLatencyWinsAndTiesGoByName"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_only_an_identical_static_prefix_can_be_reused",
+      "typescript": "e7 only an identical static prefix can be reused",
+      "java": "e7_onlyAnIdenticalStaticPrefixCanBeReused",
+      "kotlin": "e7_onlyAnIdenticalStaticPrefixCanBeReused"
+    }
+  },
+  "plants": {
+    "wrong-static-reversed": {
+      "caught_by": [
+        "m1",
+        "e3"
+      ],
+      "defect": "puts the static modules in reverse order"
+    },
+    "wrong-breakpoint-after-all": {
+      "caught_by": [
+        "m1",
+        "e7"
+      ],
+      "defect": "marks the breakpoint after the last block, dynamic ones included"
+    },
+    "wrong-variable-in-static-allowed": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "accepts a variable inside a static module"
+    },
+    "wrong-missing-variable-blank": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "replaces a missing variable with nothing"
+    },
+    "wrong-drop-highest-priority": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "drops the module with the highest priority first"
+    },
+    "wrong-drop-tie-earlier": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "drops the earlier of two modules with the same priority"
+    },
+    "wrong-over-budget-ignored": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "returns a prompt over the budget when only static modules are left"
+    },
+    "wrong-minimum-exclusive": {
+      "caught_by": [
+        "m1",
+        "e5",
+        "e7"
+      ],
+      "defect": "needs more than the minimum for a breakpoint"
+    },
+    "wrong-minimum-one-low": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "gives a breakpoint to a prefix one token under the minimum"
+    },
+    "wrong-model-tier-ignored": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "ignores the capability tier the workload needs"
+    },
+    "wrong-model-latency-ignored": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "ignores the latency limit"
+    },
+    "wrong-model-tie-by-position": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "breaks a price tie by list position and not by name"
+    },
+    "wrong-reuse-first-block-only": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "compares only the first block of the prefix"
+    },
+    "wrong-reuse-needs-whole-prompt": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "reuses nothing unless the whole prompt, dynamic blocks included, is identical"
+    }
+  }
+}

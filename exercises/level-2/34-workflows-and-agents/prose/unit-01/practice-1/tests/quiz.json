@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "34-workflows-and-agents"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: Workflow or agent: the distinction and the first three patterns",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A support bot runs three model calls in one order, wired together by the application's code. How does the article classify it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "An agent, because the model decides each next step in a loop",
+            "correct": false,
+            "says": "Ruled out because agents \"are typically just LLMs using tools based on environmental feedback in a loop\", and here the program, not the model, sets the order."
+          },
+          {
+            "id": "b",
+            "text": "A router, because a classifier hands the input to a specialist",
+            "correct": false,
+            "says": "Ruled out because \"Routing classifies an input and directs it to a specialized followup task\", while in this bot no step picks which task follows."
+          },
+          {
+            "id": "c",
+            "text": "A sectioning pattern, because independent subtasks run side by side",
+            "correct": false,
+            "says": "Ruled out because sectioning is \"Breaking a task into independent subtasks run in parallel\", while these three calls run one after another."
+          },
+          {
+            "id": "d",
+            "text": "A workflow, because the sequence is fixed before the first request",
+            "correct": true,
+            "says": "The page says \"Workflows are systems where LLMs and tools are orchestrated through predefined code paths.\""
+          }
+        ],
+        "origin": {
+          "path": "course/34-workflows-and-agents/01-workflow-or-agent-and-the-first-patterns.md",
+          "section": "Workflows and agents"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A product team wants an assistant that answers questions from a small document set, and is weighing a multi-agent design. What does the article recommend as the starting point?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A single model call that adds retrieval and examples",
+            "correct": true,
+            "says": "The page says \"optimizing single LLM calls with retrieval and in-context examples is usually enough\"."
+          },
+          {
+            "id": "b",
+            "text": "A routing workflow with one specialist prompt for each topic",
+            "correct": false,
+            "says": "Ruled out because a workflow is also an agentic system, and the page says to find \"the simplest solution possible, and only increasing complexity when needed\"."
+          },
+          {
+            "id": "c",
+            "text": "A framework whose layers hide the prompts and the replies",
+            "correct": false,
+            "says": "Ruled out because frameworks \"often create extra layers of abstraction that can obscure the underlying prompts and responses\"."
+          },
+          {
+            "id": "d",
+            "text": "An agent that plans its own search steps in a loop",
+            "correct": false,
+            "says": "Ruled out because the article reserves agents for \"open-ended problems where it's difficult or impossible to predict the required number of steps\"."
+          }
+        ],
+        "origin": {
+          "path": "course/34-workflows-and-agents/01-workflow-or-agent-and-the-first-patterns.md",
+          "section": "Start with the simplest thing"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A moderation service must check a user message and also draft a reply at the same time. The two jobs do not depend on each other. Which pattern fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Voting, where the same prompt is run several times for a majority",
+            "correct": false,
+            "says": "Ruled out because \"Running the same task multiple times to get diverse outputs\" is voting, and these are two different jobs."
+          },
+          {
+            "id": "b",
+            "text": "Prompt chaining, where each call processes the output of the previous one",
+            "correct": false,
+            "says": "Ruled out because chaining is for steps \"where each LLM call processes the output of the previous one\", and these jobs do not depend on each other."
+          },
+          {
+            "id": "c",
+            "text": "Sectioning, where separate subtasks run side by side and are joined",
+            "correct": true,
+            "says": "The page says sectioning is \"Breaking a task into independent subtasks run in parallel\", with a guardrail beside the answer as its example."
+          },
+          {
+            "id": "d",
+            "text": "Routing, where a classifier picks one specialized path for the input",
+            "correct": false,
+            "says": "Ruled out because \"Routing classifies an input and directs it to a specialized followup task\", and here both jobs run."
+          }
+        ],
+        "origin": {
+          "path": "course/34-workflows-and-agents/01-workflow-or-agent-and-the-first-patterns.md",
+          "section": "Parallelization: sectioning and voting"
+        }
+      }
+    ]
+  }
+}

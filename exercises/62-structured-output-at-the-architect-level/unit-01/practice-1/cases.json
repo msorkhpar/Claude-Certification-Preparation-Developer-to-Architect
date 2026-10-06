@@ -1,0 +1,206 @@
+{
+  "practice": "62-structured-output-at-the-architect-level/unit-01/practice-1",
+  "name": "extraction",
+  "tests": {
+    "java": "ExtractionTest",
+    "kotlin": "ExtractionTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_document_with_every_value_present_and_quoted_comes_back_valid_on_the_first_attempt",
+      "typescript": "m1 a document with every value present and quoted comes back valid on the first attempt",
+      "java": "m1_aDocumentWithEveryValuePresentAndQuotedComesBackValidOnTheFirstAttempt",
+      "kotlin": "m1_aDocumentWithEveryValuePresentAndQuotedComesBackValidOnTheFirstAttempt"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_value_the_document_does_not_give_is_null_and_needs_no_quote_while_an_invented_value_fails_as_ungrounded",
+      "typescript": "e1 a value the document does not give is null and needs no quote while an invented value fails as ungrounded",
+      "java": "e1_aValueTheDocumentDoesNotGiveIsNullAndNeedsNoQuoteWhileAnInventedValueFailsAsUngrounded",
+      "kotlin": "e1_aValueTheDocumentDoesNotGiveIsNullAndNeedsNoQuoteWhileAnInventedValueFailsAsUngrounded"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_retry_carries_the_original_document_the_failed_record_and_only_the_errors_a_second_look_can_fix",
+      "typescript": "e2 a retry carries the original document the failed record and only the errors a second look can fix",
+      "java": "e2_aRetryCarriesTheOriginalDocumentTheFailedRecordAndOnlyTheErrorsASecondLookCanFix",
+      "kotlin": "e2_aRetryCarriesTheOriginalDocumentTheFailedRecordAndOnlyTheErrorsASecondLookCanFix"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_required_value_that_the_model_reports_as_absent_is_not_retried_and_goes_to_review",
+      "typescript": "e3 a required value that the model reports as absent is not retried and goes to review",
+      "java": "e3_aRequiredValueThatTheModelReportsAsAbsentIsNotRetriedAndGoesToReview",
+      "kotlin": "e3_aRequiredValueThatTheModelReportsAsAbsentIsNotRetriedAndGoesToReview"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_retries_stop_after_the_limit_and_the_document_is_marked_failed",
+      "typescript": "e4 retries stop after the limit and the document is marked failed",
+      "java": "e4_retriesStopAfterTheLimitAndTheDocumentIsMarkedFailed",
+      "kotlin": "e4_retriesStopAfterTheLimitAndTheDocumentIsMarkedFailed"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_total_that_differs_from_the_line_items_is_a_semantic_error_and_a_flagged_conflict_goes_to_review_without_a_retry",
+      "typescript": "e5 a total that differs from the line items is a semantic error and a flagged conflict goes to review without a retry",
+      "java": "e5_aTotalThatDiffersFromTheLineItemsIsASemanticErrorAndAFlaggedConflictGoesToReviewWithoutARetry",
+      "kotlin": "e5_aTotalThatDiffersFromTheLineItemsIsASemanticErrorAndAFlaggedConflictGoesToReviewWithoutARetry"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_currency_takes_unclear_and_other_with_a_detail_and_rejects_anything_else_as_a_syntax_error",
+      "typescript": "e6 currency takes unclear and other with a detail and rejects anything else as a syntax error",
+      "java": "e6_currencyTakesUnclearAndOtherWithADetailAndRejectsAnythingElseAsASyntaxError",
+      "kotlin": "e6_currencyTakesUnclearAndOtherWithADetailAndRejectsAnythingElseAsASyntaxError"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_chunk_results_merge_by_keeping_the_first_value_and_recording_a_conflict_when_two_chunks_disagree",
+      "typescript": "e7 chunk results merge by keeping the first value and recording a conflict when two chunks disagree",
+      "java": "e7_chunkResultsMergeByKeepingTheFirstValueAndRecordingAConflictWhenTwoChunksDisagree",
+      "kotlin": "e7_chunkResultsMergeByKeepingTheFirstValueAndRecordingAConflictWhenTwoChunksDisagree"
+    },
+    "e8": {
+      "kind": "edge",
+      "python": "test_e8_accuracy_counts_every_document_and_not_only_the_validated_ones",
+      "typescript": "e8 accuracy counts every document and not only the validated ones",
+      "java": "e8_accuracyCountsEveryDocumentAndNotOnlyTheValidatedOnes",
+      "kotlin": "e8_accuracyCountsEveryDocumentAndNotOnlyTheValidatedOnes"
+    },
+    "e9": {
+      "kind": "edge",
+      "python": "test_e9_the_request_forces_a_tool_where_the_model_allows_it_and_falls_back_to_auto_with_a_reply_check_where_it_does_not",
+      "typescript": "e9 the request forces a tool where the model allows it and falls back to auto with a reply check where it does not",
+      "java": "e9_theRequestForcesAToolWhereTheModelAllowsItAndFallsBackToAutoWithAReplyCheckWhereItDoesNot",
+      "kotlin": "e9_theRequestForcesAToolWhereTheModelAllowsItAndFallsBackToAutoWithAReplyCheckWhereItDoesNot"
+    }
+  },
+  "plants": {
+    "wrong-grounding-skipped": {
+      "caught_by": [
+        "e1",
+        "e2"
+      ],
+      "defect": "accepts a quote that does not appear in the document"
+    },
+    "wrong-null-needs-quote": {
+      "caught_by": [
+        "e1",
+        "e3"
+      ],
+      "defect": "demands a quote for a value that is null"
+    },
+    "wrong-feedback-all-errors": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "sends every error back, including the ones a second look cannot fix"
+    },
+    "wrong-feedback-no-previous": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "leaves the failed record out of the retry"
+    },
+    "wrong-retry-absent": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "retries a value that the model reported as absent"
+    },
+    "wrong-absent-failed": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "marks a document with only absent values as failed instead of sending it to review"
+    },
+    "wrong-extra-retry": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "makes one retry more than the limit"
+    },
+    "wrong-sum-unchecked": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "never compares the line items with the calculated total"
+    },
+    "wrong-conflict-error": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "treats a conflict the model flagged as a semantic error"
+    },
+    "wrong-conflict-valid": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "marks a document with a flagged conflict as valid"
+    },
+    "wrong-unclear-needs-quote": {
+      "caught_by": [
+        "e2",
+        "e6"
+      ],
+      "defect": "demands a quote for a currency that is unclear"
+    },
+    "wrong-other-no-detail": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "accepts the currency other without a detail"
+    },
+    "wrong-currency-open": {
+      "caught_by": [
+        "e4",
+        "e6"
+      ],
+      "defect": "accepts any currency string"
+    },
+    "wrong-merge-last-wins": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "lets a later chunk replace an earlier value"
+    },
+    "wrong-merge-no-conflict": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "never records a conflict between chunks"
+    },
+    "wrong-accuracy-validated-only": {
+      "caught_by": [
+        "e8"
+      ],
+      "defect": "divides by the validated documents and calls it accuracy"
+    },
+    "wrong-accuracy-missing-skipped": {
+      "caught_by": [
+        "e8"
+      ],
+      "defect": "leaves the documents without a result out of the count"
+    },
+    "wrong-force-always": {
+      "caught_by": [
+        "e9"
+      ],
+      "defect": "forces a tool on models that reject a forced choice"
+    },
+    "wrong-any-for-single": {
+      "caught_by": [
+        "e9"
+      ],
+      "defect": "uses any where one named tool is enough"
+    },
+    "wrong-no-verify": {
+      "caught_by": [
+        "e9"
+      ],
+      "defect": "does not ask for a reply check on the fallback"
+    }
+  }
+}

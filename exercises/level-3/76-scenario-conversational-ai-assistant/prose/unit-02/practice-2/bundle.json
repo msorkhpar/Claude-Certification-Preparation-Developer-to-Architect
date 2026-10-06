@@ -1,0 +1,93 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "76-scenario-conversational-ai-assistant"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: review a batch of assistant conversations (TypeScript)",
+  "lang": "typescript",
+  "main_file": "conversationReview.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "conversationReview.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-3/76-scenario-conversational-ai-assistant/prose/unit-02/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-3/76-scenario-conversational-ai-assistant/prose/unit-02/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-3/76-scenario-conversational-ai-assistant/prose/unit-02/practice-2/conversationReview.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 a mixed batch gets every count the segments and a verdict",
+      "kind": "main",
+      "says": "A mixed batch gets every count, the segments and a verdict"
+    },
+    {
+      "id": "e1 an empty batch has zero figures and is held for lack of data",
+      "kind": "edge",
+      "says": "An empty batch has zero figures and is held for lack of data"
+    },
+    {
+      "id": "e2 a safety signal counts as missed unless it went to a person as a safety hand off",
+      "kind": "edge",
+      "says": "A safety signal counts as missed unless it went to a person as a safety hand-off"
+    },
+    {
+      "id": "e3 a conversation is overlong only above the turn limit and only when nobody took over",
+      "kind": "edge",
+      "says": "A conversation is overlong only above the turn limit and only when nobody took over"
+    },
+    {
+      "id": "e4 repeated questions are acceptable at exactly the limit and not above it",
+      "kind": "edge",
+      "says": "Repeated questions are acceptable at exactly the limit and not above it"
+    },
+    {
+      "id": "e5 a segment is weak only below the resolution floor and not at it",
+      "kind": "edge",
+      "says": "A segment is weak only below the resolution floor and not at it"
+    },
+    {
+      "id": "e6 a segment needs the minimum number of conversations before it can be called weak",
+      "kind": "edge",
+      "says": "A segment needs the minimum number of conversations before it can be called weak"
+    },
+    {
+      "id": "e7 a hand off is over escalation only when no person was needed and no safety signal was present",
+      "kind": "edge",
+      "says": "A hand-off is over-escalation only when no person was needed and no safety signal was present"
+    },
+    {
+      "id": "e8 only conversations the assistant settled alone count as resolved",
+      "kind": "edge",
+      "says": "Only conversations the assistant settled alone count as resolved"
+    },
+    {
+      "id": "e9 percentages are whole numbers rounded half up",
+      "kind": "edge",
+      "says": "Percentages are whole numbers rounded half up"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/76-scenario-conversational-ai-assistant/02-sensitive-talk-hand-offs-and-judging-a-conversation.md"
+}

@@ -1,0 +1,419 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "57-memory-files-and-rules"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: split one oversized memory file into a root file, scoped rules and personal files (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: split one oversized memory file into a root file, scoped rules and personal files"
+    },
+    {
+      "type": "para",
+      "text": "A team keeps all of its instructions for Claude Code in one long `CLAUDE.md`: universal rules, testing, API and Terraform conventions, a rule that must never be broken, and some lines that are only one engineer's preferences. Claude reads that file in every session, so the conventions for Terraform sit in the context while someone fixes a button, and the rule that matters most is one line among sixty. In this practice you split it. The tests are the same in all four languages and read only the files: they are configuration and notes, not code in a language, and the Java and Kotlin tests read the JSON with Jackson and the rules' YAML front matter with its YAML module. The checks run on the course's own model of the documented loading rules (`examples/57-memory-loading`, with `examples/38-settings-layers` for permission rules, in your language). Nothing here starts Claude Code or touches the network."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working set of memory files with seven gaps cut out of it. Everything that is plumbing is written and correct: the Terraform rule with its paths, the architecture notes the root file imports, the always-rules and the pointers of the root file, and the titles of every file. Each gap is a spot in one file that holds a neutral value (an empty list, an empty text, a literal where a reference belongs) or a comment that says what goes there, and the list below names the file, the rule and the case it unlocks. The starter is read by the same tests, so it fails the cases on an assertion until you fill the gaps. These tests read files, not code, so there is no function to log from: read the failure message under the case, which names the file and the rule. Write the gaps in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "The root file, in `CLAUDE.md` (unlocks `m1`, `e1`): it keeps only the three rules every task needs (and the pointers); the API conventions and the stray testing line are removed from it, because an area's conventions load from its own rule file.",
+        "The import, in `CLAUDE.md` (unlocks `e3`): `@docs/standards/architecture.md` is spelled as the file is named, on a line of its own and not inside a code span.",
+        "The testing rule, in `.claude/rules/testing.md` (unlocks `m1`, `e2`, `e6`): frontmatter with a `paths` list of `**/*.test.ts` and `**/*.test.tsx`, so the rule follows the file type and not a folder.",
+        "The API rule, in `.claude/rules/api.md` (unlocks `m1`, `e6`): `paths` as a list with `src/api/**/*.ts`, and the four API conventions moved here from the root file, none left behind.",
+        "The migrations rule, in `.claude/settings.json` (unlocks `e5`): a `deny` list with `Edit(db/migrations/**)` and nothing else, because a rule that must always hold is a permission and not a sentence.",
+        "The personal files, in `user-memory.example.md`, `CLAUDE.local.example.md` and `.gitignore` (unlocks `e4`): the short-answers preference in the first, the sandbox note in the second, neither left in the root file, and `CLAUDE.local.md` in the ignore file.",
+        "The personal path, in `CLAUDE.md` (unlocks `e7`): the line that names a path in a home folder is removed; no file holds a personal path, an address or a key."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gaps 1, 3 and 4. About ten lines in all, in the files of your language folder (the four folders hold the same files). The steps below describe the whole set, so you can see how your gaps are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`CLAUDE.md`, the shared root file:",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "at most 50 lines (the documentation targets under 200 for any file; the root of a project with scoped rules needs far fewer);",
+              "it keeps the three rules every task needs, under `## Always`: the commit message rule, running `npm test`, and asking before adding dependencies;",
+              "it imports `docs/standards/architecture.md` with an `@` import, spelled correctly and not inside a code span (the starter misspells it);",
+              "it holds none of the testing, API or Terraform conventions, and neither does anything it imports: an import loads at launch too."
+            ]
+          }
+        ],
+        [
+          "`.claude/rules/testing.md`, `.claude/rules/api.md` and `.claude/rules/terraform.md`: each starts with YAML frontmatter that has a `paths` list of globs, and holds the whole set of its area's conventions from the starter (move all of them, not some).",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "testing: test files wherever they are, `.test.ts` and `.test.tsx`, matched by file type and not by folder;",
+              "API: the TypeScript files under `src/api/`;",
+              "Terraform: everything under `terraform/`."
+            ]
+          }
+        ],
+        "`.claude/settings.json`: the rule \"never edit files under `db/migrations/`\" is a permission rule as well as a sentence, because memory is context and not enforcement. Deny edits there and nothing else.",
+        "`user-memory.example.md` and `CLAUDE.local.example.md`: stand-ins for the user-scope memory file in your home folder and for the uncommitted `CLAUDE.local.md` at the project root. The preference about short answers goes in the first, the sandbox note in the second; neither stays in a shared file.",
+        "`.gitignore`: ignore `CLAUDE.local.md`.",
+        "No file holds a personal path, an email address or a key. (The starter has a personal path; find it.)"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Scoped rules.** The exam asks how to apply conventions to files by type, wherever they live. *You should see* seven touches (an API file, a component, two kinds of test file, a Terraform file, the README, a test in a tools folder) each bring in exactly the conventions that belong to it, and the root rules every time.",
+        "**A short root.** The documentation says longer files \"consume more context and reduce adherence\". *You should see* a root file that is a screenful and names where the rest lives.",
+        "**File type, not folder.** A directory-level `CLAUDE.md` cannot follow test files spread over many folders; a glob can. *You should see* the testing rule cover three test files in three folders and no other file.",
+        "**Imports.** An import keeps a file modular and saves no context; a typo imports nothing and says nothing. *You should see* one import that resolves.",
+        "**Who gets what.** A user-scope line reaches only you, and `CLAUDE.local.md` is for personal project notes that are never committed. *You should see* no personal line in a shared file and the local file ignored.",
+        "**Context versus enforcement.** A sentence in a memory file is guidance Claude may not follow. *You should see* the migration edit denied by a rule.",
+        "**Valid frontmatter.** A `paths` value that does not parse, or that is a bare folder name, scopes nothing: the rule loads in every session or never. *You should see* every pattern balanced and matching at least one file."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Seven touched files each bring in exactly the right conventions, and the root rules every time"
+        ],
+        [
+          "`e1`",
+          "The root file is at most 50 lines, keeps the universal rules and carries no area convention, not even through an import"
+        ],
+        [
+          "`e2`",
+          "The testing rule covers test files in three different folders and no other file"
+        ],
+        [
+          "`e3`",
+          "The import names a file that exists and is expanded"
+        ],
+        [
+          "`e4`",
+          "Personal lines are in the personal files, absent from shared ones, and `CLAUDE.local.md` is ignored"
+        ],
+        [
+          "`e5`",
+          "Edits under `db/migrations/` are denied and other edits are not"
+        ],
+        [
+          "`e6`",
+          "Every rule has a list of valid `paths`, and each pattern matches a file"
+        ],
+        [
+          "`e7`",
+          "No file holds a personal path, an address or a key"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "# Inventory platform\n\nShared instructions for everyone who works on this repository. Area conventions live in `.claude/rules/` and load when matching\nfiles are touched. The architecture notes are imported below.\n\n@docs/standards/architecture.md\n\n## Always\n- Commit messages use the imperative mood and stay under 72 characters in the first line.\n- Run `npm test` before saying a task is done.\n- Do not add dependencies without asking.\n\n## Where things are\n- Area conventions: `.claude/rules/` (testing, API handlers, Terraform).\n- Files in `db/migrations/` are protected by the permission rules, not by this file.\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.claude/rules/api.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "---\npaths:\n  - \"src/api/**/*.ts\"\n---\n\n# API handler conventions\n\n- Every handler under `src/api/` validates its input with the shared `parse()` helper before it uses it.\n- Return errors as `{ code, message }` with the HTTP status from `src/api/status.ts`.\n- Handlers are `async` and never swallow a rejected promise.\n- Document each endpoint with an OpenAPI comment above its handler.\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.claude/rules/terraform.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "---\npaths:\n  - \"terraform/**/*\"\n---\n\n# Terraform conventions\n\n- Every resource carries the `owner` and `cost-centre` tags.\n- Run `terraform fmt` and `terraform validate` before proposing a change.\n- Pin provider versions with `~>` constraints.\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.claude/rules/testing.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "---\npaths:\n  - \"**/*.test.ts\"\n  - \"**/*.test.tsx\"\n---\n\n# Testing conventions\n\n- Name test files `<module>.test.ts` or `<Component>.test.tsx`, next to the file they test.\n- Every test builds its data from a fixture in `tests/fixtures/`; no ad-hoc data inline.\n- Mock the network with `msw`; a test never calls a live service.\n- Each test checks one behaviour and its name states that behaviour.\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.claude/settings.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"permissions\": {\n    \"deny\": [\"Edit(db/migrations/**)\"]\n  }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.gitignore"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "CLAUDE.local.md\nnode_modules/\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/CLAUDE.local.example.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "# Local instructions\n\nA stand-in for `CLAUDE.local.md` at the project root. It is never committed.\n\n- My sandbox API is at http://localhost:4010 with the dev token from my shell profile.\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/user-memory.example.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "# Personal preferences\n\nA stand-in for the user-scope memory file in your home folder. Only you load it.\n\n- I prefer short answers with no preamble.\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "# Inventory platform\n\nShared instructions for everyone who works on this repository. Area conventions live in `.claude/rules/` and load when matching\nfiles are touched. The architecture notes are imported below.\n\n@docs/standards/architechture.md\n\n## Always\n- Commit messages use the imperative mood and stay under 72 characters in the first line.\n- Run `npm test` before saying a task is done.\n- Do not add dependencies without asking.\n\n## API handlers\n- Every handler under `src/api/` validates its input with the shared `parse()` helper before it uses it.\n- Return errors as `{ code, message }` with the HTTP status from `src/api/status.ts`.\n- Handlers are `async` and never swallow a rejected promise.\n- Document each endpoint with an OpenAPI comment above its handler.\n\n## Where things are\n- Area conventions: `.claude/rules/` (testing, API handlers, Terraform).\n- Files in `db/migrations/` are protected by the permission rules, not by this file.\n- Name test files `<module>.test.ts` or `<Component>.test.tsx`, next to the file they test.\n\n## About me\n- I prefer short answers with no preamble.\n- My sandbox API is at http://localhost:4010 with the dev token from my shell profile.\n- My notes are in /home/dev/notes.\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.claude/rules/api.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "---\npaths: src/api\n---\n\n# API handler conventions\n\n<!-- TODO 4 of 7 (finish this to pass m1, e6): move the four API conventions here from the root file, and write `paths` as a list with the glob `src/api/**/*.ts` (a bare folder name is not a glob). -->\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.claude/rules/terraform.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "---\npaths:\n  - \"terraform/**/*\"\n---\n\n# Terraform conventions\n\nTODO: move the Terraform conventions here.\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.claude/rules/testing.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "# Testing conventions\n\n- Name test files `<module>.test.ts` or `<Component>.test.tsx`, next to the file they test.\n- Every test builds its data from a fixture in `tests/fixtures/`; no ad-hoc data inline.\n- Mock the network with `msw`; a test never calls a live service.\n- Each test checks one behaviour and its name states that behaviour.\n<!-- TODO 3 of 7 (finish this to pass m1, e2, e6): scope this rule with YAML frontmatter above the title: a `paths` list with the globs `**/*.test.ts` and `**/*.test.tsx`, so it loads for test files wherever they are. -->\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.claude/settings.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"permissions\": {\n    \"allow\": []\n  }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.gitignore"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "node_modules/\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/CLAUDE.local.example.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "# Local instructions\n\nA stand-in for `CLAUDE.local.md` at the project root. It is never committed.\n\n<!-- TODO 6 of 7 (finish this to pass e4): the sandbox note, from the root file. -->\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/user-memory.example.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "# Personal preferences\n\nA stand-in for the user-scope memory file in your home folder. Only you load it.\n\n<!-- TODO 6 of 7 (finish this to pass e4): the preference about short answers, from the root file. -->\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 10,
+    "code": 8,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "f8775d394251267bfdeb125d5a627541deae62f4b23b10d01b10a51b9383fa24",
+  "starting_code": "# Inventory platform\n\nShared instructions for everyone who works on this repository. Area conventions live in `.claude/rules/` and load when matching\nfiles are touched. The architecture notes are imported below.\n\n@docs/standards/architechture.md\n\n## Always\n- Commit messages use the imperative mood and stay under 72 characters in the first line.\n- Run `npm test` before saying a task is done.\n- Do not add dependencies without asking.\n\n## API handlers\n- Every handler under `src/api/` validates its input with the shared `parse()` helper before it uses it.\n- Return errors as `{ code, message }` with the HTTP status from `src/api/status.ts`.\n- Handlers are `async` and never swallow a rejected promise.\n- Document each endpoint with an OpenAPI comment above its handler.\n\n## Where things are\n- Area conventions: `.claude/rules/` (testing, API handlers, Terraform).\n- Files in `db/migrations/` are protected by the permission rules, not by this file.\n- Name test files `<module>.test.ts` or `<Component>.test.tsx`, next to the file they test.\n\n## About me\n- I prefer short answers with no preamble.\n- My sandbox API is at http://localhost:4010 with the dev token from my shell profile.\n- My notes are in /home/dev/notes.\n",
+  "exercise": {
+    "main_path": "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/CLAUDE.md",
+    "test_path": "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/tests/memorySetup.test.ts",
+    "run_command": [
+      "python3",
+      "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/check_files.py",
+      "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/.claude/rules/api.md",
+      "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/.claude/rules/terraform.md",
+      "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/.claude/rules/testing.md",
+      "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/.claude/settings.json",
+      "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/.gitignore",
+      "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/CLAUDE.local.example.md",
+      "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/CLAUDE.md",
+      "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/user-memory.example.md"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/tests/memorySetup.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 the conventions of each area load for exactly the files that area governs",
+        "kind": "main",
+        "says": "Seven touched files each bring in exactly the right conventions, and the root rules every time"
+      },
+      {
+        "id": "e1 the root file is short and holds only what every task needs",
+        "kind": "edge",
+        "says": "The root file is at most 50 lines, keeps the universal rules and carries no area convention, not even through an import"
+      },
+      {
+        "id": "e2 the testing rule follows the file type and not the folder",
+        "kind": "edge",
+        "says": "The testing rule covers test files in three different folders and no other file"
+      },
+      {
+        "id": "e3 the import names a file that exists and loads at launch",
+        "kind": "edge",
+        "says": "The import names a file that exists and is expanded"
+      },
+      {
+        "id": "e4 personal lines sit in personal files and the local file is ignored",
+        "kind": "edge",
+        "says": "Personal lines are in the personal files, absent from shared ones, and CLAUDE.local.md is ignored"
+      },
+      {
+        "id": "e5 a rule that must always hold is a permission rule and not a sentence",
+        "kind": "edge",
+        "says": "Edits under db/migrations/ are denied and other edits are not"
+      },
+      {
+        "id": "e6 every rule scopes itself with paths that are valid and match something",
+        "kind": "edge",
+        "says": "Every rule has a list of valid paths, and each pattern matches a file"
+      },
+      {
+        "id": "e7 no file holds a personal path an address or a key",
+        "kind": "edge",
+        "says": "No file holds a personal path, an address or a key"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/target/report.xml"
+    },
+    "origin": "course/57-memory-files-and-rules/02-path-scoped-rules-size-and-the-practice.md",
+    "concepts": [
+      "the practice of Path-scoped rules, file size and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/.claude/rules/api.md",
+      "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/.claude/rules/terraform.md",
+      "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/.claude/rules/testing.md",
+      "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/.claude/settings.json",
+      "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/.gitignore",
+      "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/CLAUDE.local.example.md",
+      "practice/level-3/57-memory-files-and-rules/prose/unit-02/practice-2/project/user-memory.example.md"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "memory-files-and-rules-u2"
+}

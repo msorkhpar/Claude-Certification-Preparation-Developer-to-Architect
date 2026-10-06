@@ -1,0 +1,99 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "60-claude-code-in-ci"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: a review job that runs Claude Code in CI and gates on its JSON (Python)",
+  "lang": "python",
+  "main_file": "project/review_gate.py",
+  "files": [
+    "project/.github/workflows/claude-review.yml",
+    "project/CLAUDE.md",
+    "project/review-schema.json"
+  ],
+  "test_file": "tests/test_ci_review.py",
+  "build": [
+    "project/schema_check.py",
+    "tests/examples/60-ci-gate/python/ci_gate.py",
+    "tests/examples/40-workflow-lint/python/miniyaml.py",
+    "tests/examples/40-workflow-lint/python/workflow_lint.py",
+    "pytest.ini",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-1/check_files.py",
+    "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-1/project/.github/workflows/claude-review.yml",
+    "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-1/project/CLAUDE.md",
+    "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-1/project/review-schema.json",
+    "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-1/project/review_gate.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-1/tests/test_ci_review.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_a_valid_run_posts_the_findings_above_the_floor_and_outside_the_disabled_categories",
+      "kind": "main",
+      "says": "A valid run produces the comments above the floor and outside the disabled categories"
+    },
+    {
+      "id": "test_e1_a_failed_run_fails_the_job_instead_of_passing_it_silently",
+      "kind": "edge",
+      "says": "A failed run (non-zero status, not JSON, turn limit, no output) fails the job and says why"
+    },
+    {
+      "id": "test_e2_an_answer_that_breaks_the_schema_fails_the_job_and_names_the_path_of_the_problem",
+      "kind": "edge",
+      "says": "An answer that breaks the schema fails the job and names the path of the problem"
+    },
+    {
+      "id": "test_e3_a_finding_at_the_failing_severity_blocks_the_merge_and_lower_ones_only_comment",
+      "kind": "edge",
+      "says": "A finding at a failing severity blocks, and lower ones only comment"
+    },
+    {
+      "id": "test_e4_the_prompt_lists_earlier_findings_and_existing_tests_and_asks_for_new_or_unaddressed_issues_only",
+      "kind": "edge",
+      "says": "The prompt lists earlier findings and existing tests, asks for new or unaddressed issues only, and ends with the diff"
+    },
+    {
+      "id": "test_e5_the_schema_file_is_valid_draft_07_and_requires_every_field_of_a_finding",
+      "kind": "edge",
+      "says": "The schema file is valid draft-07, requires every field of a finding and keeps enums closed"
+    },
+    {
+      "id": "test_e6_the_workflow_runs_claude_headless_with_json_output_a_schema_a_turn_limit_read_only_tools_and_the_context_file",
+      "kind": "edge",
+      "says": "The workflow runs Claude headless with JSON output, a schema, a turn limit, read-only tools and the context file, with a timeout and a secret key"
+    },
+    {
+      "id": "test_e7_the_project_file_states_what_to_report_and_what_to_skip_with_a_severity_example_for_each_level",
+      "kind": "edge",
+      "says": "The criteria file says what to report and skip, and gives a severity example at each level"
+    },
+    {
+      "id": "test_e8_no_file_holds_a_personal_path_an_address_or_a_key",
+      "kind": "edge",
+      "says": "No file holds a personal path, an address or a key"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/60-claude-code-in-ci/02-context-independence-and-the-practice.md"
+}

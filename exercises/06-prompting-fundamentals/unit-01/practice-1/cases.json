@@ -1,0 +1,103 @@
+{
+  "practice": "06-prompting-fundamentals/unit-01/practice-1",
+  "name": "prompt_builder",
+  "tests": {
+    "java": "PromptBuilderTest",
+    "kotlin": "PromptBuilderTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_full_prompt_has_every_section_in_order",
+      "typescript": "m1 full prompt has every section in order",
+      "java": "m1_fullPromptHasEverySectionInOrder",
+      "kotlin": "m1_fullPromptHasEverySectionInOrder"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_absent_optional_sections_are_omitted_not_empty",
+      "typescript": "e1 absent optional sections are omitted not empty",
+      "java": "e1_absentOptionalSectionsAreOmittedNotEmpty",
+      "kotlin": "e1_absentOptionalSectionsAreOmittedNotEmpty"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_variables_fill_once_and_a_missing_one_is_named",
+      "typescript": "e2 variables fill once and a missing one is named",
+      "java": "e2_variablesFillOnceAndAMissingOneIsNamed",
+      "kotlin": "e2_variablesFillOnceAndAMissingOneIsNamed"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_blank_task_is_refused",
+      "typescript": "e3 blank task is refused",
+      "java": "e3_blankTaskIsRefused",
+      "kotlin": "e3_blankTaskIsRefused"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_document_text_cannot_close_its_own_tag",
+      "typescript": "e4 document text cannot close its own tag",
+      "java": "e4_documentTextCannotCloseItsOwnTag",
+      "kotlin": "e4_documentTextCannotCloseItsOwnTag"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_placeholders_inside_documents_stay_literal",
+      "typescript": "e5 placeholders inside documents stay literal",
+      "java": "e5_placeholdersInsideDocumentsStayLiteral",
+      "kotlin": "e5_placeholdersInsideDocumentsStayLiteral"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_documents_and_examples_keep_their_order_and_index",
+      "typescript": "e6 documents and examples keep their order and index",
+      "java": "e6_documentsAndExamplesKeepTheirOrderAndIndex",
+      "kotlin": "e6_documentsAndExamplesKeepTheirOrderAndIndex"
+    }
+  },
+  "plants": {
+    "wrong-task-first": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "puts the task section before the documents"
+    },
+    "wrong-empty-sections": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "renders empty tags for absent optional sections"
+    },
+    "wrong-missing-variable-silent": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "leaves an unknown placeholder in the output instead of failing"
+    },
+    "wrong-blank-task-accepted": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "accepts a whitespace-only task"
+    },
+    "wrong-no-escape": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "does not escape document text"
+    },
+    "wrong-fill-documents": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "fills placeholders inside document text"
+    },
+    "wrong-documents-sorted": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "renders documents sorted by name instead of in the order given"
+    }
+  }
+}

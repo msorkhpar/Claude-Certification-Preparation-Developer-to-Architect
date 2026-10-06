@@ -1,0 +1,164 @@
+{
+  "practice": "43-debugging-claude-applications/unit-01/practice-1",
+  "name": "diagnose",
+  "tests": {
+    "java": "DiagnoseTest",
+    "kotlin": "DiagnoseTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_each_documented_http_error_maps_to_a_type_an_origin_and_a_recovery",
+      "typescript": "m1 each documented http error maps to a type an origin and a recovery",
+      "java": "m1_eachDocumentedHttpErrorMapsToATypeAnOriginAndARecovery",
+      "kotlin": "m1_eachDocumentedHttpErrorMapsToATypeAnOriginAndARecovery"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_429_is_a_rate_limit_or_a_spend_cap_and_other_statuses_fall_back_by_class",
+      "typescript": "e1 a 429 is a rate limit or a spend cap and other statuses fall back by class",
+      "java": "e1_a429IsARateLimitOrASpendCapAndOtherStatusesFallBackByClass",
+      "kotlin": "e1_a429IsARateLimitOrASpendCapAndOtherStatusesFallBackByClass"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_successful_response_can_still_fail_by_its_stop_reason",
+      "typescript": "e2 a successful response can still fail by its stop reason",
+      "java": "e2_aSuccessfulResponseCanStillFailByItsStopReason",
+      "kotlin": "e2_aSuccessfulResponseCanStillFailByItsStopReason"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_an_empty_end_turn_is_the_integration_when_text_followed_the_tool_result_and_the_model_otherwise",
+      "typescript": "e3 an empty end turn is the integration when text followed the tool result and the model otherwise",
+      "java": "e3_anEmptyEndTurnIsTheIntegrationWhenTextFollowedTheToolResultAndTheModelOtherwise",
+      "kotlin": "e3_anEmptyEndTurnIsTheIntegrationWhenTextFollowedTheToolResultAndTheModelOtherwise"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_a_parse_failure_is_the_integration_when_a_json_object_is_in_the_text_and_the_model_when_not",
+      "typescript": "e4 a parse failure is the integration when a json object is in the text and the model when not",
+      "java": "e4_aParseFailureIsTheIntegrationWhenAJsonObjectIsInTheTextAndTheModelWhenNot",
+      "kotlin": "e4_aParseFailureIsTheIntegrationWhenAJsonObjectIsInTheTextAndTheModelWhenNot"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_tool_failures_split_into_a_model_that_called_a_missing_tool_and_our_tool_that_raised",
+      "typescript": "e5 tool failures split into a model that called a missing tool and our tool that raised",
+      "java": "e5_toolFailuresSplitIntoAModelThatCalledAMissingToolAndOurToolThatRaised",
+      "kotlin": "e5_toolFailuresSplitIntoAModelThatCalledAMissingToolAndOurToolThatRaised"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_the_first_failure_names_the_cause_and_a_later_good_response_marks_it_recovered",
+      "typescript": "e6 the first failure names the cause and a later good response marks it recovered",
+      "java": "e6_theFirstFailureNamesTheCauseAndALaterGoodResponseMarksItRecovered",
+      "kotlin": "e6_theFirstFailureNamesTheCauseAndALaterGoodResponseMarksItRecovered"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_a_dropped_connection_has_no_status_and_belongs_to_the_service_side",
+      "typescript": "e7 a dropped connection has no status and belongs to the service side",
+      "java": "e7_aDroppedConnectionHasNoStatusAndBelongsToTheServiceSide",
+      "kotlin": "e7_aDroppedConnectionHasNoStatusAndBelongsToTheServiceSide"
+    }
+  },
+  "plants": {
+    "wrong-retry-404": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "retries a missing resource with back-off instead of fixing the request"
+    },
+    "wrong-413-service": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "blames the service for a request that is too large"
+    },
+    "wrong-429-always-retry": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "treats a spend-cap 429 as an ordinary rate limit"
+    },
+    "wrong-spend-400-ignored": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "treats a 400 spend-limit message as a malformed request"
+    },
+    "wrong-maxtokens-model": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "blames the model for a response cut off by the caller's own max_tokens"
+    },
+    "wrong-refusal-retry": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "retries a refusal with back-off instead of using a fallback model"
+    },
+    "wrong-empty-always-model": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "blames the model for every empty end turn"
+    },
+    "wrong-empty-text-anywhere": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "blames the integration whenever text and a tool result are both present, in any order"
+    },
+    "wrong-parse-always-model": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "blames the model for every parse failure"
+    },
+    "wrong-parse-braces-only": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "calls any text with braces a JSON object without parsing it"
+    },
+    "wrong-unknown-tool-integration": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "blames the integration for a tool name the model invented"
+    },
+    "wrong-tool-error-flagged": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "reports a tool result flagged is_error as a failure of our code"
+    },
+    "wrong-last-failure": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "keeps scanning and reports the last failure in the trace instead of the first"
+    },
+    "wrong-recovered-next-only": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "looks only at the next response when deciding whether the run recovered"
+    },
+    "wrong-recovered-empty": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "counts an empty end turn as a recovery"
+    },
+    "wrong-network-integration": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "blames the integration for a dropped connection"
+    }
+  }
+}

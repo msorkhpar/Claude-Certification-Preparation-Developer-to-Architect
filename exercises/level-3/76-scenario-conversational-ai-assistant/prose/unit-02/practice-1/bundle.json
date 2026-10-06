@@ -1,0 +1,93 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "76-scenario-conversational-ai-assistant"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: review a batch of assistant conversations (Python)",
+  "lang": "python",
+  "main_file": "conversation_review.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_conversation_review.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/76-scenario-conversational-ai-assistant/prose/unit-02/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-3/76-scenario-conversational-ai-assistant/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-3/76-scenario-conversational-ai-assistant/prose/unit-02/practice-1/test_conversation_review.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_a_mixed_batch_gets_every_count_the_segments_and_a_verdict",
+      "kind": "main",
+      "says": "A mixed batch gets every count, the segments and a verdict"
+    },
+    {
+      "id": "test_e1_an_empty_batch_has_zero_figures_and_is_held_for_lack_of_data",
+      "kind": "edge",
+      "says": "An empty batch has zero figures and is held for lack of data"
+    },
+    {
+      "id": "test_e2_a_safety_signal_counts_as_missed_unless_it_went_to_a_person_as_a_safety_hand_off",
+      "kind": "edge",
+      "says": "A safety signal counts as missed unless it went to a person as a safety hand-off"
+    },
+    {
+      "id": "test_e3_a_conversation_is_overlong_only_above_the_turn_limit_and_only_when_nobody_took_over",
+      "kind": "edge",
+      "says": "A conversation is overlong only above the turn limit and only when nobody took over"
+    },
+    {
+      "id": "test_e4_repeated_questions_are_acceptable_at_exactly_the_limit_and_not_above_it",
+      "kind": "edge",
+      "says": "Repeated questions are acceptable at exactly the limit and not above it"
+    },
+    {
+      "id": "test_e5_a_segment_is_weak_only_below_the_resolution_floor_and_not_at_it",
+      "kind": "edge",
+      "says": "A segment is weak only below the resolution floor and not at it"
+    },
+    {
+      "id": "test_e6_a_segment_needs_the_minimum_number_of_conversations_before_it_can_be_called_weak",
+      "kind": "edge",
+      "says": "A segment needs the minimum number of conversations before it can be called weak"
+    },
+    {
+      "id": "test_e7_a_hand_off_is_over_escalation_only_when_no_person_was_needed_and_no_safety_signal_was_present",
+      "kind": "edge",
+      "says": "A hand-off is over-escalation only when no person was needed and no safety signal was present"
+    },
+    {
+      "id": "test_e8_only_conversations_the_assistant_settled_alone_count_as_resolved",
+      "kind": "edge",
+      "says": "Only conversations the assistant settled alone count as resolved"
+    },
+    {
+      "id": "test_e9_percentages_are_whole_numbers_rounded_half_up",
+      "kind": "edge",
+      "says": "Percentages are whole numbers rounded half up"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/76-scenario-conversational-ai-assistant/02-sensitive-talk-hand-offs-and-judging-a-conversation.md"
+}

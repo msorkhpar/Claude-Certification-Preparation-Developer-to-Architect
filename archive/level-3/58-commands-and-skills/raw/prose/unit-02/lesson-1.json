@@ -1,0 +1,419 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "58-commands-and-skills"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Tools, arguments, forked skills and the practice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Tools, arguments, forked skills and the practice"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Architect · **Module 58:** Commands and skills · **Page 2 of 2** **Exams:** A3.2; S2"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** tell a pre-approval from a removal in a skill's frontmatter, fill a skill's text from the arguments typed after its name, run a skill in a separate subagent and know what that subagent sees, put each piece of guidance where it loads the way it is used, and write the module's practice."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-03 against the Claude Code documentation page \"Extend Claude with skills\", documenting behaviour up to Claude Code v2.1.286. The practice is a set of files graded by Python, TypeScript, Java and Kotlin test suites, offline, on the course's model of the documented rules (`examples/58-skill-model`); nothing in it starts Claude Code. This page deepens module 39 and module 56 (where the pre-approval point was first made) and does not repeat them. Names, locations and who may start a skill are on the first page."
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "**Exam guide and current product.** *What the guide states, and so what the exam keys:* it describes configuring `allowed-tools` in skill frontmatter \"to restrict tool access during skill execution\", for example to limit a skill to file writes and so prevent destructive actions; it describes `context: fork` as running a skill in an isolated sub-agent context so that verbose output does not pollute the main conversation; and it lists `argument-hint` as the prompt for required parameters. *What the current product does (documentation checked 2026-10-03):* `allowed-tools` lists \"Tools Claude can use without asking permission during the turn that invokes this skill\"; it \"does not restrict which tools are available: every tool remains callable, and your permission settings still govern tools that are not listed\". Restriction is a separate field, `disallowed-tools`, which removes tools \"from Claude's available pool while this skill is active\". `context: fork` and `argument-hint` behave as the guide says. On the exam, the guide's word \"restrict\" is the exam's word, so a question that offers `allowed-tools` as the restriction keys it; in a real skill, use `disallowed-tools` or deny rules for a restriction."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "The team's review skill must read a pull request and report, and must never change files. Someone writes `allowed-tools: Read Grep` and believes the skill is now read-only. It is not: Edit and Write remain callable, and the permission settings decide whether Claude is asked. The same confusion repeats with arguments (a placeholder that is spelled wrong silently becomes text) and with forks (a skill that holds only guidelines is handed to a subagent that has nothing to do). Each is a field that means something narrower than its name suggests."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Pre-approve, remove, deny"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Field or rule",
+        "What it does"
+      ],
+      "rows": [
+        [
+          "`allowed-tools`",
+          "Pre-approves the listed tools for the turn that invokes the skill; the grant \"clears when you send your next message\"; nothing is restricted"
+        ],
+        [
+          "`disallowed-tools`",
+          "Removes the listed tools from the available pool while the skill is active; it clears at the next message"
+        ],
+        [
+          "A deny rule in permission settings",
+          "Blocks the tool or path whatever skill is running"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The patterns in `allowed-tools` are as exact as the rules in module 38: `Bash(git tag *)` pre-approves `git tag v1.2.0` and not `git push --force`, and a bare `Bash` pre-approves every shell command, which is rarely what a release skill should do. In `disallowed-tools`, which works \"Like deny rules\", only a bare name removes a tool: the permissions page says \"A bare tool name like `Bash` removes the tool from Claude's context entirely\", so `Edit` takes Edit away, while a scoped entry such as `Edit(src/**)` is a narrower rule that leaves the tool in place. A project skill's `allowed-tools` is applied even in a headless run in a folder never trusted, so review the field of every skill committed to a repository before you run Claude Code there; an organisation that sets `allowManagedPermissionRulesOnly` has the field ignored in project and personal skills."
+    },
+    {
+      "type": "para",
+      "text": "So a read-only review skill is written in two lines: pre-approve what it needs (`Bash(gh pr view *) Bash(gh pr diff *)`) and remove what it must not have (`disallowed-tools: Edit Write`)."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Arguments"
+    },
+    {
+      "type": "para",
+      "text": "Text typed after the skill name is available to the body:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Placeholder",
+        "Receives"
+      ],
+      "rows": [
+        [
+          "`$ARGUMENTS`",
+          "All arguments, as typed"
+        ],
+        [
+          "`$ARGUMENTS[N]`, `$N`",
+          "The argument at index N, counting from 0"
+        ],
+        [
+          "`$name`",
+          "A name declared in `arguments: [name, ...]`, by position"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Indexed arguments use shell-style quoting, so `/my-skill \"hello world\" second` makes `$0` expand to `hello world` and `$1` to `second`. An indexed placeholder with no argument \"stays in the content unchanged\", while a named one expands to an empty string. If the user types arguments and no placeholder receives them, Claude Code appends `ARGUMENTS: <your input>` to the end of the content, so Claude still sees them. `argument-hint` only shows the expected shape in autocomplete, such as `[pr-number]`; it fills nothing."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "A skill that runs in its own subagent"
+    },
+    {
+      "type": "para",
+      "text": "`context: fork` starts a new subagent of the type named in `agent` (the default is `general-purpose`) and gives it the skill content as its prompt. \"The subagent doesn't see your conversation history, so the skill's instructions have to stand on their own.\" The name misleads: this is not a fork of the conversation, and when the task depends on the conversation, forking the conversation is the tool. The documentation also warns that `context: fork` \"only makes sense for skills with explicit instructions\": a body that holds guidelines such as \"use these API conventions\" gives the subagent no task, and it returns nothing useful. The reason to fork is the guide's: the work reads many files and the main conversation needs only the result. In a headless run the forked skill is waited for; interactively it runs in the background unless `background: false`."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Where each piece of guidance goes"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "The guidance is",
+        "It goes in",
+        "Because"
+      ],
+      "rows": [
+        [
+          "Needed in every task of the project",
+          "The root memory file",
+          "It loads at launch"
+        ],
+        [
+          "About one kind of file, wherever it sits",
+          "A scoped rule with `paths`",
+          "It loads on a match"
+        ],
+        [
+          "A procedure you start on demand",
+          "A project skill",
+          "Its body loads only when invoked"
+        ],
+        [
+          "A procedure with side effects",
+          "A skill with `disable-model-invocation: true`",
+          "A person decides the time"
+        ],
+        [
+          "A personal variant of a team procedure",
+          "A personal skill under a new name",
+          "Personal wins over project on a shared name"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "example",
+      "id": "m58-skill-model",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/58-skill-model/python/skill_model.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/58-skill-model/typescript/skillModel.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/58-skill-model/java/SkillModel.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/58-skill-model/kotlin/SkillModel.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"What a command or skill file means to Claude Code: its slash name, who may start it, which tools it pre-approves or removes, and how arguments fill its text.\n\nThe model follows the Claude Code skills documentation read on 2026-10-03 (v2.1.286): `.claude/commands/deploy.md` and `.claude/skills/deploy/SKILL.md` both create\n`/deploy`; `allowed-tools` pre-approves for the turn and does not restrict; a bare name in `disallowed-tools` removes a tool while the skill is active;\nindexed arguments use shell-style quoting; an invocation whose arguments no placeholder receives gets `ARGUMENTS: <input>` appended. Reading a file is plain data work.\n\"\"\"\nimport re\nimport shlex\nimport sys\nfrom pathlib import Path\nimport logging\n\nlog = logging.getLogger(__name__)\n\nsys.path.insert(0, str(Path(__file__).resolve().parents[2] / \"40-workflow-lint\" / \"python\"))\nfrom miniyaml import parse_yaml  # noqa: E402\n\nLEVELS = [\"enterprise\", \"personal\", \"project\"]  # the order in which a skill name is resolved: the first level wins\n\n\ndef parse(text):\n    \"\"\"(frontmatter mapping, body) of a command or skill file.\"\"\"\n    m = re.match(r\"^---\\n(.*?)\\n---\\n?(.*)$\", text, re.S)\n    return (parse_yaml(m.group(1)), m.group(2)) if m else ({}, text)\n\n\ndef command_name(path, meta):\n    \"\"\"The slash command a file creates: a skill's `name`, else its folder; a command's file name.\"\"\"\n    parts = path.split(\"/\")\n    if parts[-1] == \"SKILL.md\":\n        return str(meta.get(\"name\") or parts[-2])\n    return parts[-1][:-3]\n\n\ndef winner(candidates):\n    \"\"\"Of several skills with one name, the one whose level wins: enterprise over personal, personal over project. candidates: {level: path}.\"\"\"\n    return next((candidates[level] for level in LEVELS if level in candidates), None)\n\n\ndef invocation(meta):\n    \"\"\"Who can start it, and whether its description is always in context.\"\"\"\n    manual = meta.get(\"disable-model-invocation\") is True\n    hidden = meta.get(\"user-invocable\") is False\n    return {\"you\": not hidden, \"claude\": not manual, \"description_in_context\": not manual}\n\n\ndef _names(value):\n    return re.findall(r\"[^\\s,(]+(?:\\([^)]*\\))?\", value) if isinstance(value, str) else list(value or [])\n\n\ndef pre_approved(meta, tool, command=\"\"):\n    \"\"\"True when `allowed-tools` lists the tool bare or with a pattern the command matches: `Bash(git tag *)` covers `git tag v1`, and a bare `Bash` covers every command.\"\"\"\n    for item in _names(meta.get(\"allowed-tools\")):\n        name, _, pattern = item.partition(\"(\")\n        if name != tool:\n            continue\n        pattern = pattern.rstrip(\")\")\n        if not pattern or (pattern.endswith(\" *\") and (command == pattern[:-2] or command.startswith(pattern[:-1]))) or pattern == command:\n            return True\n    return False\n\n\ndef removed(meta, tool):\n    \"\"\"True when a bare name in `disallowed-tools` takes the tool away while the skill is active; a scoped rule such as `Edit(src/**)` leaves the tool in place.\"\"\"\n    return tool in [n for n in _names(meta.get(\"disallowed-tools\")) if \"(\" not in n]\n\n\ndef tool_status(meta, tool, command=\"\"):\n    if removed(meta, tool):\n        return \"removed\"\n    return \"pre-approved\" if pre_approved(meta, tool, command) else \"permission settings decide\"\n\n\ndef render(body, raw, names=()):\n    \"\"\"Fill $ARGUMENTS, $ARGUMENTS[N], $N (from 0) and named arguments; append `ARGUMENTS: <input>` when no placeholder received the input.\"\"\"\n    args = shlex.split(raw) if raw else []\n    named = dict(zip(names, args))\n    used = []\n\n    def sub(m):\n        token = m.group(1)\n        used.append(token)\n        if token == \"ARGUMENTS\":\n            return raw\n        index = re.fullmatch(r\"ARGUMENTS\\[(\\d+)\\]|(\\d+)\", token)\n        if index:\n            i = int(index.group(1) or index.group(2))\n            return args[i] if i < len(args) else m.group(0)  # an indexed placeholder with no argument stays as written\n        return named.get(token, \"\")  # a named placeholder with no argument is empty\n\n    out = re.sub(r\"\\$(ARGUMENTS\\[\\d+\\]|ARGUMENTS|\\d+|\" + \"|\".join(map(re.escape, names)) + r\")\" if names else r\"\\$(ARGUMENTS\\[\\d+\\]|ARGUMENTS|\\d+)\", sub, body)\n    if raw and not used:\n        out = out.rstrip(\"\\n\") + f\"\\nARGUMENTS: {raw}\\n\"\n    return out\n\n\ndef fork_agent(meta):\n    \"\"\"The subagent a forked skill runs in, or None when it runs in the conversation. The subagent does not see the conversation.\"\"\"\n    return None if meta.get(\"context\") != \"fork\" else str(meta.get(\"agent\") or \"general-purpose\")\n\n\nSKILL = \"\"\"---\nname: release-tag\ndescription: Tag a release and push the tag. Use when the user asks to cut a release.\ndisable-model-invocation: true\nargument-hint: \"[version]\"\narguments: [version]\nallowed-tools: Bash(git tag *) Bash(git push origin *)\ndisallowed-tools: Edit\n---\nCreate the tag $version and push it.\n\"\"\"\n\n\ndef main():\n    meta, body = parse(SKILL)\n    print(\"name:\", command_name(\".claude/skills/release-tag/SKILL.md\", meta), \"| legacy file:\", command_name(\".claude/commands/standup.md\", {}))\n    print(\"winner of three same-name skills:\", winner({\"project\": \"p/SKILL.md\", \"personal\": \"u/SKILL.md\"}))\n    print(\"who can start it:\", invocation(meta))\n    for tool, command in ((\"Bash\", \"git tag v1.2.0\"), (\"Bash\", \"git push --force\"), (\"Bash\", \"rm -rf build\"), (\"Edit\", \"\"), (\"Read\", \"\")):\n        print(f\"{tool} {command!r}:\", tool_status(meta, tool, command))\n    print(\"bare Bash allowed:\", pre_approved({\"allowed-tools\": \"Bash\"}, \"Bash\", \"rm -rf build\"), \"| scoped disallow removes Edit:\", removed({\"disallowed-tools\": \"Edit(src/**)\"}, \"Edit\"))\n    print(\"render:\", render(body, \"v1.2.0\", [\"version\"]).strip())\n    print(\"render, no placeholder:\", repr(render(\"Review the change.\\n\", \"123\")))\n    print(\"quoted:\", render(\"first=$0 second=$1\", '\"hello world\" second'))\n    print(\"fork:\", fork_agent({\"context\": \"fork\"}), fork_agent({\"context\": \"fork\", \"agent\": \"Explore\"}), fork_agent({}))\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "name: release-tag | legacy file: standup\nwinner of three same-name skills: u/SKILL.md\nwho can start it: {'you': True, 'claude': False, 'description_in_context': False}\nBash 'git tag v1.2.0': pre-approved\nBash 'git push --force': permission settings decide\nBash 'rm -rf build': permission settings decide\nEdit '': removed\nRead '': permission settings decide\nbare Bash allowed: True | scoped disallow removes Edit: False\nrender: Create the tag v1.2.0 and push it.\nrender, no placeholder: 'Review the change.\\nARGUMENTS: 123\\n'\nquoted: first=hello world second=second\nfork: general-purpose Explore None"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "import { logger } from \"./logger.ts\";\nconst log = logger(\"skill_model\");\n/**\n * What a command or skill file means to Claude Code: its slash name, who may start it, which tools it pre-approves or removes, and how arguments fill its text.\n *\n * The model follows the Claude Code skills documentation read on 2026-10-03 (v2.1.286): `.claude/commands/deploy.md` and `.claude/skills/deploy/SKILL.md` both create\n * `/deploy`; `allowed-tools` pre-approves for the turn and does not restrict; a bare name in `disallowed-tools` removes a tool while the skill is active;\n * indexed arguments use shell-style quoting; an invocation whose arguments no placeholder receives gets `ARGUMENTS: <input>` appended. Reading a file is plain data work.\n */\nimport { parseYaml } from \"../../40-workflow-lint/typescript/miniyaml.ts\";\n\nexport type Meta = { [key: string]: any };\nexport const LEVELS = [\"enterprise\", \"personal\", \"project\"]; // the order in which a skill name is resolved: the first level wins\n\n/** [frontmatter mapping, body] of a command or skill file. */\nexport function parse(text: string): [Meta, string] {\n  const m = /^---\\n([\\s\\S]*?)\\n---\\n?([\\s\\S]*)$/.exec(text);\n  return m ? [parseYaml(m[1]) as Meta, m[2]] : [{}, text];\n}\n\n/** The slash command a file creates: a skill's `name`, else its folder; a command's file name. */\nexport function commandName(path: string, meta: Meta): string {\n  const parts = path.split(\"/\");\n  if (parts[parts.length - 1] === \"SKILL.md\") return String(meta.name || parts[parts.length - 2]);\n  return parts[parts.length - 1].slice(0, -3);\n}\n\n/** Of several skills with one name, the one whose level wins: enterprise over personal, personal over project. */\nexport function winner(candidates: Record<string, string>): string | null {\n  const level = LEVELS.find((l) => l in candidates);\n  return level ? candidates[level] : null;\n}\n\n/** Who can start it, and whether its description is always in context. */\nexport function invocation(meta: Meta): { you: boolean; claude: boolean; description_in_context: boolean } {\n  const manual = meta[\"disable-model-invocation\"] === true;\n  const hidden = meta[\"user-invocable\"] === false;\n  return { you: !hidden, claude: !manual, description_in_context: !manual };\n}\n\nfunction names(value: unknown): string[] {\n  return typeof value === \"string\" ? value.match(/[^\\s,(]+(?:\\([^)]*\\))?/g) ?? [] : [...((value as string[]) ?? [])];\n}\n\n/** True when `allowed-tools` lists the tool bare or with a pattern the command matches: `Bash(git tag *)` covers `git tag v1`, and a bare `Bash` covers every command. */\nexport function preApproved(meta: Meta, tool: string, command = \"\"): boolean {\n  for (const item of names(meta[\"allowed-tools\"])) {\n    const open = item.indexOf(\"(\");\n    const name = open < 0 ? item : item.slice(0, open);\n    if (name !== tool) continue;\n    const pattern = open < 0 ? \"\" : item.slice(open + 1).replace(/\\)+$/, \"\");\n    if (!pattern || (pattern.endsWith(\" *\") && (command === pattern.slice(0, -2) || command.startsWith(pattern.slice(0, -1)))) || pattern === command) return true;\n  }\n  return false;\n}\n\n/** True when a bare name in `disallowed-tools` takes the tool away while the skill is active; a scoped rule such as `Edit(src/**)` leaves the tool in place. */\nexport function removed(meta: Meta, tool: string): boolean {\n  return names(meta[\"disallowed-tools\"]).filter((n) => !n.includes(\"(\")).includes(tool);\n}\n\nexport function toolStatus(meta: Meta, tool: string, command = \"\"): string {\n  if (removed(meta, tool)) return \"removed\";\n  return preApproved(meta, tool, command) ? \"pre-approved\" : \"permission settings decide\";\n}\n\n/** Shell-style split: whitespace separates, single or double quotes keep a value together. */\nexport function shellSplit(text: string): string[] {\n  return [...text.matchAll(/\"([^\"]*)\"|'([^']*)'|(\\S+)/g)].map((m) => m[1] ?? m[2] ?? m[3]);\n}\n\n/** Fill $ARGUMENTS, $ARGUMENTS[N], $N (from 0) and named arguments; append `ARGUMENTS: <input>` when no placeholder received the input. */\nexport function render(body: string, raw: string, argNames: string[] = []): string {\n  const args = raw ? shellSplit(raw) : [];\n  const named: Record<string, string> = Object.fromEntries(argNames.slice(0, args.length).map((n, i) => [n, args[i]]));\n  let used = false;\n  const escaped = argNames.map((n) => n.replace(/[.*+?^${}()|[\\]\\\\]/g, \"\\\\$&\"));\n  const pattern = new RegExp(\"\\\\$(ARGUMENTS\\\\[\\\\d+\\\\]|ARGUMENTS|\\\\d+\" + escaped.map((n) => \"|\" + n).join(\"\") + \")\", \"g\");\n  let out = body.replace(pattern, (whole, token: string) => {\n    used = true;\n    if (token === \"ARGUMENTS\") return raw;\n    const index = /^ARGUMENTS\\[(\\d+)\\]$|^(\\d+)$/.exec(token);\n    if (index) return args[Number(index[1] ?? index[2])] ?? whole; // an indexed placeholder with no argument stays as written\n    return named[token] ?? \"\"; // a named placeholder with no argument is empty\n  });\n  if (raw && !used) out = out.replace(/\\n+$/, \"\") + `\\nARGUMENTS: ${raw}\\n`;\n  return out;\n}\n\n/** The subagent a forked skill runs in, or null when it runs in the conversation. The subagent does not see the conversation. */\nexport function forkAgent(meta: Meta): string | null {\n  return meta.context !== \"fork\" ? null : String(meta.agent || \"general-purpose\");\n}\n\nconst SKILL = `---\nname: release-tag\ndescription: Tag a release and push the tag. Use when the user asks to cut a release.\ndisable-model-invocation: true\nargument-hint: \"[version]\"\narguments: [version]\nallowed-tools: Bash(git tag *) Bash(git push origin *)\ndisallowed-tools: Edit\n---\nCreate the tag $version and push it.\n`;\n\nfunction main() {\n  const [meta, body] = parse(SKILL);\n  console.log(\"name:\", commandName(\".claude/skills/release-tag/SKILL.md\", meta), \"| legacy file:\", commandName(\".claude/commands/standup.md\", {}));\n  console.log(\"winner of three same-name skills:\", winner({ project: \"p/SKILL.md\", personal: \"u/SKILL.md\" }));\n  console.log(\"who can start it:\", JSON.stringify(invocation(meta)));\n  for (const [tool, command] of [[\"Bash\", \"git tag v1.2.0\"], [\"Bash\", \"git push --force\"], [\"Bash\", \"rm -rf build\"], [\"Edit\", \"\"], [\"Read\", \"\"]]) {\n    console.log(`${tool} '${command}':`, toolStatus(meta, tool, command));\n  }\n  console.log(\"bare Bash allowed:\", preApproved({ \"allowed-tools\": \"Bash\" }, \"Bash\", \"rm -rf build\"), \"| scoped disallow removes Edit:\", removed({ \"disallowed-tools\": \"Edit(src/**)\" }, \"Edit\"));\n  console.log(\"render:\", render(body, \"v1.2.0\", [\"version\"]).trim());\n  console.log(\"render, no placeholder:\", JSON.stringify(render(\"Review the change.\\n\", \"123\")));\n  console.log(\"quoted:\", render(\"first=$0 second=$1\", '\"hello world\" second'));\n  console.log(\"fork:\", forkAgent({ context: \"fork\" }), forkAgent({ context: \"fork\", agent: \"Explore\" }), forkAgent({}));\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "name: release-tag | legacy file: standup\nwinner of three same-name skills: u/SKILL.md\nwho can start it: {\"you\":true,\"claude\":false,\"description_in_context\":false}\nBash 'git tag v1.2.0': pre-approved\nBash 'git push --force': permission settings decide\nBash 'rm -rf build': permission settings decide\nEdit '': removed\nRead '': permission settings decide\nbare Bash allowed: true | scoped disallow removes Edit: false\nrender: Create the tag v1.2.0 and push it.\nrender, no placeholder: \"Review the change.\\nARGUMENTS: 123\\n\"\nquoted: first=hello world second=second\nfork: general-purpose Explore null"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import static harness.Show.py;\n\nimport com.fasterxml.jackson.databind.ObjectMapper;\nimport com.fasterxml.jackson.dataformat.yaml.YAMLFactory;\nimport java.io.IOException;\nimport java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.regex.Matcher;\nimport java.util.regex.Pattern;\nimport java.util.stream.Collectors;\n\n/**\n * What a command or skill file means to Claude Code: its slash name, who may start it, which tools it pre-approves or removes, and how arguments fill its text.\n *\n * <p>The model follows the Claude Code skills documentation read on 2026-10-03 (v2.1.286): `.claude/commands/deploy.md` and `.claude/skills/deploy/SKILL.md` both create\n * `/deploy`; `allowed-tools` pre-approves for the turn and does not restrict; a bare name in `disallowed-tools` removes a tool while the skill is active;\n * indexed arguments use shell-style quoting; an invocation whose arguments no placeholder receives gets `ARGUMENTS: <input>` appended. Reading a file is plain data work:\n * the front matter is YAML, read with Jackson.\n */\npublic final class SkillModel {\n    private static final System.Logger LOG = System.getLogger(SkillModel.class.getName());\n    static final List<String> LEVELS = List.of(\"enterprise\", \"personal\", \"project\"); // the order in which a skill name is resolved: the first level wins\n    private static final ObjectMapper YAML = new ObjectMapper(new YAMLFactory());\n    private static final Pattern FRONTMATTER = Pattern.compile(\"^---\\\\n(.*?)\\\\n---\\\\n?(.*)$\", Pattern.DOTALL);\n\n    /** The front matter of a command or skill file, and its body. */\n    record Parsed(Map<String, Object> meta, String body) {}\n\n    /** The words of a command line as a POSIX shell would split them (quotes and backslashes); a bad quote is an error. */\n    static List<String> shlexSplit(String s) {\n        List<String> words = new ArrayList<>();\n        StringBuilder word = null;\n        int i = 0;\n        while (i < s.length()) {\n            char c = s.charAt(i++);\n            if (Character.isWhitespace(c)) {\n                if (word != null) { words.add(word.toString()); word = null; }\n                continue;\n            }\n            if (word == null) word = new StringBuilder();\n            if (c == '\\\\') {\n                if (i >= s.length()) throw new IllegalArgumentException(\"No escaped character\");\n                word.append(s.charAt(i++));\n            } else if (c == '\\'') {\n                int end = s.indexOf('\\'', i);\n                if (end < 0) throw new IllegalArgumentException(\"No closing quotation\");\n                word.append(s, i, end);\n                i = end + 1;\n            } else if (c == '\"') {\n                while (true) {\n                    if (i >= s.length()) throw new IllegalArgumentException(\"No closing quotation\");\n                    char d = s.charAt(i++);\n                    if (d == '\"') break;\n                    if (d == '\\\\' && i < s.length() && \"\\\"\\\\$`\\n\".indexOf(s.charAt(i)) >= 0) d = s.charAt(i++);\n                    word.append(d);\n                }\n            } else {\n                word.append(c);\n            }\n        }\n        if (word != null) words.add(word.toString());\n        return words;\n    }\n\n    /** (front matter mapping, body) of a command or skill file. */\n    @SuppressWarnings(\"unchecked\")\n    static Parsed parse(String text) throws IOException {\n        Matcher m = FRONTMATTER.matcher(text);\n        if (!m.matches()) return new Parsed(Map.of(), text);\n        Map<String, Object> meta = YAML.readValue(m.group(1), LinkedHashMap.class);\n        return new Parsed(meta == null ? Map.of() : meta, m.group(2));\n    }\n\n    /** The slash command a file creates: a skill's `name`, else its folder; a command's file name. */\n    static String commandName(String path, Map<String, Object> meta) {\n        String[] parts = path.split(\"/\");\n        if (parts[parts.length - 1].equals(\"SKILL.md\")) {\n            Object name = meta.get(\"name\");\n            return name == null || String.valueOf(name).isEmpty() ? parts[parts.length - 2] : String.valueOf(name);\n        }\n        String file = parts[parts.length - 1];\n        return file.substring(0, file.length() - 3);\n    }\n\n    /** Of several skills with one name, the one whose level wins: enterprise over personal, personal over project. candidates: {level: path}. */\n    static String winner(Map<String, String> candidates) {\n        for (String level : LEVELS) if (candidates.containsKey(level)) return candidates.get(level);\n        return null;\n    }\n\n    /** Who can start it, and whether its description is always in context. */\n    static Map<String, Boolean> invocation(Map<String, Object> meta) {\n        boolean manual = Boolean.TRUE.equals(meta.get(\"disable-model-invocation\"));\n        boolean hidden = Boolean.FALSE.equals(meta.get(\"user-invocable\"));\n        Map<String, Boolean> out = new LinkedHashMap<>();\n        out.put(\"you\", !hidden);\n        out.put(\"claude\", !manual);\n        out.put(\"description_in_context\", !manual);\n        return out;\n    }\n\n    private static List<String> names(Object value) {\n        List<String> out = new ArrayList<>();\n        if (value instanceof String s) {\n            Matcher m = Pattern.compile(\"[^\\\\s,(]+(?:\\\\([^)]*\\\\))?\").matcher(s);\n            while (m.find()) out.add(m.group());\n        } else if (value instanceof List<?> l) {\n            for (Object o : l) out.add(String.valueOf(o));\n        }\n        return out;\n    }\n\n    /** True when `allowed-tools` lists the tool bare or with a pattern the command matches: `Bash(git tag *)` covers `git tag v1`, and a bare `Bash` covers every command. */\n    static boolean preApproved(Map<String, Object> meta, String tool, String command) {\n        for (String item : names(meta.get(\"allowed-tools\"))) {\n            int open = item.indexOf('(');\n            String name = open < 0 ? item : item.substring(0, open);\n            if (!name.equals(tool)) continue;\n            String pattern = open < 0 ? \"\" : item.substring(open + 1);\n            while (pattern.endsWith(\")\")) pattern = pattern.substring(0, pattern.length() - 1);\n            if (pattern.isEmpty() || (pattern.endsWith(\" *\") && (command.equals(pattern.substring(0, pattern.length() - 2)) || command.startsWith(pattern.substring(0, pattern.length() - 1)))) || pattern.equals(command)) return true;\n        }\n        return false;\n    }\n\n    static boolean preApproved(Map<String, Object> meta, String tool) {\n        return preApproved(meta, tool, \"\");\n    }\n\n    /** True when a bare name in `disallowed-tools` takes the tool away while the skill is active; a scoped rule such as `Edit(src/**)` leaves the tool in place. */\n    static boolean removed(Map<String, Object> meta, String tool) {\n        return names(meta.get(\"disallowed-tools\")).stream().filter(n -> !n.contains(\"(\")).anyMatch(n -> n.equals(tool));\n    }\n\n    static String toolStatus(Map<String, Object> meta, String tool, String command) {\n        if (removed(meta, tool)) return \"removed\";\n        return preApproved(meta, tool, command) ? \"pre-approved\" : \"permission settings decide\";\n    }\n\n    static String toolStatus(Map<String, Object> meta, String tool) {\n        return toolStatus(meta, tool, \"\");\n    }\n\n    /** Fill $ARGUMENTS, $ARGUMENTS[N], $N (from 0) and named arguments; append `ARGUMENTS: <input>` when no placeholder received the input. */\n    static String render(String body, String raw, List<String> names) {\n        List<String> args = raw.isEmpty() ? List.of() : shlexSplit(raw);\n        Map<String, String> named = new LinkedHashMap<>();\n        for (int i = 0; i < Math.min(names.size(), args.size()); i++) named.put(names.get(i), args.get(i));\n        String alternatives = \"ARGUMENTS\\\\[\\\\d+\\\\]|ARGUMENTS|\\\\d+\" + names.stream().map(n -> \"|\" + Pattern.quote(n)).collect(Collectors.joining());\n        Matcher m = Pattern.compile(\"\\\\$(\" + alternatives + \")\").matcher(body);\n        Pattern indexed = Pattern.compile(\"ARGUMENTS\\\\[(\\\\d+)\\\\]|(\\\\d+)\");\n        boolean used = false;\n        StringBuilder out = new StringBuilder();\n        while (m.find()) {\n            used = true;\n            String token = m.group(1);\n            String value;\n            if (token.equals(\"ARGUMENTS\")) value = raw;\n            else {\n                Matcher index = indexed.matcher(token);\n                if (index.matches()) {\n                    int i = Integer.parseInt(index.group(1) != null ? index.group(1) : index.group(2));\n                    value = i < args.size() ? args.get(i) : m.group(0); // an indexed placeholder with no argument stays as written\n                } else value = named.getOrDefault(token, \"\"); // a named placeholder with no argument is empty\n            }\n            m.appendReplacement(out, Matcher.quoteReplacement(value));\n        }\n        m.appendTail(out);\n        String result = out.toString();\n        if (!raw.isEmpty() && !used) result = result.replaceFirst(\"\\\\n*$\", \"\") + \"\\nARGUMENTS: \" + raw + \"\\n\";\n        return result;\n    }\n\n    static String render(String body, String raw) {\n        return render(body, raw, List.of());\n    }\n\n    /** The subagent a forked skill runs in, or null when it runs in the conversation. The subagent does not see the conversation. */\n    static String forkAgent(Map<String, Object> meta) {\n        if (!\"fork\".equals(meta.get(\"context\"))) return null;\n        Object agent = meta.get(\"agent\");\n        return agent == null || String.valueOf(agent).isEmpty() ? \"general-purpose\" : String.valueOf(agent);\n    }\n\n    static final String SKILL = \"\"\"\n        ---\n        name: release-tag\n        description: Tag a release and push the tag. Use when the user asks to cut a release.\n        disable-model-invocation: true\n        argument-hint: \"[version]\"\n        arguments: [version]\n        allowed-tools: Bash(git tag *) Bash(git push origin *)\n        disallowed-tools: Edit\n        ---\n        Create the tag $version and push it.\n        \"\"\";\n\n    public static void main(String[] args) throws IOException {\n        Parsed skill = parse(SKILL);\n        System.out.println(\"name: \" + commandName(\".claude/skills/release-tag/SKILL.md\", skill.meta()) + \" | legacy file: \" + commandName(\".claude/commands/standup.md\", Map.of()));\n        System.out.println(\"winner of three same-name skills: \" + winner(Map.of(\"project\", \"p/SKILL.md\", \"personal\", \"u/SKILL.md\")));\n        System.out.println(\"who can start it: \" + py(invocation(skill.meta())));\n        String[][] calls = {{\"Bash\", \"git tag v1.2.0\"}, {\"Bash\", \"git push --force\"}, {\"Bash\", \"rm -rf build\"}, {\"Edit\", \"\"}, {\"Read\", \"\"}};\n        for (String[] c : calls) System.out.println(c[0] + \" \" + py(c[1]) + \": \" + toolStatus(skill.meta(), c[0], c[1]));\n        System.out.println(\"bare Bash allowed: \" + py(preApproved(Map.of(\"allowed-tools\", \"Bash\"), \"Bash\", \"rm -rf build\")) + \" | scoped disallow removes Edit: \" + py(removed(Map.of(\"disallowed-tools\", \"Edit(src/**)\"), \"Edit\")));\n        System.out.println(\"render: \" + render(skill.body(), \"v1.2.0\", List.of(\"version\")).strip());\n        System.out.println(\"render, no placeholder: \" + py(render(\"Review the change.\\n\", \"123\")));\n        System.out.println(\"quoted: \" + render(\"first=$0 second=$1\", \"\\\"hello world\\\" second\"));\n        System.out.println(\"fork: \" + py2(forkAgent(Map.of(\"context\", \"fork\"))) + \" \" + py2(forkAgent(Map.of(\"context\", \"fork\", \"agent\", \"Explore\"))) + \" \" + py2(forkAgent(Map.of())));\n    }\n\n    /** Python's str() of a string or None. */\n    private static String py2(String s) {\n        return s == null ? \"None\" : s;\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "name: release-tag | legacy file: standup\nwinner of three same-name skills: u/SKILL.md\nwho can start it: {'you': True, 'claude': False, 'description_in_context': False}\nBash 'git tag v1.2.0': pre-approved\nBash 'git push --force': permission settings decide\nBash 'rm -rf build': permission settings decide\nEdit '': removed\nRead '': permission settings decide\nbare Bash allowed: True | scoped disallow removes Edit: False\nrender: Create the tag v1.2.0 and push it.\nrender, no placeholder: 'Review the change.\\nARGUMENTS: 123\\n'\nquoted: first=hello world second=second\nfork: general-purpose Explore None"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import com.fasterxml.jackson.databind.ObjectMapper\nimport com.fasterxml.jackson.dataformat.yaml.YAMLFactory\nimport harness.Show.py\n\nprivate val log = System.getLogger(\"skill_model\")\n\n/**\n * What a command or skill file means to Claude Code: its slash name, who may start it, which tools it pre-approves or removes, and how arguments fill its text.\n *\n * The model follows the Claude Code skills documentation read on 2026-10-03 (v2.1.286): `.claude/commands/deploy.md` and `.claude/skills/deploy/SKILL.md` both create\n * `/deploy`; `allowed-tools` pre-approves for the turn and does not restrict; a bare name in `disallowed-tools` removes a tool while the skill is active;\n * indexed arguments use shell-style quoting; an invocation whose arguments no placeholder receives gets `ARGUMENTS: <input>` appended. Reading a file is plain data work:\n * the front matter is YAML, read with Jackson.\n */\nval LEVELS = listOf(\"enterprise\", \"personal\", \"project\") // the order in which a skill name is resolved: the first level wins\nprivate val YAML = ObjectMapper(YAMLFactory())\nprivate val FRONTMATTER = Regex(\"\"\"^---\\n(.*?)\\n---\\n?(.*)$\"\"\", RegexOption.DOT_MATCHES_ALL)\n\ntypealias Meta = Map<String, Any?>\n\n/** The front matter of a command or skill file, and its body. */\ndata class Parsed(val meta: Meta, val body: String)\n\n/** The words of a command line as a POSIX shell would split them (quotes and backslashes); a bad quote is an error. */\nfun shlexSplit(s: String): List<String> {\n    val words = mutableListOf<String>()\n    var word: StringBuilder? = null\n    var i = 0\n    while (i < s.length) {\n        val c = s[i++]\n        if (c.isWhitespace()) {\n            word?.let { words += it.toString() }\n            word = null\n            continue\n        }\n        val w = word ?: StringBuilder().also { word = it }\n        when (c) {\n            '\\\\' -> {\n                require(i < s.length) { \"No escaped character\" }\n                w.append(s[i++])\n            }\n            '\\'' -> {\n                val end = s.indexOf('\\'', i)\n                require(end >= 0) { \"No closing quotation\" }\n                w.append(s, i, end)\n                i = end + 1\n            }\n            '\"' -> while (true) {\n                require(i < s.length) { \"No closing quotation\" }\n                var d = s[i++]\n                if (d == '\"') break\n                if (d == '\\\\' && i < s.length && s[i] in \"\\\"\\\\$`\\n\") d = s[i++]\n                w.append(d)\n            }\n            else -> w.append(c)\n        }\n    }\n    word?.let { words += it.toString() }\n    return words\n}\n\n/** (front matter mapping, body) of a command or skill file. */\n@Suppress(\"UNCHECKED_CAST\")\nfun parse(text: String): Parsed {\n    val m = FRONTMATTER.matchEntire(text) ?: return Parsed(emptyMap(), text)\n    val meta = YAML.readValue(m.groupValues[1], LinkedHashMap::class.java) as Meta?\n    return Parsed(meta ?: emptyMap(), m.groupValues[2])\n}\n\n/** The slash command a file creates: a skill's `name`, else its folder; a command's file name. */\nfun commandName(path: String, meta: Meta): String {\n    val parts = path.split(\"/\")\n    if (parts.last() == \"SKILL.md\") return meta[\"name\"]?.toString()?.takeIf { it.isNotEmpty() } ?: parts[parts.size - 2]\n    return parts.last().dropLast(3)\n}\n\n/** Of several skills with one name, the one whose level wins: enterprise over personal, personal over project. candidates: {level: path}. */\nfun winner(candidates: Map<String, String>): String? = LEVELS.firstOrNull { it in candidates }?.let { candidates[it] }\n\n/** Who can start it, and whether its description is always in context. */\nfun invocation(meta: Meta): Map<String, Boolean> {\n    val manual = meta[\"disable-model-invocation\"] == true\n    val hidden = meta[\"user-invocable\"] == false\n    return linkedMapOf(\"you\" to !hidden, \"claude\" to !manual, \"description_in_context\" to !manual)\n}\n\nprivate fun names(value: Any?): List<String> = when (value) {\n    is String -> Regex(\"\"\"[^\\s,(]+(?:\\([^)]*\\))?\"\"\").findAll(value).map { it.value }.toList()\n    is List<*> -> value.map { it.toString() }\n    else -> emptyList()\n}\n\n/** True when `allowed-tools` lists the tool bare or with a pattern the command matches: `Bash(git tag *)` covers `git tag v1`, and a bare `Bash` covers every command. */\nfun preApproved(meta: Meta, tool: String, command: String = \"\"): Boolean {\n    for (item in names(meta[\"allowed-tools\"])) {\n        val name = item.substringBefore(\"(\")\n        if (name != tool) continue\n        val pattern = if (\"(\" in item) item.substringAfter(\"(\").trimEnd(')') else \"\"\n        if (pattern.isEmpty() || (pattern.endsWith(\" *\") && (command == pattern.dropLast(2) || command.startsWith(pattern.dropLast(1)))) || pattern == command) return true\n    }\n    return false\n}\n\n/** True when a bare name in `disallowed-tools` takes the tool away while the skill is active; a scoped rule such as `Edit(src/...)` leaves the tool in place. */\nfun removed(meta: Meta, tool: String): Boolean = tool in names(meta[\"disallowed-tools\"]).filter { \"(\" !in it }\n\nfun toolStatus(meta: Meta, tool: String, command: String = \"\"): String = when {\n    removed(meta, tool) -> \"removed\"\n    preApproved(meta, tool, command) -> \"pre-approved\"\n    else -> \"permission settings decide\"\n}\n\n/** Fill $ARGUMENTS, $ARGUMENTS[N], $N (from 0) and named arguments; append `ARGUMENTS: <input>` when no placeholder received the input. */\nfun render(body: String, raw: String, names: List<String> = emptyList()): String {\n    val args = if (raw.isEmpty()) emptyList() else shlexSplit(raw)\n    val named = names.zip(args).toMap()\n    val alternatives = \"\"\"ARGUMENTS\\[\\d+\\]|ARGUMENTS|\\d+\"\"\" + names.joinToString(\"\") { \"|\" + Regex.escape(it) }\n    val indexed = Regex(\"\"\"ARGUMENTS\\[(\\d+)\\]|(\\d+)\"\"\")\n    var used = false\n    var out = Regex(\"\"\"\\$($alternatives)\"\"\").replace(body) { m ->\n        used = true\n        val token = m.groupValues[1]\n        if (token == \"ARGUMENTS\") raw else {\n            val index = indexed.matchEntire(token)\n            if (index != null) {\n                val i = (index.groups[1]?.value ?: index.groups[2]!!.value).toInt()\n                if (i < args.size) args[i] else m.value // an indexed placeholder with no argument stays as written\n            } else named[token] ?: \"\" // a named placeholder with no argument is empty\n        }\n    }\n    if (raw.isNotEmpty() && !used) out = out.trimEnd('\\n') + \"\\nARGUMENTS: $raw\\n\"\n    return out\n}\n\n/** The subagent a forked skill runs in, or null when it runs in the conversation. The subagent does not see the conversation. */\nfun forkAgent(meta: Meta): String? = if (meta[\"context\"] != \"fork\") null else meta[\"agent\"]?.toString()?.takeIf { it.isNotEmpty() } ?: \"general-purpose\"\n\nval SKILL = \"\"\"---\nname: release-tag\ndescription: Tag a release and push the tag. Use when the user asks to cut a release.\ndisable-model-invocation: true\nargument-hint: \"[version]\"\narguments: [version]\nallowed-tools: Bash(git tag *) Bash(git push origin *)\ndisallowed-tools: Edit\n---\nCreate the tag ${'$'}version and push it.\n\"\"\"\n\nfun main() {\n    val skill = parse(SKILL)\n    println(\"name: ${commandName(\".claude/skills/release-tag/SKILL.md\", skill.meta)} | legacy file: ${commandName(\".claude/commands/standup.md\", emptyMap())}\")\n    println(\"winner of three same-name skills: ${winner(mapOf(\"project\" to \"p/SKILL.md\", \"personal\" to \"u/SKILL.md\"))}\")\n    println(\"who can start it: ${py(invocation(skill.meta))}\")\n    for ((tool, command) in listOf(\"Bash\" to \"git tag v1.2.0\", \"Bash\" to \"git push --force\", \"Bash\" to \"rm -rf build\", \"Edit\" to \"\", \"Read\" to \"\")) {\n        println(\"$tool ${py(command)}: ${toolStatus(skill.meta, tool, command)}\")\n    }\n    println(\"bare Bash allowed: ${py(preApproved(mapOf(\"allowed-tools\" to \"Bash\"), \"Bash\", \"rm -rf build\"))} | scoped disallow removes Edit: ${py(removed(mapOf(\"disallowed-tools\" to \"Edit(src/**)\"), \"Edit\"))}\")\n    println(\"render: ${render(skill.body, \"v1.2.0\", listOf(\"version\")).trim()}\")\n    println(\"render, no placeholder: ${py(render(\"Review the change.\\n\", \"123\"))}\")\n    println(\"quoted: ${render(\"first=\\$0 second=\\$1\", \"\\\"hello world\\\" second\")}\")\n    println(\"fork: ${forkAgent(mapOf(\"context\" to \"fork\")) ?: \"None\"} ${forkAgent(mapOf(\"context\" to \"fork\", \"agent\" to \"Explore\")) ?: \"None\"} ${forkAgent(emptyMap()) ?: \"None\"}\")\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "name: release-tag | legacy file: standup\nwinner of three same-name skills: u/SKILL.md\nwho can start it: {'you': True, 'claude': False, 'description_in_context': False}\nBash 'git tag v1.2.0': pre-approved\nBash 'git push --force': permission settings decide\nBash 'rm -rf build': permission settings decide\nEdit '': removed\nRead '': permission settings decide\nbare Bash allowed: True | scoped disallow removes Edit: False\nrender: Create the tag v1.2.0 and push it.\nrender, no placeholder: 'Review the change.\\nARGUMENTS: 123\\n'\nquoted: first=hello world second=second\nfork: general-purpose Explore None"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The practice: a forked review, a manual release and a command"
+    },
+    {
+      "type": "para",
+      "text": "The practice is in [`exercises/58-commands-and-skills`](../../exercises/58-commands-and-skills/unit-01/practice-1/statement.md). You write the review skill (forked, with an explicit task, pre-approving two commands and removing the edit tools), the release skill (manual, with a named argument and two pre-approved patterns), a command file that takes an argument, a personal variant with a new name, and a placement table for five pieces of guidance. It is graded by test suites in Python, TypeScript, Java and Kotlin, offline, on files that are not code in any language, so the four suites test the same files; the Java and Kotlin ones read the YAML front matter with Jackson's YAML module. The statement lists eight cases, and each says what you should see when it works."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**\"Give the review skill `allowed-tools: Read Grep` so that it cannot write.\"** It is tempting because the guide says the field restricts tool access. The exam keys the guide, and the product treats it as a pre-approval: Edit and Write stay callable. Removal is `disallowed-tools`, or a deny rule.",
+        "**\"Write `disallowed-tools: Edit(src/**)` to take editing away from the skill.\"** It is tempting because the scoped form is how deny rules are written. It fails because only a bare name removes a tool; a scoped entry leaves Edit in the pool.",
+        "**\"Fork the skill and write the API conventions in its body.\"** It is tempting because forking keeps the output out of the main conversation. It fails because a forked skill's body is its prompt, and guidelines without a task give the subagent nothing to do.",
+        "**\"Add `argument-hint: [version]` and the version reaches the text.\"** It is tempting because the hint is shown where the user types the argument. It fails because the hint only shows the expected shape in autocomplete; the text needs a placeholder such as `$version` (declared with `arguments`) or `$0`, and a body with none gets `ARGUMENTS: <input>` appended, which leaves Claude to guess where the version belongs."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A skill's header lists `allowed-tools: Read Grep`, and its author expects editing to be impossible while the skill is active. What actually happens?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Editing is removed from the available tools until the next message",
+              "**b**: Editing is refused because only the two listed tools are permitted",
+              "**c**: Editing runs without any prompt because the skill vouches for it",
+              "**d**: Changing files remains allowed under the usual permission settings"
+            ]
+          }
+        ],
+        [
+          "A skill's text says only 'Use these naming conventions for new endpoints', and its header sets `context: fork`. What does the isolated helper do?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: It reads the whole conversation and applies the conventions to it",
+              "**b**: It gets guidelines but no assignment, and returns nothing useful",
+              "**c**: It asks the user which endpoint the conventions concern",
+              "**d**: It runs inside the main conversation as if nothing were forked"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**d**. The field pre-approves and restricts nothing. *a* is ruled out because removal belongs to the other field, which removes tools \"from Claude's available pool while this skill is active\". *b* is ruled out because the field \"does not restrict which tools are available: every tool remains callable\". *c* is ruled out because \"your permission settings still govern tools that are not listed\".",
+            "**b**. A forked skill's body is its prompt, and guidelines without a task give the helper nothing to do. *a* is ruled out because the helper \"doesn't see your conversation history\". *c* is ruled out because the helper starts from the skill text alone, which \"gives it the skill content as its prompt\", so it has no one to ask. *d* is ruled out because the setting \"starts a new subagent of the type named in\" the agent field, so it does not stay in the conversation."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Module quiz"
+    },
+    {
+      "type": "para",
+      "text": "This quiz covers both pages of the module."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A skill explains how an old billing system works, and Claude should consult it when relevant, while typing its name would do nothing useful. Which header line fits?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: `disable-model-invocation: true`",
+              "**b**: `allowed-tools: Bash(git log *) Bash(git show *)`",
+              "**c**: `user-invocable: false`",
+              "**d**: `context: fork`"
+            ]
+          }
+        ],
+        [
+          "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. The team's review skill must be unable to change files for the turn that runs it. Which header line does that?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: `allowed-tools: Read Grep Glob`",
+              "**b**: `disallowed-tools: Edit Write`",
+              "**c**: `argument-hint: [read-only]`",
+              "**d**: `disallowed-tools: Edit(src/**)`"
+            ]
+          }
+        ],
+        [
+          "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A command text reads 'Summarise the commits by $ARGUMENTS since yesterday', and a developer runs `/standup ana`. What does Claude receive?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The sentence unchanged, with the name in a separate note",
+              "**b**: The sentence with a blank where the name belongs",
+              "**c**: The sentence with the name filled in and a line `ARGUMENTS: ana` after it",
+              "**d**: The sentence with the name filled in and nothing appended"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**c**. It hides the skill from the person and leaves it available to Claude, which suits background knowledge. *a* is ruled out because it does the opposite, so that only the person starts it and \"the full skill loads only when you invoke it\". *b* is ruled out because a pre-approval for git commands says nothing about who may start the skill, since the field \"Pre-approves the listed tools for the turn that invokes the skill\". *d* is ruled out because \"The subagent doesn't see your conversation history\", so a fork would run a background note as a task with nothing to do.",
+            "**b**. A bare name in the removal field takes the tool out of the pool while the skill is active. *a* is ruled out because the pre-approval field \"does not restrict which tools are available\". *c* is ruled out because `argument-hint` \"only shows the expected shape in autocomplete\". *d* is ruled out because \"only a bare name removes a tool\", so the scoped entry leaves editing in place.",
+            "**d**. The placeholder received the input, so it is substituted and nothing is added. *a* is ruled out because the placeholder takes \"All arguments, as typed\" and is replaced in the text. *b* is ruled out because a blank arises only for a named placeholder without an argument, since an indexed one \"stays in the content unchanged\", and here the input is given. *c* is ruled out because the extra line appears only when \"no placeholder receives them\", and this one did."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Adapted from the Claude Certified Architect - Foundations exam preparation guide by Daron Yondem (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/), changed for this course."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 12,
+    "paras": 12,
+    "code": 0,
+    "tables": 3,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 1,
+    "html": 0,
+    "disclosures": 2,
+    "examples": 1
+  },
+  "content_sha256": "4e465de5f2df1926ab5b0a582896273604e5d037b2b29e9e4d2849547f5fd29f"
+}

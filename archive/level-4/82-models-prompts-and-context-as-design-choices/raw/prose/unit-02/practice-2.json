@@ -1,0 +1,288 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "82-models-prompts-and-context-as-design-choices"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: a prompt plan under a token budget (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a prompt plan under a token budget"
+    },
+    {
+      "type": "para",
+      "text": "A support assistant sends the same role text and policy on every request, a customer record, a conversation history and a question. The architect has three decisions to make in code: how to assemble the request so that the part that never changes can be cached and the budget is respected, which model to use for a workload, and whether two requests can share a cached prefix. The model is not called: the tests give you modules, workloads and prompts. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`assemble`, `choose_model`, `reusable_prefix`, `tokens`, `MIN_CACHEABLE`); TypeScript has `assemble`, `chooseModel`, `reusablePrefix`; Java has the same camel-case names as static methods of `PromptPlan` and Kotlin has top-level functions. A module, a prompt and a model are maps, as the starters show. A refusal is `ValueError` (TypeScript: an `Error`; Java and Kotlin: `IllegalArgumentException`)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working planner with seven gaps cut out of it. `tokens`, the split into static and dynamic modules, the order of the blocks, the prefix and token counts and the shape of the result are written and correct. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`fill` unlocks `e2`: the variables of a dynamic module, and a missing one refused.",
+        "`check_static` unlocks `e1`: a variable in a static module refused.",
+        "`pick_victim` unlocks `e3`: the lowest priority first, and of a tie the later one.",
+        "`fit_budget` unlocks `e3` and `e4`: drop until the prompt fits, and refuse when only static modules are left.",
+        "`breakpoint_of` unlocks `m1` and `e5`: the breakpoint after the last static block, and none under the minimum.",
+        "`choose_model` unlocks `e6`: the cheapest model that meets the tier and the latency, ties by name.",
+        "`reusable_prefix` unlocks `e7`: the tokens of an identical static prefix, or 0."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`tokens(text)` is given: one token per four characters, rounded up. `MIN_CACHEABLE` is 512 tokens.",
+        [
+          "`assemble(modules, variables, budget)` takes modules `{name, text, static, priority}` (`priority` is a whole number and defaults to 0; it matters only for dynamic modules) and returns `{\"blocks\": [{name, text}], \"tokens\", \"dropped\": [names], \"breakpoint\"}`.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "Static modules come first, in the order given; dynamic modules follow, in the order given, with every `{variable}` in their text replaced from `variables` (extra variables are ignored). A variable with no value is refused with `missing variable: <name>`.",
+              "A static module whose text holds a `{variable}` is refused, and the message says `static`: a value that changes in the prefix breaks the cache.",
+              "While the total tokens exceed `budget`, drop the dynamic module with the lowest `priority`; of two with the same priority, drop the **later** one. Static modules are never dropped: when only static modules are left and they still exceed the budget, refuse with `over budget`. `dropped` lists the names in the order they were dropped; `tokens` counts what is left.",
+              "`breakpoint` is the index of the last static block when there is at least one static module and the static prefix has at least `MIN_CACHEABLE` tokens; otherwise it is `None` (TypeScript, Java and Kotlin: `null`)."
+            ]
+          }
+        ],
+        "`choose_model(workload, models)`: `workload` is `{tier, max_latency_ms}`, a model is `{name, tier, latency_ms, price_out}`. Return the name of the cheapest model (by `price_out`) whose tier is at least the workload's and whose latency is within the limit; equal prices are broken by the lower name; `None` when no model fits.",
+        "`reusable_prefix(a, b)` takes two assembled prompts. When both have a breakpoint, the breakpoints are equal and every block up to and including it is identical (name and text) in both, return the tokens of those blocks; otherwise return 0."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Static first.** The cache reads a prefix, so what never changes goes first. *You should see* the order role, policy, question, history for a shuffled input, and the breakpoint after the policy.",
+        "**No variable in the prefix.** One changing word in a static block invalidates everything after it. *You should see* it refused.",
+        "**Variables are checked.** *You should see* a missing variable refused and an unused one ignored.",
+        "**A budget drops the least useful first.** *You should see* `extra` dropped before `history` and the static modules untouched, then a refusal when nothing droppable is left.",
+        "**A prefix below the minimum is not cached.** *You should see* the breakpoint at exactly 512 tokens and none at 511.",
+        "**A model is chosen for the workload.** *You should see* the cheapest model that fits and `None` when the latency rules every model out.",
+        "**Reuse is all or nothing.** *You should see* 512 reusable tokens for a different question and 0 for an edit of either static block."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Static modules come first and the breakpoint follows the last one"
+        ],
+        [
+          "`e1`",
+          "A variable in a static module is refused"
+        ],
+        [
+          "`e2`",
+          "Dynamic variables are filled and a missing one is refused"
+        ],
+        [
+          "`e3`",
+          "The lowest priority dynamic module is dropped first, and a tie drops the later one"
+        ],
+        [
+          "`e4`",
+          "Static modules are never dropped, and a budget they exceed is refused"
+        ],
+        [
+          "`e5`",
+          "A prefix under the minimum gets no breakpoint"
+        ],
+        [
+          "`e6`",
+          "The cheapest model that meets the tier and the latency wins, ties go by name"
+        ],
+        [
+          "`e7`",
+          "Only an identical static prefix can be reused"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "/** A prompt plan: modules in cache-friendly order under a token budget, a model for the workload, and what a cache can reuse. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"prompt_plan\");\n\nexport const MIN_CACHEABLE = 512; // tokens: a shorter prefix cannot be cached\n\nexport const tokens = (text: string): number => Math.ceil(text.length / 4); // one token per four characters, rounded up\n\ntype Kept = { name: string; text: string; priority: number };\n\n/** Replace every {variable} in the text from the variables; a variable with no value is refused. */\nexport function fill(text: string, variables: Record<string, string>): string {\n  return text.replace(/\\{(\\w+)\\}/g, (_match, name: string) => {\n    if (!(name in variables)) throw new Error(`missing variable: ${name}`);\n    return String(variables[name]);\n  });\n}\n\n/** A static module whose text holds a {variable} is refused: a value that changes in the prefix breaks the cache. */\nexport function checkStatic(stat: any[]): void {\n  for (const m of stat) {\n    if (/\\{\\w+\\}/.test(m.text)) throw new Error(`static module ${m.name} holds a variable, which would break the cache`);\n  }\n}\n\n/** The index of the dynamic module to drop first: the lowest priority, and of a tie the later one. */\nexport function pickVictim(kept: Kept[]): number {\n  let victim = 0;\n  kept.forEach((k, i) => {\n    if (k.priority < kept[victim].priority || (k.priority === kept[victim].priority && i > victim)) victim = i;\n  });\n  return victim;\n}\n\n/** Drop dynamic modules until prefix + the kept tokens fit the budget; returns the dropped names in order. */\nexport function fitBudget(prefix: number, kept: Kept[], budget: number): string[] {\n  const dropped: string[] = [];\n  while (prefix + kept.reduce((sum, k) => sum + tokens(k.text), 0) > budget) {\n    if (kept.length === 0) throw new Error(\"over budget: the static modules alone exceed it\");\n    dropped.push(kept.splice(pickVictim(kept), 1)[0].name);\n  }\n  return dropped;\n}\n\n/** The index of the last static block when there is one and the prefix has at least MIN_CACHEABLE tokens; otherwise null. */\nexport function breakpointOf(staticCount: number, prefix: number): number | null {\n  return staticCount > 0 && prefix >= MIN_CACHEABLE ? staticCount - 1 : null;\n}\n\nexport function assemble(modules: any[], variables: Record<string, string>, budget: number): any {\n  log.debug(\"assemble input\", modules);\n  const stat = modules.filter((m) => m.static);\n  const dynamic = modules.filter((m) => !m.static);\n  checkStatic(stat);\n  const kept: Kept[] = dynamic.map((m) => ({ name: m.name, text: fill(m.text, variables), priority: m.priority ?? 0 }));\n  const blocks = stat.map((m) => ({ name: m.name, text: m.text }));\n  const prefix = blocks.reduce((sum, b) => sum + tokens(b.text), 0);\n  const dropped = fitBudget(prefix, kept, budget);\n  const used = prefix + kept.reduce((sum, k) => sum + tokens(k.text), 0);\n  blocks.push(...kept.map((k) => ({ name: k.name, text: k.text })));\n  return { blocks, tokens: used, dropped, breakpoint: breakpointOf(stat.length, prefix) };\n}\n\n/** The name of the cheapest model that meets the tier and the latency; ties go to the lower name; null when none fits. */\nexport function chooseModel(workload: any, models: any[]): string | null {\n  const fit = models.filter((m) => m.tier >= workload.tier && m.latency_ms <= workload.max_latency_ms);\n  if (fit.length === 0) return null;\n  return [...fit].sort((a, b) => a.price_out - b.price_out || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))[0].name;\n}\n\n/** The tokens of the cached prefix two assembled prompts share, or 0. */\nexport function reusablePrefix(a: any, b: any): number {\n  const ia = a.breakpoint;\n  const ib = b.breakpoint;\n  if (ia === null || ib === null || ia !== ib) return 0;\n  const same = a.blocks.slice(0, ia + 1).every((block: any, i: number) => block.name === b.blocks[i].name && block.text === b.blocks[i].text);\n  return same ? a.blocks.slice(0, ia + 1).reduce((sum: number, block: any) => sum + tokens(block.text), 0) : 0;\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { assemble, chooseModel } from \"./promptPlan.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// Prompt modules: static ones first (they can be cached), then the changing ones by priority.\nconst role = { name: \"role\", static: true, text: \"r\".repeat(400) };\nconst policy = { name: \"policy\", static: true, text: \"p\".repeat(1648) };\nconst history = { name: \"history\", static: false, priority: 1, text: \"h\".repeat(200) };\nconst question = { name: \"question\", static: false, priority: 9, text: \"Q: {q}\" };\n\nconst prompt = assemble([question, role, history, policy], { q: \"hello\" }, 10_000);\nconsole.log(\"block order:\", prompt.blocks.map((b: any) => b.name));\nconsole.log(\"cache breakpoint after block:\", prompt.breakpoint, \"| tokens:\", prompt.tokens, \"| dropped:\", prompt.dropped);\n\n// With a small budget the lowest-priority changing module is dropped.\nconst small = assemble([question, role, history, policy], { q: \"hello\" }, 520);\nconsole.log(\"dropped with a budget of 520:\", small.dropped);\n\n// The cheapest model that meets the tier and the latency.\nconst models = [{ name: \"haiku\", tier: 1, latency_ms: 300, price_out: 5 }, { name: \"sonnet\", tier: 2, latency_ms: 900, price_out: 15 }];\nconsole.log(\"model:\", chooseModel({ tier: 2, max_latency_ms: 1000 }, models));\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "/** A prompt plan: modules in cache-friendly order under a token budget, a model for the workload, and what a cache can reuse. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"prompt_plan\");\n\nexport const MIN_CACHEABLE = 512; // tokens: a shorter prefix cannot be cached\n\nexport const tokens = (text: string): number => Math.ceil(text.length / 4); // one token per four characters, rounded up\n\ntype Kept = { name: string; text: string; priority: number };\n\n/**\n * TODO 1 of 7 (unlocks e2): fill the variables of a dynamic module's text.\n * Receives the text and an object of variables. Returns the text with every `{name}` replaced by that variable's value (extra variables are ignored).\n * Throws `Error(\"missing variable: <name>\")` when a variable has no value.\n * Example: fill(\"Q: {q}\", { q: \"hello\" }) -> \"Q: hello\"\n */\nexport function fill(text: string, variables: Record<string, string>): string {\n  return text;\n}\n\n/**\n * TODO 2 of 7 (unlocks e1): refuse a variable in a static module.\n * Receives the list of static modules. Throws an `Error` with a message that says `static` (for example `static module <name> holds a variable, which\n * would break the cache`) when any module's text holds a `{variable}`; otherwise returns nothing.\n * Example: a static module with the text \"policy for {customer}\" -> Error\n */\nexport function checkStatic(stat: any[]): void {}\n\n/**\n * TODO 3 of 7 (unlocks e3): which dynamic module is dropped first?\n * Receives the list of kept dynamic modules, each `{ name, text, priority }`. Returns the index of the one with the lowest priority; of two with the same\n * priority, the later one (the higher index).\n * Example: priorities [1, 9, 1] -> 2\n */\nexport function pickVictim(kept: Kept[]): number {\n  return 0;\n}\n\n/**\n * TODO 4 of 7 (unlocks e3 and e4): drop dynamic modules until the prompt fits the budget.\n * Receives the tokens of the static prefix, the array `kept` of dynamic modules (change it in place) and the budget. While `prefix` plus the tokens of the\n * kept modules exceeds the budget, remove the module `pickVictim` chooses and note its name. Returns the dropped names in the order they were dropped.\n * When nothing is left to drop and the budget is still exceeded, throws `Error(\"over budget: ...\")`: static modules are never dropped.\n * Example: kept priorities [1, 1] and a budget that fits one of them -> the later name is dropped\n */\nexport function fitBudget(prefix: number, kept: Kept[], budget: number): string[] {\n  return [];\n}\n\n/**\n * TODO 5 of 7 (unlocks m1 and e5): where the cache breakpoint goes.\n * Receives the number of static blocks and the tokens of the static prefix. Returns the index of the last static block when there is at least one static\n * block and the prefix has at least `MIN_CACHEABLE` tokens; otherwise `null`.\n * Example: breakpointOf(2, 512) -> 1, breakpointOf(2, 511) -> null, breakpointOf(0, 900) -> null\n */\nexport function breakpointOf(staticCount: number, prefix: number): number | null {\n  return null;\n}\n\nexport function assemble(modules: any[], variables: Record<string, string>, budget: number): any {\n  log.debug(\"assemble input\", modules);\n  const stat = modules.filter((m) => m.static);\n  const dynamic = modules.filter((m) => !m.static);\n  checkStatic(stat);\n  const kept: Kept[] = dynamic.map((m) => ({ name: m.name, text: fill(m.text, variables), priority: m.priority ?? 0 }));\n  const blocks = stat.map((m) => ({ name: m.name, text: m.text }));\n  const prefix = blocks.reduce((sum, b) => sum + tokens(b.text), 0);\n  const dropped = fitBudget(prefix, kept, budget);\n  const used = prefix + kept.reduce((sum, k) => sum + tokens(k.text), 0);\n  blocks.push(...kept.map((k) => ({ name: k.name, text: k.text })));\n  return { blocks, tokens: used, dropped, breakpoint: breakpointOf(stat.length, prefix) };\n}\n\n/**\n * TODO 6 of 7 (unlocks e6): choose the model for a workload.\n * Receives the workload `{ tier, max_latency_ms }` and a list of models `{ name, tier, latency_ms, price_out }`. Returns the name of the model with the lowest\n * `price_out` among those whose `tier` is at least the workload's and whose `latency_ms` is within the limit; equal prices go to the lower name; `null` when no\n * model fits. Example: two models at the same price named \"mid\" and \"mid2\", both fitting -> \"mid\"\n */\nexport function chooseModel(workload: any, models: any[]): string | null {\n  return null;\n}\n\n/**\n * TODO 7 of 7 (unlocks e7): how many tokens of cached prefix can be reused?\n * Receives two assembled prompts (each with `blocks` and `breakpoint`). When both have a breakpoint, the breakpoints are equal and every block up to and\n * including it is identical (name and text) in both, returns the tokens of those blocks; otherwise returns 0.\n * Example: two prompts that differ only in their dynamic blocks -> the tokens of the static prefix; one edited static block -> 0\n */\nexport function reusablePrefix(a: any, b: any): number {\n  return 0;\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { assemble, chooseModel } from \"./promptPlan.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// Prompt modules: static ones first (they can be cached), then the changing ones by priority.\nconst role = { name: \"role\", static: true, text: \"r\".repeat(400) };\nconst policy = { name: \"policy\", static: true, text: \"p\".repeat(1648) };\nconst history = { name: \"history\", static: false, priority: 1, text: \"h\".repeat(200) };\nconst question = { name: \"question\", static: false, priority: 9, text: \"Q: {q}\" };\n\nconst prompt = assemble([question, role, history, policy], { q: \"hello\" }, 10_000);\nconsole.log(\"block order:\", prompt.blocks.map((b: any) => b.name));\nconsole.log(\"cache breakpoint after block:\", prompt.breakpoint, \"| tokens:\", prompt.tokens, \"| dropped:\", prompt.dropped);\n\n// With a small budget the lowest-priority changing module is dropped.\nconst small = assemble([question, role, history, policy], { q: \"hello\" }, 520);\nconsole.log(\"dropped with a budget of 520:\", small.dropped);\n\n// The cheapest model that meets the tier and the latency.\nconst models = [{ name: \"haiku\", tier: 1, latency_ms: 300, price_out: 5 }, { name: \"sonnet\", tier: 2, latency_ms: 900, price_out: 15 }];\nconsole.log(\"model:\", chooseModel({ tier: 2, max_latency_ms: 1000 }, models));\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "ee353020a97f7189e390d51e266c9e837da612546f56ea35bccfa9d9df89c1a0",
+  "starting_code": "/** A prompt plan: modules in cache-friendly order under a token budget, a model for the workload, and what a cache can reuse. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"prompt_plan\");\n\nexport const MIN_CACHEABLE = 512; // tokens: a shorter prefix cannot be cached\n\nexport const tokens = (text: string): number => Math.ceil(text.length / 4); // one token per four characters, rounded up\n\ntype Kept = { name: string; text: string; priority: number };\n\n/**\n * TODO 1 of 7 (unlocks e2): fill the variables of a dynamic module's text.\n * Receives the text and an object of variables. Returns the text with every `{name}` replaced by that variable's value (extra variables are ignored).\n * Throws `Error(\"missing variable: <name>\")` when a variable has no value.\n * Example: fill(\"Q: {q}\", { q: \"hello\" }) -> \"Q: hello\"\n */\nexport function fill(text: string, variables: Record<string, string>): string {\n  return text;\n}\n\n/**\n * TODO 2 of 7 (unlocks e1): refuse a variable in a static module.\n * Receives the list of static modules. Throws an `Error` with a message that says `static` (for example `static module <name> holds a variable, which\n * would break the cache`) when any module's text holds a `{variable}`; otherwise returns nothing.\n * Example: a static module with the text \"policy for {customer}\" -> Error\n */\nexport function checkStatic(stat: any[]): void {}\n\n/**\n * TODO 3 of 7 (unlocks e3): which dynamic module is dropped first?\n * Receives the list of kept dynamic modules, each `{ name, text, priority }`. Returns the index of the one with the lowest priority; of two with the same\n * priority, the later one (the higher index).\n * Example: priorities [1, 9, 1] -> 2\n */\nexport function pickVictim(kept: Kept[]): number {\n  return 0;\n}\n\n/**\n * TODO 4 of 7 (unlocks e3 and e4): drop dynamic modules until the prompt fits the budget.\n * Receives the tokens of the static prefix, the array `kept` of dynamic modules (change it in place) and the budget. While `prefix` plus the tokens of the\n * kept modules exceeds the budget, remove the module `pickVictim` chooses and note its name. Returns the dropped names in the order they were dropped.\n * When nothing is left to drop and the budget is still exceeded, throws `Error(\"over budget: ...\")`: static modules are never dropped.\n * Example: kept priorities [1, 1] and a budget that fits one of them -> the later name is dropped\n */\nexport function fitBudget(prefix: number, kept: Kept[], budget: number): string[] {\n  return [];\n}\n\n/**\n * TODO 5 of 7 (unlocks m1 and e5): where the cache breakpoint goes.\n * Receives the number of static blocks and the tokens of the static prefix. Returns the index of the last static block when there is at least one static\n * block and the prefix has at least `MIN_CACHEABLE` tokens; otherwise `null`.\n * Example: breakpointOf(2, 512) -> 1, breakpointOf(2, 511) -> null, breakpointOf(0, 900) -> null\n */\nexport function breakpointOf(staticCount: number, prefix: number): number | null {\n  return null;\n}\n\nexport function assemble(modules: any[], variables: Record<string, string>, budget: number): any {\n  log.debug(\"assemble input\", modules);\n  const stat = modules.filter((m) => m.static);\n  const dynamic = modules.filter((m) => !m.static);\n  checkStatic(stat);\n  const kept: Kept[] = dynamic.map((m) => ({ name: m.name, text: fill(m.text, variables), priority: m.priority ?? 0 }));\n  const blocks = stat.map((m) => ({ name: m.name, text: m.text }));\n  const prefix = blocks.reduce((sum, b) => sum + tokens(b.text), 0);\n  const dropped = fitBudget(prefix, kept, budget);\n  const used = prefix + kept.reduce((sum, k) => sum + tokens(k.text), 0);\n  blocks.push(...kept.map((k) => ({ name: k.name, text: k.text })));\n  return { blocks, tokens: used, dropped, breakpoint: breakpointOf(stat.length, prefix) };\n}\n\n/**\n * TODO 6 of 7 (unlocks e6): choose the model for a workload.\n * Receives the workload `{ tier, max_latency_ms }` and a list of models `{ name, tier, latency_ms, price_out }`. Returns the name of the model with the lowest\n * `price_out` among those whose `tier` is at least the workload's and whose `latency_ms` is within the limit; equal prices go to the lower name; `null` when no\n * model fits. Example: two models at the same price named \"mid\" and \"mid2\", both fitting -> \"mid\"\n */\nexport function chooseModel(workload: any, models: any[]): string | null {\n  return null;\n}\n\n/**\n * TODO 7 of 7 (unlocks e7): how many tokens of cached prefix can be reused?\n * Receives two assembled prompts (each with `blocks` and `breakpoint`). When both have a breakpoint, the breakpoints are equal and every block up to and\n * including it is identical (name and text) in both, returns the tokens of those blocks; otherwise returns 0.\n * Example: two prompts that differ only in their dynamic blocks -> the tokens of the static prefix; one edited static block -> 0\n */\nexport function reusablePrefix(a: any, b: any): number {\n  return 0;\n}\n",
+  "exercise": {
+    "main_path": "practice/level-4/82-models-prompts-and-context-as-design-choices/prose/unit-02/practice-2/promptPlan.ts",
+    "test_path": "practice/level-4/82-models-prompts-and-context-as-design-choices/prose/unit-02/practice-2/promptPlan.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-4/82-models-prompts-and-context-as-design-choices/prose/unit-02/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-4/82-models-prompts-and-context-as-design-choices/prose/unit-02/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-4/82-models-prompts-and-context-as-design-choices/prose/unit-02/practice-2/promptPlan.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 static modules come first and the breakpoint follows the last one",
+        "kind": "main",
+        "says": "Static modules come first and the breakpoint follows the last one"
+      },
+      {
+        "id": "e1 a variable in a static module is refused",
+        "kind": "edge",
+        "says": "A variable in a static module is refused"
+      },
+      {
+        "id": "e2 dynamic variables are filled and a missing one is refused",
+        "kind": "edge",
+        "says": "Dynamic variables are filled and a missing one is refused"
+      },
+      {
+        "id": "e3 the lowest priority dynamic module is dropped first and a tie drops the later one",
+        "kind": "edge",
+        "says": "The lowest priority dynamic module is dropped first, and a tie drops the later one"
+      },
+      {
+        "id": "e4 static modules are never dropped and a budget they exceed is refused",
+        "kind": "edge",
+        "says": "Static modules are never dropped, and a budget they exceed is refused"
+      },
+      {
+        "id": "e5 a prefix under the minimum gets no breakpoint",
+        "kind": "edge",
+        "says": "A prefix under the minimum gets no breakpoint"
+      },
+      {
+        "id": "e6 the cheapest model that meets the tier and the latency wins and ties go by name",
+        "kind": "edge",
+        "says": "The cheapest model that meets the tier and the latency wins, ties go by name"
+      },
+      {
+        "id": "e7 only an identical static prefix can be reused",
+        "kind": "edge",
+        "says": "Only an identical static prefix can be reused"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-4/82-models-prompts-and-context-as-design-choices/prose/unit-02/practice-2/target/report.xml"
+    },
+    "origin": "course/82-models-prompts-and-context-as-design-choices/02-choosing-a-model-and-shaping-the-context.md",
+    "concepts": [
+      "the practice of Choosing a model and shaping the context is solved"
+    ],
+    "files": [
+      "practice/level-4/82-models-prompts-and-context-as-design-choices/prose/unit-02/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "models-prompts-and-context-as-design-choices-u2"
+}

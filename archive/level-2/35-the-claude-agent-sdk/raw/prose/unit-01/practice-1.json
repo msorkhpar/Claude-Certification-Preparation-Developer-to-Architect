@@ -1,0 +1,155 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "35-the-claude-agent-sdk"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: The Claude Agent SDK: what it is and how its loop runs",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A service calls the SDK's query function. Where do the built-in tools actually run?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Inside the Python interpreter, which re-implements each tool itself",
+            "correct": false,
+            "says": "Ruled out because the Agent SDK is \"A library that runs the Claude Code binary\", so the tools are not re-implemented in Python."
+          },
+          {
+            "id": "b",
+            "text": "On Anthropic's servers, which receive the tool calls over the API",
+            "correct": false,
+            "says": "Ruled out because the SDK is an embedded library \"in a process you operate\", and the tools run in the binary."
+          },
+          {
+            "id": "c",
+            "text": "In a hosted sandbox that the SDK creates for each query it makes",
+            "correct": false,
+            "says": "Ruled out because the hosted option is another product: \"A hosted agent harness that runs the agent loop, with sessions in an Anthropic-managed cloud sandbox\"."
+          },
+          {
+            "id": "d",
+            "text": "In a bundled native program that the library launches on the side",
+            "correct": true,
+            "says": "The page says \"Both the TypeScript and Python SDKs bundle a native Claude Code binary\", and the SDK starts it as a child process."
+          }
+        ],
+        "origin": {
+          "path": "course/35-the-claude-agent-sdk/01-the-sdk-and-its-loop.md",
+          "section": "Four ways to build an agent"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A single-shot query hits its turn limit. What does the program observe?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A final result message with an error subtype, then a raised exception",
+            "correct": true,
+            "says": "The page says a single-shot query() call yields the final result message, then raises an error that includes the failure text."
+          },
+          {
+            "id": "b",
+            "text": "An exception only, with no result message arriving before it",
+            "correct": false,
+            "says": "Ruled out because \"A single-shot query() call yields the final result message, then raises an error that includes the failure text\", so a result arrives first."
+          },
+          {
+            "id": "c",
+            "text": "Silence, since the loop simply stops and the stream closes cleanly",
+            "correct": false,
+            "says": "Ruled out because the raise is not silence: \"The raise is intentional.\""
+          },
+          {
+            "id": "d",
+            "text": "A normal success result whose text says that the limit was reached",
+            "correct": false,
+            "says": "Ruled out because the result is the error variant: `error_max_turns` means \"Hit the maxTurns limit before finishing\"."
+          }
+        ],
+        "origin": {
+          "path": "course/35-the-claude-agent-sdk/01-the-sdk-and-its-loop.md",
+          "section": "Limits and results"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A developer wants to know whether a run succeeded or stopped on a limit. Which field is the primary way to check?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The stop reason of the last assistant message in the stream",
+            "correct": false,
+            "says": "Ruled out because \"When a limit is reached the run ends with a result whose subtype names it\", so the outcome sits on the result and not on one assistant message."
+          },
+          {
+            "id": "b",
+            "text": "The presence of a text answer in the result message",
+            "correct": false,
+            "says": "Ruled out because \"The result field holds the final text output and is only present on the success variant, so always check the subtype before reading it.\""
+          },
+          {
+            "id": "c",
+            "text": "The subtype of the final result",
+            "correct": true,
+            "says": "The page says the subtype \"is the primary way to check termination state\"."
+          },
+          {
+            "id": "d",
+            "text": "The exit code of the underlying child program",
+            "correct": false,
+            "says": "Ruled out because the instruction is \"Check the subtype field to determine whether the task succeeded or hit a limit.\", and the exit code and the raise only follow the error result."
+          }
+        ],
+        "origin": {
+          "path": "course/35-the-claude-agent-sdk/01-the-sdk-and-its-loop.md",
+          "section": "Limits and results"
+        }
+      }
+    ],
+    "concepts": [
+      "Four ways to build an agent, as the page teaches it",
+      "Limits and results, as the page teaches it"
+    ]
+  }
+}

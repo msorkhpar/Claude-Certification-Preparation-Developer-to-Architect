@@ -1,0 +1,312 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "83-deployment-architecture-and-data-handling"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: a data policy for a Claude deployment (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a data policy for a Claude deployment"
+    },
+    {
+      "type": "para",
+      "text": "A regulated customer asks where its data goes. The answer is a configuration: the platform that serves the model, the region, whether zero data retention is in place, how identifiers are handled, how tenants are separated and what the audit log keeps. In this practice you write the three checks around that configuration: the check that compares it with the customer's requirements, the rule that decides which audit entries to purge, and the routing rule that keeps each user's data in their region. The model is not called: the tests give you configurations as maps. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`check_deployment`, `retention_actions`, `pick_deployment`); TypeScript has `checkDeployment`, `retentionActions`, `pickDeployment`; Java has the same camel-case names as static methods of `DataPolicy` and Kotlin has top-level functions. Configurations, requirements and results are maps and lists, as the starters show."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The configuration and the requirements"
+    },
+    {
+      "type": "para",
+      "text": "A configuration has `platform` (`api`, `aws-platform`, `bedrock` or `vertex`), `zdr`, `hipaa_baa` (booleans), `model`, `inference_geo` (`us`, `global` or missing), `region` (for `bedrock` and `vertex`), `tenancy` (`shared` or `workspace-per-tenant`), `pii_handling` (`none`, `tokenise` or `redact`; may be missing) and `audit` with `store_prompts` and `retain_days`. The requirements have `residency` (`us`, `eu` or missing), `phi`, `zdr_required`, `multi_tenant` (booleans) and `audit_min_days` and `audit_max_days` (whole numbers, either may be missing). A missing flag is false."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working data policy with six gaps cut out of it. Everything that is plumbing is written and correct: the residency findings, the tenant finding, the retention-window findings, the function that joins them and the age of an entry. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value (`None`, `null` or an empty set), so the starter runs and fails every case on an assertion. Debug a gap by logging its input with the `log` line at the top of the file (the starter already logs the input of one function; add your own `log.debug` lines the same way); a run shows the lines you logged under the failing case. Write the gaps in this order (the Java and Kotlin names are the camel-case forms, TypeScript has no leading underscore):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_report` unlocks `m1`: the sorted list of finding ids. Once it is written the residency (`e1`), tenant (`e4`) and retention-window (`e6`) checks that are already written start to pass; read them as worked examples.",
+        "`_zdr_findings` unlocks `e2`: the findings about zero data retention.",
+        "`_phi_findings` unlocks `e3`: the findings about protected health information.",
+        "`_audit_findings` unlocks `e5`: the finding about stored prompts.",
+        "`retention_actions` unlocks `e7`: what a retention rule purges and keeps.",
+        "`pick_deployment` unlocks `e8`: the deployment that may serve a user's region."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole policy; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "`check_deployment(config, requirements)` returns the finding ids that apply, sorted and without duplicates:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Residency `us`: on `api` and `aws-platform` the request must pin `inference_geo` to `us` (`residency-not-pinned`); on `bedrock` and `vertex` the region must start with `us-` (`residency-region`). Residency `eu`: `api` and `aws-platform` have no European pin (`residency-unavailable`); on `bedrock` the region must start with `eu-`, on `vertex` with `europe-` or be `eu` (`residency-region`).",
+        "`zdr_required`: on `bedrock` and `vertex` the cloud provider is the data processor and zero data retention is not Anthropic's arrangement there (`zdr-not-anthropics`). On `api` and `aws-platform` the configuration must have `zdr` (`zdr-missing`), and a model whose id starts with `claude-fable` is refused (`model-needs-retention`), because the Fable models need 30-day retention.",
+        "`phi`: on `api` a signed agreement is needed (`phi-no-baa`); `aws-platform` has no HIPAA readiness (`phi-platform-unsupported`); `bedrock` and `vertex` add no platform finding (their own compliance documentation applies). On every platform the input must be de-identified, which is `tokenise` or `redact` (`phi-not-deidentified`, also when the key is missing).",
+        "`multi_tenant` needs `workspace-per-tenant` (`tenant-isolation`).",
+        "An audit log that stores prompts is a finding when `phi` is true or the input is not de-identified (`audit-stores-sensitive`).",
+        "`retain_days` above `audit_max_days` is `retention-too-long`; below `audit_min_days` is `retention-too-short`; equal is fine; a missing value is not checked."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`retention_actions(entries, max_days, today)`: entries are `{id, date, hold}` with ISO dates (`2026-01-31`), `hold` meaning a legal hold (missing is false). An entry is purged when it is **more than** `max_days` days old at `today` and not on hold; every other entry is kept. Return `{\"purge\": [ids], \"keep\": [ids]}`, both sorted by id."
+    },
+    {
+      "type": "para",
+      "text": "`pick_deployment(user_region, deployments)`: the user region is `us`, `eu` or `other`, a deployment is `{name, residency}` with residency `us`, `eu` or `global`. A `us` user is served by a `us` deployment, an `eu` user by an `eu` one and an `other` user by a `global` one; of several matches the lower name wins; with no match the answer is `None` (null), never another deployment."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Residency is pinned where the platform lets you pin it.** *You should see* an unpinned request flagged, a Europe requirement refused on the first-party API and a region checked on the clouds.",
+        "**Zero data retention belongs to Anthropic's own platforms and to models that allow it.** *You should see* the flag refused on a cloud provider and on a Fable model.",
+        "**Health data needs three things.** A covered platform, an agreement, de-identified input. *You should see* each missing one named.",
+        "**Tenants are separated by workspace.** *You should see* `tenant-isolation` for a shared tenancy of a multi-tenant service.",
+        "**An audit log is itself data.** *You should see* stored prompts flagged when they would hold identifiers.",
+        "**Retention has a floor and a ceiling.** *You should see* both limits accepted exactly at the limit.",
+        "**Purging is by age, never past a hold.** *You should see* the entry at exactly the limit kept and the held entry kept.",
+        "**A user's data stays in the user's region.** *You should see* `None` when the regional deployment is missing."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A compliant deployment has no findings"
+        ],
+        [
+          "`e1`",
+          "Residency is pinned by the request or by the region the platform allows"
+        ],
+        [
+          "`e2`",
+          "Zero data retention is an arrangement of the provider's own platforms and not of every model"
+        ],
+        [
+          "`e3`",
+          "Protected health information needs a covered platform, an agreement and de-identified input"
+        ],
+        [
+          "`e4`",
+          "A multi-tenant service needs a workspace for each tenant"
+        ],
+        [
+          "`e5`",
+          "An audit log must not store prompts that hold sensitive data"
+        ],
+        [
+          "`e6`",
+          "Audit retention stays between the minimum and the maximum"
+        ],
+        [
+          "`e7`",
+          "Purge only what is past the retention limit and not on hold"
+        ],
+        [
+          "`e8`",
+          "A request is served only by a deployment that keeps its data in the region"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.time.LocalDate\nimport java.time.temporal.ChronoUnit\n\nprivate val log = System.getLogger(\"data_policy\")\n\n/** A data policy for a Claude deployment: the findings of a configuration check, what a retention rule purges, and the deployment that may serve a user. See ../../statement.md. Configurations and requirements are JSON-like maps. */\n\nval SAFE_INPUT = listOf(\"tokenise\", \"redact\") // pii_handling values that keep identifiers out of the prompt\nval WANT = mapOf(\"us\" to \"us\", \"eu\" to \"eu\", \"other\" to \"global\") // the residency of the deployment that may serve a user region\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun asMap(value: Any?): Map<String, Any?> = (value as Map<String, Any?>?) ?: emptyMap()\n\nprivate fun truthy(value: Any?): Boolean = value == true\n\nprivate fun report(findings: Set<String>): List<String>? {\n    return findings.sorted()\n}\n\nprivate fun residencyFindings(req: Map<String, Any?>, config: Map<String, Any?>): Set<String> {\n    val platform = config[\"platform\"]\n    val region = (config[\"region\"] as String?) ?: \"\"\n    val cloud = platform == \"bedrock\" || platform == \"vertex\"\n    if (req[\"residency\"] == \"us\") {\n        if (!cloud) {\n            if (config[\"inference_geo\"] != \"us\") return setOf(\"residency-not-pinned\")\n        } else if (!region.startsWith(\"us-\")) {\n            return setOf(\"residency-region\")\n        }\n    } else if (req[\"residency\"] == \"eu\") {\n        if (!cloud) {\n            return setOf(\"residency-unavailable\")\n        } else if (!(region.startsWith(\"eu-\") || region.startsWith(\"europe-\") || region == \"eu\")) {\n            return setOf(\"residency-region\")\n        }\n    }\n    return emptySet()\n}\n\nprivate fun zdrFindings(req: Map<String, Any?>, config: Map<String, Any?>): Set<String> {\n    val findings = sortedSetOf<String>()\n    if (truthy(req[\"zdr_required\"])) {\n        if (config[\"platform\"] == \"bedrock\" || config[\"platform\"] == \"vertex\") {\n            findings += \"zdr-not-anthropics\"\n        } else {\n            if (!truthy(config[\"zdr\"])) findings += \"zdr-missing\"\n            if ((config[\"model\"] ?: \"\").toString().startsWith(\"claude-fable\")) findings += \"model-needs-retention\"\n        }\n    }\n    return findings\n}\n\nprivate fun phiFindings(req: Map<String, Any?>, config: Map<String, Any?>): Set<String> {\n    val findings = sortedSetOf<String>()\n    if (truthy(req[\"phi\"])) {\n        if (config[\"platform\"] == \"api\" && !truthy(config[\"hipaa_baa\"])) findings += \"phi-no-baa\"\n        if (config[\"platform\"] == \"aws-platform\") findings += \"phi-platform-unsupported\"\n        if (config[\"pii_handling\"] !in SAFE_INPUT) {\n            findings += \"phi-not-deidentified\"\n        }\n    }\n    return findings\n}\n\nprivate fun tenantFindings(req: Map<String, Any?>, config: Map<String, Any?>): Set<String> =\n    if (truthy(req[\"multi_tenant\"]) && config[\"tenancy\"] != \"workspace-per-tenant\") setOf(\"tenant-isolation\") else emptySet()\n\nprivate fun retentionFindings(req: Map<String, Any?>, config: Map<String, Any?>): Set<String> {\n    val findings = sortedSetOf<String>()\n    val days = asMap(config[\"audit\"])[\"retain_days\"] as Int?\n    if (days != null) {\n        if (req[\"audit_max_days\"] != null && days > (req[\"audit_max_days\"] as Int)) findings += \"retention-too-long\"\n        if (req[\"audit_min_days\"] != null && days < (req[\"audit_min_days\"] as Int)) findings += \"retention-too-short\"\n    }\n    return findings\n}\n\nprivate fun auditFindings(req: Map<String, Any?>, config: Map<String, Any?>): Set<String> {\n    val audit = asMap(config[\"audit\"])\n    return if (truthy(audit[\"store_prompts\"]) && (truthy(req[\"phi\"]) || config[\"pii_handling\"] !in SAFE_INPUT)) setOf(\"audit-stores-sensitive\") else emptySet()\n}\n\nfun checkDeployment(config: Map<String, Any?>, req: Map<String, Any?>): List<String>? {\n    log.log(System.Logger.Level.DEBUG, \"checkDeployment input: {0}\", config)\n    val findings = sortedSetOf<String>()\n    for (check in listOf(::residencyFindings, ::zdrFindings, ::phiFindings, ::tenantFindings, ::auditFindings, ::retentionFindings)) findings += check(req, config)\n    return report(findings)\n}\n\nprivate fun ageDays(day: String, today: String): Long = ChronoUnit.DAYS.between(LocalDate.parse(day), LocalDate.parse(today))\n\nfun retentionActions(entries: List<Map<String, Any?>>, maxDays: Int, today: String): Map<String, Any?>? {\n    val purge = mutableListOf<String>()\n    val keep = mutableListOf<String>()\n    for (e in entries.sortedBy { it[\"id\"] as String }) {\n        (if (ageDays(e[\"date\"] as String, today) > maxDays && !truthy(e[\"hold\"])) purge else keep).add(e[\"id\"] as String)\n    }\n    return linkedMapOf(\"purge\" to purge, \"keep\" to keep)\n}\n\nfun pickDeployment(userRegion: String, deployments: List<Map<String, Any?>>): String? {\n    return deployments.filter { it[\"residency\"] == WANT[userRegion] }.map { it[\"name\"] as String }.sorted().firstOrNull()\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // The deployment the team runs, and what the requirements ask of it (the tests' compliant pair).\n    val config = mapOf(\"platform\" to \"api\", \"zdr\" to true, \"hipaa_baa\" to false, \"model\" to \"claude-sonnet-5-5\", \"inference_geo\" to \"us\", \"region\" to null,\n        \"tenancy\" to \"workspace-per-tenant\", \"pii_handling\" to \"tokenise\", \"audit\" to mapOf(\"store_prompts\" to false, \"retain_days\" to 365))\n    val req = mapOf(\"residency\" to \"us\", \"phi\" to false, \"zdr_required\" to true, \"multi_tenant\" to true, \"audit_min_days\" to 180, \"audit_max_days\" to 400)\n    println(\"compliant: ${checkDeployment(config, req)}\")\n\n    // The same deployment checked against stricter requirements: EU residency, and patient data.\n    val strict = req + mapOf(\"residency\" to \"eu\", \"phi\" to true)\n    println(\"strict: ${checkDeployment(config, strict)}\")\n\n    // Which deployment may serve a user in the EU.\n    val deployments = listOf(mapOf(\"name\" to \"us-api\", \"residency\" to \"us\"), mapOf(\"name\" to \"eu-api\", \"residency\" to \"eu\"), mapOf(\"name\" to \"global-api\", \"residency\" to \"global\"))\n    println(\"deployment for an EU user: ${pickDeployment(\"eu\", deployments)}\")\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.time.LocalDate\nimport java.time.temporal.ChronoUnit\n\nprivate val log = System.getLogger(\"data_policy\")\n\n/** A data policy for a Claude deployment: the findings of a configuration check, what a retention rule purges, and the deployment that may serve a user. See ../../statement.md. Configurations and requirements are JSON-like maps. */\n\nval SAFE_INPUT = listOf(\"tokenise\", \"redact\") // pii_handling values that keep identifiers out of the prompt\nval WANT = mapOf(\"us\" to \"us\", \"eu\" to \"eu\", \"other\" to \"global\") // the residency of the deployment that may serve a user region\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun asMap(value: Any?): Map<String, Any?> = (value as Map<String, Any?>?) ?: emptyMap()\n\nprivate fun truthy(value: Any?): Boolean = value == true\n\nprivate fun report(findings: Set<String>): List<String>? {\n    // TODO 1 of 6 (unlocks m1): the answer of checkDeployment.\n    // Receives the set of finding ids. Returns them as a list sorted by text, or null when there is nothing to report yet.\n    // Example: report(setOf(\"zdr-missing\", \"phi-no-baa\")) -> [\"phi-no-baa\", \"zdr-missing\"]\n    return null\n}\n\nprivate fun residencyFindings(req: Map<String, Any?>, config: Map<String, Any?>): Set<String> {\n    val platform = config[\"platform\"]\n    val region = (config[\"region\"] as String?) ?: \"\"\n    val cloud = platform == \"bedrock\" || platform == \"vertex\"\n    if (req[\"residency\"] == \"us\") {\n        if (!cloud) {\n            if (config[\"inference_geo\"] != \"us\") return setOf(\"residency-not-pinned\")\n        } else if (!region.startsWith(\"us-\")) {\n            return setOf(\"residency-region\")\n        }\n    } else if (req[\"residency\"] == \"eu\") {\n        if (!cloud) {\n            return setOf(\"residency-unavailable\")\n        } else if (!(region.startsWith(\"eu-\") || region.startsWith(\"europe-\") || region == \"eu\")) {\n            return setOf(\"residency-region\")\n        }\n    }\n    return emptySet()\n}\n\nprivate fun zdrFindings(req: Map<String, Any?>, config: Map<String, Any?>): Set<String> {\n    // TODO 2 of 6 (unlocks e2): the findings about zero data retention.\n    // Receives the requirements and the configuration. Returns a set of finding ids. When `zdr_required` is set: `zdr-not-anthropics` on the\n    // platforms `bedrock` and `vertex` (and nothing else); on the others `zdr-missing` when `zdr` is not set, and `model-needs-retention` when the\n    // model name starts with `claude-fable`. Nothing is required, nothing is found.\n    // Example: platform \"api\", zdr false, zdr_required true -> setOf(\"zdr-missing\")\n    return emptySet()\n}\n\nprivate fun phiFindings(req: Map<String, Any?>, config: Map<String, Any?>): Set<String> {\n    // TODO 3 of 6 (unlocks e3): the findings about protected health information.\n    // Receives the requirements and the configuration. Returns a set of finding ids. When `phi` is set: `phi-no-baa` on the platform `api` without\n    // `hipaa_baa`; `phi-platform-unsupported` on `aws-platform`; `phi-not-deidentified` when `pii_handling` is not in SAFE_INPUT.\n    // Example: platform \"api\", hipaa_baa false, pii_handling \"tokenise\", phi true -> setOf(\"phi-no-baa\")\n    return emptySet()\n}\n\nprivate fun tenantFindings(req: Map<String, Any?>, config: Map<String, Any?>): Set<String> =\n    if (truthy(req[\"multi_tenant\"]) && config[\"tenancy\"] != \"workspace-per-tenant\") setOf(\"tenant-isolation\") else emptySet()\n\nprivate fun retentionFindings(req: Map<String, Any?>, config: Map<String, Any?>): Set<String> {\n    val findings = sortedSetOf<String>()\n    val days = asMap(config[\"audit\"])[\"retain_days\"] as Int?\n    if (days != null) {\n        if (req[\"audit_max_days\"] != null && days > (req[\"audit_max_days\"] as Int)) findings += \"retention-too-long\"\n        if (req[\"audit_min_days\"] != null && days < (req[\"audit_min_days\"] as Int)) findings += \"retention-too-short\"\n    }\n    return findings\n}\n\nprivate fun auditFindings(req: Map<String, Any?>, config: Map<String, Any?>): Set<String> {\n    // TODO 4 of 6 (unlocks e5): the finding about stored prompts.\n    // Receives the requirements and the configuration; the audit settings are `asMap(config[\"audit\"])` (it may be missing). Returns\n    // setOf(\"audit-stores-sensitive\") when `store_prompts` is set and either `phi` is required or `pii_handling` is not in SAFE_INPUT; an empty set otherwise.\n    // Example: store_prompts true, pii_handling \"none\" -> setOf(\"audit-stores-sensitive\")\n    return emptySet()\n}\n\nfun checkDeployment(config: Map<String, Any?>, req: Map<String, Any?>): List<String>? {\n    log.log(System.Logger.Level.DEBUG, \"checkDeployment input: {0}\", config)\n    val findings = sortedSetOf<String>()\n    for (check in listOf(::residencyFindings, ::zdrFindings, ::phiFindings, ::tenantFindings, ::auditFindings, ::retentionFindings)) findings += check(req, config)\n    return report(findings)\n}\n\nprivate fun ageDays(day: String, today: String): Long = ChronoUnit.DAYS.between(LocalDate.parse(day), LocalDate.parse(today))\n\nfun retentionActions(entries: List<Map<String, Any?>>, maxDays: Int, today: String): Map<String, Any?>? {\n    // TODO 5 of 6 (unlocks e7): what a retention rule purges.\n    // Receives the entries (each has `id` and an ISO `date`, and may have `hold`), the limit in days and today's ISO date. Returns a map with\n    // `purge` and `keep`, both lists of ids sorted by id. An entry is purged when it is older than the limit (strictly) and is not on hold.\n    // Example: an entry dated 365 days before today with maxDays 365 is kept; one dated 366 days before is purged.\n    return null\n}\n\nfun pickDeployment(userRegion: String, deployments: List<Map<String, Any?>>): String? {\n    // TODO 6 of 6 (unlocks e8): the deployment that may serve a user.\n    // Receives the user's region (\"us\", \"eu\" or \"other\") and the deployments (each has `name` and `residency`). Returns the first name, in\n    // alphabetical order, of the deployments whose residency is WANT[userRegion], or null when there is none (a global deployment does not serve \"us\" or \"eu\").\n    // Example: \"eu\" with eu-main and eu-backup -> \"eu-backup\"\n    return null\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // The deployment the team runs, and what the requirements ask of it (the tests' compliant pair).\n    val config = mapOf(\"platform\" to \"api\", \"zdr\" to true, \"hipaa_baa\" to false, \"model\" to \"claude-sonnet-5-5\", \"inference_geo\" to \"us\", \"region\" to null,\n        \"tenancy\" to \"workspace-per-tenant\", \"pii_handling\" to \"tokenise\", \"audit\" to mapOf(\"store_prompts\" to false, \"retain_days\" to 365))\n    val req = mapOf(\"residency\" to \"us\", \"phi\" to false, \"zdr_required\" to true, \"multi_tenant\" to true, \"audit_min_days\" to 180, \"audit_max_days\" to 400)\n    println(\"compliant: ${checkDeployment(config, req)}\")\n\n    // The same deployment checked against stricter requirements: EU residency, and patient data.\n    val strict = req + mapOf(\"residency\" to \"eu\", \"phi\" to true)\n    println(\"strict: ${checkDeployment(config, strict)}\")\n\n    // Which deployment may serve a user in the EU.\n    val deployments = listOf(mapOf(\"name\" to \"us-api\", \"residency\" to \"us\"), mapOf(\"name\" to \"eu-api\", \"residency\" to \"eu\"), mapOf(\"name\" to \"global-api\", \"residency\" to \"global\"))\n    println(\"deployment for an EU user: ${pickDeployment(\"eu\", deployments)}\")\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 9,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "376d741308ccdc0897ad34f30def0e7bbaa76f84c5ea9eab071115734fde819f",
+  "starting_code": "import java.time.LocalDate\nimport java.time.temporal.ChronoUnit\n\nprivate val log = System.getLogger(\"data_policy\")\n\n/** A data policy for a Claude deployment: the findings of a configuration check, what a retention rule purges, and the deployment that may serve a user. See ../../statement.md. Configurations and requirements are JSON-like maps. */\n\nval SAFE_INPUT = listOf(\"tokenise\", \"redact\") // pii_handling values that keep identifiers out of the prompt\nval WANT = mapOf(\"us\" to \"us\", \"eu\" to \"eu\", \"other\" to \"global\") // the residency of the deployment that may serve a user region\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun asMap(value: Any?): Map<String, Any?> = (value as Map<String, Any?>?) ?: emptyMap()\n\nprivate fun truthy(value: Any?): Boolean = value == true\n\nprivate fun report(findings: Set<String>): List<String>? {\n    // TODO 1 of 6 (unlocks m1): the answer of checkDeployment.\n    // Receives the set of finding ids. Returns them as a list sorted by text, or null when there is nothing to report yet.\n    // Example: report(setOf(\"zdr-missing\", \"phi-no-baa\")) -> [\"phi-no-baa\", \"zdr-missing\"]\n    return null\n}\n\nprivate fun residencyFindings(req: Map<String, Any?>, config: Map<String, Any?>): Set<String> {\n    val platform = config[\"platform\"]\n    val region = (config[\"region\"] as String?) ?: \"\"\n    val cloud = platform == \"bedrock\" || platform == \"vertex\"\n    if (req[\"residency\"] == \"us\") {\n        if (!cloud) {\n            if (config[\"inference_geo\"] != \"us\") return setOf(\"residency-not-pinned\")\n        } else if (!region.startsWith(\"us-\")) {\n            return setOf(\"residency-region\")\n        }\n    } else if (req[\"residency\"] == \"eu\") {\n        if (!cloud) {\n            return setOf(\"residency-unavailable\")\n        } else if (!(region.startsWith(\"eu-\") || region.startsWith(\"europe-\") || region == \"eu\")) {\n            return setOf(\"residency-region\")\n        }\n    }\n    return emptySet()\n}\n\nprivate fun zdrFindings(req: Map<String, Any?>, config: Map<String, Any?>): Set<String> {\n    // TODO 2 of 6 (unlocks e2): the findings about zero data retention.\n    // Receives the requirements and the configuration. Returns a set of finding ids. When `zdr_required` is set: `zdr-not-anthropics` on the\n    // platforms `bedrock` and `vertex` (and nothing else); on the others `zdr-missing` when `zdr` is not set, and `model-needs-retention` when the\n    // model name starts with `claude-fable`. Nothing is required, nothing is found.\n    // Example: platform \"api\", zdr false, zdr_required true -> setOf(\"zdr-missing\")\n    return emptySet()\n}\n\nprivate fun phiFindings(req: Map<String, Any?>, config: Map<String, Any?>): Set<String> {\n    // TODO 3 of 6 (unlocks e3): the findings about protected health information.\n    // Receives the requirements and the configuration. Returns a set of finding ids. When `phi` is set: `phi-no-baa` on the platform `api` without\n    // `hipaa_baa`; `phi-platform-unsupported` on `aws-platform`; `phi-not-deidentified` when `pii_handling` is not in SAFE_INPUT.\n    // Example: platform \"api\", hipaa_baa false, pii_handling \"tokenise\", phi true -> setOf(\"phi-no-baa\")\n    return emptySet()\n}\n\nprivate fun tenantFindings(req: Map<String, Any?>, config: Map<String, Any?>): Set<String> =\n    if (truthy(req[\"multi_tenant\"]) && config[\"tenancy\"] != \"workspace-per-tenant\") setOf(\"tenant-isolation\") else emptySet()\n\nprivate fun retentionFindings(req: Map<String, Any?>, config: Map<String, Any?>): Set<String> {\n    val findings = sortedSetOf<String>()\n    val days = asMap(config[\"audit\"])[\"retain_days\"] as Int?\n    if (days != null) {\n        if (req[\"audit_max_days\"] != null && days > (req[\"audit_max_days\"] as Int)) findings += \"retention-too-long\"\n        if (req[\"audit_min_days\"] != null && days < (req[\"audit_min_days\"] as Int)) findings += \"retention-too-short\"\n    }\n    return findings\n}\n\nprivate fun auditFindings(req: Map<String, Any?>, config: Map<String, Any?>): Set<String> {\n    // TODO 4 of 6 (unlocks e5): the finding about stored prompts.\n    // Receives the requirements and the configuration; the audit settings are `asMap(config[\"audit\"])` (it may be missing). Returns\n    // setOf(\"audit-stores-sensitive\") when `store_prompts` is set and either `phi` is required or `pii_handling` is not in SAFE_INPUT; an empty set otherwise.\n    // Example: store_prompts true, pii_handling \"none\" -> setOf(\"audit-stores-sensitive\")\n    return emptySet()\n}\n\nfun checkDeployment(config: Map<String, Any?>, req: Map<String, Any?>): List<String>? {\n    log.log(System.Logger.Level.DEBUG, \"checkDeployment input: {0}\", config)\n    val findings = sortedSetOf<String>()\n    for (check in listOf(::residencyFindings, ::zdrFindings, ::phiFindings, ::tenantFindings, ::auditFindings, ::retentionFindings)) findings += check(req, config)\n    return report(findings)\n}\n\nprivate fun ageDays(day: String, today: String): Long = ChronoUnit.DAYS.between(LocalDate.parse(day), LocalDate.parse(today))\n\nfun retentionActions(entries: List<Map<String, Any?>>, maxDays: Int, today: String): Map<String, Any?>? {\n    // TODO 5 of 6 (unlocks e7): what a retention rule purges.\n    // Receives the entries (each has `id` and an ISO `date`, and may have `hold`), the limit in days and today's ISO date. Returns a map with\n    // `purge` and `keep`, both lists of ids sorted by id. An entry is purged when it is older than the limit (strictly) and is not on hold.\n    // Example: an entry dated 365 days before today with maxDays 365 is kept; one dated 366 days before is purged.\n    return null\n}\n\nfun pickDeployment(userRegion: String, deployments: List<Map<String, Any?>>): String? {\n    // TODO 6 of 6 (unlocks e8): the deployment that may serve a user.\n    // Receives the user's region (\"us\", \"eu\" or \"other\") and the deployments (each has `name` and `residency`). Returns the first name, in\n    // alphabetical order, of the deployments whose residency is WANT[userRegion], or null when there is none (a global deployment does not serve \"us\" or \"eu\").\n    // Example: \"eu\" with eu-main and eu-backup -> \"eu-backup\"\n    return null\n}\n",
+  "exercise": {
+    "main_path": "practice/level-4/83-deployment-architecture-and-data-handling/prose/unit-02/practice-4/src/main/kotlin/DataPolicy.kt",
+    "test_path": "practice/level-4/83-deployment-architecture-and-data-handling/prose/unit-02/practice-4/src/test/kotlin/DataPolicyTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-4/83-deployment-architecture-and-data-handling/prose/unit-02/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-4/83-deployment-architecture-and-data-handling/prose/unit-02/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_aCompliantDeploymentHasNoFindings()",
+        "kind": "main",
+        "says": "A compliant deployment has no findings"
+      },
+      {
+        "id": "e1_residencyIsPinnedByTheRequestOrByTheRegionThePlatformAllows()",
+        "kind": "edge",
+        "says": "Residency is pinned by the request or by the region the platform allows"
+      },
+      {
+        "id": "e2_zeroDataRetentionIsAnArrangementOfTheProvidersOwnPlatformsAndNotOfEveryModel()",
+        "kind": "edge",
+        "says": "Zero data retention is an arrangement of the provider's own platforms and not of every model"
+      },
+      {
+        "id": "e3_protectedHealthInformationNeedsACoveredPlatformAnAgreementAndDeidentifiedInput()",
+        "kind": "edge",
+        "says": "Protected health information needs a covered platform, an agreement and de-identified input"
+      },
+      {
+        "id": "e4_aMultiTenantServiceNeedsAWorkspaceForEachTenant()",
+        "kind": "edge",
+        "says": "A multi-tenant service needs a workspace for each tenant"
+      },
+      {
+        "id": "e5_anAuditLogMustNotStorePromptsThatHoldSensitiveData()",
+        "kind": "edge",
+        "says": "An audit log must not store prompts that hold sensitive data"
+      },
+      {
+        "id": "e6_auditRetentionStaysBetweenTheMinimumAndTheMaximum()",
+        "kind": "edge",
+        "says": "Audit retention stays between the minimum and the maximum"
+      },
+      {
+        "id": "e7_purgeOnlyWhatIsPastTheRetentionLimitAndNotOnHold()",
+        "kind": "edge",
+        "says": "Purge only what is past the retention limit and not on hold"
+      },
+      {
+        "id": "e8_aRequestIsServedOnlyByADeploymentThatKeepsItsDataInTheRegion()",
+        "kind": "edge",
+        "says": "A request is served only by a deployment that keeps its data in the region"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-4/83-deployment-architecture-and-data-handling/prose/unit-02/practice-4/target/test-results/test"
+    },
+    "origin": "course/83-deployment-architecture-and-data-handling/02-the-identifier-boundary-the-audit-log-and-the-practice.md",
+    "concepts": [
+      "the practice of The identifier boundary, the audit log and the practice is solved"
+    ],
+    "files": [
+      "practice/level-4/83-deployment-architecture-and-data-handling/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "deployment-architecture-and-data-handling-u2"
+}

@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "62-structured-output-at-the-architect-level"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: What a schema guarantees and what it does not",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "An extraction schema marks the purchase order number as required, and invoices lacking one come back with believable numbers that appear nowhere in the documents. What fixes it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Add a minimum length so that short numbers are refused",
+            "correct": false,
+            "says": "Ruled out because a length limit \"would not tell a real number from an invented one\"."
+          },
+          {
+            "id": "b",
+            "text": "Allow a null for that field when the source gives none",
+            "correct": true,
+            "says": "A field that may be missing from the source is nullable, so that the model is not pushed to fabricate a value."
+          },
+          {
+            "id": "c",
+            "text": "Tell the model never to leave a required field empty",
+            "correct": false,
+            "says": "Ruled out because \"a required field pushes the model to fabricate a value\", and the instruction adds to the pressure."
+          },
+          {
+            "id": "d",
+            "text": "Set a default of `unknown` in the schema for that field",
+            "correct": false,
+            "says": "Ruled out because a default that looks like data is a problem because \"downstream code cannot tell it from a real value\"."
+          }
+        ],
+        "origin": {
+          "path": "course/62-structured-output-at-the-architect-level/01-what-a-schema-guarantees-and-what-it-does-not.md",
+          "section": "A field that may be absent is nullable"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A strict schema is in force, and one record lists line items that add up to 120.50 beside a total of 130.00. Which statement holds?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The type check rejects it at validation",
+            "correct": false,
+            "says": "Ruled out because \"A strict schema makes the first kind rare and does nothing about the second\", and both numbers pass a type check."
+          },
+          {
+            "id": "b",
+            "text": "Strict mode rejects it once the tool sets `strict`",
+            "correct": false,
+            "says": "Ruled out because strict schemas \"do not prevent semantic errors\", and this record already matches its shape."
+          },
+          {
+            "id": "c",
+            "text": "The required-field check rejects it as inconsistent",
+            "correct": false,
+            "says": "Ruled out because \"the guarantee is about shape\", which covers presence of fields and not agreement between them."
+          },
+          {
+            "id": "d",
+            "text": "Only a check in your own code rejects it",
+            "correct": true,
+            "says": "The guide says strict schemas do not prevent semantic errors, and a sum is one: shape is promised and meaning is not, so the check that catches it is \"Your code: checks that read the record against the source\"."
+          }
+        ],
+        "origin": {
+          "path": "course/62-structured-output-at-the-architect-level/01-what-a-schema-guarantees-and-what-it-does-not.md",
+          "section": "Two kinds of error"
+        }
+      }
+    ]
+  }
+}

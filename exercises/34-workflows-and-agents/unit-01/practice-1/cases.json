@@ -1,0 +1,116 @@
+{
+  "practice": "34-workflows-and-agents/unit-01/practice-1",
+  "name": "workflows",
+  "tests": {
+    "java": "WorkflowsTest",
+    "kotlin": "WorkflowsTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_an_orchestrator_plans_runs_a_worker_per_subtask_and_combines",
+      "typescript": "m1 an orchestrator plans runs a worker per subtask and combines",
+      "java": "m1_anOrchestratorPlansRunsAWorkerPerSubtaskAndCombines",
+      "kotlin": "m1_anOrchestratorPlansRunsAWorkerPerSubtaskAndCombines"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_the_plan_is_read_from_prose_cleaned_capped_and_replaced_when_unusable",
+      "typescript": "e1 the plan is read from prose cleaned capped and replaced when unusable",
+      "java": "e1_thePlanIsReadFromProseCleanedCappedAndReplacedWhenUnusable",
+      "kotlin": "e1_thePlanIsReadFromProseCleanedCappedAndReplacedWhenUnusable"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_one_failing_worker_does_not_stop_the_others_or_the_answer",
+      "typescript": "e2 one failing worker does not stop the others or the answer",
+      "java": "e2_oneFailingWorkerDoesNotStopTheOthersOrTheAnswer",
+      "kotlin": "e2_oneFailingWorkerDoesNotStopTheOthersOrTheAnswer"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_draft_is_revised_with_the_feedback_until_the_judge_accepts_it",
+      "typescript": "e3 a draft is revised with the feedback until the judge accepts it",
+      "java": "e3_aDraftIsRevisedWithTheFeedbackUntilTheJudgeAcceptsIt",
+      "kotlin": "e3_aDraftIsRevisedWithTheFeedbackUntilTheJudgeAcceptsIt"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_when_the_rounds_run_out_the_best_draft_wins_and_an_unreadable_judge_scores_zero",
+      "typescript": "e4 when the rounds run out the best draft wins and an unreadable judge scores zero",
+      "java": "e4_whenTheRoundsRunOutTheBestDraftWinsAndAnUnreadableJudgeScoresZero",
+      "kotlin": "e4_whenTheRoundsRunOutTheBestDraftWinsAndAnUnreadableJudgeScoresZero"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_label_is_read_from_the_reply_and_anything_else_takes_the_default_route",
+      "typescript": "e5 a label is read from the reply and anything else takes the default route",
+      "java": "e5_aLabelIsReadFromTheReplyAndAnythingElseTakesTheDefaultRoute",
+      "kotlin": "e5_aLabelIsReadFromTheReplyAndAnythingElseTakesTheDefaultRoute"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_the_majority_answer_wins_and_a_tie_goes_to_the_one_seen_first",
+      "typescript": "e6 the majority answer wins and a tie goes to the one seen first",
+      "java": "e6_theMajorityAnswerWinsAndATieGoesToTheOneSeenFirst",
+      "kotlin": "e6_theMajorityAnswerWinsAndATieGoesToTheOneSeenFirst"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_a_writer_that_fails_ends_the_loop_with_the_best_draft_so_far",
+      "typescript": "e7 a writer that fails ends the loop with the best draft so far",
+      "java": "e7_aWriterThatFailsEndsTheLoopWithTheBestDraftSoFar",
+      "kotlin": "e7_aWriterThatFailsEndsTheLoopWithTheBestDraftSoFar"
+    }
+  },
+  "plants": {
+    "wrong-no-cap": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "runs every subtask the planner lists instead of the first max_subtasks"
+    },
+    "wrong-stop-at-first-failure": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "stops running workers after the first one fails"
+    },
+    "wrong-no-feedback": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "revises without sending the judge's feedback to the writer"
+    },
+    "wrong-last-draft": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "returns the last draft instead of the best one when the rounds run out"
+    },
+    "wrong-trust-unreadable-judge": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "scores a judge reply it cannot read as a pass"
+    },
+    "wrong-punctuation-kept": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "does not strip punctuation around the label, so a reply of Billing. misses its route"
+    },
+    "wrong-tie-goes-last": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "breaks a voting tie in favour of the answer seen last"
+    },
+    "wrong-error-rounds": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "counts the round in which the writer failed as completed"
+    }
+  }
+}

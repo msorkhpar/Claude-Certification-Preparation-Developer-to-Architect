@@ -1,0 +1,270 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "32-mcp-fundamentals"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: a notes server for the Model Context Protocol (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a notes server for the Model Context Protocol"
+    },
+    {
+      "type": "para",
+      "text": "An MCP server is a program that a client starts and talks to over its standard input and output (the `stdio` transport), or reaches over HTTP. It offers three kinds of things: tools that a model can call, resources that a person or an application can read, and prompts that a person can pick. The official SDKs do the protocol work (the handshake, the JSON-RPC framing, the schema validation); you write what the server offers. Write a small notes server and prove it the way a real client would: the tests start your server as a separate process and connect the SDK's own client to it. Edit the file (`notes_server.py`, `notes_server.ts`, `NotesServer.java` or `NotesServer.kt`). The server uses the official SDK of its language at the versions in `docs/VERSIONS.md`; the lesson pages explain the SDK calls and what the course checked. Nothing here touches a network: the client and the server talk through pipes."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What the server offers"
+    },
+    {
+      "type": "para",
+      "text": "The server is named `notes`, version `1.0.0`, and keeps its notes in memory. The id of a note is its position, counting from 1. It declares the tools, resources and prompts capabilities."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Tool `add_note(title, text)`, with a description. Both arguments are required strings. It strips the spaces around both, then refuses: an empty title (`title is required`), an empty text (`text is required`), a text longer than 500 characters (`text is too long (max 500)`). A refusal is a **tool error**: an ordinary result whose `isError` is true and whose text says why, so the model can read it and try again (it is not a protocol error). Otherwise it saves the note and answers `Saved note {id}: {title}`. A refused call does not use an id. The tool is annotated as not read-only, not destructive and not idempotent.",
+        "Tool `search_notes(query, limit)`, with a description. `query` is a required string, `limit` an optional integer with the default 5 that the tool's input schema states. The query is stripped; an empty one is the tool error `query is required`; a limit outside 1 to 20 is the tool error `limit must be between 1 and 20`. A note matches when its title or its text contains the query, in any letter case. The answer is one line per match, `{id}. {title}`, in id order, at most `limit` lines; with no match it is `No notes match \"{query}\"` (the stripped query), which is not an error. The tool is annotated as read-only.",
+        "Resource `notes://count` (plain text): `0 notes`, `1 note`, `2 notes`, and so on.",
+        "Resource template `notes://note/{id}` (plain text): the note as `{title}`, an empty line, then `{text}`. An id that is not a whole number of an existing note (`0`, `3` of two notes, `abc`) is a protocol error whose message says `No note {id}`.",
+        "Prompt `review_notes` with one optional argument `tone` (default `brief`): one user message. With no notes it says `There are no notes to review.`; otherwise `Review these notes in a {tone} tone:` followed by one line `- {title}` per note."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "A message you write for a tool error may arrive with a prefix that the SDK adds (some SDKs prepend the tool name); the tests look for your text inside the result."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working notes server with nine gaps cut out of it. Everything that is plumbing is written and correct: the server name and version, the capabilities, the tool, resource and prompt registrations with their descriptions, schemas and annotations, the stripping of the inputs, the saving of a note and the answer to `add_note`. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks; it returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file (the starter already logs the input of `add_note` this way); a run shows the logged lines under the failing case. Write them in this order (the names are the Python forms; TypeScript, Java and Kotlin use camel case, `validateNote` is `noteError` there and returns the message or `null` instead of raising):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`validate_note` unlocks `e2` and `e7`: the three refusals of a bad note, in order.",
+        "`validate_search` unlocks `e2`: the query and the limit checks.",
+        "`find_hits` unlocks `m1` and `e3`: the matching notes as `{id}. {title}` lines, ignoring letter case.",
+        "`format_hits` unlocks `e3`: the limit and the no-match sentence.",
+        "`count_text` unlocks `e5`: `0 notes`, `1 note`, `2 notes`.",
+        "`note_text` unlocks `m1` and `e5`: the note as text, or the `No note {id}` error.",
+        "`review_text` unlocks `e6`: the prompt text, with and without notes.",
+        "`default_limit` unlocks `e1`: the limit a search uses when none is given, also advertised in the input schema (`defaultLimit` in the other languages).",
+        "`search_annotations` unlocks `e4`: the read-only annotation of `search_notes` (`searchAnnotations` in the other languages)."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About fifteen lines in all. The rest of the registration is written."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A client can save a note, find it and read it back"
+        ],
+        [
+          "`e1`",
+          "The server declares tools, resources and prompts, and names its tools"
+        ],
+        [
+          "`e2`",
+          "Bad input comes back as a tool error the model can read"
+        ],
+        [
+          "`e3`",
+          "Search ignores case, keeps id order, honours the limit and says when nothing matches"
+        ],
+        [
+          "`e4`",
+          "Tool annotations tell a client which tool only reads"
+        ],
+        [
+          "`e5`",
+          "Resources give the count, a note by id and an error for a missing one"
+        ],
+        [
+          "`e6`",
+          "The prompt lists the notes and defaults the tone"
+        ],
+        [
+          "`e7`",
+          "Ids are sequential and a failed call does not use one"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The Java and Kotlin tests start the server with `java -cp`, using the class path that the build file hands them."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"A notes server for the Model Context Protocol, over stdio. See ../../statement.md.\"\"\"\nimport logging\n\nfrom mcp.server.mcpserver import MCPServer\nfrom mcp.server.mcpserver.exceptions import ResourceNotFoundError, ToolError\nfrom mcp.types import ToolAnnotations\n\nlog = logging.getLogger(__name__)\n\nMAX_TEXT = 500\nserver = MCPServer(\"notes\", version=\"1.0.0\")\nNOTES: list[tuple[str, str]] = []  # (title, text); the id of a note is its position, counting from 1\n\n\ndef validate_note(title: str, text: str) -> None:\n    \"\"\"Refuse a bad note with a ToolError (given the title and the text, both already stripped).\"\"\"\n    if not title:\n        raise ToolError(\"title is required\")\n    if not text:\n        raise ToolError(\"text is required\")\n    if len(text) > MAX_TEXT:\n        raise ToolError(f\"text is too long (max {MAX_TEXT})\")\n\n\ndef validate_search(query: str, limit: int) -> None:\n    \"\"\"Refuse a bad search with a ToolError (given the stripped query and the limit).\"\"\"\n    if not query:\n        raise ToolError(\"query is required\")\n    if not 1 <= limit <= 20:\n        raise ToolError(\"limit must be between 1 and 20\")\n\n\ndef find_hits(query: str) -> list[str]:\n    \"\"\"The lines `{id}. {title}` of the notes whose title or text contains the query, in any letter case, in id order.\"\"\"\n    needle = query.lower()\n    return [f\"{i}. {title}\" for i, (title, text) in enumerate(NOTES, 1) if needle in title.lower() or needle in text.lower()]\n\n\ndef format_hits(hits: list[str], limit: int, query: str) -> str:\n    \"\"\"The answer of a search: at most `limit` hit lines joined by newlines, or the no-match sentence.\"\"\"\n    return \"\\n\".join(hits[:limit]) if hits else f'No notes match \"{query}\"'\n\n\ndef count_text(count: int) -> str:\n    \"\"\"The text of the count resource: 0 notes, 1 note, 2 notes.\"\"\"\n    return f\"{count} note\" + (\"\" if count == 1 else \"s\")\n\n\ndef note_text(id: str) -> str:\n    \"\"\"The text of one note, or a ResourceNotFoundError \"No note {id}\" when the id is not a whole number of an existing note.\"\"\"\n    if not id.isdigit() or not 1 <= int(id) <= len(NOTES):\n        raise ResourceNotFoundError(f\"No note {id}\")\n    title, text = NOTES[int(id) - 1]\n    return f\"{title}\\n\\n{text}\"\n\n\ndef review_text(tone: str) -> str:\n    \"\"\"The text of the review prompt.\"\"\"\n    if not NOTES:\n        return \"There are no notes to review.\"\n    return f\"Review these notes in a {tone} tone:\\n\" + \"\\n\".join(f\"- {title}\" for title, _ in NOTES)\n\n\ndef default_limit() -> int:\n    \"\"\"How many hits a search returns when the caller gives no limit.\"\"\"\n    return 5\n\n\ndef search_annotations():\n    \"\"\"The annotations that tell a client search_notes only reads.\"\"\"\n    return ToolAnnotations(read_only_hint=True)\n\n\n@server.tool(description=\"Save a note with a title and a text.\", annotations=ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False))\ndef add_note(title: str, text: str) -> str:\n    log.debug(\"add_note input: %r %r\", title, text)\n    title, text = title.strip(), text.strip()\n    validate_note(title, text)\n    NOTES.append((title, text))\n    return f\"Saved note {len(NOTES)}: {title}\"\n\n\n@server.tool(description=\"Find notes whose title or text contains the query.\", annotations=search_annotations())\ndef search_notes(query: str, limit: int = default_limit()) -> str:\n    validate_search(query.strip(), limit)\n    return format_hits(find_hits(query.strip()), limit, query.strip())\n\n\n@server.resource(\"notes://count\", description=\"How many notes there are.\")\ndef count() -> str:\n    return count_text(len(NOTES))\n\n\n@server.resource(\"notes://note/{id}\", description=\"One note by id.\")\ndef note(id: str) -> str:\n    return note_text(id)\n\n\n@server.prompt(description=\"Ask for a review of the notes.\")\ndef review_notes(tone: str = \"brief\") -> str:\n    return review_text(tone)\n\n\nif __name__ == \"__main__\":\n    server.run()\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom notes_server import add_note, count, note, search_notes\n\n# The tools and resources of the server are plain functions, so you can call them here without starting a client.\n# (The tests start the server as a separate process and connect the SDK's client to it.)\ntry:\n    print(\"add_note:\", add_note(\"Plan\", \"ship it\"))\n    print(\"search_notes:\", search_notes(\"ship\"))\n    print(\"count resource:\", count())\n    print(\"note 1 resource:\", repr(note(\"1\")))\nexcept Exception as err:  # a gap that is not written yet may raise: show it instead of a traceback\n    print(\"raised:\", type(err).__name__, err)\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"A notes server for the Model Context Protocol, over stdio. See ../../statement.md.\"\"\"\nimport logging\n\nfrom mcp.server.mcpserver import MCPServer\nfrom mcp.server.mcpserver.exceptions import ResourceNotFoundError, ToolError\nfrom mcp.types import ToolAnnotations\n\nlog = logging.getLogger(__name__)\n\nMAX_TEXT = 500\nserver = MCPServer(\"notes\", version=\"1.0.0\")\nNOTES: list[tuple[str, str]] = []  # (title, text); the id of a note is its position, counting from 1\n\n\ndef validate_note(title: str, text: str) -> None:\n    \"\"\"GAP 1 of 9 (unlocks e2 and e7): refuse a bad note.\n\n    Receives the title and the text, both already stripped. Returns nothing; raises ToolError(\"title is required\") for an empty title,\n    \"text is required\" for an empty text and f\"text is too long (max {MAX_TEXT})\" for a text longer than MAX_TEXT, checked in that order.\n    Example: validate_note(\"\", \"x\") raises ToolError(\"title is required\"); validate_note(\"T\", \"x\") returns None.\n    \"\"\"\n    return None\n\n\ndef validate_search(query: str, limit: int) -> None:\n    \"\"\"GAP 2 of 9 (unlocks e2): refuse a bad search.\n\n    Receives the stripped query and the limit. Returns nothing; raises ToolError(\"query is required\") for an empty query and\n    \"limit must be between 1 and 20\" for a limit outside 1 to 20, in that order.\n    Example: validate_search(\"x\", 21) raises ToolError(\"limit must be between 1 and 20\").\n    \"\"\"\n    return None\n\n\ndef find_hits(query: str) -> list[str]:\n    \"\"\"GAP 3 of 9 (unlocks m1 and e3): the notes that match a search.\n\n    Receives the stripped query. Returns the lines `{id}. {title}` of the notes (NOTES, ids count from 1) whose title or text contains\n    the query in any letter case, in id order.\n    Example: with notes (\"Alpha\", \"x\") and (\"beta\", \"ALPHA again\"), find_hits(\"alpha\") -> [\"1. Alpha\", \"2. beta\"]\n    \"\"\"\n    return []\n\n\ndef format_hits(hits: list[str], limit: int, query: str) -> str:\n    \"\"\"GAP 4 of 9 (unlocks e3): the answer of a search.\n\n    Receives the hit lines, the limit and the stripped query. Returns at most `limit` lines joined by newlines; with no hits the sentence\n    No notes match \"<query>\".\n    Example: format_hits([\"1. A\", \"2. B\"], 1, \"a\") -> \"1. A\"; format_hits([], 5, \"zeta\") -> 'No notes match \"zeta\"'\n    \"\"\"\n    return \"\"\n\n\ndef count_text(count: int) -> str:\n    \"\"\"GAP 5 of 9 (unlocks e5): the text of the count resource.\n\n    Receives the number of notes. Returns \"0 notes\", \"1 note\", \"2 notes\" and so on.\n    Example: count_text(1) -> \"1 note\"\n    \"\"\"\n    return \"\"\n\n\ndef note_text(id: str) -> str:\n    \"\"\"GAP 6 of 9 (unlocks m1 and e5): the text of one note.\n\n    Receives the id from the URI as a string. Returns the title, an empty line, then the text. An id that is not a whole number of an\n    existing note (\"0\", \"3\" of two notes, \"abc\") raises ResourceNotFoundError(f\"No note {id}\").\n    Example: with one note (\"Plan\", \"ship it\"), note_text(\"1\") -> \"Plan\\n\\nship it\"\n    \"\"\"\n    return \"\"\n\n\ndef review_text(tone: str) -> str:\n    \"\"\"GAP 7 of 9 (unlocks e6): the text of the review prompt.\n\n    Receives the tone. With no notes it is \"There are no notes to review.\"; otherwise \"Review these notes in a <tone> tone:\" and one\n    line \"- <title>\" per note, each after a newline.\n    Example: with one note titled \"Plan\", review_text(\"brief\") -> \"Review these notes in a brief tone:\\n- Plan\"\n    \"\"\"\n    return \"\"\n\n\ndef default_limit() -> int:\n    \"\"\"GAP 8 of 9 (unlocks e1): how many hits a search returns when the caller gives no limit.\n\n    Takes nothing; returns that number, which is also the default the tool's input schema advertises.\n    Example: default_limit() -> 5\n    \"\"\"\n    return 0\n\n\ndef search_annotations():\n    \"\"\"GAP 9 of 9 (unlocks e4): the annotations that tell a client search_notes only reads.\n\n    Takes nothing; returns ToolAnnotations with read_only_hint True.\n    Example: search_annotations().read_only_hint -> True\n    \"\"\"\n    return None\n\n\n@server.tool(description=\"Save a note with a title and a text.\", annotations=ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False))\ndef add_note(title: str, text: str) -> str:\n    log.debug(\"add_note input: %r %r\", title, text)\n    title, text = title.strip(), text.strip()\n    validate_note(title, text)\n    NOTES.append((title, text))\n    return f\"Saved note {len(NOTES)}: {title}\"\n\n\n@server.tool(description=\"Find notes whose title or text contains the query.\", annotations=search_annotations())\ndef search_notes(query: str, limit: int = default_limit()) -> str:\n    validate_search(query.strip(), limit)\n    return format_hits(find_hits(query.strip()), limit, query.strip())\n\n\n@server.resource(\"notes://count\", description=\"How many notes there are.\")\ndef count() -> str:\n    return count_text(len(NOTES))\n\n\n@server.resource(\"notes://note/{id}\", description=\"One note by id.\")\ndef note(id: str) -> str:\n    return note_text(id)\n\n\n@server.prompt(description=\"Ask for a review of the notes.\")\ndef review_notes(tone: str = \"brief\") -> str:\n    return review_text(tone)\n\n\nif __name__ == \"__main__\":\n    server.run()\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom notes_server import add_note, count, note, search_notes\n\n# The tools and resources of the server are plain functions, so you can call them here without starting a client.\n# (The tests start the server as a separate process and connect the SDK's client to it.)\ntry:\n    print(\"add_note:\", add_note(\"Plan\", \"ship it\"))\n    print(\"search_notes:\", search_notes(\"ship\"))\n    print(\"count resource:\", count())\n    print(\"note 1 resource:\", repr(note(\"1\")))\nexcept Exception as err:  # a gap that is not written yet may raise: show it instead of a traceback\n    print(\"raised:\", type(err).__name__, err)\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 7,
+    "paras": 7,
+    "code": 2,
+    "tables": 1,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "c8c8111e62bba2fbca8bd65bf2cfec7a402070c772e7d45f88b68f6b99e2145c",
+  "starting_code": "\"\"\"A notes server for the Model Context Protocol, over stdio. See ../../statement.md.\"\"\"\nimport logging\n\nfrom mcp.server.mcpserver import MCPServer\nfrom mcp.server.mcpserver.exceptions import ResourceNotFoundError, ToolError\nfrom mcp.types import ToolAnnotations\n\nlog = logging.getLogger(__name__)\n\nMAX_TEXT = 500\nserver = MCPServer(\"notes\", version=\"1.0.0\")\nNOTES: list[tuple[str, str]] = []  # (title, text); the id of a note is its position, counting from 1\n\n\ndef validate_note(title: str, text: str) -> None:\n    \"\"\"GAP 1 of 9 (unlocks e2 and e7): refuse a bad note.\n\n    Receives the title and the text, both already stripped. Returns nothing; raises ToolError(\"title is required\") for an empty title,\n    \"text is required\" for an empty text and f\"text is too long (max {MAX_TEXT})\" for a text longer than MAX_TEXT, checked in that order.\n    Example: validate_note(\"\", \"x\") raises ToolError(\"title is required\"); validate_note(\"T\", \"x\") returns None.\n    \"\"\"\n    return None\n\n\ndef validate_search(query: str, limit: int) -> None:\n    \"\"\"GAP 2 of 9 (unlocks e2): refuse a bad search.\n\n    Receives the stripped query and the limit. Returns nothing; raises ToolError(\"query is required\") for an empty query and\n    \"limit must be between 1 and 20\" for a limit outside 1 to 20, in that order.\n    Example: validate_search(\"x\", 21) raises ToolError(\"limit must be between 1 and 20\").\n    \"\"\"\n    return None\n\n\ndef find_hits(query: str) -> list[str]:\n    \"\"\"GAP 3 of 9 (unlocks m1 and e3): the notes that match a search.\n\n    Receives the stripped query. Returns the lines `{id}. {title}` of the notes (NOTES, ids count from 1) whose title or text contains\n    the query in any letter case, in id order.\n    Example: with notes (\"Alpha\", \"x\") and (\"beta\", \"ALPHA again\"), find_hits(\"alpha\") -> [\"1. Alpha\", \"2. beta\"]\n    \"\"\"\n    return []\n\n\ndef format_hits(hits: list[str], limit: int, query: str) -> str:\n    \"\"\"GAP 4 of 9 (unlocks e3): the answer of a search.\n\n    Receives the hit lines, the limit and the stripped query. Returns at most `limit` lines joined by newlines; with no hits the sentence\n    No notes match \"<query>\".\n    Example: format_hits([\"1. A\", \"2. B\"], 1, \"a\") -> \"1. A\"; format_hits([], 5, \"zeta\") -> 'No notes match \"zeta\"'\n    \"\"\"\n    return \"\"\n\n\ndef count_text(count: int) -> str:\n    \"\"\"GAP 5 of 9 (unlocks e5): the text of the count resource.\n\n    Receives the number of notes. Returns \"0 notes\", \"1 note\", \"2 notes\" and so on.\n    Example: count_text(1) -> \"1 note\"\n    \"\"\"\n    return \"\"\n\n\ndef note_text(id: str) -> str:\n    \"\"\"GAP 6 of 9 (unlocks m1 and e5): the text of one note.\n\n    Receives the id from the URI as a string. Returns the title, an empty line, then the text. An id that is not a whole number of an\n    existing note (\"0\", \"3\" of two notes, \"abc\") raises ResourceNotFoundError(f\"No note {id}\").\n    Example: with one note (\"Plan\", \"ship it\"), note_text(\"1\") -> \"Plan\\n\\nship it\"\n    \"\"\"\n    return \"\"\n\n\ndef review_text(tone: str) -> str:\n    \"\"\"GAP 7 of 9 (unlocks e6): the text of the review prompt.\n\n    Receives the tone. With no notes it is \"There are no notes to review.\"; otherwise \"Review these notes in a <tone> tone:\" and one\n    line \"- <title>\" per note, each after a newline.\n    Example: with one note titled \"Plan\", review_text(\"brief\") -> \"Review these notes in a brief tone:\\n- Plan\"\n    \"\"\"\n    return \"\"\n\n\ndef default_limit() -> int:\n    \"\"\"GAP 8 of 9 (unlocks e1): how many hits a search returns when the caller gives no limit.\n\n    Takes nothing; returns that number, which is also the default the tool's input schema advertises.\n    Example: default_limit() -> 5\n    \"\"\"\n    return 0\n\n\ndef search_annotations():\n    \"\"\"GAP 9 of 9 (unlocks e4): the annotations that tell a client search_notes only reads.\n\n    Takes nothing; returns ToolAnnotations with read_only_hint True.\n    Example: search_annotations().read_only_hint -> True\n    \"\"\"\n    return None\n\n\n@server.tool(description=\"Save a note with a title and a text.\", annotations=ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=False))\ndef add_note(title: str, text: str) -> str:\n    log.debug(\"add_note input: %r %r\", title, text)\n    title, text = title.strip(), text.strip()\n    validate_note(title, text)\n    NOTES.append((title, text))\n    return f\"Saved note {len(NOTES)}: {title}\"\n\n\n@server.tool(description=\"Find notes whose title or text contains the query.\", annotations=search_annotations())\ndef search_notes(query: str, limit: int = default_limit()) -> str:\n    validate_search(query.strip(), limit)\n    return format_hits(find_hits(query.strip()), limit, query.strip())\n\n\n@server.resource(\"notes://count\", description=\"How many notes there are.\")\ndef count() -> str:\n    return count_text(len(NOTES))\n\n\n@server.resource(\"notes://note/{id}\", description=\"One note by id.\")\ndef note(id: str) -> str:\n    return note_text(id)\n\n\n@server.prompt(description=\"Ask for a review of the notes.\")\ndef review_notes(tone: str = \"brief\") -> str:\n    return review_text(tone)\n\n\nif __name__ == \"__main__\":\n    server.run()\n",
+  "exercise": {
+    "main_path": "practice/level-2/32-mcp-fundamentals/prose/unit-03/practice-1/notes_server.py",
+    "test_path": "practice/level-2/32-mcp-fundamentals/prose/unit-03/practice-1/test_notes.py",
+    "run_command": [
+      "python3",
+      "practice/level-2/32-mcp-fundamentals/prose/unit-03/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-2/32-mcp-fundamentals/prose/unit-03/practice-1/target/report.xml",
+      "practice/level-2/32-mcp-fundamentals/prose/unit-03/practice-1/test_notes.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_a_client_can_save_a_note_find_it_and_read_it_back",
+        "kind": "main",
+        "says": "A client can save a note, find it and read it back"
+      },
+      {
+        "id": "test_e1_the_server_declares_tools_resources_and_prompts_and_names_its_tools",
+        "kind": "edge",
+        "says": "The server declares tools, resources and prompts, and names its tools"
+      },
+      {
+        "id": "test_e2_bad_input_comes_back_as_a_tool_error_the_model_can_read",
+        "kind": "edge",
+        "says": "Bad input comes back as a tool error the model can read"
+      },
+      {
+        "id": "test_e3_search_ignores_case_keeps_id_order_honours_the_limit_and_says_when_nothing_matches",
+        "kind": "edge",
+        "says": "Search ignores case, keeps id order, honours the limit and says when nothing matches"
+      },
+      {
+        "id": "test_e4_tool_annotations_tell_a_client_which_tool_only_reads",
+        "kind": "edge",
+        "says": "Tool annotations tell a client which tool only reads"
+      },
+      {
+        "id": "test_e5_resources_give_the_count_a_note_by_id_and_an_error_for_a_missing_one",
+        "kind": "edge",
+        "says": "Resources give the count, a note by id and an error for a missing one"
+      },
+      {
+        "id": "test_e6_the_prompt_lists_the_notes_and_defaults_the_tone",
+        "kind": "edge",
+        "says": "The prompt lists the notes and defaults the tone"
+      },
+      {
+        "id": "test_e7_ids_are_sequential_and_a_failed_call_does_not_use_one",
+        "kind": "edge",
+        "says": "Ids are sequential and a failed call does not use one"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/32-mcp-fundamentals/prose/unit-03/practice-1/target/report.xml"
+    },
+    "origin": "course/32-mcp-fundamentals/03-clients-testing-and-debugging.md",
+    "concepts": [
+      "the practice of MCP clients, testing a server and debugging it is solved"
+    ],
+    "files": [
+      "practice/level-2/32-mcp-fundamentals/prose/unit-03/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "mcp-fundamentals-u3"
+}

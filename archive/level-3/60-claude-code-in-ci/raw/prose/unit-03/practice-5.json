@@ -1,0 +1,156 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "60-claude-code-in-ci"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 5,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Running unattended and on a rhythm: loops, schedules, background work and headless runs",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A team needs a nightly triage of its issue tracker to run while every laptop is shut. Which setup fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A fixed loop started by an engineer before leaving for the day",
+            "correct": false,
+            "says": "Ruled out because \"Tasks only fire while Claude Code is running and idle.\""
+          },
+          {
+            "id": "b",
+            "text": "A routine, set up once with a schedule trigger in the cloud",
+            "correct": true,
+            "says": "The page says routines \"keep working when your laptop is closed\", and a routine can carry a schedule trigger and connectors."
+          },
+          {
+            "id": "c",
+            "text": "A desktop task on the laptop of one engineer on the team",
+            "correct": false,
+            "says": "Ruled out because a desktop task \"only fires while the app is open and your computer is awake\", and every laptop is shut."
+          },
+          {
+            "id": "d",
+            "text": "A monitor that watches the tracker through the whole night",
+            "correct": false,
+            "says": "Ruled out because a watch has \"5 minutes by default, at most 30 minutes\" and cannot last a night."
+          }
+        ],
+        "origin": {
+          "path": "course/60-claude-code-in-ci/03-running-unattended-and-on-a-rhythm.md",
+          "section": "Routines and desktop tasks: schedules that outlive the session"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A migration has dozens of failing call sites. An engineer wants Claude to keep working without being prompted until the build is clean and the checks pass, and then to stop. Which fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A goal that a separate model evaluates after every turn",
+            "correct": true,
+            "says": "The page says that after each turn \"a model checks whether the condition holds\" and that the goal clears when it is met."
+          },
+          {
+            "id": "b",
+            "text": "A fixed loop that sends the same prompt every ten minutes",
+            "correct": false,
+            "says": "Ruled out because a loop's next turn starts when \"a time interval elapses\" and not when a check holds."
+          },
+          {
+            "id": "c",
+            "text": "A monitor that streams the compiler output into the chat",
+            "correct": false,
+            "says": "Ruled out because Monitor only \"feeds each output line back to Claude\" and has a deadline, so it neither continues the work nor stops on a condition."
+          },
+          {
+            "id": "d",
+            "text": "A routine that starts a fresh cloud session each hour",
+            "correct": false,
+            "says": "Ruled out because \"Routines execute on Anthropic-managed cloud infrastructure\" and each run starts from a fresh clone, so they never continue the engineer's own session."
+          }
+        ],
+        "origin": {
+          "path": "course/60-claude-code-in-ci/03-running-unattended-and-on-a-rhythm.md",
+          "section": "/goal: until a condition holds"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "An engineer starts `/loop 20m /verify`. At the first fire Claude replied in general terms and nothing was exercised. What is the cause?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Twenty minutes is too short an interval for a loop to launch a skill",
+            "correct": false,
+            "says": "Ruled out because \"Any interval from one minute upwards is allowed\", and 20 minutes is well above it."
+          },
+          {
+            "id": "b",
+            "text": "That skill blocks model invocation, which a scheduled run requires",
+            "correct": true,
+            "says": "The page says that skills marked `disable-model-invocation: true`, the bundled `/verify` among them, reach Claude as plain text, because \"A scheduled fire only runs skills that Claude is allowed to invoke on its own.\""
+          },
+          {
+            "id": "c",
+            "text": "A loop re-runs plain prompts and never starts a bundled skill",
+            "correct": false,
+            "says": "Ruled out because a loop can run \"A prompt, or a skill\", for example `/review-pr 1234`, which Claude may invoke on its own."
+          },
+          {
+            "id": "d",
+            "text": "The loop lost its task when the session was not restored",
+            "correct": false,
+            "says": "Ruled out because loops on a fixed interval \"keep running until you cancel them\", and nothing in the session ended here."
+          }
+        ],
+        "origin": {
+          "path": "course/60-claude-code-in-ci/03-running-unattended-and-on-a-rhythm.md",
+          "section": "/loop: a prompt on a clock, inside a session"
+        }
+      }
+    ],
+    "concepts": [
+      "/goal: until a condition holds, as the page teaches it",
+      "/loop: a prompt on a clock, inside a session, as the page teaches it",
+      "Routines and desktop tasks: schedules that outlive the session, as the page teaches it"
+    ]
+  }
+}

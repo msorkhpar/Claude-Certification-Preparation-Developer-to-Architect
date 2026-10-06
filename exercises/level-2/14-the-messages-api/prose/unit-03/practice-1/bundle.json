@@ -1,0 +1,78 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "14-the-messages-api"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 1,
+  "title": "Practice: a conversation client, graded on the state it keeps (Python)",
+  "lang": "python",
+  "main_file": "conversation.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_conversation.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-2/14-the-messages-api/prose/unit-03/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-2/14-the-messages-api/prose/unit-03/practice-1/target/report.xml",
+    "practice/level-2/14-the-messages-api/prose/unit-03/practice-1/test_conversation.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_every_request_carries_the_whole_history_in_order",
+      "kind": "main",
+      "says": "Every request carries the whole history in order, with assistant content as received"
+    },
+    {
+      "id": "test_e1_usage_adds_up_over_the_turns",
+      "kind": "edge",
+      "says": "Usage adds up over the turns"
+    },
+    {
+      "id": "test_e2_a_failed_call_leaves_no_dangling_user_turn",
+      "kind": "edge",
+      "says": "A failed call leaves no dangling user turn"
+    },
+    {
+      "id": "test_e3_stop_reason_is_reported_and_max_tokens_marks_the_reply_truncated",
+      "kind": "edge",
+      "says": "The stop reason is reported and max_tokens marks the reply truncated"
+    },
+    {
+      "id": "test_e4_system_is_a_top_level_field_and_stop_sequences_are_passed_on",
+      "kind": "edge",
+      "says": "system is top-level (and left out when absent); stop sequences are passed on"
+    },
+    {
+      "id": "test_e5_each_request_is_a_snapshot_and_history_is_a_copy",
+      "kind": "edge",
+      "says": "Each request is a snapshot, and history() is a copy"
+    },
+    {
+      "id": "test_e6_a_blank_turn_is_refused_before_anything_is_sent",
+      "kind": "edge",
+      "says": "A blank turn is refused before anything is sent"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/14-the-messages-api/03-the-conversation-state-the-client-keeps.md"
+}

@@ -1,0 +1,83 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "42-evaluation"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 2,
+  "title": "Practice: an eval harness (TypeScript)",
+  "lang": "typescript",
+  "main_file": "harness.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "harness.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-2/42-evaluation/prose/unit-03/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-2/42-evaluation/prose/unit-03/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-2/42-evaluation/prose/unit-03/practice-2/harness.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 a run grades every case with its own check and reports the pass rate",
+      "kind": "main",
+      "says": "A run grades each case with its own check (exact, regex), reports the pass rate and the order of the results, and an empty set has rate 0.0"
+    },
+    {
+      "id": "e1 an exact check ignores case and spacing but nothing else",
+      "kind": "edge",
+      "says": "An exact check ignores case and spacing only: a longer word, a different word and an empty output fail; a regex is a search, and an anchored one still fails on extra text"
+    },
+    {
+      "id": "e2 a json field check needs a json object with the field and the same typed value",
+      "kind": "edge",
+      "says": "A json field check: a JSON object, the field present, the same typed value; a fenced block, prose around the JSON and an array are not json"
+    },
+    {
+      "id": "e3 a judge check sends the rubric prompt and accepts only a bare score at the threshold",
+      "kind": "edge",
+      "says": "A judge check: the exact prompt, a bare score at the threshold passes, a lower score fails, and a reply that is not a bare score, no judge or a judge that raises is ungradable"
+    },
+    {
+      "id": "e4 a model that fails on one case does not stop the run",
+      "kind": "edge",
+      "says": "A model error fails its own case with model error and the run goes on"
+    },
+    {
+      "id": "e5 tags report their own rates and success criteria judge each dimension",
+      "kind": "edge",
+      "says": "Tags report their own pass rates; meets judges the overall rate, each tag (a missing tag fails) and the flaky count, and a rate equal to its minimum passes"
+    },
+    {
+      "id": "e6 a regression run names what broke what was fixed and what went missing",
+      "kind": "edge",
+      "says": "compare names regressions, fixes, added and removed cases; a better average with a regression is not ok; a removed case is not ok"
+    },
+    {
+      "id": "e7 repeated runs expose flaky cases and a case passes only if every run does",
+      "kind": "edge",
+      "says": "Repeated runs: a case passes only if every run passes, a mixed case is flaky, a consistently failing case is not flaky, and the model is called once per run"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/42-evaluation/03-refining-against-a-set-and-regression-runs.md"
+}

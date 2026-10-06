@@ -1,0 +1,278 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "70-scenario-customer-support-agent"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: audit a support agent's sessions and name the first fix (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: audit a support agent's sessions and name the first fix"
+    },
+    {
+      "type": "para",
+      "text": "A customer support resolution agent has been in production for a month. The team's target is that at least 80 percent of conversations are resolved at first contact, and the agent must escalate the ones a person has to decide. The rate is below target, and each team member blames something else: the prompt, the tools, the model. In this practice you write the audit that ends the argument: it reads the month's recorded sessions, counts what went wrong in each failure shape, and names the one fix to make first. The model is not called: the tests give you recorded sessions. The audit, its failure shapes and its order of fixes are this course's own design for the capstone, not an Anthropic interface. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`audit`); TypeScript has the same name and the same snake-case fields. Java has the static method `Audit.audit` and the records `Step`, `Session` and `Report`; Kotlin has the top-level function `audit` and the data classes of the same names. In Java and Kotlin the fields are camel case (`needsHuman`, `refundCents`, `meetsTarget`, `overEscalated`, `underEscalated`, `skippedPrerequisite`, `wrongTool`, `overLimitRefunds`)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working audit with five gaps cut out of it. The plumbing is written and correct: the session count, the resolved, over- and under-escalated counts, and `audit` itself, which calls the gaps and builds the report. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (Java and Kotlin use the camel-case names):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`skipped_prerequisite` unlocks `e2`: the order of the steps and the failed identity check.",
+        "`has_wrong_tool` unlocks `e6`: a known right tool that differs from the tool used.",
+        "`is_over_limit` unlocks `e3`: a refund that was made above the limit.",
+        "`first_contact_rate` unlocks `e1` and `e5`: the rounded rate, and 0 for no sessions.",
+        "`diagnose` unlocks `e4` and the diagnosis of `m1` and `e1`: the order of the fixes."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About a dozen lines in all. The sections below describe the whole audit."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "A step is one call the agent made: `tool`, `ok` (whether it succeeded) and `right_tool`, the tool it should have used (absent when the right tool is not known). A session has `id`, `steps`, `outcome` (`resolved` or `escalated`), `needs_human` (the ground truth: a person had to decide this case), `refund_cents` (the refund made, 0 for none) and `limit_cents` (the limit above which a person decides)."
+    },
+    {
+      "type": "para",
+      "text": "`audit(sessions)` returns a report with these fields:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`sessions`: how many; `resolved`: how many have the outcome `resolved`.",
+        "`fcr`: `resolved` divided by `sessions`, rounded to three decimals (0 for no sessions); `meets_target`: `fcr` is at least 0.8.",
+        "`over_escalated`: escalated although no person was needed; `under_escalated`: resolved although a person was needed.",
+        "`skipped_prerequisite`: sessions in which a `lookup_order` or `process_refund` call came before the first successful `get_customer` call (a failed `get_customer` does not count as identifying anyone).",
+        "`wrong_tool`: sessions with at least one step whose `right_tool` is known and differs from its `tool`.",
+        "`over_limit_refunds`: sessions with the outcome `resolved` whose `refund_cents` is above `limit_cents`.",
+        "`diagnosis`, the first fix, by this order: `enforce_in_code` when `skipped_prerequisite` or `over_limit_refunds` is above zero (money moves wrongly: nothing else comes first); otherwise `rewrite_tool_descriptions` when `wrong_tool` is above zero and at least `over_escalated` plus `under_escalated`; otherwise `write_escalation_criteria` when `over_escalated` plus `under_escalated` is above zero; otherwise `none`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Measure the target.** The exam gives a rate (55 percent against 80) and asks for the most effective way up. *You should see* the rate rounded and compared at the boundary.",
+        "**A prerequisite is an order.** Calling the order tool is not the fault; calling it before the customer was identified is. *You should see* the order of the steps read, and a failed check not counted as an identification.",
+        "**A refund over the limit is a fact about what happened.** A refund that was refused and handed to a person is the design working. *You should see* only made refunds counted.",
+        "**Failure shapes need different fixes.** Skipped steps and money moved wrongly call for a gate in code; a wrong tool call calls for better descriptions; a miscalibrated escalation calls for explicit criteria with examples. *You should see* the fixes in that order of urgency.",
+        "**Count sessions, not steps.** One confused conversation is one failure however many calls it holds. *You should see* sessions counted for the wrong tool."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A mixed set of six sessions gets every field right and the first fix"
+        ],
+        [
+          "`e1`",
+          "No sessions: zero everywhere, a rate of 0, no diagnosis"
+        ],
+        [
+          "`e2`",
+          "The prerequisite is the order of the steps, and a failed identity check does not open the gate"
+        ],
+        [
+          "`e3`",
+          "Only a refund that was made counts as over the limit"
+        ],
+        [
+          "`e4`",
+          "The order of fixes: code, then descriptions (a tie goes to descriptions), then criteria"
+        ],
+        [
+          "`e5`",
+          "The rate at exactly 0.8 meets the target, 0.6 does not, 2 of 3 is 0.667, and over- and under-escalation are counted apart"
+        ],
+        [
+          "`e6`",
+          "The wrong tool counts sessions and ignores steps whose right tool is not known"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "/** One call the agent made: the tool, whether it succeeded and the tool it should have used (null when not known). */\ndata class Step(val tool: String, val ok: Boolean = true, val rightTool: String? = null)\n\ndata class Session(val id: String, val steps: List<Step>, val outcome: String, val needsHuman: Boolean, val refundCents: Int, val limitCents: Int)\n\ndata class Report(\n    val sessions: Int, val resolved: Int, val fcr: Double, val meetsTarget: Boolean, val overEscalated: Int, val underEscalated: Int,\n    val skippedPrerequisite: Int, val wrongTool: Int, val overLimitRefunds: Int, val diagnosis: String,\n)\n\nprivate val log = System.getLogger(\"audit\")\n\nprivate val PROTECTED = listOf(\"lookup_order\", \"process_refund\")\nprivate const val TARGET = 0.8\n\n/** True when an order or refund call came before the first successful get_customer call. */\nfun skippedPrerequisite(steps: List<Step>): Boolean {\n    var verified = false\n    for (step in steps) {\n        if (step.tool == \"get_customer\" && step.ok) verified = true\n        else if (step.tool in PROTECTED && !verified) return true\n    }\n    return false\n}\n\n/** True when at least one step has a known right tool that differs from the tool used. */\nfun hasWrongTool(steps: List<Step>): Boolean = steps.any { it.rightTool != null && it.tool != it.rightTool }\n\n/** True when the session was resolved with a refund above its limit. */\nfun isOverLimit(session: Session): Boolean = session.outcome == \"resolved\" && session.refundCents > session.limitCents\n\n/** The resolved share, rounded to three decimals; 0.0 for no sessions. */\nfun firstContactRate(resolved: Int, n: Int): Double = if (n > 0) Math.round(resolved.toDouble() / n * 1000) / 1000.0 else 0.0\n\n/** The first fix, by the order of the statement. */\nfun diagnose(skipped: Int, overLimit: Int, wrong: Int, over: Int, under: Int): String = when {\n    skipped > 0 || overLimit > 0 -> \"enforce_in_code\"\n    wrong > 0 && wrong >= over + under -> \"rewrite_tool_descriptions\"\n    over + under > 0 -> \"write_escalation_criteria\"\n    else -> \"none\"\n}\n\n/** Audit a support agent's recorded sessions: the rates, the failure shapes and the first fix. */\nfun audit(sessions: List<Session>): Report {\n    log.log(System.Logger.Level.DEBUG, \"audit input: {0}\", sessions)\n    val n = sessions.size\n    val resolved = sessions.count { it.outcome == \"resolved\" }\n    val over = sessions.count { it.outcome == \"escalated\" && !it.needsHuman }\n    val under = sessions.count { it.outcome == \"resolved\" && it.needsHuman }\n    val skipped = sessions.count { skippedPrerequisite(it.steps) }\n    val wrong = sessions.count { hasWrongTool(it.steps) }\n    val overLimit = sessions.count { isOverLimit(it) }\n    val fcr = firstContactRate(resolved, n)\n    return Report(n, resolved, fcr, fcr >= TARGET, over, under, skipped, wrong, overLimit, diagnose(skipped, overLimit, wrong, over, under))\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // Sessions of a support agent: a clean one, one that skipped the customer check, and one escalated without need.\n    val clean = listOf(Step(\"get_customer\"), Step(\"lookup_order\"), Step(\"process_refund\"))\n    val sessions = listOf(\n        Session(\"s\", clean, \"resolved\", false, 2000, 10000),\n        Session(\"s\", listOf(Step(\"lookup_order\"), Step(\"get_customer\"), Step(\"process_refund\")), \"resolved\", false, 0, 10000),\n        Session(\"s\", listOf(Step(\"get_customer\")), \"escalated\", false, 0, 10000))\n    val report = audit(sessions)\n    println(\"sessions: ${report.sessions} | resolved: ${report.resolved} | fcr: ${report.fcr} | meets target: ${report.meetsTarget}\")\n    println(\"over-escalated: ${report.overEscalated} | under-escalated: ${report.underEscalated}\")\n    println(\"skipped prerequisite: ${report.skippedPrerequisite} | wrong tool: ${report.wrongTool} | over-limit refunds: ${report.overLimitRefunds}\")\n    println(\"diagnosis: ${report.diagnosis}\")\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "/** One call the agent made: the tool, whether it succeeded and the tool it should have used (null when not known). */\ndata class Step(val tool: String, val ok: Boolean = true, val rightTool: String? = null)\n\ndata class Session(val id: String, val steps: List<Step>, val outcome: String, val needsHuman: Boolean, val refundCents: Int, val limitCents: Int)\n\ndata class Report(\n    val sessions: Int, val resolved: Int, val fcr: Double, val meetsTarget: Boolean, val overEscalated: Int, val underEscalated: Int,\n    val skippedPrerequisite: Int, val wrongTool: Int, val overLimitRefunds: Int, val diagnosis: String,\n)\n\nprivate val log = System.getLogger(\"audit\")\n\nprivate val PROTECTED = listOf(\"lookup_order\", \"process_refund\")\nprivate const val TARGET = 0.8\n\n/**\n * TODO 1 of 5 (unlocks e2): did an order or refund call come before the first successful get_customer call?\n * Receives a session's steps. Returns true or false; a failed get_customer does not identify anyone.\n * Example: [lookup_order, get_customer] -> true, [get_customer, lookup_order] -> false\n */\nfun skippedPrerequisite(steps: List<Step>): Boolean = false\n\n/**\n * TODO 2 of 5 (unlocks e6): does a step have a known right tool that differs from the tool used?\n * Receives a session's steps (rightTool is null when not known). Returns true for at least one such step, false otherwise.\n * Example: [Step(\"get_customer\", true, \"lookup_order\")] -> true; a step with a null rightTool never counts.\n */\nfun hasWrongTool(steps: List<Step>): Boolean = false\n\n/**\n * TODO 3 of 5 (unlocks e3): was a refund above the limit actually made?\n * Receives one session. Returns true only when its outcome is \"resolved\" and refundCents is above limitCents.\n * Example: resolved, refund 10001, limit 10000 -> true; escalated with the same refund -> false\n */\nfun isOverLimit(session: Session): Boolean = false\n\n/**\n * TODO 4 of 5 (unlocks e1 and e5): the first contact rate.\n * Receives the resolved count and the session count. Returns resolved / n rounded to three decimals, 0.0 when n is 0.\n * Example: firstContactRate(2, 3) -> 0.667\n */\nfun firstContactRate(resolved: Int, n: Int): Double = 0.0\n\n/**\n * TODO 5 of 5 (unlocks e4 and e1): the first fix, by the order in the statement.\n * Receives the counts of skipped prerequisites, over-limit refunds, wrong-tool sessions, over- and under-escalations.\n * Returns \"enforce_in_code\", \"rewrite_tool_descriptions\", \"write_escalation_criteria\" or \"none\".\n * Example: diagnose(0, 0, 2, 1, 0) -> \"rewrite_tool_descriptions\"\n */\nfun diagnose(skipped: Int, overLimit: Int, wrong: Int, over: Int, under: Int): String = \"\"\n\n/** Audit a support agent's recorded sessions: the rates, the failure shapes and the first fix. */\nfun audit(sessions: List<Session>): Report {\n    log.log(System.Logger.Level.DEBUG, \"audit input: {0}\", sessions)\n    val n = sessions.size\n    val resolved = sessions.count { it.outcome == \"resolved\" }\n    val over = sessions.count { it.outcome == \"escalated\" && !it.needsHuman }\n    val under = sessions.count { it.outcome == \"resolved\" && it.needsHuman }\n    val skipped = sessions.count { skippedPrerequisite(it.steps) }\n    val wrong = sessions.count { hasWrongTool(it.steps) }\n    val overLimit = sessions.count { isOverLimit(it) }\n    val fcr = firstContactRate(resolved, n)\n    return Report(n, resolved, fcr, fcr >= TARGET, over, under, skipped, wrong, overLimit, diagnose(skipped, overLimit, wrong, over, under))\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // Sessions of a support agent: a clean one, one that skipped the customer check, and one escalated without need.\n    val clean = listOf(Step(\"get_customer\"), Step(\"lookup_order\"), Step(\"process_refund\"))\n    val sessions = listOf(\n        Session(\"s\", clean, \"resolved\", false, 2000, 10000),\n        Session(\"s\", listOf(Step(\"lookup_order\"), Step(\"get_customer\"), Step(\"process_refund\")), \"resolved\", false, 0, 10000),\n        Session(\"s\", listOf(Step(\"get_customer\")), \"escalated\", false, 0, 10000))\n    val report = audit(sessions)\n    println(\"sessions: ${report.sessions} | resolved: ${report.resolved} | fcr: ${report.fcr} | meets target: ${report.meetsTarget}\")\n    println(\"over-escalated: ${report.overEscalated} | under-escalated: ${report.underEscalated}\")\n    println(\"skipped prerequisite: ${report.skippedPrerequisite} | wrong tool: ${report.wrongTool} | over-limit refunds: ${report.overLimitRefunds}\")\n    println(\"diagnosis: ${report.diagnosis}\")\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 7,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "99b5efe3ce3d2631771c48ffec63e797a73cf67d2c75fea5006fd839025df468",
+  "starting_code": "/** One call the agent made: the tool, whether it succeeded and the tool it should have used (null when not known). */\ndata class Step(val tool: String, val ok: Boolean = true, val rightTool: String? = null)\n\ndata class Session(val id: String, val steps: List<Step>, val outcome: String, val needsHuman: Boolean, val refundCents: Int, val limitCents: Int)\n\ndata class Report(\n    val sessions: Int, val resolved: Int, val fcr: Double, val meetsTarget: Boolean, val overEscalated: Int, val underEscalated: Int,\n    val skippedPrerequisite: Int, val wrongTool: Int, val overLimitRefunds: Int, val diagnosis: String,\n)\n\nprivate val log = System.getLogger(\"audit\")\n\nprivate val PROTECTED = listOf(\"lookup_order\", \"process_refund\")\nprivate const val TARGET = 0.8\n\n/**\n * TODO 1 of 5 (unlocks e2): did an order or refund call come before the first successful get_customer call?\n * Receives a session's steps. Returns true or false; a failed get_customer does not identify anyone.\n * Example: [lookup_order, get_customer] -> true, [get_customer, lookup_order] -> false\n */\nfun skippedPrerequisite(steps: List<Step>): Boolean = false\n\n/**\n * TODO 2 of 5 (unlocks e6): does a step have a known right tool that differs from the tool used?\n * Receives a session's steps (rightTool is null when not known). Returns true for at least one such step, false otherwise.\n * Example: [Step(\"get_customer\", true, \"lookup_order\")] -> true; a step with a null rightTool never counts.\n */\nfun hasWrongTool(steps: List<Step>): Boolean = false\n\n/**\n * TODO 3 of 5 (unlocks e3): was a refund above the limit actually made?\n * Receives one session. Returns true only when its outcome is \"resolved\" and refundCents is above limitCents.\n * Example: resolved, refund 10001, limit 10000 -> true; escalated with the same refund -> false\n */\nfun isOverLimit(session: Session): Boolean = false\n\n/**\n * TODO 4 of 5 (unlocks e1 and e5): the first contact rate.\n * Receives the resolved count and the session count. Returns resolved / n rounded to three decimals, 0.0 when n is 0.\n * Example: firstContactRate(2, 3) -> 0.667\n */\nfun firstContactRate(resolved: Int, n: Int): Double = 0.0\n\n/**\n * TODO 5 of 5 (unlocks e4 and e1): the first fix, by the order in the statement.\n * Receives the counts of skipped prerequisites, over-limit refunds, wrong-tool sessions, over- and under-escalations.\n * Returns \"enforce_in_code\", \"rewrite_tool_descriptions\", \"write_escalation_criteria\" or \"none\".\n * Example: diagnose(0, 0, 2, 1, 0) -> \"rewrite_tool_descriptions\"\n */\nfun diagnose(skipped: Int, overLimit: Int, wrong: Int, over: Int, under: Int): String = \"\"\n\n/** Audit a support agent's recorded sessions: the rates, the failure shapes and the first fix. */\nfun audit(sessions: List<Session>): Report {\n    log.log(System.Logger.Level.DEBUG, \"audit input: {0}\", sessions)\n    val n = sessions.size\n    val resolved = sessions.count { it.outcome == \"resolved\" }\n    val over = sessions.count { it.outcome == \"escalated\" && !it.needsHuman }\n    val under = sessions.count { it.outcome == \"resolved\" && it.needsHuman }\n    val skipped = sessions.count { skippedPrerequisite(it.steps) }\n    val wrong = sessions.count { hasWrongTool(it.steps) }\n    val overLimit = sessions.count { isOverLimit(it) }\n    val fcr = firstContactRate(resolved, n)\n    return Report(n, resolved, fcr, fcr >= TARGET, over, under, skipped, wrong, overLimit, diagnose(skipped, overLimit, wrong, over, under))\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-4/src/main/kotlin/Audit.kt",
+    "test_path": "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-4/src/test/kotlin/AuditTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_aMixedSetOfSessionsGetsEveryRateAndTheFirstFix()",
+        "kind": "main",
+        "says": "A mixed set of six sessions gets every field right and the first fix"
+      },
+      {
+        "id": "e1_noSessionsGiveZeroRatesAndNoDiagnosis()",
+        "kind": "edge",
+        "says": "No sessions: zero everywhere, a rate of 0, no diagnosis"
+      },
+      {
+        "id": "e2_aProtectedCallBeforeASuccessfulIdentityCheckIsASkippedPrerequisite()",
+        "kind": "edge",
+        "says": "The prerequisite is the order of the steps, and a failed identity check does not open the gate"
+      },
+      {
+        "id": "e3_aRefundOverTheLimitCountsOnlyWhenItWasMade()",
+        "kind": "edge",
+        "says": "Only a refund that was made counts as over the limit"
+      },
+      {
+        "id": "e4_moneyFirstThenToolDescriptionsThenEscalationCriteria()",
+        "kind": "edge",
+        "says": "The order of fixes: code, then descriptions (a tie goes to descriptions), then criteria"
+      },
+      {
+        "id": "e5_theTargetBoundaryAndRoundingOfTheFirstContactRate()",
+        "kind": "edge",
+        "says": "The rate at exactly 0.8 meets the target, 0.6 does not, 2 of 3 is 0.667, and over- and under-escalation are counted apart"
+      },
+      {
+        "id": "e6_aWrongToolCountsSessionsAndIgnoresStepsWithNoKnownRightTool()",
+        "kind": "edge",
+        "says": "The wrong tool counts sessions and ignores steps whose right tool is not known"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-4/target/test-results/test"
+    },
+    "origin": "course/70-scenario-customer-support-agent/02-audit-the-sessions-and-the-practice.md",
+    "concepts": [
+      "the practice of Audit the sessions, order the fixes and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "scenario-customer-support-agent-u2"
+}

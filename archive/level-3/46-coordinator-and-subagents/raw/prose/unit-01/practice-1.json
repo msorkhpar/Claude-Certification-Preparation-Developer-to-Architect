@@ -1,0 +1,121 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "46-coordinator-and-subagents"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Hub and spoke: what the coordinator owns",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A coordinator spends ten turns locating the broken check and its failure text, then tells a subagent only to \"fix the broken check\". The subagent opens other modules and edits the wrong one. What should the coordinator have done?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Write the path, the message and its decisions into the prompt it hands over",
+            "correct": true,
+            "says": "The subagent's context starts fresh, so the brief is the only channel for facts the coordinator already found."
+          },
+          {
+            "id": "b",
+            "text": "Rely on the subagent to inherit the parent's earlier tool results by itself, unprompted",
+            "correct": false,
+            "says": "Ruled out because nothing is inherited: \"The only content you pass from parent to subagent is the Agent tool's prompt string\"."
+          },
+          {
+            "id": "c",
+            "text": "Name a stronger model for the subagent in its definition file",
+            "correct": false,
+            "says": "Ruled out because the problem is missing information, and \"a vague brief produces vague work.\""
+          },
+          {
+            "id": "d",
+            "text": "Add a line telling the subagent to ask the coordinator whenever it is unsure",
+            "correct": false,
+            "says": "Ruled out because the subagent cannot converse with its parent while it runs: \"only its final message returns to the parent\"."
+          }
+        ],
+        "origin": {
+          "path": "course/46-coordinator-and-subagents/01-hub-and-spoke-and-what-the-coordinator-owns.md",
+          "section": "Hub and spoke, and where the context goes"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A team plans a multi-agent design for a feature whose planning, coding and verifying steps all draw on the same evolving sources, with the user steering between steps. Which choice fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Run the three steps as parallel subagents to cut the total waiting time",
+            "correct": false,
+            "says": "Ruled out because a delegate loses time: a subagent that is not a fork \"starts fresh and may need time to gather context\"."
+          },
+          {
+            "id": "b",
+            "text": "Give each step to its own subagent",
+            "correct": false,
+            "says": "Ruled out because the documentation lists this case for the main conversation: \"multiple phases share significant context, such as planning, implementation, and testing\"."
+          },
+          {
+            "id": "c",
+            "text": "Stay in one conversation throughout",
+            "correct": true,
+            "says": "The steps depend on one shared context and on steering, which a team cannot give."
+          },
+          {
+            "id": "d",
+            "text": "Add a coordinator that merges what the three step-agents produce at the end",
+            "correct": false,
+            "says": "Ruled out because the dependencies are the problem: \"some domains that require all agents to share the same context or involve many dependencies between agents are not a good fit\"."
+          }
+        ],
+        "origin": {
+          "path": "course/46-coordinator-and-subagents/01-hub-and-spoke-and-what-the-coordinator-owns.md",
+          "section": "When the coordinator should not delegate at all"
+        }
+      }
+    ],
+    "concepts": [
+      "Hub and spoke, and where the context goes, as the page teaches it",
+      "When the coordinator should not delegate at all, as the page teaches it"
+    ]
+  }
+}

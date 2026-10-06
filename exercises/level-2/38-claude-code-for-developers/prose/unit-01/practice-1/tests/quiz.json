@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "38-claude-code-for-developers"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: Install, the working loop and permission modes",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A developer wants Claude to study a repository and show a written draft before any file on disk changes. Which start fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The `default` mode, which asks about each action one by one",
+            "correct": false,
+            "says": "Ruled out because the table lists `default` (Manual) for \"Reviewing every action yourself\", so it prompts action by action and no draft comes first."
+          },
+          {
+            "id": "b",
+            "text": "The `acceptEdits` mode, which writes edits without asking",
+            "correct": false,
+            "says": "Ruled out because `acceptEdits` runs \"Reads, file edits, and common filesystem commands\" without asking, so edits land on disk at once."
+          },
+          {
+            "id": "c",
+            "text": "The `plan` mode, entered by pressing `Shift+Tab`",
+            "correct": true,
+            "says": "The page says \"Claude reads files and proposes a plan but makes no edits until you approve\", and `claude --permission-mode plan` starts there."
+          },
+          {
+            "id": "d",
+            "text": "The `dontAsk` mode, which denies whatever would prompt",
+            "correct": false,
+            "says": "Ruled out because `dontAsk` runs \"Reads and pre-approved tools; anything that would prompt is denied\", so it denies and shows no draft."
+          }
+        ],
+        "origin": {
+          "path": "course/38-claude-code-for-developers/01-install-the-loop-and-permission-modes.md",
+          "section": "The loop: explore, plan, code, commit"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A repository's shared settings file sets the starting permission mode to `bypassPermissions`. What happens when a teammate opens it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The session starts in auto mode for every teammate who opens it",
+            "correct": false,
+            "says": "Ruled out because that is exactly what the rule prevents, since \"the value doesn't take effect\"."
+          },
+          {
+            "id": "b",
+            "text": "The value is ignored, and each edit and command asks first",
+            "correct": true,
+            "says": "The page says a `\"bypassPermissions\"` set in those two files \"doesn't take effect either, and the session starts in Manual mode\"."
+          },
+          {
+            "id": "c",
+            "text": "The session starts in plan mode until the file is approved",
+            "correct": false,
+            "says": "Ruled out because the page names Manual mode and not plan mode: \"the session starts in Manual mode\"."
+          },
+          {
+            "id": "d",
+            "text": "Every teammate is asked once to accept the project file's mode",
+            "correct": false,
+            "says": "Ruled out because \"The other values apply from any settings file\", and these two are the exceptions, so no prompt is shown."
+          }
+        ],
+        "origin": {
+          "path": "course/38-claude-code-for-developers/01-install-the-loop-and-permission-modes.md",
+          "section": "Permission modes"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "Rules given early in a long conversation stop being followed. Where should a rule that must always apply be kept?",
+        "options": [
+          {
+            "id": "a",
+            "text": "In a `/compact` summary, which condenses the thread so far",
+            "correct": false,
+            "says": "Ruled out because \"Claude compacts automatically, but instructions from early in the conversation can get lost\", so a summary is where they are lost."
+          },
+          {
+            "id": "b",
+            "text": "In a `/clear` command, which starts fresh on a new task",
+            "correct": false,
+            "says": "Ruled out because `/clear` is described as one that \"starts fresh on a new task while keeping project memory\", so the rules must already be in the memory file."
+          },
+          {
+            "id": "c",
+            "text": "In a rewind checkpoint, which snapshots files before each edit",
+            "correct": false,
+            "says": "Ruled out because checkpoints \"only cover file changes\", so a checkpoint holds files and not rules."
+          },
+          {
+            "id": "d",
+            "text": "In `CLAUDE.md`, which sits outside the running chat",
+            "correct": true,
+            "says": "The page says \"Put persistent rules in CLAUDE.md\", because \"Claude compacts automatically, but instructions from early in the conversation can get lost.\""
+          }
+        ],
+        "origin": {
+          "path": "course/38-claude-code-for-developers/01-install-the-loop-and-permission-modes.md",
+          "section": "The loop: explore, plan, code, commit"
+        }
+      }
+    ]
+  }
+}

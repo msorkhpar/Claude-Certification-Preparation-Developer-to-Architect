@@ -1,0 +1,319 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "13-one-rest-api-under-every-sdk"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: a raw Messages API client, graded on the HTTP contract (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a raw Messages API client, graded on the HTTP contract"
+    },
+    {
+      "type": "para",
+      "text": "Write a small client that speaks the Messages API by hand: no SDK, one injected transport. The tests check the request that would go on the wire and the way a reply, good or bad, becomes a value or an error."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given types (in the starter, do not change them)"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`Request`",
+          "`method`, `url`, `headers` (a map), `body` (JSON **text**)"
+        ],
+        [
+          "`Response`",
+          "`status`, `headers` (a map, **lower-case names**), `body` (text)"
+        ],
+        [
+          "transport",
+          "a function from `Request` to `Response`; the tests pass a scripted one, a real client would do the network call"
+        ],
+        [
+          "`ApiError`",
+          "a non-2xx reply: `status`, `error_type`, `detail`, `request_id` (nothing when there is none). TypeScript, Java and Kotlin spell the fields `status`, `errorType`, `detail` and `requestId`"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Java and Kotlin also get a small `Json` helper (`parse` and `stringify`) in the starter; Python and TypeScript use their standard JSON."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working client with eight gaps cut out of it. The plumbing is written and correct: the given types, `build_request` and `send_messages` themselves, the check for a good status, the JSON parsing of an error body and the way the parts become an `ApiError`. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To see what a gap receives, debug it by logging its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (Python names; the TypeScript, Java and Kotlin names are the camel-case forms, with `headersFor` for `_headers` and `bodyFor` for `_body`):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_validate` unlocks `e2`: bad input is refused.",
+        "`_headers` unlocks `m1`: the three headers.",
+        "`_body` unlocks `m1` and `e1`: the body, with `system` only when it is present.",
+        "`_error_parts` unlocks `e4` and `e5`: the error type and message, or `unknown` and the trimmed text.",
+        "`_pick_request_id` unlocks `e4`: the header's id before the body's.",
+        "`_redact` unlocks `e6`: the key replaced by `[redacted]`.",
+        "`_parse_message` unlocks `e3`: the parsed message of a good reply.",
+        "`text_of` unlocks `e3`: the text blocks joined."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gaps 2 and 3. A few lines each, about twenty in all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The three functions"
+    },
+    {
+      "type": "para",
+      "text": "**`build_request(api_key, model, messages, max_tokens, system=None)`** (TypeScript `buildRequest`, Java `RawClient.buildRequest`, Kotlin `buildRequest`) returns a `Request`:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "method `POST`, URL `https://api.anthropic.com/v1/messages`;",
+        "exactly three headers: `x-api-key` (the key), `anthropic-version` (`2023-06-01`) and `content-type` (`application/json`);",
+        "a JSON body with `model`, `max_tokens` and `messages`, plus `system` **only when it is present and not blank**."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "It refuses bad input with `ValueError` (TypeScript `Error`, Java and Kotlin `IllegalArgumentException`): a blank key, no messages, or `max_tokens` below 1."
+    },
+    {
+      "type": "para",
+      "text": "**`send_messages(transport, api_key, model, messages, max_tokens, system=None)`** builds the request, calls the transport and:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "on a status from 200 to 299, returns the parsed JSON message;",
+        [
+          "on any other status, raises `ApiError`:",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "for a JSON body shaped like `{\"type\": \"error\", \"error\": {\"type\": ..., \"message\": ...}}`, the error's `type` and `message`;",
+              "for anything else (a proxy's HTML page, an empty body), `error_type` `unknown` and the first 200 characters of the text, trimmed, as the detail;",
+              "the **request id** comes from the `request-id` response header; when the header is absent, from the body's `request_id` field; otherwise nothing;",
+              "the API key never appears in the error: replace every occurrence of it in the detail with `[redacted]`."
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "**`text_of(message)`** returns the `text` of the message's text blocks joined, ignoring every other block type."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "The request has the right method, URL, exactly three headers and a JSON body"
+        ],
+        [
+          "`e1`",
+          "A blank or absent `system` is left out of the body"
+        ],
+        [
+          "`e2`",
+          "Bad input is refused before the transport is called"
+        ],
+        [
+          "`e3`",
+          "A good reply is parsed, and `text_of` joins text blocks only"
+        ],
+        [
+          "`e4`",
+          "An error reply becomes an `ApiError`; the header's request id wins over the body's"
+        ],
+        [
+          "`e5`",
+          "A reply that is not JSON still gives an `ApiError` (`unknown`)"
+        ],
+        [
+          "`e6`",
+          "The API key never appears in an error"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "/** A raw Messages API client over an injected transport. See ../../statement.md for the contract. */\nprivate val log = System.getLogger(\"rawClient\")\n\nconst val URL = \"https://api.anthropic.com/v1/messages\"\n\nprivate fun present(s: String?) = s != null && s.isNotBlank()\n\nprivate fun validate(apiKey: String, messages: List<Map<String, Any?>>, maxTokens: Int) {\n    require(present(apiKey)) { \"apiKey is required\" }\n    require(messages.isNotEmpty()) { \"messages must not be empty\" }\n    require(maxTokens >= 1) { \"maxTokens must be at least 1\" }\n}\n\nprivate fun headersFor(apiKey: String): Map<String, String> =\n    linkedMapOf(\"x-api-key\" to apiKey, \"anthropic-version\" to \"2023-06-01\", \"content-type\" to \"application/json\")\n\nprivate fun bodyFor(model: String, messages: List<Map<String, Any?>>, maxTokens: Int, system: String?): Map<String, Any?> {\n    val body = linkedMapOf<String, Any?>(\"model\" to model, \"max_tokens\" to maxTokens.toLong(), \"messages\" to messages)\n    if (present(system)) body[\"system\"] = system\n    return body\n}\n\nfun buildRequest(apiKey: String, model: String, messages: List<Map<String, Any?>>, maxTokens: Int, system: String? = null): Request {\n    log.log(System.Logger.Level.DEBUG, \"buildRequest input: {0} {1} {2} {3}\", model, messages, maxTokens, system)\n    validate(apiKey, messages, maxTokens)\n    return Request(\"POST\", URL, headersFor(apiKey), Json.stringify(bodyFor(model, messages, maxTokens, system)))\n}\n\nprivate fun errorParts(parsed: Any?, text: String): Pair<String, String> {\n    val error = (parsed as? Map<*, *>)?.get(\"error\") as? Map<*, *>\n    if (error != null) return Pair(error[\"type\"]?.toString() ?: \"unknown\", error[\"message\"]?.toString() ?: \"\")\n    return Pair(\"unknown\", text.trim().take(200))\n}\n\nprivate fun pickRequestId(headerId: String?, bodyId: String?): String? = headerId ?: bodyId\n\nprivate fun redact(message: String, apiKey: String): String = message.replace(apiKey, \"[redacted]\")\n\nprivate fun errorFrom(response: Response, apiKey: String): ApiError {\n    val parsed = try {\n        Json.parse(response.body)\n    } catch (notJson: IllegalArgumentException) {\n        null\n    }\n    val (kind, message) = errorParts(parsed, response.body)\n    val bodyId = (parsed as? Map<*, *>)?.get(\"request_id\")?.toString()\n    return ApiError(response.status, kind, redact(message, apiKey), pickRequestId(response.headers[\"request-id\"], bodyId))\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun parseMessage(text: String): Map<String, Any?> = Json.parse(text) as Map<String, Any?>\n\nfun sendMessages(transport: Transport, apiKey: String, model: String, messages: List<Map<String, Any?>>, maxTokens: Int, system: String? = null): Map<String, Any?> {\n    val request = buildRequest(apiKey, model, messages, maxTokens, system)\n    val response = transport.send(request)\n    if (response.status in 200..299) return parseMessage(response.body)\n    throw errorFrom(response, apiKey)\n}\n\nfun textOf(message: Map<String, Any?>): String =\n    (message[\"content\"] as? List<*>).orEmpty()\n        .filterIsInstance<Map<*, *>>()\n        .filter { it[\"type\"] == \"text\" }\n        .joinToString(\"\") { it[\"text\"].toString() }\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // A stand-in transport, like the one the tests use: it records the request and answers with a fixed reply.\n    val sent = mutableListOf<Request>()\n    val transport = Transport { request ->\n        sent.add(request)\n        Response(200, emptyMap(), \"\"\"{\"content\":[{\"type\":\"text\",\"text\":\"Paris.\"}],\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":9,\"output_tokens\":3}}\"\"\")\n    }\n\n    val messages = listOf(mapOf<String, Any?>(\"role\" to \"user\", \"content\" to \"Capital of France?\"))\n    val message = sendMessages(transport, \"sk-test-0123456789abcdef\", \"claude-sonnet-5-5\", messages, 64, \"Be brief.\")\n\n    println(\"requests sent: ${sent.size}\")\n    println(\"method and url: ${sent.firstOrNull()?.let { it.method + \" \" + it.url }}\")\n    println(\"header names: ${sent.firstOrNull()?.headers?.keys?.sorted()}\")\n    println(\"reply text: ${textOf(message)}\")\n\n    // An error reply becomes an ApiError.\n    try {\n        sendMessages({ Response(429, mapOf(\"request-id\" to \"req_1\"),\n            \"\"\"{\"type\":\"error\",\"error\":{\"type\":\"rate_limit_error\",\"message\":\"Rate limited\"}}\"\"\") },\n            \"sk-test-0123456789abcdef\", \"claude-sonnet-5-5\", messages, 64)\n    } catch (err: ApiError) {\n        println(\"api error: ${err.status} ${err.errorType} ${err.requestId}\")\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "/** A raw Messages API client over an injected transport. See ../../statement.md for the contract. */\nprivate val log = System.getLogger(\"rawClient\")\n\nconst val URL = \"https://api.anthropic.com/v1/messages\"\n\nprivate fun present(s: String?) = s != null && s.isNotBlank()\n\nprivate fun validate(apiKey: String, messages: List<Map<String, Any?>>, maxTokens: Int) {\n    // TODO 1 of 8 (finish this to pass e2): refuse bad input before anything is sent.\n    // Receives the key, the messages and maxTokens. Throws IllegalArgumentException (use require) when the key is blank (use present),\n    // the messages are empty or maxTokens is below 1; otherwise returns nothing.\n    // Example: validate(\"  \", emptyList(), 8) -> IllegalArgumentException\n}\n\nprivate fun headersFor(apiKey: String): Map<String, String> {\n    // TODO 2 of 8 (finish this to pass m1): the three request headers.\n    // Receives the API key. Returns a map with exactly x-api-key (the key), anthropic-version (2023-06-01) and content-type\n    // (application/json). Example: headersFor(\"k\")[\"anthropic-version\"] -> \"2023-06-01\"\n    return emptyMap()\n}\n\nprivate fun bodyFor(model: String, messages: List<Map<String, Any?>>, maxTokens: Int, system: String?): Map<String, Any?> {\n    // TODO 3 of 8 (finish this to pass m1 and e1): the request body as a map.\n    // Receives the model, the messages, maxTokens (store it as a Long) and the system text (may be null). Returns a map with model,\n    // max_tokens and messages, plus system only when it is present and not blank (use present).\n    // Example: bodyFor(\"m\", emptyList(), 8, \"  \") -> {model=m, max_tokens=8, messages=[]}\n    return emptyMap()\n}\n\nfun buildRequest(apiKey: String, model: String, messages: List<Map<String, Any?>>, maxTokens: Int, system: String? = null): Request {\n    log.log(System.Logger.Level.DEBUG, \"buildRequest input: {0} {1} {2} {3}\", model, messages, maxTokens, system)\n    validate(apiKey, messages, maxTokens)\n    return Request(\"POST\", URL, headersFor(apiKey), Json.stringify(bodyFor(model, messages, maxTokens, system)))\n}\n\nprivate fun errorParts(parsed: Any?, text: String): Pair<String, String> {\n    // TODO 4 of 8 (finish this to pass e4 and e5): the error type and message of an error reply.\n    // Receives the parsed JSON body (null when it is not JSON) and the raw body text. For a body shaped like\n    // {\"error\": {\"type\": ..., \"message\": ...}} returns that type and message as text; for anything else returns \"unknown\" and the\n    // first 200 characters of the text, trimmed.\n    // Example: errorParts(mapOf(\"error\" to mapOf(\"type\" to \"x\", \"message\" to \"m\")), \"\") -> Pair(\"x\", \"m\"), errorParts(null, \" <html> \") -> Pair(\"unknown\", \"<html>\")\n    return Pair(\"\", \"\")\n}\n\nprivate fun pickRequestId(headerId: String?, bodyId: String?): String? {\n    // TODO 5 of 8 (finish this to pass e4): which request id the error carries.\n    // Receives the id from the request-id header and the id from the body, either may be null. Returns the header's when there is one,\n    // else the body's, else null. Example: pickRequestId(\"h\", \"b\") -> \"h\", pickRequestId(null, \"b\") -> \"b\"\n    return null\n}\n\nprivate fun redact(message: String, apiKey: String): String {\n    // TODO 6 of 8 (finish this to pass e6): keep the key out of the error.\n    // Receives the message and the API key. Returns the message with every occurrence of the key replaced by [redacted].\n    // Example: redact(\"bad key sk-1\", \"sk-1\") -> \"bad key [redacted]\"\n    return message\n}\n\nprivate fun errorFrom(response: Response, apiKey: String): ApiError {\n    val parsed = try {\n        Json.parse(response.body)\n    } catch (notJson: IllegalArgumentException) {\n        null\n    }\n    val (kind, message) = errorParts(parsed, response.body)\n    val bodyId = (parsed as? Map<*, *>)?.get(\"request_id\")?.toString()\n    return ApiError(response.status, kind, redact(message, apiKey), pickRequestId(response.headers[\"request-id\"], bodyId))\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun parseMessage(text: String): Map<String, Any?> {\n    // TODO 7 of 8 (finish this to pass e3): the message of a good reply.\n    // Receives the response body text. Returns the parsed JSON object (Json.parse gives a Map).\n    // Example: parseMessage(\"{\\\"stop_reason\\\": \\\"end_turn\\\"}\") -> {stop_reason=end_turn}\n    return emptyMap()\n}\n\nfun sendMessages(transport: Transport, apiKey: String, model: String, messages: List<Map<String, Any?>>, maxTokens: Int, system: String? = null): Map<String, Any?> {\n    val request = buildRequest(apiKey, model, messages, maxTokens, system)\n    val response = transport.send(request)\n    if (response.status in 200..299) return parseMessage(response.body)\n    throw errorFrom(response, apiKey)\n}\n\nfun textOf(message: Map<String, Any?>): String {\n    // TODO 8 of 8 (finish this to pass e3): the text of a message.\n    // Receives a message map with a content list of blocks. Returns the text of the blocks whose type is \"text\", joined with nothing\n    // between them; every other block type is ignored.\n    // Example: a message with blocks text \"a\", tool_use, text \"b\" -> \"ab\"\n    return \"\"\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // A stand-in transport, like the one the tests use: it records the request and answers with a fixed reply.\n    val sent = mutableListOf<Request>()\n    val transport = Transport { request ->\n        sent.add(request)\n        Response(200, emptyMap(), \"\"\"{\"content\":[{\"type\":\"text\",\"text\":\"Paris.\"}],\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":9,\"output_tokens\":3}}\"\"\")\n    }\n\n    val messages = listOf(mapOf<String, Any?>(\"role\" to \"user\", \"content\" to \"Capital of France?\"))\n    val message = sendMessages(transport, \"sk-test-0123456789abcdef\", \"claude-sonnet-5-5\", messages, 64, \"Be brief.\")\n\n    println(\"requests sent: ${sent.size}\")\n    println(\"method and url: ${sent.firstOrNull()?.let { it.method + \" \" + it.url }}\")\n    println(\"header names: ${sent.firstOrNull()?.headers?.keys?.sorted()}\")\n    println(\"reply text: ${textOf(message)}\")\n\n    // An error reply becomes an ApiError.\n    try {\n        sendMessages({ Response(429, mapOf(\"request-id\" to \"req_1\"),\n            \"\"\"{\"type\":\"error\",\"error\":{\"type\":\"rate_limit_error\",\"message\":\"Rate limited\"}}\"\"\") },\n            \"sk-test-0123456789abcdef\", \"claude-sonnet-5-5\", messages, 64)\n    } catch (err: ApiError) {\n        println(\"api error: ${err.status} ${err.errorType} ${err.requestId}\")\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 9,
+    "code": 2,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "fd242984c93080ae1c45f6a49ecf7c1d35cece21dc6de83cf466fb380bfc2898",
+  "starting_code": "/** A raw Messages API client over an injected transport. See ../../statement.md for the contract. */\nprivate val log = System.getLogger(\"rawClient\")\n\nconst val URL = \"https://api.anthropic.com/v1/messages\"\n\nprivate fun present(s: String?) = s != null && s.isNotBlank()\n\nprivate fun validate(apiKey: String, messages: List<Map<String, Any?>>, maxTokens: Int) {\n    // TODO 1 of 8 (finish this to pass e2): refuse bad input before anything is sent.\n    // Receives the key, the messages and maxTokens. Throws IllegalArgumentException (use require) when the key is blank (use present),\n    // the messages are empty or maxTokens is below 1; otherwise returns nothing.\n    // Example: validate(\"  \", emptyList(), 8) -> IllegalArgumentException\n}\n\nprivate fun headersFor(apiKey: String): Map<String, String> {\n    // TODO 2 of 8 (finish this to pass m1): the three request headers.\n    // Receives the API key. Returns a map with exactly x-api-key (the key), anthropic-version (2023-06-01) and content-type\n    // (application/json). Example: headersFor(\"k\")[\"anthropic-version\"] -> \"2023-06-01\"\n    return emptyMap()\n}\n\nprivate fun bodyFor(model: String, messages: List<Map<String, Any?>>, maxTokens: Int, system: String?): Map<String, Any?> {\n    // TODO 3 of 8 (finish this to pass m1 and e1): the request body as a map.\n    // Receives the model, the messages, maxTokens (store it as a Long) and the system text (may be null). Returns a map with model,\n    // max_tokens and messages, plus system only when it is present and not blank (use present).\n    // Example: bodyFor(\"m\", emptyList(), 8, \"  \") -> {model=m, max_tokens=8, messages=[]}\n    return emptyMap()\n}\n\nfun buildRequest(apiKey: String, model: String, messages: List<Map<String, Any?>>, maxTokens: Int, system: String? = null): Request {\n    log.log(System.Logger.Level.DEBUG, \"buildRequest input: {0} {1} {2} {3}\", model, messages, maxTokens, system)\n    validate(apiKey, messages, maxTokens)\n    return Request(\"POST\", URL, headersFor(apiKey), Json.stringify(bodyFor(model, messages, maxTokens, system)))\n}\n\nprivate fun errorParts(parsed: Any?, text: String): Pair<String, String> {\n    // TODO 4 of 8 (finish this to pass e4 and e5): the error type and message of an error reply.\n    // Receives the parsed JSON body (null when it is not JSON) and the raw body text. For a body shaped like\n    // {\"error\": {\"type\": ..., \"message\": ...}} returns that type and message as text; for anything else returns \"unknown\" and the\n    // first 200 characters of the text, trimmed.\n    // Example: errorParts(mapOf(\"error\" to mapOf(\"type\" to \"x\", \"message\" to \"m\")), \"\") -> Pair(\"x\", \"m\"), errorParts(null, \" <html> \") -> Pair(\"unknown\", \"<html>\")\n    return Pair(\"\", \"\")\n}\n\nprivate fun pickRequestId(headerId: String?, bodyId: String?): String? {\n    // TODO 5 of 8 (finish this to pass e4): which request id the error carries.\n    // Receives the id from the request-id header and the id from the body, either may be null. Returns the header's when there is one,\n    // else the body's, else null. Example: pickRequestId(\"h\", \"b\") -> \"h\", pickRequestId(null, \"b\") -> \"b\"\n    return null\n}\n\nprivate fun redact(message: String, apiKey: String): String {\n    // TODO 6 of 8 (finish this to pass e6): keep the key out of the error.\n    // Receives the message and the API key. Returns the message with every occurrence of the key replaced by [redacted].\n    // Example: redact(\"bad key sk-1\", \"sk-1\") -> \"bad key [redacted]\"\n    return message\n}\n\nprivate fun errorFrom(response: Response, apiKey: String): ApiError {\n    val parsed = try {\n        Json.parse(response.body)\n    } catch (notJson: IllegalArgumentException) {\n        null\n    }\n    val (kind, message) = errorParts(parsed, response.body)\n    val bodyId = (parsed as? Map<*, *>)?.get(\"request_id\")?.toString()\n    return ApiError(response.status, kind, redact(message, apiKey), pickRequestId(response.headers[\"request-id\"], bodyId))\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun parseMessage(text: String): Map<String, Any?> {\n    // TODO 7 of 8 (finish this to pass e3): the message of a good reply.\n    // Receives the response body text. Returns the parsed JSON object (Json.parse gives a Map).\n    // Example: parseMessage(\"{\\\"stop_reason\\\": \\\"end_turn\\\"}\") -> {stop_reason=end_turn}\n    return emptyMap()\n}\n\nfun sendMessages(transport: Transport, apiKey: String, model: String, messages: List<Map<String, Any?>>, maxTokens: Int, system: String? = null): Map<String, Any?> {\n    val request = buildRequest(apiKey, model, messages, maxTokens, system)\n    val response = transport.send(request)\n    if (response.status in 200..299) return parseMessage(response.body)\n    throw errorFrom(response, apiKey)\n}\n\nfun textOf(message: Map<String, Any?>): String {\n    // TODO 8 of 8 (finish this to pass e3): the text of a message.\n    // Receives a message map with a content list of blocks. Returns the text of the blocks whose type is \"text\", joined with nothing\n    // between them; every other block type is ignored.\n    // Example: a message with blocks text \"a\", tool_use, text \"b\" -> \"ab\"\n    return \"\"\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/13-one-rest-api-under-every-sdk/prose/unit-02/practice-4/src/main/kotlin/RawClient.kt",
+    "test_path": "practice/level-2/13-one-rest-api-under-every-sdk/prose/unit-02/practice-4/src/test/kotlin/RawClientTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/13-one-rest-api-under-every-sdk/prose/unit-02/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/13-one-rest-api-under-every-sdk/prose/unit-02/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_requestHasMethodUrlThreeHeadersAndJsonBody()",
+        "kind": "main",
+        "says": "The request has the right method, URL, exactly three headers and a JSON body"
+      },
+      {
+        "id": "e1_blankOrAbsentSystemIsLeftOutOfTheBody()",
+        "kind": "edge",
+        "says": "A blank or absent system is left out of the body"
+      },
+      {
+        "id": "e2_badInputIsRefusedBeforeAnythingIsSent()",
+        "kind": "edge",
+        "says": "Bad input is refused before the transport is called"
+      },
+      {
+        "id": "e3_successReturnsTheMessageAndTextJoinsTextBlocksOnly()",
+        "kind": "edge",
+        "says": "A good reply is parsed, and text_of joins text blocks only"
+      },
+      {
+        "id": "e4_anErrorReplyBecomesAnApiErrorWithTheHeaderRequestId()",
+        "kind": "edge",
+        "says": "An error reply becomes an ApiError; the header's request id wins over the body's"
+      },
+      {
+        "id": "e5_aReplyThatIsNotJsonStillGivesAnApiError()",
+        "kind": "edge",
+        "says": "A reply that is not JSON still gives an ApiError (unknown)"
+      },
+      {
+        "id": "e6_theApiKeyNeverAppearsInAnError()",
+        "kind": "edge",
+        "says": "The API key never appears in an error"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/13-one-rest-api-under-every-sdk/prose/unit-02/practice-4/target/test-results/test"
+    },
+    "origin": "course/13-one-rest-api-under-every-sdk/02-what-the-sdk-does-for-you.md",
+    "concepts": [
+      "the practice of What the SDK does for you, and a raw client is solved"
+    ],
+    "files": [
+      "practice/level-2/13-one-rest-api-under-every-sdk/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "one-rest-api-under-every-sdk-u2"
+}

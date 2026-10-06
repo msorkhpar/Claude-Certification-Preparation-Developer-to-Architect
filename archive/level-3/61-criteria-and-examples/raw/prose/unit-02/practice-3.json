@@ -1,0 +1,317 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "61-criteria-and-examples"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: a review specification that cuts false positives (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a review specification that cuts false positives"
+    },
+    {
+      "type": "para",
+      "text": "A review job in CI posts too many comments, and developers have stopped reading them. The prompt says \"be conservative\", its examples are all findings, and nobody knows which category is the noisy one. In this practice you write the three decisions behind a precise review: the function that builds the prompt from a specification and refuses a specification that is vague or incomplete, the report that computes how much developers trust each category and which patterns they dismiss, and the function that decides what a run does with an incomplete request. The model is not called: the tests give you specifications, verdicts and requests. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`build_review_prompt`, `category_report`, `next_step`); TypeScript has `buildReviewPrompt`, `categoryReport` and `nextStep`; Java has the same camel-case names as static methods of `ReviewSpec` and Kotlin has top-level functions. Results are maps and lists, as the starters show. A refusal is `ValueError` (TypeScript: an `Error`; Java and Kotlin: `IllegalArgumentException`)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working review specification with seven gaps cut out of it. Everything that is plumbing is written and correct: the criteria and examples blocks of the prompt, the checks that a report and a skip text exist and that every example has a reason and names a criterion, the counting of accepted and dismissed findings, and the reading of a request's fields. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript, Java and Kotlin names are the camel-case forms where a name is given):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "The prompt's diff and assembly (unlocks `m1`): the criteria come first, then the examples, then the diff last in a `<diff>` block, joined with newlines.",
+        "The vague phrase (unlocks `e1`): the first phrase of VAGUE that a text contains (ignoring case) is returned, so a vague report or skip text is refused; a text with none returns nothing.",
+        "The severity examples (unlocks `e2`): a criterion without a concrete example for `high` and for `low` is refused.",
+        "The number and the verdicts of the examples (unlocks `e3`): two to four examples are required, with at least one `report` and one `skip` and no other verdict.",
+        "The disabling of a category (unlocks `e4`): a category is disabled when it has at least `min_reviewed` reviewed findings and a precision (accepted over reviewed, two decimals) below `min_precision`.",
+        "The most dismissed patterns (unlocks `e5`): the dismissed patterns are listed by count, highest first, then by name, and cut to the first three.",
+        "The next step of an incomplete request (unlocks `e6`, `e7`): with something missing that has no default, an attended run asks for exactly those fields and an unattended run stops, never asking."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gap 1. About thirteen lines in all. The steps below describe the whole specification, so you can see how your gaps are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`build_review_prompt(spec, diff)`: `spec` has `criteria` (a list of `{id, report, skip, severity: {high, low}}`) and `examples` (a list of `{verdict, code, reason}`, a `report` example also has a `category` that is the `id` of a criterion).",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "Refuse the specification when there are no criteria; when a `report` or `skip` text is empty or blank; when either text holds a phrase that names no pattern (`VAGUE` in the starter, matched without regard to case) and the message says `vague`; or when `severity.high` or `severity.low` is empty or blank.",
+              "Refuse the examples when there are fewer than two or more than four, when the verdicts are not exactly a report and a skip (a set of one kind, or any other value, is refused), when an example has no reason, or when a report example names a category that is not a criterion.",
+              [
+                "The prompt has this exact shape, with one `criterion` block per criterion and one `example` block per example, in the order given, and the diff last:",
+                {
+                  "type": "code",
+                  "lang": "text",
+                  "text": "<criteria>\n<criterion id=\"bug\">\nReport: ...\nSkip: ...\nSeverity high: ...\nSeverity low: ...\n</criterion>\n</criteria>\n<examples>\n<example verdict=\"report\" category=\"bug\">\n<code>...</code>\n<reason>...</reason>\n</example>\n<example verdict=\"skip\">\n<code>...</code>\n<reason>...</reason>\n</example>\n</examples>\n<diff>\n...\n</diff>"
+                }
+              ]
+            ]
+          }
+        ],
+        [
+          "`category_report(findings, min_reviewed=5, min_precision=0.5)`: each finding is `{category, verdict, detected_pattern}` where the verdict is `accepted` or `dismissed`. Return `{\"categories\": {name: {\"reviewed\", \"precision\", \"disable\", \"top_dismissed\"}}, \"disable\": [names]}`.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`precision` is the accepted share, rounded to two decimals.",
+              "`disable` is true when the category has at least `min_reviewed` findings and a precision below `min_precision` (at the boundaries it stays enabled); the list of names to disable is sorted.",
+              "`top_dismissed` lists at most three `[pattern, count]` pairs of dismissed findings, by count (largest first) and then by name; accepted findings do not count."
+            ]
+          }
+        ],
+        [
+          "`next_step(request, required, defaults, attended)`: a field is missing when it is absent, `None` or blank. Return `{\"action\", \"ask\", \"assumptions\"}`.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "Every missing field that has a default is assumed (listed in `assumptions` with its default); the others are unresolved.",
+              "Nothing unresolved: `proceed`. Unresolved and `attended`: `ask`, naming only the unresolved fields (in the order of `required`). Unresolved and not attended: `stop`, which never asks."
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Explicit criteria.** A report text, a skip text and a severity example at each level are what move precision; \"be conservative\" is not one. *You should see* five vague phrasings refused in both texts, and each missing part refused.",
+        "**Examples on the border.** Two to four examples with a report and a skip, each with a reason. *You should see* sets of one, five, one kind or without a reason refused.",
+        "**Order.** Criteria, then examples, then the diff last. *You should see* the exact prompt above.",
+        "**Trust by category.** A noisy category is switched off while its prompt is improved, and only with enough reviews to mean it. *You should see* `style` disabled at six reviews and 33 percent, `naming` kept at four reviews, and the boundary cases kept.",
+        "**Dismissed patterns.** The pattern behind each dismissal shows what to fix. *You should see* the three most dismissed patterns, ties broken by name.",
+        "**Attended or not.** A person can be asked; a CI run cannot. *You should see* `ask` for a person, `stop` for CI, and defaults assumed and stated in both."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "The prompt has criteria first, then examples, then the diff last, in the exact shape above"
+        ],
+        [
+          "`e1`",
+          "Vague wording is refused in both the report and the skip text, with `vague` in the message"
+        ],
+        [
+          "`e2`",
+          "A criterion needs a report, a skip and a severity example for high and low"
+        ],
+        [
+          "`e3`",
+          "Two to four examples with a report and a skip, each with a reason and a known category"
+        ],
+        [
+          "`e4`",
+          "A category with enough reviews and low precision is disabled, and the boundaries hold"
+        ],
+        [
+          "`e5`",
+          "The most dismissed patterns are listed by count and then name, capped at three"
+        ],
+        [
+          "`e6`",
+          "An attended run asks only what it cannot assume and states its assumptions"
+        ],
+        [
+          "`e7`",
+          "An unattended run never asks: it states assumptions or stops"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.Collections;\nimport java.util.HashMap;\nimport java.util.HashSet;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\n\n/** A review specification that cuts false positives: the prompt, the trust in each category and the next step when a request is incomplete. See ../../statement.md. Results are JSON-like maps. */\nfinal class ReviewSpec {\n    private static final System.Logger LOG = System.getLogger(ReviewSpec.class.getName());\n    private ReviewSpec() {}\n\n    static final List<String> VAGUE = List.of(\"be conservative\", \"high-confidence\", \"high confidence\", \"only important\", \"only significant\", \"if you are sure\", \"when you are sure\", \"use your judgment\");\n\n    private static Map<String, Object> map(Object... kv) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);\n        return m;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static List<Map<String, Object>> maps(Object value) {\n        return value == null ? List.of() : (List<Map<String, Object>>) value;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static Map<String, Object> asMap(Object value) {\n        return value == null ? Map.of() : (Map<String, Object>) value;\n    }\n\n    private static boolean present(Object value) {\n        return value instanceof String s && !s.isBlank();\n    }\n\n    private static boolean blank(Object value) {\n        return value == null || (value instanceof String s && s.isBlank());\n    }\n\n    private static String vague(String text) {\n        String lowered = text.toLowerCase();\n        for (String phrase : VAGUE) if (lowered.contains(phrase)) return phrase;\n        return null;\n    }\n\n    static String buildReviewPrompt(Map<String, Object> spec, String diff) {\n        LOG.log(System.Logger.Level.DEBUG, \"buildReviewPrompt input: {0}\", spec);\n        List<Map<String, Object>> criteria = maps(spec.get(\"criteria\"));\n        List<Map<String, Object>> examples = maps(spec.get(\"examples\"));\n        if (criteria.isEmpty()) throw new IllegalArgumentException(\"at least one criterion is required\");\n        List<String> ids = new ArrayList<>();\n        List<String> out = new ArrayList<>();\n        out.add(\"<criteria>\");\n        for (Map<String, Object> c : criteria) {\n            for (String key : List.of(\"report\", \"skip\")) {\n                if (!present(c.get(key))) throw new IllegalArgumentException(\"criterion \" + c.get(\"id\") + \": \" + key + \" is required\");\n                String phrase = vague((String) c.get(key));\n                if (phrase != null) throw new IllegalArgumentException(\"criterion \" + c.get(\"id\") + \": \" + key + \" is vague ('\" + phrase + \"'): name the pattern instead\");\n            }\n            Map<String, Object> severity = asMap(c.get(\"severity\"));\n            for (String level : List.of(\"high\", \"low\")) {\n                if (!present(severity.get(level))) throw new IllegalArgumentException(\"criterion \" + c.get(\"id\") + \": severity \" + level + \" needs a concrete example\");\n            }\n            ids.add((String) c.get(\"id\"));\n            out.add(\"<criterion id=\\\"\" + c.get(\"id\") + \"\\\">\\nReport: \" + c.get(\"report\") + \"\\nSkip: \" + c.get(\"skip\") + \"\\nSeverity high: \" + severity.get(\"high\") + \"\\nSeverity low: \" + severity.get(\"low\") + \"\\n</criterion>\");\n        }\n        out.add(\"</criteria>\");\n        if (examples.size() < 2 || examples.size() > 4) throw new IllegalArgumentException(\"use two to four examples\");\n        Set<Object> verdicts = new HashSet<>();\n        for (Map<String, Object> e : examples) verdicts.add(e.get(\"verdict\"));\n        if (!verdicts.equals(Set.of(\"report\", \"skip\"))) throw new IllegalArgumentException(\"the examples need at least one report and one skip, and no other verdict\");\n        out.add(\"<examples>\");\n        for (Map<String, Object> e : examples) {\n            if (!present(e.get(\"reason\"))) throw new IllegalArgumentException(\"every example needs a reason\");\n            if (\"report\".equals(e.get(\"verdict\")) && !ids.contains(e.get(\"category\"))) throw new IllegalArgumentException(\"a report example names one of the criteria\");\n            String tag = \"report\".equals(e.get(\"verdict\")) ? \"verdict=\\\"report\\\" category=\\\"\" + e.get(\"category\") + \"\\\"\" : \"verdict=\\\"skip\\\"\";\n            out.add(\"<example \" + tag + \">\\n<code>\" + e.get(\"code\") + \"</code>\\n<reason>\" + e.get(\"reason\") + \"</reason>\\n</example>\");\n        }\n        out.add(\"</examples>\");\n        out.add(\"<diff>\");\n        out.add(diff);\n        out.add(\"</diff>\");\n        return String.join(\"\\n\", out);\n    }\n\n    static Map<String, Object> categoryReport(List<Map<String, Object>> findings) {\n        return categoryReport(findings, 5, 0.5);\n    }\n\n    static Map<String, Object> categoryReport(List<Map<String, Object>> findings, int minReviewed, double minPrecision) {\n        Map<String, List<Map<String, Object>>> byCategory = new LinkedHashMap<>();\n        for (Map<String, Object> f : findings) byCategory.computeIfAbsent((String) f.get(\"category\"), k -> new ArrayList<>()).add(f);\n        Map<String, Object> categories = new LinkedHashMap<>();\n        List<String> disable = new ArrayList<>();\n        for (Map.Entry<String, List<Map<String, Object>>> entry : byCategory.entrySet()) {\n            List<Map<String, Object>> items = entry.getValue();\n            int accepted = 0;\n            Map<String, Integer> counts = new HashMap<>();\n            for (Map<String, Object> f : items) {\n                if (\"accepted\".equals(f.get(\"verdict\"))) accepted++;\n                else if (\"dismissed\".equals(f.get(\"verdict\"))) counts.merge((String) f.get(\"detected_pattern\"), 1, Integer::sum);\n            }\n            List<Map.Entry<String, Integer>> top = new ArrayList<>(counts.entrySet());\n            top.sort((a, b) -> b.getValue().equals(a.getValue()) ? a.getKey().compareTo(b.getKey()) : b.getValue().compareTo(a.getValue()));\n            List<Object> shown = new ArrayList<>();\n            for (int i = 0; i < Math.min(3, top.size()); i++) shown.add(List.of(top.get(i).getKey(), top.get(i).getValue()));\n            double precision = Math.round((double) accepted / items.size() * 100) / 100.0;\n            boolean off = items.size() >= minReviewed && precision < minPrecision;\n            categories.put(entry.getKey(), map(\"reviewed\", items.size(), \"precision\", precision, \"disable\", off, \"top_dismissed\", shown));\n            if (off) disable.add(entry.getKey());\n        }\n        Collections.sort(disable);\n        return map(\"categories\", categories, \"disable\", disable);\n    }\n\n    static Map<String, Object> nextStep(Map<String, Object> request, List<String> required, Map<String, String> defaults, boolean attended) {\n        List<String> missing = new ArrayList<>();\n        for (String f : required) if (blank(request.get(f))) missing.add(f);\n        Map<String, Object> assumptions = new LinkedHashMap<>();\n        List<String> unresolved = new ArrayList<>();\n        for (String f : missing) {\n            if (defaults.containsKey(f)) assumptions.put(f, defaults.get(f));\n            else unresolved.add(f);\n        }\n        if (!unresolved.isEmpty() && attended) return map(\"action\", \"ask\", \"ask\", unresolved, \"assumptions\", assumptions);\n        if (!unresolved.isEmpty()) return map(\"action\", \"stop\", \"ask\", List.of(), \"assumptions\", assumptions);\n        return map(\"action\", \"proceed\", \"ask\", List.of(), \"assumptions\", assumptions);\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.*;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // A review specification like the tests use: explicit criteria first, then examples of both verdicts.\n        Map<String, Object> criterion = new LinkedHashMap<>();\n        criterion.put(\"id\", \"bug\");\n        criterion.put(\"report\", \"A comment whose claimed behaviour contradicts what the code does.\");\n        criterion.put(\"skip\", \"Minor style, naming and patterns the codebase already uses.\");\n        Map<String, Object> severity = new LinkedHashMap<>();\n        severity.put(\"high\", \"A null dereference on a request path.\");\n        severity.put(\"low\", \"A misleading variable name.\");\n        criterion.put(\"severity\", severity);\n        Map<String, Object> report = new LinkedHashMap<>();\n        report.put(\"verdict\", \"report\");\n        report.put(\"category\", \"bug\");\n        report.put(\"code\", \"total = price * qty  # sum of the line items\");\n        report.put(\"reason\", \"The comment says the line sums items, the code multiplies.\");\n        Map<String, Object> skip = new LinkedHashMap<>();\n        skip.put(\"verdict\", \"skip\");\n        skip.put(\"code\", \"for i in range(n):  # loop\");\n        skip.put(\"reason\", \"Terse and accurate.\");\n        Map<String, Object> spec = new LinkedHashMap<>();\n        spec.put(\"criteria\", List.of(criterion));\n        spec.put(\"examples\", List.of(report, skip));\n\n        String prompt = ReviewSpec.buildReviewPrompt(spec, \"+ x = 1\");\n        System.out.println(\"prompt lines: \" + (prompt == null ? null : prompt.split(\"\\n\").length));\n        System.out.println(\"first line: \" + (prompt == null ? null : prompt.split(\"\\n\")[0]));\n        System.out.println(\"diff is last: \" + (prompt != null && prompt.stripTrailing().endsWith(\"</diff>\")));\n\n        // Which categories to switch off, from what reviewers accepted or dismissed.\n        List<Map<String, Object>> findings = new ArrayList<>();\n        for (int i = 0; i < 4; i++) findings.add(Map.of(\"category\", \"style\", \"verdict\", \"dismissed\", \"detected_pattern\", \"line-length\"));\n        findings.add(Map.of(\"category\", \"style\", \"verdict\", \"accepted\", \"detected_pattern\", \"line-length\"));\n        System.out.println(\"category report: \" + ReviewSpec.categoryReport(findings));\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.ArrayList;\nimport java.util.Collections;\nimport java.util.HashMap;\nimport java.util.HashSet;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\n\n/** A review specification that cuts false positives: the prompt, the trust in each category and the next step when a request is incomplete. See ../../statement.md. Results are JSON-like maps. */\nfinal class ReviewSpec {\n    private static final System.Logger LOG = System.getLogger(ReviewSpec.class.getName());\n    private ReviewSpec() {}\n\n    static final List<String> VAGUE = List.of(\"be conservative\", \"high-confidence\", \"high confidence\", \"only important\", \"only significant\", \"if you are sure\", \"when you are sure\", \"use your judgment\");\n\n    private static Map<String, Object> map(Object... kv) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);\n        return m;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static List<Map<String, Object>> maps(Object value) {\n        return value == null ? List.of() : (List<Map<String, Object>>) value;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static Map<String, Object> asMap(Object value) {\n        return value == null ? Map.of() : (Map<String, Object>) value;\n    }\n\n    private static boolean present(Object value) {\n        return value instanceof String s && !s.isBlank();\n    }\n\n    private static boolean blank(Object value) {\n        return value == null || (value instanceof String s && s.isBlank());\n    }\n\n    private static String vague(String text) {\n        // TODO 2 of 7 (finish this to pass e1): the vague check. Receives a criterion's report or skip text. Return the\n        //   first phrase of VAGUE that the lower-cased text contains, or nothing when it contains none. Example: \"Be\n        //   conservative here\" -> \"be conservative\".\n        return null;\n    }\n\n    static String buildReviewPrompt(Map<String, Object> spec, String diff) {\n        LOG.log(System.Logger.Level.DEBUG, \"buildReviewPrompt input: {0}\", spec);\n        List<Map<String, Object>> criteria = maps(spec.get(\"criteria\"));\n        List<Map<String, Object>> examples = maps(spec.get(\"examples\"));\n        if (criteria.isEmpty()) throw new IllegalArgumentException(\"at least one criterion is required\");\n        List<String> ids = new ArrayList<>();\n        List<String> out = new ArrayList<>();\n        out.add(\"<criteria>\");\n        for (Map<String, Object> c : criteria) {\n            for (String key : List.of(\"report\", \"skip\")) {\n                if (!present(c.get(key))) throw new IllegalArgumentException(\"criterion \" + c.get(\"id\") + \": \" + key + \" is required\");\n                String phrase = vague((String) c.get(key));\n                if (phrase != null) throw new IllegalArgumentException(\"criterion \" + c.get(\"id\") + \": \" + key + \" is vague ('\" + phrase + \"'): name the pattern instead\");\n            }\n            Map<String, Object> severity = asMap(c.get(\"severity\"));\n            // TODO 3 of 7 (finish this to pass e2): the severity check. For each of the levels high and low, refuse the\n            //   criterion when its severity has no concrete example text for that level. Example: severity {high: \"...\"}\n            //   with no low -> refused.\n            ids.add((String) c.get(\"id\"));\n            out.add(\"<criterion id=\\\"\" + c.get(\"id\") + \"\\\">\\nReport: \" + c.get(\"report\") + \"\\nSkip: \" + c.get(\"skip\") + \"\\nSeverity high: \" + severity.get(\"high\") + \"\\nSeverity low: \" + severity.get(\"low\") + \"\\n</criterion>\");\n        }\n        out.add(\"</criteria>\");\n        // TODO 4 of 7 (finish this to pass e3): the examples check. Refuse the specification unless it has two to four\n        //   examples and their verdicts are exactly report and skip (at least one of each, nothing else). Example: three\n        //   report examples and no skip -> refused.\n        out.add(\"<examples>\");\n        for (Map<String, Object> e : examples) {\n            if (!present(e.get(\"reason\"))) throw new IllegalArgumentException(\"every example needs a reason\");\n            if (\"report\".equals(e.get(\"verdict\")) && !ids.contains(e.get(\"category\"))) throw new IllegalArgumentException(\"a report example names one of the criteria\");\n            String tag = \"report\".equals(e.get(\"verdict\")) ? \"verdict=\\\"report\\\" category=\\\"\" + e.get(\"category\") + \"\\\"\" : \"verdict=\\\"skip\\\"\";\n            out.add(\"<example \" + tag + \">\\n<code>\" + e.get(\"code\") + \"</code>\\n<reason>\" + e.get(\"reason\") + \"</reason>\\n</example>\");\n        }\n        out.add(\"</examples>\");\n        // TODO 1 of 7 (finish this to pass m1): the end of the prompt. After the criteria and examples blocks, add the\n        //   diff in a <diff> block and return the whole prompt joined with newlines, so that the diff comes last. Example:\n        //   criteria, examples, then <diff>, the diff, </diff>.\n        return diff;\n    }\n\n    static Map<String, Object> categoryReport(List<Map<String, Object>> findings) {\n        return categoryReport(findings, 5, 0.5);\n    }\n\n    static Map<String, Object> categoryReport(List<Map<String, Object>> findings, int minReviewed, double minPrecision) {\n        Map<String, List<Map<String, Object>>> byCategory = new LinkedHashMap<>();\n        for (Map<String, Object> f : findings) byCategory.computeIfAbsent((String) f.get(\"category\"), k -> new ArrayList<>()).add(f);\n        Map<String, Object> categories = new LinkedHashMap<>();\n        List<String> disable = new ArrayList<>();\n        for (Map.Entry<String, List<Map<String, Object>>> entry : byCategory.entrySet()) {\n            List<Map<String, Object>> items = entry.getValue();\n            int accepted = 0;\n            Map<String, Integer> counts = new HashMap<>();\n            for (Map<String, Object> f : items) {\n                if (\"accepted\".equals(f.get(\"verdict\"))) accepted++;\n                else if (\"dismissed\".equals(f.get(\"verdict\"))) counts.merge((String) f.get(\"detected_pattern\"), 1, Integer::sum);\n            }\n            List<Map.Entry<String, Integer>> top = new ArrayList<>(counts.entrySet());\n            // TODO 6 of 7 (finish this to pass e5): the top dismissed patterns. Receives the count of dismissals per\n            //   detected pattern. Return up to three [pattern, count] pairs, ordered by count (highest first) and then by\n            //   pattern name. Example: {a: 2, b: 3, c: 2, d: 1} -> [b 3], [a 2], [c 2].\n            List<Object> shown = new ArrayList<>();\n            for (int i = 0; i < Math.min(3, top.size()); i++) shown.add(List.of(top.get(i).getKey(), top.get(i).getValue()));\n            double precision = Math.round((double) accepted / items.size() * 100) / 100.0;\n            // TODO 5 of 7 (finish this to pass e4): the disable flag of a category. Receives the number reviewed, the\n            //   precision, min_reviewed and min_precision. A category is disabled when it has at least min_reviewed\n            //   reviews and a precision below min_precision. Example: 5 reviews, precision 0.4, defaults -> disabled; 4\n            //   reviews -> not.\n            boolean off = false;\n            categories.put(entry.getKey(), map(\"reviewed\", items.size(), \"precision\", precision, \"disable\", off, \"top_dismissed\", shown));\n            if (off) disable.add(entry.getKey());\n        }\n        Collections.sort(disable);\n        return map(\"categories\", categories, \"disable\", disable);\n    }\n\n    static Map<String, Object> nextStep(Map<String, Object> request, List<String> required, Map<String, String> defaults, boolean attended) {\n        List<String> missing = new ArrayList<>();\n        for (String f : required) if (blank(request.get(f))) missing.add(f);\n        Map<String, Object> assumptions = new LinkedHashMap<>();\n        List<String> unresolved = new ArrayList<>();\n        for (String f : missing) {\n            if (defaults.containsKey(f)) assumptions.put(f, defaults.get(f));\n            else unresolved.add(f);\n        }\n        // TODO 7 of 7 (finish this to pass e6, e7): the next step. `unresolved` holds the missing fields that have no\n        //   default. When some are unresolved and the run is attended, return action ask with those fields in `ask`; when\n        //   unattended, return action stop with an empty `ask`. Both carry the assumptions. Example: attended, unresolved\n        //   [repo] -> ask [repo].\n        return map(\"action\", \"proceed\", \"ask\", List.of(), \"assumptions\", assumptions);\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.*;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // A review specification like the tests use: explicit criteria first, then examples of both verdicts.\n        Map<String, Object> criterion = new LinkedHashMap<>();\n        criterion.put(\"id\", \"bug\");\n        criterion.put(\"report\", \"A comment whose claimed behaviour contradicts what the code does.\");\n        criterion.put(\"skip\", \"Minor style, naming and patterns the codebase already uses.\");\n        Map<String, Object> severity = new LinkedHashMap<>();\n        severity.put(\"high\", \"A null dereference on a request path.\");\n        severity.put(\"low\", \"A misleading variable name.\");\n        criterion.put(\"severity\", severity);\n        Map<String, Object> report = new LinkedHashMap<>();\n        report.put(\"verdict\", \"report\");\n        report.put(\"category\", \"bug\");\n        report.put(\"code\", \"total = price * qty  # sum of the line items\");\n        report.put(\"reason\", \"The comment says the line sums items, the code multiplies.\");\n        Map<String, Object> skip = new LinkedHashMap<>();\n        skip.put(\"verdict\", \"skip\");\n        skip.put(\"code\", \"for i in range(n):  # loop\");\n        skip.put(\"reason\", \"Terse and accurate.\");\n        Map<String, Object> spec = new LinkedHashMap<>();\n        spec.put(\"criteria\", List.of(criterion));\n        spec.put(\"examples\", List.of(report, skip));\n\n        String prompt = ReviewSpec.buildReviewPrompt(spec, \"+ x = 1\");\n        System.out.println(\"prompt lines: \" + (prompt == null ? null : prompt.split(\"\\n\").length));\n        System.out.println(\"first line: \" + (prompt == null ? null : prompt.split(\"\\n\")[0]));\n        System.out.println(\"diff is last: \" + (prompt != null && prompt.stripTrailing().endsWith(\"</diff>\")));\n\n        // Which categories to switch off, from what reviewers accepted or dismissed.\n        List<Map<String, Object>> findings = new ArrayList<>();\n        for (int i = 0; i < 4; i++) findings.add(Map.of(\"category\", \"style\", \"verdict\", \"dismissed\", \"detected_pattern\", \"line-length\"));\n        findings.add(Map.of(\"category\", \"style\", \"verdict\", \"accepted\", \"detected_pattern\", \"line-length\"));\n        System.out.println(\"category report: \" + ReviewSpec.categoryReport(findings));\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "3ae27880526dadbbe12879c68cad837a94e7e09af2d031559e1e2e389370cfa6",
+  "starting_code": "import java.util.ArrayList;\nimport java.util.Collections;\nimport java.util.HashMap;\nimport java.util.HashSet;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\n\n/** A review specification that cuts false positives: the prompt, the trust in each category and the next step when a request is incomplete. See ../../statement.md. Results are JSON-like maps. */\nfinal class ReviewSpec {\n    private static final System.Logger LOG = System.getLogger(ReviewSpec.class.getName());\n    private ReviewSpec() {}\n\n    static final List<String> VAGUE = List.of(\"be conservative\", \"high-confidence\", \"high confidence\", \"only important\", \"only significant\", \"if you are sure\", \"when you are sure\", \"use your judgment\");\n\n    private static Map<String, Object> map(Object... kv) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);\n        return m;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static List<Map<String, Object>> maps(Object value) {\n        return value == null ? List.of() : (List<Map<String, Object>>) value;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static Map<String, Object> asMap(Object value) {\n        return value == null ? Map.of() : (Map<String, Object>) value;\n    }\n\n    private static boolean present(Object value) {\n        return value instanceof String s && !s.isBlank();\n    }\n\n    private static boolean blank(Object value) {\n        return value == null || (value instanceof String s && s.isBlank());\n    }\n\n    private static String vague(String text) {\n        // TODO 2 of 7 (finish this to pass e1): the vague check. Receives a criterion's report or skip text. Return the\n        //   first phrase of VAGUE that the lower-cased text contains, or nothing when it contains none. Example: \"Be\n        //   conservative here\" -> \"be conservative\".\n        return null;\n    }\n\n    static String buildReviewPrompt(Map<String, Object> spec, String diff) {\n        LOG.log(System.Logger.Level.DEBUG, \"buildReviewPrompt input: {0}\", spec);\n        List<Map<String, Object>> criteria = maps(spec.get(\"criteria\"));\n        List<Map<String, Object>> examples = maps(spec.get(\"examples\"));\n        if (criteria.isEmpty()) throw new IllegalArgumentException(\"at least one criterion is required\");\n        List<String> ids = new ArrayList<>();\n        List<String> out = new ArrayList<>();\n        out.add(\"<criteria>\");\n        for (Map<String, Object> c : criteria) {\n            for (String key : List.of(\"report\", \"skip\")) {\n                if (!present(c.get(key))) throw new IllegalArgumentException(\"criterion \" + c.get(\"id\") + \": \" + key + \" is required\");\n                String phrase = vague((String) c.get(key));\n                if (phrase != null) throw new IllegalArgumentException(\"criterion \" + c.get(\"id\") + \": \" + key + \" is vague ('\" + phrase + \"'): name the pattern instead\");\n            }\n            Map<String, Object> severity = asMap(c.get(\"severity\"));\n            // TODO 3 of 7 (finish this to pass e2): the severity check. For each of the levels high and low, refuse the\n            //   criterion when its severity has no concrete example text for that level. Example: severity {high: \"...\"}\n            //   with no low -> refused.\n            ids.add((String) c.get(\"id\"));\n            out.add(\"<criterion id=\\\"\" + c.get(\"id\") + \"\\\">\\nReport: \" + c.get(\"report\") + \"\\nSkip: \" + c.get(\"skip\") + \"\\nSeverity high: \" + severity.get(\"high\") + \"\\nSeverity low: \" + severity.get(\"low\") + \"\\n</criterion>\");\n        }\n        out.add(\"</criteria>\");\n        // TODO 4 of 7 (finish this to pass e3): the examples check. Refuse the specification unless it has two to four\n        //   examples and their verdicts are exactly report and skip (at least one of each, nothing else). Example: three\n        //   report examples and no skip -> refused.\n        out.add(\"<examples>\");\n        for (Map<String, Object> e : examples) {\n            if (!present(e.get(\"reason\"))) throw new IllegalArgumentException(\"every example needs a reason\");\n            if (\"report\".equals(e.get(\"verdict\")) && !ids.contains(e.get(\"category\"))) throw new IllegalArgumentException(\"a report example names one of the criteria\");\n            String tag = \"report\".equals(e.get(\"verdict\")) ? \"verdict=\\\"report\\\" category=\\\"\" + e.get(\"category\") + \"\\\"\" : \"verdict=\\\"skip\\\"\";\n            out.add(\"<example \" + tag + \">\\n<code>\" + e.get(\"code\") + \"</code>\\n<reason>\" + e.get(\"reason\") + \"</reason>\\n</example>\");\n        }\n        out.add(\"</examples>\");\n        // TODO 1 of 7 (finish this to pass m1): the end of the prompt. After the criteria and examples blocks, add the\n        //   diff in a <diff> block and return the whole prompt joined with newlines, so that the diff comes last. Example:\n        //   criteria, examples, then <diff>, the diff, </diff>.\n        return diff;\n    }\n\n    static Map<String, Object> categoryReport(List<Map<String, Object>> findings) {\n        return categoryReport(findings, 5, 0.5);\n    }\n\n    static Map<String, Object> categoryReport(List<Map<String, Object>> findings, int minReviewed, double minPrecision) {\n        Map<String, List<Map<String, Object>>> byCategory = new LinkedHashMap<>();\n        for (Map<String, Object> f : findings) byCategory.computeIfAbsent((String) f.get(\"category\"), k -> new ArrayList<>()).add(f);\n        Map<String, Object> categories = new LinkedHashMap<>();\n        List<String> disable = new ArrayList<>();\n        for (Map.Entry<String, List<Map<String, Object>>> entry : byCategory.entrySet()) {\n            List<Map<String, Object>> items = entry.getValue();\n            int accepted = 0;\n            Map<String, Integer> counts = new HashMap<>();\n            for (Map<String, Object> f : items) {\n                if (\"accepted\".equals(f.get(\"verdict\"))) accepted++;\n                else if (\"dismissed\".equals(f.get(\"verdict\"))) counts.merge((String) f.get(\"detected_pattern\"), 1, Integer::sum);\n            }\n            List<Map.Entry<String, Integer>> top = new ArrayList<>(counts.entrySet());\n            // TODO 6 of 7 (finish this to pass e5): the top dismissed patterns. Receives the count of dismissals per\n            //   detected pattern. Return up to three [pattern, count] pairs, ordered by count (highest first) and then by\n            //   pattern name. Example: {a: 2, b: 3, c: 2, d: 1} -> [b 3], [a 2], [c 2].\n            List<Object> shown = new ArrayList<>();\n            for (int i = 0; i < Math.min(3, top.size()); i++) shown.add(List.of(top.get(i).getKey(), top.get(i).getValue()));\n            double precision = Math.round((double) accepted / items.size() * 100) / 100.0;\n            // TODO 5 of 7 (finish this to pass e4): the disable flag of a category. Receives the number reviewed, the\n            //   precision, min_reviewed and min_precision. A category is disabled when it has at least min_reviewed\n            //   reviews and a precision below min_precision. Example: 5 reviews, precision 0.4, defaults -> disabled; 4\n            //   reviews -> not.\n            boolean off = false;\n            categories.put(entry.getKey(), map(\"reviewed\", items.size(), \"precision\", precision, \"disable\", off, \"top_dismissed\", shown));\n            if (off) disable.add(entry.getKey());\n        }\n        Collections.sort(disable);\n        return map(\"categories\", categories, \"disable\", disable);\n    }\n\n    static Map<String, Object> nextStep(Map<String, Object> request, List<String> required, Map<String, String> defaults, boolean attended) {\n        List<String> missing = new ArrayList<>();\n        for (String f : required) if (blank(request.get(f))) missing.add(f);\n        Map<String, Object> assumptions = new LinkedHashMap<>();\n        List<String> unresolved = new ArrayList<>();\n        for (String f : missing) {\n            if (defaults.containsKey(f)) assumptions.put(f, defaults.get(f));\n            else unresolved.add(f);\n        }\n        // TODO 7 of 7 (finish this to pass e6, e7): the next step. `unresolved` holds the missing fields that have no\n        //   default. When some are unresolved and the run is attended, return action ask with those fields in `ask`; when\n        //   unattended, return action stop with an empty `ask`. Both carry the assumptions. Example: attended, unresolved\n        //   [repo] -> ask [repo].\n        return map(\"action\", \"proceed\", \"ask\", List.of(), \"assumptions\", assumptions);\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/61-criteria-and-examples/prose/unit-02/practice-3/src/main/java/ReviewSpec.java",
+    "test_path": "practice/level-3/61-criteria-and-examples/prose/unit-02/practice-3/src/test/java/ReviewSpecTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/61-criteria-and-examples/prose/unit-02/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/61-criteria-and-examples/prose/unit-02/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_thePromptPutsCriteriaFirstThenExamplesThenTheDiffLast()",
+        "kind": "main",
+        "says": "The prompt has criteria first, then examples, then the diff last, in the exact shape above"
+      },
+      {
+        "id": "e1_vagueCriteriaAreRefusedInBothTheReportAndTheSkipText()",
+        "kind": "edge",
+        "says": "Vague wording is refused in both the report and the skip text, with vague in the message"
+      },
+      {
+        "id": "e2_aCriterionNeedsReportSkipAndAConcreteSeverityExampleForHighAndLow()",
+        "kind": "edge",
+        "says": "A criterion needs a report, a skip and a severity example for high and low"
+      },
+      {
+        "id": "e3_twoToFourExamplesWithAReportAndASkipEachCarryingAReason()",
+        "kind": "edge",
+        "says": "Two to four examples with a report and a skip, each with a reason and a known category"
+      },
+      {
+        "id": "e4_aCategoryWithEnoughReviewsAndLowPrecisionIsDisabled()",
+        "kind": "edge",
+        "says": "A category with enough reviews and low precision is disabled, and the boundaries hold"
+      },
+      {
+        "id": "e5_theMostDismissedPatternsAreListedByCountThenNameAndCappedAtThree()",
+        "kind": "edge",
+        "says": "The most dismissed patterns are listed by count and then name, capped at three"
+      },
+      {
+        "id": "e6_anAttendedRunAsksOnlyWhatItCannotAssumeAndStatesItsAssumptions()",
+        "kind": "edge",
+        "says": "An attended run asks only what it cannot assume and states its assumptions"
+      },
+      {
+        "id": "e7_anUnattendedRunNeverAsksItStatesAssumptionsOrStops()",
+        "kind": "edge",
+        "says": "An unattended run never asks: it states assumptions or stops"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/61-criteria-and-examples/prose/unit-02/practice-3/target/test-results/test"
+    },
+    "origin": "course/61-criteria-and-examples/02-examples-asking-and-the-practice.md",
+    "concepts": [
+      "the practice of Examples that settle the hard cases, asking and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/61-criteria-and-examples/prose/unit-02/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "criteria-and-examples-u2"
+}

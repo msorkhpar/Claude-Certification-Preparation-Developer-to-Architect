@@ -1,0 +1,95 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "65-escalation-and-ambiguity"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 3,
+  "title": "Practice: an agent that escalates for the right reasons, asks which customer is meant and hands off what the person needs (Java)",
+  "lang": "java",
+  "main_file": "src/main/java/Escalation.java",
+  "files": [
+    "src/main/java/TryIt.java"
+  ],
+  "test_file": "src/test/java/EscalationTest.java",
+  "build": [
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/65-escalation-and-ambiguity/prose/unit-02/practice-3",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/65-escalation-and-ambiguity/prose/unit-02/practice-3",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_aCustomerWhoAsksForAPersonIsEscalatedAtOnceEvenWhenTheAgentCouldResolveIt()",
+      "kind": "main",
+      "says": "A customer who asks for a person is escalated at once even when the agent could resolve it"
+    },
+    {
+      "id": "e1_frustrationAloneDoesNotEscalateAndTheReplyAcknowledgesIt()",
+      "kind": "edge",
+      "says": "Frustration alone does not escalate and the reply acknowledges it"
+    },
+    {
+      "id": "e2_aRequestThePolicyDoesNotCoverIsEscalatedAndACoveredOneIsResolved()",
+      "kind": "edge",
+      "says": "A request the policy does not cover is escalated and a covered one is resolved"
+    },
+    {
+      "id": "e3_severalMatchingRecordsNeedAClarifyingQuestionAndNeverAGuess()",
+      "kind": "edge",
+      "says": "Several matching records need a clarifying question and never a guess"
+    },
+    {
+      "id": "e4_anExplicitRequestForAPersonOutranksAnAmbiguousMatch()",
+      "kind": "edge",
+      "says": "An explicit request for a person outranks an ambiguous match"
+    },
+    {
+      "id": "e5_noProgressAfterTheAttemptLimitEscalatesAndBelowItDoesNot()",
+      "kind": "edge",
+      "says": "No progress after the attempt limit escalates and below it does not"
+    },
+    {
+      "id": "e6_sentimentAndConfidenceScoresNeverChangeTheDecision()",
+      "kind": "edge",
+      "says": "Sentiment and confidence scores never change the decision"
+    },
+    {
+      "id": "e7_theClarifyingQuestionNamesOnlyTheFieldsThatTellTheMatchesApart()",
+      "kind": "edge",
+      "says": "The clarifying question names only the fields that tell the matches apart"
+    },
+    {
+      "id": "e8_theHandOffCarriesTheStructuredFactsAndNoTranscriptAndRefusesACaseWithoutAnId()",
+      "kind": "edge",
+      "says": "The hand-off carries the structured facts and no transcript and refuses a case without an id"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/65-escalation-and-ambiguity/02-ambiguous-matches-hand-offs-and-the-practice.md"
+}

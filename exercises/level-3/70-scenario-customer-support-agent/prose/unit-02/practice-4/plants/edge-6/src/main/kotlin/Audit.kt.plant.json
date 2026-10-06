@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/kotlin/Audit.kt",
+      "old": "val wrong = sessions.count { hasWrongTool(it.steps) }",
+      "new": "val wrong = sessions.sumOf { s -> s.steps.count { hasWrongTool(listOf(it)) } }"
+    }
+  ]
+}

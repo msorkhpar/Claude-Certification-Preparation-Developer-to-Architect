@@ -1,0 +1,282 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "26-tool-use"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: a tool loop against a scripted model (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a tool loop against a scripted model"
+    },
+    {
+      "type": "para",
+      "text": "Claude never runs your tools. It answers a request with `stop_reason` of `tool_use` and one or more `tool_use` blocks; your code runs them, sends the results back in a single user message, and asks again until the model ends its turn. Write that loop, with the limits and the error handling that keep it from hanging or lying. The rules come from the Claude documentation on tool use, handling tool calls, parallel tool use, stop reasons and forced tool use, read on 2026-10-03; the lesson pages explain them. Nothing here touches the network: the model is a function that you call, and the tests give it scripted replies in the shape of a Messages API response."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given types"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`ask(request)`",
+          "the model: takes a request `{\"model\", \"max_tokens\", \"messages\", \"tools\", optionally \"tool_choice\"}` and returns a reply `{\"content\": [blocks], \"stop_reason\": ...}`"
+        ],
+        [
+          "tool",
+          "a name, a description, an `input_schema` and a handler that takes the input map and returns a string or any JSON value"
+        ],
+        [
+          "`ToolError`",
+          "a handler may throw it (or any other error) to say it failed"
+        ],
+        [
+          "`RequestError`",
+          "what your code throws, before any call, for a request the API would reject with a 400; `field` names the part"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working tool loop with seven small gaps cut out of it. Everything that is plumbing is written and correct: the types, the request that is built for every turn, the assistant message that is appended after every reply, the error results for an unknown tool and for a handler that throws, the `pause_turn` continue and the `max_turns` result. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails every case on an assertion. The TypeScript, Java and Kotlin names are the camel-case forms (`checkChoice`, `missingInputs`, `resultContent`, ...); `_turn_numbers` is `lastTurn` there. Write them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_check_choice` unlocks `e5`: the `RequestError` for a `tool_choice` the API would reject.",
+        "`_missing_inputs` unlocks `e2`: the required keys that a call leaves out.",
+        "`_result_content` unlocks `e6`: a string as it is, any other value as JSON text.",
+        "`_tool_results` unlocks `m1` and `e1`: one result per `tool_use` block, in order, none for a server tool block.",
+        "`_final_status` unlocks `e4`: `done`, `refused` or `truncated` from the stop reason.",
+        "`_turn_numbers` unlocks `e3`: the turns the loop may use, so that `max_turns` calls are made and no more.",
+        "`_sent_choice` unlocks `e5`: a forced choice on the first request only."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs the fourth gap. About fifteen lines in all. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. `run_agent` already logs the user text it receives."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "`run_agent(ask, tools, user_text, model=\"claude-sonnet-5-5\", max_turns=8, tool_choice=None)` returns `{\"status\", \"text\", \"turns\", \"messages\"}`: the final status, the text of the last reply, the number of model calls, and the conversation."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "The first message has role `user` and the text. Each request lists the tools without their handlers, and carries `model`, `max_tokens` (1024) and a snapshot of the messages so far.",
+        "After each reply, append it as an `assistant` message with its content blocks unchanged (text blocks and server tool blocks included).",
+        "Stop reason `tool_use`: run every `tool_use` block, in order, and append ONE `user` message that holds one `tool_result` block per call (`tool_use_id` of the call, `content`, and `is_error` only on an error result), nothing else. Blocks of type `server_tool_use` are Anthropic's to run and get no result. A handler's string is sent as it is and any other value as JSON text.",
+        "A call becomes a result with `is_error: true` and a message, and the loop goes on, when: the tool name is unknown (`Unknown tool: NAME`); a key listed in the schema's `required` is missing from the input (the handler is not called, and the message is `Missing required input: KEY`, with several missing keys joined by `, ` in the order of `required`); or the handler throws (the error's message).",
+        "`end_turn` or `stop_sequence`: status `done`. `refusal`: status `refused`. `max_tokens` or any other stop reason: status `truncated`. `pause_turn` (a server tool's turn that was paused): call again with the assistant message appended and no user message.",
+        "After `max_turns` model calls without an end, status `max_turns`.",
+        "`tool_choice` is a map such as `{\"type\": \"auto\", \"disable_parallel_tool_use\": true}`. Check it before the first call and throw `RequestError`: field `tool_choice.type` unless the type is `auto`, `any`, `tool` or `none`; `tool_choice.disable_parallel_tool_use` if that key is present and is not a boolean; `tool_choice` for type `any` or `tool` on `claude-opus-5-5`, `claude-sonnet-5-5`, `claude-fable-5-1` or `claude-mythos-5-1`, which reject forced tool use; and `tool_choice.name` for type `tool` when no tool has that name. Send the choice as given on the first request. A forced choice (`any` or `tool`) must not repeat, or the model could never give a final answer: from the second request on, send `{\"type\": \"auto\"}` instead. `auto` and `none` are sent unchanged every time. With no `tool_choice`, send none."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A tool call is run and its result sent back until the model ends its turn"
+        ],
+        [
+          "`e1`",
+          "Parallel calls get one user message with every result in order"
+        ],
+        [
+          "`e2`",
+          "A failing, unknown or malformed call becomes an error result and the loop goes on"
+        ],
+        [
+          "`e3`",
+          "The number of turns is bounded"
+        ],
+        [
+          "`e4`",
+          "Refusal and truncation end the loop, and a paused turn continues"
+        ],
+        [
+          "`e5`",
+          "`tool_choice` is validated for the model, and a forced choice applies to the first request only"
+        ],
+        [
+          "`e6`",
+          "Results that are not text are sent as JSON text"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// A tool loop against a scripted model. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"toolloop\");\nexport type Block = Record<string, any>;\nexport type Tool = { name: string; description: string; input_schema: Record<string, any>; handler: (input: Record<string, any>) => unknown };\nexport type Reply = { content: Block[]; stop_reason: string };\nexport type Ask = (request: Record<string, any>) => Reply;\nexport type Outcome = { status: \"done\" | \"refused\" | \"truncated\" | \"max_turns\"; text: string; turns: number; messages: any[] };\n\nconst FORCED_UNSUPPORTED = new Set([\"claude-opus-5-5\", \"claude-sonnet-5-5\", \"claude-fable-5-1\", \"claude-mythos-5-1\"]);\nconst CHOICE_TYPES = new Set([\"auto\", \"any\", \"tool\", \"none\"]);\n\n/** A tool refuses or fails; its message goes back to the model as an error result. */\nexport class ToolError extends Error {}\n\n/** The request would be rejected with a 400. `field` names the offending part. */\nexport class RequestError extends Error {\n  field: string;\n  reason: string;\n  constructor(field: string, reason: string) {\n    super(`${field}: ${reason}`);\n    this.field = field;\n    this.reason = reason;\n  }\n}\n\n/** Refuse a tool_choice the API would reject. */\nfunction checkChoice(tools: Tool[], model: string, choice: Record<string, any>): void {\n  if (!CHOICE_TYPES.has(choice.type)) throw new RequestError(\"tool_choice.type\", \"must be auto, any, tool or none\");\n  if (\"disable_parallel_tool_use\" in choice && typeof choice.disable_parallel_tool_use !== \"boolean\") throw new RequestError(\"tool_choice.disable_parallel_tool_use\", \"must be a boolean\");\n  if ((choice.type === \"any\" || choice.type === \"tool\") && FORCED_UNSUPPORTED.has(model)) throw new RequestError(\"tool_choice\", `${model} does not support forced tool use`);\n  if (choice.type === \"tool\" && !tools.some((t) => t.name === choice.name)) throw new RequestError(\"tool_choice.name\", \"names no tool in the request\");\n}\n\n/** The keys listed in the tool's required list that the input lacks. */\nfunction missingInputs(tool: Tool, input: Record<string, any>): string[] {\n  return (tool.input_schema.required ?? []).filter((k: string) => !(k in input));\n}\n\n/** The content of a tool result: a string as it is, any other value as JSON text. */\nfunction resultContent(out: unknown): string {\n  return typeof out === \"string\" ? out : JSON.stringify(out);\n}\n\nfunction runOne(tools: Tool[], block: Block): Block {\n  const result: Block = { type: \"tool_result\", tool_use_id: block.id };\n  const tool = tools.find((t) => t.name === block.name);\n  if (!tool) return { ...result, content: `Unknown tool: ${block.name}`, is_error: true };\n  const missing = missingInputs(tool, block.input);\n  if (missing.length > 0) return { ...result, content: `Missing required input: ${missing.join(\", \")}`, is_error: true };\n  try {\n    const out = tool.handler(block.input);\n    return { ...result, content: resultContent(out) };\n  } catch (err) {\n    return { ...result, content: (err as Error).message, is_error: true };\n  }\n}\n\nconst textOf = (content: Block[]) => content.filter((b) => b.type === \"text\").map((b) => b.text).join(\"\");\n\n/** One tool_result per tool_use block of the reply, in order. */\nfunction toolResults(tools: Tool[], content: Block[]): Block[] {\n  return content.filter((b) => b.type === \"tool_use\").map((b) => runOne(tools, b));\n}\n\n/** The status of a reply that ends the loop: done, refused or truncated. */\nfunction finalStatus(stop: string): \"done\" | \"refused\" | \"truncated\" {\n  if (stop === \"end_turn\" || stop === \"stop_sequence\") return \"done\";\n  if (stop === \"refusal\") return \"refused\";\n  return \"truncated\"; // max_tokens, model_context_window_exceeded: the answer is cut off\n}\n\n/** The last turn number the loop may use. */\nfunction lastTurn(maxTurns: number): number {\n  return maxTurns;\n}\n\n/** The tool_choice to send on this turn: a forced choice only on the first request. */\nfunction sentChoice(toolChoice: Record<string, any>, turn: number): Record<string, any> {\n  const forced = toolChoice.type === \"any\" || toolChoice.type === \"tool\";\n  return forced && turn > 1 ? { type: \"auto\" } : toolChoice;\n}\n\n/** Call the model, run every tool it asks for, send the results back, until it ends its turn or a limit is hit. */\nexport function runAgent(ask: Ask, tools: Tool[], userText: string, model = \"claude-sonnet-5-5\", maxTurns = 8, toolChoice?: Record<string, any>): Outcome {\n  log.debug(\"runAgent input\", userText);\n  if (toolChoice !== undefined) checkChoice(tools, model, toolChoice);\n  const definitions = tools.map(({ handler, ...definition }) => definition);\n  const messages: any[] = [{ role: \"user\", content: userText }];\n  let text = \"\";\n  let calls = 0;\n  for (let turn = 1; turn <= lastTurn(maxTurns); turn++) {\n    const request: Record<string, any> = { model, max_tokens: 1024, messages: [...messages], tools: definitions };\n    if (toolChoice !== undefined) request.tool_choice = sentChoice(toolChoice, turn);\n    const reply = ask(request);\n    calls = turn;\n    messages.push({ role: \"assistant\", content: reply.content });\n    text = textOf(reply.content);\n    const stop = reply.stop_reason;\n    if (stop === \"tool_use\") {\n      messages.push({ role: \"user\", content: toolResults(tools, reply.content) });\n    } else if (stop === \"pause_turn\") {\n      continue;\n    } else {\n      return { status: finalStatus(stop), text, turns: calls, messages };\n    }\n  }\n  return { status: \"max_turns\", text, turns: calls, messages };\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { runAgent } from \"./toolloop.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\nconst tools = [{\n  name: \"get_weather\",\n  description: \"Current weather for a city.\",\n  input_schema: { type: \"object\", properties: { city: { type: \"string\" } }, required: [\"city\"] },\n  handler: (input: Record<string, any>) => `${input.city}: 18 C`,\n}];\n\n// A stand-in for the model, like the one the tests use: it asks for one tool call, then ends its turn.\nconst replies: any[] = [\n  { content: [{ type: \"text\", text: \"Let me check.\" }, { type: \"tool_use\", id: \"tu_1\", name: \"get_weather\", input: { city: \"Oslo\" } }], stop_reason: \"tool_use\" },\n  { content: [{ type: \"text\", text: \"It is 18 C in Oslo.\" }], stop_reason: \"end_turn\" },\n];\nconst ask = (_request: Record<string, any>) => replies.shift();\n\nconst result = runAgent(ask, tools, \"Weather in Oslo?\");\n\nconsole.log(\"status:\", result.status);\nconsole.log(\"text:\", result.text);\nconsole.log(\"model calls:\", result.turns);\nconsole.log(\"messages:\", JSON.stringify(result.messages));\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// A tool loop against a scripted model. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"toolloop\");\nexport type Block = Record<string, any>;\nexport type Tool = { name: string; description: string; input_schema: Record<string, any>; handler: (input: Record<string, any>) => unknown };\nexport type Reply = { content: Block[]; stop_reason: string };\nexport type Ask = (request: Record<string, any>) => Reply;\nexport type Outcome = { status: \"done\" | \"refused\" | \"truncated\" | \"max_turns\"; text: string; turns: number; messages: any[] };\n\nconst FORCED_UNSUPPORTED = new Set([\"claude-opus-5-5\", \"claude-sonnet-5-5\", \"claude-fable-5-1\", \"claude-mythos-5-1\"]);\nconst CHOICE_TYPES = new Set([\"auto\", \"any\", \"tool\", \"none\"]);\n\n/** A tool refuses or fails; its message goes back to the model as an error result. */\nexport class ToolError extends Error {}\n\n/** The request would be rejected with a 400. `field` names the offending part. */\nexport class RequestError extends Error {\n  field: string;\n  reason: string;\n  constructor(field: string, reason: string) {\n    super(`${field}: ${reason}`);\n    this.field = field;\n    this.reason = reason;\n  }\n}\n\n/** Refuse a tool_choice the API would reject. */\nfunction checkChoice(tools: Tool[], model: string, choice: Record<string, any>): void {\n  // TODO 1 of 7 (finish this to pass e5): refuse a tool_choice the API would reject.\n  // Receives the tools, the model id and the tool_choice map. Throws RequestError, in this order: field \"tool_choice.type\" unless the type is in\n  // CHOICE_TYPES; \"tool_choice.disable_parallel_tool_use\" when that key is present and not a boolean; \"tool_choice\" for type \"any\" or \"tool\" on a\n  // model in FORCED_UNSUPPORTED; \"tool_choice.name\" for type \"tool\" when no tool has that name. Returns nothing otherwise.\n  // Example: checkChoice([], \"claude-opus-5-5\", { type: \"any\" }) throws a RequestError with field \"tool_choice\"\n}\n\n/** The keys listed in the tool's required list that the input lacks. */\nfunction missingInputs(tool: Tool, input: Record<string, any>): string[] {\n  // TODO 2 of 7 (finish this to pass e2): the required keys a call leaves out.\n  // Receives a tool and the input map of the call. Returns the keys in the tool's input_schema `required` list that the input lacks, in the\n  // order of that list; an empty array when none is missing.\n  // Example: missingInputs({ ...tool, input_schema: { required: [\"city\"] } }, {}) -> [\"city\"]\n  return [];\n}\n\n/** The content of a tool result: a string as it is, any other value as JSON text. */\nfunction resultContent(out: unknown): string {\n  // TODO 3 of 7 (finish this to pass e6): the content of a tool_result.\n  // Receives what a handler returned. Returns a string as it is and any other value as JSON text (use JSON.stringify).\n  // Example: resultContent({ city: \"Oslo\" }) -> '{\"city\":\"Oslo\"}'\n  return out as string;\n}\n\nfunction runOne(tools: Tool[], block: Block): Block {\n  const result: Block = { type: \"tool_result\", tool_use_id: block.id };\n  const tool = tools.find((t) => t.name === block.name);\n  if (!tool) return { ...result, content: `Unknown tool: ${block.name}`, is_error: true };\n  const missing = missingInputs(tool, block.input);\n  if (missing.length > 0) return { ...result, content: `Missing required input: ${missing.join(\", \")}`, is_error: true };\n  try {\n    const out = tool.handler(block.input);\n    return { ...result, content: resultContent(out) };\n  } catch (err) {\n    return { ...result, content: (err as Error).message, is_error: true };\n  }\n}\n\nconst textOf = (content: Block[]) => content.filter((b) => b.type === \"text\").map((b) => b.text).join(\"\");\n\n/** One tool_result per tool_use block of the reply, in order. */\nfunction toolResults(tools: Tool[], content: Block[]): Block[] {\n  // TODO 4 of 7 (finish this to pass m1 and e1): run every tool call of a reply.\n  // Receives the tools and the content blocks of the reply. Returns one tool_result (from runOne) per block of type \"tool_use\", in the\n  // order of the blocks; blocks of any other type, such as \"server_tool_use\", get no result.\n  // Example: [a text block, a tool_use block] -> an array with one tool_result\n  return [];\n}\n\n/** The status of a reply that ends the loop: done, refused or truncated. */\nfunction finalStatus(stop: string): \"done\" | \"refused\" | \"truncated\" {\n  // TODO 5 of 7 (finish this to pass e4): the status of a reply that ends the loop.\n  // Receives the stop_reason. Returns \"done\" for \"end_turn\" and \"stop_sequence\", \"refused\" for \"refusal\" and \"truncated\" for any other.\n  // Example: finalStatus(\"max_tokens\") -> \"truncated\"\n  return \"done\";\n}\n\n/** The last turn number the loop may use. */\nfunction lastTurn(maxTurns: number): number {\n  // TODO 6 of 7 (finish this to pass e3): the last turn number the loop may use.\n  // Receives maxTurns. Returns the highest turn number, so that at most maxTurns calls are made.\n  // Example: lastTurn(3) -> 3\n  return 1;\n}\n\n/** The tool_choice to send on this turn: a forced choice only on the first request. */\nfunction sentChoice(toolChoice: Record<string, any>, turn: number): Record<string, any> {\n  // TODO 7 of 7 (finish this to pass e5): the tool_choice to send on a turn.\n  // Receives the tool_choice map and the turn number (1 for the first request). A forced choice (type \"any\" or \"tool\") is sent as given on\n  // turn 1 and as { type: \"auto\" } from turn 2 on; \"auto\" and \"none\" are sent unchanged every turn.\n  // Example: sentChoice({ type: \"any\" }, 2) -> { type: \"auto\" }\n  return toolChoice;\n}\n\n/** Call the model, run every tool it asks for, send the results back, until it ends its turn or a limit is hit. */\nexport function runAgent(ask: Ask, tools: Tool[], userText: string, model = \"claude-sonnet-5-5\", maxTurns = 8, toolChoice?: Record<string, any>): Outcome {\n  log.debug(\"runAgent input\", userText);\n  if (toolChoice !== undefined) checkChoice(tools, model, toolChoice);\n  const definitions = tools.map(({ handler, ...definition }) => definition);\n  const messages: any[] = [{ role: \"user\", content: userText }];\n  let text = \"\";\n  let calls = 0;\n  for (let turn = 1; turn <= lastTurn(maxTurns); turn++) {\n    const request: Record<string, any> = { model, max_tokens: 1024, messages: [...messages], tools: definitions };\n    if (toolChoice !== undefined) request.tool_choice = sentChoice(toolChoice, turn);\n    const reply = ask(request);\n    calls = turn;\n    messages.push({ role: \"assistant\", content: reply.content });\n    text = textOf(reply.content);\n    const stop = reply.stop_reason;\n    if (stop === \"tool_use\") {\n      messages.push({ role: \"user\", content: toolResults(tools, reply.content) });\n    } else if (stop === \"pause_turn\") {\n      continue;\n    } else {\n      return { status: finalStatus(stop), text, turns: calls, messages };\n    }\n  }\n  return { status: \"max_turns\", text, turns: calls, messages };\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { runAgent } from \"./toolloop.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\nconst tools = [{\n  name: \"get_weather\",\n  description: \"Current weather for a city.\",\n  input_schema: { type: \"object\", properties: { city: { type: \"string\" } }, required: [\"city\"] },\n  handler: (input: Record<string, any>) => `${input.city}: 18 C`,\n}];\n\n// A stand-in for the model, like the one the tests use: it asks for one tool call, then ends its turn.\nconst replies: any[] = [\n  { content: [{ type: \"text\", text: \"Let me check.\" }, { type: \"tool_use\", id: \"tu_1\", name: \"get_weather\", input: { city: \"Oslo\" } }], stop_reason: \"tool_use\" },\n  { content: [{ type: \"text\", text: \"It is 18 C in Oslo.\" }], stop_reason: \"end_turn\" },\n];\nconst ask = (_request: Record<string, any>) => replies.shift();\n\nconst result = runAgent(ask, tools, \"Weather in Oslo?\");\n\nconsole.log(\"status:\", result.status);\nconsole.log(\"text:\", result.text);\nconsole.log(\"model calls:\", result.turns);\nconsole.log(\"messages:\", JSON.stringify(result.messages));\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "b5cc588a56b205e76d8a8aefd83412325daec58db41236c2cef75d463cb2614f",
+  "starting_code": "// A tool loop against a scripted model. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"toolloop\");\nexport type Block = Record<string, any>;\nexport type Tool = { name: string; description: string; input_schema: Record<string, any>; handler: (input: Record<string, any>) => unknown };\nexport type Reply = { content: Block[]; stop_reason: string };\nexport type Ask = (request: Record<string, any>) => Reply;\nexport type Outcome = { status: \"done\" | \"refused\" | \"truncated\" | \"max_turns\"; text: string; turns: number; messages: any[] };\n\nconst FORCED_UNSUPPORTED = new Set([\"claude-opus-5-5\", \"claude-sonnet-5-5\", \"claude-fable-5-1\", \"claude-mythos-5-1\"]);\nconst CHOICE_TYPES = new Set([\"auto\", \"any\", \"tool\", \"none\"]);\n\n/** A tool refuses or fails; its message goes back to the model as an error result. */\nexport class ToolError extends Error {}\n\n/** The request would be rejected with a 400. `field` names the offending part. */\nexport class RequestError extends Error {\n  field: string;\n  reason: string;\n  constructor(field: string, reason: string) {\n    super(`${field}: ${reason}`);\n    this.field = field;\n    this.reason = reason;\n  }\n}\n\n/** Refuse a tool_choice the API would reject. */\nfunction checkChoice(tools: Tool[], model: string, choice: Record<string, any>): void {\n  // TODO 1 of 7 (finish this to pass e5): refuse a tool_choice the API would reject.\n  // Receives the tools, the model id and the tool_choice map. Throws RequestError, in this order: field \"tool_choice.type\" unless the type is in\n  // CHOICE_TYPES; \"tool_choice.disable_parallel_tool_use\" when that key is present and not a boolean; \"tool_choice\" for type \"any\" or \"tool\" on a\n  // model in FORCED_UNSUPPORTED; \"tool_choice.name\" for type \"tool\" when no tool has that name. Returns nothing otherwise.\n  // Example: checkChoice([], \"claude-opus-5-5\", { type: \"any\" }) throws a RequestError with field \"tool_choice\"\n}\n\n/** The keys listed in the tool's required list that the input lacks. */\nfunction missingInputs(tool: Tool, input: Record<string, any>): string[] {\n  // TODO 2 of 7 (finish this to pass e2): the required keys a call leaves out.\n  // Receives a tool and the input map of the call. Returns the keys in the tool's input_schema `required` list that the input lacks, in the\n  // order of that list; an empty array when none is missing.\n  // Example: missingInputs({ ...tool, input_schema: { required: [\"city\"] } }, {}) -> [\"city\"]\n  return [];\n}\n\n/** The content of a tool result: a string as it is, any other value as JSON text. */\nfunction resultContent(out: unknown): string {\n  // TODO 3 of 7 (finish this to pass e6): the content of a tool_result.\n  // Receives what a handler returned. Returns a string as it is and any other value as JSON text (use JSON.stringify).\n  // Example: resultContent({ city: \"Oslo\" }) -> '{\"city\":\"Oslo\"}'\n  return out as string;\n}\n\nfunction runOne(tools: Tool[], block: Block): Block {\n  const result: Block = { type: \"tool_result\", tool_use_id: block.id };\n  const tool = tools.find((t) => t.name === block.name);\n  if (!tool) return { ...result, content: `Unknown tool: ${block.name}`, is_error: true };\n  const missing = missingInputs(tool, block.input);\n  if (missing.length > 0) return { ...result, content: `Missing required input: ${missing.join(\", \")}`, is_error: true };\n  try {\n    const out = tool.handler(block.input);\n    return { ...result, content: resultContent(out) };\n  } catch (err) {\n    return { ...result, content: (err as Error).message, is_error: true };\n  }\n}\n\nconst textOf = (content: Block[]) => content.filter((b) => b.type === \"text\").map((b) => b.text).join(\"\");\n\n/** One tool_result per tool_use block of the reply, in order. */\nfunction toolResults(tools: Tool[], content: Block[]): Block[] {\n  // TODO 4 of 7 (finish this to pass m1 and e1): run every tool call of a reply.\n  // Receives the tools and the content blocks of the reply. Returns one tool_result (from runOne) per block of type \"tool_use\", in the\n  // order of the blocks; blocks of any other type, such as \"server_tool_use\", get no result.\n  // Example: [a text block, a tool_use block] -> an array with one tool_result\n  return [];\n}\n\n/** The status of a reply that ends the loop: done, refused or truncated. */\nfunction finalStatus(stop: string): \"done\" | \"refused\" | \"truncated\" {\n  // TODO 5 of 7 (finish this to pass e4): the status of a reply that ends the loop.\n  // Receives the stop_reason. Returns \"done\" for \"end_turn\" and \"stop_sequence\", \"refused\" for \"refusal\" and \"truncated\" for any other.\n  // Example: finalStatus(\"max_tokens\") -> \"truncated\"\n  return \"done\";\n}\n\n/** The last turn number the loop may use. */\nfunction lastTurn(maxTurns: number): number {\n  // TODO 6 of 7 (finish this to pass e3): the last turn number the loop may use.\n  // Receives maxTurns. Returns the highest turn number, so that at most maxTurns calls are made.\n  // Example: lastTurn(3) -> 3\n  return 1;\n}\n\n/** The tool_choice to send on this turn: a forced choice only on the first request. */\nfunction sentChoice(toolChoice: Record<string, any>, turn: number): Record<string, any> {\n  // TODO 7 of 7 (finish this to pass e5): the tool_choice to send on a turn.\n  // Receives the tool_choice map and the turn number (1 for the first request). A forced choice (type \"any\" or \"tool\") is sent as given on\n  // turn 1 and as { type: \"auto\" } from turn 2 on; \"auto\" and \"none\" are sent unchanged every turn.\n  // Example: sentChoice({ type: \"any\" }, 2) -> { type: \"auto\" }\n  return toolChoice;\n}\n\n/** Call the model, run every tool it asks for, send the results back, until it ends its turn or a limit is hit. */\nexport function runAgent(ask: Ask, tools: Tool[], userText: string, model = \"claude-sonnet-5-5\", maxTurns = 8, toolChoice?: Record<string, any>): Outcome {\n  log.debug(\"runAgent input\", userText);\n  if (toolChoice !== undefined) checkChoice(tools, model, toolChoice);\n  const definitions = tools.map(({ handler, ...definition }) => definition);\n  const messages: any[] = [{ role: \"user\", content: userText }];\n  let text = \"\";\n  let calls = 0;\n  for (let turn = 1; turn <= lastTurn(maxTurns); turn++) {\n    const request: Record<string, any> = { model, max_tokens: 1024, messages: [...messages], tools: definitions };\n    if (toolChoice !== undefined) request.tool_choice = sentChoice(toolChoice, turn);\n    const reply = ask(request);\n    calls = turn;\n    messages.push({ role: \"assistant\", content: reply.content });\n    text = textOf(reply.content);\n    const stop = reply.stop_reason;\n    if (stop === \"tool_use\") {\n      messages.push({ role: \"user\", content: toolResults(tools, reply.content) });\n    } else if (stop === \"pause_turn\") {\n      continue;\n    } else {\n      return { status: finalStatus(stop), text, turns: calls, messages };\n    }\n  }\n  return { status: \"max_turns\", text, turns: calls, messages };\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/26-tool-use/prose/unit-03/practice-2/toolloop.ts",
+    "test_path": "practice/level-2/26-tool-use/prose/unit-03/practice-2/toolloop.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-2/26-tool-use/prose/unit-03/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-2/26-tool-use/prose/unit-03/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-2/26-tool-use/prose/unit-03/practice-2/toolloop.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 a tool call is run and its result sent back until the model ends its turn",
+        "kind": "main",
+        "says": "A tool call is run and its result sent back until the model ends its turn"
+      },
+      {
+        "id": "e1 parallel calls get one user message with every result in order",
+        "kind": "edge",
+        "says": "Parallel calls get one user message with every result in order"
+      },
+      {
+        "id": "e2 a failing unknown or malformed call becomes an error result and the loop goes on",
+        "kind": "edge",
+        "says": "A failing, unknown or malformed call becomes an error result and the loop goes on"
+      },
+      {
+        "id": "e3 the number of turns is bounded",
+        "kind": "edge",
+        "says": "The number of turns is bounded"
+      },
+      {
+        "id": "e4 refusal and truncation end the loop and a paused turn continues",
+        "kind": "edge",
+        "says": "Refusal and truncation end the loop, and a paused turn continues"
+      },
+      {
+        "id": "e5 tool choice is validated for the model and a forced choice applies to the first request only",
+        "kind": "edge",
+        "says": "tool_choice is validated for the model, and a forced choice applies to the first request only"
+      },
+      {
+        "id": "e6 results that are not text are sent as json text",
+        "kind": "edge",
+        "says": "Results that are not text are sent as JSON text"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/26-tool-use/prose/unit-03/practice-2/target/report.xml"
+    },
+    "origin": "course/26-tool-use/03-parallel-calls-the-tool-runner-and-the-practice.md",
+    "concepts": [
+      "the practice of Parallel calls, the tool runner and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/26-tool-use/prose/unit-03/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "tool-use-u3"
+}

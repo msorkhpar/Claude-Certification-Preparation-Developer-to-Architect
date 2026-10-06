@@ -1,0 +1,78 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "70-scenario-customer-support-agent"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: audit a support agent's sessions and name the first fix (TypeScript)",
+  "lang": "typescript",
+  "main_file": "audit.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "audit.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-3/70-scenario-customer-support-agent/prose/unit-02/practice-2/audit.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 a mixed set of sessions gets every rate and the first fix",
+      "kind": "main",
+      "says": "A mixed set of six sessions gets every field right and the first fix"
+    },
+    {
+      "id": "e1 no sessions give zero rates and no diagnosis",
+      "kind": "edge",
+      "says": "No sessions: zero everywhere, a rate of 0, no diagnosis"
+    },
+    {
+      "id": "e2 a protected call before a successful identity check is a skipped prerequisite",
+      "kind": "edge",
+      "says": "The prerequisite is the order of the steps, and a failed identity check does not open the gate"
+    },
+    {
+      "id": "e3 a refund over the limit counts only when it was made",
+      "kind": "edge",
+      "says": "Only a refund that was made counts as over the limit"
+    },
+    {
+      "id": "e4 money first then tool descriptions then escalation criteria",
+      "kind": "edge",
+      "says": "The order of fixes: code, then descriptions (a tie goes to descriptions), then criteria"
+    },
+    {
+      "id": "e5 the target boundary and rounding of the first contact rate",
+      "kind": "edge",
+      "says": "The rate at exactly 0.8 meets the target, 0.6 does not, 2 of 3 is 0.667, and over- and under-escalation are counted apart"
+    },
+    {
+      "id": "e6 a wrong tool counts sessions and ignores steps with no known right tool",
+      "kind": "edge",
+      "says": "The wrong tool counts sessions and ignores steps whose right tool is not known"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/70-scenario-customer-support-agent/02-audit-the-sessions-and-the-practice.md"
+}

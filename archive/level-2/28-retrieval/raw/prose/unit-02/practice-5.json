@@ -1,0 +1,159 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "28-retrieval"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 5,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Fusion, reranking, context and recall",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "Two result lists come from indexes whose scores sit on different scales. How does the fusion method of the practice combine them?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It adds the raw scores of both indexes and sorts the totals that result",
+            "correct": false,
+            "says": "Ruled out because \"the scores cannot be added\" when they are on different scales."
+          },
+          {
+            "id": "b",
+            "text": "It sums `1 / (k + rank)` for each place where an id is found",
+            "correct": true,
+            "says": "The page says \"an id's score is the sum, over the lists that hold it, of `1 / (k + rank)`\"."
+          },
+          {
+            "id": "c",
+            "text": "It keeps the longer list and ignores the shorter one completely",
+            "correct": false,
+            "says": "Ruled out because \"an id at the top of one list and absent from the other still scores\"."
+          },
+          {
+            "id": "d",
+            "text": "It multiplies each chunk's two scores together before sorting them",
+            "correct": false,
+            "says": "Ruled out because \"Fusion uses only the ranks\", with no multiplication of scores."
+          }
+        ],
+        "origin": {
+          "path": "course/28-retrieval/02-fusion-reranking-context-and-recall.md",
+          "section": "Merging two rankings: reciprocal rank fusion"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A reranker is given a pool of 10 chunks, and the passage with the answer is ranked 14th by the merged list. What happens?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The reranker finds it and moves it to the front of the final list",
+            "correct": false,
+            "says": "Ruled out because \"reranking cannot fix a retrieval that missed\"."
+          },
+          {
+            "id": "b",
+            "text": "The candidate count is raised for that question by the scorer itself",
+            "correct": false,
+            "says": "Ruled out because \"the pool must be large enough to contain the answer\", and a scorer has no control over it."
+          },
+          {
+            "id": "c",
+            "text": "It is added to the candidates when its score is high enough to qualify",
+            "correct": false,
+            "says": "Ruled out because the pool is \"the first `pool` ids of the merged ranking\" and nothing is added to it afterwards."
+          },
+          {
+            "id": "d",
+            "text": "It is never considered, since the scorer sees only the first ten",
+            "correct": true,
+            "says": "The page says \"Only the pool takes part: a chunk outside it is never considered\"."
+          }
+        ],
+        "origin": {
+          "path": "course/28-retrieval/02-fusion-reranking-context-and-recall.md",
+          "section": "Reranking"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A company's reference material has 80,000 tokens and changes once a month. What does the write-up's rule of thumb suggest?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Build the full pipeline, since every base needs one of its own to work well",
+            "correct": false,
+            "says": "Ruled out because \"A pipeline adds stages that can each fail\"."
+          },
+          {
+            "id": "b",
+            "text": "Skip retrieval, and place the whole of it in a prompt that is cached",
+            "correct": true,
+            "says": "The page says \"under about 200,000 tokens, put the whole knowledge base in the prompt and cache it, and skip retrieval\"."
+          },
+          {
+            "id": "c",
+            "text": "Split it into 20 chunks and index only the first ones that are written",
+            "correct": false,
+            "says": "Ruled out because the guide for retrieval is to \"retrieve 20 chunks rather than fewer\", which is a count to retrieve and not a way to index."
+          },
+          {
+            "id": "d",
+            "text": "Train an embedding model of its own on the text of the material",
+            "correct": false,
+            "says": "Ruled out because \"The rule is about size, not quality\", and it says nothing about training a model."
+          }
+        ],
+        "origin": {
+          "path": "course/28-retrieval/02-fusion-reranking-context-and-recall.md",
+          "section": "When retrieval is unnecessary"
+        }
+      }
+    ],
+    "concepts": [
+      "Contextual retrieval, as the page teaches it",
+      "Fusion, reranking, context and recall, as the page teaches it",
+      "Merging two rankings: reciprocal rank fusion, as the page teaches it",
+      "Reranking, as the page teaches it",
+      "When retrieval is unnecessary, as the page teaches it",
+      "Why it matters, as the page teaches it"
+    ]
+  }
+}

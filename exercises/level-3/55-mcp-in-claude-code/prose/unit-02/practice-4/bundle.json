@@ -1,0 +1,104 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "55-mcp-in-claude-code"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 4,
+  "title": "Practice: connect a team's MCP servers to Claude Code (Kotlin)",
+  "lang": "kotlin",
+  "main_file": "project/.mcp.json",
+  "files": [
+    "project/.claude/settings.json",
+    "project/docs/mcp-servers.md",
+    "project/docs/tool-descriptions.json",
+    "project/user-scope.example.json"
+  ],
+  "test_file": "src/test/kotlin/McpSetupTest.kt",
+  "build": [
+    "libs/harness/build.gradle.kts",
+    "libs/harness/src/main/java/harness/Show.java",
+    "libs/55-mcp-config/build.gradle.kts",
+    "libs/55-mcp-config/src/main/kotlin/McpConfig.kt",
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-4/check_files.py",
+    "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-4/project/.claude/settings.json",
+    "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-4/project/.mcp.json",
+    "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-4/project/docs/mcp-servers.md",
+    "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-4/project/docs/tool-descriptions.json",
+    "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-4/project/user-scope.example.json"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-4",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_theSharedFileDeclaresTheFourTeamServersWithTheRightShape()",
+      "kind": "main",
+      "says": "The shared file declares the four team servers with the right shape"
+    },
+    {
+      "id": "e1_credentialsAreReadFromTheEnvironmentAndNeverWrittenInTheFile()",
+      "kind": "edge",
+      "says": "Credentials come from the environment, never from the file, and not under a name Claude Code blanks out"
+    },
+    {
+      "id": "e2_endpointsAndPathsThatAreNotSecretHaveADefaultSoTheFileWorksUnset()",
+      "kind": "edge",
+      "says": "Endpoints and paths that are not secret have a default, so the file works with nothing set"
+    },
+    {
+      "id": "e3_onlyTheSmallCoreServerIsLoadedAtTheStart()",
+      "kind": "edge",
+      "says": "Only the small core server is loaded at the start"
+    },
+    {
+      "id": "e4_sharedServersStayInTheProjectFileAndPersonalOnesInTheUserScopeFile()",
+      "kind": "edge",
+      "says": "Shared servers are in the project file and the personal one only in the user-scope example"
+    },
+    {
+      "id": "e5_permissionsAllowTheReadOnlyServersByNameAndDenyTheDestructiveTool()",
+      "kind": "edge",
+      "says": "Permissions allow the read-only servers by name and deny the destructive tool"
+    },
+    {
+      "id": "e6_theToolDescriptionSaysWhenToUseItInsteadOfGrepAndFitsTheLimit()",
+      "kind": "edge",
+      "says": "The tool description gives the boundary against Grep early and fits the limit"
+    },
+    {
+      "id": "e7_theNotesListEveryServerWithItsScopeAndReadTheCatalogAsAResource()",
+      "kind": "edge",
+      "says": "The notes list every server with its scope and read the catalog as a resource"
+    },
+    {
+      "id": "e8_noFileHoldsAPersonalPathAnAddressOrAKey()",
+      "kind": "edge",
+      "says": "No file holds a personal path, an address or a key"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/55-mcp-in-claude-code/02-tools-together-descriptions-resources-and-the-practice.md"
+}

@@ -1,0 +1,496 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "42-evaluation"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Refining against an eval set, regression runs and the practice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Refining against an eval set, regression runs and the practice"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Developer · **Module 42:** Evaluation · **Page 3 of 3** **Exams:** DV8; A4.4"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** improve a prompt with a loop that an eval set judges, tell a better average from a safe change, run a regression comparison that names what broke, keep a model or setting change under the same gate, and write the module's practice, an eval harness."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-03 against the Claude API documentation pages \"Define success criteria and build evaluations\", \"Prompt engineering overview\" and \"Claude API errors\", and against the pinned model table in the course's version notes. The example runs offline in Python, TypeScript, Java and Kotlin with scripted stand-ins for the application and no model. The practice runs offline in Python, TypeScript, Java and Kotlin."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "Prompt refinement without an eval is a walk in the dark: each edit fixes the case you were looking at and may break three you were not. The exam's evaluation questions describe a team that changed something and asks what it should have done before shipping: run the set, compare per case, look at every dimension, and keep the comparison after the next model release. This page is that routine, and the practice builds its machinery."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The refinement loop"
+    },
+    {
+      "type": "para",
+      "text": "The loop has five steps, and the order is what makes it work."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Baseline.** Run the whole set on the current prompt and keep the report. Every later number is judged against it.",
+        "**One change.** Edit one thing: an instruction, an example, a field name. Two edits at once leave you unable to say which one helped.",
+        "**Run the whole set.** Not the case you were fixing. The edit may have changed any of them.",
+        "**Compare per case.** The average says whether the change was good on balance. The per-case diff says what it cost.",
+        "**Keep or revert.** Keep the change only if every success dimension still holds and nothing regressed without a reason you accept. Then the new report is the baseline."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The prompt engineering overview supplies the guard on step 1: the techniques assume \"Some ways to empirically test against those criteria\". The same page supplies the guard on the whole loop: \"Not every success criteria or failing eval is best solved by prompt engineering.\" If the failing dimension is latency or price, the cure may be a different model, a smaller output or a cache, and the loop's report is how you notice that."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "A run, a gate and a comparison"
+    },
+    {
+      "type": "para",
+      "text": "The example below does the five steps on six sentiment cases. It uses two scripted \"versions\" of a prompt, which are lookup tables standing in for the application, so the program is exact and needs no model. Code grading is by exact label (the example's grader trims and lower-cases only, a simpler rule than the practice's `exact` check, which also collapses runs of white space), the criteria are a pass rate of at least 0.8 overall and at least 0.75 among the cases tagged `edge`, and the comparison names regressions and fixes. The source of all four languages is shown, and under each is what it printed in the container."
+    },
+    {
+      "type": "example",
+      "id": "m42-eval-run",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/42-eval-run/python/eval_run.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/42-eval-run/typescript/evalRun.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/42-eval-run/java/EvalRun.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/42-eval-run/kotlin/EvalRun.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"An eval run, a success gate and a regression comparison, on a scripted classifier.\n\nThe Claude documentation on success criteria and evaluations (read on 2026-10-03) says to design evals that mirror the real task, edge\ncases included, to automate the grading, and to judge several dimensions at once (\"an F1 score of at least 0.85\", \"99.5% of outputs are\nnon-toxic\"). This file runs six sentiment cases through two scripted versions of a prompt, grades them by exact match, and shows that a\nbetter average can still hide a regression. The two models are lookup tables standing in for the application: no model is called.\n\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\nCASES = [\n    {\"id\": \"pos-1\", \"input\": \"Love it, works great\", \"expect\": \"positive\", \"tags\": [\"core\"]},\n    {\"id\": \"neg-1\", \"input\": \"Broke after two days\", \"expect\": \"negative\", \"tags\": [\"core\"]},\n    {\"id\": \"neu-1\", \"input\": \"It arrived on Tuesday\", \"expect\": \"neutral\", \"tags\": [\"core\"]},\n    {\"id\": \"sarcasm-1\", \"input\": \"Oh great, another crash\", \"expect\": \"negative\", \"tags\": [\"edge\"]},\n    {\"id\": \"mixed-1\", \"input\": \"Fast shipping but the screen is dim\", \"expect\": \"neutral\", \"tags\": [\"edge\"]},\n    {\"id\": \"empty-1\", \"input\": \"\", \"expect\": \"neutral\", \"tags\": [\"edge\"]},\n]\n\nPROMPT_V1 = {\"Love it, works great\": \"positive\", \"Broke after two days\": \"negative\", \"It arrived on Tuesday\": \"neutral\",\n             \"Oh great, another crash\": \"positive\", \"Fast shipping but the screen is dim\": \"positive\", \"\": \"Neutral\"}\nPROMPT_V2 = {**PROMPT_V1, \"Oh great, another crash\": \"negative\", \"Fast shipping but the screen is dim\": \"neutral\", \"\": \"positive\"}\n\nCRITERIA = {\"min_pass_rate\": 0.8, \"tags\": {\"edge\": 0.75}}\n\n\ndef grade(case, output):\n    \"\"\"Code-graded: the answer must equal the expected label, ignoring case and surrounding white space.\"\"\"\n    return output.strip().lower() == case[\"expect\"]\n\n\ndef run(cases, model):\n    results = [{\"id\": c[\"id\"], \"passed\": grade(c, model[c[\"input\"]]), \"tags\": c[\"tags\"]} for c in cases]\n    rate = sum(r[\"passed\"] for r in results) / len(results)\n    by_tag = {}\n    for r in results:\n        for tag in r[\"tags\"]:\n            row = by_tag.setdefault(tag, [0, 0])\n            row[0] += r[\"passed\"]\n            row[1] += 1\n    return {\"results\": results, \"pass_rate\": rate, \"by_tag\": by_tag}\n\n\ndef gate(report, criteria):\n    \"\"\"Every dimension of the success criteria must hold, not only the average.\"\"\"\n    failures = []\n    if report[\"pass_rate\"] < criteria[\"min_pass_rate\"]:\n        failures.append(\"overall\")\n    for tag, minimum in criteria[\"tags\"].items():\n        passed, total = report[\"by_tag\"][tag]\n        if passed / total < minimum:\n            failures.append(f\"tag:{tag}\")\n    return failures\n\n\ndef compare(baseline, current):\n    before = {r[\"id\"]: r[\"passed\"] for r in baseline[\"results\"]}\n    regressions = [r[\"id\"] for r in current[\"results\"] if before[r[\"id\"]] and not r[\"passed\"]]\n    fixed = [r[\"id\"] for r in current[\"results\"] if not before[r[\"id\"]] and r[\"passed\"]]\n    return {\"regressions\": regressions, \"fixed\": fixed}\n\n\ndef main():\n    v1, v2 = run(CASES, PROMPT_V1), run(CASES, PROMPT_V2)\n    for name, report in ((\"prompt v1\", v1), (\"prompt v2\", v2)):\n        edge = report[\"by_tag\"][\"edge\"]\n        print(f\"{name}: pass rate {report['pass_rate']:.3f}, edge {edge[0]}/{edge[1]}, gate failures {gate(report, CRITERIA)}\")\n    diff = compare(v1, v2)\n    print(\"v2 against v1: fixed\", diff[\"fixed\"], \"regressions\", diff[\"regressions\"])\n    print(\"average improved:\", v2[\"pass_rate\"] > v1[\"pass_rate\"], \"- safe to ship:\", not diff[\"regressions\"] and not gate(v2, CRITERIA))\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "prompt v1: pass rate 0.667, edge 1/3, gate failures ['overall', 'tag:edge']\nprompt v2: pass rate 0.833, edge 2/3, gate failures ['tag:edge']\nv2 against v1: fixed ['sarcasm-1', 'mixed-1'] regressions ['empty-1']\naverage improved: True - safe to ship: False"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// An eval run, a success gate and a regression comparison, on a scripted classifier.\n//\n// The Claude documentation on success criteria and evaluations (read on 2026-10-03) says to design evals that mirror the real task, edge\n// cases included, to automate the grading, and to judge several dimensions at once (\"an F1 score of at least 0.85\", \"99.5% of outputs are\n// non-toxic\"). This file runs six sentiment cases through two scripted versions of a prompt, grades them by exact match, and shows that a\n// better average can still hide a regression. The two models are lookup tables standing in for the application: no model is called.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"eval_run\");\n\ntype Case = { id: string; input: string; expect: string; tags: string[] };\ntype Report = { results: { id: string; passed: boolean; tags: string[] }[]; pass_rate: number; by_tag: Record<string, [number, number]> };\n\nexport const CASES: Case[] = [\n  { id: \"pos-1\", input: \"Love it, works great\", expect: \"positive\", tags: [\"core\"] },\n  { id: \"neg-1\", input: \"Broke after two days\", expect: \"negative\", tags: [\"core\"] },\n  { id: \"neu-1\", input: \"It arrived on Tuesday\", expect: \"neutral\", tags: [\"core\"] },\n  { id: \"sarcasm-1\", input: \"Oh great, another crash\", expect: \"negative\", tags: [\"edge\"] },\n  { id: \"mixed-1\", input: \"Fast shipping but the screen is dim\", expect: \"neutral\", tags: [\"edge\"] },\n  { id: \"empty-1\", input: \"\", expect: \"neutral\", tags: [\"edge\"] },\n];\n\nexport const PROMPT_V1: Record<string, string> = {\n  \"Love it, works great\": \"positive\", \"Broke after two days\": \"negative\", \"It arrived on Tuesday\": \"neutral\",\n  \"Oh great, another crash\": \"positive\", \"Fast shipping but the screen is dim\": \"positive\", \"\": \"Neutral\",\n};\nexport const PROMPT_V2: Record<string, string> = { ...PROMPT_V1, \"Oh great, another crash\": \"negative\", \"Fast shipping but the screen is dim\": \"neutral\", \"\": \"positive\" };\n\nexport const CRITERIA = { min_pass_rate: 0.8, tags: { edge: 0.75 } as Record<string, number> };\n\n/** Code-graded: the answer must equal the expected label, ignoring case and surrounding white space. */\nexport function grade(c: { expect: string }, output: string): boolean {\n  return output.trim().toLowerCase() === c.expect;\n}\n\nexport function run(cases: Case[], model: Record<string, string>): Report {\n  const results = cases.map((c) => ({ id: c.id, passed: grade(c, model[c.input]), tags: c.tags }));\n  const by_tag: Record<string, [number, number]> = {};\n  for (const r of results) {\n    for (const tag of r.tags) {\n      const row = (by_tag[tag] ??= [0, 0]);\n      row[0] += r.passed ? 1 : 0;\n      row[1] += 1;\n    }\n  }\n  return { results, pass_rate: results.filter((r) => r.passed).length / results.length, by_tag };\n}\n\n/** Every dimension of the success criteria must hold, not only the average. */\nexport function gate(report: Report, criteria: typeof CRITERIA): string[] {\n  const failures: string[] = [];\n  if (report.pass_rate < criteria.min_pass_rate) failures.push(\"overall\");\n  for (const [tag, minimum] of Object.entries(criteria.tags)) {\n    const [passed, total] = report.by_tag[tag];\n    if (passed / total < minimum) failures.push(`tag:${tag}`);\n  }\n  return failures;\n}\n\nexport function compare(baseline: Report, current: Report) {\n  const before = new Map(baseline.results.map((r) => [r.id, r.passed]));\n  return {\n    regressions: current.results.filter((r) => before.get(r.id) && !r.passed).map((r) => r.id),\n    fixed: current.results.filter((r) => !before.get(r.id) && r.passed).map((r) => r.id),\n  };\n}\n\nconst list = (items: string[]) => `[${items.map((i) => `'${i}'`).join(\", \")}]`;\n\nfunction main() {\n  const v1 = run(CASES, PROMPT_V1);\n  const v2 = run(CASES, PROMPT_V2);\n  for (const [name, report] of [[\"prompt v1\", v1], [\"prompt v2\", v2]] as const) {\n    const edge = report.by_tag.edge;\n    console.log(`${name}: pass rate ${report.pass_rate.toFixed(3)}, edge ${edge[0]}/${edge[1]}, gate failures ${list(gate(report, CRITERIA))}`);\n  }\n  const diff = compare(v1, v2);\n  console.log(\"v2 against v1: fixed\", list(diff.fixed), \"regressions\", list(diff.regressions));\n  const safe = diff.regressions.length === 0 && gate(v2, CRITERIA).length === 0;\n  console.log(\"average improved:\", v2.pass_rate > v1.pass_rate ? \"True\" : \"False\", \"- safe to ship:\", safe ? \"True\" : \"False\");\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "prompt v1: pass rate 0.667, edge 1/3, gate failures ['overall', 'tag:edge']\nprompt v2: pass rate 0.833, edge 2/3, gate failures ['tag:edge']\nv2 against v1: fixed ['sarcasm-1', 'mixed-1'] regressions ['empty-1']\naverage improved: True - safe to ship: False"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Locale;\nimport java.util.Map;\nimport java.util.stream.Collectors;\n\n/**\n * An eval run, a success gate and a regression comparison, on a scripted classifier.\n *\n * <p>The Claude documentation on success criteria and evaluations (read on 2026-10-03) says to design evals that mirror the real task, edge\n * cases included, to automate the grading, and to judge several dimensions at once (\"an F1 score of at least 0.85\", \"99.5% of outputs are\n * non-toxic\"). This file runs six sentiment cases through two scripted versions of a prompt, grades them by exact match, and shows that a\n * better average can still hide a regression. The two models are lookup tables standing in for the application: no model is called.\n */\npublic final class EvalRun {\n    private static final System.Logger LOG = System.getLogger(EvalRun.class.getName());\n    record Case(String id, String input, String expect, List<String> tags) {}\n\n    record Result(String id, boolean passed, List<String> tags) {}\n\n    /** pass rate of a run, and per tag {passed, total}. */\n    record Report(List<Result> results, double passRate, Map<String, int[]> byTag) {}\n\n    record Criteria(double minPassRate, Map<String, Double> tags) {}\n\n    record Diff(List<String> regressions, List<String> fixed) {}\n\n    static final List<Case> CASES = List.of(\n        new Case(\"pos-1\", \"Love it, works great\", \"positive\", List.of(\"core\")),\n        new Case(\"neg-1\", \"Broke after two days\", \"negative\", List.of(\"core\")),\n        new Case(\"neu-1\", \"It arrived on Tuesday\", \"neutral\", List.of(\"core\")),\n        new Case(\"sarcasm-1\", \"Oh great, another crash\", \"negative\", List.of(\"edge\")),\n        new Case(\"mixed-1\", \"Fast shipping but the screen is dim\", \"neutral\", List.of(\"edge\")),\n        new Case(\"empty-1\", \"\", \"neutral\", List.of(\"edge\")));\n\n    static final Map<String, String> PROMPT_V1 = Map.of(\n        \"Love it, works great\", \"positive\", \"Broke after two days\", \"negative\", \"It arrived on Tuesday\", \"neutral\",\n        \"Oh great, another crash\", \"positive\", \"Fast shipping but the screen is dim\", \"positive\", \"\", \"Neutral\");\n    static final Map<String, String> PROMPT_V2 = Map.of(\n        \"Love it, works great\", \"positive\", \"Broke after two days\", \"negative\", \"It arrived on Tuesday\", \"neutral\",\n        \"Oh great, another crash\", \"negative\", \"Fast shipping but the screen is dim\", \"neutral\", \"\", \"positive\");\n\n    static final Criteria CRITERIA = new Criteria(0.8, Map.of(\"edge\", 0.75));\n\n    /** Code-graded: the answer must equal the expected label, ignoring case and surrounding white space. */\n    static boolean grade(Case c, String output) {\n        return output.strip().toLowerCase(Locale.ROOT).equals(c.expect());\n    }\n\n    static Report run(List<Case> cases, Map<String, String> model) {\n        List<Result> results = new ArrayList<>();\n        Map<String, int[]> byTag = new LinkedHashMap<>();\n        int passed = 0;\n        for (Case c : cases) {\n            boolean ok = grade(c, model.get(c.input()));\n            results.add(new Result(c.id(), ok, c.tags()));\n            if (ok) passed++;\n            for (String tag : c.tags()) {\n                int[] row = byTag.computeIfAbsent(tag, t -> new int[2]);\n                if (ok) row[0]++;\n                row[1]++;\n            }\n        }\n        return new Report(results, passed / (double) results.size(), byTag);\n    }\n\n    /** Every dimension of the success criteria must hold, not only the average. */\n    static List<String> gate(Report report, Criteria criteria) {\n        List<String> failures = new ArrayList<>();\n        if (report.passRate() < criteria.minPassRate()) failures.add(\"overall\");\n        for (Map.Entry<String, Double> tag : criteria.tags().entrySet()) {\n            int[] row = report.byTag().get(tag.getKey());\n            if (row[0] / (double) row[1] < tag.getValue()) failures.add(\"tag:\" + tag.getKey());\n        }\n        return failures;\n    }\n\n    static Diff compare(Report baseline, Report current) {\n        Map<String, Boolean> before = new LinkedHashMap<>();\n        for (Result r : baseline.results()) before.put(r.id(), r.passed());\n        List<String> regressions = new ArrayList<>();\n        List<String> fixed = new ArrayList<>();\n        for (Result r : current.results()) {\n            if (before.get(r.id()) && !r.passed()) regressions.add(r.id());\n            if (!before.get(r.id()) && r.passed()) fixed.add(r.id());\n        }\n        return new Diff(regressions, fixed);\n    }\n\n    private static String py(List<String> names) {\n        return names.stream().map(n -> \"'\" + n + \"'\").collect(Collectors.joining(\", \", \"[\", \"]\"));\n    }\n\n    private static String py(boolean value) {\n        return value ? \"True\" : \"False\";\n    }\n\n    public static void main(String[] args) {\n        Report v1 = run(CASES, PROMPT_V1);\n        Report v2 = run(CASES, PROMPT_V2);\n        for (Map.Entry<String, Report> e : List.of(Map.entry(\"prompt v1\", v1), Map.entry(\"prompt v2\", v2))) {\n            Report report = e.getValue();\n            int[] edge = report.byTag().get(\"edge\");\n            System.out.println(String.format(Locale.ROOT, \"%s: pass rate %.3f, edge %d/%d, gate failures %s\", e.getKey(), report.passRate(), edge[0], edge[1], py(gate(report, CRITERIA))));\n        }\n        Diff diff = compare(v1, v2);\n        System.out.println(\"v2 against v1: fixed \" + py(diff.fixed()) + \" regressions \" + py(diff.regressions()));\n        System.out.println(\"average improved: \" + py(v2.passRate() > v1.passRate()) + \" - safe to ship: \" + py(diff.regressions().isEmpty() && gate(v2, CRITERIA).isEmpty()));\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "prompt v1: pass rate 0.667, edge 1/3, gate failures ['overall', 'tag:edge']\nprompt v2: pass rate 0.833, edge 2/3, gate failures ['tag:edge']\nv2 against v1: fixed ['sarcasm-1', 'mixed-1'] regressions ['empty-1']\naverage improved: True - safe to ship: False"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "private val log = System.getLogger(\"eval_run\")\n\n/**\n * An eval run, a success gate and a regression comparison, on a scripted classifier.\n *\n * The Claude documentation on success criteria and evaluations (read on 2026-10-03) says to design evals that mirror the real task, edge\n * cases included, to automate the grading, and to judge several dimensions at once (\"an F1 score of at least 0.85\", \"99.5% of outputs are\n * non-toxic\"). This file runs six sentiment cases through two scripted versions of a prompt, grades them by exact match, and shows that a\n * better average can still hide a regression. The two models are lookup tables standing in for the application: no model is called.\n */\ndata class Case(val id: String, val input: String, val expect: String, val tags: List<String>)\n\ndata class Result(val id: String, val passed: Boolean, val tags: List<String>)\n\n/** The pass rate of a run, and per tag (passed, total). */\ndata class Report(val results: List<Result>, val passRate: Double, val byTag: Map<String, Pair<Int, Int>>)\n\ndata class Criteria(val minPassRate: Double, val tags: Map<String, Double>)\n\ndata class Diff(val regressions: List<String>, val fixed: List<String>)\n\nval CASES = listOf(\n    Case(\"pos-1\", \"Love it, works great\", \"positive\", listOf(\"core\")),\n    Case(\"neg-1\", \"Broke after two days\", \"negative\", listOf(\"core\")),\n    Case(\"neu-1\", \"It arrived on Tuesday\", \"neutral\", listOf(\"core\")),\n    Case(\"sarcasm-1\", \"Oh great, another crash\", \"negative\", listOf(\"edge\")),\n    Case(\"mixed-1\", \"Fast shipping but the screen is dim\", \"neutral\", listOf(\"edge\")),\n    Case(\"empty-1\", \"\", \"neutral\", listOf(\"edge\")),\n)\n\nval PROMPT_V1 = mapOf(\n    \"Love it, works great\" to \"positive\", \"Broke after two days\" to \"negative\", \"It arrived on Tuesday\" to \"neutral\",\n    \"Oh great, another crash\" to \"positive\", \"Fast shipping but the screen is dim\" to \"positive\", \"\" to \"Neutral\",\n)\nval PROMPT_V2 = PROMPT_V1 + mapOf(\"Oh great, another crash\" to \"negative\", \"Fast shipping but the screen is dim\" to \"neutral\", \"\" to \"positive\")\n\nval CRITERIA = Criteria(0.8, mapOf(\"edge\" to 0.75))\n\n/** Code-graded: the answer must equal the expected label, ignoring case and surrounding white space. */\nfun grade(case: Case, output: String) = output.trim().lowercase() == case.expect\n\nfun run(cases: List<Case>, model: Map<String, String>): Report {\n    val results = cases.map { Result(it.id, grade(it, model.getValue(it.input)), it.tags) }\n    val byTag = linkedMapOf<String, Pair<Int, Int>>()\n    for (r in results) for (tag in r.tags) {\n        val (passed, total) = byTag[tag] ?: (0 to 0)\n        byTag[tag] = (passed + if (r.passed) 1 else 0) to (total + 1)\n    }\n    return Report(results, results.count { it.passed } / results.size.toDouble(), byTag)\n}\n\n/** Every dimension of the success criteria must hold, not only the average. */\nfun gate(report: Report, criteria: Criteria): List<String> {\n    val failures = mutableListOf<String>()\n    if (report.passRate < criteria.minPassRate) failures += \"overall\"\n    for ((tag, minimum) in criteria.tags) {\n        val (passed, total) = report.byTag.getValue(tag)\n        if (passed / total.toDouble() < minimum) failures += \"tag:$tag\"\n    }\n    return failures\n}\n\nfun compare(baseline: Report, current: Report): Diff {\n    val before = baseline.results.associate { it.id to it.passed }\n    return Diff(\n        regressions = current.results.filter { before.getValue(it.id) && !it.passed }.map { it.id },\n        fixed = current.results.filter { !before.getValue(it.id) && it.passed }.map { it.id },\n    )\n}\n\nprivate fun py(names: List<String>) = names.joinToString(\", \", \"[\", \"]\") { \"'$it'\" }\n\nprivate fun py(value: Boolean) = if (value) \"True\" else \"False\"\n\nfun main() {\n    val v1 = run(CASES, PROMPT_V1)\n    val v2 = run(CASES, PROMPT_V2)\n    for ((name, report) in listOf(\"prompt v1\" to v1, \"prompt v2\" to v2)) {\n        val (passed, total) = report.byTag.getValue(\"edge\")\n        println(\"$name: pass rate ${\"%.3f\".format(report.passRate)}, edge $passed/$total, gate failures ${py(gate(report, CRITERIA))}\")\n    }\n    val diff = compare(v1, v2)\n    println(\"v2 against v1: fixed ${py(diff.fixed)} regressions ${py(diff.regressions)}\")\n    println(\"average improved: ${py(v2.passRate > v1.passRate)} - safe to ship: ${py(diff.regressions.isEmpty() && gate(v2, CRITERIA).isEmpty())}\")\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "prompt v1: pass rate 0.667, edge 1/3, gate failures ['overall', 'tag:edge']\nprompt v2: pass rate 0.833, edge 2/3, gate failures ['tag:edge']\nv2 against v1: fixed ['sarcasm-1', 'mixed-1'] regressions ['empty-1']\naverage improved: True - safe to ship: False"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Read the output as a reviewer would. Prompt v2 raises the pass rate from 0.667 to 0.833: the average improved. It fixed two edge cases, the sarcastic message and the mixed review. It also broke one, the empty message, which it now labels `positive` where v1 said `neutral`. The edge dimension is at 2 of 3, below its 0.75 minimum, so the gate still fails, and the comparison names `empty-1` as a regression. \"Safe to ship\" is false, and the reason is on the screen. A team that watched only the average would have shipped a prompt that guesses a sentiment for an empty input."
+    },
+    {
+      "type": "para",
+      "text": "Three rules follow from that run."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "**An average never excuses a regression.** If a case passed before and fails now, a person looks at it. Sometimes the old pass was an accident and the team accepts the change; the point is that the decision is made, not discovered.",
+        "**A dimension that was set aside is where regressions hide.** The edge tag has its own threshold because edge cases are few and rare, and a count that is small in the average can matter to a customer.",
+        "**A case that disappears is not a pass.** If a case is deleted from the set between two runs, the harness reports it as removed and fails the comparison, because dropping the case that fails is the easiest way to improve a score."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Do not tune to the set"
+    },
+    {
+      "type": "para",
+      "text": "The loop rewards changes that make the set pass. If you copy a failing case into the prompt as an example, the case will pass, and the set's score has measured your editing and not the prompt. Two habits keep the number honest. Keep a held-out slice that the loop never touches and run it at the end (page 1). When a failure suggests an instruction, write the instruction in general words, and check it against the slice."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Non-determinism in the loop"
+    },
+    {
+      "type": "para",
+      "text": "One run is one sample. When a case matters, run it several times and pass it only if every run passes. A case that passes in some runs and fails in others is flaky, and a flaky case is a finding: the instruction it tests is followed most of the time and not always. The criteria can say how many flaky cases are tolerated. With sampling parameters held at their defaults on the newer models (module 18), repetition is the tool you have."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Regression runs: when they run"
+    },
+    {
+      "type": "para",
+      "text": "A regression run is the same set, run again, with a comparison against the last accepted report. It runs whenever something that could change behaviour changes:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Change",
+        "Why it can regress",
+        "Where the run sits"
+      ],
+      "rows": [
+        [
+          "A prompt edit",
+          "The edit fixes one case and breaks another",
+          "Before the merge, as a check on the pull request"
+        ],
+        [
+          "A new model id",
+          "Models differ, and a migration changes behaviour",
+          "Before the id is changed in configuration"
+        ],
+        [
+          "A changed setting",
+          "Effort, thinking, `max_tokens` and the output format all change results",
+          "Before the setting is merged"
+        ],
+        [
+          "A changed tool or schema",
+          "The model reads the description, so a rename changes its choices",
+          "Before the merge"
+        ],
+        [
+          "A scheduled run",
+          "The provider may change what an alias points to, and traffic drifts",
+          "Nightly, with an alert on a drop"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The pinned model ids the course uses are snapshots, which is what makes a before-and-after comparison fair. The errors page shows that some migrations fail at the request and not in the output: a prefilled assistant message returns a 400 on Claude 4.6 and later models, a forced `tool_choice` returns a 400 on Claude Opus 5.5, Sonnet 5.5, Fable 5.1 and Mythos 5.1, and `thinking: {\"type\": \"enabled\"}` returns a 400 on models from 4.7. A regression run on the new id turns each of those into a failed case the same afternoon, and not a failed request in production. Module 43 reads such failures."
+    },
+    {
+      "type": "para",
+      "text": "A pull request check is the natural home for the run: module 40 shows a workflow triggered by a repository event, and an eval job is one more job in it. The set lives in the repository beside the prompt, so a change to either shows in the same diff."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What an eval run costs"
+    },
+    {
+      "type": "para",
+      "text": "A set of a few hundred cases, graded by a model, is a few hundred requests per run. Two documented features cut the price when the run is large and nobody waits: the Message Batches API charges half the standard price for work that can wait up to a day (module 21), and prompt caching makes a long shared prefix, such as a long system prompt, cheaper after the first call (module 20). A nightly regression run is the typical batch job. A quick check on a pull request stays synchronous and small."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The practice"
+    },
+    {
+      "type": "para",
+      "text": "The practice is the harness. You write, in the language of your choice (Python, TypeScript, Java or Kotlin):"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`grade`, which checks one output against its case with an `exact`, `regex`, `json_field` or `judge` check and returns a pass or fail with a reason, and, for a judge check, the score;",
+        "`run_eval`, which runs every case through the model, repeats each run as asked, lets one failing model call fail only its own case, marks flaky cases, and reports the pass rate and the rate per tag;",
+        "`meets`, which compares a report with success criteria for the overall rate, for each tag and for the number of flaky cases;",
+        "`compare`, which names the regressions, the fixes and the added and removed cases between two reports, and is not ok for a regression or a removed case."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The Java and Kotlin folders give you a small `Json` helper, because those two have no JSON library in the course's offline image. The statement lists every rule and every reason string. The starter fails every test, the reference passes, and each planted wrong solution fails on an assertion. The statement is at `exercises/42-evaluation/unit-01/practice-1/statement.md`."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Case",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A run grades each case with its own check and reports the pass rate"
+        ],
+        [
+          "`e1`",
+          "An exact check ignores case and spacing only"
+        ],
+        [
+          "`e2`",
+          "A JSON field check needs an object, the field and the same type"
+        ],
+        [
+          "`e3`",
+          "A judge check sends the rubric prompt and accepts only a bare score"
+        ],
+        [
+          "`e4`",
+          "A model error fails its own case and the run goes on"
+        ],
+        [
+          "`e5`",
+          "Tags report their own rates and the criteria judge each dimension"
+        ],
+        [
+          "`e6`",
+          "A comparison names regressions, fixes and removed cases"
+        ],
+        [
+          "`e7`",
+          "Repeated runs expose flaky cases"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Judging by the average.** A rise in the pass rate can hide a regression on a rare case. Compare per case and gate each dimension.",
+        "**Changing two things at once.** You cannot say which edit helped, so you cannot keep one and drop the other.",
+        "**Tuning to the set.** Copying failing cases into the prompt makes the set pass and the score meaningless. Keep a held-out slice.",
+        "**Running the set only on prompt edits.** A model id, a setting or a tool description changes behaviour too, and a migration can fail the request before it reaches the output."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A new prompt raises the overall pass rate from 0.78 to 0.84. The per-item comparison shows that one input which passed before now fails. What should the team do?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Review that regression, then accept or repair it",
+              "**b**: Ship it, because the pass rate rose",
+              "**c**: Delete the failing item from the set, since it is noisy",
+              "**d**: Rerun the set until that input passes"
+            ]
+          }
+        ],
+        [
+          "A regression run is scheduled for the day a team changes the model id in its configuration. Which failure does that run catch that a prompt-only check would not?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: A prefilled assistant turn that the new release rejects",
+              "**b**: A typo that crept into an example sentence in the prompt",
+              "**c**: An edit that fixes one case and breaks another",
+              "**d**: A label that was copied wrongly from a spreadsheet into the set"
+            ]
+          }
+        ],
+        [
+          "A team re-grades 800 items with a model every night, and nobody waits for the result. Which option cuts the price of that job the most while every item is still graded each night?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Grade a random tenth of the items each night",
+              "**b**: Rerun the work on every commit instead of nightly",
+              "**c**: Submit the work through the Message Batches API",
+              "**d**: Send the items as parallel synchronous requests"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**a**. The page says that \"An average never excuses a regression\": \"If a case passed before and fails now, a person looks at it\", and then the decision is made. *b* is ruled out because the example's v2 also raised the average and still failed its gate, and the rule for step 5 is to keep a change \"only if every success dimension still holds and nothing regressed without a reason you accept\". *c* is ruled out because \"A case that disappears is not a pass\", and dropping the case that fails \"is the easiest way to improve a score\". *d* is ruled out because a rerun until the input passes treats a signal as noise, while the page says \"a flaky case is a finding\".",
+            "**a**. The page says a prefilled assistant message \"returns a 400 on Claude 4.6 and later models\", and that a regression run on the new id \"turns each of those into a failed case the same afternoon\". *b* is ruled out because an example sentence typo is a prompt edit, which the table already puts \"Before the merge, as a check on the pull request\". *c* is ruled out because the table gives the prompt edit its own run, where \"The edit fixes one case and breaks another\", with no model id involved. *d* is ruled out because a wrongly copied label is a data error, and \"The set lives in the repository beside the prompt\", so a review of the diff finds it.",
+            "**c**. The page says the Message Batches API \"charges half the standard price for work that can wait up to a day\", and calls a nightly regression run \"the typical batch job\". *b* is ruled out because a run on every commit multiplies the requests, and the page says \"A quick check on a pull request stays synchronous and small\". *a* is ruled out because grading a sample drops cases, and \"A case that disappears is not a pass\". *d* is ruled out because the discount is for work that can wait, and synchronous calls take none of it: the Batches API \"charges half the standard price for work that can wait up to a day\"."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Module quiz"
+    },
+    {
+      "type": "para",
+      "text": "This quiz covers all three pages of the module."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A team writes one criterion, \"replies should be accurate\". Which addition turns it into something an eval can enforce?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: A monthly review where the team reads sample replies",
+              "**b**: A target that sets a metric, a threshold and a data set",
+              "**c**: A longer list that spells out the qualities of a good reply",
+              "**d**: A ranking that puts accuracy ahead of speed and cost"
+            ]
+          }
+        ],
+        [
+          "A ticket-routing prompt is edited, and the team reruns a set in which every case is graded by a script. Which grader fits a case whose output must parse as a JSON object holding a `queue` key?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: A pattern check that finds the word queue in the output",
+              "**b**: An exact match against one stored reference output",
+              "**c**: A structure check that decodes and compares the value",
+              "**d**: A similarity score against a reference output"
+            ]
+          }
+        ],
+        [
+          "A prompt change scores better overall, and the team wants to be sure the improvement is real before launch. Which pair of checks gives the most trustworthy answer?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: A comparison per case, and a second run of the same cases",
+              "**b**: A review of the average, and a run on held-out cases",
+              "**c**: A larger set of the same easy cases, and a stricter threshold",
+              "**d**: A comparison per case, and a run on held-out cases"
+            ]
+          }
+        ],
+        [
+          "A case passes in two of three repeated runs. How should the harness treat it?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: A pass, because two of three runs succeeded",
+              "**b**: A fail, listed as flaky in the report",
+              "**c**: A pass, once the failing run is discarded",
+              "**d**: A fail, left out of the count of flaky cases"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**b**. A good criterion names \"a metric, a threshold, a data set, and a baseline to beat\", and the four traits ask for \"quantitative metrics or well-defined qualitative scales\". *a* is ruled out because a review is a process and does not make the criterion measurable: \"Nobody can say what number or scale a result would have\". *c* is ruled out because a longer list of qualities repeats the problem, since good, accurate and natural are \"wishes until they carry a number or a scale and a data set\". *d* is ruled out because the page says \"Most use cases need multidimensional evaluation along several success criteria\", which means a number for each, not one ranking in a sentence.",
+            "**c**. The page lists a \"Structure check\" for \"A reply that must parse and carry the right fields\", and says it \"parses the whole output as JSON\". *a* is ruled out because a pattern \"is found anywhere in the output\", so it would pass text that does not parse as one JSON object. *b* is ruled out because exact match decides \"A categorical answer: a label, a choice\", and a whole reference output would fail on key order or an extra field. *d* is ruled out because similarity answers \"Whether two texts say the same thing\", and a queue name has an exact right value.",
+            "**d**. The page says \"Compare per case\" and to \"Keep a held-out slice that the loop never touches and run it at the end\". *a* is ruled out because rerunning the same cases repeats the tuned set, and \"The score is then a memory test\". *b* is ruled out because a review of the average cannot show a rare failure, and \"An average never excuses a regression\". *c* is ruled out because \"Grading only what is easy to grade\" measures a different task, and a threshold on easy cases does not change that.",
+            "**b**. The page says to \"pass it only if every run passes\", and that \"A case that passes in some runs and fails in others is flaky\". *a* is ruled out because a case that fails sometimes will fail for some customers, which is why \"a flaky case is a finding\". *c* is ruled out because discarding the failing run removes the evidence, and the page says to \"pass it only if every run passes\". *d* is ruled out because the criteria \"can say how many flaky cases are tolerated\", which needs the count to include it."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 13,
+    "paras": 18,
+    "code": 0,
+    "tables": 2,
+    "lists": 6,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 2,
+    "examples": 1
+  },
+  "content_sha256": "d5d6608da22144de07ad4a0bbb29564855901882eb5f94cc6a16813a5441828e"
+}

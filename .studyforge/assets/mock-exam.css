@@ -1,0 +1,92 @@
+/* The mock exam: progress, the submit controls and the result, over the quiz's own look.
+
+   ⭐ Written beside `page.css`, never inside it, and ONLY for a corpus that has a mock exam
+   (`render.page.mock.files`): a corpus with none carries no byte of it. The section is a
+   quiz section (`data-practice-quiz`), so the questions, the options and the verdict
+   sentences wear `practice-quiz.css` unchanged; this file adds what only an exam has.
+
+   ⛔ No colour and no measure of its own: every value is a palette token, as
+   `practice-quiz.css` holds itself to. ⚠️ Phone first: the progress line stays in view while
+   the questions scroll, the controls are as wide as the page, and the result table never
+   scrolls sideways. */
+
+section[data-practice-mock] p[data-mock-part="progress"] {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  margin: 0 0 .75rem;
+  padding: .4rem 0;
+  background: var(--practice-soft);
+  border-bottom: 1px solid var(--rule);
+  font-size: .9rem;
+  color: var(--fg-soft);
+}
+
+section[data-practice-mock] progress[data-mock-part="meter"] {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: .6rem;
+  accent-color: var(--done);
+}
+
+section[data-practice-mock] span[data-mock-part="count"] { flex: 0 0 auto; }
+
+section[data-practice-mock] p[data-mock-part="controls"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin: .75rem 0 0;
+}
+
+section[data-practice-mock] p[data-mock-part="controls"] button { flex: 1 1 10rem; }
+
+section[data-practice-mock] p[data-mock-part="missing"] {
+  padding: .4rem .6rem;
+  border-left: 3px solid var(--accent);
+  background: var(--surface);
+  color: var(--fg);
+}
+
+section[data-practice-mock] div[data-mock-part="result"] {
+  margin: .75rem 0 0;
+  padding: .6rem .75rem;
+  background: var(--surface);
+  border-left: 3px solid var(--rule-strong);
+  border-radius: var(--radius-tight);
+}
+
+section[data-practice-mock][data-mock-passed="true"] div[data-mock-part="result"] {
+  border-left-color: var(--done);
+}
+
+section[data-practice-mock][data-mock-passed="false"] div[data-mock-part="result"] {
+  border-left-color: var(--accent);
+}
+
+section[data-practice-mock] p[data-mock-part="overall"] { margin: 0 0 .5rem; font-weight: 700; }
+
+section[data-practice-mock] table[data-mock-part="domains"] {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: .9rem;
+}
+
+section[data-practice-mock] table[data-mock-part="domains"] th,
+section[data-practice-mock] table[data-mock-part="domains"] td {
+  padding: .25rem .4rem;
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+  border-bottom: 1px solid var(--rule);
+}
+
+section[data-practice-mock] input[type="radio"]:disabled + * { cursor: default; }
+
+@media (max-width: 40rem) {
+  section[data-practice-mock] label { padding: .55rem .5rem; }
+  section[data-practice-mock] p[data-mock-part="controls"] button { flex-basis: 100%; }
+}

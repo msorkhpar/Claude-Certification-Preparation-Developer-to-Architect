@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/kotlin/Assemble.kt",
+      "old": "(event[\"usage\"] as? Map<String, Any?>)?.let { (message[\"usage\"] as MutableMap<String, Any?>).putAll(it) }",
+      "new": "(event[\"usage\"] as? Map<String, Any?>)?.let { u ->\n        val total = message[\"usage\"] as MutableMap<String, Any?>\n        total[\"output_tokens\"] = (total[\"output_tokens\"] as Number).toLong() + (u[\"output_tokens\"] as Number).toLong()\n    }"
+    }
+  ]
+}

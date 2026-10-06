@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "67-exploring-a-large-codebase"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: Why long explorations degrade, and where their findings should live",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "Scenario S4, developer productivity with Claude. After two hours on a payments codebase, the agent answers a question about retries by describing how such systems typically retry, though it read the actual retry classes an hour earlier. Which practice would have prevented this?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Writing specific findings to a notes file and consulting it for later queries",
+            "correct": true,
+            "says": "The specifics are kept in a file that outlives the window and are read again when a later question needs them."
+          },
+          {
+            "id": "b",
+            "text": "Switching to a model with a bigger context window for the whole of the session",
+            "correct": false,
+            "says": "Ruled out because \"a bigger window only moves the problem later\"."
+          },
+          {
+            "id": "c",
+            "text": "Raising the output limit so that each answer can quote more of the code",
+            "correct": false,
+            "says": "Ruled out because the symptom is that \"answers become inconsistent from one turn to the next, and specific names give way to plausible generalities\", which more output does not repair."
+          },
+          {
+            "id": "d",
+            "text": "Telling the agent in its prompt to avoid generic answers from here onward",
+            "correct": false,
+            "says": "Ruled out because \"A reminder in the prompt does not bring back a class that has left the window\"."
+          }
+        ],
+        "origin": {
+          "path": "course/67-exploring-a-large-codebase/01-why-explorations-degrade-and-where-findings-live.md",
+          "section": "What a filled context looks like"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "Scenario S4, developer productivity with Claude. A coordinator must list every test file that covers refunds in a very large repository, then trace the refund flow. It does both in its own conversation, and the context fills with listings and file contents. Which structure fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Hand the whole job to one helper with the brief to explore everything and report it all",
+            "correct": false,
+            "says": "Ruled out because \"a broad brief returns a broad report\"."
+          },
+          {
+            "id": "b",
+            "text": "Keep the reading in the coordinator and add a notes file for what it finds",
+            "correct": false,
+            "says": "Ruled out because \"Each file read, each search result, each command output stays in the window\", so the coordinator's own reading keeps filling it."
+          },
+          {
+            "id": "c",
+            "text": "Give each question to a read-only exploring helper and keep just the summaries",
+            "correct": true,
+            "says": "Each narrow question goes to a read-only subagent, and the coordinator receives only a summary."
+          },
+          {
+            "id": "d",
+            "text": "Use a helper with every tool, so that it can save the lists to files",
+            "correct": false,
+            "says": "Ruled out because \"Read-only matters: an exploration that can edit can also damage\"."
+          }
+        ],
+        "origin": {
+          "path": "course/67-exploring-a-large-codebase/01-why-explorations-degrade-and-where-findings-live.md",
+          "section": "Traps"
+        }
+      }
+    ]
+  }
+}

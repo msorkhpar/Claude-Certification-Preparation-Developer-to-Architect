@@ -1,0 +1,78 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "26-tool-use"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 1,
+  "title": "Practice: a tool loop against a scripted model (Python)",
+  "lang": "python",
+  "main_file": "toolloop.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_toolloop.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-2/26-tool-use/prose/unit-03/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-2/26-tool-use/prose/unit-03/practice-1/target/report.xml",
+    "practice/level-2/26-tool-use/prose/unit-03/practice-1/test_toolloop.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_a_tool_call_is_run_and_its_result_sent_back_until_the_model_ends_its_turn",
+      "kind": "main",
+      "says": "A tool call is run and its result sent back until the model ends its turn"
+    },
+    {
+      "id": "test_e1_parallel_calls_get_one_user_message_with_every_result_in_order",
+      "kind": "edge",
+      "says": "Parallel calls get one user message with every result in order"
+    },
+    {
+      "id": "test_e2_a_failing_unknown_or_malformed_call_becomes_an_error_result_and_the_loop_goes_on",
+      "kind": "edge",
+      "says": "A failing, unknown or malformed call becomes an error result and the loop goes on"
+    },
+    {
+      "id": "test_e3_the_number_of_turns_is_bounded",
+      "kind": "edge",
+      "says": "The number of turns is bounded"
+    },
+    {
+      "id": "test_e4_refusal_and_truncation_end_the_loop_and_a_paused_turn_continues",
+      "kind": "edge",
+      "says": "Refusal and truncation end the loop, and a paused turn continues"
+    },
+    {
+      "id": "test_e5_tool_choice_is_validated_for_the_model_and_a_forced_choice_applies_to_the_first_request_only",
+      "kind": "edge",
+      "says": "tool_choice is validated for the model, and a forced choice applies to the first request only"
+    },
+    {
+      "id": "test_e6_results_that_are_not_text_are_sent_as_json_text",
+      "kind": "edge",
+      "says": "Results that are not text are sent as JSON text"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/26-tool-use/03-parallel-calls-the-tool-runner-and-the-practice.md"
+}

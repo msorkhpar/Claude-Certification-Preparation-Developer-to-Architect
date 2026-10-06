@@ -1,0 +1,280 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "87-observability-at-scale"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: trace triage (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: trace triage"
+    },
+    {
+      "type": "para",
+      "text": "A platform keeps a random one percent of its traces, so the failures it needs to explain are mostly gone; when an agent fails, its dashboard names the span that reported the error and not the one that failed; a stale index never shows up because nothing threw; its alert fires on a single bad minute and is ignored by the third night; and its log records carry whole prompts. In this practice you write the pieces that replace that: the reason a trace is kept, with its order of priority; the search for the deepest failing span; the drift check against a baseline; the alert over consecutive windows; the redaction of a log record; and the trail of one request across components. The model is not called: the tests give you spans, metrics, series and events. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`keep_trace`, `root_cause`, `drift`, `alert_at`, `redact`, `request_trail`); TypeScript has the camel-case names (`keepTrace`, `rootCause`, `alertAt`, `requestTrail`); Java has the same camel-case names as static methods of `Triage`; Kotlin has top-level functions. A span is `Span(id, parent, kind, name, status, ms, note)` and an event is `Event(request, ts, component, message)`; the starter shows them in each language, with `bucket` already written. The first span of a trace is its root. A `kind` is `agent`, `llm`, `tool` or `retrieval`; a `status` is `ok` or `error`."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working triage with seven gaps cut out of it. Everything that is plumbing is written and correct: `bucket`, the walk from a failing span up to the root that builds the path, and the answer when nothing failed. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value (`None`, an empty list, the first failed span), so the starter runs and fails every case on an assertion. Debug a gap by logging its input with the `log` line at the top of the file (the starter already logs the input of one function; add your own `log.debug` lines the same way); a run shows the lines you logged under the failing case. Write the gaps in this order (the Java and Kotlin names are the camel-case forms, TypeScript has no leading underscore):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`keep_trace` unlocks `m1` and `e1`: why a trace is kept, by the order error, slow, retries, feedback, sampled.",
+        "`_deepest` unlocks `e2`: the failing span that no other failing span hangs below.",
+        "`_blamed_retrieval` unlocks `e3`: the stale or empty retrieval to blame when nothing failed.",
+        "`drift` unlocks `e4`: the metrics that moved over the tolerance, in either direction.",
+        "`alert_at` unlocks `e5`: consecutive windows over the threshold, a dip starting the count again.",
+        "`redact` unlocks `e6`: a record without its content fields unless allowed by name.",
+        "`request_trail` unlocks `e7`: one request's events in time order."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole triage."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`keep_trace(trace_id, spans, rate, feedback=False, slow_ms=5000)` returns why a trace is kept, checked in this order: `error` (any span has the status `error`), `slow` (the root took more than `slow_ms`), `retries` (one tool name appears on three or more spans of kind `tool`), `feedback` (the flag is set), then `sampled` when `bucket(trace_id)` is under `rate` and `dropped` otherwise.",
+        "`root_cause(spans)` returns the layer (`kind`), the `name`, the reason `why` and the `path` of the origin of a failure. When spans failed, the origin is the first failing span, in the order given, that is not the parent of another failing span; `why` is `failed` and `path` runs from the root to the origin by name, following the parent ids (the root's parent is empty). When none failed, the first retrieval span whose note is `stale` or `no-hits` is blamed, with `why` set to that note and the path `[root name, span name]`. With neither, return the layer `none`, an empty name, the reason `no span failed` and an empty path.",
+        "`drift(baseline, current, tolerance)` returns a line `<name> up <percent>%` or `<name> down <percent>%` for each metric whose change is over `tolerance` percent, sorted by name. The percent is `|current - baseline| * 100 / baseline`, whole numbers, rounded down; a change exactly at the tolerance is not over it. When the baseline is zero, a move from zero is 100 percent and no move is 0, and nothing is divided by zero.",
+        "`alert_at(series, threshold, windows)` returns the index of the value that completes `windows` consecutive values over the threshold, or -1. A value equal to the threshold is not over it, and a value that is not over starts the count again.",
+        "`redact(event, allowed=())` returns the record without the fields `prompt`, `response`, `tool_input` and `tool_output`, unless a field is named in `allowed`. All other fields stay.",
+        "`request_trail(events, request)` returns `<component>: <message>` for each event of that request in order of `ts`, events with equal `ts` keeping the order they were given. An unknown request has an empty trail."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Keep what you must explain.** *You should see* a failed trace kept at a rate of zero, and a healthy one kept by its id and not by chance.",
+        "**The order of the checks is the policy.** *You should see* a trace that failed and was slow called an error, and three calls of one tool called retries even when the user flagged it.",
+        "**The origin is the deepest failure.** *You should see* the orchestrator and the researcher passed over for the tool that failed, with the path from the root.",
+        "**A suspicion is not a fact.** *You should see* a stale retrieval blamed only when no span failed.",
+        "**A change in either direction.** *You should see* a metric that fell reported as well as one that rose, and a zero baseline handled.",
+        "**A change that lasts.** *You should see* one bad window give no alert when three in a row are required, and a dip start the count again.",
+        "**Records without content.** *You should see* the prompt and tool outputs gone, ids and counts kept, and a field allowed by name kept.",
+        "**One request, many components.** *You should see* the events of one request from every component in time order."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Every trace gets one reason and a healthy trace is kept by its id"
+        ],
+        [
+          "`e1`",
+          "An error outranks a slow root, which outranks retries, which outrank a flag"
+        ],
+        [
+          "`e2`",
+          "The root cause is the deepest failing span and its path starts at the root"
+        ],
+        [
+          "`e3`",
+          "A stale or empty retrieval is blamed only when no span failed"
+        ],
+        [
+          "`e4`",
+          "Drift reports a move in either direction over the tolerance and never divides by zero"
+        ],
+        [
+          "`e5`",
+          "An alert needs consecutive windows over the threshold and a dip starts the count again"
+        ],
+        [
+          "`e6`",
+          "A log record drops the content fields unless they are allowed by name"
+        ],
+        [
+          "`e7`",
+          "A request's trail joins the events of every component in time order"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Trace triage: which traces to keep, the layer that failed, drift, alerts, redaction and one request's trail. See ../../statement.md.\"\"\"\nimport logging\nfrom collections import namedtuple\n\nlog = logging.getLogger(__name__)\n\nSpan = namedtuple(\"Span\", \"id parent kind name status ms note\")\nEvent = namedtuple(\"Event\", \"request ts component message\")\nCONTENT = {\"prompt\", \"response\", \"tool_input\", \"tool_output\"}\n\n\ndef bucket(trace_id):\n    h = 7\n    for c in trace_id:\n        h = (h * 31 + ord(c)) % 1000003\n    return h % 100\n\n\ndef keep_trace(trace_id, spans, rate, feedback=False, slow_ms=5000):\n    log.debug(\"keep_trace input: %r\", spans)\n    if any(s.status == \"error\" for s in spans):\n        return \"error\"\n    if spans[0].ms > slow_ms:\n        return \"slow\"\n    tools = [s.name for s in spans if s.kind == \"tool\"]\n    if any(tools.count(n) >= 3 for n in tools):\n        return \"retries\"\n    if feedback:\n        return \"feedback\"\n    return \"sampled\" if bucket(trace_id) < rate else \"dropped\"\n\n\ndef _deepest(failed):\n    parents = {s.parent for s in failed}\n    return next(s for s in failed if s.id not in parents)\n\n\ndef _blamed_retrieval(spans):\n    for s in spans:\n        if s.kind == \"retrieval\" and s.note in (\"stale\", \"no-hits\"):\n            return s\n    return None\n\n\ndef root_cause(spans):\n    by_id = {s.id: s for s in spans}\n    failed = [s for s in spans if s.status == \"error\"]\n    if failed:\n        origin = _deepest(failed)\n        path, cursor = [], origin\n        while cursor is not None:\n            path.append(cursor.name)\n            cursor = by_id.get(cursor.parent)\n        return {\"layer\": origin.kind, \"name\": origin.name, \"why\": \"failed\", \"path\": path[::-1]}\n    s = _blamed_retrieval(spans)\n    if s is not None:\n        return {\"layer\": \"retrieval\", \"name\": s.name, \"why\": s.note, \"path\": [spans[0].name, s.name]}\n    return {\"layer\": \"none\", \"name\": \"\", \"why\": \"no span failed\", \"path\": []}\n\n\ndef drift(baseline, current, tolerance):\n    out = []\n    for name in sorted(baseline):\n        base, now = baseline[name], current[name]\n        pct = abs(now - base) * 100 // base if base else (100 if now else 0)\n        if pct > tolerance:\n            out.append(f\"{name} {'up' if now > base else 'down'} {pct}%\")\n    return out\n\n\ndef alert_at(series, threshold, windows):\n    run = 0\n    for i, value in enumerate(series):\n        run = run + 1 if value > threshold else 0\n        if run >= windows:\n            return i\n    return -1\n\n\ndef redact(event, allowed=()):\n    return {k: v for k, v in event.items() if k not in CONTENT or k in allowed}\n\n\ndef request_trail(events, request):\n    return [f\"{e.component}: {e.message}\" for e in sorted((e for e in events if e.request == request), key=lambda e: e.ts)]\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom triage import Event, Span, keep_trace, redact, request_trail, root_cause\n\n# One trace of a request: the assistant calls a search, then the model answers slowly.\nspans = [Span(\"s1\", \"\", \"agent\", \"assistant\", \"ok\", 1900, \"\"),\n         Span(\"s2\", \"s1\", \"retrieval\", \"search\", \"ok\", 100, \"\"),\n         Span(\"s3\", \"s1\", \"llm\", \"answer\", \"ok\", 1700, \"\")]\nprint(\"kept as:\", keep_trace(\"trace-1\", spans, 0))\nprint(\"kept as (a failed span):\", keep_trace(\"trace-1\", [Span(\"s1\", \"\", \"agent\", \"assistant\", \"error\", 90, \"timeout\")], 0))\n\n# Where the failure started, from the deepest failed span.\nfailed = [Span(\"s1\", \"\", \"agent\", \"assistant\", \"error\", 900, \"\"), Span(\"s2\", \"s1\", \"tool\", \"lookup_order\", \"error\", 800, \"HTTP 500\")]\nprint(\"root cause:\", root_cause(failed))\n\n# A log event without content, and the trail of one request across components.\nprint(\"redacted:\", redact({\"trace\": \"t\", \"tool_input\": \"secret\", \"input_tokens\": 5}))\nevents = [Event(\"r1\", 30, \"tool\", \"lookup done\"), Event(\"r2\", 10, \"api\", \"other\"), Event(\"r1\", 10, \"api\", \"received\")]\nprint(\"trail:\", request_trail(events, \"r1\"))\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Trace triage: which traces to keep, the layer that failed, drift, alerts, redaction and one request's trail. See ../../statement.md.\"\"\"\nimport logging\nfrom collections import namedtuple\n\nlog = logging.getLogger(__name__)\n\nSpan = namedtuple(\"Span\", \"id parent kind name status ms note\")\nEvent = namedtuple(\"Event\", \"request ts component message\")\nCONTENT = {\"prompt\", \"response\", \"tool_input\", \"tool_output\"}\n\n\ndef bucket(trace_id):\n    h = 7\n    for c in trace_id:\n        h = (h * 31 + ord(c)) % 1000003\n    return h % 100\n\n\ndef keep_trace(trace_id, spans, rate, feedback=False, slow_ms=5000):\n    log.debug(\"keep_trace input: %r\", spans)\n    \"\"\"TODO 1 of 7 (unlocks m1 and e1): why a trace is kept.\n\n    Receives the trace id, its spans (`status`, `ms`, `kind`, `name`; the first span is the root), the sampling rate (0 to 100) and the flags. Returns the first reason\n    that applies, in this order: \"error\" when any span has the status \"error\"; \"slow\" when the root's `ms` is over `slow_ms` (equal is not slow); \"retries\" when\n    one tool (a span of kind \"tool\") was called three times or more by name; \"feedback\" when `feedback` is set; otherwise \"sampled\" when `bucket(trace_id)` is\n    below `rate` and \"dropped\" when it is not.\n    Example: one tool span called \"fetch\" three times, nothing else wrong -> \"retries\"\n    \"\"\"\n    return None\n\n\ndef _deepest(failed):\n    \"\"\"TODO 2 of 7 (unlocks e2): the span that is the origin of a failure.\n\n    Receives the spans that failed (each has `id` and `parent`). Returns the first one that is not the parent of another failed span, so the error that a\n    parent merely reported is passed over for the span below it.\n    Example: s1 (root) <- s2 <- s3, all failed -> s3; two failed children of one parent -> the first of them\n    \"\"\"\n    return failed[0]\n\n\ndef _blamed_retrieval(spans):\n    \"\"\"TODO 3 of 7 (unlocks e3): the retrieval span to blame when nothing failed.\n\n    Receives the spans. Returns the first span of kind \"retrieval\" whose `note` is \"stale\" or \"no-hits\", or None when there is none.\n    Example: a retrieval span with the note \"stale\" -> that span\n    \"\"\"\n    return None\n\n\ndef root_cause(spans):\n    by_id = {s.id: s for s in spans}\n    failed = [s for s in spans if s.status == \"error\"]\n    if failed:\n        origin = _deepest(failed)\n        path, cursor = [], origin\n        while cursor is not None:\n            path.append(cursor.name)\n            cursor = by_id.get(cursor.parent)\n        return {\"layer\": origin.kind, \"name\": origin.name, \"why\": \"failed\", \"path\": path[::-1]}\n    s = _blamed_retrieval(spans)\n    if s is not None:\n        return {\"layer\": \"retrieval\", \"name\": s.name, \"why\": s.note, \"path\": [spans[0].name, s.name]}\n    return {\"layer\": \"none\", \"name\": \"\", \"why\": \"no span failed\", \"path\": []}\n\n\ndef drift(baseline, current, tolerance):\n    \"\"\"TODO 4 of 7 (unlocks e4): the metrics that moved.\n\n    Receives the baseline and the current values (metric name to a whole number) and a tolerance in percent. Goes through the baseline names in alphabetical order.\n    The change is `abs(now - base) * 100 // base` (integer division); a baseline of 0 counts as 100 when the value is not 0 and 0 when it is. Returns one string\n    \"<name> up <pct>%\" or \"<name> down <pct>%\" for each metric whose change is over the tolerance (equal is fine).\n    Example: baseline 10, now 14, tolerance 30 -> [\"a up 40%\"]\n    \"\"\"\n    return []\n\n\ndef alert_at(series, threshold, windows):\n    \"\"\"TODO 5 of 7 (unlocks e5): when an alert fires.\n\n    Receives the series of window values, the threshold and how many windows in a row must be over it (strictly over). Returns the index of the window at which the\n    count of consecutive windows over the threshold first reaches `windows`, or -1 when it never does. A window at or under the threshold starts the count again.\n    Example: [1, 2, 9, 2, 8, 9, 10, 3], threshold 5, windows 3 -> 6\n    \"\"\"\n    return -1\n\n\ndef redact(event, allowed=()):\n    \"\"\"TODO 6 of 7 (unlocks e6): what a log record keeps.\n\n    Receives a record (a dict) and the names that may stay. Returns a new dict without the fields in CONTENT (`prompt`, `response`, `tool_input`, `tool_output`) unless the\n    field's name is in `allowed`; every other field stays.\n    Example: {\"trace\": \"t\", \"prompt\": \"x\"} -> {\"trace\": \"t\"}\n    \"\"\"\n    return dict(event)\n\n\ndef request_trail(events, request):\n    \"\"\"TODO 7 of 7 (unlocks e7): one request's story.\n\n    Receives the events of every component (`request`, `ts`, `component`, `message`) and a request id. Returns \"<component>: <message>\" for each event of that request, in\n    order of `ts` (events with the same `ts` stay in the order they came); an unknown request gives an empty list.\n    Example: events at ts 30 (tool), 10 (api), 20 (agent) -> [\"api: ...\", \"agent: ...\", \"tool: ...\"]\n    \"\"\"\n    return []\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom triage import Event, Span, keep_trace, redact, request_trail, root_cause\n\n# One trace of a request: the assistant calls a search, then the model answers slowly.\nspans = [Span(\"s1\", \"\", \"agent\", \"assistant\", \"ok\", 1900, \"\"),\n         Span(\"s2\", \"s1\", \"retrieval\", \"search\", \"ok\", 100, \"\"),\n         Span(\"s3\", \"s1\", \"llm\", \"answer\", \"ok\", 1700, \"\")]\nprint(\"kept as:\", keep_trace(\"trace-1\", spans, 0))\nprint(\"kept as (a failed span):\", keep_trace(\"trace-1\", [Span(\"s1\", \"\", \"agent\", \"assistant\", \"error\", 90, \"timeout\")], 0))\n\n# Where the failure started, from the deepest failed span.\nfailed = [Span(\"s1\", \"\", \"agent\", \"assistant\", \"error\", 900, \"\"), Span(\"s2\", \"s1\", \"tool\", \"lookup_order\", \"error\", 800, \"HTTP 500\")]\nprint(\"root cause:\", root_cause(failed))\n\n# A log event without content, and the trail of one request across components.\nprint(\"redacted:\", redact({\"trace\": \"t\", \"tool_input\": \"secret\", \"input_tokens\": 5}))\nevents = [Event(\"r1\", 30, \"tool\", \"lookup done\"), Event(\"r2\", 10, \"api\", \"other\"), Event(\"r1\", 10, \"api\", \"received\")]\nprint(\"trail:\", request_trail(events, \"r1\"))\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "bd65b746437eefa35fcd772412a356b15a532cb303cead09808908e7d564b05c",
+  "starting_code": "\"\"\"Trace triage: which traces to keep, the layer that failed, drift, alerts, redaction and one request's trail. See ../../statement.md.\"\"\"\nimport logging\nfrom collections import namedtuple\n\nlog = logging.getLogger(__name__)\n\nSpan = namedtuple(\"Span\", \"id parent kind name status ms note\")\nEvent = namedtuple(\"Event\", \"request ts component message\")\nCONTENT = {\"prompt\", \"response\", \"tool_input\", \"tool_output\"}\n\n\ndef bucket(trace_id):\n    h = 7\n    for c in trace_id:\n        h = (h * 31 + ord(c)) % 1000003\n    return h % 100\n\n\ndef keep_trace(trace_id, spans, rate, feedback=False, slow_ms=5000):\n    log.debug(\"keep_trace input: %r\", spans)\n    \"\"\"TODO 1 of 7 (unlocks m1 and e1): why a trace is kept.\n\n    Receives the trace id, its spans (`status`, `ms`, `kind`, `name`; the first span is the root), the sampling rate (0 to 100) and the flags. Returns the first reason\n    that applies, in this order: \"error\" when any span has the status \"error\"; \"slow\" when the root's `ms` is over `slow_ms` (equal is not slow); \"retries\" when\n    one tool (a span of kind \"tool\") was called three times or more by name; \"feedback\" when `feedback` is set; otherwise \"sampled\" when `bucket(trace_id)` is\n    below `rate` and \"dropped\" when it is not.\n    Example: one tool span called \"fetch\" three times, nothing else wrong -> \"retries\"\n    \"\"\"\n    return None\n\n\ndef _deepest(failed):\n    \"\"\"TODO 2 of 7 (unlocks e2): the span that is the origin of a failure.\n\n    Receives the spans that failed (each has `id` and `parent`). Returns the first one that is not the parent of another failed span, so the error that a\n    parent merely reported is passed over for the span below it.\n    Example: s1 (root) <- s2 <- s3, all failed -> s3; two failed children of one parent -> the first of them\n    \"\"\"\n    return failed[0]\n\n\ndef _blamed_retrieval(spans):\n    \"\"\"TODO 3 of 7 (unlocks e3): the retrieval span to blame when nothing failed.\n\n    Receives the spans. Returns the first span of kind \"retrieval\" whose `note` is \"stale\" or \"no-hits\", or None when there is none.\n    Example: a retrieval span with the note \"stale\" -> that span\n    \"\"\"\n    return None\n\n\ndef root_cause(spans):\n    by_id = {s.id: s for s in spans}\n    failed = [s for s in spans if s.status == \"error\"]\n    if failed:\n        origin = _deepest(failed)\n        path, cursor = [], origin\n        while cursor is not None:\n            path.append(cursor.name)\n            cursor = by_id.get(cursor.parent)\n        return {\"layer\": origin.kind, \"name\": origin.name, \"why\": \"failed\", \"path\": path[::-1]}\n    s = _blamed_retrieval(spans)\n    if s is not None:\n        return {\"layer\": \"retrieval\", \"name\": s.name, \"why\": s.note, \"path\": [spans[0].name, s.name]}\n    return {\"layer\": \"none\", \"name\": \"\", \"why\": \"no span failed\", \"path\": []}\n\n\ndef drift(baseline, current, tolerance):\n    \"\"\"TODO 4 of 7 (unlocks e4): the metrics that moved.\n\n    Receives the baseline and the current values (metric name to a whole number) and a tolerance in percent. Goes through the baseline names in alphabetical order.\n    The change is `abs(now - base) * 100 // base` (integer division); a baseline of 0 counts as 100 when the value is not 0 and 0 when it is. Returns one string\n    \"<name> up <pct>%\" or \"<name> down <pct>%\" for each metric whose change is over the tolerance (equal is fine).\n    Example: baseline 10, now 14, tolerance 30 -> [\"a up 40%\"]\n    \"\"\"\n    return []\n\n\ndef alert_at(series, threshold, windows):\n    \"\"\"TODO 5 of 7 (unlocks e5): when an alert fires.\n\n    Receives the series of window values, the threshold and how many windows in a row must be over it (strictly over). Returns the index of the window at which the\n    count of consecutive windows over the threshold first reaches `windows`, or -1 when it never does. A window at or under the threshold starts the count again.\n    Example: [1, 2, 9, 2, 8, 9, 10, 3], threshold 5, windows 3 -> 6\n    \"\"\"\n    return -1\n\n\ndef redact(event, allowed=()):\n    \"\"\"TODO 6 of 7 (unlocks e6): what a log record keeps.\n\n    Receives a record (a dict) and the names that may stay. Returns a new dict without the fields in CONTENT (`prompt`, `response`, `tool_input`, `tool_output`) unless the\n    field's name is in `allowed`; every other field stays.\n    Example: {\"trace\": \"t\", \"prompt\": \"x\"} -> {\"trace\": \"t\"}\n    \"\"\"\n    return dict(event)\n\n\ndef request_trail(events, request):\n    \"\"\"TODO 7 of 7 (unlocks e7): one request's story.\n\n    Receives the events of every component (`request`, `ts`, `component`, `message`) and a request id. Returns \"<component>: <message>\" for each event of that request, in\n    order of `ts` (events with the same `ts` stay in the order they came); an unknown request gives an empty list.\n    Example: events at ts 30 (tool), 10 (api), 20 (agent) -> [\"api: ...\", \"agent: ...\", \"tool: ...\"]\n    \"\"\"\n    return []\n",
+  "exercise": {
+    "main_path": "practice/level-4/87-observability-at-scale/prose/unit-02/practice-1/triage.py",
+    "test_path": "practice/level-4/87-observability-at-scale/prose/unit-02/practice-1/test_triage.py",
+    "run_command": [
+      "python3",
+      "practice/level-4/87-observability-at-scale/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-4/87-observability-at-scale/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-4/87-observability-at-scale/prose/unit-02/practice-1/test_triage.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_every_trace_gets_one_reason_and_a_healthy_trace_is_kept_by_its_id",
+        "kind": "main",
+        "says": "Every trace gets one reason and a healthy trace is kept by its id"
+      },
+      {
+        "id": "test_e1_an_error_outranks_a_slow_root_which_outranks_retries_which_outrank_a_flag",
+        "kind": "edge",
+        "says": "An error outranks a slow root, which outranks retries, which outrank a flag"
+      },
+      {
+        "id": "test_e2_the_root_cause_is_the_deepest_failing_span_and_its_path_starts_at_the_root",
+        "kind": "edge",
+        "says": "The root cause is the deepest failing span and its path starts at the root"
+      },
+      {
+        "id": "test_e3_a_stale_or_empty_retrieval_is_blamed_only_when_no_span_failed",
+        "kind": "edge",
+        "says": "A stale or empty retrieval is blamed only when no span failed"
+      },
+      {
+        "id": "test_e4_drift_reports_a_move_in_either_direction_over_the_tolerance_and_never_divides_by_zero",
+        "kind": "edge",
+        "says": "Drift reports a move in either direction over the tolerance and never divides by zero"
+      },
+      {
+        "id": "test_e5_an_alert_needs_consecutive_windows_over_the_threshold_and_a_dip_starts_the_count_again",
+        "kind": "edge",
+        "says": "An alert needs consecutive windows over the threshold and a dip starts the count again"
+      },
+      {
+        "id": "test_e6_a_log_record_drops_the_content_fields_unless_they_are_allowed_by_name",
+        "kind": "edge",
+        "says": "A log record drops the content fields unless they are allowed by name"
+      },
+      {
+        "id": "test_e7_a_requests_trail_joins_the_events_of_every_component_in_time_order",
+        "kind": "edge",
+        "says": "A request's trail joins the events of every component in time order"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-4/87-observability-at-scale/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/87-observability-at-scale/02-drift-alerts-and-the-practice.md",
+    "concepts": [
+      "the practice of Drift, alerts and the practice is solved"
+    ],
+    "files": [
+      "practice/level-4/87-observability-at-scale/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "observability-at-scale-u2"
+}

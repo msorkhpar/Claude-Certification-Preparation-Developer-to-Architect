@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/kotlin/Mrtr.kt",
+      "old": "val token = request[\"requestState\"]",
+      "new": "val token = request[\"requestState\"]?.takeIf { readState(secret, it.toString()) != null }"
+    }
+  ]
+}

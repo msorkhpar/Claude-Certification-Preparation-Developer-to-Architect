@@ -1,0 +1,264 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "22-claude-on-the-cloud-platforms"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: one request, three front doors (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: one request, three front doors"
+    },
+    {
+      "type": "para",
+      "text": "The same Messages request can go to the direct API, to Claude in Amazon Bedrock or to Claude on Google Vertex AI. The body is nearly the same; the URL, the model id, where the version goes and the features available are not. Write the function that builds the request for each platform and the function that tells a team which features it would lose. The shapes come from the Claude documentation pages for Amazon Bedrock and Google Cloud, read on 2026-10-02; the lesson pages explain them. Nothing here signs a request or touches the network: authentication (AWS SigV4, a Google access token or an API key) is added by an SDK or a proxy and is not part of what you build."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given data"
+    },
+    {
+      "type": "para",
+      "text": "`build_request(platform, model, body, config)` takes `platform` (`anthropic`, `bedrock` or `vertex`), `model` (the id on the direct API, for example `claude-opus-5-5` or `claude-haiku-4-5-20251001`), `body` (a Messages request body) and `config` (a map with `region` for Bedrock, `project` and `endpoint` for Vertex). It returns a map with `method`, `url`, `headers` (without any credential) and `body`, and raises `PlatformError` (`field` names the offending part: `platform`, `model`, `config`, `endpoint` or `feature`). The four course models and `claude-sonnet-4-6` are the only models to handle."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working request builder with seven gaps cut out of it. Everything that is plumbing is written and correct: the constants and feature tables, `PlatformError`, the direct API request, the shape of the Bedrock and Vertex requests, the deep copy of the body, the check that the Vertex model and project are given, and the check that a platform and its features are known. Each gap is a small function with its signature, a comment that says what it receives and returns, one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. Python names them with a leading underscore; TypeScript, Java and Kotlin use camel case without it (`checkBedrock`, `vertexHost`). Write them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_family` unlocks `e1`: a dated and an undated Haiku id are one family.",
+        "`_check_bedrock` unlocks `e4` and `e6`: a model Bedrock does not serve and a missing region are refused.",
+        "`_bedrock_model_id` unlocks `m1` and `e1`: `anthropic.` and the family.",
+        "`_vertex_model_id` unlocks `e1`: the dated Haiku id in a Vertex URL.",
+        "`_vertex_host` unlocks `m1` and `e3`: the host of a global, multi-region or regional endpoint, and which models a region serves.",
+        "`_vertex_body` unlocks `e2`: no model, a version field, and the caller's body left alone.",
+        "`_lacking` unlocks `e5`: the features a platform lacks."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About a dozen lines in all. To see what a gap receives, log its input with the `log` line at the top of the file: `build_request` already logs its input at debug level, and a run shows the logged lines under the failing case."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "`build_request`"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Direct API:** `POST https://api.anthropic.com/v1/messages`, headers `anthropic-version: 2023-06-01` and `content-type: application/json`, the model in the body.",
+        "**Bedrock:** `POST https://bedrock-mantle.<region>.api.aws/anthropic/v1/messages`, the same two headers, and the model in the body as the Bedrock id: `anthropic.` followed by the model name without a date (`anthropic.claude-opus-5-5`, `anthropic.claude-haiku-4-5` for both `claude-haiku-4-5-20251001` and `claude-haiku-4-5`). Bedrock's Messages endpoint serves the Fable 5.1, Opus 5.5, Sonnet 5.5 and Haiku 4.5 models here; `claude-sonnet-4-6` is `model`. A missing or empty `region` is `config`.",
+        "**Vertex:** the model is **not** in the body but in the URL, and the version is **not** a header but a body field `anthropic_version` with the value `vertex-2023-10-16`; the only header is `content-type`. The URL is `https://<host>/v1/projects/<project>/locations/<endpoint>/publishers/anthropic/models/<model id>:rawPredict`. The endpoint (default `global`) picks the host: `global` is `aiplatform.googleapis.com`; the multi-region endpoints `us` and `eu` are `aiplatform.us.rep.googleapis.com` and `aiplatform.eu.rep.googleapis.com`; any other value is a specific region and the host is `<region>-aiplatform.googleapis.com`, which serves `claude-sonnet-4-6` only (any other model with a specific region is `endpoint`). The Vertex model id is the model name, with `claude-haiku-4-5@20251001` for Haiku 4.5. A missing or empty `project` is `config`. The five models above are served; any other is `model`.",
+        "An unknown platform is `platform`. Never change the `body` you were given."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "`unsupported_features(platform, features)` (TypeScript `unsupportedFeatures`, Java `Platforms.unsupportedFeatures`, Kotlin `unsupportedFeatures`)"
+    },
+    {
+      "type": "para",
+      "text": "Return the features of the list that the platform lacks, in the order given; an unknown platform or feature is a `PlatformError`. The direct API lacks none. Bedrock lacks `batches` (the Message Batches API), `fast_mode`, `files_api`, `web_search`, `web_fetch`, `code_execution`, `mcp_connector`, `structured_outputs`, `skills` and `managed_agents`. Vertex lacks `batches`, `fast_mode`, `files_api`, `web_fetch`, `code_execution`, `mcp_connector`, `skills` and `managed_agents`. The other names (`prompt_caching`, `thinking`, `tool_use`, `citations`) are available everywhere."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "The same message takes three shapes: URL, headers and model place for each platform"
+        ],
+        [
+          "`e1`",
+          "Model ids change with the platform"
+        ],
+        [
+          "`e2`",
+          "Vertex moves the model into the URL and the version into the body, and the caller's body is never changed"
+        ],
+        [
+          "`e3`",
+          "Vertex global, multi-region and regional endpoints, and which models a regional endpoint serves"
+        ],
+        [
+          "`e4`",
+          "A platform serves only its own models"
+        ],
+        [
+          "`e5`",
+          "Each platform lacks its own features"
+        ],
+        [
+          "`e6`",
+          "A request needs the place it is sent to (region or project)"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"One request, three front doors: the direct API, Amazon Bedrock and Google Vertex AI. See ../../statement.md.\"\"\"\nimport copy\nimport logging\n\nlog = logging.getLogger(__name__)\n\nANTHROPIC_VERSION = \"2023-06-01\"\nVERTEX_VERSION = \"vertex-2023-10-16\"\nHAIKU = \"claude-haiku-4-5\"\nHAIKU_VERTEX = \"claude-haiku-4-5@20251001\"\nBEDROCK_MODELS = {\"claude-fable-5-1\", \"claude-opus-5-5\", \"claude-sonnet-5-5\", HAIKU}\nVERTEX_MODELS = BEDROCK_MODELS | {\"claude-sonnet-4-6\"}\nREGIONAL_VERTEX_MODELS = {\"claude-sonnet-4-6\"}  # specific regional endpoints serve Sonnet 4.6 and earlier only\nMISSING = {\n    \"anthropic\": set(),\n    \"bedrock\": {\"batches\", \"fast_mode\", \"files_api\", \"web_search\", \"web_fetch\", \"code_execution\", \"mcp_connector\",\n                \"structured_outputs\", \"skills\", \"managed_agents\"},\n    \"vertex\": {\"batches\", \"fast_mode\", \"files_api\", \"web_fetch\", \"code_execution\", \"mcp_connector\", \"skills\", \"managed_agents\"},\n}\nFEATURES = {\"batches\", \"fast_mode\", \"files_api\", \"web_search\", \"web_fetch\", \"code_execution\", \"mcp_connector\",\n            \"structured_outputs\", \"skills\", \"managed_agents\", \"prompt_caching\", \"thinking\", \"tool_use\", \"citations\"}\n\n\nclass PlatformError(Exception):\n    \"\"\"The request cannot be built for this platform. `field` names the offending part.\"\"\"\n\n    def __init__(self, field, reason):\n        super().__init__(f\"{field}: {reason}\")\n        self.field, self.reason = field, reason\n\n\ndef _family(model):\n    return HAIKU if model.startswith(HAIKU) else model\n\n\ndef _check_bedrock(model, family, config):\n    if family not in BEDROCK_MODELS:\n        raise PlatformError(\"model\", f\"{model} is not served by Claude in Amazon Bedrock\")\n    if not config.get(\"region\"):\n        raise PlatformError(\"config\", \"a Bedrock request needs a region\")\n\n\ndef _bedrock_model_id(family):\n    return f\"anthropic.{family}\"\n\n\ndef _vertex_model_id(family):\n    return HAIKU_VERTEX if family == HAIKU else family\n\n\ndef _vertex_host(endpoint, family, model):\n    if endpoint == \"global\":\n        return \"aiplatform.googleapis.com\"\n    if endpoint in (\"us\", \"eu\"):\n        return f\"aiplatform.{endpoint}.rep.googleapis.com\"\n    if family not in REGIONAL_VERTEX_MODELS:\n        raise PlatformError(\"endpoint\", f\"{model} is served on the global and multi-region endpoints, not on a specific region\")\n    return f\"{endpoint}-aiplatform.googleapis.com\"\n\n\ndef _vertex_body(body):\n    sent = copy.deepcopy(body)\n    sent.pop(\"model\", None)\n    sent[\"anthropic_version\"] = VERTEX_VERSION\n    return sent\n\n\ndef _lacking(platform, features):\n    return [name for name in features if name in MISSING[platform]]\n\n\ndef build_request(platform, model, body, config):\n    log.debug(\"build_request input: %s %s %r %r\", platform, model, body, config)\n    family = _family(model)\n    if platform == \"anthropic\":\n        return {\"method\": \"POST\", \"url\": \"https://api.anthropic.com/v1/messages\",\n                \"headers\": {\"anthropic-version\": ANTHROPIC_VERSION, \"content-type\": \"application/json\"},\n                \"body\": {**copy.deepcopy(body), \"model\": model}}\n    if platform == \"bedrock\":\n        _check_bedrock(model, family, config)\n        region = config.get(\"region\")\n        return {\"method\": \"POST\", \"url\": f\"https://bedrock-mantle.{region}.api.aws/anthropic/v1/messages\",\n                \"headers\": {\"anthropic-version\": ANTHROPIC_VERSION, \"content-type\": \"application/json\"},\n                \"body\": {**copy.deepcopy(body), \"model\": _bedrock_model_id(family)}}\n    if platform == \"vertex\":\n        if family not in VERTEX_MODELS:\n            raise PlatformError(\"model\", f\"{model} is not served on Google Vertex AI\")\n        project = config.get(\"project\")\n        if not project:\n            raise PlatformError(\"config\", \"a Vertex request needs a project\")\n        endpoint = config.get(\"endpoint\", \"global\")\n        path = f\"/v1/projects/{project}/locations/{endpoint}/publishers/anthropic/models/{_vertex_model_id(family)}:rawPredict\"\n        host = _vertex_host(endpoint, family, model)\n        return {\"method\": \"POST\", \"url\": f\"https://{host}{path}\", \"headers\": {\"content-type\": \"application/json\"}, \"body\": _vertex_body(body)}\n    raise PlatformError(\"platform\", f\"unknown platform {platform}\")\n\n\ndef unsupported_features(platform, features):\n    if platform not in MISSING:\n        raise PlatformError(\"platform\", f\"unknown platform {platform}\")\n    for name in features:\n        if name not in FEATURES:\n            raise PlatformError(\"feature\", f\"unknown feature {name}\")\n    return _lacking(platform, features)\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom platforms import PlatformError, build_request, unsupported_features\n\nbody = {\"model\": \"ignored-by-the-builder\", \"max_tokens\": 256, \"messages\": [{\"role\": \"user\", \"content\": \"Hello, Claude\"}]}\nOPUS = \"claude-opus-5-5\"\n\n# The same message for three front doors: the URL, the model id and the version header change.\ntry:\n    for platform, config in ((\"anthropic\", {}), (\"bedrock\", {\"region\": \"us-east-1\"}), (\"vertex\", {\"project\": \"my-project\"})):\n        request = build_request(platform, OPUS, dict(body), config) or {}\n        print(platform, \"->\", request.get(\"url\"), \"| model in body:\", (request.get(\"body\") or {}).get(\"model\"),\n              \"| headers:\", sorted(request.get(\"headers\") or {}))\nexcept PlatformError as err:\n    print(\"platform error:\", err)\n\n# What a team would lose by moving to Bedrock.\nprint(\"missing on bedrock:\", unsupported_features(\"bedrock\", [\"batches\", \"fast_mode\", \"files_api\"]))\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"One request, three front doors: the direct API, Amazon Bedrock and Google Vertex AI. See ../../statement.md.\"\"\"\nimport copy\nimport logging\n\nlog = logging.getLogger(__name__)\n\nANTHROPIC_VERSION = \"2023-06-01\"\nVERTEX_VERSION = \"vertex-2023-10-16\"\nHAIKU = \"claude-haiku-4-5\"\nHAIKU_VERTEX = \"claude-haiku-4-5@20251001\"\nBEDROCK_MODELS = {\"claude-fable-5-1\", \"claude-opus-5-5\", \"claude-sonnet-5-5\", HAIKU}\nVERTEX_MODELS = BEDROCK_MODELS | {\"claude-sonnet-4-6\"}\nREGIONAL_VERTEX_MODELS = {\"claude-sonnet-4-6\"}  # specific regional endpoints serve Sonnet 4.6 and earlier only\nMISSING = {\n    \"anthropic\": set(),\n    \"bedrock\": {\"batches\", \"fast_mode\", \"files_api\", \"web_search\", \"web_fetch\", \"code_execution\", \"mcp_connector\",\n                \"structured_outputs\", \"skills\", \"managed_agents\"},\n    \"vertex\": {\"batches\", \"fast_mode\", \"files_api\", \"web_fetch\", \"code_execution\", \"mcp_connector\", \"skills\", \"managed_agents\"},\n}\nFEATURES = {\"batches\", \"fast_mode\", \"files_api\", \"web_search\", \"web_fetch\", \"code_execution\", \"mcp_connector\",\n            \"structured_outputs\", \"skills\", \"managed_agents\", \"prompt_caching\", \"thinking\", \"tool_use\", \"citations\"}\n\n\nclass PlatformError(Exception):\n    \"\"\"The request cannot be built for this platform. `field` names the offending part.\"\"\"\n\n    def __init__(self, field, reason):\n        super().__init__(f\"{field}: {reason}\")\n        self.field, self.reason = field, reason\n\n\ndef _family(model):\n    \"\"\"TODO 1 of 7 (finish this to pass e1): the model name without its date.\n\n    Receives a model id. Returns HAIKU when the id starts with HAIKU (so a dated id such as claude-haiku-4-5-20251001 and the plain name\n    are one family), the id itself otherwise. Example: _family(\"claude-haiku-4-5-20251001\") -> \"claude-haiku-4-5\"\n    \"\"\"\n    return model\n\n\ndef _check_bedrock(model, family, config):\n    \"\"\"TODO 2 of 7 (finish this to pass e4 and e6): refuse what Bedrock cannot take.\n\n    Receives the model id, its family and the config map. Raises PlatformError(\"model\", reason) when the family is not in BEDROCK_MODELS,\n    and PlatformError(\"config\", reason) when config has no region or an empty one. Example: _check_bedrock(\"claude-sonnet-4-6\",\n    \"claude-sonnet-4-6\", {\"region\": \"us-east-1\"}) raises with field \"model\"\n    \"\"\"\n\n\ndef _bedrock_model_id(family):\n    \"\"\"TODO 3 of 7 (finish this to pass m1 and e1): the model id in a Bedrock body.\n\n    Receives the family. Returns \"anthropic.\" followed by it. Example: _bedrock_model_id(\"claude-opus-5-5\") -> \"anthropic.claude-opus-5-5\"\n    \"\"\"\n    return family\n\n\ndef _vertex_model_id(family):\n    \"\"\"TODO 4 of 7 (finish this to pass e1): the model id in a Vertex URL.\n\n    Receives the family. Returns HAIKU_VERTEX for HAIKU and the family itself for the others.\n    Example: _vertex_model_id(\"claude-haiku-4-5\") -> \"claude-haiku-4-5@20251001\"\n    \"\"\"\n    return family\n\n\ndef _vertex_host(endpoint, family, model):\n    \"\"\"TODO 5 of 7 (finish this to pass m1 and e3): the host of a Vertex endpoint.\n\n    Receives the endpoint, the model's family and the model id. Returns aiplatform.googleapis.com for \"global\", aiplatform.<endpoint>.rep.googleapis.com\n    for \"us\" and \"eu\", and <endpoint>-aiplatform.googleapis.com for a specific region, which raises PlatformError(\"endpoint\", reason) unless\n    the family is in REGIONAL_VERTEX_MODELS. Example: _vertex_host(\"eu\", \"claude-opus-5-5\", \"claude-opus-5-5\") -> \"aiplatform.eu.rep.googleapis.com\"\n    \"\"\"\n    return \"\"\n\n\ndef _vertex_body(body):\n    \"\"\"TODO 6 of 7 (finish this to pass e2): the body Vertex takes.\n\n    Receives the caller's body. Returns a deep copy without the `model` key (the model is in the URL) and with `anthropic_version` set to\n    VERTEX_VERSION; the caller's own body is never changed. Example: {\"model\": \"x\", \"max_tokens\": 5} -> {\"max_tokens\": 5, \"anthropic_version\": ...}\n    \"\"\"\n    return copy.deepcopy(body)\n\n\ndef _lacking(platform, features):\n    \"\"\"TODO 7 of 7 (finish this to pass e5): the features this platform lacks.\n\n    Receives a known platform and a list of known feature names. Returns the names that are in MISSING[platform], in the order given.\n    Example: _lacking(\"vertex\", [\"batches\", \"thinking\"]) -> [\"batches\"]\n    \"\"\"\n    return []\n\n\ndef build_request(platform, model, body, config):\n    log.debug(\"build_request input: %s %s %r %r\", platform, model, body, config)\n    family = _family(model)\n    if platform == \"anthropic\":\n        return {\"method\": \"POST\", \"url\": \"https://api.anthropic.com/v1/messages\",\n                \"headers\": {\"anthropic-version\": ANTHROPIC_VERSION, \"content-type\": \"application/json\"},\n                \"body\": {**copy.deepcopy(body), \"model\": model}}\n    if platform == \"bedrock\":\n        _check_bedrock(model, family, config)\n        region = config.get(\"region\")\n        return {\"method\": \"POST\", \"url\": f\"https://bedrock-mantle.{region}.api.aws/anthropic/v1/messages\",\n                \"headers\": {\"anthropic-version\": ANTHROPIC_VERSION, \"content-type\": \"application/json\"},\n                \"body\": {**copy.deepcopy(body), \"model\": _bedrock_model_id(family)}}\n    if platform == \"vertex\":\n        if family not in VERTEX_MODELS:\n            raise PlatformError(\"model\", f\"{model} is not served on Google Vertex AI\")\n        project = config.get(\"project\")\n        if not project:\n            raise PlatformError(\"config\", \"a Vertex request needs a project\")\n        endpoint = config.get(\"endpoint\", \"global\")\n        path = f\"/v1/projects/{project}/locations/{endpoint}/publishers/anthropic/models/{_vertex_model_id(family)}:rawPredict\"\n        host = _vertex_host(endpoint, family, model)\n        return {\"method\": \"POST\", \"url\": f\"https://{host}{path}\", \"headers\": {\"content-type\": \"application/json\"}, \"body\": _vertex_body(body)}\n    raise PlatformError(\"platform\", f\"unknown platform {platform}\")\n\n\ndef unsupported_features(platform, features):\n    if platform not in MISSING:\n        raise PlatformError(\"platform\", f\"unknown platform {platform}\")\n    for name in features:\n        if name not in FEATURES:\n            raise PlatformError(\"feature\", f\"unknown feature {name}\")\n    return _lacking(platform, features)\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom platforms import PlatformError, build_request, unsupported_features\n\nbody = {\"model\": \"ignored-by-the-builder\", \"max_tokens\": 256, \"messages\": [{\"role\": \"user\", \"content\": \"Hello, Claude\"}]}\nOPUS = \"claude-opus-5-5\"\n\n# The same message for three front doors: the URL, the model id and the version header change.\ntry:\n    for platform, config in ((\"anthropic\", {}), (\"bedrock\", {\"region\": \"us-east-1\"}), (\"vertex\", {\"project\": \"my-project\"})):\n        request = build_request(platform, OPUS, dict(body), config) or {}\n        print(platform, \"->\", request.get(\"url\"), \"| model in body:\", (request.get(\"body\") or {}).get(\"model\"),\n              \"| headers:\", sorted(request.get(\"headers\") or {}))\nexcept PlatformError as err:\n    print(\"platform error:\", err)\n\n# What a team would lose by moving to Bedrock.\nprint(\"missing on bedrock:\", unsupported_features(\"bedrock\", [\"batches\", \"fast_mode\", \"files_api\"]))\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 6,
+    "code": 2,
+    "tables": 1,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "85eb7af42a474cadf869c30b0d28a236b9ca8bf51e08dda7f43419666ae88cd1",
+  "starting_code": "\"\"\"One request, three front doors: the direct API, Amazon Bedrock and Google Vertex AI. See ../../statement.md.\"\"\"\nimport copy\nimport logging\n\nlog = logging.getLogger(__name__)\n\nANTHROPIC_VERSION = \"2023-06-01\"\nVERTEX_VERSION = \"vertex-2023-10-16\"\nHAIKU = \"claude-haiku-4-5\"\nHAIKU_VERTEX = \"claude-haiku-4-5@20251001\"\nBEDROCK_MODELS = {\"claude-fable-5-1\", \"claude-opus-5-5\", \"claude-sonnet-5-5\", HAIKU}\nVERTEX_MODELS = BEDROCK_MODELS | {\"claude-sonnet-4-6\"}\nREGIONAL_VERTEX_MODELS = {\"claude-sonnet-4-6\"}  # specific regional endpoints serve Sonnet 4.6 and earlier only\nMISSING = {\n    \"anthropic\": set(),\n    \"bedrock\": {\"batches\", \"fast_mode\", \"files_api\", \"web_search\", \"web_fetch\", \"code_execution\", \"mcp_connector\",\n                \"structured_outputs\", \"skills\", \"managed_agents\"},\n    \"vertex\": {\"batches\", \"fast_mode\", \"files_api\", \"web_fetch\", \"code_execution\", \"mcp_connector\", \"skills\", \"managed_agents\"},\n}\nFEATURES = {\"batches\", \"fast_mode\", \"files_api\", \"web_search\", \"web_fetch\", \"code_execution\", \"mcp_connector\",\n            \"structured_outputs\", \"skills\", \"managed_agents\", \"prompt_caching\", \"thinking\", \"tool_use\", \"citations\"}\n\n\nclass PlatformError(Exception):\n    \"\"\"The request cannot be built for this platform. `field` names the offending part.\"\"\"\n\n    def __init__(self, field, reason):\n        super().__init__(f\"{field}: {reason}\")\n        self.field, self.reason = field, reason\n\n\ndef _family(model):\n    \"\"\"TODO 1 of 7 (finish this to pass e1): the model name without its date.\n\n    Receives a model id. Returns HAIKU when the id starts with HAIKU (so a dated id such as claude-haiku-4-5-20251001 and the plain name\n    are one family), the id itself otherwise. Example: _family(\"claude-haiku-4-5-20251001\") -> \"claude-haiku-4-5\"\n    \"\"\"\n    return model\n\n\ndef _check_bedrock(model, family, config):\n    \"\"\"TODO 2 of 7 (finish this to pass e4 and e6): refuse what Bedrock cannot take.\n\n    Receives the model id, its family and the config map. Raises PlatformError(\"model\", reason) when the family is not in BEDROCK_MODELS,\n    and PlatformError(\"config\", reason) when config has no region or an empty one. Example: _check_bedrock(\"claude-sonnet-4-6\",\n    \"claude-sonnet-4-6\", {\"region\": \"us-east-1\"}) raises with field \"model\"\n    \"\"\"\n\n\ndef _bedrock_model_id(family):\n    \"\"\"TODO 3 of 7 (finish this to pass m1 and e1): the model id in a Bedrock body.\n\n    Receives the family. Returns \"anthropic.\" followed by it. Example: _bedrock_model_id(\"claude-opus-5-5\") -> \"anthropic.claude-opus-5-5\"\n    \"\"\"\n    return family\n\n\ndef _vertex_model_id(family):\n    \"\"\"TODO 4 of 7 (finish this to pass e1): the model id in a Vertex URL.\n\n    Receives the family. Returns HAIKU_VERTEX for HAIKU and the family itself for the others.\n    Example: _vertex_model_id(\"claude-haiku-4-5\") -> \"claude-haiku-4-5@20251001\"\n    \"\"\"\n    return family\n\n\ndef _vertex_host(endpoint, family, model):\n    \"\"\"TODO 5 of 7 (finish this to pass m1 and e3): the host of a Vertex endpoint.\n\n    Receives the endpoint, the model's family and the model id. Returns aiplatform.googleapis.com for \"global\", aiplatform.<endpoint>.rep.googleapis.com\n    for \"us\" and \"eu\", and <endpoint>-aiplatform.googleapis.com for a specific region, which raises PlatformError(\"endpoint\", reason) unless\n    the family is in REGIONAL_VERTEX_MODELS. Example: _vertex_host(\"eu\", \"claude-opus-5-5\", \"claude-opus-5-5\") -> \"aiplatform.eu.rep.googleapis.com\"\n    \"\"\"\n    return \"\"\n\n\ndef _vertex_body(body):\n    \"\"\"TODO 6 of 7 (finish this to pass e2): the body Vertex takes.\n\n    Receives the caller's body. Returns a deep copy without the `model` key (the model is in the URL) and with `anthropic_version` set to\n    VERTEX_VERSION; the caller's own body is never changed. Example: {\"model\": \"x\", \"max_tokens\": 5} -> {\"max_tokens\": 5, \"anthropic_version\": ...}\n    \"\"\"\n    return copy.deepcopy(body)\n\n\ndef _lacking(platform, features):\n    \"\"\"TODO 7 of 7 (finish this to pass e5): the features this platform lacks.\n\n    Receives a known platform and a list of known feature names. Returns the names that are in MISSING[platform], in the order given.\n    Example: _lacking(\"vertex\", [\"batches\", \"thinking\"]) -> [\"batches\"]\n    \"\"\"\n    return []\n\n\ndef build_request(platform, model, body, config):\n    log.debug(\"build_request input: %s %s %r %r\", platform, model, body, config)\n    family = _family(model)\n    if platform == \"anthropic\":\n        return {\"method\": \"POST\", \"url\": \"https://api.anthropic.com/v1/messages\",\n                \"headers\": {\"anthropic-version\": ANTHROPIC_VERSION, \"content-type\": \"application/json\"},\n                \"body\": {**copy.deepcopy(body), \"model\": model}}\n    if platform == \"bedrock\":\n        _check_bedrock(model, family, config)\n        region = config.get(\"region\")\n        return {\"method\": \"POST\", \"url\": f\"https://bedrock-mantle.{region}.api.aws/anthropic/v1/messages\",\n                \"headers\": {\"anthropic-version\": ANTHROPIC_VERSION, \"content-type\": \"application/json\"},\n                \"body\": {**copy.deepcopy(body), \"model\": _bedrock_model_id(family)}}\n    if platform == \"vertex\":\n        if family not in VERTEX_MODELS:\n            raise PlatformError(\"model\", f\"{model} is not served on Google Vertex AI\")\n        project = config.get(\"project\")\n        if not project:\n            raise PlatformError(\"config\", \"a Vertex request needs a project\")\n        endpoint = config.get(\"endpoint\", \"global\")\n        path = f\"/v1/projects/{project}/locations/{endpoint}/publishers/anthropic/models/{_vertex_model_id(family)}:rawPredict\"\n        host = _vertex_host(endpoint, family, model)\n        return {\"method\": \"POST\", \"url\": f\"https://{host}{path}\", \"headers\": {\"content-type\": \"application/json\"}, \"body\": _vertex_body(body)}\n    raise PlatformError(\"platform\", f\"unknown platform {platform}\")\n\n\ndef unsupported_features(platform, features):\n    if platform not in MISSING:\n        raise PlatformError(\"platform\", f\"unknown platform {platform}\")\n    for name in features:\n        if name not in FEATURES:\n            raise PlatformError(\"feature\", f\"unknown feature {name}\")\n    return _lacking(platform, features)\n",
+  "exercise": {
+    "main_path": "practice/level-2/22-claude-on-the-cloud-platforms/prose/unit-02/practice-1/platforms.py",
+    "test_path": "practice/level-2/22-claude-on-the-cloud-platforms/prose/unit-02/practice-1/test_platforms.py",
+    "run_command": [
+      "python3",
+      "practice/level-2/22-claude-on-the-cloud-platforms/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-2/22-claude-on-the-cloud-platforms/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-2/22-claude-on-the-cloud-platforms/prose/unit-02/practice-1/test_platforms.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_the_same_message_takes_three_shapes",
+        "kind": "main",
+        "says": "The same message takes three shapes: URL, headers and model place for each platform"
+      },
+      {
+        "id": "test_e1_model_ids_change_with_the_platform",
+        "kind": "edge",
+        "says": "Model ids change with the platform"
+      },
+      {
+        "id": "test_e2_vertex_moves_the_model_into_the_url_and_the_version_into_the_body",
+        "kind": "edge",
+        "says": "Vertex moves the model into the URL and the version into the body, and the caller's body is never changed"
+      },
+      {
+        "id": "test_e3_vertex_endpoints_global_multi_region_and_regional",
+        "kind": "edge",
+        "says": "Vertex global, multi-region and regional endpoints, and which models a regional endpoint serves"
+      },
+      {
+        "id": "test_e4_a_platform_serves_only_its_own_models",
+        "kind": "edge",
+        "says": "A platform serves only its own models"
+      },
+      {
+        "id": "test_e5_each_platform_lacks_its_own_features",
+        "kind": "edge",
+        "says": "Each platform lacks its own features"
+      },
+      {
+        "id": "test_e6_a_request_needs_the_place_it_is_sent_to",
+        "kind": "edge",
+        "says": "A request needs the place it is sent to (region or project)"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/22-claude-on-the-cloud-platforms/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/22-claude-on-the-cloud-platforms/02-what-each-platform-lacks-where-it-runs-and-what-it-costs.md",
+    "concepts": [
+      "the practice of What each platform lacks, where it runs and what it costs is solved"
+    ],
+    "files": [
+      "practice/level-2/22-claude-on-the-cloud-platforms/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "claude-on-the-cloud-platforms-u2"
+}

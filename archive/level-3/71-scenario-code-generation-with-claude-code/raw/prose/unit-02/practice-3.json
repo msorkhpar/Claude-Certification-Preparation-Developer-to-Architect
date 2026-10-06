@@ -1,0 +1,410 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "71-scenario-code-generation-with-claude-code"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: a complete Claude Code setup for a small project (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a complete Claude Code setup for a small project"
+    },
+    {
+      "type": "para",
+      "text": "A team builds a small web application with Claude Code. Its first setup is one long root memory file that holds every convention, a review checklist and a personal note, and its settings allow the whole `Bash` tool. In this practice you correct the setup: the conventions move to rule files that load only for the files of their area, the review becomes a shared command, the settings protect the environment file, and a table settles when to plan and when to edit directly. There is no program to write and no model is called: the tests read your files. The names and paths the tests check are the documented ones of Claude Code (checked 2026-10-04): `CLAUDE.md`, `.claude/rules/` with a `paths` list of globs, `.claude/commands/`, and permission rules in `.claude/settings.json`; the limit of 25 lines for the root file and the modes table are this course's own conventions. It is in Python, TypeScript, Java and Kotlin; pick your language folder, open `starter/` and edit the files there; each language folder holds its own copy of the files."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is the draft of the setup with eight gaps cut out of it. The rule file `.claude/rules/docs.md` is finished and is the model for the front matter of the others. The bodies of the four convention rules and of the review command are written; they only lack their front matter. Each gap is marked by a `TODO n of 8` comment in the file (the settings file takes none, because JSON has no comments) that says what is missing, with one example and the cases it unlocks. Delete the comment when the file is done. A file holds no program, so there is no logger to write here: the tests read the files and report the failing case with its message. Write them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`.claude/rules/components.md` unlocks `m1` and `e5`: the `paths` list for `src/ui`.",
+        "`.claude/rules/handlers.md` unlocks `m1` and `e5`: the `paths` list for `server/handlers`.",
+        "`.claude/rules/database.md` unlocks `m1` and `e5`: the `paths` list for `server/db`.",
+        "`.claude/rules/tests.md` unlocks `m1` and `e5`: the `paths` list for the `.spec.ts` and `.spec.tsx` files.",
+        "`.claude/commands/review.md` unlocks `e2`: the front matter with a `description` and the read-only `allowed-tools`.",
+        "`.claude/settings.json` unlocks `e3`: deny the environment file and approve no whole tool.",
+        "`CLAUDE.md` unlocks `e1` and `e6`: the short root file, without the personal path.",
+        "`docs/working-modes.md` unlocks `e4`: the mode of each row."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About a dozen lines in all. The sections below describe the whole setup."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "The project folder holds `CLAUDE.md`, `.claude/rules/`, `.claude/commands/review.md`, `.claude/settings.json` and `docs/working-modes.md`. The sample files the tests use are `src/ui/Button.tsx`, `server/handlers/orders.ts`, `server/db/orderRepo.ts`, a `.spec.ts` or `.spec.tsx` file beside each, and `docs/readme.md`."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "**Rules.** One rule file for each convention: components (hooks) for `src/ui`, handlers (async/await) for `server/handlers`, database access (the repository pattern) for `server/db`, and tests (`describe`) for every `.spec.ts` and `.spec.tsx` file wherever it sits. Each file has front matter with a `paths` list of globs, written like `src/ui/**/*.tsx`. A convention must load for the files of its area and for no other sample file.",
+        "**The root file.** `CLAUDE.md` holds only what every task needs, in at most 25 lines that are not blank, and none of the area conventions. It points to the rules and to `docs/working-modes.md`.",
+        "**The review command.** `.claude/commands/review.md` has a `description`, an `allowed-tools` line that has `Read` and none of `Bash`, `Edit` or `Write` on its own (`Bash(git diff *)` is allowed), and a body that says to run `git diff`.",
+        "**The settings.** `Read(./.env)` is denied, and no allow rule is `Bash`, `Bash(*)`, `Edit` or `Write`.",
+        "**The modes table.** `docs/working-modes.md` has a table of `Task | Mode | Why`. A typo fix, a validation check in one handler and a rename of a local variable are `direct`; the restructuring of the monolith, the migration to a new auth library and a feature with unclear requirements are `plan`.",
+        "**No personal data.** No file holds a home path, an address other than `example.com`, or a key."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**A convention should cost context only where it applies.** Area conventions in the root file load in every session. *You should see* each convention load for its own files and no others, and the testing convention load for spec files wherever they are.",
+        "**The root file is for what every task needs.** *You should see* a short file that points elsewhere.",
+        "**A shared command is a file in the project.** *You should see* a review that every clone has and that can only read.",
+        "**A rule that must hold goes in the settings, not in a sentence.** *You should see* the environment file denied and no whole tool approved.",
+        "**Planning has a cost, so it is chosen by the task.** *You should see* open design work sent to plan mode and clear small work sent to direct execution."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Each convention loads for exactly the files of its area"
+        ],
+        [
+          "`e1`",
+          "The root file is short and holds none of the area conventions"
+        ],
+        [
+          "`e2`",
+          "The review command is shared, read only and says what it does"
+        ],
+        [
+          "`e3`",
+          "The settings protect the environment file and approve no whole tool"
+        ],
+        [
+          "`e4`",
+          "The modes table sends open design work to plan mode and clear small work to direct"
+        ],
+        [
+          "`e5`",
+          "Every rule has a `paths` list, and its globs match at least one sample file"
+        ],
+        [
+          "`e6`",
+          "No file holds a personal path, an address or a key"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "# Dispatch app\n\n- TypeScript strict mode. No default exports.\n- Run `npm test` before finishing a task.\n- Conventions for each area live in `.claude/rules/` and load when Claude works on a matching file.\n- Use `/review` before opening a pull request.\n- Read `docs/working-modes.md` to decide between plan mode and direct execution.\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.claude/commands/review.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "---\ndescription: Review the current changes against the team checklist\nallowed-tools: Read Grep Glob Bash(git diff *)\n---\n\nRun `git diff`, then check the changes against these points: types, error handling, tests for new behaviour, and secrets. Report each finding with its file and line.\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.claude/rules/components.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "---\npaths:\n  - \"src/ui/**/*.tsx\"\n---\n\n# Components\n\n- Write function components that use hooks. Type props with an interface.\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.claude/rules/database.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "---\npaths:\n  - \"server/db/**/*.ts\"\n---\n\n# Database access\n\n- Follow the repository pattern. No SQL outside a repository.\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.claude/rules/docs.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "---\npaths:\n  - \"docs/**/*.md\"\n---\n\n# Documentation\n\n- Write headings in sentence case. Keep each page to one topic.\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.claude/rules/handlers.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "---\npaths:\n  - \"server/handlers/**/*.ts\"\n---\n\n# API handlers\n\n- Use async/await. Wrap failures in `AppError` with an HTTP status.\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.claude/rules/tests.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "---\npaths:\n  - \"**/*.spec.ts\"\n  - \"**/*.spec.tsx\"\n---\n\n# Tests\n\n- Use `describe` and `it`. Keep the test file next to the file it tests.\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.claude/settings.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"permissions\": {\n    \"allow\": [\"Bash(npm test)\"],\n    \"deny\": [\"Read(./.env)\"]\n  }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/docs/working-modes.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "# Plan mode or direct execution\n\n| Task | Mode | Why |\n|---|---|---|\n| Fix a typo in an error message | direct | the change is clear and fits in one diff |\n| Restructure the monolith into services, across dozens of files | plan | several valid designs, so explore before changing anything |\n| Add a validation check to one handler, with a clear spec | direct | the scope is known and small |\n| Migrate to a new auth library, touching many files, with several valid designs | plan | the design decisions come before the edits |\n| Rename a local variable in one function | direct | trivial and contained |\n| Build a feature whose requirements are unclear, so interview first | plan | the questions come before the code |\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "<!-- TODO 7 of 8 (unlocks e1 and e6): cut this file to what every task needs, in at most 25 lines, point to the rules, `/review` and `docs/working-modes.md`, and remove the personal path. -->\n# Dispatch app\n\n## General\n- TypeScript strict mode. No default exports.\n- Run `npm test` before finishing a task.\n- My notes are in /home/dev/notes/dispatch.\n\n## Components\n- Write function components that use hooks. Type props with an interface.\n\n## API handlers\n- Use async/await. Wrap failures in `AppError` with an HTTP status.\n\n## Database access\n- Follow the repository pattern. No SQL outside a repository.\n\n## Tests\n- Use `describe` and `it`. Keep the test file next to the file it tests.\n- Test files are named `<name>.spec.ts` or `<name>.spec.tsx` and sit beside the file they test.\n\n## Reviews\n- Before a pull request, run git diff and check types, error handling, tests and secrets.\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.claude/commands/review.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "<!-- TODO 5 of 8 (unlocks e2): start this file with front matter that has a `description` and an `allowed-tools` line (read tools and `Bash(git diff *)`, no bare Bash).\nExample: a line `---`, `description: Summarise the staged changes`, `allowed-tools: Read Grep`, a line `---`. Delete this comment. -->\n\nRun `git diff`, then check the changes against these points: types, error handling, tests for new behaviour, and secrets. Report each finding with its file and line.\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.claude/rules/components.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "<!-- TODO 1 of 8 (unlocks m1 and e5): start this file with front matter that has a `paths` list of globs reaching only the files of its area.\nExample: a rule for the folder `docs` starts with a line `---`, then `paths:`, then `  - \"docs/**/*.md\"`, then `---`. Delete this comment. -->\n\n# Components\n\n- Write function components that use hooks. Type props with an interface.\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.claude/rules/database.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "<!-- TODO 3 of 8 (unlocks m1 and e5): start this file with front matter that has a `paths` list of globs reaching only the files of its area.\nExample: a rule for the folder `docs` starts with a line `---`, then `paths:`, then `  - \"docs/**/*.md\"`, then `---`. Delete this comment. -->\n\n# Database access\n\n- Follow the repository pattern. No SQL outside a repository.\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.claude/rules/docs.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "---\npaths:\n  - \"docs/**/*.md\"\n---\n\n# Documentation\n\n- Write headings in sentence case. Keep each page to one topic.\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.claude/rules/handlers.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "<!-- TODO 2 of 8 (unlocks m1 and e5): start this file with front matter that has a `paths` list of globs reaching only the files of its area.\nExample: a rule for the folder `docs` starts with a line `---`, then `paths:`, then `  - \"docs/**/*.md\"`, then `---`. Delete this comment. -->\n\n# API handlers\n\n- Use async/await. Wrap failures in `AppError` with an HTTP status.\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.claude/rules/tests.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "<!-- TODO 4 of 8 (unlocks m1 and e5): start this file with front matter that has a `paths` list of globs reaching only the files of its area.\nExample: a rule for the folder `docs` starts with a line `---`, then `paths:`, then `  - \"docs/**/*.md\"`, then `---`. Delete this comment. -->\n\n# Tests\n\n- Use `describe` and `it`. Keep the test file next to the file it tests.\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.claude/settings.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"permissions\": {\n    \"allow\": [\"Bash\"],\n    \"deny\": []\n  }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/docs/working-modes.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "<!-- TODO 8 of 8 (unlocks e4): set the Mode of every row to `plan` or `direct`: open design work is `plan`, clear small work is `direct`. -->\n# Plan mode or direct execution\n\n| Task | Mode | Why |\n|---|---|---|\n| Fix a typo in an error message | direct | the change is clear and fits in one diff |\n| Restructure the monolith into services, across dozens of files | direct | several valid designs, so explore before changing anything |\n| Add a validation check to one handler, with a clear spec | direct | the scope is known and small |\n| Migrate to a new auth library, touching many files, with several valid designs | direct | the design decisions come before the edits |\n| Rename a local variable in one function | direct | trivial and contained |\n| Build a feature whose requirements are unclear, so interview first | direct | the questions come before the code |\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 12,
+    "code": 9,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "6cbc25e0f1ffbdf3d4007bab9596f40348480762ea6d085e6a71a604678dc818",
+  "starting_code": "<!-- TODO 7 of 8 (unlocks e1 and e6): cut this file to what every task needs, in at most 25 lines, point to the rules, `/review` and `docs/working-modes.md`, and remove the personal path. -->\n# Dispatch app\n\n## General\n- TypeScript strict mode. No default exports.\n- Run `npm test` before finishing a task.\n- My notes are in /home/dev/notes/dispatch.\n\n## Components\n- Write function components that use hooks. Type props with an interface.\n\n## API handlers\n- Use async/await. Wrap failures in `AppError` with an HTTP status.\n\n## Database access\n- Follow the repository pattern. No SQL outside a repository.\n\n## Tests\n- Use `describe` and `it`. Keep the test file next to the file it tests.\n- Test files are named `<name>.spec.ts` or `<name>.spec.tsx` and sit beside the file they test.\n\n## Reviews\n- Before a pull request, run git diff and check types, error handling, tests and secrets.\n",
+  "exercise": {
+    "main_path": "practice/level-3/71-scenario-code-generation-with-claude-code/prose/unit-02/practice-3/project/CLAUDE.md",
+    "test_path": "practice/level-3/71-scenario-code-generation-with-claude-code/prose/unit-02/practice-3/src/test/java/TeamSetupTest.java",
+    "run_command": [
+      "python3",
+      "practice/level-3/71-scenario-code-generation-with-claude-code/prose/unit-02/practice-3/check_files.py",
+      "practice/level-3/71-scenario-code-generation-with-claude-code/prose/unit-02/practice-3/project/.claude/commands/review.md",
+      "practice/level-3/71-scenario-code-generation-with-claude-code/prose/unit-02/practice-3/project/.claude/rules/components.md",
+      "practice/level-3/71-scenario-code-generation-with-claude-code/prose/unit-02/practice-3/project/.claude/rules/database.md",
+      "practice/level-3/71-scenario-code-generation-with-claude-code/prose/unit-02/practice-3/project/.claude/rules/docs.md",
+      "practice/level-3/71-scenario-code-generation-with-claude-code/prose/unit-02/practice-3/project/.claude/rules/handlers.md",
+      "practice/level-3/71-scenario-code-generation-with-claude-code/prose/unit-02/practice-3/project/.claude/rules/tests.md",
+      "practice/level-3/71-scenario-code-generation-with-claude-code/prose/unit-02/practice-3/project/.claude/settings.json",
+      "practice/level-3/71-scenario-code-generation-with-claude-code/prose/unit-02/practice-3/project/CLAUDE.md",
+      "practice/level-3/71-scenario-code-generation-with-claude-code/prose/unit-02/practice-3/project/docs/working-modes.md"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/71-scenario-code-generation-with-claude-code/prose/unit-02/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_eachConventionLoadsForExactlyTheFilesOfItsArea()",
+        "kind": "main",
+        "says": "Each convention loads for exactly the files of its area"
+      },
+      {
+        "id": "e1_theRootFileIsShortAndHoldsOnlyWhatEveryTaskNeeds()",
+        "kind": "edge",
+        "says": "The root file is short and holds none of the area conventions"
+      },
+      {
+        "id": "e2_theReviewCommandIsSharedReadOnlyAndSaysWhatItDoes()",
+        "kind": "edge",
+        "says": "The review command is shared, read only and says what it does"
+      },
+      {
+        "id": "e3_theSettingsProtectTheEnvironmentFileAndApproveNoWholeTool()",
+        "kind": "edge",
+        "says": "The settings protect the environment file and approve no whole tool"
+      },
+      {
+        "id": "e4_theModesTableSendsOpenDesignWorkToPlanModeAndClearSmallWorkToDirect()",
+        "kind": "edge",
+        "says": "The modes table sends open design work to plan mode and clear small work to direct"
+      },
+      {
+        "id": "e5_everyRuleScopesItselfWithAGlobThatMatchesAFile()",
+        "kind": "edge",
+        "says": "Every rule has a paths list, and its globs match at least one sample file"
+      },
+      {
+        "id": "e6_noFileHoldsAPersonalPathAnAddressOrAKey()",
+        "kind": "edge",
+        "says": "No file holds a personal path, an address or a key"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/71-scenario-code-generation-with-claude-code/prose/unit-02/practice-3/target/test-results/test"
+    },
+    "origin": "course/71-scenario-code-generation-with-claude-code/02-plan-or-direct-a-target-to-iterate-on-and-the-practice.md",
+    "concepts": [
+      "the practice of Plan or direct, a target to iterate on, and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/71-scenario-code-generation-with-claude-code/prose/unit-02/practice-3/project/.claude/commands/review.md",
+      "practice/level-3/71-scenario-code-generation-with-claude-code/prose/unit-02/practice-3/project/.claude/rules/components.md",
+      "practice/level-3/71-scenario-code-generation-with-claude-code/prose/unit-02/practice-3/project/.claude/rules/database.md",
+      "practice/level-3/71-scenario-code-generation-with-claude-code/prose/unit-02/practice-3/project/.claude/rules/docs.md",
+      "practice/level-3/71-scenario-code-generation-with-claude-code/prose/unit-02/practice-3/project/.claude/rules/handlers.md",
+      "practice/level-3/71-scenario-code-generation-with-claude-code/prose/unit-02/practice-3/project/.claude/rules/tests.md",
+      "practice/level-3/71-scenario-code-generation-with-claude-code/prose/unit-02/practice-3/project/.claude/settings.json",
+      "practice/level-3/71-scenario-code-generation-with-claude-code/prose/unit-02/practice-3/project/docs/working-modes.md"
+    ]
+  },
+  "lang": "java",
+  "edition": "scenario-code-generation-with-claude-code-u2"
+}

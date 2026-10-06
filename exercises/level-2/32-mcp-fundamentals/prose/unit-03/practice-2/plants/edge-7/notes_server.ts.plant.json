@@ -1,0 +1,15 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "notes_server.ts",
+      "old": "    title = title.trim();\n",
+      "new": "    const raw = { title, text };\n    title = title.trim();\n"
+    },
+    {
+      "file": "notes_server.ts",
+      "old": "    notes.push({ title, text });\n    return ok(`Saved note ${notes.length}: ${title}`);",
+      "new": "    notes.push(raw);\n    return ok(`Saved note ${notes.length}: ${raw.title}`);"
+    }
+  ]
+}

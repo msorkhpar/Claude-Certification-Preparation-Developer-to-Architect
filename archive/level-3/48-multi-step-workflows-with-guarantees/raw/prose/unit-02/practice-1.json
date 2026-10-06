@@ -1,0 +1,312 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "48-multi-step-workflows-with-guarantees"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: a refund desk that cannot skip identity (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a refund desk that cannot skip identity"
+    },
+    {
+      "type": "para",
+      "text": "A customer-support agent has four tools: verify the customer's identity, look up an order, process a refund and escalate to a person. A prompt can ask the model to verify identity first, but a prompt is a request, and requests fail at some small rate: on one conversation in a few hundred, the model calls `process_refund` first. Money has moved by then. The fix is not a stronger sentence. It is a gate in the code that runs the tools: the prerequisite is checked every time, the call that breaks it never reaches the backend, and the model receives an error it can act on. When the case needs a person, the agent hands over a structured record, not a transcript. Write that gate. Nothing here touches the network: the backend is a set of functions that the tests script, and the tests play the model by making the calls in the order it would."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`backend`",
+          "a map from a tool name (`verify_identity`, `lookup_order`, `process_refund`, `escalate`) to a function from the input map to a result map (string and whole-number values); it may throw"
+        ],
+        [
+          "`verify_identity` result",
+          "`verified` is `yes` or `no`; when yes it also has `customer_id`"
+        ],
+        [
+          "`lookup_order` result",
+          "`order_id`, `customer_id`, `total_cents` and `refunded_cents` (whole numbers)"
+        ],
+        [
+          "`process_refund` input",
+          "`order_id` and `amount_cents`; the result has a `refund_id`"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working refund desk with eight gaps cut out of it. Everything that is plumbing is written and correct: the desk's state and its snapshot, the refusal result with its messages, the backend call that turns an exception into an error result, the rendering of a result, the order lookup and refund bookkeeping, and the `handoff` record. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "The outcome of an identity check unlocks `m1`, `e5`: a successful `verify_identity` result makes its customer the verified one and resets the failures; any other result clears the verified customer, adds a failure and, at three in a row, locks the desk.",
+        "The identity prerequisite unlocks `e1`: every call but `verify_identity` and `escalate` is refused with `identity_required` while no customer is verified.",
+        "The ownership check unlocks `e2`: an order whose `customer_id` is not the verified customer is refused with `order_not_owned` and not kept.",
+        "The amount check unlocks `e3`: an amount that is not a whole number above zero is refused with `bad_amount`; a boolean, a decimal, a string or a missing amount counts as not whole.",
+        "The check against what is left unlocks `e3`: an amount above the order's `total_cents` minus its `refunded_cents` is refused with `exceeds_order`.",
+        "The limit unlocks `e4`: an amount above `limit_cents` is never executed: it is refused with `needs_human`.",
+        "The unknown tool unlocks `e6`: a name that is not one of the four tools is refused with `unknown_tool` and the message `Unknown tool: NAME`.",
+        "The recommended action unlocks `e4`, `e5`: `verify_identity_manually` when the desk is locked, otherwise `review_refund` when the most recent refusal was `needs_human`, otherwise `review_case`."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gap 1. Every other case needs it too, because each one starts by verifying a customer. About sixteen lines in all. The steps below describe the whole desk, so you can see how your gaps are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "A class `RefundDesk(backend, limit_cents=10000)` (`RefundDesk(backend, limitCents)` in TypeScript and Kotlin, a constructor with an optional limit in Java) with three methods. In Python and TypeScript the names are `state`, `call` and `handoff`; they are the same in the others."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`call(name, args)` returns `{\"content\": text, \"is_error\": bool, \"blocked\": code or null}`.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "A result that came from the backend has the content `key=value; key=value` (the result's pairs in order, joined by `; `), `is_error` false and `blocked` null. A backend call that throws gives the exception's message as content, `is_error` true and `blocked` null, and changes nothing in the desk. Every call that reaches the backend, even one that throws, is logged by name.",
+              "A call that the desk refuses never reaches the backend. Its result is `BLOCKED {code}: {message}` with `is_error` true and `blocked` set to the code. Every refusal is also kept, in order, as `{\"tool\", \"code\"}`.",
+              "Check in this order. A tool name that is not one of the four: `unknown_tool`, message `Unknown tool: NAME`. `escalate` is always allowed and goes straight to the backend. Otherwise, when the desk is locked: `locked`. `verify_identity` goes to the backend (see below). Every other call needs a verified customer: `identity_required`. Then `lookup_order` goes to the backend. Then `process_refund` is checked: the order must have been looked up in this session (`order_not_checked`); `amount_cents` must be a whole number above zero, and a boolean, a decimal, a string or a missing value is not (`bad_amount`); it must not be more than the order's `total_cents` minus its `refunded_cents` (`exceeds_order`); and it must not be above `limit_cents` (`needs_human`: a refund over the limit is never executed). Only then does the backend run.",
+              "Identity. A `verify_identity` result with `verified` equal to `yes` and a `customer_id` makes that customer the verified one and resets the count of failures. Any other result clears the verified customer, adds a failure and, at three failures in a row, locks the desk. The desk never trusts an earlier success once a check has failed.",
+              "Orders. A `lookup_order` result whose `customer_id` is not the verified customer is refused with `order_not_owned`, and nothing of it is kept or shown. A result that belongs to the customer is remembered, and its `refunded_cents` grows with each refund the desk makes.",
+              "The messages: `identity_required` \"Verify the customer's identity before this action.\"; `order_not_owned` \"That order does not belong to the verified customer.\"; `order_not_checked` \"Look up the order before refunding it.\"; `bad_amount` \"The amount must be a positive whole number of cents.\"; `exceeds_order` \"The amount is more than what is left to refund on the order.\"; `needs_human` \"Refunds over the limit need a person.\"; `locked` \"Too many failed identity checks; escalate to a person.\"",
+              "A successful refund is kept as `{\"order_id\", \"amount_cents\", \"refund_id\"}`."
+            ]
+          }
+        ],
+        "`state()` returns a snapshot: `{\"customer\": the verified id or null, \"locked\", \"failures\", \"orders\": {id: the order as looked up, with its current refunded_cents}, \"refunds\": [...], \"blocked\": [...], \"backend_calls\": [tool names]}`. A change to the snapshot must not change the desk.",
+        "`handoff(reason)` returns the record a person needs: `{\"customer_id\", \"identity_verified\": bool, \"reason\", \"orders_checked\": [ids], \"refunds_done\": [...], \"blocked\": [...], \"recommended_action\"}`. The recommended action is `verify_identity_manually` when the desk is locked, otherwise `review_refund` when the most recent refusal was `needs_human`, otherwise `review_case`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each step is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Check the prerequisite in code, every time.** The exam contrasts programmatic enforcement with prompt guidance, and says that where compliance must be deterministic a prompt has a non-zero failure rate. *You should see* a refund before verification refused with `identity_required`, and the backend log show that the call never arrived.",
+        "**Keep the facts in the desk, not in the model's report.** *You should see* the verified customer set only by a successful check, and cleared by a failed one, so that an earlier success cannot be reused.",
+        "**Check the object, the amount and the limit.** A chain of prerequisites is the architect's design: who, which object, how much, within what authority. *You should see* another customer's order refused and never remembered, and a refund beyond what is left, or of zero, refused with its own code.",
+        "**Return a refusal the model can act on.** The result carries a code for the logs and a sentence for the model. *You should see* `BLOCKED code: message` as an error result, and the model's next step possible from the message.",
+        "**Keep a way out.** *You should see* `escalate` work in every state, including a locked desk.",
+        "**Hand over a record, not a transcript.** The exam expects a structured hand-off with the customer, the cause and a recommended action for a person who cannot see the conversation. *You should see* the record built from the desk's state, with every refusal listed and the recommended action chosen by rule."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A verified customer looks up an order and is refunded within the limit; the desk records it"
+        ],
+        [
+          "`e1`",
+          "A refund before identity is verified is refused in code and never reaches the backend"
+        ],
+        [
+          "`e2`",
+          "Another customer's order is not shown, not remembered and not refundable; lookup also needs identity"
+        ],
+        [
+          "`e3`",
+          "A refund is checked against the looked-up order, the amount and what is left"
+        ],
+        [
+          "`e4`",
+          "A refund over the limit is not executed, and the hand-off says what a person needs to decide"
+        ],
+        [
+          "`e5`",
+          "A failed check unlocks nothing; three in a row lock the desk, and only escalation still works"
+        ],
+        [
+          "`e6`",
+          "Unknown tools and backend errors are reported, and the hand-off lists every refusal"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"A refund desk whose prerequisites are enforced in code, with a structured hand-off to a person. See ../../statement.md.\"\"\"\n\nimport logging\n\nlog = logging.getLogger(__name__)\n\nMESSAGES = {\n    \"identity_required\": \"Verify the customer's identity before this action.\",\n    \"order_not_owned\": \"That order does not belong to the verified customer.\",\n    \"order_not_checked\": \"Look up the order before refunding it.\",\n    \"bad_amount\": \"The amount must be a positive whole number of cents.\",\n    \"exceeds_order\": \"The amount is more than what is left to refund on the order.\",\n    \"needs_human\": \"Refunds over the limit need a person.\",\n    \"locked\": \"Too many failed identity checks; escalate to a person.\",\n}\nTOOLS = (\"verify_identity\", \"lookup_order\", \"process_refund\", \"escalate\")\n\n\ndef _render(result):\n    return \"; \".join(f\"{key}={value}\" for key, value in result.items())\n\n\nclass RefundDesk:\n    def __init__(self, backend, limit_cents=10000):\n        self.backend, self.limit = backend, limit_cents\n        self._customer, self._locked, self._failures = None, False, 0\n        self._orders, self._refunds, self._blocked, self._calls = {}, [], [], []\n\n    def state(self):\n        return {\"customer\": self._customer, \"locked\": self._locked, \"failures\": self._failures, \"orders\": {k: dict(v) for k, v in self._orders.items()},\n                \"refunds\": [dict(r) for r in self._refunds], \"blocked\": [dict(b) for b in self._blocked], \"backend_calls\": list(self._calls)}\n\n    def _block(self, tool, code, message=None):\n        self._blocked.append({\"tool\": tool, \"code\": code})\n        return {\"content\": f\"BLOCKED {code}: {message or MESSAGES[code]}\", \"is_error\": True, \"blocked\": code}\n\n    def _backend(self, name, args):\n        self._calls.append(name)\n        try:\n            return self.backend[name](args), None\n        except Exception as error:  # a backend failure is a result for the model and changes nothing here\n            return None, {\"content\": str(error), \"is_error\": True, \"blocked\": None}\n\n    @staticmethod\n    def _ok(result):\n        return {\"content\": _render(result), \"is_error\": False, \"blocked\": None}\n\n    def call(self, name, args):\n        log.debug(\"call input: %r\", args)\n        if name not in TOOLS:\n            return self._block(name, \"unknown_tool\", f\"Unknown tool: {name}\")\n        if name == \"escalate\":\n            result, error = self._backend(name, args)\n            return error or self._ok(result)\n        if self._locked:\n            return self._block(name, \"locked\")\n        if name == \"verify_identity\":\n            result, error = self._backend(name, args)\n            if error:\n                return error\n            if result.get(\"verified\") == \"yes\" and result.get(\"customer_id\"):\n                self._customer, self._failures = result[\"customer_id\"], 0\n            else:\n                self._customer, self._failures = None, self._failures + 1\n                self._locked = self._failures >= 3\n            return self._ok(result)\n        if self._customer is None:\n            return self._block(name, \"identity_required\")\n        if name == \"lookup_order\":\n            result, error = self._backend(name, args)\n            if error:\n                return error\n            if result.get(\"customer_id\") != self._customer:\n                return self._block(name, \"order_not_owned\")\n            self._orders[result[\"order_id\"]] = dict(result)\n            return self._ok(result)\n        order = self._orders.get(args.get(\"order_id\"))\n        if order is None:\n            return self._block(name, \"order_not_checked\")\n        amount = args.get(\"amount_cents\")\n        if not isinstance(amount, int) or isinstance(amount, bool) or amount <= 0:\n            return self._block(name, \"bad_amount\")\n        if amount > order[\"total_cents\"] - order[\"refunded_cents\"]:\n            return self._block(name, \"exceeds_order\")\n        if amount > self.limit:\n            return self._block(name, \"needs_human\")\n        result, error = self._backend(name, args)\n        if error:\n            return error\n        order[\"refunded_cents\"] += amount\n        self._refunds.append({\"order_id\": order[\"order_id\"], \"amount_cents\": amount, \"refund_id\": result.get(\"refund_id\")})\n        return self._ok(result)\n\n    def handoff(self, reason):\n        last = self._blocked[-1][\"code\"] if self._blocked else None\n        action = \"verify_identity_manually\" if self._locked else \"review_refund\" if last == \"needs_human\" else \"review_case\"\n        return {\"customer_id\": self._customer, \"identity_verified\": self._customer is not None, \"reason\": reason, \"orders_checked\": list(self._orders),\n                \"refunds_done\": [dict(r) for r in self._refunds], \"blocked\": [dict(b) for b in self._blocked], \"recommended_action\": action}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom desk import RefundDesk\n\nORDER = {\"order_id\": \"O1\", \"customer_id\": \"C1\", \"total_cents\": 5000, \"refunded_cents\": 0}\nrefunds = []\n\n# A scripted backend, like the one the tests use: four functions that answer with fixed data.\nbackend = {\n    \"verify_identity\": lambda args: {\"verified\": \"yes\", \"customer_id\": \"C1\"} if args.get(\"code\") == \"1234\" else {\"verified\": \"no\"},\n    \"lookup_order\": lambda args: dict(ORDER),\n    \"process_refund\": lambda args: refunds.append(args) or {\"refund_id\": f\"R{len(refunds)}\", \"amount_cents\": args[\"amount_cents\"]},\n    \"escalate\": lambda args: {\"ticket_id\": \"T1\"},\n}\ndesk = RefundDesk(backend)\n\n# The model breaks the order of the steps: a refund before identity is verified must be blocked in code.\nearly = desk.call(\"process_refund\", {\"order_id\": \"O1\", \"amount_cents\": 2000}) or {}\nprint(\"refund before verifying:\", early.get(\"content\"), \"| is_error:\", early.get(\"is_error\"))\n\nfor name, args in ((\"verify_identity\", {\"code\": \"1234\"}), (\"lookup_order\", {\"order_id\": \"O1\"}),\n                   (\"process_refund\", {\"order_id\": \"O1\", \"amount_cents\": 2000})):\n    out = desk.call(name, args) or {}\n    print(f\"{name}:\", out.get(\"content\"))\nprint(\"refunds that reached the backend:\", len(refunds))\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"A refund desk whose prerequisites are enforced in code, with a structured hand-off to a person. See ../../statement.md.\"\"\"\n\nimport logging\n\nlog = logging.getLogger(__name__)\n\nMESSAGES = {\n    \"identity_required\": \"Verify the customer's identity before this action.\",\n    \"order_not_owned\": \"That order does not belong to the verified customer.\",\n    \"order_not_checked\": \"Look up the order before refunding it.\",\n    \"bad_amount\": \"The amount must be a positive whole number of cents.\",\n    \"exceeds_order\": \"The amount is more than what is left to refund on the order.\",\n    \"needs_human\": \"Refunds over the limit need a person.\",\n    \"locked\": \"Too many failed identity checks; escalate to a person.\",\n}\nTOOLS = (\"verify_identity\", \"lookup_order\", \"process_refund\", \"escalate\")\n\n\ndef _render(result):\n    return \"; \".join(f\"{key}={value}\" for key, value in result.items())\n\n\nclass RefundDesk:\n    def __init__(self, backend, limit_cents=10000):\n        self.backend, self.limit = backend, limit_cents\n        self._customer, self._locked, self._failures = None, False, 0\n        self._orders, self._refunds, self._blocked, self._calls = {}, [], [], []\n\n    def state(self):\n        return {\"customer\": self._customer, \"locked\": self._locked, \"failures\": self._failures, \"orders\": {k: dict(v) for k, v in self._orders.items()},\n                \"refunds\": [dict(r) for r in self._refunds], \"blocked\": [dict(b) for b in self._blocked], \"backend_calls\": list(self._calls)}\n\n    def _block(self, tool, code, message=None):\n        self._blocked.append({\"tool\": tool, \"code\": code})\n        return {\"content\": f\"BLOCKED {code}: {message or MESSAGES[code]}\", \"is_error\": True, \"blocked\": code}\n\n    def _backend(self, name, args):\n        self._calls.append(name)\n        try:\n            return self.backend[name](args), None\n        except Exception as error:  # a backend failure is a result for the model and changes nothing here\n            return None, {\"content\": str(error), \"is_error\": True, \"blocked\": None}\n\n    @staticmethod\n    def _ok(result):\n        return {\"content\": _render(result), \"is_error\": False, \"blocked\": None}\n\n    def call(self, name, args):\n        log.debug(\"call input: %r\", args)\n        # TODO 7 of 8 (finish this to pass e6): the first check of call. When the tool name is not one of TOOLS, return\n        #   the refusal `unknown_tool` with the message \"Unknown tool: NAME\". Example: call(\"delete_everything\", {}) ->\n        #   BLOCKED unknown_tool: Unknown tool: delete_everything.\n        if name == \"escalate\":\n            result, error = self._backend(name, args)\n            return error or self._ok(result)\n        if self._locked:\n            return self._block(name, \"locked\")\n        if name == \"verify_identity\":\n            result, error = self._backend(name, args)\n            if error:\n                return error\n            # TODO 1 of 8 (finish this to pass m1, e5): what a `verify_identity` result does to the desk. Receives the\n            #   backend's result map. A result with `verified` equal to `yes` and a `customer_id` sets the verified\n            #   customer and resets the failure count to 0; any other result clears the verified customer, adds one\n            #   failure and locks the desk at three. Example: three results of {verified: no} lock the desk.\n            return self._ok(result)\n        # TODO 2 of 8 (finish this to pass e1): the prerequisite check. When no customer is verified, return the refusal\n        #   `identity_required` for this call: block(name, \"identity_required\") builds and records it. Example:\n        #   process_refund before verify_identity -> BLOCKED identity_required, and the backend is never called.\n        if name == \"lookup_order\":\n            result, error = self._backend(name, args)\n            if error:\n                return error\n            # TODO 3 of 8 (finish this to pass e2): the ownership check on a looked-up order. When the order's\n            #   customer_id is not the verified customer, return the refusal `order_not_owned` before the order is\n            #   remembered. Example: customer C1 looks up an order of C2 -> BLOCKED order_not_owned, and state()[\"orders\"]\n            #   stays empty.\n            self._orders[result[\"order_id\"]] = dict(result)\n            return self._ok(result)\n        order = self._orders.get(args.get(\"order_id\"))\n        if order is None:\n            return self._block(name, \"order_not_checked\")\n        amount = args.get(\"amount_cents\")\n        # TODO 4 of 8 (finish this to pass e3): the amount check. Receives the amount from the call. When it is not a\n        #   whole number above zero (a boolean, a decimal, a string, a missing value or 0), return the refusal\n        #   `bad_amount`. Example: amount_cents 0 or 12.5 or True -> BLOCKED bad_amount.\n        amount = amount if isinstance(amount, int) else 0\n        # TODO 5 of 8 (finish this to pass e3): the check against the order. When the amount is more than the order's\n        #   total_cents minus its refunded_cents, return the refusal `exceeds_order`. Example: 3000 refunded on a 5000\n        #   order, then 2001 -> BLOCKED exceeds_order.\n        # TODO 6 of 8 (finish this to pass e4): the authority limit. When the amount is above the desk's limit, return\n        #   the refusal `needs_human` and do not call the backend. Example: limit 10000, amount 12000 on a 50000 order ->\n        #   BLOCKED needs_human.\n        result, error = self._backend(name, args)\n        if error:\n            return error\n        order[\"refunded_cents\"] += amount\n        self._refunds.append({\"order_id\": order[\"order_id\"], \"amount_cents\": amount, \"refund_id\": result.get(\"refund_id\")})\n        return self._ok(result)\n\n    def handoff(self, reason):\n        last = self._blocked[-1][\"code\"] if self._blocked else None\n        # TODO 8 of 8 (finish this to pass e4, e5): the recommended action of the hand-off. `last` is the code of the\n        #   most recent refusal or none. Choose verify_identity_manually when the desk is locked, otherwise review_refund\n        #   when last is needs_human, otherwise review_case. Example: locked desk -> verify_identity_manually.\n        action = \"review_case\"\n        return {\"customer_id\": self._customer, \"identity_verified\": self._customer is not None, \"reason\": reason, \"orders_checked\": list(self._orders),\n                \"refunds_done\": [dict(r) for r in self._refunds], \"blocked\": [dict(b) for b in self._blocked], \"recommended_action\": action}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom desk import RefundDesk\n\nORDER = {\"order_id\": \"O1\", \"customer_id\": \"C1\", \"total_cents\": 5000, \"refunded_cents\": 0}\nrefunds = []\n\n# A scripted backend, like the one the tests use: four functions that answer with fixed data.\nbackend = {\n    \"verify_identity\": lambda args: {\"verified\": \"yes\", \"customer_id\": \"C1\"} if args.get(\"code\") == \"1234\" else {\"verified\": \"no\"},\n    \"lookup_order\": lambda args: dict(ORDER),\n    \"process_refund\": lambda args: refunds.append(args) or {\"refund_id\": f\"R{len(refunds)}\", \"amount_cents\": args[\"amount_cents\"]},\n    \"escalate\": lambda args: {\"ticket_id\": \"T1\"},\n}\ndesk = RefundDesk(backend)\n\n# The model breaks the order of the steps: a refund before identity is verified must be blocked in code.\nearly = desk.call(\"process_refund\", {\"order_id\": \"O1\", \"amount_cents\": 2000}) or {}\nprint(\"refund before verifying:\", early.get(\"content\"), \"| is_error:\", early.get(\"is_error\"))\n\nfor name, args in ((\"verify_identity\", {\"code\": \"1234\"}), (\"lookup_order\", {\"order_id\": \"O1\"}),\n                   (\"process_refund\", {\"order_id\": \"O1\", \"amount_cents\": 2000})):\n    out = desk.call(name, args) or {}\n    print(f\"{name}:\", out.get(\"content\"))\nprint(\"refunds that reached the backend:\", len(refunds))\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 5,
+    "code": 2,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "dfc44c5e78267f95a80b30f0e471853092c98a58ae07de49302cfa9ba399f8b4",
+  "starting_code": "\"\"\"A refund desk whose prerequisites are enforced in code, with a structured hand-off to a person. See ../../statement.md.\"\"\"\n\nimport logging\n\nlog = logging.getLogger(__name__)\n\nMESSAGES = {\n    \"identity_required\": \"Verify the customer's identity before this action.\",\n    \"order_not_owned\": \"That order does not belong to the verified customer.\",\n    \"order_not_checked\": \"Look up the order before refunding it.\",\n    \"bad_amount\": \"The amount must be a positive whole number of cents.\",\n    \"exceeds_order\": \"The amount is more than what is left to refund on the order.\",\n    \"needs_human\": \"Refunds over the limit need a person.\",\n    \"locked\": \"Too many failed identity checks; escalate to a person.\",\n}\nTOOLS = (\"verify_identity\", \"lookup_order\", \"process_refund\", \"escalate\")\n\n\ndef _render(result):\n    return \"; \".join(f\"{key}={value}\" for key, value in result.items())\n\n\nclass RefundDesk:\n    def __init__(self, backend, limit_cents=10000):\n        self.backend, self.limit = backend, limit_cents\n        self._customer, self._locked, self._failures = None, False, 0\n        self._orders, self._refunds, self._blocked, self._calls = {}, [], [], []\n\n    def state(self):\n        return {\"customer\": self._customer, \"locked\": self._locked, \"failures\": self._failures, \"orders\": {k: dict(v) for k, v in self._orders.items()},\n                \"refunds\": [dict(r) for r in self._refunds], \"blocked\": [dict(b) for b in self._blocked], \"backend_calls\": list(self._calls)}\n\n    def _block(self, tool, code, message=None):\n        self._blocked.append({\"tool\": tool, \"code\": code})\n        return {\"content\": f\"BLOCKED {code}: {message or MESSAGES[code]}\", \"is_error\": True, \"blocked\": code}\n\n    def _backend(self, name, args):\n        self._calls.append(name)\n        try:\n            return self.backend[name](args), None\n        except Exception as error:  # a backend failure is a result for the model and changes nothing here\n            return None, {\"content\": str(error), \"is_error\": True, \"blocked\": None}\n\n    @staticmethod\n    def _ok(result):\n        return {\"content\": _render(result), \"is_error\": False, \"blocked\": None}\n\n    def call(self, name, args):\n        log.debug(\"call input: %r\", args)\n        # TODO 7 of 8 (finish this to pass e6): the first check of call. When the tool name is not one of TOOLS, return\n        #   the refusal `unknown_tool` with the message \"Unknown tool: NAME\". Example: call(\"delete_everything\", {}) ->\n        #   BLOCKED unknown_tool: Unknown tool: delete_everything.\n        if name == \"escalate\":\n            result, error = self._backend(name, args)\n            return error or self._ok(result)\n        if self._locked:\n            return self._block(name, \"locked\")\n        if name == \"verify_identity\":\n            result, error = self._backend(name, args)\n            if error:\n                return error\n            # TODO 1 of 8 (finish this to pass m1, e5): what a `verify_identity` result does to the desk. Receives the\n            #   backend's result map. A result with `verified` equal to `yes` and a `customer_id` sets the verified\n            #   customer and resets the failure count to 0; any other result clears the verified customer, adds one\n            #   failure and locks the desk at three. Example: three results of {verified: no} lock the desk.\n            return self._ok(result)\n        # TODO 2 of 8 (finish this to pass e1): the prerequisite check. When no customer is verified, return the refusal\n        #   `identity_required` for this call: block(name, \"identity_required\") builds and records it. Example:\n        #   process_refund before verify_identity -> BLOCKED identity_required, and the backend is never called.\n        if name == \"lookup_order\":\n            result, error = self._backend(name, args)\n            if error:\n                return error\n            # TODO 3 of 8 (finish this to pass e2): the ownership check on a looked-up order. When the order's\n            #   customer_id is not the verified customer, return the refusal `order_not_owned` before the order is\n            #   remembered. Example: customer C1 looks up an order of C2 -> BLOCKED order_not_owned, and state()[\"orders\"]\n            #   stays empty.\n            self._orders[result[\"order_id\"]] = dict(result)\n            return self._ok(result)\n        order = self._orders.get(args.get(\"order_id\"))\n        if order is None:\n            return self._block(name, \"order_not_checked\")\n        amount = args.get(\"amount_cents\")\n        # TODO 4 of 8 (finish this to pass e3): the amount check. Receives the amount from the call. When it is not a\n        #   whole number above zero (a boolean, a decimal, a string, a missing value or 0), return the refusal\n        #   `bad_amount`. Example: amount_cents 0 or 12.5 or True -> BLOCKED bad_amount.\n        amount = amount if isinstance(amount, int) else 0\n        # TODO 5 of 8 (finish this to pass e3): the check against the order. When the amount is more than the order's\n        #   total_cents minus its refunded_cents, return the refusal `exceeds_order`. Example: 3000 refunded on a 5000\n        #   order, then 2001 -> BLOCKED exceeds_order.\n        # TODO 6 of 8 (finish this to pass e4): the authority limit. When the amount is above the desk's limit, return\n        #   the refusal `needs_human` and do not call the backend. Example: limit 10000, amount 12000 on a 50000 order ->\n        #   BLOCKED needs_human.\n        result, error = self._backend(name, args)\n        if error:\n            return error\n        order[\"refunded_cents\"] += amount\n        self._refunds.append({\"order_id\": order[\"order_id\"], \"amount_cents\": amount, \"refund_id\": result.get(\"refund_id\")})\n        return self._ok(result)\n\n    def handoff(self, reason):\n        last = self._blocked[-1][\"code\"] if self._blocked else None\n        # TODO 8 of 8 (finish this to pass e4, e5): the recommended action of the hand-off. `last` is the code of the\n        #   most recent refusal or none. Choose verify_identity_manually when the desk is locked, otherwise review_refund\n        #   when last is needs_human, otherwise review_case. Example: locked desk -> verify_identity_manually.\n        action = \"review_case\"\n        return {\"customer_id\": self._customer, \"identity_verified\": self._customer is not None, \"reason\": reason, \"orders_checked\": list(self._orders),\n                \"refunds_done\": [dict(r) for r in self._refunds], \"blocked\": [dict(b) for b in self._blocked], \"recommended_action\": action}\n",
+  "exercise": {
+    "main_path": "practice/level-3/48-multi-step-workflows-with-guarantees/prose/unit-02/practice-1/desk.py",
+    "test_path": "practice/level-3/48-multi-step-workflows-with-guarantees/prose/unit-02/practice-1/test_desk.py",
+    "run_command": [
+      "python3",
+      "practice/level-3/48-multi-step-workflows-with-guarantees/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-3/48-multi-step-workflows-with-guarantees/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-3/48-multi-step-workflows-with-guarantees/prose/unit-02/practice-1/test_desk.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_a_verified_customer_can_look_up_an_order_and_be_refunded_within_the_limit",
+        "kind": "main",
+        "says": "A verified customer looks up an order and is refunded within the limit; the desk records it"
+      },
+      {
+        "id": "test_e1_a_refund_before_identity_is_verified_is_blocked_in_code_and_never_reaches_the_backend",
+        "kind": "edge",
+        "says": "A refund before identity is verified is refused in code and never reaches the backend"
+      },
+      {
+        "id": "test_e2_an_order_that_belongs_to_someone_else_is_neither_shown_nor_refundable",
+        "kind": "edge",
+        "says": "Another customer's order is not shown, not remembered and not refundable; lookup also needs identity"
+      },
+      {
+        "id": "test_e3_a_refund_is_checked_against_the_order_its_amount_and_what_is_left",
+        "kind": "edge",
+        "says": "A refund is checked against the looked-up order, the amount and what is left"
+      },
+      {
+        "id": "test_e4_a_refund_over_the_limit_is_not_executed_and_becomes_a_structured_hand_off",
+        "kind": "edge",
+        "says": "A refund over the limit is not executed, and the hand-off says what a person needs to decide"
+      },
+      {
+        "id": "test_e5_a_failed_check_does_not_unlock_anything_and_three_in_a_row_lock_the_desk",
+        "kind": "edge",
+        "says": "A failed check unlocks nothing; three in a row lock the desk, and only escalation still works"
+      },
+      {
+        "id": "test_e6_unknown_tools_and_backend_errors_are_reported_and_the_hand_off_lists_every_block",
+        "kind": "edge",
+        "says": "Unknown tools and backend errors are reported, and the hand-off lists every refusal"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/48-multi-step-workflows-with-guarantees/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/48-multi-step-workflows-with-guarantees/02-prerequisite-chains-limits-hand-offs-and-the-practice.md",
+    "concepts": [
+      "the practice of Prerequisite chains, limits, hand-offs and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/48-multi-step-workflows-with-guarantees/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "multi-step-workflows-with-guarantees-u2"
+}

@@ -1,0 +1,104 @@
+{
+  "practice": "70-scenario-customer-support-agent/unit-01/practice-1",
+  "name": "audit",
+  "tests": {
+    "java": "AuditTest",
+    "kotlin": "AuditTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_mixed_set_of_sessions_gets_every_rate_and_the_first_fix",
+      "typescript": "m1 a mixed set of sessions gets every rate and the first fix",
+      "java": "m1_aMixedSetOfSessionsGetsEveryRateAndTheFirstFix",
+      "kotlin": "m1_aMixedSetOfSessionsGetsEveryRateAndTheFirstFix"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_no_sessions_give_zero_rates_and_no_diagnosis",
+      "typescript": "e1 no sessions give zero rates and no diagnosis",
+      "java": "e1_noSessionsGiveZeroRatesAndNoDiagnosis",
+      "kotlin": "e1_noSessionsGiveZeroRatesAndNoDiagnosis"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_protected_call_before_a_successful_identity_check_is_a_skipped_prerequisite",
+      "typescript": "e2 a protected call before a successful identity check is a skipped prerequisite",
+      "java": "e2_aProtectedCallBeforeASuccessfulIdentityCheckIsASkippedPrerequisite",
+      "kotlin": "e2_aProtectedCallBeforeASuccessfulIdentityCheckIsASkippedPrerequisite"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_refund_over_the_limit_counts_only_when_it_was_made",
+      "typescript": "e3 a refund over the limit counts only when it was made",
+      "java": "e3_aRefundOverTheLimitCountsOnlyWhenItWasMade",
+      "kotlin": "e3_aRefundOverTheLimitCountsOnlyWhenItWasMade"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_money_first_then_tool_descriptions_then_escalation_criteria",
+      "typescript": "e4 money first then tool descriptions then escalation criteria",
+      "java": "e4_moneyFirstThenToolDescriptionsThenEscalationCriteria",
+      "kotlin": "e4_moneyFirstThenToolDescriptionsThenEscalationCriteria"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_the_target_boundary_and_rounding_of_the_first_contact_rate",
+      "typescript": "e5 the target boundary and rounding of the first contact rate",
+      "java": "e5_theTargetBoundaryAndRoundingOfTheFirstContactRate",
+      "kotlin": "e5_theTargetBoundaryAndRoundingOfTheFirstContactRate"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_a_wrong_tool_counts_sessions_and_ignores_steps_with_no_known_right_tool",
+      "typescript": "e6 a wrong tool counts sessions and ignores steps with no known right tool",
+      "java": "e6_aWrongToolCountsSessionsAndIgnoresStepsWithNoKnownRightTool",
+      "kotlin": "e6_aWrongToolCountsSessionsAndIgnoresStepsWithNoKnownRightTool"
+    }
+  },
+  "plants": {
+    "wrong-failed-identity-opens": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "treats a failed identity check as an identification"
+    },
+    "wrong-over-limit-any-outcome": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "counts a refund over the limit in a session where it was refused and escalated"
+    },
+    "wrong-diagnosis-criteria-first": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "puts the escalation criteria before the tool descriptions in the order of fixes"
+    },
+    "wrong-target-strict": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "requires the rate to be above the target and not at it"
+    },
+    "wrong-wrong-tool-steps": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "counts wrong steps and not the sessions that have one"
+    },
+    "wrong-empty-rate-one": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "reports a rate of 1 when there are no sessions"
+    },
+    "wrong-over-counts-needs-human": {
+      "caught_by": [
+        "m1",
+        "e3"
+      ],
+      "defect": "counts every escalation as an over-escalation, even one that needed a person"
+    }
+  }
+}

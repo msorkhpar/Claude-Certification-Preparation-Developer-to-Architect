@@ -1,0 +1,157 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "18-model-choice-cost-and-migration"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Pinning model ids and migrating safely",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A team changes one configuration value from an older id to Claude Opus 5.5 and every call starts failing with 400. Their call sets a manual thinking budget. Which fix does the page back?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Drop the settings that the new target rejects, and build per target",
+            "correct": true,
+            "says": "The page says an item that is \"rejected\" returns a 400 error and that the guide lists what to remove: a manual `budget_tokens` is rejected on Opus 5.5."
+          },
+          {
+            "id": "b",
+            "text": "Raise `max_tokens`, since a budget needs more room under the new id",
+            "correct": false,
+            "says": "Ruled out because \"Sending thinking of type disabled, or a manual budget_tokens, is rejected\", whatever the room."
+          },
+          {
+            "id": "c",
+            "text": "Add retries, since a 400 on a fresh deployment is often transient",
+            "correct": false,
+            "says": "Ruled out because a rejected setting fails every time, and a rising 400 rate is \"the signal of a rejected parameter\"."
+          },
+          {
+            "id": "d",
+            "text": "Keep the old id and pin the new one on a second key",
+            "correct": false,
+            "says": "Ruled out because the page says to make the request builder per model and \"Change the request builder together with the id\"."
+          }
+        ],
+        "origin": {
+          "path": "course/18-model-choice-cost-and-migration/03-pinning-ids-and-migrating-safely.md",
+          "section": "What a newer model rejects"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A deprecated id is still called by a nightly job that nobody remembers. How does the page say to find it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Export the Console usage as a CSV and read it by key and model",
+            "correct": true,
+            "says": "The page says \"usage broken down by API key and model\" shows which key still calls which model."
+          },
+          {
+            "id": "b",
+            "text": "Wait for the retirement email, which names each calling application",
+            "correct": false,
+            "says": "Ruled out because the notice is about dates, \"providing at least 60 days' notice before model retirement for publicly released models\", and names no callers."
+          },
+          {
+            "id": "c",
+            "text": "Ask the model for its own version in a test prompt",
+            "correct": false,
+            "says": "Ruled out because the page's own method is the export that shows \"usage broken down by API key and model\", while a prompt returns text and no record of calls."
+          },
+          {
+            "id": "d",
+            "text": "Check the alias list, which names every application that resolves it",
+            "correct": false,
+            "says": "Ruled out because an alias is \"a convenience pointer that resolves to the dated ID\" and holds no list of callers."
+          }
+        ],
+        "origin": {
+          "path": "course/18-model-choice-cost-and-migration/03-pinning-ids-and-migrating-safely.md",
+          "section": "The lifecycle"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "The same team runs on the Claude API and on a cloud service. One model has a published retirement day. What does the page say about the same model there?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It stops sixty days earlier, to give notice to its customers",
+            "correct": false,
+            "says": "Ruled out because the only fixed period on the page is \"at least 60 days' notice\", counted before retirement on the operator's own schedule."
+          },
+          {
+            "id": "b",
+            "text": "It stops on the same date, because the model id is identical",
+            "correct": false,
+            "says": "Ruled out because the dates listed apply to \"the Claude API, Claude Platform on AWS and Microsoft Foundry\"."
+          },
+          {
+            "id": "c",
+            "text": "The partner that operates it sets its own schedule",
+            "correct": true,
+            "says": "The page says \"Partner-operated platforms (Amazon Bedrock and Google Cloud) set their own retirement schedules\"."
+          },
+          {
+            "id": "d",
+            "text": "It becomes an alias of the replacement on the date",
+            "correct": false,
+            "says": "Ruled out because the page names no aliasing on retirement: \"Requests to retired models will fail.\""
+          }
+        ],
+        "origin": {
+          "path": "course/18-model-choice-cost-and-migration/03-pinning-ids-and-migrating-safely.md",
+          "section": "The lifecycle"
+        }
+      }
+    ],
+    "concepts": [
+      "Pinning model ids and migrating safely, as the page teaches it",
+      "The lifecycle, as the page teaches it",
+      "Traps, as the page teaches it",
+      "What a newer model rejects, as the page teaches it"
+    ]
+  }
+}

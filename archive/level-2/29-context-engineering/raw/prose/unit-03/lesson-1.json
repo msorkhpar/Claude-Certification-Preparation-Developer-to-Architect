@@ -1,0 +1,491 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "29-context-engineering"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Citations, the Files API and the practice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Citations, the Files API and the practice"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Developer · **Module 29:** Context engineering · **Page 3 of 3** **Exams:** DV4; A5.1"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** ask Claude to cite the passages behind an answer, read the three kinds of citation location, check a citation against the document it points at, say which feature a citation cannot be combined with, upload a file once and reference it by id, and name the workspace rule that makes file ids sensitive."
+    },
+    {
+      "type": "para",
+      "text": "Checked against the Claude API documentation (Citations, Search results and Files API) on 2026-10-03, and by running the example and the practice offline in the course container (`anthropic` 1.11.0, `@anthropic-ai/sdk` 0.131.0). The example's replies are illustrative, hand-written bodies in the shape of the citations and context editing pages, not captures."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "An answer drawn from a long document is only as useful as the reader's ability to check it. Citations give each claim a pointer into the source, and a file uploaded once can serve many requests without being sent again. Both are small features with sharp edges: a combination that returns a 400 error, an id that crosses a tenant boundary. The exam asks about the edges."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Citations"
+    },
+    {
+      "type": "para",
+      "text": "\"Claude can provide detailed citations when answering questions about documents, helping you track and verify the sources behind each response.\" You provide documents and set `citations.enabled=true` on each: \"Currently, citations must be enabled on all or none of the documents within a request.\" Only text is citable: \"Image citations are not yet possible.\" The response then holds several text blocks, each with a claim and a list of citations. Where a citation points depends on the document type:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Document",
+        "Chunking",
+        "Citation location"
+      ],
+      "rows": [
+        [
+          "Plain text",
+          "sentences",
+          "character index range (0-indexed), type `char_location`"
+        ],
+        [
+          "PDF",
+          "sentences",
+          "page number range (1-indexed), type `page_location`"
+        ],
+        [
+          "Custom content",
+          "your blocks, \"used as-is\"",
+          "content block index range (0-indexed), type `content_block_location`"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "\"Character indices are 0-indexed with exclusive end indices\", and document indices are 0-indexed over every document block in the request. Each citation carries a `cited_text`. The `title` and `context` fields of a document are passed to the model but are not citable."
+    },
+    {
+      "type": "para",
+      "text": "The documentation lists three advantages over asking the model in the prompt to quote its sources. \"`cited_text` does not count toward your output tokens\", and \"When passed back in subsequent conversation turns, `cited_text` is also not counted toward input tokens.\" Reliability: \"citations are guaranteed to contain valid pointers to the provided documents.\" And quality: in Anthropic's evaluations the feature \"is significantly more likely to cite the most relevant quotes\". There is a small cost: enabling citations \"incurs a slight increase in input tokens because of system prompt additions and document chunking\"."
+    },
+    {
+      "type": "para",
+      "text": "For retrieval, the documentation gives a rule: \"if you want Claude to be able to cite specific sentences from your RAG chunks, you should put each RAG chunk into a plain text document.\" The `search_result` block of module 28 is the other route and follows the same all-or-nothing rule."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The one combination that fails"
+    },
+    {
+      "type": "para",
+      "text": "\"Citations and structured outputs are incompatible.\" If citations are enabled on any user-provided document (`document` or `search_result` blocks) and the request also has `output_config.format`, \"the API returns a 400 error\". The reason is stated in the page: \"citations require interleaving citation blocks with text output, which is incompatible with the strict JSON schema constraints of structured outputs.\" A design that needs both has to separate them: cite in one call, and shape the result in a second call that has no documents, or ask for an `evidence` field and check it with the program, as the extractor of module 25 does."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Check a citation yourself"
+    },
+    {
+      "type": "para",
+      "text": "The API's pointers are valid, and the program still should not take a citation as proof. A citation is a claim about where text came from, and your program may sit between the API and the reader: a stored copy, a transformed document, a citation that came back through a model's prose, or an offset used to highlight a span in a user interface. The practice's `verify_citations` reports, in this order of checks, four problems:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Problem",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`unsupported_type`",
+          "the citation is not a `char_location`"
+        ],
+        [
+          "`unknown_document`",
+          "the document index is outside the list"
+        ],
+        [
+          "`bad_range`",
+          "start below 0, end not after start, or end past the text"
+        ],
+        [
+          "`text_mismatch`",
+          "the span `text[start:end]` is not the cited text"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`footnotes` then turns a cited answer into readable text: `[n]` after the block of each citation, `n` numbering the distinct cited spans from 1 in order of first appearance, and a `Sources:` list with one line per number. The same span cited twice has one number."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The Files API"
+    },
+    {
+      "type": "para",
+      "text": "\"The Files API lets you upload and manage files to use with the Claude API without re-uploading content with each request.\" It provides a \"create-once, use-many-times approach\": upload a file and receive a `file_id`, reference it in a Messages request in place of the content, and list, retrieve or delete it. The Files API is generally available and \"needs no beta header\"; requests that still send the old `files-api-2025-04-14` header keep working with the old response shapes. A PDF or a text file goes in a `document` block whose source is `{\"type\": \"file\", \"file_id\": ...}`, an image goes in an `image` block, and the `document` block can carry `citations`."
+    },
+    {
+      "type": "para",
+      "text": "The facts that matter:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Limits: \"Maximum file size: 500 MB per file\" and \"Total storage: 1 TB per organization\".",
+        "Cost: the operations are free, and \"File content used in Messages requests is priced as input tokens.\" A referenced file still fills the window like any other input.",
+        "Lifetime: \"Files persist until you delete them\", or until their `expires_at`, which you can set at upload with `expires_in_seconds` between one hour and 90 days. \"Files cannot be modified or renamed after upload.\"",
+        "A file that is larger than the window fails: \"Exceeds context window size (400)\".",
+        "Downloads: only \"files that are created by skills or the code execution tool\" can be downloaded. A file you uploaded cannot."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The warning to remember is about who can see a file: \"**Uploaded files are accessible to your entire workspace, not scoped to an end user, conversation, or session.**\" Any key with access to the workspace can use any file in it. So \"Never accept `file_id` values from end users or other untrusted sources: a user-supplied file ID would let one user of your application read content that another user uploaded.\" Keep the mapping from users to files in your application, and give each tenant its own workspace: \"The workspace is the isolation boundary for files\"."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "para",
+      "text": "The example does three things offline. It builds a conversation with five tool results and clears all but the newest two, showing the size before and after. It sends the editing request of page 2 through the scripted client and reads the `applied_edits` report. And it checks a cited answer, then tampers with one `cited_text` to show the check failing."
+    },
+    {
+      "type": "example",
+      "id": "m29-context-trimming",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/29-context-trimming/python/context_trimming.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/29-context-trimming/typescript/contextTrimming.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/29-context-trimming/java/ContextTrimming.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/29-context-trimming/kotlin/ContextTrimming.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Clearing old tool results, asking the API to clear them, and checking the citations in an answer.\n\nThe replies are illustrative, hand-written bodies in the shapes of the context editing and citations pages (claude-sonnet-5-5),\nnot captures; the numbers in the context editing response are the documentation's own example.\n\"\"\"\nimport logging\nimport copy\n\nfrom harness import scripted_client\nfrom harness.scripted import message, text\n\nlog = logging.getLogger(__name__)\n\nMODEL = \"claude-sonnet-5-5\"\nPOLICY = \"The grass is green. The sky is blue. Water is essential for life.\"\n\n\ndef tokens(messages):\n    \"\"\"A rough size: 4 per message, 1 per 4 characters of text, 10 per tool call.\"\"\"\n    total = 0\n    for m in messages:\n        total += 4\n        for b in m[\"content\"] if isinstance(m[\"content\"], list) else [{\"type\": \"text\", \"text\": m[\"content\"]}]:\n            total += {\"text\": lambda: (len(b.get(\"text\", \"\")) + 3) // 4, \"tool_result\": lambda: (len(b[\"content\"]) + 3) // 4, \"tool_use\": lambda: 10}[b[\"type\"]]()\n    return total\n\n\ndef conversation():\n    messages = [{\"role\": \"user\", \"content\": \"Find every mention of the grass in the logs.\"}]\n    for i in range(1, 6):\n        messages.append({\"role\": \"assistant\", \"content\": [{\"type\": \"tool_use\", \"id\": f\"toolu_{i}\", \"name\": \"grep_logs\", \"input\": {\"pattern\": f\"grass-{i}\"}}]})\n        messages.append({\"role\": \"user\", \"content\": [{\"type\": \"tool_result\", \"tool_use_id\": f\"toolu_{i}\", \"content\": f\"log line {i}: \" + \"x\" * 400}]})\n    messages.append({\"role\": \"assistant\", \"content\": [{\"type\": \"text\", \"text\": \"Found them all.\"}]})\n    return messages\n\n\ndef clear_tool_results(messages, keep=2, placeholder=\"[cleared]\"):\n    \"\"\"A copy in which every tool result but the newest `keep` has its content replaced; the calls stay.\"\"\"\n    out = copy.deepcopy(messages)\n    results = [b for m in out if isinstance(m[\"content\"], list) for b in m[\"content\"] if b[\"type\"] == \"tool_result\"]\n    for block in results[:max(len(results) - keep, 0)]:\n        block[\"content\"] = placeholder\n    return out\n\n\ndef verify(blocks, documents):\n    \"\"\"A citation is a claim about where text came from; check it against the document.\"\"\"\n    bad = []\n    for i, block in enumerate(blocks):\n        for j, cite in enumerate(block.get(\"citations\") or []):\n            if documents[cite[\"document_index\"]][cite[\"start_char_index\"]:cite[\"end_char_index\"]] != cite[\"cited_text\"]:\n                bad.append({\"block\": i, \"citation\": j, \"problem\": \"text_mismatch\"})\n    return bad\n\n\ndef footnotes(blocks, titles):\n    numbers, lines, out = {}, [], \"\"\n    for block in blocks:\n        out += block[\"text\"]\n        for cite in block.get(\"citations\") or []:\n            key = (cite[\"document_index\"], cite[\"start_char_index\"], cite[\"end_char_index\"])\n            if key not in numbers:\n                numbers[key] = len(numbers) + 1\n                lines.append(f'[{numbers[key]}] {titles[cite[\"document_index\"]]}: \"{cite[\"cited_text\"]}\"')\n            out += f\"[{numbers[key]}]\"\n    return out + (\"\\n\\nSources:\\n\" + \"\\n\".join(lines) if lines else \"\")\n\n\ndef cite(start, end):\n    return {\"type\": \"char_location\", \"cited_text\": POLICY[start:end], \"document_index\": 0, \"document_title\": \"Policy\", \"start_char_index\": start, \"end_char_index\": end, \"file_id\": None}\n\n\nEDITS = {\"edits\": [{\"type\": \"clear_tool_uses_20250919\", \"trigger\": {\"type\": \"input_tokens\", \"value\": 30000}, \"keep\": {\"type\": \"tool_uses\", \"value\": 3},\n                    \"clear_at_least\": {\"type\": \"input_tokens\", \"value\": 5000}, \"exclude_tools\": [\"web_search\"]}]}\n\n\ndef editing_reply():\n    body = message([text(\"Found them all.\")], model=MODEL)\n    body[\"context_management\"] = {\"applied_edits\": [{\"type\": \"clear_tool_uses_20250919\", \"cleared_tool_uses\": 8, \"cleared_input_tokens\": 50000}]}\n    return body\n\n\ndef cited_reply():\n    blocks = [{\"type\": \"text\", \"text\": \"The grass is green. \", \"citations\": [cite(0, 19)]}, {\"type\": \"text\", \"text\": \"Water matters. \", \"citations\": [cite(37, 65)]},\n              {\"type\": \"text\", \"text\": \"Green again.\", \"citations\": [cite(0, 19)]}]\n    return message(blocks, model=MODEL)\n\n\ndef main():\n    before = conversation()\n    after = clear_tool_results(before, 2)\n    cleared = sum(1 for m in after if isinstance(m[\"content\"], list) for b in m[\"content\"] if b[\"type\"] == \"tool_result\" and b[\"content\"] == \"[cleared]\")\n    print(f\"conversation: {len(before)} messages, 5 tool results, about {tokens(before)} tokens\")\n    print(f\"after clearing all but the newest 2 results: about {tokens(after)} tokens, {cleared} results replaced, calls kept: {[m for m in after if m['role'] == 'assistant'] == [m for m in before if m['role'] == 'assistant']}\")\n    client, transport = scripted_client(editing_reply(), cited_reply())\n    reply = client.beta.messages.create(model=MODEL, max_tokens=300, messages=before, betas=[\"context-management-2025-06-27\"], context_management=EDITS)\n    print(\"beta header sent:\", transport.headers[0][\"anthropic-beta\"])\n    edit = transport.requests[0][\"context_management\"][\"edits\"][0]\n    print(\"edit sent:\", edit[\"type\"], \"trigger\", edit[\"trigger\"][\"value\"], \"keep\", edit[\"keep\"][\"value\"], \"exclude\", edit[\"exclude_tools\"])\n    applied = reply.context_management.applied_edits[0]\n    print(\"applied edit reported:\", applied.type, f\"cleared {applied.cleared_tool_uses} tool uses, {applied.cleared_input_tokens} input tokens\")\n    document = {\"type\": \"document\", \"source\": {\"type\": \"text\", \"media_type\": \"text/plain\", \"data\": POLICY}, \"title\": \"Policy\", \"citations\": {\"enabled\": True}}\n    answer = client.messages.create(model=MODEL, max_tokens=300, messages=[{\"role\": \"user\", \"content\": [document, {\"type\": \"text\", \"text\": \"What does the policy say about grass and water?\"}]}])\n    blocks = [b.model_dump() for b in answer.content]\n    print(\"citations enabled in the request:\", transport.requests[1][\"messages\"][0][\"content\"][0][\"citations\"])\n    print(\"citation problems:\", verify(blocks, [POLICY]))\n    tampered = copy.deepcopy(blocks)\n    tampered[1][\"citations\"][0][\"cited_text\"] = \"Water is optional.\"\n    print(\"after tampering with one cited_text:\", verify(tampered, [POLICY]))\n    print(footnotes(blocks, [\"Policy\"]))\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "conversation: 12 messages, 5 tool results, about 628 tokens\nafter clearing all but the newest 2 results: about 328 tokens, 3 results replaced, calls kept: True\nbeta header sent: context-management-2025-06-27\nedit sent: clear_tool_uses_20250919 trigger 30000 keep 3 exclude ['web_search']\napplied edit reported: clear_tool_uses_20250919 cleared 8 tool uses, 50000 input tokens\ncitations enabled in the request: {'enabled': True}\ncitation problems: []\nafter tampering with one cited_text: [{'block': 1, 'citation': 0, 'problem': 'text_mismatch'}]\nThe grass is green. [1]Water matters. [2]Green again.[1]\n\nSources:\n[1] Policy: \"The grass is green.\"\n[2] Policy: \"Water is essential for life.\""
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Clearing old tool results, asking the API to clear them, and checking the citations in an answer.\n// The replies are illustrative, hand-written bodies in the shapes of the context editing and citations pages (claude-sonnet-5-5),\n// not captures; the numbers in the context editing response are the documentation's own example.\nimport Anthropic from \"@anthropic-ai/sdk\";\nimport { message, scriptedFetch, text } from \"../../../harness/ts/scriptedFetch.ts\";\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"context_trimming\");\n\nexport const MODEL = \"claude-sonnet-5-5\";\nexport const POLICY = \"The grass is green. The sky is blue. Water is essential for life.\";\n\ntype Msg = { role: string; content: string | any[] };\n\n/** A rough size: 4 per message, 1 per 4 characters of text, 10 per tool call. */\nexport function tokens(messages: Msg[]): number {\n  let total = 0;\n  for (const m of messages) {\n    total += 4;\n    for (const b of typeof m.content === \"string\" ? [{ type: \"text\", text: m.content }] : m.content) {\n      total += b.type === \"text\" ? Math.floor(((b.text ?? \"\").length + 3) / 4) : b.type === \"tool_result\" ? Math.floor((b.content.length + 3) / 4) : 10;\n    }\n  }\n  return total;\n}\n\nexport function conversation(): Msg[] {\n  const messages: Msg[] = [{ role: \"user\", content: \"Find every mention of the grass in the logs.\" }];\n  for (let i = 1; i <= 5; i++) {\n    messages.push({ role: \"assistant\", content: [{ type: \"tool_use\", id: `toolu_${i}`, name: \"grep_logs\", input: { pattern: `grass-${i}` } }] });\n    messages.push({ role: \"user\", content: [{ type: \"tool_result\", tool_use_id: `toolu_${i}`, content: `log line ${i}: ` + \"x\".repeat(400) }] });\n  }\n  messages.push({ role: \"assistant\", content: [{ type: \"text\", text: \"Found them all.\" }] });\n  return messages;\n}\n\n/** A copy in which every tool result but the newest `keep` has its content replaced; the calls stay. */\nexport function clearToolResults(messages: Msg[], keep = 2, placeholder = \"[cleared]\"): Msg[] {\n  const out: Msg[] = structuredClone(messages);\n  const results = out.flatMap((m) => (Array.isArray(m.content) ? m.content : [])).filter((b) => b.type === \"tool_result\");\n  for (const block of results.slice(0, Math.max(results.length - keep, 0))) block.content = placeholder;\n  return out;\n}\n\n/** A citation is a claim about where text came from; check it against the document. */\nexport function verify(blocks: any[], documents: string[]) {\n  const bad: Array<{ block: number; citation: number; problem: string }> = [];\n  blocks.forEach((block, i) => (block.citations ?? []).forEach((cite: any, j: number) => {\n    if (documents[cite.document_index].slice(cite.start_char_index, cite.end_char_index) !== cite.cited_text) bad.push({ block: i, citation: j, problem: \"text_mismatch\" });\n  }));\n  return bad;\n}\n\nexport function footnotes(blocks: any[], titles: string[]): string {\n  const numbers = new Map<string, number>();\n  const lines: string[] = [];\n  let out = \"\";\n  for (const block of blocks) {\n    out += block.text;\n    for (const cite of block.citations ?? []) {\n      const key = `${cite.document_index}:${cite.start_char_index}:${cite.end_char_index}`;\n      if (!numbers.has(key)) {\n        numbers.set(key, numbers.size + 1);\n        lines.push(`[${numbers.get(key)}] ${titles[cite.document_index]}: \"${cite.cited_text}\"`);\n      }\n      out += `[${numbers.get(key)}]`;\n    }\n  }\n  return out + (lines.length ? \"\\n\\nSources:\\n\" + lines.join(\"\\n\") : \"\");\n}\n\nexport const cite = (start: number, end: number) => ({ type: \"char_location\", cited_text: POLICY.slice(start, end), document_index: 0, document_title: \"Policy\", start_char_index: start, end_char_index: end, file_id: null });\n\nexport const EDITS = { edits: [{ type: \"clear_tool_uses_20250919\", trigger: { type: \"input_tokens\", value: 30000 }, keep: { type: \"tool_uses\", value: 3 },\n  clear_at_least: { type: \"input_tokens\", value: 5000 }, exclude_tools: [\"web_search\"] }] };\n\nconst usage = { input_tokens: 1, output_tokens: 1 };\nexport const editingReply = () => ({ body: { ...message([text(\"Found them all.\")], \"end_turn\", usage, MODEL), context_management: { applied_edits: [{ type: \"clear_tool_uses_20250919\", cleared_tool_uses: 8, cleared_input_tokens: 50000 }] } } });\nexport const citedBlocks = () => [{ type: \"text\", text: \"The grass is green. \", citations: [cite(0, 19)] }, { type: \"text\", text: \"Water matters. \", citations: [cite(37, 65)] }, { type: \"text\", text: \"Green again.\", citations: [cite(0, 19)] }];\nexport const citedReply = () => ({ body: message(citedBlocks(), \"end_turn\", usage, MODEL) });\n\nexport function clientFor(replies: Array<Record<string, unknown>>) {\n  const fake = scriptedFetch(replies as any);\n  return { fake, client: new Anthropic({ apiKey: \"placeholder\", maxRetries: 0, fetch: fake.fetch }) };\n}\n\nconst py = (v: any): string => {\n  if (v === null || v === undefined) return \"None\";\n  if (typeof v === \"boolean\") return v ? \"True\" : \"False\";\n  if (typeof v === \"string\") return `'${v}'`;\n  if (Array.isArray(v)) return `[${v.map(py).join(\", \")}]`;\n  if (typeof v === \"object\") return `{${Object.entries(v).map(([k, x]) => `${py(k)}: ${py(x)}`).join(\", \")}}`;\n  return String(v);\n};\n\nasync function main() {\n  const before = conversation();\n  const after = clearToolResults(before, 2);\n  const cleared = after.flatMap((m) => (Array.isArray(m.content) ? m.content : [])).filter((b) => b.type === \"tool_result\" && b.content === \"[cleared]\").length;\n  const same = JSON.stringify(after.filter((m) => m.role === \"assistant\")) === JSON.stringify(before.filter((m) => m.role === \"assistant\"));\n  console.log(`conversation: ${before.length} messages, 5 tool results, about ${tokens(before)} tokens`);\n  console.log(`after clearing all but the newest 2 results: about ${tokens(after)} tokens, ${cleared} results replaced, calls kept: ${py(same)}`);\n  const { fake, client } = clientFor([editingReply(), citedReply()]);\n  const reply: any = await client.beta.messages.create({ model: MODEL, max_tokens: 300, messages: before as any, betas: [\"context-management-2025-06-27\"], context_management: EDITS as any });\n  console.log(\"beta header sent:\", fake.seen[0].headers[\"anthropic-beta\"]);\n  const edit = fake.seen[0].body.context_management.edits[0];\n  console.log(\"edit sent:\", edit.type, \"trigger\", edit.trigger.value, \"keep\", edit.keep.value, \"exclude\", py(edit.exclude_tools));\n  const applied = reply.context_management.applied_edits[0];\n  console.log(\"applied edit reported:\", applied.type, `cleared ${applied.cleared_tool_uses} tool uses, ${applied.cleared_input_tokens} input tokens`);\n  const document = { type: \"document\" as const, source: { type: \"text\" as const, media_type: \"text/plain\" as const, data: POLICY }, title: \"Policy\", citations: { enabled: true } };\n  const answer = await client.messages.create({ model: MODEL, max_tokens: 300, messages: [{ role: \"user\", content: [document, { type: \"text\", text: \"What does the policy say about grass and water?\" }] }] });\n  const blocks = answer.content as any[];\n  console.log(\"citations enabled in the request:\", py(fake.seen[1].body.messages[0].content[0].citations));\n  console.log(\"citation problems:\", py(verify(blocks, [POLICY])));\n  const tampered = structuredClone(blocks);\n  tampered[1].citations[0].cited_text = \"Water is optional.\";\n  console.log(\"after tampering with one cited_text:\", py(verify(tampered, [POLICY])));\n  console.log(footnotes(blocks, [\"Policy\"]));\n}\n\nif (import.meta.main) await main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "conversation: 12 messages, 5 tool results, about 628 tokens\nafter clearing all but the newest 2 results: about 328 tokens, 3 results replaced, calls kept: True\nbeta header sent: context-management-2025-06-27\nedit sent: clear_tool_uses_20250919 trigger 30000 keep 3 exclude ['web_search']\napplied edit reported: clear_tool_uses_20250919 cleared 8 tool uses, 50000 input tokens\ncitations enabled in the request: {'enabled': True}\ncitation problems: []\nafter tampering with one cited_text: [{'block': 1, 'citation': 0, 'problem': 'text_mismatch'}]\nThe grass is green. [1]Water matters. [2]Green again.[1]\n\nSources:\n[1] Policy: \"The grass is green.\"\n[2] Policy: \"Water is essential for life.\""
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import static harness.Scripted.map;\nimport static harness.Scripted.message;\nimport static harness.Scripted.text;\nimport static harness.Show.py;\n\nimport com.anthropic.core.ObjectMappers;\nimport com.anthropic.models.beta.messages.BetaContextManagementConfig;\nimport com.anthropic.models.beta.messages.BetaMessage;\nimport com.anthropic.models.beta.messages.BetaMessageParam;\nimport com.anthropic.models.messages.ContentBlockParam;\nimport com.anthropic.models.messages.DocumentBlockParam;\nimport com.anthropic.models.messages.CitationsConfigParam;\nimport com.anthropic.models.messages.Message;\nimport com.anthropic.models.messages.MessageCreateParams;\nimport com.anthropic.models.messages.Model;\nimport com.anthropic.models.messages.TextBlockParam;\nimport com.fasterxml.jackson.core.type.TypeReference;\nimport com.fasterxml.jackson.databind.JsonNode;\nimport com.fasterxml.jackson.databind.ObjectMapper;\nimport com.fasterxml.jackson.databind.node.ArrayNode;\nimport com.fasterxml.jackson.databind.node.ObjectNode;\nimport harness.Scripted;\nimport java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/**\n * Clearing old tool results, asking the API to clear them, and checking the citations in an answer.\n *\n * <p>The replies are illustrative, hand-written bodies in the shapes of the context editing and citations pages (claude-sonnet-5-5),\n * not captures; the numbers in the context editing response are the documentation's own example.\n * Messages are JSON trees (Jackson), the same shape the API takes; the SDK's own types read them for the beta call.\n */\npublic final class ContextTrimming {\n    private static final System.Logger LOG = System.getLogger(ContextTrimming.class.getName());\n    static final String MODEL = \"claude-sonnet-5-5\";\n    static final String POLICY = \"The grass is green. The sky is blue. Water is essential for life.\";\n    private static final ObjectMapper JSON = new ObjectMapper();\n\n    /** A rough size: 4 per message, 1 per 4 characters of text, 10 per tool call. */\n    static int tokens(JsonNode messages) {\n        int total = 0;\n        for (JsonNode m : messages) {\n            total += 4;\n            JsonNode content = m.get(\"content\");\n            if (content.isTextual()) {\n                total += (content.asText().length() + 3) / 4;\n                continue;\n            }\n            for (JsonNode b : content) {\n                switch (b.get(\"type\").asText()) {\n                    case \"text\" -> total += (b.get(\"text\").asText().length() + 3) / 4;\n                    case \"tool_result\" -> total += (b.get(\"content\").asText().length() + 3) / 4;\n                    default -> total += 10; // tool_use\n                }\n            }\n        }\n        return total;\n    }\n\n    static ArrayNode conversation() {\n        ArrayNode messages = JSON.createArrayNode();\n        messages.add(JSON.valueToTree(map(\"role\", \"user\", \"content\", \"Find every mention of the grass in the logs.\")));\n        for (int i = 1; i <= 5; i++) {\n            messages.add(JSON.valueToTree(map(\"role\", \"assistant\", \"content\", List.of(map(\"type\", \"tool_use\", \"id\", \"toolu_\" + i, \"name\", \"grep_logs\", \"input\", map(\"pattern\", \"grass-\" + i))))));\n            messages.add(JSON.valueToTree(map(\"role\", \"user\", \"content\", List.of(map(\"type\", \"tool_result\", \"tool_use_id\", \"toolu_\" + i, \"content\", \"log line \" + i + \": \" + \"x\".repeat(400))))));\n        }\n        messages.add(JSON.valueToTree(map(\"role\", \"assistant\", \"content\", List.of(map(\"type\", \"text\", \"text\", \"Found them all.\")))));\n        return messages;\n    }\n\n    static List<ObjectNode> toolResults(JsonNode messages) {\n        List<ObjectNode> results = new ArrayList<>();\n        for (JsonNode m : messages) {\n            if (!m.get(\"content\").isArray()) continue;\n            for (JsonNode b : m.get(\"content\")) if (b.get(\"type\").asText().equals(\"tool_result\")) results.add((ObjectNode) b);\n        }\n        return results;\n    }\n\n    /** A copy in which every tool result but the newest `keep` has its content replaced; the calls stay. */\n    static ArrayNode clearToolResults(JsonNode messages, int keep, String placeholder) {\n        ArrayNode out = messages.deepCopy();\n        List<ObjectNode> results = toolResults(out);\n        for (ObjectNode block : results.subList(0, Math.max(results.size() - keep, 0))) block.put(\"content\", placeholder);\n        return out;\n    }\n\n    /** A citation is a claim about where text came from; check it against the document. */\n    static List<Map<String, Object>> verify(JsonNode blocks, List<String> documents) {\n        List<Map<String, Object>> bad = new ArrayList<>();\n        for (int i = 0; i < blocks.size(); i++) {\n            JsonNode citations = blocks.get(i).path(\"citations\");\n            for (int j = 0; j < citations.size(); j++) {\n                JsonNode cite = citations.get(j);\n                String cited = documents.get(cite.get(\"document_index\").asInt()).substring(cite.get(\"start_char_index\").asInt(), cite.get(\"end_char_index\").asInt());\n                if (!cited.equals(cite.get(\"cited_text\").asText())) bad.add(map(\"block\", i, \"citation\", j, \"problem\", \"text_mismatch\"));\n            }\n        }\n        return bad;\n    }\n\n    static String footnotes(JsonNode blocks, List<String> titles) {\n        Map<String, Integer> numbers = new LinkedHashMap<>();\n        List<String> lines = new ArrayList<>();\n        StringBuilder out = new StringBuilder();\n        for (JsonNode block : blocks) {\n            out.append(block.get(\"text\").asText());\n            for (JsonNode cite : block.path(\"citations\")) {\n                String key = cite.get(\"document_index\").asInt() + \":\" + cite.get(\"start_char_index\").asInt() + \":\" + cite.get(\"end_char_index\").asInt();\n                if (!numbers.containsKey(key)) {\n                    numbers.put(key, numbers.size() + 1);\n                    lines.add(\"[\" + numbers.get(key) + \"] \" + titles.get(cite.get(\"document_index\").asInt()) + \": \\\"\" + cite.get(\"cited_text\").asText() + \"\\\"\");\n                }\n                out.append(\"[\").append(numbers.get(key)).append(\"]\");\n            }\n        }\n        return out + (lines.isEmpty() ? \"\" : \"\\n\\nSources:\\n\" + String.join(\"\\n\", lines));\n    }\n\n    static Map<String, Object> cite(int start, int end) {\n        return map(\"type\", \"char_location\", \"cited_text\", POLICY.substring(start, end), \"document_index\", 0, \"document_title\", \"Policy\",\n            \"start_char_index\", start, \"end_char_index\", end, \"file_id\", null);\n    }\n\n    static final String EDITS = \"\"\"\n        {\"edits\": [{\"type\": \"clear_tool_uses_20250919\", \"trigger\": {\"type\": \"input_tokens\", \"value\": 30000}, \"keep\": {\"type\": \"tool_uses\", \"value\": 3},\n                    \"clear_at_least\": {\"type\": \"input_tokens\", \"value\": 5000}, \"exclude_tools\": [\"web_search\"]}]}\"\"\";\n\n    static Map<String, Object> editingReply() {\n        Map<String, Object> body = message(List.of(text(\"Found them all.\")));\n        body.put(\"context_management\", map(\"applied_edits\", List.of(map(\"type\", \"clear_tool_uses_20250919\", \"cleared_tool_uses\", 8, \"cleared_input_tokens\", 50000))));\n        return body;\n    }\n\n    static Map<String, Object> citedReply() {\n        return message(List.of(\n            map(\"type\", \"text\", \"text\", \"The grass is green. \", \"citations\", List.of(cite(0, 19))),\n            map(\"type\", \"text\", \"text\", \"Water matters. \", \"citations\", List.of(cite(37, 65))),\n            map(\"type\", \"text\", \"text\", \"Green again.\", \"citations\", List.of(cite(0, 19)))));\n    }\n\n    public static void main(String[] args) throws Exception {\n        ArrayNode before = conversation();\n        ArrayNode after = clearToolResults(before, 2, \"[cleared]\");\n        long cleared = toolResults(after).stream().filter(b -> b.get(\"content\").asText().equals(\"[cleared]\")).count();\n        boolean callsKept = true;\n        for (int i = 0; i < before.size(); i++) if (before.get(i).get(\"role\").asText().equals(\"assistant\") && !before.get(i).equals(after.get(i))) callsKept = false;\n        System.out.println(\"conversation: \" + before.size() + \" messages, 5 tool results, about \" + tokens(before) + \" tokens\");\n        System.out.println(\"after clearing all but the newest 2 results: about \" + tokens(after) + \" tokens, \" + cleared + \" results replaced, calls kept: \" + py(callsKept));\n        Scripted.Rig rig = Scripted.client(editingReply(), citedReply());\n        BetaMessage reply = rig.client().beta().messages().create(com.anthropic.models.beta.messages.MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(300)\n            .messages(ObjectMappers.jsonMapper().convertValue(before, new TypeReference<List<BetaMessageParam>>() {}))\n            .addBeta(\"context-management-2025-06-27\").contextManagement(ObjectMappers.jsonMapper().readValue(EDITS, BetaContextManagementConfig.class)).build());\n        System.out.println(\"beta header sent: \" + rig.http().headers.get(0).get(\"anthropic-beta\"));\n        JsonNode edit = rig.http().requests.get(0).at(\"/context_management/edits/0\");\n        System.out.println(\"edit sent: \" + edit.get(\"type\").asText() + \" trigger \" + edit.at(\"/trigger/value\").asInt() + \" keep \" + edit.at(\"/keep/value\").asInt() + \" exclude \" + py(edit.get(\"exclude_tools\")));\n        JsonNode applied = ObjectMappers.jsonMapper().valueToTree(reply.contextManagement().get().appliedEdits().get(0));\n        System.out.println(\"applied edit reported: \" + applied.get(\"type\").asText() + \" cleared \" + applied.get(\"cleared_tool_uses\").asInt() + \" tool uses, \" + applied.get(\"cleared_input_tokens\").asInt() + \" input tokens\");\n        MessageCreateParams ask = MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(300).addUserMessageOfBlockParams(List.of(\n            ContentBlockParam.ofDocument(DocumentBlockParam.builder().source(DocumentBlockParam.Source.ofText(POLICY)).title(\"Policy\").citations(CitationsConfigParam.builder().enabled(true).build()).build()),\n            ContentBlockParam.ofText(TextBlockParam.builder().text(\"What does the policy say about grass and water?\").build()))).build();\n        Message answer = rig.client().messages().create(ask);\n        JsonNode blocks = ObjectMappers.jsonMapper().valueToTree(answer.content());\n        System.out.println(\"citations enabled in the request: \" + py(rig.http().requests.get(1).at(\"/messages/0/content/0/citations\")));\n        System.out.println(\"citation problems: \" + py(verify(blocks, List.of(POLICY))));\n        ArrayNode tampered = blocks.deepCopy();\n        ((ObjectNode) tampered.get(1).get(\"citations\").get(0)).put(\"cited_text\", \"Water is optional.\");\n        System.out.println(\"after tampering with one cited_text: \" + py(verify(tampered, List.of(POLICY))));\n        System.out.println(footnotes(blocks, List.of(\"Policy\")));\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "conversation: 12 messages, 5 tool results, about 628 tokens\nafter clearing all but the newest 2 results: about 328 tokens, 3 results replaced, calls kept: True\nbeta header sent: context-management-2025-06-27\nedit sent: clear_tool_uses_20250919 trigger 30000 keep 3 exclude ['web_search']\napplied edit reported: clear_tool_uses_20250919 cleared 8 tool uses, 50000 input tokens\ncitations enabled in the request: {'enabled': True}\ncitation problems: []\nafter tampering with one cited_text: [{'block': 1, 'citation': 0, 'problem': 'text_mismatch'}]\nThe grass is green. [1]Water matters. [2]Green again.[1]\n\nSources:\n[1] Policy: \"The grass is green.\"\n[2] Policy: \"Water is essential for life.\""
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import com.anthropic.core.jsonMapper\nimport com.anthropic.models.beta.messages.BetaContextManagementConfig\nimport com.anthropic.models.beta.messages.BetaMessageParam\nimport com.anthropic.models.messages.CitationsConfigParam\nimport com.anthropic.models.messages.ContentBlockParam\nimport com.anthropic.models.messages.DocumentBlockParam\nimport com.anthropic.models.messages.MessageCreateParams\nimport com.anthropic.models.messages.Model\nimport com.anthropic.models.messages.TextBlockParam\nimport com.fasterxml.jackson.core.type.TypeReference\nimport com.fasterxml.jackson.databind.JsonNode\nimport com.fasterxml.jackson.databind.ObjectMapper\nimport com.fasterxml.jackson.databind.node.ArrayNode\nimport com.fasterxml.jackson.databind.node.ObjectNode\nimport harness.Scripted\nimport harness.Scripted.map\nimport harness.Scripted.message\nimport harness.Scripted.text\nimport harness.Show.py\n\nprivate val log = System.getLogger(\"context_trimming\")\n\n/**\n * Clearing old tool results, asking the API to clear them, and checking the citations in an answer.\n *\n * The replies are illustrative, hand-written bodies in the shapes of the context editing and citations pages (claude-sonnet-5-5),\n * not captures; the numbers in the context editing response are the documentation's own example.\n * Messages are JSON trees (Jackson), the same shape the API takes; the SDK's own types read them for the beta call.\n */\nconst val MODEL = \"claude-sonnet-5-5\"\nconst val POLICY = \"The grass is green. The sky is blue. Water is essential for life.\"\nprivate val JSON = ObjectMapper()\n\n/** A rough size: 4 per message, 1 per 4 characters of text, 10 per tool call. */\nfun tokens(messages: JsonNode): Int = messages.sumOf { m ->\n    val content = m[\"content\"]\n    4 + if (content.isTextual) (content.asText().length + 3) / 4 else content.sumOf { b ->\n        when (b[\"type\"].asText()) {\n            \"text\" -> (b[\"text\"].asText().length + 3) / 4\n            \"tool_result\" -> (b[\"content\"].asText().length + 3) / 4\n            else -> 10 // tool_use\n        }\n    }\n}\n\nfun conversation(): ArrayNode {\n    val messages = JSON.createArrayNode()\n    messages.add(JSON.valueToTree<JsonNode>(map(\"role\", \"user\", \"content\", \"Find every mention of the grass in the logs.\")))\n    for (i in 1..5) {\n        messages.add(JSON.valueToTree<JsonNode>(map(\"role\", \"assistant\", \"content\", listOf(map(\"type\", \"tool_use\", \"id\", \"toolu_$i\", \"name\", \"grep_logs\", \"input\", map(\"pattern\", \"grass-$i\"))))))\n        messages.add(JSON.valueToTree<JsonNode>(map(\"role\", \"user\", \"content\", listOf(map(\"type\", \"tool_result\", \"tool_use_id\", \"toolu_$i\", \"content\", \"log line $i: \" + \"x\".repeat(400))))))\n    }\n    messages.add(JSON.valueToTree<JsonNode>(map(\"role\", \"assistant\", \"content\", listOf(map(\"type\", \"text\", \"text\", \"Found them all.\")))))\n    return messages\n}\n\nfun toolResults(messages: JsonNode): List<ObjectNode> =\n    messages.filter { it[\"content\"].isArray }.flatMap { m -> m[\"content\"].filter { it[\"type\"].asText() == \"tool_result\" }.map { it as ObjectNode } }\n\n/** A copy in which every tool result but the newest `keep` has its content replaced; the calls stay. */\nfun clearToolResults(messages: JsonNode, keep: Int = 2, placeholder: String = \"[cleared]\"): ArrayNode {\n    val out = messages.deepCopy<ArrayNode>()\n    val results = toolResults(out)\n    results.take(maxOf(results.size - keep, 0)).forEach { it.put(\"content\", placeholder) }\n    return out\n}\n\n/** A citation is a claim about where text came from; check it against the document. */\nfun verify(blocks: JsonNode, documents: List<String>): List<Map<String, Any>> {\n    val bad = mutableListOf<Map<String, Any>>()\n    for ((i, block) in blocks.withIndex()) for ((j, cite) in block.path(\"citations\").withIndex()) {\n        val cited = documents[cite[\"document_index\"].asInt()].substring(cite[\"start_char_index\"].asInt(), cite[\"end_char_index\"].asInt())\n        if (cited != cite[\"cited_text\"].asText()) bad += map(\"block\", i, \"citation\", j, \"problem\", \"text_mismatch\")\n    }\n    return bad\n}\n\nfun footnotes(blocks: JsonNode, titles: List<String>): String {\n    val numbers = linkedMapOf<String, Int>()\n    val lines = mutableListOf<String>()\n    val out = StringBuilder()\n    for (block in blocks) {\n        out.append(block[\"text\"].asText())\n        for (cite in block.path(\"citations\")) {\n            val key = \"${cite[\"document_index\"].asInt()}:${cite[\"start_char_index\"].asInt()}:${cite[\"end_char_index\"].asInt()}\"\n            if (key !in numbers) {\n                numbers[key] = numbers.size + 1\n                lines += \"[${numbers[key]}] ${titles[cite[\"document_index\"].asInt()]}: \\\"${cite[\"cited_text\"].asText()}\\\"\"\n            }\n            out.append(\"[${numbers[key]}]\")\n        }\n    }\n    return out.toString() + if (lines.isNotEmpty()) \"\\n\\nSources:\\n\" + lines.joinToString(\"\\n\") else \"\"\n}\n\nfun cite(start: Int, end: Int) = map(\n    \"type\", \"char_location\", \"cited_text\", POLICY.substring(start, end), \"document_index\", 0, \"document_title\", \"Policy\",\n    \"start_char_index\", start, \"end_char_index\", end, \"file_id\", null,\n)\n\nconst val EDITS = \"\"\"\n    {\"edits\": [{\"type\": \"clear_tool_uses_20250919\", \"trigger\": {\"type\": \"input_tokens\", \"value\": 30000}, \"keep\": {\"type\": \"tool_uses\", \"value\": 3},\n                \"clear_at_least\": {\"type\": \"input_tokens\", \"value\": 5000}, \"exclude_tools\": [\"web_search\"]}]}\"\"\"\n\nfun editingReply(): Map<String, Any?> = message(listOf(text(\"Found them all.\"))).also {\n    it[\"context_management\"] = map(\"applied_edits\", listOf(map(\"type\", \"clear_tool_uses_20250919\", \"cleared_tool_uses\", 8, \"cleared_input_tokens\", 50000)))\n}\n\nfun citedReply(): Map<String, Any?> = message(\n    listOf(\n        map(\"type\", \"text\", \"text\", \"The grass is green. \", \"citations\", listOf(cite(0, 19))),\n        map(\"type\", \"text\", \"text\", \"Water matters. \", \"citations\", listOf(cite(37, 65))),\n        map(\"type\", \"text\", \"text\", \"Green again.\", \"citations\", listOf(cite(0, 19))),\n    ),\n)\n\nfun main() {\n    val before = conversation()\n    val after = clearToolResults(before, 2)\n    val cleared = toolResults(after).count { it[\"content\"].asText() == \"[cleared]\" }\n    val callsKept = (0 until before.size()).filter { before[it][\"role\"].asText() == \"assistant\" }.all { before[it] == after[it] }\n    println(\"conversation: ${before.size()} messages, 5 tool results, about ${tokens(before)} tokens\")\n    println(\"after clearing all but the newest 2 results: about ${tokens(after)} tokens, $cleared results replaced, calls kept: ${py(callsKept)}\")\n    val rig = Scripted.client(editingReply(), citedReply())\n    val reply = rig.client().beta().messages().create(\n        com.anthropic.models.beta.messages.MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(300)\n            .messages(jsonMapper().convertValue(before, object : TypeReference<List<BetaMessageParam>>() {}))\n            .addBeta(\"context-management-2025-06-27\").contextManagement(jsonMapper().readValue(EDITS, BetaContextManagementConfig::class.java)).build(),\n    )\n    println(\"beta header sent: ${rig.http().headers[0][\"anthropic-beta\"]}\")\n    val edit = rig.http().requests[0].at(\"/context_management/edits/0\")\n    println(\"edit sent: ${edit[\"type\"].asText()} trigger ${edit.at(\"/trigger/value\").asInt()} keep ${edit.at(\"/keep/value\").asInt()} exclude ${py(edit[\"exclude_tools\"])}\")\n    val applied = jsonMapper().valueToTree<JsonNode>(reply.contextManagement().get().appliedEdits()[0])\n    println(\"applied edit reported: ${applied[\"type\"].asText()} cleared ${applied[\"cleared_tool_uses\"].asInt()} tool uses, ${applied[\"cleared_input_tokens\"].asInt()} input tokens\")\n    val ask = MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(300).addUserMessageOfBlockParams(\n        listOf(\n            ContentBlockParam.ofDocument(DocumentBlockParam.builder().source(DocumentBlockParam.Source.ofText(POLICY)).title(\"Policy\").citations(CitationsConfigParam.builder().enabled(true).build()).build()),\n            ContentBlockParam.ofText(TextBlockParam.builder().text(\"What does the policy say about grass and water?\").build()),\n        ),\n    ).build()\n    val answer = rig.client().messages().create(ask)\n    val blocks = jsonMapper().valueToTree<JsonNode>(answer.content())\n    println(\"citations enabled in the request: ${py(rig.http().requests[1].at(\"/messages/0/content/0/citations\"))}\")\n    println(\"citation problems: ${py(verify(blocks, listOf(POLICY)))}\")\n    val tampered = blocks.deepCopy<ArrayNode>()\n    (tampered[1][\"citations\"][0] as ObjectNode).put(\"cited_text\", \"Water is optional.\")\n    println(\"after tampering with one cited_text: ${py(verify(tampered, listOf(POLICY)))}\")\n    println(footnotes(blocks, listOf(\"Policy\")))\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "conversation: 12 messages, 5 tool results, about 628 tokens\nafter clearing all but the newest 2 results: about 328 tokens, 3 results replaced, calls kept: True\nbeta header sent: context-management-2025-06-27\nedit sent: clear_tool_uses_20250919 trigger 30000 keep 3 exclude ['web_search']\napplied edit reported: clear_tool_uses_20250919 cleared 8 tool uses, 50000 input tokens\ncitations enabled in the request: {'enabled': True}\ncitation problems: []\nafter tampering with one cited_text: [{'block': 1, 'citation': 0, 'problem': 'text_mismatch'}]\nThe grass is green. [1]Water matters. [2]Green again.[1]\n\nSources:\n[1] Policy: \"The grass is green.\"\n[2] Policy: \"Water is essential for life.\""
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Read the output. The conversation has 12 messages and about 628 tokens by the example's rough counter; clearing all but the newest two results brings it to about 328 and replaces three results, with every call kept. The request carried the beta header `context-management-2025-06-27` and an edit with a trigger of 30,000, a keep of 3 and `web_search` excluded. The reply reported 8 tool uses and 50,000 input tokens cleared. The citation check found no problem in the untouched answer and a `text_mismatch` after the tampering, and the footnotes number the grass sentence once although two blocks cite it."
+    },
+    {
+      "type": "para",
+      "text": "Java and Kotlin readers: the practice follows in your language, and its functions are plain list and map code."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The practice: trimming, compacting and citing"
+    },
+    {
+      "type": "para",
+      "text": "You write `split_turns`, `clear_tool_results`, `window`, `compact`, `verify_citations` and `footnotes`. The statement is in `exercises/29-context-engineering/unit-01/practice-1/statement.md`; each language folder has a `starter`, the tests and a build file, and the starter fails every test. The summariser is a function that the tests pass in."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "An over-budget conversation becomes a summary and the newest turn"
+        ],
+        [
+          "`e1`",
+          "Old tool results are cleared, but their calls and flags stay"
+        ],
+        [
+          "`e2`",
+          "The window drops whole turns and never splits a tool call from its result"
+        ],
+        [
+          "`e3`",
+          "A conversation within budget, or with nothing older, is left alone"
+        ],
+        [
+          "`e4`",
+          "A second compaction folds the earlier summary into the new one"
+        ],
+        [
+          "`e5`",
+          "A citation that does not match its document is reported"
+        ],
+        [
+          "`e6`",
+          "Footnotes number each distinct source once, in order of appearance"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Case `e2` is the pairing rule of page 1 in code, and `e4` is the \"exactly one summary\" rule: the second compaction receives the first summary among the messages it folds."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Citations with structured outputs.** The request fails with a 400 error. Separate the two steps.",
+        "**Citations on some documents only.** All or none: mixed settings are an error.",
+        "**A file id from a user's request.** Files belong to the workspace, not to a user. Map users to files yourself, and never trust an id that arrives from outside.",
+        "**Assuming an uploaded file can be downloaded.** Only files created by skills or the code execution tool can."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A request enables citations on one document and includes `output_config.format` with a JSON schema. What happens?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: A 400 error comes back, because the features conflict",
+              "**b**: The reply is JSON with the citations inside the schema's fields",
+              "**c**: The citations are dropped, and the schema is applied alone",
+              "**d**: The schema is dropped, and the citations come back alone"
+            ]
+          }
+        ],
+        [
+          "An application sends the id of an uploaded file straight from a web form into a Messages request. What is the risk?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Someone could read another customer's material in the same workspace",
+              "**b**: The file would be deleted as soon as the request had been read",
+              "**c**: The request would be billed at twice the usual input price",
+              "**d**: The file would be moved to the account of the user who sent the id"
+            ]
+          }
+        ],
+        [
+          "A citation reports a span from character 40 to character 30 in a document of 100 characters. Which problem does the practice's check name?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: `unknown_document`, since the index is outside the list",
+              "**b**: `text_mismatch`, since the cited text is not in the document",
+              "**c**: `bad_range`, since the end is not after the start",
+              "**d**: `unsupported_type`, since the citation is not a character range"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**a**. The page says \"Citations and structured outputs are incompatible\", and \"the API returns a 400 error\". *b* is ruled out because \"citations require interleaving citation blocks with text output, which is incompatible with the strict JSON schema constraints of structured outputs.\" *c* is ruled out because the request does not run at all: \"the API returns a 400 error\". *d* is ruled out because \"the API returns a 400 error\", so a rejected request returns no citations.",
+            "**a**. The page says \"a user-supplied file ID would let one user of your application read content that another user uploaded.\" *b* is ruled out because \"Files persist until you delete them\". *c* is ruled out because \"File content used in Messages requests is priced as input tokens\", at the usual rate. *d* is ruled out because the page describes read access in a shared space, since files are \"accessible to your entire workspace\", and says nothing of moving them.",
+            "**c**. The page lists `bad_range` as \"start below 0, end not after start, or end past the text\". *b* is ruled out because the checks run \"in this order of checks\", and the range check comes before the text comparison. *a* is ruled out because `unknown_document` means \"the document index is outside the list\", and this citation names a range. *d* is ruled out because `unsupported_type` means \"the citation is not a `char_location`\", and a character range is one."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Module quiz"
+    },
+    {
+      "type": "para",
+      "text": "This quiz covers all three pages of the module."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "An agent prunes old tool results by rule, and the team also needs a customer's stated wish to survive a summary and a new session. Which pair fits?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Context editing for the clearing, and a longer system prompt for the wish",
+              "**b**: Context editing for the clearing, and memory files for that fact",
+              "**c**: Citations for the clearing, and the Files API for the wish",
+              "**d**: Threshold compaction for the clearing, and prompt caching for the wish"
+            ]
+          }
+        ],
+        [
+          "A request to compact a conversation on demand returns a `compaction` block. What must the next request do with it?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Drop its signature, so that the summary can be edited by the application",
+              "**b**: Append it after the summarized messages, which stay in the list as before",
+              "**c**: Send it first in the messages, in place of the ones it summarizes, exactly as it came",
+              "**d**: Send it in the system prompt, where summaries are expected to sit"
+            ]
+          }
+        ],
+        [
+          "A pipeline needs a cited answer and a result in a fixed JSON shape from the same documents. What design does the module support?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: One call with the schema inside each document's `title` field",
+              "**b**: One call with both features, since each one works on its own",
+              "**c**: One call with citations on half of the documents and off for the rest",
+              "**d**: Two steps: one call that cites, and a second that only formats"
+            ]
+          }
+        ],
+        [
+          "A program drops messages from a long history and the next request fails with a 400 error. Which cause fits the module?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The newest turn was kept even though it was over the budget",
+              "**b**: A tool result stayed while its call was removed",
+              "**c**: The first turn was pinned so that the task stayed in view",
+              "**d**: An older summary was folded into the new one as required"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**b**. The page pairs them: \"consider using both: compaction keeps the active context small without client-side bookkeeping, and memory preserves the information that must survive summarization.\" *a* is ruled out because \"Your context window might be reset at any moment\", so a prompt cannot hold state. *c* is ruled out because the Files API stores files and does not clear anything: \"upload and manage files\". *d* is ruled out because prompt caching changes what you pay: \"prompt caching changes what you pay for those tokens, not whether they count.\"",
+            "**c**. The page says \"It goes first in `messages`, in place of the messages it summarizes\", and \"Send it in future requests exactly as it came.\" *b* is ruled out because \"the summarized messages are removed, or the request returns a 400 error (`compaction_block_misplaced`)\", and here they stay in front of the block. *a* is ruled out because a block with a changed signature is rejected: \"The signature and content must be exactly as returned.\" *d* is ruled out because the block belongs in `messages`, not elsewhere: \"the block comes first\".",
+            "**d**. The page says \"cite in one call, and shape the result in a second call that has no documents\". *b* is ruled out because \"Citations and structured outputs are incompatible.\" *c* is ruled out because \"citations must be enabled on all or none of the documents within a request.\" *a* is ruled out because \"`title` and `context` fields of a document are passed to the model but are not citable\", and a schema there is not applied.",
+            "**b**. The page says \"Tool result blocks must immediately follow their corresponding tool use blocks in the message history\", and that a list which keeps one without the other \"fails with a 400 error\". *a* is ruled out because \"The newest turn always stays, even if it alone is over the budget.\" *c* is ruled out because a pinned turn is a whole turn: \"Optionally pin the first turn\". *d* is ruled out because a second compaction \"should fold the first summary into the new one\"."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 12,
+    "paras": 20,
+    "code": 0,
+    "tables": 3,
+    "lists": 4,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 2,
+    "examples": 1
+  },
+  "content_sha256": "d028b4c353eb10f14256fbfe23e62e6a2b86059d534c112ce4332c401d323009"
+}

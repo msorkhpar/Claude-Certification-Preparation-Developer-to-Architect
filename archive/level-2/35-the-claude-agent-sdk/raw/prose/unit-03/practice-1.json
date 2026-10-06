@@ -1,0 +1,302 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "35-the-claude-agent-sdk"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: an agent that may read, but not do harm (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an agent that may read, but not do harm"
+    },
+    {
+      "type": "para",
+      "text": "The Claude Agent SDK runs the same agent loop as Claude Code, as a library: your program calls `query()`, and the SDK starts the Claude Code binary as a child process and exchanges messages with it. The model and the tools live in that binary. What you own is the part around it: which tools exist, which calls are allowed, what a hook may veto, how long the run may last, and what you make of the stream of messages that comes back. Write that part. The options, the permission order, the hook output and the message types come from the Agent SDK documentation and the SDK's own type definitions at the versions in `docs/VERSIONS.md`, read on 2026-10-03; the lesson pages explain them. The tests never call the model. They start `harness/fake_claude.py`, a scripted stand-in for the binary that speaks the same protocol, through the SDK's own path option (`cli_path` in Python, `pathToClaudeCodeExecutable` in TypeScript), so the SDK code you call is the real one."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`READ_TOOLS`, `EDIT_TOOLS`, `SAFE_COMMANDS`, `STATUS`",
+          "the read tools (`Read`, `Grep`, `Glob`), the edit tools (`Edit`, `Write`), the shell words that may run (`ls`, `cat`, `pytest`), and the map from a result subtype to the course status"
+        ],
+        [
+          "`project_dir`",
+          "the one directory the agent may touch"
+        ],
+        [
+          "`mode`",
+          "`readonly` (the default) or `edit`"
+        ],
+        [
+          "`cli_path`",
+          "the executable that the SDK starts; the tests pass the stand-in"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is the working code with nine small gaps cut out. The path helpers, the options plumbing, `decide`, the hook, `summarize` and `run_agent` are written and correct; each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file (`log.debug(...)` in Python, `log.debug(...)` on the `logger` in TypeScript); a run shows the lines under the failing case. The names are in Python style; TypeScript uses camelCase (`isSecretName`, `makeCanUseTool`)."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_is_secret_name` unlocks `e2`: which file names hold secrets.",
+        "`_dangerous` unlocks `e3`: `sudo` and `rm -rf`.",
+        "`_chained` unlocks `e3`: chaining, pipes, redirection and substitution.",
+        "`_command_allowed` unlocks `e3`: the first word against `SAFE_COMMANDS`.",
+        "`make_can_use_tool` unlocks `m1` and `e7`: the callback that turns `decide()` into the SDK's allow or deny result.",
+        "`_is_push` unlocks `e4`: the whole-word `git push` test.",
+        "`build_options` unlocks `e1`: the options that reach the CLI as flags.",
+        "`_denied` unlocks `e5` and `e7`: counting the tool results marked as errors.",
+        "`_status` unlocks `e5`: the course status of a result subtype."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The sections below describe the whole program; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`decide(tool_name, tool_input, project_dir, mode)` is the permission policy as plain data: `{\"behavior\": \"allow\"}` or `{\"behavior\": \"deny\", \"message\", \"interrupt\"}`.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`Read`, `Grep`, `Glob`, `Edit` and `Write` take the path from `file_path` or else `path`; a call with no path is allowed (a search of the project). `Edit` and `Write` in `readonly` mode: deny, `Edits are not allowed in readonly mode`, checked first.",
+              "A path outside the project (relative paths are taken from `project_dir`, `..` is resolved, and a sibling folder whose name merely starts like the project's is outside): deny, `{path} is outside the project`, with the path as given.",
+              "A file whose name starts with `.env`, except `.env.example`: deny, `{name} holds secrets and is never read`, with the file name only. An edit of a path that has a `.git` folder in it: deny, `{path} is inside .git`.",
+              "`Bash` looks at `command`. When it contains the word `sudo` or the text `rm -rf`: deny, `Dangerous command`, with `interrupt` true (the whole run stops). Otherwise when it contains `;`, `&`, `|`, `<`, `>`, a backtick or `$(`: deny, `Command not allowed: no chaining or redirection`. Otherwise it is allowed when its first word is one of `SAFE_COMMANDS`; else deny, `Command not allowed: only ls, cat and pytest`.",
+              "Any other tool: deny, `{tool} is not allowed`. `interrupt` is false for every denial except the dangerous command."
+            ]
+          }
+        ],
+        "`make_can_use_tool(project_dir, mode)` returns the callback the SDK calls for a tool that is not already decided: it turns `decide()` into the SDK's allow result (carrying the input back as the updated input) or deny result (message and interrupt).",
+        "`bash_guard` is a `PreToolUse` hook. When the command of a `Bash` call runs `git push` (the two words, with any white space between, and as whole words: `git pushd` and `legit push` are not pushes), it returns the hook output that denies the call, with the reason `Nothing is pushed from an agent`; otherwise it returns an empty result. A hook runs before the permission callback.",
+        "`build_options(project_dir, cli_path, mode)` builds the SDK options: the CLI path, `cwd` the project, the available tools (`Read`, `Grep`, `Glob`, `Bash`, plus `Edit` and `Write` in `edit` mode), **no pre-approved tools** (an allow list would let those tools run without the callback being asked), `Bash(rm *)` disallowed, at most 6 turns, a budget of 0.5 US dollars, permission mode `default`, no setting sources (the run does not read user or project settings), the callback and the hook for `Bash`.",
+        "`summarize(messages)` folds the messages of one run into `{\"status\", \"text\", \"tools\", \"turns\", \"cost\", \"denied\"}`: `tools` lists the name of every tool call in order; `denied` counts the tool results marked as errors; `text` is the result text, or when that is empty or missing the last text the assistant wrote; `turns` and `cost` come from the result message (a missing cost is 0). The status is `STATUS[subtype]`, or the subtype itself when it is not in `STATUS`. A run with no result message is `{\"status\": \"incomplete\", ..., \"turns\": 0, \"cost\": 0}`.",
+        "`run_agent(prompt, project_dir, cli_path, mode)` runs `query()` with those options, collects every message and returns the summary. A single-shot `query()` that ends on an error result (the turn limit, the budget) yields that result and then raises, because the process exits with a nonzero code; that raise is not a failure of the run, so a summary is still returned once a result message has arrived. An error with no result message before it (the process died) is not hidden: it propagates."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Every tool call goes through the permission callback, and the run is summarised"
+        ],
+        [
+          "`e1`",
+          "The options reach the CLI as flags, and the run starts in the project"
+        ],
+        [
+          "`e2`",
+          "File tools stay inside the project and away from secrets"
+        ],
+        [
+          "`e3`",
+          "Bash is limited to a few commands, and dangerous ones stop the run"
+        ],
+        [
+          "`e4`",
+          "A hook blocks a push before the permission callback is asked"
+        ],
+        [
+          "`e5`",
+          "The messages of a run fold into a summary"
+        ],
+        [
+          "`e6`",
+          "An error result still gives its summary, and a crash is not hidden"
+        ],
+        [
+          "`e7`",
+          "Denied calls are counted, and the run still ends with a result"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Code around the Claude Agent SDK: options, a permission callback, a hook and the message handling. See ../../statement.md.\"\"\"\nimport logging\nimport os\nimport re\n\nfrom claude_agent_sdk import (AssistantMessage, ClaudeAgentOptions, HookMatcher, PermissionResultAllow, PermissionResultDeny, ResultMessage,\n                              TextBlock, ToolResultBlock, ToolUseBlock, UserMessage, query)\n\nlog = logging.getLogger(__name__)\n\nREAD_TOOLS = [\"Read\", \"Grep\", \"Glob\"]\nEDIT_TOOLS = [\"Edit\", \"Write\"]\nSAFE_COMMANDS = (\"ls\", \"cat\", \"pytest\")\nSTATUS = {\"success\": \"done\", \"error_max_turns\": \"max_turns\", \"error_max_budget_usd\": \"budget\", \"error_during_execution\": \"failed\"}\n\n\ndef _resolve(project_dir, path):\n    return os.path.normpath(os.path.join(project_dir, path))\n\n\ndef _inside(project_dir, path):\n    full, root = _resolve(project_dir, path), os.path.normpath(project_dir)\n    return full == root or full.startswith(root + os.sep)\n\n\ndef _is_secret_name(base):\n    return base.startswith(\".env\") and base != \".env.example\"\n\n\ndef _dangerous(command):\n    return bool(re.search(r\"\\bsudo\\b\", command)) or \"rm -rf\" in command\n\n\ndef _chained(command):\n    return bool(re.search(r\"[;&|<>`]|\\$\\(\", command))\n\n\ndef _command_allowed(command):\n    words = command.split()\n    return bool(words) and words[0] in SAFE_COMMANDS\n\n\ndef decide(tool_name, tool_input, project_dir, mode=\"readonly\"):\n    \"\"\"The permission policy as plain data: {\"behavior\": \"allow\"} or {\"behavior\": \"deny\", \"message\", \"interrupt\"}.\"\"\"\n    log.debug(\"decide input: %r %r\", tool_name, tool_input)\n    def deny(message, interrupt=False):\n        return {\"behavior\": \"deny\", \"message\": message, \"interrupt\": interrupt}\n\n    if tool_name in READ_TOOLS + EDIT_TOOLS:\n        path = tool_input.get(\"file_path\") or tool_input.get(\"path\")\n        if tool_name in EDIT_TOOLS and mode != \"edit\":\n            return deny(\"Edits are not allowed in readonly mode\")\n        if path is not None:\n            if not _inside(project_dir, path):\n                return deny(f\"{path} is outside the project\")\n            base = os.path.basename(_resolve(project_dir, path))\n            if _is_secret_name(base):\n                return deny(f\"{base} holds secrets and is never read\")\n            if tool_name in EDIT_TOOLS and \".git\" in _resolve(project_dir, path).split(os.sep):\n                return deny(f\"{path} is inside .git\")\n        return {\"behavior\": \"allow\"}\n    if tool_name == \"Bash\":\n        command = tool_input.get(\"command\", \"\")\n        if _dangerous(command):\n            return deny(\"Dangerous command\", True)\n        if _chained(command):\n            return deny(\"Command not allowed: no chaining or redirection\")\n        if _command_allowed(command):\n            return {\"behavior\": \"allow\"}\n        return deny(\"Command not allowed: only ls, cat and pytest\")\n    return deny(f\"{tool_name} is not allowed\")\n\n\ndef make_can_use_tool(project_dir, mode=\"readonly\"):\n    async def can_use_tool(tool_name, tool_input, context):\n        verdict = decide(tool_name, tool_input, project_dir, mode)\n        if verdict[\"behavior\"] == \"allow\":\n            return PermissionResultAllow(updated_input=tool_input)\n        return PermissionResultDeny(message=verdict[\"message\"], interrupt=verdict[\"interrupt\"])\n    return can_use_tool\n\n\ndef _is_push(command):\n    return bool(re.search(r\"\\bgit\\s+push\\b\", command))\n\n\nasync def bash_guard(input_data, tool_use_id, context):\n    \"\"\"A PreToolUse hook: nothing is pushed from an agent.\"\"\"\n    if _is_push((input_data.get(\"tool_input\") or {}).get(\"command\", \"\")):\n        return {\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"deny\", \"permissionDecisionReason\": \"Nothing is pushed from an agent\"}}\n    return {}\n\n\ndef build_options(project_dir, cli_path, mode=\"readonly\"):\n    return ClaudeAgentOptions(\n        cli_path=cli_path, cwd=project_dir, tools=READ_TOOLS + [\"Bash\"] + (EDIT_TOOLS if mode == \"edit\" else []), allowed_tools=[],\n        disallowed_tools=[\"Bash(rm *)\"], max_turns=6, max_budget_usd=0.5, permission_mode=\"default\", setting_sources=[],\n        can_use_tool=make_can_use_tool(project_dir, mode), hooks={\"PreToolUse\": [HookMatcher(matcher=\"Bash\", hooks=[bash_guard])]})\n\n\ndef _denied(content):\n    return sum(1 for b in content if isinstance(b, ToolResultBlock) and b.is_error)\n\n\ndef _status(subtype):\n    return STATUS.get(subtype, subtype)\n\n\ndef summarize(messages):\n    text, tools, denied, result = \"\", [], 0, None\n    for message in messages:\n        if isinstance(message, AssistantMessage):\n            for block in message.content:\n                if isinstance(block, TextBlock):\n                    text = block.text\n                elif isinstance(block, ToolUseBlock):\n                    tools.append(block.name)\n        elif isinstance(message, UserMessage) and isinstance(message.content, list):\n            denied += _denied(message.content)\n        elif isinstance(message, ResultMessage):\n            result = message\n    if result is None:\n        return {\"status\": \"incomplete\", \"text\": text, \"tools\": tools, \"turns\": 0, \"cost\": 0.0, \"denied\": denied}\n    return {\"status\": _status(result.subtype), \"text\": result.result or text, \"tools\": tools, \"turns\": result.num_turns,\n            \"cost\": result.total_cost_usd or 0.0, \"denied\": denied}\n\n\nasync def run_agent(prompt, project_dir, cli_path, mode=\"readonly\"):\n    messages = []\n    try:\n        async for message in query(prompt=prompt, options=build_options(project_dir, cli_path, mode)):\n            messages.append(message)\n    except Exception:\n        # After an error result (turn limit, budget) a single-shot query() yields the result and then raises, because the process exits with a\n        # nonzero code. That is not a failure of the run; a crash before any result message is, and is not hidden.\n        if not any(isinstance(m, ResultMessage) for m in messages):\n            raise\n    return summarize(messages)\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nimport asyncio\nimport json\nimport os\nimport shutil\nimport tempfile\nfrom pathlib import Path\n\nfrom agent import run_agent\n\n# The tests never call the model: they start harness/fake_claude.py, a scripted stand-in for the Claude Code binary.\nhere = Path(__file__).resolve()\nfake = next(str(p) for p in (Path(\"/w/harness/fake_claude.py\"), *(here.parents[i] / \"harness\" / \"fake_claude.py\" for i in range(min(len(here.parents), 8)))) if p.exists())\n\n# The script: the agent reads a file, runs the tests with Bash, then finishes.\nsteps = [\n    {\"tool\": {\"id\": \"t1\", \"name\": \"Read\", \"input\": {\"file_path\": \"a.txt\"}, \"output\": \"Read ok\"}},\n    {\"tool\": {\"id\": \"t2\", \"name\": \"Bash\", \"input\": {\"command\": \"pytest -q\"}, \"output\": \"Bash ok\"}},\n    {\"say\": \"All done.\"},\n    {\"result\": {\"subtype\": \"success\", \"result\": \"All done.\", \"cost\": 0.02, \"turns\": 3}},\n]\nproject = tempfile.mkdtemp()\n# The SDK starts the stand-in as a program, so it must be executable: use a copy marked so (the harness folder may be read-only).\nfake = shutil.copy(fake, Path(project, \"fake_claude.py\"))\nos.chmod(fake, 0o755)\nscript = Path(project, \"script.json\")\nscript.write_text(json.dumps({\"session_id\": \"s1\", \"turns\": [steps]}))\nos.environ[\"FAKE_CLAUDE_SCRIPT\"] = str(script)\nos.environ[\"FAKE_CLAUDE_RECORD\"] = str(Path(project, \"record.jsonl\"))\n\ntry:\n    summary = asyncio.run(run_agent(\"go\", project, fake, \"readonly\")) or {}\n    print(\"status:\", summary.get(\"status\"))\n    print(\"tools used:\", summary.get(\"tools\"))\n    print(\"turns and cost:\", summary.get(\"turns\"), summary.get(\"cost\"))\n    print(\"calls denied:\", summary.get(\"denied\"))\nexcept Exception as err:  # a gap that is not written yet may raise: show it instead of a traceback\n    print(\"raised:\", type(err).__name__, err)\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Code around the Claude Agent SDK: options, a permission callback, a hook and the message handling. See ../../statement.md.\"\"\"\nimport logging\nimport os\nimport re\n\nfrom claude_agent_sdk import (AssistantMessage, ClaudeAgentOptions, HookMatcher, PermissionResultAllow, PermissionResultDeny, ResultMessage,\n                              TextBlock, ToolResultBlock, ToolUseBlock, UserMessage, query)\n\nlog = logging.getLogger(__name__)\n\nREAD_TOOLS = [\"Read\", \"Grep\", \"Glob\"]\nEDIT_TOOLS = [\"Edit\", \"Write\"]\nSAFE_COMMANDS = (\"ls\", \"cat\", \"pytest\")\nSTATUS = {\"success\": \"done\", \"error_max_turns\": \"max_turns\", \"error_max_budget_usd\": \"budget\", \"error_during_execution\": \"failed\"}\n\n\ndef _resolve(project_dir, path):\n    return os.path.normpath(os.path.join(project_dir, path))\n\n\ndef _inside(project_dir, path):\n    full, root = _resolve(project_dir, path), os.path.normpath(project_dir)\n    return full == root or full.startswith(root + os.sep)\n\n\ndef _is_secret_name(base):\n    \"\"\"TODO 1 of 9 (unlocks e2): does this file name hold secrets?\n\n    Receives a file name (no folders). Returns True when it starts with `.env` unless it is `.env.example`.\n    Example: _is_secret_name(\".env.local\") -> True, _is_secret_name(\".env.example\") -> False\n    \"\"\"\n    return False\n\n\ndef _dangerous(command):\n    \"\"\"TODO 2 of 9 (unlocks e3): is this shell command dangerous enough to stop the run?\n\n    Receives a command. Returns True when it contains the word `sudo` (as a whole word) or the text `rm -rf`.\n    Example: _dangerous(\"pytest && sudo reboot\") -> True, _dangerous(\"ls\") -> False\n    \"\"\"\n    return False\n\n\ndef _chained(command):\n    \"\"\"TODO 3 of 9 (unlocks e3): does this command chain, pipe, redirect or substitute?\n\n    Receives a command. Returns True when it contains `;`, `&`, `|`, `<`, `>`, a backtick or `$(`.\n    Example: _chained(\"ls | wc\") -> True, _chained(\"ls -la\") -> False\n    \"\"\"\n    return False\n\n\ndef _command_allowed(command):\n    \"\"\"TODO 4 of 9 (unlocks e3): is the first word of the command one of SAFE_COMMANDS?\n\n    Receives a command. Returns True when its first word is in SAFE_COMMANDS; False for anything else, including an empty command.\n    Example: _command_allowed(\"  pytest -q\") -> True, _command_allowed(\"python x.py\") -> False\n    \"\"\"\n    return False\n\n\ndef decide(tool_name, tool_input, project_dir, mode=\"readonly\"):\n    \"\"\"The permission policy as plain data: {\"behavior\": \"allow\"} or {\"behavior\": \"deny\", \"message\", \"interrupt\"}.\"\"\"\n    log.debug(\"decide input: %r %r\", tool_name, tool_input)\n    def deny(message, interrupt=False):\n        return {\"behavior\": \"deny\", \"message\": message, \"interrupt\": interrupt}\n\n    if tool_name in READ_TOOLS + EDIT_TOOLS:\n        path = tool_input.get(\"file_path\") or tool_input.get(\"path\")\n        if tool_name in EDIT_TOOLS and mode != \"edit\":\n            return deny(\"Edits are not allowed in readonly mode\")\n        if path is not None:\n            if not _inside(project_dir, path):\n                return deny(f\"{path} is outside the project\")\n            base = os.path.basename(_resolve(project_dir, path))\n            if _is_secret_name(base):\n                return deny(f\"{base} holds secrets and is never read\")\n            if tool_name in EDIT_TOOLS and \".git\" in _resolve(project_dir, path).split(os.sep):\n                return deny(f\"{path} is inside .git\")\n        return {\"behavior\": \"allow\"}\n    if tool_name == \"Bash\":\n        command = tool_input.get(\"command\", \"\")\n        if _dangerous(command):\n            return deny(\"Dangerous command\", True)\n        if _chained(command):\n            return deny(\"Command not allowed: no chaining or redirection\")\n        if _command_allowed(command):\n            return {\"behavior\": \"allow\"}\n        return deny(\"Command not allowed: only ls, cat and pytest\")\n    return deny(f\"{tool_name} is not allowed\")\n\n\ndef make_can_use_tool(project_dir, mode=\"readonly\"):\n    \"\"\"TODO 5 of 9 (unlocks m1 and e7): the callback the SDK asks for a tool that is not already decided.\n\n    Receives the project directory and the mode. Returns an async function (tool_name, tool_input, context) that turns `decide()`\n    into `PermissionResultAllow(updated_input=tool_input)` or `PermissionResultDeny(message=..., interrupt=...)`.\n    Example: for {\"behavior\": \"deny\", \"message\": \"no\", \"interrupt\": False} it returns PermissionResultDeny(message=\"no\", interrupt=False)\n    \"\"\"\n    async def can_use_tool(tool_name, tool_input, context):\n        return PermissionResultDeny(message=\"not written yet\", interrupt=False)\n    return can_use_tool\n\n\ndef _is_push(command):\n    \"\"\"TODO 6 of 9 (unlocks e4): does this command run `git push`?\n\n    Receives a command. Returns True when it has the two words `git` and `push` with any white space between them, as whole words.\n    Example: _is_push(\"echo ok && git  push origin\") -> True, _is_push(\"git pushd\") -> False, _is_push(\"legit push\") -> False\n    \"\"\"\n    return False\n\n\nasync def bash_guard(input_data, tool_use_id, context):\n    \"\"\"A PreToolUse hook: nothing is pushed from an agent.\"\"\"\n    if _is_push((input_data.get(\"tool_input\") or {}).get(\"command\", \"\")):\n        return {\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"deny\", \"permissionDecisionReason\": \"Nothing is pushed from an agent\"}}\n    return {}\n\n\ndef build_options(project_dir, cli_path, mode=\"readonly\"):\n    \"\"\"TODO 7 of 9 (unlocks e1): the SDK options of the agent.\n\n    Receives the project directory, the CLI path and the mode. Returns ClaudeAgentOptions with the CLI path, `cwd` the project, `tools`\n    (the read tools, `Bash`, and the edit tools in `edit` mode), no `allowed_tools`, `Bash(rm *)` disallowed, 6 turns, a budget of 0.5,\n    permission mode `default`, no setting sources, the callback from `make_can_use_tool` and a `PreToolUse` hook for `Bash` (`bash_guard`).\n    Example: build_options(\"/proj\", \"/bin/cli\").max_turns -> 6\n    \"\"\"\n    return ClaudeAgentOptions(cli_path=cli_path, cwd=project_dir)\n\n\ndef _denied(content):\n    \"\"\"TODO 8 of 9 (unlocks e5 and e7): how many tool results in this list of blocks are errors?\n\n    Receives a list of content blocks. Returns how many are a `ToolResultBlock` with `is_error` true (a missing flag is not an error).\n    Example: [ToolResultBlock(\"t1\", \"no\", True), ToolResultBlock(\"t2\", \"ok\", False)] -> 1\n    \"\"\"\n    return 0\n\n\ndef _status(subtype):\n    \"\"\"TODO 9 of 9 (unlocks e5): the course status of a result subtype.\n\n    Receives a result subtype. Returns `STATUS[subtype]`, or the subtype itself when it is not in `STATUS`.\n    Example: _status(\"error_max_turns\") -> \"max_turns\", _status(\"something_new\") -> \"something_new\"\n    \"\"\"\n    return \"\"\n\n\ndef summarize(messages):\n    text, tools, denied, result = \"\", [], 0, None\n    for message in messages:\n        if isinstance(message, AssistantMessage):\n            for block in message.content:\n                if isinstance(block, TextBlock):\n                    text = block.text\n                elif isinstance(block, ToolUseBlock):\n                    tools.append(block.name)\n        elif isinstance(message, UserMessage) and isinstance(message.content, list):\n            denied += _denied(message.content)\n        elif isinstance(message, ResultMessage):\n            result = message\n    if result is None:\n        return {\"status\": \"incomplete\", \"text\": text, \"tools\": tools, \"turns\": 0, \"cost\": 0.0, \"denied\": denied}\n    return {\"status\": _status(result.subtype), \"text\": result.result or text, \"tools\": tools, \"turns\": result.num_turns,\n            \"cost\": result.total_cost_usd or 0.0, \"denied\": denied}\n\n\nasync def run_agent(prompt, project_dir, cli_path, mode=\"readonly\"):\n    messages = []\n    try:\n        async for message in query(prompt=prompt, options=build_options(project_dir, cli_path, mode)):\n            messages.append(message)\n    except Exception:\n        # After an error result (turn limit, budget) a single-shot query() yields the result and then raises, because the process exits with a\n        # nonzero code. That is not a failure of the run; a crash before any result message is, and is not hidden.\n        if not any(isinstance(m, ResultMessage) for m in messages):\n            raise\n    return summarize(messages)\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nimport asyncio\nimport json\nimport os\nimport shutil\nimport tempfile\nfrom pathlib import Path\n\nfrom agent import run_agent\n\n# The tests never call the model: they start harness/fake_claude.py, a scripted stand-in for the Claude Code binary.\nhere = Path(__file__).resolve()\nfake = next(str(p) for p in (Path(\"/w/harness/fake_claude.py\"), *(here.parents[i] / \"harness\" / \"fake_claude.py\" for i in range(min(len(here.parents), 8)))) if p.exists())\n\n# The script: the agent reads a file, runs the tests with Bash, then finishes.\nsteps = [\n    {\"tool\": {\"id\": \"t1\", \"name\": \"Read\", \"input\": {\"file_path\": \"a.txt\"}, \"output\": \"Read ok\"}},\n    {\"tool\": {\"id\": \"t2\", \"name\": \"Bash\", \"input\": {\"command\": \"pytest -q\"}, \"output\": \"Bash ok\"}},\n    {\"say\": \"All done.\"},\n    {\"result\": {\"subtype\": \"success\", \"result\": \"All done.\", \"cost\": 0.02, \"turns\": 3}},\n]\nproject = tempfile.mkdtemp()\n# The SDK starts the stand-in as a program, so it must be executable: use a copy marked so (the harness folder may be read-only).\nfake = shutil.copy(fake, Path(project, \"fake_claude.py\"))\nos.chmod(fake, 0o755)\nscript = Path(project, \"script.json\")\nscript.write_text(json.dumps({\"session_id\": \"s1\", \"turns\": [steps]}))\nos.environ[\"FAKE_CLAUDE_SCRIPT\"] = str(script)\nos.environ[\"FAKE_CLAUDE_RECORD\"] = str(Path(project, \"record.jsonl\"))\n\ntry:\n    summary = asyncio.run(run_agent(\"go\", project, fake, \"readonly\")) or {}\n    print(\"status:\", summary.get(\"status\"))\n    print(\"tools used:\", summary.get(\"tools\"))\n    print(\"turns and cost:\", summary.get(\"turns\"), summary.get(\"cost\"))\n    print(\"calls denied:\", summary.get(\"denied\"))\nexcept Exception as err:  # a gap that is not written yet may raise: show it instead of a traceback\n    print(\"raised:\", type(err).__name__, err)\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 4,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "4c9b07295d78921151ed65d720a2b379ed3e99d0513b56b404a8454beaffc70f",
+  "starting_code": "\"\"\"Code around the Claude Agent SDK: options, a permission callback, a hook and the message handling. See ../../statement.md.\"\"\"\nimport logging\nimport os\nimport re\n\nfrom claude_agent_sdk import (AssistantMessage, ClaudeAgentOptions, HookMatcher, PermissionResultAllow, PermissionResultDeny, ResultMessage,\n                              TextBlock, ToolResultBlock, ToolUseBlock, UserMessage, query)\n\nlog = logging.getLogger(__name__)\n\nREAD_TOOLS = [\"Read\", \"Grep\", \"Glob\"]\nEDIT_TOOLS = [\"Edit\", \"Write\"]\nSAFE_COMMANDS = (\"ls\", \"cat\", \"pytest\")\nSTATUS = {\"success\": \"done\", \"error_max_turns\": \"max_turns\", \"error_max_budget_usd\": \"budget\", \"error_during_execution\": \"failed\"}\n\n\ndef _resolve(project_dir, path):\n    return os.path.normpath(os.path.join(project_dir, path))\n\n\ndef _inside(project_dir, path):\n    full, root = _resolve(project_dir, path), os.path.normpath(project_dir)\n    return full == root or full.startswith(root + os.sep)\n\n\ndef _is_secret_name(base):\n    \"\"\"TODO 1 of 9 (unlocks e2): does this file name hold secrets?\n\n    Receives a file name (no folders). Returns True when it starts with `.env` unless it is `.env.example`.\n    Example: _is_secret_name(\".env.local\") -> True, _is_secret_name(\".env.example\") -> False\n    \"\"\"\n    return False\n\n\ndef _dangerous(command):\n    \"\"\"TODO 2 of 9 (unlocks e3): is this shell command dangerous enough to stop the run?\n\n    Receives a command. Returns True when it contains the word `sudo` (as a whole word) or the text `rm -rf`.\n    Example: _dangerous(\"pytest && sudo reboot\") -> True, _dangerous(\"ls\") -> False\n    \"\"\"\n    return False\n\n\ndef _chained(command):\n    \"\"\"TODO 3 of 9 (unlocks e3): does this command chain, pipe, redirect or substitute?\n\n    Receives a command. Returns True when it contains `;`, `&`, `|`, `<`, `>`, a backtick or `$(`.\n    Example: _chained(\"ls | wc\") -> True, _chained(\"ls -la\") -> False\n    \"\"\"\n    return False\n\n\ndef _command_allowed(command):\n    \"\"\"TODO 4 of 9 (unlocks e3): is the first word of the command one of SAFE_COMMANDS?\n\n    Receives a command. Returns True when its first word is in SAFE_COMMANDS; False for anything else, including an empty command.\n    Example: _command_allowed(\"  pytest -q\") -> True, _command_allowed(\"python x.py\") -> False\n    \"\"\"\n    return False\n\n\ndef decide(tool_name, tool_input, project_dir, mode=\"readonly\"):\n    \"\"\"The permission policy as plain data: {\"behavior\": \"allow\"} or {\"behavior\": \"deny\", \"message\", \"interrupt\"}.\"\"\"\n    log.debug(\"decide input: %r %r\", tool_name, tool_input)\n    def deny(message, interrupt=False):\n        return {\"behavior\": \"deny\", \"message\": message, \"interrupt\": interrupt}\n\n    if tool_name in READ_TOOLS + EDIT_TOOLS:\n        path = tool_input.get(\"file_path\") or tool_input.get(\"path\")\n        if tool_name in EDIT_TOOLS and mode != \"edit\":\n            return deny(\"Edits are not allowed in readonly mode\")\n        if path is not None:\n            if not _inside(project_dir, path):\n                return deny(f\"{path} is outside the project\")\n            base = os.path.basename(_resolve(project_dir, path))\n            if _is_secret_name(base):\n                return deny(f\"{base} holds secrets and is never read\")\n            if tool_name in EDIT_TOOLS and \".git\" in _resolve(project_dir, path).split(os.sep):\n                return deny(f\"{path} is inside .git\")\n        return {\"behavior\": \"allow\"}\n    if tool_name == \"Bash\":\n        command = tool_input.get(\"command\", \"\")\n        if _dangerous(command):\n            return deny(\"Dangerous command\", True)\n        if _chained(command):\n            return deny(\"Command not allowed: no chaining or redirection\")\n        if _command_allowed(command):\n            return {\"behavior\": \"allow\"}\n        return deny(\"Command not allowed: only ls, cat and pytest\")\n    return deny(f\"{tool_name} is not allowed\")\n\n\ndef make_can_use_tool(project_dir, mode=\"readonly\"):\n    \"\"\"TODO 5 of 9 (unlocks m1 and e7): the callback the SDK asks for a tool that is not already decided.\n\n    Receives the project directory and the mode. Returns an async function (tool_name, tool_input, context) that turns `decide()`\n    into `PermissionResultAllow(updated_input=tool_input)` or `PermissionResultDeny(message=..., interrupt=...)`.\n    Example: for {\"behavior\": \"deny\", \"message\": \"no\", \"interrupt\": False} it returns PermissionResultDeny(message=\"no\", interrupt=False)\n    \"\"\"\n    async def can_use_tool(tool_name, tool_input, context):\n        return PermissionResultDeny(message=\"not written yet\", interrupt=False)\n    return can_use_tool\n\n\ndef _is_push(command):\n    \"\"\"TODO 6 of 9 (unlocks e4): does this command run `git push`?\n\n    Receives a command. Returns True when it has the two words `git` and `push` with any white space between them, as whole words.\n    Example: _is_push(\"echo ok && git  push origin\") -> True, _is_push(\"git pushd\") -> False, _is_push(\"legit push\") -> False\n    \"\"\"\n    return False\n\n\nasync def bash_guard(input_data, tool_use_id, context):\n    \"\"\"A PreToolUse hook: nothing is pushed from an agent.\"\"\"\n    if _is_push((input_data.get(\"tool_input\") or {}).get(\"command\", \"\")):\n        return {\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"deny\", \"permissionDecisionReason\": \"Nothing is pushed from an agent\"}}\n    return {}\n\n\ndef build_options(project_dir, cli_path, mode=\"readonly\"):\n    \"\"\"TODO 7 of 9 (unlocks e1): the SDK options of the agent.\n\n    Receives the project directory, the CLI path and the mode. Returns ClaudeAgentOptions with the CLI path, `cwd` the project, `tools`\n    (the read tools, `Bash`, and the edit tools in `edit` mode), no `allowed_tools`, `Bash(rm *)` disallowed, 6 turns, a budget of 0.5,\n    permission mode `default`, no setting sources, the callback from `make_can_use_tool` and a `PreToolUse` hook for `Bash` (`bash_guard`).\n    Example: build_options(\"/proj\", \"/bin/cli\").max_turns -> 6\n    \"\"\"\n    return ClaudeAgentOptions(cli_path=cli_path, cwd=project_dir)\n\n\ndef _denied(content):\n    \"\"\"TODO 8 of 9 (unlocks e5 and e7): how many tool results in this list of blocks are errors?\n\n    Receives a list of content blocks. Returns how many are a `ToolResultBlock` with `is_error` true (a missing flag is not an error).\n    Example: [ToolResultBlock(\"t1\", \"no\", True), ToolResultBlock(\"t2\", \"ok\", False)] -> 1\n    \"\"\"\n    return 0\n\n\ndef _status(subtype):\n    \"\"\"TODO 9 of 9 (unlocks e5): the course status of a result subtype.\n\n    Receives a result subtype. Returns `STATUS[subtype]`, or the subtype itself when it is not in `STATUS`.\n    Example: _status(\"error_max_turns\") -> \"max_turns\", _status(\"something_new\") -> \"something_new\"\n    \"\"\"\n    return \"\"\n\n\ndef summarize(messages):\n    text, tools, denied, result = \"\", [], 0, None\n    for message in messages:\n        if isinstance(message, AssistantMessage):\n            for block in message.content:\n                if isinstance(block, TextBlock):\n                    text = block.text\n                elif isinstance(block, ToolUseBlock):\n                    tools.append(block.name)\n        elif isinstance(message, UserMessage) and isinstance(message.content, list):\n            denied += _denied(message.content)\n        elif isinstance(message, ResultMessage):\n            result = message\n    if result is None:\n        return {\"status\": \"incomplete\", \"text\": text, \"tools\": tools, \"turns\": 0, \"cost\": 0.0, \"denied\": denied}\n    return {\"status\": _status(result.subtype), \"text\": result.result or text, \"tools\": tools, \"turns\": result.num_turns,\n            \"cost\": result.total_cost_usd or 0.0, \"denied\": denied}\n\n\nasync def run_agent(prompt, project_dir, cli_path, mode=\"readonly\"):\n    messages = []\n    try:\n        async for message in query(prompt=prompt, options=build_options(project_dir, cli_path, mode)):\n            messages.append(message)\n    except Exception:\n        # After an error result (turn limit, budget) a single-shot query() yields the result and then raises, because the process exits with a\n        # nonzero code. That is not a failure of the run; a crash before any result message is, and is not hidden.\n        if not any(isinstance(m, ResultMessage) for m in messages):\n            raise\n    return summarize(messages)\n",
+  "exercise": {
+    "main_path": "practice/level-2/35-the-claude-agent-sdk/prose/unit-03/practice-1/agent.py",
+    "test_path": "practice/level-2/35-the-claude-agent-sdk/prose/unit-03/practice-1/test_agent.py",
+    "run_command": [
+      "python3",
+      "practice/level-2/35-the-claude-agent-sdk/prose/unit-03/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-2/35-the-claude-agent-sdk/prose/unit-03/practice-1/target/report.xml",
+      "practice/level-2/35-the-claude-agent-sdk/prose/unit-03/practice-1/test_agent.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_every_tool_call_goes_through_the_permission_callback_and_the_run_is_summarised",
+        "kind": "main",
+        "says": "Every tool call goes through the permission callback, and the run is summarised"
+      },
+      {
+        "id": "test_e1_the_options_reach_the_cli_as_flags_and_the_run_starts_in_the_project",
+        "kind": "edge",
+        "says": "The options reach the CLI as flags, and the run starts in the project"
+      },
+      {
+        "id": "test_e2_file_tools_stay_inside_the_project_and_away_from_secrets",
+        "kind": "edge",
+        "says": "File tools stay inside the project and away from secrets"
+      },
+      {
+        "id": "test_e3_bash_is_limited_to_a_few_commands_and_dangerous_ones_stop_the_run",
+        "kind": "edge",
+        "says": "Bash is limited to a few commands, and dangerous ones stop the run"
+      },
+      {
+        "id": "test_e4_a_hook_blocks_a_push_before_the_permission_callback_is_asked",
+        "kind": "edge",
+        "says": "A hook blocks a push before the permission callback is asked"
+      },
+      {
+        "id": "test_e5_the_messages_of_a_run_fold_into_a_summary",
+        "kind": "edge",
+        "says": "The messages of a run fold into a summary"
+      },
+      {
+        "id": "test_e6_an_error_result_still_gives_its_summary_and_a_crash_is_not_hidden",
+        "kind": "edge",
+        "says": "An error result still gives its summary, and a crash is not hidden"
+      },
+      {
+        "id": "test_e7_denied_calls_are_counted_and_the_run_still_ends_with_a_result",
+        "kind": "edge",
+        "says": "Denied calls are counted, and the run still ends with a result"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/35-the-claude-agent-sdk/prose/unit-03/practice-1/target/report.xml"
+    },
+    "origin": "course/35-the-claude-agent-sdk/03-driving-the-sdk-offline-and-the-practice.md",
+    "concepts": [
+      "the practice of Driving the Agent SDK offline, and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/35-the-claude-agent-sdk/prose/unit-03/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "the-claude-agent-sdk-u3"
+}

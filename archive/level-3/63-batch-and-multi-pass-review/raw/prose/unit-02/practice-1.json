@@ -1,0 +1,277 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "63-batch-and-multi-pass-review"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: a review pipeline that picks the right interface, resubmits only what failed and combines independent passes (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a review pipeline that picks the right interface, resubmits only what failed and combines independent passes"
+    },
+    {
+      "type": "para",
+      "text": "A team reviews pull requests and audits services with Claude. Its first design puts every job on the discounted batch queue, submits one batch a night while promising a 30-hour turnaround, resubmits the whole batch when a few entries fail, and reviews a large change in a single pass whose findings nobody can confirm. In this practice you write the pipeline's decisions: the submission interval that keeps a promise, the choice between the synchronous API and a batch, the plan for resubmitting failed entries by `custom_id`, the passes of a multi-file review, and the combination of the passes' findings into one list with a route for each finding. The model is not called: the tests give you results, sizes and findings. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`submission_interval`, `choose_api`, `resubmission_plan`, `review_plan`, `merge_passes`); TypeScript has the camel-case names (`submissionInterval`, `chooseApi`, ...); Java has the same camel-case names as static methods of `BatchReview`, with the records the starter defines (`Result`, `Step`, `Pass`, `Finding`, `Merged`); Kotlin has top-level functions and the same data classes. Python and TypeScript use tuples (arrays) and plain objects as the starters show."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working set of batch and review decisions with eight gaps cut out of it. Everything that is plumbing is written and correct: the result, plan and finding records, the loops over results, files and passes, the grouping of findings by file, line and issue, and the count of the passes that reported each. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript, Java and Kotlin names are the camel-case forms where a name is given):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "The submission interval (unlocks `m1`): the hours between submissions are the SLA minus the window of the batch (24 hours by default) minus the handling time (2 hours by default).",
+        "The SLA without room (unlocks `e1`): an interval of zero or less is refused with an error, because the SLA leaves no room to wait for a batch to fill.",
+        "The choice of API (unlocks `e2`): a blocking check or a job that needs a tool loop uses the `synchronous` API; any other job uses `batch`.",
+        "The items that succeeded (unlocks `e3`): an item that succeeded is not resubmitted; every other item is, by its custom id.",
+        "The oversized item (unlocks `e4`): an item larger than the limit is chunked (`chunk`), not resubmitted unchanged; a rejected request (`invalid_request`) is fixed first (`fix`); anything else is resubmitted.",
+        "The integration pass (unlocks `e5`): a review of more than one file gets, after the local pass of each file, one `integration` pass over all the files; a single file gets no integration pass.",
+        "The merged severity and confidence (unlocks `e6`): when passes report the same finding, the merged finding keeps the highest severity and the lowest confidence.",
+        "The route of a finding (unlocks `e7`): a finding is `accept`ed only when at least two independent passes reported it and its (lowest) confidence is 80 or more; every other finding goes to `verify`."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gap 1. About twelve lines in all. The steps below describe the whole set, so you can see how your gaps are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`submission_interval(sla_hours, window_hours=24, handling_hours=2)` returns the longest gap in hours between submissions that still keeps every item inside the SLA: the SLA minus the processing window minus the handling time. An SLA that leaves no positive gap is refused (an error).",
+        "`choose_api(blocking, needs_tool_loop=False)` returns `\"synchronous\"` for a blocking workload or one that needs a tool loop (a batch cannot run a tool and continue), and `\"batch\"` otherwise.",
+        "`resubmission_plan(results, sizes, limit)` takes `(custom_id, kind)` results, where `kind` is `succeeded`, `expired`, `canceled`, `server_error` or `invalid_request`, a map of each `custom_id` to the size of its document in tokens, and a size limit. It returns `(custom_id, action)` pairs, in the order of the results, for the entries that did not succeed: `chunk` when the entry is over the limit, otherwise `fix` for an `invalid_request` and `resubmit` for the other kinds. Succeeded entries do not appear.",
+        "`review_plan(files)` returns the passes of a review as `{name, files}`: one local pass per file named `local:<file>`, in order, and, when there is more than one file, a last pass named `integration` that holds all the files.",
+        "`merge_passes(passes)` takes the findings of each independent pass (each finding has `file`, `line`, `severity` of `low`, `medium` or `high`, `issue` and `confidence`, a whole number from 0 to 100) and returns one entry per distinct `(file, line, issue)` in the order first seen: the highest severity reported, the lowest confidence reported, `passes` as the number of distinct passes that reported it, and `route`: `accept` when at least two passes reported it and the confidence is 80 or more, otherwise `verify` (an independent verification, not a human review)."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**The interval.** A promise is the interval plus the window plus the handling. *You should see* 4 hours for a 30-hour promise, and an error for a promise of 26.",
+        "**The interface.** A check that blocks a merge, or work that needs tools mid-request, cannot wait for a window. *You should see* `synchronous` for both and `batch` for the rest.",
+        "**Resubmit only what failed.** Succeeded entries are paid for already. *You should see* only the failed ids, with an oversized entry chunked and a rejected request fixed before it is sent again.",
+        "**Local passes plus an integration pass.** A single pass over many files dilutes attention and contradicts itself. *You should see* one local pass per file and one integration pass.",
+        "**Combining independent passes.** The same finding from two passes is one finding, and agreement of independent passes, not one pass's own confidence, earns acceptance. *You should see* a single high-confidence finding routed to `verify`, and a finding repeated inside one pass counted once."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "The interval leaves room for the window and the handling"
+        ],
+        [
+          "`e1`",
+          "An SLA with no room for a batch is refused"
+        ],
+        [
+          "`e2`",
+          "A blocking check or a tool loop needs the synchronous API"
+        ],
+        [
+          "`e3`",
+          "Only the entries that did not succeed are resubmitted, by `custom_id`"
+        ],
+        [
+          "`e4`",
+          "An entry over the limit is chunked and a rejected request is fixed first"
+        ],
+        [
+          "`e5`",
+          "A multi-file review gets a local pass per file and one integration pass"
+        ],
+        [
+          "`e6`",
+          "The same finding from two passes is one finding with the highest severity and the lowest confidence"
+        ],
+        [
+          "`e7`",
+          "A finding is accepted only when two independent passes agree with confidence"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Batch and multi-pass review decisions: when a batch fits, what to resubmit, how a review is split into passes, and how the passes are combined. See ../../statement.md.\"\"\"\n\nimport logging\n\nlog = logging.getLogger(__name__)\n\nSEVERITIES = (\"low\", \"medium\", \"high\")\n\n\ndef submission_interval(sla_hours, window_hours=24, handling_hours=2):\n    log.debug(\"submission_interval input: %r\", sla_hours)\n    interval = sla_hours - window_hours - handling_hours\n    if interval <= 0:\n        raise ValueError(\"the SLA leaves no room to wait for a batch to fill\")\n    return interval\n\n\ndef choose_api(blocking, needs_tool_loop=False):\n    return \"synchronous\" if blocking or needs_tool_loop else \"batch\"\n\n\ndef resubmission_plan(results, sizes, limit):\n    plan = []\n    for custom_id, kind in results:\n        if kind == \"succeeded\":\n            continue\n        if sizes.get(custom_id, 0) > limit:\n            action = \"chunk\"\n        elif kind == \"invalid_request\":\n            action = \"fix\"\n        else:\n            action = \"resubmit\"\n        plan.append((custom_id, action))\n    return plan\n\n\ndef review_plan(files):\n    passes = [{\"name\": f\"local:{f}\", \"files\": [f]} for f in files]\n    if len(files) > 1:\n        passes.append({\"name\": \"integration\", \"files\": list(files)})\n    return passes\n\n\ndef merge_passes(passes):\n    merged = {}\n    for number, findings in enumerate(passes):\n        for f in findings:\n            key = (f[\"file\"], f[\"line\"], f[\"issue\"])\n            m = merged.get(key)\n            if m is None:\n                m = merged[key] = {\"file\": f[\"file\"], \"line\": f[\"line\"], \"issue\": f[\"issue\"], \"severity\": f[\"severity\"], \"passes\": set(), \"confidence\": f[\"confidence\"]}\n            if SEVERITIES.index(f[\"severity\"]) > SEVERITIES.index(m[\"severity\"]):\n                m[\"severity\"] = f[\"severity\"]\n            m[\"confidence\"] = min(m[\"confidence\"], f[\"confidence\"])\n            m[\"passes\"].add(number)\n    out = []\n    for m in merged.values():\n        count = len(m[\"passes\"])\n        out.append({**m, \"passes\": count, \"route\": \"accept\" if count >= 2 and m[\"confidence\"] >= 80 else \"verify\"})\n    return out\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom batch_review import choose_api, resubmission_plan, review_plan, submission_interval\n\n# How often to submit a batch so a 30-hour SLA still leaves room for the 24-hour window and 2 hours of handling.\nprint(\"interval for a 30 h SLA:\", submission_interval(30))\nprint(\"API for a blocking check:\", choose_api(True))\nprint(\"API for a nightly report:\", choose_api(False))\n\n# What to do with the results of a batch: (custom id, result kind) pairs and the size of each request.\nresults = [(\"a1\", \"succeeded\"), (\"big\", \"expired\"), (\"bad\", \"invalid_request\"), (\"late\", \"errored\")]\nprint(\"resubmission plan:\", resubmission_plan(results, {\"big\": 2000, \"bad\": 10, \"late\": 10}, 1000))\nprint(\"review passes:\", review_plan([\"a.py\", \"b.py\", \"c.py\"]))\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Batch and multi-pass review decisions: when a batch fits, what to resubmit, how a review is split into passes, and how the passes are combined. See ../../statement.md.\"\"\"\n\nimport logging\n\nlog = logging.getLogger(__name__)\n\nSEVERITIES = (\"low\", \"medium\", \"high\")\n\n\ndef submission_interval(sla_hours, window_hours=24, handling_hours=2):\n    log.debug(\"submission_interval input: %r\", sla_hours)\n    # TODO 1 of 8 (finish this to pass m1): the interval. Receives the SLA, the window and the handling time, all in\n    #   hours. Return the SLA minus the window minus the handling time. Example: an SLA of 30 hours, defaults -> 4.\n    interval = sla_hours\n    # TODO 2 of 8 (finish this to pass e1): the refusal. When the interval is zero or negative, refuse with an error\n    #   that says the SLA leaves no room to wait for a batch to fill. Example: an SLA of 26 hours, defaults -> refused.\n    return interval\n\n\ndef choose_api(blocking, needs_tool_loop=False):\n    # TODO 3 of 8 (finish this to pass e2): the API. Receives whether something is blocked on the result and whether the\n    #   job needs a tool loop. Return synchronous when either is true, otherwise batch. Example: blocking false, tool loop\n    #   true -> synchronous.\n    return \"batch\"\n\n\ndef resubmission_plan(results, sizes, limit):\n    plan = []\n    for custom_id, kind in results:\n        # TODO 4 of 8 (finish this to pass e3): the items to resubmit. Skip a result whose kind is succeeded; every\n        #   other result is planned by its custom id. Example: results [(a, succeeded), (b, errored)] -> a plan for b\n        #   only.\n        # TODO 5 of 8 (finish this to pass e4): the action for one item. When the item's size is above the limit, the\n        #   action is chunk; otherwise fix when its kind is invalid_request; otherwise resubmit. An entry exactly at the\n        #   limit is not chunked. Example: size 101, limit 100 -> chunk.\n        if kind == \"invalid_request\":\n            action = \"fix\"\n        else:\n            action = \"resubmit\"\n        plan.append((custom_id, action))\n    return plan\n\n\ndef review_plan(files):\n    passes = [{\"name\": f\"local:{f}\", \"files\": [f]} for f in files]\n    # TODO 6 of 8 (finish this to pass e5): the integration pass. After the local passes, when there is more than one\n    #   file add one pass named integration over all the files. Example: two files -> local, local, integration; one file\n    #   -> local only.\n    return passes\n\n\ndef merge_passes(passes):\n    merged = {}\n    for number, findings in enumerate(passes):\n        for f in findings:\n            key = (f[\"file\"], f[\"line\"], f[\"issue\"])\n            m = merged.get(key)\n            if m is None:\n                m = merged[key] = {\"file\": f[\"file\"], \"line\": f[\"line\"], \"issue\": f[\"issue\"], \"severity\": f[\"severity\"], \"passes\": set(), \"confidence\": f[\"confidence\"]}\n            # TODO 7 of 8 (finish this to pass e6): the merge of one finding seen again. When the same finding (file,\n            #   line, issue) is reported by another pass, keep the higher of the two severities (low, medium, high) and\n            #   the lower of the two confidences. Example: medium at 90 and high at 70 -> high at 70.\n            m[\"passes\"].add(number)\n    out = []\n    for m in merged.values():\n        count = len(m[\"passes\"])\n        # TODO 8 of 8 (finish this to pass e7): the route of a merged finding. Receives the number of passes that\n        #   reported it and its confidence. Return accept when at least 2 passes reported it and the confidence is at\n        #   least 80, otherwise verify. Example: 2 passes, confidence 79 -> verify.\n        out.append({**m, \"passes\": count, \"route\": \"verify\"})\n    return out\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom batch_review import choose_api, resubmission_plan, review_plan, submission_interval\n\n# How often to submit a batch so a 30-hour SLA still leaves room for the 24-hour window and 2 hours of handling.\nprint(\"interval for a 30 h SLA:\", submission_interval(30))\nprint(\"API for a blocking check:\", choose_api(True))\nprint(\"API for a nightly report:\", choose_api(False))\n\n# What to do with the results of a batch: (custom id, result kind) pairs and the size of each request.\nresults = [(\"a1\", \"succeeded\"), (\"big\", \"expired\"), (\"bad\", \"invalid_request\"), (\"late\", \"errored\")]\nprint(\"resubmission plan:\", resubmission_plan(results, {\"big\": 2000, \"bad\": 10, \"late\": 10}, 1000))\nprint(\"review passes:\", review_plan([\"a.py\", \"b.py\", \"c.py\"]))\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "5f5fc0fb7f5ea344a0ff3336a543d0c8cf2e3e34d2326a30f3265dc747071a19",
+  "starting_code": "\"\"\"Batch and multi-pass review decisions: when a batch fits, what to resubmit, how a review is split into passes, and how the passes are combined. See ../../statement.md.\"\"\"\n\nimport logging\n\nlog = logging.getLogger(__name__)\n\nSEVERITIES = (\"low\", \"medium\", \"high\")\n\n\ndef submission_interval(sla_hours, window_hours=24, handling_hours=2):\n    log.debug(\"submission_interval input: %r\", sla_hours)\n    # TODO 1 of 8 (finish this to pass m1): the interval. Receives the SLA, the window and the handling time, all in\n    #   hours. Return the SLA minus the window minus the handling time. Example: an SLA of 30 hours, defaults -> 4.\n    interval = sla_hours\n    # TODO 2 of 8 (finish this to pass e1): the refusal. When the interval is zero or negative, refuse with an error\n    #   that says the SLA leaves no room to wait for a batch to fill. Example: an SLA of 26 hours, defaults -> refused.\n    return interval\n\n\ndef choose_api(blocking, needs_tool_loop=False):\n    # TODO 3 of 8 (finish this to pass e2): the API. Receives whether something is blocked on the result and whether the\n    #   job needs a tool loop. Return synchronous when either is true, otherwise batch. Example: blocking false, tool loop\n    #   true -> synchronous.\n    return \"batch\"\n\n\ndef resubmission_plan(results, sizes, limit):\n    plan = []\n    for custom_id, kind in results:\n        # TODO 4 of 8 (finish this to pass e3): the items to resubmit. Skip a result whose kind is succeeded; every\n        #   other result is planned by its custom id. Example: results [(a, succeeded), (b, errored)] -> a plan for b\n        #   only.\n        # TODO 5 of 8 (finish this to pass e4): the action for one item. When the item's size is above the limit, the\n        #   action is chunk; otherwise fix when its kind is invalid_request; otherwise resubmit. An entry exactly at the\n        #   limit is not chunked. Example: size 101, limit 100 -> chunk.\n        if kind == \"invalid_request\":\n            action = \"fix\"\n        else:\n            action = \"resubmit\"\n        plan.append((custom_id, action))\n    return plan\n\n\ndef review_plan(files):\n    passes = [{\"name\": f\"local:{f}\", \"files\": [f]} for f in files]\n    # TODO 6 of 8 (finish this to pass e5): the integration pass. After the local passes, when there is more than one\n    #   file add one pass named integration over all the files. Example: two files -> local, local, integration; one file\n    #   -> local only.\n    return passes\n\n\ndef merge_passes(passes):\n    merged = {}\n    for number, findings in enumerate(passes):\n        for f in findings:\n            key = (f[\"file\"], f[\"line\"], f[\"issue\"])\n            m = merged.get(key)\n            if m is None:\n                m = merged[key] = {\"file\": f[\"file\"], \"line\": f[\"line\"], \"issue\": f[\"issue\"], \"severity\": f[\"severity\"], \"passes\": set(), \"confidence\": f[\"confidence\"]}\n            # TODO 7 of 8 (finish this to pass e6): the merge of one finding seen again. When the same finding (file,\n            #   line, issue) is reported by another pass, keep the higher of the two severities (low, medium, high) and\n            #   the lower of the two confidences. Example: medium at 90 and high at 70 -> high at 70.\n            m[\"passes\"].add(number)\n    out = []\n    for m in merged.values():\n        count = len(m[\"passes\"])\n        # TODO 8 of 8 (finish this to pass e7): the route of a merged finding. Receives the number of passes that\n        #   reported it and its confidence. Return accept when at least 2 passes reported it and the confidence is at\n        #   least 80, otherwise verify. Example: 2 passes, confidence 79 -> verify.\n        out.append({**m, \"passes\": count, \"route\": \"verify\"})\n    return out\n",
+  "exercise": {
+    "main_path": "practice/level-3/63-batch-and-multi-pass-review/prose/unit-02/practice-1/batch_review.py",
+    "test_path": "practice/level-3/63-batch-and-multi-pass-review/prose/unit-02/practice-1/test_batch_review.py",
+    "run_command": [
+      "python3",
+      "practice/level-3/63-batch-and-multi-pass-review/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-3/63-batch-and-multi-pass-review/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-3/63-batch-and-multi-pass-review/prose/unit-02/practice-1/test_batch_review.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_the_interval_between_submissions_leaves_room_for_the_window_and_the_handling",
+        "kind": "main",
+        "says": "The interval leaves room for the window and the handling"
+      },
+      {
+        "id": "test_e1_an_sla_without_room_for_a_batch_is_refused",
+        "kind": "edge",
+        "says": "An SLA with no room for a batch is refused"
+      },
+      {
+        "id": "test_e2_a_blocking_check_or_a_tool_loop_needs_the_synchronous_api",
+        "kind": "edge",
+        "says": "A blocking check or a tool loop needs the synchronous API"
+      },
+      {
+        "id": "test_e3_only_the_items_that_did_not_succeed_are_resubmitted_by_custom_id",
+        "kind": "edge",
+        "says": "Only the entries that did not succeed are resubmitted, by custom_id"
+      },
+      {
+        "id": "test_e4_an_item_over_the_limit_is_chunked_and_a_rejected_request_is_fixed_first",
+        "kind": "edge",
+        "says": "An entry over the limit is chunked and a rejected request is fixed first"
+      },
+      {
+        "id": "test_e5_a_multi_file_review_gets_a_local_pass_per_file_and_one_integration_pass",
+        "kind": "edge",
+        "says": "A multi-file review gets a local pass per file and one integration pass"
+      },
+      {
+        "id": "test_e6_the_same_finding_from_two_passes_is_one_finding_with_the_highest_severity_and_the_lowest_confidence",
+        "kind": "edge",
+        "says": "The same finding from two passes is one finding with the highest severity and the lowest confidence"
+      },
+      {
+        "id": "test_e7_a_finding_is_accepted_only_when_two_independent_passes_agree_with_confidence",
+        "kind": "edge",
+        "says": "A finding is accepted only when two independent passes agree with confidence"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/63-batch-and-multi-pass-review/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/63-batch-and-multi-pass-review/02-independent-passes-combined-verdicts-and-the-practice.md",
+    "concepts": [
+      "the practice of Independent passes, combined verdicts and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/63-batch-and-multi-pass-review/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "batch-and-multi-pass-review-u2"
+}

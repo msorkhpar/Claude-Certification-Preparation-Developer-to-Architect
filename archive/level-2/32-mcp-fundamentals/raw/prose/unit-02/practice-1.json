@@ -1,0 +1,156 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "32-mcp-fundamentals"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Writing an MCP server: tools, resources, prompts and the stdout rule",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A stdio server prints a debug line with the language's ordinary print function, and the client then fails to parse the stream. Why?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The client reads standard error as well, and treats any text there as fatal",
+            "correct": false,
+            "says": "Ruled out because the client \"SHOULD NOT assume stderr output indicates error conditions\"."
+          },
+          {
+            "id": "b",
+            "text": "Standard output carries only protocol messages, so stray text corrupts it",
+            "correct": true,
+            "says": "The page says \"The server MUST NOT write anything to its stdout that is not a valid MCP message.\""
+          },
+          {
+            "id": "c",
+            "text": "The SDK forbids logging libraries, so every debug line is rejected",
+            "correct": false,
+            "says": "Ruled out because the guide says to use a logger that writes to stderr: \"Never write to stdout. Writing to stdout will corrupt the JSON-RPC messages and break your server.\""
+          },
+          {
+            "id": "d",
+            "text": "Printed lines are queued and delivered after the tool call has ended",
+            "correct": false,
+            "says": "Ruled out because the stream carries one message per line and \"The server MUST NOT write anything to its stdout that is not a valid MCP message\", with no queue of printed lines."
+          }
+        ],
+        "origin": {
+          "path": "course/32-mcp-fundamentals/02-writing-a-server.md",
+          "section": "The stdout rule"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A search tool receives a date range in the wrong format, and the server wants the model to try again with a fix. How should the failure be reported?",
+        "options": [
+          {
+            "id": "a",
+            "text": "As a JSON-RPC error response, which is passed to the model for retries",
+            "correct": false,
+            "says": "Ruled out because \"Clients MAY provide protocol errors to language models, though these are less likely to result in successful recovery.\""
+          },
+          {
+            "id": "b",
+            "text": "As a protocol error that says the request itself is malformed",
+            "correct": false,
+            "says": "Ruled out because a wrong format is an \"Input validation errors (e.g., date in wrong format, value out of range)\", which is a tool execution error and not a malformed request."
+          },
+          {
+            "id": "c",
+            "text": "By returning empty text, which signals the model to ask the user",
+            "correct": false,
+            "says": "Ruled out because \"Clients SHOULD provide tool execution errors to language models to enable self-correction\", which needs text that says what to change."
+          },
+          {
+            "id": "d",
+            "text": "As an ordinary result flagged as an error, with a readable explanation",
+            "correct": true,
+            "says": "The page says tool execution errors \"contain actionable feedback that language models can use to self-correct and retry with adjusted parameters\", and lists \"Input validation errors (e.g., date in wrong format, value out of range)\" among them."
+          }
+        ],
+        "origin": {
+          "path": "course/32-mcp-fundamentals/02-writing-a-server.md",
+          "section": "Two kinds of failure"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A tool's annotations say that it only reads data, and a client skips the confirmation prompt because of them. What does the specification say about relying on them?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Follow them as binding unless the tool is marked destructive",
+            "correct": false,
+            "says": "Ruled out because annotations help a client \"decide whether to ask a person\", \"not because they enforce anything\", so no marking makes them binding."
+          },
+          {
+            "id": "b",
+            "text": "Treat them as untrusted unless the server is trusted",
+            "correct": true,
+            "says": "The page quotes the specification: \"clients MUST consider tool annotations to be untrusted unless they come from trusted servers.\""
+          },
+          {
+            "id": "c",
+            "text": "Follow them unless the first call ends with an error",
+            "correct": false,
+            "says": "Ruled out because trust depends on where the server comes from, \"unless they come from trusted servers\", and not on how a first call went."
+          },
+          {
+            "id": "d",
+            "text": "Let the SDK verify them unless the server runs locally",
+            "correct": false,
+            "says": "Ruled out because annotations are only \"Optional properties describing tool behavior\", and nothing on the page says the SDK checks them, locally or not."
+          }
+        ],
+        "origin": {
+          "path": "course/32-mcp-fundamentals/02-writing-a-server.md",
+          "section": "Annotations are hints, not guarantees"
+        }
+      }
+    ],
+    "concepts": [
+      "Annotations are hints, not guarantees, as the page teaches it",
+      "The stdout rule, as the page teaches it",
+      "Two kinds of failure, as the page teaches it"
+    ]
+  }
+}

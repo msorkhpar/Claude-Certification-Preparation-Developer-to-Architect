@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "synthesis.ts",
+      "old": "results.filter((r) => r.status === \"ok\" && r.findings.length > 0).map((r) => r.scope)",
+      "new": "results.filter((r) => (r.status === \"ok\" && r.findings.length > 0) || (r.error?.partial.length ?? 0) > 0).map((r) => r.scope)"
+    }
+  ]
+}

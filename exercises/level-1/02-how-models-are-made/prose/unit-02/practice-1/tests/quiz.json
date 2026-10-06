@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-1",
+    "02-how-models-are-made"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Check yourself: Fine-tuning, feedback training and what training gives",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A stakeholder asks why a deployed assistant answers a question with an answer, when the raw model it started from tends to continue the question with more questions. Which part of how models are made does most to explain the gap?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Pretraining on a far larger corpus than the raw model saw",
+            "correct": false,
+            "says": "Ruled out because the stage list says of pretraining that \"The result is capable and unruly\", and a bigger corpus does not change that."
+          },
+          {
+            "id": "b",
+            "text": "A later round of tuning on curated examples and replies ranked by people",
+            "correct": true,
+            "says": "Fine-tuning and feedback training are the stages that turn a text continuer into an assistant (the stages section)."
+          },
+          {
+            "id": "c",
+            "text": "A separate look-up store of answers that the assistant consults",
+            "correct": false,
+            "says": "Ruled out because \"There is no third place such as a notebook it consults\": everything the model uses is in the window or in the weights."
+          },
+          {
+            "id": "d",
+            "text": "A larger attention mechanism that lets the model reread the whole question",
+            "correct": false,
+            "says": "Ruled out because in attention \"every position in the context can look at every earlier position\", in the raw model as much as in the assistant."
+          }
+        ],
+        "origin": {
+          "path": "course/02-how-models-are-made/02-fine-tuning-feedback-and-what-training-gives.md",
+          "section": "The stages, in order"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A company wants Claude to answer from its product manual, which is revised every month, through the Claude API. An engineer proposes fine-tuning on each new version. What is the best response?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Rely on what the model absorbed in training from earlier editions",
+            "correct": false,
+            "says": "Ruled out because the table lists \"Knowledge of anything after the cut-off\" among the things training does not give, and \"the standard route is to put the knowledge in the context\"."
+          },
+          {
+            "id": "b",
+            "text": "Retrain the weights each month through a fine-tuning request to the API",
+            "correct": false,
+            "says": "Ruled out because \"the Claude API does not currently offer fine-tuning\", so the monthly request cannot be made through this route."
+          },
+          {
+            "id": "c",
+            "text": "Paste corrections into the chat and rely on the model to recall them later",
+            "correct": false,
+            "says": "Ruled out because the table lists \"Memory of your previous conversations\" among the things training does not give, so pasted corrections are not recalled."
+          },
+          {
+            "id": "d",
+            "text": "Send the current edition with each call, as the standard route",
+            "correct": true,
+            "says": "Knowledge that changes monthly belongs in the context, and the glossary says the Claude API does not currently offer fine-tuning (the second trap and the table)."
+          }
+        ],
+        "origin": {
+          "path": "course/02-how-models-are-made/02-fine-tuning-feedback-and-what-training-gives.md",
+          "section": "What training gives, and what it does not"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,152 @@
+name: "${COURSE_PROJECT:-claude-certification-preparation}"
+services:
+  runner-prime:
+    build:
+      context: .studyforge/images/toolchain
+      dockerfile: docker/prime/Dockerfile
+      target: runner-prime
+      args:
+        BASE_IMAGE: "${STUDYFORGE_NAMESPACE:?STUDYFORGE_NAMESPACE is not set. It is the Docker Hub account the course images are published under: set it in .env (copy course.env) to the account you were given}/studyforge-code-toolchain-runner-claude-sdks:gradle-java-kotlin-node-python-amd64-2ed9b7f2bc32@sha256:4e2a85fa559149b4e1f4c35f96733292f155d8a74977addbde9013ea14047a54"
+        PRIME_GRADLE_HOME: /opt/prime/gradle-home
+        PRIME_KEY: 34bcdec4051634a2f557878cf13a6d587f2b289dd241578d8c16852ce9b98778
+        PRIME_MAVEN_ARGS: ""
+        WITH_GRADLE_PRIME: "yes"
+        WITH_MAVEN_PRIME: "no"
+      additional_contexts:
+        consumer-prime: .studyforge/execution/prime
+    scale: 0
+  site:
+    build:
+      context: .
+      dockerfile: .studyforge/images/site/Dockerfile
+      target: "${COURSE_NARRATION:-without-narration}"
+      args:
+        STUDYFORGE_NAMESPACE: "${STUDYFORGE_NAMESPACE:?STUDYFORGE_NAMESPACE is not set. It is the Docker Hub account the course images are published under: set it in .env (copy course.env) to the account you were given}"
+    image: "${STUDYFORGE_NAMESPACE:?STUDYFORGE_NAMESPACE is not set. It is the Docker Hub account the course images are published under: set it in .env (copy course.env) to the account you were given}/claude-certification-preparation-site:7a073f34537b-8d167e01611f-${COURSE_NARRATION:-without-narration}"
+    user: "1000:1000"
+    command:
+      - serve
+      - /corpus
+      - --published
+      - --port
+      - "${COURSE_SITE_PORT:-8765}"
+    ports:
+      - "127.0.0.1:${COURSE_SITE_PORT:-8765}:${COURSE_SITE_PORT:-8765}"
+    environment:
+      STUDYFORGE_EDITOR_ORIGIN: "http://127.0.0.1:${COURSE_EDITOR_PORT:-8443}"
+      STUDYFORGE_EDITOR_BINDS: course=/home/coder/repo/sources;practice=/home/coder/repo/practice;.studyforge/execution/code=/home/coder/repo/code
+      STUDYFORGE_EDITOR_HEALTH: "http://editor:8080/healthz"
+      STUDYFORGE_RUN_SERVICE: runner
+      PYTHONDONTWRITEBYTECODE: 1
+    healthcheck:
+      test:
+        - CMD
+        - python3
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:${COURSE_SITE_PORT:-8765}/', timeout=2)"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+      start_interval: 1s
+    volumes:
+      - "sources:/corpus/course"
+      - "practice:/corpus/practice"
+      - "code:/corpus/.studyforge/execution/code"
+      - "allowed:/corpus/.studyforge/execution/allowed"
+      - "progress:/corpus/.studyforge/progress"
+    networks:
+      - default
+      - runs
+    restart: "no"
+  runner:
+    build:
+      context: .
+      dockerfile: .studyforge/images/runner/Dockerfile
+      args:
+        RUNNER_PRIMED: course-runner-prime
+      additional_contexts:
+        course-runner-prime: "service:runner-prime"
+    image: "${STUDYFORGE_NAMESPACE:?STUDYFORGE_NAMESPACE is not set. It is the Docker Hub account the course images are published under: set it in .env (copy course.env) to the account you were given}/claude-certification-preparation-runner:7a073f34537b-4e2a85fa5591"
+    user: "1000:1000"
+    init: true
+    volumes:
+      - "sources:/work/course"
+      - "practice:/work/practice"
+      - "code:/work/.studyforge/execution/code"
+      - "allowed:/work/.studyforge/execution/allowed:ro"
+    labels:
+      org.studyforge.binds: =/work
+    networks:
+      - runs
+    depends_on:
+      site:
+        condition: service_healthy
+    restart: "no"
+  editor:
+    build:
+      context: .studyforge/images/toolchain
+      dockerfile: docker/prime/Dockerfile
+      target: editor-prime
+      args:
+        BASE_IMAGE: "${STUDYFORGE_NAMESPACE:?STUDYFORGE_NAMESPACE is not set. It is the Docker Hub account the course images are published under: set it in .env (copy course.env) to the account you were given}/studyforge-code-toolchain-editor-claude-sdks:gradle-java-kotlin-node-python-amd64-4e1eae568548@sha256:faf3181cdd1d4c27468497582869f9bc8afb9d1cb345787f9603b7093a0c32dd"
+        PRIME_GRADLE_HOME: /opt/prime/gradle-home
+        PRIME_KEY: 34bcdec4051634a2f557878cf13a6d587f2b289dd241578d8c16852ce9b98778
+        PRIME_MAVEN_ARGS: ""
+        WITH_GRADLE_PRIME: "yes"
+        WITH_MAVEN_PRIME: "no"
+      additional_contexts:
+        consumer-prime: .studyforge/execution/prime
+    image: "${STUDYFORGE_NAMESPACE:?STUDYFORGE_NAMESPACE is not set. It is the Docker Hub account the course images are published under: set it in .env (copy course.env) to the account you were given}/claude-certification-preparation-editor:7a073f34537b-faf3181cdd1d"
+    labels:
+      org.studyforge.binds: course=/home/coder/repo/sources;practice=/home/coder/repo/practice;.studyforge/execution/code=/home/coder/repo/code
+    user: "1000:1000"
+    read_only: false
+    ports:
+      - "127.0.0.1:${COURSE_EDITOR_PORT:-8443}:8080"
+    environment:
+      GRADLE_USER_HOME: /home/coder/.gradle
+    command:
+      - --auth=none
+      - "--bind-addr=0.0.0.0:8080"
+      - --extensions-dir=/opt/code-server/extensions
+      - --disable-workspace-trust
+      - --disable-telemetry
+      - --disable-update-check
+      - /home/coder/repo
+    tmpfs:
+      - /home/coder/repo
+    volumes:
+      - "sources:/home/coder/repo/sources"
+      - "editor-config:/home/coder/.config"
+      - "editor-data:/home/coder/.local"
+      - "gradle-home:/home/coder/.gradle"
+      - "practice:/home/coder/repo/practice"
+      - "code:/home/coder/repo/code"
+    healthcheck:
+      test:
+        - CMD
+        - /usr/lib/code-server/lib/node
+        - -e
+        - "fetch('http://127.0.0.1:8080/healthz').then(r => process.exit(r.status === 200 ? 0 : 1), () => process.exit(1))"
+      interval: 60s
+      timeout: 5s
+      start_period: 30s
+      start_interval: 1s
+      retries: 3
+    restart: "no"
+    depends_on:
+      site:
+        condition: service_healthy
+networks:
+  runs:
+    internal: true
+volumes:
+  allowed: {}
+  code: {}
+  editor-config: {}
+  editor-data: {}
+  gradle-home: {}
+  practice: {}
+  progress: {}
+  sources: {}

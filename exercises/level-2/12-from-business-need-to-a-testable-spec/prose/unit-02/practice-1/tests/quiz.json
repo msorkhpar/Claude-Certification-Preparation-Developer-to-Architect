@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "12-from-business-need-to-a-testable-spec"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Check yourself: Latency, throughput, region and cost budgets, and the architecture that fits",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A feature must label two million archived tickets overnight, and nobody reads the labels until morning. The team proposes a pool of workers that call the API one ticket at a time all night. Which change fits the requirement best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Stream every reply from the workers so that the first words of each label arrive sooner",
+            "correct": false,
+            "says": "Ruled out because streaming \"does not shorten the total time\", and no reader is watching the words arrive."
+          },
+          {
+            "id": "b",
+            "text": "Hand the whole job to the batch interface, which halves the price and runs unattended",
+            "correct": true,
+            "says": "Nobody is waiting and volume is large, which the page assigns to a batch: \"most batches finishing in less than 1 hour while reducing costs by 50%\"."
+          },
+          {
+            "id": "c",
+            "text": "Move the workers to the fastest tier so that the overnight window is certain to be enough",
+            "correct": false,
+            "says": "Ruled out because a faster tier is correct only \"if your evaluation set (page 1) says its quality holds\", and it does not change the cost."
+          },
+          {
+            "id": "d",
+            "text": "Chain a second call after each label that checks the label before the result is stored",
+            "correct": false,
+            "says": "Ruled out because \"chaining calls multiplies latency\" and also cost, and the requirement gives no reason for a second call."
+          }
+        ],
+        "origin": {
+          "path": "course/12-from-business-need-to-a-testable-spec/02-budgets-and-matching-an-architecture.md",
+          "section": "Cost: tokens, tier and batches"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A requirement says customer data may only be processed in the United States. A developer plans to use `claude-haiku-4-5-20251001` and set `inference_geo` to `\"us\"` on every request. What does the page predict?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The calls succeed and are billed at 1.1 times the standard rate for inference kept in the US",
+            "correct": false,
+            "says": "Ruled out because the 1.1 times price belongs to models where the setting is \"supported on Claude 4.6 and later\", which excludes this one."
+          },
+          {
+            "id": "b",
+            "text": "The calls succeed and run in any region, because the unsupported setting is quietly dropped",
+            "correct": false,
+            "says": "Ruled out because the documentation says such requests \"return a 400 error\", so the setting is rejected and not dropped."
+          },
+          {
+            "id": "c",
+            "text": "The calls fail with a 429 error, because the capacity inside the US for that model is limited",
+            "correct": false,
+            "says": "Ruled out because \"Rate limits are shared across all geos\", so the setting opens no separate US pool whose capacity could run out."
+          },
+          {
+            "id": "d",
+            "text": "The calls fail with a 400 error, because the setting is not supported on that model",
+            "correct": true,
+            "says": "The page says a request that sets the geography on Claude Haiku 4.5 or an earlier model \"return a 400 error\"."
+          }
+        ],
+        "origin": {
+          "path": "course/12-from-business-need-to-a-testable-spec/02-budgets-and-matching-an-architecture.md",
+          "section": "Region: where inference runs"
+        }
+      }
+    ]
+  }
+}

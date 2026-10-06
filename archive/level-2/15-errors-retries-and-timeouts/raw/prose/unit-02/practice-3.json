@@ -1,0 +1,289 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "15-errors-retries-and-timeouts"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: a retry policy, graded on scripted failures (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a retry policy, graded on scripted failures"
+    },
+    {
+      "type": "para",
+      "text": "Write the function that decides whether to try an API call again, and for how long to wait. No test waits: the sleep is injected and the failures are scripted."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working retry policy with seven gaps cut out of it. The plumbing is written and correct: the given types, `call_with_retry` itself (the loop, the attempt count, the status check, the sleep and the decision to give up), and the way a retryable status and a spend cap combine. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To see what a gap receives, debug it by logging its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (Python names; the TypeScript, Java and Kotlin names are the camel-case forms, with `delayFor` for `_delay`):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_status_retryable` unlocks `m1` and `e1`: which statuses may be tried again.",
+        "`_spend_cap` unlocks `e4`: a 429 that says the spend limit is reached.",
+        "`_error_type` unlocks `e1`, `e4` and `e6`: the API's error type, or `unknown`.",
+        "`_request_id` unlocks `e1`, `e4` and `e6`: the `request-id` header.",
+        "`_connection_failure` unlocks `e5`: status 0 and `connection_error`.",
+        "`_retry_after` unlocks `e2`: the header as seconds.",
+        "`_delay` unlocks `m1`, `e3` and `e5`: the doubling delay, the cap and the jitter applied last."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gaps 1 and 7. A few lines each, about fifteen in all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given types"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`Response`",
+          "`status`, `headers` (lower-case names) and `body` (the parsed JSON object, or empty)"
+        ],
+        [
+          "`send`",
+          "a function with no arguments that returns a `Response` or raises `TransportError` (the connection failed or timed out, so no reply came)"
+        ],
+        [
+          "`sleep`",
+          "a function that takes the seconds to wait; the tests record them"
+        ],
+        [
+          "`CallFailed`",
+          "the final failure: `status`, `error_type`, `attempts`, `request_id` (TypeScript, Java and Kotlin: `errorType`, `requestId`)"
+        ],
+        [
+          "policy",
+          "`max_attempts` (default 4), `base_delay` (0.5), `cap` (8.0) and `jitter`, a function applied to each computed delay (default: the delay itself). Python takes them as keyword arguments, TypeScript as an options object, Java and Kotlin as a `Policy`"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "`call_with_retry(send, sleep, ...)` (TypeScript `callWithRetry`, Java `Retry.callWithRetry`, Kotlin `callWithRetry`)"
+    },
+    {
+      "type": "para",
+      "text": "Call `send` up to `max_attempts` times."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "A reply with a status **below 400** is returned at once.",
+        "**Retry** on a connection failure and on the statuses 408, 409, 429 and every 500 and above (529 included). Every other status of 400 and above is **not** retried: raise `CallFailed` with that attempt count.",
+        "A **429 whose body says `error.details.error_code` is `enforced_spend_limit_reached`** is a spend cap, not a rate limit: retrying cannot succeed, so do not retry it.",
+        "The wait before attempt *n + 1* is `jitter(min(cap, base_delay * 2^(n-1)))`, where *n* is the attempt that just failed (`n` starts at 1).",
+        "If the failed reply has a **`retry-after`** header (seconds), the wait is at least that long: wait the larger of the jittered delay and the header.",
+        "**Never wait after the last attempt.** When the attempts run out, raise `CallFailed` with the last reply's status, its `error.type` (`unknown` when the body has none), the number of attempts made and the `request-id` header. When the last failure was a lost connection: status `0`, error type `connection_error`, no request id."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Overloaded twice, then success: the good reply comes back after waits of 0.5 and 1.0"
+        ],
+        [
+          "`e1`",
+          "400, 401, 404 and 413 are not retried"
+        ],
+        [
+          "`e2`",
+          "`retry-after` is a floor for the wait"
+        ],
+        [
+          "`e3`",
+          "The delay doubles up to the cap, and the jitter is applied last"
+        ],
+        [
+          "`e4`",
+          "A spend-cap 429 is not retried"
+        ],
+        [
+          "`e5`",
+          "Connection errors are retried like server errors, and give `connection_error` at the end"
+        ],
+        [
+          "`e6`",
+          "Giving up reports the last reply, makes exactly `max_attempts` calls and waits one time fewer"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.Map;\n\n/** A retry policy for API calls. See ../../statement.md for the contract. */\nfinal class Retry {\n    private static final System.Logger LOG = System.getLogger(Retry.class.getName());\n\n    private Retry() {}\n\n    private static Map<?, ?> error(Response response) {\n        return response.body() != null && response.body().get(\"error\") instanceof Map<?, ?> e ? e : Map.of();\n    }\n\n    private static boolean statusRetryable(int s) {\n        return s == 408 || s == 409 || s == 429 || s >= 500;\n    }\n\n    private static boolean spendCap(Response response) {\n        return error(response).get(\"details\") instanceof Map<?, ?> d && \"enforced_spend_limit_reached\".equals(d.get(\"error_code\"));\n    }\n\n    private static boolean retryable(Response response) {\n        return statusRetryable(response.status()) && !spendCap(response);\n    }\n\n    private static String errorType(Response response) {\n        Object type = error(response).get(\"type\");\n        return type == null ? \"unknown\" : String.valueOf(type);\n    }\n\n    private static String requestId(Response response) {\n        return response.headers().get(\"request-id\");\n    }\n\n    private static CallFailed failure(Response response, int attempts) {\n        return new CallFailed(response.status(), errorType(response), attempts, requestId(response));\n    }\n\n    private static CallFailed connectionFailure(int attempts) {\n        return new CallFailed(0, \"connection_error\", attempts, null);\n    }\n\n    private static double retryAfter(Response response) {\n        try {\n            return Math.max(0.0, Double.parseDouble(response.headers().get(\"retry-after\")));\n        } catch (NullPointerException | NumberFormatException e) {\n            return 0.0;\n        }\n    }\n\n    private static double delayFor(int attempt, Policy policy) {\n        return policy.jitter().applyAsDouble(Math.min(policy.cap(), policy.baseDelay() * Math.pow(2, attempt - 1)));\n    }\n\n    static Response callWithRetry(Send send, Sleep sleep, Policy policy) {\n        LOG.log(System.Logger.Level.DEBUG, \"callWithRetry input: {0} {1} {2}\", policy.maxAttempts(), policy.baseDelay(), policy.cap());\n        for (int attempt = 1; ; attempt++) {\n            double wait = 0.0;\n            try {\n                Response response = send.send();\n                if (response.status() < 400) return response;\n                if (!retryable(response) || attempt >= policy.maxAttempts()) throw failure(response, attempt);\n                wait = retryAfter(response);\n            } catch (TransportError e) {\n                if (attempt >= policy.maxAttempts()) throw connectionFailure(attempt);\n            }\n            sleep.sleep(Math.max(delayFor(attempt, policy), wait));\n        }\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        Response ok = new Response(200, Map.of(), Map.of(\"type\", \"message\"));\n        // A scripted send(), like the one the tests use: overloaded twice, then a good reply.\n        List<Response> replies = new ArrayList<>(List.of(failure(529, \"overloaded_error\"), failure(503, \"api_error\"), ok));\n        int[] calls = {0};\n        Send send = () -> {\n            calls[0]++;\n            return replies.remove(0);\n        };\n\n        // The sleep is injected, so nothing really waits: it just records the delays asked for.\n        List<Double> waits = new ArrayList<>();\n        try {\n            Response result = Retry.callWithRetry(send, waits::add, Policy.defaults());\n            System.out.println(\"final status: \" + (result == null ? null : result.status()));\n        } catch (CallFailed err) {\n            System.out.println(\"gave up: \" + err.getMessage());\n        }\n        System.out.println(\"calls made: \" + calls[0]);\n        System.out.println(\"waits requested: \" + waits);\n    }\n\n    private static Response failure(int code, String kind) {\n        return new Response(code, Map.of(), Map.of(\"type\", \"error\", \"error\", Map.of(\"type\", kind, \"message\", \"x\")));\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.Map;\n\n/** A retry policy for API calls. See ../../statement.md for the contract. */\nfinal class Retry {\n    private static final System.Logger LOG = System.getLogger(Retry.class.getName());\n\n    private Retry() {}\n\n    private static Map<?, ?> error(Response response) {\n        return response.body() != null && response.body().get(\"error\") instanceof Map<?, ?> e ? e : Map.of();\n    }\n\n    private static boolean statusRetryable(int s) {\n        // TODO 1 of 7 (finish this to pass m1 and e1): may a reply with this status be tried again?\n        // Receives the HTTP status. Returns true for 408, 409, 429 and every status of 500 and above (529 included); false for every\n        // other one. Example: statusRetryable(529) -> true, statusRetryable(404) -> false\n        return false;\n    }\n\n    private static boolean spendCap(Response response) {\n        // TODO 2 of 7 (finish this to pass e4): is this 429 a spend cap rather than a rate limit?\n        // Receives the Response. Returns true when its body's error.details.error_code is \"enforced_spend_limit_reached\" (use the\n        // error helper; any level may be missing); retrying cannot succeed then.\n        // Example: a body {error={details={error_code=enforced_spend_limit_reached}}} -> true; {} -> false\n        return false;\n    }\n\n    private static boolean retryable(Response response) {\n        return statusRetryable(response.status()) && !spendCap(response);\n    }\n\n    private static String errorType(Response response) {\n        // TODO 3 of 7 (finish this to pass e1, e4 and e6): the API's error type of a reply.\n        // Receives the Response. Returns body.error.type as text, or \"unknown\" when the body has none.\n        // Example: a body {error={type=overloaded_error}} -> \"overloaded_error\"; {} -> \"unknown\"\n        return \"\";\n    }\n\n    private static String requestId(Response response) {\n        // TODO 4 of 7 (finish this to pass e1, e4 and e6): the request id of a reply.\n        // Receives the Response. Returns its request-id header (header names are lower case), or null when there is none.\n        // Example: headers {request-id=req_1} -> \"req_1\"; {} -> null\n        return \"\";\n    }\n\n    private static CallFailed failure(Response response, int attempts) {\n        return new CallFailed(response.status(), errorType(response), attempts, requestId(response));\n    }\n\n    private static CallFailed connectionFailure(int attempts) {\n        // TODO 5 of 7 (finish this to pass e5): the failure when the last attempt lost its connection.\n        // Receives the number of attempts made. Returns a CallFailed with status 0, error type \"connection_error\", that many attempts\n        // and no request id. Example: connectionFailure(2) -> CallFailed(0, \"connection_error\", 2, null)\n        return new CallFailed(0, \"\", attempts, null);\n    }\n\n    private static double retryAfter(Response response) {\n        // TODO 6 of 7 (finish this to pass e2): the wait the server asked for.\n        // Receives the Response. Returns its retry-after header as seconds (never below 0); 0.0 when the header is absent or not a number.\n        // Example: headers {retry-after=3} -> 3.0; {} -> 0.0; {retry-after=soon} -> 0.0\n        return 0.0;\n    }\n\n    private static double delayFor(int attempt, Policy policy) {\n        // TODO 7 of 7 (finish this to pass m1, e3 and e5): the wait before the next attempt.\n        // Receives the attempt that just failed (1 for the first) and the policy. Returns\n        // jitter(min(cap, baseDelay * 2^(attempt - 1))): the jitter is applied last, after the cap.\n        // Example: baseDelay 1.0, cap 5.0, no jitter: attempt 3 -> 4.0, attempt 4 -> 5.0\n        return 0.0;\n    }\n\n    static Response callWithRetry(Send send, Sleep sleep, Policy policy) {\n        LOG.log(System.Logger.Level.DEBUG, \"callWithRetry input: {0} {1} {2}\", policy.maxAttempts(), policy.baseDelay(), policy.cap());\n        for (int attempt = 1; ; attempt++) {\n            double wait = 0.0;\n            try {\n                Response response = send.send();\n                if (response.status() < 400) return response;\n                if (!retryable(response) || attempt >= policy.maxAttempts()) throw failure(response, attempt);\n                wait = retryAfter(response);\n            } catch (TransportError e) {\n                if (attempt >= policy.maxAttempts()) throw connectionFailure(attempt);\n            }\n            sleep.sleep(Math.max(delayFor(attempt, policy), wait));\n        }\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.ArrayList;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        Response ok = new Response(200, Map.of(), Map.of(\"type\", \"message\"));\n        // A scripted send(), like the one the tests use: overloaded twice, then a good reply.\n        List<Response> replies = new ArrayList<>(List.of(failure(529, \"overloaded_error\"), failure(503, \"api_error\"), ok));\n        int[] calls = {0};\n        Send send = () -> {\n            calls[0]++;\n            return replies.remove(0);\n        };\n\n        // The sleep is injected, so nothing really waits: it just records the delays asked for.\n        List<Double> waits = new ArrayList<>();\n        try {\n            Response result = Retry.callWithRetry(send, waits::add, Policy.defaults());\n            System.out.println(\"final status: \" + (result == null ? null : result.status()));\n        } catch (CallFailed err) {\n            System.out.println(\"gave up: \" + err.getMessage());\n        }\n        System.out.println(\"calls made: \" + calls[0]);\n        System.out.println(\"waits requested: \" + waits);\n    }\n\n    private static Response failure(int code, String kind) {\n        return new Response(code, Map.of(), Map.of(\"type\", \"error\", \"error\", Map.of(\"type\", kind, \"message\", \"x\")));\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "63cf3efc10239c84ea49f66d630fd6f1bb36ea87393ccb4722af0851dbdb57dc",
+  "starting_code": "import java.util.Map;\n\n/** A retry policy for API calls. See ../../statement.md for the contract. */\nfinal class Retry {\n    private static final System.Logger LOG = System.getLogger(Retry.class.getName());\n\n    private Retry() {}\n\n    private static Map<?, ?> error(Response response) {\n        return response.body() != null && response.body().get(\"error\") instanceof Map<?, ?> e ? e : Map.of();\n    }\n\n    private static boolean statusRetryable(int s) {\n        // TODO 1 of 7 (finish this to pass m1 and e1): may a reply with this status be tried again?\n        // Receives the HTTP status. Returns true for 408, 409, 429 and every status of 500 and above (529 included); false for every\n        // other one. Example: statusRetryable(529) -> true, statusRetryable(404) -> false\n        return false;\n    }\n\n    private static boolean spendCap(Response response) {\n        // TODO 2 of 7 (finish this to pass e4): is this 429 a spend cap rather than a rate limit?\n        // Receives the Response. Returns true when its body's error.details.error_code is \"enforced_spend_limit_reached\" (use the\n        // error helper; any level may be missing); retrying cannot succeed then.\n        // Example: a body {error={details={error_code=enforced_spend_limit_reached}}} -> true; {} -> false\n        return false;\n    }\n\n    private static boolean retryable(Response response) {\n        return statusRetryable(response.status()) && !spendCap(response);\n    }\n\n    private static String errorType(Response response) {\n        // TODO 3 of 7 (finish this to pass e1, e4 and e6): the API's error type of a reply.\n        // Receives the Response. Returns body.error.type as text, or \"unknown\" when the body has none.\n        // Example: a body {error={type=overloaded_error}} -> \"overloaded_error\"; {} -> \"unknown\"\n        return \"\";\n    }\n\n    private static String requestId(Response response) {\n        // TODO 4 of 7 (finish this to pass e1, e4 and e6): the request id of a reply.\n        // Receives the Response. Returns its request-id header (header names are lower case), or null when there is none.\n        // Example: headers {request-id=req_1} -> \"req_1\"; {} -> null\n        return \"\";\n    }\n\n    private static CallFailed failure(Response response, int attempts) {\n        return new CallFailed(response.status(), errorType(response), attempts, requestId(response));\n    }\n\n    private static CallFailed connectionFailure(int attempts) {\n        // TODO 5 of 7 (finish this to pass e5): the failure when the last attempt lost its connection.\n        // Receives the number of attempts made. Returns a CallFailed with status 0, error type \"connection_error\", that many attempts\n        // and no request id. Example: connectionFailure(2) -> CallFailed(0, \"connection_error\", 2, null)\n        return new CallFailed(0, \"\", attempts, null);\n    }\n\n    private static double retryAfter(Response response) {\n        // TODO 6 of 7 (finish this to pass e2): the wait the server asked for.\n        // Receives the Response. Returns its retry-after header as seconds (never below 0); 0.0 when the header is absent or not a number.\n        // Example: headers {retry-after=3} -> 3.0; {} -> 0.0; {retry-after=soon} -> 0.0\n        return 0.0;\n    }\n\n    private static double delayFor(int attempt, Policy policy) {\n        // TODO 7 of 7 (finish this to pass m1, e3 and e5): the wait before the next attempt.\n        // Receives the attempt that just failed (1 for the first) and the policy. Returns\n        // jitter(min(cap, baseDelay * 2^(attempt - 1))): the jitter is applied last, after the cap.\n        // Example: baseDelay 1.0, cap 5.0, no jitter: attempt 3 -> 4.0, attempt 4 -> 5.0\n        return 0.0;\n    }\n\n    static Response callWithRetry(Send send, Sleep sleep, Policy policy) {\n        LOG.log(System.Logger.Level.DEBUG, \"callWithRetry input: {0} {1} {2}\", policy.maxAttempts(), policy.baseDelay(), policy.cap());\n        for (int attempt = 1; ; attempt++) {\n            double wait = 0.0;\n            try {\n                Response response = send.send();\n                if (response.status() < 400) return response;\n                if (!retryable(response) || attempt >= policy.maxAttempts()) throw failure(response, attempt);\n                wait = retryAfter(response);\n            } catch (TransportError e) {\n                if (attempt >= policy.maxAttempts()) throw connectionFailure(attempt);\n            }\n            sleep.sleep(Math.max(delayFor(attempt, policy), wait));\n        }\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/15-errors-retries-and-timeouts/prose/unit-02/practice-3/src/main/java/Retry.java",
+    "test_path": "practice/level-2/15-errors-retries-and-timeouts/prose/unit-02/practice-3/src/test/java/RetryTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/15-errors-retries-and-timeouts/prose/unit-02/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/15-errors-retries-and-timeouts/prose/unit-02/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_overloadedTwiceThenSuccessReturnsTheGoodReplyAfterTwoWaits()",
+        "kind": "main",
+        "says": "Overloaded twice, then success: the good reply comes back after waits of 0.5 and 1.0"
+      },
+      {
+        "id": "e1_clientErrorsAreNotRetried()",
+        "kind": "edge",
+        "says": "400, 401, 404 and 413 are not retried"
+      },
+      {
+        "id": "e2_retryAfterIsAFloorForTheWait()",
+        "kind": "edge",
+        "says": "retry-after is a floor for the wait"
+      },
+      {
+        "id": "e3_delayDoublesUpToTheCapAndTheJitterIsAppliedLast()",
+        "kind": "edge",
+        "says": "The delay doubles up to the cap, and the jitter is applied last"
+      },
+      {
+        "id": "e4_aSpendCap429IsNotRetried()",
+        "kind": "edge",
+        "says": "A spend-cap 429 is not retried"
+      },
+      {
+        "id": "e5_connectionErrorsAreRetriedLikeServerErrors()",
+        "kind": "edge",
+        "says": "Connection errors are retried like server errors, and give connection_error at the end"
+      },
+      {
+        "id": "e6_givingUpReportsTheLastReplyAndDoesNotWaitAfterTheLastAttempt()",
+        "kind": "edge",
+        "says": "Giving up reports the last reply, makes exactly max_attempts calls and waits one time fewer"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/15-errors-retries-and-timeouts/prose/unit-02/practice-3/target/test-results/test"
+    },
+    "origin": "course/15-errors-retries-and-timeouts/02-retry-back-off-and-idempotency.md",
+    "concepts": [
+      "the practice of Retry, back-off and idempotency, and a retry policy is solved"
+    ],
+    "files": [
+      "practice/level-2/15-errors-retries-and-timeouts/prose/unit-02/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "errors-retries-and-timeouts-u2"
+}

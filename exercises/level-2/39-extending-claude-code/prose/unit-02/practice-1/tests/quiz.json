@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "39-extending-claude-code"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Check yourself: Subagents, their memory, and hooks",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A reviewer subagent's file has no `tools` line. What can it do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Read only, because a review of code needs nothing more than reading it",
+            "correct": false,
+            "says": "Ruled out because a reviewer is bounded only when you list `Read`, `Grep` and `Glob`, as the page says: \"Bound a subagent by listing its tools.\""
+          },
+          {
+            "id": "b",
+            "text": "Nothing at all, because an empty list gives the subagent no tools to use",
+            "correct": false,
+            "says": "Ruled out because the table says \"Omit it and the subagent inherits every tool\", which is the opposite of none."
+          },
+          {
+            "id": "c",
+            "text": "Use every tool of the session, including editing and running commands",
+            "correct": true,
+            "says": "The page says \"Omit it and the subagent inherits every tool\", and \"a reviewer with no `tools` line can edit files and run commands\"."
+          },
+          {
+            "id": "d",
+            "text": "Use only the tools that the main conversation allows without asking first",
+            "correct": false,
+            "says": "Ruled out because a subagent has \"specific tool access, and independent permissions\", and an omitted list does not narrow it to the main conversation's pre-approvals."
+          }
+        ],
+        "origin": {
+          "path": "course/39-extending-claude-code/02-subagents-and-hooks.md",
+          "section": "Subagents"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A hook script is meant to stop `git push`. Which behaviour stops the call?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Exiting with code 2 with the reason written to standard error",
+            "correct": true,
+            "says": "The page says \"Exit 2: Claude Code blocks the action. Write a reason to stderr.\""
+          },
+          {
+            "id": "b",
+            "text": "Printing a warning to standard output and exiting with code 1",
+            "correct": false,
+            "says": "Ruled out because with an exit code of 1 and plain-text output \"the action proceeds as a non-blocking error\", and a warning does not stop the call."
+          },
+          {
+            "id": "c",
+            "text": "Exiting with code 0 after logging the command to a file",
+            "correct": false,
+            "says": "Ruled out because \"Exit 0: no objection\", and a logging hook \"does not weaken a guard hook\" and does not block either."
+          },
+          {
+            "id": "d",
+            "text": "Exiting with code 3 after writing a reason to standard error",
+            "correct": false,
+            "says": "Ruled out because exit code 3 is an \"other exit code\", and the page says to \"Treat it as a bug in the hook, because it does not stop the call.\""
+          }
+        ],
+        "origin": {
+          "path": "course/39-extending-claude-code/02-subagents-and-hooks.md",
+          "section": "Quiz"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A subagent builds notes on a repository, and teammates should receive them through version control. Which `memory` value fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "`user`, whose directory sits in each person's home folder",
+            "correct": false,
+            "says": "Ruled out because the `user` scope is for a case where \"The agent should remember across all projects\", and its directory is under `~/.claude/`, outside the repository."
+          },
+          {
+            "id": "b",
+            "text": "`local`, whose directory is kept out of commits",
+            "correct": false,
+            "says": "Ruled out because the `local` scope is for knowledge that is \"project-specific and should not be checked in\"."
+          },
+          {
+            "id": "c",
+            "text": "`team`, whose directory is shared by every teammate",
+            "correct": false,
+            "says": "Ruled out because the field takes one of three values, and the page's own example is flagged: \"memory must be user, project or local\"."
+          },
+          {
+            "id": "d",
+            "text": "`project`, whose directory is committed alongside the sources",
+            "correct": true,
+            "says": "The table says the `project` scope, at `.claude/agent-memory/<name>/`, is for knowledge that is \"shareable via version control\"."
+          }
+        ],
+        "origin": {
+          "path": "course/39-extending-claude-code/02-subagents-and-hooks.md",
+          "section": "Subagent memory"
+        }
+      }
+    ]
+  }
+}

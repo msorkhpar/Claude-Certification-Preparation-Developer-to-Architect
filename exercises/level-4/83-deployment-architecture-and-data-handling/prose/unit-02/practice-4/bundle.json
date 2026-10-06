@@ -1,0 +1,95 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-4",
+    "83-deployment-architecture-and-data-handling"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 4,
+  "title": "Practice: a data policy for a Claude deployment (Kotlin)",
+  "lang": "kotlin",
+  "main_file": "src/main/kotlin/DataPolicy.kt",
+  "files": [
+    "src/main/kotlin/TryIt.kt"
+  ],
+  "test_file": "src/test/kotlin/DataPolicyTest.kt",
+  "build": [
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-4/83-deployment-architecture-and-data-handling/prose/unit-02/practice-4",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-4/83-deployment-architecture-and-data-handling/prose/unit-02/practice-4",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_aCompliantDeploymentHasNoFindings()",
+      "kind": "main",
+      "says": "A compliant deployment has no findings"
+    },
+    {
+      "id": "e1_residencyIsPinnedByTheRequestOrByTheRegionThePlatformAllows()",
+      "kind": "edge",
+      "says": "Residency is pinned by the request or by the region the platform allows"
+    },
+    {
+      "id": "e2_zeroDataRetentionIsAnArrangementOfTheProvidersOwnPlatformsAndNotOfEveryModel()",
+      "kind": "edge",
+      "says": "Zero data retention is an arrangement of the provider's own platforms and not of every model"
+    },
+    {
+      "id": "e3_protectedHealthInformationNeedsACoveredPlatformAnAgreementAndDeidentifiedInput()",
+      "kind": "edge",
+      "says": "Protected health information needs a covered platform, an agreement and de-identified input"
+    },
+    {
+      "id": "e4_aMultiTenantServiceNeedsAWorkspaceForEachTenant()",
+      "kind": "edge",
+      "says": "A multi-tenant service needs a workspace for each tenant"
+    },
+    {
+      "id": "e5_anAuditLogMustNotStorePromptsThatHoldSensitiveData()",
+      "kind": "edge",
+      "says": "An audit log must not store prompts that hold sensitive data"
+    },
+    {
+      "id": "e6_auditRetentionStaysBetweenTheMinimumAndTheMaximum()",
+      "kind": "edge",
+      "says": "Audit retention stays between the minimum and the maximum"
+    },
+    {
+      "id": "e7_purgeOnlyWhatIsPastTheRetentionLimitAndNotOnHold()",
+      "kind": "edge",
+      "says": "Purge only what is past the retention limit and not on hold"
+    },
+    {
+      "id": "e8_aRequestIsServedOnlyByADeploymentThatKeepsItsDataInTheRegion()",
+      "kind": "edge",
+      "says": "A request is served only by a deployment that keeps its data in the region"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/83-deployment-architecture-and-data-handling/02-the-identifier-boundary-the-audit-log-and-the-practice.md"
+}

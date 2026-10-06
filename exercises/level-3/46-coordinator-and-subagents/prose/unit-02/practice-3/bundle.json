@@ -1,0 +1,85 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "46-coordinator-and-subagents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 3,
+  "title": "Practice: a coordinator that delegates to isolated subagents (Java)",
+  "lang": "java",
+  "main_file": "src/main/java/Coordinator.java",
+  "files": [
+    "src/main/java/TryIt.java"
+  ],
+  "test_file": "src/test/java/CoordinatorTest.java",
+  "build": [
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-3",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-3",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_aHubSendsOneBriefToEachSpokeAndSynthesizesWhatComesBack()",
+      "kind": "main",
+      "says": "A hub sends one brief to each spoke, in order, and synthesizes what comes back"
+    },
+    {
+      "id": "e1_aQuestionTheCoordinatorCanAnswerItselfIsAnsweredWithoutAnySubagent()",
+      "kind": "edge",
+      "says": "A question the planner answers itself starts no team"
+    },
+    {
+      "id": "e2_aSubagentSeesItsOwnBriefAndNothingTheOthersFound()",
+      "kind": "main",
+      "says": "A subagent receives exactly its own brief"
+    },
+    {
+      "id": "e3_thePlanIsCleanedOfEmptyBriefsAndDuplicateScopesAndCapped()",
+      "kind": "edge",
+      "says": "Empty briefs and duplicate scopes are dropped, the team is capped, a plan with nothing usable fails without calls"
+    },
+    {
+      "id": "e4_aFailingSubagentDoesNotStopTheOthersAndARunWithNoFindingsDoesNotSynthesize()",
+      "kind": "edge",
+      "says": "One failing subagent does not stop the others; a run with no findings neither reviews nor synthesizes"
+    },
+    {
+      "id": "e5_aReviewSendsOnlyTheGapsBackOutAndStopsWhenNoneAreLeft()",
+      "kind": "edge",
+      "says": "A review sends only the gaps out again, cleaned, and stops when none are left"
+    },
+    {
+      "id": "e6_theRoundsAreCappedAndTheGapsThatRemainAreReported()",
+      "kind": "edge",
+      "says": "The rounds are capped, the gaps that remain are reported and the status is partial"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/46-coordinator-and-subagents/02-review-iteration-failures-and-the-practice.md"
+}

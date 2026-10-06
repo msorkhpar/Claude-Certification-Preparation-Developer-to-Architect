@@ -1,0 +1,307 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "46-coordinator-and-subagents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: a coordinator that delegates to isolated subagents (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a coordinator that delegates to isolated subagents"
+    },
+    {
+      "type": "para",
+      "text": "A research system has one coordinator and several subagents. The coordinator splits the question, hands each subagent a brief, reads what comes back, asks for more where there are gaps, and writes one answer. A subagent knows only its brief: it does not see the conversation, the plan or the other subagents' findings. Most of the failures of such a system are in the coordinator's code, not in the model: duplicated work, a vague brief, one failure that stops the team, a review that sends everyone out again, and a team built for a question that one agent could answer. Write the coordinator. Nothing here touches the network: the four model roles are functions that the tests script."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`planner(question)`",
+          "returns the plan: `{\"delegate\": bool, \"answer\": text or null, \"subtasks\": [{\"scope\": text, \"brief\": text}]}`"
+        ],
+        [
+          "`subagent(brief)`",
+          "runs one subagent and returns its final report as text; it may throw"
+        ],
+        [
+          "`reviewer(question, findings)`",
+          "returns the list of gap descriptions (texts) still to be researched; an empty list means nothing is missing"
+        ],
+        [
+          "`synthesizer(question, findings)`",
+          "returns the final answer as text"
+        ],
+        [
+          "a finding",
+          "`{\"scope\": text, \"text\": the subagent's report}`"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working coordinator with eight small gaps cut out of it. The plan, the calls to the planner, subagent, reviewer and synthesizer, the failure handling and the result shapes are written and correct. Each gap is one function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the Java, Kotlin and TypeScript names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_wants_team` unlocks `e1`: does the plan ask for subagents.",
+        "`_drop_reason` unlocks `e3`: why a subtask is dropped (empty brief, duplicate scope, over limit), or none.",
+        "`_report_problem` unlocks `e4`: a report that is not text or is blank is an `empty report`.",
+        "`_clean_gaps` unlocks `e5` and `e6`: the reviewer's gaps stripped, deduplicated and capped.",
+        "`_follow_up` unlocks `e5`: the brief for one gap.",
+        "`_may_refine` unlocks `e5` and `e6`: gaps left and rounds below the limit.",
+        "`_final_status` unlocks `m1` and `e6`: `complete` or `partial`.",
+        "`_brief_of` unlocks `m1` and `e2`: the text a subagent is handed, which is its own brief and nothing else."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About a dozen lines in all. The sections below describe the whole coordinator."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "`coordinate(planner, subagent, reviewer, synthesizer, question, max_agents=4, max_rounds=2)` (`coordinate` in every language, with the same arguments) returns `{\"status\", \"answer\", \"findings\", \"failed\", \"dropped\", \"gaps\", \"rounds\", \"subagent_calls\"}`."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Call `planner` once. When `delegate` is false, return status `direct` with the planner's `answer`, no findings, and no subagent, reviewer or synthesizer call at all: a question that the coordinator can answer itself is not worth a team.",
+        "Clean the subtasks, in order. A subtask whose brief is empty or only spaces is dropped with the reason `empty brief`. A subtask whose scope (compared stripped and in lower case) was already kept is dropped with `duplicate scope`. Once `max_agents` subtasks are kept, every further one is dropped with `over limit`. A dropped entry is `{\"scope\": the scope as given, \"reason\"}`.",
+        "Call `subagent` once per kept subtask, in order, with **exactly its brief**: nothing from the plan, from the question or from another subagent's report is added. A report that is a non-blank string becomes a finding `{\"scope\", \"text\"}`. A call that throws, or a report that is blank, becomes a `failed` entry `{\"scope\", \"error\"}`: the exception's message, or `empty report`. The others still run. `subagent_calls` counts every call, successful or not.",
+        "When no subtask produced a finding (all failed, or none was kept), return status `failed`, answer null, and call neither the reviewer nor the synthesizer.",
+        "Review. Call `reviewer` with copies of the findings. Clean its answer: strip each gap, drop empty ones and repeats (the first stays) and keep at most `max_agents`. While gaps remain and fewer than `max_rounds` rounds were run: count a round, call `subagent` once per gap with the brief `Follow up: {gap}\\nQuestion: {question}` (the scope of the new finding is the gap text), and call `reviewer` again. Subtasks that already have findings are not run again.",
+        "Call `synthesizer` once with copies of all findings, in the order they arrived. Status is `complete` when no gaps remain and nothing failed, otherwise `partial`. `gaps` is what the last review still reported (empty when complete), `rounds` the number of refinement rounds."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each step is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Delegate only when it pays** (step 1). The exam expects a coordinator that chooses its subagents from the complexity of the query and does not send everything through the full pipeline. *You should see* a question the planner answers itself finish with no subagent call.",
+        "**Partition the scope** (step 2). The exam asks for distinct subtopics or sources to minimise duplicated work, and a cap on the team. *You should see* the empty and the repeated subtasks listed as dropped with their reasons, and the team no larger than `max_agents`.",
+        "**Send each subagent its own brief and nothing else** (step 3). Subagents work in isolated context and do not inherit what the coordinator knows. *You should see* the briefs received equal the briefs planned, whatever the other subagents found, and one failing subagent leave the others' findings in place.",
+        "**Do not synthesize from nothing** (step 4). An error message is not evidence. *You should see* status `failed` with no reviewer or synthesizer call when no subagent returned a finding.",
+        "**Refine where the gaps are** (step 5). The exam describes a loop in which the coordinator finds gaps, re-delegates targeted queries and stops when coverage is enough. *You should see* only the gaps sent out again, cleaned and capped, and the first-round subtasks left alone.",
+        "**End with an honest status** (step 6). *You should see* `complete` only when nothing failed and no gap is left, and `partial` with the remaining gaps when the round limit stopped the loop."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A hub sends one brief to each spoke, in order, and synthesizes what comes back"
+        ],
+        [
+          "`e1`",
+          "A question the planner answers itself starts no team"
+        ],
+        [
+          "`e2`",
+          "A subagent receives exactly its own brief"
+        ],
+        [
+          "`e3`",
+          "Empty briefs and duplicate scopes are dropped, the team is capped, a plan with nothing usable fails without calls"
+        ],
+        [
+          "`e4`",
+          "One failing subagent does not stop the others; a run with no findings neither reviews nor synthesizes"
+        ],
+        [
+          "`e5`",
+          "A review sends only the gaps out again, cleaned, and stops when none are left"
+        ],
+        [
+          "`e6`",
+          "The rounds are capped, the gaps that remain are reported and the status is `partial`"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "private val log = System.getLogger(\"coordinator\")\n/** A coordinator that delegates to isolated subagents, reviews what comes back and synthesizes. See ../../statement.md. */\n\ntypealias Planner = (String) -> Map<String, Any?>\ntypealias Spoke = (String) -> String?\ntypealias Reviewer = (String, List<Map<String, Any?>>) -> List<String>\ntypealias Synthesizer = (String, List<Map<String, Any?>>) -> String\n\nprivate fun dropReason(brief: String, key: String, seen: Set<String>, keptCount: Int, maxAgents: Int): String? = when {\n    brief.isBlank() -> \"empty brief\"\n    key in seen -> \"duplicate scope\"\n    keptCount >= maxAgents -> \"over limit\"\n    else -> null\n}\n\nprivate fun reportProblem(report: String?): String? = if (report == null || report.isBlank()) \"empty report\" else null\n\nprivate fun followUp(gap: String, question: String): String = \"Follow up: $gap\\nQuestion: $question\"\n\nprivate fun mayRefine(gaps: List<String>, rounds: Int, maxRounds: Int): Boolean = gaps.isNotEmpty() && rounds < maxRounds\n\nprivate fun finalStatus(gaps: List<String>, failed: List<Map<String, Any?>>): String = if (gaps.isEmpty() && failed.isEmpty()) \"complete\" else \"partial\"\n\nprivate fun wantsTeam(plan: Map<String, Any?>): Boolean = plan[\"delegate\"] == true\n\nprivate fun cleanGaps(gaps: List<String>?, maxAgents: Int): List<String> {\n    val out = mutableListOf<String>()\n    for (gap in gaps ?: emptyList()) {\n        val text = gap.trim()\n        if (text.isNotEmpty() && text !in out) out.add(text)\n    }\n    return out.take(maxAgents)\n}\n\nprivate fun copy(findings: List<Map<String, Any?>>): List<Map<String, Any?>> = findings.map { LinkedHashMap(it) }\n\n/** What a subagent is told: its own brief and nothing the others found. */\nprivate fun briefOf(brief: String): String = brief\n\n@Suppress(\"UNCHECKED_CAST\")\nfun coordinate(planner: Planner, subagent: Spoke, reviewer: Reviewer, synthesizer: Synthesizer, question: String, maxAgents: Int = 4, maxRounds: Int = 2): Map<String, Any?>? {\n    log.log(System.Logger.Level.DEBUG, \"coordinate input: {0}\", question)\n    val plan = planner(question)\n    if (!wantsTeam(plan)) { // a question the coordinator can answer itself is not worth a team\n        return linkedMapOf(\"status\" to \"direct\", \"answer\" to plan[\"answer\"], \"findings\" to emptyList<Any?>(), \"failed\" to emptyList<Any?>(), \"dropped\" to emptyList<Any?>(),\n            \"gaps\" to emptyList<Any?>(), \"rounds\" to 0, \"subagent_calls\" to 0)\n    }\n    val tasks = mutableListOf<Pair<String, String>>()\n    val dropped = mutableListOf<Map<String, Any?>>()\n    val seen = mutableSetOf<String>()\n    for (task in (plan[\"subtasks\"] as List<Map<String, Any?>>?) ?: emptyList()) {\n        val scope = (task[\"scope\"] ?: \"\").toString()\n        val brief = (task[\"brief\"] ?: \"\").toString()\n        val key = scope.trim().lowercase()\n        val reason = dropReason(brief, key, seen, tasks.size, maxAgents)\n        if (reason != null) dropped.add(linkedMapOf(\"scope\" to scope, \"reason\" to reason))\n        else { seen.add(key); tasks.add(scope to brief) }\n    }\n    val findings = mutableListOf<Map<String, Any?>>()\n    val failed = mutableListOf<Map<String, Any?>>()\n    var calls = 0\n    fun run(scope: String, brief: String) {\n        calls++\n        val report = try {\n            subagent(brief) // the brief is everything the subagent knows\n        } catch (error: RuntimeException) { // one subagent failing must not stop the others\n            failed.add(linkedMapOf(\"scope\" to scope, \"error\" to error.message.toString()))\n            return\n        }\n        val problem = reportProblem(report)\n        if (problem != null) failed.add(linkedMapOf(\"scope\" to scope, \"error\" to problem))\n        else findings.add(linkedMapOf(\"scope\" to scope, \"text\" to report))\n    }\n    for ((scope, brief) in tasks) run(scope, briefOf(brief))\n    if (findings.isEmpty()) {\n        return linkedMapOf(\"status\" to \"failed\", \"answer\" to null, \"findings\" to emptyList<Any?>(), \"failed\" to failed, \"dropped\" to dropped, \"gaps\" to emptyList<Any?>(), \"rounds\" to 0, \"subagent_calls\" to calls)\n    }\n    var rounds = 0\n    var gaps = cleanGaps(reviewer(question, copy(findings)), maxAgents)\n    while (mayRefine(gaps, rounds, maxRounds)) {\n        rounds++\n        for (gap in gaps) run(gap, followUp(gap, question))\n        gaps = cleanGaps(reviewer(question, copy(findings)), maxAgents)\n    }\n    val answer = synthesizer(question, copy(findings))\n    val status = finalStatus(gaps, failed)\n    return linkedMapOf(\"status\" to status, \"answer\" to answer, \"findings\" to findings, \"failed\" to failed, \"dropped\" to dropped, \"gaps\" to gaps, \"rounds\" to rounds, \"subagent_calls\" to calls)\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // The four model roles are plain functions, like the ones the tests script.\n    val planner: Planner = { _ ->\n        mapOf(\"delegate\" to true, \"answer\" to null, \"subtasks\" to listOf(\n            mapOf(\"scope\" to \"chips\", \"brief\" to \"chips: find 2024 chip supply news\"),\n            mapOf(\"scope\" to \"cars\", \"brief\" to \"cars: find 2024 car output news\"),\n            mapOf(\"scope\" to \"rates\", \"brief\" to \"rates: find 2024 interest rates\")))\n    }\n    // A subagent knows only its brief: here it just reports on the topic that starts it.\n    val subagent: Spoke = { brief -> brief.substringBefore(\":\") + \" report\" }\n    val reviewer: Reviewer = { _, _ -> emptyList() } // no gaps: nothing more to ask\n    val synthesizer: Synthesizer = { _, findings -> findings.joinToString(\" | \") { it[\"text\"].toString() } }\n\n    val result = coordinate(planner, subagent, reviewer, synthesizer, \"How did supply change?\")\n\n    println(\"status: ${result?.get(\"status\")} | subagent calls: ${result?.get(\"subagent_calls\")} | rounds: ${result?.get(\"rounds\")}\")\n    println(\"findings: ${result?.get(\"findings\")}\")\n    println(\"answer: ${result?.get(\"answer\")}\")\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "private val log = System.getLogger(\"coordinator\")\n/** A coordinator that delegates to isolated subagents, reviews what comes back and synthesizes. See ../../statement.md. */\n\ntypealias Planner = (String) -> Map<String, Any?>\ntypealias Spoke = (String) -> String?\ntypealias Reviewer = (String, List<Map<String, Any?>>) -> List<String>\ntypealias Synthesizer = (String, List<Map<String, Any?>>) -> String\n\n/**\n * TODO 1 of 8 (unlocks e3): why a subtask is dropped, or null to keep it.\n * Receives the brief, the lower-cased scope key, the keys already kept, how many are kept and the limit. Returns \"empty brief\" for a blank\n * brief, else \"duplicate scope\" for a key already seen, else \"over limit\" when keptCount has reached maxAgents, else null.\n * Example: dropReason(\"  \", \"a\", emptySet(), 0, 3) returns \"empty brief\".\n */\nprivate fun dropReason(brief: String, key: String, seen: Set<String>, keptCount: Int, maxAgents: Int): String? = null\n\n/**\n * TODO 2 of 8 (unlocks e4): what is wrong with a subagent's report, or null.\n * Receives what the subagent returned (maybe null). Returns \"empty report\" when it is null or blank, else null.\n * Example: reportProblem(\"   \") returns \"empty report\".\n */\nprivate fun reportProblem(report: String?): String? = null\n\n/**\n * TODO 3 of 8 (unlocks e5): the brief for a follow-up on one gap.\n * Returns \"Follow up: \" + gap, a newline, then \"Question: \" + question. Example: followUp(\"2023\", \"q\") returns \"Follow up: 2023\\nQuestion: q\".\n */\nprivate fun followUp(gap: String, question: String): String = gap\n\n/**\n * TODO 4 of 8 (unlocks e5 and e6): is another refinement round allowed?\n * True while there are gaps and fewer than maxRounds rounds have run. Example: mayRefine(listOf(\"x\"), 2, 2) returns false.\n */\nprivate fun mayRefine(gaps: List<String>, rounds: Int, maxRounds: Int): Boolean = false\n\n/**\n * TODO 5 of 8 (unlocks m1 and e6): the status of a run that has an answer.\n * \"complete\" when no gaps remain and nothing failed, else \"partial\". Example: finalStatus(listOf(\"x\"), emptyList()) returns \"partial\".\n */\nprivate fun finalStatus(gaps: List<String>, failed: List<Map<String, Any?>>): String = \"complete\"\n\n/**\n * TODO 6 of 8 (unlocks e1): does the plan ask for subagents?\n * Receives the planner's map. True when its \"delegate\" value is true, else false. Example: wantsTeam(mapOf(\"delegate\" to false)) returns false.\n */\nprivate fun wantsTeam(plan: Map<String, Any?>): Boolean = true\n\n/**\n * TODO 7 of 8 (unlocks e5 and e6): the reviewer's gaps, tidied.\n * Receives the reviewer's list (maybe null) and the limit. Returns the gaps trimmed, without empty or repeated ones, in order, at most\n * maxAgents of them. Example: cleanGaps(listOf(\" a \", \"\", \"a\", \"b\"), 1) returns [\"a\"].\n */\nprivate fun cleanGaps(gaps: List<String>?, maxAgents: Int): List<String> = gaps ?: emptyList()\n\nprivate fun copy(findings: List<Map<String, Any?>>): List<Map<String, Any?>> = findings.map { LinkedHashMap(it) }\n\n/**\n * TODO 8 of 8 (unlocks m1 and e2): the text a subagent is handed.\n * Receives the subtask's brief. Returns exactly what the subagent is told: that brief and nothing else (no scope list, no earlier findings).\n * Example: briefOf(\"cars: find 2024 car output news\") returns \"cars: find 2024 car output news\".\n */\nprivate fun briefOf(brief: String): String = \"\"\n\n@Suppress(\"UNCHECKED_CAST\")\nfun coordinate(planner: Planner, subagent: Spoke, reviewer: Reviewer, synthesizer: Synthesizer, question: String, maxAgents: Int = 4, maxRounds: Int = 2): Map<String, Any?>? {\n    log.log(System.Logger.Level.DEBUG, \"coordinate input: {0}\", question)\n    val plan = planner(question)\n    if (!wantsTeam(plan)) { // a question the coordinator can answer itself is not worth a team\n        return linkedMapOf(\"status\" to \"direct\", \"answer\" to plan[\"answer\"], \"findings\" to emptyList<Any?>(), \"failed\" to emptyList<Any?>(), \"dropped\" to emptyList<Any?>(),\n            \"gaps\" to emptyList<Any?>(), \"rounds\" to 0, \"subagent_calls\" to 0)\n    }\n    val tasks = mutableListOf<Pair<String, String>>()\n    val dropped = mutableListOf<Map<String, Any?>>()\n    val seen = mutableSetOf<String>()\n    for (task in (plan[\"subtasks\"] as List<Map<String, Any?>>?) ?: emptyList()) {\n        val scope = (task[\"scope\"] ?: \"\").toString()\n        val brief = (task[\"brief\"] ?: \"\").toString()\n        val key = scope.trim().lowercase()\n        val reason = dropReason(brief, key, seen, tasks.size, maxAgents)\n        if (reason != null) dropped.add(linkedMapOf(\"scope\" to scope, \"reason\" to reason))\n        else { seen.add(key); tasks.add(scope to brief) }\n    }\n    val findings = mutableListOf<Map<String, Any?>>()\n    val failed = mutableListOf<Map<String, Any?>>()\n    var calls = 0\n    fun run(scope: String, brief: String) {\n        calls++\n        val report = try {\n            subagent(brief) // the brief is everything the subagent knows\n        } catch (error: RuntimeException) { // one subagent failing must not stop the others\n            failed.add(linkedMapOf(\"scope\" to scope, \"error\" to error.message.toString()))\n            return\n        }\n        val problem = reportProblem(report)\n        if (problem != null) failed.add(linkedMapOf(\"scope\" to scope, \"error\" to problem))\n        else findings.add(linkedMapOf(\"scope\" to scope, \"text\" to report))\n    }\n    for ((scope, brief) in tasks) run(scope, briefOf(brief))\n    if (findings.isEmpty()) {\n        return linkedMapOf(\"status\" to \"failed\", \"answer\" to null, \"findings\" to emptyList<Any?>(), \"failed\" to failed, \"dropped\" to dropped, \"gaps\" to emptyList<Any?>(), \"rounds\" to 0, \"subagent_calls\" to calls)\n    }\n    var rounds = 0\n    var gaps = cleanGaps(reviewer(question, copy(findings)), maxAgents)\n    while (mayRefine(gaps, rounds, maxRounds)) {\n        rounds++\n        for (gap in gaps) run(gap, followUp(gap, question))\n        gaps = cleanGaps(reviewer(question, copy(findings)), maxAgents)\n    }\n    val answer = synthesizer(question, copy(findings))\n    val status = finalStatus(gaps, failed)\n    return linkedMapOf(\"status\" to status, \"answer\" to answer, \"findings\" to findings, \"failed\" to failed, \"dropped\" to dropped, \"gaps\" to gaps, \"rounds\" to rounds, \"subagent_calls\" to calls)\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // The four model roles are plain functions, like the ones the tests script.\n    val planner: Planner = { _ ->\n        mapOf(\"delegate\" to true, \"answer\" to null, \"subtasks\" to listOf(\n            mapOf(\"scope\" to \"chips\", \"brief\" to \"chips: find 2024 chip supply news\"),\n            mapOf(\"scope\" to \"cars\", \"brief\" to \"cars: find 2024 car output news\"),\n            mapOf(\"scope\" to \"rates\", \"brief\" to \"rates: find 2024 interest rates\")))\n    }\n    // A subagent knows only its brief: here it just reports on the topic that starts it.\n    val subagent: Spoke = { brief -> brief.substringBefore(\":\") + \" report\" }\n    val reviewer: Reviewer = { _, _ -> emptyList() } // no gaps: nothing more to ask\n    val synthesizer: Synthesizer = { _, findings -> findings.joinToString(\" | \") { it[\"text\"].toString() } }\n\n    val result = coordinate(planner, subagent, reviewer, synthesizer, \"How did supply change?\")\n\n    println(\"status: ${result?.get(\"status\")} | subagent calls: ${result?.get(\"subagent_calls\")} | rounds: ${result?.get(\"rounds\")}\")\n    println(\"findings: ${result?.get(\"findings\")}\")\n    println(\"answer: ${result?.get(\"answer\")}\")\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 5,
+    "code": 2,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "9b8e9a5b9c202e3e3197707e5fc08050ecff0e6e39b74a7707460dae0f9351f4",
+  "starting_code": "private val log = System.getLogger(\"coordinator\")\n/** A coordinator that delegates to isolated subagents, reviews what comes back and synthesizes. See ../../statement.md. */\n\ntypealias Planner = (String) -> Map<String, Any?>\ntypealias Spoke = (String) -> String?\ntypealias Reviewer = (String, List<Map<String, Any?>>) -> List<String>\ntypealias Synthesizer = (String, List<Map<String, Any?>>) -> String\n\n/**\n * TODO 1 of 8 (unlocks e3): why a subtask is dropped, or null to keep it.\n * Receives the brief, the lower-cased scope key, the keys already kept, how many are kept and the limit. Returns \"empty brief\" for a blank\n * brief, else \"duplicate scope\" for a key already seen, else \"over limit\" when keptCount has reached maxAgents, else null.\n * Example: dropReason(\"  \", \"a\", emptySet(), 0, 3) returns \"empty brief\".\n */\nprivate fun dropReason(brief: String, key: String, seen: Set<String>, keptCount: Int, maxAgents: Int): String? = null\n\n/**\n * TODO 2 of 8 (unlocks e4): what is wrong with a subagent's report, or null.\n * Receives what the subagent returned (maybe null). Returns \"empty report\" when it is null or blank, else null.\n * Example: reportProblem(\"   \") returns \"empty report\".\n */\nprivate fun reportProblem(report: String?): String? = null\n\n/**\n * TODO 3 of 8 (unlocks e5): the brief for a follow-up on one gap.\n * Returns \"Follow up: \" + gap, a newline, then \"Question: \" + question. Example: followUp(\"2023\", \"q\") returns \"Follow up: 2023\\nQuestion: q\".\n */\nprivate fun followUp(gap: String, question: String): String = gap\n\n/**\n * TODO 4 of 8 (unlocks e5 and e6): is another refinement round allowed?\n * True while there are gaps and fewer than maxRounds rounds have run. Example: mayRefine(listOf(\"x\"), 2, 2) returns false.\n */\nprivate fun mayRefine(gaps: List<String>, rounds: Int, maxRounds: Int): Boolean = false\n\n/**\n * TODO 5 of 8 (unlocks m1 and e6): the status of a run that has an answer.\n * \"complete\" when no gaps remain and nothing failed, else \"partial\". Example: finalStatus(listOf(\"x\"), emptyList()) returns \"partial\".\n */\nprivate fun finalStatus(gaps: List<String>, failed: List<Map<String, Any?>>): String = \"complete\"\n\n/**\n * TODO 6 of 8 (unlocks e1): does the plan ask for subagents?\n * Receives the planner's map. True when its \"delegate\" value is true, else false. Example: wantsTeam(mapOf(\"delegate\" to false)) returns false.\n */\nprivate fun wantsTeam(plan: Map<String, Any?>): Boolean = true\n\n/**\n * TODO 7 of 8 (unlocks e5 and e6): the reviewer's gaps, tidied.\n * Receives the reviewer's list (maybe null) and the limit. Returns the gaps trimmed, without empty or repeated ones, in order, at most\n * maxAgents of them. Example: cleanGaps(listOf(\" a \", \"\", \"a\", \"b\"), 1) returns [\"a\"].\n */\nprivate fun cleanGaps(gaps: List<String>?, maxAgents: Int): List<String> = gaps ?: emptyList()\n\nprivate fun copy(findings: List<Map<String, Any?>>): List<Map<String, Any?>> = findings.map { LinkedHashMap(it) }\n\n/**\n * TODO 8 of 8 (unlocks m1 and e2): the text a subagent is handed.\n * Receives the subtask's brief. Returns exactly what the subagent is told: that brief and nothing else (no scope list, no earlier findings).\n * Example: briefOf(\"cars: find 2024 car output news\") returns \"cars: find 2024 car output news\".\n */\nprivate fun briefOf(brief: String): String = \"\"\n\n@Suppress(\"UNCHECKED_CAST\")\nfun coordinate(planner: Planner, subagent: Spoke, reviewer: Reviewer, synthesizer: Synthesizer, question: String, maxAgents: Int = 4, maxRounds: Int = 2): Map<String, Any?>? {\n    log.log(System.Logger.Level.DEBUG, \"coordinate input: {0}\", question)\n    val plan = planner(question)\n    if (!wantsTeam(plan)) { // a question the coordinator can answer itself is not worth a team\n        return linkedMapOf(\"status\" to \"direct\", \"answer\" to plan[\"answer\"], \"findings\" to emptyList<Any?>(), \"failed\" to emptyList<Any?>(), \"dropped\" to emptyList<Any?>(),\n            \"gaps\" to emptyList<Any?>(), \"rounds\" to 0, \"subagent_calls\" to 0)\n    }\n    val tasks = mutableListOf<Pair<String, String>>()\n    val dropped = mutableListOf<Map<String, Any?>>()\n    val seen = mutableSetOf<String>()\n    for (task in (plan[\"subtasks\"] as List<Map<String, Any?>>?) ?: emptyList()) {\n        val scope = (task[\"scope\"] ?: \"\").toString()\n        val brief = (task[\"brief\"] ?: \"\").toString()\n        val key = scope.trim().lowercase()\n        val reason = dropReason(brief, key, seen, tasks.size, maxAgents)\n        if (reason != null) dropped.add(linkedMapOf(\"scope\" to scope, \"reason\" to reason))\n        else { seen.add(key); tasks.add(scope to brief) }\n    }\n    val findings = mutableListOf<Map<String, Any?>>()\n    val failed = mutableListOf<Map<String, Any?>>()\n    var calls = 0\n    fun run(scope: String, brief: String) {\n        calls++\n        val report = try {\n            subagent(brief) // the brief is everything the subagent knows\n        } catch (error: RuntimeException) { // one subagent failing must not stop the others\n            failed.add(linkedMapOf(\"scope\" to scope, \"error\" to error.message.toString()))\n            return\n        }\n        val problem = reportProblem(report)\n        if (problem != null) failed.add(linkedMapOf(\"scope\" to scope, \"error\" to problem))\n        else findings.add(linkedMapOf(\"scope\" to scope, \"text\" to report))\n    }\n    for ((scope, brief) in tasks) run(scope, briefOf(brief))\n    if (findings.isEmpty()) {\n        return linkedMapOf(\"status\" to \"failed\", \"answer\" to null, \"findings\" to emptyList<Any?>(), \"failed\" to failed, \"dropped\" to dropped, \"gaps\" to emptyList<Any?>(), \"rounds\" to 0, \"subagent_calls\" to calls)\n    }\n    var rounds = 0\n    var gaps = cleanGaps(reviewer(question, copy(findings)), maxAgents)\n    while (mayRefine(gaps, rounds, maxRounds)) {\n        rounds++\n        for (gap in gaps) run(gap, followUp(gap, question))\n        gaps = cleanGaps(reviewer(question, copy(findings)), maxAgents)\n    }\n    val answer = synthesizer(question, copy(findings))\n    val status = finalStatus(gaps, failed)\n    return linkedMapOf(\"status\" to status, \"answer\" to answer, \"findings\" to findings, \"failed\" to failed, \"dropped\" to dropped, \"gaps\" to gaps, \"rounds\" to rounds, \"subagent_calls\" to calls)\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-4/src/main/kotlin/Coordinator.kt",
+    "test_path": "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-4/src/test/kotlin/CoordinatorTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_aHubSendsOneBriefToEachSpokeAndSynthesizesWhatComesBack()",
+        "kind": "main",
+        "says": "A hub sends one brief to each spoke, in order, and synthesizes what comes back"
+      },
+      {
+        "id": "e1_aQuestionTheCoordinatorCanAnswerItselfIsAnsweredWithoutAnySubagent()",
+        "kind": "edge",
+        "says": "A question the planner answers itself starts no team"
+      },
+      {
+        "id": "e2_aSubagentSeesItsOwnBriefAndNothingTheOthersFound()",
+        "kind": "main",
+        "says": "A subagent receives exactly its own brief"
+      },
+      {
+        "id": "e3_thePlanIsCleanedOfEmptyBriefsAndDuplicateScopesAndCapped()",
+        "kind": "edge",
+        "says": "Empty briefs and duplicate scopes are dropped, the team is capped, a plan with nothing usable fails without calls"
+      },
+      {
+        "id": "e4_aFailingSubagentDoesNotStopTheOthersAndARunWithNoFindingsDoesNotSynthesize()",
+        "kind": "edge",
+        "says": "One failing subagent does not stop the others; a run with no findings neither reviews nor synthesizes"
+      },
+      {
+        "id": "e5_aReviewSendsOnlyTheGapsBackOutAndStopsWhenNoneAreLeft()",
+        "kind": "edge",
+        "says": "A review sends only the gaps out again, cleaned, and stops when none are left"
+      },
+      {
+        "id": "e6_theRoundsAreCappedAndTheGapsThatRemainAreReported()",
+        "kind": "edge",
+        "says": "The rounds are capped, the gaps that remain are reported and the status is partial"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-4/target/test-results/test"
+    },
+    "origin": "course/46-coordinator-and-subagents/02-review-iteration-failures-and-the-practice.md",
+    "concepts": [
+      "the practice of Review, iteration, failures and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "coordinator-and-subagents-u2"
+}

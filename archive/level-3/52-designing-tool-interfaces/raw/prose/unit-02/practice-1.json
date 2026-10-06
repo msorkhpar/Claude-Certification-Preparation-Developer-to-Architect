@@ -1,0 +1,382 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "52-designing-tool-interfaces"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: grade a tool set on schema rules (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: grade a tool set on schema rules"
+    },
+    {
+      "type": "para",
+      "text": "The model chooses a tool from its name, its description and its schema, so those are the interface, and they can be checked like code. This practice has you write the grader: a linter for one tool and for a whole set, a pager for a result that is too long, and the rule for how far a tool's own annotations may be trusted. The rules are the course's own, built on the documented guidance (a description of at least three or four sentences, when to use the tool and when not, a description on every parameter, valid examples, namespacing, a bounded list); their thresholds are stated below so the tests can pin them. The model is never called. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`lint_tool`, `lint_tool_set`, `page_results`, `effective_hints`, `parallel_safe`); TypeScript has `lintTool`, `lintToolSet`, `pageResults`, `effectiveHints` and `parallelSafe` (arguments `maxTools`, `maxChars`); Java has `Toolset.lintTool` and so on, with overloads for the defaults; Kotlin has top-level functions with default arguments. A tool is a map: `name`, `description`, `input_schema` (`properties`, each with `type`, `description` and optionally `enum`; and `required`), optionally `input_examples` (a list of example inputs), `annotations` (a map of Boolean hints) and, for a tool that came from a server, `server`."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working grader with eight gaps cut out of it. Everything that is plumbing is written and correct: the constants, the type check for examples, the word extraction, the cursor encoding and decoding, the paging loop and its note, the pairing and sorting of a tool set, the hint defaults and `parallel_safe`, and the rules that are not listed below. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_name_rules` unlocks `e1`: `bad-name` and `vague-name`.",
+        "`_description_rules` unlocks `e2`: `short-description` and `no-boundary`.",
+        "`_parameter_rules` unlocks `e3`: `param-undescribed` and `required-unknown`.",
+        "`_list_and_hint_rules` unlocks `e4`: `list-unbounded` and `hint-contradicts-name`.",
+        "`_similar` unlocks `e5`: the overlap threshold of two descriptions.",
+        "`_check_limit` unlocks `e6`: the limit that is refused below 1 and cut to 50.",
+        "`_over_cap` unlocks `e7`: when the size cap ends a page, and the first item that is always taken.",
+        "`effective_hints` unlocks `e8`: a tool's own hints count only from a trusted server."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs the first four. About twenty lines in all. The steps below describe the whole grader, so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Step 1: `lint_tool(tool)`"
+    },
+    {
+      "type": "para",
+      "text": "Return the sorted list of rule ids the tool breaks, without repeats; `[]` for a clean tool."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Rule",
+        "A tool breaks it when"
+      ],
+      "rows": [
+        [
+          "`bad-name`",
+          "the name does not match `[A-Za-z0-9_-]{1,128}` in full"
+        ],
+        [
+          "`vague-name`",
+          "the name, in lower case, is one of `tool`, `helper`, `do`, `run`, `process`, `handle`, `data`, `util`, `utils`, `query`"
+        ],
+        [
+          "`short-description`",
+          "the description has fewer than 3 sentences, a sentence ending at `.`, `!` or `?` followed by white space or the end"
+        ],
+        [
+          "`no-use-when`",
+          "the lower-cased description lacks `use when`"
+        ],
+        [
+          "`no-boundary`",
+          "it lacks all of `do not use`, `not for` and `instead of` (the boundary against the neighbouring tool)"
+        ],
+        [
+          "`param-undescribed`",
+          "a property has no description, or a blank one"
+        ],
+        [
+          "`required-unknown`",
+          "`required` names something that is not a property"
+        ],
+        [
+          "`open-set`",
+          "a string property without an `enum` has a description containing `one of` or `either`"
+        ],
+        [
+          "`reasoning-param`",
+          "a property name or description contains `reasoning` or `thinking`"
+        ],
+        [
+          "`bad-example`",
+          "an `input_examples` entry is not a map, lacks a required key, has a key that is not a property, has a value of the wrong type (`string`, `integer` without booleans, `number`, `boolean`, `array`, `object`) or outside the property's `enum`"
+        ],
+        [
+          "`list-unbounded`",
+          "the name starts with `list_`, `search_` or `find_` and the properties lack `limit` or lack `cursor`"
+        ],
+        [
+          "`hint-contradicts-name`",
+          "`readOnlyHint` is true and the name starts with `create_`, `update_`, `delete_`, `remove_`, `send_` or `write_`, or `destructiveHint` is false and the name starts with `delete_` or `remove_`"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "**Why the exam cares.** The guide says tool descriptions are the primary mechanism for tool selection, and asks for input formats, example queries, edge cases and boundaries against similar tools. A rule that a script can check is a rule a team can keep. **What you should see when it works:** a tool of four sentences with a when-to-use phrase, a boundary, described parameters and valid examples is clean; a tool called `helper` with the description \"Gets stuff.\" is named for five rules."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Step 2: `lint_tool_set(tools, max_tools=20)`"
+    },
+    {
+      "type": "para",
+      "text": "Return sorted `[tool name, rule]` pairs: every pair `lint_tool` finds, plus `duplicate-name` (once per name used by more than one tool), `overlap:<other name>` on both tools of a pair with different names whose descriptions share at least 0.6 of their words (the words are the runs of three or more letters a to z in the lower-cased description; the share is the size of the common words over the size of all the words), and `[\"*\", \"too-many-tools\"]` when the set has more than `max_tools` tools. Sort by name, then by rule."
+    },
+    {
+      "type": "para",
+      "text": "**Why the exam cares.** Overlapping descriptions cause misrouting (the guide's `analyze_content` and `analyze_document`), and the documentation says that tool selection accuracy degrades with more than 30 to 50 tools loaded at once. **What you should see when it works:** two tools with the same description point at each other, two with different ones do not, and a set at exactly the budget is not too large."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Step 3: `page_results(items, cursor=None, limit=10, max_chars=2000)`"
+    },
+    {
+      "type": "para",
+      "text": "`items` is a list of text. Return `{\"items\", \"next_cursor\", \"truncated\", \"note\"}`."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`limit` must be a whole number of at least 1, else raise `ValueError` (TypeScript: an `Error`; Java and Kotlin: `IllegalArgumentException`); a limit above 50 is cut to 50.",
+        "The cursor is opaque: build it from the offset of the first item not returned (the reference encodes `offset:<n>` in base64, and any encoding that hides the number passes). A missing cursor starts at the beginning; a cursor that does not decode to an offset between 0 and the number of items is refused as above.",
+        "Take up to `limit` items from the offset, but stop before the item that would push the total length of the page over `max_chars`; the first item is always taken, however long. `truncated` is true when the size cap made the page shorter than the limit and the items left allowed.",
+        "`next_cursor` is null on the last page. `note` is null then too; otherwise it is `Showing N of M results; pass next_cursor to continue, or narrow the query with a filter.`"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "**Why the exam cares.** A tool that returns everything fills the context; the documentation advises pagination, filtering and truncation with sensible defaults, and a truncation message that steers the agent. **What you should see when it works:** 25 rows come back in pages of 10, 10 and 5; the last page has no cursor and no note; a limit of 500 returns at most 50; and a page that hit the size cap says so."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Step 4: `effective_hints(tool, trusted_server)` and `parallel_safe(tools, trusted_servers)`"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`effective_hints` returns the four hints `readOnlyHint` (default false), `destructiveHint` (true), `idempotentHint` (false) and `openWorldHint` (true). The tool's own Boolean values replace the defaults only when its server is trusted; values that are not Booleans are ignored.",
+        "`parallel_safe` returns the names of the tools whose effective `readOnlyHint` is true, taking each tool's `server` and the set of trusted servers, in the order given."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "**Why the exam cares.** The MCP specification says that clients \"MUST consider tool annotations to be untrusted unless they come from trusted servers\", and the Agent SDK uses the read-only hint only to decide which tools may run side by side. A hint is a claim, not a control. **What you should see when it works:** a read-only hint from an unknown server changes nothing, and the same hint from a trusted server lets the tool run in parallel."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A well made tool is clean and a poor one is named for every rule it breaks"
+        ],
+        [
+          "`e1`",
+          "Names must match the pattern, and a vague name is flagged in any case"
+        ],
+        [
+          "`e2`",
+          "A description needs three sentences, a when-to-use phrase and a boundary"
+        ],
+        [
+          "`e3`",
+          "Parameters are described, required names exist, closed sets are enums, examples fit the schema"
+        ],
+        [
+          "`e4`",
+          "A list tool needs a limit and a cursor, and a hint may not contradict the name"
+        ],
+        [
+          "`e5`",
+          "A set is graded for duplicate names, overlapping descriptions at the threshold, and size at the budget"
+        ],
+        [
+          "`e6`",
+          "Pages carry an opaque cursor, a clamped limit and a note, and refuse a bad limit or cursor"
+        ],
+        [
+          "`e7`",
+          "A page stops at the size cap, says so, and always carries one item"
+        ],
+        [
+          "`e8`",
+          "A tool's own hints count only from a trusted server"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Tool interfaces graded on rules: lint a tool and a tool set, page large results, and weigh a tool's annotations. See ../../statement.md.\"\"\"\nimport logging\nimport base64\nimport re\n\nlog = logging.getLogger(__name__)\n\nNAME = re.compile(r\"[A-Za-z0-9_-]{1,128}\")\nVAGUE = {\"tool\", \"helper\", \"do\", \"run\", \"process\", \"handle\", \"data\", \"util\", \"utils\", \"query\"}\nREAD_PREFIXES = (\"list_\", \"search_\", \"find_\")\nWRITE_PREFIXES = (\"create_\", \"update_\", \"delete_\", \"remove_\", \"send_\", \"write_\")\nDELETE_PREFIXES = (\"delete_\", \"remove_\")\nOVERLAP = 0.6  # token overlap of two descriptions from which the tools count as overlapping\nMAX_LIMIT = 50\nDEFAULT_HINTS = {\"readOnlyHint\": False, \"destructiveHint\": True, \"idempotentHint\": False, \"openWorldHint\": True}\n\n\ndef _valid(value, schema):\n    kind = schema.get(\"type\")\n    if kind == \"string\" and not isinstance(value, str):\n        return False\n    if kind == \"integer\" and (isinstance(value, bool) or not isinstance(value, int)):\n        return False\n    if kind == \"number\" and (isinstance(value, bool) or not isinstance(value, (int, float))):\n        return False\n    if kind == \"boolean\" and not isinstance(value, bool):\n        return False\n    if kind == \"array\" and not isinstance(value, list):\n        return False\n    if kind == \"object\" and not isinstance(value, dict):\n        return False\n    return \"enum\" not in schema or value in schema[\"enum\"]\n\n\ndef _example_ok(example, properties, required):\n    if not isinstance(example, dict) or any(name not in example for name in required):\n        return False\n    return all(name in properties and _valid(value, properties[name]) for name, value in example.items())\n\n\ndef _name_rules(name):\n    found = set()\n    if not NAME.fullmatch(name):\n        found.add(\"bad-name\")\n    if name.lower() in VAGUE:\n        found.add(\"vague-name\")\n    return found\n\n\ndef _description_rules(description):\n    found = set()\n    low = description.lower()\n    if len(re.findall(r\"[.!?](?:\\s|$)\", description)) < 3:\n        found.add(\"short-description\")\n    if not any(phrase in low for phrase in (\"do not use\", \"not for\", \"instead of\")):\n        found.add(\"no-boundary\")\n    return found\n\n\ndef _parameter_rules(properties, required):\n    found = set()\n    if any(not str((spec or {}).get(\"description\") or \"\").strip() for spec in properties.values()):\n        found.add(\"param-undescribed\")\n    if any(item not in properties for item in required):\n        found.add(\"required-unknown\")\n    return found\n\n\ndef _list_and_hint_rules(name, properties, hints):\n    found = set()\n    if name.startswith(READ_PREFIXES) and not (\"limit\" in properties and \"cursor\" in properties):\n        found.add(\"list-unbounded\")\n    if (hints.get(\"readOnlyHint\") is True and name.startswith(WRITE_PREFIXES)) or (hints.get(\"destructiveHint\") is False and name.startswith(DELETE_PREFIXES)):\n        found.add(\"hint-contradicts-name\")\n    return found\n\n\ndef lint_tool(tool):\n    \"\"\"The rules one tool breaks, sorted and without repeats.\"\"\"\n    log.debug(\"lint_tool input: %r\", tool)\n    found = set()\n    name = str(tool.get(\"name\") or \"\")\n    description = str(tool.get(\"description\") or \"\")\n    schema = tool.get(\"input_schema\") or {}\n    properties = schema.get(\"properties\") or {}\n    required = schema.get(\"required\") or []\n    found |= _name_rules(name)\n    found |= _description_rules(description)\n    if \"use when\" not in description.lower():\n        found.add(\"no-use-when\")\n    found |= _parameter_rules(properties, required)\n    if any((spec or {}).get(\"type\") == \"string\" and \"enum\" not in spec and re.search(r\"one of|either\", str(spec.get(\"description\") or \"\").lower()) for spec in properties.values()):\n        found.add(\"open-set\")\n    if any(re.search(r\"reasoning|thinking\", key.lower() + \" \" + str((spec or {}).get(\"description\") or \"\").lower()) for key, spec in properties.items()):\n        found.add(\"reasoning-param\")\n    if any(not _example_ok(example, properties, required) for example in tool.get(\"input_examples\") or []):\n        found.add(\"bad-example\")\n    found |= _list_and_hint_rules(name, properties, tool.get(\"annotations\") or {})\n    return sorted(found)\n\n\ndef _words(text):\n    return set(re.findall(r\"[a-z]{3,}\", str(text).lower()))\n\n\ndef _similar(wa, wb):\n    return bool(wa | wb) and len(wa & wb) / len(wa | wb) >= OVERLAP\n\n\ndef lint_tool_set(tools, max_tools=20):\n    \"\"\"[tool name, rule] pairs, sorted: each tool's own rules, duplicate names, overlapping descriptions and a set that is too large.\"\"\"\n    found = {(tool.get(\"name\"), rule) for tool in tools for rule in lint_tool(tool)}\n    names = [tool.get(\"name\") for tool in tools]\n    found |= {(name, \"duplicate-name\") for name in set(names) if names.count(name) > 1}\n    for i, a in enumerate(tools):\n        for b in tools[i + 1:]:\n            wa, wb = _words(a.get(\"description\")), _words(b.get(\"description\"))\n            if a.get(\"name\") != b.get(\"name\") and _similar(wa, wb):\n                found |= {(a.get(\"name\"), f\"overlap:{b.get('name')}\"), (b.get(\"name\"), f\"overlap:{a.get('name')}\")}\n    if len(tools) > max_tools:\n        found.add((\"*\", \"too-many-tools\"))\n    return [list(pair) for pair in sorted(found)]\n\n\ndef _encode(offset):\n    return base64.b64encode(f\"offset:{offset}\".encode()).decode()\n\n\ndef _decode(cursor, total):\n    try:\n        text = base64.b64decode(cursor.encode(), validate=True).decode()\n        offset = int(text.removeprefix(\"offset:\")) if text.startswith(\"offset:\") else -1\n    except Exception:\n        offset = -1\n    if offset < 0 or offset > total:\n        raise ValueError(\"invalid cursor\")\n    return offset\n\n\ndef _check_limit(limit):\n    if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:\n        raise ValueError(\"limit must be a whole number of at least 1\")\n    limit = min(limit, MAX_LIMIT)\n    return limit\n\n\ndef _over_cap(page, used, item, max_chars):\n    return bool(page) and used + len(item) > max_chars\n\n\ndef page_results(items, cursor=None, limit=10, max_chars=2000):\n    \"\"\"One page of a long list: an opaque cursor, a limit that is clamped, a size cap, and a note that tells the model how to go on.\"\"\"\n    limit = _check_limit(limit)\n    offset = 0 if cursor is None else _decode(cursor, len(items))\n    page, used = [], 0\n    for item in items[offset:offset + limit]:\n        if _over_cap(page, used, item, max_chars):\n            break\n        page.append(item)\n        used += len(item)\n    taken = offset + len(page)\n    next_cursor = _encode(taken) if taken < len(items) else None\n    note = f\"Showing {len(page)} of {len(items)} results; pass next_cursor to continue, or narrow the query with a filter.\" if next_cursor else None\n    return {\"items\": page, \"next_cursor\": next_cursor, \"truncated\": len(page) < min(limit, len(items) - offset), \"note\": note}\n\n\ndef effective_hints(tool, trusted_server):\n    \"\"\"The four annotation hints a client acts on: the tool's own only when its server is trusted, the defaults otherwise.\"\"\"\n    hints = dict(DEFAULT_HINTS)\n    if trusted_server:\n        for key in hints:\n            value = (tool.get(\"annotations\") or {}).get(key)\n            if isinstance(value, bool):\n                hints[key] = value\n    return hints\n\n\ndef parallel_safe(tools, trusted_servers):\n    \"\"\"Names of the tools that may run beside other read-only tools: a read-only hint from a trusted server.\"\"\"\n    return [tool[\"name\"] for tool in tools if effective_hints(tool, tool.get(\"server\") in trusted_servers)[\"readOnlyHint\"]]\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom toolset import lint_tool\n\n# A well-made tool, like the one the tests start from: a clear description with when to use it and when not.\ngood = {\n    \"name\": \"lookup_order\",\n    \"description\": (\"Looks up one order by its id and returns its status, items and total in cents. Use when the customer gives an order id \"\n                    \"such as A-1042 or asks where an order is. Do not use it to find a customer by name; use get_customer instead of \"\n                    \"this tool for that. It returns no payment details.\"),\n    \"input_schema\": {\"type\": \"object\", \"required\": [\"order_id\"],\n                     \"properties\": {\"order_id\": {\"type\": \"string\", \"description\": \"The order id, for example A-1042.\"}}},\n    \"input_examples\": [{\"order_id\": \"A-1042\"}],\n    \"annotations\": {\"readOnlyHint\": True},\n}\n# A poor one: a vague name, a short description and a parameter nobody explained.\npoor = {\"name\": \"helper\", \"description\": \"Gets stuff.\",\n        \"input_schema\": {\"type\": \"object\", \"properties\": {\"q\": {\"type\": \"string\"}}, \"required\": [\"q\"]}}\n\nprint(\"good tool:\", lint_tool(good))\npoor_rules = lint_tool(poor)\nprint(\"poor tool:\", poor_rules)\nprint(\"rules the poor tool breaks:\", len(poor_rules or []))\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Tool interfaces graded on rules: lint a tool and a tool set, page large results, and weigh a tool's annotations. See ../../statement.md.\"\"\"\nimport logging\nimport base64\nimport re\n\nlog = logging.getLogger(__name__)\n\nNAME = re.compile(r\"[A-Za-z0-9_-]{1,128}\")\nVAGUE = {\"tool\", \"helper\", \"do\", \"run\", \"process\", \"handle\", \"data\", \"util\", \"utils\", \"query\"}\nREAD_PREFIXES = (\"list_\", \"search_\", \"find_\")\nWRITE_PREFIXES = (\"create_\", \"update_\", \"delete_\", \"remove_\", \"send_\", \"write_\")\nDELETE_PREFIXES = (\"delete_\", \"remove_\")\nOVERLAP = 0.6  # token overlap of two descriptions from which the tools count as overlapping\nMAX_LIMIT = 50\nDEFAULT_HINTS = {\"readOnlyHint\": False, \"destructiveHint\": True, \"idempotentHint\": False, \"openWorldHint\": True}\n\n\ndef _valid(value, schema):\n    kind = schema.get(\"type\")\n    if kind == \"string\" and not isinstance(value, str):\n        return False\n    if kind == \"integer\" and (isinstance(value, bool) or not isinstance(value, int)):\n        return False\n    if kind == \"number\" and (isinstance(value, bool) or not isinstance(value, (int, float))):\n        return False\n    if kind == \"boolean\" and not isinstance(value, bool):\n        return False\n    if kind == \"array\" and not isinstance(value, list):\n        return False\n    if kind == \"object\" and not isinstance(value, dict):\n        return False\n    return \"enum\" not in schema or value in schema[\"enum\"]\n\n\ndef _example_ok(example, properties, required):\n    if not isinstance(example, dict) or any(name not in example for name in required):\n        return False\n    return all(name in properties and _valid(value, properties[name]) for name, value in example.items())\n\n\ndef _name_rules(name):\n    \"\"\"TODO 1 of 8 (finish this to pass e1): the rule ids a tool name breaks.\n\n    Receives the tool's name. Returns a set with `bad-name` when the name does not match NAME in full, and `vague-name` when the\n    name in lower case is in VAGUE. Example: _name_rules(\"Helper\") -> {\"vague-name\"}, _name_rules(\"my tool\") -> {\"bad-name\"}\n    \"\"\"\n    found = set()\n    return found\n\n\ndef _description_rules(description):\n    \"\"\"TODO 2 of 8 (finish this to pass e2): the rule ids a description breaks.\n\n    Receives the description text. Returns a set with `short-description` when it has fewer than 3 sentences (a `.`, `!` or `?`\n    followed by white space or the end) and `no-boundary` when the lower-cased text has none of \"do not use\", \"not for\", \"instead of\".\n    Example: _description_rules(\"Gets stuff.\") -> {\"short-description\", \"no-boundary\"}\n    \"\"\"\n    found = set()\n    return found\n\n\ndef _parameter_rules(properties, required):\n    \"\"\"TODO 3 of 8 (finish this to pass e3): the rule ids the parameters break.\n\n    Receives the schema's `properties` (name -> spec) and the `required` list. Returns a set with `param-undescribed` when a property\n    has no description or a blank one, and `required-unknown` when `required` names something that is not a property.\n    Example: _parameter_rules({\"q\": {\"type\": \"string\"}}, [\"limit\"]) -> {\"param-undescribed\", \"required-unknown\"}\n    \"\"\"\n    found = set()\n    return found\n\n\ndef _list_and_hint_rules(name, properties, hints):\n    \"\"\"TODO 4 of 8 (finish this to pass e4): the rule ids a list tool and its annotations break.\n\n    Receives the name, the `properties` and the tool's `annotations` map. Returns a set with `list-unbounded` when the name starts\n    with a READ_PREFIXES entry and `properties` lacks `limit` or `cursor`, and `hint-contradicts-name` when `readOnlyHint` is True\n    and the name starts with a WRITE_PREFIXES entry, or `destructiveHint` is False and it starts with a DELETE_PREFIXES entry.\n    Example: _list_and_hint_rules(\"list_users\", {\"limit\": {}}, {}) -> {\"list-unbounded\"}\n    \"\"\"\n    found = set()\n    return found\n\n\ndef lint_tool(tool):\n    \"\"\"The rules one tool breaks, sorted and without repeats.\"\"\"\n    log.debug(\"lint_tool input: %r\", tool)\n    found = set()\n    name = str(tool.get(\"name\") or \"\")\n    description = str(tool.get(\"description\") or \"\")\n    schema = tool.get(\"input_schema\") or {}\n    properties = schema.get(\"properties\") or {}\n    required = schema.get(\"required\") or []\n    found |= _name_rules(name)\n    found |= _description_rules(description)\n    if \"use when\" not in description.lower():\n        found.add(\"no-use-when\")\n    found |= _parameter_rules(properties, required)\n    if any((spec or {}).get(\"type\") == \"string\" and \"enum\" not in spec and re.search(r\"one of|either\", str(spec.get(\"description\") or \"\").lower()) for spec in properties.values()):\n        found.add(\"open-set\")\n    if any(re.search(r\"reasoning|thinking\", key.lower() + \" \" + str((spec or {}).get(\"description\") or \"\").lower()) for key, spec in properties.items()):\n        found.add(\"reasoning-param\")\n    if any(not _example_ok(example, properties, required) for example in tool.get(\"input_examples\") or []):\n        found.add(\"bad-example\")\n    found |= _list_and_hint_rules(name, properties, tool.get(\"annotations\") or {})\n    return sorted(found)\n\n\ndef _words(text):\n    return set(re.findall(r\"[a-z]{3,}\", str(text).lower()))\n\n\ndef _similar(wa, wb):\n    \"\"\"TODO 5 of 8 (finish this to pass e5): do two descriptions overlap?\n\n    Receives two sets of words. Returns True when the share of common words over all the words is at least OVERLAP (0.6), and False\n    when both sets are empty. Example: _similar({\"a\", \"b\", \"c\"}, {\"a\", \"b\", \"c\", \"d\"}) -> True (3 of 4), _similar({\"a\", \"b\"}, {\"c\", \"d\"}) -> False\n    \"\"\"\n    return False\n\n\ndef lint_tool_set(tools, max_tools=20):\n    \"\"\"[tool name, rule] pairs, sorted: each tool's own rules, duplicate names, overlapping descriptions and a set that is too large.\"\"\"\n    found = {(tool.get(\"name\"), rule) for tool in tools for rule in lint_tool(tool)}\n    names = [tool.get(\"name\") for tool in tools]\n    found |= {(name, \"duplicate-name\") for name in set(names) if names.count(name) > 1}\n    for i, a in enumerate(tools):\n        for b in tools[i + 1:]:\n            wa, wb = _words(a.get(\"description\")), _words(b.get(\"description\"))\n            if a.get(\"name\") != b.get(\"name\") and _similar(wa, wb):\n                found |= {(a.get(\"name\"), f\"overlap:{b.get('name')}\"), (b.get(\"name\"), f\"overlap:{a.get('name')}\")}\n    if len(tools) > max_tools:\n        found.add((\"*\", \"too-many-tools\"))\n    return [list(pair) for pair in sorted(found)]\n\n\ndef _encode(offset):\n    return base64.b64encode(f\"offset:{offset}\".encode()).decode()\n\n\ndef _decode(cursor, total):\n    try:\n        text = base64.b64decode(cursor.encode(), validate=True).decode()\n        offset = int(text.removeprefix(\"offset:\")) if text.startswith(\"offset:\") else -1\n    except Exception:\n        offset = -1\n    if offset < 0 or offset > total:\n        raise ValueError(\"invalid cursor\")\n    return offset\n\n\ndef _check_limit(limit):\n    \"\"\"TODO 6 of 8 (finish this to pass e6): validate and clamp a page limit.\n\n    Receives the requested limit. Raises ValueError unless it is a whole number (not a bool) of at least 1; otherwise returns it cut\n    to MAX_LIMIT. Example: _check_limit(500) -> 50, _check_limit(0) raises ValueError\n    \"\"\"\n    return limit\n\n\ndef _over_cap(page, used, item, max_chars):\n    \"\"\"TODO 7 of 8 (finish this to pass e7): would this item push the page over the size cap?\n\n    Receives the items already in the page, their total length `used`, the next item and `max_chars`. Returns True when the page is\n    not empty and adding the item would make the total longer than max_chars; the first item is always taken, however long.\n    Example: _over_cap([\"a\" * 5], 5, \"b\" * 6, 10) -> True, _over_cap([], 0, \"b\" * 99, 10) -> False\n    \"\"\"\n    return False\n\n\ndef page_results(items, cursor=None, limit=10, max_chars=2000):\n    \"\"\"One page of a long list: an opaque cursor, a limit that is clamped, a size cap, and a note that tells the model how to go on.\"\"\"\n    limit = _check_limit(limit)\n    offset = 0 if cursor is None else _decode(cursor, len(items))\n    page, used = [], 0\n    for item in items[offset:offset + limit]:\n        if _over_cap(page, used, item, max_chars):\n            break\n        page.append(item)\n        used += len(item)\n    taken = offset + len(page)\n    next_cursor = _encode(taken) if taken < len(items) else None\n    note = f\"Showing {len(page)} of {len(items)} results; pass next_cursor to continue, or narrow the query with a filter.\" if next_cursor else None\n    return {\"items\": page, \"next_cursor\": next_cursor, \"truncated\": len(page) < min(limit, len(items) - offset), \"note\": note}\n\n\ndef effective_hints(tool, trusted_server):\n    \"\"\"TODO 8 of 8 (finish this to pass e8): the four annotation hints a client acts on.\n\n    Receives a tool (its `annotations` map holds its own hints) and whether its server is trusted. Returns a dict with the four keys\n    of DEFAULT_HINTS: the tool's own Boolean value for a key replaces the default only when the server is trusted (values that are\n    not Booleans are ignored); an untrusted server gets the defaults.\n    Example: effective_hints({\"annotations\": {\"readOnlyHint\": True}}, False)[\"readOnlyHint\"] -> False; with True -> True\n    \"\"\"\n    hints = dict(DEFAULT_HINTS)\n    return hints\n\n\ndef parallel_safe(tools, trusted_servers):\n    \"\"\"Names of the tools that may run beside other read-only tools: a read-only hint from a trusted server.\"\"\"\n    return [tool[\"name\"] for tool in tools if effective_hints(tool, tool.get(\"server\") in trusted_servers)[\"readOnlyHint\"]]\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom toolset import lint_tool\n\n# A well-made tool, like the one the tests start from: a clear description with when to use it and when not.\ngood = {\n    \"name\": \"lookup_order\",\n    \"description\": (\"Looks up one order by its id and returns its status, items and total in cents. Use when the customer gives an order id \"\n                    \"such as A-1042 or asks where an order is. Do not use it to find a customer by name; use get_customer instead of \"\n                    \"this tool for that. It returns no payment details.\"),\n    \"input_schema\": {\"type\": \"object\", \"required\": [\"order_id\"],\n                     \"properties\": {\"order_id\": {\"type\": \"string\", \"description\": \"The order id, for example A-1042.\"}}},\n    \"input_examples\": [{\"order_id\": \"A-1042\"}],\n    \"annotations\": {\"readOnlyHint\": True},\n}\n# A poor one: a vague name, a short description and a parameter nobody explained.\npoor = {\"name\": \"helper\", \"description\": \"Gets stuff.\",\n        \"input_schema\": {\"type\": \"object\", \"properties\": {\"q\": {\"type\": \"string\"}}, \"required\": [\"q\"]}}\n\nprint(\"good tool:\", lint_tool(good))\npoor_rules = lint_tool(poor)\nprint(\"poor tool:\", poor_rules)\nprint(\"rules the poor tool breaks:\", len(poor_rules or []))\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 11,
+    "paras": 12,
+    "code": 2,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "27dfb5558bca4bb964ff5a147461dc33fa5e5a46a5c5673d97966c8199cd88b1",
+  "starting_code": "\"\"\"Tool interfaces graded on rules: lint a tool and a tool set, page large results, and weigh a tool's annotations. See ../../statement.md.\"\"\"\nimport logging\nimport base64\nimport re\n\nlog = logging.getLogger(__name__)\n\nNAME = re.compile(r\"[A-Za-z0-9_-]{1,128}\")\nVAGUE = {\"tool\", \"helper\", \"do\", \"run\", \"process\", \"handle\", \"data\", \"util\", \"utils\", \"query\"}\nREAD_PREFIXES = (\"list_\", \"search_\", \"find_\")\nWRITE_PREFIXES = (\"create_\", \"update_\", \"delete_\", \"remove_\", \"send_\", \"write_\")\nDELETE_PREFIXES = (\"delete_\", \"remove_\")\nOVERLAP = 0.6  # token overlap of two descriptions from which the tools count as overlapping\nMAX_LIMIT = 50\nDEFAULT_HINTS = {\"readOnlyHint\": False, \"destructiveHint\": True, \"idempotentHint\": False, \"openWorldHint\": True}\n\n\ndef _valid(value, schema):\n    kind = schema.get(\"type\")\n    if kind == \"string\" and not isinstance(value, str):\n        return False\n    if kind == \"integer\" and (isinstance(value, bool) or not isinstance(value, int)):\n        return False\n    if kind == \"number\" and (isinstance(value, bool) or not isinstance(value, (int, float))):\n        return False\n    if kind == \"boolean\" and not isinstance(value, bool):\n        return False\n    if kind == \"array\" and not isinstance(value, list):\n        return False\n    if kind == \"object\" and not isinstance(value, dict):\n        return False\n    return \"enum\" not in schema or value in schema[\"enum\"]\n\n\ndef _example_ok(example, properties, required):\n    if not isinstance(example, dict) or any(name not in example for name in required):\n        return False\n    return all(name in properties and _valid(value, properties[name]) for name, value in example.items())\n\n\ndef _name_rules(name):\n    \"\"\"TODO 1 of 8 (finish this to pass e1): the rule ids a tool name breaks.\n\n    Receives the tool's name. Returns a set with `bad-name` when the name does not match NAME in full, and `vague-name` when the\n    name in lower case is in VAGUE. Example: _name_rules(\"Helper\") -> {\"vague-name\"}, _name_rules(\"my tool\") -> {\"bad-name\"}\n    \"\"\"\n    found = set()\n    return found\n\n\ndef _description_rules(description):\n    \"\"\"TODO 2 of 8 (finish this to pass e2): the rule ids a description breaks.\n\n    Receives the description text. Returns a set with `short-description` when it has fewer than 3 sentences (a `.`, `!` or `?`\n    followed by white space or the end) and `no-boundary` when the lower-cased text has none of \"do not use\", \"not for\", \"instead of\".\n    Example: _description_rules(\"Gets stuff.\") -> {\"short-description\", \"no-boundary\"}\n    \"\"\"\n    found = set()\n    return found\n\n\ndef _parameter_rules(properties, required):\n    \"\"\"TODO 3 of 8 (finish this to pass e3): the rule ids the parameters break.\n\n    Receives the schema's `properties` (name -> spec) and the `required` list. Returns a set with `param-undescribed` when a property\n    has no description or a blank one, and `required-unknown` when `required` names something that is not a property.\n    Example: _parameter_rules({\"q\": {\"type\": \"string\"}}, [\"limit\"]) -> {\"param-undescribed\", \"required-unknown\"}\n    \"\"\"\n    found = set()\n    return found\n\n\ndef _list_and_hint_rules(name, properties, hints):\n    \"\"\"TODO 4 of 8 (finish this to pass e4): the rule ids a list tool and its annotations break.\n\n    Receives the name, the `properties` and the tool's `annotations` map. Returns a set with `list-unbounded` when the name starts\n    with a READ_PREFIXES entry and `properties` lacks `limit` or `cursor`, and `hint-contradicts-name` when `readOnlyHint` is True\n    and the name starts with a WRITE_PREFIXES entry, or `destructiveHint` is False and it starts with a DELETE_PREFIXES entry.\n    Example: _list_and_hint_rules(\"list_users\", {\"limit\": {}}, {}) -> {\"list-unbounded\"}\n    \"\"\"\n    found = set()\n    return found\n\n\ndef lint_tool(tool):\n    \"\"\"The rules one tool breaks, sorted and without repeats.\"\"\"\n    log.debug(\"lint_tool input: %r\", tool)\n    found = set()\n    name = str(tool.get(\"name\") or \"\")\n    description = str(tool.get(\"description\") or \"\")\n    schema = tool.get(\"input_schema\") or {}\n    properties = schema.get(\"properties\") or {}\n    required = schema.get(\"required\") or []\n    found |= _name_rules(name)\n    found |= _description_rules(description)\n    if \"use when\" not in description.lower():\n        found.add(\"no-use-when\")\n    found |= _parameter_rules(properties, required)\n    if any((spec or {}).get(\"type\") == \"string\" and \"enum\" not in spec and re.search(r\"one of|either\", str(spec.get(\"description\") or \"\").lower()) for spec in properties.values()):\n        found.add(\"open-set\")\n    if any(re.search(r\"reasoning|thinking\", key.lower() + \" \" + str((spec or {}).get(\"description\") or \"\").lower()) for key, spec in properties.items()):\n        found.add(\"reasoning-param\")\n    if any(not _example_ok(example, properties, required) for example in tool.get(\"input_examples\") or []):\n        found.add(\"bad-example\")\n    found |= _list_and_hint_rules(name, properties, tool.get(\"annotations\") or {})\n    return sorted(found)\n\n\ndef _words(text):\n    return set(re.findall(r\"[a-z]{3,}\", str(text).lower()))\n\n\ndef _similar(wa, wb):\n    \"\"\"TODO 5 of 8 (finish this to pass e5): do two descriptions overlap?\n\n    Receives two sets of words. Returns True when the share of common words over all the words is at least OVERLAP (0.6), and False\n    when both sets are empty. Example: _similar({\"a\", \"b\", \"c\"}, {\"a\", \"b\", \"c\", \"d\"}) -> True (3 of 4), _similar({\"a\", \"b\"}, {\"c\", \"d\"}) -> False\n    \"\"\"\n    return False\n\n\ndef lint_tool_set(tools, max_tools=20):\n    \"\"\"[tool name, rule] pairs, sorted: each tool's own rules, duplicate names, overlapping descriptions and a set that is too large.\"\"\"\n    found = {(tool.get(\"name\"), rule) for tool in tools for rule in lint_tool(tool)}\n    names = [tool.get(\"name\") for tool in tools]\n    found |= {(name, \"duplicate-name\") for name in set(names) if names.count(name) > 1}\n    for i, a in enumerate(tools):\n        for b in tools[i + 1:]:\n            wa, wb = _words(a.get(\"description\")), _words(b.get(\"description\"))\n            if a.get(\"name\") != b.get(\"name\") and _similar(wa, wb):\n                found |= {(a.get(\"name\"), f\"overlap:{b.get('name')}\"), (b.get(\"name\"), f\"overlap:{a.get('name')}\")}\n    if len(tools) > max_tools:\n        found.add((\"*\", \"too-many-tools\"))\n    return [list(pair) for pair in sorted(found)]\n\n\ndef _encode(offset):\n    return base64.b64encode(f\"offset:{offset}\".encode()).decode()\n\n\ndef _decode(cursor, total):\n    try:\n        text = base64.b64decode(cursor.encode(), validate=True).decode()\n        offset = int(text.removeprefix(\"offset:\")) if text.startswith(\"offset:\") else -1\n    except Exception:\n        offset = -1\n    if offset < 0 or offset > total:\n        raise ValueError(\"invalid cursor\")\n    return offset\n\n\ndef _check_limit(limit):\n    \"\"\"TODO 6 of 8 (finish this to pass e6): validate and clamp a page limit.\n\n    Receives the requested limit. Raises ValueError unless it is a whole number (not a bool) of at least 1; otherwise returns it cut\n    to MAX_LIMIT. Example: _check_limit(500) -> 50, _check_limit(0) raises ValueError\n    \"\"\"\n    return limit\n\n\ndef _over_cap(page, used, item, max_chars):\n    \"\"\"TODO 7 of 8 (finish this to pass e7): would this item push the page over the size cap?\n\n    Receives the items already in the page, their total length `used`, the next item and `max_chars`. Returns True when the page is\n    not empty and adding the item would make the total longer than max_chars; the first item is always taken, however long.\n    Example: _over_cap([\"a\" * 5], 5, \"b\" * 6, 10) -> True, _over_cap([], 0, \"b\" * 99, 10) -> False\n    \"\"\"\n    return False\n\n\ndef page_results(items, cursor=None, limit=10, max_chars=2000):\n    \"\"\"One page of a long list: an opaque cursor, a limit that is clamped, a size cap, and a note that tells the model how to go on.\"\"\"\n    limit = _check_limit(limit)\n    offset = 0 if cursor is None else _decode(cursor, len(items))\n    page, used = [], 0\n    for item in items[offset:offset + limit]:\n        if _over_cap(page, used, item, max_chars):\n            break\n        page.append(item)\n        used += len(item)\n    taken = offset + len(page)\n    next_cursor = _encode(taken) if taken < len(items) else None\n    note = f\"Showing {len(page)} of {len(items)} results; pass next_cursor to continue, or narrow the query with a filter.\" if next_cursor else None\n    return {\"items\": page, \"next_cursor\": next_cursor, \"truncated\": len(page) < min(limit, len(items) - offset), \"note\": note}\n\n\ndef effective_hints(tool, trusted_server):\n    \"\"\"TODO 8 of 8 (finish this to pass e8): the four annotation hints a client acts on.\n\n    Receives a tool (its `annotations` map holds its own hints) and whether its server is trusted. Returns a dict with the four keys\n    of DEFAULT_HINTS: the tool's own Boolean value for a key replaces the default only when the server is trusted (values that are\n    not Booleans are ignored); an untrusted server gets the defaults.\n    Example: effective_hints({\"annotations\": {\"readOnlyHint\": True}}, False)[\"readOnlyHint\"] -> False; with True -> True\n    \"\"\"\n    hints = dict(DEFAULT_HINTS)\n    return hints\n\n\ndef parallel_safe(tools, trusted_servers):\n    \"\"\"Names of the tools that may run beside other read-only tools: a read-only hint from a trusted server.\"\"\"\n    return [tool[\"name\"] for tool in tools if effective_hints(tool, tool.get(\"server\") in trusted_servers)[\"readOnlyHint\"]]\n",
+  "exercise": {
+    "main_path": "practice/level-3/52-designing-tool-interfaces/prose/unit-02/practice-1/toolset.py",
+    "test_path": "practice/level-3/52-designing-tool-interfaces/prose/unit-02/practice-1/test_toolset.py",
+    "run_command": [
+      "python3",
+      "practice/level-3/52-designing-tool-interfaces/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-3/52-designing-tool-interfaces/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-3/52-designing-tool-interfaces/prose/unit-02/practice-1/test_toolset.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_a_well_made_tool_lints_clean_and_a_poor_one_is_named_for_every_rule_it_breaks",
+        "kind": "main",
+        "says": "A well made tool is clean and a poor one is named for every rule it breaks"
+      },
+      {
+        "id": "test_e1_names_must_match_the_pattern_and_a_vague_name_is_flagged",
+        "kind": "edge",
+        "says": "Names must match the pattern, and a vague name is flagged in any case"
+      },
+      {
+        "id": "test_e2_a_description_needs_three_sentences_a_when_to_use_phrase_and_a_boundary_against_the_neighbour",
+        "kind": "edge",
+        "says": "A description needs three sentences, a when-to-use phrase and a boundary"
+      },
+      {
+        "id": "test_e3_parameters_are_described_and_required_names_exist_and_closed_sets_are_enums_and_examples_fit_the_schema",
+        "kind": "edge",
+        "says": "Parameters are described, required names exist, closed sets are enums, examples fit the schema"
+      },
+      {
+        "id": "test_e4_a_list_tool_needs_a_limit_and_a_cursor_and_a_hint_may_not_contradict_the_name",
+        "kind": "edge",
+        "says": "A list tool needs a limit and a cursor, and a hint may not contradict the name"
+      },
+      {
+        "id": "test_e5_a_set_is_graded_for_duplicate_names_overlapping_descriptions_and_size",
+        "kind": "edge",
+        "says": "A set is graded for duplicate names, overlapping descriptions at the threshold, and size at the budget"
+      },
+      {
+        "id": "test_e6_pages_carry_an_opaque_cursor_and_a_clamped_limit_and_a_note",
+        "kind": "edge",
+        "says": "Pages carry an opaque cursor, a clamped limit and a note, and refuse a bad limit or cursor"
+      },
+      {
+        "id": "test_e7_a_page_stops_at_the_size_cap_and_says_so_but_always_carries_one_item",
+        "kind": "edge",
+        "says": "A page stops at the size cap, says so, and always carries one item"
+      },
+      {
+        "id": "test_e8_a_tools_own_hints_are_trusted_only_from_a_trusted_server_and_the_defaults_apply_otherwise",
+        "kind": "edge",
+        "says": "A tool's own hints count only from a trusted server"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/52-designing-tool-interfaces/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/52-designing-tool-interfaces/02-results-annotations-large-tool-sets-and-the-practice.md",
+    "concepts": [
+      "the practice of Results, annotations and large tool sets, and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/52-designing-tool-interfaces/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "designing-tool-interfaces-u2"
+}

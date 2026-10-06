@@ -1,0 +1,279 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "72-scenario-multi-agent-research-system"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: the coordinator's last step in a research run (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: the coordinator's last step in a research run"
+    },
+    {
+      "type": "para",
+      "text": "A coordinator hands subtasks to a search subagent, a document-analysis subagent and a synthesis subagent. The subagents have finished, some of them with a failure, and the coordinator has a list of results. Before the report is written, the coordinator must decide what it knows: which of the question's scopes were really covered, which claims several sources agree on, which claims the sources disagree about, what failed and what could be tried instead, and what the report cannot say. In this practice you write that step. The model is not called: the tests give you the results of the subagents. The shapes of a result and of the report are this course's own design for the capstone, not an Anthropic interface. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`synthesize`); TypeScript has the same name and the same fields. Java has the static method `Synthesis.synthesize` and the records `Finding`, `Failure`, `Result`, `Claim`, `Conflict` and `Report`; Kotlin has the top-level function `synthesize` and the data classes of the same names."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working synthesis step with seven gaps cut out of it. The plumbing is written and correct: collecting the findings of `ok` results and of the `partial` lists, grouping them by claim, telling a conflict (two or more values) from an agreed claim, and building the report from the pieces. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (Java and Kotlin use the camel-case names):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`covered_scopes` unlocks `e1` and `e5`, and the coverage in every case: the covered scopes and the gaps.",
+        "`sources_of` unlocks `e6`: the sources of a claim, in arrival order, without duplicates.",
+        "`observed_values` unlocks `e3`: the values and sources of a conflicting claim.",
+        "`all_partial` unlocks `e4`: whether every finding of a claim came from a partial list.",
+        "`unresolved_errors` unlocks `e2` and `e4`: the errors that a later result did not make up for.",
+        "`partial_scopes` unlocks `e4`: the gaps that a failed search still returned findings for.",
+        "`coverage_note` unlocks `e1`, `e2` and `e5`: the sentence about what is not covered."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About fifteen lines in all. The sections below describe the whole step."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "A finding is `{claim, value, source, date}`. A result of a subagent is `{scope, status, findings, error}`: `status` is `ok` (with `findings`) or `error` (with `error`, an object `{type, query, partial, alternatives}`, where `partial` is a list of findings that came back before the failure and `alternatives` lists queries to try instead)."
+    },
+    {
+      "type": "para",
+      "text": "`synthesize(required, results)` takes the scopes the question needs, in order, and returns a report with:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`covered`: the required scopes (in the order of `required`) that have an `ok` result with at least one finding; `gaps`: the other required scopes; `status`: `complete` when there are no gaps and `partial` otherwise.",
+        "`claims`: a list, sorted by the text of the claim, with `{claim, value, sources, partial}` for every claim on which all findings agree. `sources` is a list of `{source, date}` in the order the findings arrived, without duplicates. Findings come from `ok` results and from the `partial` lists of errors. `partial` is true only when every finding of the claim came from a `partial` list.",
+        "`conflicts`: a list, sorted by claim, with `{claim, values}` for every claim that has two or more different values; `values` lists `{value, source, date}` for each distinct value and source, in arrival order. A conflicting claim is not in `claims`: the report does not choose.",
+        "`errors`: for each result with status `error` whose scope is not covered, `{scope, type, query, alternatives}`. An error that a later `ok` result for the same scope made up for is not listed.",
+        "`partial`: the gaps for which an error returned partial findings.",
+        "`note`: `all scopes covered` when there are no gaps; otherwise `not covered: ` and the gaps in order, separated by `, `, each as `<scope> (<type> on '<query>')` when an unresolved error is recorded for it, `<scope> (not researched)` when no result at all names the scope (the plan never covered it), and `<scope> (no findings)` otherwise."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Coverage is checked against the question, not against the plan.** The exam's example is a report on the creative industries that covers only visual arts: every subagent succeeded and the coordinator's decomposition was too narrow. *You should see* a scope nobody researched reported as a gap and as `not researched`, which differs from a scope whose search failed.",
+        "**A failure travels with its context.** A bare \"search failed\" tells the coordinator nothing. *You should see* the type, the query and the alternatives kept, and a note that names them.",
+        "**A partial result is still information, and it is not coverage.** *You should see* partial findings in the claims, flagged, while their scope stays a gap.",
+        "**A conflict is information.** Two sources with two values are both shown, with their dates, and the report does not average or pick. *You should see* a conflict that names both sources and no claim for it.",
+        "**A status that cannot lie.** `complete` means that every scope was covered. *You should see* `partial` whenever a scope is missing, whatever the reason."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A full run with agreement: claims with every source, a complete status and the all-clear note"
+        ],
+        [
+          "`e1`",
+          "No results: every scope is a gap, `not researched`"
+        ],
+        [
+          "`e2`",
+          "A scope the plan never covered and a scope whose search failed read differently in the note"
+        ],
+        [
+          "`e3`",
+          "Two values for one claim are a conflict naming both sources and no claim"
+        ],
+        [
+          "`e4`",
+          "Partial results kept and flagged, not covering their scope, and an error that a retry made up for disappears"
+        ],
+        [
+          "`e5`",
+          "An `ok` result with no findings does not cover its scope"
+        ],
+        [
+          "`e6`",
+          "Claims sorted, sources in arrival order without duplicates, scopes in the order of `required`"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.TreeMap;\n\n/** The coordinator's last step in a research run: merge what the subagents returned into claims with their sources, conflicts, errors and a coverage note. */\npublic final class Synthesis {\n    private static final System.Logger LOG = System.getLogger(Synthesis.class.getName());\n\n    public record Finding(String claim, String value, String source, String date) {}\n\n    /** What a failed subagent returns: its type, the query, the partial findings and what to try instead. */\n    public record Failure(String type, String query, List<Finding> partial, List<String> alternatives) {}\n\n    /** A subagent's result: status \"ok\" with findings, or \"error\" with a failure. */\n    public record Result(String scope, String status, List<Finding> findings, Failure error) {}\n\n    public record Source(String source, String date) {}\n\n    public record Claim(String claim, String value, List<Source> sources, boolean partial) {}\n\n    public record Observed(String value, String source, String date) {}\n\n    public record Conflict(String claim, List<Observed> values) {}\n\n    public record Unresolved(String scope, String type, String query, List<String> alternatives) {}\n\n    public record Report(String status, List<String> covered, List<String> gaps, List<String> partial, List<Claim> claims, List<Conflict> conflicts, List<Unresolved> errors, String note) {}\n\n    /** The covered scopes and the gaps, both in the order of the required scopes. */\n    record Coverage(List<String> covered, List<String> gaps) {}\n\n    /** One finding and whether it came from a partial list. */\n    record Seen(Finding finding, boolean partial) {}\n\n    private static <T> void addNew(List<T> items, T item) {\n        if (!items.contains(item)) items.add(item);\n    }\n\n    /** Every finding with its partial flag, in arrival order. */\n    static List<Seen> findings(List<Result> results) {\n        List<Seen> seen = new ArrayList<>();\n        for (Result r : results) {\n            if (r.status().equals(\"ok\")) r.findings().forEach(f -> seen.add(new Seen(f, false)));\n            else r.error().partial().forEach(f -> seen.add(new Seen(f, true)));\n        }\n        return seen;\n    }\n\n    static Coverage coveredScopes(List<String> required, List<Result> results) {\n        List<String> okScopes = results.stream().filter(r -> r.status().equals(\"ok\") && !r.findings().isEmpty()).map(Result::scope).toList();\n        return new Coverage(required.stream().filter(okScopes::contains).toList(), required.stream().filter(s -> !okScopes.contains(s)).toList());\n    }\n\n    static List<Source> sourcesOf(List<Seen> group) {\n        List<Source> sources = new ArrayList<>();\n        for (Seen s : group) addNew(sources, new Source(s.finding().source(), s.finding().date()));\n        return sources;\n    }\n\n    static List<Observed> observedValues(List<Seen> group) {\n        List<Observed> observed = new ArrayList<>();\n        for (Seen s : group) addNew(observed, new Observed(s.finding().value(), s.finding().source(), s.finding().date()));\n        return observed;\n    }\n\n    static boolean allPartial(List<Seen> group) {\n        return group.stream().allMatch(Seen::partial);\n    }\n\n    static List<Unresolved> unresolvedErrors(List<Result> results, List<String> covered) {\n        return results.stream().filter(r -> r.status().equals(\"error\") && !covered.contains(r.scope()))\n            .map(r -> new Unresolved(r.scope(), r.error().type(), r.error().query(), r.error().alternatives())).toList();\n    }\n\n    static List<String> partialScopes(List<Result> results, List<String> gaps) {\n        return gaps.stream().filter(s -> results.stream().anyMatch(r -> r.status().equals(\"error\") && r.scope().equals(s) && !r.error().partial().isEmpty())).toList();\n    }\n\n    static String coverageNote(List<String> gaps, List<Unresolved> errors, List<Result> results) {\n        List<String> parts = new ArrayList<>();\n        for (String g : gaps) {\n            Unresolved failed = errors.stream().filter(e -> e.scope().equals(g)).findFirst().orElse(null);\n            if (failed != null) parts.add(g + \" (\" + failed.type() + \" on '\" + failed.query() + \"')\");\n            else if (results.stream().noneMatch(r -> r.scope().equals(g))) parts.add(g + \" (not researched)\");\n            else parts.add(g + \" (no findings)\");\n        }\n        return parts.isEmpty() ? \"all scopes covered\" : \"not covered: \" + String.join(\", \", parts);\n    }\n\n    public static Report synthesize(List<String> required, List<Result> results) {\n        LOG.log(System.Logger.Level.DEBUG, \"synthesize input: {0}\", results);\n        Coverage coverage = coveredScopes(required, results);\n        Map<String, List<Seen>> byClaim = new TreeMap<>();\n        for (Seen s : findings(results)) byClaim.computeIfAbsent(s.finding().claim(), k -> new ArrayList<>()).add(s);\n        List<Claim> claims = new ArrayList<>();\n        List<Conflict> conflicts = new ArrayList<>();\n        byClaim.forEach((claim, group) -> {\n            List<String> values = new ArrayList<>();\n            for (Seen s : group) addNew(values, s.finding().value());\n            if (values.size() > 1) conflicts.add(new Conflict(claim, observedValues(group)));\n            else claims.add(new Claim(claim, values.get(0), sourcesOf(group), allPartial(group)));\n        });\n        List<Unresolved> errors = unresolvedErrors(results, coverage.covered());\n        return new Report(coverage.gaps().isEmpty() ? \"complete\" : \"partial\", coverage.covered(), coverage.gaps(), partialScopes(results, coverage.gaps()), claims, conflicts, errors,\n            coverageNote(coverage.gaps(), errors, results));\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.*;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // Two subagents agree on claim X; a third scope timed out and is not covered.\n        Synthesis.Result a = new Synthesis.Result(\"a\", \"ok\", List.of(new Synthesis.Finding(\"X\", \"1\", \"s1\", \"2025-01-01\"), new Synthesis.Finding(\"Y\", \"2\", \"s2\", \"2025-01-01\")), null);\n        Synthesis.Result b = new Synthesis.Result(\"b\", \"ok\", List.of(new Synthesis.Finding(\"X\", \"1\", \"s3\", \"2025-01-01\")), null);\n        Synthesis.Result c = new Synthesis.Result(\"c\", \"error\", List.of(), new Synthesis.Failure(\"timeout\", \"q-c\", List.of(), List.of(\"q-c-narrow\")));\n        Synthesis.Report report = Synthesis.synthesize(List.of(\"a\", \"b\", \"c\"), List.of(a, b, c));\n        System.out.println(\"status: \" + report.status());\n        System.out.println(\"covered: \" + report.covered() + \" | gaps: \" + report.gaps());\n        System.out.println(\"claims: \" + report.claims());\n        System.out.println(\"note: \" + report.note());\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.ArrayList;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.TreeMap;\n\n/** The coordinator's last step in a research run: merge what the subagents returned into claims with their sources, conflicts, errors and a coverage note. */\npublic final class Synthesis {\n    private static final System.Logger LOG = System.getLogger(Synthesis.class.getName());\n\n    public record Finding(String claim, String value, String source, String date) {}\n\n    /** What a failed subagent returns: its type, the query, the partial findings and what to try instead. */\n    public record Failure(String type, String query, List<Finding> partial, List<String> alternatives) {}\n\n    /** A subagent's result: status \"ok\" with findings, or \"error\" with a failure. */\n    public record Result(String scope, String status, List<Finding> findings, Failure error) {}\n\n    public record Source(String source, String date) {}\n\n    public record Claim(String claim, String value, List<Source> sources, boolean partial) {}\n\n    public record Observed(String value, String source, String date) {}\n\n    public record Conflict(String claim, List<Observed> values) {}\n\n    public record Unresolved(String scope, String type, String query, List<String> alternatives) {}\n\n    public record Report(String status, List<String> covered, List<String> gaps, List<String> partial, List<Claim> claims, List<Conflict> conflicts, List<Unresolved> errors, String note) {}\n\n    /** The covered scopes and the gaps, both in the order of the required scopes. */\n    record Coverage(List<String> covered, List<String> gaps) {}\n\n    /** One finding and whether it came from a partial list. */\n    record Seen(Finding finding, boolean partial) {}\n\n    private static <T> void addNew(List<T> items, T item) {\n        if (!items.contains(item)) items.add(item);\n    }\n\n    /** Every finding with its partial flag, in arrival order. */\n    static List<Seen> findings(List<Result> results) {\n        List<Seen> seen = new ArrayList<>();\n        for (Result r : results) {\n            if (r.status().equals(\"ok\")) r.findings().forEach(f -> seen.add(new Seen(f, false)));\n            else r.error().partial().forEach(f -> seen.add(new Seen(f, true)));\n        }\n        return seen;\n    }\n\n    /**\n     * TODO 1 of 7 (unlocks e1, e5 and the coverage of every other case): split the required scopes into covered and gaps.\n     * Receives the required scopes and the results. Returns a Coverage of both lists, in the order of `required`: a scope is covered\n     * when an \"ok\" result for it has at least one finding.\n     * Example: required [\"a\", \"b\"], one ok result for \"a\" with a finding -> Coverage([\"a\"], [\"b\"])\n     */\n    static Coverage coveredScopes(List<String> required, List<Result> results) {\n        return new Coverage(List.of(), List.of());\n    }\n\n    /**\n     * TODO 2 of 7 (unlocks e6): the sources of one claim.\n     * Receives the Seen findings of one claim. Returns a list of Source in arrival order, no duplicates.\n     * Example: findings from s9, s1, s9 -> [Source(\"s9\", ...), Source(\"s1\", ...)]\n     */\n    static List<Source> sourcesOf(List<Seen> group) {\n        return List.of();\n    }\n\n    /**\n     * TODO 3 of 7 (unlocks e3): what the sources said about a conflicting claim.\n     * Receives the Seen findings of one claim. Returns a list of Observed (value, source, date) in arrival order, no duplicates.\n     * Example: s1 says \"12\", s2 says \"14\" twice -> [Observed(\"12\", \"s1\", ...), Observed(\"14\", \"s2\", ...)]\n     */\n    static List<Observed> observedValues(List<Seen> group) {\n        return List.of();\n    }\n\n    /**\n     * TODO 4 of 7 (unlocks e4): is every finding of the claim from a partial list?\n     * Receives the Seen findings of one claim. Returns true only when all of them are partial.\n     * Example: [Seen(f, true), Seen(f, false)] -> false\n     */\n    static boolean allPartial(List<Seen> group) {\n        return false;\n    }\n\n    /**\n     * TODO 5 of 7 (unlocks e2 and e4): the errors that nothing made up for.\n     * Receives the results and the covered scopes. Returns an Unresolved (scope, type, query, alternatives) for each \"error\" result whose scope is not covered.\n     * Example: an error for \"b\" while only \"a\" is covered -> [Unresolved(\"b\", \"timeout\", \"qb\", [...])]\n     */\n    static List<Unresolved> unresolvedErrors(List<Result> results, List<String> covered) {\n        return List.of();\n    }\n\n    /**\n     * TODO 6 of 7 (unlocks e4): the gaps for which a failed search still returned findings.\n     * Receives the results and the gaps. Returns the gaps that have an \"error\" result with a non-empty partial list.\n     * Example: gap \"b\" with an error that carries one partial finding -> [\"b\"]\n     */\n    static List<String> partialScopes(List<Result> results, List<String> gaps) {\n        return List.of();\n    }\n\n    /**\n     * TODO 7 of 7 (unlocks e1, e2 and e5): say what the report cannot cover.\n     * Receives the gaps, the unresolved errors and the results. Returns \"all scopes covered\" for no gaps; otherwise \"not covered: \" and\n     * each gap as \"<scope> (<type> on '<query>')\" for an unresolved error, \"<scope> (not researched)\" when no result names the scope,\n     * or \"<scope> (no findings)\", joined by \", \".\n     * Example: gaps [\"b\", \"c\"], an error for \"b\" (timeout on \"qb\"), no result for \"c\" -> \"not covered: b (timeout on 'qb'), c (not researched)\"\n     */\n    static String coverageNote(List<String> gaps, List<Unresolved> errors, List<Result> results) {\n        return \"\";\n    }\n\n    public static Report synthesize(List<String> required, List<Result> results) {\n        LOG.log(System.Logger.Level.DEBUG, \"synthesize input: {0}\", results);\n        Coverage coverage = coveredScopes(required, results);\n        Map<String, List<Seen>> byClaim = new TreeMap<>();\n        for (Seen s : findings(results)) byClaim.computeIfAbsent(s.finding().claim(), k -> new ArrayList<>()).add(s);\n        List<Claim> claims = new ArrayList<>();\n        List<Conflict> conflicts = new ArrayList<>();\n        byClaim.forEach((claim, group) -> {\n            List<String> values = new ArrayList<>();\n            for (Seen s : group) addNew(values, s.finding().value());\n            if (values.size() > 1) conflicts.add(new Conflict(claim, observedValues(group)));\n            else claims.add(new Claim(claim, values.get(0), sourcesOf(group), allPartial(group)));\n        });\n        List<Unresolved> errors = unresolvedErrors(results, coverage.covered());\n        return new Report(coverage.gaps().isEmpty() ? \"complete\" : \"partial\", coverage.covered(), coverage.gaps(), partialScopes(results, coverage.gaps()), claims, conflicts, errors,\n            coverageNote(coverage.gaps(), errors, results));\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.*;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // Two subagents agree on claim X; a third scope timed out and is not covered.\n        Synthesis.Result a = new Synthesis.Result(\"a\", \"ok\", List.of(new Synthesis.Finding(\"X\", \"1\", \"s1\", \"2025-01-01\"), new Synthesis.Finding(\"Y\", \"2\", \"s2\", \"2025-01-01\")), null);\n        Synthesis.Result b = new Synthesis.Result(\"b\", \"ok\", List.of(new Synthesis.Finding(\"X\", \"1\", \"s3\", \"2025-01-01\")), null);\n        Synthesis.Result c = new Synthesis.Result(\"c\", \"error\", List.of(), new Synthesis.Failure(\"timeout\", \"q-c\", List.of(), List.of(\"q-c-narrow\")));\n        Synthesis.Report report = Synthesis.synthesize(List.of(\"a\", \"b\", \"c\"), List.of(a, b, c));\n        System.out.println(\"status: \" + report.status());\n        System.out.println(\"covered: \" + report.covered() + \" | gaps: \" + report.gaps());\n        System.out.println(\"claims: \" + report.claims());\n        System.out.println(\"note: \" + report.note());\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 7,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "09c3d5a5769a702b7a9d317116dbe4a0029e06e1f13dc3e55ebde37b932bd0db",
+  "starting_code": "import java.util.ArrayList;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.TreeMap;\n\n/** The coordinator's last step in a research run: merge what the subagents returned into claims with their sources, conflicts, errors and a coverage note. */\npublic final class Synthesis {\n    private static final System.Logger LOG = System.getLogger(Synthesis.class.getName());\n\n    public record Finding(String claim, String value, String source, String date) {}\n\n    /** What a failed subagent returns: its type, the query, the partial findings and what to try instead. */\n    public record Failure(String type, String query, List<Finding> partial, List<String> alternatives) {}\n\n    /** A subagent's result: status \"ok\" with findings, or \"error\" with a failure. */\n    public record Result(String scope, String status, List<Finding> findings, Failure error) {}\n\n    public record Source(String source, String date) {}\n\n    public record Claim(String claim, String value, List<Source> sources, boolean partial) {}\n\n    public record Observed(String value, String source, String date) {}\n\n    public record Conflict(String claim, List<Observed> values) {}\n\n    public record Unresolved(String scope, String type, String query, List<String> alternatives) {}\n\n    public record Report(String status, List<String> covered, List<String> gaps, List<String> partial, List<Claim> claims, List<Conflict> conflicts, List<Unresolved> errors, String note) {}\n\n    /** The covered scopes and the gaps, both in the order of the required scopes. */\n    record Coverage(List<String> covered, List<String> gaps) {}\n\n    /** One finding and whether it came from a partial list. */\n    record Seen(Finding finding, boolean partial) {}\n\n    private static <T> void addNew(List<T> items, T item) {\n        if (!items.contains(item)) items.add(item);\n    }\n\n    /** Every finding with its partial flag, in arrival order. */\n    static List<Seen> findings(List<Result> results) {\n        List<Seen> seen = new ArrayList<>();\n        for (Result r : results) {\n            if (r.status().equals(\"ok\")) r.findings().forEach(f -> seen.add(new Seen(f, false)));\n            else r.error().partial().forEach(f -> seen.add(new Seen(f, true)));\n        }\n        return seen;\n    }\n\n    /**\n     * TODO 1 of 7 (unlocks e1, e5 and the coverage of every other case): split the required scopes into covered and gaps.\n     * Receives the required scopes and the results. Returns a Coverage of both lists, in the order of `required`: a scope is covered\n     * when an \"ok\" result for it has at least one finding.\n     * Example: required [\"a\", \"b\"], one ok result for \"a\" with a finding -> Coverage([\"a\"], [\"b\"])\n     */\n    static Coverage coveredScopes(List<String> required, List<Result> results) {\n        return new Coverage(List.of(), List.of());\n    }\n\n    /**\n     * TODO 2 of 7 (unlocks e6): the sources of one claim.\n     * Receives the Seen findings of one claim. Returns a list of Source in arrival order, no duplicates.\n     * Example: findings from s9, s1, s9 -> [Source(\"s9\", ...), Source(\"s1\", ...)]\n     */\n    static List<Source> sourcesOf(List<Seen> group) {\n        return List.of();\n    }\n\n    /**\n     * TODO 3 of 7 (unlocks e3): what the sources said about a conflicting claim.\n     * Receives the Seen findings of one claim. Returns a list of Observed (value, source, date) in arrival order, no duplicates.\n     * Example: s1 says \"12\", s2 says \"14\" twice -> [Observed(\"12\", \"s1\", ...), Observed(\"14\", \"s2\", ...)]\n     */\n    static List<Observed> observedValues(List<Seen> group) {\n        return List.of();\n    }\n\n    /**\n     * TODO 4 of 7 (unlocks e4): is every finding of the claim from a partial list?\n     * Receives the Seen findings of one claim. Returns true only when all of them are partial.\n     * Example: [Seen(f, true), Seen(f, false)] -> false\n     */\n    static boolean allPartial(List<Seen> group) {\n        return false;\n    }\n\n    /**\n     * TODO 5 of 7 (unlocks e2 and e4): the errors that nothing made up for.\n     * Receives the results and the covered scopes. Returns an Unresolved (scope, type, query, alternatives) for each \"error\" result whose scope is not covered.\n     * Example: an error for \"b\" while only \"a\" is covered -> [Unresolved(\"b\", \"timeout\", \"qb\", [...])]\n     */\n    static List<Unresolved> unresolvedErrors(List<Result> results, List<String> covered) {\n        return List.of();\n    }\n\n    /**\n     * TODO 6 of 7 (unlocks e4): the gaps for which a failed search still returned findings.\n     * Receives the results and the gaps. Returns the gaps that have an \"error\" result with a non-empty partial list.\n     * Example: gap \"b\" with an error that carries one partial finding -> [\"b\"]\n     */\n    static List<String> partialScopes(List<Result> results, List<String> gaps) {\n        return List.of();\n    }\n\n    /**\n     * TODO 7 of 7 (unlocks e1, e2 and e5): say what the report cannot cover.\n     * Receives the gaps, the unresolved errors and the results. Returns \"all scopes covered\" for no gaps; otherwise \"not covered: \" and\n     * each gap as \"<scope> (<type> on '<query>')\" for an unresolved error, \"<scope> (not researched)\" when no result names the scope,\n     * or \"<scope> (no findings)\", joined by \", \".\n     * Example: gaps [\"b\", \"c\"], an error for \"b\" (timeout on \"qb\"), no result for \"c\" -> \"not covered: b (timeout on 'qb'), c (not researched)\"\n     */\n    static String coverageNote(List<String> gaps, List<Unresolved> errors, List<Result> results) {\n        return \"\";\n    }\n\n    public static Report synthesize(List<String> required, List<Result> results) {\n        LOG.log(System.Logger.Level.DEBUG, \"synthesize input: {0}\", results);\n        Coverage coverage = coveredScopes(required, results);\n        Map<String, List<Seen>> byClaim = new TreeMap<>();\n        for (Seen s : findings(results)) byClaim.computeIfAbsent(s.finding().claim(), k -> new ArrayList<>()).add(s);\n        List<Claim> claims = new ArrayList<>();\n        List<Conflict> conflicts = new ArrayList<>();\n        byClaim.forEach((claim, group) -> {\n            List<String> values = new ArrayList<>();\n            for (Seen s : group) addNew(values, s.finding().value());\n            if (values.size() > 1) conflicts.add(new Conflict(claim, observedValues(group)));\n            else claims.add(new Claim(claim, values.get(0), sourcesOf(group), allPartial(group)));\n        });\n        List<Unresolved> errors = unresolvedErrors(results, coverage.covered());\n        return new Report(coverage.gaps().isEmpty() ? \"complete\" : \"partial\", coverage.covered(), coverage.gaps(), partialScopes(results, coverage.gaps()), claims, conflicts, errors,\n            coverageNote(coverage.gaps(), errors, results));\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/72-scenario-multi-agent-research-system/prose/unit-02/practice-3/src/main/java/Synthesis.java",
+    "test_path": "practice/level-3/72-scenario-multi-agent-research-system/prose/unit-02/practice-3/src/test/java/SynthesisTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/72-scenario-multi-agent-research-system/prose/unit-02/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/72-scenario-multi-agent-research-system/prose/unit-02/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_aFullRunWithAgreementReturnsClaimsWithEverySourceAndACompleteStatus()",
+        "kind": "main",
+        "says": "A full run with agreement: claims with every source, a complete status and the all-clear note"
+      },
+      {
+        "id": "e1_noResultsLeaveEveryScopeAGapAndSayNotResearched()",
+        "kind": "edge",
+        "says": "No results: every scope is a gap, not researched"
+      },
+      {
+        "id": "e2_aScopeThePlanNeverCoveredAndAScopeWhoseSearchFailedReadDifferentlyInTheNote()",
+        "kind": "edge",
+        "says": "A scope the plan never covered and a scope whose search failed read differently in the note"
+      },
+      {
+        "id": "e3_twoValuesForOneClaimAreAConflictThatNamesBothSourcesAndNoClaim()",
+        "kind": "edge",
+        "says": "Two values for one claim are a conflict naming both sources and no claim"
+      },
+      {
+        "id": "e4_partialResultsAreKeptAndFlaggedButDoNotCoverTheScopeAndARetryThatWorkedClearsTheError()",
+        "kind": "edge",
+        "says": "Partial results kept and flagged, not covering their scope, and an error that a retry made up for disappears"
+      },
+      {
+        "id": "e5_aResultWithNoFindingsDoesNotCoverItsScope()",
+        "kind": "edge",
+        "says": "An ok result with no findings does not cover its scope"
+      },
+      {
+        "id": "e6_claimsSourcesAndScopesComeOutInAFixedOrderWithoutDuplicates()",
+        "kind": "edge",
+        "says": "Claims sorted, sources in arrival order without duplicates, scopes in the order of required"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/72-scenario-multi-agent-research-system/prose/unit-02/practice-3/target/test-results/test"
+    },
+    "origin": "course/72-scenario-multi-agent-research-system/02-failures-conflicts-the-coverage-note-and-the-practice.md",
+    "concepts": [
+      "the practice of Failures, conflicts, the coverage note and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/72-scenario-multi-agent-research-system/prose/unit-02/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "scenario-multi-agent-research-system-u2"
+}

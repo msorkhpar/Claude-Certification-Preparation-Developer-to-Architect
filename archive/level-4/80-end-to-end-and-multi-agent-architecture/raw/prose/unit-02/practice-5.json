@@ -1,0 +1,122 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "80-end-to-end-and-multi-agent-architecture"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 5,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Contracts between parts, and the review",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "Scenario: At Alder Freight an intake service and a pricing service each pass every one of their own tests. In production about one request in fifty stalls between them, and always for shipments with no matching tariff. What does this most likely indicate?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Upgrading the pricing service to a more capable model so it copes with unusual shipments",
+            "correct": false,
+            "says": "Ruled out because a bigger model \"only changes how the same ambiguity is worded\"."
+          },
+          {
+            "id": "b",
+            "text": "An unwritten rule for how the two parts treat a lookup that finds nothing",
+            "correct": true,
+            "says": "Both parts pass their own checks, so the gap is what neither contract says about the empty case."
+          },
+          {
+            "id": "c",
+            "text": "A transient network fault that an automatic retry would clear on the next attempt",
+            "correct": false,
+            "says": "Ruled out because a failure that follows an input pattern \"is deterministic, and a retry repeats it\"."
+          },
+          {
+            "id": "d",
+            "text": "A third component placed between the two that logs every request and response",
+            "correct": false,
+            "says": "Ruled out because logging adds a component and not a rule, and the page says to \"Find the case the contract left out\"."
+          }
+        ],
+        "origin": {
+          "path": "course/80-end-to-end-and-multi-agent-architecture/02-contracts-between-parts-and-the-review.md",
+          "section": "Traps"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "Scenario: Cobalt Freight's design has an input stage, a processing stage, a feedback loop and an output stage that writes the model's text straight into the shipping database with no check. What does the rubric report?",
+        "options": [
+          {
+            "id": "a",
+            "text": "No finding, since all four stages are present in the design and the loop is in place",
+            "correct": false,
+            "says": "Ruled out because the rubric raises a finding when \"There is an output stage that has no validation step\"."
+          },
+          {
+            "id": "b",
+            "text": "A high finding, so the verdict is reject whatever the price of the whole design",
+            "correct": false,
+            "says": "Ruled out because \"any `high` gives `reject`, otherwise any `medium` gives `revise`\", and nothing here is high."
+          },
+          {
+            "id": "c",
+            "text": "A medium finding, so the verdict is revise until a vetting step is added",
+            "correct": true,
+            "says": "A stage that exists but lets text through unchecked is a medium finding, and a medium finding gives `revise`."
+          },
+          {
+            "id": "d",
+            "text": "A finding for the missing feedback stage, since nothing is ever learned from the results",
+            "correct": false,
+            "says": "Ruled out because the finding for that is raised when \"There is no feedback stage\", and this design has one."
+          }
+        ],
+        "origin": {
+          "path": "course/80-end-to-end-and-multi-agent-architecture/02-contracts-between-parts-and-the-review.md",
+          "section": "An architecture review as a rubric"
+        }
+      }
+    ],
+    "concepts": [
+      "An architecture review as a rubric, as the page teaches it",
+      "Contracts between parts, and the review, as the page teaches it",
+      "Traps, as the page teaches it"
+    ]
+  }
+}

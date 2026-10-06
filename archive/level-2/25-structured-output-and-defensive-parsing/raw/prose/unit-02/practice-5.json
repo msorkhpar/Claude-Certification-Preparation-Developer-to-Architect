@@ -1,0 +1,158 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "25-structured-output-and-defensive-parsing"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 5,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Defensive parsing, validation and the re-prompt",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A reply arrives as a friendly sentence, then JSON inside a code block, then a closing remark. Which reading order does the page give?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Reject the whole reply, since extra words around the data are not allowed",
+            "correct": false,
+            "says": "Ruled out because the reader \"repairs a harmless habit\" of wrapping the data in words."
+          },
+          {
+            "id": "b",
+            "text": "The first fence's body, else the span from the first brace to the last",
+            "correct": true,
+            "says": "The page's steps are to take the first fence's body, then \"the span from the first `{` to the last `}`\"."
+          },
+          {
+            "id": "c",
+            "text": "Strip only the leading sentence, then parse whatever text is left over",
+            "correct": false,
+            "says": "Ruled out because the steps start from the fence or the braces: \"If the text has a code fence, take the body of the first fence\"."
+          },
+          {
+            "id": "d",
+            "text": "Parse the last line alone, since data tends to follow the prose in a reply",
+            "correct": false,
+            "says": "Ruled out because the steps name no position for the data, only \"Take the span from the first `{` to the last `}`\"."
+          }
+        ],
+        "origin": {
+          "path": "course/25-structured-output-and-defensive-parsing/02-defensive-parsing-validation-and-the-re-prompt.md",
+          "section": "Read before you trust"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A validator meets `true` where the schema wants an integer quantity. What does the page decide?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Accept it, since in many languages a truthy value counts as the number one",
+            "correct": false,
+            "says": "Ruled out because \"A boolean is never a number or an integer\"."
+          },
+          {
+            "id": "b",
+            "text": "Convert it to 1 and go on with the remaining checks of the field",
+            "correct": false,
+            "says": "Ruled out because the reader \"does not repair a broken value\", and the same holds for a value."
+          },
+          {
+            "id": "c",
+            "text": "Report a separate problem for every constraint that the field carries in the schema",
+            "correct": false,
+            "says": "Ruled out because \"A wrong type stops the checks of that value\", so no further problem is added."
+          },
+          {
+            "id": "d",
+            "text": "A single problem is reported for the value, and its other checks are skipped",
+            "correct": true,
+            "says": "The page says \"A wrong type stops the checks of that value.\" and \"`true` is not a quantity\"."
+          }
+        ],
+        "origin": {
+          "path": "course/25-structured-output-and-defensive-parsing/02-defensive-parsing-validation-and-the-re-prompt.md",
+          "section": "Validate and report everything"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "Which result ends the extractor loop without another call to the model?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A reply with a valid body but a total of zero, which breaks the minimum",
+            "correct": false,
+            "says": "Ruled out because the validator \"returns a list of problems, each with a path\", and the next call uses it."
+          },
+          {
+            "id": "b",
+            "text": "A reply that was cut off because it ran into the token limit",
+            "correct": true,
+            "says": "The page says a reply at the limit has the action \"Raise `max_tokens` or continue the response\", and that \"Asking again with an error list cannot fix either\"."
+          },
+          {
+            "id": "c",
+            "text": "A reply whose JSON is wrapped in a code fence with prose around it",
+            "correct": false,
+            "says": "Ruled out because \"If the text has a code fence, take the body of the first fence\", so the reply is read and not rejected."
+          },
+          {
+            "id": "d",
+            "text": "A reply that quotes a sentence which the document never contained",
+            "correct": false,
+            "says": "Ruled out because a failed check leads to a repair: \"the next call needs the whole conversation\"."
+          }
+        ],
+        "origin": {
+          "path": "course/25-structured-output-and-defensive-parsing/02-defensive-parsing-validation-and-the-re-prompt.md",
+          "section": "Stop reasons that are not retried"
+        }
+      }
+    ],
+    "concepts": [
+      "A quotation must occur in the source, as the page teaches it",
+      "Defensive parsing, validation and the re-prompt, as the page teaches it",
+      "Read before you trust, as the page teaches it",
+      "Stop reasons that are not retried, as the page teaches it",
+      "Validate and report everything, as the page teaches it"
+    ]
+  }
+}

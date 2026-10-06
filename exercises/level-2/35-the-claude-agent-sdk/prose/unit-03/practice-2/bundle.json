@@ -1,0 +1,82 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "35-the-claude-agent-sdk"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 2,
+  "title": "Practice: an agent that may read, but not do harm (TypeScript)",
+  "lang": "typescript",
+  "main_file": "agent.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "agent.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "package.json",
+    "package-lock.json",
+    "run-tests.mjs",
+    "harness/fake_claude.py",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-2/35-the-claude-agent-sdk/prose/unit-03/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "practice/level-2/35-the-claude-agent-sdk/prose/unit-03/practice-2/run-tests.mjs"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 every tool call goes through the permission callback and the run is summarised",
+      "kind": "main",
+      "says": "Every tool call goes through the permission callback, and the run is summarised"
+    },
+    {
+      "id": "e1 the options reach the cli as flags and the run starts in the project",
+      "kind": "edge",
+      "says": "The options reach the CLI as flags, and the run starts in the project"
+    },
+    {
+      "id": "e2 file tools stay inside the project and away from secrets",
+      "kind": "edge",
+      "says": "File tools stay inside the project and away from secrets"
+    },
+    {
+      "id": "e3 bash is limited to a few commands and dangerous ones stop the run",
+      "kind": "edge",
+      "says": "Bash is limited to a few commands, and dangerous ones stop the run"
+    },
+    {
+      "id": "e4 a hook blocks a push before the permission callback is asked",
+      "kind": "edge",
+      "says": "A hook blocks a push before the permission callback is asked"
+    },
+    {
+      "id": "e5 the messages of a run fold into a summary",
+      "kind": "edge",
+      "says": "The messages of a run fold into a summary"
+    },
+    {
+      "id": "e6 an error result still gives its summary and a crash is not hidden",
+      "kind": "edge",
+      "says": "An error result still gives its summary, and a crash is not hidden"
+    },
+    {
+      "id": "e7 denied calls are counted and the run still ends with a result",
+      "kind": "edge",
+      "says": "Denied calls are counted, and the run still ends with a result"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/35-the-claude-agent-sdk/03-driving-the-sdk-offline-and-the-practice.md"
+}

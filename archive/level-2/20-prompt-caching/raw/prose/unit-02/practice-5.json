@@ -1,0 +1,158 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "20-prompt-caching"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 5,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Prices, lifetimes, the lookback and what breaks a cache",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A support bot reuses a 20,000-token prefix once every 40 minutes, around the clock. Which choice does the page's guidance favour?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The default TTL, since each reuse refreshes the entry free of charge and keeps it alive",
+            "correct": false,
+            "says": "Ruled out because the entry is \"refreshed for no additional cost each time the cached content is used\", and a 40-minute gap lets the default entry lapse first."
+          },
+          {
+            "id": "b",
+            "text": "The one-hour TTL, since the gap is past the default but within the hour",
+            "correct": true,
+            "says": "The page recommends the one-hour TTL for prompts used \"less frequently than 5 minutes, but more frequently than every hour\"."
+          },
+          {
+            "id": "c",
+            "text": "Neither TTL, since an entry survives through frequent use alone",
+            "correct": false,
+            "says": "Ruled out because the one-hour TTL exists for \"less frequently than 5 minutes, but more frequently than every hour\"."
+          },
+          {
+            "id": "d",
+            "text": "Both TTLs together, since each request has to carry the pair of settings",
+            "correct": false,
+            "says": "Ruled out because \"You can use both 1-hour and 5-minute cache controls in the same request\" is allowed, not required."
+          }
+        ],
+        "origin": {
+          "path": "course/20-prompt-caching/02-prices-lifetimes-lookback-and-invalidation.md",
+          "section": "How long an entry lives"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A conversation adds 25 blocks between two requests, with one breakpoint on the final block. The second request misses the earlier write. What fixes it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A label on the request, so the older entry is found by name",
+            "correct": false,
+            "says": "Ruled out because the search is \"looking for an entry an earlier request wrote\", by hash, not by a label."
+          },
+          {
+            "id": "b",
+            "text": "A longer TTL on the last marker, so the older entry survives until the next request",
+            "correct": false,
+            "says": "Ruled out because the miss comes from the window: \"It checks at most 20 positions\", and a longer TTL does not widen it."
+          },
+          {
+            "id": "c",
+            "text": "A larger `max_tokens`, so the search can reach further back through the blocks",
+            "correct": false,
+            "says": "Ruled out because the search \"walks backward one block at a time\", and `max_tokens` governs the reply."
+          },
+          {
+            "id": "d",
+            "text": "A further marker near the older spot, so a fresh entry builds up there",
+            "correct": true,
+            "says": "The page says a second breakpoint near the older position starts a second lookback window there, since \"You can define up to 4 cache breakpoints\"."
+          }
+        ],
+        "origin": {
+          "path": "course/20-prompt-caching/02-prices-lifetimes-lookback-and-invalidation.md",
+          "section": "The lookback window"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A team adds an image to the fifth message of a long conversation. Which parts of the cache are invalidated?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Only the tool list, while the instructions and the dialogue stay intact",
+            "correct": false,
+            "says": "Ruled out because \"Changes at each level invalidate that level and all subsequent levels\", and tools come first."
+          },
+          {
+            "id": "b",
+            "text": "Only the dialogue blocks, while the tool list and instructions stay intact",
+            "correct": true,
+            "says": "The page says \"Adding/removing images anywhere in the prompt affects message blocks\", and the table shows ✓ for tools and system."
+          },
+          {
+            "id": "c",
+            "text": "The instructions and the dialogue, while the tool list stays intact",
+            "correct": false,
+            "says": "Ruled out because that pattern belongs to \"Enabling/disabling web search modifies the system prompt\", not to images."
+          },
+          {
+            "id": "d",
+            "text": "Nothing, since pictures sit outside the cached text",
+            "correct": false,
+            "says": "Ruled out because \"Adding/removing images anywhere in the prompt affects message blocks\"."
+          }
+        ],
+        "origin": {
+          "path": "course/20-prompt-caching/02-prices-lifetimes-lookback-and-invalidation.md",
+          "section": "What empties a cache"
+        }
+      }
+    ],
+    "concepts": [
+      "How long an entry lives, as the page teaches it",
+      "The lookback window, as the page teaches it",
+      "The practice: order a request for cache hits, as the page teaches it",
+      "The price of a write and a read, as the page teaches it",
+      "What empties a cache, as the page teaches it"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/kotlin/ReliableAgents.kt",
+      "old": "val (status, value) = callOnce(agents, name, key, inputs)",
+      "new": "val (status, value) = callOnce(agents, name, if (n < 3) key else key + \":retry\", inputs)"
+    }
+  ]
+}

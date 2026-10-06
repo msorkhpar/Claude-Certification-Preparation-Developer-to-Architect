@@ -1,0 +1,157 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "41-security-and-safety"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 5,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Layered guardrails, monitoring and the practice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A team wants to spot a user who keeps probing the application's guardrails. Which monitoring rule fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Alert on every question put to a person, since each may be an attack",
+            "correct": false,
+            "says": "Ruled out because \"An `ask` is the gate working, and alerts on it bury the real ones.\""
+          },
+          {
+            "id": "b",
+            "text": "Add up denials across all actors, and alert on the total",
+            "correct": false,
+            "says": "Ruled out because the alert is per actor: \"three denials by one actor\", and a pooled total names nobody."
+          },
+          {
+            "id": "c",
+            "text": "Count denials for each actor, and alert at a threshold",
+            "correct": true,
+            "says": "The page says the response to repeat offenders \"needs a threshold\", and \"The practice uses three denials by one actor, which raises an alert\"."
+          },
+          {
+            "id": "d",
+            "text": "Tighten the system prompt, so the model refuses harder next time",
+            "correct": false,
+            "says": "Ruled out because \"A control that blocks should also record\", and a stricter prompt records nothing."
+          }
+        ],
+        "origin": {
+          "path": "course/41-security-and-safety/03-guardrails-monitoring-and-the-practice.md",
+          "section": "Monitoring: identity and access"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A team wants to cut the risk of a prompt leak without hurting the work. Which step adds no complexity?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Screen every reply with a prompted model that looks for leaked text",
+            "correct": false,
+            "says": "Ruled out because the page ranks it behind the cheapest step: \"The cheapest to apply is the third, because it adds no complexity.\""
+          },
+          {
+            "id": "b",
+            "text": "Add many rules that forbid repeating text from the instructions",
+            "correct": false,
+            "says": "Ruled out because leak-proofing \"can add complexity that may degrade performance\"."
+          },
+          {
+            "id": "c",
+            "text": "Rewrite the prompt with tighter wording before any monitoring",
+            "correct": false,
+            "says": "Ruled out because the first advice is to \"try monitoring before prompt engineering\"."
+          },
+          {
+            "id": "d",
+            "text": "Leave out proprietary details that the task does not need",
+            "correct": true,
+            "says": "The page says \"If Claude doesn't need it to perform the task, don't include it\", and that a secret not in the prompt \"cannot leak from it\"."
+          }
+        ],
+        "origin": {
+          "path": "course/41-security-and-safety/03-guardrails-monitoring-and-the-practice.md",
+          "section": "Reducing prompt leaks"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A gate writes each decision to an audit with the call's inputs, one of which is an API key. What should it record?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The arguments, with the secret replaced by a fixed marker",
+            "correct": true,
+            "says": "The page says to record \"the arguments with secrets redacted, because a log that holds a raw key has become a leak of its own\"."
+          },
+          {
+            "id": "b",
+            "text": "The raw arguments, since an audit wants the full detail",
+            "correct": false,
+            "says": "Ruled out because the audit keeps \"the arguments with secrets redacted\" and not the raw ones."
+          },
+          {
+            "id": "c",
+            "text": "No entry for a call that happens to carry a secret value",
+            "correct": false,
+            "says": "Ruled out because the audit exists to answer \"who tried what, which denials repeat, which sessions were tainted\", and a call that carries a secret is one worth recording."
+          },
+          {
+            "id": "d",
+            "text": "The tool and the decision, with the arguments left out entirely",
+            "correct": false,
+            "says": "Ruled out because the record holds \"the tool, the decision, the reason and the arguments with secrets redacted\", so the arguments stay in it."
+          }
+        ],
+        "origin": {
+          "path": "course/41-security-and-safety/03-guardrails-monitoring-and-the-practice.md",
+          "section": "Monitoring: identity and access"
+        }
+      }
+    ],
+    "concepts": [
+      "Layered guardrails, monitoring and the practice, as the page teaches it",
+      "Layers around the model, as the page teaches it",
+      "Monitoring: identity and access, as the page teaches it",
+      "Reducing prompt leaks, as the page teaches it"
+    ]
+  }
+}

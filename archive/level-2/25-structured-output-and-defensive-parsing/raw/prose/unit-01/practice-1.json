@@ -1,0 +1,156 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "25-structured-output-and-defensive-parsing"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Getting JSON: schemas, structured outputs and strict tools",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A team wants every reply from Claude Sonnet 5.5 to be a record in a fixed JSON shape. What does the documentation recommend?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A tool choice of any, so that some tool is always called",
+            "correct": false,
+            "says": "Ruled out because `any` is one of the values that \"return a 400 error\" on this model."
+          },
+          {
+            "id": "b",
+            "text": "A forced tool whose schema is the record, chosen with the name field",
+            "correct": false,
+            "says": "Ruled out because `any` and `tool` \"return a 400 error\" on Claude Sonnet 5.5."
+          },
+          {
+            "id": "c",
+            "text": "A prompt that shows the record and asks the model to copy the shape",
+            "correct": false,
+            "says": "Ruled out because a prompt gives \"no guarantee; the program must parse defensively\"."
+          },
+          {
+            "id": "d",
+            "text": "Structured outputs with the schema in the output configuration",
+            "correct": true,
+            "says": "The page says to use structured outputs \"when you need a response in a fixed JSON shape\"."
+          }
+        ],
+        "origin": {
+          "path": "course/25-structured-output-and-defensive-parsing/01-getting-json-schemas-structured-outputs-and-strict-tools.md",
+          "section": "Forced tools are not always available"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "The schema says a field named `total` has a `minimum` of 0, and the request is sent with that schema unchanged. What happens?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It fails with a 400 error that comes with details of the unsupported item",
+            "correct": true,
+            "says": "The page says \"If you use an unsupported feature, you'll receive a 400 error with details.\""
+          },
+          {
+            "id": "b",
+            "text": "The reply is checked against the limit and retried for the caller",
+            "correct": false,
+            "says": "Ruled out because \"a helper that validates responses still enforces every constraint in your code\", so the check is the program's job."
+          },
+          {
+            "id": "c",
+            "text": "The limit is read as a hint and the call goes on as usual",
+            "correct": false,
+            "says": "Ruled out because \"If you use an unsupported feature\" the outcome is an error, with no hint read."
+          },
+          {
+            "id": "d",
+            "text": "The constraint is applied only when the field is a whole number",
+            "correct": false,
+            "says": "Ruled out because the numerical constraints are listed as unsupported with no exception: \"Numerical constraints (such as `minimum`, `maximum`, `multipleOf`)\"."
+          }
+        ],
+        "origin": {
+          "path": "course/25-structured-output-and-defensive-parsing/01-getting-json-schemas-structured-outputs-and-strict-tools.md",
+          "section": "What a schema may contain"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A reply arrives with a 200 status and `stop_reason` of `refusal`. What should the program assume about the body?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It becomes whole once the call is repeated with more tokens",
+            "correct": false,
+            "says": "Ruled out because the remedy of more tokens belongs to `max_tokens`: \"Retry with a higher `max_tokens` value to get the complete structured output.\""
+          },
+          {
+            "id": "b",
+            "text": "It keeps the shape, because the status code says success",
+            "correct": false,
+            "says": "Ruled out because a refusal has \"a 200 status code and billed tokens\" and still breaks the shape."
+          },
+          {
+            "id": "c",
+            "text": "The model's decline takes the place of the promised shape",
+            "correct": true,
+            "says": "The page says \"The output may not match your schema because the refusal message takes precedence over schema constraints.\""
+          },
+          {
+            "id": "d",
+            "text": "It is always an empty object, which signals the refusal",
+            "correct": false,
+            "says": "Ruled out because the page names no such body, only that the output \"may not match your schema\"."
+          }
+        ],
+        "origin": {
+          "path": "course/25-structured-output-and-defensive-parsing/01-getting-json-schemas-structured-outputs-and-strict-tools.md",
+          "section": "Two replies that do not follow the schema"
+        }
+      }
+    ],
+    "concepts": [
+      "Forced tools are not always available, as the page teaches it",
+      "Two replies that do not follow the schema, as the page teaches it",
+      "What a schema may contain, as the page teaches it"
+    ]
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "gates_api": 1,
+  "inputs": [
+    {
+      "role": "statement",
+      "path": "statement.md",
+      "digest": "sha256:7b8595110fb2e61fba615d703c460052eaba498d1baae82d1522c4fe2b7aacc5"
+    },
+    {
+      "role": "starter",
+      "path": "starter/rollout.ts",
+      "digest": "sha256:d0bed785a06c16f165daa0748519ea21af41b64d78c4c956baa7906c8605663c"
+    },
+    {
+      "role": "reference",
+      "path": "reference/rollout.ts",
+      "digest": "sha256:4ce07cae9e2789bdfdd5a1b4cc129d335026de4485820fc446dc245cd29ae826"
+    },
+    {
+      "role": "starter:try-it.ts",
+      "path": "starter/try-it.ts",
+      "digest": "sha256:d8ffdf09c8c01fcea963d1b4a2315d69af4ced01a28b87633e71cf0304a72a53"
+    },
+    {
+      "role": "reference:try-it.ts",
+      "path": "reference/try-it.ts",
+      "digest": "sha256:d8ffdf09c8c01fcea963d1b4a2315d69af4ced01a28b87633e71cf0304a72a53"
+    },
+    {
+      "role": "tests",
+      "path": "tests/rollout.test.ts",
+      "digest": "sha256:fc276d04f7d14f07dd5215ef234e9332e16e97acc862c0dbb437d409589b7110"
+    },
+    {
+      "role": "plant:e1 a must pass case that fails blocks the change and the ids are listed in order",
+      "path": "plants/edge-1/rollout.ts.plant.json",
+      "digest": "sha256:0f303c9c0727f77eb60841dab7650944952dd29c943ce4b89ef96d3ae23b2274"
+    },
+    {
+      "role": "plant:e2 a protected segment that lost answers blocks the change even when gains elsewhere match the losses",
+      "path": "plants/edge-2/rollout.ts.plant.json",
+      "digest": "sha256:7d86267a3ccb8e540c3f392d3488ac85b3f58753ae930a4997c51e843bd381f7"
+    },
+    {
+      "role": "plant:e3 more losses than gains blocks the change and both counts are named",
+      "path": "plants/edge-3/rollout.ts.plant.json",
+      "digest": "sha256:f171964a48e03dd78aeff84f7cba51eec7604a79644ba1d7aad10362fac610b9"
+    },
+    {
+      "role": "plant:e4 a cost rise over the limit blocks the change and a rise exactly at the limit does not",
+      "path": "plants/edge-4/rollout.ts.plant.json",
+      "digest": "sha256:e0fd6d30ea439246f10c5011ddf95f9d0f8ebe9e54aa904db442e74477d5ca2a"
+    },
+    {
+      "role": "plant:e5 the tail is the nearest rank 95th percentile and a single slow case does not block",
+      "path": "plants/edge-5/rollout.ts.plant.json",
+      "digest": "sha256:76057787a4768780f40e7b632c190681bc5bed511543c549da82b1c8e117284a"
+    },
+    {
+      "role": "plant:e6 a roll out advances when healthy holds with too few requests and rolls back to zero when errors pass the limit",
+      "path": "plants/edge-6/rollout.ts.plant.json",
+      "digest": "sha256:c20781006bd3dbd464257d2be901c576b27034665b80e6b8f00affc15c847e03"
+    },
+    {
+      "role": "plant:e7 the retirement calendar counts days ranks the nearest first and names the level",
+      "path": "plants/edge-7/rollout.ts.plant.json",
+      "digest": "sha256:b5eafa490e879a1aa9badd03d05159205fa986cd79e86dce6b3971e58ee9be3b"
+    },
+    {
+      "role": "plant:e8 migration removes the settings the new model refuses and names each change",
+      "path": "plants/edge-8/rollout.ts.plant.json",
+      "digest": "sha256:102337dedefc65c2e512a134fbd25a67a80ab8f1d026afa089ca6b61138761c9"
+    },
+    {
+      "role": "build:junit-file.mjs",
+      "path": "build/junit-file.mjs",
+      "digest": "sha256:eebbfd3bebdf18b0d715903d01abac0b7199da78c76c588b50c0c40352614cef"
+    },
+    {
+      "role": "build:logger.ts",
+      "path": "build/logger.ts",
+      "digest": "sha256:ee4ada918729a2eb77f3d514a0acf59bad03b63ca373a3a7b92f86d95f23197d"
+    }
+  ],
+  "origins": [
+    {
+      "role": "origin",
+      "path": "course/89-migration-and-model-upgrades-at-scale/02-the-gate-the-roll-out-and-the-way-back.md",
+      "section": null,
+      "digest": "sha256:db917b8d9b0d161985e37b3ad9bb62b210d239900571cd23f531f09d0136b390"
+    }
+  ],
+  "gates": [
+    {
+      "id": "G1",
+      "family": "code",
+      "held": true,
+      "says": "all 9 cases passed on the reference, on two runs alike",
+      "recorded": {}
+    },
+    {
+      "id": "G2",
+      "family": "code",
+      "held": true,
+      "says": "none of the 9 cases passed on the starter",
+      "recorded": {}
+    },
+    {
+      "id": "G3",
+      "family": "code",
+      "held": true,
+      "says": "each of the 8 edge cases was caught by its own plant",
+      "recorded": {}
+    },
+    {
+      "id": "G4",
+      "family": "code",
+      "held": true,
+      "says": "every test the report named mapped to one of the 9 cases, and every case was named",
+      "recorded": {}
+    },
+    {
+      "id": "G5",
+      "family": "code",
+      "held": true,
+      "says": "the cited passage of 'course/89-migration-and-model-upgrades-at-scale/02-the-gate-the-roll-out-and-the-way-back.md' still matches the ledger",
+      "recorded": {}
+    }
+  ]
+}

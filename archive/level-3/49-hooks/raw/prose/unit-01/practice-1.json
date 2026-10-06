@@ -1,0 +1,121 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "49-hooks"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: What a hook decides, and what it cannot undo",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A PreToolUse hook is meant to rewrite a command before it runs. It returns the new input in a field next to `hookSpecificOutput`, and the original command runs unchanged. What is the cause?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The value is honoured only when nested in the answer structure",
+            "correct": true,
+            "says": "The answer is read only from its documented place."
+          },
+          {
+            "id": "b",
+            "text": "A rewrite takes effect only if the hook answers with a deferral",
+            "correct": false,
+            "says": "Ruled out because a deferral discards the change: \"the input is dropped\"."
+          },
+          {
+            "id": "c",
+            "text": "Commands can be rewritten only by a hook that runs as a separate program",
+            "correct": false,
+            "says": "Ruled out because callback hooks may change input too: \"Pair `updatedInput` with `permissionDecision: 'allow'` to auto-approve the modified input\"."
+          },
+          {
+            "id": "d",
+            "text": "The rewrite was applied, then undone by the session's permission mode",
+            "correct": false,
+            "says": "Ruled out because nothing undoes a change that is applied: \"the modified input still applies and flows through the normal permission evaluation\"."
+          }
+        ],
+        "origin": {
+          "path": "course/49-hooks/01-what-a-hook-decides-and-what-it-cannot-undo.md",
+          "section": "What a PreToolUse hook answers"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A team adds a hook with the matcher `src/payments/*` to review every write under that folder. The hook never fires. What is the best fix?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Switch the matcher to a regular expression that also lists every file in the folder",
+            "correct": false,
+            "says": "Ruled out because \"Matchers only match tool names, not file paths or other arguments.\""
+          },
+          {
+            "id": "b",
+            "text": "Raise the timeout of the hook",
+            "correct": false,
+            "says": "Ruled out because the timeout bounds the callback and has nothing to do with matching: \"Each callback runs with a timeout in seconds\"."
+          },
+          {
+            "id": "c",
+            "text": "Attach it to the file-editing tools and test the path inside the callback",
+            "correct": true,
+            "says": "A matcher sees only the name of the tool, so the path is read from the input."
+          },
+          {
+            "id": "d",
+            "text": "Move the hook to the PostToolUse event, which evaluates paths after the write",
+            "correct": false,
+            "says": "Ruled out because the post event comes after the tool and cannot change what a matcher sees: \"the tool already ran\"."
+          }
+        ],
+        "origin": {
+          "path": "course/49-hooks/01-what-a-hook-decides-and-what-it-cannot-undo.md",
+          "section": "What a matcher matches"
+        }
+      }
+    ],
+    "concepts": [
+      "What a matcher matches, as the page teaches it",
+      "What a PreToolUse hook answers, as the page teaches it"
+    ]
+  }
+}

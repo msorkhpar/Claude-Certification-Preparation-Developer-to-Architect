@@ -1,0 +1,89 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "51-session-state"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: plan a session, say what changed, and set the options (Python)",
+  "lang": "python",
+  "main_file": "sessions.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_sessions.py",
+  "build": [
+    "harness/fake_claude.py",
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/51-session-state/prose/unit-02/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-3/51-session-state/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-3/51-session-state/prose/unit-02/practice-1/test_sessions.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_the_plan_resumes_an_unchanged_session_and_tells_a_changed_one_what_differs_and_starts_fresh_when_most_of_it_changed",
+      "kind": "main",
+      "says": "An untouched session resumes, a changed one resumes with a notice, a mostly changed one starts fresh"
+    },
+    {
+      "id": "test_e1_changed_deleted_and_added_files_are_listed_in_order_and_any_difference_asks_for_a_notice",
+      "kind": "edge",
+      "says": "Changed, deleted and added files are listed in order, and any difference asks for a notice"
+    },
+    {
+      "id": "test_e2_more_than_half_of_the_files_changed_or_gone_starts_fresh_and_exactly_half_does_not",
+      "kind": "edge",
+      "says": "More than half changed or gone starts fresh, exactly half does not, and new files do not count toward it"
+    },
+    {
+      "id": "test_e3_a_session_idle_for_more_than_a_week_starts_fresh_and_exactly_a_week_is_resumed",
+      "kind": "edge",
+      "says": "More than a week idle starts fresh, exactly a week does not"
+    },
+    {
+      "id": "test_e4_no_saved_session_starts_fresh_and_a_fork_is_only_planned_from_a_session_that_is_resumed",
+      "kind": "edge",
+      "says": "No record starts fresh, and a fork is planned only from a resumed session"
+    },
+    {
+      "id": "test_e5_the_change_notice_names_only_what_differs_and_the_prompt_puts_the_notice_or_the_summary_before_the_task",
+      "kind": "edge",
+      "says": "The notice names only what differs, and the prompt puts the notice or the summary before the task"
+    },
+    {
+      "id": "test_e6_the_summary_has_a_fixed_layout_with_blank_and_repeated_items_dropped_and_files_listed_by_path",
+      "kind": "edge",
+      "says": "The summary has the fixed layout, with blanks and repeats dropped and files sorted by path"
+    },
+    {
+      "id": "test_e7_options_resume_by_id_and_fork_together_and_continue_is_refused_unless_one_session_exists_and_a_name_must_be_unique",
+      "kind": "edge",
+      "says": "Resume and fork go together, continue needs exactly one session, a name must be unique"
+    },
+    {
+      "id": "test_e8_a_run_through_the_sdk_passes_resume_and_fork_to_the_binary_and_returns_the_session_id_even_after_an_error",
+      "kind": "edge",
+      "says": "A run through the SDK sends --resume and --fork-session and returns the session id, also after an error"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/51-session-state/02-stale-results-the-notice-the-summary-and-the-practice.md"
+}

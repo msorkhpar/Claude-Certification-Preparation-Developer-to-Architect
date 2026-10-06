@@ -1,0 +1,156 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "32-mcp-fundamentals"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: MCP: hosts, clients, servers and the three primitives",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "An AI application connects to a ticketing system and a document store, both exposed through MCP. How is the connecting side organized?",
+        "options": [
+          {
+            "id": "a",
+            "text": "One shared client multiplexes both servers over one connection",
+            "correct": false,
+            "says": "Ruled out because each client \"maintains a dedicated connection with its corresponding MCP server\", so none is shared."
+          },
+          {
+            "id": "b",
+            "text": "The host talks to each server itself, with no client component",
+            "correct": false,
+            "says": "Ruled out because \"The host does not talk to a server itself.\""
+          },
+          {
+            "id": "c",
+            "text": "Each server creates a client inside itself to call back",
+            "correct": false,
+            "says": "Ruled out because it is the host that does the creating: \"The MCP host accomplishes this by creating one MCP client for each MCP server\"."
+          },
+          {
+            "id": "d",
+            "text": "The host creates one client for each server",
+            "correct": true,
+            "says": "The page says \"The MCP host accomplishes this by creating one MCP client for each MCP server\", and that each client \"maintains a dedicated connection with its corresponding MCP server\"."
+          }
+        ],
+        "origin": {
+          "path": "course/32-mcp-fundamentals/01-hosts-clients-servers-and-primitives.md",
+          "section": "Three participants"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A server publishes a read-only database schema, and the host app chooses when to attach it to the model's context. Which primitive does this describe?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A tool, which the model decides to call",
+            "correct": false,
+            "says": "Ruled out because a tool is one of the \"Functions that the model can call\", not passive data."
+          },
+          {
+            "id": "b",
+            "text": "A prompt, which a person picks from a menu",
+            "correct": false,
+            "says": "Ruled out because \"Prompts are picked by a person, for example from a menu\", and here the application, not a person, chooses."
+          },
+          {
+            "id": "c",
+            "text": "A resource, which the application accesses directly",
+            "correct": true,
+            "says": "A schema is data that the application attaches, and the page says a resource gives \"read-only access to information, such as a file or a database schema\" which the application \"can access this information directly and decide how to use it\"."
+          },
+          {
+            "id": "d",
+            "text": "A sampling request, which the server sends to the client",
+            "correct": false,
+            "says": "Ruled out because sampling is the case where \"the server asks the client's model for a completion\", which moves no data to the model's context."
+          }
+        ],
+        "origin": {
+          "path": "course/32-mcp-fundamentals/01-hosts-clients-servers-and-primitives.md",
+          "section": "Three primitives, three controllers"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "How does a client written for the 2026-07-28 revision tell a server which protocol version it speaks?",
+        "options": [
+          {
+            "id": "a",
+            "text": "An initialize exchange that opens a session and fixes it for later calls",
+            "correct": false,
+            "says": "Ruled out because the legacy versions \"establish a session with an initialize handshake\", and the modern ones have none."
+          },
+          {
+            "id": "b",
+            "text": "A header on the first call only, which the server remembers afterwards",
+            "correct": false,
+            "says": "Ruled out because the server \"accepts or rejects each request independently\", so nothing is remembered from a first call."
+          },
+          {
+            "id": "c",
+            "text": "Each call carries it in its metadata field, with no opening handshake",
+            "correct": true,
+            "says": "The page says \"Every request declares the protocol version it is using\" in its metadata field, and that the server \"accepts or rejects each request independently\"."
+          },
+          {
+            "id": "d",
+            "text": "A mandatory discovery call that must precede every other call",
+            "correct": false,
+            "says": "Ruled out because a client \"is free to invoke any RPC inline\", so discovery is optional."
+          }
+        ],
+        "origin": {
+          "path": "course/32-mcp-fundamentals/01-hosts-clients-servers-and-primitives.md",
+          "section": "Two eras of the protocol"
+        }
+      }
+    ],
+    "concepts": [
+      "Three participants, as the page teaches it",
+      "Three primitives, three controllers, as the page teaches it",
+      "Two eras of the protocol, as the page teaches it"
+    ]
+  }
+}

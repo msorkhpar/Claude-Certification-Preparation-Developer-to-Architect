@@ -1,0 +1,91 @@
+{
+  "practice": "16-async-concurrency-and-backpressure/unit-01/practice-1",
+  "name": "bounded",
+  "tests": {
+    "java": "BoundedTest",
+    "kotlin": "BoundedTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_results_come_back_for_every_item_and_never_more_than_limit_run_at_once",
+      "typescript": "m1 results come back for every item and never more than limit run at once",
+      "java": "m1_resultsComeBackForEveryItemAndNeverMoreThanLimitRunAtOnce",
+      "kotlin": "m1_resultsComeBackForEveryItemAndNeverMoreThanLimitRunAtOnce"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_results_keep_the_input_order_even_when_later_items_finish_first",
+      "typescript": "e1 results keep the input order even when later items finish first",
+      "java": "e1_resultsKeepTheInputOrderEvenWhenLaterItemsFinishFirst",
+      "kotlin": "e1_resultsKeepTheInputOrderEvenWhenLaterItemsFinishFirst"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_failing_item_is_reported_and_the_others_still_finish",
+      "typescript": "e2 a failing item is reported and the others still finish",
+      "java": "e2_aFailingItemIsReportedAndTheOthersStillFinish",
+      "kotlin": "e2_aFailingItemIsReportedAndTheOthersStillFinish"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_limit_above_the_item_count_and_an_empty_input_both_work",
+      "typescript": "e3 a limit above the item count and an empty input both work",
+      "java": "e3_aLimitAboveTheItemCountAndAnEmptyInputBothWork",
+      "kotlin": "e3_aLimitAboveTheItemCountAndAnEmptyInputBothWork"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_a_limit_below_one_is_refused",
+      "typescript": "e4 a limit below one is refused",
+      "java": "e4_aLimitBelowOneIsRefused",
+      "kotlin": "e4_aLimitBelowOneIsRefused"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_items_are_pulled_lazily_so_a_slow_consumer_holds_the_producer_back",
+      "typescript": "e5 items are pulled lazily so a slow consumer holds the producer back",
+      "java": "e5_itemsArePulledLazilySoASlowConsumerHoldsTheProducerBack",
+      "kotlin": "e5_itemsArePulledLazilySoASlowConsumerHoldsTheProducerBack"
+    }
+  },
+  "plants": {
+    "wrong-unbounded": {
+      "caught_by": [
+        "m1",
+        "e5"
+      ],
+      "defect": "starts every item at once, ignoring the limit"
+    },
+    "wrong-fail-fast": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "lets the first failure abort the whole run"
+    },
+    "wrong-completion-order": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "returns outcomes in the order the items finished"
+    },
+    "wrong-eager-input": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "reads the whole input into memory before starting any work"
+    },
+    "wrong-large-limit-sequential": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "runs one item at a time when the limit is above ten"
+    },
+    "wrong-zero-limit-accepted": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "accepts a limit of zero instead of refusing it"
+    }
+  }
+}

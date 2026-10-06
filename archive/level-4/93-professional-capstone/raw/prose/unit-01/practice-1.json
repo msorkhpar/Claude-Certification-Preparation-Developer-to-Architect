@@ -1,0 +1,446 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "93-professional-capstone"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: a launch review (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a launch review"
+    },
+    {
+      "type": "para",
+      "text": "A team brings a design to the architecture board: a claims assistant that reads policy documents, answers customers and passes the costly decisions to a person. The board does not read the whole design again each time. It runs a review that turns the design into findings, groups them by the seven domains of the Professional exam and returns one verdict. In this practice you write that review. The model is not called: the tests give you a design as a set of facts (flags) and a set of numbers, and you return findings. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`launch_review`, `verdict`, `scorecard`, `needed_accuracy`); TypeScript has the camel-case names (`launchReview`, `neededAccuracy`); Java has the same camel-case names as static methods of `LaunchReview`; Kotlin has top-level functions. The flags are a set of strings and the numbers are a map from a name to a whole number; a missing number counts as 0."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working review with eight gaps cut out of it. The plumbing is written: the `add` function that records a finding, the call of every domain's rules in turn, and the rules of the domains P2, P6 and P7. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks; a gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_p1_rules` unlocks `e1`, `e4` and `e7`: the three rules of domain P1.",
+        "`_p3_rules` unlocks `e4` and `e8`: the four rules of domain P3.",
+        "`_p4_rules` unlocks `e1`, `e3` and `e4`: the four rules of domain P4.",
+        "`_p5_rules` unlocks `e4`, `e7` and `e8`: the five rules of domain P5.",
+        "`_order` unlocks `e3`: severity, then domain, then rule id.",
+        "`verdict` unlocks `e1` and `e2`: reject, revise or approve.",
+        "`scorecard` unlocks `e5`: the seven domain counts.",
+        "`needed_accuracy` unlocks `m1` and `e6`: the break-even accuracy, rounded up on the cost side."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole review."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`launch_review(flags, numbers)` returns the findings, each a string `<severity> <domain> <rule>` such as `high P1 missing-feedback`. The findings run from high to medium to low, then by domain (P1 to P7), then by rule id in alphabetical order. The 22 rules are in the table below.",
+        "`verdict(findings)` returns `reject` when any finding is high, `revise` when none is high and any is medium, and `approve` otherwise, so a design with only low findings is approved.",
+        "`scorecard(findings)` returns a list of seven counts, the findings of P1, P2, P3, P4, P5, P6 and P7 in that order.",
+        "`needed_accuracy(error_cost, review_cost)` returns the accuracy in whole percent above which a design should let answers go out without a check: 100 minus the review cost as a percent of the error cost, with that percent rounded up, and never below 0. It returns 0 when an error costs nothing or less."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The rules"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Domain",
+        "Rule id",
+        "Severity",
+        "Fires when"
+      ],
+      "rows": [
+        [
+          "P1",
+          "`missing-feedback`",
+          "high",
+          "the flag `feedback_loop` is absent"
+        ],
+        [
+          "P1",
+          "`autonomy-without-need`",
+          "medium",
+          "`agent` or `team` is present and `path_known` is present"
+        ],
+        [
+          "P1",
+          "`team-below-price`",
+          "medium",
+          "`team` is present and `team_value_chats` is below 15"
+        ],
+        [
+          "P2",
+          "`volatile-prefix`",
+          "medium",
+          "`volatile_prefix` is present"
+        ],
+        [
+          "P2",
+          "`model-not-measured`",
+          "low",
+          "`model_measured` is absent"
+        ],
+        [
+          "P3",
+          "`filter-after-ranking`",
+          "high",
+          "`filter_after_ranking` is present"
+        ],
+        [
+          "P3",
+          "`stale-index`",
+          "high",
+          "`replace_on_change` is absent"
+        ],
+        [
+          "P3",
+          "`tool-bloat`",
+          "medium",
+          "`tool_tokens` is above 10000 and `deferral` is absent"
+        ],
+        [
+          "P3",
+          "`agent-rights-only`",
+          "high",
+          "`agent_rights_only` is present"
+        ],
+        [
+          "P4",
+          "`no-protected-segment`",
+          "medium",
+          "`protected_segment` is absent"
+        ],
+        [
+          "P4",
+          "`small-eval-set`",
+          "low",
+          "`eval_cases` is below 20"
+        ],
+        [
+          "P4",
+          "`no-way-back`",
+          "high",
+          "`rollback` is absent"
+        ],
+        [
+          "P4",
+          "`big-bang-rollout`",
+          "medium",
+          "`rollout_stages` is below 3"
+        ],
+        [
+          "P5",
+          "`identifiers-reach-model`",
+          "high",
+          "`pii_reaches_model` is present"
+        ],
+        [
+          "P5",
+          "`residency-unmet`",
+          "high",
+          "`residency_unmet` is present"
+        ],
+        [
+          "P5",
+          "`audit-keeps-content`",
+          "medium",
+          "`audit_keeps_content` is present"
+        ],
+        [
+          "P5",
+          "`irreversible-without-person`",
+          "high",
+          "`irreversible_action` is present and `human_step` is absent"
+        ],
+        [
+          "P5",
+          "`retention-outside-window`",
+          "medium",
+          "`retain_days` is below `floor_days` or above `ceiling_days`"
+        ],
+        [
+          "P6",
+          "`no-accountable-owner`",
+          "medium",
+          "`owner` is absent"
+        ],
+        [
+          "P6",
+          "`sla-without-numbers`",
+          "medium",
+          "`latency_ms` is 0 or less, or `availability_tenths` is 0 or less"
+        ],
+        [
+          "P6",
+          "`accuracy-unstated`",
+          "low",
+          "`accuracy_stated` is absent"
+        ],
+        [
+          "P7",
+          "`unmanaged-team-settings`",
+          "medium",
+          "`team_size` is above 10 and `managed_settings` is absent"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**A design at the limits.** *You should see* a design that sits exactly on every threshold get no findings and an approval.",
+        "**High findings.** *You should see* one missing feedback loop, one filter after ranking or one missing way back reject the design.",
+        "**The verdict ladder.** *You should see* a medium finding ask for a revision and low findings alone pass.",
+        "**A stable order.** *You should see* severity first, then domain, then rule id, so two reviews of the same design read the same.",
+        "**Thresholds with an edge.** *You should see* each number pass exactly at its value and fail one step beyond it.",
+        "**The scorecard.** *You should see* the seven counts, with zero for a domain that has no finding.",
+        "**The accuracy a design needs.** *You should see* 98 for an error that costs 250 against a check that costs 5, 66 when three is the error cost and one the check, and 0 when a check costs as much as an error.",
+        "**Rules with a second fact.** *You should see* a rule stay quiet when its second fact is missing.",
+        "**Every flaw at once.** *You should see* all 22 findings for a design that breaks every rule."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A design that sits exactly at every threshold has no findings and is approved"
+        ],
+        [
+          "`e1`",
+          "A missing feedback loop, a filter after ranking or no way back is a high finding and the design is rejected"
+        ],
+        [
+          "`e2`",
+          "Medium findings revise the design and low findings alone approve it"
+        ],
+        [
+          "`e3`",
+          "Findings are ordered by severity, then domain, then rule id"
+        ],
+        [
+          "`e4`",
+          "Each numeric threshold passes exactly at its value and fails one step beyond"
+        ],
+        [
+          "`e5`",
+          "The scorecard counts the findings of each domain from P1 to P7"
+        ],
+        [
+          "`e6`",
+          "The accuracy a design needs is the break-even rounded up from the two costs"
+        ],
+        [
+          "`e7`",
+          "Rules that depend on a second fact fire only when both hold"
+        ],
+        [
+          "`e8`",
+          "Retrieval and privacy flaws are high findings in domains P3 and P5"
+        ],
+        [
+          "`e9`",
+          "A design with every flaw gets all 22 findings and a scorecard that adds up"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Launch review: the findings of a design against the seven domains, the verdict, the scorecard and the accuracy a design needs. See ../../statement.md.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\nSEVERITY = {\"high\": 0, \"medium\": 1, \"low\": 2}\nDOMAINS = [\"P1\", \"P2\", \"P3\", \"P4\", \"P5\", \"P6\", \"P7\"]\n\n\ndef _p1_rules(f, n, add):\n    add(\"feedback_loop\" not in f, \"high\", \"P1\", \"missing-feedback\")\n    add((\"agent\" in f or \"team\" in f) and \"path_known\" in f, \"medium\", \"P1\", \"autonomy-without-need\")\n    add(\"team\" in f and n.get(\"team_value_chats\", 0) < 15, \"medium\", \"P1\", \"team-below-price\")\n\n\ndef _p3_rules(f, n, add):\n    add(\"filter_after_ranking\" in f, \"high\", \"P3\", \"filter-after-ranking\")\n    add(\"replace_on_change\" not in f, \"high\", \"P3\", \"stale-index\")\n    add(n.get(\"tool_tokens\", 0) > 10000 and \"deferral\" not in f, \"medium\", \"P3\", \"tool-bloat\")\n    add(\"agent_rights_only\" in f, \"high\", \"P3\", \"agent-rights-only\")\n\n\ndef _p4_rules(f, n, add):\n    add(\"protected_segment\" not in f, \"medium\", \"P4\", \"no-protected-segment\")\n    add(n.get(\"eval_cases\", 0) < 20, \"low\", \"P4\", \"small-eval-set\")\n    add(\"rollback\" not in f, \"high\", \"P4\", \"no-way-back\")\n    add(n.get(\"rollout_stages\", 0) < 3, \"medium\", \"P4\", \"big-bang-rollout\")\n\n\ndef _p5_rules(f, n, add):\n    add(\"pii_reaches_model\" in f, \"high\", \"P5\", \"identifiers-reach-model\")\n    add(\"residency_unmet\" in f, \"high\", \"P5\", \"residency-unmet\")\n    add(\"audit_keeps_content\" in f, \"medium\", \"P5\", \"audit-keeps-content\")\n    add(\"irreversible_action\" in f and \"human_step\" not in f, \"high\", \"P5\", \"irreversible-without-person\")\n    add(n.get(\"retain_days\", 0) < n.get(\"floor_days\", 0) or n.get(\"retain_days\", 0) > n.get(\"ceiling_days\", 0), \"medium\", \"P5\", \"retention-outside-window\")\n\n\ndef _p2_rules(f, n, add):\n    add(\"volatile_prefix\" in f, \"medium\", \"P2\", \"volatile-prefix\")\n    add(\"model_measured\" not in f, \"low\", \"P2\", \"model-not-measured\")\n\n\ndef _p6_rules(f, n, add):\n    add(\"owner\" not in f, \"medium\", \"P6\", \"no-accountable-owner\")\n    add(n.get(\"latency_ms\", 0) <= 0 or n.get(\"availability_tenths\", 0) <= 0, \"medium\", \"P6\", \"sla-without-numbers\")\n    add(\"accuracy_stated\" not in f, \"low\", \"P6\", \"accuracy-unstated\")\n\n\ndef _p7_rules(f, n, add):\n    add(n.get(\"team_size\", 0) > 10 and \"managed_settings\" not in f, \"medium\", \"P7\", \"unmanaged-team-settings\")\n\n\ndef _order(found):\n    return sorted(found, key=lambda s: (SEVERITY[s.split()[0]], s.split()[1], s.split()[2]))\n\n\ndef launch_review(flags, numbers):\n    \"\"\"The findings, each \"<severity> <domain> <rule>\", high first, then by domain, then by rule.\"\"\"\n    log.debug(\"launch_review input: %r\", sorted(flags))\n    f, n = set(flags), dict(numbers)\n    found = []\n\n    def add(condition, severity, domain, rule):\n        if condition:\n            found.append(f\"{severity} {domain} {rule}\")\n\n    for rules in (_p1_rules, _p2_rules, _p3_rules, _p4_rules, _p5_rules, _p6_rules, _p7_rules):\n        rules(f, n, add)\n    return _order(found)\n\n\ndef verdict(findings):\n    \"\"\"reject for any high finding, revise for any medium one, otherwise approve.\"\"\"\n    if any(x.startswith(\"high \") for x in findings):\n        return \"reject\"\n    if any(x.startswith(\"medium \") for x in findings):\n        return \"revise\"\n    return \"approve\"\n\n\ndef scorecard(findings):\n    \"\"\"The number of findings in each domain, P1 to P7.\"\"\"\n    return [sum(1 for x in findings if x.split()[1] == d) for d in DOMAINS]\n\n\ndef needed_accuracy(error_cost, review_cost):\n    \"\"\"The break-even accuracy in whole percent, rounded up on the cost side; 0 when an error costs nothing or no more than a check.\"\"\"\n    if error_cost <= 0:\n        return 0\n    needed = -(-100 * review_cost // error_cost)\n    return max(0, 100 - needed)\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom launch_review import launch_review, needed_accuracy, scorecard, verdict\n\n# A design that sits at every threshold of the review, as the tests' clean design does.\nCLEAN_FLAGS = {\"feedback_loop\", \"model_measured\", \"replace_on_change\", \"deferral\", \"protected_segment\", \"rollback\", \"human_step\", \"owner\",\n               \"accuracy_stated\", \"managed_settings\", \"irreversible_action\", \"team\"}\nCLEAN_NUMBERS = {\"team_value_chats\": 15, \"tool_tokens\": 10000, \"eval_cases\": 20, \"rollout_stages\": 3, \"retain_days\": 365, \"floor_days\": 90,\n                 \"ceiling_days\": 365, \"team_size\": 10, \"latency_ms\": 2000, \"availability_tenths\": 995}\n\nfindings = launch_review(CLEAN_FLAGS, CLEAN_NUMBERS)\nprint(\"clean design:\", findings, \"->\", verdict(findings))\n\n# The same design with an agent that does not need to be one, and PII reaching the model.\nrisky = launch_review(CLEAN_FLAGS | {\"agent\", \"path_known\", \"pii_reaches_model\"}, CLEAN_NUMBERS)\nprint(\"risky design:\", risky, \"->\", verdict(risky))\nprint(\"findings per domain:\", scorecard(risky))\nprint(\"accuracy needed when an error costs 250 and a review 5:\", needed_accuracy(250, 5))\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Launch review: the findings of a design against the seven domains, the verdict, the scorecard and the accuracy a design needs. See ../../statement.md.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\nSEVERITY = {\"high\": 0, \"medium\": 1, \"low\": 2}\nDOMAINS = [\"P1\", \"P2\", \"P3\", \"P4\", \"P5\", \"P6\", \"P7\"]\n\n\ndef _p1_rules(f, n, add):\n    \"\"\"TODO 1 of 8 (unlocks e1, e4 and e7): the rules of domain P1.\n\n    Receives the flags and the numbers and reports each rule it finds through `add`. The rules: missing-feedback, autonomy-without-need and team-below-price from the statement's table. Example: missing-feedback: the flag feedback_loop is absent -> one finding `high P1 missing-feedback`.\n    \"\"\"\n    pass\n\n\ndef _p3_rules(f, n, add):\n    \"\"\"TODO 2 of 8 (unlocks e4 and e8): the rules of domain P3.\n\n    Receives the flags and the numbers and reports each rule it finds through `add`. The rules: filter-after-ranking, stale-index, tool-bloat and agent-rights-only. Example: stale-index: the flag replace_on_change is absent -> one finding `high P3 stale-index`.\n    \"\"\"\n    pass\n\n\ndef _p4_rules(f, n, add):\n    \"\"\"TODO 3 of 8 (unlocks e1, e3 and e4): the rules of domain P4.\n\n    Receives the flags and the numbers and reports each rule it finds through `add`. The rules: no-protected-segment, small-eval-set, no-way-back and big-bang-rollout. Example: no-way-back: the flag rollback is absent -> one finding `high P4 no-way-back`.\n    \"\"\"\n    pass\n\n\ndef _p5_rules(f, n, add):\n    \"\"\"TODO 4 of 8 (unlocks e4, e7 and e8): the rules of domain P5.\n\n    Receives the flags and the numbers and reports each rule it finds through `add`. The rules: identifiers-reach-model, residency-unmet, audit-keeps-content, irreversible-without-person and retention-outside-window. Example: irreversible-without-person: irreversible_action present and human_step absent -> `high P5 irreversible-without-person`.\n    \"\"\"\n    pass\n\n\ndef _p2_rules(f, n, add):\n    add(\"volatile_prefix\" in f, \"medium\", \"P2\", \"volatile-prefix\")\n    add(\"model_measured\" not in f, \"low\", \"P2\", \"model-not-measured\")\n\n\ndef _p6_rules(f, n, add):\n    add(\"owner\" not in f, \"medium\", \"P6\", \"no-accountable-owner\")\n    add(n.get(\"latency_ms\", 0) <= 0 or n.get(\"availability_tenths\", 0) <= 0, \"medium\", \"P6\", \"sla-without-numbers\")\n    add(\"accuracy_stated\" not in f, \"low\", \"P6\", \"accuracy-unstated\")\n\n\ndef _p7_rules(f, n, add):\n    add(n.get(\"team_size\", 0) > 10 and \"managed_settings\" not in f, \"medium\", \"P7\", \"unmanaged-team-settings\")\n\n\ndef _order(found):\n    \"\"\"TODO 5 of 8 (unlocks e3): order the findings.\n\n    Receives the findings. Returns them ordered by severity (high, medium, low), then by domain, then by rule id in alphabetical order. Example: [\"low P2 a\", \"high P6 z\", \"high P1 y\"] -> [\"high P1 y\", \"high P6 z\", \"low P2 a\"]\n    \"\"\"\n    return found\n\n\ndef launch_review(flags, numbers):\n    \"\"\"The findings, each \"<severity> <domain> <rule>\", high first, then by domain, then by rule.\"\"\"\n    log.debug(\"launch_review input: %r\", sorted(flags))\n    f, n = set(flags), dict(numbers)\n    found = []\n\n    def add(condition, severity, domain, rule):\n        if condition:\n            found.append(f\"{severity} {domain} {rule}\")\n\n    for rules in (_p1_rules, _p2_rules, _p3_rules, _p4_rules, _p5_rules, _p6_rules, _p7_rules):\n        rules(f, n, add)\n    return _order(found)\n\n\ndef verdict(findings):\n    \"\"\"TODO 6 of 8 (unlocks e1 and e2): the verdict.\n\n    Receives the findings. Returns `reject` when any is high, `revise` when none is high and any is medium, `approve` otherwise. Example: [\"low P2 a\"] -> \"approve\"\n    \"\"\"\n    return \"\"\n\n\ndef scorecard(findings):\n    \"\"\"TODO 7 of 8 (unlocks e5): the scorecard.\n\n    Receives the findings. Returns the seven counts of the findings of P1 to P7 in that order. Example: [\"high P1 a\", \"low P7 c\"] -> [1, 0, 0, 0, 0, 0, 1]\n    \"\"\"\n    return []\n\n\ndef needed_accuracy(error_cost, review_cost):\n    \"\"\"TODO 8 of 8 (unlocks m1 and e6): the accuracy a design needs.\n\n    Receives the cost of an error and the cost of a check. Returns 100 minus the check cost as a percent of the error cost, the percent rounded up, never below 0, and 0 when an error costs nothing or less. Example: needed_accuracy(250, 5) -> 98\n    \"\"\"\n    return -1\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom launch_review import launch_review, needed_accuracy, scorecard, verdict\n\n# A design that sits at every threshold of the review, as the tests' clean design does.\nCLEAN_FLAGS = {\"feedback_loop\", \"model_measured\", \"replace_on_change\", \"deferral\", \"protected_segment\", \"rollback\", \"human_step\", \"owner\",\n               \"accuracy_stated\", \"managed_settings\", \"irreversible_action\", \"team\"}\nCLEAN_NUMBERS = {\"team_value_chats\": 15, \"tool_tokens\": 10000, \"eval_cases\": 20, \"rollout_stages\": 3, \"retain_days\": 365, \"floor_days\": 90,\n                 \"ceiling_days\": 365, \"team_size\": 10, \"latency_ms\": 2000, \"availability_tenths\": 995}\n\nfindings = launch_review(CLEAN_FLAGS, CLEAN_NUMBERS)\nprint(\"clean design:\", findings, \"->\", verdict(findings))\n\n# The same design with an agent that does not need to be one, and PII reaching the model.\nrisky = launch_review(CLEAN_FLAGS | {\"agent\", \"path_known\", \"pii_reaches_model\"}, CLEAN_NUMBERS)\nprint(\"risky design:\", risky, \"->\", verdict(risky))\nprint(\"findings per domain:\", scorecard(risky))\nprint(\"accuracy needed when an error costs 250 and a review 5:\", needed_accuracy(250, 5))\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 5,
+    "code": 2,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "47f7a5e41f21ca4ce05e15937608ceb930c3f885598b9e4a13d2c180444de2e8",
+  "starting_code": "\"\"\"Launch review: the findings of a design against the seven domains, the verdict, the scorecard and the accuracy a design needs. See ../../statement.md.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\nSEVERITY = {\"high\": 0, \"medium\": 1, \"low\": 2}\nDOMAINS = [\"P1\", \"P2\", \"P3\", \"P4\", \"P5\", \"P6\", \"P7\"]\n\n\ndef _p1_rules(f, n, add):\n    \"\"\"TODO 1 of 8 (unlocks e1, e4 and e7): the rules of domain P1.\n\n    Receives the flags and the numbers and reports each rule it finds through `add`. The rules: missing-feedback, autonomy-without-need and team-below-price from the statement's table. Example: missing-feedback: the flag feedback_loop is absent -> one finding `high P1 missing-feedback`.\n    \"\"\"\n    pass\n\n\ndef _p3_rules(f, n, add):\n    \"\"\"TODO 2 of 8 (unlocks e4 and e8): the rules of domain P3.\n\n    Receives the flags and the numbers and reports each rule it finds through `add`. The rules: filter-after-ranking, stale-index, tool-bloat and agent-rights-only. Example: stale-index: the flag replace_on_change is absent -> one finding `high P3 stale-index`.\n    \"\"\"\n    pass\n\n\ndef _p4_rules(f, n, add):\n    \"\"\"TODO 3 of 8 (unlocks e1, e3 and e4): the rules of domain P4.\n\n    Receives the flags and the numbers and reports each rule it finds through `add`. The rules: no-protected-segment, small-eval-set, no-way-back and big-bang-rollout. Example: no-way-back: the flag rollback is absent -> one finding `high P4 no-way-back`.\n    \"\"\"\n    pass\n\n\ndef _p5_rules(f, n, add):\n    \"\"\"TODO 4 of 8 (unlocks e4, e7 and e8): the rules of domain P5.\n\n    Receives the flags and the numbers and reports each rule it finds through `add`. The rules: identifiers-reach-model, residency-unmet, audit-keeps-content, irreversible-without-person and retention-outside-window. Example: irreversible-without-person: irreversible_action present and human_step absent -> `high P5 irreversible-without-person`.\n    \"\"\"\n    pass\n\n\ndef _p2_rules(f, n, add):\n    add(\"volatile_prefix\" in f, \"medium\", \"P2\", \"volatile-prefix\")\n    add(\"model_measured\" not in f, \"low\", \"P2\", \"model-not-measured\")\n\n\ndef _p6_rules(f, n, add):\n    add(\"owner\" not in f, \"medium\", \"P6\", \"no-accountable-owner\")\n    add(n.get(\"latency_ms\", 0) <= 0 or n.get(\"availability_tenths\", 0) <= 0, \"medium\", \"P6\", \"sla-without-numbers\")\n    add(\"accuracy_stated\" not in f, \"low\", \"P6\", \"accuracy-unstated\")\n\n\ndef _p7_rules(f, n, add):\n    add(n.get(\"team_size\", 0) > 10 and \"managed_settings\" not in f, \"medium\", \"P7\", \"unmanaged-team-settings\")\n\n\ndef _order(found):\n    \"\"\"TODO 5 of 8 (unlocks e3): order the findings.\n\n    Receives the findings. Returns them ordered by severity (high, medium, low), then by domain, then by rule id in alphabetical order. Example: [\"low P2 a\", \"high P6 z\", \"high P1 y\"] -> [\"high P1 y\", \"high P6 z\", \"low P2 a\"]\n    \"\"\"\n    return found\n\n\ndef launch_review(flags, numbers):\n    \"\"\"The findings, each \"<severity> <domain> <rule>\", high first, then by domain, then by rule.\"\"\"\n    log.debug(\"launch_review input: %r\", sorted(flags))\n    f, n = set(flags), dict(numbers)\n    found = []\n\n    def add(condition, severity, domain, rule):\n        if condition:\n            found.append(f\"{severity} {domain} {rule}\")\n\n    for rules in (_p1_rules, _p2_rules, _p3_rules, _p4_rules, _p5_rules, _p6_rules, _p7_rules):\n        rules(f, n, add)\n    return _order(found)\n\n\ndef verdict(findings):\n    \"\"\"TODO 6 of 8 (unlocks e1 and e2): the verdict.\n\n    Receives the findings. Returns `reject` when any is high, `revise` when none is high and any is medium, `approve` otherwise. Example: [\"low P2 a\"] -> \"approve\"\n    \"\"\"\n    return \"\"\n\n\ndef scorecard(findings):\n    \"\"\"TODO 7 of 8 (unlocks e5): the scorecard.\n\n    Receives the findings. Returns the seven counts of the findings of P1 to P7 in that order. Example: [\"high P1 a\", \"low P7 c\"] -> [1, 0, 0, 0, 0, 0, 1]\n    \"\"\"\n    return []\n\n\ndef needed_accuracy(error_cost, review_cost):\n    \"\"\"TODO 8 of 8 (unlocks m1 and e6): the accuracy a design needs.\n\n    Receives the cost of an error and the cost of a check. Returns 100 minus the check cost as a percent of the error cost, the percent rounded up, never below 0, and 0 when an error costs nothing or less. Example: needed_accuracy(250, 5) -> 98\n    \"\"\"\n    return -1\n",
+  "exercise": {
+    "main_path": "practice/level-4/93-professional-capstone/prose/unit-01/practice-1/launch_review.py",
+    "test_path": "practice/level-4/93-professional-capstone/prose/unit-01/practice-1/test_launch_review.py",
+    "run_command": [
+      "python3",
+      "practice/level-4/93-professional-capstone/prose/unit-01/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-4/93-professional-capstone/prose/unit-01/practice-1/target/report.xml",
+      "practice/level-4/93-professional-capstone/prose/unit-01/practice-1/test_launch_review.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_a_design_that_sits_exactly_at_every_threshold_has_no_findings_and_is_approved",
+        "kind": "main",
+        "says": "A design that sits exactly at every threshold has no findings and is approved"
+      },
+      {
+        "id": "test_e1_a_missing_feedback_loop_a_filter_after_ranking_or_no_way_back_is_a_high_finding_and_the_design_is_rejected",
+        "kind": "edge",
+        "says": "A missing feedback loop, a filter after ranking or no way back is a high finding and the design is rejected"
+      },
+      {
+        "id": "test_e2_medium_findings_revise_the_design_and_low_findings_alone_approve_it",
+        "kind": "edge",
+        "says": "Medium findings revise the design and low findings alone approve it"
+      },
+      {
+        "id": "test_e3_findings_are_ordered_by_severity_then_domain_then_rule_id",
+        "kind": "edge",
+        "says": "Findings are ordered by severity, then domain, then rule id"
+      },
+      {
+        "id": "test_e4_each_numeric_threshold_passes_exactly_at_its_value_and_fails_one_step_beyond",
+        "kind": "edge",
+        "says": "Each numeric threshold passes exactly at its value and fails one step beyond"
+      },
+      {
+        "id": "test_e5_the_scorecard_counts_the_findings_of_each_domain_from_P1_to_P7",
+        "kind": "edge",
+        "says": "The scorecard counts the findings of each domain from P1 to P7"
+      },
+      {
+        "id": "test_e6_the_accuracy_a_design_needs_is_the_break_even_rounded_up_from_the_two_costs",
+        "kind": "edge",
+        "says": "The accuracy a design needs is the break-even rounded up from the two costs"
+      },
+      {
+        "id": "test_e7_rules_that_depend_on_a_second_fact_fire_only_when_both_hold",
+        "kind": "edge",
+        "says": "Rules that depend on a second fact fire only when both hold"
+      },
+      {
+        "id": "test_e8_retrieval_and_privacy_flaws_are_high_findings_in_domains_P3_and_P5",
+        "kind": "edge",
+        "says": "Retrieval and privacy flaws are high findings in domains P3 and P5"
+      },
+      {
+        "id": "test_e9_a_design_with_every_flaw_gets_all_22_findings_and_a_scorecard_that_adds_up",
+        "kind": "edge",
+        "says": "A design with every flaw gets all 22 findings and a scorecard that adds up"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-4/93-professional-capstone/prose/unit-01/practice-1/target/report.xml"
+    },
+    "origin": "course/93-professional-capstone/01-a-claims-assistant-end-to-end-across-the-seven-domains.md",
+    "concepts": [
+      "the practice of A claims assistant end to end, across the seven domains is solved"
+    ],
+    "files": [
+      "practice/level-4/93-professional-capstone/prose/unit-01/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "professional-capstone-u1"
+}

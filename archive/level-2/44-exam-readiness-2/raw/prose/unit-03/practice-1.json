@@ -1,0 +1,2007 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "44-exam-readiness-2"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Developer mock exam 1",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "x1",
+        "stem": "A team's monitoring shows its per-minute token use at about 40 percent of its tier's limit, yet 429 errors appear in sharp bursts whenever a scheduled job starts. Which explanation fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Cached tokens are counted twice against the input limit, so the average hides the real total",
+            "correct": false,
+            "says": "Ruled out because the page says that for most models \"only uncached input tokens count toward ITPM\", so cached tokens are not double counted."
+          },
+          {
+            "id": "b",
+            "text": "The allowance resets in full at fixed minute boundaries, so jobs that start together all collide at once",
+            "correct": false,
+            "says": "Ruled out because the bucket refills \"rather than being reset at fixed intervals\", so there is no minute boundary."
+          },
+          {
+            "id": "c",
+            "text": "Spare capacity is topped up gradually, so a sudden spike empties it even when the mean is low",
+            "correct": true,
+            "says": "The limit works as a token bucket that is \"continuously replenished up to your maximum limit\", so a spike can empty it (module 12, page 2)."
+          },
+          {
+            "id": "d",
+            "text": "A raised max_tokens value is charged against the output limit even when the reply is short",
+            "correct": false,
+            "says": "Ruled out because the rate-limit page says \"does not factor into OTPM rate limit calculations\" for the max_tokens parameter."
+          }
+        ],
+        "origin": {
+          "path": "course/12-from-business-need-to-a-testable-spec/02-budgets-and-matching-an-architecture.md",
+          "section": "Throughput: rate limits are a requirement on you"
+        },
+        "domain": "DV1"
+      },
+      {
+        "id": "x2",
+        "stem": "After a provider update, a hand-written client that worked for months throws an exception on every reply because the JSON now carries a field it has never seen. Which change fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Pin the request to an earlier documented version of the API",
+            "correct": false,
+            "says": "Ruled out because earlier versions \"may be unavailable for new users\" and the only current value is the one already in use."
+          },
+          {
+            "id": "b",
+            "text": "Pick out just the values the code uses and skip whatever else arrives",
+            "correct": true,
+            "says": "A client should \"Read what you need and ignore the rest\", since an unknown field is not an error (module 13, page 1)."
+          },
+          {
+            "id": "c",
+            "text": "Validate every reply against a strict schema and reject any extra entry",
+            "correct": false,
+            "says": "Ruled out because a client that fails on an unknown field \"breaks on a change the versioning page allows\"."
+          },
+          {
+            "id": "d",
+            "text": "Treat the unknown field as a transient failure and retry the call",
+            "correct": false,
+            "says": "Ruled out because \"An unknown field is not an error.\", so a retry only meets the same field again."
+          }
+        ],
+        "origin": {
+          "path": "course/13-one-rest-api-under-every-sdk/01-the-http-contract.md",
+          "section": "What may change, and what may not"
+        },
+        "domain": "DV1"
+      },
+      {
+        "id": "x3",
+        "stem": "A support bot caches a long prefix. After turn four the team wants a new tone rule applied to later turns on Claude Sonnet 5.5, without discarding the cached earlier part. Which two statements describe the approach that fits? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "Rewrite the top-level system field with the new rule on the next request",
+            "correct": false,
+            "says": "Ruled out because adding the rule partway \"changes the system prompt and invalidates the conversation's earlier thinking blocks\"."
+          },
+          {
+            "id": "b",
+            "text": "Append a system-role instruction after the latest user message",
+            "correct": true,
+            "says": "A message with the system role after a user turn \"does not invalidate a cached prefix that came before it\" (module 14, page 1), so the earlier part of the conversation stays reusable."
+          },
+          {
+            "id": "c",
+            "text": "End the list with a partial assistant message that already follows the rule",
+            "correct": false,
+            "says": "Ruled out because a conversation that ends on the model's side \"must end with a user message\" and returns a 400."
+          },
+          {
+            "id": "d",
+            "text": "Prior content keeps its saved computation",
+            "correct": true,
+            "says": "A message with the system role after a user turn \"does not invalidate a cached prefix that came before it\" (module 14, page 1), so the earlier part of the conversation stays reusable."
+          },
+          {
+            "id": "e",
+            "text": "Start a fresh conversation and resend a summary that includes the rule",
+            "correct": false,
+            "says": "Ruled out because the page assigns \"the mid-conversation message for instructions that only become relevant later\", so no restart is needed."
+          }
+        ],
+        "origin": {
+          "path": "course/14-the-messages-api/01-turns-roles-and-content-blocks.md",
+          "section": "Roles"
+        },
+        "domain": "DV1",
+        "select": 2
+      },
+      {
+        "id": "x4",
+        "stem": "A dashboard charts only the plain input count from each response and shows 50 for a call that sent a 200,000-token document from the cache. The team asks whether the figure is broken. What should they be told?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The field was capped at 50 because the document exceeded the context limit of that model",
+            "correct": false,
+            "says": "Ruled out because the page gives the same case, \"reads 50 although the total input is 200,050\", and nothing was capped."
+          },
+          {
+            "id": "b",
+            "text": "Input tokens are billed separately from the cache, so the figure shown is already complete and exact",
+            "correct": false,
+            "says": "Ruled out because the page states that \"the total input is the sum of three numbers\", not one."
+          },
+          {
+            "id": "c",
+            "text": "Streaming reports that figure only in the closing event, so the dashboard read it early",
+            "correct": false,
+            "says": "Ruled out because the page says \"the input side arrives in message_start\", so timing does not explain a low value."
+          },
+          {
+            "id": "d",
+            "text": "It holds just the tail after the final breakpoint, so combine it with the read and write totals",
+            "correct": true,
+            "says": "The plain count \"only represents tokens that appear after your last cache breakpoint\", so the other two fields must be added (module 14, page 2)."
+          }
+        ],
+        "origin": {
+          "path": "course/14-the-messages-api/02-limits-stop-reasons-and-usage.md",
+          "section": "usage: the numbers behind the bill"
+        },
+        "domain": "DV1"
+      },
+      {
+        "id": "x5",
+        "stem": "Every call returns a 400 whose message begins with \"You have reached your specified API usage limits\". The team reformats the request body three times with no change. What should they do next?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Back off and retry after the interval that the response supplies",
+            "correct": false,
+            "says": "Ruled out because a 400 is in the group where \"the same request fails again\", so waiting does not help."
+          },
+          {
+            "id": "b",
+            "text": "Rotate the API key and send the same request again",
+            "correct": false,
+            "says": "Ruled out because the page explains that \"A limit you set yourself, below the tier's cap, also stops requests\"."
+          },
+          {
+            "id": "c",
+            "text": "Raise the ceiling that an administrator configured below the plan's cap",
+            "correct": true,
+            "says": "A limit set below the tier's cap returns a 400, and \"Lifting the limit is the cure, not changing the request\" (module 15, page 1)."
+          },
+          {
+            "id": "d",
+            "text": "Shrink the payload toward the 32 MB size limit and send it again",
+            "correct": false,
+            "says": "Ruled out because an oversized body gives a different outcome: \"a larger request is refused with a 413\"."
+          }
+        ],
+        "origin": {
+          "path": "course/15-errors-retries-and-timeouts/01-error-classes-by-type-and-origin.md",
+          "section": "Three cases that are easy to confuse"
+        },
+        "domain": "DV1"
+      },
+      {
+        "id": "x6",
+        "stem": "A client computes a 2-second back-off after a rate-limit response, but that response carries a header asking for 30 seconds. Which delay should the client apply?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The computed value, because the header is only advisory",
+            "correct": false,
+            "says": "Ruled out because the page says \"it is a floor, not a suggestion\", so the header cannot be treated as advice."
+          },
+          {
+            "id": "b",
+            "text": "The longer of the two waits, because earlier retries will fail",
+            "correct": true,
+            "says": "The header sets a floor, so wait \"the larger of your back-off and the header\" (module 15, page 2)."
+          },
+          {
+            "id": "c",
+            "text": "The header value minus the time the failed request already took",
+            "correct": false,
+            "says": "Ruled out because the header text says \"Earlier retries will fail\", and nothing in it is reduced by elapsed time."
+          },
+          {
+            "id": "d",
+            "text": "Zero, so the limit is probed again as soon as it refills",
+            "correct": false,
+            "says": "Ruled out because the page warns that \"hammering the endpoint in the meantime only fails\"."
+          }
+        ],
+        "origin": {
+          "path": "course/15-errors-retries-and-timeouts/02-retry-back-off-and-idempotency.md",
+          "section": "retry-after: the server's own number"
+        },
+        "domain": "DV1"
+      },
+      {
+        "id": "x7",
+        "stem": "A batch service must sustain 600 requests a minute against the API, and each call takes about 3 seconds. Which cap on simultaneous calls fits that target without inviting rate-limit errors?",
+        "options": [
+          {
+            "id": "a",
+            "text": "About 10, the number of requests that begin during each single second",
+            "correct": false,
+            "says": "Ruled out because a bound taken from the starts per second ignores the call time, and the page's own case shows the gap: \"when each call takes 6 seconds, you need about 100 in flight\", far above the per-second rate."
+          },
+          {
+            "id": "b",
+            "text": "About 300, half of the requests that are sent during that minute",
+            "correct": false,
+            "says": "Ruled out because a bound above the need \"would only invite 429 errors\"."
+          },
+          {
+            "id": "c",
+            "text": "About 30, from the arrival frequency times each exchange's duration",
+            "correct": true,
+            "says": "In-flight calls follow Little's law: \"the number of requests in flight equals the request rate times the time each takes\", so 10 a second for 3 seconds gives 30 (module 16, page 1)."
+          },
+          {
+            "id": "d",
+            "text": "About 600, one slot for each request sent during the minute",
+            "correct": false,
+            "says": "Ruled out because the rule is to \"compute the bound from the limit you must stay under\", not to match the total sent."
+          }
+        ],
+        "origin": {
+          "path": "course/16-async-concurrency-and-backpressure/01-async-calls-and-bounded-concurrency.md",
+          "section": "Choosing the bound"
+        },
+        "domain": "DV1"
+      },
+      {
+        "id": "x8",
+        "stem": "A logging layer for a streamed reply records the stop reason from the first chunk it receives and stores a null. Which two statements explain it? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "It arrives in the HTTP status line of the response",
+            "correct": false,
+            "says": "Ruled out because \"stop_reason indicates normal completion; HTTP errors indicate failures\"."
+          },
+          {
+            "id": "b",
+            "text": "The value arrives in the delta frame sent close to the finish",
+            "correct": true,
+            "says": "The stop reason \"arrives in message_delta, near the end\", so a read at the start finds nothing (module 17, page 1)."
+          },
+          {
+            "id": "c",
+            "text": "It arrives in a content_block_stop frame, once each block completes",
+            "correct": false,
+            "says": "Ruled out because that frame means \"The block at index is complete\" and carries no reason."
+          },
+          {
+            "id": "d",
+            "text": "Reading at the start finds it missing",
+            "correct": true,
+            "says": "The stop reason \"arrives in message_delta, near the end\", so a read at the start finds nothing (module 17, page 1)."
+          },
+          {
+            "id": "e",
+            "text": "It arrives in message_start, alongside the input token count",
+            "correct": false,
+            "says": "Ruled out because the opening frame carries \"an empty content and the input token count in usage\", not the stop reason."
+          }
+        ],
+        "origin": {
+          "path": "course/17-streaming/01-events-and-assembling-a-message.md",
+          "section": "The shape of a stream"
+        },
+        "domain": "DV1",
+        "select": 2
+      },
+      {
+        "id": "x9",
+        "stem": "An operator stops a running batch and sees an interim state named canceling. What should the team expect for the requests that had already run?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Every one is refunded because the batch never reached its normal end",
+            "correct": false,
+            "says": "Ruled out because the page says \"the requests that had already run are still billed\"."
+          },
+          {
+            "id": "b",
+            "text": "Their charges stand, and their outputs may show up once polling reaches the end",
+            "correct": true,
+            "says": "Batches that are stopped \"end up with a status of ended and may contain partial results\", and processed work is billed (module 21, page 2)."
+          },
+          {
+            "id": "c",
+            "text": "Their results are discarded and nothing can be downloaded afterwards",
+            "correct": false,
+            "says": "Ruled out because the batch \"may contain partial results for requests that were processed before cancellation\"."
+          },
+          {
+            "id": "d",
+            "text": "The whole batch is deleted at once, so its results address stops working for everyone",
+            "correct": false,
+            "says": "Ruled out because \"Cancellation may not be instant\", so the batch is not removed at once."
+          }
+        ],
+        "origin": {
+          "path": "course/21-message-batches/02-polling-results-and-retries.md",
+          "section": "Polling"
+        },
+        "domain": "DV1"
+      },
+      {
+        "id": "x10",
+        "stem": "A developer ports a working direct-API request to the Messages API of Claude in Amazon Bedrock and removes the version header, assuming the platform now handles versioning. What does the page say?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The date moves into the body and is renamed to a platform-specific field name",
+            "correct": false,
+            "says": "Ruled out because that placement is the Google Cloud rule: \"anthropic_version is passed in the request body\"."
+          },
+          {
+            "id": "b",
+            "text": "The platform infers it from the model identifier, so no value is sent",
+            "correct": false,
+            "says": "Ruled out because the contract lists the version as \"which the overview lists as required\"."
+          },
+          {
+            "id": "c",
+            "text": "It stays, with the value 2023-06-01, exactly as on Anthropic's own endpoint",
+            "correct": true,
+            "says": "On Bedrock the version \"stays a header, as on the direct API\" (module 22, page 1)."
+          },
+          {
+            "id": "d",
+            "text": "AWS signing replaces it, SigV4 authenticating the whole call",
+            "correct": false,
+            "says": "Ruled out because the page treats them as separate items: \"Authentication, version and body type are all a plain request needs\"."
+          }
+        ],
+        "origin": {
+          "path": "course/22-claude-on-the-cloud-platforms/01-one-messages-api-three-front-doors.md",
+          "section": "Bedrock"
+        },
+        "domain": "DV1"
+      },
+      {
+        "id": "x11",
+        "stem": "A document-review service on Google Cloud attaches dozens of page images to each request and is refused although the token count is well under the window. Which limit did it most likely hit?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The 600-image ceiling that applies to models with larger windows",
+            "correct": false,
+            "says": "Ruled out because the page says the request size limit \"can be reached first\", before any image count."
+          },
+          {
+            "id": "b",
+            "text": "A payload size ceiling of 30 MB enforced by the platform",
+            "correct": true,
+            "says": "Google Cloud \"limits request payloads to 30 MB\", which many images can reach first (module 22, page 2)."
+          },
+          {
+            "id": "c",
+            "text": "A tokens-per-minute quota that is shared across the account",
+            "correct": false,
+            "says": "Ruled out because the refusal came while the count was low, and a team with many images \"can reach before the token limit\"."
+          },
+          {
+            "id": "d",
+            "text": "A requirement that images arrive as links instead of encoded strings",
+            "correct": false,
+            "says": "Ruled out because on this platform \"only base64-encoded sources are currently available\", so links are not an option."
+          }
+        ],
+        "origin": {
+          "path": "course/22-claude-on-the-cloud-platforms/02-what-each-platform-lacks-where-it-runs-and-what-it-costs.md",
+          "section": "Quotas, limits and records"
+        },
+        "domain": "DV1"
+      },
+      {
+        "id": "x12",
+        "stem": "A security lead wants to stop all inference against foundation models in an AWS account today, while keeping the policy as short as possible. Which statement holds?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Each related action needs its own explicit deny statement as well",
+            "correct": false,
+            "says": "Ruled out because the page lists the neighbours, \"such as Converse and StartAsyncInvoke\", as blocked without extra statements."
+          },
+          {
+            "id": "b",
+            "text": "A wildcard in a deny rule is the same defect as one in an allow rule",
+            "correct": false,
+            "says": "Ruled out because the page says \"In a guardrail, the wildcard is the point\", so the wildcard is legitimate in a deny."
+          },
+          {
+            "id": "c",
+            "text": "A deny statement belongs in the same policy as the allow-list actions",
+            "correct": false,
+            "says": "Ruled out because \"a Deny statement belongs in a separate guardrail\", and not in the allow-list policy."
+          },
+          {
+            "id": "d",
+            "text": "Denying the invoke action alone also blocks the neighbouring conversation APIs",
+            "correct": true,
+            "says": "Denying InvokeModel is enough because other actions \"are blocked automatically when InvokeModel is denied\" (module 23, page 1)."
+          }
+        ],
+        "origin": {
+          "path": "course/23-setting-up-claude-on-the-cloud-platforms/01-least-privilege-for-bedrock-and-vertex.md",
+          "section": "What goes wrong in a policy"
+        },
+        "domain": "DV1"
+      },
+      {
+        "id": "x13",
+        "stem": "A service that extracted invoices by forcing one tool on every call moves to Claude Sonnet 5.5 and every request now fails with a 400. Which replacement fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Switch the choice to any, which lets the model pick among the tools",
+            "correct": false,
+            "says": "Ruled out because on these models `any` and `tool` \"return a 400 error\" just as a named tool does."
+          },
+          {
+            "id": "b",
+            "text": "A fixed-shape reply through the output format setting with a JSON schema",
+            "correct": true,
+            "says": "The page recommends structured outputs \"when you need a response in a fixed JSON shape\" (module 25, page 1)."
+          },
+          {
+            "id": "c",
+            "text": "Ask for JSON in the prompt and parse whatever text comes back",
+            "correct": false,
+            "says": "Ruled out because a prompt request gives \"no guarantee; the program must parse defensively\"."
+          },
+          {
+            "id": "d",
+            "text": "Add an assistant message that opens a brace to start the reply as JSON",
+            "correct": false,
+            "says": "Ruled out because prefilled assistant messages \"return a 400 error\" on these models."
+          }
+        ],
+        "origin": {
+          "path": "course/25-structured-output-and-defensive-parsing/01-getting-json-schemas-structured-outputs-and-strict-tools.md",
+          "section": "Forced tools are not always available"
+        },
+        "domain": "DV1"
+      },
+      {
+        "id": "x14",
+        "stem": "A team reads PDFs through Amazon Bedrock's Converse API and finds that answers ignore every chart, although the same files work well on the Claude API. Which two statements explain it and the fix? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "Switching to base64 sources hides the links that blocked the images",
+            "correct": false,
+            "says": "Ruled out because on that platform \"only base64 sources are available\", so that is already the case."
+          },
+          {
+            "id": "b",
+            "text": "A PDF surcharge disables page images unless it is paid",
+            "correct": false,
+            "says": "Ruled out because \"Standard API pricing applies with no additional PDF fees\"."
+          },
+          {
+            "id": "c",
+            "text": "The visual mode requires citations enabled",
+            "correct": true,
+            "says": "\"Without citations, Converse falls back to basic text extraction\", so enabling them restores the full visual mode (module 30, page 2)."
+          },
+          {
+            "id": "d",
+            "text": "Converting each PDF to plain text first adds the image content",
+            "correct": false,
+            "says": "Ruled out because text extraction is the mode that \"cannot analyze images or charts\"."
+          },
+          {
+            "id": "e",
+            "text": "Without them the service falls back to basic text extraction",
+            "correct": true,
+            "says": "\"Without citations, Converse falls back to basic text extraction\", so enabling them restores the full visual mode (module 30, page 2)."
+          }
+        ],
+        "origin": {
+          "path": "course/30-vision-and-documents/02-pdfs-documents-and-the-practice.md",
+          "section": "What a PDF costs"
+        },
+        "domain": "DV1",
+        "select": 2
+      },
+      {
+        "id": "x15",
+        "stem": "A guard hook works on its author's laptop but fails for every teammate who adds it from the marketplace; the command line names an absolute path. Which fix fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Copy the program into each teammate's home directory during onboarding",
+            "correct": false,
+            "says": "Ruled out because the page says \"The path differs on every machine\", so a copied location cannot be shared."
+          },
+          {
+            "id": "b",
+            "text": "Move the guard into the agent file with a permission mode setting",
+            "correct": false,
+            "says": "Ruled out because agent fields of that kind \"are ignored when loading agents from a plugin\"."
+          },
+          {
+            "id": "c",
+            "text": "Reach the program through the variable holding the install root",
+            "correct": true,
+            "says": "A hook script in a plugin \"cannot assume where the plugin was installed\", so it uses the plugin-root variable (module 39, page 3)."
+          },
+          {
+            "id": "d",
+            "text": "Place the program beside the manifest in the dot-folder",
+            "correct": false,
+            "says": "Ruled out because \"Only plugin.json goes inside .claude-plugin/\", so other files do not belong there."
+          }
+        ],
+        "origin": {
+          "path": "course/39-extending-claude-code/03-plugins-sharing-and-the-practice.md",
+          "section": "What a plugin is"
+        },
+        "domain": "DV1"
+      },
+      {
+        "id": "x16",
+        "stem": "A workflow lets Claude push fixes to a branch, but the test pipeline that should run on each push never starts. The workflow signs in with the repository's built-in credential. Which change fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Commit with a GitHub App token, since the default one's commits trigger nothing",
+            "correct": true,
+            "says": "\"GitHub doesn't trigger workflows on commits made with the default GITHUB_TOKEN\", so an app token is needed (module 40, page 2)."
+          },
+          {
+            "id": "b",
+            "text": "Pin the action to the beta tag so event delivery is restored",
+            "correct": false,
+            "says": "Ruled out because the page says \"workflows written for @beta need to move\", which concerns versions and not triggers."
+          },
+          {
+            "id": "c",
+            "text": "Grant the job write access to every scope, including the identity token",
+            "correct": false,
+            "says": "Ruled out because the page tells you to \"Grant the least a job needs\"."
+          },
+          {
+            "id": "d",
+            "text": "Limit parallel runs with concurrency controls so that the pipeline is not skipped over",
+            "correct": false,
+            "says": "Ruled out because the page says \"Use GitHub's concurrency controls to limit parallel runs\", which bounds cost and does not trigger anything."
+          }
+        ],
+        "origin": {
+          "path": "course/40-claude-in-the-software-life-cycle/02-ci-code-review-and-repository-events.md",
+          "section": "Bounding every run"
+        },
+        "domain": "DV1"
+      },
+      {
+        "id": "x17",
+        "stem": "A team wrote its build commands and conventions into the repository's memory file while using the terminal tool. A developer now opens the same repository in an IDE extension. What should the team expect?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Nothing carries over, because each surface keeps its own separate memory",
+            "correct": false,
+            "says": "Ruled out because the page says \"settings, and MCP servers work across all of them\"."
+          },
+          {
+            "id": "b",
+            "text": "The conventions apply, but the settings and servers must be recreated",
+            "correct": false,
+            "says": "Ruled out because memory files \"and settings that travel with the repository across its surfaces\"."
+          },
+          {
+            "id": "c",
+            "text": "Only the terminal reads that file, and extensions need the Agent SDK",
+            "correct": false,
+            "says": "Ruled out because Claude Code is \"available in the terminal, IDE extensions, a desktop app and the browser\"."
+          },
+          {
+            "id": "d",
+            "text": "Matching rules and configuration apply, as each surface runs one engine",
+            "correct": true,
+            "says": "Each surface \"connects to the same underlying Claude Code engine\", so the files carry across (module 3, page 2)."
+          }
+        ],
+        "origin": {
+          "path": "course/03-claudes-family-and-its-surfaces/02-the-surfaces-one-model-behind-many.md",
+          "section": "The map"
+        },
+        "domain": "DV1"
+      },
+      {
+        "id": "x18",
+        "stem": "Nightly bulk jobs share a 30,000-token instruction block, yet cache hit rates stay low because each entry lapses before many requests have arrived. Which adjustment does the page suggest?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Submit that block as a separate batch beforehand to warm the entry",
+            "correct": false,
+            "says": "Ruled out because warming \"targets time-to-first-token, which does not apply to batch processing\"."
+          },
+          {
+            "id": "b",
+            "text": "Ask for the one-hour lifetime on the common material",
+            "correct": true,
+            "says": "Because a batch can outlast five minutes, \"it suggests the one-hour lifetime for shared context\" (module 21, page 1)."
+          },
+          {
+            "id": "c",
+            "text": "Remove the cache markers from every request in the batch",
+            "correct": false,
+            "says": "Ruled out because the page says \"The pricing discounts from prompt caching and Message Batches can stack\"."
+          },
+          {
+            "id": "d",
+            "text": "Vary the instruction block slightly per call to make entries differ",
+            "correct": false,
+            "says": "Ruled out because hits depend on \"identical cache_control blocks in every request\"."
+          }
+        ],
+        "origin": {
+          "path": "course/21-message-batches/01-submitting-a-batch-limits-and-price.md",
+          "section": "The price"
+        },
+        "domain": "DV2"
+      },
+      {
+        "id": "x19",
+        "stem": "A team began a long-running coding agent on the recommended default tier, and its own evaluations at higher effort still fall short of the quality bar. Which step fits the model overview?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Add a second agent on the same tier that votes on each answer",
+            "correct": false,
+            "says": "Ruled out because the course advises \"adding complexity only when it demonstrably improves outcomes\" (module 34, page 2), and a vote adds complexity with no evidence of gain."
+          },
+          {
+            "id": "b",
+            "text": "Move down to Claude Sonnet 5.5 and lower the effort setting",
+            "correct": false,
+            "says": "Ruled out because the capability-first path is to \"get the quality, then work down to cheaper options\", and the quality is not yet reached."
+          },
+          {
+            "id": "c",
+            "text": "Restart on Claude Haiku 4.5 and move up only where it shows a gap",
+            "correct": false,
+            "says": "Ruled out because a cheap start is the efficiency-first path, and this agent fits the other one, which is \"Suited to complex reasoning, accuracy that outweighs cost, and high-autonomy agent work\"."
+          },
+          {
+            "id": "d",
+            "text": "Switch to Claude Fable 5.1 and compare its results on the same cases",
+            "correct": true,
+            "says": "The overview points to Claude Fable 5.1 \"when evals at higher effort still fall short\" (module 3, page 1)."
+          }
+        ],
+        "origin": {
+          "path": "course/03-claudes-family-and-its-surfaces/01-the-model-family-and-choosing-a-tier.md",
+          "section": "How the documentation says to choose"
+        },
+        "domain": "DV2"
+      },
+      {
+        "id": "x20",
+        "stem": "A shared request builder sends Claude Sonnet 5.5 a thinking setting that keeps only the short updates between tool calls, together with xhigh effort, and every call returns a 400. Which two statements explain it and the fix? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "That mode works at the three lowest levels",
+            "correct": true,
+            "says": "The mode \"works at `low`, `medium` and `high` effort and returns a 400 at `xhigh` and `max`\" (module 19, page 1), so the fix is one of the three lowest values."
+          },
+          {
+            "id": "b",
+            "text": "Pass adaptive as the effort value, leaving the model to choose its own",
+            "correct": false,
+            "says": "Ruled out because \"Don't pass adaptive as an effort value\"."
+          },
+          {
+            "id": "c",
+            "text": "Raise max_tokens, the 400 reporting a truncated reply",
+            "correct": false,
+            "says": "Ruled out because a cut reply is a different case, because it \"arrives with status 200\"."
+          },
+          {
+            "id": "d",
+            "text": "Add temperature 0 to make the behaviour deterministic",
+            "correct": false,
+            "says": "Ruled out because on these models \"a non-default value of any of them is rejected with a 400 error\"."
+          },
+          {
+            "id": "e",
+            "text": "At the two highest levels it is rejected",
+            "correct": true,
+            "says": "The mode \"works at `low`, `medium` and `high` effort and returns a 400 at `xhigh` and `max`\" (module 19, page 1), so the fix is one of the three lowest values."
+          }
+        ],
+        "origin": {
+          "path": "course/19-thinking-effort-and-speed/01-thinking-and-effort.md",
+          "section": "Two kinds of thinking"
+        },
+        "domain": "DV2",
+        "select": 2
+      },
+      {
+        "id": "x21",
+        "stem": "After a deploy, a service immediately fires ten simultaneous requests that share a 30,000-token prefix with a marker on it. Usage shows ten writes and no reads. What is the fix?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Raise the lifetime to one hour so later entries reach the earlier one",
+            "correct": false,
+            "says": "Ruled out because a one-hour entry \"writes at twice the base price\" and still does not exist before the first response."
+          },
+          {
+            "id": "b",
+            "text": "Alternate the effort setting on every call to spread out the writes",
+            "correct": false,
+            "says": "Ruled out because \"Changing the thinking mode or the effort always discards the cached messages\"."
+          },
+          {
+            "id": "c",
+            "text": "Send one, wait until its response begins, then release the other nine",
+            "correct": true,
+            "says": "The page says to \"wait for the first response before sending subsequent requests\" (module 20, page 2)."
+          },
+          {
+            "id": "d",
+            "text": "Shrink the prefix below the minimum, leaving nothing to be written",
+            "correct": false,
+            "says": "Ruled out because a prefix below the minimum \"will be processed without caching\", so the saving is lost."
+          }
+        ],
+        "origin": {
+          "path": "course/20-prompt-caching/02-prices-lifetimes-lookback-and-invalidation.md",
+          "section": "How long an entry lives"
+        },
+        "domain": "DV2"
+      },
+      {
+        "id": "x22",
+        "stem": "A team has no evaluation data yet and no sense of how hard its new feature is. Which starting plan matches the documentation's method?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Begin with the cheapest tier and move up only if tests show a gap",
+            "correct": false,
+            "says": "Ruled out because \"If you're unsure which model to use, start with Claude Opus 5.5 for most workloads.\""
+          },
+          {
+            "id": "b",
+            "text": "Begin with a capable model, test on real cases, then step down a tier",
+            "correct": true,
+            "says": "The method is to \"measure on your own cases, then move down a tier at a time\" (module 18, page 1)."
+          },
+          {
+            "id": "c",
+            "text": "Begin on Claude Fable 5.1 and keep it until cost becomes a complaint",
+            "correct": false,
+            "says": "Ruled out because a tier above Opus is \"earned by failing an evaluation, not assumed\"."
+          },
+          {
+            "id": "d",
+            "text": "Take the middle tier, which the price list names for most production work",
+            "correct": false,
+            "says": "Ruled out because the price list's advice is \"where to end up once you have measured\", and nothing has been measured yet."
+          }
+        ],
+        "origin": {
+          "path": "course/18-model-choice-cost-and-migration/01-matching-a-tier-to-a-workload.md",
+          "section": "Where the documentation starts you"
+        },
+        "domain": "DV2"
+      },
+      {
+        "id": "x23",
+        "stem": "A request to Claude Haiku 4.5, whose limit is 200K, carries about 150,000 input tokens and sets max_tokens to 64,000, which together go beyond that limit. What happens?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The call is accepted, and a lengthy reply ends early with a dedicated stop reason",
+            "correct": true,
+            "says": "Input plus max_tokens beyond the window is allowed because \"the request is still accepted\", and generation stops at the limit (module 1, page 1)."
+          },
+          {
+            "id": "b",
+            "text": "The call is rejected with a 400 error before any generation starts",
+            "correct": false,
+            "says": "Ruled out because \"Older models returned a validation error instead\"."
+          },
+          {
+            "id": "c",
+            "text": "The excess is trimmed from the start of the input history before any processing begins",
+            "correct": false,
+            "says": "Ruled out because chat products \"manage the window on a rolling first-in, first-out basis; the API does not\"."
+          },
+          {
+            "id": "d",
+            "text": "The output allowance is silently lowered to fit, so the reply always completes",
+            "correct": false,
+            "says": "Ruled out because the page says \"if generation then reaches the window limit it stops with\" a stop reason, not a lowered allowance."
+          }
+        ],
+        "origin": {
+          "path": "course/01-how-a-language-model-works/01-how-a-language-model-works.md",
+          "section": "What happens at the limit"
+        },
+        "domain": "DV2"
+      },
+      {
+        "id": "x24",
+        "stem": "Two otherwise identical multi-turn services use thinking: one runs on Claude Opus 5.5 and one on Claude Haiku 4.5. The first one's conversations fill their context faster. Which two statements explain the gap? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "Haiku 4.5 has a smaller window of 64K, so its context is cleared sooner",
+            "correct": false,
+            "says": "Ruled out because Haiku 4.5 has a window of \"200K for Claude Haiku 4.5\", and 64K is only its output ceiling."
+          },
+          {
+            "id": "b",
+            "text": "Adaptive thinking bills reasoning as input, which crowds the window",
+            "correct": false,
+            "says": "Ruled out because reasoning tokens \"are billed as output tokens\"."
+          },
+          {
+            "id": "c",
+            "text": "The larger model retains earlier reasoning by default",
+            "correct": true,
+            "says": "Earlier thinking is kept where \"current Opus, Sonnet and Fable models keep them by default\" (module 4, page 2), and the smaller model strips it, which is why the first service's context fills faster."
+          },
+          {
+            "id": "d",
+            "text": "Opus 5.5 can disable thinking, so it compensates with longer prompts",
+            "correct": false,
+            "says": "Ruled out because \"Opus 5.5 use adaptive thinking that is always on\"."
+          },
+          {
+            "id": "e",
+            "text": "The smaller model drops earlier reasoning blocks",
+            "correct": true,
+            "says": "Earlier thinking is kept where \"current Opus, Sonnet and Fable models keep them by default\" (module 4, page 2), and the smaller model strips it, which is why the first service's context fills faster."
+          }
+        ],
+        "origin": {
+          "path": "course/04-capabilities-and-limits/02-thinking-computer-use-and-when-not-to-use-a-model.md",
+          "section": "Thinking at a glance"
+        },
+        "domain": "DV2",
+        "select": 2
+      },
+      {
+        "id": "x25",
+        "stem": "A drafting feature scores 62 percent on the team's fixed test set against a 90 percent target and costs more than planned. Someone proposes switching tiers immediately. What does the module advise?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Move to the smaller tier now and raise effort until the score recovers",
+            "correct": false,
+            "says": "Ruled out because a smaller tier or lower effort fits only \"where the evaluation set says quality holds\", and here the score is far below the target."
+          },
+          {
+            "id": "b",
+            "text": "Shorten the prompt to cut tokens and check the score afterwards",
+            "correct": false,
+            "says": "Ruled out because a cheaper prompt is one \"that keeps the same results\", and the results are not yet good enough."
+          },
+          {
+            "id": "c",
+            "text": "Rewrite several parts of the prompt together to gain accuracy quickly",
+            "correct": false,
+            "says": "Ruled out because \"Several simultaneous edits leave you unable to say what helped\"."
+          },
+          {
+            "id": "d",
+            "text": "Close the gap first, then look for a cheaper way to hold the result",
+            "correct": true,
+            "says": "The order is \"first reach the quality bar; then look for the cheaper way to hold it\" (module 6, page 4)."
+          }
+        ],
+        "origin": {
+          "path": "course/06-prompting-fundamentals/04-diagnosing-a-weak-output.md",
+          "section": "Cheaper and faster at equal quality"
+        },
+        "domain": "DV2"
+      },
+      {
+        "id": "x26",
+        "stem": "A team migrates a reasoning-heavy workload to a newer model and copies its old effort values unchanged. Quality drifts. Which step does the guidance give?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Reapply the old thinking budgets, which carry over between generations",
+            "correct": false,
+            "says": "Ruled out because a manual budget \"or a manual budget_tokens, is rejected\" on the newer models."
+          },
+          {
+            "id": "b",
+            "text": "Run a sweep across levels on its own test set",
+            "correct": true,
+            "says": "The page says to \"Run an effort sweep on your own evals rather than carrying settings over from an earlier model\" (module 18, page 3)."
+          },
+          {
+            "id": "c",
+            "text": "Raise every level by one notch to offset the newer model",
+            "correct": false,
+            "says": "Ruled out because on Sonnet 5.5 \"its levels are recalibrated\", so no direction can be assumed."
+          },
+          {
+            "id": "d",
+            "text": "Pin the old model id until the next generation arrives",
+            "correct": false,
+            "says": "Ruled out because the page promises \"at least 60 days' notice before model retirement\", which allows time to test instead of waiting."
+          }
+        ],
+        "origin": {
+          "path": "course/18-model-choice-cost-and-migration/03-pinning-ids-and-migrating-safely.md",
+          "section": "What a newer model rejects"
+        },
+        "domain": "DV2"
+      },
+      {
+        "id": "x27",
+        "stem": "A pipeline starts two model calls at once: one drafts a reply and one checks the reply's tone, and every check fails with an empty input. How should the team restructure it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Run them in sequence, so the second receives the first one's output",
+            "correct": true,
+            "says": "Sectioning needs independent work, and \"Parallel calls cannot see each other's output\", so a dependent step belongs in a chain (module 34, page 1)."
+          },
+          {
+            "id": "b",
+            "text": "Keep both calls parallel and add a third that merges draft and verdict",
+            "correct": false,
+            "says": "Ruled out because \"Parallel calls cannot see each other's output\", so the checker still has nothing to read."
+          },
+          {
+            "id": "c",
+            "text": "Route the draft to a specialised prompt chosen by a classifier",
+            "correct": false,
+            "says": "Ruled out because routing \"directs it to a specialized followup task\" and does not order two calls."
+          },
+          {
+            "id": "d",
+            "text": "Replace both calls with an autonomous agent that decides the order of the steps",
+            "correct": false,
+            "says": "Ruled out because an agent suits a case where \"the path cannot be written in advance\", and this path is fixed."
+          }
+        ],
+        "origin": {
+          "path": "course/34-workflows-and-agents/01-workflow-or-agent-and-the-first-patterns.md",
+          "section": "Traps"
+        },
+        "domain": "DV3"
+      },
+      {
+        "id": "x28",
+        "stem": "In a draft-and-review loop, the reviewer's reply is sometimes prose such as \"looks fine to me\" instead of a score the program can parse. The loop currently treats that as a pass. What should it do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Keep treating it as a pass, and add a warning to the log",
+            "correct": false,
+            "says": "Ruled out because \"treating an unreadable reply as a pass would accept an unchecked draft\", whatever the log says."
+          },
+          {
+            "id": "b",
+            "text": "Count the attempt as unchecked, giving it zero with a stated cause",
+            "correct": true,
+            "says": "\"If the verdict cannot be parsed, the draft is unchecked\", so it is graded zero with a reason (module 34, page 2)."
+          },
+          {
+            "id": "c",
+            "text": "Pull the first digit from the text and treat it as the grade",
+            "correct": false,
+            "says": "Ruled out because such a parse \"turns a broken grader into a plausible number\" (module 42, page 2)."
+          },
+          {
+            "id": "d",
+            "text": "Return the latest draft to the user as it now stands",
+            "correct": false,
+            "says": "Ruled out because \"A refinement loop can get worse\", so the page keeps the best draft and not the last."
+          }
+        ],
+        "origin": {
+          "path": "course/34-workflows-and-agents/02-orchestrators-evaluators-agents-and-the-practice.md",
+          "section": "Traps"
+        },
+        "domain": "DV3"
+      },
+      {
+        "id": "x29",
+        "stem": "A service sets a dollar budget on its Agent SDK run, and the run fans work out to secondary workers. Finance worries that the workers' spending escapes the limit. What does the documentation say?",
+        "options": [
+          {
+            "id": "a",
+            "text": "No cost control exists, so the team must stop runs by hand",
+            "correct": false,
+            "says": "Ruled out because the option is described as \"Maximum cost before stopping\"."
+          },
+          {
+            "id": "b",
+            "text": "The cap counts only turns that use a tool, never dollars",
+            "correct": false,
+            "says": "Ruled out because only the turn limit \"counts tool-use turns only\", while the budget measures cost."
+          },
+          {
+            "id": "c",
+            "text": "The cap is checked once the run finishes, so overruns are unavoidable",
+            "correct": false,
+            "says": "Ruled out because \"When a limit is reached the run ends with a result whose subtype names it\"."
+          },
+          {
+            "id": "d",
+            "text": "The ceiling reaches down to the delegates as well",
+            "correct": true,
+            "says": "The page states that \"the budget covers subagents too\" (module 35, page 1)."
+          }
+        ],
+        "origin": {
+          "path": "course/35-the-claude-agent-sdk/01-the-sdk-and-its-loop.md",
+          "section": "Limits and results"
+        },
+        "domain": "DV3"
+      },
+      {
+        "id": "x30",
+        "stem": "A custom in-process tool is annotated as read-only, and the team lets it run alongside other tools without review, assuming that it cannot modify anything. Which two statements explain why that assumption fails? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "The handler's code can still write",
+            "correct": true,
+            "says": "\"Annotations are metadata, not enforcement\", and \"A tool marked read-only can still write if its handler does\" (module 35, page 2)."
+          },
+          {
+            "id": "b",
+            "text": "The label is enforced when the tool is served from outside the process boundary",
+            "correct": false,
+            "says": "Ruled out because clients treat annotations as \"untrusted unless they come from trusted servers\" (module 32, page 2), wherever the tool is served."
+          },
+          {
+            "id": "c",
+            "text": "The SDK rejects any write that such a tool attempts while the run is under way",
+            "correct": false,
+            "says": "Ruled out because annotations exist \"not because they enforce anything\" (module 32, page 2), so the SDK does not police writes on their basis."
+          },
+          {
+            "id": "d",
+            "text": "Tools carrying the label are exempt from hooks, so a veto there cannot reach them",
+            "correct": false,
+            "says": "Ruled out because \"hooks run before every other step, and a hook deny applies even in bypassPermissions mode\"."
+          },
+          {
+            "id": "e",
+            "text": "The label is only a scheduling hint that nothing enforces",
+            "correct": true,
+            "says": "\"Annotations are metadata, not enforcement\", and \"A tool marked read-only can still write if its handler does\" (module 35, page 2)."
+          }
+        ],
+        "origin": {
+          "path": "course/35-the-claude-agent-sdk/02-tools-permissions-hooks-and-custom-tools.md",
+          "section": "Custom tools"
+        },
+        "domain": "DV3",
+        "select": 2
+      },
+      {
+        "id": "x31",
+        "stem": "A team promotes a new system prompt for a hosted agent and wants production runs to keep the previous behaviour until a person approves the switch. Which approach fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Override the system field on every run with the earlier prompt text",
+            "correct": false,
+            "says": "Ruled out because an override applies to \"that one session\", so every run would carry the old prompt in code, where a pinned version can be \"promoted or rolled back without a deploy\"."
+          },
+          {
+            "id": "b",
+            "text": "Create the sessions with just the agent ID, which keeps yesterday's version",
+            "correct": false,
+            "says": "Ruled out because a session made with just an agent ID \"creates the session with the latest agent version\"."
+          },
+          {
+            "id": "c",
+            "text": "Create each session with a pinned version number",
+            "correct": true,
+            "says": "The page says \"a session can instead pin a version\" so a prompt can be promoted or rolled back without a deploy (module 36, page 1)."
+          },
+          {
+            "id": "d",
+            "text": "Set the agent's version field back to the earlier number",
+            "correct": false,
+            "says": "Ruled out because a version \"starts at 1 and increments each time an update changes the agent\", so it is a counter and not a field to set."
+          }
+        ],
+        "origin": {
+          "path": "course/36-managed-and-self-hosted-agents/01-what-managed-agents-is.md",
+          "section": "An agent is a versioned resource"
+        },
+        "domain": "DV3"
+      },
+      {
+        "id": "x32",
+        "stem": "A security officer approves self-hosted sandboxes for a managed agent on the grounds that nothing the agent touches will ever leave the company network. What is wrong with that reasoning?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Inputs and outputs of each call still reach the provider's control plane",
+            "correct": true,
+            "says": "\"Tool inputs and outputs still flow to Anthropic's control plane\" (module 36, page 2)."
+          },
+          {
+            "id": "b",
+            "text": "Only the sandbox image is hosted by the provider, so source files are exposed",
+            "correct": false,
+            "says": "Ruled out because \"Anthropic does not inspect or verify your sandbox image\", and the image is the customer's."
+          },
+          {
+            "id": "c",
+            "text": "Files and processes also run on the provider's side, so only egress rules differ",
+            "correct": false,
+            "says": "Ruled out because the page says \"files, processes and network traffic stay in your environment\"."
+          },
+          {
+            "id": "d",
+            "text": "The environment key must be stored inside the image so the worker can start",
+            "correct": false,
+            "says": "Ruled out because the key belongs in \"a secrets manager, never an image\"."
+          }
+        ],
+        "origin": {
+          "path": "course/36-managed-and-self-hosted-agents/02-environments-policies-budgets-and-self-hosting.md",
+          "section": "Self-hosted sandboxes"
+        },
+        "domain": "DV3"
+      },
+      {
+        "id": "x33",
+        "stem": "A typed agent returns a refund record that passes its schema, showing an amount of 4999 cents for a 49-cent item, and the team ships it because validation succeeded. What should they conclude?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The schema is wrong and must be rewritten from scratch with new limits",
+            "correct": false,
+            "says": "Ruled out because \"A refund of 4999 cents passes the schema whether or not it is right\"."
+          },
+          {
+            "id": "b",
+            "text": "Form checks prove only shape, so a separate rule must judge the value",
+            "correct": true,
+            "says": "\"Validation proves the shape\", and nothing more (module 37, page 1)."
+          },
+          {
+            "id": "c",
+            "text": "The retry loop should have caught it before shipping",
+            "correct": false,
+            "says": "Ruled out because only \"a reply that does not validate against the output type is refused\", and this one validated."
+          },
+          {
+            "id": "d",
+            "text": "A graph framework would have prevented it from shipping",
+            "correct": false,
+            "says": "Ruled out because \"A checkpoint is a copy of the state at a point in the graph\", not a check."
+          }
+        ],
+        "origin": {
+          "path": "course/37-agent-frameworks-compared/01-three-families-of-agent-frameworks.md",
+          "section": "Traps"
+        },
+        "domain": "DV3"
+      },
+      {
+        "id": "x34",
+        "stem": "A team wants a framework mainly because it is popular, though nobody can say which missing feature it would supply. Which step does the page advise?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Write the requirement with a number in it and test the simplest option",
+            "correct": true,
+            "says": "The page says to \"check whether the simplest option meets it\" (module 37, page 2)."
+          },
+          {
+            "id": "b",
+            "text": "Adopt it and trim the unused parts after the first release goes out",
+            "correct": false,
+            "says": "Ruled out because the advice is to \"start with direct calls and add layers when a need appears\"."
+          },
+          {
+            "id": "c",
+            "text": "Adopt it, but keep the model call behind a thin function of your own",
+            "correct": false,
+            "says": "Ruled out because \"A framework earns its place when the feature it brings is one you need and would build badly, and not before.\""
+          },
+          {
+            "id": "d",
+            "text": "Begin at the bottom row of the options table and move up on failure",
+            "correct": false,
+            "says": "Ruled out because the table is read as an order of questions: \"Start from the top and stop at the first row that meets the requirement.\""
+          }
+        ],
+        "origin": {
+          "path": "course/37-agent-frameworks-compared/02-framework-or-sdk.md",
+          "section": "Testing the choice"
+        },
+        "domain": "DV3"
+      },
+      {
+        "id": "x35",
+        "stem": "An application pastes a user's forwarded email between fixed tags in its prompt. A tester shows that an email containing the closing tag followed by new orders is treated as part of the instructions. Which measure from the page on pasted content fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Move the email above the instructions, where its position marks it as data",
+            "correct": false,
+            "says": "Ruled out because \"Moving a pasted document above the instructions does not mark it as data\"."
+          },
+          {
+            "id": "b",
+            "text": "Place the email in the system prompt, where it carries the most weight with the model",
+            "correct": false,
+            "says": "Ruled out because data in the system prompt \"gets the authority of an instruction\"."
+          },
+          {
+            "id": "c",
+            "text": "Fence it with a random identifier and warn the model it could hold directives",
+            "correct": true,
+            "says": "The page wraps pasted text in a tag \"with a random id that your application generates\" and says the text may carry instructions (module 24, page 1)."
+          },
+          {
+            "id": "d",
+            "text": "Rely on tags alone, so the model treats text inside them as inert data",
+            "correct": false,
+            "says": "Ruled out because \"Tags mark where data starts and ends, but they do not make data safe\"."
+          }
+        ],
+        "origin": {
+          "path": "course/24-prompt-engineering-for-applications/01-templates-placement-and-instructions.md",
+          "section": "A template is a prompt with holes"
+        },
+        "domain": "DV4"
+      },
+      {
+        "id": "x36",
+        "stem": "A JSON schema for a classifier includes a property named \"thinking_steps\" that demands the model's reasoning, and some requests now come back refused. Which change fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Raise max_tokens to keep the long reasoning from being cut off",
+            "correct": false,
+            "says": "Ruled out because \"a 200 with refusal is not an answer\", and a refusal is not a cut reply."
+          },
+          {
+            "id": "b",
+            "text": "Retry the same call until the model stops refusing",
+            "correct": false,
+            "says": "Ruled out because \"The same request gets the same decision\"."
+          },
+          {
+            "id": "c",
+            "text": "Lower the effort so the model reasons less before filling the field",
+            "correct": false,
+            "says": "Ruled out because the page says \"Do not ask for the reasoning as output\", whatever the effort."
+          },
+          {
+            "id": "d",
+            "text": "Ask for a brief explanation as the field's content in its place",
+            "correct": true,
+            "says": "The page says to \"Ask for a short explanation instead\" of the reasoning (module 24, page 2)."
+          }
+        ],
+        "origin": {
+          "path": "course/24-prompt-engineering-for-applications/02-examples-reasoning-long-documents-and-chains.md",
+          "section": "Reasoning on a model that always thinks"
+        },
+        "domain": "DV4"
+      },
+      {
+        "id": "x37",
+        "stem": "An extraction loop repairs failed replies by sending the original prompt again with the note \"try again\". The same mistakes keep recurring. Which two changes fit? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "Retry without a limit until the hard document finally succeeds",
+            "correct": false,
+            "says": "Ruled out because \"An unbounded retry on a hard document is a cost leak\"."
+          },
+          {
+            "id": "b",
+            "text": "Return the model's own answer with the request",
+            "correct": true,
+            "says": "The next call needs the model's own reply and \"a user message that lists each problem with its path and message\" (module 25, page 2)."
+          },
+          {
+            "id": "c",
+            "text": "List every problem with its path and message",
+            "correct": true,
+            "says": "The next call needs the model's own reply and \"a user message that lists each problem with its path and message\" (module 25, page 2)."
+          },
+          {
+            "id": "d",
+            "text": "Add a prefilled assistant turn that opens the JSON object",
+            "correct": false,
+            "says": "Ruled out because \"Prefilling the assistant response returns a 400 error\" on current models."
+          },
+          {
+            "id": "e",
+            "text": "Report only the first problem each time, to keep the note short",
+            "correct": false,
+            "says": "Ruled out because \"Collect all the problems in one pass\"."
+          }
+        ],
+        "origin": {
+          "path": "course/25-structured-output-and-defensive-parsing/02-defensive-parsing-validation-and-the-re-prompt.md",
+          "section": "Ask again, with the problems"
+        },
+        "domain": "DV4",
+        "select": 2
+      },
+      {
+        "id": "x38",
+        "stem": "A retrieval service embeds both stored passages and incoming questions with the same provider call and no further options, and results are mediocre. Which change do the course pages back?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Truncate each passage to a single sentence before embedding",
+            "correct": false,
+            "says": "Ruled out because \"Too small a chunk loses context\"."
+          },
+          {
+            "id": "b",
+            "text": "Switch to Anthropic's own embedding model, which handles both uses",
+            "correct": false,
+            "says": "Ruled out because \"Anthropic does not offer its own embedding model\"."
+          },
+          {
+            "id": "c",
+            "text": "Set the parameter that labels each input as a query or a document",
+            "correct": true,
+            "says": "The documentation says \"Do not omit input_type or set input_type=None\" (module 28, page 1)."
+          },
+          {
+            "id": "d",
+            "text": "Replace the vectors with keyword scores, which match meaning exactly",
+            "correct": false,
+            "says": "Ruled out because keyword scoring fails on paraphrases because \"it matches words, not meaning\"."
+          }
+        ],
+        "origin": {
+          "path": "course/28-retrieval/01-chunks-bm25-and-embeddings.md",
+          "section": "Where embeddings come from"
+        },
+        "domain": "DV4"
+      },
+      {
+        "id": "x39",
+        "stem": "An agent compacts its history every forty turns by adding a fresh summary, and after several rounds the conversation holds four summaries that partly contradict each other. Which fix fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Keep every summary and let the newest override the rest",
+            "correct": false,
+            "says": "Ruled out because \"exactly one block is sent per request\"."
+          },
+          {
+            "id": "b",
+            "text": "Delete the oldest summary and keep the other three",
+            "correct": false,
+            "says": "Ruled out because the page says \"an earlier summary is folded into the next one rather than stacked\"."
+          },
+          {
+            "id": "c",
+            "text": "Stop compacting and raise max_tokens to avoid a full window",
+            "correct": false,
+            "says": "Ruled out because \"Raising it does not enlarge the window\"."
+          },
+          {
+            "id": "d",
+            "text": "Fold the earlier one into the newest, leaving exactly one",
+            "correct": true,
+            "says": "\"A second compaction should fold the first summary into the new one\", so that exactly one remains (module 29, page 1)."
+          }
+        ],
+        "origin": {
+          "path": "course/29-context-engineering/01-the-window-context-rot-and-trimming-in-code.md",
+          "section": "Traps"
+        },
+        "domain": "DV4"
+      },
+      {
+        "id": "x40",
+        "stem": "A team enables automatic clearing of old tool results, yet every clearing frees only a few hundred tokens and the next request pays a large cache write. Which parameter addresses this?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A longer list of excluded tools so fewer results qualify",
+            "correct": false,
+            "says": "Ruled out because exclusions are \"tool names whose results are never cleared\", which makes clears smaller."
+          },
+          {
+            "id": "b",
+            "text": "A higher keep value so more recent pairs stay",
+            "correct": false,
+            "says": "Ruled out because keep sets \"how many recent tool use and result pairs stay\", which shrinks each clear further."
+          },
+          {
+            "id": "c",
+            "text": "A lower bound on the savings each pass must achieve",
+            "correct": true,
+            "says": "The setting exists for the cache, because clearing \"invalidates cached prompt prefixes when content is cleared\" (module 29, page 2)."
+          },
+          {
+            "id": "d",
+            "text": "A lower trigger, with clearing beginning at a smaller context size",
+            "correct": false,
+            "says": "Ruled out because the trigger sets \"when clearing starts; input_tokens or tool_uses\" and not how much each pass frees."
+          }
+        ],
+        "origin": {
+          "path": "course/29-context-engineering/02-context-editing-compaction-and-memory.md",
+          "section": "Context editing: clear by rule"
+        },
+        "domain": "DV4"
+      },
+      {
+        "id": "x41",
+        "stem": "A service forces a named tool on Claude Haiku 4.5 and every reply is a bare tool call with no sentence before it, but product wants a brief explanation first. What fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Switch to the any setting, which adds an explanation before the call",
+            "correct": false,
+            "says": "Ruled out because \"the API prefills the assistant message to force a tool to be used\", so no text comes first."
+          },
+          {
+            "id": "b",
+            "text": "Disable parallel use, so each reply holds one action and text comes first",
+            "correct": false,
+            "says": "Ruled out because with a forced type \"Claude calls exactly one tool\", and no text is promised."
+          },
+          {
+            "id": "c",
+            "text": "Set the choice to none, with commentary written before anything else",
+            "correct": false,
+            "says": "Ruled out because none \"prevents Claude from using any tools\"."
+          },
+          {
+            "id": "d",
+            "text": "Use the automatic setting and say in a user message to run that function",
+            "correct": true,
+            "says": "The page says \"To get both a tool call and an explanation, use auto and say in a user message to use the tool\" (module 26, page 1)."
+          }
+        ],
+        "origin": {
+          "path": "course/26-tool-use/01-tools-schemas-descriptions-and-tool-choice.md",
+          "section": "The four values of tool_choice"
+        },
+        "domain": "DV5"
+      },
+      {
+        "id": "x42",
+        "stem": "After a refactor, a model that used to call three independent tools in one reply now calls them one at a time. The code sends each output back in its own message. What is the likely cause?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Parallel use is now limited to operations that merely read data",
+            "correct": false,
+            "says": "Ruled out because \"By default, Claude may call multiple tools in a single response\"."
+          },
+          {
+            "id": "b",
+            "text": "The default for the choice field was switched to disable parallel use between releases",
+            "correct": false,
+            "says": "Ruled out because the switch is a field of the choice object: \"It is not a top-level request parameter\"."
+          },
+          {
+            "id": "c",
+            "text": "Separate returns teach Claude to avoid issuing several requests together",
+            "correct": true,
+            "says": "The rule is to \"return one tool_result for each tool_use block, all together in the next user message\" (module 26, page 3)."
+          },
+          {
+            "id": "d",
+            "text": "Parallel calls vanish whenever a conversation passes a certain length of history",
+            "correct": false,
+            "says": "Ruled out because \"The most common issue is formatting tool results incorrectly in the conversation history\"."
+          }
+        ],
+        "origin": {
+          "path": "course/26-tool-use/03-parallel-calls-the-tool-runner-and-the-practice.md",
+          "section": "Parallel calls"
+        },
+        "domain": "DV5"
+      },
+      {
+        "id": "x43",
+        "stem": "A developer connects forty tool-bearing servers to Claude Code and worries that every request now carries all their schemas. Which two statements does the documentation support? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "Dormant integrations cost little space",
+            "correct": true,
+            "says": "\"Tool search is on by default, so idle MCP tools consume minimal context\" (module 27, page 1)."
+          },
+          {
+            "id": "b",
+            "text": "Discovery on demand is switched on by default",
+            "correct": true,
+            "says": "\"Tool search is on by default, so idle MCP tools consume minimal context\" (module 27, page 1)."
+          },
+          {
+            "id": "c",
+            "text": "The schemas belong in CLAUDE.md, which loads when a question needs them",
+            "correct": false,
+            "says": "Ruled out because \"CLAUDE.md is paid for on every request\"."
+          },
+          {
+            "id": "d",
+            "text": "Servers load nothing at start, so adding more affects latency alone",
+            "correct": false,
+            "says": "Ruled out because the context cost is \"low until a tool is used\", and not zero."
+          },
+          {
+            "id": "e",
+            "text": "Each schema loads in full at session start, so the cost stays fixed per server",
+            "correct": false,
+            "says": "Ruled out because the loading table shows \"tool names; full schemas on demand\"."
+          }
+        ],
+        "origin": {
+          "path": "course/27-choosing-an-extension/01-the-extension-surface-and-what-each-costs.md",
+          "section": "What each one costs in context"
+        },
+        "domain": "DV5",
+        "select": 2
+      },
+      {
+        "id": "x44",
+        "stem": "An application defines its own function called screenshot alongside Anthropic's screen-control entry. Incoming blocks with that word are sometimes meant for one and sometimes for the other. How should dispatch work?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Reject the custom function and keep only Anthropic's entry",
+            "correct": false,
+            "says": "Ruled out because \"A custom tool in the same request can share a member's name\", so both belong in one request."
+          },
+          {
+            "id": "b",
+            "text": "Match on the name alone and send every such block to the toolset handler",
+            "correct": false,
+            "says": "Ruled out because the page says to \"Dispatch on the pair\" of member and field, and a name alone cannot tell the two tools apart."
+          },
+          {
+            "id": "c",
+            "text": "Look for display dimensions in the input of each call",
+            "correct": false,
+            "says": "Ruled out because \"The entry takes no display size\", so calls carry no dimensions."
+          },
+          {
+            "id": "d",
+            "text": "Check both the name and the toolset_name fields of each call",
+            "correct": true,
+            "says": "\"toolset_name is what marks a block as a computer action\" (module 31, page 1)."
+          }
+        ],
+        "origin": {
+          "path": "course/31-computer-use/01-the-toolset-the-loop-and-scaling.md",
+          "section": "One entry, seventeen members"
+        },
+        "domain": "DV5"
+      },
+      {
+        "id": "x45",
+        "stem": "A server built with the MCP Python SDK rejects a blank title by raising a ValueError inside the handler, and the model never sees why the call failed. Which change fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Return a protocol error that asks the client to resend the request",
+            "correct": false,
+            "says": "Ruled out because protocol errors are for \"issues with the request structure itself that models are less likely to be able to fix\"."
+          },
+          {
+            "id": "b",
+            "text": "Print the reason to standard output for the client to relay",
+            "correct": false,
+            "says": "Ruled out because \"The server MUST NOT write anything to its stdout that is not a valid MCP message\"."
+          },
+          {
+            "id": "c",
+            "text": "Switch to ToolError for a problem of this expected kind",
+            "correct": true,
+            "says": "\"In the Python SDK, raise ToolError for an expected failure\" (module 32, page 2)."
+          },
+          {
+            "id": "d",
+            "text": "Catch the exception and return an empty success result",
+            "correct": false,
+            "says": "Ruled out because a swallowed failure \"tells the model the call worked\" (module 26, page 2). The answer is specific to this SDK: the Agent SDK's in-process server of module 35 returns the raw exception message as an error result, but a server built with the MCP Python SDK reports an exception that is not a ToolError \"without its message\"."
+          }
+        ],
+        "origin": {
+          "path": "course/32-mcp-fundamentals/02-writing-a-server.md",
+          "section": "Two kinds of failure"
+        },
+        "domain": "DV5"
+      },
+      {
+        "id": "x46",
+        "stem": "During a deployment tool's confirmation step, the person chooses decline. The server currently returns a protocol error and the client logs an incident. How should the server treat that answer?",
+        "options": [
+          {
+            "id": "a",
+            "text": "As a failed call, signalling the code for a missing client capability",
+            "correct": false,
+            "says": "Ruled out because that error is for a capability the call did not declare, \"which names the missing capabilities\"."
+          },
+          {
+            "id": "b",
+            "text": "As an ordinary outcome, finishing with a result that reports it was cancelled",
+            "correct": true,
+            "says": "\"An answer of decline or cancel is a normal outcome\" (module 33, page 1)."
+          },
+          {
+            "id": "c",
+            "text": "As a prompt to ask again, repeating the confirmation until the person accepts",
+            "correct": false,
+            "says": "Ruled out because the page lists three forms of answer and says \"a server handles each\"."
+          },
+          {
+            "id": "d",
+            "text": "As a timeout, so the whole call is retried with a new identifier",
+            "correct": false,
+            "says": "Ruled out because a retry exists to supply information: the client \"retries the original request including the additional requested information\"."
+          }
+        ],
+        "origin": {
+          "path": "course/33-mcp-advanced/01-round-trips-elicitation-and-notifications.md",
+          "section": "Traps"
+        },
+        "domain": "DV5"
+      },
+      {
+        "id": "x47",
+        "stem": "A company on a commercial plan, with training use off by default, tells staff that anything typed is erased within 30 days. A reviewer notes one exception that staff create themselves. Which action does the reviewer mean?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Giving thumbs feedback on a reply keeps the conversation for up to five years",
+            "correct": true,
+            "says": "\"Giving feedback with the thumbs buttons stores the conversation for up to five years\", on both plan types (module 10, page 1)."
+          },
+          {
+            "id": "b",
+            "text": "Opening a chat in incognito mode, which is then stored by the provider for a year",
+            "correct": false,
+            "says": "Ruled out because \"Incognito chats are not used to improve Claude\"."
+          },
+          {
+            "id": "c",
+            "text": "Connecting a data source, whose raw content is then kept by the provider for seven years",
+            "correct": false,
+            "says": "Ruled out because \"Raw content fetched through a connector is excluded unless you copy it into the chat\"."
+          },
+          {
+            "id": "d",
+            "text": "Deleting a chat, which the back end then retains for five years in a hidden archive",
+            "correct": false,
+            "says": "Ruled out because where improvement is off, \"a deleted chat leaves the back end within 30 days\"."
+          }
+        ],
+        "origin": {
+          "path": "course/10-safety-privacy-and-policy/01-the-usage-policy-and-sensitive-data.md",
+          "section": "What happens to what you type"
+        },
+        "domain": "DV6"
+      },
+      {
+        "id": "x48",
+        "stem": "A team plans to drop the disposable container for its screen-driving agent because Anthropic already scans screenshots for planted instructions. Which two statements should the reviewer make? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "Injected text can still be obeyed despite the filter",
+            "correct": true,
+            "says": "The classifiers \"are a second layer\", and \"Claude will follow commands found in content even when they conflict with your instructions\" (module 31, page 2)."
+          },
+          {
+            "id": "b",
+            "text": "Screenshots are stored by Anthropic and never reach the local machine",
+            "correct": false,
+            "says": "Ruled out because screenshots \"are captured and stored in your environment, not by Anthropic\"."
+          },
+          {
+            "id": "c",
+            "text": "Such filters are a backup layer behind the first defences",
+            "correct": true,
+            "says": "The classifiers \"are a second layer\", and \"Claude will follow commands found in content even when they conflict with your instructions\" (module 31, page 2)."
+          },
+          {
+            "id": "d",
+            "text": "An allowlist of domains gives the same protection as a container",
+            "correct": false,
+            "says": "Ruled out because the container is there \"to prevent direct system attacks or accidents\", while an allowlist only works \"to reduce exposure to malicious content\"."
+          },
+          {
+            "id": "e",
+            "text": "The scan makes planted text harmless, and confirmations become optional",
+            "correct": false,
+            "says": "Ruled out because the documented precautions include \"Asking a human to confirm decisions that might result in meaningful real-world consequences\", and the scan does not replace that step."
+          }
+        ],
+        "origin": {
+          "path": "course/31-computer-use/02-safety-sandboxing-and-the-practice.md",
+          "section": "Traps"
+        },
+        "domain": "DV6",
+        "select": 2
+      },
+      {
+        "id": "x49",
+        "stem": "An agent loop returns a vendor lookup to Claude, and the team adds \"now email the summary to finance\" to the end of that same return. The instruction is routinely ignored. Which placement fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Put it in a separate user message that follows the block",
+            "correct": true,
+            "says": "The page says \"Don't put your own instructions in tool results\", so send them in a user turn after the block (module 41, page 1)."
+          },
+          {
+            "id": "b",
+            "text": "Repeat it three times inside the returned text so it is noticed",
+            "correct": false,
+            "says": "Ruled out because \"Claude treats that content as untrusted data, so your instruction may be ignored\", however often it is repeated."
+          },
+          {
+            "id": "c",
+            "text": "Move it into the system prompt together with the vendor text",
+            "correct": false,
+            "says": "Ruled out because third-party content goes \"never in system prompts or plain user text blocks\"."
+          },
+          {
+            "id": "d",
+            "text": "Wrap it in a JSON string with the vendor data so both stay together",
+            "correct": false,
+            "says": "Ruled out because the JSON step applies to untrusted content: \"Wrap third-party strings in a JSON object\"."
+          }
+        ],
+        "origin": {
+          "path": "course/41-security-and-safety/01-injection-jailbreaks-and-untrusted-input.md",
+          "section": "Keeping untrusted content apart"
+        },
+        "domain": "DV6"
+      },
+      {
+        "id": "x50",
+        "stem": "A screening call on a web fetch's raw output flags an injection attempt. The agent loop currently passes the page through anyway and logs a warning. What does the documentation say to return?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The untouched page, plus a note telling the model that it looks suspect",
+            "correct": false,
+            "says": "Ruled out because content is returned only \"if the screen reports no injection attempt\"."
+          },
+          {
+            "id": "b",
+            "text": "Nothing at all, ending the whole run immediately with no output",
+            "correct": false,
+            "says": "Ruled out because the page adds \"consider surfacing the attempt to the user\", which is not a reason to end the run."
+          },
+          {
+            "id": "c",
+            "text": "A failure notice or a condensed digest rather than the original body",
+            "correct": true,
+            "says": "The page says to \"return an error or a stripped summary in the tool_result block instead of the raw content\" (module 41, page 3)."
+          },
+          {
+            "id": "d",
+            "text": "The page with the matched phrases deleted and the rest left intact",
+            "correct": false,
+            "says": "Ruled out because \"A list of patterns catches the phrasing someone thought of and misses the paraphrase\"."
+          }
+        ],
+        "origin": {
+          "path": "course/41-security-and-safety/03-guardrails-monitoring-and-the-practice.md",
+          "section": "Layers around the model"
+        },
+        "domain": "DV6"
+      },
+      {
+        "id": "x51",
+        "stem": "A CI job runs the headless mode with the flag that skips local configuration and now reports no credentials, although the developer is signed in with a subscription on the same machine. What is needed?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Mount the developer's keychain into the runner so it can be read",
+            "correct": false,
+            "says": "Ruled out because in CI \"keys live in the platform's secret store and are referenced and not written\", so a developer's keychain is not the source."
+          },
+          {
+            "id": "b",
+            "text": "Drop the flag, so the other mode reads the same local setup on every machine",
+            "correct": false,
+            "says": "Ruled out because the flag is \"useful for CI and scripts where you need the same result on every machine\"."
+          },
+          {
+            "id": "c",
+            "text": "Run it interactively in a terminal, where the login prompt can appear",
+            "correct": false,
+            "says": "Ruled out because the headless mode is meant to \"Run Claude non-interactively for CI, pre-commit hooks, or batch processing\"."
+          },
+          {
+            "id": "d",
+            "text": "Provide an API key through an environment variable at launch",
+            "correct": true,
+            "says": "Bare mode \"never reads OAuth credentials or the system keychain\", so a key must come from the environment (module 38, page 3)."
+          }
+        ],
+        "origin": {
+          "path": "course/38-claude-code-for-developers/03-commands-headless-runs-and-the-practice.md",
+          "section": "Headless runs"
+        },
+        "domain": "DV7"
+      },
+      {
+        "id": "x52",
+        "stem": "Two hooks match the same shell call: a logging hook that exits cleanly and a guard hook that answers with a denial. A teammate fears the logger's success will let the call through. What happens?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It proceeds, because the hook that exits with zero is consulted first",
+            "correct": false,
+            "says": "Ruled out because \"A logging hook that exits 0 does not weaken a guard hook that denies\"."
+          },
+          {
+            "id": "b",
+            "text": "It is stopped, since the harshest verdict among them prevails",
+            "correct": true,
+            "says": "When several hooks match, \"the most restrictive answer applies\", so the denial wins (module 39, page 2)."
+          },
+          {
+            "id": "c",
+            "text": "It proceeds, since hooks run one after another and the first result decides",
+            "correct": false,
+            "says": "Ruled out because \"Several hooks can match one call, and they run in parallel\"."
+          },
+          {
+            "id": "d",
+            "text": "It pauses for a person, because any disagreement produces an ask",
+            "correct": false,
+            "says": "Ruled out because the order is \"in the order deny, defer, ask, allow\", so deny outranks ask."
+          }
+        ],
+        "origin": {
+          "path": "course/39-extending-claude-code/02-subagents-and-hooks.md",
+          "section": "Hooks"
+        },
+        "domain": "DV7"
+      },
+      {
+        "id": "x53",
+        "stem": "Between two evaluation runs the pass rate rose from 0.71 to 0.80, but a diff shows that four failing cases were deleted from the set. How should the harness treat this?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Flag the dropped items as removed and reject the check",
+            "correct": true,
+            "says": "The harness \"reports it as removed and fails the comparison\" (module 42, page 3)."
+          },
+          {
+            "id": "b",
+            "text": "Accept it as the same run with a higher score",
+            "correct": false,
+            "says": "Ruled out because \"An average never excuses a regression\"."
+          },
+          {
+            "id": "c",
+            "text": "Treat the deleted ones as passes in the new total",
+            "correct": false,
+            "says": "Ruled out because \"A case that disappears is not a pass\"."
+          },
+          {
+            "id": "d",
+            "text": "Ignore the deletions when the edge-tagged cases still reach their threshold",
+            "correct": false,
+            "says": "Ruled out because the page says \"dropping the case that fails is the easiest way to improve a score\"."
+          }
+        ],
+        "origin": {
+          "path": "course/42-evaluation/03-refining-against-a-set-and-regression-runs.md",
+          "section": "A run, a gate and a comparison"
+        },
+        "domain": "DV8"
+      }
+    ],
+    "mock": {
+      "pass_mark": 70,
+      "domains": [
+        {
+          "id": "DV1",
+          "title": "Applications and integration"
+        },
+        {
+          "id": "DV2",
+          "title": "Model selection and optimisation"
+        },
+        {
+          "id": "DV3",
+          "title": "Agents and workflows"
+        },
+        {
+          "id": "DV4",
+          "title": "Prompt and context engineering"
+        },
+        {
+          "id": "DV5",
+          "title": "Tools and MCP"
+        },
+        {
+          "id": "DV6",
+          "title": "Security and safety"
+        },
+        {
+          "id": "DV7",
+          "title": "Claude Code"
+        },
+        {
+          "id": "DV8",
+          "title": "Evaluation, testing and debugging"
+        }
+      ]
+    },
+    "concepts": [
+      "the level's ideas, met as scenarios"
+    ]
+  }
+}

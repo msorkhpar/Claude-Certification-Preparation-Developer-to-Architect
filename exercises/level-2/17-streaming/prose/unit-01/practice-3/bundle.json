@@ -1,0 +1,87 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "17-streaming"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 3,
+  "title": "Practice: assemble a streamed message (Java)",
+  "lang": "java",
+  "main_file": "src/main/java/Assemble.java",
+  "files": [
+    "src/main/java/TryIt.java"
+  ],
+  "test_file": "src/test/java/AssembleTest.java",
+  "build": [
+    "src/main/java/Json.java",
+    "src/main/java/StreamError.java",
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/17-streaming/prose/unit-01/practice-3",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/17-streaming/prose/unit-01/practice-3",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_textDeltasAreJoinedAndTheMessageIsComplete()",
+      "kind": "main",
+      "says": "Text deltas are joined and the message is complete"
+    },
+    {
+      "id": "e1_toolInputIsTheFragmentsJoinedThenParsedAndEmptyInputIsAnEmptyObject()",
+      "kind": "edge",
+      "says": "Tool input is the fragments joined, then parsed; empty input is {}"
+    },
+    {
+      "id": "e2_pingAndUnknownEventTypesAreIgnored()",
+      "kind": "edge",
+      "says": "ping and unknown event types are ignored"
+    },
+    {
+      "id": "e3_anErrorEventRaisesWithItsTypeAndMessage()",
+      "kind": "edge",
+      "says": "An error event raises with its type and message"
+    },
+    {
+      "id": "e4_aStreamThatEndsBeforeMessageStopIsAnErrorNotAShortMessage()",
+      "kind": "edge",
+      "says": "A stream that ends before message_stop is an error, not a short message"
+    },
+    {
+      "id": "e5_usageTakesInputTokensFromTheStartAndTheCumulativeOutputFromTheEnd()",
+      "kind": "edge",
+      "says": "Usage: input tokens from the start, the cumulative output tokens from the end"
+    },
+    {
+      "id": "e6_blocksKeepTheirIndexOrderAndThinkingFieldsAreAssembled()",
+      "kind": "edge",
+      "says": "Blocks keep their index order; thinking fields are assembled"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/17-streaming/01-events-and-assembling-a-message.md"
+}

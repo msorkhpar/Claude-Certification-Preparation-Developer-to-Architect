@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "37-agent-frameworks-compared"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Check yourself: When a framework beats the SDK",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A team's feature is one model call that summarises a document, with retrieved passages added to the prompt. What does the engineering advice suggest?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A graph framework with durable state and resume support",
+            "correct": false,
+            "says": "Ruled out because \"A framework earns its place when the feature it brings is one you need and would build badly, and not before.\", and one call needs no durable state."
+          },
+          {
+            "id": "b",
+            "text": "The Messages API alone, refined with in-context examples",
+            "correct": true,
+            "says": "The post says \"For many applications, however, optimizing single LLM calls with retrieval and in-context examples is usually enough.\""
+          },
+          {
+            "id": "c",
+            "text": "The Agent SDK running Claude Code's loop in the service",
+            "correct": false,
+            "says": "Ruled out because \"Start from the top and stop at the first row that meets the requirement.\", and one call is met by the first row, before the Agent SDK."
+          },
+          {
+            "id": "d",
+            "text": "Managed Agents with the session stored on Anthropic's side",
+            "correct": false,
+            "says": "Ruled out because Managed Agents is chosen when \"The task is long-running or asynchronous\", and this is one short call."
+          }
+        ],
+        "origin": {
+          "path": "course/37-agent-frameworks-compared/02-framework-or-sdk.md",
+          "section": "What the engineering advice says"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A framework agent gives odd answers, and nobody on the team can read the exact text it sent to the model. Which cost of frameworks is this?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Coupling, as state formats follow the framework's releases",
+            "correct": false,
+            "says": "Ruled out because coupling is that \"Your state format, your tool definitions and your tests then follow the framework's releases.\", which says nothing of reading the prompt."
+          },
+          {
+            "id": "b",
+            "text": "A missing feature, as frameworks offer no tracing hooks",
+            "correct": false,
+            "says": "Ruled out because a framework gives you \"tool schemas and parsing, retries, tracing hooks\", so the feature is not missing."
+          },
+          {
+            "id": "c",
+            "text": "Unneeded features, as persistence adds code to maintain",
+            "correct": false,
+            "says": "Ruled out because \"Otherwise it is code to maintain.\" is the cost of features nobody needs, and the symptom here is a prompt nobody can read."
+          },
+          {
+            "id": "d",
+            "text": "Hidden prompts, as layers obscure the prompts and responses",
+            "correct": true,
+            "says": "The post says frameworks \"often create extra layers of abstraction that can obscure the underlying prompts and responses, making them harder to debug.\""
+          }
+        ],
+        "origin": {
+          "path": "course/37-agent-frameworks-compared/02-framework-or-sdk.md",
+          "section": "What the engineering advice says"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A product must survive a restart and resume a long task, and the team does not want to operate the sandbox in which the code runs. Which option is the smallest that fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The Messages API, with a loop that the team writes and stores",
+            "correct": false,
+            "says": "Ruled out because a loop of your own leaves \"The loop, the tools, the state\" and the sandbox to the team, which is more than the smallest option."
+          },
+          {
+            "id": "b",
+            "text": "Managed Agents, with the session kept on Anthropic's side",
+            "correct": true,
+            "says": "The table gives Managed Agents the task that is \"long-running or asynchronous\" for those who want \"no sandbox to run\", with the session stored by Anthropic."
+          },
+          {
+            "id": "c",
+            "text": "A graph framework, hosted and upgraded by the team itself",
+            "correct": false,
+            "says": "Ruled out because a graph is chosen when you \"need its state, resume or typed output, and will pay in coupling\", and the team would still host it."
+          },
+          {
+            "id": "d",
+            "text": "The Claude Code CLI, started by a person every morning",
+            "correct": false,
+            "says": "Ruled out because the table row for Managed Agents reads \"The task is long-running or asynchronous and you want no sandbox to run\", and a person starting a CLI each morning is not a service that resumes."
+          }
+        ],
+        "origin": {
+          "path": "course/37-agent-frameworks-compared/02-framework-or-sdk.md",
+          "section": "The five options for an Anthropic stack"
+        }
+      }
+    ]
+  }
+}

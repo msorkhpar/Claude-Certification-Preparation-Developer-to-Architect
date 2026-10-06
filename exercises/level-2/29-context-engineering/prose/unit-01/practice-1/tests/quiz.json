@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "29-context-engineering"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: The window, context rot and trimming in code",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A long agent session has thirty tool results, and the oldest twenty-five will never be needed again. What is the cheapest safe step?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Raise `max_tokens` so that the window can hold the older results as well",
+            "correct": false,
+            "says": "Ruled out because \"more context isn't automatically better\", and a larger limit does not remove the noise."
+          },
+          {
+            "id": "b",
+            "text": "Delete the old results from the history and leave their calls in place without any reply",
+            "correct": false,
+            "says": "Ruled out because \"Tool result blocks must immediately follow their corresponding tool use blocks in the message history.\""
+          },
+          {
+            "id": "c",
+            "text": "Replace the whole conversation with one summary that a model writes for the agent",
+            "correct": false,
+            "says": "Ruled out because a summary \"loses detail, so it comes last\"."
+          },
+          {
+            "id": "d",
+            "text": "Swap the old outputs for a short placeholder, and keep every call in the history",
+            "correct": true,
+            "says": "The page says clearing \"keeps both blocks and changes only the content of the result, so the pairing holds\"."
+          }
+        ],
+        "origin": {
+          "path": "course/29-context-engineering/01-the-window-context-rot-and-trimming-in-code.md",
+          "section": "Never split a call from its result"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A program must drop old messages to fit a budget. What does the page say is the unit to drop?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A whole turn, which keeps each tool call together with its result",
+            "correct": true,
+            "says": "The page says \"the unit of dropping is the turn\", and that \"A tool call and its result always sit in one turn.\""
+          },
+          {
+            "id": "b",
+            "text": "A single message, starting with the oldest one in the list of messages",
+            "correct": false,
+            "says": "Ruled out because a message list that keeps a call and drops its result \"fails with a 400 error\"."
+          },
+          {
+            "id": "c",
+            "text": "One content block at a time, so that no passage of text is lost whole",
+            "correct": false,
+            "says": "Ruled out because \"A tool call and its result always sit in one turn\", so a block taken alone breaks the pair."
+          },
+          {
+            "id": "d",
+            "text": "Every message that carries an image or a document, whatever its age",
+            "correct": false,
+            "says": "Ruled out because the functions \"drop and fold whole turns only\", whatever the content type."
+          }
+        ],
+        "origin": {
+          "path": "course/29-context-engineering/01-the-window-context-rot-and-trimming-in-code.md",
+          "section": "Never split a call from its result"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "Why is it a mistake to fill a 1M-token window as a matter of habit?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Cached prefixes do not count toward the window at all in the request",
+            "correct": false,
+            "says": "Ruled out because \"all three count toward the window\"."
+          },
+          {
+            "id": "b",
+            "text": "The API refuses any request that is over half of the window in size",
+            "correct": false,
+            "says": "Ruled out because the only refusal is when \"the input alone is larger than the window\"."
+          },
+          {
+            "id": "c",
+            "text": "Accuracy and recall both degrade as the amount of context grows",
+            "correct": true,
+            "says": "The page quotes \"As token count grows, accuracy and recall degrade, a phenomenon known as *context rot*.\""
+          },
+          {
+            "id": "d",
+            "text": "Output tokens are billed at the same price as input tokens",
+            "correct": false,
+            "says": "Ruled out because \"The output counts too, including extended thinking.\" and the page names no price."
+          }
+        ],
+        "origin": {
+          "path": "course/29-context-engineering/01-the-window-context-rot-and-trimming-in-code.md",
+          "section": "More is not better"
+        }
+      }
+    ]
+  }
+}

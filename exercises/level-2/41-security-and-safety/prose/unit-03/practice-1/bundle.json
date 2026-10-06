@@ -1,0 +1,83 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "41-security-and-safety"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 1,
+  "title": "Practice: an injection-resistant tool gate (Python)",
+  "lang": "python",
+  "main_file": "gate.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_gate.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-2/41-security-and-safety/prose/unit-03/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-2/41-security-and-safety/prose/unit-03/practice-1/target/report.xml",
+    "practice/level-2/41-security-and-safety/prose/unit-03/practice-1/test_gate.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_untrusted_text_reaches_the_model_only_as_one_json_string_that_says_where_it_came_from",
+      "kind": "main",
+      "says": "Untrusted text is delivered as one JSON string that names its source and says it is untrusted"
+    },
+    {
+      "id": "test_e1_a_screen_names_injection_signals_and_a_flagged_result_is_withheld_with_an_error",
+      "kind": "edge",
+      "says": "The screen names the signals, ignores clean text, and a flagged result is withheld with an error that shows none of the text"
+    },
+    {
+      "id": "test_e2_reads_and_writes_stay_inside_the_project_and_away_from_secrets_and_protected_folders",
+      "kind": "edge",
+      "says": "Paths stay inside the project, secrets and protected folders are refused, a sibling folder with a similar name is outside"
+    },
+    {
+      "id": "test_e3_bash_is_limited_to_a_few_read_only_commands_and_dangerous_or_chained_ones_are_refused",
+      "kind": "edge",
+      "says": "Bash is limited to read-only commands; dangerous, chained and redirected commands and secret arguments are refused"
+    },
+    {
+      "id": "test_e4_fetch_and_email_obey_the_host_and_domain_lists_and_refuse_credentials_in_a_url",
+      "kind": "edge",
+      "says": "Fetch obeys the host list (a lookalike host fails) and refuses credentials; email obeys the domain list and the body check"
+    },
+    {
+      "id": "test_e5_once_untrusted_content_is_in_the_session_anything_that_changes_things_asks_or_is_refused",
+      "kind": "edge",
+      "says": "After untrusted content entered the session, changes ask, an email is refused, reads still work, and a denial stays a denial"
+    },
+    {
+      "id": "test_e6_secrets_card_numbers_and_addresses_are_redacted_in_text_and_in_the_audit",
+      "kind": "edge",
+      "says": "Redaction covers keys, addresses and Luhn-valid cards, leaves other numbers, and the audit never holds a raw secret"
+    },
+    {
+      "id": "test_e7_the_hook_answer_follows_the_documented_shapes_and_repeated_denials_raise_an_alert",
+      "kind": "edge",
+      "says": "The hook answer has the documented shapes and repeated denials by one actor raise an alert, while questions do not"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/41-security-and-safety/03-guardrails-monitoring-and-the-practice.md"
+}

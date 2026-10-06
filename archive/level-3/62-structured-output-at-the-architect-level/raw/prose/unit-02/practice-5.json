@@ -1,0 +1,124 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "62-structured-output-at-the-architect-level"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 5,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Retries, conflicts, chunks, honest accuracy and the practice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "An extraction fails a check because the printed total differs from the sum of the lines, and the record has `conflict_detected` set to true. What should the pipeline do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Retry with the error message appended to the prompt",
+            "correct": false,
+            "says": "Ruled out because \"a second look will find the same difference\", so the retry cannot change the outcome."
+          },
+          {
+            "id": "b",
+            "text": "Replace the printed total with the computed one",
+            "correct": false,
+            "says": "Ruled out because \"A record that carries a difference and says so is a correct record of a bad document\", and replacing the printed value hides what it says."
+          },
+          {
+            "id": "c",
+            "text": "Route it to a person with the discrepancy noted",
+            "correct": true,
+            "says": "A flagged conflict is information about a bad source, and a second look finds the same difference."
+          },
+          {
+            "id": "d",
+            "text": "Mark the document failed once the retry limit is reached",
+            "correct": false,
+            "says": "Ruled out because this record is not invalid, since \"a document that is still invalid after the last one is marked failed\" applies to errors that are retried."
+          }
+        ],
+        "origin": {
+          "path": "course/62-structured-output-at-the-architect-level/02-retries-conflicts-chunks-and-the-practice.md",
+          "section": "Conflicts are information"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A pipeline reports 98 percent accuracy over the documents that passed its checks, while 30 percent of all documents did not pass. What is wrong with the figure?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It excludes every failure from its base",
+            "correct": true,
+            "says": "The denominator is filtered by the pipeline's own verdict, which drops the documents most likely to be wrong."
+          },
+          {
+            "id": "b",
+            "text": "It understates accuracy for the passing set",
+            "correct": false,
+            "says": "Ruled out because the filtered figure is the higher one: \"accuracy over the validated is 5 of 6, 0.83, and accuracy over all documents is 5 of 10, 0.5\"."
+          },
+          {
+            "id": "c",
+            "text": "It counts each one twice, once per rule",
+            "correct": false,
+            "says": "Ruled out because it \"leaves out the documents that went to review or failed\", and nothing is counted twice."
+          },
+          {
+            "id": "d",
+            "text": "It counts reviewed documents as passed",
+            "correct": false,
+            "says": "Ruled out because the report \"divides by the documents that passed, which are the easy ones\"."
+          }
+        ],
+        "origin": {
+          "path": "course/62-structured-output-at-the-architect-level/02-retries-conflicts-chunks-and-the-practice.md",
+          "section": "The accuracy that hides the failures"
+        }
+      }
+    ],
+    "concepts": [
+      "A long document in chunks, as the page teaches it",
+      "Conflicts are information, as the page teaches it",
+      "Retries, conflicts, chunks, honest accuracy and the practice, as the page teaches it",
+      "The accuracy that hides the failures, as the page teaches it",
+      "What a retry can and cannot fix, as the page teaches it"
+    ]
+  }
+}

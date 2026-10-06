@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "capability.ts",
+      "old": "  if (!policy.models[team].includes(request.model)) return [\"deny\", \"model not allowed\"];",
+      "new": "  if (request.recent >= policy.limits[team]) return [\"deny\", \"rate limited\"];\n  if (!policy.models[team].includes(request.model)) return [\"deny\", \"model not allowed\"];"
+    }
+  ]
+}

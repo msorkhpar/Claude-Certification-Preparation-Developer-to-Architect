@@ -1,0 +1,122 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "49-hooks"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Normalising results, command hooks and the practice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A support agent uses three vendor systems: one gives epoch seconds, one a numeric status code, one local date text. The model keeps comparing dates wrongly. Which fix fits best, given that the team does not own them?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A longer system prompt that teaches the model each vendor's date format by example",
+            "correct": false,
+            "says": "Ruled out because a conversion in the model's head can be wrong, and the page assigns that task to code: \"is a prompt for a task with a right answer\"."
+          },
+          {
+            "id": "b",
+            "text": "A PostToolUse hook that supplies one readable format as the replacement output",
+            "correct": true,
+            "says": "The hook converts once, in code, for any tool, before the model reads the result."
+          },
+          {
+            "id": "c",
+            "text": "A PreToolUse hook that refuses any call whose answer is hard to read for the agent",
+            "correct": false,
+            "says": "Ruled out because the hook runs after the tool and cannot refuse it: \"The hook runs after the tool.\""
+          },
+          {
+            "id": "d",
+            "text": "A larger model for the support agent",
+            "correct": false,
+            "says": "Ruled out because a larger model still converts by reasoning, and the page names the reliable place: \"A PostToolUse hook is the place to make them consistent, once, in code.\""
+          }
+        ],
+        "origin": {
+          "path": "course/49-hooks/02-normalising-results-command-hooks-and-the-practice.md",
+          "section": "Normalise in a PostToolUse hook"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A team commits a git-push guard to the project's `.claude/settings.json`. Its batch service runs the SDK with `setting_sources=[]` and a callback hook for refunds. A push attempt from the service is not blocked. Why?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The callback hook overrides every command hook that the settings define",
+            "correct": false,
+            "says": "Ruled out because the two kinds run side by side: \"next to its callbacks, in parallel and with the most restrictive answer applying\"."
+          },
+          {
+            "id": "b",
+            "text": "Command hooks are meant for interactive sessions of Claude Code only",
+            "correct": false,
+            "says": "Ruled out because the SDK collects \"shell command hooks from settings files when the corresponding `setting_sources` entry is enabled\"."
+          },
+          {
+            "id": "c",
+            "text": "The guard's timeout is too short for a batch service, so the call proceeds",
+            "correct": false,
+            "says": "Ruled out because the timeout is a setting of the command and says nothing about whether the file is read: \"with the timeout in seconds\"."
+          },
+          {
+            "id": "d",
+            "text": "Nothing reads that checked-in file here, so its shell commands are skipped",
+            "correct": true,
+            "says": "With no setting sources the SDK collects only the callbacks."
+          }
+        ],
+        "origin": {
+          "path": "course/49-hooks/02-normalising-results-command-hooks-and-the-practice.md",
+          "section": "Where the two kinds meet"
+        }
+      }
+    ],
+    "concepts": [
+      "Normalise in a PostToolUse hook, as the page teaches it",
+      "Normalising results, command hooks and the practice, as the page teaches it",
+      "Where the two kinds meet, as the page teaches it"
+    ]
+  }
+}

@@ -1,0 +1,288 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "18-model-choice-cost-and-migration"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: a cost model and a model router, graded on a cost table (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a cost model and a model router, graded on a cost table"
+    },
+    {
+      "type": "para",
+      "text": "Write two functions: one that prices a request from the `usage` object the API returns, and one that picks the cheapest model that can take a task. Everything is plain data: no network, no clock."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given data"
+    },
+    {
+      "type": "para",
+      "text": "A **model** is a map with `id`, `tier` (1 smallest to 4 largest; a course label, not an API field), `context` (tokens), `max_output` (tokens), `input` and `output` (the price in dollars per million tokens, which is the same number as micro-dollars per token), `cache_read_multiplier` (what a cache read costs as a multiple of `input`) and an optional `deprecated` flag. The tests use the four course models with the prices read from the pricing page on 2026-10-02."
+    },
+    {
+      "type": "para",
+      "text": "A **usage** is the object a response carries: `input_tokens`, `output_tokens`, `cache_read_input_tokens`, `cache_creation_input_tokens` and, when present, `cache_creation` with `ephemeral_5m_input_tokens` and `ephemeral_1h_input_tokens`. A missing field counts as zero."
+    },
+    {
+      "type": "para",
+      "text": "A **task** is `usage` (the estimate to price), `min_tier` (default 1), `max_tokens` (the output cap the request will set, default 0) and `batch` (default false). Java and Kotlin pass maps, Python dictionaries, TypeScript objects."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "`request_cost(model, usage, batch=False)` (TypeScript `requestCost`, Java `Router.requestCost`, Kotlin `requestCost`)"
+    },
+    {
+      "type": "para",
+      "text": "Return the cost in micro-dollars, rounded to 6 decimals:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Uncached input (`input_tokens`) costs `input` per token and output costs `output` per token.",
+        "A cache write of the 5-minute kind costs **1.25 times** `input`, and of the 1-hour kind **2 times** `input`. When `cache_creation` is present use its split; when only `cache_creation_input_tokens` is present, count it all as the 5-minute kind.",
+        "A cache read costs `input` times the model's `cache_read_multiplier`.",
+        "The batch discount takes **half off every part** of the sum."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "`route(catalog, task)` (TypeScript `route`, Java `Router.route`, Kotlin `route`)"
+    },
+    {
+      "type": "para",
+      "text": "Return the `id` of the cheapest model that can take the task, or raise `NoModelError`:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Skip deprecated models and models below `min_tier`.",
+        "Skip a model whose `context` is smaller than the task's total input (`input_tokens` plus cache reads plus all cache writes), or whose `max_output` is smaller than `max_tokens`.",
+        "Price the usage on each remaining model with `request_cost` (with the task's `batch` flag) and take the lowest.",
+        "On equal cost take the lower tier, then the smaller id. The order of the catalog never matters."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working cost model and router with six gaps cut out of it. The pricing sum, the rounding, the split of cache writes (`_writes`), the filtering and the call order of `route` are written and correct. Each gap is one small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails every case on an assertion. To see what a gap receives, log its input with the `log` line at the top of the file (`log.debug(...)`); a run shows the lines under the failing case. The names below are Python's; TypeScript, Java and Kotlin use the camel-case forms (`cacheCost`, `applyBatch`, `inputTokens`, `canTake`, `cheapest`, `requireChoice`)."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_cache_cost` unlocks `e1`: the cost of cache writes and reads.",
+        "`_apply_batch` unlocks `e2`: half off the whole sum for a batch.",
+        "`_input_tokens` unlocks `e4`: the tokens a model must hold as input.",
+        "`_can_take` unlocks `m1`, `e4` and `e5`: not deprecated, tier, context and output limit.",
+        "`_cheapest` unlocks `m1`, `e3` and `e6`: the id of the lowest cost, ties to the lower tier then the smaller id.",
+        "`_require_choice` unlocks `e5`: an empty choice raises `NoModelError`."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A plain request is priced from input and output, and the router returns the cheapest model at or above the tier"
+        ],
+        [
+          "`e1`",
+          "Cache writes cost 1.25 and 2 times input, reads use the model's own multiplier, and an unsplit write is the 5-minute kind"
+        ],
+        [
+          "`e2`",
+          "The batch discount halves every part of the cost, cache parts included"
+        ],
+        [
+          "`e3`",
+          "The router picks by cost and tier, whatever the order of the catalog"
+        ],
+        [
+          "`e4`",
+          "A model with too small a context window or output limit is skipped"
+        ],
+        [
+          "`e5`",
+          "Deprecated models are skipped, and a choice with no model raises `NoModelError`"
+        ],
+        [
+          "`e6`",
+          "A cost tie goes to the lower tier"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.Comparator;\nimport java.util.List;\nimport java.util.Map;\n\n/** A cost model and a model router. See ../../statement.md for the contract. Models, usages and tasks are JSON-like maps. */\nfinal class Router {\n    private static final System.Logger LOG = System.getLogger(Router.class.getName());\n    private Router() {}\n\n    private static long n(Map<String, Object> m, String key) {\n        Object v = m.get(key);\n        return v == null ? 0 : ((Number) v).longValue();\n    }\n\n    private static double d(Map<String, Object> m, String key) {\n        return ((Number) m.get(key)).doubleValue();\n    }\n\n    /** The cache-write tokens as {5-minute kind, 1-hour kind}; an unsplit count is all the 5-minute kind. */\n    @SuppressWarnings(\"unchecked\")\n    private static long[] writes(Map<String, Object> usage) {\n        Map<String, Object> split = (Map<String, Object>) usage.get(\"cache_creation\");\n        if (split == null) return new long[] {n(usage, \"cache_creation_input_tokens\"), 0};\n        return new long[] {n(split, \"ephemeral_5m_input_tokens\"), n(split, \"ephemeral_1h_input_tokens\")};\n    }\n\n    /** The cost of the cache parts of a request: the writes and the reads. */\n    private static double cacheCost(Map<String, Object> model, Map<String, Object> usage) {\n        long[] written = writes(usage);\n        double price = d(model, \"input\");\n        return written[0] * price * 1.25 + written[1] * price * 2.0 + n(usage, \"cache_read_input_tokens\") * price * d(model, \"cache_read_multiplier\");\n    }\n\n    /** The cost after the batch discount: half of it when `batch` is true. */\n    private static double applyBatch(double total, boolean batch) {\n        return batch ? total * 0.5 : total;\n    }\n\n    /** Cost of one request in micro-dollars (a price of $N per million tokens is N micro-dollars per token). */\n    static double requestCost(Map<String, Object> model, Map<String, Object> usage, boolean batch) {\n        double total = n(usage, \"input_tokens\") * d(model, \"input\") + cacheCost(model, usage) + n(usage, \"output_tokens\") * d(model, \"output\");\n        return Math.round(applyBatch(total, batch) * 1e6) / 1e6;\n    }\n\n    /** The tokens the model has to hold as input: uncached input, cache reads and every cache write. */\n    private static long inputTokens(Map<String, Object> usage) {\n        long[] written = writes(usage);\n        return n(usage, \"input_tokens\") + n(usage, \"cache_read_input_tokens\") + written[0] + written[1];\n    }\n\n    /** Whether the model is allowed and big enough for the task. */\n    private static boolean canTake(Map<String, Object> model, Map<String, Object> task, long tokens) {\n        long minTier = task.containsKey(\"min_tier\") ? n(task, \"min_tier\") : 1;\n        return !Boolean.TRUE.equals(model.get(\"deprecated\")) && n(model, \"tier\") >= minTier && tokens <= n(model, \"context\") && n(task, \"max_tokens\") <= n(model, \"max_output\");\n    }\n\n    /** The id of the cheapest of `models` for this usage; on a tie the lower tier, then the smaller id. */\n    private static String cheapest(List<Map<String, Object>> models, Map<String, Object> usage, boolean batch) {\n        return models.stream()\n                .min(Comparator.<Map<String, Object>>comparingDouble(m -> requestCost(m, usage, batch))\n                        .thenComparingLong(m -> n(m, \"tier\"))\n                        .thenComparing(m -> (String) m.get(\"id\")))\n                .map(m -> (String) m.get(\"id\"))\n                .orElse(\"\");\n    }\n\n    /** An empty list of models is an error: no model can take the task. */\n    private static void requireChoice(List<Map<String, Object>> models) {\n        if (models.isEmpty()) throw new NoModelError(\"no model can take this task\");\n    }\n\n    /** The id of the cheapest model that can take the task; throws NoModelError when none can. */\n    @SuppressWarnings(\"unchecked\")\n    static String route(List<Map<String, Object>> catalog, Map<String, Object> task) {\n        LOG.log(System.Logger.Level.DEBUG, \"route input: {0}\", task);\n        Map<String, Object> usage = (Map<String, Object>) task.get(\"usage\");\n        long tokens = inputTokens(usage);\n        List<Map<String, Object>> eligible = catalog.stream().filter(m -> canTake(m, task, tokens)).toList();\n        requireChoice(eligible);\n        return cheapest(eligible, usage, Boolean.TRUE.equals(task.get(\"batch\")));\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // Two of the course models, with prices in dollars per million tokens, as the tests use them.\n        Map<String, Object> haiku = model(\"claude-haiku-4-5-20251001\", 1, 200_000, 64_000, 1, 5, 0.1);\n        Map<String, Object> sonnet = model(\"claude-sonnet-5-5\", 2, 1_000_000, 128_000, 2, 10, 0.1);\n        List<Map<String, Object>> catalog = List.of(haiku, sonnet);\n        Map<String, Object> usage = Map.of(\"input_tokens\", 1200, \"output_tokens\", 300);\n\n        System.out.println(\"sonnet cost (micro-dollars): \" + Router.requestCost(sonnet, usage, false));\n        System.out.println(\"haiku cost (micro-dollars): \" + Router.requestCost(haiku, usage, false));\n        try {\n            System.out.println(\"tier 1 task goes to: \" + Router.route(catalog, Map.of(\"min_tier\", 1, \"usage\", usage)));\n            System.out.println(\"tier 2 task goes to: \" + Router.route(catalog, Map.of(\"min_tier\", 2, \"usage\", usage)));\n        } catch (NoModelError err) {\n            System.out.println(\"no model: \" + err.getMessage());\n        }\n    }\n\n    private static Map<String, Object> model(String id, int tier, long context, long maxOutput, double input, double output, double mult) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        m.put(\"id\", id);\n        m.put(\"tier\", tier);\n        m.put(\"context\", context);\n        m.put(\"max_output\", maxOutput);\n        m.put(\"input\", input);\n        m.put(\"output\", output);\n        m.put(\"cache_read_multiplier\", mult);\n        return m;\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.List;\nimport java.util.Map;\n\n/** A cost model and a model router. See ../../statement.md for the contract. Models, usages and tasks are JSON-like maps. */\nfinal class Router {\n    private static final System.Logger LOG = System.getLogger(Router.class.getName());\n    private Router() {}\n\n    private static long n(Map<String, Object> m, String key) {\n        Object v = m.get(key);\n        return v == null ? 0 : ((Number) v).longValue();\n    }\n\n    private static double d(Map<String, Object> m, String key) {\n        return ((Number) m.get(key)).doubleValue();\n    }\n\n    /** The cache-write tokens as {5-minute kind, 1-hour kind}; an unsplit count is all the 5-minute kind. */\n    @SuppressWarnings(\"unchecked\")\n    private static long[] writes(Map<String, Object> usage) {\n        Map<String, Object> split = (Map<String, Object>) usage.get(\"cache_creation\");\n        if (split == null) return new long[] {n(usage, \"cache_creation_input_tokens\"), 0};\n        return new long[] {n(split, \"ephemeral_5m_input_tokens\"), n(split, \"ephemeral_1h_input_tokens\")};\n    }\n\n    private static double cacheCost(Map<String, Object> model, Map<String, Object> usage) {\n        // TODO 1 of 6 (finish this to pass e1): the cost of the cache parts of a request: the writes and the reads.\n        // Receives the model (\"input\" price, \"cache_read_multiplier\") and the usage. Returns the 5-minute write tokens times 1.25 times the input price, plus the 1-hour write\n        // tokens times 2 times the input price, plus the cache read tokens times the input price times the model's cache_read_multiplier. writes(usage) gives the two write counts.\n        // Example: input price 4, cache_read_input_tokens 1000, multiplier 0.05 -> 200.0\n        return 0.0;\n    }\n\n    private static double applyBatch(double total, boolean batch) {\n        // TODO 2 of 6 (finish this to pass e2): the cost after the batch discount.\n        // Receives the total cost and whether the request is a batch. Returns half of the total when `batch` is true, the total unchanged otherwise.\n        // Example: applyBatch(1000, true) -> 500.0, applyBatch(1000, false) -> 1000.0\n        return total;\n    }\n\n    /** Cost of one request in micro-dollars (a price of $N per million tokens is N micro-dollars per token). */\n    static double requestCost(Map<String, Object> model, Map<String, Object> usage, boolean batch) {\n        double total = n(usage, \"input_tokens\") * d(model, \"input\") + cacheCost(model, usage) + n(usage, \"output_tokens\") * d(model, \"output\");\n        return Math.round(applyBatch(total, batch) * 1e6) / 1e6;\n    }\n\n    private static long inputTokens(Map<String, Object> usage) {\n        // TODO 3 of 6 (finish this to pass e4): the tokens the model has to hold as input.\n        // Receives the usage. Returns uncached input tokens plus cache read tokens plus every cache write (both kinds; writes(usage) gives them). A missing field counts as 0.\n        // Example: {input_tokens: 250000, cache_read_input_tokens: 50000} -> 300000\n        return 0;\n    }\n\n    private static boolean canTake(Map<String, Object> model, Map<String, Object> task, long tokens) {\n        // TODO 4 of 6 (finish this to pass m1, e4 and e5): whether the model is allowed and big enough for the task.\n        // Receives the model, the task (\"min_tier\" default 1, \"max_tokens\" default 0) and the task's total input tokens. Returns true when the model is not deprecated,\n        // its tier is at least min_tier, its context holds the input tokens and its max_output holds max_tokens. n(map, key) reads a number, 0 when missing.\n        // Example: a model with context 200000 and tokens 250000 -> false\n        return false;\n    }\n\n    /** The id of the cheapest of `models` for this usage; on a tie the lower tier, then the smaller id. */\n    private static String cheapest(List<Map<String, Object>> models, Map<String, Object> usage, boolean batch) {\n        // TODO 5 of 6 (finish this to pass m1, e3 and e6): the id of the cheapest of `models` for this usage.\n        // Receives a non-empty list of models, the usage and the batch flag. Prices each with requestCost(model, usage, batch) and returns the id of the lowest; on equal\n        // cost the lower tier wins, then the smaller id. The order of the list never matters.\n        // Example: Sonnet and Opus costing 200000 each -> the Sonnet id (tier 2 before tier 3)\n        return \"\";\n    }\n\n    /** An empty list of models is an error: no model can take the task. */\n    private static void requireChoice(List<Map<String, Object>> models) {\n        // TODO 6 of 6 (finish this to pass e5): an empty list of models is an error.\n        // Receives the models that can take the task. Throws new NoModelError(\"no model can take this task\") when the list is empty; returns nothing otherwise.\n        // Example: requireChoice(List.of()) throws NoModelError\n    }\n\n    /** The id of the cheapest model that can take the task; throws NoModelError when none can. */\n    @SuppressWarnings(\"unchecked\")\n    static String route(List<Map<String, Object>> catalog, Map<String, Object> task) {\n        LOG.log(System.Logger.Level.DEBUG, \"route input: {0}\", task);\n        Map<String, Object> usage = (Map<String, Object>) task.get(\"usage\");\n        long tokens = inputTokens(usage);\n        List<Map<String, Object>> eligible = catalog.stream().filter(m -> canTake(m, task, tokens)).toList();\n        requireChoice(eligible);\n        return cheapest(eligible, usage, Boolean.TRUE.equals(task.get(\"batch\")));\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // Two of the course models, with prices in dollars per million tokens, as the tests use them.\n        Map<String, Object> haiku = model(\"claude-haiku-4-5-20251001\", 1, 200_000, 64_000, 1, 5, 0.1);\n        Map<String, Object> sonnet = model(\"claude-sonnet-5-5\", 2, 1_000_000, 128_000, 2, 10, 0.1);\n        List<Map<String, Object>> catalog = List.of(haiku, sonnet);\n        Map<String, Object> usage = Map.of(\"input_tokens\", 1200, \"output_tokens\", 300);\n\n        System.out.println(\"sonnet cost (micro-dollars): \" + Router.requestCost(sonnet, usage, false));\n        System.out.println(\"haiku cost (micro-dollars): \" + Router.requestCost(haiku, usage, false));\n        try {\n            System.out.println(\"tier 1 task goes to: \" + Router.route(catalog, Map.of(\"min_tier\", 1, \"usage\", usage)));\n            System.out.println(\"tier 2 task goes to: \" + Router.route(catalog, Map.of(\"min_tier\", 2, \"usage\", usage)));\n        } catch (NoModelError err) {\n            System.out.println(\"no model: \" + err.getMessage());\n        }\n    }\n\n    private static Map<String, Object> model(String id, int tier, long context, long maxOutput, double input, double output, double mult) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        m.put(\"id\", id);\n        m.put(\"tier\", tier);\n        m.put(\"context\", context);\n        m.put(\"max_output\", maxOutput);\n        m.put(\"input\", input);\n        m.put(\"output\", output);\n        m.put(\"cache_read_multiplier\", mult);\n        return m;\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 9,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "e68e7859e1f0a6a76a27fbabe976cce1dae4480758a24c656c09cc1d3f018097",
+  "starting_code": "import java.util.List;\nimport java.util.Map;\n\n/** A cost model and a model router. See ../../statement.md for the contract. Models, usages and tasks are JSON-like maps. */\nfinal class Router {\n    private static final System.Logger LOG = System.getLogger(Router.class.getName());\n    private Router() {}\n\n    private static long n(Map<String, Object> m, String key) {\n        Object v = m.get(key);\n        return v == null ? 0 : ((Number) v).longValue();\n    }\n\n    private static double d(Map<String, Object> m, String key) {\n        return ((Number) m.get(key)).doubleValue();\n    }\n\n    /** The cache-write tokens as {5-minute kind, 1-hour kind}; an unsplit count is all the 5-minute kind. */\n    @SuppressWarnings(\"unchecked\")\n    private static long[] writes(Map<String, Object> usage) {\n        Map<String, Object> split = (Map<String, Object>) usage.get(\"cache_creation\");\n        if (split == null) return new long[] {n(usage, \"cache_creation_input_tokens\"), 0};\n        return new long[] {n(split, \"ephemeral_5m_input_tokens\"), n(split, \"ephemeral_1h_input_tokens\")};\n    }\n\n    private static double cacheCost(Map<String, Object> model, Map<String, Object> usage) {\n        // TODO 1 of 6 (finish this to pass e1): the cost of the cache parts of a request: the writes and the reads.\n        // Receives the model (\"input\" price, \"cache_read_multiplier\") and the usage. Returns the 5-minute write tokens times 1.25 times the input price, plus the 1-hour write\n        // tokens times 2 times the input price, plus the cache read tokens times the input price times the model's cache_read_multiplier. writes(usage) gives the two write counts.\n        // Example: input price 4, cache_read_input_tokens 1000, multiplier 0.05 -> 200.0\n        return 0.0;\n    }\n\n    private static double applyBatch(double total, boolean batch) {\n        // TODO 2 of 6 (finish this to pass e2): the cost after the batch discount.\n        // Receives the total cost and whether the request is a batch. Returns half of the total when `batch` is true, the total unchanged otherwise.\n        // Example: applyBatch(1000, true) -> 500.0, applyBatch(1000, false) -> 1000.0\n        return total;\n    }\n\n    /** Cost of one request in micro-dollars (a price of $N per million tokens is N micro-dollars per token). */\n    static double requestCost(Map<String, Object> model, Map<String, Object> usage, boolean batch) {\n        double total = n(usage, \"input_tokens\") * d(model, \"input\") + cacheCost(model, usage) + n(usage, \"output_tokens\") * d(model, \"output\");\n        return Math.round(applyBatch(total, batch) * 1e6) / 1e6;\n    }\n\n    private static long inputTokens(Map<String, Object> usage) {\n        // TODO 3 of 6 (finish this to pass e4): the tokens the model has to hold as input.\n        // Receives the usage. Returns uncached input tokens plus cache read tokens plus every cache write (both kinds; writes(usage) gives them). A missing field counts as 0.\n        // Example: {input_tokens: 250000, cache_read_input_tokens: 50000} -> 300000\n        return 0;\n    }\n\n    private static boolean canTake(Map<String, Object> model, Map<String, Object> task, long tokens) {\n        // TODO 4 of 6 (finish this to pass m1, e4 and e5): whether the model is allowed and big enough for the task.\n        // Receives the model, the task (\"min_tier\" default 1, \"max_tokens\" default 0) and the task's total input tokens. Returns true when the model is not deprecated,\n        // its tier is at least min_tier, its context holds the input tokens and its max_output holds max_tokens. n(map, key) reads a number, 0 when missing.\n        // Example: a model with context 200000 and tokens 250000 -> false\n        return false;\n    }\n\n    /** The id of the cheapest of `models` for this usage; on a tie the lower tier, then the smaller id. */\n    private static String cheapest(List<Map<String, Object>> models, Map<String, Object> usage, boolean batch) {\n        // TODO 5 of 6 (finish this to pass m1, e3 and e6): the id of the cheapest of `models` for this usage.\n        // Receives a non-empty list of models, the usage and the batch flag. Prices each with requestCost(model, usage, batch) and returns the id of the lowest; on equal\n        // cost the lower tier wins, then the smaller id. The order of the list never matters.\n        // Example: Sonnet and Opus costing 200000 each -> the Sonnet id (tier 2 before tier 3)\n        return \"\";\n    }\n\n    /** An empty list of models is an error: no model can take the task. */\n    private static void requireChoice(List<Map<String, Object>> models) {\n        // TODO 6 of 6 (finish this to pass e5): an empty list of models is an error.\n        // Receives the models that can take the task. Throws new NoModelError(\"no model can take this task\") when the list is empty; returns nothing otherwise.\n        // Example: requireChoice(List.of()) throws NoModelError\n    }\n\n    /** The id of the cheapest model that can take the task; throws NoModelError when none can. */\n    @SuppressWarnings(\"unchecked\")\n    static String route(List<Map<String, Object>> catalog, Map<String, Object> task) {\n        LOG.log(System.Logger.Level.DEBUG, \"route input: {0}\", task);\n        Map<String, Object> usage = (Map<String, Object>) task.get(\"usage\");\n        long tokens = inputTokens(usage);\n        List<Map<String, Object>> eligible = catalog.stream().filter(m -> canTake(m, task, tokens)).toList();\n        requireChoice(eligible);\n        return cheapest(eligible, usage, Boolean.TRUE.equals(task.get(\"batch\")));\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/18-model-choice-cost-and-migration/prose/unit-02/practice-3/src/main/java/Router.java",
+    "test_path": "practice/level-2/18-model-choice-cost-and-migration/prose/unit-02/practice-3/src/test/java/RouterTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/18-model-choice-cost-and-migration/prose/unit-02/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/18-model-choice-cost-and-migration/prose/unit-02/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_costOfAPlainRequestAndTheCheapestModelThatMeetsTheTier()",
+        "kind": "main",
+        "says": "A plain request is priced from input and output, and the router returns the cheapest model at or above the tier"
+      },
+      {
+        "id": "e1_cacheReadsAndWritesArePricedByTheirOwnMultipliers()",
+        "kind": "edge",
+        "says": "Cache writes cost 1.25 and 2 times input, reads use the model's own multiplier, and an unsplit write is the 5-minute kind"
+      },
+      {
+        "id": "e2_theBatchDiscountHalvesEveryPartOfTheCost()",
+        "kind": "edge",
+        "says": "The batch discount halves every part of the cost, cache parts included"
+      },
+      {
+        "id": "e3_theRouterPicksByCostAndTierNotByTheOrderOfTheCatalog()",
+        "kind": "edge",
+        "says": "The router picks by cost and tier, whatever the order of the catalog"
+      },
+      {
+        "id": "e4_aModelWhoseContextOrOutputLimitIsTooSmallIsSkipped()",
+        "kind": "edge",
+        "says": "A model with too small a context window or output limit is skipped"
+      },
+      {
+        "id": "e5_deprecatedModelsAreSkippedAndAnEmptyChoiceRaises()",
+        "kind": "edge",
+        "says": "Deprecated models are skipped, and a choice with no model raises NoModelError"
+      },
+      {
+        "id": "e6_aTieGoesToTheLowerTier()",
+        "kind": "edge",
+        "says": "A cost tie goes to the lower tier"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/18-model-choice-cost-and-migration/prose/unit-02/practice-3/target/test-results/test"
+    },
+    "origin": "course/18-model-choice-cost-and-migration/02-usage-token-counting-and-a-cost-model.md",
+    "concepts": [
+      "the practice of Reading usage, counting tokens before sending, and modelling cost is solved"
+    ],
+    "files": [
+      "practice/level-2/18-model-choice-cost-and-migration/prose/unit-02/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "model-choice-cost-and-migration-u2"
+}

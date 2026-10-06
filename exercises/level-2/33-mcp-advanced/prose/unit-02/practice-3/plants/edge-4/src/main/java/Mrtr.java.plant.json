@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/java/Mrtr.java",
+      "old": "Object token = request.get(\"requestState\");",
+      "new": "Object token = request.get(\"requestState\") != null && readState(secret, String.valueOf(request.get(\"requestState\"))) == null ? null : request.get(\"requestState\");"
+    }
+  ]
+}

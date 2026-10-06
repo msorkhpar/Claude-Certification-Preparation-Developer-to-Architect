@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/kotlin/Capability.kt",
+      "old": "return agent.holds.filter { it !in agent.needs }",
+      "new": "return agent.holds.filter { it !in agent.needs || (agent.used[it] ?: 0) == 0 }"
+    }
+  ]
+}

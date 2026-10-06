@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "38-claude-code-for-developers"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Check yourself: The memory file, settings layers and permission rules",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A repository holds credentials in `.env`, and Claude must never open them. One teammate writes a sentence about it in the memory file, and another adds a path block to the shared configuration. Which one actually stops it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The `Read` rule, which is checked before each call runs",
+            "correct": true,
+            "says": "The page says \"Claude treats them as context, not enforced configuration\", while \"Rules are evaluated in order: deny, then ask, then allow.\""
+          },
+          {
+            "id": "b",
+            "text": "The memory sentence, which Claude Code enforces once it loads",
+            "correct": false,
+            "says": "Ruled out because memory files are \"context, not enforced configuration\", so the sentence only asks."
+          },
+          {
+            "id": "c",
+            "text": "Both entries equally, since each is read before any tool call",
+            "correct": false,
+            "says": "Ruled out because a memory file is loaded \"at the start of every conversation\" and still only asks, while a deny rule sits first in \"deny, then ask, then allow\"."
+          },
+          {
+            "id": "d",
+            "text": "Neither entry, since a project file never beats a user file",
+            "correct": false,
+            "says": "Ruled out because \"A key set at a higher level overrides the same key set lower down\" is about the same key, and since \"they combine across layers\", a project deny still applies."
+          }
+        ],
+        "origin": {
+          "path": "course/38-claude-code-for-developers/02-memory-settings-and-permission-rules.md",
+          "section": "The memory file"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A settings file allows `Bash(git log *)` and another layer lists `Bash(git *)` under deny. What happens when Claude runs `git log --oneline`?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It is allowed, because the allow rule names the narrower command here",
+            "correct": false,
+            "says": "Ruled out because \"rule specificity doesn't change the order\", so a narrower allow does not win."
+          },
+          {
+            "id": "b",
+            "text": "It is allowed, because the later layer replaces the earlier one in full",
+            "correct": false,
+            "says": "Ruled out because \"they combine across layers\", so the later layer does not replace the earlier one."
+          },
+          {
+            "id": "c",
+            "text": "It asks, because the two rules cancel each other out in the end",
+            "correct": false,
+            "says": "Ruled out because the first match decides and the rules never cancel: \"An allow rule can't carve an exception out of a deny rule\"."
+          },
+          {
+            "id": "d",
+            "text": "It is refused, because rules of that kind are checked first and win",
+            "correct": true,
+            "says": "The page says \"Rules are evaluated in order: deny, then ask, then allow. The first match in that order determines the outcome, and rule specificity doesn't change the order.\""
+          }
+        ],
+        "origin": {
+          "path": "course/38-claude-code-for-developers/02-memory-settings-and-permission-rules.md",
+          "section": "Permission rules"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A developer wants to use a cheaper model on their own machine without changing it for the team. Where does the setting go?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The shared project file, which is committed with the code of the team",
+            "correct": false,
+            "says": "Ruled out because \"The team's choices go in the shared project file, which is committed\", so the choice would reach the whole team."
+          },
+          {
+            "id": "b",
+            "text": "The managed settings, which override every other layer of the settings",
+            "correct": false,
+            "says": "Ruled out because managed settings are for \"A rule that must hold regardless of what any developer writes\", and are not a personal file."
+          },
+          {
+            "id": "c",
+            "text": "The local project file, which is kept out of version control",
+            "correct": true,
+            "says": "The page puts \"A personal override\" in the local file, which \"belongs in `.gitignore`\"."
+          },
+          {
+            "id": "d",
+            "text": "The memory file, which names the model in one plain sentence of text",
+            "correct": false,
+            "says": "Ruled out because the memory file \"asks\" and does not set a model: \"A memory file asks and a hook enforces.\""
+          }
+        ],
+        "origin": {
+          "path": "course/38-claude-code-for-developers/02-memory-settings-and-permission-rules.md",
+          "section": "Settings: five layers"
+        }
+      }
+    ]
+  }
+}

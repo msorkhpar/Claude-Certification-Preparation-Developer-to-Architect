@@ -1,0 +1,156 @@
+{
+  "practice": "76-scenario-conversational-ai-assistant/unit-01/practice-1",
+  "name": "conversation_review",
+  "tests": {
+    "java": "ConversationReviewTest",
+    "kotlin": "ConversationReviewTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_mixed_batch_gets_every_count_the_segments_and_a_verdict",
+      "typescript": "m1 a mixed batch gets every count the segments and a verdict",
+      "java": "m1_aMixedBatchGetsEveryCountTheSegmentsAndAVerdict",
+      "kotlin": "m1_aMixedBatchGetsEveryCountTheSegmentsAndAVerdict"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_an_empty_batch_has_zero_figures_and_is_held_for_lack_of_data",
+      "typescript": "e1 an empty batch has zero figures and is held for lack of data",
+      "java": "e1_anEmptyBatchHasZeroFiguresAndIsHeldForLackOfData",
+      "kotlin": "e1_anEmptyBatchHasZeroFiguresAndIsHeldForLackOfData"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_safety_signal_counts_as_missed_unless_it_went_to_a_person_as_a_safety_hand_off",
+      "typescript": "e2 a safety signal counts as missed unless it went to a person as a safety hand off",
+      "java": "e2_aSafetySignalCountsAsMissedUnlessItWentToAPersonAsASafetyHandOff",
+      "kotlin": "e2_aSafetySignalCountsAsMissedUnlessItWentToAPersonAsASafetyHandOff"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_conversation_is_overlong_only_above_the_turn_limit_and_only_when_nobody_took_over",
+      "typescript": "e3 a conversation is overlong only above the turn limit and only when nobody took over",
+      "java": "e3_aConversationIsOverlongOnlyAboveTheTurnLimitAndOnlyWhenNobodyTookOver",
+      "kotlin": "e3_aConversationIsOverlongOnlyAboveTheTurnLimitAndOnlyWhenNobodyTookOver"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_repeated_questions_are_acceptable_at_exactly_the_limit_and_not_above_it",
+      "typescript": "e4 repeated questions are acceptable at exactly the limit and not above it",
+      "java": "e4_repeatedQuestionsAreAcceptableAtExactlyTheLimitAndNotAboveIt",
+      "kotlin": "e4_repeatedQuestionsAreAcceptableAtExactlyTheLimitAndNotAboveIt"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_segment_is_weak_only_below_the_resolution_floor_and_not_at_it",
+      "typescript": "e5 a segment is weak only below the resolution floor and not at it",
+      "java": "e5_aSegmentIsWeakOnlyBelowTheResolutionFloorAndNotAtIt",
+      "kotlin": "e5_aSegmentIsWeakOnlyBelowTheResolutionFloorAndNotAtIt"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_a_segment_needs_the_minimum_number_of_conversations_before_it_can_be_called_weak",
+      "typescript": "e6 a segment needs the minimum number of conversations before it can be called weak",
+      "java": "e6_aSegmentNeedsTheMinimumNumberOfConversationsBeforeItCanBeCalledWeak",
+      "kotlin": "e6_aSegmentNeedsTheMinimumNumberOfConversationsBeforeItCanBeCalledWeak"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_a_hand_off_is_over_escalation_only_when_no_person_was_needed_and_no_safety_signal_was_present",
+      "typescript": "e7 a hand off is over escalation only when no person was needed and no safety signal was present",
+      "java": "e7_aHandOffIsOverEscalationOnlyWhenNoPersonWasNeededAndNoSafetySignalWasPresent",
+      "kotlin": "e7_aHandOffIsOverEscalationOnlyWhenNoPersonWasNeededAndNoSafetySignalWasPresent"
+    },
+    "e8": {
+      "kind": "edge",
+      "python": "test_e8_only_conversations_the_assistant_settled_alone_count_as_resolved",
+      "typescript": "e8 only conversations the assistant settled alone count as resolved",
+      "java": "e8_onlyConversationsTheAssistantSettledAloneCountAsResolved",
+      "kotlin": "e8_onlyConversationsTheAssistantSettledAloneCountAsResolved"
+    },
+    "e9": {
+      "kind": "edge",
+      "python": "test_e9_percentages_are_whole_numbers_rounded_half_up",
+      "typescript": "e9 percentages are whole numbers rounded half up",
+      "java": "e9_percentagesAreWholeNumbersRoundedHalfUp",
+      "kotlin": "e9_percentagesAreWholeNumbersRoundedHalfUp"
+    }
+  },
+  "plants": {
+    "wrong-safety-any-hand-off": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "counts a safety signal as handled when any person took over and not a safety hand off"
+    },
+    "wrong-safety-never-holds": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "ships the assistant although a safety signal was missed"
+    },
+    "wrong-overlong-inclusive": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "calls a conversation overlong when it has exactly the turn limit"
+    },
+    "wrong-repeat-strict": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "accepts repeated questions only below the limit and not at it"
+    },
+    "wrong-weak-inclusive": {
+      "caught_by": [
+        "m1",
+        "e5"
+      ],
+      "defect": "calls a segment weak when it is exactly at the resolution floor"
+    },
+    "wrong-floor-too-low": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "compares a segment with a floor ten points below the policy floor"
+    },
+    "wrong-weak-ignores-min-n": {
+      "caught_by": [
+        "m1",
+        "e6"
+      ],
+      "defect": "calls a small segment weak whatever its size"
+    },
+    "wrong-min-n-strict": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "needs more conversations than the minimum and not at least that many"
+    },
+    "wrong-over-escalated-counts-risk": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "counts a safety hand off as over escalation"
+    },
+    "wrong-resolved-ignores-hand-off": {
+      "caught_by": [
+        "e8"
+      ],
+      "defect": "counts a conversation a person settled as resolved by the assistant"
+    },
+    "wrong-resolved-pct-floor": {
+      "caught_by": [
+        "e9"
+      ],
+      "defect": "rounds the resolved percentage down and not half up"
+    },
+    "wrong-empty-ships": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "ships an empty batch instead of holding it for lack of data"
+    }
+  }
+}

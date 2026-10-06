@@ -1,0 +1,286 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "68-human-review-and-calibrated-confidence"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: human review that does not fool itself (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: human review that does not fool itself"
+    },
+    {
+      "type": "para",
+      "text": "A team extracts fields from documents and reports \"98% accurate\" to justify removing the human reviewers. The figure is an average over thousands of easy invoices; handwritten documents are wrong four times in ten. In this practice you write the pieces that make a review process honest: accuracy broken down by segment, the decision whether a segment may be automated, a confidence threshold calibrated against labelled examples, a stratified sample for ongoing checks, routing of uncertain extractions to a limited number of reviewers, and a checkpoint for actions that cannot be undone. The model is not called. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`accuracy_by`, `can_automate`, `calibrate_threshold`, `stratified_sample`, `route`, `checkpoint`); TypeScript has the camel-case names; Java has the same camel-case names as static methods of `ReviewRouting` with the records the starter defines (`Rec`, `Seg`, `Automation`, `Labeled`, `Item`, `Extraction`, `Routing`); Kotlin has top-level functions and data classes. Percentages are whole numbers, rounded half up (`(200 * correct + total) // (2 * total)`)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working review router with seven gaps cut out of it. Everything that is plumbing is written and correct: the rounding of a percentage, the overall figure, the order of the strata, the sorting of the stratum members, the set of irreversible actions and the shape of every answer. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript, Java and Kotlin names are the camel-case forms where a name is given):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "The accuracy by segment (unlocks `m1`, `e1`): after the overall figure, one entry for each `document type/field` segment, sorted by name, with its correct count, its total and its rounded percentage, so that a weak segment shows next to a high overall figure.",
+        "The segments that stop automation (unlocks `e2`): a segment with fewer samples than `min_n` is undersampled, and one with enough samples whose percentage is below the threshold is failing; automation needs every segment to pass.",
+        "The calibrated threshold (unlocks `e3`, `e4`): the lowest confidence whose accepted items (confidence at or above it) have a precision of at least the target; none when no confidence level meets the target.",
+        "The best of every stratum (unlocks `e5`): the sample takes the first `per_stratum` items of each stratum by rank (then id), so every stratum is represented by its best ranked items.",
+        "What goes to review (unlocks `e6`): an extraction goes to review when it has a conflict or its confidence is below the threshold; conflicts come first, then the lowest confidence, then by id.",
+        "The review capacity (unlocks `e7`): no more than `capacity` items go to review, the first ones of the queue; the rest wait in the backlog, in order.",
+        "The checkpoint (unlocks `e8`): an irreversible action (`delete_records`, `send_payment`, `close_account`) needs a `human` whatever the confidence; so does an amount above the limit; any other action is `auto`."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gap 1. About sixteen lines in all. The steps below describe the whole router, so you can see how your gaps are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`accuracy_by(records)` takes records `{doc_type, field, correct}` and returns a list of `{segment, correct, total, percent}`: first the segment `overall`, then one segment per `doc_type/field` in alphabetical order. No records give an `overall` segment with `0` for the percentage and no other segment.",
+        "`can_automate(records, threshold, min_n)` returns `{automate, failing, undersampled}`. A segment with fewer than `min_n` records is `undersampled`; any other segment below `threshold` percent is `failing`. `automate` is true only when there is at least one segment and neither list has anything in it. The overall figure plays no part.",
+        "`calibrate_threshold(labeled, target)` takes `(confidence, correct)` pairs and returns the lowest confidence value `t` such that, among the pairs with confidence of at least `t`, the share that is correct is at least `target` percent (compare without division). When no value qualifies, it returns `None` (`null`).",
+        "`stratified_sample(items, per_stratum)` takes items `{id, stratum, rank}` and returns the ids of the `per_stratum` items with the lowest rank in every stratum (ties by id), strata in the order they first appear, items of a stratum together.",
+        "`route(extractions, threshold, capacity)` takes `{id, confidence, conflict}` and returns `{review, backlog, auto}`. An extraction needs review when it has a conflict or its confidence is below the threshold. The queue puts conflicts first, then the lowest confidence first, ties by id. The first `capacity` of the queue are `review`, the rest `backlog`; everything else is `auto`, in input order.",
+        "`checkpoint(action, amount, limit=1000)` returns `human` for the actions `delete_records`, `send_payment` and `close_account` whatever the amount, and for any action above the limit; otherwise `auto`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Break the figure down.** An average hides the segment that matters. *You should see* the overall figure next to one row per document type and field.",
+        "**Automate a segment only when it is proven.** A good average and ten samples prove nothing. *You should see* a segment with too few records held back, and a weak one named.",
+        "**Calibrate against labels.** A confidence score is only useful where it matches how often the answer is right. *You should see* the lowest cut-off that still meets the target, and no cut-off when none does.",
+        "**Sample every stratum.** A random pull of the easy cases says nothing about the hard ones. *You should see* the same number of items from every stratum.",
+        "**Spend scarce attention on the weakest.** Reviewers are few. *You should see* conflicts and low confidence first, and the overflow waiting in a backlog.",
+        "**Some actions need a person.** Confidence does not undo a deleted record. *You should see* `human` for those actions at any amount."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Accuracy is reported per document type and field next to the overall figure"
+        ],
+        [
+          "`e1`",
+          "A weak segment is hidden by a high overall figure and found by the breakdown"
+        ],
+        [
+          "`e2`",
+          "Automation needs every segment to pass and enough samples in each"
+        ],
+        [
+          "`e3`",
+          "The threshold is the lowest confidence whose accepted items meet the target precision"
+        ],
+        [
+          "`e4`",
+          "No threshold exists when no confidence level meets the target"
+        ],
+        [
+          "`e5`",
+          "The stratified sample takes the best ranked items of every stratum"
+        ],
+        [
+          "`e6`",
+          "Low confidence and conflicts go to review with the weakest first"
+        ],
+        [
+          "`e7`",
+          "Review capacity is respected and the rest wait in a backlog"
+        ],
+        [
+          "`e8`",
+          "An irreversible action needs a person whatever the confidence"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "import { logger } from \"./logger.ts\";\nconst log = logger(\"review_routing\");\n/** Human review without fooling yourself: accuracy by segment, the decision to automate, a calibrated confidence threshold, a stratified sample, review routing within capacity, and checkpoints for irreversible actions. See ../../statement.md. */\n\nexport const IRREVERSIBLE = [\"delete_records\", \"send_payment\", \"close_account\"];\n\nconst percent = (correct: number, total: number): number => Math.floor((200 * correct + total) / (2 * total));\n\nexport function accuracyBy(records: any[]): any[] {\n  log.debug(\"accuracyBy input\", records);\n  const groups = new Map<string, [number, number]>();\n  for (const r of records) {\n    const key = `${r.doc_type}/${r.field}`;\n    const [c, t] = groups.get(key) ?? [0, 0];\n    groups.set(key, [c + (r.correct ? 1 : 0), t + 1]);\n  }\n  let correct = 0;\n  let total = 0;\n  for (const [c, t] of groups.values()) {\n    correct += c;\n    total += t;\n  }\n  const out: any[] = [{ segment: \"overall\", correct, total, percent: total ? percent(correct, total) : 0 }];\n  for (const name of [...groups.keys()].sort()) {\n    const [c, t] = groups.get(name)!;\n    out.push({ segment: name, correct: c, total: t, percent: percent(c, t) });\n  }\n  return out;\n}\n\nexport function canAutomate(records: any[], threshold: number, minN: number): { automate: boolean; failing: string[]; undersampled: string[] } {\n  const failing: string[] = [];\n  const undersampled: string[] = [];\n  const segments = accuracyBy(records).slice(1);\n  for (const s of segments) {\n    if (s.total < minN) undersampled.push(s.segment);\n    else if (s.percent < threshold) failing.push(s.segment);\n  }\n  return { automate: segments.length > 0 && failing.length === 0 && undersampled.length === 0, failing, undersampled };\n}\n\nexport function calibrateThreshold(labeled: Array<[number, boolean]>, target: number): number | null {\n  for (const t of [...new Set(labeled.map(([c]) => c))].sort((a, b) => a - b)) {\n    const kept = labeled.filter(([c]) => c >= t);\n    const right = kept.filter(([, ok]) => ok).length;\n    if (100 * right >= target * kept.length) return t;\n  }\n  return null;\n}\n\nexport function stratifiedSample(items: any[], perStratum: number): string[] {\n  const strata: string[] = [];\n  for (const item of items) if (!strata.includes(item.stratum)) strata.push(item.stratum);\n  const chosen: string[] = [];\n  for (const stratum of strata) {\n    const members = items.filter((i) => i.stratum === stratum).sort((a, b) => a.rank - b.rank || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));\n    chosen.push(...members.slice(0, perStratum).map((i) => i.id));\n  }\n  return chosen;\n}\n\nexport function route(extractions: any[], threshold: number, capacity: number): { review: string[]; backlog: string[]; auto: string[] } {\n  const priority = (e: any) => (e.conflict ? 0 : e.confidence);\n  const candidates = extractions.filter((e) => e.conflict || e.confidence < threshold).sort((a, b) => priority(a) - priority(b) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));\n  const queue = candidates.map((e) => e.id);\n  const flagged = new Set(queue);\n  return { review: queue.slice(0, capacity), backlog: queue.slice(capacity), auto: extractions.filter((e) => !flagged.has(e.id)).map((e) => e.id) };\n}\n\nexport function checkpoint(action: string, amount: number, limit = 1000): string {\n  return IRREVERSIBLE.includes(action) || amount > limit ? \"human\" : \"auto\";\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { accuracyBy, calibrateThreshold, checkpoint, route } from \"./reviewRouting.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// Accuracy per document type and field, next to the overall figure.\nconst rec = (doc_type: string, field: string, correct: boolean) => ({ doc_type, field, correct });\nconst records = [...Array(90).fill(rec(\"invoice\", \"total\", true)), ...Array(8).fill(rec(\"receipt\", \"date\", true)), ...Array(2).fill(rec(\"receipt\", \"date\", false))];\nconsole.log(\"accuracy:\", JSON.stringify(accuracyBy(records)));\n\n// The lowest confidence at which the model still reaches the target accuracy, from labelled outcomes.\nconst labeled: Array<[number, boolean]> = [[95, true], [90, true], [85, true], [80, false], [60, false]];\nconsole.log(\"threshold for 90% accuracy:\", calibrateThreshold(labeled, 90));\n\n// Which extractions a person reviews: conflicts and low confidence first, up to the capacity.\nconst extractions = [{ id: \"x1\", confidence: 95, conflict: false }, { id: \"x2\", confidence: 60, conflict: false },\n  { id: \"x3\", confidence: 90, conflict: true }, { id: \"x4\", confidence: 70, conflict: false }];\nconsole.log(\"routing:\", JSON.stringify(route(extractions, 80, 2)));\nconsole.log(\"checkpoints:\", checkpoint(\"send_payment\", 5), checkpoint(\"update_note\", 50));\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "import { logger } from \"./logger.ts\";\nconst log = logger(\"review_routing\");\n/** Human review without fooling yourself: accuracy by segment, the decision to automate, a calibrated confidence threshold, a stratified sample, review routing within capacity, and checkpoints for irreversible actions. See ../../statement.md. */\n\nexport const IRREVERSIBLE = [\"delete_records\", \"send_payment\", \"close_account\"];\n\nconst percent = (correct: number, total: number): number => Math.floor((200 * correct + total) / (2 * total));\n\nexport function accuracyBy(records: any[]): any[] {\n  log.debug(\"accuracyBy input\", records);\n  const groups = new Map<string, [number, number]>();\n  for (const r of records) {\n    const key = `${r.doc_type}/${r.field}`;\n    const [c, t] = groups.get(key) ?? [0, 0];\n    groups.set(key, [c + (r.correct ? 1 : 0), t + 1]);\n  }\n  let correct = 0;\n  let total = 0;\n  for (const [c, t] of groups.values()) {\n    correct += c;\n    total += t;\n  }\n  const out: any[] = [{ segment: \"overall\", correct, total, percent: total ? percent(correct, total) : 0 }];\n  // TODO 1 of 7 (finish this to pass m1, e1): the segment rows. After the overall row, add one row for each segment\n  //   (\"doc_type/field\"), sorted by name, with its correct count, its total and the rounded percent. Example:\n  //   invoice/total 8 of 10 -> {segment: invoice/total, correct 8, total 10, percent 80}.\n  for (const name of [...groups.keys()].sort()) {\n    const [c, t] = groups.get(name)!;\n    out.push({ segment: name, correct: c, total: t, percent: out[0].percent });\n  }\n  return out;\n}\n\nexport function canAutomate(records: any[], threshold: number, minN: number): { automate: boolean; failing: string[]; undersampled: string[] } {\n  const failing: string[] = [];\n  const undersampled: string[] = [];\n  const segments = accuracyBy(records).slice(1);\n  for (const s of segments) {\n    // TODO 2 of 7 (finish this to pass e2): the sort of the segments. For each segment (not the overall row): when its\n    //   total is below min_n it is undersampled; otherwise when its percent is below the threshold it is failing. Example:\n    //   min_n 5, segment with 4 records -> undersampled; 5 records at 70 percent, threshold 90 -> failing.\n  }\n  return { automate: segments.length > 0 && failing.length === 0 && undersampled.length === 0, failing, undersampled };\n}\n\nexport function calibrateThreshold(labeled: Array<[number, boolean]>, target: number): number | null {\n  // TODO 3 of 7 (finish this to pass e3, e4): the threshold. Receives the labelled items (confidence, correct) and the\n  //   target precision in percent. Try each distinct confidence from the lowest; return the first for which the items at\n  //   or above it are right at least target percent of the time; return none when no level does. Example: target 90 and no\n  //   level reaches it -> none.\n  return 0;\n}\n\nexport function stratifiedSample(items: any[], perStratum: number): string[] {\n  const strata: string[] = [];\n  for (const item of items) if (!strata.includes(item.stratum)) strata.push(item.stratum);\n  const chosen: string[] = [];\n  for (const stratum of strata) {\n    const members = items.filter((i) => i.stratum === stratum).sort((a, b) => a.rank - b.rank || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));\n    // TODO 4 of 7 (finish this to pass e5): the sample of one stratum. `members` are the stratum's items sorted by rank\n    //   then id. Take only the first per_stratum of them and add their ids. Example: 5 items, per_stratum 2 -> the 2 best\n    //   ranked.\n    chosen.push(...members.map((i) => i.id));\n  }\n  return chosen;\n}\n\nexport function route(extractions: any[], threshold: number, capacity: number): { review: string[]; backlog: string[]; auto: string[] } {\n  const priority = (e: any) => (e.conflict ? 0 : e.confidence);\n  // TODO 5 of 7 (finish this to pass e6): the review queue. Keep the extractions that have a conflict or a confidence\n  //   below the threshold, ordered with conflicts first, then by confidence (lowest first), then by id. Example: threshold\n  //   80, a conflict, a 60 and a 90 -> the conflict, then the 60.\n  const candidates = [...extractions];\n  const queue = candidates.map((e) => e.id);\n  const flagged = new Set(queue);\n  // TODO 6 of 7 (finish this to pass e7): the capacity cut. Split the queue: the first `capacity` ids go to review, the\n  //   others to the backlog, both in order. Example: queue [a, b, c], capacity 2 -> review [a, b], backlog [c].\n  return { review: queue, backlog: [], auto: extractions.filter((e) => !flagged.has(e.id)).map((e) => e.id) };\n}\n\nexport function checkpoint(action: string, amount: number, limit = 1000): string {\n  // TODO 7 of 7 (finish this to pass e8): the checkpoint. Receives the action, the amount and the limit. Return human\n  //   when the action is in IRREVERSIBLE or the amount is above the limit, otherwise auto. Example: close_account for 10\n  //   -> human.\n  return \"auto\";\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { accuracyBy, calibrateThreshold, checkpoint, route } from \"./reviewRouting.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// Accuracy per document type and field, next to the overall figure.\nconst rec = (doc_type: string, field: string, correct: boolean) => ({ doc_type, field, correct });\nconst records = [...Array(90).fill(rec(\"invoice\", \"total\", true)), ...Array(8).fill(rec(\"receipt\", \"date\", true)), ...Array(2).fill(rec(\"receipt\", \"date\", false))];\nconsole.log(\"accuracy:\", JSON.stringify(accuracyBy(records)));\n\n// The lowest confidence at which the model still reaches the target accuracy, from labelled outcomes.\nconst labeled: Array<[number, boolean]> = [[95, true], [90, true], [85, true], [80, false], [60, false]];\nconsole.log(\"threshold for 90% accuracy:\", calibrateThreshold(labeled, 90));\n\n// Which extractions a person reviews: conflicts and low confidence first, up to the capacity.\nconst extractions = [{ id: \"x1\", confidence: 95, conflict: false }, { id: \"x2\", confidence: 60, conflict: false },\n  { id: \"x3\", confidence: 90, conflict: true }, { id: \"x4\", confidence: 70, conflict: false }];\nconsole.log(\"routing:\", JSON.stringify(route(extractions, 80, 2)));\nconsole.log(\"checkpoints:\", checkpoint(\"send_payment\", 5), checkpoint(\"update_note\", 50));\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "b8b366844f5496e47181469030676241969b41d1bce775a2e311c81003d9bc63",
+  "starting_code": "import { logger } from \"./logger.ts\";\nconst log = logger(\"review_routing\");\n/** Human review without fooling yourself: accuracy by segment, the decision to automate, a calibrated confidence threshold, a stratified sample, review routing within capacity, and checkpoints for irreversible actions. See ../../statement.md. */\n\nexport const IRREVERSIBLE = [\"delete_records\", \"send_payment\", \"close_account\"];\n\nconst percent = (correct: number, total: number): number => Math.floor((200 * correct + total) / (2 * total));\n\nexport function accuracyBy(records: any[]): any[] {\n  log.debug(\"accuracyBy input\", records);\n  const groups = new Map<string, [number, number]>();\n  for (const r of records) {\n    const key = `${r.doc_type}/${r.field}`;\n    const [c, t] = groups.get(key) ?? [0, 0];\n    groups.set(key, [c + (r.correct ? 1 : 0), t + 1]);\n  }\n  let correct = 0;\n  let total = 0;\n  for (const [c, t] of groups.values()) {\n    correct += c;\n    total += t;\n  }\n  const out: any[] = [{ segment: \"overall\", correct, total, percent: total ? percent(correct, total) : 0 }];\n  // TODO 1 of 7 (finish this to pass m1, e1): the segment rows. After the overall row, add one row for each segment\n  //   (\"doc_type/field\"), sorted by name, with its correct count, its total and the rounded percent. Example:\n  //   invoice/total 8 of 10 -> {segment: invoice/total, correct 8, total 10, percent 80}.\n  for (const name of [...groups.keys()].sort()) {\n    const [c, t] = groups.get(name)!;\n    out.push({ segment: name, correct: c, total: t, percent: out[0].percent });\n  }\n  return out;\n}\n\nexport function canAutomate(records: any[], threshold: number, minN: number): { automate: boolean; failing: string[]; undersampled: string[] } {\n  const failing: string[] = [];\n  const undersampled: string[] = [];\n  const segments = accuracyBy(records).slice(1);\n  for (const s of segments) {\n    // TODO 2 of 7 (finish this to pass e2): the sort of the segments. For each segment (not the overall row): when its\n    //   total is below min_n it is undersampled; otherwise when its percent is below the threshold it is failing. Example:\n    //   min_n 5, segment with 4 records -> undersampled; 5 records at 70 percent, threshold 90 -> failing.\n  }\n  return { automate: segments.length > 0 && failing.length === 0 && undersampled.length === 0, failing, undersampled };\n}\n\nexport function calibrateThreshold(labeled: Array<[number, boolean]>, target: number): number | null {\n  // TODO 3 of 7 (finish this to pass e3, e4): the threshold. Receives the labelled items (confidence, correct) and the\n  //   target precision in percent. Try each distinct confidence from the lowest; return the first for which the items at\n  //   or above it are right at least target percent of the time; return none when no level does. Example: target 90 and no\n  //   level reaches it -> none.\n  return 0;\n}\n\nexport function stratifiedSample(items: any[], perStratum: number): string[] {\n  const strata: string[] = [];\n  for (const item of items) if (!strata.includes(item.stratum)) strata.push(item.stratum);\n  const chosen: string[] = [];\n  for (const stratum of strata) {\n    const members = items.filter((i) => i.stratum === stratum).sort((a, b) => a.rank - b.rank || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));\n    // TODO 4 of 7 (finish this to pass e5): the sample of one stratum. `members` are the stratum's items sorted by rank\n    //   then id. Take only the first per_stratum of them and add their ids. Example: 5 items, per_stratum 2 -> the 2 best\n    //   ranked.\n    chosen.push(...members.map((i) => i.id));\n  }\n  return chosen;\n}\n\nexport function route(extractions: any[], threshold: number, capacity: number): { review: string[]; backlog: string[]; auto: string[] } {\n  const priority = (e: any) => (e.conflict ? 0 : e.confidence);\n  // TODO 5 of 7 (finish this to pass e6): the review queue. Keep the extractions that have a conflict or a confidence\n  //   below the threshold, ordered with conflicts first, then by confidence (lowest first), then by id. Example: threshold\n  //   80, a conflict, a 60 and a 90 -> the conflict, then the 60.\n  const candidates = [...extractions];\n  const queue = candidates.map((e) => e.id);\n  const flagged = new Set(queue);\n  // TODO 6 of 7 (finish this to pass e7): the capacity cut. Split the queue: the first `capacity` ids go to review, the\n  //   others to the backlog, both in order. Example: queue [a, b, c], capacity 2 -> review [a, b], backlog [c].\n  return { review: queue, backlog: [], auto: extractions.filter((e) => !flagged.has(e.id)).map((e) => e.id) };\n}\n\nexport function checkpoint(action: string, amount: number, limit = 1000): string {\n  // TODO 7 of 7 (finish this to pass e8): the checkpoint. Receives the action, the amount and the limit. Return human\n  //   when the action is in IRREVERSIBLE or the amount is above the limit, otherwise auto. Example: close_account for 10\n  //   -> human.\n  return \"auto\";\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/68-human-review-and-calibrated-confidence/prose/unit-02/practice-2/reviewRouting.ts",
+    "test_path": "practice/level-3/68-human-review-and-calibrated-confidence/prose/unit-02/practice-2/reviewRouting.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-3/68-human-review-and-calibrated-confidence/prose/unit-02/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-3/68-human-review-and-calibrated-confidence/prose/unit-02/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-3/68-human-review-and-calibrated-confidence/prose/unit-02/practice-2/reviewRouting.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 accuracy is reported per document type and field next to the overall figure",
+        "kind": "main",
+        "says": "Accuracy is reported per document type and field next to the overall figure"
+      },
+      {
+        "id": "e1 a weak segment is hidden by a high overall figure and found by the breakdown",
+        "kind": "edge",
+        "says": "A weak segment is hidden by a high overall figure and found by the breakdown"
+      },
+      {
+        "id": "e2 automation needs every segment to pass and enough samples in each",
+        "kind": "edge",
+        "says": "Automation needs every segment to pass and enough samples in each"
+      },
+      {
+        "id": "e3 the threshold is the lowest confidence whose accepted items meet the target precision",
+        "kind": "edge",
+        "says": "The threshold is the lowest confidence whose accepted items meet the target precision"
+      },
+      {
+        "id": "e4 no threshold exists when no confidence level meets the target",
+        "kind": "edge",
+        "says": "No threshold exists when no confidence level meets the target"
+      },
+      {
+        "id": "e5 the stratified sample takes the best ranked items of every stratum",
+        "kind": "edge",
+        "says": "The stratified sample takes the best ranked items of every stratum"
+      },
+      {
+        "id": "e6 low confidence and conflicts go to review with the weakest first",
+        "kind": "edge",
+        "says": "Low confidence and conflicts go to review with the weakest first"
+      },
+      {
+        "id": "e7 review capacity is respected and the rest wait in a backlog",
+        "kind": "edge",
+        "says": "Review capacity is respected and the rest wait in a backlog"
+      },
+      {
+        "id": "e8 an irreversible action needs a person whatever the confidence",
+        "kind": "edge",
+        "says": "An irreversible action needs a person whatever the confidence"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/68-human-review-and-calibrated-confidence/prose/unit-02/practice-2/target/report.xml"
+    },
+    "origin": "course/68-human-review-and-calibrated-confidence/02-routing-review-checkpoints-and-the-practice.md",
+    "concepts": [
+      "the practice of Routing review, checkpoints for irreversible actions, and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/68-human-review-and-calibrated-confidence/prose/unit-02/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "human-review-and-calibrated-confidence-u2"
+}

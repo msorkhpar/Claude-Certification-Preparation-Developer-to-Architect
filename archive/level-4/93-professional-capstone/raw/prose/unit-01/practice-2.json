@@ -1,0 +1,445 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "93-professional-capstone"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: a launch review (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a launch review"
+    },
+    {
+      "type": "para",
+      "text": "A team brings a design to the architecture board: a claims assistant that reads policy documents, answers customers and passes the costly decisions to a person. The board does not read the whole design again each time. It runs a review that turns the design into findings, groups them by the seven domains of the Professional exam and returns one verdict. In this practice you write that review. The model is not called: the tests give you a design as a set of facts (flags) and a set of numbers, and you return findings. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`launch_review`, `verdict`, `scorecard`, `needed_accuracy`); TypeScript has the camel-case names (`launchReview`, `neededAccuracy`); Java has the same camel-case names as static methods of `LaunchReview`; Kotlin has top-level functions. The flags are a set of strings and the numbers are a map from a name to a whole number; a missing number counts as 0."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working review with eight gaps cut out of it. The plumbing is written: the `add` function that records a finding, the call of every domain's rules in turn, and the rules of the domains P2, P6 and P7. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks; a gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_p1_rules` unlocks `e1`, `e4` and `e7`: the three rules of domain P1.",
+        "`_p3_rules` unlocks `e4` and `e8`: the four rules of domain P3.",
+        "`_p4_rules` unlocks `e1`, `e3` and `e4`: the four rules of domain P4.",
+        "`_p5_rules` unlocks `e4`, `e7` and `e8`: the five rules of domain P5.",
+        "`_order` unlocks `e3`: severity, then domain, then rule id.",
+        "`verdict` unlocks `e1` and `e2`: reject, revise or approve.",
+        "`scorecard` unlocks `e5`: the seven domain counts.",
+        "`needed_accuracy` unlocks `m1` and `e6`: the break-even accuracy, rounded up on the cost side."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole review."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`launch_review(flags, numbers)` returns the findings, each a string `<severity> <domain> <rule>` such as `high P1 missing-feedback`. The findings run from high to medium to low, then by domain (P1 to P7), then by rule id in alphabetical order. The 22 rules are in the table below.",
+        "`verdict(findings)` returns `reject` when any finding is high, `revise` when none is high and any is medium, and `approve` otherwise, so a design with only low findings is approved.",
+        "`scorecard(findings)` returns a list of seven counts, the findings of P1, P2, P3, P4, P5, P6 and P7 in that order.",
+        "`needed_accuracy(error_cost, review_cost)` returns the accuracy in whole percent above which a design should let answers go out without a check: 100 minus the review cost as a percent of the error cost, with that percent rounded up, and never below 0. It returns 0 when an error costs nothing or less."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The rules"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Domain",
+        "Rule id",
+        "Severity",
+        "Fires when"
+      ],
+      "rows": [
+        [
+          "P1",
+          "`missing-feedback`",
+          "high",
+          "the flag `feedback_loop` is absent"
+        ],
+        [
+          "P1",
+          "`autonomy-without-need`",
+          "medium",
+          "`agent` or `team` is present and `path_known` is present"
+        ],
+        [
+          "P1",
+          "`team-below-price`",
+          "medium",
+          "`team` is present and `team_value_chats` is below 15"
+        ],
+        [
+          "P2",
+          "`volatile-prefix`",
+          "medium",
+          "`volatile_prefix` is present"
+        ],
+        [
+          "P2",
+          "`model-not-measured`",
+          "low",
+          "`model_measured` is absent"
+        ],
+        [
+          "P3",
+          "`filter-after-ranking`",
+          "high",
+          "`filter_after_ranking` is present"
+        ],
+        [
+          "P3",
+          "`stale-index`",
+          "high",
+          "`replace_on_change` is absent"
+        ],
+        [
+          "P3",
+          "`tool-bloat`",
+          "medium",
+          "`tool_tokens` is above 10000 and `deferral` is absent"
+        ],
+        [
+          "P3",
+          "`agent-rights-only`",
+          "high",
+          "`agent_rights_only` is present"
+        ],
+        [
+          "P4",
+          "`no-protected-segment`",
+          "medium",
+          "`protected_segment` is absent"
+        ],
+        [
+          "P4",
+          "`small-eval-set`",
+          "low",
+          "`eval_cases` is below 20"
+        ],
+        [
+          "P4",
+          "`no-way-back`",
+          "high",
+          "`rollback` is absent"
+        ],
+        [
+          "P4",
+          "`big-bang-rollout`",
+          "medium",
+          "`rollout_stages` is below 3"
+        ],
+        [
+          "P5",
+          "`identifiers-reach-model`",
+          "high",
+          "`pii_reaches_model` is present"
+        ],
+        [
+          "P5",
+          "`residency-unmet`",
+          "high",
+          "`residency_unmet` is present"
+        ],
+        [
+          "P5",
+          "`audit-keeps-content`",
+          "medium",
+          "`audit_keeps_content` is present"
+        ],
+        [
+          "P5",
+          "`irreversible-without-person`",
+          "high",
+          "`irreversible_action` is present and `human_step` is absent"
+        ],
+        [
+          "P5",
+          "`retention-outside-window`",
+          "medium",
+          "`retain_days` is below `floor_days` or above `ceiling_days`"
+        ],
+        [
+          "P6",
+          "`no-accountable-owner`",
+          "medium",
+          "`owner` is absent"
+        ],
+        [
+          "P6",
+          "`sla-without-numbers`",
+          "medium",
+          "`latency_ms` is 0 or less, or `availability_tenths` is 0 or less"
+        ],
+        [
+          "P6",
+          "`accuracy-unstated`",
+          "low",
+          "`accuracy_stated` is absent"
+        ],
+        [
+          "P7",
+          "`unmanaged-team-settings`",
+          "medium",
+          "`team_size` is above 10 and `managed_settings` is absent"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**A design at the limits.** *You should see* a design that sits exactly on every threshold get no findings and an approval.",
+        "**High findings.** *You should see* one missing feedback loop, one filter after ranking or one missing way back reject the design.",
+        "**The verdict ladder.** *You should see* a medium finding ask for a revision and low findings alone pass.",
+        "**A stable order.** *You should see* severity first, then domain, then rule id, so two reviews of the same design read the same.",
+        "**Thresholds with an edge.** *You should see* each number pass exactly at its value and fail one step beyond it.",
+        "**The scorecard.** *You should see* the seven counts, with zero for a domain that has no finding.",
+        "**The accuracy a design needs.** *You should see* 98 for an error that costs 250 against a check that costs 5, 66 when three is the error cost and one the check, and 0 when a check costs as much as an error.",
+        "**Rules with a second fact.** *You should see* a rule stay quiet when its second fact is missing.",
+        "**Every flaw at once.** *You should see* all 22 findings for a design that breaks every rule."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A design that sits exactly at every threshold has no findings and is approved"
+        ],
+        [
+          "`e1`",
+          "A missing feedback loop, a filter after ranking or no way back is a high finding and the design is rejected"
+        ],
+        [
+          "`e2`",
+          "Medium findings revise the design and low findings alone approve it"
+        ],
+        [
+          "`e3`",
+          "Findings are ordered by severity, then domain, then rule id"
+        ],
+        [
+          "`e4`",
+          "Each numeric threshold passes exactly at its value and fails one step beyond"
+        ],
+        [
+          "`e5`",
+          "The scorecard counts the findings of each domain from P1 to P7"
+        ],
+        [
+          "`e6`",
+          "The accuracy a design needs is the break-even rounded up from the two costs"
+        ],
+        [
+          "`e7`",
+          "Rules that depend on a second fact fire only when both hold"
+        ],
+        [
+          "`e8`",
+          "Retrieval and privacy flaws are high findings in domains P3 and P5"
+        ],
+        [
+          "`e9`",
+          "A design with every flaw gets all 22 findings and a scorecard that adds up"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "/** Launch review: the findings of a design against the seven domains, the verdict, the scorecard and the accuracy a design needs. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"launch_review\");\n\nconst SEVERITY: Record<string, number> = { high: 0, medium: 1, low: 2 };\nconst DOMAINS = [\"P1\", \"P2\", \"P3\", \"P4\", \"P5\", \"P6\", \"P7\"];\n\ntype Add = (condition: boolean, severity: string, domain: string, rule: string) => void;\ntype Numbers = Record<string, number>;\n\nfunction p1Rules(f: Set<string>, n: Numbers, add: Add): void {\n  add(!f.has(\"feedback_loop\"), \"high\", \"P1\", \"missing-feedback\");\n  add((f.has(\"agent\") || f.has(\"team\")) && f.has(\"path_known\"), \"medium\", \"P1\", \"autonomy-without-need\");\n  add(f.has(\"team\") && (n[\"team_value_chats\"] ?? 0) < 15, \"medium\", \"P1\", \"team-below-price\");\n}\n\nfunction p3Rules(f: Set<string>, n: Numbers, add: Add): void {\n  add(f.has(\"filter_after_ranking\"), \"high\", \"P3\", \"filter-after-ranking\");\n  add(!f.has(\"replace_on_change\"), \"high\", \"P3\", \"stale-index\");\n  add((n[\"tool_tokens\"] ?? 0) > 10000 && !f.has(\"deferral\"), \"medium\", \"P3\", \"tool-bloat\");\n  add(f.has(\"agent_rights_only\"), \"high\", \"P3\", \"agent-rights-only\");\n}\n\nfunction p4Rules(f: Set<string>, n: Numbers, add: Add): void {\n  add(!f.has(\"protected_segment\"), \"medium\", \"P4\", \"no-protected-segment\");\n  add((n[\"eval_cases\"] ?? 0) < 20, \"low\", \"P4\", \"small-eval-set\");\n  add(!f.has(\"rollback\"), \"high\", \"P4\", \"no-way-back\");\n  add((n[\"rollout_stages\"] ?? 0) < 3, \"medium\", \"P4\", \"big-bang-rollout\");\n}\n\nfunction p5Rules(f: Set<string>, n: Numbers, add: Add): void {\n  add(f.has(\"pii_reaches_model\"), \"high\", \"P5\", \"identifiers-reach-model\");\n  add(f.has(\"residency_unmet\"), \"high\", \"P5\", \"residency-unmet\");\n  add(f.has(\"audit_keeps_content\"), \"medium\", \"P5\", \"audit-keeps-content\");\n  add(f.has(\"irreversible_action\") && !f.has(\"human_step\"), \"high\", \"P5\", \"irreversible-without-person\");\n  add((n[\"retain_days\"] ?? 0) < (n[\"floor_days\"] ?? 0) || (n[\"retain_days\"] ?? 0) > (n[\"ceiling_days\"] ?? 0), \"medium\", \"P5\", \"retention-outside-window\");\n}\n\nfunction p2Rules(f: Set<string>, n: Numbers, add: Add): void {\n  add(f.has(\"volatile_prefix\"), \"medium\", \"P2\", \"volatile-prefix\");\n  add(!f.has(\"model_measured\"), \"low\", \"P2\", \"model-not-measured\");\n}\n\nfunction p6Rules(f: Set<string>, n: Numbers, add: Add): void {\n  add(!f.has(\"owner\"), \"medium\", \"P6\", \"no-accountable-owner\");\n  add((n[\"latency_ms\"] ?? 0) <= 0 || (n[\"availability_tenths\"] ?? 0) <= 0, \"medium\", \"P6\", \"sla-without-numbers\");\n  add(!f.has(\"accuracy_stated\"), \"low\", \"P6\", \"accuracy-unstated\");\n}\n\nfunction p7Rules(f: Set<string>, n: Numbers, add: Add): void {\n  add((n[\"team_size\"] ?? 0) > 10 && !f.has(\"managed_settings\"), \"medium\", \"P7\", \"unmanaged-team-settings\");\n}\n\nfunction order(found: string[]): string[] {\n  const part = (s: string, i: number) => s.split(\" \")[i];\n  return found.sort((a, b) => SEVERITY[part(a, 0)] - SEVERITY[part(b, 0)] || (part(a, 1) < part(b, 1) ? -1 : part(a, 1) > part(b, 1) ? 1 : 0) || (part(a, 2) < part(b, 2) ? -1 : part(a, 2) > part(b, 2) ? 1 : 0));\n}\n\n/** The findings, each \"<severity> <domain> <rule>\", high first, then by domain, then by rule. */\nexport function launchReview(flags: Set<string>, numbers: Record<string, number>): string[] {\n  log.debug(\"launchReview input\", [...flags].sort());\n  const f = new Set(flags);\n  const n = { ...numbers };\n  const found: string[] = [];\n  const add: Add = (condition, severity, domain, rule) => {\n    if (condition) found.push(`${severity} ${domain} ${rule}`);\n  };\n  for (const rules of [p1Rules, p2Rules, p3Rules, p4Rules, p5Rules, p6Rules, p7Rules]) rules(f, n, add);\n  return order(found);\n}\n\n/** reject for any high finding, revise for any medium one, otherwise approve. */\nexport function verdict(findings: string[]): string {\n  if (findings.some((x) => x.startsWith(\"high \"))) return \"reject\";\n  if (findings.some((x) => x.startsWith(\"medium \"))) return \"revise\";\n  return \"approve\";\n}\n\n/** The number of findings in each domain, P1 to P7. */\nexport function scorecard(findings: string[]): number[] {\n  return DOMAINS.map((d) => findings.filter((x) => x.split(\" \")[1] === d).length);\n}\n\n/** The break-even accuracy in whole percent, rounded up on the cost side; 0 when an error costs nothing or no more than a check. */\nexport function neededAccuracy(errorCost: number, reviewCost: number): number {\n  if (errorCost <= 0) return 0;\n  const needed = Math.ceil((100 * reviewCost) / errorCost);\n  return Math.max(0, 100 - needed);\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { launchReview, neededAccuracy, scorecard, verdict } from \"./launchReview.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// A design that sits at every threshold of the review, as the tests' clean design does.\nconst cleanFlags = [\"feedback_loop\", \"model_measured\", \"replace_on_change\", \"deferral\", \"protected_segment\", \"rollback\", \"human_step\", \"owner\",\n  \"accuracy_stated\", \"managed_settings\", \"irreversible_action\", \"team\"];\nconst numbers = { team_value_chats: 15, tool_tokens: 10000, eval_cases: 20, rollout_stages: 3, retain_days: 365, floor_days: 90,\n  ceiling_days: 365, team_size: 10, latency_ms: 2000, availability_tenths: 995 };\n\nconst findings = launchReview(new Set(cleanFlags), numbers);\nconsole.log(\"clean design:\", findings, \"->\", verdict(findings));\n\n// The same design with an agent that does not need to be one, and PII reaching the model.\nconst risky = launchReview(new Set([...cleanFlags, \"agent\", \"path_known\", \"pii_reaches_model\"]), numbers);\nconsole.log(\"risky design:\", risky, \"->\", verdict(risky));\nconsole.log(\"findings per domain:\", scorecard(risky));\nconsole.log(\"accuracy needed when an error costs 250 and a review 5:\", neededAccuracy(250, 5));\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "/** Launch review: the findings of a design against the seven domains, the verdict, the scorecard and the accuracy a design needs. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"launch_review\");\n\nconst SEVERITY: Record<string, number> = { high: 0, medium: 1, low: 2 };\nconst DOMAINS = [\"P1\", \"P2\", \"P3\", \"P4\", \"P5\", \"P6\", \"P7\"];\n\ntype Add = (condition: boolean, severity: string, domain: string, rule: string) => void;\ntype Numbers = Record<string, number>;\n\n/**\n * TODO 1 of 8 (unlocks e1, e4 and e7): the rules of domain P1.\n * Receives the flags and the numbers and reports each rule it finds through `add`. The rules: missing-feedback, autonomy-without-need and team-below-price from the statement's table. Example: missing-feedback: the flag feedback_loop is absent -> one finding `high P1 missing-feedback`.\n */\nfunction p1Rules(f: Set<string>, n: Numbers, add: Add): void {\n}\n\n/**\n * TODO 2 of 8 (unlocks e4 and e8): the rules of domain P3.\n * Receives the flags and the numbers and reports each rule it finds through `add`. The rules: filter-after-ranking, stale-index, tool-bloat and agent-rights-only. Example: stale-index: the flag replace_on_change is absent -> one finding `high P3 stale-index`.\n */\nfunction p3Rules(f: Set<string>, n: Numbers, add: Add): void {\n}\n\n/**\n * TODO 3 of 8 (unlocks e1, e3 and e4): the rules of domain P4.\n * Receives the flags and the numbers and reports each rule it finds through `add`. The rules: no-protected-segment, small-eval-set, no-way-back and big-bang-rollout. Example: no-way-back: the flag rollback is absent -> one finding `high P4 no-way-back`.\n */\nfunction p4Rules(f: Set<string>, n: Numbers, add: Add): void {\n}\n\n/**\n * TODO 4 of 8 (unlocks e4, e7 and e8): the rules of domain P5.\n * Receives the flags and the numbers and reports each rule it finds through `add`. The rules: identifiers-reach-model, residency-unmet, audit-keeps-content, irreversible-without-person and retention-outside-window. Example: irreversible-without-person: irreversible_action present and human_step absent -> `high P5 irreversible-without-person`.\n */\nfunction p5Rules(f: Set<string>, n: Numbers, add: Add): void {\n}\n\nfunction p2Rules(f: Set<string>, n: Numbers, add: Add): void {\n  add(f.has(\"volatile_prefix\"), \"medium\", \"P2\", \"volatile-prefix\");\n  add(!f.has(\"model_measured\"), \"low\", \"P2\", \"model-not-measured\");\n}\n\nfunction p6Rules(f: Set<string>, n: Numbers, add: Add): void {\n  add(!f.has(\"owner\"), \"medium\", \"P6\", \"no-accountable-owner\");\n  add((n[\"latency_ms\"] ?? 0) <= 0 || (n[\"availability_tenths\"] ?? 0) <= 0, \"medium\", \"P6\", \"sla-without-numbers\");\n  add(!f.has(\"accuracy_stated\"), \"low\", \"P6\", \"accuracy-unstated\");\n}\n\nfunction p7Rules(f: Set<string>, n: Numbers, add: Add): void {\n  add((n[\"team_size\"] ?? 0) > 10 && !f.has(\"managed_settings\"), \"medium\", \"P7\", \"unmanaged-team-settings\");\n}\n\n/**\n * TODO 5 of 8 (unlocks e3): order the findings.\n * Receives the findings. Returns them ordered by severity (high, medium, low), then by domain, then by rule id in alphabetical order. Example: low P2 a, high P6 z, high P1 y -> high P1 y, high P6 z, low P2 a\n */\nfunction order(found: string[]): string[] {\n  return found;\n}\n\n/** The findings, each \"<severity> <domain> <rule>\", high first, then by domain, then by rule. */\nexport function launchReview(flags: Set<string>, numbers: Record<string, number>): string[] {\n  log.debug(\"launchReview input\", [...flags].sort());\n  const f = new Set(flags);\n  const n = { ...numbers };\n  const found: string[] = [];\n  const add: Add = (condition, severity, domain, rule) => {\n    if (condition) found.push(`${severity} ${domain} ${rule}`);\n  };\n  for (const rules of [p1Rules, p2Rules, p3Rules, p4Rules, p5Rules, p6Rules, p7Rules]) rules(f, n, add);\n  return order(found);\n}\n\n/**\n * TODO 6 of 8 (unlocks e1 and e2): the verdict.\n * Receives the findings. Returns `reject` when any is high, `revise` when none is high and any is medium, `approve` otherwise. Example: [low P2 a] -> approve\n */\nexport function verdict(findings: string[]): string {\n  return \"\";\n}\n\n/**\n * TODO 7 of 8 (unlocks e5): the scorecard.\n * Receives the findings. Returns the seven counts of the findings of P1 to P7 in that order. Example: [high P1 a, low P7 c] -> [1, 0, 0, 0, 0, 0, 1]\n */\nexport function scorecard(findings: string[]): number[] {\n  return [];\n}\n\n/**\n * TODO 8 of 8 (unlocks m1 and e6): the accuracy a design needs.\n * Receives the cost of an error and the cost of a check. Returns 100 minus the check cost as a percent of the error cost, the percent rounded up, never below 0, and 0 when an error costs nothing or less. Example: neededAccuracy(250, 5) -> 98\n */\nexport function neededAccuracy(errorCost: number, reviewCost: number): number {\n  return -1;\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { launchReview, neededAccuracy, scorecard, verdict } from \"./launchReview.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// A design that sits at every threshold of the review, as the tests' clean design does.\nconst cleanFlags = [\"feedback_loop\", \"model_measured\", \"replace_on_change\", \"deferral\", \"protected_segment\", \"rollback\", \"human_step\", \"owner\",\n  \"accuracy_stated\", \"managed_settings\", \"irreversible_action\", \"team\"];\nconst numbers = { team_value_chats: 15, tool_tokens: 10000, eval_cases: 20, rollout_stages: 3, retain_days: 365, floor_days: 90,\n  ceiling_days: 365, team_size: 10, latency_ms: 2000, availability_tenths: 995 };\n\nconst findings = launchReview(new Set(cleanFlags), numbers);\nconsole.log(\"clean design:\", findings, \"->\", verdict(findings));\n\n// The same design with an agent that does not need to be one, and PII reaching the model.\nconst risky = launchReview(new Set([...cleanFlags, \"agent\", \"path_known\", \"pii_reaches_model\"]), numbers);\nconsole.log(\"risky design:\", risky, \"->\", verdict(risky));\nconsole.log(\"findings per domain:\", scorecard(risky));\nconsole.log(\"accuracy needed when an error costs 250 and a review 5:\", neededAccuracy(250, 5));\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 5,
+    "code": 2,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "2cd7ee2c16650993fb8339668e24ae48e5dbaf686dd301d1eb6728e8cfdddeb8",
+  "starting_code": "/** Launch review: the findings of a design against the seven domains, the verdict, the scorecard and the accuracy a design needs. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"launch_review\");\n\nconst SEVERITY: Record<string, number> = { high: 0, medium: 1, low: 2 };\nconst DOMAINS = [\"P1\", \"P2\", \"P3\", \"P4\", \"P5\", \"P6\", \"P7\"];\n\ntype Add = (condition: boolean, severity: string, domain: string, rule: string) => void;\ntype Numbers = Record<string, number>;\n\n/**\n * TODO 1 of 8 (unlocks e1, e4 and e7): the rules of domain P1.\n * Receives the flags and the numbers and reports each rule it finds through `add`. The rules: missing-feedback, autonomy-without-need and team-below-price from the statement's table. Example: missing-feedback: the flag feedback_loop is absent -> one finding `high P1 missing-feedback`.\n */\nfunction p1Rules(f: Set<string>, n: Numbers, add: Add): void {\n}\n\n/**\n * TODO 2 of 8 (unlocks e4 and e8): the rules of domain P3.\n * Receives the flags and the numbers and reports each rule it finds through `add`. The rules: filter-after-ranking, stale-index, tool-bloat and agent-rights-only. Example: stale-index: the flag replace_on_change is absent -> one finding `high P3 stale-index`.\n */\nfunction p3Rules(f: Set<string>, n: Numbers, add: Add): void {\n}\n\n/**\n * TODO 3 of 8 (unlocks e1, e3 and e4): the rules of domain P4.\n * Receives the flags and the numbers and reports each rule it finds through `add`. The rules: no-protected-segment, small-eval-set, no-way-back and big-bang-rollout. Example: no-way-back: the flag rollback is absent -> one finding `high P4 no-way-back`.\n */\nfunction p4Rules(f: Set<string>, n: Numbers, add: Add): void {\n}\n\n/**\n * TODO 4 of 8 (unlocks e4, e7 and e8): the rules of domain P5.\n * Receives the flags and the numbers and reports each rule it finds through `add`. The rules: identifiers-reach-model, residency-unmet, audit-keeps-content, irreversible-without-person and retention-outside-window. Example: irreversible-without-person: irreversible_action present and human_step absent -> `high P5 irreversible-without-person`.\n */\nfunction p5Rules(f: Set<string>, n: Numbers, add: Add): void {\n}\n\nfunction p2Rules(f: Set<string>, n: Numbers, add: Add): void {\n  add(f.has(\"volatile_prefix\"), \"medium\", \"P2\", \"volatile-prefix\");\n  add(!f.has(\"model_measured\"), \"low\", \"P2\", \"model-not-measured\");\n}\n\nfunction p6Rules(f: Set<string>, n: Numbers, add: Add): void {\n  add(!f.has(\"owner\"), \"medium\", \"P6\", \"no-accountable-owner\");\n  add((n[\"latency_ms\"] ?? 0) <= 0 || (n[\"availability_tenths\"] ?? 0) <= 0, \"medium\", \"P6\", \"sla-without-numbers\");\n  add(!f.has(\"accuracy_stated\"), \"low\", \"P6\", \"accuracy-unstated\");\n}\n\nfunction p7Rules(f: Set<string>, n: Numbers, add: Add): void {\n  add((n[\"team_size\"] ?? 0) > 10 && !f.has(\"managed_settings\"), \"medium\", \"P7\", \"unmanaged-team-settings\");\n}\n\n/**\n * TODO 5 of 8 (unlocks e3): order the findings.\n * Receives the findings. Returns them ordered by severity (high, medium, low), then by domain, then by rule id in alphabetical order. Example: low P2 a, high P6 z, high P1 y -> high P1 y, high P6 z, low P2 a\n */\nfunction order(found: string[]): string[] {\n  return found;\n}\n\n/** The findings, each \"<severity> <domain> <rule>\", high first, then by domain, then by rule. */\nexport function launchReview(flags: Set<string>, numbers: Record<string, number>): string[] {\n  log.debug(\"launchReview input\", [...flags].sort());\n  const f = new Set(flags);\n  const n = { ...numbers };\n  const found: string[] = [];\n  const add: Add = (condition, severity, domain, rule) => {\n    if (condition) found.push(`${severity} ${domain} ${rule}`);\n  };\n  for (const rules of [p1Rules, p2Rules, p3Rules, p4Rules, p5Rules, p6Rules, p7Rules]) rules(f, n, add);\n  return order(found);\n}\n\n/**\n * TODO 6 of 8 (unlocks e1 and e2): the verdict.\n * Receives the findings. Returns `reject` when any is high, `revise` when none is high and any is medium, `approve` otherwise. Example: [low P2 a] -> approve\n */\nexport function verdict(findings: string[]): string {\n  return \"\";\n}\n\n/**\n * TODO 7 of 8 (unlocks e5): the scorecard.\n * Receives the findings. Returns the seven counts of the findings of P1 to P7 in that order. Example: [high P1 a, low P7 c] -> [1, 0, 0, 0, 0, 0, 1]\n */\nexport function scorecard(findings: string[]): number[] {\n  return [];\n}\n\n/**\n * TODO 8 of 8 (unlocks m1 and e6): the accuracy a design needs.\n * Receives the cost of an error and the cost of a check. Returns 100 minus the check cost as a percent of the error cost, the percent rounded up, never below 0, and 0 when an error costs nothing or less. Example: neededAccuracy(250, 5) -> 98\n */\nexport function neededAccuracy(errorCost: number, reviewCost: number): number {\n  return -1;\n}\n",
+  "exercise": {
+    "main_path": "practice/level-4/93-professional-capstone/prose/unit-01/practice-2/launchReview.ts",
+    "test_path": "practice/level-4/93-professional-capstone/prose/unit-01/practice-2/launchReview.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-4/93-professional-capstone/prose/unit-01/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-4/93-professional-capstone/prose/unit-01/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-4/93-professional-capstone/prose/unit-01/practice-2/launchReview.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 a design that sits exactly at every threshold has no findings and is approved",
+        "kind": "main",
+        "says": "A design that sits exactly at every threshold has no findings and is approved"
+      },
+      {
+        "id": "e1 a missing feedback loop a filter after ranking or no way back is a high finding and the design is rejected",
+        "kind": "edge",
+        "says": "A missing feedback loop, a filter after ranking or no way back is a high finding and the design is rejected"
+      },
+      {
+        "id": "e2 medium findings revise the design and low findings alone approve it",
+        "kind": "edge",
+        "says": "Medium findings revise the design and low findings alone approve it"
+      },
+      {
+        "id": "e3 findings are ordered by severity then domain then rule id",
+        "kind": "edge",
+        "says": "Findings are ordered by severity, then domain, then rule id"
+      },
+      {
+        "id": "e4 each numeric threshold passes exactly at its value and fails one step beyond",
+        "kind": "edge",
+        "says": "Each numeric threshold passes exactly at its value and fails one step beyond"
+      },
+      {
+        "id": "e5 the scorecard counts the findings of each domain from P1 to P7",
+        "kind": "edge",
+        "says": "The scorecard counts the findings of each domain from P1 to P7"
+      },
+      {
+        "id": "e6 the accuracy a design needs is the break even rounded up from the two costs",
+        "kind": "edge",
+        "says": "The accuracy a design needs is the break-even rounded up from the two costs"
+      },
+      {
+        "id": "e7 rules that depend on a second fact fire only when both hold",
+        "kind": "edge",
+        "says": "Rules that depend on a second fact fire only when both hold"
+      },
+      {
+        "id": "e8 retrieval and privacy flaws are high findings in domains P3 and P5",
+        "kind": "edge",
+        "says": "Retrieval and privacy flaws are high findings in domains P3 and P5"
+      },
+      {
+        "id": "e9 a design with every flaw gets all 22 findings and a scorecard that adds up",
+        "kind": "edge",
+        "says": "A design with every flaw gets all 22 findings and a scorecard that adds up"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-4/93-professional-capstone/prose/unit-01/practice-2/target/report.xml"
+    },
+    "origin": "course/93-professional-capstone/01-a-claims-assistant-end-to-end-across-the-seven-domains.md",
+    "concepts": [
+      "the practice of A claims assistant end to end, across the seven domains is solved"
+    ],
+    "files": [
+      "practice/level-4/93-professional-capstone/prose/unit-01/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "professional-capstone-u1"
+}

@@ -1,0 +1,300 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "81-reliability-of-multi-agent-systems"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: a multi-agent run graded on injected failures (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a multi-agent run graded on injected failures"
+    },
+    {
+      "type": "para",
+      "text": "A research team of agents runs a plan of tasks, and in production some of them time out, some fail for good and some take the process down. In this practice you write the runner that decides what happens next: which task is retried and with which key, which tasks are skipped because something they need failed, when an agent is cut off, when a weaker agent takes over, and what a second run does with the work that was already done. The model is not called: the tests give you agents that fail on demand. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`run_plan`, `Transient`, `Fatal`); TypeScript has `runPlan`; Java has the static method `runPlan` of `ReliableAgents` with the nested classes `Transient`, `Fatal` and the interface `Agent`; Kotlin has top-level `runPlan`, the classes `Transient` and `Fatal` and the type `Agent`. The starters declare them."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The plan, the agents and the store"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`plan` is a list of tasks in running order, each `{id, agent, key, needs, fallback}`: `agent` names an entry of `agents`, `key` is the task's idempotency key, `needs` lists the ids of earlier tasks whose results it takes (maybe empty or missing), `fallback` names a weaker agent (maybe none).",
+        "An agent is a function `(key, inputs) -> string`, where `inputs` maps each needed id to its result. It may raise `Transient` (worth retrying), `Fatal` (not) or anything else.",
+        "`store` is the checkpoint: a map from task id to result, owned by the caller and updated by the runner."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working runner with seven gaps cut out of it. The loop over the tasks, the single call to an agent (`call_once`, which turns a transient or fatal failure into a status and lets any other exception through), the inputs a task receives and the report are written and correct. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`breaker_open` unlocks `e4`: whether an agent has failed its threshold of calls in a row.",
+        "`record_outcome` unlocks `e4`: a success resets the count, a failure adds one.",
+        "`attempt` unlocks `m1`, `e1`, `e2` and `e4`: the call with the same key, the retry limit, the fatal failure and the open breaker.",
+        "`missing_dependency` unlocks `e3`: the first dependency that did not finish.",
+        "`fallback_key` unlocks `e5`: the fallback's own key.",
+        "`should_resume` unlocks `e6`: a task the store already holds is not run again.",
+        "`checkpoint` unlocks `m1`, `e5`, `e6` and `e7`: a finished result is written at once, a degraded one is not."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About fifteen lines in all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "`run_plan(plan, agents, store, attempts, breaker_threshold)` runs the tasks in order and returns a map with `done` (id to result), `failed` (id to reason), `skipped` (id to reason), `degraded` (ids), `attempts` (id to the number of calls made to agents for the task, 0 when none) and `resumed` (ids taken from the store)."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "A task already in `store` is `resumed`: its stored result is `done` and no agent is called.",
+        "A task whose `needs` holds an id that is not `done` is `skipped` with the reason `dependency failed: <that id>` (the first one, in `needs` order).",
+        "Otherwise the agent is called with the task's `key` and its inputs. A `Transient` failure is retried with **the same key**, up to `attempts` calls in all; when they are used up the task `failed` with `retries exhausted`. A `Fatal` failure is not retried: the task `failed` with `fatal: <message>`.",
+        "A breaker per agent name counts **consecutive** failed calls (a success resets it to zero). Before each call, if the count has reached `breaker_threshold`, the call is not made and the task fails with `circuit open`. The breaker stays open for the rest of the run.",
+        "When the primary fails and the task has a `fallback`, the fallback agent is tried once, with the key `<key>:fallback` (and the same breaker rules). If it succeeds, its result is the task's `done` result and the id goes in `degraded`; a degraded result is **not** written to the store, so that a later run tries the primary again. If it fails too, the task `failed` with the primary's reason.",
+        "A successful primary result is written to `store` as soon as the task finishes. An exception that is not `Transient` or `Fatal` is a crash: it is not caught, and everything written to the store before it stays there."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Order and inputs.** A task sees only the results it asked for. *You should see* three tasks in order, the third with two inputs.",
+        "**One key for every retry.** A tool that pays or sends is safe to retry only if the repeat is recognised. *You should see* the same key on all three calls.",
+        "**Retry limits and fatal errors.** *You should see* three calls for a transient failure that never clears and one for a fatal one.",
+        "**Isolation.** A failed branch does not stop an independent one, and its dependents are skipped with a reason. *You should see* `c` done and `b` and `d` skipped.",
+        "**A breaker.** An agent that keeps failing stops being called, and one success clears the count. *You should see* zero calls for the third task of the failing agent.",
+        "**Degradation.** A weaker agent keeps the run moving, under its own key, without being mistaken for a final result. *You should see* `degraded` and a store without it.",
+        "**Resumption and crashes.** A second run does only what is left, and a crash loses nothing that was finished. *You should see* the first task called once over two runs."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Tasks run in order and receive the results of the tasks they need"
+        ],
+        [
+          "`e1`",
+          "Every retry of a task carries the same idempotency key"
+        ],
+        [
+          "`e2`",
+          "Retries stop at the limit and a fatal failure is not retried"
+        ],
+        [
+          "`e3`",
+          "A failure stays inside its branch and dependents are skipped"
+        ],
+        [
+          "`e4`",
+          "A breaker stops calls to an agent that keeps failing, and a success resets it"
+        ],
+        [
+          "`e5`",
+          "A fallback degrades one task with its own key and is not checkpointed"
+        ],
+        [
+          "`e6`",
+          "A second run resumes from the checkpoint and retries only what failed"
+        ],
+        [
+          "`e7`",
+          "An unexpected crash is not swallowed and keeps the work already checkpointed"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.HashMap;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/** A multi-agent run that survives injected failures: retries with one key, isolation, a breaker, a fallback and a checkpoint. See ../../statement.md. */\nfinal class ReliableAgents {\n    private static final System.Logger LOG = System.getLogger(ReliableAgents.class.getName());\n    private ReliableAgents() {}\n\n    /** A failure worth retrying: a timeout, a rate limit, a lost response. */\n    static class Transient extends RuntimeException {\n        Transient(String message) {\n            super(message);\n        }\n    }\n\n    /** A failure that retrying cannot fix. */\n    static class Fatal extends RuntimeException {\n        Fatal(String message) {\n            super(message);\n        }\n    }\n\n    interface Agent {\n        String call(String key, Map<String, String> inputs);\n    }\n\n    /** The result and no reason, or no result and a reason. */\n    record Outcome(String result, String reason) {}\n\n    /** One call to an agent: status \"ok\", \"transient\" or \"fatal\" and the result or message. Any other exception is a crash and is not caught. */\n    record Call(String status, String value) {}\n\n    static Call callOnce(Map<String, Agent> agents, String name, String key, Map<String, String> inputs) {\n        try {\n            return new Call(\"ok\", agents.get(name).call(key, inputs));\n        } catch (Transient e) {\n            return new Call(\"transient\", null);\n        } catch (Fatal e) {\n            return new Call(\"fatal\", e.getMessage());\n        }\n    }\n\n    /** True when the agent has failed {@code threshold} calls in a row. */\n    static boolean breakerOpen(Map<String, Integer> consecutive, String name, int threshold) {\n        return consecutive.getOrDefault(name, 0) >= threshold;\n    }\n\n    /** A success resets the agent's count to zero; a failure adds one. */\n    static void recordOutcome(Map<String, Integer> consecutive, String name, boolean ok) {\n        if (ok) consecutive.put(name, 0);\n        else consecutive.merge(name, 1, Integer::sum);\n    }\n\n    /** The result and no reason, or no result and a reason; every call to an agent is counted for the task. */\n    static Outcome attempt(Map<String, Agent> agents, String name, String key, Map<String, String> inputs, Map<String, Integer> calls, String taskId,\n                           Map<String, Integer> consecutive, int attempts, int threshold) {\n        for (int n = 1; n <= attempts; n++) {\n            if (breakerOpen(consecutive, name, threshold)) return new Outcome(null, \"circuit open\");\n            calls.merge(taskId, 1, Integer::sum);\n            Call call = callOnce(agents, name, key, inputs);\n            recordOutcome(consecutive, name, call.status().equals(\"ok\"));\n            if (call.status().equals(\"ok\")) return new Outcome(call.value(), null);\n            if (call.status().equals(\"fatal\")) return new Outcome(null, \"fatal: \" + call.value());\n        }\n        return new Outcome(null, \"retries exhausted\");\n    }\n\n    /** The first id in {@code needs} that is not done, or null. */\n    static String missingDependency(List<String> needs, Map<String, String> done) {\n        for (String n : needs) if (!done.containsKey(n)) return n;\n        return null;\n    }\n\n    /** The key the fallback agent receives. */\n    static String fallbackKey(String key) {\n        return key + \":fallback\";\n    }\n\n    /** True when the store already holds this task's result. */\n    static boolean shouldResume(String tid, Map<String, String> store) {\n        return store.containsKey(tid);\n    }\n\n    /** Write a final result to the store as soon as the task finishes; a degraded result is not final. */\n    static void checkpoint(Map<String, String> store, String tid, String result, boolean degraded) {\n        if (!degraded) store.put(tid, result);\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> runPlan(List<Map<String, Object>> plan, Map<String, Agent> agents, Map<String, String> store, int attempts, int breakerThreshold) {\n        LOG.log(System.Logger.Level.DEBUG, \"runPlan input: {0}\", plan);\n        Map<String, String> done = new LinkedHashMap<>();\n        Map<String, String> failed = new LinkedHashMap<>();\n        Map<String, String> skipped = new LinkedHashMap<>();\n        List<String> degraded = new ArrayList<>();\n        List<String> resumed = new ArrayList<>();\n        Map<String, Integer> calls = new LinkedHashMap<>();\n        Map<String, Integer> consecutive = new HashMap<>();\n\n        for (Map<String, Object> task : plan) {\n            String tid = (String) task.get(\"id\");\n            calls.put(tid, 0);\n            if (shouldResume(tid, store)) {\n                done.put(tid, store.get(tid));\n                resumed.add(tid);\n                continue;\n            }\n            List<String> needs = task.get(\"needs\") == null ? List.of() : (List<String>) task.get(\"needs\");\n            String missing = missingDependency(needs, done);\n            if (missing != null) {\n                skipped.put(tid, \"dependency failed: \" + missing);\n                continue;\n            }\n            Map<String, String> inputs = new LinkedHashMap<>();\n            for (String n : needs) inputs.put(n, done.get(n));\n            Outcome outcome = attempt(agents, (String) task.get(\"agent\"), (String) task.get(\"key\"), inputs, calls, tid, consecutive, attempts, breakerThreshold);\n            if (outcome.result() == null && task.get(\"fallback\") != null) {\n                Outcome second = attempt(agents, (String) task.get(\"fallback\"), fallbackKey((String) task.get(\"key\")), inputs, calls, tid, consecutive, attempts, breakerThreshold);\n                if (second.result() != null) {\n                    done.put(tid, second.result());\n                    degraded.add(tid);\n                    checkpoint(store, tid, second.result(), true);\n                    continue;\n                }\n            }\n            if (outcome.result() == null) {\n                failed.put(tid, outcome.reason());\n                continue;\n            }\n            done.put(tid, outcome.result());\n            checkpoint(store, tid, outcome.result(), false);\n        }\n        Map<String, Object> out = new LinkedHashMap<>();\n        out.put(\"done\", done);\n        out.put(\"failed\", failed);\n        out.put(\"skipped\", skipped);\n        out.put(\"degraded\", degraded);\n        out.put(\"attempts\", calls);\n        out.put(\"resumed\", resumed);\n        return out;\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.*;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // A stand-in for a worker agent, like the tests use: its first call is lost, then it answers.\n        int[] calls = {0};\n        ReliableAgents.Agent flaky = (key, inputs) -> {\n            calls[0]++;\n            if (calls[0] == 1) throw new ReliableAgents.Transient(\"lost\");\n            return key + \"|\" + String.join(\",\", new TreeMap<>(inputs).values());\n        };\n\n        // Task b needs the result of a; the lost call is retried, the result is checkpointed in the store.\n        Map<String, String> store = new LinkedHashMap<>();\n        Map<String, Object> result = ReliableAgents.runPlan(List.of(task(\"a\", List.of()), task(\"b\", List.of(\"a\"))), Map.of(\"w\", flaky), store, 3, 3);\n        System.out.println(\"done: \" + (result == null ? null : result.get(\"done\")));\n        System.out.println(\"attempts: \" + (result == null ? null : result.get(\"attempts\")));\n        System.out.println(\"failed: \" + (result == null ? null : result.get(\"failed\")) + \" | skipped: \" + (result == null ? null : result.get(\"skipped\")));\n        System.out.println(\"store: \" + store);\n    }\n\n    static Map<String, Object> task(String id, List<String> needs) {\n        Map<String, Object> t = new LinkedHashMap<>();\n        t.put(\"id\", id);\n        t.put(\"agent\", \"w\");\n        t.put(\"key\", \"key-\" + id);\n        t.put(\"needs\", needs);\n        t.put(\"fallback\", null);\n        return t;\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.ArrayList;\nimport java.util.HashMap;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/** A multi-agent run that survives injected failures: retries with one key, isolation, a breaker, a fallback and a checkpoint. See ../../statement.md. */\nfinal class ReliableAgents {\n    private static final System.Logger LOG = System.getLogger(ReliableAgents.class.getName());\n    private ReliableAgents() {}\n\n    /** A failure worth retrying: a timeout, a rate limit, a lost response. */\n    static class Transient extends RuntimeException {\n        Transient(String message) {\n            super(message);\n        }\n    }\n\n    /** A failure that retrying cannot fix. */\n    static class Fatal extends RuntimeException {\n        Fatal(String message) {\n            super(message);\n        }\n    }\n\n    interface Agent {\n        String call(String key, Map<String, String> inputs);\n    }\n\n    /** The result and no reason, or no result and a reason. */\n    record Outcome(String result, String reason) {}\n\n    /** One call to an agent: status \"ok\", \"transient\" or \"fatal\" and the result or message. Any other exception is a crash and is not caught. */\n    record Call(String status, String value) {}\n\n    static Call callOnce(Map<String, Agent> agents, String name, String key, Map<String, String> inputs) {\n        try {\n            return new Call(\"ok\", agents.get(name).call(key, inputs));\n        } catch (Transient e) {\n            return new Call(\"transient\", null);\n        } catch (Fatal e) {\n            return new Call(\"fatal\", e.getMessage());\n        }\n    }\n\n    /**\n     * TODO 1 of 7 (unlocks e4): is the breaker of this agent open?\n     * Receives the map of consecutive failures per agent, the agent name and the threshold. Returns true when the agent's count has reached the threshold\n     * (a name that is not in the map has a count of 0). Example: breakerOpen(Map.of(\"w\", 3), \"w\", 3) -> true, breakerOpen(Map.of(), \"w\", 3) -> false\n     */\n    static boolean breakerOpen(Map<String, Integer> consecutive, String name, int threshold) {\n        return false;\n    }\n\n    /**\n     * TODO 2 of 7 (unlocks e4): update the consecutive-failure count of an agent after a call.\n     * Receives the map of consecutive failures, the agent name and whether the call succeeded. Sets the count to 0 on a success and adds one on a failure.\n     * Example: after a failure then a success then a failure, the count is 1\n     */\n    static void recordOutcome(Map<String, Integer> consecutive, String name, boolean ok) {}\n\n    /**\n     * TODO 3 of 7 (unlocks m1, e1, e2 and e4): call an agent for a task, retrying a transient failure.\n     * Receives the agents, the agent name, the task's key and inputs, the per-task call counts, the task id, the breaker counts, the attempt limit and the breaker\n     * threshold. Up to {@code attempts} times: if the breaker is open return Outcome(null, \"circuit open\") without calling; otherwise add one to {@code calls} for the task, make the\n     * call with {@code callOnce} (always the same key), record the outcome and return Outcome(result, null) on \"ok\"; return Outcome(null, \"fatal: <message>\") on \"fatal\" without\n     * retrying; retry on \"transient\". After the last attempt return Outcome(null, \"retries exhausted\").\n     * Example: an agent that fails once with Transient and then answers \"ok\" -> Outcome(\"ok\", null) with two calls counted\n     */\n    static Outcome attempt(Map<String, Agent> agents, String name, String key, Map<String, String> inputs, Map<String, Integer> calls, String taskId,\n                           Map<String, Integer> consecutive, int attempts, int threshold) {\n        return new Outcome(null, \"retries exhausted\");\n    }\n\n    /**\n     * TODO 4 of 7 (unlocks e3): the first dependency that did not finish.\n     * Receives the ids a task needs and the map of finished results. Returns the first id in {@code needs} (in order) that is not in {@code done}, or null when all are.\n     * Example: missingDependency(List.of(\"a\", \"b\"), Map.of(\"a\", \"x\")) -> \"b\"\n     */\n    static String missingDependency(List<String> needs, Map<String, String> done) {\n        return null;\n    }\n\n    /**\n     * TODO 5 of 7 (unlocks e5): the idempotency key for the fallback agent.\n     * Receives the task's key. Returns it followed by {@code :fallback}, so that a repeat of the fallback is recognised without colliding with the primary.\n     * Example: fallbackKey(\"key-s\") -> \"key-s:fallback\"\n     */\n    static String fallbackKey(String key) {\n        return key;\n    }\n\n    /**\n     * TODO 6 of 7 (unlocks e6): is this task already checkpointed?\n     * Receives a task id and the store of checkpointed results. Returns true when the store holds the task, so that no agent is called for it.\n     * Example: shouldResume(\"a\", Map.of(\"a\", \"ok\")) -> true\n     */\n    static boolean shouldResume(String tid, Map<String, String> store) {\n        return false;\n    }\n\n    /**\n     * TODO 7 of 7 (unlocks m1, e5, e6 and e7): write a finished task's result to the store.\n     * Receives the store, the task id, the result and whether the result is degraded (it came from the fallback). Writes the result to the store unless it is\n     * degraded, so that a later run tries the primary again. It is called as soon as each task finishes, so a crash later in the run loses nothing finished.\n     * Example: checkpoint(store, \"a\", \"ok\", false) -> store is {a=ok}; with degraded true the store is unchanged\n     */\n    static void checkpoint(Map<String, String> store, String tid, String result, boolean degraded) {}\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> runPlan(List<Map<String, Object>> plan, Map<String, Agent> agents, Map<String, String> store, int attempts, int breakerThreshold) {\n        LOG.log(System.Logger.Level.DEBUG, \"runPlan input: {0}\", plan);\n        Map<String, String> done = new LinkedHashMap<>();\n        Map<String, String> failed = new LinkedHashMap<>();\n        Map<String, String> skipped = new LinkedHashMap<>();\n        List<String> degraded = new ArrayList<>();\n        List<String> resumed = new ArrayList<>();\n        Map<String, Integer> calls = new LinkedHashMap<>();\n        Map<String, Integer> consecutive = new HashMap<>();\n\n        for (Map<String, Object> task : plan) {\n            String tid = (String) task.get(\"id\");\n            calls.put(tid, 0);\n            if (shouldResume(tid, store)) {\n                done.put(tid, store.get(tid));\n                resumed.add(tid);\n                continue;\n            }\n            List<String> needs = task.get(\"needs\") == null ? List.of() : (List<String>) task.get(\"needs\");\n            String missing = missingDependency(needs, done);\n            if (missing != null) {\n                skipped.put(tid, \"dependency failed: \" + missing);\n                continue;\n            }\n            Map<String, String> inputs = new LinkedHashMap<>();\n            for (String n : needs) inputs.put(n, done.get(n));\n            Outcome outcome = attempt(agents, (String) task.get(\"agent\"), (String) task.get(\"key\"), inputs, calls, tid, consecutive, attempts, breakerThreshold);\n            if (outcome.result() == null && task.get(\"fallback\") != null) {\n                Outcome second = attempt(agents, (String) task.get(\"fallback\"), fallbackKey((String) task.get(\"key\")), inputs, calls, tid, consecutive, attempts, breakerThreshold);\n                if (second.result() != null) {\n                    done.put(tid, second.result());\n                    degraded.add(tid);\n                    checkpoint(store, tid, second.result(), true);\n                    continue;\n                }\n            }\n            if (outcome.result() == null) {\n                failed.put(tid, outcome.reason());\n                continue;\n            }\n            done.put(tid, outcome.result());\n            checkpoint(store, tid, outcome.result(), false);\n        }\n        Map<String, Object> out = new LinkedHashMap<>();\n        out.put(\"done\", done);\n        out.put(\"failed\", failed);\n        out.put(\"skipped\", skipped);\n        out.put(\"degraded\", degraded);\n        out.put(\"attempts\", calls);\n        out.put(\"resumed\", resumed);\n        return out;\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.*;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // A stand-in for a worker agent, like the tests use: its first call is lost, then it answers.\n        int[] calls = {0};\n        ReliableAgents.Agent flaky = (key, inputs) -> {\n            calls[0]++;\n            if (calls[0] == 1) throw new ReliableAgents.Transient(\"lost\");\n            return key + \"|\" + String.join(\",\", new TreeMap<>(inputs).values());\n        };\n\n        // Task b needs the result of a; the lost call is retried, the result is checkpointed in the store.\n        Map<String, String> store = new LinkedHashMap<>();\n        Map<String, Object> result = ReliableAgents.runPlan(List.of(task(\"a\", List.of()), task(\"b\", List.of(\"a\"))), Map.of(\"w\", flaky), store, 3, 3);\n        System.out.println(\"done: \" + (result == null ? null : result.get(\"done\")));\n        System.out.println(\"attempts: \" + (result == null ? null : result.get(\"attempts\")));\n        System.out.println(\"failed: \" + (result == null ? null : result.get(\"failed\")) + \" | skipped: \" + (result == null ? null : result.get(\"skipped\")));\n        System.out.println(\"store: \" + store);\n    }\n\n    static Map<String, Object> task(String id, List<String> needs) {\n        Map<String, Object> t = new LinkedHashMap<>();\n        t.put(\"id\", id);\n        t.put(\"agent\", \"w\");\n        t.put(\"key\", \"key-\" + id);\n        t.put(\"needs\", needs);\n        t.put(\"fallback\", null);\n        return t;\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 6,
+    "code": 2,
+    "tables": 1,
+    "lists": 4,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "5ba1f033e26e7bf3626343b55683644079124b279ee654b151f351c2e00ac03e",
+  "starting_code": "import java.util.ArrayList;\nimport java.util.HashMap;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/** A multi-agent run that survives injected failures: retries with one key, isolation, a breaker, a fallback and a checkpoint. See ../../statement.md. */\nfinal class ReliableAgents {\n    private static final System.Logger LOG = System.getLogger(ReliableAgents.class.getName());\n    private ReliableAgents() {}\n\n    /** A failure worth retrying: a timeout, a rate limit, a lost response. */\n    static class Transient extends RuntimeException {\n        Transient(String message) {\n            super(message);\n        }\n    }\n\n    /** A failure that retrying cannot fix. */\n    static class Fatal extends RuntimeException {\n        Fatal(String message) {\n            super(message);\n        }\n    }\n\n    interface Agent {\n        String call(String key, Map<String, String> inputs);\n    }\n\n    /** The result and no reason, or no result and a reason. */\n    record Outcome(String result, String reason) {}\n\n    /** One call to an agent: status \"ok\", \"transient\" or \"fatal\" and the result or message. Any other exception is a crash and is not caught. */\n    record Call(String status, String value) {}\n\n    static Call callOnce(Map<String, Agent> agents, String name, String key, Map<String, String> inputs) {\n        try {\n            return new Call(\"ok\", agents.get(name).call(key, inputs));\n        } catch (Transient e) {\n            return new Call(\"transient\", null);\n        } catch (Fatal e) {\n            return new Call(\"fatal\", e.getMessage());\n        }\n    }\n\n    /**\n     * TODO 1 of 7 (unlocks e4): is the breaker of this agent open?\n     * Receives the map of consecutive failures per agent, the agent name and the threshold. Returns true when the agent's count has reached the threshold\n     * (a name that is not in the map has a count of 0). Example: breakerOpen(Map.of(\"w\", 3), \"w\", 3) -> true, breakerOpen(Map.of(), \"w\", 3) -> false\n     */\n    static boolean breakerOpen(Map<String, Integer> consecutive, String name, int threshold) {\n        return false;\n    }\n\n    /**\n     * TODO 2 of 7 (unlocks e4): update the consecutive-failure count of an agent after a call.\n     * Receives the map of consecutive failures, the agent name and whether the call succeeded. Sets the count to 0 on a success and adds one on a failure.\n     * Example: after a failure then a success then a failure, the count is 1\n     */\n    static void recordOutcome(Map<String, Integer> consecutive, String name, boolean ok) {}\n\n    /**\n     * TODO 3 of 7 (unlocks m1, e1, e2 and e4): call an agent for a task, retrying a transient failure.\n     * Receives the agents, the agent name, the task's key and inputs, the per-task call counts, the task id, the breaker counts, the attempt limit and the breaker\n     * threshold. Up to {@code attempts} times: if the breaker is open return Outcome(null, \"circuit open\") without calling; otherwise add one to {@code calls} for the task, make the\n     * call with {@code callOnce} (always the same key), record the outcome and return Outcome(result, null) on \"ok\"; return Outcome(null, \"fatal: <message>\") on \"fatal\" without\n     * retrying; retry on \"transient\". After the last attempt return Outcome(null, \"retries exhausted\").\n     * Example: an agent that fails once with Transient and then answers \"ok\" -> Outcome(\"ok\", null) with two calls counted\n     */\n    static Outcome attempt(Map<String, Agent> agents, String name, String key, Map<String, String> inputs, Map<String, Integer> calls, String taskId,\n                           Map<String, Integer> consecutive, int attempts, int threshold) {\n        return new Outcome(null, \"retries exhausted\");\n    }\n\n    /**\n     * TODO 4 of 7 (unlocks e3): the first dependency that did not finish.\n     * Receives the ids a task needs and the map of finished results. Returns the first id in {@code needs} (in order) that is not in {@code done}, or null when all are.\n     * Example: missingDependency(List.of(\"a\", \"b\"), Map.of(\"a\", \"x\")) -> \"b\"\n     */\n    static String missingDependency(List<String> needs, Map<String, String> done) {\n        return null;\n    }\n\n    /**\n     * TODO 5 of 7 (unlocks e5): the idempotency key for the fallback agent.\n     * Receives the task's key. Returns it followed by {@code :fallback}, so that a repeat of the fallback is recognised without colliding with the primary.\n     * Example: fallbackKey(\"key-s\") -> \"key-s:fallback\"\n     */\n    static String fallbackKey(String key) {\n        return key;\n    }\n\n    /**\n     * TODO 6 of 7 (unlocks e6): is this task already checkpointed?\n     * Receives a task id and the store of checkpointed results. Returns true when the store holds the task, so that no agent is called for it.\n     * Example: shouldResume(\"a\", Map.of(\"a\", \"ok\")) -> true\n     */\n    static boolean shouldResume(String tid, Map<String, String> store) {\n        return false;\n    }\n\n    /**\n     * TODO 7 of 7 (unlocks m1, e5, e6 and e7): write a finished task's result to the store.\n     * Receives the store, the task id, the result and whether the result is degraded (it came from the fallback). Writes the result to the store unless it is\n     * degraded, so that a later run tries the primary again. It is called as soon as each task finishes, so a crash later in the run loses nothing finished.\n     * Example: checkpoint(store, \"a\", \"ok\", false) -> store is {a=ok}; with degraded true the store is unchanged\n     */\n    static void checkpoint(Map<String, String> store, String tid, String result, boolean degraded) {}\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> runPlan(List<Map<String, Object>> plan, Map<String, Agent> agents, Map<String, String> store, int attempts, int breakerThreshold) {\n        LOG.log(System.Logger.Level.DEBUG, \"runPlan input: {0}\", plan);\n        Map<String, String> done = new LinkedHashMap<>();\n        Map<String, String> failed = new LinkedHashMap<>();\n        Map<String, String> skipped = new LinkedHashMap<>();\n        List<String> degraded = new ArrayList<>();\n        List<String> resumed = new ArrayList<>();\n        Map<String, Integer> calls = new LinkedHashMap<>();\n        Map<String, Integer> consecutive = new HashMap<>();\n\n        for (Map<String, Object> task : plan) {\n            String tid = (String) task.get(\"id\");\n            calls.put(tid, 0);\n            if (shouldResume(tid, store)) {\n                done.put(tid, store.get(tid));\n                resumed.add(tid);\n                continue;\n            }\n            List<String> needs = task.get(\"needs\") == null ? List.of() : (List<String>) task.get(\"needs\");\n            String missing = missingDependency(needs, done);\n            if (missing != null) {\n                skipped.put(tid, \"dependency failed: \" + missing);\n                continue;\n            }\n            Map<String, String> inputs = new LinkedHashMap<>();\n            for (String n : needs) inputs.put(n, done.get(n));\n            Outcome outcome = attempt(agents, (String) task.get(\"agent\"), (String) task.get(\"key\"), inputs, calls, tid, consecutive, attempts, breakerThreshold);\n            if (outcome.result() == null && task.get(\"fallback\") != null) {\n                Outcome second = attempt(agents, (String) task.get(\"fallback\"), fallbackKey((String) task.get(\"key\")), inputs, calls, tid, consecutive, attempts, breakerThreshold);\n                if (second.result() != null) {\n                    done.put(tid, second.result());\n                    degraded.add(tid);\n                    checkpoint(store, tid, second.result(), true);\n                    continue;\n                }\n            }\n            if (outcome.result() == null) {\n                failed.put(tid, outcome.reason());\n                continue;\n            }\n            done.put(tid, outcome.result());\n            checkpoint(store, tid, outcome.result(), false);\n        }\n        Map<String, Object> out = new LinkedHashMap<>();\n        out.put(\"done\", done);\n        out.put(\"failed\", failed);\n        out.put(\"skipped\", skipped);\n        out.put(\"degraded\", degraded);\n        out.put(\"attempts\", calls);\n        out.put(\"resumed\", resumed);\n        return out;\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-4/81-reliability-of-multi-agent-systems/prose/unit-02/practice-3/src/main/java/ReliableAgents.java",
+    "test_path": "practice/level-4/81-reliability-of-multi-agent-systems/prose/unit-02/practice-3/src/test/java/ReliableAgentsTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-4/81-reliability-of-multi-agent-systems/prose/unit-02/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-4/81-reliability-of-multi-agent-systems/prose/unit-02/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_tasksRunInOrderAndReceiveTheResultsOfTheTasksTheyNeed()",
+        "kind": "main",
+        "says": "Tasks run in order and receive the results of the tasks they need"
+      },
+      {
+        "id": "e1_everyRetryOfATaskCarriesTheSameIdempotencyKey()",
+        "kind": "edge",
+        "says": "Every retry of a task carries the same idempotency key"
+      },
+      {
+        "id": "e2_retriesStopAtTheLimitAndAFatalFailureIsNotRetried()",
+        "kind": "edge",
+        "says": "Retries stop at the limit and a fatal failure is not retried"
+      },
+      {
+        "id": "e3_aFailureStaysInsideItsBranchAndDependentsAreSkipped()",
+        "kind": "edge",
+        "says": "A failure stays inside its branch and dependents are skipped"
+      },
+      {
+        "id": "e4_aBreakerStopsCallsToAnAgentThatKeepsFailingAndASuccessResetsIt()",
+        "kind": "edge",
+        "says": "A breaker stops calls to an agent that keeps failing, and a success resets it"
+      },
+      {
+        "id": "e5_aFallbackDegradesOneTaskWithItsOwnKeyAndIsNotCheckpointed()",
+        "kind": "edge",
+        "says": "A fallback degrades one task with its own key and is not checkpointed"
+      },
+      {
+        "id": "e6_aSecondRunResumesFromTheCheckpointAndRetriesOnlyWhatFailed()",
+        "kind": "edge",
+        "says": "A second run resumes from the checkpoint and retries only what failed"
+      },
+      {
+        "id": "e7_anUnexpectedCrashIsNotSwallowedAndKeepsTheWorkAlreadyCheckpointed()",
+        "kind": "edge",
+        "says": "An unexpected crash is not swallowed and keeps the work already checkpointed"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-4/81-reliability-of-multi-agent-systems/prose/unit-02/practice-3/target/test-results/test"
+    },
+    "origin": "course/81-reliability-of-multi-agent-systems/02-isolation-fallbacks-and-resuming-a-run.md",
+    "concepts": [
+      "the practice of Isolation, fallbacks and resuming a run is solved"
+    ],
+    "files": [
+      "practice/level-4/81-reliability-of-multi-agent-systems/prose/unit-02/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "reliability-of-multi-agent-systems-u2"
+}

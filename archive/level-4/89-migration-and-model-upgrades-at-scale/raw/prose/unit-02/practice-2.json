@@ -1,0 +1,289 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "89-migration-and-model-upgrades-at-scale"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: a roll-out gate (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a roll-out gate"
+    },
+    {
+      "type": "para",
+      "text": "A team moves its product to a newer model the week before the old one retires. It runs the regression suite once, reads the overall score, switches all traffic at midnight and finds out at noon that refunds regressed, that the bill is a third higher and that three request settings now return an error. In this practice you write the pieces that replace that: the calendar of retirements with its urgency, the migration of a request to the settings a new model accepts, the gate that a regression suite must pass, and the step of a staged roll-out with its way back. The model is not called: the tests give you cases, costs, timings, requests and counts. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`retirement_status`, `migrate_request`, `gate`, `rollout_step`); TypeScript has the camel-case names (`retirementStatus`, `migrateRequest`, `rolloutStep`); Java has the same camel-case names as static methods of `Rollout`; Kotlin has top-level functions. A case is `Case(id, segment, must_pass, old_ok, new_ok, old_cost, new_cost, new_ms)` and a request is `Request(model, temperature, top_p, top_k, thinking, tool_choice, strict, prefill)`; the starter shows both in each language, with `days_until` and `percentile` (nearest rank) already written. A model is a `(name, retirement date, tentative)` triple, where the date is ISO text (`2026-11-30`) and tentative says that the date may still move later."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working kit with nine small gaps cut out of it. The plumbing is written: the data types, `days_until`, `percentile`, the sorting of the calendar, the sampling and tool-choice parts of the migration and the assembly of the gate from its checks. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks; a gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_status_line` unlocks `e7`: one calendar line, with its level and the tentative mark.",
+        "`_migrate_thinking` unlocks `e8`: the thinking setting and the change that names it.",
+        "`_must_pass` unlocks `e1`: the failed must-pass ids, sorted.",
+        "`_protected` unlocks `e2`: the protected segments that lost answers.",
+        "`_net_loss` unlocks `e3`: more losses than gains, with both counts.",
+        "`_cost` unlocks `e4`: the cost rise in whole percent against the limit.",
+        "`_latency` unlocks `e5`: the 95th percentile against the limit.",
+        "`_decision` unlocks `m1`: go with no reasons, no-go otherwise.",
+        "`rollout_step` unlocks `e6`: hold, roll back, complete or advance."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole kit."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`retirement_status(models, today)` returns one line per model, `<name>: <days> days, <level>`, with ` (tentative)` added when the date is tentative. Days come from `days_until(today, date)` and are negative once the date has passed. The level is `retired` below zero, `urgent` up to 14 days, `migrate now` up to 60 days and `watch` beyond. The lines run from the fewest days left to the most, ties by name.",
+        "`migrate_request(request)` returns the request for `claude-sonnet-5-5` and the list of changes, in this order: `model set to claude-sonnet-5-5` when the model differs; `removed temperature`, `removed top_p` and `removed top_k` for each of them that is present; a thinking setting of `budget` becomes `adaptive` (`thinking budget replaced by adaptive thinking; sweep the effort`) and `disabled` becomes `between_tools` (`thinking disabled replaced by between_tools`), anything else is kept; a forced tool choice (`any` or `tool`) becomes `auto` with `strict` set (`forced tool choice replaced by auto with strict tools`); an assistant prefill is dropped (`assistant prefill removed; state the format in the instructions`). The new request has no sampling settings and no prefill. A request that needs nothing comes back equal, with no changes.",
+        "`gate(cases, protected, max_cost_up, max_p95)` returns a `decision` (`go` or `no-go`) and a list of `reasons`, one for each check that fails, in this order. `must-pass failed: <ids>` lists, sorted, the cases marked must pass that the new model fails. `protected segment lost answers: <segments>` lists, sorted and distinct, the protected segments with a case the old model got right and the new one did not. `net loss: lost N, gained M` appears when the cases lost outnumber the cases gained. `cost up X% over the Y% limit` appears when the total new cost exceeds the total old cost by more than `max_cost_up` percent (X is the rise in whole percent, rounded down; no rise is 0). `p95 latency X ms over the Y ms limit` appears when the nearest-rank 95th percentile of the new timings is over `max_p95`. The decision is `go` only when there is no reason.",
+        "`rollout_step(stage, requests, errors, min_requests, max_errors_per_1000)` takes the stages 1, 5, 25 and 100 percent of traffic and returns `hold at <stage>` when the stage has fewer than `min_requests` requests, `rollback to 0` when errors per thousand requests (whole number, rounded down) are over the limit, `complete` at stage 100 when healthy, and `advance to <next stage>` otherwise."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**A go with no reasons.** *You should see* a change inside every limit get an empty list of reasons.",
+        "**A case that must pass.** *You should see* a change refused for one broken must-pass case, whatever the average says.",
+        "**A protected segment.** *You should see* a change refused when a protected segment lost answers although the gains elsewhere match the losses.",
+        "**A net loss.** *You should see* both counts named when the losses win.",
+        "**A budget for cost.** *You should see* a rise exactly at the limit pass and a rise one point over it refused.",
+        "**The tail, not the worst case.** *You should see* one slow case in forty not block the change and three slow cases block it.",
+        "**Small steps and a way back.** *You should see* a stage wait for enough requests, then advance, or go back to zero when errors pass the limit.",
+        "**A calendar that ranks.** *You should see* the nearest retirement first, and exactly fourteen days left called urgent.",
+        "**Settings a new model refuses.** *You should see* the sampling settings, the forced tool choice, the prefill and the disabled thinking replaced or removed, each one named."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A change that regresses nothing and stays inside its limits gets a go with no reasons"
+        ],
+        [
+          "`e1`",
+          "A must-pass case that fails blocks the change and the ids are listed in order"
+        ],
+        [
+          "`e2`",
+          "A protected segment that lost answers blocks the change even when gains elsewhere match the losses"
+        ],
+        [
+          "`e3`",
+          "More losses than gains blocks the change and both counts are named"
+        ],
+        [
+          "`e4`",
+          "A cost rise over the limit blocks the change and a rise exactly at the limit does not"
+        ],
+        [
+          "`e5`",
+          "The tail is the nearest-rank 95th percentile and a single slow case does not block"
+        ],
+        [
+          "`e6`",
+          "A roll-out advances when healthy, holds with too few requests and rolls back to zero when errors pass the limit"
+        ],
+        [
+          "`e7`",
+          "The retirement calendar counts days, ranks the nearest first and names the level"
+        ],
+        [
+          "`e8`",
+          "Migration removes the settings the new model refuses and names each change"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "/** Rollout kit: the retirement calendar, the settings a new model refuses, a gate on a regression suite and a staged roll-out. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"rollout\");\n\nexport type Case = { id: string; segment: string; mustPass: boolean; oldOk: boolean; newOk: boolean; oldCost: number; newCost: number; newMs: number };\nexport type Request = { model: string; temperature: number | null; topP: number | null; topK: number | null; thinking: string; toolChoice: string; strict: boolean; prefill: boolean };\n\nexport const STAGES = [1, 5, 25, 100];\nexport const TARGET = \"claude-sonnet-5-5\";\n\n/** Whole days from one ISO date to another, negative when it has passed (written for you). */\nexport function daysUntil(today: string, when: string): number {\n  const [y1, m1, d1] = today.split(\"-\").map(Number);\n  const [y2, m2, d2] = when.split(\"-\").map(Number);\n  return Math.round((Date.UTC(y2, m2 - 1, d2) - Date.UTC(y1, m1 - 1, d1)) / 86400000);\n}\n\n/** Nearest-rank percentile, 0 for no values (written for you). */\nexport function percentile(values: number[], p: number): number {\n  const ordered = [...values].sort((a, b) => a - b);\n  return ordered.length ? ordered[Math.floor((p * ordered.length + 99) / 100) - 1] : 0;\n}\n\nfunction statusLine(days: number, name: string, tentative: boolean): string {\n  const level = days < 0 ? \"retired\" : days <= 14 ? \"urgent\" : days <= 60 ? \"migrate now\" : \"watch\";\n  return `${name}: ${days} days, ${level}${tentative ? \" (tentative)\" : \"\"}`;\n}\n\nexport function retirementStatus(models: [string, string, boolean][], today: string): string[] {\n  log.debug(\"retirementStatus input\", models);\n  const rows = models.map(([name, when, tentative]) => ({ days: daysUntil(today, when), name, tentative }));\n  rows.sort((a, b) => a.days - b.days || (a.name < b.name ? -1 : a.name > b.name ? 1 : Number(a.tentative) - Number(b.tentative)));\n  return rows.map((r) => statusLine(r.days, r.name, r.tentative));\n}\n\nfunction migrateThinking(thinking: string, changes: string[]): string {\n  if (thinking === \"budget\") {\n    changes.push(\"thinking budget replaced by adaptive thinking; sweep the effort\");\n    return \"adaptive\";\n  }\n  if (thinking === \"disabled\") {\n    changes.push(\"thinking disabled replaced by between_tools\");\n    return \"between_tools\";\n  }\n  return thinking;\n}\n\nexport function migrateRequest(request: Request, target = TARGET): [Request, string[]] {\n  const changes: string[] = [];\n  if (request.model !== target) changes.push(`model set to ${target}`);\n  if (request.temperature !== null) changes.push(\"removed temperature\");\n  if (request.topP !== null) changes.push(\"removed top_p\");\n  if (request.topK !== null) changes.push(\"removed top_k\");\n  const thinking = migrateThinking(request.thinking, changes);\n  let toolChoice = request.toolChoice;\n  let strict = request.strict;\n  if (toolChoice === \"any\" || toolChoice === \"tool\") {\n    toolChoice = \"auto\";\n    strict = true;\n    changes.push(\"forced tool choice replaced by auto with strict tools\");\n  }\n  if (request.prefill) changes.push(\"assistant prefill removed; state the format in the instructions\");\n  return [{ model: target, temperature: null, topP: null, topK: null, thinking, toolChoice, strict, prefill: false }, changes];\n}\n\nfunction mustPass(cases: Case[]): string[] {\n  const failed = cases.filter((c) => c.mustPass && !c.newOk).map((c) => c.id).sort();\n  return failed.length ? [\"must-pass failed: \" + failed.join(\", \")] : [];\n}\n\nfunction protectedLost(cases: Case[], protectedSegments: string[]): string[] {\n  const hit = [...new Set(cases.filter((c) => c.oldOk && !c.newOk && protectedSegments.includes(c.segment)).map((c) => c.segment))].sort();\n  return hit.length ? [\"protected segment lost answers: \" + hit.join(\", \")] : [];\n}\n\nfunction netLoss(cases: Case[]): string[] {\n  const lost = cases.filter((c) => c.oldOk && !c.newOk).length;\n  const gained = cases.filter((c) => c.newOk && !c.oldOk).length;\n  return lost > gained ? [`net loss: lost ${lost}, gained ${gained}`] : [];\n}\n\nfunction costRise(cases: Case[], maxCostUp: number): string[] {\n  const oldTotal = cases.reduce((a, c) => a + c.oldCost, 0);\n  const newTotal = cases.reduce((a, c) => a + c.newCost, 0);\n  const up = oldTotal > 0 && newTotal > oldTotal ? Math.floor(((newTotal - oldTotal) * 100) / oldTotal) : 0;\n  return up > maxCostUp ? [`cost up ${up}% over the ${maxCostUp}% limit`] : [];\n}\n\nfunction latency(cases: Case[], maxP95: number): string[] {\n  const p95 = percentile(cases.map((c) => c.newMs), 95);\n  return p95 > maxP95 ? [`p95 latency ${p95} ms over the ${maxP95} ms limit`] : [];\n}\n\nfunction decision(reasons: string[]): string {\n  return reasons.length ? \"no-go\" : \"go\";\n}\n\nexport function gate(cases: Case[], protectedSegments: string[], maxCostUp: number, maxP95: number): { decision: string; reasons: string[] } {\n  const reasons = [...mustPass(cases), ...protectedLost(cases, protectedSegments), ...netLoss(cases), ...costRise(cases, maxCostUp), ...latency(cases, maxP95)];\n  return { decision: decision(reasons), reasons };\n}\n\nexport function rolloutStep(stage: number, requests: number, errors: number, minRequests: number, maxErrorsPer1000: number): string {\n  if (requests < minRequests) return `hold at ${stage}`;\n  if (Math.floor((errors * 1000) / requests) > maxErrorsPer1000) return \"rollback to 0\";\n  if (stage === STAGES[STAGES.length - 1]) return \"complete\";\n  return `advance to ${STAGES[STAGES.indexOf(stage) + 1]}`;\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { migrateRequest, retirementStatus, rolloutStep } from \"./rollout.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// The retirement calendar: days left per model, nearest first, with the level of urgency.\nconst models: Array<[string, string, boolean]> = [[\"claude-old-a\", \"2026-10-18\", true], [\"claude-old-b\", \"2026-11-30\", false], [\"claude-old-c\", \"2027-01-01\", false]];\nconsole.log(\"calendar:\", retirementStatus(models, \"2026-10-04\").join(\"; \"));\n\n// A request written for an older model, and what the migration changes in it.\nconst old = { model: \"claude-sonnet-4-5-20250929\", temperature: 0.7, topP: 0.9, topK: 40, thinking: \"disabled\", toolChoice: \"any\", strict: false, prefill: true };\nconst [migrated, changes] = migrateRequest(old);\nconsole.log(\"migrated model:\", migrated.model);\nconsole.log(\"changes:\", changes.join(\"; \"));\n\n// A staged rollout: one decision per stage from the traffic and the errors seen so far.\nconsole.log(\"stage 1:\", rolloutStep(1, 2000, 6, 1000, 5));\nconsole.log(\"stage 25:\", rolloutStep(25, 50000, 400, 1000, 5));\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "/** Rollout kit: the retirement calendar, the settings a new model refuses, a gate on a regression suite and a staged roll-out. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"rollout\");\n\nexport type Case = { id: string; segment: string; mustPass: boolean; oldOk: boolean; newOk: boolean; oldCost: number; newCost: number; newMs: number };\nexport type Request = { model: string; temperature: number | null; topP: number | null; topK: number | null; thinking: string; toolChoice: string; strict: boolean; prefill: boolean };\n\nexport const STAGES = [1, 5, 25, 100];\nexport const TARGET = \"claude-sonnet-5-5\";\n\n/** Whole days from one ISO date to another, negative when it has passed (written for you). */\nexport function daysUntil(today: string, when: string): number {\n  const [y1, m1, d1] = today.split(\"-\").map(Number);\n  const [y2, m2, d2] = when.split(\"-\").map(Number);\n  return Math.round((Date.UTC(y2, m2 - 1, d2) - Date.UTC(y1, m1 - 1, d1)) / 86400000);\n}\n\n/** Nearest-rank percentile, 0 for no values (written for you). */\nexport function percentile(values: number[], p: number): number {\n  const ordered = [...values].sort((a, b) => a - b);\n  return ordered.length ? ordered[Math.floor((p * ordered.length + 99) / 100) - 1] : 0;\n}\n\n/**\n * TODO 1 of 9 (unlocks e7): one line of the retirement calendar.\n * Receives the days left, the model name and whether the date is tentative. Returns `<name>: <days> days, <level>` with ` (tentative)`\n * added when it is tentative; the level is `retired` below 0, `urgent` up to 14, `migrate now` up to 60, else `watch`.\n * Example: statusLine(14, \"a\", true) -> \"a: 14 days, urgent (tentative)\"\n */\nfunction statusLine(days: number, name: string, tentative: boolean): string {\n  return \"\";\n}\n\nexport function retirementStatus(models: [string, string, boolean][], today: string): string[] {\n  log.debug(\"retirementStatus input\", models);\n  const rows = models.map(([name, when, tentative]) => ({ days: daysUntil(today, when), name, tentative }));\n  rows.sort((a, b) => a.days - b.days || (a.name < b.name ? -1 : a.name > b.name ? 1 : Number(a.tentative) - Number(b.tentative)));\n  return rows.map((r) => statusLine(r.days, r.name, r.tentative));\n}\n\n/**\n * TODO 2 of 9 (unlocks e8): migrate the thinking setting.\n * Receives the thinking setting and the list of changes so far. `budget` becomes `adaptive` and `disabled` becomes `between_tools`, each\n * pushing its sentence from the statement onto `changes`; anything else is kept. Returns the new setting.\n * Example: migrateThinking(\"disabled\", changes) -> \"between_tools\", and changes gains \"thinking disabled replaced by between_tools\"\n */\nfunction migrateThinking(thinking: string, changes: string[]): string {\n  return thinking;\n}\n\nexport function migrateRequest(request: Request, target = TARGET): [Request, string[]] {\n  const changes: string[] = [];\n  if (request.model !== target) changes.push(`model set to ${target}`);\n  if (request.temperature !== null) changes.push(\"removed temperature\");\n  if (request.topP !== null) changes.push(\"removed top_p\");\n  if (request.topK !== null) changes.push(\"removed top_k\");\n  const thinking = migrateThinking(request.thinking, changes);\n  let toolChoice = request.toolChoice;\n  let strict = request.strict;\n  if (toolChoice === \"any\" || toolChoice === \"tool\") {\n    toolChoice = \"auto\";\n    strict = true;\n    changes.push(\"forced tool choice replaced by auto with strict tools\");\n  }\n  if (request.prefill) changes.push(\"assistant prefill removed; state the format in the instructions\");\n  return [{ model: target, temperature: null, topP: null, topK: null, thinking, toolChoice, strict, prefill: false }, changes];\n}\n\n/**\n * TODO 3 of 9 (unlocks e1): the reasons for failed must-pass cases.\n * Receives the cases. Returns an array with `must-pass failed: <ids>` (sorted, joined by `, `) for the cases marked must pass that the new\n * model fails, or an empty array. Example: one failing must-pass case a1 -> [\"must-pass failed: a1\"]\n */\nfunction mustPass(cases: Case[]): string[] {\n  return [];\n}\n\n/**\n * TODO 4 of 9 (unlocks e2): the reason for a protected segment that lost answers.\n * Receives the cases and the protected segments. Returns an array with `protected segment lost answers: <segments>` (sorted, distinct)\n * for the protected segments with a case the old model got right and the new one did not, or an empty array.\n * Example: refund lost b3 -> [\"protected segment lost answers: refund\"]\n */\nfunction protectedLost(cases: Case[], protectedSegments: string[]): string[] {\n  return [];\n}\n\n/**\n * TODO 5 of 9 (unlocks e3): the reason for more losses than gains.\n * Receives the cases. Returns an array with `net loss: lost N, gained M` when the cases lost (old right, new wrong) outnumber the cases\n * gained (the opposite), or an empty array. Example: 2 lost and 1 gained -> [\"net loss: lost 2, gained 1\"]\n */\nfunction netLoss(cases: Case[]): string[] {\n  return [];\n}\n\n/**\n * TODO 6 of 9 (unlocks e4): the reason for a cost rise over the limit.\n * Receives the cases and the largest allowed rise in whole percent. The rise is the new total cost over the old one, rounded down, 0 when\n * the old total is 0 or the cost fell. Returns an array with `cost up X% over the Y% limit` when X is above Y, or an empty array.\n * Example: costs 40 -> 50 with a limit of 20 -> [\"cost up 25% over the 20% limit\"]; costs 40 -> 48 with a limit of 20 -> []\n */\nfunction costRise(cases: Case[], maxCostUp: number): string[] {\n  return [];\n}\n\n/**\n * TODO 7 of 9 (unlocks e5): the reason for a slow tail.\n * Receives the cases and the largest allowed 95th-percentile time in ms. Uses `percentile` over the `newMs` of the cases. Returns an array\n * with `p95 latency X ms over the Y ms limit` when X is above Y, or an empty array. Example: p95 3000 with a limit of 2000 -> one reason\n */\nfunction latency(cases: Case[], maxP95: number): string[] {\n  return [];\n}\n\n/**\n * TODO 8 of 9 (unlocks m1): the decision of the gate.\n * Receives the array of reasons. Returns \"no-go\" when there is any reason, \"go\" when there is none. Example: decision([]) -> \"go\"\n */\nfunction decision(reasons: string[]): string {\n  return \"\";\n}\n\nexport function gate(cases: Case[], protectedSegments: string[], maxCostUp: number, maxP95: number): { decision: string; reasons: string[] } {\n  const reasons = [...mustPass(cases), ...protectedLost(cases, protectedSegments), ...netLoss(cases), ...costRise(cases, maxCostUp), ...latency(cases, maxP95)];\n  return { decision: decision(reasons), reasons };\n}\n\n/**\n * TODO 9 of 9 (unlocks e6): the step of a staged roll-out.\n * Receives the stage (1, 5, 25 or 100), the requests and errors seen, the fewest requests to judge and the most errors per 1000.\n * Returns \"hold at <stage>\" with too few requests, \"rollback to 0\" when errors per 1000 (rounded down) pass the limit, \"complete\" at\n * stage 100 when healthy, else \"advance to <next stage>\". Example: rolloutStep(1, 2000, 6, 1000, 5) -> \"advance to 5\"\n */\nexport function rolloutStep(stage: number, requests: number, errors: number, minRequests: number, maxErrorsPer1000: number): string {\n  return \"\";\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { migrateRequest, retirementStatus, rolloutStep } from \"./rollout.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// The retirement calendar: days left per model, nearest first, with the level of urgency.\nconst models: Array<[string, string, boolean]> = [[\"claude-old-a\", \"2026-10-18\", true], [\"claude-old-b\", \"2026-11-30\", false], [\"claude-old-c\", \"2027-01-01\", false]];\nconsole.log(\"calendar:\", retirementStatus(models, \"2026-10-04\").join(\"; \"));\n\n// A request written for an older model, and what the migration changes in it.\nconst old = { model: \"claude-sonnet-4-5-20250929\", temperature: 0.7, topP: 0.9, topK: 40, thinking: \"disabled\", toolChoice: \"any\", strict: false, prefill: true };\nconst [migrated, changes] = migrateRequest(old);\nconsole.log(\"migrated model:\", migrated.model);\nconsole.log(\"changes:\", changes.join(\"; \"));\n\n// A staged rollout: one decision per stage from the traffic and the errors seen so far.\nconsole.log(\"stage 1:\", rolloutStep(1, 2000, 6, 1000, 5));\nconsole.log(\"stage 25:\", rolloutStep(25, 50000, 400, 1000, 5));\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "7e4821c0fcb7d38619d319895eba66b6eb387bd6f134b6fe4965d8953a6a5d9d",
+  "starting_code": "/** Rollout kit: the retirement calendar, the settings a new model refuses, a gate on a regression suite and a staged roll-out. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"rollout\");\n\nexport type Case = { id: string; segment: string; mustPass: boolean; oldOk: boolean; newOk: boolean; oldCost: number; newCost: number; newMs: number };\nexport type Request = { model: string; temperature: number | null; topP: number | null; topK: number | null; thinking: string; toolChoice: string; strict: boolean; prefill: boolean };\n\nexport const STAGES = [1, 5, 25, 100];\nexport const TARGET = \"claude-sonnet-5-5\";\n\n/** Whole days from one ISO date to another, negative when it has passed (written for you). */\nexport function daysUntil(today: string, when: string): number {\n  const [y1, m1, d1] = today.split(\"-\").map(Number);\n  const [y2, m2, d2] = when.split(\"-\").map(Number);\n  return Math.round((Date.UTC(y2, m2 - 1, d2) - Date.UTC(y1, m1 - 1, d1)) / 86400000);\n}\n\n/** Nearest-rank percentile, 0 for no values (written for you). */\nexport function percentile(values: number[], p: number): number {\n  const ordered = [...values].sort((a, b) => a - b);\n  return ordered.length ? ordered[Math.floor((p * ordered.length + 99) / 100) - 1] : 0;\n}\n\n/**\n * TODO 1 of 9 (unlocks e7): one line of the retirement calendar.\n * Receives the days left, the model name and whether the date is tentative. Returns `<name>: <days> days, <level>` with ` (tentative)`\n * added when it is tentative; the level is `retired` below 0, `urgent` up to 14, `migrate now` up to 60, else `watch`.\n * Example: statusLine(14, \"a\", true) -> \"a: 14 days, urgent (tentative)\"\n */\nfunction statusLine(days: number, name: string, tentative: boolean): string {\n  return \"\";\n}\n\nexport function retirementStatus(models: [string, string, boolean][], today: string): string[] {\n  log.debug(\"retirementStatus input\", models);\n  const rows = models.map(([name, when, tentative]) => ({ days: daysUntil(today, when), name, tentative }));\n  rows.sort((a, b) => a.days - b.days || (a.name < b.name ? -1 : a.name > b.name ? 1 : Number(a.tentative) - Number(b.tentative)));\n  return rows.map((r) => statusLine(r.days, r.name, r.tentative));\n}\n\n/**\n * TODO 2 of 9 (unlocks e8): migrate the thinking setting.\n * Receives the thinking setting and the list of changes so far. `budget` becomes `adaptive` and `disabled` becomes `between_tools`, each\n * pushing its sentence from the statement onto `changes`; anything else is kept. Returns the new setting.\n * Example: migrateThinking(\"disabled\", changes) -> \"between_tools\", and changes gains \"thinking disabled replaced by between_tools\"\n */\nfunction migrateThinking(thinking: string, changes: string[]): string {\n  return thinking;\n}\n\nexport function migrateRequest(request: Request, target = TARGET): [Request, string[]] {\n  const changes: string[] = [];\n  if (request.model !== target) changes.push(`model set to ${target}`);\n  if (request.temperature !== null) changes.push(\"removed temperature\");\n  if (request.topP !== null) changes.push(\"removed top_p\");\n  if (request.topK !== null) changes.push(\"removed top_k\");\n  const thinking = migrateThinking(request.thinking, changes);\n  let toolChoice = request.toolChoice;\n  let strict = request.strict;\n  if (toolChoice === \"any\" || toolChoice === \"tool\") {\n    toolChoice = \"auto\";\n    strict = true;\n    changes.push(\"forced tool choice replaced by auto with strict tools\");\n  }\n  if (request.prefill) changes.push(\"assistant prefill removed; state the format in the instructions\");\n  return [{ model: target, temperature: null, topP: null, topK: null, thinking, toolChoice, strict, prefill: false }, changes];\n}\n\n/**\n * TODO 3 of 9 (unlocks e1): the reasons for failed must-pass cases.\n * Receives the cases. Returns an array with `must-pass failed: <ids>` (sorted, joined by `, `) for the cases marked must pass that the new\n * model fails, or an empty array. Example: one failing must-pass case a1 -> [\"must-pass failed: a1\"]\n */\nfunction mustPass(cases: Case[]): string[] {\n  return [];\n}\n\n/**\n * TODO 4 of 9 (unlocks e2): the reason for a protected segment that lost answers.\n * Receives the cases and the protected segments. Returns an array with `protected segment lost answers: <segments>` (sorted, distinct)\n * for the protected segments with a case the old model got right and the new one did not, or an empty array.\n * Example: refund lost b3 -> [\"protected segment lost answers: refund\"]\n */\nfunction protectedLost(cases: Case[], protectedSegments: string[]): string[] {\n  return [];\n}\n\n/**\n * TODO 5 of 9 (unlocks e3): the reason for more losses than gains.\n * Receives the cases. Returns an array with `net loss: lost N, gained M` when the cases lost (old right, new wrong) outnumber the cases\n * gained (the opposite), or an empty array. Example: 2 lost and 1 gained -> [\"net loss: lost 2, gained 1\"]\n */\nfunction netLoss(cases: Case[]): string[] {\n  return [];\n}\n\n/**\n * TODO 6 of 9 (unlocks e4): the reason for a cost rise over the limit.\n * Receives the cases and the largest allowed rise in whole percent. The rise is the new total cost over the old one, rounded down, 0 when\n * the old total is 0 or the cost fell. Returns an array with `cost up X% over the Y% limit` when X is above Y, or an empty array.\n * Example: costs 40 -> 50 with a limit of 20 -> [\"cost up 25% over the 20% limit\"]; costs 40 -> 48 with a limit of 20 -> []\n */\nfunction costRise(cases: Case[], maxCostUp: number): string[] {\n  return [];\n}\n\n/**\n * TODO 7 of 9 (unlocks e5): the reason for a slow tail.\n * Receives the cases and the largest allowed 95th-percentile time in ms. Uses `percentile` over the `newMs` of the cases. Returns an array\n * with `p95 latency X ms over the Y ms limit` when X is above Y, or an empty array. Example: p95 3000 with a limit of 2000 -> one reason\n */\nfunction latency(cases: Case[], maxP95: number): string[] {\n  return [];\n}\n\n/**\n * TODO 8 of 9 (unlocks m1): the decision of the gate.\n * Receives the array of reasons. Returns \"no-go\" when there is any reason, \"go\" when there is none. Example: decision([]) -> \"go\"\n */\nfunction decision(reasons: string[]): string {\n  return \"\";\n}\n\nexport function gate(cases: Case[], protectedSegments: string[], maxCostUp: number, maxP95: number): { decision: string; reasons: string[] } {\n  const reasons = [...mustPass(cases), ...protectedLost(cases, protectedSegments), ...netLoss(cases), ...costRise(cases, maxCostUp), ...latency(cases, maxP95)];\n  return { decision: decision(reasons), reasons };\n}\n\n/**\n * TODO 9 of 9 (unlocks e6): the step of a staged roll-out.\n * Receives the stage (1, 5, 25 or 100), the requests and errors seen, the fewest requests to judge and the most errors per 1000.\n * Returns \"hold at <stage>\" with too few requests, \"rollback to 0\" when errors per 1000 (rounded down) pass the limit, \"complete\" at\n * stage 100 when healthy, else \"advance to <next stage>\". Example: rolloutStep(1, 2000, 6, 1000, 5) -> \"advance to 5\"\n */\nexport function rolloutStep(stage: number, requests: number, errors: number, minRequests: number, maxErrorsPer1000: number): string {\n  return \"\";\n}\n",
+  "exercise": {
+    "main_path": "practice/level-4/89-migration-and-model-upgrades-at-scale/prose/unit-02/practice-2/rollout.ts",
+    "test_path": "practice/level-4/89-migration-and-model-upgrades-at-scale/prose/unit-02/practice-2/rollout.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-4/89-migration-and-model-upgrades-at-scale/prose/unit-02/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-4/89-migration-and-model-upgrades-at-scale/prose/unit-02/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-4/89-migration-and-model-upgrades-at-scale/prose/unit-02/practice-2/rollout.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 a change that regresses nothing and stays inside its limits gets a go with no reasons",
+        "kind": "main",
+        "says": "A change that regresses nothing and stays inside its limits gets a go with no reasons"
+      },
+      {
+        "id": "e1 a must pass case that fails blocks the change and the ids are listed in order",
+        "kind": "edge",
+        "says": "A must-pass case that fails blocks the change and the ids are listed in order"
+      },
+      {
+        "id": "e2 a protected segment that lost answers blocks the change even when gains elsewhere match the losses",
+        "kind": "edge",
+        "says": "A protected segment that lost answers blocks the change even when gains elsewhere match the losses"
+      },
+      {
+        "id": "e3 more losses than gains blocks the change and both counts are named",
+        "kind": "edge",
+        "says": "More losses than gains blocks the change and both counts are named"
+      },
+      {
+        "id": "e4 a cost rise over the limit blocks the change and a rise exactly at the limit does not",
+        "kind": "edge",
+        "says": "A cost rise over the limit blocks the change and a rise exactly at the limit does not"
+      },
+      {
+        "id": "e5 the tail is the nearest rank 95th percentile and a single slow case does not block",
+        "kind": "edge",
+        "says": "The tail is the nearest-rank 95th percentile and a single slow case does not block"
+      },
+      {
+        "id": "e6 a roll out advances when healthy holds with too few requests and rolls back to zero when errors pass the limit",
+        "kind": "edge",
+        "says": "A roll-out advances when healthy, holds with too few requests and rolls back to zero when errors pass the limit"
+      },
+      {
+        "id": "e7 the retirement calendar counts days ranks the nearest first and names the level",
+        "kind": "edge",
+        "says": "The retirement calendar counts days, ranks the nearest first and names the level"
+      },
+      {
+        "id": "e8 migration removes the settings the new model refuses and names each change",
+        "kind": "edge",
+        "says": "Migration removes the settings the new model refuses and names each change"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-4/89-migration-and-model-upgrades-at-scale/prose/unit-02/practice-2/target/report.xml"
+    },
+    "origin": "course/89-migration-and-model-upgrades-at-scale/02-the-gate-the-roll-out-and-the-way-back.md",
+    "concepts": [
+      "the practice of The gate, the roll-out and the way back is solved"
+    ],
+    "files": [
+      "practice/level-4/89-migration-and-model-upgrades-at-scale/prose/unit-02/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "migration-and-model-upgrades-at-scale-u2"
+}

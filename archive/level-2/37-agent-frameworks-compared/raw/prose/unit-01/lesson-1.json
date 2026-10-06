@@ -1,0 +1,303 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "37-agent-frameworks-compared"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Graph-based, model-driven and typed frameworks",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Graph-based, model-driven and typed frameworks"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Developer · **Module 37:** Agent frameworks compared · **Page 1 of 2** **Exams:** DV3"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** describe what a graph-based, a model-driven and a typed agent framework each gives you, say what a checkpoint is and why a graph needs one, and name the control each style trades away."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-03 against the vendors' own pages: the Anthropic engineering post \"Building effective agents\" (published 2024-12-19), the LangGraph overview and persistence pages, the Strands Agents blog post of 2025-09-12 and the Pydantic AI home page. The frameworks change quickly, so the page teaches the families and quotes each vendor only for its own definition. The example runs offline with a scripted model, and it contains the course's own miniatures of the three styles, not any framework's code. The tabs are Python, TypeScript, Java and Kotlin."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "Teams reach for a framework before they know what they need from one. The exam asks you to recognise the three families by what they put under your control, and to give the reason a framework is, or is not, the right choice for a task. You do not need to know any API by heart."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Where the control sits"
+    },
+    {
+      "type": "para",
+      "text": "Every agent is a loop that asks a model what to do, runs the tool it picks and feeds back the result. The families differ in who owns the shape of that loop."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Family",
+        "Who decides the next step",
+        "What the framework gives you"
+      ],
+      "rows": [
+        [
+          "Graph-based",
+          "You, in advance: nodes and edges",
+          "State, checkpoints, resume, human approval"
+        ],
+        [
+          "Model-driven",
+          "The model, at each turn",
+          "A loop, tool handling and stop conditions"
+        ],
+        [
+          "Typed",
+          "The model, inside a schema",
+          "Validated output, typed dependencies"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The families are not exclusive. A graph can contain a model-driven node, and a typed agent can run inside a graph. They are the answer to a design question: how much of the route do I want to write down?"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Graph-based: you draw the route"
+    },
+    {
+      "type": "para",
+      "text": "LangGraph describes itself as a \"low-level orchestration framework and runtime for building, managing, and deploying long-running, stateful agents.\" Its stated strength is \"the ability to mix deterministic steps with LLM-driven agentic steps in a single graph\". A graph has nodes, which do work, and edges, which choose the next node from the state. The model fills in a node. It does not pick the route."
+    },
+    {
+      "type": "para",
+      "text": "The cost of drawing the route is what buys the main feature. When every step is a node with explicit state, the state can be saved after each node. LangGraph names this layer persistence: \"Checkpointers persist a thread's graph state as checkpoints\", used for \"conversation continuity, human-in-the-loop workflows, time travel, and fault tolerance.\" A checkpoint is a copy of the state at a point in the graph. After a crash, or while a person decides, the run resumes from the last checkpoint and repeats no earlier node, so the model calls already paid for are not made again."
+    },
+    {
+      "type": "para",
+      "text": "Use the style when the process is known and must be auditable: an approval chain, an order flow, a pipeline in which some steps must always run. Its limit is the other side of the same choice: a case you did not draw has no path."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Model-driven: the model draws the route"
+    },
+    {
+      "type": "para",
+      "text": "The Strands Agents SDK takes the opposite position. Its authors write that \"Traditional agent frameworks required developers to build elaborate orchestration logic, state machines, and predefined workflows to guide language models through tasks.\" Their answer is the model-driven approach: \"we let modern large language models drive their own behavior, make intelligent decisions about tool usage, and adapt dynamically to whatever comes their way.\""
+    },
+    {
+      "type": "para",
+      "text": "The framework shrinks to a loop, a set of tools and a stop rule. The route is whatever the model chooses, so the same code handles a case nobody planned for. The price is the usual one of an agent. \"Agentic systems often trade latency and cost for better task performance\", in the words of \"Building effective agents\", and a loop that never ends must be cut off: that post lists \"stopping conditions (such as a maximum number of iterations) to maintain control.\" Claude Code's own loop, from module 35, is of this kind."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Typed: the answer must fit a schema"
+    },
+    {
+      "type": "para",
+      "text": "Pydantic AI presents itself as \"a typed, extensible agent loop with every model a string swap away.\" Its centre is the contract of the call. The agent is generic in the type of its dependencies and the type of its output, and a reply that does not validate against the output type is refused. In practice the failure goes back to the model as a retry message and the run continues, which turns a malformed reply into a recoverable event. The style fits services whose callers need a record of fixed shape: a refund amount in cents, a category from a list."
+    },
+    {
+      "type": "para",
+      "text": "Typing and the other styles combine. A typed agent can be one node of a graph, and a model-driven loop can end with a typed result. Types guard the edges of the model's freedom. They do not choose the route."
+    },
+    {
+      "type": "example",
+      "id": "m37-three-agent-styles",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/37-three-agent-styles/python/three_styles.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/37-three-agent-styles/typescript/threeStyles.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/37-three-agent-styles/java/ThreeStyles.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/37-three-agent-styles/kotlin/ThreeStyles.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"One small task, three ways to build it: a graph you draw, a loop the model drives, and a typed result you validate.\n\nThe task is a support ticket: decide whether it is about billing, look the invoice up when it is, and write a reply. The three\nfunctions below are miniatures of what graph-based, model-driven and typed agent frameworks give you. They are the course's own\nsketches, not any framework's code, and the model is a scripted function, so nothing here calls an API.\n\"\"\"\nimport logging\nimport json\n\nlog = logging.getLogger(__name__)\n\nTICKET = \"I was charged twice for invoice 1042.\"\nINVOICES = {\"1042\": \"paid twice on 2026-09-30\"}\n\n\ndef scripted(replies):\n    \"\"\"A stand-in model: it returns the next scripted reply and keeps the prompts it was shown.\"\"\"\n    queue, seen = list(replies), []\n\n    def model(prompt):\n        seen.append(prompt)\n        return queue.pop(0)\n\n    model.seen = seen\n    return model\n\n\n# 1. Graph style: the programmer fixes the nodes and the edges; the model only fills in a node. State is explicit and checkpointed.\n\ndef run_graph(model, ticket, resume_from=0, checkpoints=None):\n    def classify(s):\n        return {\"topic\": model(f\"Classify as billing or other: {s['ticket']}\").strip().lower()}\n\n    def lookup(s):\n        return {\"invoice\": INVOICES.get(s[\"ticket\"].split(\"invoice \")[1].rstrip(\".\"), \"unknown\")}\n\n    def draft(s):\n        return {\"reply\": model(f\"Write a reply. Topic: {s['topic']}. Invoice: {s.get('invoice', 'none')}\")}\n\n    nodes = {\"classify\": classify, \"lookup\": lookup, \"draft\": draft}\n    edges = {\"classify\": lambda s: \"lookup\" if s[\"topic\"] == \"billing\" else \"draft\", \"lookup\": lambda s: \"draft\", \"draft\": lambda s: None}\n    checkpoints = checkpoints if checkpoints is not None else [(\"classify\", {\"ticket\": ticket})]\n    node, state = checkpoints[resume_from]\n    del checkpoints[resume_from + 1:]\n    path = []\n    while node:\n        state = {**state, **nodes[node](state)}\n        path.append(node)\n        node = edges[node](state)\n        if node:\n            checkpoints.append((node, dict(state)))\n    return {\"path\": path, \"state\": state, \"checkpoints\": checkpoints}\n\n\n# 2. Model-driven style: the model sees the tools and decides the next step; the loop only executes and stops.\n\ndef run_agent(model, ticket, max_steps=5):\n    tools = {\"lookup_invoice\": lambda arg: INVOICES.get(arg, \"unknown\")}\n    trace, observation = [], \"\"\n    for _ in range(max_steps):\n        step = json.loads(model(f\"Ticket: {ticket}\\nTools: {sorted(tools)}\\nLast result: {observation}\\nReply JSON: a tool call or a final reply.\"))\n        if \"final\" in step:\n            return {\"reply\": step[\"final\"], \"trace\": trace}\n        observation = tools[step[\"tool\"]](step[\"arg\"])\n        trace.append(f\"{step['tool']}({step['arg']}) -> {observation}\")\n    return {\"reply\": None, \"trace\": trace, \"stopped\": \"max_steps\"}\n\n\n# 3. Typed style: the answer must match a schema; a mismatch goes back to the model as feedback, once.\n\nSCHEMA = {\"topic\": str, \"refund_cents\": int}\n\n\ndef validate(raw):\n    try:\n        data = json.loads(raw)\n    except json.JSONDecodeError:\n        return None, \"the reply is not JSON\"\n    for field, kind in SCHEMA.items():\n        if not isinstance(data.get(field), kind) or isinstance(data.get(field), bool):\n            return None, f\"field {field} must be {kind.__name__}\"\n    return data, None\n\n\ndef run_typed(model, ticket, retries=1):\n    prompt, attempts = f\"Return JSON with topic and refund_cents for: {ticket}\", 0\n    while True:\n        attempts += 1\n        data, error = validate(model(prompt))\n        if data is not None:\n            return {\"data\": data, \"attempts\": attempts}\n        if attempts > retries:\n            return {\"data\": None, \"attempts\": attempts, \"error\": error}\n        prompt = f\"{prompt}\\nYour last reply was refused: {error}. Fix it.\"\n\n\ndef main():\n    m = scripted([\"billing\", \"We refunded the duplicate charge on invoice 1042.\"])\n    graph = run_graph(m, TICKET)\n    print(\"graph:\", \" -> \".join(graph[\"path\"]), \"| model calls:\", len(m.seen), \"| checkpoints:\", len(graph[\"checkpoints\"]))\n    again = scripted([\"We refunded the duplicate charge on invoice 1042.\"])\n    resumed = run_graph(again, TICKET, resume_from=2, checkpoints=list(graph[\"checkpoints\"]))\n    print(\"graph resumed from checkpoint 2:\", \" -> \".join(resumed[\"path\"]), \"| model calls:\", len(again.seen), \"| same reply:\", resumed[\"state\"][\"reply\"] == graph[\"state\"][\"reply\"])\n    a = scripted(['{\"tool\": \"lookup_invoice\", \"arg\": \"1042\"}', '{\"final\": \"Refunded the second payment.\"}'])\n    agent = run_agent(a, TICKET)\n    print(\"agent:\", agent[\"trace\"], \"->\", agent[\"reply\"], \"| model calls:\", len(a.seen))\n    loop = scripted(['{\"tool\": \"lookup_invoice\", \"arg\": \"1\"}'] * 3)\n    print(\"agent that never finishes:\", run_agent(loop, TICKET, max_steps=3)[\"stopped\"], \"after\", len(loop.seen), \"calls\")\n    t = scripted(['{\"topic\": \"billing\", \"refund_cents\": \"4999\"}', '{\"topic\": \"billing\", \"refund_cents\": 4999}'])\n    typed = run_typed(t, TICKET)\n    print(\"typed:\", typed[\"data\"], \"| attempts:\", typed[\"attempts\"], \"| second prompt ends:\", t.seen[1].split(\"\\n\")[-1])\n    bad = run_typed(scripted([\"no json\", \"still no json\"]), TICKET)\n    print(\"typed, never valid:\", bad[\"error\"], \"after\", bad[\"attempts\"], \"attempts\")\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "graph: classify -> lookup -> draft | model calls: 2 | checkpoints: 3\ngraph resumed from checkpoint 2: draft | model calls: 1 | same reply: True\nagent: ['lookup_invoice(1042) -> paid twice on 2026-09-30'] -> Refunded the second payment. | model calls: 2\nagent that never finishes: max_steps after 3 calls\ntyped: {'topic': 'billing', 'refund_cents': 4999} | attempts: 2 | second prompt ends: Your last reply was refused: field refund_cents must be int. Fix it.\ntyped, never valid: the reply is not JSON after 2 attempts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// One small task, three ways to build it: a graph you draw, a loop the model drives, and a typed result you validate.\n//\n// The task is a support ticket: decide whether it is about billing, look the invoice up when it is, and write a reply. The three\n// functions below are miniatures of what graph-based, model-driven and typed agent frameworks give you. They are the course's own\n// sketches, not any framework's code, and the model is a scripted function, so nothing here calls an API.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"three_styles\");\n\nexport const TICKET = \"I was charged twice for invoice 1042.\";\nconst INVOICES: Record<string, string> = { \"1042\": \"paid twice on 2026-09-30\" };\n\nexport type Model = ((prompt: string) => string) & { seen: string[] };\ntype State = Record<string, any>;\ntype Checkpoint = [string, State];\n\n/** A stand-in model: it returns the next scripted reply and keeps the prompts it was shown. */\nexport function scripted(replies: string[]): Model {\n  const queue = [...replies];\n  const seen: string[] = [];\n  const model = ((prompt: string) => {\n    seen.push(prompt);\n    return queue.shift() as string;\n  }) as Model;\n  model.seen = seen;\n  return model;\n}\n\n// 1. Graph style: the programmer fixes the nodes and the edges; the model only fills in a node. State is explicit and checkpointed.\n\nexport function runGraph(model: Model, ticket: string, resumeFrom = 0, checkpoints?: Checkpoint[]) {\n  const nodes: Record<string, (s: State) => State> = {\n    classify: (s) => ({ topic: model(`Classify as billing or other: ${s.ticket}`).trim().toLowerCase() }),\n    lookup: (s) => ({ invoice: INVOICES[s.ticket.split(\"invoice \")[1].replace(/\\.+$/, \"\")] ?? \"unknown\" }),\n    draft: (s) => ({ reply: model(`Write a reply. Topic: ${s.topic}. Invoice: ${s.invoice ?? \"none\"}`) }),\n  };\n  const edges: Record<string, (s: State) => string | null> = {\n    classify: (s) => (s.topic === \"billing\" ? \"lookup\" : \"draft\"),\n    lookup: () => \"draft\",\n    draft: () => null,\n  };\n  const saved: Checkpoint[] = checkpoints ?? [[\"classify\", { ticket }]];\n  let [node, state]: [string | null, State] = saved[resumeFrom];\n  saved.length = resumeFrom + 1;\n  const path: string[] = [];\n  while (node) {\n    state = { ...state, ...nodes[node](state) };\n    path.push(node);\n    node = edges[node](state);\n    if (node) saved.push([node, { ...state }]);\n  }\n  return { path, state, checkpoints: saved };\n}\n\n// 2. Model-driven style: the model sees the tools and decides the next step; the loop only executes and stops.\n\nexport function runAgent(model: Model, ticket: string, maxSteps = 5): { reply: string | null; trace: string[]; stopped?: string } {\n  const tools: Record<string, (arg: string) => string> = { lookup_invoice: (arg) => INVOICES[arg] ?? \"unknown\" };\n  const trace: string[] = [];\n  let observation = \"\";\n  for (let i = 0; i < maxSteps; i++) {\n    const step = JSON.parse(model(`Ticket: ${ticket}\\nTools: ${JSON.stringify(Object.keys(tools).sort()).replace(/\"/g, \"'\").replace(/,/g, \", \")}\\nLast result: ${observation}\\nReply JSON: a tool call or a final reply.`));\n    if (\"final\" in step) return { reply: step.final, trace };\n    observation = tools[step.tool](step.arg);\n    trace.push(`${step.tool}(${step.arg}) -> ${observation}`);\n  }\n  return { reply: null, trace, stopped: \"max_steps\" };\n}\n\n// 3. Typed style: the answer must match a schema; a mismatch goes back to the model as feedback, once.\n\nconst SCHEMA: Record<string, \"string\" | \"integer\"> = { topic: \"string\", refund_cents: \"integer\" };\nconst KIND_NAME = { string: \"str\", integer: \"int\" };\n\nexport function validate(raw: string): [Record<string, any> | null, string | null] {\n  let data: any;\n  try {\n    data = JSON.parse(raw);\n  } catch {\n    return [null, \"the reply is not JSON\"];\n  }\n  for (const [field, kind] of Object.entries(SCHEMA)) {\n    const ok = kind === \"string\" ? typeof data?.[field] === \"string\" : Number.isInteger(data?.[field]);\n    if (!ok) return [null, `field ${field} must be ${KIND_NAME[kind]}`];\n  }\n  return [data, null];\n}\n\nexport function runTyped(model: Model, ticket: string, retries = 1) {\n  let prompt = `Return JSON with topic and refund_cents for: ${ticket}`;\n  let attempts = 0;\n  for (;;) {\n    attempts++;\n    const [data, error] = validate(model(prompt));\n    if (data) return { data, attempts };\n    if (attempts > retries) return { data: null, attempts, error };\n    prompt = `${prompt}\\nYour last reply was refused: ${error}. Fix it.`;\n  }\n}\n\nfunction show(value: unknown): string {\n  if (Array.isArray(value)) return `[${value.map(show).join(\", \")}]`;\n  if (value && typeof value === \"object\") return `{${Object.entries(value).map(([k, v]) => `'${k}': ${show(v)}`).join(\", \")}}`;\n  return typeof value === \"string\" ? `'${value}'` : String(value);\n}\n\nfunction main() {\n  const m = scripted([\"billing\", \"We refunded the duplicate charge on invoice 1042.\"]);\n  const graph = runGraph(m, TICKET);\n  console.log(\"graph:\", graph.path.join(\" -> \"), \"| model calls:\", m.seen.length, \"| checkpoints:\", graph.checkpoints.length);\n  const again = scripted([\"We refunded the duplicate charge on invoice 1042.\"]);\n  const resumed = runGraph(again, TICKET, 2, [...graph.checkpoints]);\n  console.log(\"graph resumed from checkpoint 2:\", resumed.path.join(\" -> \"), \"| model calls:\", again.seen.length, \"| same reply:\", resumed.state.reply === graph.state.reply ? \"True\" : \"False\");\n  const a = scripted(['{\"tool\": \"lookup_invoice\", \"arg\": \"1042\"}', '{\"final\": \"Refunded the second payment.\"}']);\n  const agent = runAgent(a, TICKET);\n  console.log(\"agent:\", show(agent.trace), \"->\", agent.reply, \"| model calls:\", a.seen.length);\n  const loop = scripted(Array(3).fill('{\"tool\": \"lookup_invoice\", \"arg\": \"1\"}'));\n  console.log(\"agent that never finishes:\", runAgent(loop, TICKET, 3).stopped, \"after\", loop.seen.length, \"calls\");\n  const t = scripted(['{\"topic\": \"billing\", \"refund_cents\": \"4999\"}', '{\"topic\": \"billing\", \"refund_cents\": 4999}']);\n  const typed = runTyped(t, TICKET);\n  console.log(\"typed:\", show(typed.data), \"| attempts:\", typed.attempts, \"| second prompt ends:\", t.seen[1].split(\"\\n\").at(-1));\n  const bad = runTyped(scripted([\"no json\", \"still no json\"]), TICKET);\n  console.log(\"typed, never valid:\", bad.error, \"after\", bad.attempts, \"attempts\");\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "graph: classify -> lookup -> draft | model calls: 2 | checkpoints: 3\ngraph resumed from checkpoint 2: draft | model calls: 1 | same reply: True\nagent: ['lookup_invoice(1042) -> paid twice on 2026-09-30'] -> Refunded the second payment. | model calls: 2\nagent that never finishes: max_steps after 3 calls\ntyped: {'topic': 'billing', 'refund_cents': 4999} | attempts: 2 | second prompt ends: Your last reply was refused: field refund_cents must be int. Fix it.\ntyped, never valid: the reply is not JSON after 2 attempts"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import com.fasterxml.jackson.databind.ObjectMapper;\nimport java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.function.Function;\nimport java.util.stream.Collectors;\n\n/**\n * One small task, three ways to build it: a graph you draw, a loop the model drives, and a typed result you validate.\n *\n * <p>The task is a support ticket: decide whether it is about billing, look the invoice up when it is, and write a reply. The three\n * functions below are miniatures of what graph-based, model-driven and typed agent frameworks give you. They are the course's own\n * sketches, not any framework's code, and the model is a scripted function, so nothing here calls an API.\n */\npublic final class ThreeStyles {\n    private static final System.Logger LOG = System.getLogger(ThreeStyles.class.getName());\n    static final String TICKET = \"I was charged twice for invoice 1042.\";\n    static final Map<String, String> INVOICES = Map.of(\"1042\", \"paid twice on 2026-09-30\");\n    private static final ObjectMapper JSON = new ObjectMapper();\n\n    /** A stand-in model: it returns the next scripted reply and keeps the prompts it was shown. */\n    static final class Scripted implements Function<String, String> {\n        final List<String> queue;\n        final List<String> seen = new ArrayList<>();\n\n        Scripted(String... replies) {\n            queue = new ArrayList<>(List.of(replies));\n        }\n\n        @Override\n        public String apply(String prompt) {\n            seen.add(prompt);\n            return queue.remove(0);\n        }\n    }\n\n    // 1. Graph style: the programmer fixes the nodes and the edges; the model only fills in a node. State is explicit and checkpointed.\n\n    record Checkpoint(String node, Map<String, String> state) {}\n\n    record GraphRun(List<String> path, Map<String, String> state, List<Checkpoint> checkpoints) {}\n\n    static GraphRun runGraph(Function<String, String> model, String ticket, int resumeFrom, List<Checkpoint> given) {\n        Map<String, Function<Map<String, String>, Map<String, String>>> nodes = Map.of(\n            \"classify\", s -> Map.of(\"topic\", model.apply(\"Classify as billing or other: \" + s.get(\"ticket\")).strip().toLowerCase(java.util.Locale.ROOT)),\n            \"lookup\", s -> Map.of(\"invoice\", INVOICES.getOrDefault(s.get(\"ticket\").split(\"invoice \")[1].replaceAll(\"\\\\.+$\", \"\"), \"unknown\")),\n            \"draft\", s -> Map.of(\"reply\", model.apply(\"Write a reply. Topic: \" + s.get(\"topic\") + \". Invoice: \" + s.getOrDefault(\"invoice\", \"none\"))));\n        Map<String, Function<Map<String, String>, String>> edges = Map.of(\n            \"classify\", s -> s.get(\"topic\").equals(\"billing\") ? \"lookup\" : \"draft\",\n            \"lookup\", s -> \"draft\",\n            \"draft\", s -> null);\n        List<Checkpoint> checkpoints = given != null ? given : new ArrayList<>(List.of(new Checkpoint(\"classify\", Map.of(\"ticket\", ticket))));\n        String node = checkpoints.get(resumeFrom).node();\n        Map<String, String> state = checkpoints.get(resumeFrom).state();\n        while (checkpoints.size() > resumeFrom + 1) checkpoints.remove(checkpoints.size() - 1);\n        List<String> path = new ArrayList<>();\n        while (node != null) {\n            Map<String, String> next = new LinkedHashMap<>(state);\n            next.putAll(nodes.get(node).apply(state));\n            state = next;\n            path.add(node);\n            node = edges.get(node).apply(state);\n            if (node != null) checkpoints.add(new Checkpoint(node, new LinkedHashMap<>(state)));\n        }\n        return new GraphRun(path, state, checkpoints);\n    }\n\n    // 2. Model-driven style: the model sees the tools and decides the next step; the loop only executes and stops.\n\n    record AgentRun(String reply, List<String> trace, String stopped) {}\n\n    @SuppressWarnings(\"unchecked\")\n    static AgentRun runAgent(Function<String, String> model, String ticket, int maxSteps) throws Exception {\n        Map<String, Function<String, String>> tools = Map.of(\"lookup_invoice\", arg -> INVOICES.getOrDefault(arg, \"unknown\"));\n        List<String> trace = new ArrayList<>();\n        String observation = \"\";\n        for (int i = 0; i < maxSteps; i++) {\n            Map<String, Object> step = JSON.readValue(model.apply(\"Ticket: \" + ticket + \"\\nTools: \" + py(tools.keySet().stream().sorted().toList())\n                + \"\\nLast result: \" + observation + \"\\nReply JSON: a tool call or a final reply.\"), Map.class);\n            if (step.containsKey(\"final\")) return new AgentRun((String) step.get(\"final\"), trace, null);\n            observation = tools.get((String) step.get(\"tool\")).apply((String) step.get(\"arg\"));\n            trace.add(step.get(\"tool\") + \"(\" + step.get(\"arg\") + \") -> \" + observation);\n        }\n        return new AgentRun(null, trace, \"max_steps\");\n    }\n\n    // 3. Typed style: the answer must match a schema; a mismatch goes back to the model as feedback, once.\n\n    /** The checked reply, or the reason it was refused. */\n    record Checked(Map<String, Object> data, String error) {}\n\n    record TypedRun(Map<String, Object> data, int attempts, String error) {}\n\n    static Checked validate(String raw) {\n        Map<String, Object> data;\n        try {\n            data = JSON.readValue(raw, new com.fasterxml.jackson.core.type.TypeReference<LinkedHashMap<String, Object>>() {});\n        } catch (Exception e) {\n            return new Checked(null, \"the reply is not JSON\");\n        }\n        if (!(data.get(\"topic\") instanceof String)) return new Checked(null, \"field topic must be str\");\n        if (!(data.get(\"refund_cents\") instanceof Integer)) return new Checked(null, \"field refund_cents must be int\");\n        return new Checked(data, null);\n    }\n\n    static TypedRun runTyped(Function<String, String> model, String ticket, int retries) {\n        String prompt = \"Return JSON with topic and refund_cents for: \" + ticket;\n        int attempts = 0;\n        while (true) {\n            attempts++;\n            Checked checked = validate(model.apply(prompt));\n            if (checked.data() != null) return new TypedRun(checked.data(), attempts, null);\n            if (attempts > retries) return new TypedRun(null, attempts, checked.error());\n            prompt = prompt + \"\\nYour last reply was refused: \" + checked.error() + \". Fix it.\";\n        }\n    }\n\n    /** Python's repr of strings, lists and maps, so every language of the course prints the same text. */\n    static String py(Object v) {\n        if (v == null) return \"None\";\n        if (v instanceof String s) {\n            String q = s.contains(\"'\") && !s.contains(\"\\\"\") ? \"\\\"\" : \"'\";\n            return q + s.replace(\"\\\\\", \"\\\\\\\\\").replace(\"\\n\", \"\\\\n\").replace(q, \"\\\\\" + q) + q;\n        }\n        if (v instanceof Map<?, ?> m) return m.entrySet().stream().map(e -> py(e.getKey()) + \": \" + py(e.getValue())).collect(Collectors.joining(\", \", \"{\", \"}\"));\n        if (v instanceof List<?> l) return l.stream().map(ThreeStyles::py).collect(Collectors.joining(\", \", \"[\", \"]\"));\n        return String.valueOf(v);\n    }\n\n    public static void main(String[] args) throws Exception {\n        Scripted m = new Scripted(\"billing\", \"We refunded the duplicate charge on invoice 1042.\");\n        GraphRun graph = runGraph(m, TICKET, 0, null);\n        System.out.println(\"graph: \" + String.join(\" -> \", graph.path()) + \" | model calls: \" + m.seen.size() + \" | checkpoints: \" + graph.checkpoints().size());\n        Scripted again = new Scripted(\"We refunded the duplicate charge on invoice 1042.\");\n        GraphRun resumed = runGraph(again, TICKET, 2, new ArrayList<>(graph.checkpoints()));\n        System.out.println(\"graph resumed from checkpoint 2: \" + String.join(\" -> \", resumed.path()) + \" | model calls: \" + again.seen.size()\n            + \" | same reply: \" + (resumed.state().get(\"reply\").equals(graph.state().get(\"reply\")) ? \"True\" : \"False\"));\n        Scripted a = new Scripted(\"{\\\"tool\\\": \\\"lookup_invoice\\\", \\\"arg\\\": \\\"1042\\\"}\", \"{\\\"final\\\": \\\"Refunded the second payment.\\\"}\");\n        AgentRun agent = runAgent(a, TICKET, 5);\n        System.out.println(\"agent: \" + py(agent.trace()) + \" -> \" + agent.reply() + \" | model calls: \" + a.seen.size());\n        Scripted loop = new Scripted(\"{\\\"tool\\\": \\\"lookup_invoice\\\", \\\"arg\\\": \\\"1\\\"}\", \"{\\\"tool\\\": \\\"lookup_invoice\\\", \\\"arg\\\": \\\"1\\\"}\", \"{\\\"tool\\\": \\\"lookup_invoice\\\", \\\"arg\\\": \\\"1\\\"}\");\n        System.out.println(\"agent that never finishes: \" + runAgent(loop, TICKET, 3).stopped() + \" after \" + loop.seen.size() + \" calls\");\n        Scripted t = new Scripted(\"{\\\"topic\\\": \\\"billing\\\", \\\"refund_cents\\\": \\\"4999\\\"}\", \"{\\\"topic\\\": \\\"billing\\\", \\\"refund_cents\\\": 4999}\");\n        TypedRun typed = runTyped(t, TICKET, 1);\n        String[] lines = t.seen.get(1).split(\"\\n\");\n        System.out.println(\"typed: \" + py(typed.data()) + \" | attempts: \" + typed.attempts() + \" | second prompt ends: \" + lines[lines.length - 1]);\n        TypedRun bad = runTyped(new Scripted(\"no json\", \"still no json\"), TICKET, 1);\n        System.out.println(\"typed, never valid: \" + bad.error() + \" after \" + bad.attempts() + \" attempts\");\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "graph: classify -> lookup -> draft | model calls: 2 | checkpoints: 3\ngraph resumed from checkpoint 2: draft | model calls: 1 | same reply: True\nagent: ['lookup_invoice(1042) -> paid twice on 2026-09-30'] -> Refunded the second payment. | model calls: 2\nagent that never finishes: max_steps after 3 calls\ntyped: {'topic': 'billing', 'refund_cents': 4999} | attempts: 2 | second prompt ends: Your last reply was refused: field refund_cents must be int. Fix it.\ntyped, never valid: the reply is not JSON after 2 attempts"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import com.fasterxml.jackson.databind.ObjectMapper\n\nprivate val log = System.getLogger(\"three_styles\")\n\n/**\n * One small task, three ways to build it: a graph you draw, a loop the model drives, and a typed result you validate.\n *\n * The task is a support ticket: decide whether it is about billing, look the invoice up when it is, and write a reply. The three\n * functions below are miniatures of what graph-based, model-driven and typed agent frameworks give you. They are the course's own\n * sketches, not any framework's code, and the model is a scripted function, so nothing here calls an API.\n */\nconst val TICKET = \"I was charged twice for invoice 1042.\"\nval INVOICES = mapOf(\"1042\" to \"paid twice on 2026-09-30\")\nprivate val JSON = ObjectMapper()\n\n/** A stand-in model: it returns the next scripted reply and keeps the prompts it was shown. */\nclass Scripted(vararg replies: String) : (String) -> String {\n    private val queue = replies.toMutableList()\n    val seen = mutableListOf<String>()\n\n    override fun invoke(prompt: String): String {\n        seen += prompt\n        return queue.removeAt(0)\n    }\n}\n\n// 1. Graph style: the programmer fixes the nodes and the edges; the model only fills in a node. State is explicit and checkpointed.\n\ntypealias State = Map<String, String>\n\ndata class Checkpoint(val node: String, val state: State)\n\ndata class GraphRun(val path: List<String>, val state: State, val checkpoints: MutableList<Checkpoint>)\n\nfun runGraph(model: (String) -> String, ticket: String, resumeFrom: Int = 0, given: MutableList<Checkpoint>? = null): GraphRun {\n    val nodes = mapOf<String, (State) -> State>(\n        \"classify\" to { s -> mapOf(\"topic\" to model(\"Classify as billing or other: ${s[\"ticket\"]}\").trim().lowercase()) },\n        \"lookup\" to { s -> mapOf(\"invoice\" to (INVOICES[s.getValue(\"ticket\").split(\"invoice \")[1].trimEnd('.')] ?: \"unknown\")) },\n        \"draft\" to { s -> mapOf(\"reply\" to model(\"Write a reply. Topic: ${s[\"topic\"]}. Invoice: ${s[\"invoice\"] ?: \"none\"}\")) },\n    )\n    val edges = mapOf<String, (State) -> String?>(\n        \"classify\" to { s -> if (s[\"topic\"] == \"billing\") \"lookup\" else \"draft\" },\n        \"lookup\" to { \"draft\" },\n        \"draft\" to { null },\n    )\n    val checkpoints = given ?: mutableListOf(Checkpoint(\"classify\", mapOf(\"ticket\" to ticket)))\n    var node: String? = checkpoints[resumeFrom].node\n    var state = checkpoints[resumeFrom].state\n    while (checkpoints.size > resumeFrom + 1) checkpoints.removeLast()\n    val path = mutableListOf<String>()\n    while (node != null) {\n        state = state + nodes.getValue(node)(state)\n        path += node\n        node = edges.getValue(node)(state)\n        if (node != null) checkpoints += Checkpoint(node, state.toMap())\n    }\n    return GraphRun(path, state, checkpoints)\n}\n\n// 2. Model-driven style: the model sees the tools and decides the next step; the loop only executes and stops.\n\ndata class AgentRun(val reply: String?, val trace: List<String>, val stopped: String? = null)\n\nfun runAgent(model: (String) -> String, ticket: String, maxSteps: Int = 5): AgentRun {\n    val tools = mapOf<String, (String) -> String>(\"lookup_invoice\" to { arg -> INVOICES[arg] ?: \"unknown\" })\n    val trace = mutableListOf<String>()\n    var observation = \"\"\n    repeat(maxSteps) {\n        @Suppress(\"UNCHECKED_CAST\")\n        val step = JSON.readValue(model(\"Ticket: $ticket\\nTools: ${py(tools.keys.sorted())}\\nLast result: $observation\\nReply JSON: a tool call or a final reply.\"), Map::class.java) as Map<String, Any?>\n        if (\"final\" in step) return AgentRun(step[\"final\"] as String, trace)\n        observation = tools.getValue(step[\"tool\"] as String)(step[\"arg\"] as String)\n        trace += \"${step[\"tool\"]}(${step[\"arg\"]}) -> $observation\"\n    }\n    return AgentRun(null, trace, \"max_steps\")\n}\n\n// 3. Typed style: the answer must match a schema; a mismatch goes back to the model as feedback, once.\n\n/** The checked reply, or the reason it was refused. */\ndata class Checked(val data: Map<String, Any?>?, val error: String?)\n\ndata class TypedRun(val data: Map<String, Any?>?, val attempts: Int, val error: String? = null)\n\nfun validate(raw: String): Checked {\n    @Suppress(\"UNCHECKED_CAST\")\n    val data = runCatching { JSON.readValue(raw, LinkedHashMap::class.java) as Map<String, Any?> }.getOrNull() ?: return Checked(null, \"the reply is not JSON\")\n    if (data[\"topic\"] !is String) return Checked(null, \"field topic must be str\")\n    if (data[\"refund_cents\"] !is Int) return Checked(null, \"field refund_cents must be int\")\n    return Checked(data, null)\n}\n\nfun runTyped(model: (String) -> String, ticket: String, retries: Int = 1): TypedRun {\n    var prompt = \"Return JSON with topic and refund_cents for: $ticket\"\n    var attempts = 0\n    while (true) {\n        attempts++\n        val (data, error) = validate(model(prompt))\n        if (data != null) return TypedRun(data, attempts)\n        if (attempts > retries) return TypedRun(null, attempts, error)\n        prompt = \"$prompt\\nYour last reply was refused: $error. Fix it.\"\n    }\n}\n\n/** Python's repr of strings, lists and maps, so every language of the course prints the same text. */\nfun py(v: Any?): String = when (v) {\n    null -> \"None\"\n    is String -> (if (\"'\" in v && \"\\\"\" !in v) \"\\\"\" else \"'\").let { q -> q + v.replace(\"\\\\\", \"\\\\\\\\\").replace(\"\\n\", \"\\\\n\").replace(q, \"\\\\\" + q) + q }\n    is Map<*, *> -> v.entries.joinToString(\", \", \"{\", \"}\") { \"${py(it.key)}: ${py(it.value)}\" }\n    is List<*> -> v.joinToString(\", \", \"[\", \"]\") { py(it) }\n    else -> v.toString()\n}\n\nfun main() {\n    val m = Scripted(\"billing\", \"We refunded the duplicate charge on invoice 1042.\")\n    val graph = runGraph(m, TICKET)\n    println(\"graph: ${graph.path.joinToString(\" -> \")} | model calls: ${m.seen.size} | checkpoints: ${graph.checkpoints.size}\")\n    val again = Scripted(\"We refunded the duplicate charge on invoice 1042.\")\n    val resumed = runGraph(again, TICKET, resumeFrom = 2, given = graph.checkpoints.toMutableList())\n    println(\"graph resumed from checkpoint 2: ${resumed.path.joinToString(\" -> \")} | model calls: ${again.seen.size} | same reply: ${if (resumed.state[\"reply\"] == graph.state[\"reply\"]) \"True\" else \"False\"}\")\n    val a = Scripted(\"\"\"{\"tool\": \"lookup_invoice\", \"arg\": \"1042\"}\"\"\", \"\"\"{\"final\": \"Refunded the second payment.\"}\"\"\")\n    val agent = runAgent(a, TICKET)\n    println(\"agent: ${py(agent.trace)} -> ${agent.reply} | model calls: ${a.seen.size}\")\n    val loop = Scripted(*Array(3) { \"\"\"{\"tool\": \"lookup_invoice\", \"arg\": \"1\"}\"\"\" })\n    println(\"agent that never finishes: ${runAgent(loop, TICKET, maxSteps = 3).stopped} after ${loop.seen.size} calls\")\n    val t = Scripted(\"\"\"{\"topic\": \"billing\", \"refund_cents\": \"4999\"}\"\"\", \"\"\"{\"topic\": \"billing\", \"refund_cents\": 4999}\"\"\")\n    val typed = runTyped(t, TICKET)\n    println(\"typed: ${py(typed.data)} | attempts: ${typed.attempts} | second prompt ends: ${t.seen[1].lines().last()}\")\n    val bad = runTyped(Scripted(\"no json\", \"still no json\"), TICKET)\n    println(\"typed, never valid: ${bad.error} after ${bad.attempts} attempts\")\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "graph: classify -> lookup -> draft | model calls: 2 | checkpoints: 3\ngraph resumed from checkpoint 2: draft | model calls: 1 | same reply: True\nagent: ['lookup_invoice(1042) -> paid twice on 2026-09-30'] -> Refunded the second payment. | model calls: 2\nagent that never finishes: max_steps after 3 calls\ntyped: {'topic': 'billing', 'refund_cents': 4999} | attempts: 2 | second prompt ends: Your last reply was refused: field refund_cents must be int. Fix it.\ntyped, never valid: the reply is not JSON after 2 attempts"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The example solves one support ticket three ways with a scripted model. The graph calls the model for two of its three nodes and saves three checkpoints, and a run resumed from checkpoint 2 makes one model call and writes the same reply. The agent chooses its own tool, and a run that never finishes is cut off after three calls by `max_steps`. The typed run sends the validation error back as a retry and succeeds on the second attempt, and a model that never returns JSON fails after two attempts with an error that names the cause."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Choosing the family by the brand.** The question is who should own the route, not which library is popular. A fixed approval chain wants a graph, and an open-ended research task wants a loop.",
+        "**Expecting a checkpoint in a loop with no state of its own.** A model-driven loop keeps its history, but resuming it means replaying a conversation, while a graph resumes from a node.",
+        "**Calling a typed result a correct result.** Validation proves the shape. A refund of 4999 cents passes the schema whether or not it is right."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A bank's loan flow must always check identity, then credit, then ask a person to approve, and an interrupted application must not repeat the credit check. Which style fits?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: A single prompt, because the order is stated in the text of the call",
+              "**b**: A model-driven loop, because the model picks each next step on its own",
+              "**c**: A typed agent, because the loan is a record of fixed shape and size",
+              "**d**: A graph, because each node saves state and resumes after a stop"
+            ]
+          }
+        ],
+        [
+          "A support agent starts receiving a kind of request that its authors never listed. Which style copes without anyone adding a path for it?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: A loop in which the model chooses each next step",
+              "**b**: A graph whose edges pick the next node from the state",
+              "**c**: A typed agent whose replies must fit an output schema",
+              "**d**: A checkpointer that restores the run to its last state"
+            ]
+          }
+        ],
+        [
+          "A model-driven loop keeps calling the same tool and never produces a final reply. Which control does the engineering post name for this?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: A checkpoint saved after each tool call",
+              "**b**: A longer context window for the whole conversation",
+              "**c**: A ceiling on the number of rounds that it is allowed",
+              "**d**: A second model that repeats each call to confirm it"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**d**. The page says \"Checkpointers persist a thread's graph state as checkpoints\", and a resumed run \"repeats no earlier node\", so the credit check is not paid for twice. *b* is ruled out because the table gives the next step to \"The model, at each turn\", and the loan order must always be fixed. *c* is ruled out because a typed agent has \"Validated output\" but \"Types guard the edges of the model's freedom. They do not choose the route.\" *a* is ruled out because a prompt keeps no state, and the page gives the graph, not the prompt, the job of resuming: \"the run resumes from the last checkpoint\".",
+            "**a**. The page says \"The route is whatever the model chooses, so the same code handles a case nobody planned for.\" *b* is ruled out because \"a case you did not draw has no path\", and the edges are drawn in advance. *c* is ruled out because \"Types guard the edges of the model's freedom. They do not choose the route.\" *d* is ruled out because \"A checkpoint is a copy of the state at a point in the graph.\", which helps a run resume and adds no path.",
+            "**c**. The post lists \"stopping conditions (such as a maximum number of iterations) to maintain control.\" *a* is ruled out because \"A checkpoint is a copy of the state at a point in the graph.\", which saves the state and does not end a loop. *b* is ruled out because \"a loop that never ends must be cut off\", and a larger window does not give the loop an end. *d* is ruled out because a repeated call adds cost without a stop, and \"Agentic systems often trade latency and cost for better task performance\"."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 14,
+    "code": 0,
+    "tables": 1,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "e9ca4ff6db9fe1f0175a4e559ea2bc1fa443a12c97d2babfa2257a24582954ac"
+}

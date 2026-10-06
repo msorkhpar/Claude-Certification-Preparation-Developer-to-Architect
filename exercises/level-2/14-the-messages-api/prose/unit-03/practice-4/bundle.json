@@ -1,0 +1,87 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "14-the-messages-api"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 4,
+  "title": "Practice: a conversation client, graded on the state it keeps (Kotlin)",
+  "lang": "kotlin",
+  "main_file": "src/main/kotlin/Conversation.kt",
+  "files": [
+    "src/main/kotlin/TryIt.kt"
+  ],
+  "test_file": "src/test/kotlin/ConversationTest.kt",
+  "build": [
+    "src/main/kotlin/Json.kt",
+    "src/main/kotlin/Types.kt",
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/14-the-messages-api/prose/unit-03/practice-4",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/14-the-messages-api/prose/unit-03/practice-4",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_everyRequestCarriesTheWholeHistoryInOrder()",
+      "kind": "main",
+      "says": "Every request carries the whole history in order, with assistant content as received"
+    },
+    {
+      "id": "e1_usageAddsUpOverTheTurns()",
+      "kind": "edge",
+      "says": "Usage adds up over the turns"
+    },
+    {
+      "id": "e2_aFailedCallLeavesNoDanglingUserTurn()",
+      "kind": "edge",
+      "says": "A failed call leaves no dangling user turn"
+    },
+    {
+      "id": "e3_stopReasonIsReportedAndMaxTokensMarksTheReplyTruncated()",
+      "kind": "edge",
+      "says": "The stop reason is reported and max_tokens marks the reply truncated"
+    },
+    {
+      "id": "e4_systemIsATopLevelFieldAndStopSequencesArePassedOn()",
+      "kind": "edge",
+      "says": "system is top-level (and left out when absent); stop sequences are passed on"
+    },
+    {
+      "id": "e5_eachRequestIsASnapshotAndHistoryIsACopy()",
+      "kind": "edge",
+      "says": "Each request is a snapshot, and history() is a copy"
+    },
+    {
+      "id": "e6_aBlankTurnIsRefusedBeforeAnythingIsSent()",
+      "kind": "edge",
+      "says": "A blank turn is refused before anything is sent"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/14-the-messages-api/03-the-conversation-state-the-client-keeps.md"
+}

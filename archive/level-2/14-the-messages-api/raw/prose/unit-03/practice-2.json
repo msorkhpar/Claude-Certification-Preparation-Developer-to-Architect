@@ -1,0 +1,282 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "14-the-messages-api"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: a conversation client, graded on the state it keeps (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a conversation client, graded on the state it keeps"
+    },
+    {
+      "type": "para",
+      "text": "The Messages API is stateless: every request must carry the whole conversation. Write the client that keeps it."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working conversation client with eight gaps cut out of it. The plumbing is written and correct: the constructor, `say` itself (it calls the gaps in order), `totals` and `reset`. Each gap is a small method with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To see what a gap receives, debug it by logging its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (Python names; the TypeScript, Java and Kotlin names are the camel-case forms, `makeReply` for `_reply`):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_check_text` unlocks `e6`: a blank turn is refused.",
+        "`_request_body` unlocks `m1` and `e5`: the body with a deep copy of the whole history.",
+        "`_optional_fields` unlocks `e4`: the top-level `system` and the stop sequences.",
+        "`_send_or_roll_back` unlocks `e2`: no dangling user turn when the call fails.",
+        "`_assistant_turn` unlocks `m1`: the assistant turn with the content as received.",
+        "`_add_usage` unlocks `e1`: the running totals.",
+        "`_reply` unlocks `m1` and `e3`: the text, the stop reason and `truncated`.",
+        "`history` unlocks `e5`: the turns as a copy."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gaps 2, 5 and 7. A few lines each, about fifteen in all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given types"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`send`",
+          "an injected function: it takes the request body (a map) and returns a Messages API response (a map with `content`, `stop_reason` and `usage`); the tests pass a scripted one"
+        ],
+        [
+          "`Reply`",
+          "`text` (the text blocks joined), `stop_reason` and `truncated`; TypeScript, Java and Kotlin spell them `text`, `stopReason` and `truncated`"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "`Conversation(send, model, max_tokens, system=None, stop_sequences=None)`"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "**`say(text)`** adds a user turn, sends the request and returns a `Reply`.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "The request body has `model`, `max_tokens` and `messages`, where `messages` is the **whole history** so far, oldest first, ending with the new user turn. `system` is a **top-level field**, never a message with a system role, and it is left out when absent or blank. `stop_sequences` is passed on when given and non-empty.",
+              "The body handed to `send` is a **snapshot**: later turns must not change a request already sent.",
+              "The assistant turn is stored as `{\"role\": \"assistant\", \"content\": <the response's content, as received>}`.",
+              "`usage` is added to the running totals. `truncated` is true when `stop_reason` is `max_tokens`.",
+              "If `send` fails, the exception propagates and the history is left as it was before the call (no dangling user turn, so roles keep alternating on the next call).",
+              "Blank text (empty or only whitespace) is refused before anything is sent: `ValueError` (TypeScript `Error`, Java and Kotlin `IllegalArgumentException`)."
+            ]
+          }
+        ],
+        "**`history()`** returns a copy of the turns; changing the copy changes nothing.",
+        "**`totals()`** returns `input_tokens` and `output_tokens` summed over every successful turn.",
+        "**`reset()`** clears history and totals."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Every request carries the whole history in order, with assistant content as received"
+        ],
+        [
+          "`e1`",
+          "Usage adds up over the turns"
+        ],
+        [
+          "`e2`",
+          "A failed call leaves no dangling user turn"
+        ],
+        [
+          "`e3`",
+          "The stop reason is reported and `max_tokens` marks the reply truncated"
+        ],
+        [
+          "`e4`",
+          "`system` is top-level (and left out when absent); stop sequences are passed on"
+        ],
+        [
+          "`e5`",
+          "Each request is a snapshot, and `history()` is a copy"
+        ],
+        [
+          "`e6`",
+          "A blank turn is refused before anything is sent"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// A conversation client that keeps the state the API does not. See ../../statement.md for the contract.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"conversation\");\n\nexport type Body = Record<string, any>;\nexport type Send = (body: Body) => Body;\nexport type Reply = { text: string; stopReason: string; truncated: boolean };\n\nexport class Conversation {\n  send: Send;\n  model: string;\n  maxTokens: number;\n  system: string | null;\n  stopSequences: string[] | null;\n  _history: any[] = [];\n  _totals = { input_tokens: 0, output_tokens: 0 };\n\n  constructor(send: Send, model: string, maxTokens: number, system: string | null = null, stopSequences: string[] | null = null) {\n    this.send = send;\n    this.model = model;\n    this.maxTokens = maxTokens;\n    this.system = system;\n    this.stopSequences = stopSequences;\n  }\n\n  checkText(text: string): void {\n    if (typeof text !== \"string\" || text.trim() === \"\") throw new Error(\"a turn needs text\");\n  }\n\n  requestBody(): Body {\n    return { model: this.model, max_tokens: this.maxTokens, messages: structuredClone(this._history) };\n  }\n\n  optionalFields(body: Body): void {\n    if (this.system && this.system.trim() !== \"\") body.system = this.system;\n    if (this.stopSequences && this.stopSequences.length > 0) body.stop_sequences = [...this.stopSequences];\n  }\n\n  sendOrRollBack(body: Body): Body {\n    try {\n      return this.send(body);\n    } catch (err) {\n      this._history.pop();\n      throw err;\n    }\n  }\n\n  assistantTurn(response: Body): Body {\n    return { role: \"assistant\", content: response.content };\n  }\n\n  addUsage(usage: Body): void {\n    this._totals.input_tokens += usage?.input_tokens ?? 0;\n    this._totals.output_tokens += usage?.output_tokens ?? 0;\n  }\n\n  makeReply(response: Body): Reply {\n    const text = response.content.filter((b: any) => b.type === \"text\").map((b: any) => b.text ?? \"\").join(\"\");\n    return { text, stopReason: response.stop_reason, truncated: response.stop_reason === \"max_tokens\" };\n  }\n\n  say(text: string): Reply {\n    log.debug(\"say input\", text);\n    this.checkText(text);\n    this._history.push({ role: \"user\", content: text });\n    const body = this.requestBody();\n    this.optionalFields(body);\n    const response = this.sendOrRollBack(body);\n    this._history.push(this.assistantTurn(response));\n    this.addUsage(response.usage);\n    return this.makeReply(response);\n  }\n\n  history(): any[] {\n    return structuredClone(this._history);\n  }\n\n  totals() {\n    return { ...this._totals };\n  }\n\n  reset(): void {\n    this._history = [];\n    this._totals = { input_tokens: 0, output_tokens: 0 };\n  }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { Conversation } from \"./conversation.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// A stand-in for the API, like the one the tests use: it answers every request the same way.\nconst fakeSend = (_body: Record<string, any>) => ({\n  content: [{ type: \"text\", text: \"Paris.\" }],\n  stop_reason: \"end_turn\",\n  usage: { input_tokens: 10, output_tokens: 5 },\n});\n\nconst chat = new Conversation(fakeSend, \"claude-sonnet-5-5\", 64, \"Be brief.\");\nconst reply = chat.say(\"Capital of France?\");\nchat.say(\"Since when?\");\n\nconsole.log(\"reply text:\", reply.text);\nconsole.log(\"stop reason:\", reply.stopReason, \"| truncated:\", reply.truncated);\nconsole.log(\"history size:\", chat.history().length);\nconsole.log(\"totals:\", chat.totals());\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// A conversation client that keeps the state the API does not. See ../../statement.md for the contract.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"conversation\");\n\nexport type Body = Record<string, any>;\nexport type Send = (body: Body) => Body;\nexport type Reply = { text: string; stopReason: string; truncated: boolean };\n\nexport class Conversation {\n  send: Send;\n  model: string;\n  maxTokens: number;\n  system: string | null;\n  stopSequences: string[] | null;\n  _history: any[] = [];\n  _totals = { input_tokens: 0, output_tokens: 0 };\n\n  constructor(send: Send, model: string, maxTokens: number, system: string | null = null, stopSequences: string[] | null = null) {\n    this.send = send;\n    this.model = model;\n    this.maxTokens = maxTokens;\n    this.system = system;\n    this.stopSequences = stopSequences;\n  }\n\n  checkText(text: string): void {\n    // TODO 1 of 8 (finish this to pass e6): refuse a blank turn before anything is sent.\n    // Receives the text of the turn. Throws an Error when it is not a string, empty or only whitespace; otherwise returns nothing.\n    // Example: checkText(\"   \") -> Error, checkText(\"hi\") -> undefined\n  }\n\n  requestBody(): Body {\n    // TODO 2 of 8 (finish this to pass m1 and e5): the request body, a snapshot.\n    // Receives nothing (it reads this). Returns an object with `model`, `max_tokens` and `messages`, where `messages` is a deep copy\n    // (structuredClone) of the whole history so far (the new user turn is already in it), so a later turn cannot change a request\n    // already sent. Example: after say(\"a\"), the first body has messages [{ role: \"user\", content: \"a\" }]\n    return { model: this.model, max_tokens: this.maxTokens, messages: [] };\n  }\n\n  optionalFields(body: Body): void {\n    // TODO 3 of 8 (finish this to pass e4): the top-level fields that are only sometimes there.\n    // Receives the body and adds to it: `system` (a top-level field, never a message) when this.system is not blank, and\n    // `stop_sequences` (a copy of the array) when this.stopSequences is given and not empty. Returns nothing.\n    // Example: with system \"Be brief.\" the body gains { system: \"Be brief.\" }; with system \"  \" it gains nothing\n  }\n\n  sendOrRollBack(body: Body): Body {\n    // TODO 4 of 8 (finish this to pass e2): send the body, and leave no dangling user turn when the call fails.\n    // Receives the body. Returns this.send(body). When send throws, removes the user turn that say added to this._history and throws\n    // the same error again, so roles keep alternating on the next call.\n    return this.send(body);\n  }\n\n  assistantTurn(response: Body): Body {\n    // TODO 5 of 8 (finish this to pass m1): the turn to store for the reply.\n    // Receives the response. Returns { role: \"assistant\", content: <the response's content array, as received> }.\n    // Example: content [{ type: \"text\", text: \"Paris.\" }] -> { role: \"assistant\", content: [that same array] }\n    return { role: \"assistant\", content: [] };\n  }\n\n  addUsage(usage: Body): void {\n    // TODO 6 of 8 (finish this to pass e1): keep the running totals.\n    // Receives the response's usage (it may be undefined or lack a key). Adds its input_tokens and output_tokens to this._totals.\n    // Returns nothing. Example: totals input_tokens 12 plus usage { input_tokens: 30, output_tokens: 9 } -> input_tokens 42\n  }\n\n  makeReply(response: Body): Reply {\n    // TODO 7 of 8 (finish this to pass m1 and e3): what say returns.\n    // Receives the response. Returns a Reply: the `text` of the content blocks whose `type` is \"text\" joined with nothing between\n    // them, the response's stop_reason as `stopReason`, and `truncated`, true only when the stop reason is \"max_tokens\".\n    // Example: stop_reason \"max_tokens\" -> truncated true; \"end_turn\" -> truncated false\n    return { text: \"\", stopReason: \"\", truncated: false };\n  }\n\n  say(text: string): Reply {\n    log.debug(\"say input\", text);\n    this.checkText(text);\n    this._history.push({ role: \"user\", content: text });\n    const body = this.requestBody();\n    this.optionalFields(body);\n    const response = this.sendOrRollBack(body);\n    this._history.push(this.assistantTurn(response));\n    this.addUsage(response.usage);\n    return this.makeReply(response);\n  }\n\n  history(): any[] {\n    // TODO 8 of 8 (finish this to pass e5): the turns so far, as a copy.\n    // Returns a deep copy (structuredClone) of this._history, so changing what the caller gets changes nothing here.\n    // Example: chat.history().push(x) leaves chat.history().length unchanged\n    return [];\n  }\n\n  totals() {\n    return { ...this._totals };\n  }\n\n  reset(): void {\n    this._history = [];\n    this._totals = { input_tokens: 0, output_tokens: 0 };\n  }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { Conversation } from \"./conversation.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// A stand-in for the API, like the one the tests use: it answers every request the same way.\nconst fakeSend = (_body: Record<string, any>) => ({\n  content: [{ type: \"text\", text: \"Paris.\" }],\n  stop_reason: \"end_turn\",\n  usage: { input_tokens: 10, output_tokens: 5 },\n});\n\nconst chat = new Conversation(fakeSend, \"claude-sonnet-5-5\", 64, \"Be brief.\");\nconst reply = chat.say(\"Capital of France?\");\nchat.say(\"Since when?\");\n\nconsole.log(\"reply text:\", reply.text);\nconsole.log(\"stop reason:\", reply.stopReason, \"| truncated:\", reply.truncated);\nconsole.log(\"history size:\", chat.history().length);\nconsole.log(\"totals:\", chat.totals());\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 4,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "03806799b2151723d83f792002a55f077c871f9b7d7fca2d1338c6bb7e1bd734",
+  "starting_code": "// A conversation client that keeps the state the API does not. See ../../statement.md for the contract.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"conversation\");\n\nexport type Body = Record<string, any>;\nexport type Send = (body: Body) => Body;\nexport type Reply = { text: string; stopReason: string; truncated: boolean };\n\nexport class Conversation {\n  send: Send;\n  model: string;\n  maxTokens: number;\n  system: string | null;\n  stopSequences: string[] | null;\n  _history: any[] = [];\n  _totals = { input_tokens: 0, output_tokens: 0 };\n\n  constructor(send: Send, model: string, maxTokens: number, system: string | null = null, stopSequences: string[] | null = null) {\n    this.send = send;\n    this.model = model;\n    this.maxTokens = maxTokens;\n    this.system = system;\n    this.stopSequences = stopSequences;\n  }\n\n  checkText(text: string): void {\n    // TODO 1 of 8 (finish this to pass e6): refuse a blank turn before anything is sent.\n    // Receives the text of the turn. Throws an Error when it is not a string, empty or only whitespace; otherwise returns nothing.\n    // Example: checkText(\"   \") -> Error, checkText(\"hi\") -> undefined\n  }\n\n  requestBody(): Body {\n    // TODO 2 of 8 (finish this to pass m1 and e5): the request body, a snapshot.\n    // Receives nothing (it reads this). Returns an object with `model`, `max_tokens` and `messages`, where `messages` is a deep copy\n    // (structuredClone) of the whole history so far (the new user turn is already in it), so a later turn cannot change a request\n    // already sent. Example: after say(\"a\"), the first body has messages [{ role: \"user\", content: \"a\" }]\n    return { model: this.model, max_tokens: this.maxTokens, messages: [] };\n  }\n\n  optionalFields(body: Body): void {\n    // TODO 3 of 8 (finish this to pass e4): the top-level fields that are only sometimes there.\n    // Receives the body and adds to it: `system` (a top-level field, never a message) when this.system is not blank, and\n    // `stop_sequences` (a copy of the array) when this.stopSequences is given and not empty. Returns nothing.\n    // Example: with system \"Be brief.\" the body gains { system: \"Be brief.\" }; with system \"  \" it gains nothing\n  }\n\n  sendOrRollBack(body: Body): Body {\n    // TODO 4 of 8 (finish this to pass e2): send the body, and leave no dangling user turn when the call fails.\n    // Receives the body. Returns this.send(body). When send throws, removes the user turn that say added to this._history and throws\n    // the same error again, so roles keep alternating on the next call.\n    return this.send(body);\n  }\n\n  assistantTurn(response: Body): Body {\n    // TODO 5 of 8 (finish this to pass m1): the turn to store for the reply.\n    // Receives the response. Returns { role: \"assistant\", content: <the response's content array, as received> }.\n    // Example: content [{ type: \"text\", text: \"Paris.\" }] -> { role: \"assistant\", content: [that same array] }\n    return { role: \"assistant\", content: [] };\n  }\n\n  addUsage(usage: Body): void {\n    // TODO 6 of 8 (finish this to pass e1): keep the running totals.\n    // Receives the response's usage (it may be undefined or lack a key). Adds its input_tokens and output_tokens to this._totals.\n    // Returns nothing. Example: totals input_tokens 12 plus usage { input_tokens: 30, output_tokens: 9 } -> input_tokens 42\n  }\n\n  makeReply(response: Body): Reply {\n    // TODO 7 of 8 (finish this to pass m1 and e3): what say returns.\n    // Receives the response. Returns a Reply: the `text` of the content blocks whose `type` is \"text\" joined with nothing between\n    // them, the response's stop_reason as `stopReason`, and `truncated`, true only when the stop reason is \"max_tokens\".\n    // Example: stop_reason \"max_tokens\" -> truncated true; \"end_turn\" -> truncated false\n    return { text: \"\", stopReason: \"\", truncated: false };\n  }\n\n  say(text: string): Reply {\n    log.debug(\"say input\", text);\n    this.checkText(text);\n    this._history.push({ role: \"user\", content: text });\n    const body = this.requestBody();\n    this.optionalFields(body);\n    const response = this.sendOrRollBack(body);\n    this._history.push(this.assistantTurn(response));\n    this.addUsage(response.usage);\n    return this.makeReply(response);\n  }\n\n  history(): any[] {\n    // TODO 8 of 8 (finish this to pass e5): the turns so far, as a copy.\n    // Returns a deep copy (structuredClone) of this._history, so changing what the caller gets changes nothing here.\n    // Example: chat.history().push(x) leaves chat.history().length unchanged\n    return [];\n  }\n\n  totals() {\n    return { ...this._totals };\n  }\n\n  reset(): void {\n    this._history = [];\n    this._totals = { input_tokens: 0, output_tokens: 0 };\n  }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/14-the-messages-api/prose/unit-03/practice-2/conversation.ts",
+    "test_path": "practice/level-2/14-the-messages-api/prose/unit-03/practice-2/conversation.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-2/14-the-messages-api/prose/unit-03/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-2/14-the-messages-api/prose/unit-03/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-2/14-the-messages-api/prose/unit-03/practice-2/conversation.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 every request carries the whole history in order",
+        "kind": "main",
+        "says": "Every request carries the whole history in order, with assistant content as received"
+      },
+      {
+        "id": "e1 usage adds up over the turns",
+        "kind": "edge",
+        "says": "Usage adds up over the turns"
+      },
+      {
+        "id": "e2 a failed call leaves no dangling user turn",
+        "kind": "edge",
+        "says": "A failed call leaves no dangling user turn"
+      },
+      {
+        "id": "e3 stop reason is reported and max tokens marks the reply truncated",
+        "kind": "edge",
+        "says": "The stop reason is reported and max_tokens marks the reply truncated"
+      },
+      {
+        "id": "e4 system is a top level field and stop sequences are passed on",
+        "kind": "edge",
+        "says": "system is top-level (and left out when absent); stop sequences are passed on"
+      },
+      {
+        "id": "e5 each request is a snapshot and history is a copy",
+        "kind": "edge",
+        "says": "Each request is a snapshot, and history() is a copy"
+      },
+      {
+        "id": "e6 a blank turn is refused before anything is sent",
+        "kind": "edge",
+        "says": "A blank turn is refused before anything is sent"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/14-the-messages-api/prose/unit-03/practice-2/target/report.xml"
+    },
+    "origin": "course/14-the-messages-api/03-the-conversation-state-the-client-keeps.md",
+    "concepts": [
+      "the practice of The conversation state the client keeps, and a conversation client is solved"
+    ],
+    "files": [
+      "practice/level-2/14-the-messages-api/prose/unit-03/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "the-messages-api-u3"
+}

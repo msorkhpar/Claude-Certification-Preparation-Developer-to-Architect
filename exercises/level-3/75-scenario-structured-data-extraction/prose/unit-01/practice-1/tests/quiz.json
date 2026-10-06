@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "75-scenario-structured-data-extraction"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: The extraction system: where the pipeline can lie",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "In the example run, a scanned invoice names its vendor but holds no total anywhere in its text, and the model returns the total as null. What does the pipeline do with that document?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Retry it once with the error attached, since a second look may still find a figure there",
+            "correct": false,
+            "says": "Ruled out because the retry covers only what a second look can fix: \"A value that the document does not contain stays absent however often it is asked for.\""
+          },
+          {
+            "id": "b",
+            "text": "Send it to a person after one attempt, as no retry supplies what the page lacks",
+            "correct": true,
+            "says": "A missing value is routed, not retried."
+          },
+          {
+            "id": "c",
+            "text": "Compute the figure from the line items instead, since the lines imply what the total should be, and mark the record as valid",
+            "correct": false,
+            "says": "Ruled out because the status comes from the checks and not from a guess: \"The status is derived from the checks, and the model's own opinion plays no part.\""
+          },
+          {
+            "id": "d",
+            "text": "Fail it at once and discard the vendor that the scan did manage to read",
+            "correct": false,
+            "says": "Ruled out because a missing value is not a failure of the document: \"It is `needs_review` when the only open matters are a value the page lacks or a conflict that the model flagged, and neither is retried.\""
+          }
+        ],
+        "origin": {
+          "path": "course/75-scenario-structured-data-extraction/01-the-extraction-system-where-the-pipeline-can-lie.md",
+          "section": "What the pipeline owns"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "The example run reports three valid documents, all correct, out of six that were sent. Which pair of figures does an honest report give?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A full hundred percent, with nothing else reported alongside it",
+            "correct": false,
+            "says": "Ruled out because the denominator is every document: \"A document that failed is a document the customer sent.\""
+          },
+          {
+            "id": "b",
+            "text": "Half of everything received and all of the accepted ones, with the gap stated",
+            "correct": true,
+            "says": "The two figures and the gap are the report."
+          },
+          {
+            "id": "c",
+            "text": "Half of everything received, with the accepted-only figure left out of the report",
+            "correct": false,
+            "says": "Ruled out because the validated figure is a different figure and not an irrelevant one: \"The figure on the validated ones alone is a different figure and is always at least as high.\""
+          },
+          {
+            "id": "d",
+            "text": "Three quarters, the mean of the two figures, reported alone",
+            "correct": false,
+            "says": "Ruled out because the figures are not blended: \"The accuracy of a run is the share of all documents whose delivered record is correct.\""
+          }
+        ],
+        "origin": {
+          "path": "course/75-scenario-structured-data-extraction/01-the-extraction-system-where-the-pipeline-can-lie.md",
+          "section": "What the pipeline owns"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A pipeline on Claude Sonnet 5.5 must make sure that an extraction tool is used on every request, and it forces the tool through `tool_choice`. What happens, and what does the documentation recommend instead?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The call works, but cached message blocks are processed again from the start",
+            "correct": false,
+            "says": "Ruled out because the request does not get as far as the cache: \"Not every model and setting supports forced tool use.\""
+          },
+          {
+            "id": "b",
+            "text": "The tool is used, and the text before the tool call is dropped",
+            "correct": false,
+            "says": "Ruled out because the request does not run: \"On Claude Opus 5.5, Sonnet 5.5 and Fable 5.1, `any` and `tool` return a 400 error\"."
+          },
+          {
+            "id": "c",
+            "text": "The call fails with a 400 error, and `auto` with strict schemas replaces it",
+            "correct": true,
+            "says": "On the models in the documentation's table, forcing is refused and the replacement is named."
+          },
+          {
+            "id": "d",
+            "text": "The setting is ignored, and the model chooses whichever tool it likes best",
+            "correct": false,
+            "says": "Ruled out because a setting that the API cannot honour is rejected and not ignored: \"`any` and `tool` return a 400 error, and the documented replacement is `auto` with strict tool use or structured outputs\"."
+          }
+        ],
+        "origin": {
+          "path": "course/75-scenario-structured-data-extraction/01-the-extraction-system-where-the-pipeline-can-lie.md",
+          "section": "The extraction system: where the pipeline can lie"
+        }
+      }
+    ]
+  }
+}

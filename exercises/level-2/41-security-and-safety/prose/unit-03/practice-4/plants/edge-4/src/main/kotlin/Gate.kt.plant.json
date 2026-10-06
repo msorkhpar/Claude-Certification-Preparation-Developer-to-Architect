@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/kotlin/Gate.kt",
+      "old": "if (allowedHosts.none { host == it || host.endsWith(\".$it\") }) return result(\"deny\", \"host not allowed\")",
+      "new": "if (allowedHosts.none { host.endsWith(it) }) return result(\"deny\", \"host not allowed\")"
+    }
+  ]
+}

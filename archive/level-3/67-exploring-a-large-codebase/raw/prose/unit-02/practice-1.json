@@ -1,0 +1,277 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "67-exploring-a-large-codebase"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: an exploration that writes down what it learns and can be resumed after a crash (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an exploration that writes down what it learns and can be resumed after a crash"
+    },
+    {
+      "type": "para",
+      "text": "A team lets agents explore a large codebase for hours. The main conversation fills with file contents until its answers talk about \"typical patterns\" instead of the classes it found an hour ago; when a worker crashes, the whole exploration starts again from nothing; and the manifest the coordinator wrote lists a worker as finished although its notes were never saved. In this practice you write the pieces that keep an exploration alive outside any one context window: the scratchpad of findings, the manifest of agent state, the plan for resuming after a crash, the prompt that continues an agent from its exported state, and the `/compact` command that tells compaction what to keep. The model is not called. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`add_finding`, `render_scratchpad`, `build_manifest`, `resume_plan`, `resume_prompt`, `compact_command`); TypeScript has the camel-case names; Java has the same camel-case names as static methods of `Recovery` with the records the starter defines (`Finding`, `AgentEntry`, `Manifest`, `Action`); Kotlin has top-level functions and data classes."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working exploration recovery helper with six gaps cut out of it. Everything that is plumbing is written and correct: the records, the order of the areas, the sorting of the manifest and the join of the lines. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript, Java and Kotlin names are the camel-case forms where a name is given):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "One finding per area and fact (unlocks `m1`): a finding whose area and fact are already recorded is not added again; the first one stays, in first-seen order, and the list given is never changed.",
+        "The grouping by area (unlocks `e1`): the scratchpad has one `## area` block per area, in first-seen order, and each block lists only the findings of that area as `- fact (location)`.",
+        "The bad manifest input (unlocks `e2`): two agents with the same name, or an agent with a status other than `done`, `running` or `failed`, are refused with an error.",
+        "The resume actions (unlocks `e3`, `e4`, `e5`): an agent whose state file is missing is restarted from scratch (`restart`); a finished agent with its state file is reused (`reuse`) and not run again; a running or failed agent with a state file is resumed from it (`resume`).",
+        "The resume prompt (unlocks `e6`): the prompt is the task, then a blank line, `State from the last run:`, one `- line` per state line and `Continue from the first unfinished step.`, and nothing else; with no state lines it is the task alone.",
+        "The compact command (unlocks `e7`): `/compact` alone when there is nothing to keep, otherwise `/compact Focus on ` and the things to keep joined with `, `."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gap 1. About fourteen lines in all. The steps below describe the whole helper, so you can see how your gaps are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`add_finding(findings, area, fact, location)` returns a new list (the input is not changed). A finding is `{area, fact, location}`. The same `fact` in the same `area` is recorded once, whatever its location; the same text under another area is a different finding. Findings stay in the order they were first added.",
+        "`render_scratchpad(findings)` returns Markdown: for each area, in the order the areas first appear, a heading `## <area>` and one line `- <fact> (<location>)` for each of its findings in order; the blocks are separated by one blank line. No findings give an empty string.",
+        "`build_manifest(agents)` takes agents `{name, state_file, status}` with status `done`, `running` or `failed`, and returns `{version: 1, agents: [...]}` with the agents sorted by name and each one holding exactly those three fields. A duplicate name or an unknown status is an error.",
+        "`resume_plan(manifest, existing_files)` returns `(name, action)` for every agent of the manifest, in its order: `restart` when the agent's state file is not among the existing files (whatever its status), otherwise `reuse` for a `done` agent and `resume` for any other.",
+        "`resume_prompt(task, state_lines)` returns the task alone when there are no state lines. Otherwise it returns the task, a blank line, `State from the last run:`, one line `- <line>` for each state line and a last line `Continue from the first unfinished step.`",
+        "`compact_command(keep)` returns `/compact` when there is nothing to keep, otherwise `/compact Focus on ` followed by the items joined by `, `."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**The scratchpad.** Findings written to a file survive the context window that found them, and a fact recorded twice is noise. *You should see* each fact once, grouped by area.",
+        "**The manifest.** The coordinator needs one place to learn which agent did what. *You should see* every agent with its state file and status, in a stable order, and a bad status refused.",
+        "**Trust the file, not the status.** A manifest that says `running` or even `done` is only a claim until the state file exists. *You should see* `restart` for an agent whose file is missing.",
+        "**Reuse what is done.** A finished agent is not run again; its exported state goes into the next prompt. *You should see* `reuse`, and `resume` for the agent that stopped half-way.",
+        "**Inject state, not transcripts.** A resumed agent gets the lines it exported and an instruction to continue, and nothing from the old conversation. *You should see* exactly that prompt.",
+        "**Steer compaction.** `/compact` accepts instructions about what to keep. *You should see* the command carry them."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A finding is recorded once per area and fact, in first-seen order"
+        ],
+        [
+          "`e1`",
+          "The scratchpad groups findings under their area"
+        ],
+        [
+          "`e2`",
+          "The manifest lists every agent with its state file and status, and refuses bad input"
+        ],
+        [
+          "`e3`",
+          "A finished agent with its state file is reused and not run again"
+        ],
+        [
+          "`e4`",
+          "A running or failed agent with a state file is resumed from it"
+        ],
+        [
+          "`e5`",
+          "An agent whose state file is missing is restarted from scratch"
+        ],
+        [
+          "`e6`",
+          "The resume prompt carries the task and the state lines and nothing else"
+        ],
+        [
+          "`e7`",
+          "The compact command names what to keep"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"What a long exploration keeps outside its context: a scratchpad of findings, a manifest of agent state, and the prompt that resumes an agent after a crash. See ../../statement.md.\"\"\"\n\nimport logging\n\nlog = logging.getLogger(__name__)\n\nSTATUSES = (\"done\", \"running\", \"failed\")\n\n\ndef add_finding(findings, area, fact, location):\n    if any(f[\"area\"] == area and f[\"fact\"] == fact for f in findings):\n        return list(findings)\n    return list(findings) + [{\"area\": area, \"fact\": fact, \"location\": location}]\n\n\ndef render_scratchpad(findings):\n    areas = []\n    for f in findings:\n        if f[\"area\"] not in areas:\n            areas.append(f[\"area\"])\n    blocks = []\n    for area in areas:\n        lines = [f\"- {f['fact']} ({f['location']})\" for f in findings if f[\"area\"] == area]\n        blocks.append(f\"## {area}\\n\" + \"\\n\".join(lines))\n    return \"\\n\\n\".join(blocks)\n\n\ndef build_manifest(agents):\n    log.debug(\"build_manifest input: %r\", agents)\n    names = [a[\"name\"] for a in agents]\n    if len(set(names)) != len(names):\n        raise ValueError(\"duplicate agent name\")\n    for a in agents:\n        if a[\"status\"] not in STATUSES:\n            raise ValueError(f\"unknown status {a['status']}\")\n    return {\"version\": 1, \"agents\": [{\"name\": a[\"name\"], \"state_file\": a[\"state_file\"], \"status\": a[\"status\"]} for a in sorted(agents, key=lambda a: a[\"name\"])]}\n\n\ndef resume_plan(manifest, existing_files):\n    plan = []\n    for a in manifest[\"agents\"]:\n        if a[\"state_file\"] not in existing_files:\n            action = \"restart\"\n        elif a[\"status\"] == \"done\":\n            action = \"reuse\"\n        else:\n            action = \"resume\"\n        plan.append((a[\"name\"], action))\n    return plan\n\n\ndef resume_prompt(task, state_lines):\n    if not state_lines:\n        return task\n    return task + \"\\n\\nState from the last run:\\n\" + \"\\n\".join(f\"- {line}\" for line in state_lines) + \"\\nContinue from the first unfinished step.\"\n\n\ndef compact_command(keep):\n    return \"/compact\" if not keep else \"/compact Focus on \" + \", \".join(keep)\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom recovery import add_finding, build_manifest, compact_command, render_scratchpad, resume_plan\n\n# The scratchpad: one line per finding, a fact is recorded once per area.\nfindings = add_finding([], \"auth\", \"tokens are signed in TokenSigner\", \"auth/TokenSigner.java:12\")\nfindings = add_finding(findings, \"billing\", \"invoices use cents\", \"billing/Money.java:5\")\nfindings = add_finding(findings, \"auth\", \"tokens are signed in TokenSigner\", \"auth/Other.java:99\")\nprint(render_scratchpad(findings))\n\n# The manifest of the subagents, and what to do with each after a crash.\nagents = [\n    {\"name\": \"search\", \"state_file\": \"state/search.md\", \"status\": \"running\"},\n    {\"name\": \"auth\", \"state_file\": \"state/auth.md\", \"status\": \"done\"},\n    {\"name\": \"billing\", \"state_file\": \"state/billing.md\", \"status\": \"failed\"},\n]\nmanifest = build_manifest(agents)\nprint(\"manifest:\", manifest)\nprint(\"resume plan:\", resume_plan(manifest, {\"state/auth.md\", \"state/search.md\"}))\nprint(\"compact command:\", compact_command([\"the open questions\", \"file paths\"]))\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"What a long exploration keeps outside its context: a scratchpad of findings, a manifest of agent state, and the prompt that resumes an agent after a crash. See ../../statement.md.\"\"\"\n\nimport logging\n\nlog = logging.getLogger(__name__)\n\nSTATUSES = (\"done\", \"running\", \"failed\")\n\n\ndef add_finding(findings, area, fact, location):\n    # TODO 1 of 6 (finish this to pass m1): the scratchpad's duplicate rule. Receives the findings so far and a new one\n    #   (area, fact, location). When a finding with the same area and the same fact already exists, return the findings\n    #   unchanged; otherwise return them with the new one added last. Example: adding (api, \"uses JWT\") twice -> one\n    #   entry.\n    return list(findings) + [{\"area\": area, \"fact\": fact, \"location\": location}]\n\n\ndef render_scratchpad(findings):\n    areas = []\n    for f in findings:\n        if f[\"area\"] not in areas:\n            areas.append(f[\"area\"])\n    blocks = []\n    for area in areas:\n        # TODO 2 of 6 (finish this to pass e1): the lines of one area. Receives all the findings and one area. Return\n        #   one line \"- fact (location)\" for each finding of that area only, in order. Example: findings of api and db,\n        #   area api -> the api lines only.\n        lines = [f\"- {f['fact']} ({f['location']})\" for f in findings]\n        blocks.append(f\"## {area}\\n\" + \"\\n\".join(lines))\n    return \"\\n\\n\".join(blocks)\n\n\ndef build_manifest(agents):\n    log.debug(\"build_manifest input: %r\", agents)\n    names = [a[\"name\"] for a in agents]\n    # TODO 3 of 6 (finish this to pass e2): the checks of the manifest. Refuse with an error when two agents have the\n    #   same name, and when an agent's status is not one of STATUSES. Example: two agents named a -> refused; status\n    #   \"paused\" -> refused.\n    return {\"version\": 1, \"agents\": [{\"name\": a[\"name\"], \"state_file\": a[\"state_file\"], \"status\": a[\"status\"]} for a in sorted(agents, key=lambda a: a[\"name\"])]}\n\n\ndef resume_plan(manifest, existing_files):\n    plan = []\n    for a in manifest[\"agents\"]:\n        # TODO 4 of 6 (finish this to pass e3, e4, e5): the action for one agent. When its state file does not exist,\n        #   restart; otherwise when its status is done, reuse it; otherwise resume it from the state file. Example: done\n        #   with its file -> reuse; failed with its file -> resume; any status without its file -> restart.\n        action = \"skip\"\n        plan.append((a[\"name\"], action))\n    return plan\n\n\ndef resume_prompt(task, state_lines):\n    # TODO 5 of 6 (finish this to pass e6): the resume prompt. Receives the task and the state lines. With no state\n    #   lines, return the task alone; otherwise the task, a blank line, \"State from the last run:\", one \"- line\" per state\n    #   line, and \"Continue from the first unfinished step.\". Example: [] -> the task.\n    return task\n\n\ndef compact_command(keep):\n    # TODO 6 of 6 (finish this to pass e7): the compact command. Receives the things to keep. Return /compact when there\n    #   are none, otherwise \"/compact Focus on \" followed by them joined with \", \". Example: [auth flow, schema] ->\n    #   /compact Focus on auth flow, schema.\n    return \"/compact\"\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom recovery import add_finding, build_manifest, compact_command, render_scratchpad, resume_plan\n\n# The scratchpad: one line per finding, a fact is recorded once per area.\nfindings = add_finding([], \"auth\", \"tokens are signed in TokenSigner\", \"auth/TokenSigner.java:12\")\nfindings = add_finding(findings, \"billing\", \"invoices use cents\", \"billing/Money.java:5\")\nfindings = add_finding(findings, \"auth\", \"tokens are signed in TokenSigner\", \"auth/Other.java:99\")\nprint(render_scratchpad(findings))\n\n# The manifest of the subagents, and what to do with each after a crash.\nagents = [\n    {\"name\": \"search\", \"state_file\": \"state/search.md\", \"status\": \"running\"},\n    {\"name\": \"auth\", \"state_file\": \"state/auth.md\", \"status\": \"done\"},\n    {\"name\": \"billing\", \"state_file\": \"state/billing.md\", \"status\": \"failed\"},\n]\nmanifest = build_manifest(agents)\nprint(\"manifest:\", manifest)\nprint(\"resume plan:\", resume_plan(manifest, {\"state/auth.md\", \"state/search.md\"}))\nprint(\"compact command:\", compact_command([\"the open questions\", \"file paths\"]))\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "b40a38694f550aa27d109eb7f5b3e17798ff8e2881f7f62d34d19208c4efa304",
+  "starting_code": "\"\"\"What a long exploration keeps outside its context: a scratchpad of findings, a manifest of agent state, and the prompt that resumes an agent after a crash. See ../../statement.md.\"\"\"\n\nimport logging\n\nlog = logging.getLogger(__name__)\n\nSTATUSES = (\"done\", \"running\", \"failed\")\n\n\ndef add_finding(findings, area, fact, location):\n    # TODO 1 of 6 (finish this to pass m1): the scratchpad's duplicate rule. Receives the findings so far and a new one\n    #   (area, fact, location). When a finding with the same area and the same fact already exists, return the findings\n    #   unchanged; otherwise return them with the new one added last. Example: adding (api, \"uses JWT\") twice -> one\n    #   entry.\n    return list(findings) + [{\"area\": area, \"fact\": fact, \"location\": location}]\n\n\ndef render_scratchpad(findings):\n    areas = []\n    for f in findings:\n        if f[\"area\"] not in areas:\n            areas.append(f[\"area\"])\n    blocks = []\n    for area in areas:\n        # TODO 2 of 6 (finish this to pass e1): the lines of one area. Receives all the findings and one area. Return\n        #   one line \"- fact (location)\" for each finding of that area only, in order. Example: findings of api and db,\n        #   area api -> the api lines only.\n        lines = [f\"- {f['fact']} ({f['location']})\" for f in findings]\n        blocks.append(f\"## {area}\\n\" + \"\\n\".join(lines))\n    return \"\\n\\n\".join(blocks)\n\n\ndef build_manifest(agents):\n    log.debug(\"build_manifest input: %r\", agents)\n    names = [a[\"name\"] for a in agents]\n    # TODO 3 of 6 (finish this to pass e2): the checks of the manifest. Refuse with an error when two agents have the\n    #   same name, and when an agent's status is not one of STATUSES. Example: two agents named a -> refused; status\n    #   \"paused\" -> refused.\n    return {\"version\": 1, \"agents\": [{\"name\": a[\"name\"], \"state_file\": a[\"state_file\"], \"status\": a[\"status\"]} for a in sorted(agents, key=lambda a: a[\"name\"])]}\n\n\ndef resume_plan(manifest, existing_files):\n    plan = []\n    for a in manifest[\"agents\"]:\n        # TODO 4 of 6 (finish this to pass e3, e4, e5): the action for one agent. When its state file does not exist,\n        #   restart; otherwise when its status is done, reuse it; otherwise resume it from the state file. Example: done\n        #   with its file -> reuse; failed with its file -> resume; any status without its file -> restart.\n        action = \"skip\"\n        plan.append((a[\"name\"], action))\n    return plan\n\n\ndef resume_prompt(task, state_lines):\n    # TODO 5 of 6 (finish this to pass e6): the resume prompt. Receives the task and the state lines. With no state\n    #   lines, return the task alone; otherwise the task, a blank line, \"State from the last run:\", one \"- line\" per state\n    #   line, and \"Continue from the first unfinished step.\". Example: [] -> the task.\n    return task\n\n\ndef compact_command(keep):\n    # TODO 6 of 6 (finish this to pass e7): the compact command. Receives the things to keep. Return /compact when there\n    #   are none, otherwise \"/compact Focus on \" followed by them joined with \", \". Example: [auth flow, schema] ->\n    #   /compact Focus on auth flow, schema.\n    return \"/compact\"\n",
+  "exercise": {
+    "main_path": "practice/level-3/67-exploring-a-large-codebase/prose/unit-02/practice-1/recovery.py",
+    "test_path": "practice/level-3/67-exploring-a-large-codebase/prose/unit-02/practice-1/test_recovery.py",
+    "run_command": [
+      "python3",
+      "practice/level-3/67-exploring-a-large-codebase/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-3/67-exploring-a-large-codebase/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-3/67-exploring-a-large-codebase/prose/unit-02/practice-1/test_recovery.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_a_finding_is_recorded_once_per_area_and_fact_in_first_seen_order",
+        "kind": "main",
+        "says": "A finding is recorded once per area and fact, in first-seen order"
+      },
+      {
+        "id": "test_e1_the_scratchpad_groups_findings_under_their_area",
+        "kind": "edge",
+        "says": "The scratchpad groups findings under their area"
+      },
+      {
+        "id": "test_e2_the_manifest_lists_every_agent_with_its_state_file_and_status_and_refuses_bad_input",
+        "kind": "edge",
+        "says": "The manifest lists every agent with its state file and status, and refuses bad input"
+      },
+      {
+        "id": "test_e3_a_finished_agent_with_its_state_file_is_reused_and_not_run_again",
+        "kind": "edge",
+        "says": "A finished agent with its state file is reused and not run again"
+      },
+      {
+        "id": "test_e4_a_running_or_failed_agent_with_a_state_file_is_resumed_from_it",
+        "kind": "edge",
+        "says": "A running or failed agent with a state file is resumed from it"
+      },
+      {
+        "id": "test_e5_an_agent_whose_state_file_is_missing_is_restarted_from_scratch",
+        "kind": "edge",
+        "says": "An agent whose state file is missing is restarted from scratch"
+      },
+      {
+        "id": "test_e6_the_resume_prompt_carries_the_task_and_the_state_lines_and_nothing_else",
+        "kind": "edge",
+        "says": "The resume prompt carries the task and the state lines and nothing else"
+      },
+      {
+        "id": "test_e7_the_compact_command_names_what_to_keep",
+        "kind": "edge",
+        "says": "The compact command names what to keep"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/67-exploring-a-large-codebase/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/67-exploring-a-large-codebase/02-compaction-crash-recovery-and-the-practice.md",
+    "concepts": [
+      "the practice of Compaction, crash recovery and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/67-exploring-a-large-codebase/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "exploring-a-large-codebase-u2"
+}

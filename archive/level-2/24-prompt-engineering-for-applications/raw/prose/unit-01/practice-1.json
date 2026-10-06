@@ -1,0 +1,156 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "24-prompt-engineering-for-applications"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Templates, placement and instructions that hold up",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A support tool inserts each customer message into a template. One customer's message contains the literal string `{{refund_limit}}`, which is also a variable of the template. What must the filling code do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Escape the braces first, then rebuild the whole template from its original source",
+            "correct": false,
+            "says": "Ruled out because the page asks only to \"Fill in one pass\", with no step that rebuilds the template."
+          },
+          {
+            "id": "b",
+            "text": "Rescan the filled template until no placeholder remains anywhere in the output",
+            "correct": false,
+            "says": "Ruled out because \"never scan the result again\" is the rule that keeps a customer's placeholder from being read as a template."
+          },
+          {
+            "id": "c",
+            "text": "Delete curly braces from every incoming customer message before filling anything",
+            "correct": false,
+            "says": "Ruled out because the page's fix is a single pass, and a value \"must come out as those characters\", not as edited text."
+          },
+          {
+            "id": "d",
+            "text": "Substitute every placeholder in one pass and keep what was typed untouched",
+            "correct": true,
+            "says": "The page says to \"Replace every `{{name}}` once, from left to right, and never scan the result again\", so data stays data."
+          }
+        ],
+        "origin": {
+          "path": "course/24-prompt-engineering-for-applications/01-templates-placement-and-instructions.md",
+          "section": "A template is a prompt with holes"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A team keeps adding one sentence to the system prompt after every complaint, and answers to the original tasks now get worse. Which explanation fits the page?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Rules that matter become a small share of the text and compete",
+            "correct": true,
+            "says": "The page says the rules that matter are \"a small share of the text\" when a prompt \"grows by accretion\"."
+          },
+          {
+            "id": "b",
+            "text": "The model stops reading everything that follows the first paragraph",
+            "correct": false,
+            "says": "Ruled out because the mechanism described is that the model \"weighs them against the thirty that do not\", not that it stops reading."
+          },
+          {
+            "id": "c",
+            "text": "The API refuses any system prompt that grows beyond a fixed size",
+            "correct": false,
+            "says": "Ruled out because the effect described is a change in behaviour: \"If you find the model thinking more often than you'd like\"."
+          },
+          {
+            "id": "d",
+            "text": "Each newer rule cancels the older ones, so the earlier rules are lost",
+            "correct": false,
+            "says": "Ruled out because the page's advice \"Say a rule once, in one place, so that two lines cannot disagree\" shows rules competing, not newer ones cancelling older ones."
+          }
+        ],
+        "origin": {
+          "path": "course/24-prompt-engineering-for-applications/01-templates-placement-and-instructions.md",
+          "section": "Prompt dilution"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A nightly job classifies thousands of ambiguous tickets with nobody watching. What should the prompt tell the model to do when a ticket allows two readings?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Ask the sender which meaning was intended before assigning any label",
+            "correct": false,
+            "says": "Ruled out because an interactive assistant \"can ask, but one question at a time\", which needs someone to answer."
+          },
+          {
+            "id": "b",
+            "text": "Stop the whole run for every ticket and wait until a person gives an answer",
+            "correct": false,
+            "says": "Ruled out because \"A nightly batch has nobody to answer\", so waiting would never end."
+          },
+          {
+            "id": "c",
+            "text": "Choose the more probable meaning and record that choice with the label",
+            "correct": true,
+            "says": "The page says that \"A nightly batch has nobody to answer, so the prompt should tell the model to choose the likeliest reading and write the assumption in the output\"."
+          },
+          {
+            "id": "d",
+            "text": "Return an empty label for the ticket so that no guess is ever made",
+            "correct": false,
+            "says": "Ruled out because the documented behaviour is to \"state the assumption you made\" and not to withhold a result."
+          }
+        ],
+        "origin": {
+          "path": "course/24-prompt-engineering-for-applications/01-templates-placement-and-instructions.md",
+          "section": "Ask or assume"
+        }
+      }
+    ],
+    "concepts": [
+      "A template is a prompt with holes, as the page teaches it",
+      "Ask or assume, as the page teaches it",
+      "Prompt dilution, as the page teaches it"
+    ]
+  }
+}

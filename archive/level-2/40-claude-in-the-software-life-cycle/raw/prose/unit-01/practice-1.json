@@ -1,0 +1,155 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "40-claude-in-the-software-life-cycle"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Git workflows, committed configuration and versioned prompts",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A developer wants private notes about how they like to work in this repository, visible to nobody else. Which place holds them?",
+        "options": [
+          {
+            "id": "a",
+            "text": "`.mcp.json`, which lists the servers the whole team uses",
+            "correct": false,
+            "says": "Ruled out because `.mcp.json` holds \"The MCP servers a project uses\", which is configuration and not notes."
+          },
+          {
+            "id": "b",
+            "text": "`.claude/settings.json`, which carries the team's rules to every clone",
+            "correct": false,
+            "says": "Ruled out because the file is committed and holds \"Team permission rules, default model, hooks, plugins\", so the notes would reach the whole team."
+          },
+          {
+            "id": "c",
+            "text": "`CLAUDE.md`, which every session loads before the first prompt is typed",
+            "correct": false,
+            "says": "Ruled out because `CLAUDE.md` is committed and holds \"Commands, conventions, the git workflow\", which every teammate loads."
+          },
+          {
+            "id": "d",
+            "text": "`CLAUDE.local.md`, which stays out of version control",
+            "correct": true,
+            "says": "The table puts \"One developer's notes for this project\" in `CLAUDE.local.md`, which is \"No, in `.gitignore`\"."
+          }
+        ],
+        "origin": {
+          "path": "course/40-claude-in-the-software-life-cycle/01-git-committed-configuration-and-versioned-prompts.md",
+          "section": "What is committed and what is not"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A workflow embeds its instruction text in a string, and teammates tweak it whenever an answer looks off. What makes those edits safe to ship?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A versioned file with a changelog line and a review",
+            "correct": true,
+            "says": "The page says to keep \"One file per prompt, in the repository\", with \"A version in the file\", \"A changelog entry for every change\" and \"A review of the change\"."
+          },
+          {
+            "id": "b",
+            "text": "A shorter string of a few lines in the same workflow",
+            "correct": false,
+            "says": "Ruled out because \"A reworded prompt is a behaviour change\", and a shorter string is still a rewording with no version or review."
+          },
+          {
+            "id": "c",
+            "text": "A secret-store entry in place of the repository text",
+            "correct": false,
+            "says": "Ruled out because a prompt in the repository gives a diff and a revert: \"a rollback is one revert\", which a secret store does not offer."
+          },
+          {
+            "id": "d",
+            "text": "A nightly rewrite by Claude from the day's results",
+            "correct": false,
+            "says": "Ruled out because a rewrite nobody reads skips the step the page asks for: \"A review of the change, ideally with a sample of inputs whose outputs are compared before and after\"."
+          }
+        ],
+        "origin": {
+          "path": "course/40-claude-in-the-software-life-cycle/01-git-committed-configuration-and-versioned-prompts.md",
+          "section": "Versioning prompts and settings"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A pull request adds a line to the committed `.claude/settings.json` that allows a new shell command. How should the team treat it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "As a personal preference, since each developer picks their own rules",
+            "correct": false,
+            "says": "Ruled out because the line \"changes what runs on every teammate's machine\", so it is shared behaviour and not a private choice."
+          },
+          {
+            "id": "b",
+            "text": "As documentation, since the file only describes how Claude should act",
+            "correct": false,
+            "says": "Ruled out because the file holds \"Team permission rules, default model, hooks, plugins\", which are rules that take effect and not prose."
+          },
+          {
+            "id": "c",
+            "text": "As a change to a build script, since it alters what every clone runs",
+            "correct": true,
+            "says": "The page says \"a line in `.claude/settings.json` that allows a command or enables a plugin changes what runs on every teammate's machine\", so such pull requests \"deserve the same care as a change to a build script\"."
+          },
+          {
+            "id": "d",
+            "text": "As a local override, since such lines belong in `.gitignore`",
+            "correct": false,
+            "says": "Ruled out because \"a committed file is reviewed like code\", and the shared settings file is committed, while the local file is the one kept out of version control."
+          }
+        ],
+        "origin": {
+          "path": "course/40-claude-in-the-software-life-cycle/01-git-committed-configuration-and-versioned-prompts.md",
+          "section": "What is committed and what is not"
+        }
+      }
+    ],
+    "concepts": [
+      "Versioning prompts and settings, as the page teaches it",
+      "What is committed and what is not, as the page teaches it"
+    ]
+  }
+}

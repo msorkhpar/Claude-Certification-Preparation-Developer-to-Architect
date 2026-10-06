@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "router.py",
+      "old": "best = min(models, key=lambda m: (request_cost(m, usage, batch), m[\"tier\"], m[\"id\"]))",
+      "new": "best = min(models, key=lambda m: ((-1 if batch else 1) * request_cost(m, usage, False), m[\"tier\"], m[\"id\"]))"
+    }
+  ]
+}

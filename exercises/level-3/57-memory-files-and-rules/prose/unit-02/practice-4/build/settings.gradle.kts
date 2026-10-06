@@ -1,0 +1,11 @@
+rootProject.name = "memory_setup"
+include(":harness")
+project(":harness").projectDir = file("libs/harness")
+include(":38-settings-layers")
+project(":38-settings-layers").projectDir = file("libs/38-settings-layers")
+include(":39-hook-gate")
+project(":39-hook-gate").projectDir = file("libs/39-hook-gate")
+include(":56-builtin-tools")
+project(":56-builtin-tools").projectDir = file("libs/56-builtin-tools")
+include(":57-memory-loading")
+project(":57-memory-loading").projectDir = file("libs/57-memory-loading")

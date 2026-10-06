@@ -1,0 +1,122 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "45-the-agentic-loop-in-depth"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 5,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Results, parallel calls, growing context and the practice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A custom tool `deduct_stock` writes to inventory, and a custom tool `notify_warehouse` reads the new level. The model asks for both in one turn, and the developer marks only `notify_warehouse` as read-only to save time. What can the team count as guaranteed?",
+        "options": [
+          {
+            "id": "a",
+            "text": "That the write finishes first, since state-changing tools always run ahead of any readers",
+            "correct": false,
+            "says": "Ruled out because the documented rule is about conflicts among tools that change state: \"Tools that modify state (like Edit, Write, and Bash) run sequentially to avoid conflicts.\""
+          },
+          {
+            "id": "b",
+            "text": "Nothing, since simultaneous requests have no promised order and need separate rounds",
+            "correct": true,
+            "says": "The page says to put a dependency in two turns, because the model decides what to ask for in one turn and the SDK promises no order between the calls it makes together."
+          },
+          {
+            "id": "c",
+            "text": "That both run in the order requested, since every custom tool runs one after another here",
+            "correct": false,
+            "says": "Ruled out because a tool marked read-only is allowed to run alongside others: \"To enable parallel execution for a custom tool, set readOnlyHint in its annotations.\""
+          },
+          {
+            "id": "d",
+            "text": "That the reader waits, since the SDK works out the dependency from the tool names",
+            "correct": false,
+            "says": "Ruled out because the SDK does not read names for dependencies: \"a dependency belongs in two turns.\""
+          }
+        ],
+        "origin": {
+          "path": "course/45-the-agentic-loop-in-depth/02-results-parallel-calls-context-and-the-practice.md",
+          "section": "What the Agent SDK does in that position"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A finance dashboard reads the `usage` field of every result to report what agent runs cost, but the invoices are higher for the runs that delegated to subagents. What explains the gap, and what is the fix?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Add the cost of the helpers by parsing their own messages out of the stream",
+            "correct": false,
+            "says": "Ruled out because the SDK already provides that accounting: \"Use `modelUsage`, or `model_usage` in Python, for whole-tree token and cost accounting.\""
+          },
+          {
+            "id": "b",
+            "text": "Treat the figure as complete and look for unlogged retries in the application",
+            "correct": false,
+            "says": "Ruled out because the figure is incomplete by design: \"A run that delegated to subagents has spent more than `usage` says.\""
+          },
+          {
+            "id": "c",
+            "text": "It covers only the lead loop, so consult the per-model accounting for the whole tree",
+            "correct": true,
+            "says": "The `usage` figure counts one loop only, and the page names the field for the whole tree."
+          },
+          {
+            "id": "d",
+            "text": "The figure is zeroed whenever a run is cut off, so leave those runs out",
+            "correct": false,
+            "says": "Ruled out because zeroed figures belong to a crash and not to a cut-off: \"the final result is an `error_during_execution` whose cost fields may be zeroed\"."
+          }
+        ],
+        "origin": {
+          "path": "course/45-the-agentic-loop-in-depth/02-results-parallel-calls-context-and-the-practice.md",
+          "section": "What the Agent SDK does in that position"
+        }
+      }
+    ],
+    "concepts": [
+      "Results, parallel calls, growing context and the practice, as the page teaches it",
+      "What the Agent SDK does in that position, as the page teaches it",
+      "What the loop owns when you write it yourself, as the page teaches it"
+    ]
+  }
+}

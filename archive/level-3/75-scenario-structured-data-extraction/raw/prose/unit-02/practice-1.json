@@ -1,0 +1,293 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "75-scenario-structured-data-extraction"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: audit an extraction run (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: audit an extraction run"
+    },
+    {
+      "type": "para",
+      "text": "A team extracts the vendor, the currency and the totals from invoices of three kinds: typed, scanned and handwritten. The pipeline forces an extraction tool, validates every record, retries once with feedback and sends what it cannot settle to a person. Its dashboard says 99 percent accurate, and the reviewers say the handwritten forms are a disaster. In this practice you write the audit that settles the argument: the accuracy on every document next to the accuracy on the validated ones, the accuracy of each kind of document and whether that kind may be automated, the failure shapes the run shows and the first fix to make. The model is not called: the tests give you the log of a run. The shapes of the log, of the policy and of the report are this course's own design for the capstone, not an Anthropic interface. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`audit`); TypeScript has the same name and the same snake-case fields. Java has the static method `RunAudit.audit` and the records `Run`, `Policy`, `Segment` and `Report` with camel-case fields (`retriedAbsent`, `sumOk`, `minN`, `needsReview`, `accuracyAll`); Kotlin has the top-level function `audit` and the data classes of the same names."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working audit with six gaps cut out of it. The counting of the statuses, the accuracies and the assembly of the report are written and correct. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`percent` unlocks `e8` (and the figures of `m1` and `e1`): the whole percentage, rounded half up.",
+        "`segments_of` unlocks `e3` and `e4`: one entry per kind, sorted, with the automate decision.",
+        "`failure_shapes` unlocks `e6`: the invented, wasted-retry and unchecked-total counts.",
+        "`meets` unlocks `e2` and `e1`: the target comparison, false for an empty run.",
+        "`is_overstated` unlocks `e5`: the validated accuracy against the all-document accuracy and the gap.",
+        "`choose_fix` unlocks `e7`: the first fix by the order of what costs most."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "A run is a list of documents `{id, kind, status, correct, invented, retried_absent, sum_ok}`: `status` is `valid`, `needs_review` or `failed`; `correct` says that the record the pipeline delivered matches the label (a document that was not delivered is not correct); `invented` says that a value was not in the document; `retried_absent` says that a retry was sent for a value the document does not contain; `sum_ok` says that the record's totals agree with its line items. The policy is `{target, min_n, gap}`, whole numbers: the target accuracy in percent, the fewest documents of a kind that may justify automating it, and the gap in percentage points."
+    },
+    {
+      "type": "para",
+      "text": "`audit(runs, policy)` returns a report with:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`n`, `valid`, `needs_review`, `failed`: the counts.",
+        "`accuracy_all`: the percentage of all documents that are correct. `accuracy_validated`: the percentage of the `valid` documents that are correct (0 when none is valid). Percentages are whole numbers rounded half up: `(200 * correct + total) // (2 * total)`, and 0 when the total is 0.",
+        "`meets_target`: true when the run has at least one document and `correct * 100 >= target * n`.",
+        "`segments`: one entry per kind, sorted by kind, `{kind, n, correct, percent, automate}`. `automate` is true when the kind has at least `min_n` documents and `correct * 100 >= target * n` for that kind.",
+        "`invented`, `wasted_retries`: the number of documents flagged `invented` and `retried_absent`. `unchecked_totals`: the number of `valid` documents whose `sum_ok` is false (a document that was never accepted is not counted).",
+        "`overstated`: true when `accuracy_validated - accuracy_all` is greater than `gap`.",
+        "`first_fix`: `none` for an empty run; otherwise the first that applies of `make_fields_nullable` (any invented value), `stop_retrying_absent` (any wasted retry), `add_semantic_checks` (any unchecked total), `measure_all_documents` (the figure is overstated), `improve_weak_segments` (the run does not meet the target) and `none`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Measure every document.** A document that failed validation is still a document the customer sent. *You should see* 100 percent on the validated ones next to 57 percent on all of them, and the gap named as the figure being overstated.",
+        "**A target is met at the target.** The goal is \"at least\", so a run exactly on it meets it. *You should see* 9 correct documents of 10 meet a target of 90, and 8 of 10 do not.",
+        "**Automate a kind only with evidence.** Too few documents prove nothing, and a kind below the target is not ready. *You should see* a kind with exactly `min_n` documents automated, one with one fewer held back, and 17 of 19 refused while 9 of 10 pass.",
+        "**Name the shape, then order the fixes.** An invented value is a schema fault, a wasted retry a loop fault, an unchecked total a missing check. *You should see* the cheapest fix that removes the most damage first."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A mixed run gets every count, both accuracies, the segments and the first fix"
+        ],
+        [
+          "`e1`",
+          "An empty run has zero figures, no segments and never meets the target"
+        ],
+        [
+          "`e2`",
+          "The run meets the target at exactly the target and not below it"
+        ],
+        [
+          "`e3`",
+          "A kind needs at least the minimum number of documents to be automated"
+        ],
+        [
+          "`e4`",
+          "A kind is automated at exactly the target accuracy and not below it"
+        ],
+        [
+          "`e5`",
+          "The figure is overstated only when the gap is exceeded, not when it is met"
+        ],
+        [
+          "`e6`",
+          "Each shape counts documents once, and an unchecked total counts only valid documents"
+        ],
+        [
+          "`e7`",
+          "The first fix follows the order of what costs most"
+        ],
+        [
+          "`e8`",
+          "Percentages are whole numbers rounded half up"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Audit an extraction run: the accuracy on every document, the accuracy by kind of document, the failure shapes and the first fix.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef percent(correct, total):\n    \"\"\"A whole percentage, rounded half up; 0 when there is nothing to divide.\"\"\"\n    return (200 * correct + total) // (2 * total) if total else 0\n\n\ndef segments_of(runs, policy):\n    \"\"\"One entry per kind, sorted by kind: {kind, n, correct, percent, automate}.\"\"\"\n    result = []\n    for kind in sorted({r[\"kind\"] for r in runs}):\n        group = [r for r in runs if r[\"kind\"] == kind]\n        ok = sum(1 for r in group if r[\"correct\"])\n        result.append({\"kind\": kind, \"n\": len(group), \"correct\": ok, \"percent\": percent(ok, len(group)),\n                       \"automate\": len(group) >= policy[\"min_n\"] and ok * 100 >= policy[\"target\"] * len(group)})\n    return result\n\n\ndef failure_shapes(runs):\n    \"\"\"(invented, wasted_retries, unchecked_totals) counted in documents.\"\"\"\n    invented = sum(1 for r in runs if r[\"invented\"])\n    wasted = sum(1 for r in runs if r[\"retried_absent\"])\n    unchecked = sum(1 for r in runs if r[\"status\"] == \"valid\" and not r[\"sum_ok\"])\n    return invented, wasted, unchecked\n\n\ndef meets(right, n, target):\n    \"\"\"True when the run has a document and right * 100 >= target * n.\"\"\"\n    return n > 0 and right * 100 >= target * n\n\n\ndef is_overstated(accuracy_validated, accuracy_all, gap):\n    \"\"\"True when the validated accuracy exceeds the all-document accuracy by more than the gap.\"\"\"\n    return accuracy_validated - accuracy_all > gap\n\n\ndef choose_fix(n, invented, wasted, unchecked, overstated, meets_target):\n    \"\"\"The first fix that applies, in the order of the statement.\"\"\"\n    if n == 0:\n        return \"none\"\n    if invented:\n        return \"make_fields_nullable\"\n    if wasted:\n        return \"stop_retrying_absent\"\n    if unchecked:\n        return \"add_semantic_checks\"\n    if overstated:\n        return \"measure_all_documents\"\n    if not meets_target:\n        return \"improve_weak_segments\"\n    return \"none\"\n\n\ndef audit(runs, policy):\n    log.debug(\"audit input: %r\", runs)\n    n = len(runs)\n    counts = {s: sum(1 for r in runs if r[\"status\"] == s) for s in (\"valid\", \"needs_review\", \"failed\")}\n    right = sum(1 for r in runs if r[\"correct\"])\n    right_valid = sum(1 for r in runs if r[\"status\"] == \"valid\" and r[\"correct\"])\n    accuracy_all = percent(right, n)\n    accuracy_validated = percent(right_valid, counts[\"valid\"])\n    invented, wasted, unchecked = failure_shapes(runs)\n    overstated = is_overstated(accuracy_validated, accuracy_all, policy[\"gap\"])\n    meets_target = meets(right, n, policy[\"target\"])\n    return {\"n\": n, \"valid\": counts[\"valid\"], \"needs_review\": counts[\"needs_review\"], \"failed\": counts[\"failed\"],\n            \"accuracy_all\": accuracy_all, \"accuracy_validated\": accuracy_validated, \"meets_target\": meets_target,\n            \"segments\": segments_of(runs, policy), \"invented\": invented, \"wasted_retries\": wasted, \"unchecked_totals\": unchecked,\n            \"overstated\": overstated, \"first_fix\": choose_fix(n, invented, wasted, unchecked, overstated, meets_target)}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom run_audit import audit\n\nPOLICY = {\"target\": 90, \"min_n\": 3, \"gap\": 5}\n\ndef run(kind=\"typed\", status=\"valid\", correct=True, invented=False, wasted=False):\n    return {\"id\": \"d\", \"kind\": kind, \"status\": status, \"correct\": correct, \"invented\": invented, \"retried_absent\": wasted, \"sum_ok\": True}\n\n# A run of seven documents: three typed ones right, two scans, two handwritten ones that went wrong.\nruns = [run() for _ in range(3)] + [run(\"scanned\"), run(\"scanned\", \"needs_review\", False),\n                                    run(\"handwritten\", \"failed\", False, invented=True), run(\"handwritten\", \"needs_review\", False, wasted=True)]\nreport = audit(runs, POLICY)\nprint(\"documents:\", report[\"n\"], \"| valid:\", report[\"valid\"], \"| needs review:\", report[\"needs_review\"], \"| failed:\", report[\"failed\"])\nprint(\"accuracy, all vs validated:\", report[\"accuracy_all\"], report[\"accuracy_validated\"])\nprint(\"segments:\", report[\"segments\"])\nprint(\"first fix:\", report[\"first_fix\"])\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Audit an extraction run: the accuracy on every document, the accuracy by kind of document, the failure shapes and the first fix.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef percent(correct, total):\n    \"\"\"TODO 1 of 6 (unlocks m1, e1 and e8): a whole percentage, rounded half up.\n\n    Receives the correct count and the total. Returns `(200 * correct + total) // (2 * total)`, and 0 when the total is 0.\n    Example: percent(2, 3) -> 67, percent(1, 3) -> 33, percent(0, 0) -> 0\n    \"\"\"\n    return 0\n\n\ndef segments_of(runs, policy):\n    \"\"\"TODO 2 of 6 (unlocks m1, e3 and e4): one entry per kind of document.\n\n    Receives the runs and the policy. Returns a list sorted by kind of {kind, n, correct, percent, automate}; `automate` needs at\n    least `min_n` documents of the kind and `correct * 100 >= target * n` for it.\n    Example: 9 of 10 typed documents with min_n 5 and target 90 -> [{\"kind\": \"typed\", \"n\": 10, \"correct\": 9, \"percent\": 90, \"automate\": True}]\n    \"\"\"\n    return [{\"kind\": \"\", \"n\": 0, \"correct\": 0, \"percent\": 0, \"automate\": False}]\n\n\ndef failure_shapes(runs):\n    \"\"\"TODO 3 of 6 (unlocks m1 and e6): count the failure shapes in documents.\n\n    Receives the runs. Returns (invented, wasted_retries, unchecked_totals): documents flagged `invented`, documents flagged\n    `retried_absent`, and `valid` documents whose `sum_ok` is false (a document never accepted is not counted).\n    Example: one valid document with sum_ok false and one failed document with sum_ok false -> (0, 0, 1)\n    \"\"\"\n    return 0, 0, 0\n\n\ndef meets(right, n, target):\n    \"\"\"TODO 4 of 6 (unlocks m1, e1 and e2): does the run meet the target?\n\n    Receives the correct count, the document count and the target in percent. Returns True when there is at least one document\n    and `right * 100 >= target * n`. Example: meets(9, 10, 90) -> True, meets(8, 10, 90) -> False, meets(0, 0, 90) -> False\n    \"\"\"\n    return False\n\n\ndef is_overstated(accuracy_validated, accuracy_all, gap):\n    \"\"\"TODO 5 of 6 (unlocks m1 and e5): is the figure overstated?\n\n    Receives both accuracies and the gap in points. Returns True only when the validated accuracy exceeds the all-document\n    accuracy by more than the gap. Example: overstated(100, 95, 5) -> False, overstated(100, 94, 5) -> True\n    \"\"\"\n    return False\n\n\ndef choose_fix(n, invented, wasted, unchecked, overstated, meets_target):\n    \"\"\"TODO 6 of 6 (unlocks m1, e1 and e7): the first fix that applies.\n\n    Receives the document count, the three shape counts, `overstated` and `meets_target`. Returns `none` for an empty run, else the\n    first that applies of make_fields_nullable (invented), stop_retrying_absent (wasted), add_semantic_checks (unchecked),\n    measure_all_documents (overstated), improve_weak_segments (target not met), and `none`.\n    Example: choose_fix(3, 0, 1, 1, False, True) -> \"stop_retrying_absent\"\n    \"\"\"\n    return \"\"\n\n\ndef audit(runs, policy):\n    log.debug(\"audit input: %r\", runs)\n    n = len(runs)\n    counts = {s: sum(1 for r in runs if r[\"status\"] == s) for s in (\"valid\", \"needs_review\", \"failed\")}\n    right = sum(1 for r in runs if r[\"correct\"])\n    right_valid = sum(1 for r in runs if r[\"status\"] == \"valid\" and r[\"correct\"])\n    accuracy_all = percent(right, n)\n    accuracy_validated = percent(right_valid, counts[\"valid\"])\n    invented, wasted, unchecked = failure_shapes(runs)\n    overstated = is_overstated(accuracy_validated, accuracy_all, policy[\"gap\"])\n    meets_target = meets(right, n, policy[\"target\"])\n    return {\"n\": n, \"valid\": counts[\"valid\"], \"needs_review\": counts[\"needs_review\"], \"failed\": counts[\"failed\"],\n            \"accuracy_all\": accuracy_all, \"accuracy_validated\": accuracy_validated, \"meets_target\": meets_target,\n            \"segments\": segments_of(runs, policy), \"invented\": invented, \"wasted_retries\": wasted, \"unchecked_totals\": unchecked,\n            \"overstated\": overstated, \"first_fix\": choose_fix(n, invented, wasted, unchecked, overstated, meets_target)}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom run_audit import audit\n\nPOLICY = {\"target\": 90, \"min_n\": 3, \"gap\": 5}\n\ndef run(kind=\"typed\", status=\"valid\", correct=True, invented=False, wasted=False):\n    return {\"id\": \"d\", \"kind\": kind, \"status\": status, \"correct\": correct, \"invented\": invented, \"retried_absent\": wasted, \"sum_ok\": True}\n\n# A run of seven documents: three typed ones right, two scans, two handwritten ones that went wrong.\nruns = [run() for _ in range(3)] + [run(\"scanned\"), run(\"scanned\", \"needs_review\", False),\n                                    run(\"handwritten\", \"failed\", False, invented=True), run(\"handwritten\", \"needs_review\", False, wasted=True)]\nreport = audit(runs, POLICY)\nprint(\"documents:\", report[\"n\"], \"| valid:\", report[\"valid\"], \"| needs review:\", report[\"needs_review\"], \"| failed:\", report[\"failed\"])\nprint(\"accuracy, all vs validated:\", report[\"accuracy_all\"], report[\"accuracy_validated\"])\nprint(\"segments:\", report[\"segments\"])\nprint(\"first fix:\", report[\"first_fix\"])\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 7,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "4d995c252d33b333c8431c0fa4fa20bc21dbd5dc547f7a0cfac8b9bb41510ff1",
+  "starting_code": "\"\"\"Audit an extraction run: the accuracy on every document, the accuracy by kind of document, the failure shapes and the first fix.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef percent(correct, total):\n    \"\"\"TODO 1 of 6 (unlocks m1, e1 and e8): a whole percentage, rounded half up.\n\n    Receives the correct count and the total. Returns `(200 * correct + total) // (2 * total)`, and 0 when the total is 0.\n    Example: percent(2, 3) -> 67, percent(1, 3) -> 33, percent(0, 0) -> 0\n    \"\"\"\n    return 0\n\n\ndef segments_of(runs, policy):\n    \"\"\"TODO 2 of 6 (unlocks m1, e3 and e4): one entry per kind of document.\n\n    Receives the runs and the policy. Returns a list sorted by kind of {kind, n, correct, percent, automate}; `automate` needs at\n    least `min_n` documents of the kind and `correct * 100 >= target * n` for it.\n    Example: 9 of 10 typed documents with min_n 5 and target 90 -> [{\"kind\": \"typed\", \"n\": 10, \"correct\": 9, \"percent\": 90, \"automate\": True}]\n    \"\"\"\n    return [{\"kind\": \"\", \"n\": 0, \"correct\": 0, \"percent\": 0, \"automate\": False}]\n\n\ndef failure_shapes(runs):\n    \"\"\"TODO 3 of 6 (unlocks m1 and e6): count the failure shapes in documents.\n\n    Receives the runs. Returns (invented, wasted_retries, unchecked_totals): documents flagged `invented`, documents flagged\n    `retried_absent`, and `valid` documents whose `sum_ok` is false (a document never accepted is not counted).\n    Example: one valid document with sum_ok false and one failed document with sum_ok false -> (0, 0, 1)\n    \"\"\"\n    return 0, 0, 0\n\n\ndef meets(right, n, target):\n    \"\"\"TODO 4 of 6 (unlocks m1, e1 and e2): does the run meet the target?\n\n    Receives the correct count, the document count and the target in percent. Returns True when there is at least one document\n    and `right * 100 >= target * n`. Example: meets(9, 10, 90) -> True, meets(8, 10, 90) -> False, meets(0, 0, 90) -> False\n    \"\"\"\n    return False\n\n\ndef is_overstated(accuracy_validated, accuracy_all, gap):\n    \"\"\"TODO 5 of 6 (unlocks m1 and e5): is the figure overstated?\n\n    Receives both accuracies and the gap in points. Returns True only when the validated accuracy exceeds the all-document\n    accuracy by more than the gap. Example: overstated(100, 95, 5) -> False, overstated(100, 94, 5) -> True\n    \"\"\"\n    return False\n\n\ndef choose_fix(n, invented, wasted, unchecked, overstated, meets_target):\n    \"\"\"TODO 6 of 6 (unlocks m1, e1 and e7): the first fix that applies.\n\n    Receives the document count, the three shape counts, `overstated` and `meets_target`. Returns `none` for an empty run, else the\n    first that applies of make_fields_nullable (invented), stop_retrying_absent (wasted), add_semantic_checks (unchecked),\n    measure_all_documents (overstated), improve_weak_segments (target not met), and `none`.\n    Example: choose_fix(3, 0, 1, 1, False, True) -> \"stop_retrying_absent\"\n    \"\"\"\n    return \"\"\n\n\ndef audit(runs, policy):\n    log.debug(\"audit input: %r\", runs)\n    n = len(runs)\n    counts = {s: sum(1 for r in runs if r[\"status\"] == s) for s in (\"valid\", \"needs_review\", \"failed\")}\n    right = sum(1 for r in runs if r[\"correct\"])\n    right_valid = sum(1 for r in runs if r[\"status\"] == \"valid\" and r[\"correct\"])\n    accuracy_all = percent(right, n)\n    accuracy_validated = percent(right_valid, counts[\"valid\"])\n    invented, wasted, unchecked = failure_shapes(runs)\n    overstated = is_overstated(accuracy_validated, accuracy_all, policy[\"gap\"])\n    meets_target = meets(right, n, policy[\"target\"])\n    return {\"n\": n, \"valid\": counts[\"valid\"], \"needs_review\": counts[\"needs_review\"], \"failed\": counts[\"failed\"],\n            \"accuracy_all\": accuracy_all, \"accuracy_validated\": accuracy_validated, \"meets_target\": meets_target,\n            \"segments\": segments_of(runs, policy), \"invented\": invented, \"wasted_retries\": wasted, \"unchecked_totals\": unchecked,\n            \"overstated\": overstated, \"first_fix\": choose_fix(n, invented, wasted, unchecked, overstated, meets_target)}\n",
+  "exercise": {
+    "main_path": "practice/level-3/75-scenario-structured-data-extraction/prose/unit-02/practice-1/run_audit.py",
+    "test_path": "practice/level-3/75-scenario-structured-data-extraction/prose/unit-02/practice-1/test_run_audit.py",
+    "run_command": [
+      "python3",
+      "practice/level-3/75-scenario-structured-data-extraction/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-3/75-scenario-structured-data-extraction/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-3/75-scenario-structured-data-extraction/prose/unit-02/practice-1/test_run_audit.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_a_mixed_run_gets_every_count_both_accuracies_the_segments_and_the_first_fix",
+        "kind": "main",
+        "says": "A mixed run gets every count, both accuracies, the segments and the first fix"
+      },
+      {
+        "id": "test_e1_an_empty_run_has_zero_figures_no_segments_and_never_meets_the_target",
+        "kind": "edge",
+        "says": "An empty run has zero figures, no segments and never meets the target"
+      },
+      {
+        "id": "test_e2_the_run_meets_the_target_at_exactly_the_target_and_not_below_it",
+        "kind": "edge",
+        "says": "The run meets the target at exactly the target and not below it"
+      },
+      {
+        "id": "test_e3_a_kind_needs_at_least_the_minimum_number_of_documents_to_be_automated",
+        "kind": "edge",
+        "says": "A kind needs at least the minimum number of documents to be automated"
+      },
+      {
+        "id": "test_e4_a_kind_is_automated_at_exactly_the_target_accuracy_and_not_below_it",
+        "kind": "edge",
+        "says": "A kind is automated at exactly the target accuracy and not below it"
+      },
+      {
+        "id": "test_e5_the_figure_is_overstated_only_when_the_validated_accuracy_exceeds_the_all_document_accuracy_by_more_than_the_gap",
+        "kind": "edge",
+        "says": "The figure is overstated only when the gap is exceeded, not when it is met"
+      },
+      {
+        "id": "test_e6_each_shape_counts_documents_once_and_an_unchecked_total_counts_only_documents_accepted_as_valid",
+        "kind": "edge",
+        "says": "Each shape counts documents once, and an unchecked total counts only valid documents"
+      },
+      {
+        "id": "test_e7_the_first_fix_follows_the_order_of_what_costs_most",
+        "kind": "edge",
+        "says": "The first fix follows the order of what costs most"
+      },
+      {
+        "id": "test_e8_percentages_are_whole_numbers_rounded_half_up",
+        "kind": "edge",
+        "says": "Percentages are whole numbers rounded half up"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/75-scenario-structured-data-extraction/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/75-scenario-structured-data-extraction/02-segments-gaps-and-the-practice.md",
+    "concepts": [
+      "the practice of Segments, gaps and the practice: what the audit decides is solved"
+    ],
+    "files": [
+      "practice/level-3/75-scenario-structured-data-extraction/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "scenario-structured-data-extraction-u2"
+}

@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "retrieval.ts",
+      "old": "  const found = new Set(ids.slice(0, k).map((id) => docOf[id]));\n  const wanted = new Set(relevant);\n  return [...wanted].filter((d) => found.has(d)).length / wanted.size;\n",
+      "new": "  const wanted = new Set(relevant);\n  return Math.min(1, ids.slice(0, k).filter((id) => wanted.has(docOf[id])).length / wanted.size);\n"
+    }
+  ]
+}

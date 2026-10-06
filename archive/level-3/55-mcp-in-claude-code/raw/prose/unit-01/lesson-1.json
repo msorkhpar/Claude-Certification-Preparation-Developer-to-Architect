@@ -1,0 +1,332 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "55-mcp-in-claude-code"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Scopes, the project file and environment expansion",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Scopes, the project file and environment expansion"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Architect · **Module 55:** MCP in Claude Code · **Page 1 of 2** **Exams:** A2.4; S4"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** say which of the three scopes a server belongs in and who gets it, write a shared `.mcp.json` whose credentials come from each developer's environment and never from the file, use `${VAR:-default}` where a value is not secret, predict what happens when a variable is unset, and explain why a project's servers load without a prompt in `claude -p` and SDK runs."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-03 against the Claude Code documentation page \"Connect Claude Code to tools via MCP\" (the scopes, `.mcp.json`, environment expansion and project approvals), with the Python `claude-agent-sdk` 0.2.163 and TypeScript `@anthropic-ai/claude-agent-sdk` 0.3.287 the course ran. The example runs offline: it is the course's own model of the documented rules, not the product's code, and no server was started. This page deepens module 32 (what MCP is and how a server is written) and module 38 (settings layers), and it does not repeat them."
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "**Exam guide and current product.** *What the guide states, and so what the exam keys:* servers are scoped at the project level in `.mcp.json` for shared team tooling, or at the user level in `~/.claude.json` for personal and experimental servers, and `.mcp.json` supports environment variable expansion such as `${GITHUB_TOKEN}` so that credentials are never committed. *What the current product does (documentation checked 2026-10-03):* there are three scopes, not two. Local is the default for `claude mcp add`: it loads only in the project where it was added, stays private, and is stored in `~/.claude.json` under that project's path, in the same file as the user scope. Project is `.mcp.json` at the project root, shared through version control. User is `~/.claude.json` for all your projects. When a name appears in more than one place the order is local, project, user, then plugins and connectors, and the whole entry of the winner is used with no merging of fields. Expansion also has a default form, `${VAR:-default}`, and in a remote server's `url` and `headers` credential variables read as empty. On the exam, answer project for shared and user for personal; in practice a server you add without a flag is local, so say `--scope project` when the team should have it."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "A server is a door into your systems, and the questions about it are about who gets the door and what is written on it. The Architect exam asks where a shared server belongs, where a personal experiment belongs, and how a token reaches a server without reaching the repository. In S4, a developer-productivity agent that \"integrates with Model Context Protocol (MCP) servers\", the cost of a wrong answer is a token in version control, a teammate's experiment loaded for everyone, or a shared server that fails on every machine but yours. Each of them comes from a few lines of configuration, and each is easy to test, which is why module 55's practice is a set of files with a test suite."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Three scopes: who loads it and who shares it"
+    },
+    {
+      "type": "para",
+      "text": "\"MCP servers can be configured at three scopes.\" The scope controls which projects a server loads in and whether the configuration is shared."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Scope",
+        "Loads in",
+        "Shared with the team",
+        "Stored in"
+      ],
+      "rows": [
+        [
+          "Local (the default)",
+          "The current project only",
+          "No",
+          "`~/.claude.json`"
+        ],
+        [
+          "Project",
+          "The current project only",
+          "Yes, through version control",
+          "`.mcp.json` in the project root"
+        ],
+        [
+          "User",
+          "All your projects",
+          "No",
+          "`~/.claude.json`"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Local scope is \"the default\". \"A local-scoped server loads only in the project where you added it and stays private to you.\" The documentation warns that the word means something else here than in settings: local MCP servers live in your home directory's `~/.claude.json`, while the general local settings file is `.claude/settings.local.json` in the project. Project scope is for the team: \"Check `.mcp.json` into version control so everyone on your team gets the same MCP tools and services.\" A community guide adds the lesson that matters when a token is involved: local scope suits \"Sensitive credentials for personal accounts, experimental servers under evaluation, project-specific tooling not yet ready to share\", and \"Selecting the wrong scope for a personal tool can leak credentials into a shared repo or, conversely, hide a tool the developer expected to see in every project.\" The administrator's route is separate: \"Administrators can also deploy or provide servers for every user via managed configuration.\" User scope \"works well for personal utility servers, development tools, or services you frequently use across different projects.\""
+    },
+    {
+      "type": "para",
+      "text": "When the same name is defined in more than one place, \"Claude Code connects to it once, using the definition from the highest-precedence source. The entire server entry from that source is used; fields are not merged across scopes.\" The order is local, project, user, plugin-provided servers, then claude.ai connectors. A developer who defines `github` locally with a different URL therefore replaces the team's entry for themselves, header and all; they do not inherit the team's `Authorization` line. Claude Code warns about a conflict in `claude mcp list` and in `/mcp`. A server your organisation provides through managed settings ranks above all of them."
+    },
+    {
+      "type": "para",
+      "text": "The command line writes the file for you. `claude mcp add --transport http shared-server --scope project https://example.com/mcp` creates or updates `.mcp.json`; without `--scope` it writes the local scope. `claude mcp list` and `claude mcp get <name>` show what is configured and its status."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The project file"
+    },
+    {
+      "type": "para",
+      "text": "`.mcp.json` has one top-level key, `mcpServers`, and an entry per server. A remote server has a `type` (`http`, `sse` or `ws`) and a `url`, and may have `headers`. A local server has a `command`, `args` and an `env` map of variables for its process; its `type` is `stdio`. The same entry shapes appear in `~/.claude.json`."
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"mcpServers\": {\n    \"api-server\": {\n      \"type\": \"http\",\n      \"url\": \"${API_BASE_URL:-https://api.example.com}/mcp\",\n      \"headers\": { \"Authorization\": \"Bearer ${API_KEY}\" }\n    }\n  }\n}"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Environment expansion: credentials by reference"
+    },
+    {
+      "type": "para",
+      "text": "\"Claude Code supports environment variable expansion in `.mcp.json` files, allowing teams to share configurations while maintaining flexibility for machine-specific paths and sensitive values like API keys.\" Two forms exist: `${VAR}` \"expands to the value of environment variable `VAR`\", and `${VAR:-default}` \"expands to `VAR` if set, otherwise uses `default`\". Expansion applies to five places: `command` (the server executable path), `args`, `env`, `url` (\"for HTTP server types\") and `headers` (\"for HTTP server authentication\"). Anywhere else the text stays as written."
+    },
+    {
+      "type": "para",
+      "text": "Four rules decide whether a shared file works."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**A credential is a reference, never a value and never a default.** `Bearer ${GITHUB_TOKEN}` ships in the file and each developer exports the variable. A default such as `${GITHUB_TOKEN:-ghp_abc}` writes the secret into the repository again, so it is as wrong as a literal. A value that is not secret, such as a base URL or a path, should have a default so that the file works with nothing set.",
+        "**An unset variable without a default does not stop the load.** \"If a referenced environment variable isn't set and has no default value, the config still loads: Claude Code reports a missing-variable warning for that server in `claude mcp list` output and uses the unexpanded `${VAR}` text as-is.\" The server then receives the literal text `${GITHUB_TOKEN}` and rejects it, so the symptom is an authentication failure and the first place to look is the warning in `claude mcp list`.",
+        "**Some credential names read as empty toward a remote server.** \"In a remote server's `url` and `headers`, Claude Code reads credential variables from your environment as empty rather than expanding them.\" The reason is that a repository's file must not be able to send your Claude Code or cloud credentials to a server it names. The covered names are Claude Code's own credentials such as `ANTHROPIC_API_KEY`, cloud provider credentials such as `AWS_BEARER_TOKEN_BEDROCK`, and others such as `HTTPS_PROXY` and `NPM_TOKEN`. A covered name is empty whether or not you set it, and a `:-` default on it is ignored. If you write `Bearer ${NPM_TOKEN}`, the server receives `Bearer ` with nothing after it and usually answers 401. The fix is to copy the secret into a variable with a name of your own and reference that name. A name outside the set, such as `API_KEY`, \"expands as written\".",
+        "**`CLAUDE_PROJECT_DIR` needs a default in `command` and `args`.** Claude Code sets it \"in the spawned server's environment to the project root\", not in its own, so `${CLAUDE_PROJECT_DIR}` in a project file has nothing to expand from. The documentation's answer is a default such as `${CLAUDE_PROJECT_DIR:-.}`. The server itself can read the variable once it runs."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Who approves a project server"
+    },
+    {
+      "type": "para",
+      "text": "A server that came with a repository is code from somebody else. \"Claude Code prompts for approval in interactive sessions before using project-scoped servers from `.mcp.json` files\", and until you approve it `claude mcp list` shows it as pending. A cloned repository cannot approve its own servers: approvals committed to the project's `.claude/settings.json` are ignored in a folder you have not trusted. That prompt needs a person, and an unattended run has none. \"In `claude -p` runs, Agent SDK sessions, and cloud sessions, Claude Code can't show that prompt: it loads project-scoped servers without asking.\" So a CI job or an SDK application that opens a freshly cloned repository loads whatever its `.mcp.json` names. To keep a server out anyway, list it in `disabledMcpjsonServers`, exclude project settings with `--setting-sources` or the SDK's `settingSources`, or start the session with `--strict-mcp-config` and pass only the servers you want with `--mcp-config`. A change to `.mcp.json` in a pull request deserves the review of a change to code."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "para",
+      "text": "The example is a model of these rules in Python, TypeScript, Java and Kotlin: `expand` for `${VAR}`, `${VAR:-default}` and the covered credential names, `expand_server` for the five fields, `resolve_servers` for the order of scopes, `lint` for the shape of a shared file and for a literal secret, and `mcp_decision` for the permission rules of page 2. It prints the expanded entries of a shared file, a conflict between scopes, and the lint findings of a file that holds a literal key."
+    },
+    {
+      "type": "example",
+      "id": "m55-mcp-config",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/55-mcp-config/python/mcp_config.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/55-mcp-config/typescript/mcpConfig.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/55-mcp-config/java/McpConfig.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/55-mcp-config/kotlin/McpConfig.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"MCP server configuration in Claude Code, resolved offline: scopes, environment expansion and a lint of a shared `.mcp.json`.\n\nA teaching model of what the Claude Code documentation says (page \"Connect Claude Code to tools via MCP\", read on 2026-10-03): three scopes with\nthe order local, project, user, where the whole entry of the highest scope is used and fields are not merged; `${VAR}` and `${VAR:-default}`\nexpanded in command, args, env, url and headers; an unset variable with no default keeps its text; and, toward a remote server, credential\nvariables read as empty. The set of credential names here is the documentation's examples, not its full list. Not the product's code.\n\"\"\"\nimport fnmatch\nimport json\nimport re\nimport logging\n\nlog = logging.getLogger(__name__)\n\nSCOPES = [\"local\", \"project\", \"user\"]  # highest precedence first\nCOVERED = {\"ANTHROPIC_API_KEY\", \"ANTHROPIC_AUTH_TOKEN\", \"AWS_BEARER_TOKEN_BEDROCK\", \"HTTPS_PROXY\", \"NPM_TOKEN\"}\nREMOTE = (\"http\", \"sse\", \"ws\")\nVAR = re.compile(r\"\\$\\{([A-Za-z_][A-Za-z0-9_]*)(?::-([^}]*))?\\}\")\nSECRET_KEY = re.compile(r\"token|key|secret|authorization|password\", re.I)\nDESCRIPTION_LIMIT = 2048  # characters kept of a tool description and of a server's instructions\n\n\ndef expand(text, env, remote=False):\n    \"\"\"Expand ${VAR} and ${VAR:-default}. Returns (text, names that were unset and had no default).\"\"\"\n    missing = []\n\n    def one(m):\n        name, default = m.group(1), m.group(2)\n        if remote and name in COVERED:\n            return \"\"  # never sent toward a remote server, whether or not it is set, and a default is ignored\n        if name in env:\n            return env[name]\n        if default is not None:\n            return default\n        missing.append(name)\n        return m.group(0)  # the unexpanded text is used as written\n\n    return VAR.sub(one, text), missing\n\n\ndef expand_server(entry, env):\n    \"\"\"Expand the five fields where expansion applies. Returns (entry, warnings).\"\"\"\n    remote = entry.get(\"type\") in REMOTE\n    warnings, out = [], dict(entry)\n    for field in (\"command\", \"url\"):\n        if field in out:\n            out[field], miss = expand(out[field], env, remote)\n            warnings += [f\"{n} is not set\" for n in miss]\n    if \"args\" in out:\n        out[\"args\"] = []\n        for arg in entry[\"args\"]:\n            text, miss = expand(arg, env, remote)\n            out[\"args\"].append(text)\n            warnings += [f\"{n} is not set\" for n in miss]\n    for field in (\"env\", \"headers\"):\n        if field in out:\n            out[field] = {}\n            for key, value in entry[field].items():\n                text, miss = expand(value, env, remote)\n                out[field][key] = text\n                warnings += [f\"{n} is not set\" for n in miss]\n    return out, warnings\n\n\ndef resolve_servers(scopes):\n    \"\"\"scopes maps a scope name to {server name: entry}. A name defined in several scopes is used once, from the highest scope, whole.\"\"\"\n    servers, warnings = {}, []\n    for scope in SCOPES:\n        for name, entry in scopes.get(scope, {}).items():\n            if name not in servers:\n                servers[name] = (scope, entry)\n            elif servers[name][1] != entry:\n                warnings.append(f\"{name} is defined in {servers[name][0]} and {scope} with different settings: {servers[name][0]} wins\")\n    return servers, warnings\n\n\ndef lint(config):\n    \"\"\"Findings for a shared `.mcp.json`: a server's shape and any credential written out instead of referenced.\"\"\"\n    findings = []\n    for name, entry in config.get(\"mcpServers\", {}).items():\n        kind = entry.get(\"type\", \"stdio\")\n        if kind in REMOTE and \"url\" not in entry:\n            findings.append(f\"{name}: a {kind} server needs a url\")\n        if kind == \"stdio\" and \"command\" not in entry:\n            findings.append(f\"{name}: a stdio server needs a command\")\n        for field in (\"env\", \"headers\"):\n            for key, value in entry.get(field, {}).items():\n                if SECRET_KEY.search(key) and \"${\" not in value:\n                    findings.append(f\"{name}: {field}.{key} holds a literal value, reference an environment variable\")\n    return findings\n\n\ndef mcp_decision(settings, tool):\n    \"\"\"allow, ask or deny for an MCP tool named mcp__<server>__<tool>. Deny rules may use globs; an allow rule counts only when the\n    server part is written out and glob-free (mcp__docs__* is honoured, mcp__* and * are ignored). Deny wins, then allow, else ask.\"\"\"\n    perms = settings.get(\"permissions\", {})\n    if any(fnmatch.fnmatchcase(tool, rule) for rule in perms.get(\"deny\", [])):\n        return \"deny\"\n    for rule in perms.get(\"allow\", []):\n        parts = rule.split(\"__\")\n        if len(parts) >= 3 and parts[0] == \"mcp\" and parts[1] and \"*\" not in parts[1] and fnmatch.fnmatchcase(tool, rule):\n            return \"allow\"\n    return \"ask\"\n\n\ndef truncate(text, limit=DESCRIPTION_LIMIT):\n    return text[:limit]\n\n\ndef show(value):\n    return json.dumps(value, separators=(\",\", \":\"))\n\n\ndef main():\n    env = {\"GITHUB_TOKEN\": \"demo-gh\", \"NPM_TOKEN\": \"demo-npm\"}\n    shared = {\"mcpServers\": {\n        \"github\": {\"type\": \"http\", \"url\": \"${GITHUB_MCP_URL:-https://github-mcp.example.com/mcp}\", \"headers\": {\"Authorization\": \"Bearer ${GITHUB_TOKEN}\"}},\n        \"registry\": {\"type\": \"http\", \"url\": \"https://registry-mcp.example.com/mcp\", \"headers\": {\"Authorization\": \"Bearer ${NPM_TOKEN}\"}},\n        \"docs\": {\"command\": \"python3\", \"args\": [\"${CLAUDE_PROJECT_DIR:-.}/tools/docs_server.py\", \"${DOCS_INDEX}\"], \"env\": {\"DOCS_API_KEY\": \"${DOCS_API_KEY}\"}},\n    }}\n    print(\"expanded entries:\")\n    for name, entry in shared[\"mcpServers\"].items():\n        out, warnings = expand_server(entry, env)\n        print(f\"  {name}: {show(out)}\")\n        for w in warnings:\n            print(f\"    warning: {w}\")\n    scopes = {\"project\": shared[\"mcpServers\"], \"user\": {\"github\": {\"type\": \"http\", \"url\": \"https://other.example.com/mcp\"}, \"scratch\": {\"command\": \"python3\", \"args\": [\"scratch.py\"]}}}\n    servers, warnings = resolve_servers(scopes)\n    print(\"resolved servers:\", \", \".join(f\"{n} from {s}\" for n, (s, _) in servers.items()))\n    for w in warnings:\n        print(\"  warning:\", w)\n    bad = {\"mcpServers\": {\"api\": {\"type\": \"http\", \"headers\": {\"X-Api-Key\": \"abc123\"}}, \"tool\": {\"args\": [\"x\"]}}}\n    print(\"lint of a shared file with literal secrets:\")\n    for f in lint(bad):\n        print(\"  \" + f)\n    print(\"lint of the file above:\", lint(shared) or \"no findings\")\n    settings = {\"permissions\": {\"allow\": [\"mcp__docs__*\", \"mcp__*\"], \"deny\": [\"mcp__github__delete_*\"]}}\n    for tool in (\"mcp__docs__search_docs\", \"mcp__github__list_prs\", \"mcp__github__delete_repository\"):\n        print(f\"{tool} ->\", mcp_decision(settings, tool))\n    print(\"a description of 3000 characters keeps\", len(truncate(\"x\" * 3000)), \"of them\")\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "expanded entries:\n  github: {\"type\":\"http\",\"url\":\"https://github-mcp.example.com/mcp\",\"headers\":{\"Authorization\":\"Bearer demo-gh\"}}\n  registry: {\"type\":\"http\",\"url\":\"https://registry-mcp.example.com/mcp\",\"headers\":{\"Authorization\":\"Bearer \"}}\n  docs: {\"command\":\"python3\",\"args\":[\"./tools/docs_server.py\",\"${DOCS_INDEX}\"],\"env\":{\"DOCS_API_KEY\":\"${DOCS_API_KEY}\"}}\n    warning: DOCS_INDEX is not set\n    warning: DOCS_API_KEY is not set\nresolved servers: github from project, registry from project, docs from project, scratch from user\n  warning: github is defined in project and user with different settings: project wins\nlint of a shared file with literal secrets:\n  api: a http server needs a url\n  api: headers.X-Api-Key holds a literal value, reference an environment variable\n  tool: a stdio server needs a command\nlint of the file above: no findings\nmcp__docs__search_docs -> allow\nmcp__github__list_prs -> ask\nmcp__github__delete_repository -> deny\na description of 3000 characters keeps 2048 of them"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// MCP server configuration in Claude Code, resolved offline: scopes, environment expansion and a lint of a shared `.mcp.json`.\n//\n// A teaching model of what the Claude Code documentation says (page \"Connect Claude Code to tools via MCP\", read on 2026-10-03): three scopes with\n// the order local, project, user, where the whole entry of the highest scope is used and fields are not merged; `${VAR}` and `${VAR:-default}`\n// expanded in command, args, env, url and headers; an unset variable with no default keeps its text; and, toward a remote server, credential\n// variables read as empty. The set of credential names here is the documentation's examples, not its full list. Not the product's code.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"mcp_config\");\nexport const SCOPES = [\"local\", \"project\", \"user\"]; // highest precedence first\nconst COVERED = new Set([\"ANTHROPIC_API_KEY\", \"ANTHROPIC_AUTH_TOKEN\", \"AWS_BEARER_TOKEN_BEDROCK\", \"HTTPS_PROXY\", \"NPM_TOKEN\"]);\nconst REMOTE = [\"http\", \"sse\", \"ws\"];\nconst SECRET_KEY = /token|key|secret|authorization|password/i;\nconst DESCRIPTION_LIMIT = 2048; // characters kept of a tool description and of a server's instructions\n\ntype Entry = Record<string, any>;\n\n/** Expand ${VAR} and ${VAR:-default}. Returns [text, names that were unset and had no default]. */\nexport function expand(text: string, env: Record<string, string>, remote = false): [string, string[]] {\n  const missing: string[] = [];\n  const out = text.replace(/\\$\\{([A-Za-z_][A-Za-z0-9_]*)(?::-([^}]*))?\\}/g, (whole, name: string, fallback?: string) => {\n    if (remote && COVERED.has(name)) return \"\"; // never sent toward a remote server, whether or not it is set, and a default is ignored\n    if (name in env) return env[name];\n    if (fallback !== undefined) return fallback;\n    missing.push(name);\n    return whole; // the unexpanded text is used as written\n  });\n  return [out, missing];\n}\n\n/** Expand the five fields where expansion applies. Returns [entry, warnings]. */\nexport function expandServer(entry: Entry, env: Record<string, string>): [Entry, string[]] {\n  const remote = REMOTE.includes(entry.type);\n  const warnings: string[] = [];\n  const out: Entry = { ...entry };\n  const one = (text: string) => {\n    const [value, miss] = expand(text, env, remote);\n    warnings.push(...miss.map((n) => `${n} is not set`));\n    return value;\n  };\n  for (const field of [\"command\", \"url\"]) if (field in out) out[field] = one(out[field]);\n  if (\"args\" in out) out.args = entry.args.map((a: string) => one(a));\n  for (const field of [\"env\", \"headers\"]) {\n    if (field in out) out[field] = Object.fromEntries(Object.entries(entry[field] as Record<string, string>).map(([k, v]) => [k, one(v)]));\n  }\n  return [out, warnings];\n}\n\n/** scopes maps a scope name to {server name: entry}. A name defined in several scopes is used once, from the highest scope, whole. */\nexport function resolveServers(scopes: Record<string, Record<string, Entry>>): [Record<string, [string, Entry]>, string[]] {\n  const servers: Record<string, [string, Entry]> = {};\n  const warnings: string[] = [];\n  for (const scope of SCOPES) {\n    for (const [name, entry] of Object.entries(scopes[scope] ?? {})) {\n      if (!(name in servers)) servers[name] = [scope, entry];\n      else if (JSON.stringify(servers[name][1]) !== JSON.stringify(entry)) {\n        warnings.push(`${name} is defined in ${servers[name][0]} and ${scope} with different settings: ${servers[name][0]} wins`);\n      }\n    }\n  }\n  return [servers, warnings];\n}\n\n/** Findings for a shared `.mcp.json`: a server's shape and any credential written out instead of referenced. */\nexport function lint(config: Entry): string[] {\n  const findings: string[] = [];\n  for (const [name, entry] of Object.entries<Entry>(config.mcpServers ?? {})) {\n    const kind = entry.type ?? \"stdio\";\n    if (REMOTE.includes(kind) && !(\"url\" in entry)) findings.push(`${name}: a ${kind} server needs a url`);\n    if (kind === \"stdio\" && !(\"command\" in entry)) findings.push(`${name}: a stdio server needs a command`);\n    for (const field of [\"env\", \"headers\"]) {\n      for (const [key, value] of Object.entries<string>(entry[field] ?? {})) {\n        if (SECRET_KEY.test(key) && !value.includes(\"${\")) findings.push(`${name}: ${field}.${key} holds a literal value, reference an environment variable`);\n      }\n    }\n  }\n  return findings;\n}\n\n/** allow, ask or deny for an MCP tool named mcp__<server>__<tool>. Deny rules may use globs; an allow rule counts only when the\n * server part is written out and glob-free (mcp__docs__* is honoured, mcp__* and * are ignored). Deny wins, then allow, else ask. */\nconst globMatch = (rule: string, name: string) => new RegExp(\"^\" + rule.split(\"*\").map((s) => s.replace(/[.+?^${}()|[\\]\\\\]/g, \"\\\\$&\")).join(\".*\") + \"$\").test(name);\nexport function mcpDecision(settings: Entry, tool: string): string {\n  const perms = settings.permissions ?? {};\n  if ((perms.deny ?? []).some((rule: string) => globMatch(rule, tool))) return \"deny\";\n  for (const rule of perms.allow ?? []) {\n    const parts = rule.split(\"__\");\n    if (parts.length >= 3 && parts[0] === \"mcp\" && parts[1] && !parts[1].includes(\"*\") && globMatch(rule, tool)) return \"allow\";\n  }\n  return \"ask\";\n}\n\nexport function truncate(text: string, limit = DESCRIPTION_LIMIT): string {\n  return text.slice(0, limit);\n}\n\nconst show = (value: unknown) => JSON.stringify(value);\n\nfunction main() {\n  const env = { GITHUB_TOKEN: \"demo-gh\", NPM_TOKEN: \"demo-npm\" };\n  const shared: Entry = { mcpServers: {\n    github: { type: \"http\", url: \"${GITHUB_MCP_URL:-https://github-mcp.example.com/mcp}\", headers: { Authorization: \"Bearer ${GITHUB_TOKEN}\" } },\n    registry: { type: \"http\", url: \"https://registry-mcp.example.com/mcp\", headers: { Authorization: \"Bearer ${NPM_TOKEN}\" } },\n    docs: { command: \"python3\", args: [\"${CLAUDE_PROJECT_DIR:-.}/tools/docs_server.py\", \"${DOCS_INDEX}\"], env: { DOCS_API_KEY: \"${DOCS_API_KEY}\" } },\n  } };\n  console.log(\"expanded entries:\");\n  for (const [name, entry] of Object.entries<Entry>(shared.mcpServers)) {\n    const [out, warnings] = expandServer(entry, env);\n    console.log(`  ${name}: ${show(out)}`);\n    for (const w of warnings) console.log(`    warning: ${w}`);\n  }\n  const scopes = { project: shared.mcpServers, user: { github: { type: \"http\", url: \"https://other.example.com/mcp\" }, scratch: { command: \"python3\", args: [\"scratch.py\"] } } };\n  const [servers, warnings] = resolveServers(scopes);\n  console.log(\"resolved servers:\", Object.entries(servers).map(([n, [s]]) => `${n} from ${s}`).join(\", \"));\n  for (const w of warnings) console.log(\"  warning:\", w);\n  const bad = { mcpServers: { api: { type: \"http\", headers: { \"X-Api-Key\": \"abc123\" } }, tool: { args: [\"x\"] } } };\n  console.log(\"lint of a shared file with literal secrets:\");\n  for (const f of lint(bad)) console.log(\"  \" + f);\n  const clean = lint(shared);\n  console.log(\"lint of the file above:\", clean.length ? clean : \"no findings\");\n  const settings = { permissions: { allow: [\"mcp__docs__*\", \"mcp__*\"], deny: [\"mcp__github__delete_*\"] } };\n  for (const tool of [\"mcp__docs__search_docs\", \"mcp__github__list_prs\", \"mcp__github__delete_repository\"]) console.log(`${tool} ->`, mcpDecision(settings, tool));\n  console.log(\"a description of 3000 characters keeps\", truncate(\"x\".repeat(3000)).length, \"of them\");\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "expanded entries:\n  github: {\"type\":\"http\",\"url\":\"https://github-mcp.example.com/mcp\",\"headers\":{\"Authorization\":\"Bearer demo-gh\"}}\n  registry: {\"type\":\"http\",\"url\":\"https://registry-mcp.example.com/mcp\",\"headers\":{\"Authorization\":\"Bearer \"}}\n  docs: {\"command\":\"python3\",\"args\":[\"./tools/docs_server.py\",\"${DOCS_INDEX}\"],\"env\":{\"DOCS_API_KEY\":\"${DOCS_API_KEY}\"}}\n    warning: DOCS_INDEX is not set\n    warning: DOCS_API_KEY is not set\nresolved servers: github from project, registry from project, docs from project, scratch from user\n  warning: github is defined in project and user with different settings: project wins\nlint of a shared file with literal secrets:\n  api: a http server needs a url\n  api: headers.X-Api-Key holds a literal value, reference an environment variable\n  tool: a stdio server needs a command\nlint of the file above: no findings\nmcp__docs__search_docs -> allow\nmcp__github__list_prs -> ask\nmcp__github__delete_repository -> deny\na description of 3000 characters keeps 2048 of them"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import static harness.Show.py;\n\nimport com.fasterxml.jackson.databind.ObjectMapper;\nimport java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\nimport java.util.regex.Matcher;\nimport java.util.regex.Pattern;\n\n/**\n * MCP server configuration in Claude Code, resolved offline: scopes, environment expansion and a lint of a shared `.mcp.json`.\n *\n * <p>A teaching model of what the Claude Code documentation says (page \"Connect Claude Code to tools via MCP\", read on 2026-10-03): three scopes with\n * the order local, project, user, where the whole entry of the highest scope is used and fields are not merged; `${VAR}` and `${VAR:-default}`\n * expanded in command, args, env, url and headers; an unset variable with no default keeps its text; and, toward a remote server, credential\n * variables read as empty. The set of credential names here is the documentation's examples, not its full list. Not the product's code.\n * The configuration is JSON, read with Jackson.\n */\npublic final class McpConfig {\n    private static final System.Logger LOG = System.getLogger(McpConfig.class.getName());\n    static final List<String> SCOPES = List.of(\"local\", \"project\", \"user\"); // highest precedence first\n    static final Set<String> COVERED = Set.of(\"ANTHROPIC_API_KEY\", \"ANTHROPIC_AUTH_TOKEN\", \"AWS_BEARER_TOKEN_BEDROCK\", \"HTTPS_PROXY\", \"NPM_TOKEN\");\n    static final Set<String> REMOTE = Set.of(\"http\", \"sse\", \"ws\");\n    static final Pattern VAR = Pattern.compile(\"\\\\$\\\\{([A-Za-z_][A-Za-z0-9_]*)(?::-([^}]*))?\\\\}\");\n    static final Pattern SECRET_KEY = Pattern.compile(\"token|key|secret|authorization|password\", Pattern.CASE_INSENSITIVE);\n    static final int DESCRIPTION_LIMIT = 2048; // characters kept of a tool description and of a server's instructions\n    private static final ObjectMapper JSON = new ObjectMapper();\n\n    /** The text after expansion and the names that were unset and had no default. */\n    record Expanded(String text, List<String> missing) {}\n\n    /** A server entry after expansion, and the warnings it raised. */\n    record ExpandedServer(Map<String, Object> entry, List<String> warnings) {}\n\n    /** A server's winning scope and entry. */\n    record Source(String scope, Map<String, Object> entry) {}\n\n    /** The servers in use, and the warnings about conflicts. */\n    record Resolved(Map<String, Source> servers, List<String> warnings) {}\n\n    static Map<String, Object> parse(String json) {\n        try {\n            @SuppressWarnings(\"unchecked\")\n            Map<String, Object> m = JSON.readValue(json, LinkedHashMap.class);\n            return m;\n        } catch (Exception e) {\n            throw new IllegalArgumentException(e);\n        }\n    }\n\n    /** Expand ${VAR} and ${VAR:-default}. Returns the text and the names that were unset and had no default. */\n    static Expanded expand(String text, Map<String, String> env, boolean remote) {\n        List<String> missing = new ArrayList<>();\n        Matcher m = VAR.matcher(text);\n        StringBuilder out = new StringBuilder();\n        while (m.find()) {\n            String name = m.group(1), dflt = m.group(2);\n            String value;\n            if (remote && COVERED.contains(name)) value = \"\"; // never sent toward a remote server, whether or not it is set, and a default is ignored\n            else if (env.containsKey(name)) value = env.get(name);\n            else if (dflt != null) value = dflt;\n            else {\n                missing.add(name);\n                value = m.group(0); // the unexpanded text is used as written\n            }\n            m.appendReplacement(out, Matcher.quoteReplacement(value));\n        }\n        m.appendTail(out);\n        return new Expanded(out.toString(), missing);\n    }\n\n    static Expanded expand(String text, Map<String, String> env) {\n        return expand(text, env, false);\n    }\n\n    private static void warn(List<String> warnings, List<String> missing) {\n        for (String n : missing) warnings.add(n + \" is not set\");\n    }\n\n    /** Expand the five fields where expansion applies. Returns the entry and the warnings. */\n    @SuppressWarnings(\"unchecked\")\n    static ExpandedServer expandServer(Map<String, Object> entry, Map<String, String> env) {\n        boolean remote = entry.get(\"type\") != null && REMOTE.contains(entry.get(\"type\"));\n        List<String> warnings = new ArrayList<>();\n        Map<String, Object> out = new LinkedHashMap<>(entry);\n        for (String field : List.of(\"command\", \"url\")) {\n            if (!out.containsKey(field)) continue;\n            Expanded e = expand((String) out.get(field), env, remote);\n            out.put(field, e.text());\n            warn(warnings, e.missing());\n        }\n        if (out.containsKey(\"args\")) {\n            List<String> args = new ArrayList<>();\n            for (Object arg : (List<Object>) entry.get(\"args\")) {\n                Expanded e = expand((String) arg, env, remote);\n                args.add(e.text());\n                warn(warnings, e.missing());\n            }\n            out.put(\"args\", args);\n        }\n        for (String field : List.of(\"env\", \"headers\")) {\n            if (!out.containsKey(field)) continue;\n            Map<String, Object> values = new LinkedHashMap<>();\n            for (Map.Entry<String, Object> kv : ((Map<String, Object>) entry.get(field)).entrySet()) {\n                Expanded e = expand((String) kv.getValue(), env, remote);\n                values.put(kv.getKey(), e.text());\n                warn(warnings, e.missing());\n            }\n            out.put(field, values);\n        }\n        return new ExpandedServer(out, warnings);\n    }\n\n    /** scopes maps a scope name to {server name: entry}. A name defined in several scopes is used once, from the highest scope, whole. */\n    static Resolved resolveServers(Map<String, Map<String, Map<String, Object>>> scopes) {\n        Map<String, Source> servers = new LinkedHashMap<>();\n        List<String> warnings = new ArrayList<>();\n        for (String scope : SCOPES) {\n            for (Map.Entry<String, Map<String, Object>> e : scopes.getOrDefault(scope, Map.of()).entrySet()) {\n                String name = e.getKey();\n                if (!servers.containsKey(name)) servers.put(name, new Source(scope, e.getValue()));\n                else if (!servers.get(name).entry().equals(e.getValue())) {\n                    warnings.add(name + \" is defined in \" + servers.get(name).scope() + \" and \" + scope + \" with different settings: \" + servers.get(name).scope() + \" wins\");\n                }\n            }\n        }\n        return new Resolved(servers, warnings);\n    }\n\n    /** Findings for a shared `.mcp.json`: a server's shape and any credential written out instead of referenced. */\n    @SuppressWarnings(\"unchecked\")\n    static List<String> lint(Map<String, Object> config) {\n        List<String> findings = new ArrayList<>();\n        Map<String, Object> servers = (Map<String, Object>) config.getOrDefault(\"mcpServers\", Map.of());\n        for (Map.Entry<String, Object> s : servers.entrySet()) {\n            String name = s.getKey();\n            Map<String, Object> entry = (Map<String, Object>) s.getValue();\n            String kind = (String) entry.getOrDefault(\"type\", \"stdio\");\n            if (REMOTE.contains(kind) && !entry.containsKey(\"url\")) findings.add(name + \": a \" + kind + \" server needs a url\");\n            if (kind.equals(\"stdio\") && !entry.containsKey(\"command\")) findings.add(name + \": a stdio server needs a command\");\n            for (String field : List.of(\"env\", \"headers\")) {\n                for (Map.Entry<String, Object> kv : ((Map<String, Object>) entry.getOrDefault(field, Map.of())).entrySet()) {\n                    if (SECRET_KEY.matcher(kv.getKey()).find() && !((String) kv.getValue()).contains(\"${\")) {\n                        findings.add(name + \": \" + field + \".\" + kv.getKey() + \" holds a literal value, reference an environment variable\");\n                    }\n                }\n            }\n        }\n        return findings;\n    }\n\n    /** Python's fnmatch.fnmatchcase: `*` any run, `?` one character, `[...]` a set. */\n    static boolean fnmatch(String name, String pattern) {\n        StringBuilder re = new StringBuilder();\n        for (int i = 0; i < pattern.length(); i++) {\n            char c = pattern.charAt(i);\n            if (c == '*') re.append(\".*\");\n            else if (c == '?') re.append('.');\n            else if (c == '[') {\n                int j = pattern.indexOf(']', i + 2);\n                if (j < 0) re.append(\"\\\\[\");\n                else {\n                    String set = pattern.substring(i + 1, j);\n                    re.append('[').append(set.startsWith(\"!\") ? \"^\" + set.substring(1) : set).append(']');\n                    i = j;\n                }\n            } else re.append(Pattern.quote(String.valueOf(c)));\n        }\n        return Pattern.compile(re.toString(), Pattern.DOTALL).matcher(name).matches();\n    }\n\n    /**\n     * allow, ask or deny for an MCP tool named mcp__&lt;server&gt;__&lt;tool&gt;. Deny rules may use globs; an allow rule counts only when the\n     * server part is written out and glob-free (mcp__docs__* is honoured, mcp__* and * are ignored). Deny wins, then allow, else ask.\n     */\n    @SuppressWarnings(\"unchecked\")\n    static String mcpDecision(Map<String, Object> settings, String tool) {\n        Map<String, Object> perms = (Map<String, Object>) settings.getOrDefault(\"permissions\", Map.of());\n        for (Object rule : (List<Object>) perms.getOrDefault(\"deny\", List.of())) if (fnmatch(tool, (String) rule)) return \"deny\";\n        for (Object r : (List<Object>) perms.getOrDefault(\"allow\", List.of())) {\n            String rule = (String) r;\n            String[] parts = rule.split(\"__\", -1);\n            if (parts.length >= 3 && parts[0].equals(\"mcp\") && !parts[1].isEmpty() && !parts[1].contains(\"*\") && fnmatch(tool, rule)) return \"allow\";\n        }\n        return \"ask\";\n    }\n\n    static String truncate(String text, int limit) {\n        return text.length() <= limit ? text : text.substring(0, limit);\n    }\n\n    static String truncate(String text) {\n        return truncate(text, DESCRIPTION_LIMIT);\n    }\n\n    static String show(Object value) {\n        try {\n            return JSON.writeValueAsString(value);\n        } catch (Exception e) {\n            throw new IllegalStateException(e);\n        }\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    public static void main(String[] args) {\n        Map<String, String> env = Map.of(\"GITHUB_TOKEN\", \"demo-gh\", \"NPM_TOKEN\", \"demo-npm\");\n        Map<String, Object> shared = parse(\"\"\"\n            {\"mcpServers\": {\n              \"github\": {\"type\": \"http\", \"url\": \"${GITHUB_MCP_URL:-https://github-mcp.example.com/mcp}\", \"headers\": {\"Authorization\": \"Bearer ${GITHUB_TOKEN}\"}},\n              \"registry\": {\"type\": \"http\", \"url\": \"https://registry-mcp.example.com/mcp\", \"headers\": {\"Authorization\": \"Bearer ${NPM_TOKEN}\"}},\n              \"docs\": {\"command\": \"python3\", \"args\": [\"${CLAUDE_PROJECT_DIR:-.}/tools/docs_server.py\", \"${DOCS_INDEX}\"], \"env\": {\"DOCS_API_KEY\": \"${DOCS_API_KEY}\"}}\n            }}\"\"\");\n        Map<String, Map<String, Object>> sharedServers = (Map<String, Map<String, Object>>) (Object) shared.get(\"mcpServers\");\n        System.out.println(\"expanded entries:\");\n        for (Map.Entry<String, Map<String, Object>> s : sharedServers.entrySet()) {\n            ExpandedServer out = expandServer(s.getValue(), env);\n            System.out.println(\"  \" + s.getKey() + \": \" + show(out.entry()));\n            for (String w : out.warnings()) System.out.println(\"    warning: \" + w);\n        }\n        Map<String, Map<String, Object>> user = (Map<String, Map<String, Object>>) (Object) parse(\"\"\"\n            {\"github\": {\"type\": \"http\", \"url\": \"https://other.example.com/mcp\"}, \"scratch\": {\"command\": \"python3\", \"args\": [\"scratch.py\"]}}\"\"\");\n        Resolved resolved = resolveServers(Map.of(\"project\", sharedServers, \"user\", user));\n        List<String> parts = new ArrayList<>();\n        resolved.servers().forEach((n, s) -> parts.add(n + \" from \" + s.scope()));\n        System.out.println(\"resolved servers: \" + String.join(\", \", parts));\n        for (String w : resolved.warnings()) System.out.println(\"  warning: \" + w);\n        Map<String, Object> bad = parse(\"\"\"\n            {\"mcpServers\": {\"api\": {\"type\": \"http\", \"headers\": {\"X-Api-Key\": \"abc123\"}}, \"tool\": {\"args\": [\"x\"]}}}\"\"\");\n        System.out.println(\"lint of a shared file with literal secrets:\");\n        for (String f : lint(bad)) System.out.println(\"  \" + f);\n        List<String> clean = lint(shared);\n        System.out.println(\"lint of the file above: \" + (clean.isEmpty() ? \"no findings\" : py(clean)));\n        Map<String, Object> settings = parse(\"\"\"\n            {\"permissions\": {\"allow\": [\"mcp__docs__*\", \"mcp__*\"], \"deny\": [\"mcp__github__delete_*\"]}}\"\"\");\n        for (String tool : List.of(\"mcp__docs__search_docs\", \"mcp__github__list_prs\", \"mcp__github__delete_repository\")) {\n            System.out.println(tool + \" -> \" + mcpDecision(settings, tool));\n        }\n        System.out.println(\"a description of 3000 characters keeps \" + truncate(\"x\".repeat(3000)).length() + \" of them\");\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "expanded entries:\n  github: {\"type\":\"http\",\"url\":\"https://github-mcp.example.com/mcp\",\"headers\":{\"Authorization\":\"Bearer demo-gh\"}}\n  registry: {\"type\":\"http\",\"url\":\"https://registry-mcp.example.com/mcp\",\"headers\":{\"Authorization\":\"Bearer \"}}\n  docs: {\"command\":\"python3\",\"args\":[\"./tools/docs_server.py\",\"${DOCS_INDEX}\"],\"env\":{\"DOCS_API_KEY\":\"${DOCS_API_KEY}\"}}\n    warning: DOCS_INDEX is not set\n    warning: DOCS_API_KEY is not set\nresolved servers: github from project, registry from project, docs from project, scratch from user\n  warning: github is defined in project and user with different settings: project wins\nlint of a shared file with literal secrets:\n  api: a http server needs a url\n  api: headers.X-Api-Key holds a literal value, reference an environment variable\n  tool: a stdio server needs a command\nlint of the file above: no findings\nmcp__docs__search_docs -> allow\nmcp__github__list_prs -> ask\nmcp__github__delete_repository -> deny\na description of 3000 characters keeps 2048 of them"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import com.fasterxml.jackson.databind.ObjectMapper\nimport harness.Show.py\n\nprivate val log = System.getLogger(\"mcp_config\")\n\n/**\n * MCP server configuration in Claude Code, resolved offline: scopes, environment expansion and a lint of a shared `.mcp.json`.\n *\n * A teaching model of what the Claude Code documentation says (page \"Connect Claude Code to tools via MCP\", read on 2026-10-03): three scopes with\n * the order local, project, user, where the whole entry of the highest scope is used and fields are not merged; `${VAR}` and `${VAR:-default}`\n * expanded in command, args, env, url and headers; an unset variable with no default keeps its text; and, toward a remote server, credential\n * variables read as empty. The set of credential names here is the documentation's examples, not its full list. Not the product's code.\n * The configuration is JSON, read with Jackson.\n */\nval SCOPES = listOf(\"local\", \"project\", \"user\") // highest precedence first\nval COVERED = setOf(\"ANTHROPIC_API_KEY\", \"ANTHROPIC_AUTH_TOKEN\", \"AWS_BEARER_TOKEN_BEDROCK\", \"HTTPS_PROXY\", \"NPM_TOKEN\")\nval REMOTE = setOf(\"http\", \"sse\", \"ws\")\nval VAR = Regex(\"\"\"\\$\\{([A-Za-z_][A-Za-z0-9_]*)(?::-([^}]*))?\\}\"\"\")\nval SECRET_KEY = Regex(\"token|key|secret|authorization|password\", RegexOption.IGNORE_CASE)\nconst val DESCRIPTION_LIMIT = 2048 // characters kept of a tool description and of a server's instructions\nprivate val JSON = ObjectMapper()\n\ntypealias Entry = Map<String, Any?>\n\n/** The text after expansion and the names that were unset and had no default. */\ndata class Expanded(val text: String, val missing: List<String>)\n\n/** A server entry after expansion, and the warnings it raised. */\ndata class ExpandedServer(val entry: Entry, val warnings: List<String>)\n\n/** A server's winning scope and entry. */\ndata class Source(val scope: String, val entry: Entry)\n\n/** The servers in use, and the warnings about conflicts. */\ndata class Resolved(val servers: Map<String, Source>, val warnings: List<String>)\n\n@Suppress(\"UNCHECKED_CAST\")\nfun parse(json: String): Map<String, Any?> = JSON.readValue(json, LinkedHashMap::class.java) as Map<String, Any?>\n\n/** Expand ${VAR} and ${VAR:-default}. Returns the text and the names that were unset and had no default. */\nfun expand(text: String, env: Map<String, String>, remote: Boolean = false): Expanded {\n    val missing = mutableListOf<String>()\n    val out = VAR.replace(text) { m ->\n        val name = m.groupValues[1]\n        val default = m.groups[2]?.value\n        when {\n            remote && name in COVERED -> \"\" // never sent toward a remote server, whether or not it is set, and a default is ignored\n            name in env -> env.getValue(name)\n            default != null -> default\n            else -> {\n                missing += name\n                m.value // the unexpanded text is used as written\n            }\n        }\n    }\n    return Expanded(out, missing)\n}\n\n/** Expand the five fields where expansion applies. Returns the entry and the warnings. */\nfun expandServer(entry: Entry, env: Map<String, String>): ExpandedServer {\n    val remote = entry[\"type\"] in REMOTE\n    val warnings = mutableListOf<String>()\n    val out = LinkedHashMap(entry)\n    fun one(value: Any?): String {\n        val e = expand(value as String, env, remote)\n        e.missing.forEach { warnings += \"$it is not set\" }\n        return e.text\n    }\n    for (field in listOf(\"command\", \"url\")) if (field in out) out[field] = one(out[field])\n    if (\"args\" in out) out[\"args\"] = (entry[\"args\"] as List<*>).map { one(it) }\n    for (field in listOf(\"env\", \"headers\")) if (field in out) out[field] = (entry[field] as Map<*, *>).entries.associate { (k, v) -> k as String to one(v) }\n    return ExpandedServer(out, warnings)\n}\n\n/** scopes maps a scope name to {server name: entry}. A name defined in several scopes is used once, from the highest scope, whole. */\nfun resolveServers(scopes: Map<String, Map<String, Entry>>): Resolved {\n    val servers = linkedMapOf<String, Source>()\n    val warnings = mutableListOf<String>()\n    for (scope in SCOPES) {\n        for ((name, entry) in scopes[scope] ?: emptyMap()) {\n            val seen = servers[name]\n            if (seen == null) servers[name] = Source(scope, entry)\n            else if (seen.entry != entry) warnings += \"$name is defined in ${seen.scope} and $scope with different settings: ${seen.scope} wins\"\n        }\n    }\n    return Resolved(servers, warnings)\n}\n\n/** Findings for a shared `.mcp.json`: a server's shape and any credential written out instead of referenced. */\nfun lint(config: Entry): List<String> {\n    val findings = mutableListOf<String>()\n    for ((name, e) in (config[\"mcpServers\"] as Map<*, *>? ?: emptyMap<String, Any?>())) {\n        val entry = e as Map<*, *>\n        val kind = entry[\"type\"] as String? ?: \"stdio\"\n        if (kind in REMOTE && \"url\" !in entry) findings += \"$name: a $kind server needs a url\"\n        if (kind == \"stdio\" && \"command\" !in entry) findings += \"$name: a stdio server needs a command\"\n        for (field in listOf(\"env\", \"headers\")) {\n            for ((key, value) in (entry[field] as Map<*, *>? ?: emptyMap<String, Any?>())) {\n                if (SECRET_KEY.containsMatchIn(key as String) && \"\\${\" !in (value as String)) findings += \"$name: $field.$key holds a literal value, reference an environment variable\"\n            }\n        }\n    }\n    return findings\n}\n\n/** Python's fnmatch.fnmatchcase: `*` any run, `?` one character, `[...]` a set. */\nfun fnmatch(name: String, pattern: String): Boolean {\n    val re = StringBuilder()\n    var i = 0\n    while (i < pattern.length) {\n        val c = pattern[i]\n        when {\n            c == '*' -> re.append(\".*\")\n            c == '?' -> re.append('.')\n            c == '[' && pattern.indexOf(']', i + 2) >= 0 -> {\n                val j = pattern.indexOf(']', i + 2)\n                val set = pattern.substring(i + 1, j)\n                re.append('[').append(if (set.startsWith(\"!\")) \"^\" + set.substring(1) else set).append(']')\n                i = j\n            }\n            else -> re.append(Regex.escape(c.toString()))\n        }\n        i++\n    }\n    return Regex(re.toString(), RegexOption.DOT_MATCHES_ALL).matches(name)\n}\n\n/**\n * allow, ask or deny for an MCP tool named mcp__<server>__<tool>. Deny rules may use globs; an allow rule counts only when the\n * server part is written out and glob-free (mcp__docs__* is honoured, mcp__* and * are ignored). Deny wins, then allow, else ask.\n */\nfun mcpDecision(settings: Entry, tool: String): String {\n    val perms = settings[\"permissions\"] as Map<*, *>? ?: emptyMap<String, Any?>()\n    if ((perms[\"deny\"] as List<*>? ?: emptyList<String>()).any { fnmatch(tool, it as String) }) return \"deny\"\n    for (rule in (perms[\"allow\"] as List<*>? ?: emptyList<String>())) {\n        val parts = (rule as String).split(\"__\")\n        if (parts.size >= 3 && parts[0] == \"mcp\" && parts[1].isNotEmpty() && \"*\" !in parts[1] && fnmatch(tool, rule)) return \"allow\"\n    }\n    return \"ask\"\n}\n\nfun truncate(text: String, limit: Int = DESCRIPTION_LIMIT): String = text.take(limit)\n\nfun show(value: Any?): String = JSON.writeValueAsString(value)\n\n@Suppress(\"UNCHECKED_CAST\")\nfun main() {\n    val env = mapOf(\"GITHUB_TOKEN\" to \"demo-gh\", \"NPM_TOKEN\" to \"demo-npm\")\n    val shared = parse(\n        \"\"\"\n        {\"mcpServers\": {\n          \"github\": {\"type\": \"http\", \"url\": \"${'$'}{GITHUB_MCP_URL:-https://github-mcp.example.com/mcp}\", \"headers\": {\"Authorization\": \"Bearer ${'$'}{GITHUB_TOKEN}\"}},\n          \"registry\": {\"type\": \"http\", \"url\": \"https://registry-mcp.example.com/mcp\", \"headers\": {\"Authorization\": \"Bearer ${'$'}{NPM_TOKEN}\"}},\n          \"docs\": {\"command\": \"python3\", \"args\": [\"${'$'}{CLAUDE_PROJECT_DIR:-.}/tools/docs_server.py\", \"${'$'}{DOCS_INDEX}\"], \"env\": {\"DOCS_API_KEY\": \"${'$'}{DOCS_API_KEY}\"}}\n        }}\n        \"\"\",\n    )\n    val sharedServers = shared[\"mcpServers\"] as Map<String, Entry>\n    println(\"expanded entries:\")\n    for ((name, entry) in sharedServers) {\n        val out = expandServer(entry, env)\n        println(\"  $name: ${show(out.entry)}\")\n        out.warnings.forEach { println(\"    warning: $it\") }\n    }\n    val user = parse(\"\"\"{\"github\": {\"type\": \"http\", \"url\": \"https://other.example.com/mcp\"}, \"scratch\": {\"command\": \"python3\", \"args\": [\"scratch.py\"]}}\"\"\") as Map<String, Entry>\n    val resolved = resolveServers(mapOf(\"project\" to sharedServers, \"user\" to user))\n    println(\"resolved servers: \" + resolved.servers.entries.joinToString(\", \") { (n, s) -> \"$n from ${s.scope}\" })\n    resolved.warnings.forEach { println(\"  warning: $it\") }\n    val bad = parse(\"\"\"{\"mcpServers\": {\"api\": {\"type\": \"http\", \"headers\": {\"X-Api-Key\": \"abc123\"}}, \"tool\": {\"args\": [\"x\"]}}}\"\"\")\n    println(\"lint of a shared file with literal secrets:\")\n    lint(bad).forEach { println(\"  $it\") }\n    val clean = lint(shared)\n    println(\"lint of the file above: ${if (clean.isEmpty()) \"no findings\" else py(clean)}\")\n    val settings = parse(\"\"\"{\"permissions\": {\"allow\": [\"mcp__docs__*\", \"mcp__*\"], \"deny\": [\"mcp__github__delete_*\"]}}\"\"\")\n    for (tool in listOf(\"mcp__docs__search_docs\", \"mcp__github__list_prs\", \"mcp__github__delete_repository\")) println(\"$tool -> ${mcpDecision(settings, tool)}\")\n    println(\"a description of 3000 characters keeps ${truncate(\"x\".repeat(3000)).length} of them\")\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "expanded entries:\n  github: {\"type\":\"http\",\"url\":\"https://github-mcp.example.com/mcp\",\"headers\":{\"Authorization\":\"Bearer demo-gh\"}}\n  registry: {\"type\":\"http\",\"url\":\"https://registry-mcp.example.com/mcp\",\"headers\":{\"Authorization\":\"Bearer \"}}\n  docs: {\"command\":\"python3\",\"args\":[\"./tools/docs_server.py\",\"${DOCS_INDEX}\"],\"env\":{\"DOCS_API_KEY\":\"${DOCS_API_KEY}\"}}\n    warning: DOCS_INDEX is not set\n    warning: DOCS_API_KEY is not set\nresolved servers: github from project, registry from project, docs from project, scratch from user\n  warning: github is defined in project and user with different settings: project wins\nlint of a shared file with literal secrets:\n  api: a http server needs a url\n  api: headers.X-Api-Key holds a literal value, reference an environment variable\n  tool: a stdio server needs a command\nlint of the file above: no findings\nmcp__docs__search_docs -> allow\nmcp__github__list_prs -> ask\nmcp__github__delete_repository -> deny\na description of 3000 characters keeps 2048 of them"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Read the output from the top. The `github` entry gets its default URL and the token from the environment. The `registry` entry shows the covered name at work: the header is `Bearer ` and nothing more, although `NPM_TOKEN` is set. The `docs` entry keeps `${DOCS_INDEX}` and `${DOCS_API_KEY}` as written and reports both as unset, while `${CLAUDE_PROJECT_DIR:-.}` becomes `.`. The user scope's `github` loses to the project's, with a warning, and its whole entry is ignored. The lint of the second file flags a missing URL, a missing command and a header whose name says \"key\" and whose value is a literal."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "para",
+      "text": "These are the wrong answers that the exam's options for this task statement offer, each with the reason it is rejected."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**\"Add the experimental server to `.mcp.json`; teammates can ignore it.\"** It is tempting because `.mcp.json` is where MCP configuration lives. The exam rejects it: a project server is shared, so every teammate and every unattended run loads it. A personal or experimental server goes in the user scope.",
+        "**\"Put the token in `.mcp.json` and add the file to `.gitignore`.\"** It is tempting because the secret then stays off the remote. The exam rejects it: the file exists to be committed so that the team gets the same tools. Reference `${GITHUB_TOKEN}` and let each developer set it.",
+        "**\"Give the variable a default so the server starts for everyone.\"** It is tempting because an unset variable produces a warning. The exam rejects it for credentials: a default for a token is a token in the repository. Defaults are for URLs and paths.",
+        "**\"A user entry can add a header to the team's server.\"** It is tempting because settings files merge their lists. The exam rejects it: for servers \"fields are not merged across scopes\", and the whole entry of the highest scope wins.",
+        "**\"The user-level file is `~/.claude.json`, so the default scope is the user scope.\"** It is tempting because the guide names that file for personal servers. The exam keys user for personal, but the default of `claude mcp add` is local, which is stored in the same file under the project's path and loads only there."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A team commits `.mcp.json` with the header `Bearer ${NPM_TOKEN}` for a hosted package registry. Every developer exports the variable, yet the registry answers 401. What is the cause?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The file loads only after an interactive approval that the developers skipped",
+              "**b**: Header values are expanded only for entries that start a local process",
+              "**c**: Claude Code reads names of this kind, which carry sign-in secrets, as empty",
+              "**d**: A variable in a header needs a fallback after the colon and dash before use"
+            ]
+          }
+        ],
+        [
+          "A developer needs an integration that signs in with a personal account's token. It should exist in this repository only, and the token must never reach teammates through version control. Where should it be registered?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Local scope, the default for a newly added server",
+              "**b**: Project scope, kept in the shared `.mcp.json` file",
+              "**c**: User scope, which loads the server in every project",
+              "**d**: The local settings file, kept inside the repository"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**c**. Credential names such as this one read as empty toward a remote endpoint. *a* is ruled out because a server that waits for approval is not connected at all: \"claude mcp list shows it as pending\", and it does not answer with a 401. *b* is ruled out because the documentation lists the places where expansion applies: `headers` (\"for HTTP server authentication\"). *d* is ruled out because a default is optional, and the plain form works: \"expands to the value of environment variable\".",
+            "**a**. Local scope is the default and belongs to its owner and that one project. The guide names user-level scope for personal servers, and the product has a third scope between the two, which is the one that fits a single repository. *b* is ruled out because \"Selecting the wrong scope for a personal tool can leak credentials into a shared repo\". *c* is ruled out because user scope is for \"services you frequently use across different projects\", which is wider than this repository. *d* is ruled out because that file holds settings and not servers: \"while the general local settings file is `.claude/settings.local.json` in the project\"."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Adapted from the Claude Certified Architect - Foundations exam preparation guide by Daron Yondem (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/), changed for this course."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 10,
+    "paras": 16,
+    "code": 1,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 1,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "dfd3e0340a4175e7b056886654603924793daabd4a18bb89327f1b4f8c70af57"
+}

@@ -1,0 +1,300 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "81-reliability-of-multi-agent-systems"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: a multi-agent run graded on injected failures (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a multi-agent run graded on injected failures"
+    },
+    {
+      "type": "para",
+      "text": "A research team of agents runs a plan of tasks, and in production some of them time out, some fail for good and some take the process down. In this practice you write the runner that decides what happens next: which task is retried and with which key, which tasks are skipped because something they need failed, when an agent is cut off, when a weaker agent takes over, and what a second run does with the work that was already done. The model is not called: the tests give you agents that fail on demand. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`run_plan`, `Transient`, `Fatal`); TypeScript has `runPlan`; Java has the static method `runPlan` of `ReliableAgents` with the nested classes `Transient`, `Fatal` and the interface `Agent`; Kotlin has top-level `runPlan`, the classes `Transient` and `Fatal` and the type `Agent`. The starters declare them."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The plan, the agents and the store"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`plan` is a list of tasks in running order, each `{id, agent, key, needs, fallback}`: `agent` names an entry of `agents`, `key` is the task's idempotency key, `needs` lists the ids of earlier tasks whose results it takes (maybe empty or missing), `fallback` names a weaker agent (maybe none).",
+        "An agent is a function `(key, inputs) -> string`, where `inputs` maps each needed id to its result. It may raise `Transient` (worth retrying), `Fatal` (not) or anything else.",
+        "`store` is the checkpoint: a map from task id to result, owned by the caller and updated by the runner."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working runner with seven gaps cut out of it. The loop over the tasks, the single call to an agent (`call_once`, which turns a transient or fatal failure into a status and lets any other exception through), the inputs a task receives and the report are written and correct. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`breaker_open` unlocks `e4`: whether an agent has failed its threshold of calls in a row.",
+        "`record_outcome` unlocks `e4`: a success resets the count, a failure adds one.",
+        "`attempt` unlocks `m1`, `e1`, `e2` and `e4`: the call with the same key, the retry limit, the fatal failure and the open breaker.",
+        "`missing_dependency` unlocks `e3`: the first dependency that did not finish.",
+        "`fallback_key` unlocks `e5`: the fallback's own key.",
+        "`should_resume` unlocks `e6`: a task the store already holds is not run again.",
+        "`checkpoint` unlocks `m1`, `e5`, `e6` and `e7`: a finished result is written at once, a degraded one is not."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About fifteen lines in all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "`run_plan(plan, agents, store, attempts, breaker_threshold)` runs the tasks in order and returns a map with `done` (id to result), `failed` (id to reason), `skipped` (id to reason), `degraded` (ids), `attempts` (id to the number of calls made to agents for the task, 0 when none) and `resumed` (ids taken from the store)."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "A task already in `store` is `resumed`: its stored result is `done` and no agent is called.",
+        "A task whose `needs` holds an id that is not `done` is `skipped` with the reason `dependency failed: <that id>` (the first one, in `needs` order).",
+        "Otherwise the agent is called with the task's `key` and its inputs. A `Transient` failure is retried with **the same key**, up to `attempts` calls in all; when they are used up the task `failed` with `retries exhausted`. A `Fatal` failure is not retried: the task `failed` with `fatal: <message>`.",
+        "A breaker per agent name counts **consecutive** failed calls (a success resets it to zero). Before each call, if the count has reached `breaker_threshold`, the call is not made and the task fails with `circuit open`. The breaker stays open for the rest of the run.",
+        "When the primary fails and the task has a `fallback`, the fallback agent is tried once, with the key `<key>:fallback` (and the same breaker rules). If it succeeds, its result is the task's `done` result and the id goes in `degraded`; a degraded result is **not** written to the store, so that a later run tries the primary again. If it fails too, the task `failed` with the primary's reason.",
+        "A successful primary result is written to `store` as soon as the task finishes. An exception that is not `Transient` or `Fatal` is a crash: it is not caught, and everything written to the store before it stays there."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Order and inputs.** A task sees only the results it asked for. *You should see* three tasks in order, the third with two inputs.",
+        "**One key for every retry.** A tool that pays or sends is safe to retry only if the repeat is recognised. *You should see* the same key on all three calls.",
+        "**Retry limits and fatal errors.** *You should see* three calls for a transient failure that never clears and one for a fatal one.",
+        "**Isolation.** A failed branch does not stop an independent one, and its dependents are skipped with a reason. *You should see* `c` done and `b` and `d` skipped.",
+        "**A breaker.** An agent that keeps failing stops being called, and one success clears the count. *You should see* zero calls for the third task of the failing agent.",
+        "**Degradation.** A weaker agent keeps the run moving, under its own key, without being mistaken for a final result. *You should see* `degraded` and a store without it.",
+        "**Resumption and crashes.** A second run does only what is left, and a crash loses nothing that was finished. *You should see* the first task called once over two runs."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Tasks run in order and receive the results of the tasks they need"
+        ],
+        [
+          "`e1`",
+          "Every retry of a task carries the same idempotency key"
+        ],
+        [
+          "`e2`",
+          "Retries stop at the limit and a fatal failure is not retried"
+        ],
+        [
+          "`e3`",
+          "A failure stays inside its branch and dependents are skipped"
+        ],
+        [
+          "`e4`",
+          "A breaker stops calls to an agent that keeps failing, and a success resets it"
+        ],
+        [
+          "`e5`",
+          "A fallback degrades one task with its own key and is not checkpointed"
+        ],
+        [
+          "`e6`",
+          "A second run resumes from the checkpoint and retries only what failed"
+        ],
+        [
+          "`e7`",
+          "An unexpected crash is not swallowed and keeps the work already checkpointed"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "/** A multi-agent run that survives injected failures: retries with one key, isolation, a breaker, a fallback and a checkpoint. See ../../statement.md. */\nprivate val log = System.getLogger(\"reliable_agents\")\n\n/** A failure worth retrying: a timeout, a rate limit, a lost response. */\nclass Transient(message: String) : RuntimeException(message)\n\n/** A failure that retrying cannot fix. */\nclass Fatal(message: String) : RuntimeException(message)\n\ntypealias Agent = (String, Map<String, String>) -> String\n\n/** One call to an agent: (\"ok\", result), (\"transient\", null) or (\"fatal\", message). Any other exception is a crash and is not caught. */\nfun callOnce(agents: Map<String, Agent>, name: String, key: String, inputs: Map<String, String>): Pair<String, String?> =\n    try {\n        \"ok\" to agents.getValue(name)(key, inputs)\n    } catch (e: Transient) {\n        \"transient\" to null\n    } catch (e: Fatal) {\n        \"fatal\" to e.message\n    }\n\n/** True when the agent has failed `threshold` calls in a row. */\nfun breakerOpen(consecutive: Map<String, Int>, name: String, threshold: Int): Boolean = (consecutive[name] ?: 0) >= threshold\n\n/** A success resets the agent's count to zero; a failure adds one. */\nfun recordOutcome(consecutive: MutableMap<String, Int>, name: String, ok: Boolean) {\n    consecutive[name] = if (ok) 0 else (consecutive[name] ?: 0) + 1\n}\n\n/** The result and null, or null and a reason; every call to an agent is counted for the task. */\nfun attempt(\n    agents: Map<String, Agent>, name: String, key: String, inputs: Map<String, String>, calls: MutableMap<String, Int>, taskId: String,\n    consecutive: MutableMap<String, Int>, attempts: Int, threshold: Int,\n): Pair<String?, String?> {\n    for (n in 1..attempts) {\n        if (breakerOpen(consecutive, name, threshold)) return null to \"circuit open\"\n        calls[taskId] = calls.getValue(taskId) + 1\n        val (status, value) = callOnce(agents, name, key, inputs)\n        recordOutcome(consecutive, name, status == \"ok\")\n        if (status == \"ok\") return value to null\n        if (status == \"fatal\") return null to \"fatal: $value\"\n    }\n    return null to \"retries exhausted\"\n}\n\n/** The first id in `needs` that is not done, or null. */\nfun missingDependency(needs: List<String>, done: Map<String, String>): String? = needs.firstOrNull { it !in done }\n\n/** The key the fallback agent receives. */\nfun fallbackKey(key: String): String = key + \":fallback\"\n\n/** True when the store already holds this task's result. */\nfun shouldResume(tid: String, store: Map<String, String>): Boolean = tid in store\n\n/** Write a final result to the store as soon as the task finishes; a degraded result is not final. */\nfun checkpoint(store: MutableMap<String, String>, tid: String, result: String, degraded: Boolean) {\n    if (!degraded) store[tid] = result\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun runPlan(plan: List<Map<String, Any?>>, agents: Map<String, Agent>, store: MutableMap<String, String>, attempts: Int, breakerThreshold: Int): Map<String, Any?>? {\n    log.log(System.Logger.Level.DEBUG, \"runPlan input: {0}\", plan)\n    val done = linkedMapOf<String, String>()\n    val failed = linkedMapOf<String, String>()\n    val skipped = linkedMapOf<String, String>()\n    val degraded = mutableListOf<String>()\n    val resumed = mutableListOf<String>()\n    val calls = linkedMapOf<String, Int>()\n    val consecutive = mutableMapOf<String, Int>()\n\n    for (task in plan) {\n        val tid = task[\"id\"] as String\n        calls[tid] = 0\n        if (shouldResume(tid, store)) {\n            done[tid] = store.getValue(tid)\n            resumed += tid\n            continue\n        }\n        val needs = (task[\"needs\"] as List<String>?) ?: emptyList()\n        val missing = missingDependency(needs, done)\n        if (missing != null) {\n            skipped[tid] = \"dependency failed: $missing\"\n            continue\n        }\n        val inputs = needs.associateWith { done[it] ?: \"\" }\n        var (result, reason) = attempt(agents, task[\"agent\"] as String, task[\"key\"] as String, inputs, calls, tid, consecutive, attempts, breakerThreshold)\n        if (result == null && task[\"fallback\"] != null) {\n            result = attempt(agents, task[\"fallback\"] as String, fallbackKey(task[\"key\"] as String), inputs, calls, tid, consecutive, attempts, breakerThreshold).first\n            if (result != null) {\n                done[tid] = result\n                degraded += tid\n                checkpoint(store, tid, result, true)\n                continue\n            }\n        }\n        if (result == null) {\n            failed[tid] = reason!!\n            continue\n        }\n        done[tid] = result\n        checkpoint(store, tid, result, false)\n    }\n    return linkedMapOf(\"done\" to done, \"failed\" to failed, \"skipped\" to skipped, \"degraded\" to degraded, \"attempts\" to calls, \"resumed\" to resumed)\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    fun task(id: String, needs: List<String> = emptyList()): Map<String, Any?> =\n        linkedMapOf(\"id\" to id, \"agent\" to \"w\", \"key\" to \"key-$id\", \"needs\" to needs, \"fallback\" to null)\n\n    // A stand-in for a worker agent, like the tests use: its first call is lost, then it answers.\n    var calls = 0\n    val flaky: Agent = { key, inputs ->\n        calls += 1\n        if (calls == 1) throw Transient(\"lost\")\n        key + \"|\" + inputs.toSortedMap().values.joinToString(\",\")\n    }\n\n    // Task b needs the result of a; the lost call is retried, the result is checkpointed in the store.\n    val store = linkedMapOf<String, String>()\n    val result = runPlan(listOf(task(\"a\"), task(\"b\", listOf(\"a\"))), mapOf(\"w\" to flaky), store, 3, 3)\n    println(\"done: ${result?.get(\"done\")}\")\n    println(\"attempts: ${result?.get(\"attempts\")}\")\n    println(\"failed: ${result?.get(\"failed\")} | skipped: ${result?.get(\"skipped\")}\")\n    println(\"store: $store\")\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "/** A multi-agent run that survives injected failures: retries with one key, isolation, a breaker, a fallback and a checkpoint. See ../../statement.md. */\nprivate val log = System.getLogger(\"reliable_agents\")\n\n/** A failure worth retrying: a timeout, a rate limit, a lost response. */\nclass Transient(message: String) : RuntimeException(message)\n\n/** A failure that retrying cannot fix. */\nclass Fatal(message: String) : RuntimeException(message)\n\ntypealias Agent = (String, Map<String, String>) -> String\n\n/** One call to an agent: (\"ok\", result), (\"transient\", null) or (\"fatal\", message). Any other exception is a crash and is not caught. */\nfun callOnce(agents: Map<String, Agent>, name: String, key: String, inputs: Map<String, String>): Pair<String, String?> =\n    try {\n        \"ok\" to agents.getValue(name)(key, inputs)\n    } catch (e: Transient) {\n        \"transient\" to null\n    } catch (e: Fatal) {\n        \"fatal\" to e.message\n    }\n\n/**\n * TODO 1 of 7 (unlocks e4): is the breaker of this agent open?\n * Receives the map of consecutive failures per agent, the agent name and the threshold. Returns true when the agent's count has reached the threshold\n * (a name that is not in the map has a count of 0). Example: breakerOpen(mapOf(\"w\" to 3), \"w\", 3) -> true, breakerOpen(emptyMap(), \"w\", 3) -> false\n */\nfun breakerOpen(consecutive: Map<String, Int>, name: String, threshold: Int): Boolean = false\n\n/**\n * TODO 2 of 7 (unlocks e4): update the consecutive-failure count of an agent after a call.\n * Receives the map of consecutive failures, the agent name and whether the call succeeded. Sets the count to 0 on a success and adds one on a failure.\n * Example: after a failure then a success then a failure, the count is 1\n */\nfun recordOutcome(consecutive: MutableMap<String, Int>, name: String, ok: Boolean) {}\n\n/**\n * TODO 3 of 7 (unlocks m1, e1, e2 and e4): call an agent for a task, retrying a transient failure.\n * Receives the agents, the agent name, the task's key and inputs, the per-task call counts, the task id, the breaker counts, the attempt limit and the breaker\n * threshold. Up to `attempts` times: if the breaker is open return null to \"circuit open\" without calling; otherwise add one to `calls[taskId]`, make the\n * call with `callOnce` (always the same key), record the outcome and return result to null on \"ok\"; return null to \"fatal: <message>\" on \"fatal\" without\n * retrying; retry on \"transient\". After the last attempt return null to \"retries exhausted\".\n * Example: an agent that fails once with Transient and then answers \"ok\" -> \"ok\" to null with two calls counted\n */\nfun attempt(\n    agents: Map<String, Agent>, name: String, key: String, inputs: Map<String, String>, calls: MutableMap<String, Int>, taskId: String,\n    consecutive: MutableMap<String, Int>, attempts: Int, threshold: Int,\n): Pair<String?, String?> = null to \"retries exhausted\"\n\n/**\n * TODO 4 of 7 (unlocks e3): the first dependency that did not finish.\n * Receives the ids a task needs and the map of finished results. Returns the first id in `needs` (in order) that is not in `done`, or null when all are.\n * Example: missingDependency(listOf(\"a\", \"b\"), mapOf(\"a\" to \"x\")) -> \"b\"\n */\nfun missingDependency(needs: List<String>, done: Map<String, String>): String? = null\n\n/**\n * TODO 5 of 7 (unlocks e5): the idempotency key for the fallback agent.\n * Receives the task's key. Returns it followed by `:fallback`, so that a repeat of the fallback is recognised without colliding with the primary.\n * Example: fallbackKey(\"key-s\") -> \"key-s:fallback\"\n */\nfun fallbackKey(key: String): String = key\n\n/**\n * TODO 6 of 7 (unlocks e6): is this task already checkpointed?\n * Receives a task id and the store of checkpointed results. Returns true when the store holds the task, so that no agent is called for it.\n * Example: shouldResume(\"a\", mapOf(\"a\" to \"ok\")) -> true\n */\nfun shouldResume(tid: String, store: Map<String, String>): Boolean = false\n\n/**\n * TODO 7 of 7 (unlocks m1, e5, e6 and e7): write a finished task's result to the store.\n * Receives the store, the task id, the result and whether the result is degraded (it came from the fallback). Writes the result to the store unless it is\n * degraded, so that a later run tries the primary again. It is called as soon as each task finishes, so a crash later in the run loses nothing finished.\n * Example: checkpoint(store, \"a\", \"ok\", false) -> store is {a=ok}; with degraded true the store is unchanged\n */\nfun checkpoint(store: MutableMap<String, String>, tid: String, result: String, degraded: Boolean) {}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun runPlan(plan: List<Map<String, Any?>>, agents: Map<String, Agent>, store: MutableMap<String, String>, attempts: Int, breakerThreshold: Int): Map<String, Any?>? {\n    log.log(System.Logger.Level.DEBUG, \"runPlan input: {0}\", plan)\n    val done = linkedMapOf<String, String>()\n    val failed = linkedMapOf<String, String>()\n    val skipped = linkedMapOf<String, String>()\n    val degraded = mutableListOf<String>()\n    val resumed = mutableListOf<String>()\n    val calls = linkedMapOf<String, Int>()\n    val consecutive = mutableMapOf<String, Int>()\n\n    for (task in plan) {\n        val tid = task[\"id\"] as String\n        calls[tid] = 0\n        if (shouldResume(tid, store)) {\n            done[tid] = store.getValue(tid)\n            resumed += tid\n            continue\n        }\n        val needs = (task[\"needs\"] as List<String>?) ?: emptyList()\n        val missing = missingDependency(needs, done)\n        if (missing != null) {\n            skipped[tid] = \"dependency failed: $missing\"\n            continue\n        }\n        val inputs = needs.associateWith { done[it] ?: \"\" }\n        var (result, reason) = attempt(agents, task[\"agent\"] as String, task[\"key\"] as String, inputs, calls, tid, consecutive, attempts, breakerThreshold)\n        if (result == null && task[\"fallback\"] != null) {\n            result = attempt(agents, task[\"fallback\"] as String, fallbackKey(task[\"key\"] as String), inputs, calls, tid, consecutive, attempts, breakerThreshold).first\n            if (result != null) {\n                done[tid] = result\n                degraded += tid\n                checkpoint(store, tid, result, true)\n                continue\n            }\n        }\n        if (result == null) {\n            failed[tid] = reason!!\n            continue\n        }\n        done[tid] = result\n        checkpoint(store, tid, result, false)\n    }\n    return linkedMapOf(\"done\" to done, \"failed\" to failed, \"skipped\" to skipped, \"degraded\" to degraded, \"attempts\" to calls, \"resumed\" to resumed)\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    fun task(id: String, needs: List<String> = emptyList()): Map<String, Any?> =\n        linkedMapOf(\"id\" to id, \"agent\" to \"w\", \"key\" to \"key-$id\", \"needs\" to needs, \"fallback\" to null)\n\n    // A stand-in for a worker agent, like the tests use: its first call is lost, then it answers.\n    var calls = 0\n    val flaky: Agent = { key, inputs ->\n        calls += 1\n        if (calls == 1) throw Transient(\"lost\")\n        key + \"|\" + inputs.toSortedMap().values.joinToString(\",\")\n    }\n\n    // Task b needs the result of a; the lost call is retried, the result is checkpointed in the store.\n    val store = linkedMapOf<String, String>()\n    val result = runPlan(listOf(task(\"a\"), task(\"b\", listOf(\"a\"))), mapOf(\"w\" to flaky), store, 3, 3)\n    println(\"done: ${result?.get(\"done\")}\")\n    println(\"attempts: ${result?.get(\"attempts\")}\")\n    println(\"failed: ${result?.get(\"failed\")} | skipped: ${result?.get(\"skipped\")}\")\n    println(\"store: $store\")\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 6,
+    "code": 2,
+    "tables": 1,
+    "lists": 4,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "82145095f04731c0b1030c4667bcdf28b54202d51a29fc619dfef99603b151a3",
+  "starting_code": "/** A multi-agent run that survives injected failures: retries with one key, isolation, a breaker, a fallback and a checkpoint. See ../../statement.md. */\nprivate val log = System.getLogger(\"reliable_agents\")\n\n/** A failure worth retrying: a timeout, a rate limit, a lost response. */\nclass Transient(message: String) : RuntimeException(message)\n\n/** A failure that retrying cannot fix. */\nclass Fatal(message: String) : RuntimeException(message)\n\ntypealias Agent = (String, Map<String, String>) -> String\n\n/** One call to an agent: (\"ok\", result), (\"transient\", null) or (\"fatal\", message). Any other exception is a crash and is not caught. */\nfun callOnce(agents: Map<String, Agent>, name: String, key: String, inputs: Map<String, String>): Pair<String, String?> =\n    try {\n        \"ok\" to agents.getValue(name)(key, inputs)\n    } catch (e: Transient) {\n        \"transient\" to null\n    } catch (e: Fatal) {\n        \"fatal\" to e.message\n    }\n\n/**\n * TODO 1 of 7 (unlocks e4): is the breaker of this agent open?\n * Receives the map of consecutive failures per agent, the agent name and the threshold. Returns true when the agent's count has reached the threshold\n * (a name that is not in the map has a count of 0). Example: breakerOpen(mapOf(\"w\" to 3), \"w\", 3) -> true, breakerOpen(emptyMap(), \"w\", 3) -> false\n */\nfun breakerOpen(consecutive: Map<String, Int>, name: String, threshold: Int): Boolean = false\n\n/**\n * TODO 2 of 7 (unlocks e4): update the consecutive-failure count of an agent after a call.\n * Receives the map of consecutive failures, the agent name and whether the call succeeded. Sets the count to 0 on a success and adds one on a failure.\n * Example: after a failure then a success then a failure, the count is 1\n */\nfun recordOutcome(consecutive: MutableMap<String, Int>, name: String, ok: Boolean) {}\n\n/**\n * TODO 3 of 7 (unlocks m1, e1, e2 and e4): call an agent for a task, retrying a transient failure.\n * Receives the agents, the agent name, the task's key and inputs, the per-task call counts, the task id, the breaker counts, the attempt limit and the breaker\n * threshold. Up to `attempts` times: if the breaker is open return null to \"circuit open\" without calling; otherwise add one to `calls[taskId]`, make the\n * call with `callOnce` (always the same key), record the outcome and return result to null on \"ok\"; return null to \"fatal: <message>\" on \"fatal\" without\n * retrying; retry on \"transient\". After the last attempt return null to \"retries exhausted\".\n * Example: an agent that fails once with Transient and then answers \"ok\" -> \"ok\" to null with two calls counted\n */\nfun attempt(\n    agents: Map<String, Agent>, name: String, key: String, inputs: Map<String, String>, calls: MutableMap<String, Int>, taskId: String,\n    consecutive: MutableMap<String, Int>, attempts: Int, threshold: Int,\n): Pair<String?, String?> = null to \"retries exhausted\"\n\n/**\n * TODO 4 of 7 (unlocks e3): the first dependency that did not finish.\n * Receives the ids a task needs and the map of finished results. Returns the first id in `needs` (in order) that is not in `done`, or null when all are.\n * Example: missingDependency(listOf(\"a\", \"b\"), mapOf(\"a\" to \"x\")) -> \"b\"\n */\nfun missingDependency(needs: List<String>, done: Map<String, String>): String? = null\n\n/**\n * TODO 5 of 7 (unlocks e5): the idempotency key for the fallback agent.\n * Receives the task's key. Returns it followed by `:fallback`, so that a repeat of the fallback is recognised without colliding with the primary.\n * Example: fallbackKey(\"key-s\") -> \"key-s:fallback\"\n */\nfun fallbackKey(key: String): String = key\n\n/**\n * TODO 6 of 7 (unlocks e6): is this task already checkpointed?\n * Receives a task id and the store of checkpointed results. Returns true when the store holds the task, so that no agent is called for it.\n * Example: shouldResume(\"a\", mapOf(\"a\" to \"ok\")) -> true\n */\nfun shouldResume(tid: String, store: Map<String, String>): Boolean = false\n\n/**\n * TODO 7 of 7 (unlocks m1, e5, e6 and e7): write a finished task's result to the store.\n * Receives the store, the task id, the result and whether the result is degraded (it came from the fallback). Writes the result to the store unless it is\n * degraded, so that a later run tries the primary again. It is called as soon as each task finishes, so a crash later in the run loses nothing finished.\n * Example: checkpoint(store, \"a\", \"ok\", false) -> store is {a=ok}; with degraded true the store is unchanged\n */\nfun checkpoint(store: MutableMap<String, String>, tid: String, result: String, degraded: Boolean) {}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun runPlan(plan: List<Map<String, Any?>>, agents: Map<String, Agent>, store: MutableMap<String, String>, attempts: Int, breakerThreshold: Int): Map<String, Any?>? {\n    log.log(System.Logger.Level.DEBUG, \"runPlan input: {0}\", plan)\n    val done = linkedMapOf<String, String>()\n    val failed = linkedMapOf<String, String>()\n    val skipped = linkedMapOf<String, String>()\n    val degraded = mutableListOf<String>()\n    val resumed = mutableListOf<String>()\n    val calls = linkedMapOf<String, Int>()\n    val consecutive = mutableMapOf<String, Int>()\n\n    for (task in plan) {\n        val tid = task[\"id\"] as String\n        calls[tid] = 0\n        if (shouldResume(tid, store)) {\n            done[tid] = store.getValue(tid)\n            resumed += tid\n            continue\n        }\n        val needs = (task[\"needs\"] as List<String>?) ?: emptyList()\n        val missing = missingDependency(needs, done)\n        if (missing != null) {\n            skipped[tid] = \"dependency failed: $missing\"\n            continue\n        }\n        val inputs = needs.associateWith { done[it] ?: \"\" }\n        var (result, reason) = attempt(agents, task[\"agent\"] as String, task[\"key\"] as String, inputs, calls, tid, consecutive, attempts, breakerThreshold)\n        if (result == null && task[\"fallback\"] != null) {\n            result = attempt(agents, task[\"fallback\"] as String, fallbackKey(task[\"key\"] as String), inputs, calls, tid, consecutive, attempts, breakerThreshold).first\n            if (result != null) {\n                done[tid] = result\n                degraded += tid\n                checkpoint(store, tid, result, true)\n                continue\n            }\n        }\n        if (result == null) {\n            failed[tid] = reason!!\n            continue\n        }\n        done[tid] = result\n        checkpoint(store, tid, result, false)\n    }\n    return linkedMapOf(\"done\" to done, \"failed\" to failed, \"skipped\" to skipped, \"degraded\" to degraded, \"attempts\" to calls, \"resumed\" to resumed)\n}\n",
+  "exercise": {
+    "main_path": "practice/level-4/81-reliability-of-multi-agent-systems/prose/unit-02/practice-4/src/main/kotlin/ReliableAgents.kt",
+    "test_path": "practice/level-4/81-reliability-of-multi-agent-systems/prose/unit-02/practice-4/src/test/kotlin/ReliableAgentsTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-4/81-reliability-of-multi-agent-systems/prose/unit-02/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-4/81-reliability-of-multi-agent-systems/prose/unit-02/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_tasksRunInOrderAndReceiveTheResultsOfTheTasksTheyNeed()",
+        "kind": "main",
+        "says": "Tasks run in order and receive the results of the tasks they need"
+      },
+      {
+        "id": "e1_everyRetryOfATaskCarriesTheSameIdempotencyKey()",
+        "kind": "edge",
+        "says": "Every retry of a task carries the same idempotency key"
+      },
+      {
+        "id": "e2_retriesStopAtTheLimitAndAFatalFailureIsNotRetried()",
+        "kind": "edge",
+        "says": "Retries stop at the limit and a fatal failure is not retried"
+      },
+      {
+        "id": "e3_aFailureStaysInsideItsBranchAndDependentsAreSkipped()",
+        "kind": "edge",
+        "says": "A failure stays inside its branch and dependents are skipped"
+      },
+      {
+        "id": "e4_aBreakerStopsCallsToAnAgentThatKeepsFailingAndASuccessResetsIt()",
+        "kind": "edge",
+        "says": "A breaker stops calls to an agent that keeps failing, and a success resets it"
+      },
+      {
+        "id": "e5_aFallbackDegradesOneTaskWithItsOwnKeyAndIsNotCheckpointed()",
+        "kind": "edge",
+        "says": "A fallback degrades one task with its own key and is not checkpointed"
+      },
+      {
+        "id": "e6_aSecondRunResumesFromTheCheckpointAndRetriesOnlyWhatFailed()",
+        "kind": "edge",
+        "says": "A second run resumes from the checkpoint and retries only what failed"
+      },
+      {
+        "id": "e7_anUnexpectedCrashIsNotSwallowedAndKeepsTheWorkAlreadyCheckpointed()",
+        "kind": "edge",
+        "says": "An unexpected crash is not swallowed and keeps the work already checkpointed"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-4/81-reliability-of-multi-agent-systems/prose/unit-02/practice-4/target/test-results/test"
+    },
+    "origin": "course/81-reliability-of-multi-agent-systems/02-isolation-fallbacks-and-resuming-a-run.md",
+    "concepts": [
+      "the practice of Isolation, fallbacks and resuming a run is solved"
+    ],
+    "files": [
+      "practice/level-4/81-reliability-of-multi-agent-systems/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "reliability-of-multi-agent-systems-u2"
+}

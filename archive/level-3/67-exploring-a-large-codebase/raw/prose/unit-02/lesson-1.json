@@ -1,0 +1,383 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "67-exploring-a-large-codebase"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Compaction, crash recovery and the practice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Compaction, crash recovery and the practice"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Architect · **Module 67:** Exploring a large codebase · **Page 2 of 2** **Exams:** A5.4; S4"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** steer `/compact` and automatic compaction so that what an exploration needs survives them, choose between compacting and clearing, design the state export and the manifest that let a coordinator recover after a crash, read a manifest against the files that exist and decide for each agent whether to reuse, resume or restart it, build the prompt that continues an agent from its exported state, and write the module's practice."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-04 against the exam guide's task statement 5.4 and scenario S4, the Claude Code documentation pages \"Best practices for Claude Code\" (compaction, `/clear`, summarising from a checkpoint) and \"Manage costs effectively\" (compaction instructions in `CLAUDE.md`), and the Claude Agent SDK page on subagents (resuming a subagent). Nothing here called a model: the example is a crash and a recovery over an in-memory file system, and the practice is graded by Python, TypeScript, Java and Kotlin test suites, offline. The first page covered why explorations degrade and where findings go; this page covers what survives compaction and what survives a crash."
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "**Exam guide and current product.** *What the guide states, and so what the exam keys:* use `/compact` to reduce context usage \"during extended exploration sessions when context fills with verbose discovery output\"; for crash recovery, \"each agent exports state to a known location, and the coordinator loads a manifest on resume\", injecting the exported state into the agents' prompts. *What the product documents now (read 2026-10-04):* Claude Code \"automatically compacts conversation history when you approach context limits\"; `/compact` accepts instructions (\"`/compact Focus on the API changes`\"); a project instructions file can steer compaction with a sentence such as \"When compacting, always preserve the full list of modified files and any test commands\"; Esc then Esc (or `/rewind`) opens a checkpoint from which to summarise either forwards or backwards; `/clear` \"resets the context window entirely\"; and a custom subagent can be resumed with its full history, while the built-in `Explore` and `Plan` agents are one-shot. The product has compaction and subagent resumption. It has no coordinator manifest: the manifest, the state files and the decision on resume are yours. On the exam, a question about recovery after a crash has the answer: state exported to a known place, a manifest, and a coordinator that reads the manifest and injects the state."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "Six agents explore six modules of a large service for most of an afternoon. The machine restarts. Without a design, the coordinator has nothing: six transcripts that were in memory, a conversation that no longer exists, and an afternoon to repeat. With a design, each agent wrote what it learned to a file as it went, the coordinator wrote one line per agent into a manifest, and on restart it reads that file, sees that four agents finished, one was half-way and one had not started, and runs only the work that is missing, handing the survivors' findings to the agents that continue. The same session may also hit the window limit long before any crash, and then the question is what compaction keeps."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Steer compaction"
+    },
+    {
+      "type": "para",
+      "text": "Compaction replaces the conversation with a summary. Left to itself the summary keeps what looks important, which in an exploration is rarely the list of files already read, the commands that run the tests, or the open questions. Three controls exist:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "run `/compact` with instructions: `/compact Focus on the list of files read and the open questions`;",
+        "put standing instructions in the project's instructions file (\"When compacting, always preserve the full list of modified files and any test commands\"), which also steers the automatic compaction that happens near the limit;",
+        "summarise only part of the conversation, from a checkpoint, when the early context is the part to keep."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Turning compaction off is not a remedy: the window then fills, and performance degrades. Compaction is not the same as `/clear`. Compaction continues the same work with a shorter memory of it. `/clear` starts over and is right between unrelated tasks, and wrong in the middle of an exploration whose findings are only in the window. The reliable version of \"keep this\" is the scratchpad of page 1, since a summary is a lossy copy and a file is not. The practice's `compact_command` builds the command with its focus."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "State export and the manifest"
+    },
+    {
+      "type": "para",
+      "text": "A crash does not warn. The design that survives one has two parts written as the work goes."
+    },
+    {
+      "type": "para",
+      "text": "**Each agent exports its state to a known location**, a file per agent whose path is fixed by the design (`state/<agent>.md`), holding its findings in the scratchpad form of page 1: specific, once, grouped. It is written as the agent learns and not only at the end, so that a crash half-way leaves something."
+    },
+    {
+      "type": "para",
+      "text": "**The coordinator keeps a manifest**: one entry per agent with its name, its state file and its status (`running`, `done`, `failed`). It writes an agent's entry when the agent starts, so that a crash leaves a trace of work that began and has nothing to show. The manifest is small, readable by a person, and the one thing the coordinator reads first."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Reading the manifest on resume"
+    },
+    {
+      "type": "para",
+      "text": "On restart the coordinator loads the manifest and compares it with the files that exist. The rule of the practice has three branches and one principle:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "State file",
+        "Status",
+        "Action"
+      ],
+      "rows": [
+        [
+          "Missing",
+          "any",
+          "`restart`: there is nothing to continue from, whatever the manifest says"
+        ],
+        [
+          "Exists",
+          "`done`",
+          "`reuse`: do not run it again; its findings go into the next prompts"
+        ],
+        [
+          "Exists",
+          "`running` or `failed`",
+          "`resume`: continue from the exported state"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The principle is that the file outranks the status. A status is a claim written at one moment; a state file is evidence. A manifest that says `done` for an agent whose file is missing was written by a crash between two steps, and trusting it loses that agent's work without anyone noticing. The same discipline protects against a manifest that says `running` for an agent that finished and wrote its file just before the crash: the file is there, so the work is kept."
+    },
+    {
+      "type": "para",
+      "text": "A resumed or restarted agent gets a prompt that carries its task, the state lines it exported, and one instruction: continue from the first unfinished step. It does not get the old transcript, which is what filled the first window. The practice's `resume_prompt` is that shape. When the agent is a custom subagent that was resumable in the same session, resuming it with its own history is an alternative, but a crash that ended the session leaves only the files."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "example",
+      "id": "m67-state-manifest",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/67-state-manifest/python/state_manifest.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/67-state-manifest/typescript/stateManifest.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/67-state-manifest/java/StateManifest.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/67-state-manifest/kotlin/StateManifest.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Surviving a crash during a long exploration: each agent exports its state to a known place, and the coordinator reads a manifest on resume.\n\nThe exam guide (task 5.4) describes crash recovery as agents that export structured state to a known location and a coordinator that loads a manifest on resume and injects the state into the prompts of the agents it\nrestarts. The Claude Code documentation (read 2026-10-04) says that subagents explore in a separate context and report back summaries, and that a context window which fills up degrades Claude's work. Below, a dictionary\nstands for the file system, three agents explore three modules, one crashes, and the coordinator recovers. The sizes of the transcripts are invented for the illustration; nothing here calls a model.\n\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\nMANIFEST = \"state/manifest.txt\"\nTRANSCRIPT_CHARS = {\"auth\": 3200, \"billing\": 2400, \"search\": 1600}\n\n\ndef tokens(text_or_chars):\n    chars = text_or_chars if isinstance(text_or_chars, int) else len(text_or_chars)\n    return -(-chars // 4)\n\n\ndef read_manifest(fs):\n    entries = {}\n    for line in fs.get(MANIFEST, \"\").splitlines():\n        name, status, path = line.split(\"|\")\n        entries[name] = (status, path)\n    return entries\n\n\ndef write_manifest(fs, entries):\n    fs[MANIFEST] = \"\\n\".join(f\"{name}|{status}|{path}\" for name, (status, path) in entries.items())\n\n\ndef start(fs, agent):\n    \"\"\"The manifest is written when the agent starts, so that a crash leaves a trace.\"\"\"\n    entries = read_manifest(fs)\n    entries[agent] = (\"running\", f\"state/{agent}.md\")\n    write_manifest(fs, entries)\n\n\ndef finish(fs, agent, findings):\n    \"\"\"The state file is written when the agent has something to keep, and the manifest then says done.\"\"\"\n    entries = read_manifest(fs)\n    path = entries[agent][1]\n    fs[path] = \"\\n\".join(f\"- {fact} ({where})\" for fact, where in findings)\n    entries[agent] = (\"done\", path)\n    write_manifest(fs, entries)\n\n\ndef recovery_plan(fs, planned):\n    entries = read_manifest(fs)\n    plan = []\n    for agent in planned:\n        status, path = entries.get(agent, (\"running\", f\"state/{agent}.md\"))\n        plan.append((agent, \"restart\" if path not in fs else \"reuse\" if status == \"done\" else \"resume\"))\n    return plan\n\n\ndef injected_state(fs, plan):\n    \"\"\"What the coordinator puts into the next phase's prompt: the exported findings of every agent that need not run again.\"\"\"\n    entries = read_manifest(fs)\n    return \"\\n\".join(f\"{agent}:\\n{fs[entries[agent][1]]}\" for agent, action in plan if action in (\"reuse\", \"resume\"))\n\n\ndef main():\n    fs = {}\n    work = {\n        \"auth\": [(\"sessions expire after 30 minutes\", \"auth/Session.java:18\"), (\"tokens are signed in TokenSigner\", \"auth/TokenSigner.java:12\"), (\"the login route is POST /login\", \"auth/Routes.java:7\")],\n        \"billing\": [(\"amounts are integer cents\", \"billing/Money.java:5\"), (\"refunds go through RefundService\", \"billing/RefundService.java:41\")],\n    }\n    for agent, findings in work.items():\n        start(fs, agent)\n        finish(fs, agent, findings)\n        print(f\"{agent}: exported {read_manifest(fs)[agent][1]} ({len(findings)} findings), manifest says {read_manifest(fs)[agent][0]}\")\n    start(fs, \"search\")\n    print(\"search: manifest says running, state file never written (crash)\")\n    plan = recovery_plan(fs, [\"auth\", \"billing\", \"search\"])\n    print(\"recovery plan: \" + \", \".join(f\"{agent} {action}\" for agent, action in plan))\n    state = injected_state(fs, plan)\n    replay = sum(tokens(n) for n in TRANSCRIPT_CHARS.values())\n    print(f\"injected into the next phase: {sum(len(f) for f in work.values())} findings from {len(work)} agents, about {tokens(state)} tokens\")\n    print(f\"replaying the three transcripts instead: about {replay} tokens\")\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "auth: exported state/auth.md (3 findings), manifest says done\nbilling: exported state/billing.md (2 findings), manifest says done\nsearch: manifest says running, state file never written (crash)\nrecovery plan: auth reuse, billing reuse, search restart\ninjected into the next phase: 5 findings from 2 agents, about 77 tokens\nreplaying the three transcripts instead: about 1800 tokens"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "import { logger } from \"./logger.ts\";\nconst log = logger(\"state_manifest\");\n/**\n * Surviving a crash during a long exploration: each agent exports its state to a known place, and the coordinator reads a manifest on resume.\n *\n * The exam guide (task 5.4) describes crash recovery as agents that export structured state to a known location and a coordinator that loads a manifest on resume and injects the state into the prompts of the agents it\n * restarts. The Claude Code documentation (read 2026-10-04) says that subagents explore in a separate context and report back summaries, and that a context window which fills up degrades Claude's work. Below, a dictionary\n * stands for the file system, three agents explore three modules, one crashes, and the coordinator recovers. The sizes of the transcripts are invented for the illustration; nothing here calls a model.\n */\nexport type Fs = Record<string, string>;\nconst MANIFEST = \"state/manifest.txt\";\nconst TRANSCRIPT_CHARS: Record<string, number> = { auth: 3200, billing: 2400, search: 1600 };\n\nexport function tokens(textOrChars: string | number): number {\n  const chars = typeof textOrChars === \"number\" ? textOrChars : textOrChars.length;\n  return Math.ceil(chars / 4);\n}\n\nexport function readManifest(fs: Fs): Record<string, [string, string]> {\n  const entries: Record<string, [string, string]> = {};\n  for (const line of (fs[MANIFEST] ?? \"\").split(\"\\n\").filter((l) => l !== \"\")) {\n    const [name, status, path] = line.split(\"|\");\n    entries[name] = [status, path];\n  }\n  return entries;\n}\n\nfunction writeManifest(fs: Fs, entries: Record<string, [string, string]>): void {\n  fs[MANIFEST] = Object.entries(entries).map(([name, [status, path]]) => `${name}|${status}|${path}`).join(\"\\n\");\n}\n\n/** The manifest is written when the agent starts, so that a crash leaves a trace. */\nexport function start(fs: Fs, agent: string): void {\n  const entries = readManifest(fs);\n  entries[agent] = [\"running\", `state/${agent}.md`];\n  writeManifest(fs, entries);\n}\n\n/** The state file is written when the agent has something to keep, and the manifest then says done. */\nexport function finish(fs: Fs, agent: string, findings: Array<[string, string]>): void {\n  const entries = readManifest(fs);\n  const path = entries[agent][1];\n  fs[path] = findings.map(([fact, where]) => `- ${fact} (${where})`).join(\"\\n\");\n  entries[agent] = [\"done\", path];\n  writeManifest(fs, entries);\n}\n\nexport function recoveryPlan(fs: Fs, planned: string[]): Array<[string, string]> {\n  const entries = readManifest(fs);\n  return planned.map((agent): [string, string] => {\n    const [status, path] = entries[agent] ?? [\"running\", `state/${agent}.md`];\n    return [agent, !(path in fs) ? \"restart\" : status === \"done\" ? \"reuse\" : \"resume\"];\n  });\n}\n\n/** What the coordinator puts into the next phase's prompt: the exported findings of every agent that need not run again. */\nexport function injectedState(fs: Fs, plan: Array<[string, string]>): string {\n  const entries = readManifest(fs);\n  return plan.filter(([, action]) => action === \"reuse\" || action === \"resume\").map(([agent]) => `${agent}:\\n${fs[entries[agent][1]]}`).join(\"\\n\");\n}\n\nfunction main() {\n  const fs: Fs = {};\n  const work: Record<string, Array<[string, string]>> = {\n    auth: [[\"sessions expire after 30 minutes\", \"auth/Session.java:18\"], [\"tokens are signed in TokenSigner\", \"auth/TokenSigner.java:12\"], [\"the login route is POST /login\", \"auth/Routes.java:7\"]],\n    billing: [[\"amounts are integer cents\", \"billing/Money.java:5\"], [\"refunds go through RefundService\", \"billing/RefundService.java:41\"]],\n  };\n  for (const [agent, findings] of Object.entries(work)) {\n    start(fs, agent);\n    finish(fs, agent, findings);\n    console.log(`${agent}: exported ${readManifest(fs)[agent][1]} (${findings.length} findings), manifest says ${readManifest(fs)[agent][0]}`);\n  }\n  start(fs, \"search\");\n  console.log(\"search: manifest says running, state file never written (crash)\");\n  const plan = recoveryPlan(fs, [\"auth\", \"billing\", \"search\"]);\n  console.log(\"recovery plan: \" + plan.map(([agent, action]) => `${agent} ${action}`).join(\", \"));\n  const state = injectedState(fs, plan);\n  const replay = Object.values(TRANSCRIPT_CHARS).reduce((sum, n) => sum + tokens(n), 0);\n  console.log(`injected into the next phase: ${Object.values(work).reduce((s, f) => s + f.length, 0)} findings from ${Object.keys(work).length} agents, about ${tokens(state)} tokens`);\n  console.log(`replaying the three transcripts instead: about ${replay} tokens`);\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "auth: exported state/auth.md (3 findings), manifest says done\nbilling: exported state/billing.md (2 findings), manifest says done\nsearch: manifest says running, state file never written (crash)\nrecovery plan: auth reuse, billing reuse, search restart\ninjected into the next phase: 5 findings from 2 agents, about 77 tokens\nreplaying the three transcripts instead: about 1800 tokens"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/**\n * Surviving a crash during a long exploration: each agent exports its state to a known place, and the coordinator reads a manifest on resume.\n *\n * <p>The exam guide (task 5.4) describes crash recovery as agents that export structured state to a known location and a coordinator that loads a manifest on resume and injects the state into the prompts of the agents it\n * restarts. The Claude Code documentation (read 2026-10-04) says that subagents explore in a separate context and report back summaries, and that a context window which fills up degrades Claude's work. Below, a map\n * stands for the file system, three agents explore three modules, one crashes, and the coordinator recovers. The sizes of the transcripts are invented for the illustration; nothing here calls a model.\n */\npublic final class StateManifest {\n    private static final System.Logger LOG = System.getLogger(StateManifest.class.getName());\n    static final String MANIFEST = \"state/manifest.txt\";\n\n    record Entry(String status, String path) {}\n\n    record Finding(String fact, String where) {}\n\n    record Step(String agent, String action) {}\n\n    static int tokens(int chars) {\n        return (chars + 3) / 4;\n    }\n\n    static int tokens(String text) {\n        return tokens(text.length());\n    }\n\n    static Map<String, Entry> readManifest(Map<String, String> fs) {\n        Map<String, Entry> entries = new LinkedHashMap<>();\n        for (String line : fs.getOrDefault(MANIFEST, \"\").split(\"\\n\")) {\n            if (line.isEmpty()) continue;\n            String[] p = line.split(\"\\\\|\");\n            entries.put(p[0], new Entry(p[1], p[2]));\n        }\n        return entries;\n    }\n\n    private static void writeManifest(Map<String, String> fs, Map<String, Entry> entries) {\n        List<String> lines = new ArrayList<>();\n        for (Map.Entry<String, Entry> e : entries.entrySet()) lines.add(e.getKey() + \"|\" + e.getValue().status() + \"|\" + e.getValue().path());\n        fs.put(MANIFEST, String.join(\"\\n\", lines));\n    }\n\n    /** The manifest is written when the agent starts, so that a crash leaves a trace. */\n    static void start(Map<String, String> fs, String agent) {\n        Map<String, Entry> entries = readManifest(fs);\n        entries.put(agent, new Entry(\"running\", \"state/\" + agent + \".md\"));\n        writeManifest(fs, entries);\n    }\n\n    /** The state file is written when the agent has something to keep, and the manifest then says done. */\n    static void finish(Map<String, String> fs, String agent, List<Finding> findings) {\n        Map<String, Entry> entries = readManifest(fs);\n        String path = entries.get(agent).path();\n        List<String> lines = new ArrayList<>();\n        for (Finding f : findings) lines.add(\"- \" + f.fact() + \" (\" + f.where() + \")\");\n        fs.put(path, String.join(\"\\n\", lines));\n        entries.put(agent, new Entry(\"done\", path));\n        writeManifest(fs, entries);\n    }\n\n    static List<Step> recoveryPlan(Map<String, String> fs, List<String> planned) {\n        Map<String, Entry> entries = readManifest(fs);\n        List<Step> plan = new ArrayList<>();\n        for (String agent : planned) {\n            Entry e = entries.getOrDefault(agent, new Entry(\"running\", \"state/\" + agent + \".md\"));\n            plan.add(new Step(agent, !fs.containsKey(e.path()) ? \"restart\" : e.status().equals(\"done\") ? \"reuse\" : \"resume\"));\n        }\n        return plan;\n    }\n\n    /** What the coordinator puts into the next phase's prompt: the exported findings of every agent that need not run again. */\n    static String injectedState(Map<String, String> fs, List<Step> plan) {\n        Map<String, Entry> entries = readManifest(fs);\n        List<String> parts = new ArrayList<>();\n        for (Step s : plan) if (s.action().equals(\"reuse\") || s.action().equals(\"resume\")) parts.add(s.agent() + \":\\n\" + fs.get(entries.get(s.agent()).path()));\n        return String.join(\"\\n\", parts);\n    }\n\n    public static void main(String[] args) {\n        Map<String, String> fs = new LinkedHashMap<>();\n        Map<String, List<Finding>> work = new LinkedHashMap<>();\n        work.put(\"auth\", List.of(new Finding(\"sessions expire after 30 minutes\", \"auth/Session.java:18\"), new Finding(\"tokens are signed in TokenSigner\", \"auth/TokenSigner.java:12\"), new Finding(\"the login route is POST /login\", \"auth/Routes.java:7\")));\n        work.put(\"billing\", List.of(new Finding(\"amounts are integer cents\", \"billing/Money.java:5\"), new Finding(\"refunds go through RefundService\", \"billing/RefundService.java:41\")));\n        int total = 0;\n        for (Map.Entry<String, List<Finding>> w : work.entrySet()) {\n            start(fs, w.getKey());\n            finish(fs, w.getKey(), w.getValue());\n            total += w.getValue().size();\n            System.out.println(w.getKey() + \": exported \" + readManifest(fs).get(w.getKey()).path() + \" (\" + w.getValue().size() + \" findings), manifest says \" + readManifest(fs).get(w.getKey()).status());\n        }\n        start(fs, \"search\");\n        System.out.println(\"search: manifest says running, state file never written (crash)\");\n        List<Step> plan = recoveryPlan(fs, List.of(\"auth\", \"billing\", \"search\"));\n        List<String> parts = new ArrayList<>();\n        for (Step s : plan) parts.add(s.agent() + \" \" + s.action());\n        System.out.println(\"recovery plan: \" + String.join(\", \", parts));\n        String state = injectedState(fs, plan);\n        int replay = tokens(3200) + tokens(2400) + tokens(1600);\n        System.out.println(\"injected into the next phase: \" + total + \" findings from \" + work.size() + \" agents, about \" + tokens(state) + \" tokens\");\n        System.out.println(\"replaying the three transcripts instead: about \" + replay + \" tokens\");\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "auth: exported state/auth.md (3 findings), manifest says done\nbilling: exported state/billing.md (2 findings), manifest says done\nsearch: manifest says running, state file never written (crash)\nrecovery plan: auth reuse, billing reuse, search restart\ninjected into the next phase: 5 findings from 2 agents, about 77 tokens\nreplaying the three transcripts instead: about 1800 tokens"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "private val log = System.getLogger(\"state_manifest\")\n\n/**\n * Surviving a crash during a long exploration: each agent exports its state to a known place, and the coordinator reads a manifest on resume.\n *\n * The exam guide (task 5.4) describes crash recovery as agents that export structured state to a known location and a coordinator that loads a manifest on resume and injects the state into the prompts of the agents it\n * restarts. The Claude Code documentation (read 2026-10-04) says that subagents explore in a separate context and report back summaries, and that a context window which fills up degrades Claude's work. Below, a map\n * stands for the file system, three agents explore three modules, one crashes, and the coordinator recovers. The sizes of the transcripts are invented for the illustration; nothing here calls a model.\n */\nconst val MANIFEST = \"state/manifest.txt\"\n\ndata class Entry(val status: String, val path: String)\n\ndata class Finding(val fact: String, val where: String)\n\ndata class Step(val agent: String, val action: String)\n\nfun tokens(chars: Int): Int = (chars + 3) / 4\n\nfun tokens(text: String): Int = tokens(text.length)\n\nfun readManifest(fs: Map<String, String>): LinkedHashMap<String, Entry> {\n    val entries = linkedMapOf<String, Entry>()\n    for (line in (fs[MANIFEST] ?: \"\").lines().filter { it.isNotEmpty() }) {\n        val (name, status, path) = line.split(\"|\")\n        entries[name] = Entry(status, path)\n    }\n    return entries\n}\n\nprivate fun writeManifest(fs: MutableMap<String, String>, entries: Map<String, Entry>) {\n    fs[MANIFEST] = entries.entries.joinToString(\"\\n\") { \"${it.key}|${it.value.status}|${it.value.path}\" }\n}\n\n/** The manifest is written when the agent starts, so that a crash leaves a trace. */\nfun start(fs: MutableMap<String, String>, agent: String) {\n    val entries = readManifest(fs)\n    entries[agent] = Entry(\"running\", \"state/$agent.md\")\n    writeManifest(fs, entries)\n}\n\n/** The state file is written when the agent has something to keep, and the manifest then says done. */\nfun finish(fs: MutableMap<String, String>, agent: String, findings: List<Finding>) {\n    val entries = readManifest(fs)\n    val path = entries.getValue(agent).path\n    fs[path] = findings.joinToString(\"\\n\") { \"- ${it.fact} (${it.where})\" }\n    entries[agent] = Entry(\"done\", path)\n    writeManifest(fs, entries)\n}\n\nfun recoveryPlan(fs: Map<String, String>, planned: List<String>): List<Step> {\n    val entries = readManifest(fs)\n    return planned.map { agent ->\n        val e = entries[agent] ?: Entry(\"running\", \"state/$agent.md\")\n        Step(agent, if (e.path !in fs) \"restart\" else if (e.status == \"done\") \"reuse\" else \"resume\")\n    }\n}\n\n/** What the coordinator puts into the next phase's prompt: the exported findings of every agent that need not run again. */\nfun injectedState(fs: Map<String, String>, plan: List<Step>): String {\n    val entries = readManifest(fs)\n    return plan.filter { it.action == \"reuse\" || it.action == \"resume\" }.joinToString(\"\\n\") { \"${it.agent}:\\n${fs.getValue(entries.getValue(it.agent).path)}\" }\n}\n\nfun main() {\n    val fs = linkedMapOf<String, String>()\n    val work = linkedMapOf(\n        \"auth\" to listOf(Finding(\"sessions expire after 30 minutes\", \"auth/Session.java:18\"), Finding(\"tokens are signed in TokenSigner\", \"auth/TokenSigner.java:12\"), Finding(\"the login route is POST /login\", \"auth/Routes.java:7\")),\n        \"billing\" to listOf(Finding(\"amounts are integer cents\", \"billing/Money.java:5\"), Finding(\"refunds go through RefundService\", \"billing/RefundService.java:41\")),\n    )\n    for ((agent, findings) in work) {\n        start(fs, agent)\n        finish(fs, agent, findings)\n        println(\"$agent: exported ${readManifest(fs).getValue(agent).path} (${findings.size} findings), manifest says ${readManifest(fs).getValue(agent).status}\")\n    }\n    start(fs, \"search\")\n    println(\"search: manifest says running, state file never written (crash)\")\n    val plan = recoveryPlan(fs, listOf(\"auth\", \"billing\", \"search\"))\n    println(\"recovery plan: \" + plan.joinToString(\", \") { \"${it.agent} ${it.action}\" })\n    val state = injectedState(fs, plan)\n    val replay = tokens(3200) + tokens(2400) + tokens(1600)\n    println(\"injected into the next phase: ${work.values.sumOf { it.size }} findings from ${work.size} agents, about ${tokens(state)} tokens\")\n    println(\"replaying the three transcripts instead: about $replay tokens\")\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "auth: exported state/auth.md (3 findings), manifest says done\nbilling: exported state/billing.md (2 findings), manifest says done\nsearch: manifest says running, state file never written (crash)\nrecovery plan: auth reuse, billing reuse, search restart\ninjected into the next phase: 5 findings from 2 agents, about 77 tokens\nreplaying the three transcripts instead: about 1800 tokens"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The practice: an exploration that can be resumed"
+    },
+    {
+      "type": "para",
+      "text": "The practice is in [`exercises/67-exploring-a-large-codebase`](../../exercises/67-exploring-a-large-codebase/unit-01/practice-1/statement.md). You write the scratchpad (findings recorded once, grouped by area), the manifest, the plan for resuming, the prompt that continues an agent and the compaction command. It is graded in Python, TypeScript, Java and Kotlin; the statement lists eight cases, each saying what you should see when it works. The outline marks this module as configuration, and the practice treats the manifest and the compaction instructions as the configuration of an exploration."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**\"Compact the session; the summary will keep what matters.\"** It is tempting because compaction is automatic. The exam rejects it: a summary keeps what looks important, so tell it what to keep, and keep the findings in a file.",
+        "**\"Clear the context when it fills; the agent will rediscover everything.\"** It is tempting because it is the cheapest reset. The exam rejects it: clearing in the middle of an exploration throws away findings that exist only in the window.",
+        "**\"The manifest says the agent is done; skip it.\"** It is tempting because the manifest is the record. The exam rejects it: a state file that does not exist outranks a status that says done, and the agent restarts.",
+        "**\"After the crash, replay every agent's transcript into the new coordinator.\"** It is tempting because it restores everything. The exam rejects it: the transcripts are what filled the window. Load the manifest and inject the state, not the history."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "Scenario S4, developer productivity with Claude. During a long exploration the team wants automatic summarising near the limit to keep the roster of sources already opened and the commands that run the tests. What should they do?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Turn automatic summarising off so that nothing is condensed at all",
+              "**b**: Add a sentence on what to preserve to the project's instructions file",
+              "**c**: Raise the output limit so that the summary can run longer than usual",
+              "**d**: Clear the conversation at each phase so that nothing needs preserving"
+            ]
+          }
+        ],
+        [
+          "Scenario S4, developer productivity with Claude. A coordinator restarts after a crash. Its manifest lists 6 agents as running, and notes written by only 4 of them can be found on disk. What should it do?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Restart the whole set, since a manifest written before a crash cannot be trusted",
+              "**b**: Resume each of the 6 on the manifest's word, giving empty notes to the 2 without any",
+              "**c**: Replay the 6 transcripts into the new coordinator before it continues",
+              "**d**: Carry on from the saved material where it exists and begin afresh where it does not"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**b**. A standing instruction in the project's file steers the automatic summary toward what the exploration needs. *a* is ruled out because \"Turning compaction off is not a remedy: the window then fills, and performance degrades\". *c* is ruled out because \"Left to itself the summary keeps what looks important\", and a longer summary still chooses by that. *d* is ruled out because clearing \"starts over and is right between unrelated tasks\", and a phase of the same exploration is not one.",
+            "**d**. The agents with files continue from them and the others start over, since the file outranks the status. *a* is ruled out because for an agent whose file survived, \"the file is there, so the work is kept\". *b* is ruled out because for a missing file there is \"nothing to continue from, whatever the manifest says\". *c* is ruled out because \"the transcripts are what filled the window\"."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Module quiz"
+    },
+    {
+      "type": "para",
+      "text": "This quiz covers both pages of the module."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "Scenario S4, developer productivity with Claude. After a crash, one agent is started again from material it wrote out earlier. What should its new prompt hold?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Its assignment alone, because the saved material is implied by it",
+              "**b**: Its assignment and the complete old transcript, so that nothing is lost",
+              "**c**: Its assignment, the exported notes and an instruction to continue",
+              "**d**: The saved notes alone, because the assignment is contained in them"
+            ]
+          }
+        ],
+        [
+          "Scenario S4, developer productivity with Claude. A team needs a code-searching helper whose work can be picked up later in the same session. Which fits?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The built-in Explore subagent, continued with its own history",
+              "**b**: A custom subagent, continued with its own history",
+              "**c**: A fresh Explore each time, handed a copy of the earlier transcript",
+              "**d**: A second coordinator that reads the first coordinator's conversation"
+            ]
+          }
+        ],
+        [
+          "Scenario S4, developer productivity with Claude. A session finishes one exploration, and an unrelated piece of work then begins in the same window. Which step fits?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Turn compaction off for the new job so that no detail is lost",
+              "**b**: Compact it with instructions to keep everything the first job found",
+              "**c**: Enlarge the context limit so that both jobs fit side by side",
+              "**d**: Clear the conversation, since nothing from the first job is needed"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**c**. The page says the prompt \"carries its task, the state lines it exported, and one instruction: continue from the first unfinished step\". *b* is ruled out because \"It does not get the old transcript, which is what filled the first window\". *a* is ruled out because the prompt \"carries its task, the state lines it exported\", so the notes are not implied. *d* is ruled out because the prompt \"carries its task, the state lines it exported\", and the task comes first.",
+            "**b**. A custom subagent can be resumed with its history, and the built-in one cannot. *a* is ruled out because \"The built-in Explore agent is one-shot\". *c* is ruled out because \"the transcripts are what filled the window\". *d* is ruled out because \"a crash that ended the session leaves only the files\", and an ordinary session leaves a resumable subagent.",
+            "**d**. The page says \"`/clear` starts over and is right between unrelated tasks\". *b* is ruled out because \"Compaction continues the same work with a shorter memory of it\". *c* is ruled out because \"a bigger window only moves the problem later\". *a* is ruled out because \"Turning compaction off is not a remedy: the window then fills, and performance degrades\"."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Adapted from the Claude Certified Architect - Foundations exam preparation guide by Daron Yondem (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/), changed for this course."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 11,
+    "paras": 15,
+    "code": 0,
+    "tables": 1,
+    "lists": 4,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 1,
+    "html": 0,
+    "disclosures": 2,
+    "examples": 1
+  },
+  "content_sha256": "206e589d5b35dbdeeb4cf71ad568fdad26d000988681c88c91f9cec1f084ae7e"
+}

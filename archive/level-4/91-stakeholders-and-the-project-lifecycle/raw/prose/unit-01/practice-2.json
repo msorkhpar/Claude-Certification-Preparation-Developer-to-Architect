@@ -1,0 +1,321 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "91-stakeholders-and-the-project-lifecycle"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: a design record that a sponsor and an engineer can both use (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a design record that a sponsor and an engineer can both use"
+    },
+    {
+      "type": "para",
+      "text": "A utility wants an assistant that helps its billing agents decide whether a disputed charge is credited. You have been the architect through discovery and design, and now you write the record that goes to the sponsor for a decision and to the engineering team for the build. The draft in `starter/docs/design-record.md` is thin and partly wrong: it recommends the option that is newest and not the one that is cheapest, it promises a latency the agents cannot live with, it lists one segment and one assumption, and it leaves the sponsor with nothing to decide. In this practice you write the record. There is no program to write and no model is called: the tests grade your Markdown against a rubric. The figures are invented for the case below, and the rubric's numbers (a break-even accuracy, a limit of 80 words for the sponsor) are this course's teaching values. It is in Python, TypeScript, Java and Kotlin; pick your language folder, open `starter/` and edit the file there; each language folder holds its own copy."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The case"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Fact",
+        "Value"
+      ],
+      "rows": [
+        [
+          "Disputes",
+          "About 3,000 a day"
+        ],
+        [
+          "Who waits",
+          "A billing agent on screen: the answer must come within 2 seconds at the 95th percentile, and the service must be available at least 99.5 percent of the time"
+        ],
+        [
+          "Cost of a wrong credit",
+          "About 250"
+        ],
+        [
+          "Cost of one check by a person",
+          "5"
+        ],
+        [
+          "Accountable",
+          "The billing operations manager"
+        ],
+        [
+          "Segments",
+          "credit (cost per error 250), complaint (60) and status (12)"
+        ],
+        [
+          "Measured accuracy",
+          "credit 63 percent, complaint 91 percent, status 98 percent, on 100 cases each"
+        ],
+        [
+          "Options priced",
+          "People decide every dispute 315,000 a month and meets the service levels; the model decides every dispute 300,000 and misses them; the model drafts and a person decides every item 150,000 and meets them; routing by confidence with a person on the rest 80,000 and meets them"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The record exists as a draft with the title, the eight headings and the case table in place; there is no code to write and no function to log from, because the tests read the document. You fill the gaps below, in this order, and each unlocks the cases named:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Summary for the sponsor** is a `TODO` line: write it, at most 80 words, with the monthly cost and one decision asked for (`m1` for the filled section, `e8` for the words, the cost and the ask).",
+        "**Decision statement** is one thin sentence: add the volume, the latency, the two costs and the accountable role (`e1`).",
+        "**Options considered** recommends the newest option and leaves a rejection without a reason, with two options missing: fix the status column, add the reasons and the missing options (`e2`).",
+        "**Recommendation and trade-offs** is a `TODO` line: state the break-even rule and the monthly cost of the recommended option (`e3`).",
+        "**Accuracy by segment** has one row without a failure shape: add the other two segments, the costliest first, with a shape and a handling that follows the break-even (`e5`).",
+        "**Service levels** promises 5000 ms with no measure and an owner of `TBD`: correct the targets and name a measure and an owner on every row (`e4`).",
+        "**Pilot to scale** has one assumption with no test and no trigger: complete it and add three more, each stop trigger holding a number (`e6`).",
+        "**Hand-off and monitoring** is a `TODO` line: name the owner, the runbook, at least two monitors and the rollback to the previous model (`e7`)."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The sections below describe the whole record."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "`docs/design-record.md` has a title and these eight sections, as level 2 headings, in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Summary for the sponsor**: at most 80 words, in plain words, with the monthly cost of the recommended option and the one decision you ask for.",
+        "**Decision statement**: the volume, the latency, the cost of an error and of a check, and the accountable role.",
+        "**Options considered**: a table with the columns Option, Monthly cost, Meets SLA, Status and Reason. At least four options. Exactly one is `recommended`, the others are `alternative` or `rejected`, and a rejected option has a reason of at least five words. The recommended option is the cheapest one that meets the service levels.",
+        "**Recommendation and trade-offs**: why, what the design gives up, and the rule \"at or above N percent\" with the break-even accuracy that follows from the two costs. It states the monthly cost of the recommended option.",
+        "**Accuracy by segment**: a table with Segment, Cases, Accuracy, Failure shape, Cost per error and Handling, the costliest segment first. A failure shape is one of `wrong amount`, `outdated figure`, `refusal`, `made-up clause` or `omitted exception`. A segment at or above the break-even accuracy is `auto`, one below it is `reviewed`.",
+        "**Service levels**: a table with Metric, Target, Measured by and Owner, for latency, availability and accuracy. The latency target is in `ms` and no more than the case allows, the availability target is in `percent` and no less, and the accuracy target is stated for the credit segment. Every row has a named owner (a role).",
+        "**Pilot to scale**: a table with Assumption, Test and Stop trigger, at least four rows, every stop trigger with a number.",
+        "**Hand-off and monitoring**: the owner of the service, the runbook, the monitors (at least two signals), the rollback and the previous model that stays available."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "No section may be left with a `TODO`, and no file holds a home path or an address other than `example.com`."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**A sponsor decides in a minute, so the summary is short and asks for something.** *You should see* a summary of at most 80 words that holds the monthly cost and the decision.",
+        "**A requirement is a number with an owner.** *You should see* the volume, the latency, both costs and the accountable role in the decision statement.",
+        "**Price comes last, among the options that qualify.** *You should see* the cheapest option that meets the service levels recommended, and a reason for every rejection.",
+        "**The break-even follows from two costs.** *You should see* the rule \"at or above 98 percent\", since 2 percent of 250 is exactly the 5 that a check costs.",
+        "**A headline accuracy hides the segment that costs most.** *You should see* every segment, the costliest first, with its failure shape, and a person on every segment below the break-even.",
+        "**A promise is a target someone owns.** *You should see* three service levels within the case's limits, each with a measure and an owner.",
+        "**A pilot's friendly conditions end at scale.** *You should see* four assumptions, each with a test and a number that stops the roll-out.",
+        "**A hand-off is what lets someone else run it.** *You should see* an owner, a runbook, monitors and a rollback to a model that is still configured."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "The eight sections are present in order, each filled, with no TODO"
+        ],
+        [
+          "`e1`",
+          "The decision statement carries the volume, the latency, the error cost, the check cost and the accountable role"
+        ],
+        [
+          "`e2`",
+          "At least four options, one recommended and it is the cheapest that meets the service levels, a reason for each rejection"
+        ],
+        [
+          "`e3`",
+          "The break-even accuracy is 98 percent, stated as \"at or above 98 percent\", and the recommendation states the cost"
+        ],
+        [
+          "`e4`",
+          "Latency at most 2000 ms (exactly 2000 is allowed), availability at least 99.5 percent, accuracy for credit, each with a measure and a named owner"
+        ],
+        [
+          "`e5`",
+          "Segments costliest first, a known failure shape, and handling that follows the break-even (exactly 98 percent is `auto`)"
+        ],
+        [
+          "`e6`",
+          "At least four assumptions, each with a test and a stop trigger that holds a number"
+        ],
+        [
+          "`e7`",
+          "The hand-off names an owner, a runbook, a rollback to the previous model and at least two monitors"
+        ],
+        [
+          "`e8`",
+          "The sponsor summary has at most 80 words (exactly 80 is allowed), states the cost and asks for a decision, and no file holds personal data"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "# Design record: dispute assistant\n\n## Summary for the sponsor\n\nWe recommend a design in which the model drafts every reply and a person checks only the answers it is unsure about. It costs 80,000 a month against 315,000 for people alone, and it meets the two-second and 99.5 percent targets. Credit answers are right 63 times in 100, so a person approves every credit. We ask for one decision today: approve the pilot of this design for the billing team, with credit kept manual until the measured figures improve.\n\n## Decision statement\n\nThe assistant helps a billing agent decide whether a disputed charge is credited. About 3,000 disputes arrive a day, and the agent waits on screen, so the answer must come within 2 seconds at the 95th percentile. A wrong credit costs about 250 and a check by a person costs 5. The billing operations manager is accountable for each credit, and the model prepares the file and does not decide.\n\n## Options considered\n\n| Option | Monthly cost | Meets SLA | Status | Reason |\n|---|---|---|---|---|\n| People decide every dispute | 315,000 | yes | rejected | The most expensive option and the slowest to answer |\n| The model decides every dispute | 300,000 | no | rejected | Wrong credits cost more than the checks it removes |\n| The model drafts and a person decides every item | 150,000 | yes | alternative | Safe, but it pays for checks on answers that are already right |\n| Route by confidence, with a person on the rest | 80,000 | yes | recommended | The cheapest design that meets the service levels |\n\n## Recommendation and trade-offs\n\nWe recommend routing by confidence. The break-even accuracy follows from the two costs: an item is worth a check when the expected error cost exceeds the cost of the check, and 2 percent of 250 is 5. A slice that is right at or above 98 percent is not reviewed, and any slice below it is. The design costs 80,000 a month, which is 235,000 less than people alone, and it gives up speed in the credit slice, where a person must approve. It is also exposed to confident wrong answers, which an independent check against the source reduces and does not remove.\n\n## Accuracy by segment\n\n| Segment | Cases | Accuracy | Failure shape | Cost per error | Handling |\n|---|---|---|---|---|---|\n| credit | 100 | 63 percent | wrong amount | 250 | reviewed |\n| complaint | 100 | 91 percent | omitted exception | 60 | reviewed |\n| status | 100 | 98 percent | outdated figure | 12 | auto |\n\n## Service levels\n\n| Metric | Target | Measured by | Owner |\n|---|---|---|---|\n| Latency, 95th percentile | 2000 ms | Trace timings of every answer, per day | Platform engineering lead |\n| Availability | 99.5 percent | Share of requests answered without error, per month | Platform engineering lead |\n| Accuracy by segment | Credit at least 98 percent after review | Weekly sample read by the quality team, per segment | Billing quality lead |\n\n## Pilot to scale\n\n| Assumption | Test | Stop trigger |\n|---|---|---|\n| Inputs were typical | Sample production disputes and score them by segment | Credit accuracy falls below 60 percent on the sample |\n| Staff covered edge cases by hand | Count escalations per 100 disputes | More than 12 escalations per 100 disputes |\n| Capacity was never close | Replay peak load against the rate limits | Any 429 error at 70 percent of the limit |\n| Reviewers kept up | Compute reviewer hours from volume and routing | The review queue is older than 4 hours |\n\n## Hand-off and monitoring\n\nThe billing operations manager is the owner of the service, and the platform engineering lead owns the runbook that explains each alert. Monitors are refusals, tokens per answer, the share of answers a person flagged and the 95th percentile latency, each compared with a baseline in both directions. Rollback sends every request to the previous model, which stays configured and tested until its own retirement date. The record is reviewed at each stage of the roll-out.\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "# Design record: dispute assistant\n\n## Summary for the sponsor\n\nTODO: one paragraph a sponsor can read in a minute.\n\n## Decision statement\n\nThe assistant helps agents with disputes.\n\n## Options considered\n\n| Option | Monthly cost | Meets SLA | Status | Reason |\n|---|---|---|---|---|\n| The model decides every dispute | 300,000 | no | recommended | It is the newest idea |\n| People decide every dispute | 315,000 | yes | rejected | |\n\n## Recommendation and trade-offs\n\nTODO: the recommendation and what it trades.\n\n## Accuracy by segment\n\n| Segment | Cases | Accuracy | Failure shape | Cost per error | Handling |\n|---|---|---|---|---|---|\n| status | 100 | 98 percent | | 12 | reviewed |\n\n## Service levels\n\n| Metric | Target | Measured by | Owner |\n|---|---|---|---|\n| Latency, 95th percentile | 5000 ms | | TBD |\n\n## Pilot to scale\n\n| Assumption | Test | Stop trigger |\n|---|---|---|\n| Inputs were typical | | |\n\n## Hand-off and monitoring\n\nTODO: who owns it and how it is watched.\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 5,
+    "code": 1,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "0f610d63b0bcb9e85621bb79b07f9c7305b3fbfdae600c0047130f4529e4421f",
+  "starting_code": "# Design record: dispute assistant\n\n## Summary for the sponsor\n\nTODO: one paragraph a sponsor can read in a minute.\n\n## Decision statement\n\nThe assistant helps agents with disputes.\n\n## Options considered\n\n| Option | Monthly cost | Meets SLA | Status | Reason |\n|---|---|---|---|---|\n| The model decides every dispute | 300,000 | no | recommended | It is the newest idea |\n| People decide every dispute | 315,000 | yes | rejected | |\n\n## Recommendation and trade-offs\n\nTODO: the recommendation and what it trades.\n\n## Accuracy by segment\n\n| Segment | Cases | Accuracy | Failure shape | Cost per error | Handling |\n|---|---|---|---|---|---|\n| status | 100 | 98 percent | | 12 | reviewed |\n\n## Service levels\n\n| Metric | Target | Measured by | Owner |\n|---|---|---|---|\n| Latency, 95th percentile | 5000 ms | | TBD |\n\n## Pilot to scale\n\n| Assumption | Test | Stop trigger |\n|---|---|---|\n| Inputs were typical | | |\n\n## Hand-off and monitoring\n\nTODO: who owns it and how it is watched.\n",
+  "exercise": {
+    "main_path": "practice/level-4/91-stakeholders-and-the-project-lifecycle/prose/unit-01/practice-2/project/docs/design-record.md",
+    "test_path": "practice/level-4/91-stakeholders-and-the-project-lifecycle/prose/unit-01/practice-2/tests/designRecord.test.ts",
+    "run_command": [
+      "python3",
+      "practice/level-4/91-stakeholders-and-the-project-lifecycle/prose/unit-01/practice-2/check_files.py",
+      "practice/level-4/91-stakeholders-and-the-project-lifecycle/prose/unit-01/practice-2/project/docs/design-record.md"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-4/91-stakeholders-and-the-project-lifecycle/prose/unit-01/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-4/91-stakeholders-and-the-project-lifecycle/prose/unit-01/practice-2/tests/designRecord.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 the eight sections are present in order and filled",
+        "kind": "main",
+        "says": "The eight sections are present in order, each filled, with no TODO"
+      },
+      {
+        "id": "e1 the decision statement carries the volume the latency the error cost and the accountable role",
+        "kind": "edge",
+        "says": "The decision statement carries the volume, the latency, the error cost, the check cost and the accountable role"
+      },
+      {
+        "id": "e2 the options include a recommended one that is the cheapest to meet the service levels and a reason for each rejection",
+        "kind": "edge",
+        "says": "At least four options, one recommended and it is the cheapest that meets the service levels, a reason for each rejection"
+      },
+      {
+        "id": "e3 the break even accuracy is 98 percent and the recommendation states the cost",
+        "kind": "edge",
+        "says": "The break-even accuracy is 98 percent, stated as \"at or above 98 percent\", and the recommendation states the cost"
+      },
+      {
+        "id": "e4 each service level has a target within the case limits and a named owner",
+        "kind": "edge",
+        "says": "Latency at most 2000 ms (exactly 2000 is allowed), availability at least 99.5 percent, accuracy for credit, each with a measure and a named owner"
+      },
+      {
+        "id": "e5 segments are listed by error cost and handled by the break even",
+        "kind": "edge",
+        "says": "Segments costliest first, a known failure shape, and handling that follows the break-even (exactly 98 percent is auto)"
+      },
+      {
+        "id": "e6 the pilot to scale table has four assumptions each with a test and a stop trigger with a number",
+        "kind": "edge",
+        "says": "At least four assumptions, each with a test and a stop trigger that holds a number"
+      },
+      {
+        "id": "e7 the hand off names an owner a runbook a rollback and monitors",
+        "kind": "edge",
+        "says": "The hand-off names an owner, a runbook, a rollback to the previous model and at least two monitors"
+      },
+      {
+        "id": "e8 the sponsor summary has at most 80 words and states the cost and the decision and no file holds personal data",
+        "kind": "edge",
+        "says": "The sponsor summary has at most 80 words (exactly 80 is allowed), states the cost and asks for a decision, and no file holds personal data"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-4/91-stakeholders-and-the-project-lifecycle/prose/unit-01/practice-2/target/report.xml"
+    },
+    "origin": "course/91-stakeholders-and-the-project-lifecycle/01-discovery-the-decision-statement-and-one-decision-for-two-audiences.md",
+    "concepts": [
+      "the practice of Discovery, the record and one decision for two audiences is solved"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "stakeholders-and-the-project-lifecycle-u1"
+}

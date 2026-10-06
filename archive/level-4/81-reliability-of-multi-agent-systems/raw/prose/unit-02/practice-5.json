@@ -1,0 +1,124 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "81-reliability-of-multi-agent-systems"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 5,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Isolation, fallbacks and resuming a run",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "Scenario: Elm Biotech's plan has five tasks: a, b, c, d and e. Task b breaks for good, d needs b, and c and e need neither. What should the runner report?",
+        "options": [
+          {
+            "id": "a",
+            "text": "a, c and e done, b failed, d skipped because of b, with each reason stated",
+            "correct": true,
+            "says": "Only the task that needed b is affected, and the report lists what is done, what failed and what was skipped."
+          },
+          {
+            "id": "b",
+            "text": "The whole run counts as failed, since one broken part makes the rest untrustworthy for the reader",
+            "correct": false,
+            "says": "Ruled out because the failure is isolated: \"it ends only its own branch\"."
+          },
+          {
+            "id": "c",
+            "text": "Task a done, with the later tasks left unreported until someone has repaired the broken one",
+            "correct": false,
+            "says": "Ruled out because the report names \"what is done, what failed and why, and what was skipped because of it\", and silence about d hides a gap."
+          },
+          {
+            "id": "d",
+            "text": "Five tasks done, with d computed from a plausible guess at what b would have returned",
+            "correct": false,
+            "says": "Ruled out because a task whose input failed is skipped \"with a reason that names the failed one\", and is not fed a guess."
+          }
+        ],
+        "origin": {
+          "path": "course/81-reliability-of-multi-agent-systems/02-isolation-fallbacks-and-resuming-a-run.md",
+          "section": "A failure stays in its branch"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "Scenario: Rowan Insights' search agent fails, and a cheaper backup agent answers the task. The runner keeps the backup's answer. What should it do with that result?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Write it to the store of finished work, so that a later run does not repeat the same effort",
+            "correct": false,
+            "says": "Ruled out because a stored answer makes the task look done: \"the weaker answer would become permanent by accident\"."
+          },
+          {
+            "id": "b",
+            "text": "Use it, flag it as degraded, and leave it out of the store of finished work",
+            "correct": true,
+            "says": "A degraded result is used and flagged, and it is not stored, so a later run can try the primary again."
+          },
+          {
+            "id": "c",
+            "text": "Discard it, because only the primary agent's answers may ever appear in a final report",
+            "correct": false,
+            "says": "Ruled out because the fallback \"keeps the run moving\", and discarding it loses the point of having one."
+          },
+          {
+            "id": "d",
+            "text": "Use it and say nothing, because the reader of the report wants only the content of the answer",
+            "correct": false,
+            "says": "Ruled out because the task is listed as degraded \"so that the report and the caller know the answer is weaker than planned\"."
+          }
+        ],
+        "origin": {
+          "path": "course/81-reliability-of-multi-agent-systems/02-isolation-fallbacks-and-resuming-a-run.md",
+          "section": "A fallback degrades, and says so"
+        }
+      }
+    ],
+    "concepts": [
+      "A crash is not a failure, as the page teaches it",
+      "A failure stays in its branch, as the page teaches it",
+      "A fallback degrades, and says so, as the page teaches it",
+      "Checkpoint and resume, as the page teaches it",
+      "Isolation, fallbacks and resuming a run, as the page teaches it"
+    ]
+  }
+}

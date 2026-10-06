@@ -1,0 +1,22 @@
+{
+  "jobs": [
+    {
+      "name": "pre-merge-review", "kind": "review", "audience": "waiting", "api": "realtime",
+      "passes": ["per-file", "integration"], "session": "fresh", "context": ["prior_findings"],
+      "tools": ["Read", "Grep", "Glob"],
+      "command": "claude -p \"Review the changed files against ci/review-criteria.md\" --output-format json --json-schema ci/review.schema.json --max-turns 8 --allowedTools \"Read,Grep,Glob\""
+    },
+    {
+      "name": "debt-report", "kind": "report", "audience": "scheduled", "api": "batch",
+      "passes": [], "session": "fresh", "context": [],
+      "tools": [],
+      "command": "python ci/submit_batch.py debt-report"
+    },
+    {
+      "name": "test-generation", "kind": "testgen", "audience": "waiting", "api": "realtime",
+      "passes": [], "session": "fresh", "context": ["existing_tests"],
+      "tools": ["Read", "Glob", "Edit"],
+      "command": "claude -p \"Write tests as described in ci/testgen-prompt.md\" --output-format json --max-turns 6 --allowedTools \"Read,Glob,Edit\""
+    }
+  ]
+}

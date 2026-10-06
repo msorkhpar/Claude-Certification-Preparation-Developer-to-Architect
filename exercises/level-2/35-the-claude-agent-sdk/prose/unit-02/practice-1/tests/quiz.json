@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "35-the-claude-agent-sdk"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Check yourself: The Agent SDK: tools, permissions, hooks and custom tools",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A developer lists Read and Grep in allowed_tools, and expects shell commands to be out of reach. What happens?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Bash is removed from the agent's context before the first turn",
+            "correct": false,
+            "says": "Ruled out because only a bare name in disallowed_tools \"removes the tool from Claude's context altogether\", and allowed_tools is not that setting."
+          },
+          {
+            "id": "b",
+            "text": "Bash remains available, and its calls fall through to the mode",
+            "correct": true,
+            "says": "The page says allowed_tools \"does not restrict Claude to only these tools\", and that unlisted tools \"fall through to permission_mode and can_use_tool\"."
+          },
+          {
+            "id": "c",
+            "text": "Bash calls are denied in every permission mode",
+            "correct": false,
+            "says": "Ruled out because allowed_tools \"auto-approves the tools you list\", so it approves and does not deny."
+          },
+          {
+            "id": "d",
+            "text": "Bash calls are approved automatically with no prompt",
+            "correct": false,
+            "says": "Ruled out because \"Tools not listed are still available, and calls to them that need approval fall through to the permission mode and canUseTool.\""
+          }
+        ],
+        "origin": {
+          "path": "course/35-the-claude-agent-sdk/02-tools-permissions-hooks-and-custom-tools.md",
+          "section": "Availability is not approval"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A PreToolUse hook returns deny for a call that a matching allow rule would approve, in acceptEdits mode. What happens to the call?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It runs, and the allow rule wins",
+            "correct": false,
+            "says": "Ruled out because \"hooks run before every other step, and a hook deny applies even in bypassPermissions mode\", so an allow rule cannot override it."
+          },
+          {
+            "id": "b",
+            "text": "It goes to the callback, which decides",
+            "correct": false,
+            "says": "Ruled out because \"The callback sees only what nothing earlier decided.\", and the hook has decided."
+          },
+          {
+            "id": "c",
+            "text": "It waits for the permission mode to decide",
+            "correct": false,
+            "says": "Ruled out because the mode is checked after the hooks, and \"Hooks run first, so a hook can deny a call outright\"."
+          },
+          {
+            "id": "d",
+            "text": "It is blocked, and no later step is consulted",
+            "correct": true,
+            "says": "The page says \"Hooks run first, so a hook can deny a call outright\", and \"Each step can end the decision.\""
+          }
+        ],
+        "origin": {
+          "path": "course/35-the-claude-agent-sdk/02-tools-permissions-hooks-and-custom-tools.md",
+          "section": "The order of evaluation"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A custom in-process tool divides by zero and the handler throws without catching. What does Claude see?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Nothing, because the query aborts before any result is produced",
+            "correct": false,
+            "says": "Ruled out because \"A handler error doesn't stop the agent loop.\""
+          },
+          {
+            "id": "b",
+            "text": "The raw exception message as an error result, and the loop continues",
+            "correct": true,
+            "says": "The page says the in-process server catches an uncaught exception and returns it as an error result that carries the raw exception message, and the loop goes on."
+          },
+          {
+            "id": "c",
+            "text": "A message that you compose, since uncaught errors are reported as written",
+            "correct": false,
+            "says": "Ruled out because \"Claude sees the message you compose\" only when the handler catches the error and returns is_error, and an uncaught exception does not do that."
+          },
+          {
+            "id": "d",
+            "text": "A generic failure notice with the message stripped for safety",
+            "correct": false,
+            "says": "Ruled out because the result is an error result \"that carries the raw exception message\", not a stripped one."
+          }
+        ],
+        "origin": {
+          "path": "course/35-the-claude-agent-sdk/02-tools-permissions-hooks-and-custom-tools.md",
+          "section": "Custom tools"
+        }
+      }
+    ]
+  }
+}

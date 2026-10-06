@@ -1,0 +1,255 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "20-prompt-caching"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: order a request for cache hits (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: order a request for cache hits"
+    },
+    {
+      "type": "para",
+      "text": "A prompt cache stores a **prefix** of the request: the tools first, then the system prompt, then the messages, up to a breakpoint. Anything that changes inside the prefix, a timestamp for instance, starts the cache over. Write the function that puts a request's blocks in the order that keeps the prefix stable and places the breakpoints the cache needs. The rules come from the Claude documentation on prompt caching, read on 2026-10-02; the lesson pages explain them."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given data"
+    },
+    {
+      "type": "para",
+      "text": "A **block** is a map with `id`, `section` (`tools`, `system` or `messages`), `tokens`, and optional `volatile` (true when the content changes on every request, such as the current time), `breakpoint` (true when the author wants the cache to end here) and `ttl` (`5m`, the default, or `1h`). The function returns a list, one entry per block, as maps `{\"id\": ..., \"cache\": null | \"5m\" | \"1h\"}`; a `cache` value stands for a `cache_control` marker on that block."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working planner with six gaps cut out of it. Everything that is plumbing is written and correct: the constants, `PlanError`, the walk over the blocks with the running token total, the building of the plan entries and the collecting of the breakpoints. Each gap is a small function with its signature, a comment that says what it receives and returns, one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. Python names them with a leading underscore; TypeScript, Java and Kotlin use the same names without it, in camel case (`checkTools`, `wantsBreakpoint`). Write them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_check_tools` unlocks `e5`: a volatile tool definition is refused.",
+        "`_ordered` unlocks `m1`, `e1` and `e6`: the prefix order, the volatile blocks last, and a new list.",
+        "`_wants_breakpoint` unlocks `e2` and `e5`: the prefix must reach the minimum, and a volatile block never carries a breakpoint.",
+        "`_marker` unlocks `m1`: the lifetime a breakpoint carries, `5m` by default.",
+        "`_check_count` unlocks `e3`: at most four breakpoints.",
+        "`_check_lifetimes` unlocks `e4`: a `1h` breakpoint never follows a `5m` one."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About a dozen lines in all. To see what a gap receives, log its input with the `log` line at the top of the file: `plan_request` already logs its input at debug level, and a run shows the logged lines under the failing case."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "`plan_request(blocks, min_tokens=1024)` (TypeScript `planRequest`, Java `CachePlan.planRequest`, Kotlin `planRequest`)"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Order.** The sections come in the order `tools`, `system`, `messages`; blocks of one section keep the order they were given in. Then every volatile block moves to the very end, in its given order, so that nothing volatile sits inside the prefix. A volatile block in `tools` cannot move there: raise `PlanError`.",
+        "**Breakpoints.** A block with `breakpoint` gets its `ttl` as `cache` only if it is not volatile and the stable tokens from the start of the request up to and including that block add up to at least `min_tokens`. A block that does not reach the minimum gets `null` (the API would ignore the marker and return no error, so there is nothing to raise).",
+        "**At most four** breakpoints may remain after rule 2; more is a `PlanError` (the API answers 400).",
+        "**Lifetimes.** A `1h` breakpoint must come before every `5m` breakpoint; the other order is a `PlanError`.",
+        "Every input block appears once in the result, and the input list and its maps are left unchanged."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Stable content comes first, the volatile date goes last, and the breakpoints sit on the stable blocks"
+        ],
+        [
+          "`e1`",
+          "Sections follow the prefix order and keep their own order"
+        ],
+        [
+          "`e2`",
+          "A breakpoint needs the stable prefix up to it to reach the minimum"
+        ],
+        [
+          "`e3`",
+          "At most four breakpoints are sent, counting only those that reach the minimum"
+        ],
+        [
+          "`e4`",
+          "A one-hour breakpoint may not follow a five-minute one"
+        ],
+        [
+          "`e5`",
+          "A volatile block never carries a breakpoint, and tools cannot be volatile"
+        ],
+        [
+          "`e6`",
+          "Every block comes out once and the input is not changed"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Order a request for cache hits and place its breakpoints. See ../../statement.md for the contract.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\nSECTIONS = {\"tools\": 0, \"system\": 1, \"messages\": 2}\nMAX_BREAKPOINTS = 4\n\n\nclass PlanError(Exception):\n    \"\"\"The request cannot be cached as asked (the API would answer 400, or the plan can never hit).\"\"\"\n\n\ndef _check_tools(blocks):\n    for block in blocks:\n        if block.get(\"volatile\", False) and block[\"section\"] == \"tools\":\n            raise PlanError(f\"tool definition {block['id']} cannot be volatile: tools come first\")\n\n\ndef _ordered(blocks):\n    by_section = sorted(blocks, key=lambda b: SECTIONS[b[\"section\"]])  # stable inside a section\n    return [b for b in by_section if not b.get(\"volatile\", False)] + [b for b in by_section if b.get(\"volatile\", False)]\n\n\ndef _wants_breakpoint(block, total, min_tokens):\n    return block.get(\"breakpoint\", False) and not block.get(\"volatile\", False) and total >= min_tokens\n\n\ndef _marker(block):\n    return block.get(\"ttl\", \"5m\")\n\n\ndef _check_count(marked):\n    if len(marked) > MAX_BREAKPOINTS:\n        raise PlanError(f\"{len(marked)} breakpoints: at most {MAX_BREAKPOINTS}\")\n\n\ndef _check_lifetimes(marked):\n    seen_five = False\n    for cache in marked:\n        if cache == \"5m\":\n            seen_five = True\n        elif seen_five:\n            raise PlanError(\"a 1h breakpoint must come before every 5m breakpoint\")\n\n\ndef plan_request(blocks, min_tokens=1024):\n    log.debug(\"plan_request input: %r\", blocks)\n    _check_tools(blocks)\n    plan, total = [], 0\n    for block in _ordered(blocks):\n        if not block.get(\"volatile\", False):\n            total += block[\"tokens\"]\n        wanted = _wants_breakpoint(block, total, min_tokens)\n        plan.append({\"id\": block[\"id\"], \"cache\": _marker(block) if wanted else None})\n    marked = [p[\"cache\"] for p in plan if p[\"cache\"]]\n    _check_count(marked)\n    _check_lifetimes(marked)\n    return plan\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom cacheplan import PlanError, plan_request\n\n\ndef block(id, section, tokens, **extra):\n    return {\"id\": id, \"section\": section, \"tokens\": tokens, **extra}\n\n\n# A request whose blocks arrive in the wrong order: the volatile date sits first, in the system prompt.\nblocks = [\n    block(\"date\", \"system\", 20, volatile=True),\n    block(\"tools\", \"tools\", 2000),\n    block(\"rules\", \"system\", 3000, breakpoint=True),\n    block(\"manual\", \"messages\", 6000, breakpoint=True),\n    block(\"question\", \"messages\", 40),\n]\ntry:\n    plan = plan_request(blocks, min_tokens=1024) or []\n    print(\"order:\", [p[\"id\"] for p in plan])\n    print(\"cache per block:\", {p[\"id\"]: p[\"cache\"] for p in plan})\n    print(\"breakpoints at:\", [p[\"id\"] for p in plan if p[\"cache\"]])\nexcept PlanError as err:\n    print(\"plan error:\", err)\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Order a request for cache hits and place its breakpoints. See ../../statement.md for the contract.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\nSECTIONS = {\"tools\": 0, \"system\": 1, \"messages\": 2}\nMAX_BREAKPOINTS = 4\n\n\nclass PlanError(Exception):\n    \"\"\"The request cannot be cached as asked (the API would answer 400, or the plan can never hit).\"\"\"\n\n\ndef _check_tools(blocks):\n    \"\"\"TODO 1 of 6 (finish this to pass e5): refuse a volatile tool definition.\n\n    Receives the list of blocks. Raises PlanError when a block in the `tools` section is volatile (tools come first, nothing volatile may\n    sit in the prefix); returns nothing otherwise. Example: _check_tools([{\"id\": \"t\", \"section\": \"tools\", \"tokens\": 9, \"volatile\": True}])\n    raises PlanError\n    \"\"\"\n\n\ndef _ordered(blocks):\n    \"\"\"TODO 2 of 6 (finish this to pass m1, e1 and e6): the blocks in cache-friendly order, as a new list.\n\n    Receives the blocks. Returns a new list: sections in the order of SECTIONS (tools, system, messages), blocks of one section in the\n    order given, then every volatile block moved to the very end in its given order. The input list is left unchanged.\n    Example: ids of [m(messages), s(system, volatile), t(tools)] come out as t, m, s\n    \"\"\"\n    return []\n\n\ndef _wants_breakpoint(block, total, min_tokens):\n    \"\"\"TODO 3 of 6 (finish this to pass e2 and e5): does this block carry a breakpoint?\n\n    Receives the block, `total` (the stable tokens from the start up to and including this block) and `min_tokens`. Returns True when the\n    block asks for a breakpoint, is not volatile and total is at least min_tokens; False otherwise.\n    Example: _wants_breakpoint({\"breakpoint\": True}, 500, 1024) -> False\n    \"\"\"\n    return False\n\n\ndef _marker(block):\n    \"\"\"TODO 4 of 6 (finish this to pass m1): the cache lifetime a breakpoint carries.\n\n    Receives the block. Returns its `ttl` (\"5m\" or \"1h\"), \"5m\" when it has none. Example: _marker({\"ttl\": \"1h\"}) -> \"1h\", _marker({}) -> \"5m\"\n    \"\"\"\n    return None\n\n\ndef _check_count(marked):\n    \"\"\"TODO 5 of 6 (finish this to pass e3): at most MAX_BREAKPOINTS breakpoints.\n\n    Receives the list of lifetimes of the blocks that kept a breakpoint. Raises PlanError when there are more than MAX_BREAKPOINTS.\n    Example: _check_count([\"5m\"] * 5) raises PlanError\n    \"\"\"\n\n\ndef _check_lifetimes(marked):\n    \"\"\"TODO 6 of 6 (finish this to pass e4): a 1h breakpoint must come before every 5m one.\n\n    Receives the lifetimes of the kept breakpoints in request order. Raises PlanError when a \"1h\" follows a \"5m\".\n    Example: _check_lifetimes([\"5m\", \"1h\"]) raises PlanError, _check_lifetimes([\"1h\", \"5m\"]) does not\n    \"\"\"\n\n\ndef plan_request(blocks, min_tokens=1024):\n    log.debug(\"plan_request input: %r\", blocks)\n    _check_tools(blocks)\n    plan, total = [], 0\n    for block in _ordered(blocks):\n        if not block.get(\"volatile\", False):\n            total += block[\"tokens\"]\n        wanted = _wants_breakpoint(block, total, min_tokens)\n        plan.append({\"id\": block[\"id\"], \"cache\": _marker(block) if wanted else None})\n    marked = [p[\"cache\"] for p in plan if p[\"cache\"]]\n    _check_count(marked)\n    _check_lifetimes(marked)\n    return plan\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom cacheplan import PlanError, plan_request\n\n\ndef block(id, section, tokens, **extra):\n    return {\"id\": id, \"section\": section, \"tokens\": tokens, **extra}\n\n\n# A request whose blocks arrive in the wrong order: the volatile date sits first, in the system prompt.\nblocks = [\n    block(\"date\", \"system\", 20, volatile=True),\n    block(\"tools\", \"tools\", 2000),\n    block(\"rules\", \"system\", 3000, breakpoint=True),\n    block(\"manual\", \"messages\", 6000, breakpoint=True),\n    block(\"question\", \"messages\", 40),\n]\ntry:\n    plan = plan_request(blocks, min_tokens=1024) or []\n    print(\"order:\", [p[\"id\"] for p in plan])\n    print(\"cache per block:\", {p[\"id\"]: p[\"cache\"] for p in plan})\n    print(\"breakpoints at:\", [p[\"id\"] for p in plan if p[\"cache\"]])\nexcept PlanError as err:\n    print(\"plan error:\", err)\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 1,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "38f2aef7b573b2a8a271f26c8dfa8dd692e478d9789bd7aaf84733c1a22ebca9",
+  "starting_code": "\"\"\"Order a request for cache hits and place its breakpoints. See ../../statement.md for the contract.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\nSECTIONS = {\"tools\": 0, \"system\": 1, \"messages\": 2}\nMAX_BREAKPOINTS = 4\n\n\nclass PlanError(Exception):\n    \"\"\"The request cannot be cached as asked (the API would answer 400, or the plan can never hit).\"\"\"\n\n\ndef _check_tools(blocks):\n    \"\"\"TODO 1 of 6 (finish this to pass e5): refuse a volatile tool definition.\n\n    Receives the list of blocks. Raises PlanError when a block in the `tools` section is volatile (tools come first, nothing volatile may\n    sit in the prefix); returns nothing otherwise. Example: _check_tools([{\"id\": \"t\", \"section\": \"tools\", \"tokens\": 9, \"volatile\": True}])\n    raises PlanError\n    \"\"\"\n\n\ndef _ordered(blocks):\n    \"\"\"TODO 2 of 6 (finish this to pass m1, e1 and e6): the blocks in cache-friendly order, as a new list.\n\n    Receives the blocks. Returns a new list: sections in the order of SECTIONS (tools, system, messages), blocks of one section in the\n    order given, then every volatile block moved to the very end in its given order. The input list is left unchanged.\n    Example: ids of [m(messages), s(system, volatile), t(tools)] come out as t, m, s\n    \"\"\"\n    return []\n\n\ndef _wants_breakpoint(block, total, min_tokens):\n    \"\"\"TODO 3 of 6 (finish this to pass e2 and e5): does this block carry a breakpoint?\n\n    Receives the block, `total` (the stable tokens from the start up to and including this block) and `min_tokens`. Returns True when the\n    block asks for a breakpoint, is not volatile and total is at least min_tokens; False otherwise.\n    Example: _wants_breakpoint({\"breakpoint\": True}, 500, 1024) -> False\n    \"\"\"\n    return False\n\n\ndef _marker(block):\n    \"\"\"TODO 4 of 6 (finish this to pass m1): the cache lifetime a breakpoint carries.\n\n    Receives the block. Returns its `ttl` (\"5m\" or \"1h\"), \"5m\" when it has none. Example: _marker({\"ttl\": \"1h\"}) -> \"1h\", _marker({}) -> \"5m\"\n    \"\"\"\n    return None\n\n\ndef _check_count(marked):\n    \"\"\"TODO 5 of 6 (finish this to pass e3): at most MAX_BREAKPOINTS breakpoints.\n\n    Receives the list of lifetimes of the blocks that kept a breakpoint. Raises PlanError when there are more than MAX_BREAKPOINTS.\n    Example: _check_count([\"5m\"] * 5) raises PlanError\n    \"\"\"\n\n\ndef _check_lifetimes(marked):\n    \"\"\"TODO 6 of 6 (finish this to pass e4): a 1h breakpoint must come before every 5m one.\n\n    Receives the lifetimes of the kept breakpoints in request order. Raises PlanError when a \"1h\" follows a \"5m\".\n    Example: _check_lifetimes([\"5m\", \"1h\"]) raises PlanError, _check_lifetimes([\"1h\", \"5m\"]) does not\n    \"\"\"\n\n\ndef plan_request(blocks, min_tokens=1024):\n    log.debug(\"plan_request input: %r\", blocks)\n    _check_tools(blocks)\n    plan, total = [], 0\n    for block in _ordered(blocks):\n        if not block.get(\"volatile\", False):\n            total += block[\"tokens\"]\n        wanted = _wants_breakpoint(block, total, min_tokens)\n        plan.append({\"id\": block[\"id\"], \"cache\": _marker(block) if wanted else None})\n    marked = [p[\"cache\"] for p in plan if p[\"cache\"]]\n    _check_count(marked)\n    _check_lifetimes(marked)\n    return plan\n",
+  "exercise": {
+    "main_path": "practice/level-2/20-prompt-caching/prose/unit-02/practice-1/cacheplan.py",
+    "test_path": "practice/level-2/20-prompt-caching/prose/unit-02/practice-1/test_cacheplan.py",
+    "run_command": [
+      "python3",
+      "practice/level-2/20-prompt-caching/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-2/20-prompt-caching/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-2/20-prompt-caching/prose/unit-02/practice-1/test_cacheplan.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_stable_content_comes_first_and_the_volatile_date_goes_last",
+        "kind": "main",
+        "says": "Stable content comes first, the volatile date goes last, and the breakpoints sit on the stable blocks"
+      },
+      {
+        "id": "test_e1_sections_follow_the_prefix_order_and_keep_their_own_order",
+        "kind": "edge",
+        "says": "Sections follow the prefix order and keep their own order"
+      },
+      {
+        "id": "test_e2_a_breakpoint_needs_the_stable_prefix_to_reach_the_minimum",
+        "kind": "edge",
+        "says": "A breakpoint needs the stable prefix up to it to reach the minimum"
+      },
+      {
+        "id": "test_e3_at_most_four_breakpoints_are_sent",
+        "kind": "edge",
+        "says": "At most four breakpoints are sent, counting only those that reach the minimum"
+      },
+      {
+        "id": "test_e4_a_one_hour_breakpoint_may_not_follow_a_five_minute_one",
+        "kind": "edge",
+        "says": "A one-hour breakpoint may not follow a five-minute one"
+      },
+      {
+        "id": "test_e5_volatile_blocks_never_carry_a_breakpoint_and_tools_cannot_be_volatile",
+        "kind": "edge",
+        "says": "A volatile block never carries a breakpoint, and tools cannot be volatile"
+      },
+      {
+        "id": "test_e6_every_block_comes_out_once_and_the_input_is_not_changed",
+        "kind": "edge",
+        "says": "Every block comes out once and the input is not changed"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/20-prompt-caching/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/20-prompt-caching/02-prices-lifetimes-lookback-and-invalidation.md",
+    "concepts": [
+      "the practice of Prices, lifetimes, the lookback and what breaks a cache is solved"
+    ],
+    "files": [
+      "practice/level-2/20-prompt-caching/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "prompt-caching-u2"
+}

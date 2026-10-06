@@ -1,0 +1,20 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/java/PromptBuilder.java",
+      "old": "renderDocument(int index, Doc doc) {",
+      "new": "renderDocument(int index, Doc doc, Map<String, String> variables) {"
+    },
+    {
+      "file": "src/main/java/PromptBuilder.java",
+      "old": "+ escape(doc.text()) +",
+      "new": "+ escape(fill(doc.text(), variables)) +"
+    },
+    {
+      "file": "src/main/java/PromptBuilder.java",
+      "old": "renderDocument(i++, doc)",
+      "new": "renderDocument(i++, doc, variables)"
+    }
+  ]
+}

@@ -1,0 +1,155 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "43-debugging-claude-applications"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Failure types, origins and recoveries",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A service starts Claude's reply with prefilled text on a newly adopted Claude 4.6 model, and every call returns a 400. What is the right recovery?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Retry each call with exponential back-off and jitter",
+            "correct": false,
+            "says": "Ruled out because \"A request that fails the same way every time it is sent is an integration failure until proved otherwise, and retrying it only repeats the failure\"."
+          },
+          {
+            "id": "b",
+            "text": "Extend the timeout so that each call has longer to finish",
+            "correct": false,
+            "says": "Ruled out because a timeout is the 504 recovery, where the table says \"Change the call: stream, or use a batch\", while every migration row has the same recovery: \"change the request\"."
+          },
+          {
+            "id": "c",
+            "text": "Reword the system prompt so that Claude continues the text",
+            "correct": false,
+            "says": "Ruled out because \"None is cured by a retry, a longer timeout or a different prompt\", and a reworded system prompt is a different prompt."
+          },
+          {
+            "id": "d",
+            "text": "Rebuild the request so that the user speaks last",
+            "correct": true,
+            "says": "The errors page lists the rejected prefill under \"Common validation errors\": \"This model does not support assistant message prefill. The conversation must end with a user message.\" The module adds that a migration error has the recovery \"change the request\"."
+          }
+        ],
+        "origin": {
+          "path": "course/43-debugging-claude-applications/01-failure-types-origins-and-recoveries.md",
+          "section": "Migration errors: your request, after a model change"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A reply to a long-document summary ends mid-sentence, with status 200 and a stop reason of `max_tokens`. What is the origin and the right fix?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The integration's limit, so raise it or continue the turn",
+            "correct": true,
+            "says": "The table reads `max_tokens` as \"Integration: the limit is yours\" with the recovery \"Raise `max_tokens` or continue the response\"."
+          },
+          {
+            "id": "b",
+            "text": "The model, so reword the prompt to ask for shorter output",
+            "correct": false,
+            "says": "Ruled out because the trap says \"A reply cut by `max_tokens` needs a larger limit or a continuation, and no wording will change it\"."
+          },
+          {
+            "id": "c",
+            "text": "The service, so retry the same call after a short pause",
+            "correct": false,
+            "says": "Ruled out because a retry repeats the same limit, and the page says \"A cut-off reply is usually your setting\"."
+          },
+          {
+            "id": "d",
+            "text": "The account, so ask for a higher quota on the organisation",
+            "correct": false,
+            "says": "Ruled out because the status is 200 and no quota was exceeded: stop reasons are \"part of the response body\" and not account errors."
+          }
+        ],
+        "origin": {
+          "path": "course/43-debugging-claude-applications/01-failure-types-origins-and-recoveries.md",
+          "section": "Failures that carry a status of 200"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "An assistant's reply arrives with status 200 and a stop reason of `refusal`. The team's dashboard shows nothing wrong. What does the documentation imply?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Nothing failed, so the dashboard is right to show no alert",
+            "correct": false,
+            "says": "Ruled out because the refusal is a real failure of the request, and the course's advice is to \"track refusals as their own signal\"."
+          },
+          {
+            "id": "b",
+            "text": "A resend will usually work, so the team should retry as is",
+            "correct": false,
+            "says": "Ruled out because \"Re-sending a refused request to the same model usually results in another refusal\"."
+          },
+          {
+            "id": "c",
+            "text": "Error-rate alerts miss it, so a separate signal is needed",
+            "correct": true,
+            "says": "The page says \"Refusals are responses, not errors\", so \"monitoring built only on error rates won't surface it\"."
+          },
+          {
+            "id": "d",
+            "text": "The service is overloaded, so the call should wait for a header",
+            "correct": false,
+            "says": "Ruled out because waiting for a retry header is the recovery for capacity failures: \"Wait for the header, or back off with jitter, then retry\", while this reply has status 200."
+          }
+        ],
+        "origin": {
+          "path": "course/43-debugging-claude-applications/01-failure-types-origins-and-recoveries.md",
+          "section": "Failures that carry a status of 200"
+        }
+      }
+    ],
+    "concepts": [
+      "Failures that carry a status of 200, as the page teaches it",
+      "Migration errors: your request, after a model change, as the page teaches it"
+    ]
+  }
+}

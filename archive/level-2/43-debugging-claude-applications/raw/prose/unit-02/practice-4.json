@@ -1,0 +1,417 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "43-debugging-claude-applications"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: diagnose a failure from a trace (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: diagnose a failure from a trace"
+    },
+    {
+      "type": "para",
+      "text": "A Claude application fails in ways that look alike from outside: \"it did not work\". The fix depends on two answers. **Where did it fail:** in your integration (the request you built, the code that parses the output, the tool you run), in the model's output, in the service or the network, or in your account? **What should happen next:** fix and resend, retry with back-off, wait for a header, use a fallback model, or hand the problem to a person? In this practice you write the function that reads a trace of what happened and answers both. It is the course's own decision table, built from the documented error types, stop reasons and loop rules; nothing here calls a model or the network."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "para",
+      "text": "The Java and Kotlin folders give you `Json` (parse text into maps, lists, strings, numbers, booleans and null, and write them back). Python and TypeScript have JSON built in. A trace is a list of events, and an event is a map with string keys. A number read from JSON is a `Long` in Java and Kotlin; read numbers as `Number`."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The events"
+    },
+    {
+      "type": "para",
+      "text": "Every event has a `kind`. Fields not listed for a kind are ignored, and a listed field may be missing."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Kind",
+        "Fields"
+      ],
+      "rows": [
+        [
+          "`request`",
+          "`model`, `max_tokens`, `tools` (a list of tool names), `last_user_blocks` (the block types of the last user message, in order, for example `[\"tool_result\", \"text\"]`)"
+        ],
+        [
+          "`response`",
+          "`status` (200), `stop_reason`, `content` (a list of blocks)"
+        ],
+        [
+          "`error`",
+          "`status`, `error_type`, `message`, `headers` (a map), `error_code`"
+        ],
+        [
+          "`network_error`",
+          "`message`"
+        ],
+        [
+          "`tool_call`",
+          "`name`, `input`"
+        ],
+        [
+          "`tool_result`",
+          "`name`, `is_error`, `exception` (text, present when our own tool code raised)"
+        ],
+        [
+          "`parse`",
+          "`ok`, `text` (the model output our code tried to parse)"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working diagnosis with seven gaps cut out of it. Everything that is plumbing is written and correct: the HTTP and stop reason tables, the request tracking, the classification of each event kind, the loop that finds the first failure and the final answer. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_rate_limit` unlocks `e1`: the diagnosis of a 429 (`retry-after` wins, then the spend cap, then the plain rate limit).",
+        "`_by_status` unlocks `m1` and `e1`: the table row for a status and the fallback by class.",
+        "`_has_json_object` unlocks `e4`: whether the text holds a JSON object between its first `{` and last `}`.",
+        "`_empty_origin` unlocks `e3`: integration or model for an empty end turn, from the block order.",
+        "`_tool_failure` unlocks `e5`: the unknown tool and the tool that raised.",
+        "`_recovered` unlocks `e6` and `e7`: whether a later good response recovered the run.",
+        "`_stop_failure` unlocks `e2`: the table row for a response that succeeded but stopped for a bad reason, and nothing for the fine ones."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole function; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "`diagnose(trace)` returns the **first failure** in the trace as `{\"index\", \"type\", \"origin\", \"recovery\", \"recovered\"}`. `index` is the event's position. The origin is one of `integration` (what you built or sent), `model` (what the model produced), `service` (capacity, the provider or the network) and `account` (credential, billing, access, limits). A trace with no failure returns `{\"index\": -1, \"type\": \"ok\", \"origin\": \"none\", \"recovery\": \"none\", \"recovered\": false}`, and so does an empty trace. The `request` events are not failures; each one sets the tool list and the last-user blocks that later events are judged against (a trace with no request yet has no tool list, so no tool call is unknown)."
+    },
+    {
+      "type": "para",
+      "text": "**An `error` event** is classified by status; the result is `type | origin | recovery`:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Status",
+        "Result"
+      ],
+      "rows": [
+        [
+          "400",
+          "`invalid_request` `integration` `fix_request`"
+        ],
+        [
+          "401",
+          "`authentication` `account` `fix_credentials`"
+        ],
+        [
+          "402",
+          "`billing` `account` `fix_billing`"
+        ],
+        [
+          "403",
+          "`permission` `account` `fix_access`"
+        ],
+        [
+          "404",
+          "`not_found` `integration` `fix_request`"
+        ],
+        [
+          "409",
+          "`conflict` `integration` `resolve_then_retry`"
+        ],
+        [
+          "413",
+          "`request_too_large` `integration` `shrink_request`"
+        ],
+        [
+          "429",
+          "with a `retry-after` header: `rate_limit` `service` `wait_retry_after`; otherwise with `error_code` equal to `enforced_spend_limit_reached`: `spend_cap` `account` `wait_for_reset`; otherwise `rate_limit` `service` `retry_backoff`"
+        ],
+        [
+          "500",
+          "`server_error` `service` `retry_backoff`"
+        ],
+        [
+          "504",
+          "`timeout` `service` `stream_or_batch`"
+        ],
+        [
+          "529",
+          "`overloaded` `service` `retry_backoff`"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Two more rules. A 400 whose message contains `spend limit`, in any letter case, is `spend_limit` `account` `raise_limit`. Any other status is classed like the nearest documented one: 500 and above like 500, anything else like 400."
+    },
+    {
+      "type": "para",
+      "text": "**A `network_error` event** is `network` `service` `retry_backoff`."
+    },
+    {
+      "type": "para",
+      "text": "**A `response` event with status 200** fails by its `stop_reason`:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Stop reason",
+        "Result"
+      ],
+      "rows": [
+        [
+          "`max_tokens`",
+          "`truncated` `integration` `raise_max_tokens`"
+        ],
+        [
+          "`model_context_window_exceeded`",
+          "`context_exceeded` `integration` `trim_context`"
+        ],
+        [
+          "`refusal`",
+          "`refusal` `model` `fallback_model`"
+        ],
+        [
+          "`pause_turn`",
+          "`paused` `integration` `continue_turn`"
+        ],
+        [
+          "`end_turn` with no content blocks",
+          "`empty_response`, and the origin depends on the most recent `request`: when its `last_user_blocks` has a `text` block after a `tool_result` block, `integration` `remove_text_after_tool_result`; otherwise `model` `add_continue_prompt`"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Any other stop reason (`end_turn` with content, `stop_sequence`, `tool_use`) is not a failure."
+    },
+    {
+      "type": "para",
+      "text": "**A `tool_call`** whose `name` is not in the most recent request's `tools` is `unknown_tool` `model` `return_error_result`. **A `tool_result`** with a non-empty `exception` is `tool_exception` `integration` `fix_tool_code`; one that is flagged `is_error` without an exception is a tool reporting an error as designed, and is not a failure. **A `parse` event** with `ok` false is `parse_failure`. When the text holds a JSON object (the text from its first `{` to its last `}` parses as a JSON object) the integration's parser was too strict: `integration` `extract_json`. Otherwise the model did not produce JSON: `model` `validate_and_retry`."
+    },
+    {
+      "type": "para",
+      "text": "`recovered` is true when a later event is a `response` with status 200, stop reason `end_turn` and at least one content block."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Each documented HTTP error maps to its type, origin and recovery"
+        ],
+        [
+          "`e1`",
+          "The two kinds of 429, the 400 spend limit, and the fallback by class for statuses the table does not list"
+        ],
+        [
+          "`e2`",
+          "A 200 response with a failing stop reason, and the stop reasons that are fine"
+        ],
+        [
+          "`e3`",
+          "An empty `end_turn`: our message structure or the model, by the last user message's blocks"
+        ],
+        [
+          "`e4`",
+          "A parse failure: our parser or the model, by whether a JSON object is in the text"
+        ],
+        [
+          "`e5`",
+          "A tool name the model invented against our own tool raising; a tool-reported error is not a failure"
+        ],
+        [
+          "`e6`",
+          "The first failure wins, with its index; a later good response means it recovered; a clean or empty trace is `ok`"
+        ],
+        [
+          "`e7`",
+          "A dropped connection has no status and belongs to the service side, and may recover"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "private val log = System.getLogger(\"diagnose\")\n/** Diagnose a failure from a trace. See ../../statement.md. */\nobject Diagnose {\n    private val HTTP = mapOf(\n        400 to listOf(\"invalid_request\", \"integration\", \"fix_request\"),\n        401 to listOf(\"authentication\", \"account\", \"fix_credentials\"),\n        402 to listOf(\"billing\", \"account\", \"fix_billing\"),\n        403 to listOf(\"permission\", \"account\", \"fix_access\"),\n        404 to listOf(\"not_found\", \"integration\", \"fix_request\"),\n        409 to listOf(\"conflict\", \"integration\", \"resolve_then_retry\"),\n        413 to listOf(\"request_too_large\", \"integration\", \"shrink_request\"),\n        500 to listOf(\"server_error\", \"service\", \"retry_backoff\"),\n        504 to listOf(\"timeout\", \"service\", \"stream_or_batch\"),\n        529 to listOf(\"overloaded\", \"service\", \"retry_backoff\"))\n    private val STOP = mapOf(\n        \"max_tokens\" to listOf(\"truncated\", \"integration\", \"raise_max_tokens\"),\n        \"model_context_window_exceeded\" to listOf(\"context_exceeded\", \"integration\", \"trim_context\"),\n        \"refusal\" to listOf(\"refusal\", \"model\", \"fallback_model\"),\n        \"pause_turn\" to listOf(\"paused\", \"integration\", \"continue_turn\"))\n\n    private fun rateLimit(event: Map<String, Any?>): List<String> {\n        if ((event[\"headers\"] as? Map<*, *>)?.containsKey(\"retry-after\") == true) return listOf(\"rate_limit\", \"service\", \"wait_retry_after\")\n        if (event[\"error_code\"] == \"enforced_spend_limit_reached\") return listOf(\"spend_cap\", \"account\", \"wait_for_reset\")\n        return listOf(\"rate_limit\", \"service\", \"retry_backoff\")\n    }\n\n    private fun byStatus(status: Int): List<String> = HTTP[status] ?: if (status >= 500) HTTP.getValue(500) else HTTP.getValue(400)\n    private fun http(event: Map<String, Any?>): List<String> {\n        val status = (event[\"status\"] as? Number)?.toInt() ?: 0\n        if (status == 429) return rateLimit(event)\n        if (status == 400 && (event[\"message\"] as? String ?: \"\").lowercase().contains(\"spend limit\")) return listOf(\"spend_limit\", \"account\", \"raise_limit\")\n        return byStatus(status)\n    }\n\n    private fun hasJsonObject(text: String): Boolean {\n        val start = text.indexOf('{')\n        val end = text.lastIndexOf('}')\n        if (start < 0 || end < start) return false\n        return try { Json.parse(text.substring(start, end + 1)) is Map<*, *> } catch (e: RuntimeException) { false }\n    }\n\n    private fun emptyOrigin(lastBlocks: List<*>): List<String> {\n        val at = lastBlocks.indexOf(\"tool_result\")\n        return if (at >= 0 && \"text\" in lastBlocks.subList(at, lastBlocks.size)) listOf(\"empty_response\", \"integration\", \"remove_text_after_tool_result\")\n        else listOf(\"empty_response\", \"model\", \"add_continue_prompt\")\n    }\n\n    private fun toolFailure(event: Map<String, Any?>, tools: List<*>?): List<String>? {\n        if (event[\"kind\"] == \"tool_call\" && tools != null && event[\"name\"] !in tools) return listOf(\"unknown_tool\", \"model\", \"return_error_result\")\n        if (event[\"kind\"] == \"tool_result\" && !(event[\"exception\"] as? String).isNullOrEmpty()) return listOf(\"tool_exception\", \"integration\", \"fix_tool_code\")\n        return null\n    }\n\n    private fun recoveredAfter(trace: List<Map<String, Any?>>, i: Int): Boolean = trace.drop(i + 1).any {\n        it[\"kind\"] == \"response\" && (it[\"status\"] as? Number)?.toInt() == 200 && it[\"stop_reason\"] == \"end_turn\" && !(it[\"content\"] as? List<*>).isNullOrEmpty()\n    }\n\n    /** The triple for a successful response that still failed by its stop reason, or null. */\n    private fun stopFailure(reason: Any?): List<String>? = STOP[reason]\n\n    private fun classify(event: Map<String, Any?>, tools: List<*>?, lastBlocks: List<*>): List<String>? {\n        when (event[\"kind\"]) {\n            \"error\" -> return http(event)\n            \"network_error\" -> return listOf(\"network\", \"service\", \"retry_backoff\")\n            \"response\" -> if ((event[\"status\"] as? Number)?.toInt() == 200) {\n                val reason = event[\"stop_reason\"]\n                stopFailure(reason)?.let { return it }\n                if (reason == \"end_turn\" && (event[\"content\"] as? List<*>).isNullOrEmpty()) return emptyOrigin(lastBlocks)\n            }\n            \"tool_call\", \"tool_result\" -> toolFailure(event, tools)?.let { return it }\n            \"parse\" -> if (event[\"ok\"] == false) {\n                return if (hasJsonObject(event[\"text\"] as? String ?: \"\")) listOf(\"parse_failure\", \"integration\", \"extract_json\")\n                else listOf(\"parse_failure\", \"model\", \"validate_and_retry\")\n            }\n        }\n        return null\n    }\n\n    /** The first failure in the trace: its index, type, origin, recovery, and whether a later response recovered. */\n    fun diagnose(trace: List<Map<String, Any?>>): Map<String, Any?> {\n        log.log(System.Logger.Level.DEBUG, \"diagnose input: {0}\", trace)\n        var tools: List<*>? = null\n        var lastBlocks: List<*> = emptyList<Any?>()\n        for ((i, event) in trace.withIndex()) {\n            if (event[\"kind\"] == \"request\") {\n                tools = event[\"tools\"] as? List<*>\n                lastBlocks = event[\"last_user_blocks\"] as? List<*> ?: emptyList<Any?>()\n                continue\n            }\n            val found = classify(event, tools, lastBlocks) ?: continue\n            val recovered = recoveredAfter(trace, i)\n            return linkedMapOf(\"index\" to i, \"type\" to found[0], \"origin\" to found[1], \"recovery\" to found[2], \"recovered\" to recovered)\n        }\n        return linkedMapOf(\"index\" to -1, \"type\" to \"ok\", \"origin\" to \"none\", \"recovery\" to \"none\", \"recovered\" to false)\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // A trace is the list of what happened: the request, then what came back.\n    val request = mapOf(\"kind\" to \"request\", \"model\" to \"claude-sonnet-5-5\", \"max_tokens\" to 1024,\n        \"tools\" to listOf(\"get_weather\"), \"last_user_blocks\" to listOf(\"text\"))\n\n    for ((status, errorType) in listOf(401 to \"authentication_error\", 504 to \"timeout_error\", 529 to \"overloaded_error\")) {\n        val error = mapOf(\"kind\" to \"error\", \"status\" to status, \"error_type\" to errorType, \"message\" to \"m\")\n        val d = Diagnose.diagnose(listOf(request, error))\n        println(\"HTTP $status: type=${d[\"type\"]} origin=${d[\"origin\"]} recovery=${d[\"recovery\"]}\")\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "private val log = System.getLogger(\"diagnose\")\n/** Diagnose a failure from a trace. See ../../statement.md. */\nobject Diagnose {\n    private val HTTP = mapOf(\n        400 to listOf(\"invalid_request\", \"integration\", \"fix_request\"),\n        401 to listOf(\"authentication\", \"account\", \"fix_credentials\"),\n        402 to listOf(\"billing\", \"account\", \"fix_billing\"),\n        403 to listOf(\"permission\", \"account\", \"fix_access\"),\n        404 to listOf(\"not_found\", \"integration\", \"fix_request\"),\n        409 to listOf(\"conflict\", \"integration\", \"resolve_then_retry\"),\n        413 to listOf(\"request_too_large\", \"integration\", \"shrink_request\"),\n        500 to listOf(\"server_error\", \"service\", \"retry_backoff\"),\n        504 to listOf(\"timeout\", \"service\", \"stream_or_batch\"),\n        529 to listOf(\"overloaded\", \"service\", \"retry_backoff\"))\n    private val STOP = mapOf(\n        \"max_tokens\" to listOf(\"truncated\", \"integration\", \"raise_max_tokens\"),\n        \"model_context_window_exceeded\" to listOf(\"context_exceeded\", \"integration\", \"trim_context\"),\n        \"refusal\" to listOf(\"refusal\", \"model\", \"fallback_model\"),\n        \"pause_turn\" to listOf(\"paused\", \"integration\", \"continue_turn\"))\n\n    // TODO 1 of 7 (unlocks e1): the diagnosis of a 429.\n    // Receives the error event. Returns listOf(\"rate_limit\", \"service\", \"wait_retry_after\") when its \"headers\" map has a \"retry-after\" key (this wins),\n    // else listOf(\"spend_cap\", \"account\", \"wait_for_reset\") when \"error_code\" is \"enforced_spend_limit_reached\", else listOf(\"rate_limit\", \"service\",\n    // \"retry_backoff\"). Example: a 429 with error_code enforced_spend_limit_reached and no headers -> the spend_cap triple\n    private fun rateLimit(event: Map<String, Any?>): List<String> = listOf(\"rate_limit\", \"service\", \"retry_backoff\")\n\n    // TODO 6 of 7 (unlocks e1 and m1): the triple for a status.\n    // Receives the status number. Returns HTTP[status] for a documented status; any other status falls back by class: 500 and above use\n    // the 500 row, everything else the 400 row. Example: byStatus(502) -> HTTP.getValue(500), byStatus(418) -> HTTP.getValue(400)\n    private fun byStatus(status: Int): List<String> = HTTP.getValue(400)\n    private fun http(event: Map<String, Any?>): List<String> {\n        val status = (event[\"status\"] as? Number)?.toInt() ?: 0\n        if (status == 429) return rateLimit(event)\n        if (status == 400 && (event[\"message\"] as? String ?: \"\").lowercase().contains(\"spend limit\")) return listOf(\"spend_limit\", \"account\", \"raise_limit\")\n        return byStatus(status)\n    }\n\n    // TODO 2 of 7 (unlocks e4): does the text hold a JSON object?\n    // Receives a text. Returns true when the span from the first '{' to the last '}' parses as JSON (use Json.parse) and is an object\n    // (a Map, not a list or a number); false for no braces, a broken span or another JSON type.\n    // Example: hasJsonObject(\"ok {\\\"a\\\": 1} done\") -> true, hasJsonObject(\"see {nope}\") -> false\n    private fun hasJsonObject(text: String): Boolean = false\n\n    // TODO 3 of 7 (unlocks e3): who is to blame for an empty end turn?\n    // Receives the block types of the last user message, in order. Returns listOf(\"empty_response\", \"integration\", \"remove_text_after_tool_result\")\n    // when a \"text\" block comes after a \"tool_result\" block, else listOf(\"empty_response\", \"model\", \"add_continue_prompt\").\n    // Example: [\"tool_result\", \"text\"] -> integration; [\"text\", \"tool_result\"] -> model\n    private fun emptyOrigin(lastBlocks: List<*>): List<String> = listOf(\"empty_response\", \"model\", \"add_continue_prompt\")\n\n    // TODO 4 of 7 (unlocks e5): is this tool event a failure, and whose?\n    // Receives an event and the tool names of the last request (null when unknown). Returns listOf(\"unknown_tool\", \"model\", \"return_error_result\")\n    // for a \"tool_call\" whose name is not in tools, listOf(\"tool_exception\", \"integration\", \"fix_tool_code\") for a \"tool_result\" with a non-empty\n    // \"exception\" string, and null otherwise (an is_error flag alone is not our failure).\n    // Example: a tool_call named get_wether with tools [get_weather] -> the unknown_tool triple\n    private fun toolFailure(event: Map<String, Any?>, tools: List<*>?): List<String>? = null\n\n    // TODO 5 of 7 (unlocks e6): did a later response recover from the failure at index i?\n    // Receives the trace and the index of the failure. Returns true when a later event is a response with status 200, stop_reason\n    // \"end_turn\" and a non-empty content list; false otherwise. Example: a failure at 1 and a good end_turn at 5 -> true\n    private fun recoveredAfter(trace: List<Map<String, Any?>>, i: Int): Boolean = false\n\n    // TODO 7 of 7 (unlocks e2): the triple for a response that succeeded but stopped for a bad reason.\n    // Receives the stop_reason (maybe null). Returns STOP[reason] when the reason is in the STOP table, else null (end_turn, stop_sequence and tool_use are fine).\n    // Example: stopFailure(\"refusal\") -> listOf(\"refusal\", \"model\", \"fallback_model\"), stopFailure(\"end_turn\") -> null\n    private fun stopFailure(reason: Any?): List<String>? = null\n\n    private fun classify(event: Map<String, Any?>, tools: List<*>?, lastBlocks: List<*>): List<String>? {\n        when (event[\"kind\"]) {\n            \"error\" -> return http(event)\n            \"network_error\" -> return listOf(\"network\", \"service\", \"retry_backoff\")\n            \"response\" -> if ((event[\"status\"] as? Number)?.toInt() == 200) {\n                val reason = event[\"stop_reason\"]\n                stopFailure(reason)?.let { return it }\n                if (reason == \"end_turn\" && (event[\"content\"] as? List<*>).isNullOrEmpty()) return emptyOrigin(lastBlocks)\n            }\n            \"tool_call\", \"tool_result\" -> toolFailure(event, tools)?.let { return it }\n            \"parse\" -> if (event[\"ok\"] == false) {\n                return if (hasJsonObject(event[\"text\"] as? String ?: \"\")) listOf(\"parse_failure\", \"integration\", \"extract_json\")\n                else listOf(\"parse_failure\", \"model\", \"validate_and_retry\")\n            }\n        }\n        return null\n    }\n\n    /** The first failure in the trace: its index, type, origin, recovery, and whether a later response recovered. */\n    fun diagnose(trace: List<Map<String, Any?>>): Map<String, Any?> {\n        log.log(System.Logger.Level.DEBUG, \"diagnose input: {0}\", trace)\n        var tools: List<*>? = null\n        var lastBlocks: List<*> = emptyList<Any?>()\n        for ((i, event) in trace.withIndex()) {\n            if (event[\"kind\"] == \"request\") {\n                tools = event[\"tools\"] as? List<*>\n                lastBlocks = event[\"last_user_blocks\"] as? List<*> ?: emptyList<Any?>()\n                continue\n            }\n            val found = classify(event, tools, lastBlocks) ?: continue\n            val recovered = recoveredAfter(trace, i)\n            return linkedMapOf(\"index\" to i, \"type\" to found[0], \"origin\" to found[1], \"recovery\" to found[2], \"recovered\" to recovered)\n        }\n        return linkedMapOf(\"index\" to -1, \"type\" to \"ok\", \"origin\" to \"none\", \"recovery\" to \"none\", \"recovered\" to false)\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // A trace is the list of what happened: the request, then what came back.\n    val request = mapOf(\"kind\" to \"request\", \"model\" to \"claude-sonnet-5-5\", \"max_tokens\" to 1024,\n        \"tools\" to listOf(\"get_weather\"), \"last_user_blocks\" to listOf(\"text\"))\n\n    for ((status, errorType) in listOf(401 to \"authentication_error\", 504 to \"timeout_error\", 529 to \"overloaded_error\")) {\n        val error = mapOf(\"kind\" to \"error\", \"status\" to status, \"error_type\" to errorType, \"message\" to \"m\")\n        val d = Diagnose.diagnose(listOf(request, error))\n        println(\"HTTP $status: type=${d[\"type\"]} origin=${d[\"origin\"]} recovery=${d[\"recovery\"]}\")\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 14,
+    "code": 2,
+    "tables": 4,
+    "lists": 1,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "2812f08c082849080ad7a7e56d99155962a0bb45f33c78b4070bc0fe58c57f72",
+  "starting_code": "private val log = System.getLogger(\"diagnose\")\n/** Diagnose a failure from a trace. See ../../statement.md. */\nobject Diagnose {\n    private val HTTP = mapOf(\n        400 to listOf(\"invalid_request\", \"integration\", \"fix_request\"),\n        401 to listOf(\"authentication\", \"account\", \"fix_credentials\"),\n        402 to listOf(\"billing\", \"account\", \"fix_billing\"),\n        403 to listOf(\"permission\", \"account\", \"fix_access\"),\n        404 to listOf(\"not_found\", \"integration\", \"fix_request\"),\n        409 to listOf(\"conflict\", \"integration\", \"resolve_then_retry\"),\n        413 to listOf(\"request_too_large\", \"integration\", \"shrink_request\"),\n        500 to listOf(\"server_error\", \"service\", \"retry_backoff\"),\n        504 to listOf(\"timeout\", \"service\", \"stream_or_batch\"),\n        529 to listOf(\"overloaded\", \"service\", \"retry_backoff\"))\n    private val STOP = mapOf(\n        \"max_tokens\" to listOf(\"truncated\", \"integration\", \"raise_max_tokens\"),\n        \"model_context_window_exceeded\" to listOf(\"context_exceeded\", \"integration\", \"trim_context\"),\n        \"refusal\" to listOf(\"refusal\", \"model\", \"fallback_model\"),\n        \"pause_turn\" to listOf(\"paused\", \"integration\", \"continue_turn\"))\n\n    // TODO 1 of 7 (unlocks e1): the diagnosis of a 429.\n    // Receives the error event. Returns listOf(\"rate_limit\", \"service\", \"wait_retry_after\") when its \"headers\" map has a \"retry-after\" key (this wins),\n    // else listOf(\"spend_cap\", \"account\", \"wait_for_reset\") when \"error_code\" is \"enforced_spend_limit_reached\", else listOf(\"rate_limit\", \"service\",\n    // \"retry_backoff\"). Example: a 429 with error_code enforced_spend_limit_reached and no headers -> the spend_cap triple\n    private fun rateLimit(event: Map<String, Any?>): List<String> = listOf(\"rate_limit\", \"service\", \"retry_backoff\")\n\n    // TODO 6 of 7 (unlocks e1 and m1): the triple for a status.\n    // Receives the status number. Returns HTTP[status] for a documented status; any other status falls back by class: 500 and above use\n    // the 500 row, everything else the 400 row. Example: byStatus(502) -> HTTP.getValue(500), byStatus(418) -> HTTP.getValue(400)\n    private fun byStatus(status: Int): List<String> = HTTP.getValue(400)\n    private fun http(event: Map<String, Any?>): List<String> {\n        val status = (event[\"status\"] as? Number)?.toInt() ?: 0\n        if (status == 429) return rateLimit(event)\n        if (status == 400 && (event[\"message\"] as? String ?: \"\").lowercase().contains(\"spend limit\")) return listOf(\"spend_limit\", \"account\", \"raise_limit\")\n        return byStatus(status)\n    }\n\n    // TODO 2 of 7 (unlocks e4): does the text hold a JSON object?\n    // Receives a text. Returns true when the span from the first '{' to the last '}' parses as JSON (use Json.parse) and is an object\n    // (a Map, not a list or a number); false for no braces, a broken span or another JSON type.\n    // Example: hasJsonObject(\"ok {\\\"a\\\": 1} done\") -> true, hasJsonObject(\"see {nope}\") -> false\n    private fun hasJsonObject(text: String): Boolean = false\n\n    // TODO 3 of 7 (unlocks e3): who is to blame for an empty end turn?\n    // Receives the block types of the last user message, in order. Returns listOf(\"empty_response\", \"integration\", \"remove_text_after_tool_result\")\n    // when a \"text\" block comes after a \"tool_result\" block, else listOf(\"empty_response\", \"model\", \"add_continue_prompt\").\n    // Example: [\"tool_result\", \"text\"] -> integration; [\"text\", \"tool_result\"] -> model\n    private fun emptyOrigin(lastBlocks: List<*>): List<String> = listOf(\"empty_response\", \"model\", \"add_continue_prompt\")\n\n    // TODO 4 of 7 (unlocks e5): is this tool event a failure, and whose?\n    // Receives an event and the tool names of the last request (null when unknown). Returns listOf(\"unknown_tool\", \"model\", \"return_error_result\")\n    // for a \"tool_call\" whose name is not in tools, listOf(\"tool_exception\", \"integration\", \"fix_tool_code\") for a \"tool_result\" with a non-empty\n    // \"exception\" string, and null otherwise (an is_error flag alone is not our failure).\n    // Example: a tool_call named get_wether with tools [get_weather] -> the unknown_tool triple\n    private fun toolFailure(event: Map<String, Any?>, tools: List<*>?): List<String>? = null\n\n    // TODO 5 of 7 (unlocks e6): did a later response recover from the failure at index i?\n    // Receives the trace and the index of the failure. Returns true when a later event is a response with status 200, stop_reason\n    // \"end_turn\" and a non-empty content list; false otherwise. Example: a failure at 1 and a good end_turn at 5 -> true\n    private fun recoveredAfter(trace: List<Map<String, Any?>>, i: Int): Boolean = false\n\n    // TODO 7 of 7 (unlocks e2): the triple for a response that succeeded but stopped for a bad reason.\n    // Receives the stop_reason (maybe null). Returns STOP[reason] when the reason is in the STOP table, else null (end_turn, stop_sequence and tool_use are fine).\n    // Example: stopFailure(\"refusal\") -> listOf(\"refusal\", \"model\", \"fallback_model\"), stopFailure(\"end_turn\") -> null\n    private fun stopFailure(reason: Any?): List<String>? = null\n\n    private fun classify(event: Map<String, Any?>, tools: List<*>?, lastBlocks: List<*>): List<String>? {\n        when (event[\"kind\"]) {\n            \"error\" -> return http(event)\n            \"network_error\" -> return listOf(\"network\", \"service\", \"retry_backoff\")\n            \"response\" -> if ((event[\"status\"] as? Number)?.toInt() == 200) {\n                val reason = event[\"stop_reason\"]\n                stopFailure(reason)?.let { return it }\n                if (reason == \"end_turn\" && (event[\"content\"] as? List<*>).isNullOrEmpty()) return emptyOrigin(lastBlocks)\n            }\n            \"tool_call\", \"tool_result\" -> toolFailure(event, tools)?.let { return it }\n            \"parse\" -> if (event[\"ok\"] == false) {\n                return if (hasJsonObject(event[\"text\"] as? String ?: \"\")) listOf(\"parse_failure\", \"integration\", \"extract_json\")\n                else listOf(\"parse_failure\", \"model\", \"validate_and_retry\")\n            }\n        }\n        return null\n    }\n\n    /** The first failure in the trace: its index, type, origin, recovery, and whether a later response recovered. */\n    fun diagnose(trace: List<Map<String, Any?>>): Map<String, Any?> {\n        log.log(System.Logger.Level.DEBUG, \"diagnose input: {0}\", trace)\n        var tools: List<*>? = null\n        var lastBlocks: List<*> = emptyList<Any?>()\n        for ((i, event) in trace.withIndex()) {\n            if (event[\"kind\"] == \"request\") {\n                tools = event[\"tools\"] as? List<*>\n                lastBlocks = event[\"last_user_blocks\"] as? List<*> ?: emptyList<Any?>()\n                continue\n            }\n            val found = classify(event, tools, lastBlocks) ?: continue\n            val recovered = recoveredAfter(trace, i)\n            return linkedMapOf(\"index\" to i, \"type\" to found[0], \"origin\" to found[1], \"recovery\" to found[2], \"recovered\" to recovered)\n        }\n        return linkedMapOf(\"index\" to -1, \"type\" to \"ok\", \"origin\" to \"none\", \"recovery\" to \"none\", \"recovered\" to false)\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/43-debugging-claude-applications/prose/unit-02/practice-4/src/main/kotlin/Diagnose.kt",
+    "test_path": "practice/level-2/43-debugging-claude-applications/prose/unit-02/practice-4/src/test/kotlin/DiagnoseTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/43-debugging-claude-applications/prose/unit-02/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/43-debugging-claude-applications/prose/unit-02/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_eachDocumentedHttpErrorMapsToATypeAnOriginAndARecovery()",
+        "kind": "main",
+        "says": "Each documented HTTP error maps to its type, origin and recovery"
+      },
+      {
+        "id": "e1_a429IsARateLimitOrASpendCapAndOtherStatusesFallBackByClass()",
+        "kind": "edge",
+        "says": "The two kinds of 429, the 400 spend limit, and the fallback by class for statuses the table does not list"
+      },
+      {
+        "id": "e2_aSuccessfulResponseCanStillFailByItsStopReason()",
+        "kind": "edge",
+        "says": "A 200 response with a failing stop reason, and the stop reasons that are fine"
+      },
+      {
+        "id": "e3_anEmptyEndTurnIsTheIntegrationWhenTextFollowedTheToolResultAndTheModelOtherwise()",
+        "kind": "edge",
+        "says": "An empty end_turn: our message structure or the model, by the last user message's blocks"
+      },
+      {
+        "id": "e4_aParseFailureIsTheIntegrationWhenAJsonObjectIsInTheTextAndTheModelWhenNot()",
+        "kind": "edge",
+        "says": "A parse failure: our parser or the model, by whether a JSON object is in the text"
+      },
+      {
+        "id": "e5_toolFailuresSplitIntoAModelThatCalledAMissingToolAndOurToolThatRaised()",
+        "kind": "edge",
+        "says": "A tool name the model invented against our own tool raising; a tool-reported error is not a failure"
+      },
+      {
+        "id": "e6_theFirstFailureNamesTheCauseAndALaterGoodResponseMarksItRecovered()",
+        "kind": "edge",
+        "says": "The first failure wins, with its index; a later good response means it recovered; a clean or empty trace is ok"
+      },
+      {
+        "id": "e7_aDroppedConnectionHasNoStatusAndBelongsToTheServiceSide()",
+        "kind": "edge",
+        "says": "A dropped connection has no status and belongs to the service side, and may recover"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/43-debugging-claude-applications/prose/unit-02/practice-4/target/test-results/test"
+    },
+    "origin": "course/43-debugging-claude-applications/02-reading-a-trace-and-the-practice.md",
+    "concepts": [
+      "the practice of Reading a trace, isolating the origin and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/43-debugging-claude-applications/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "debugging-claude-applications-u2"
+}

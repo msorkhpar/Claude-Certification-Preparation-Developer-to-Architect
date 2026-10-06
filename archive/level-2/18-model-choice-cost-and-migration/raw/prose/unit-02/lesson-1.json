@@ -1,0 +1,369 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "18-model-choice-cost-and-migration"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Reading usage, counting tokens before sending, and modelling cost",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Reading usage, counting tokens before sending, and modelling cost"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Developer · **Module 18:** Model choice, cost and migration · **Page 2 of 3** **Exams:** DV2"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** read every field of a response's `usage` object, count the tokens of a request before sending it, price a request from its usage with the cache and batch multipliers, and write a router that is graded on a cost table."
+    },
+    {
+      "type": "para",
+      "text": "Checked against the Claude API documentation (Pricing, Token counting, Prompt caching, Batch processing) on 2026-10-02, and by running the example and the practice offline in the course container (`anthropic` 1.11.0, `@anthropic-ai/sdk` 0.131.0). The replies are illustrative, hand-written responses in the API's shapes, not captures."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "A bill is a sum over requests, and every request reports what it used. A team that never reads `usage` finds its cost on the invoice; a team that reads it can attribute cost to a feature, a customer or a prompt change on the day it happens. The exam asks you to compute a cost from a usage object, to say which multipliers apply, and to say what the token counting endpoint is for."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The usage object"
+    },
+    {
+      "type": "para",
+      "text": "Every Messages response carries `usage`. The fields that cost money are these:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Field",
+        "Meaning",
+        "Billed at"
+      ],
+      "rows": [
+        [
+          "`input_tokens`",
+          "Input tokens that were not read from or written to a cache: with caching, only those after the last breakpoint",
+          "base input price"
+        ],
+        [
+          "`cache_creation_input_tokens`",
+          "Tokens written to the cache; `cache_creation` splits them into `ephemeral_5m_input_tokens` and `ephemeral_1h_input_tokens`",
+          "1.25 times input (5 minutes) or 2 times input (1 hour)"
+        ],
+        [
+          "`cache_read_input_tokens`",
+          "Tokens read from the cache",
+          "0.1 times input; 0.05 on Opus 5.5 and 0.025 on Fable 5.1"
+        ],
+        [
+          "`output_tokens`",
+          "Tokens generated, thinking included",
+          "output price"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The prompt caching page gives the identity that ties them together: the total input is the sum of the three input fields. Streaming splits the report: the input side arrives in `message_start` and the final output count in `message_delta`."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Counting tokens before you send"
+    },
+    {
+      "type": "para",
+      "text": "The token counting endpoint takes the same structured input as a Messages request (system prompt, tools, images, documents) and returns `input_tokens`. Four facts decide how to use it:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "It is an estimate. The page says \"The token count is an estimate\", and the real count may differ by a small amount.",
+        "It is free. The page says: \"Token counting is free to use but subject to requests per minute rate limits based on your usage tier.\"",
+        "It has its own limits. \"Token counting and message creation have separate and independent rate limits.\"",
+        "It rejects some inputs the Messages API accepts, such as server tools like web search."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Use it to decide before paying: route a request by its size, refuse an input over a budget, or fit a prompt to a target length. It is not a substitute for reading `usage` afterwards, which is exact and carries the cache split."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The cost model"
+    },
+    {
+      "type": "para",
+      "text": "Per request, with prices per million tokens:"
+    },
+    {
+      "type": "code",
+      "lang": "text",
+      "text": "cost = input_tokens x P_in\n     + cache_5m_tokens x P_in x 1.25 + cache_1h_tokens x P_in x 2\n     + cache_read_tokens x P_in x R\n     + output_tokens x P_out"
+    },
+    {
+      "type": "para",
+      "text": "where `R` is 0.1 on most models, 0.05 on Claude Opus 5.5 and 0.025 on Claude Fable 5.1. The Pricing page states how the modifiers combine: \"These multipliers stack with other pricing modifiers such as the Batch API discount and data residency.\" The batch discount is 50 percent on input and output, so the whole sum halves; data residency with `inference_geo: \"us\"` adds 1.1 times on Claude 4.6 and later models. Fast mode, with its higher rates, is not available in a batch."
+    },
+    {
+      "type": "para",
+      "text": "Because a dollar per million tokens equals a micro-dollar per token, the arithmetic is simple: 120 input tokens on Sonnet 5.5 at $2 cost 240 micro-dollars. The practice works in micro-dollars so that no cost is rounded away."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "para",
+      "text": "The example counts a request's tokens, sends it, and prices the reply from its usage. Its prices are the pricing page's of 2026-10-02."
+    },
+    {
+      "type": "example",
+      "id": "m18-cost-from-usage",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/18-cost-from-usage/python/cost.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/18-cost-from-usage/typescript/cost.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/18-cost-from-usage/java/Cost.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/18-cost-from-usage/kotlin/Cost.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Count tokens before sending, then price the reply from its usage object.\n\nBoth calls go through a scripted transport, so nothing leaves the container. The replies are illustrative,\nhand-written responses in the API's shapes (claude-sonnet-5-5), not captures. Prices are dollars per million\ntokens, read from the Claude pricing page on 2026-10-02.\n\"\"\"\nimport logging\nfrom harness import scripted_client\nfrom harness.scripted import message, text\n\nlog = logging.getLogger(__name__)\n\nMODEL = \"claude-sonnet-5-5\"\nPRICES = {  # input, output, cache-read multiplier\n    \"claude-haiku-4-5-20251001\": (1.0, 5.0, 0.1),\n    \"claude-sonnet-5-5\": (2.0, 10.0, 0.1),\n    \"claude-opus-5-5\": (4.0, 20.0, 0.05),\n    \"claude-fable-5-1\": (10.0, 50.0, 0.025),\n}\nPARAMS = dict(model=MODEL, max_tokens=300, system=\"You answer from the policy document.\",\n              messages=[{\"role\": \"user\", \"content\": \"Summarise the refund policy in two sentences.\"}])\nUSAGE = {\"input_tokens\": 120, \"output_tokens\": 340, \"cache_read_input_tokens\": 0, \"cache_creation_input_tokens\": 4000,\n         \"cache_creation\": {\"ephemeral_5m_input_tokens\": 4000, \"ephemeral_1h_input_tokens\": 0}}\n\n\ndef cost(model, usage, batch=False):\n    \"\"\"Dollars for one request: cache writes cost 1.25x input (5 minutes) or 2x (1 hour), reads a model-specific fraction.\"\"\"\n    price_in, price_out, read = PRICES[model]\n    per_token = (usage.input_tokens * price_in\n                 + usage.cache_creation.ephemeral_5m_input_tokens * price_in * 1.25\n                 + usage.cache_creation.ephemeral_1h_input_tokens * price_in * 2.0\n                 + usage.cache_read_input_tokens * price_in * read\n                 + usage.output_tokens * price_out)\n    return per_token / 1_000_000 * (0.5 if batch else 1.0)\n\n\ndef main():\n    client, transport = scripted_client({\"input_tokens\": 4821}, message([text(\"Refunds take 14 days. Opened items are excluded.\")], usage=USAGE))\n    counted = client.messages.count_tokens(model=MODEL, system=PARAMS[\"system\"], messages=PARAMS[\"messages\"])\n    print(f\"count_tokens -> {counted.input_tokens} input tokens (POST {transport.urls[0].split('.com')[1]})\")\n    price_in = PRICES[MODEL][0]\n    print(f\"estimate before sending, input only: ${counted.input_tokens * price_in / 1_000_000:.6f} on {MODEL}\")\n    reply = client.messages.create(**PARAMS)\n    u = reply.usage\n    print(f\"usage: input {u.input_tokens}, cache write {u.cache_creation_input_tokens}, cache read {u.cache_read_input_tokens}, output {u.output_tokens}\")\n    print(f\"cost of this request: ${cost(MODEL, u):.6f}  (batch: ${cost(MODEL, u, batch=True):.6f})\")\n    print(\"the same usage on each model:\")\n    for model in PRICES:\n        print(f\"  {model:28} ${cost(model, u):.6f}\")\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "count_tokens -> 4821 input tokens (POST /v1/messages/count_tokens)\nestimate before sending, input only: $0.009642 on claude-sonnet-5-5\nusage: input 120, cache write 4000, cache read 0, output 340\ncost of this request: $0.013640  (batch: $0.006820)\nthe same usage on each model:\n  claude-haiku-4-5-20251001    $0.006820\n  claude-sonnet-5-5            $0.013640\n  claude-opus-5-5              $0.027280\n  claude-fable-5-1             $0.068200"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Count tokens before sending, then price the reply from its usage object.\n// Both calls go through a scripted fetch, so nothing leaves the container. The replies are illustrative,\n// hand-written responses in the API's shapes (claude-sonnet-5-5), not captures. Prices are dollars per million\n// tokens, read from the Claude pricing page on 2026-10-02.\nimport Anthropic from \"@anthropic-ai/sdk\";\nimport { message, scriptedFetch, text } from \"../../../harness/ts/scriptedFetch.ts\";\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"cost\");\n\nexport const MODEL = \"claude-sonnet-5-5\";\nexport const PRICES: Record<string, [number, number, number]> = {\n  // input, output, cache-read multiplier\n  \"claude-haiku-4-5-20251001\": [1.0, 5.0, 0.1],\n  \"claude-sonnet-5-5\": [2.0, 10.0, 0.1],\n  \"claude-opus-5-5\": [4.0, 20.0, 0.05],\n  \"claude-fable-5-1\": [10.0, 50.0, 0.025],\n};\nexport const PARAMS = {\n  model: MODEL,\n  max_tokens: 300,\n  system: \"You answer from the policy document.\",\n  messages: [{ role: \"user\" as const, content: \"Summarise the refund policy in two sentences.\" }],\n};\nexport const USAGE = {\n  input_tokens: 120, output_tokens: 340, cache_read_input_tokens: 0, cache_creation_input_tokens: 4000,\n  cache_creation: { ephemeral_5m_input_tokens: 4000, ephemeral_1h_input_tokens: 0 },\n};\n\n/** Dollars for one request: cache writes cost 1.25x input (5 minutes) or 2x (1 hour), reads a model-specific fraction. */\nexport function cost(model: string, usage: any, batch = false): number {\n  const [priceIn, priceOut, read] = PRICES[model];\n  const micro =\n    usage.input_tokens * priceIn +\n    usage.cache_creation.ephemeral_5m_input_tokens * priceIn * 1.25 +\n    usage.cache_creation.ephemeral_1h_input_tokens * priceIn * 2.0 +\n    usage.cache_read_input_tokens * priceIn * read +\n    usage.output_tokens * priceOut;\n  return (micro / 1_000_000) * (batch ? 0.5 : 1.0);\n}\n\nexport function clientFor(...bodies: unknown[]) {\n  const fake = scriptedFetch(bodies.map((body) => ({ body })));\n  return { fake, client: new Anthropic({ apiKey: \"placeholder\", maxRetries: 0, fetch: fake.fetch }) };\n}\n\nasync function main() {\n  const { fake, client } = clientFor({ input_tokens: 4821 }, message([text(\"Refunds take 14 days. Opened items are excluded.\")], \"end_turn\", USAGE as any));\n  const counted = await client.messages.countTokens({ model: MODEL, system: PARAMS.system, messages: PARAMS.messages });\n  console.log(`count_tokens -> ${counted.input_tokens} input tokens (POST ${new URL(fake.seen[0].url).pathname})`);\n  console.log(`estimate before sending, input only: $${((counted.input_tokens * PRICES[MODEL][0]) / 1_000_000).toFixed(6)} on ${MODEL}`);\n  const reply = await client.messages.create(PARAMS);\n  const u: any = reply.usage;\n  console.log(`usage: input ${u.input_tokens}, cache write ${u.cache_creation_input_tokens}, cache read ${u.cache_read_input_tokens}, output ${u.output_tokens}`);\n  console.log(`cost of this request: $${cost(MODEL, u).toFixed(6)}  (batch: $${cost(MODEL, u, true).toFixed(6)})`);\n  console.log(\"the same usage on each model:\");\n  for (const model of Object.keys(PRICES)) console.log(`  ${model.padEnd(28)} $${cost(model, u).toFixed(6)}`);\n}\n\nif (import.meta.main) await main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "count_tokens -> 4821 input tokens (POST /v1/messages/count_tokens)\nestimate before sending, input only: $0.009642 on claude-sonnet-5-5\nusage: input 120, cache write 4000, cache read 0, output 340\ncost of this request: $0.013640  (batch: $0.006820)\nthe same usage on each model:\n  claude-haiku-4-5-20251001    $0.006820\n  claude-sonnet-5-5            $0.013640\n  claude-opus-5-5              $0.027280\n  claude-fable-5-1             $0.068200"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import static harness.Scripted.map;\nimport static harness.Scripted.message;\nimport static harness.Scripted.text;\n\nimport com.anthropic.models.messages.MessageCountTokensParams;\nimport com.anthropic.models.messages.MessageCreateParams;\nimport com.anthropic.models.messages.Model;\nimport com.anthropic.models.messages.Usage;\nimport harness.Scripted;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Locale;\nimport java.util.Map;\n\n/**\n * Count tokens before sending, then price the reply from its usage object.\n *\n * <p>Both calls go through a scripted transport, so nothing leaves the container. The replies are illustrative,\n * hand-written responses in the API's shapes (claude-sonnet-5-5), not captures. Prices are dollars per million\n * tokens, read from the Claude pricing page on 2026-10-02.\n */\npublic final class Cost {\n    private static final System.Logger LOG = System.getLogger(Cost.class.getName());\n    static final String MODEL = \"claude-sonnet-5-5\";\n    static final String SYSTEM = \"You answer from the policy document.\";\n    static final String QUESTION = \"Summarise the refund policy in two sentences.\";\n\n    /** input, output, cache-read multiplier */\n    static final Map<String, double[]> PRICES = new LinkedHashMap<>();\n\n    static {\n        PRICES.put(\"claude-haiku-4-5-20251001\", new double[] {1.0, 5.0, 0.1});\n        PRICES.put(\"claude-sonnet-5-5\", new double[] {2.0, 10.0, 0.1});\n        PRICES.put(\"claude-opus-5-5\", new double[] {4.0, 20.0, 0.05});\n        PRICES.put(\"claude-fable-5-1\", new double[] {10.0, 50.0, 0.025});\n    }\n\n    static final Map<String, Object> USAGE = map(\"input_tokens\", 120, \"output_tokens\", 340, \"cache_read_input_tokens\", 0, \"cache_creation_input_tokens\", 4000,\n        \"cache_creation\", map(\"ephemeral_5m_input_tokens\", 4000, \"ephemeral_1h_input_tokens\", 0));\n\n    static MessageCreateParams params() {\n        return MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(300).system(SYSTEM).addUserMessage(QUESTION).build();\n    }\n\n    static double cost(String model, Usage usage) {\n        return cost(model, usage, false);\n    }\n\n    /** Dollars for one request: cache writes cost 1.25x input (5 minutes) or 2x (1 hour), reads a model-specific fraction. */\n    static double cost(String model, Usage usage, boolean batch) {\n        double[] price = PRICES.get(model);\n        double priceIn = price[0], priceOut = price[1], read = price[2];\n        double perToken = usage.inputTokens() * priceIn\n            + usage.cacheCreation().get().ephemeral5mInputTokens() * priceIn * 1.25\n            + usage.cacheCreation().get().ephemeral1hInputTokens() * priceIn * 2.0\n            + usage.cacheReadInputTokens().get() * priceIn * read\n            + usage.outputTokens() * priceOut;\n        return perToken / 1_000_000 * (batch ? 0.5 : 1.0);\n    }\n\n    private static String dollars(double v) {\n        return String.format(Locale.ROOT, \"$%.6f\", v);\n    }\n\n    public static void main(String[] args) {\n        Scripted.Rig rig = Scripted.client(map(\"input_tokens\", 4821), message(List.of(text(\"Refunds take 14 days. Opened items are excluded.\")), \"end_turn\", MODEL, USAGE, null));\n        long counted = rig.client().messages().countTokens(MessageCountTokensParams.builder().model(MODEL).system(SYSTEM).addUserMessage(QUESTION).build()).inputTokens();\n        System.out.println(\"count_tokens -> \" + counted + \" input tokens (POST \" + rig.http().urls.get(0).split(\"\\\\.com\")[1] + \")\");\n        double priceIn = PRICES.get(MODEL)[0];\n        System.out.println(\"estimate before sending, input only: \" + dollars(counted * priceIn / 1_000_000) + \" on \" + MODEL);\n        Usage u = rig.client().messages().create(params()).usage();\n        System.out.println(\"usage: input \" + u.inputTokens() + \", cache write \" + u.cacheCreationInputTokens().get() + \", cache read \" + u.cacheReadInputTokens().get() + \", output \" + u.outputTokens());\n        System.out.println(\"cost of this request: \" + dollars(cost(MODEL, u)) + \"  (batch: \" + dollars(cost(MODEL, u, true)) + \")\");\n        System.out.println(\"the same usage on each model:\");\n        for (String model : PRICES.keySet()) System.out.println(String.format(\"  %-28s \", model) + dollars(cost(model, u)));\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "count_tokens -> 4821 input tokens (POST /v1/messages/count_tokens)\nestimate before sending, input only: $0.009642 on claude-sonnet-5-5\nusage: input 120, cache write 4000, cache read 0, output 340\ncost of this request: $0.013640  (batch: $0.006820)\nthe same usage on each model:\n  claude-haiku-4-5-20251001    $0.006820\n  claude-sonnet-5-5            $0.013640\n  claude-opus-5-5              $0.027280\n  claude-fable-5-1             $0.068200"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import com.anthropic.models.messages.MessageCountTokensParams\nimport com.anthropic.models.messages.MessageCreateParams\nimport com.anthropic.models.messages.Model\nimport com.anthropic.models.messages.Usage\nimport harness.Scripted\nimport harness.Scripted.map\nimport harness.Scripted.message\nimport harness.Scripted.text\n\nprivate val log = System.getLogger(\"cost\")\n\n/**\n * Count tokens before sending, then price the reply from its usage object.\n *\n * Both calls go through a scripted transport, so nothing leaves the container. The replies are illustrative,\n * hand-written responses in the API's shapes (claude-sonnet-5-5), not captures. Prices are dollars per million\n * tokens, read from the Claude pricing page on 2026-10-02.\n */\nconst val MODEL = \"claude-sonnet-5-5\"\nconst val SYSTEM = \"You answer from the policy document.\"\nconst val QUESTION = \"Summarise the refund policy in two sentences.\"\n\n/** input, output, cache-read multiplier */\nval PRICES = linkedMapOf(\n    \"claude-haiku-4-5-20251001\" to Triple(1.0, 5.0, 0.1),\n    \"claude-sonnet-5-5\" to Triple(2.0, 10.0, 0.1),\n    \"claude-opus-5-5\" to Triple(4.0, 20.0, 0.05),\n    \"claude-fable-5-1\" to Triple(10.0, 50.0, 0.025),\n)\n\nval USAGE = map(\n    \"input_tokens\", 120, \"output_tokens\", 340, \"cache_read_input_tokens\", 0, \"cache_creation_input_tokens\", 4000,\n    \"cache_creation\", map(\"ephemeral_5m_input_tokens\", 4000, \"ephemeral_1h_input_tokens\", 0),\n)\n\nfun params(): MessageCreateParams = MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(300).system(SYSTEM).addUserMessage(QUESTION).build()\n\n/** Dollars for one request: cache writes cost 1.25x input (5 minutes) or 2x (1 hour), reads a model-specific fraction. */\nfun cost(model: String, usage: Usage, batch: Boolean = false): Double {\n    val (priceIn, priceOut, read) = PRICES.getValue(model)\n    val perToken = (usage.inputTokens() * priceIn\n        + usage.cacheCreation().get().ephemeral5mInputTokens() * priceIn * 1.25\n        + usage.cacheCreation().get().ephemeral1hInputTokens() * priceIn * 2.0\n        + usage.cacheReadInputTokens().get() * priceIn * read\n        + usage.outputTokens() * priceOut)\n    return perToken / 1_000_000 * (if (batch) 0.5 else 1.0)\n}\n\nprivate fun dollars(v: Double) = \"$\" + \"%.6f\".format(v)\n\nfun main() {\n    val rig = Scripted.client(map(\"input_tokens\", 4821), message(listOf(text(\"Refunds take 14 days. Opened items are excluded.\")), \"end_turn\", MODEL, USAGE, null))\n    val counted = rig.client().messages().countTokens(MessageCountTokensParams.builder().model(MODEL).system(SYSTEM).addUserMessage(QUESTION).build()).inputTokens()\n    println(\"count_tokens -> $counted input tokens (POST ${rig.http().urls[0].split(\".com\")[1]})\")\n    println(\"estimate before sending, input only: ${dollars(counted * PRICES.getValue(MODEL).first / 1_000_000)} on $MODEL\")\n    val u = rig.client().messages().create(params()).usage()\n    println(\"usage: input ${u.inputTokens()}, cache write ${u.cacheCreationInputTokens().get()}, cache read ${u.cacheReadInputTokens().get()}, output ${u.outputTokens()}\")\n    println(\"cost of this request: ${dollars(cost(MODEL, u))}  (batch: ${dollars(cost(MODEL, u, batch = true))})\")\n    println(\"the same usage on each model:\")\n    for (model in PRICES.keys) println(\"  ${model.padEnd(28)} ${dollars(cost(model, u))}\")\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "count_tokens -> 4821 input tokens (POST /v1/messages/count_tokens)\nestimate before sending, input only: $0.009642 on claude-sonnet-5-5\nusage: input 120, cache write 4000, cache read 0, output 340\ncost of this request: $0.013640  (batch: $0.006820)\nthe same usage on each model:\n  claude-haiku-4-5-20251001    $0.006820\n  claude-sonnet-5-5            $0.013640\n  claude-opus-5-5              $0.027280\n  claude-fable-5-1             $0.068200"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Read the last table of the output. The same usage costs $0.006820 on Haiku 4.5, twice that on Sonnet 5.5, four times on Opus 5.5 and ten times on Fable 5.1: the costs follow the input prices (1, 2, 4 and 10), because every part of this usage is priced from the input price and output is five times input on every row. The ratios break only where a model has its own cache read multiplier. A prompt that is mostly cache reads costs the same on Sonnet 5.5 and Opus 5.5, although Opus lists twice the price. That is why a router must price the real usage and not compare list prices."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The practice: a router and a cost model"
+    },
+    {
+      "type": "para",
+      "text": "You write `request_cost(model, usage, batch)` and `route(catalog, task)`. The first prices a usage object with the rules above, in micro-dollars. The second returns the id of the cheapest model that can take a task: not deprecated, at or above the task's minimum tier, with a context window that holds the task's input and an output limit that holds its `max_tokens`. A cost tie goes to the lower tier, and the order of the catalog never matters. The statement is in `exercises/18-model-choice-cost-and-migration/unit-01/practice-1/statement.md`; each language folder has a `starter`, the tests and a build file. The starter fails every test."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A plain request is priced from input and output, and the router returns the cheapest model at or above the tier"
+        ],
+        [
+          "`e1`",
+          "Cache writes cost 1.25 and 2 times input, reads use the model's own multiplier, and an unsplit write is the 5-minute kind"
+        ],
+        [
+          "`e2`",
+          "The batch discount halves every part of the cost, cache parts included"
+        ],
+        [
+          "`e3`",
+          "The router picks by cost and tier, whatever the order of the catalog"
+        ],
+        [
+          "`e4`",
+          "A model with too small a context window or output limit is skipped"
+        ],
+        [
+          "`e5`",
+          "Deprecated models are skipped, and a choice with no model raises `NoModelError`"
+        ],
+        [
+          "`e6`",
+          "A cost tie goes to the lower tier"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Case `e6` is built on a real tie: on a prompt that is all cache reads, Sonnet 5.5 at $2 and 0.1 costs the same as Opus 5.5 at $4 and 0.05. A router that breaks ties by list order gives an answer that depends on how the catalog was written."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Pricing input as one number.** A usage object has four input-side fields at three prices. Multiplying `input_tokens` by the input price misses the cache writes and reads, and with caching on, `input_tokens` is only the tail.",
+        "**Applying one cache multiplier to every model.** Reads are 0.1 of input on most models and 0.05 and 0.025 on two of them. A cost model with a constant is wrong exactly where the large models are used.",
+        "**Treating the counted tokens as the bill.** The count is an estimate of input only. Output, thinking and the cache split appear only in `usage` after the call."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A response reports 120 `input_tokens`, 4,000 `cache_creation_input_tokens` and 340 `output_tokens`. A team adds them up as 460 tokens in and out. What does the page say they missed?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The output tokens are priced from the cache multiplier",
+              "**b**: The cache write has its own price above the base input price",
+              "**c**: The count in `input_tokens` already includes the written tokens",
+              "**d**: The batch discount applies to cache writes before anything else"
+            ]
+          }
+        ],
+        [
+          "Before sending a long prompt, an application wants to know whether it fits a budget. Which tool does the page back, and with what caveat?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The pricing page, whose figures give the token count of any prompt",
+              "**b**: A trial request with a tiny `max_tokens`, whose usage is exact and free of charge",
+              "**c**: The `input_tokens` of the previous response, which always predicts the next one",
+              "**d**: The token counting endpoint, whose figure is an estimate and is free to request"
+            ]
+          }
+        ],
+        [
+          "A router must pick between two models whose costs for a cache-heavy request are equal. What does the practice's rule do?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: It takes the first model in the catalog, since order is the only signal left",
+              "**b**: It takes the lower tier, so the answer does not depend on the catalog",
+              "**c**: It takes the larger window, since room is worth keeping in reserve",
+              "**d**: It takes the higher tier, since quality is worth the extra spend"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**b**. The page prices a 5-minute cache write at \"1.25 times input\", so 4,000 written tokens are not ordinary input. *a* is ruled out because output tokens are \"Tokens generated, thinking included\" and the table prices them at the output price, while the cache multipliers apply to input. *c* is ruled out because `input_tokens` is \"Input tokens that were not read from or written to a cache\". *d* is ruled out because the batch discount is \"50 percent on input and output\" and halves the sum, and it is not an ordering of charges.",
+            "**d**. The page says \"The token count is an estimate\" and \"Token counting is free to use but subject to requests per minute rate limits based on your usage tier.\" *b* is ruled out because a trial request is a billed Messages call (the page calls counting \"free to use\"), while the page offers counting as a separate call with \"separate and independent rate limits\". *c* is ruled out because the page says \"to decide before paying\" with counting on the new prompt, and an earlier response predicts nothing about it. *a* is ruled out because the pricing page gives prices per million tokens, while the endpoint \"takes the same structured input as a Messages request\" and counts it.",
+            "**b**. The practice's rule is \"A cost tie goes to the lower tier\", and the order of the catalog never matters. *a* is ruled out because a router that breaks ties by list order gives \"an answer that depends on how the catalog was written\". *c* is ruled out because the rule is \"A cost tie goes to the lower tier\" and never ranks windows once the limits are met. *d* is ruled out because the statement says \"goes to the lower tier\"."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 10,
+    "paras": 15,
+    "code": 1,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "435336fba66b60795c9a4e2b787d86a232c1b1408d7effeff0f08898eef2af5c"
+}

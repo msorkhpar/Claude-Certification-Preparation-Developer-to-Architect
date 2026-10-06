@@ -1,0 +1,2213 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "78-exam-readiness-3"
+  ],
+  "variant": "prose",
+  "unit": 4,
+  "ordinal": 1,
+  "title": "Architect mock exam 2",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "x1",
+        "stem": "Scenario S2. A hook that must replace what the model sees as a tool's output has to work for built-in tools and for MCP tools, in both SDKs. Which field should it set?",
+        "options": [
+          {
+            "id": "a",
+            "text": "additionalContext, since it overwrites the whole result with the text that is given",
+            "correct": false,
+            "says": "Ruled out because that field is for adding: \"to append information to the tool result\""
+          },
+          {
+            "id": "b",
+            "text": "The newer successor setting, since the older one is limited to one server type and is deprecated",
+            "correct": true,
+            "says": "The page names the field (module 49, page 2): \"To replace the tool's output before Claude sees it, set `updatedToolOutput`, which works for any tool in both SDKs.\""
+          },
+          {
+            "id": "c",
+            "text": "updatedInput, since it rewrites the call before the model reads the answer",
+            "correct": false,
+            "says": "Ruled out because that field changes the call, not the result: \"A replacement input for the tool\""
+          },
+          {
+            "id": "d",
+            "text": "permissionDecisionReason, since the model reads that text in place of the actual result",
+            "correct": false,
+            "says": "Ruled out because that text appears only on a refusal: \"for a denial it is what the model reads\""
+          }
+        ],
+        "origin": {
+          "path": "course/49-hooks/02-normalising-results-command-hooks-and-the-practice.md",
+          "section": "Normalise in a PostToolUse hook"
+        },
+        "domain": "A1"
+      },
+      {
+        "id": "x2",
+        "stem": "Scenario S2. An adaptive loop halts when its planner issues a step it has already run. After a while the planner re-issues the step with different capitalisation. How should the check treat it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Compare the exact bytes, since any difference between two steps shows real progress",
+            "correct": false,
+            "says": "Ruled out because the status names the cause: \"The plan has stopped making progress\""
+          },
+          {
+            "id": "b",
+            "text": "Ignore case and surrounding spaces, since a faltering one seldom copies itself byte for byte",
+            "correct": true,
+            "says": "The page states it (module 50, page 2): \"the repeated-step check ignores case and outer spaces, because a planner that has been stuck rarely repeats itself byte for byte\"."
+          },
+          {
+            "id": "c",
+            "text": "Compare only the first word of each step, since the rest is only detail",
+            "correct": false,
+            "says": "Ruled out because the planner is the only judge of success: \"The only success; the summary is the planner's\""
+          },
+          {
+            "id": "d",
+            "text": "Skip the check altogether and rely on the step limit alone to end the run",
+            "correct": false,
+            "says": "Ruled out because the limit is a backstop and not a check: \"A loop that runs into it needs a progress check\""
+          }
+        ],
+        "origin": {
+          "path": "course/50-task-decomposition/02-per-item-passes-adaptive-guards-and-the-practice.md",
+          "section": "Guards for the adaptive loop"
+        },
+        "domain": "A1"
+      },
+      {
+        "id": "x3",
+        "stem": "Scenario S2. An Edit call is refused because the target text appears three times in the file, and only one of the places should change. What is the first remedy?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Set replace_all, which changes just the line that was meant and no other",
+            "correct": false,
+            "says": "Ruled out because replace-all is for renames: \"`replace_all` changes every occurrence, which is right for a rename and wrong when only one of three similar lines should change.\""
+          },
+          {
+            "id": "b",
+            "text": "Read the file again and then retry the identical call",
+            "correct": false,
+            "says": "Ruled out because a second read does not change the match count: \"The order of remedies is the order of risk.\""
+          },
+          {
+            "id": "c",
+            "text": "Use Read and Write to rewrite the whole file",
+            "correct": false,
+            "says": "Ruled out because rewriting is the last resort: \"which is the guide's fallback, changes the file by rewriting all of it\""
+          },
+          {
+            "id": "d",
+            "text": "Lengthen the anchor string until just the intended spot matches",
+            "correct": true,
+            "says": "The page orders the remedies (module 56, page 1): \"A longer anchor changes only the occurrence you meant.\""
+          }
+        ],
+        "origin": {
+          "path": "course/56-the-built-in-tools/01-what-each-tool-is-for-and-how-edit-fails.md",
+          "section": "Edit needs one exact match"
+        },
+        "domain": "A2"
+      },
+      {
+        "id": "x4",
+        "stem": "Scenario S2. A developer has a deploy skill in ~/.claude/skills and the repository has its own deploy skill. Both places hold a skill called deploy, and the developer types the slash command without any prefix. Which one runs on /deploy?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The repository's, since committed files always override personal ones on every machine that uses the project",
+            "correct": false,
+            "says": "Ruled out because personal outranks project: \"so a personal skill with the team's name silently replaces the team's version on your machine\""
+          },
+          {
+            "id": "b",
+            "text": "Neither, since a name clash disables both of them until one is renamed",
+            "correct": false,
+            "says": "Ruled out because a clash has a winner, and with both folders in place \"`/deploy` runs the personal one\" rather than disabling both."
+          },
+          {
+            "id": "c",
+            "text": "Both, one after the other, starting with the committed one",
+            "correct": false,
+            "says": "Ruled out because a shared name keeps one version and a different name is what keeps both available: \"The safe habit for a personal variant is a different name (`review-pr-mine`), which also keeps the team's version available to you.\""
+          },
+          {
+            "id": "d",
+            "text": "The home-folder one, because that location outranks the committed one for a shared name",
+            "correct": true,
+            "says": "The page gives the order (module 58, page 1): \"Enterprise over personal, and personal over project.\""
+          }
+        ],
+        "origin": {
+          "path": "course/39-extending-claude-code/01-skills-and-how-they-compare.md",
+          "section": "Where skills live"
+        },
+        "domain": "A3"
+      },
+      {
+        "id": "x5",
+        "stem": "Scenario S2. A team rule seems ignored in a session. Which command shows what instruction files actually loaded?",
+        "options": [
+          {
+            "id": "a",
+            "text": "/context, which lists every entry that is visible to the model",
+            "correct": true,
+            "says": "The page names the command (module 57, page 1): \"`/context` lists the memory files that loaded into the session\"."
+          },
+          {
+            "id": "b",
+            "text": "/memory, which lists the files that loaded and the ones that were skipped, with the reason for each",
+            "correct": false,
+            "says": "Ruled out because that command lists locations and opens them: \"`/memory` lists the memory file locations and opens them in your editor, including ones you have not created yet.\""
+          },
+          {
+            "id": "c",
+            "text": "/clear, which reloads every file from disk",
+            "correct": false,
+            "says": "Ruled out because clearing starts again and does not report: \"Run `/clear` and start again\""
+          },
+          {
+            "id": "d",
+            "text": "/compact, which prints the instructions that survive summarising",
+            "correct": false,
+            "says": "Ruled out because compaction replaces text: \"Compaction replaces older messages with a summary\""
+          }
+        ],
+        "origin": {
+          "path": "course/57-memory-files-and-rules/01-where-instructions-live-and-what-loads-when.md",
+          "section": "Seeing what loaded"
+        },
+        "domain": "A3"
+      },
+      {
+        "id": "x6",
+        "stem": "Scenario S2. A developer approves a plan in plan mode and picks the option that auto-accepts edits. Which two statements describe what approval does to the session? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "It applies the plan to a copy of the repository before touching the real files",
+            "correct": false,
+            "says": "Ruled out because \"Reading is free, and shell commands are controlled by the session\"."
+          },
+          {
+            "id": "b",
+            "text": "It adopts the permission setting that the selected choice names",
+            "correct": true,
+            "says": "Approving \"exits plan mode and switches the session to the permission mode each approve option describes\" (module 59, page 1)."
+          },
+          {
+            "id": "c",
+            "text": "It ends the read-only phase",
+            "correct": true,
+            "says": "Approving \"exits plan mode and switches the session to the permission mode each approve option describes\" (module 59, page 1)."
+          },
+          {
+            "id": "d",
+            "text": "It restarts the session with the plan as its first message",
+            "correct": false,
+            "says": "Ruled out because \"approve and start editing (in auto mode, or auto-accepting edits, or approving each edit by hand)\"."
+          },
+          {
+            "id": "e",
+            "text": "It stays in plan mode and queues the edits until the end of the session",
+            "correct": false,
+            "says": "Ruled out because \"In plan mode Claude researches and proposes, and does not change your source.\""
+          }
+        ],
+        "origin": {
+          "path": "course/59-plan-mode-and-iterative-refinement/01-plan-mode-or-direct-execution.md",
+          "section": "What plan mode does"
+        },
+        "domain": "A3",
+        "select": 2
+      },
+      {
+        "id": "x7",
+        "stem": "Scenario S2. A developer asks Claude to write the code and then its tests from that code. The session produced twelve tests that all pass at once. Why is that weak?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Tests written after the code run more slowly than tests written before it was started by the team",
+            "correct": false,
+            "says": "Ruled out because the loop is the strength of tests: \"Claude does the work, runs the check, reads the result, and iterates until the check passes.\""
+          },
+          {
+            "id": "b",
+            "text": "Claude cannot write tests for code that it wrote itself earlier in the same session",
+            "correct": false,
+            "says": "Ruled out because a check Claude can run is the aim: \"Give Claude a check it can run: tests, a build, a screenshot to compare.\""
+          },
+          {
+            "id": "c",
+            "text": "Generated tests are rejected by the runner unless a person has signed them off first",
+            "correct": false,
+            "says": "Ruled out because the developer writes or commissions them first: \"The developer's part is to write, or have Claude write, the tests first and to give the target as the failing tests.\""
+          },
+          {
+            "id": "d",
+            "text": "Cases born of one misreading confirm nothing, so the first checks should come from a person",
+            "correct": true,
+            "says": "The page states it (module 59, page 2): \"A test written from the same misunderstanding as the code verifies nothing, which is why the first test cases come from a person or from the examples, and not from the code under test.\""
+          }
+        ],
+        "origin": {
+          "path": "course/59-plan-mode-and-iterative-refinement/02-examples-tests-the-interview-and-feedback.md",
+          "section": "Let the tests lead"
+        },
+        "domain": "A3"
+      },
+      {
+        "id": "x8",
+        "stem": "Scenario S2. A skill's description and when_to_use text together run to several thousand symbols. What happens in the skill listing?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The skill is dropped from the listing until the wording is shortened by its author",
+            "correct": false,
+            "says": "Ruled out because the text is used to decide: \"Claude uses this to decide when to apply the skill\""
+          },
+          {
+            "id": "b",
+            "text": "They are cut at 1,536, so the key use case belongs first",
+            "correct": true,
+            "says": "The page states it (module 58, page 1): \"It should say what the skill does and when to use it, with the key use case first\"."
+          },
+          {
+            "id": "c",
+            "text": "Only the description is shown and when_to_use is discarded from the listing",
+            "correct": false,
+            "says": "Ruled out because the two texts are treated as one: \"the combined `description` and `when_to_use` text\""
+          },
+          {
+            "id": "d",
+            "text": "A model call summarises the wording before the skill is listed for use",
+            "correct": false,
+            "says": "Ruled out because the cut is a fact, not a removal of the skill: \"is truncated at 1,536 characters in the skill listing\""
+          }
+        ],
+        "origin": {
+          "path": "course/58-commands-and-skills/01-commands-and-skills-are-one-mechanism.md",
+          "section": "The description is how a skill is found"
+        },
+        "domain": "A3"
+      },
+      {
+        "id": "x9",
+        "stem": "Scenario S2. A team has a repeatable procedure that should only enter context when someone starts it. Where does it belong?",
+        "options": [
+          {
+            "id": "a",
+            "text": "In a project skill, whose body loads only when it is invoked",
+            "correct": true,
+            "says": "The page gives the table (module 58, page 2): \"Its body loads only when invoked\"."
+          },
+          {
+            "id": "b",
+            "text": "In the root memory file, which loads at launch",
+            "correct": false,
+            "says": "Ruled out because the root file is for every task: \"Needed in every task of the project\""
+          },
+          {
+            "id": "c",
+            "text": "In a scoped rule with a paths list, which loads on a match between the files of the project",
+            "correct": false,
+            "says": "Ruled out because a scoped rule is for a kind of file: \"About one kind of file, wherever it sits\""
+          },
+          {
+            "id": "d",
+            "text": "In the settings file as a hook that runs at session start",
+            "correct": false,
+            "says": "Ruled out because a hook is for fixed points: \"it runs at a fixed point, whether or not the model remembers\""
+          }
+        ],
+        "origin": {
+          "path": "course/58-commands-and-skills/02-tools-arguments-forked-skills-and-the-practice.md",
+          "section": "Where each piece of guidance goes"
+        },
+        "domain": "A3"
+      },
+      {
+        "id": "x10",
+        "stem": "Scenario S2. A developer wants short answers in every project on their machine, and the team does not. Where does that preference go?",
+        "options": [
+          {
+            "id": "a",
+            "text": "In the project's root memory file, committed for the whole team to receive",
+            "correct": false,
+            "says": "Ruled out because a committed file is for the team: \"Two kinds of line do not belong in a committed file.\""
+          },
+          {
+            "id": "b",
+            "text": "In a local note beside the root file, ignored by version control on every machine",
+            "correct": false,
+            "says": "Ruled out because a local note is for one project: \"A note about one project that nobody else needs, such as a sandbox address, goes in `CLAUDE.local.md`\""
+          },
+          {
+            "id": "c",
+            "text": "In the user-level memory document or the user rules folder in the home directory",
+            "correct": true,
+            "says": "The page states it (module 57, page 2): \"A preference that follows you into every project, such as short answers, goes in the user file or in `~/.claude/rules/`\"."
+          },
+          {
+            "id": "d",
+            "text": "In the managed policy file that the organisation distributes to its machines",
+            "correct": false,
+            "says": "Ruled out because a managed file reaches everyone: \"Everyone on the machine, and individual settings cannot exclude it\""
+          }
+        ],
+        "origin": {
+          "path": "course/57-memory-files-and-rules/02-path-scoped-rules-size-and-the-practice.md",
+          "section": "Personal lines belong in personal files"
+        },
+        "domain": "A3"
+      },
+      {
+        "id": "x11",
+        "stem": "Scenario S2. A developer asks Claude to refactor a module, and the session ends with code that looks finished but breaks a test. The prompt asked only to clean up the module and gave no further instruction. What was missing?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A longer prompt describing the module in much more detail than before",
+            "correct": false,
+            "says": "Ruled out because the model stops when the work looks done: \"Claude stops when the work looks done\""
+          },
+          {
+            "id": "b",
+            "text": "A higher thinking budget so that the model reviews its own work harder",
+            "correct": false,
+            "says": "Ruled out because more room is not a new starting point: \"a larger thinking budget, which gives the model more room to reason from the same starting point\""
+          },
+          {
+            "id": "c",
+            "text": "A second conversation that reviews the refactor once the session is over and reports back to the team",
+            "correct": false,
+            "says": "Ruled out because a second review in the same conversation shares the context: \"a second review in the same conversation, which adds a third reader who shares the first two readers' context\""
+          },
+          {
+            "id": "d",
+            "text": "A runnable check, since otherwise an appearance of completion is the only signal",
+            "correct": true,
+            "says": "The page states it (module 71, page 2): \"Give Claude a check it can run: tests, a build, a screenshot to compare.\""
+          }
+        ],
+        "origin": {
+          "path": "course/71-scenario-code-generation-with-claude-code/02-plan-or-direct-a-target-to-iterate-on-and-the-practice.md",
+          "section": "Give the task a target"
+        },
+        "domain": "A3"
+      },
+      {
+        "id": "x12",
+        "stem": "Scenario S2. A review prompt holds standards, a few samples and the material under review. Which two statements describe the order? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "Everything is interleaved, with each sample beside the part it resembles",
+            "correct": false,
+            "says": "Ruled out because \"`<examples>` with one `<example>` per case, then `<diff>`\"."
+          },
+          {
+            "id": "b",
+            "text": "The material goes first, so the model reads the input before any instruction",
+            "correct": false,
+            "says": "Ruled out because \"The practice asks for the order criteria, examples, diff last, and its tests check it\"."
+          },
+          {
+            "id": "c",
+            "text": "Samples come first, then the material, with the standards in a footer",
+            "correct": false,
+            "says": "Ruled out because that order \"keeps the criteria and the examples together\"."
+          },
+          {
+            "id": "d",
+            "text": "Rules lead, followed by worked cases each in its own tag",
+            "correct": true,
+            "says": "\"Examples sit between the criteria and the input, each in its own tag, with the diff last\" (module 61, page 2)."
+          },
+          {
+            "id": "e",
+            "text": "The input to judge sits last",
+            "correct": true,
+            "says": "\"Examples sit between the criteria and the input, each in its own tag, with the diff last\" (module 61, page 2)."
+          }
+        ],
+        "origin": {
+          "path": "course/61-criteria-and-examples/02-examples-asking-and-the-practice.md",
+          "section": "Where examples go"
+        },
+        "domain": "A4",
+        "select": 2
+      },
+      {
+        "id": "x13",
+        "stem": "Scenario S2. A batch finishes with some entries succeeded, some expired, and one rejected as an invalid request. What is the sound reaction?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Resubmit the whole batch to keep the results consistent with one another",
+            "correct": false,
+            "says": "Ruled out because a full resubmission pays twice: \"Resubmitting the whole batch pays twice for work that is done.\""
+          },
+          {
+            "id": "b",
+            "text": "Resubmit all the failures unchanged, including the one that was rejected as an invalid request",
+            "correct": false,
+            "says": "Ruled out because an invalid entry fails again: \"sending it again fails again\""
+          },
+          {
+            "id": "c",
+            "text": "Keep the completed ones, resend the timed-out ones as they were, repair the faulty one",
+            "correct": true,
+            "says": "The page lists the reactions (module 63, page 1): \"An entry that expired, was canceled, or hit a server error is resubmitted unchanged in the next batch\"."
+          },
+          {
+            "id": "d",
+            "text": "Discard the batch and run all of the work synchronously instead",
+            "correct": false,
+            "says": "Ruled out because the discount is worth keeping: \"The half price is a reason to move work that can wait.\""
+          }
+        ],
+        "origin": {
+          "path": "course/63-batch-and-multi-pass-review/01-when-a-batch-fits-and-what-to-resubmit.md",
+          "section": "Failures: resubmit the failed items, and change what failed"
+        },
+        "domain": "A4"
+      },
+      {
+        "id": "x14",
+        "stem": "Scenario S2. A bulk job submits batch entries that set stream to true. What happens?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Results stream back entry by entry as they finish, within the window of the batch",
+            "correct": false,
+            "says": "Ruled out because results are read from a finished batch: \"A finished batch has a result per entry: succeeded, errored, canceled or expired.\""
+          },
+          {
+            "id": "b",
+            "text": "The flag is ignored and results arrive after the window has closed",
+            "correct": false,
+            "says": "Ruled out because a batch finishes within a window: \"A batch finishes within 24 hours (usually much sooner)\""
+          },
+          {
+            "id": "c",
+            "text": "It is refused with a validation error and the results come back as one file",
+            "correct": true,
+            "says": "The page lists it (module 63, page 1): \"Three parameters are refused with a validation error: `stream: true` (the results come back as one file, not a stream)\"."
+          },
+          {
+            "id": "d",
+            "text": "The batch is accepted but billed at the full price of the live API",
+            "correct": false,
+            "says": "Ruled out because the discount applies to work that can wait: \"The half price is a reason to move work that can wait.\""
+          }
+        ],
+        "origin": {
+          "path": "course/63-batch-and-multi-pass-review/01-when-a-batch-fits-and-what-to-resubmit.md",
+          "section": "What a batch request may and may not contain"
+        },
+        "domain": "A4"
+      },
+      {
+        "id": "x15",
+        "stem": "Scenario S2. A team proposes to log every tool result into the notes file during an exploration. Why is that wrong?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A file cannot be read back into a session once it has been written",
+            "correct": false,
+            "says": "Ruled out because later questions begin by reading it: \"Later questions begin by reading the scratchpad\""
+          },
+          {
+            "id": "b",
+            "text": "Notes files are loaded into every session like an instructions file is",
+            "correct": false,
+            "says": "Ruled out because the instructions file is another thing: \"It is not a replacement for the project's instructions file, which holds what is true of the project for every session\""
+          },
+          {
+            "id": "c",
+            "text": "Working memory should hold findings, not a transcript, which is what filled the window",
+            "correct": true,
+            "says": "The page states it (module 67, page 1): \"it is not a transcript, which is the thing that filled the window in the first place\"."
+          },
+          {
+            "id": "d",
+            "text": "Tool results contain nothing that is worth keeping for later questions",
+            "correct": false,
+            "says": "Ruled out because reading is what fills the window: \"Exploration is the most context-hungry thing an agent does.\""
+          }
+        ],
+        "origin": {
+          "path": "course/67-exploring-a-large-codebase/01-why-explorations-degrade-and-where-findings-live.md",
+          "section": "A scratchpad outlives the window"
+        },
+        "domain": "A5"
+      },
+      {
+        "id": "x16",
+        "stem": "Scenario S4. On Wednesday an engineer wants to carry on Monday's exploration of the payments module as a single line of work, although two other sessions have run in that directory since. Which control fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Resume that session by its id, which adds to the original and keeps one thread",
+            "correct": true,
+            "says": "The page separates the two (module 51, page 1): \"Resume to continue one thread; fork to branch it.\""
+          },
+          {
+            "id": "b",
+            "text": "Fork the session, which keeps the whole history and carries on the work",
+            "correct": false,
+            "says": "Ruled out because a fork starts a second line: \"a fork creates a new session with its own id, so the line of work now exists twice\""
+          },
+          {
+            "id": "c",
+            "text": "Continue the most recent session, which takes the newest one whatever it is",
+            "correct": false,
+            "says": "Ruled out because continue takes the newest: \"Picks up the most recent session in the current directory and adds to it\""
+          },
+          {
+            "id": "d",
+            "text": "Start fresh with a prompt that asks the model to recall Monday from memory",
+            "correct": false,
+            "says": "Ruled out because the history is what holds the earlier analysis: \"A session is the conversation history the SDK accumulates while your agent works.\""
+          }
+        ],
+        "origin": {
+          "path": "course/51-session-state/01-continue-resume-and-fork-what-a-session-keeps.md",
+          "section": "Traps"
+        },
+        "domain": "A1"
+      },
+      {
+        "id": "x17",
+        "stem": "Scenario S4. Two forks of one session each try a refactor in the same working directory. Which two statements follow the page? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "A comparison that must not collide gives each branch its own copy of the code",
+            "correct": true,
+            "says": "\"Forking branches the conversation history, not the filesystem\", and \"For a comparison that must not collide, fork for the analysis and let each branch work in its own copy of the code\" (module 51, page 1)."
+          },
+          {
+            "id": "b",
+            "text": "Each fork gets a private copy of the whole directory, so the attempts are isolated",
+            "correct": false,
+            "says": "Ruled out because \"If a forked agent edits files, those changes are real and visible to any session working in the same directory.\""
+          },
+          {
+            "id": "c",
+            "text": "Branching copies the conversation and not the disk",
+            "correct": true,
+            "says": "\"Forking branches the conversation history, not the filesystem\", and \"For a comparison that must not collide, fork for the analysis and let each branch work in its own copy of the code\" (module 51, page 1)."
+          },
+          {
+            "id": "d",
+            "text": "Their edits are merged automatically when the sessions end",
+            "correct": false,
+            "says": "Ruled out because \"Forking the session without isolating the files leaves both attempts editing the same checkout\"."
+          },
+          {
+            "id": "e",
+            "text": "The second fork is rejected at once and a directory admits one branch",
+            "correct": false,
+            "says": "Ruled out because \"Two forks that each try a refactor in the same working tree write over each other.\""
+          }
+        ],
+        "origin": {
+          "path": "course/51-session-state/01-continue-resume-and-fork-what-a-session-keeps.md",
+          "section": "What each way of going back costs"
+        },
+        "domain": "A1",
+        "select": 2
+      },
+      {
+        "id": "x18",
+        "stem": "Scenario S4. A service runs an exploration on one machine, and an engineer wants to continue it on a CI worker. What limits this?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Sessions can be resumed only by the account that created them, whatever host is used",
+            "correct": false,
+            "says": "Ruled out because the limit is the machine and not the account: \"You can resume from another directory on the same machine\""
+          },
+          {
+            "id": "b",
+            "text": "A saved session expires after one hour of idleness and cannot be reopened",
+            "correct": false,
+            "says": "Ruled out because idleness only changes the cost: a session \"has been inactive for more than about an hour and is over 100,000 tokens\""
+          },
+          {
+            "id": "c",
+            "text": "Only the Agent SDK can resume sessions, never the command line",
+            "correct": false,
+            "says": "Ruled out because the command line can resume SDK sessions: \"You can still resume one by passing its session ID to `claude --resume <session-id>`.\""
+          },
+          {
+            "id": "d",
+            "text": "Saved conversations stay on the host that wrote them, so copy them or use a digest",
+            "correct": true,
+            "says": "The page states it (module 51, page 1): \"Session files are local to the machine that created them.\""
+          }
+        ],
+        "origin": {
+          "path": "course/51-session-state/01-continue-resume-and-fork-what-a-session-keeps.md",
+          "section": "Where sessions live and how far they travel"
+        },
+        "domain": "A1"
+      },
+      {
+        "id": "x19",
+        "stem": "Scenario S4. A process died while a tool call was running, and the session is resumed. What does the model see?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The operation flagged as interrupted before its outcome was stored, to verify",
+            "correct": true,
+            "says": "The page states it (module 51, page 2): the model \"is told to check whether it took effect before running it again\"."
+          },
+          {
+            "id": "b",
+            "text": "The call is finished again silently when the session resumes, without any notice",
+            "correct": false,
+            "says": "Ruled out because nothing runs again: \"doesn't finish or run again when you resume\""
+          },
+          {
+            "id": "c",
+            "text": "The call is shown as succeeded, with no mark that it was cut short",
+            "correct": false,
+            "says": "Ruled out because a session does not mark old results: \"Nothing in the session marks the old tool results as old.\""
+          },
+          {
+            "id": "d",
+            "text": "The history is cut at the last completed message and the session carries on as normal",
+            "correct": false,
+            "says": "Ruled out because a session holds the conversation and not the world: \"Sessions persist the conversation, not the filesystem.\""
+          }
+        ],
+        "origin": {
+          "path": "course/51-session-state/01-continue-resume-and-fork-what-a-session-keeps.md",
+          "section": "What a resumed session restores, and what it does not"
+        },
+        "domain": "A1"
+      },
+      {
+        "id": "x20",
+        "stem": "Scenario S4. A team denies Write(secrets/**) to keep the agent from changing a folder. Why does that protect nothing?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Deny rules apply only to shell commands and are not applied to any of the file tools",
+            "correct": false,
+            "says": "Ruled out because the edit rules do cover file tools, so a deny is not limited to shell commands: \"`Edit(path)` rules govern all built-in tools that write files, including `Write` and `NotebookEdit`\""
+          },
+          {
+            "id": "b",
+            "text": "Folders that hold credentials are exempt from deny rules for reading and for writing",
+            "correct": false,
+            "says": "Ruled out because no folder is exempt, and a read deny is the rule that protects such a folder fully: \"A `Read(...)` deny rule also blocks the Edit and Write tools on the same path, including creating a new file there\""
+          },
+          {
+            "id": "c",
+            "text": "Deny rules are advisory, and the model may decide to ignore them when it sees fit",
+            "correct": false,
+            "says": "Ruled out because a matching deny is enforced, so the failure is the spelling and not an option the model has: \"If a deny rule matches, the tool is blocked, even in `bypassPermissions` mode.\""
+          },
+          {
+            "id": "d",
+            "text": "Path checks for modifications use the edit spelling, so a rule spelled the other way is never used",
+            "correct": true,
+            "says": "The page states it (module 56, page 2): \"a `Write(path)` rule is never matched by the file permission checks\"."
+          }
+        ],
+        "origin": {
+          "path": "course/56-the-built-in-tools/02-permissions-exploring-a-codebase-and-the-practice.md",
+          "section": "Which rule covers which tool"
+        },
+        "domain": "A2"
+      },
+      {
+        "id": "x21",
+        "stem": "Scenario S4. A team screens an agent's output for dangerous calls and runs it unattended whenever the screen is clean. Which two statements apply to relying on this alone? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "Detection covers only what its authors anticipated, so a disguise slips past",
+            "correct": true,
+            "says": "\"A scan finds what its authors thought of: a call spelled differently, built from strings or imported by name slips past it\", yet \"it refuses the obvious, it compares what the code does with what the proposal declares\" (module 77, page 1)."
+          },
+          {
+            "id": "b",
+            "text": "Running it on every proposal costs too much, so it must be sampled",
+            "correct": false,
+            "says": "Ruled out because \"and it costs nothing\"."
+          },
+          {
+            "id": "c",
+            "text": "A clean result proves nothing about what the output declares",
+            "correct": false,
+            "says": "Ruled out because the table makes the declaration the thing to check: \"Compare what the code does with the permissions declared, and refuse the difference\"."
+          },
+          {
+            "id": "d",
+            "text": "Machine-written output cannot be read by any automatic check",
+            "correct": false,
+            "says": "Ruled out because \"The gate in this module does read the code\"."
+          },
+          {
+            "id": "e",
+            "text": "It still earns its place by refusing the obvious and checking what was declared",
+            "correct": true,
+            "says": "\"A scan finds what its authors thought of: a call spelled differently, built from strings or imported by name slips past it\", yet \"it refuses the obvious, it compares what the code does with what the proposal declares\" (module 77, page 1)."
+          }
+        ],
+        "origin": {
+          "path": "course/77-scenario-agentic-tool-builder/01-the-tool-builder-what-the-agent-may-write.md",
+          "section": "A text scan is not a sandbox"
+        },
+        "domain": "A2",
+        "select": 2
+      },
+      {
+        "id": "x22",
+        "stem": "Scenario S4. A tool design whose name breaks the required form also declares an effect that needs a person's sign-off. What should happen first?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It goes straight to the person, who can fix the name while approving",
+            "correct": false,
+            "says": "Ruled out because a flawed proposal does not reach a person first: \"Otherwise a proposal with findings is sent back for revision.\""
+          },
+          {
+            "id": "b",
+            "text": "It returns for revision, so approval goes to something worth reading",
+            "correct": true,
+            "says": "The page states it (module 77, page 2): \"A revision comes before a gate, because a person should be asked to approve a proposal that is worth reading\"."
+          },
+          {
+            "id": "c",
+            "text": "It is refused outright, with no chance of revision at all",
+            "correct": false,
+            "says": "Ruled out because a format error only sends it back: \"Four things only send it back: a name that is not in the fixed form\""
+          },
+          {
+            "id": "d",
+            "text": "It is approved outright and fixed at a later review of the tool",
+            "correct": false,
+            "says": "Ruled out because only a clean proposal passes outright: \"Only a proposal with none of these is approved outright.\""
+          }
+        ],
+        "origin": {
+          "path": "course/77-scenario-agentic-tool-builder/02-reviewing-a-proposal-and-the-practice.md",
+          "section": "The order of the decisions"
+        },
+        "domain": "A2"
+      },
+      {
+        "id": "x23",
+        "stem": "Scenario S4. A documentation tool's description is long, with its key rule in the last paragraph. What does Claude Code do with the text?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It reads all of it but shows only the first sentence of it to the user in the list of tools",
+            "correct": false,
+            "says": "Ruled out because the cut is a fact: \"Descriptions and server instructions are truncated at 2,048 characters by default.\""
+          },
+          {
+            "id": "b",
+            "text": "It summarises the description with a model call when the text is very long indeed",
+            "correct": false,
+            "says": "Ruled out because the advice follows from it: \"Keep them concise, and put critical details near the start.\""
+          },
+          {
+            "id": "c",
+            "text": "It truncates at 2,048 characters, so critical details should sit near the beginning",
+            "correct": true,
+            "says": "The page states the limit (module 55, page 2): \"Claude Code truncates each tool description and each server's instructions at 2,048 characters by default\"."
+          },
+          {
+            "id": "d",
+            "text": "It rejects the server at launch with an error message naming the limit in force",
+            "correct": false,
+            "says": "Ruled out because the page names the effect: \"The exam rejects the length: Claude Code truncates at 2,048 characters, so what you put last may be cut.\""
+          }
+        ],
+        "origin": {
+          "path": "course/55-mcp-in-claude-code/02-tools-together-descriptions-resources-and-the-practice.md",
+          "section": "A description is what steers the model"
+        },
+        "domain": "A2"
+      },
+      {
+        "id": "x24",
+        "stem": "Scenario S4. A skill from an installed plugin has the same folder name as a project skill. How can both be used?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The extension's is prefixed with its package label, so two commands exist",
+            "correct": true,
+            "says": "The page lists the location (module 58, page 1): \"with the name prefixed by the plugin's name\"."
+          },
+          {
+            "id": "b",
+            "text": "Only the project's skill stays and the plugin's one is dropped at install",
+            "correct": false,
+            "says": "Ruled out because the precedence list ranks only enterprise, personal and project skills, so it never drops a plugin skill at install: \"Enterprise over personal, and personal over project.\""
+          },
+          {
+            "id": "c",
+            "text": "Only the plugin's skill stays and the project's one is ignored while it is installed",
+            "correct": false,
+            "says": "Ruled out because the project skill stays available to its own audience, so installing a plugin does not ignore it: \"Whoever works in the repository, through version control\""
+          },
+          {
+            "id": "d",
+            "text": "Neither runs until one of them is renamed to remove the clash",
+            "correct": false,
+            "says": "Ruled out because a shared name does not stop skills from loading: \"A project-root skill and a nested one with one name both load\"."
+          }
+        ],
+        "origin": {
+          "path": "course/58-commands-and-skills/01-commands-and-skills-are-one-mechanism.md",
+          "section": "Where the file lives decides who gets it"
+        },
+        "domain": "A3"
+      },
+      {
+        "id": "x25",
+        "stem": "Scenario S4. A user-level file and a repository-level file give conflicting style advice. Which two statements follow the page? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "The user-level file loads last and personal preferences apply at the end",
+            "correct": false,
+            "says": "Ruled out because the files closer to the working directory come last: \"instructions closer to where you launched Claude are read last\"."
+          },
+          {
+            "id": "b",
+            "text": "Loading runs from the broadest scope to the most specific",
+            "correct": true,
+            "says": "The documentation lists the files \"in load order, from broadest scope to most specific, so a project instruction appears in context after a user instruction\" (module 57, page 1)."
+          },
+          {
+            "id": "c",
+            "text": "Memory is guidance with good delivery, not an override",
+            "correct": true,
+            "says": "The documentation lists the files \"in load order, from broadest scope to most specific, so a project instruction appears in context after a user instruction\" (module 57, page 1)."
+          },
+          {
+            "id": "d",
+            "text": "Neither file loads and the conflicting advice is dropped",
+            "correct": false,
+            "says": "Ruled out because \"All discovered files are concatenated into context\"."
+          },
+          {
+            "id": "e",
+            "text": "The more recently edited file loads last and the loader sorts by time",
+            "correct": false,
+            "says": "Ruled out because the order follows the folders: \"ordered from the filesystem root down to the working directory\"."
+          }
+        ],
+        "origin": {
+          "path": "course/57-memory-files-and-rules/01-where-instructions-live-and-what-loads-when.md",
+          "section": "Five places, one load order"
+        },
+        "domain": "A3",
+        "select": 2
+      },
+      {
+        "id": "x26",
+        "stem": "Scenario S4. A skill lists disallowed-tools: Bash(rm *). What does that do while the skill is active?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It denies matching commands and keeps the shell available, since only a bare name removes it",
+            "correct": true,
+            "says": "The page states it (module 58, page 2): \"A bare tool name like `Bash` removes the tool from Claude's context entirely\"."
+          },
+          {
+            "id": "b",
+            "text": "It removes the shell from the available pool for the whole turn of the skill",
+            "correct": false,
+            "says": "Ruled out because only a bare name removes a tool: \"only a bare name removes a tool\""
+          },
+          {
+            "id": "c",
+            "text": "It has no effect, since specifiers are ignored in the headers of skills",
+            "correct": false,
+            "says": "Ruled out because a scoped entry has an effect: \"a scoped entry such as `Edit(src/**)` is a narrower rule that leaves the tool in place\""
+          },
+          {
+            "id": "d",
+            "text": "It blocks every command until the user sends the next message to the session",
+            "correct": false,
+            "says": "Ruled out because patterns are exact: \"The patterns in `allowed-tools` are as exact as the rules in module 38\""
+          }
+        ],
+        "origin": {
+          "path": "course/58-commands-and-skills/02-tools-arguments-forked-skills-and-the-practice.md",
+          "section": "Pre-approve, remove, deny"
+        },
+        "domain": "A3"
+      },
+      {
+        "id": "x27",
+        "stem": "Scenario S4. A developer wants the built-in exploring subagent to dig deeply into a tangled module. What can the caller request?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A level of thoroughness, from quick through medium to very thorough",
+            "correct": true,
+            "says": "The page states it (module 67, page 1): \"The caller can ask for a thoroughness (quick, medium or very thorough).\""
+          },
+          {
+            "id": "b",
+            "text": "A write permission, from none to full access to the whole tree of the project",
+            "correct": false,
+            "says": "Ruled out because it is read-only: \"with Write and Edit denied\""
+          },
+          {
+            "id": "c",
+            "text": "A larger window, from standard to extended for the long search",
+            "correct": false,
+            "says": "Ruled out because the cost of reading is the window: \"Exploration is the most context-hungry thing an agent does.\""
+          },
+          {
+            "id": "d",
+            "text": "A count of files to read, from ten up to a thousand files",
+            "correct": false,
+            "says": "Ruled out because the question has to be specific: \"The question must be specific\""
+          }
+        ],
+        "origin": {
+          "path": "course/67-exploring-a-large-codebase/01-why-explorations-degrade-and-where-findings-live.md",
+          "section": "The built-in Explore subagent"
+        },
+        "domain": "A5"
+      },
+      {
+        "id": "x28",
+        "stem": "Scenario S4. A large exploration moves from mapping modules to tracing flows. How should the findings of the first phase reach the second?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A digest from the notes goes into the opening prompts of the later workers",
+            "correct": true,
+            "says": "The page states it (module 67, page 1): \"The coordinator summarises the first phase's findings (from the scratchpad) and puts that summary into the initial prompts of the second phase's subagents.\""
+          },
+          {
+            "id": "b",
+            "text": "Pass the full transcript of the first phase to each second-phase worker to lose nothing",
+            "correct": false,
+            "says": "Ruled out because the transcript is what filled the window: \"It does not get the old transcript, which is what filled the first window.\""
+          },
+          {
+            "id": "c",
+            "text": "Let the second phase rediscover them with fresh eyes",
+            "correct": false,
+            "says": "Ruled out because one phase starts from the next: \"The findings of one phase are the starting point of the next.\""
+          },
+          {
+            "id": "d",
+            "text": "Keep the first phase's workers running and reuse their windows",
+            "correct": false,
+            "says": "Ruled out because a worker does not inherit anything: \"the brief must carry what the subagent needs, because it does not inherit the conversation\""
+          }
+        ],
+        "origin": {
+          "path": "course/67-exploring-a-large-codebase/01-why-explorations-degrade-and-where-findings-live.md",
+          "section": "Summarise a phase, then inject it"
+        },
+        "domain": "A5"
+      },
+      {
+        "id": "x29",
+        "stem": "Scenario S4. A manager tells a helper to explore the whole repository and gets back a long account. Which two statements describe what delegation needs? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "The question has to be specific",
+            "correct": true,
+            "says": "\"The question must be specific\", and \"the brief must carry what the subagent needs, because it does not inherit the conversation\" (module 67, page 1)."
+          },
+          {
+            "id": "b",
+            "text": "The brief carries what the worker requires, since it inherits no conversation",
+            "correct": true,
+            "says": "\"The question must be specific\", and \"the brief must carry what the subagent needs, because it does not inherit the conversation\" (module 67, page 1)."
+          },
+          {
+            "id": "c",
+            "text": "The helper's window is too small for such a long search",
+            "correct": false,
+            "says": "Ruled out because \"Subagents run in separate context windows\"."
+          },
+          {
+            "id": "d",
+            "text": "The helper needs write access so that it can keep notes",
+            "correct": false,
+            "says": "Ruled out because \"with Write and Edit denied\"."
+          },
+          {
+            "id": "e",
+            "text": "The summary should be requested as a table instead of prose",
+            "correct": false,
+            "says": "Ruled out because \"the coordinator has gained nothing\"."
+          }
+        ],
+        "origin": {
+          "path": "course/67-exploring-a-large-codebase/01-why-explorations-degrade-and-where-findings-live.md",
+          "section": "Delegate the reading"
+        },
+        "domain": "A5",
+        "select": 2
+      },
+      {
+        "id": "x30",
+        "stem": "Scenario S4. A coordinator runs five sources in order, and the second fails with a timeout. The run stops there. What does that waste?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Everything scheduled after the broken one, whose work was never done",
+            "correct": true,
+            "says": "The page states it (module 66, page 1): \"aborting on the first failure throws away every source after the failing one\"."
+          },
+          {
+            "id": "b",
+            "text": "Only the failed source's partial results, which were small anyway",
+            "correct": false,
+            "says": "Ruled out because partial results are work already done: \"Discarding them wastes work the subagent did\""
+          },
+          {
+            "id": "c",
+            "text": "Nothing at all, and the later sources depend on the second one in the plan",
+            "correct": false,
+            "says": "Ruled out because a failed topic does not end the plan: \"There is no entry that ends the run.\""
+          },
+          {
+            "id": "d",
+            "text": "The retry budget, which is reset by stopping",
+            "correct": false,
+            "says": "Ruled out because a transient failure is the worker's to retry: \"A transient failure, a timeout or a brief outage, is the subagent's to retry\""
+          }
+        ],
+        "origin": {
+          "path": "course/66-errors-across-agents/01-where-a-failure-is-handled-and-what-travels-up.md",
+          "section": "Three anti-patterns, one example"
+        },
+        "domain": "A5"
+      },
+      {
+        "id": "x31",
+        "stem": "Scenario S6. A normalising hook runs twice on the same result, for instance when a result is replayed. Which property should it have?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Determinism across tools: the same date shape is applied to each field that it sees",
+            "correct": false,
+            "says": "Ruled out because changing everything is the opposite of the rule: \"Change only what you understand.\""
+          },
+          {
+            "id": "b",
+            "text": "Statelessness: it must not read the tool input of the call that it handles",
+            "correct": false,
+            "says": "Ruled out because a hook reads the input and the id that ties events together: \"the tool use id that ties a pre and a post event together\""
+          },
+          {
+            "id": "c",
+            "text": "Idempotence: an already readable value is left alone and the answer stays empty",
+            "correct": true,
+            "says": "The page lists the rule (module 49, page 2): \"A value that is already readable is not touched\"."
+          },
+          {
+            "id": "d",
+            "text": "Atomicity: it must write the fields together or not write any of them",
+            "correct": false,
+            "says": "Ruled out because unknown fields pass: \"Fields that are not in the table pass through as they were.\""
+          }
+        ],
+        "origin": {
+          "path": "course/49-hooks/02-normalising-results-command-hooks-and-the-practice.md",
+          "section": "Normalise in a PostToolUse hook"
+        },
+        "domain": "A1"
+      },
+      {
+        "id": "x32",
+        "stem": "Scenario S6. A team registers a hook with the matcher Write|Edit. How is that value read?",
+        "options": [
+          {
+            "id": "a",
+            "text": "As a regular expression that also matches names containing either word in the middle",
+            "correct": false,
+            "says": "Ruled out because only other values are expressions: \"anything else is read as a regular expression\""
+          },
+          {
+            "id": "b",
+            "text": "As a list of two exact tool names that holds only letters and a pipe",
+            "correct": true,
+            "says": "The page gives the syntax (module 49, page 1): \"A value with only letters, digits, underscores, hyphens, spaces, commas and pipes is read as an exact name or a list of exact names\"."
+          },
+          {
+            "id": "c",
+            "text": "As a path filter for the locations that those tools write to disk",
+            "correct": false,
+            "says": "Ruled out because matchers see names and nothing else: \"Matchers only match tool names, not file paths or other arguments.\""
+          },
+          {
+            "id": "d",
+            "text": "As a request to match both names only when they occur in the same turn",
+            "correct": false,
+            "says": "Ruled out because no matcher means every event: \"Hooks without a matcher run for every event of that type\""
+          }
+        ],
+        "origin": {
+          "path": "course/49-hooks/01-what-a-hook-decides-and-what-it-cannot-undo.md",
+          "section": "What a matcher matches"
+        },
+        "domain": "A1"
+      },
+      {
+        "id": "x33",
+        "stem": "Scenario S6. A fan-out runs one extraction pass per document, then a cross-check pass over their summaries. One of twelve passes fails. What should the run do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Abort the whole run and treat the rest as unreliable",
+            "correct": false,
+            "says": "Ruled out because a failure belongs to its item: \"a failure in one is a fact about that file\"."
+          },
+          {
+            "id": "b",
+            "text": "Log it with its message, carry on with the rest, and exclude it from the last step",
+            "correct": true,
+            "says": "The page states it (module 50, page 2): \"The practice records it (path and message) and goes on with the others, and it leaves the failed file out of the cross pass.\""
+          },
+          {
+            "id": "c",
+            "text": "Retry that one forever until it succeeds, then continue",
+            "correct": false,
+            "says": "Ruled out because a loop with no bound never ends: \"A loop with no bound turns a service outage into a run that never ends.\""
+          },
+          {
+            "id": "d",
+            "text": "Give the last step an empty summary for that pass and report all twelve passes as covered",
+            "correct": false,
+            "says": "Ruled out because only reviewed items reach the last pass, \"The cross pass sees only the files that were reviewed\", an empty summary would read as a clean file, and the result must not read as full coverage: \"so that nobody reads a quiet report as full coverage\"."
+          }
+        ],
+        "origin": {
+          "path": "course/50-task-decomposition/02-per-item-passes-adaptive-guards-and-the-practice.md",
+          "section": "A pass that fails"
+        },
+        "domain": "A1"
+      },
+      {
+        "id": "x34",
+        "stem": "Scenario S6. Logs of an extraction agent show many redundant tool calls and few errors. What does the article suggest?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Rewrite the descriptions with clearer examples",
+            "correct": false,
+            "says": "Ruled out because errors, not repeats, point at descriptions: \"lots of tool errors for invalid parameters might suggest tools could use clearer descriptions or better examples\""
+          },
+          {
+            "id": "b",
+            "text": "Remove half of the tools to make fewer calls possible",
+            "correct": false,
+            "says": "Ruled out because the article warns about overlap and not about a count: \"Too many tools or overlapping tools can also distract agents from pursuing efficient strategies.\""
+          },
+          {
+            "id": "c",
+            "text": "Raise the output ceiling to let each call return more",
+            "correct": false,
+            "says": "Ruled out because a response should be lean: \"Design tool responses to return only high-signal information.\""
+          },
+          {
+            "id": "d",
+            "text": "Rightsize the pagination or token limit parameters",
+            "correct": true,
+            "says": "The page quotes the article (module 52, page 2): \"Lots of redundant tool calls might suggest some rightsizing of pagination or token limit parameters is warranted\"."
+          }
+        ],
+        "origin": {
+          "path": "course/52-designing-tool-interfaces/02-results-annotations-large-tool-sets-and-the-practice.md",
+          "section": "When to redesign and not to reprompt"
+        },
+        "domain": "A2"
+      },
+      {
+        "id": "x35",
+        "stem": "Scenario S6. An extraction tool looks up a vendor record by its number, and the call times out. Which handling does the page give?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Send it again only after the vendor service confirms the first call did not run",
+            "correct": false,
+            "says": "Ruled out because a check is the step after a write: \"wherever a write may have happened, the next step is a read\""
+          },
+          {
+            "id": "b",
+            "text": "Treat the timeout as proof that the record does not exist",
+            "correct": false,
+            "says": "Ruled out because a timeout carries no news: \"A timeout after sending is not a failure of the effect; it is the absence of news.\""
+          },
+          {
+            "id": "c",
+            "text": "Send it again, since repeating a read changes nothing",
+            "correct": true,
+            "says": "The page gives the rule (module 53, page 2): \"Repeating a read changes nothing, so a timed out lookup can simply be sent again.\""
+          },
+          {
+            "id": "d",
+            "text": "Send it once more under a fresh idempotency key, so that attempts are told apart",
+            "correct": false,
+            "says": "Ruled out because a retry reuses its key: \"The tool sends the same key on every attempt, and the service performs the action once however often it receives the key\""
+          }
+        ],
+        "origin": {
+          "path": "course/53-tool-errors-agents-can-act-on/02-a-call-with-an-unknown-outcome-retries-and-the-practice.md",
+          "section": "When a retry is safe"
+        },
+        "domain": "A2"
+      },
+      {
+        "id": "x36",
+        "stem": "Scenario S6. An extraction stores for each field the quote it came from. What does a passing check prove?",
+        "options": [
+          {
+            "id": "a",
+            "text": "That the value is correct, whatever the text says",
+            "correct": false,
+            "says": "Ruled out because other checks cover correctness: \"the sum check and the review of conflicts cover the rest\""
+          },
+          {
+            "id": "b",
+            "text": "That the model is confident about the value it gave",
+            "correct": false,
+            "says": "Ruled out because the test is plain code: \"it does not ask the model whether it is right\""
+          },
+          {
+            "id": "c",
+            "text": "That the schema is valid for the document type",
+            "correct": false,
+            "says": "Ruled out because provenance is part of the shape: \"a required `provenance` object that maps each field to a quote\""
+          },
+          {
+            "id": "d",
+            "text": "That the value is grounded in the text, not that it is correct",
+            "correct": true,
+            "says": "The page limits the check (module 62, page 1): \"Provenance does not prove a value is correct, only that it is grounded\"."
+          }
+        ],
+        "origin": {
+          "path": "course/62-structured-output-at-the-architect-level/01-what-a-schema-guarantees-and-what-it-does-not.md",
+          "section": "Provenance: the quote that proves it"
+        },
+        "domain": "A4"
+      },
+      {
+        "id": "x37",
+        "stem": "Scenario S6. A schema gives a missing vendor name the default unknown. Why does that hurt downstream?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It breaks the parser of the report that reads each record downstream",
+            "correct": false,
+            "says": "Ruled out because the parse is fine: \"The JSON never fails to parse.\""
+          },
+          {
+            "id": "b",
+            "text": "It lowers accuracy in the final report that the team reads each week",
+            "correct": false,
+            "says": "Ruled out because a clean record passes: \"A pipeline that stops at schema validation reports a high success rate and passes wrong records on.\""
+          },
+          {
+            "id": "c",
+            "text": "It forces the model to guess the vendor on every record it reads",
+            "correct": false,
+            "says": "Ruled out because nullability is the remedy: \"a field that may be missing from the source is optional or nullable\""
+          },
+          {
+            "id": "d",
+            "text": "It cannot be told from a real value by code, so a placeholder passes as real",
+            "correct": true,
+            "says": "The page gives the reason (module 62, page 1): \"downstream code cannot tell it from a real value\"."
+          }
+        ],
+        "origin": {
+          "path": "course/62-structured-output-at-the-architect-level/01-what-a-schema-guarantees-and-what-it-does-not.md",
+          "section": "A field that may be absent is nullable"
+        },
+        "domain": "A4"
+      },
+      {
+        "id": "x38",
+        "stem": "Scenario S6. A team plans a weekly extraction over thousands of stored documents and wants the lowest cost. Which two statements describe the right approach and its entries? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "The synchronous interface in parallel threads fits, since discounts need a contract",
+            "correct": false,
+            "says": "Ruled out because \"The half price is a reason to move work that can wait.\""
+          },
+          {
+            "id": "b",
+            "text": "Batch processing with stream set to true fits, so that results arrive one by one",
+            "correct": false,
+            "says": "Ruled out because \"the results come back as one file, not a stream\"."
+          },
+          {
+            "id": "c",
+            "text": "The synchronous interface with streaming fits, since results arrive sooner",
+            "correct": false,
+            "says": "Ruled out because \"Standard documents go to the batch queue\"."
+          },
+          {
+            "id": "d",
+            "text": "The queued interface fits, since the work can wait",
+            "correct": true,
+            "says": "\"A batch entry is `{custom_id, params}`\", and the `custom_id` is \"the only link between a request and its result\", because the results \"can be returned in any order\", so the half price suits work that can wait (module 63, page 1)."
+          },
+          {
+            "id": "e",
+            "text": "Each entry carries a unique identifier, as results return in any order",
+            "correct": true,
+            "says": "\"A batch entry is `{custom_id, params}`\", and the `custom_id` is \"the only link between a request and its result\", because the results \"can be returned in any order\", so the half price suits work that can wait (module 63, page 1)."
+          }
+        ],
+        "origin": {
+          "path": "course/63-batch-and-multi-pass-review/01-when-a-batch-fits-and-what-to-resubmit.md",
+          "section": "What a batch request may and may not contain"
+        },
+        "domain": "A4",
+        "select": 2
+      },
+      {
+        "id": "x39",
+        "stem": "Scenario S6. A pipeline's overall accuracy clears its target, and the team proposes dropping manual review for everything. What does the page say decides this?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The overall average, a figure above target that covers every kind",
+            "correct": false,
+            "says": "Ruled out because an average can hide a hopeless kind: \"The dashboard says 99 percent and the reviewers say handwriting is hopeless\""
+          },
+          {
+            "id": "b",
+            "text": "Evidence for each kind of input, never the average",
+            "correct": true,
+            "says": "The page states it (module 75, page 1): \"decided by evidence for each kind, never by the average.\""
+          },
+          {
+            "id": "c",
+            "text": "The workload that reviewers face in a normal week",
+            "correct": false,
+            "says": "Ruled out because a segment is judged on its own record: \"A segment is automated when it, itself, has been shown to work.\""
+          },
+          {
+            "id": "d",
+            "text": "The model's own confidence on each record it returns",
+            "correct": false,
+            "says": "Ruled out because confidence is not the test: \"The status is derived from the checks, and the model's own opinion plays no part.\""
+          }
+        ],
+        "origin": {
+          "path": "course/75-scenario-structured-data-extraction/01-the-extraction-system-where-the-pipeline-can-lie.md",
+          "section": "What the pipeline owns"
+        },
+        "domain": "A4"
+      },
+      {
+        "id": "x40",
+        "stem": "Scenario S6. A record has the currency other and no currency_detail. How does the pipeline classify it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "As a semantic error, since the value is plausible but unchecked",
+            "correct": false,
+            "says": "Ruled out because semantic errors are about meaning: \"a vendor in the currency field\""
+          },
+          {
+            "id": "b",
+            "text": "As a syntax error, since the pair comes incomplete",
+            "correct": true,
+            "says": "The page states it (module 62, page 1): \"A record with `other` and no detail is a syntax error, because the pair is the contract.\""
+          },
+          {
+            "id": "c",
+            "text": "As valid, since other is a member of the enum",
+            "correct": false,
+            "says": "Ruled out because being a member of the enum is not enough, since the value is meant to come with its detail: \"`other` plus a detail field for a value the enum did not foresee: the currency `other` with `currency_detail: \"CHF\"`\""
+          },
+          {
+            "id": "d",
+            "text": "As an absent value, since it goes to review untried",
+            "correct": false,
+            "says": "Ruled out because absence is another case: \"A required value that the model reports as absent is not retried: the document goes to review\""
+          }
+        ],
+        "origin": {
+          "path": "course/62-structured-output-at-the-architect-level/01-what-a-schema-guarantees-and-what-it-does-not.md",
+          "section": "Enums that admit ambiguity and growth"
+        },
+        "domain": "A4"
+      },
+      {
+        "id": "x41",
+        "stem": "Scenario S6. A batch's results file lists entries in a different order from the requests. How should the pipeline pair each result with its request?",
+        "options": [
+          {
+            "id": "a",
+            "text": "By position, since results mirror the sequence in which the entries were sent to the batch service",
+            "correct": false,
+            "says": "Ruled out because results come in any order: \"can be returned in any order\""
+          },
+          {
+            "id": "b",
+            "text": "By matching the text of each answer against the text of each prompt sent",
+            "correct": false,
+            "says": "Ruled out because the label is a short identifier: \"The `custom_id` is 1 to 64 characters of letters, digits, hyphens and underscores\""
+          },
+          {
+            "id": "c",
+            "text": "By the unique label that each submission carries, because sequence is not promised",
+            "correct": true,
+            "says": "The page states it (module 63, page 1): \"it is the only link between a request and its result\"."
+          },
+          {
+            "id": "d",
+            "text": "By timestamps, since the earliest request normally finishes first",
+            "correct": false,
+            "says": "Ruled out because each entry has its own result: \"A finished batch has a result per entry: succeeded, errored, canceled or expired.\""
+          }
+        ],
+        "origin": {
+          "path": "course/63-batch-and-multi-pass-review/01-when-a-batch-fits-and-what-to-resubmit.md",
+          "section": "What a batch request may and may not contain"
+        },
+        "domain": "A4"
+      },
+      {
+        "id": "x42",
+        "stem": "Scenario S6. One pass reports the same defect twice, and another pass reports it once. How many independent confirmations are there?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Two, since a reviewer that repeats itself still counts as one voice",
+            "correct": true,
+            "says": "The page states it (module 63, page 2): \"A pass that reports it twice counts once, since repetition inside a pass is not independent evidence.\""
+          },
+          {
+            "id": "b",
+            "text": "Three, since each report of the defect is a confirmation",
+            "correct": false,
+            "says": "Ruled out because identity is by file, line and issue: \"The same finding, identified by file, line and issue, reported by two passes is one finding.\""
+          },
+          {
+            "id": "c",
+            "text": "One, since the second reviewer only repeats the first one",
+            "correct": false,
+            "says": "Ruled out because independence is about the reviewer: \"A reviewer is independent if it could not have copied the author's rationale.\""
+          },
+          {
+            "id": "d",
+            "text": "Zero, since independent confirmation needs at least three reviewers",
+            "correct": false,
+            "says": "Ruled out because passes produce lists that are combined by rules: \"Several independent passes produce several lists.\""
+          }
+        ],
+        "origin": {
+          "path": "course/63-batch-and-multi-pass-review/02-independent-passes-combined-verdicts-and-the-practice.md",
+          "section": "Combining the passes"
+        },
+        "domain": "A4"
+      },
+      {
+        "id": "x43",
+        "stem": "Scenario S6. On a labelled set, no confidence cut-off reaches the 95% target. What follows?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Use the cut-off with the highest precision and automate everything above it",
+            "correct": false,
+            "says": "Ruled out because the rule picks the lowest qualifying threshold: \"The lowest qualifying threshold automates the most work while meeting the target.\""
+          },
+          {
+            "id": "b",
+            "text": "Lower the target until some cut-off qualifies for automation",
+            "correct": false,
+            "says": "Ruled out because a threshold has to reach the target: \"Pick the lowest threshold whose precision reaches the target.\""
+          },
+          {
+            "id": "c",
+            "text": "Ask the model to restate its confidence on a hundred-point scale",
+            "correct": false,
+            "says": "Ruled out because a restated number is still a score: \"The number is only a score\""
+          },
+          {
+            "id": "d",
+            "text": "Review every item until the pipeline improves, with no honest boundary to use",
+            "correct": true,
+            "says": "The page states it (module 68, page 1): \"If no threshold reaches the target, there is no honest cut-off: every item needs review until the pipeline improves.\""
+          }
+        ],
+        "origin": {
+          "path": "course/68-human-review-and-calibrated-confidence/01-measuring-accuracy-by-segment-and-calibrating-confidence.md",
+          "section": "Calibrating a confidence threshold"
+        },
+        "domain": "A5"
+      },
+      {
+        "id": "x44",
+        "stem": "Scenario S6. A subagent cannot name a source for a statement that the schema demands one for. What should it do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Invent a plausible citation to make the schema validate the finding at once",
+            "correct": false,
+            "says": "Ruled out because a required field pushes toward invention: \"a required field pushes a model to invent a value when there is none\""
+          },
+          {
+            "id": "b",
+            "text": "Cite the search engine as the source of each unsourced claim in the answer",
+            "correct": false,
+            "says": "Ruled out because a source travels with its claim: \"A source survives as long as it travels with its claim in a field.\""
+          },
+          {
+            "id": "c",
+            "text": "Return it as a finding with an empty reference field and a warning",
+            "correct": false,
+            "says": "Ruled out because a finding without a source is refused on entry: \"a finding without one is refused where it enters the pipeline\""
+          },
+          {
+            "id": "d",
+            "text": "Report it apart as lacking an origin, or omit it, rather than return it as a finding",
+            "correct": true,
+            "says": "The page states it (module 69, page 1): \"A subagent that cannot name a source for a statement does not return it as a finding: it reports it separately as unsourced, or leaves it out\"."
+          }
+        ],
+        "origin": {
+          "path": "course/69-provenance-and-uncertainty/01-keeping-claims-tied-to-their-sources-conflicts-and-dates.md",
+          "section": "Provenance is a required field"
+        },
+        "domain": "A5"
+      },
+      {
+        "id": "x45",
+        "stem": "Scenario S6. Six extraction workers may be lost to a restart. When should each write its state file?",
+        "options": [
+          {
+            "id": "a",
+            "text": "As it learns, whenever it has something worth keeping",
+            "correct": true,
+            "says": "The page states it (module 67, page 2): \"It is written as the agent learns and not only at the end, so that a crash half-way leaves something.\""
+          },
+          {
+            "id": "b",
+            "text": "At the end only, when its findings are complete and checked",
+            "correct": false,
+            "says": "Ruled out because a crash gives no warning: \"A crash does not warn.\""
+          },
+          {
+            "id": "c",
+            "text": "Once an hour on a timer, whatever it has learned in that time",
+            "correct": false,
+            "says": "Ruled out because the file holds findings in a fixed form: \"holding its findings in the scratchpad form of page 1: specific, once, grouped\""
+          },
+          {
+            "id": "d",
+            "text": "Only when a person asks for a checkpoint of its work",
+            "correct": false,
+            "says": "Ruled out because the path is fixed by the design: \"Each agent exports its state to a known location\""
+          }
+        ],
+        "origin": {
+          "path": "course/67-exploring-a-large-codebase/02-compaction-crash-recovery-and-the-practice.md",
+          "section": "State export and the manifest"
+        },
+        "domain": "A5"
+      },
+      {
+        "id": "x46",
+        "stem": "Scenario S1. A loop checks a turn limit before every model call. On one run the limit is ten, and the tenth reply ends its turn with a full answer. Which status should a correct loop report?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Max turns, because the number of calls reached the limit on that very reply of the run",
+            "correct": false,
+            "says": "Ruled out because a reply that ended its turn is finished, and the count is only a backstop: \"Keep the count as a backstop, above the real need, with a status that is not `done`.\""
+          },
+          {
+            "id": "b",
+            "text": "Truncated, because the loop made its last permitted request and must therefore assume that the text was cut off",
+            "correct": false,
+            "says": "Ruled out because a reply that ended its turn is not cut off, since the page reads that stop reason as \"Claude finished its response naturally.\""
+          },
+          {
+            "id": "c",
+            "text": "Unexpected, because a loop that has no call left cannot confirm how the reply ended",
+            "correct": false,
+            "says": "Ruled out because a known value is handled by name: \"in your own code, give every other value a status of its own.\""
+          },
+          {
+            "id": "d",
+            "text": "Done, because the tally was tested before that last request and nothing was cut",
+            "correct": true,
+            "says": "The page puts the check where it protects the last call (module 45, page 1): \"a reply that ends the turn on the very last allowed call is still done\"."
+          }
+        ],
+        "origin": {
+          "path": "course/45-the-agentic-loop-in-depth/01-what-ends-a-run.md",
+          "section": "Anti-pattern two: the count as the loop"
+        },
+        "domain": "A1"
+      },
+      {
+        "id": "x47",
+        "stem": "Scenario S1. A reply that describes a refund policy ends with the stop reason `max_tokens`, in the middle of a sentence. Which two statements describe what the loop should do? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "Call the model again at once with identical messages, since a cut-off reply is a fault of the service",
+            "correct": false,
+            "says": "Ruled out because \"Run the calls and send the results; this is the only value that continues\"."
+          },
+          {
+            "id": "b",
+            "text": "Treat a higher ceiling as the code's decision",
+            "correct": true,
+            "says": "The page lists the value: \"Leave with a status of its own: the reply is cut off, and raising the limit is a decision for your code\" (module 45, page 1)."
+          },
+          {
+            "id": "c",
+            "text": "Treat the run as finished, since the model stopped producing tool calls",
+            "correct": false,
+            "says": "Ruled out because \"A value the loop has never seen must not be guessed at.\""
+          },
+          {
+            "id": "d",
+            "text": "Leave with a status of its own, as the output is cut off",
+            "correct": true,
+            "says": "The page lists the value: \"Leave with a status of its own: the reply is cut off, and raising the limit is a decision for your code\" (module 45, page 1)."
+          },
+          {
+            "id": "e",
+            "text": "Ask the model to repeat the answer in fewer words, since the ceiling is the reply's fault",
+            "correct": false,
+            "says": "Ruled out because \"The response reached your `max_tokens` limit.\""
+          }
+        ],
+        "origin": {
+          "path": "course/45-the-agentic-loop-in-depth/01-what-ends-a-run.md",
+          "section": "The values that end a run"
+        },
+        "domain": "A1",
+        "select": 2
+      },
+      {
+        "id": "x48",
+        "stem": "Scenario S1. A pre-call hook denies refunds above 500. The hook returns a short sentence that the model reads before it decides what to tell the customer. Which reason should it return to the model?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Forbidden by company policy for this kind of request",
+            "correct": false,
+            "says": "Ruled out because a bare refusal says nothing to do: \"A reason is part of the interface.\""
+          },
+          {
+            "id": "b",
+            "text": "Amounts over that limit go to a person, so hand this case over",
+            "correct": true,
+            "says": "The page prefers a reason that teaches (module 49, page 1): a reason \"tells the model what to do next, which is the same design as the refusal sentence of module 48\"."
+          },
+          {
+            "id": "c",
+            "text": "Permission denied for the requested action by the rules",
+            "correct": false,
+            "says": "Ruled out because a flat denial ends the attempt: \"Writing to /etc is not allowed\""
+          },
+          {
+            "id": "d",
+            "text": "Blocked for now: please retry the same call again in a moment or two, after a short pause",
+            "correct": false,
+            "says": "Ruled out because the reason \"tells the model why, so it avoids retrying.\""
+          }
+        ],
+        "origin": {
+          "path": "course/49-hooks/01-what-a-hook-decides-and-what-it-cannot-undo.md",
+          "section": "What a PreToolUse hook answers"
+        },
+        "domain": "A1"
+      },
+      {
+        "id": "x49",
+        "stem": "Scenario S1. A hook converts epoch seconds to dates in order results. A tool returns a plain-text error. What should the hook do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Parse it as JSON and fill the missing fields with defaults so that the shape is uniform for the next stage",
+            "correct": false,
+            "says": "Ruled out because it changes only what it understands: \"Fields that are not in the table pass through as they were.\""
+          },
+          {
+            "id": "b",
+            "text": "Replace it with a tidy message so that every result looks the same",
+            "correct": false,
+            "says": "Ruled out because the page rejects it by name: \"Normalise by rewriting every result, errors included.\""
+          },
+          {
+            "id": "c",
+            "text": "Raise an exception, so that the call is retried by the loop",
+            "correct": false,
+            "says": "Ruled out because a crash is not a repair: \"A guard that crashes on unexpected input is therefore a guard that lets the call through.\""
+          },
+          {
+            "id": "d",
+            "text": "Pass it through unchanged with an empty answer, since rewriting it would hide the failure",
+            "correct": true,
+            "says": "The page limits the normaliser (module 49, page 2): \"since rewriting an error hides the failure\"."
+          }
+        ],
+        "origin": {
+          "path": "course/49-hooks/02-normalising-results-command-hooks-and-the-practice.md",
+          "section": "Normalise in a PostToolUse hook"
+        },
+        "domain": "A1"
+      },
+      {
+        "id": "x50",
+        "stem": "Scenario S1. A hook script stops a refund by signalling failure to the harness and also prints a machine-readable decision. Which two statements does the guide support? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "Prefer the status and discard the structured output",
+            "correct": false,
+            "says": "Ruled out because \"Mixing them leaves it to the reference to say which wins, and a guard should not depend on that.\""
+          },
+          {
+            "id": "b",
+            "text": "A single approach is the rule for each component",
+            "correct": true,
+            "says": "The guide says \"Use exit 2 to block with a stderr message, or exit 0 with JSON for structured control. Choose one approach per hook\" (module 49, page 2)."
+          },
+          {
+            "id": "c",
+            "text": "Print the structured output first and signal failure afterwards, so both are recorded",
+            "correct": false,
+            "says": "Ruled out because each exit code is its own path: \"with JSON printed on standard output, the JSON decides\"."
+          },
+          {
+            "id": "d",
+            "text": "Always print the structured output and ignore the status",
+            "correct": false,
+            "says": "Ruled out because the status is how a block is signalled: \"Claude Code blocks the action. Write a reason to stderr.\""
+          },
+          {
+            "id": "e",
+            "text": "Status 2 blocks with a stderr message, while status 0 with structured output gives finer control",
+            "correct": true,
+            "says": "The guide says \"Use exit 2 to block with a stderr message, or exit 0 with JSON for structured control. Choose one approach per hook\" (module 49, page 2)."
+          }
+        ],
+        "origin": {
+          "path": "course/49-hooks/02-normalising-results-command-hooks-and-the-practice.md",
+          "section": "The command hook"
+        },
+        "domain": "A1",
+        "select": 2
+      },
+      {
+        "id": "x51",
+        "stem": "Scenario S1. An agent's loop answers two tool calls that came in one reply. In what shape must the results go back?",
+        "options": [
+          {
+            "id": "a",
+            "text": "In one user message, together, with those blocks placed before any added text",
+            "correct": true,
+            "says": "The page gives the shape (module 45, page 2): \"the tool_result blocks must come FIRST in the content array.\""
+          },
+          {
+            "id": "b",
+            "text": "In separate user messages, one per call, in the order the calls were made by the model itself",
+            "correct": false,
+            "says": "Ruled out because one message answers the whole turn: \"A turn with three calls gets one user message with three results\""
+          },
+          {
+            "id": "c",
+            "text": "In one assistant message that echoes the model's request",
+            "correct": false,
+            "says": "Ruled out because the answer is a user message: \"Tool result blocks must immediately follow their corresponding tool use blocks in the message history\""
+          },
+          {
+            "id": "d",
+            "text": "In one user message, with explanatory text first and the blocks after it",
+            "correct": false,
+            "says": "Ruled out because text may not lead: \"Any text must come AFTER all tool results.\""
+          }
+        ],
+        "origin": {
+          "path": "course/26-tool-use/02-the-loop-results-errors-and-stop-reasons.md",
+          "section": "The formatting rules that cause 400 errors"
+        },
+        "domain": "A1"
+      },
+      {
+        "id": "x52",
+        "stem": "Scenario S1. A loop receives a reply whose stop reason is stop_sequence. The setup lists two custom endings for a generation. What should it do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Continue with the next request and treat only an end of turn as finished",
+            "correct": false,
+            "says": "Ruled out because only one value continues: \"Run the calls and send the results; this is the only value that continues\""
+          },
+          {
+            "id": "b",
+            "text": "Raise the output ceiling and ask again with the same messages",
+            "correct": false,
+            "says": "Ruled out because a cut-off is another value: \"Leave with a status of its own: the reply is cut off, and raising the limit is a decision for your code\""
+          },
+          {
+            "id": "c",
+            "text": "Treat it as finished, and check which of the configured strings fired if that matters",
+            "correct": true,
+            "says": "The page gives the action (module 45, page 1): \"Leave: done, and read which sequence fired\"."
+          },
+          {
+            "id": "d",
+            "text": "Report an unexpected value that needs an alert and a person to look at it",
+            "correct": false,
+            "says": "Ruled out because this value is known: \"A value the loop has never seen must not be guessed at.\""
+          }
+        ],
+        "origin": {
+          "path": "course/45-the-agentic-loop-in-depth/01-what-ends-a-run.md",
+          "section": "The values that end a run"
+        },
+        "domain": "A1"
+      },
+      {
+        "id": "x53",
+        "stem": "Scenario S1. A lookup finds no orders for a customer. The customer exists, but no purchase was made in the period that was searched. Which reply is right?",
+        "options": [
+          {
+            "id": "a",
+            "text": "An error result flagged as not found, which sends the agent to another route through the other service",
+            "correct": false,
+            "says": "Ruled out because a failure and an empty answer are different: \"from a valid empty result, which is a successful query that found no matches\""
+          },
+          {
+            "id": "b",
+            "text": "An empty string, which leaves the agent to decide what it means",
+            "correct": false,
+            "says": "Ruled out because the two replies mean opposite things: \"The two replies look alike in a log and mean opposite things\""
+          },
+          {
+            "id": "c",
+            "text": "A successful response saying that nothing matched the identifier and the date range",
+            "correct": true,
+            "says": "The page treats it as success (module 53, page 1): \"A lookup that finds no orders for a customer has worked.\""
+          },
+          {
+            "id": "d",
+            "text": "A transient error with retry set, in case the index is catching up",
+            "correct": false,
+            "says": "Ruled out because a transient failure is a timeout or a limit: \"A timeout, an unavailable service, a rate limit: the same call may work soon\""
+          }
+        ],
+        "origin": {
+          "path": "course/53-tool-errors-agents-can-act-on/01-the-error-result-and-what-the-loop-does-with-it.md",
+          "section": "A valid empty result is not an error"
+        },
+        "domain": "A2"
+      },
+      {
+        "id": "x54",
+        "stem": "Scenario S1. The wrapper has no information yet about the state of the remote system. Which two of these calls may be sent again after a timeout without first checking state? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "A refund that carries an idempotency key which the service honours",
+            "correct": true,
+            "says": "\"Repeating a read changes nothing, so a timed out lookup can simply be sent again\", and so can \"A call that carries an idempotency key that the service honours\" (module 53, page 2)."
+          },
+          {
+            "id": "b",
+            "text": "An email send that the outbox may already have accepted",
+            "correct": false,
+            "says": "Ruled out because \"an email that left the outbox cannot be called back\"."
+          },
+          {
+            "id": "c",
+            "text": "A ticket creation whose duplicates can be merged later",
+            "correct": false,
+            "says": "Ruled out because \"a ticket created twice is two tickets\"."
+          },
+          {
+            "id": "d",
+            "text": "A refund with no key whose amount the service validates",
+            "correct": false,
+            "says": "Ruled out because \"a refund sent twice refunds twice\"."
+          },
+          {
+            "id": "e",
+            "text": "A lookup that only reads a record",
+            "correct": true,
+            "says": "\"Repeating a read changes nothing, so a timed out lookup can simply be sent again\", and so can \"A call that carries an idempotency key that the service honours\" (module 53, page 2)."
+          }
+        ],
+        "origin": {
+          "path": "course/53-tool-errors-agents-can-act-on/02-a-call-with-an-unknown-outcome-retries-and-the-practice.md",
+          "section": "When a retry is safe"
+        },
+        "domain": "A2",
+        "select": 2
+      },
+      {
+        "id": "x55",
+        "stem": "Scenario S1. A refund call fails with a permission error, and the loop retries it three times. The error text says that the caller lacks the right to issue refunds. What went wrong?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Only a person with authority is able to settle it, so repeating puts a human question to a machine",
+            "correct": true,
+            "says": "The page states it (module 53, page 1): \"a loop that retries a permission failure three times has asked a person's question of a machine three times\"."
+          },
+          {
+            "id": "b",
+            "text": "Three is too many, and a single retry after a short pause would have succeeded in the end",
+            "correct": false,
+            "says": "Ruled out because a transient fault is the kind that clears: \"A timeout, an unavailable service, a rate limit: the same call may work soon\""
+          },
+          {
+            "id": "c",
+            "text": "The error should have been marked as a validation failure by the tool author",
+            "correct": false,
+            "says": "Ruled out because the two failures are repaired differently: \"but the agent repairs one and escalates the other\""
+          },
+          {
+            "id": "d",
+            "text": "The loop should have retried with a different amount each time it failed",
+            "correct": false,
+            "says": "Ruled out because a validation failure is about the input: \"The input was wrong: a missing field, a value out of range, a bad format\""
+          }
+        ],
+        "origin": {
+          "path": "course/53-tool-errors-agents-can-act-on/01-the-error-result-and-what-the-loop-does-with-it.md",
+          "section": "The categories, and the action each one calls for"
+        },
+        "domain": "A2"
+      },
+      {
+        "id": "x56",
+        "stem": "Scenario S1. A support agent's tools come from a billing service and a shipping service, and both define a tool named lookup. How should the names be set?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Rename them lookup1 and lookup2, since numbers keep the labels short and unique across the whole catalogue",
+            "correct": false,
+            "says": "Ruled out because a name is the first thing the model reads: \"A name is the first thing the model reads.\""
+          },
+          {
+            "id": "b",
+            "text": "Begin each one with the system it belongs to, so that each family is easy to tell apart",
+            "correct": true,
+            "says": "The page quotes the documentation (module 52, page 1): \"When your tools span multiple services or resources, prefix names with the service (for example, `github_list_prs`, `slack_send_message`).\""
+          },
+          {
+            "id": "c",
+            "text": "Keep both as lookup and rely on the descriptions to separate them in each turn",
+            "correct": false,
+            "says": "Ruled out because near-identical texts leave nothing to choose by: \"Two tools whose texts say nearly the same thing leave the model nothing to choose by\""
+          },
+          {
+            "id": "d",
+            "text": "Merge them into one lookup that tries both of the services in turn",
+            "correct": false,
+            "says": "Ruled out because a merge is a larger change: \"it is a larger change than a first step needs\""
+          }
+        ],
+        "origin": {
+          "path": "course/52-designing-tool-interfaces/01-descriptions-names-and-boundaries.md",
+          "section": "Names and prefixes"
+        },
+        "domain": "A2"
+      },
+      {
+        "id": "x57",
+        "stem": "Scenario S1. An organisation wants data-handling reminders delivered to every machine and wants a particular shell command blocked. Which pairing is right?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A managed memory document for both the text and the block",
+            "correct": false,
+            "says": "Ruled out because memory is context and not enforcement: \"Claude treats them as context, not enforced configuration\""
+          },
+          {
+            "id": "b",
+            "text": "Managed settings for both the reminders and the prohibition",
+            "correct": false,
+            "says": "Ruled out because a managed memory file is for behaviour: \"A managed CLAUDE.md is for behaviour\""
+          },
+          {
+            "id": "c",
+            "text": "A managed memory file for text, managed settings for the ban",
+            "correct": true,
+            "says": "The page separates them (module 57, page 1): \"blocking a tool, a command or a path is done with managed settings\"."
+          },
+          {
+            "id": "d",
+            "text": "A user-level memory document for both, pushed by a login script",
+            "correct": false,
+            "says": "Ruled out because a user-level file is personal: \"You, in every project\""
+          }
+        ],
+        "origin": {
+          "path": "course/57-memory-files-and-rules/01-where-instructions-live-and-what-loads-when.md",
+          "section": "Five places, one load order"
+        },
+        "domain": "A3"
+      },
+      {
+        "id": "x58",
+        "stem": "Scenario S1. A support assistant's role is set in one sentence of the system prompt. What does the documentation say about such a sentence?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It carries no weight unless a page of rules follows it",
+            "correct": false,
+            "says": "Ruled out because a persona needs little: \"A persona needs a name, a manner and its limits, not a page of rules\""
+          },
+          {
+            "id": "b",
+            "text": "It overrides each instruction that appears later in the conversation",
+            "correct": false,
+            "says": "Ruled out because rules that must hold belong elsewhere: \"the rules that must hold belong in the second row\""
+          },
+          {
+            "id": "c",
+            "text": "It makes a difference to focus and tone even as a brief line",
+            "correct": true,
+            "says": "The page quotes the documentation (module 76, page 1): \"Setting a role in the system prompt focuses Claude's behavior and tone for your use case. Even a single sentence makes a difference.\""
+          },
+          {
+            "id": "d",
+            "text": "It applies to the first reply of a session and then lapses",
+            "correct": false,
+            "says": "Ruled out because the prompt is stable across turns: \"one stable block is reusable on every turn\""
+          }
+        ],
+        "origin": {
+          "path": "course/76-scenario-conversational-ai-assistant/01-the-assistant-persona-memory-and-the-window.md",
+          "section": "What lives where"
+        },
+        "domain": "A4"
+      },
+      {
+        "id": "x59",
+        "stem": "Scenario S1. A support team wants a reviewer that shares none of the refund assistant's reasoning. What gives the product that building block?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A second turn in the same conversation with a stricter instruction",
+            "correct": false,
+            "says": "Ruled out because a stricter instruction leaves the reasoning in place: \"a stricter instruction in the same conversation, since the reasoning is still there\""
+          },
+          {
+            "id": "b",
+            "text": "A larger thinking budget given to the same session",
+            "correct": false,
+            "says": "Ruled out because more room is the same starting point: \"a larger thinking budget, which gives the model more room to reason from the same starting point\""
+          },
+          {
+            "id": "c",
+            "text": "A separate helper that begins with a fresh window and hands back only a summary",
+            "correct": true,
+            "says": "The page states it (module 63, page 1): \"In Claude Code a subagent starts with a fresh context window that does not include the conversation history, the skills already invoked or the files the main agent has read, and returns only a summary.\""
+          },
+          {
+            "id": "d",
+            "text": "A copy of the conversation passed to a new instance with the notes attached for its own reading",
+            "correct": false,
+            "says": "Ruled out because the reviewer gets the code and not the reasoning: \"the code, and not the reasoning\""
+          }
+        ],
+        "origin": {
+          "path": "course/63-batch-and-multi-pass-review/01-when-a-batch-fits-and-what-to-resubmit.md",
+          "section": "An independent instance is the product's building block"
+        },
+        "domain": "A4"
+      },
+      {
+        "id": "x60",
+        "stem": "Scenario S1. A long input holds twenty order summaries and a question. Where should the question and the key facts go?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The question at the start, to have the model read it before the summaries",
+            "correct": false,
+            "says": "Ruled out because the question belongs at the end: \"The question at the end can improve quality on complex inputs.\""
+          },
+          {
+            "id": "b",
+            "text": "The ask at the end, with a short digest of the essentials at the start",
+            "correct": true,
+            "says": "The page states it (module 64, page 1): \"Put the long material first and the question last.\""
+          },
+          {
+            "id": "c",
+            "text": "Both in the middle, where the attention of the model is strongest",
+            "correct": false,
+            "says": "Ruled out because \"a long input's middle is where findings go missing\"."
+          },
+          {
+            "id": "d",
+            "text": "The question repeated after every one of the twenty summaries",
+            "correct": false,
+            "says": "Ruled out because quoting before answering is another tool: \"Asking the model to quote the relevant passages before answering is a fourth tool for long documents.\""
+          }
+        ],
+        "origin": {
+          "path": "course/64-keeping-what-matters-in-long-conversations/01-case-facts-trimmed-results-and-position.md",
+          "section": "Where a fact sits"
+        },
+        "domain": "A5"
+      }
+    ],
+    "mock": {
+      "pass_mark": 70,
+      "domains": [
+        {
+          "id": "A1",
+          "title": "Agentic architecture and orchestration"
+        },
+        {
+          "id": "A2",
+          "title": "Tool design and MCP integration"
+        },
+        {
+          "id": "A3",
+          "title": "Claude Code configuration and workflows"
+        },
+        {
+          "id": "A4",
+          "title": "Prompt engineering and structured output"
+        },
+        {
+          "id": "A5",
+          "title": "Context management and reliability"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "25-structured-output-and-defensive-parsing"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: an extractor with validation and a re-prompt (Python)",
+  "lang": "python",
+  "main_file": "extractor.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_extractor.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-1/test_extractor.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_a_valid_reply_is_returned_after_one_call",
+      "kind": "main",
+      "says": "A valid reply is returned after one call"
+    },
+    {
+      "id": "test_e1_json_is_found_in_fences_and_prose_and_bad_text_is_retried",
+      "kind": "edge",
+      "says": "JSON is found inside fences and prose, and text with no JSON is retried"
+    },
+    {
+      "id": "test_e2_every_schema_violation_is_listed_and_sent_back_to_the_model",
+      "kind": "edge",
+      "says": "Every schema violation is listed and sent back to the model"
+    },
+    {
+      "id": "test_e3_the_number_of_attempts_is_bounded",
+      "kind": "edge",
+      "says": "The number of attempts is bounded"
+    },
+    {
+      "id": "test_e4_a_refusal_or_a_cut_off_reply_is_not_retried",
+      "kind": "edge",
+      "says": "A refusal or a cut-off reply is not retried"
+    },
+    {
+      "id": "test_e5_a_quote_that_is_not_in_the_document_is_rejected",
+      "kind": "edge",
+      "says": "A quotation that is not in the document is rejected"
+    },
+    {
+      "id": "test_e6_types_are_exact_booleans_are_not_numbers_and_integers_have_no_fraction",
+      "kind": "edge",
+      "says": "Types are exact: booleans are not numbers and integers have no fraction"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/25-structured-output-and-defensive-parsing/02-defensive-parsing-validation-and-the-re-prompt.md"
+}

@@ -1,0 +1,304 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "46-coordinator-and-subagents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: a coordinator that delegates to isolated subagents (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a coordinator that delegates to isolated subagents"
+    },
+    {
+      "type": "para",
+      "text": "A research system has one coordinator and several subagents. The coordinator splits the question, hands each subagent a brief, reads what comes back, asks for more where there are gaps, and writes one answer. A subagent knows only its brief: it does not see the conversation, the plan or the other subagents' findings. Most of the failures of such a system are in the coordinator's code, not in the model: duplicated work, a vague brief, one failure that stops the team, a review that sends everyone out again, and a team built for a question that one agent could answer. Write the coordinator. Nothing here touches the network: the four model roles are functions that the tests script."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`planner(question)`",
+          "returns the plan: `{\"delegate\": bool, \"answer\": text or null, \"subtasks\": [{\"scope\": text, \"brief\": text}]}`"
+        ],
+        [
+          "`subagent(brief)`",
+          "runs one subagent and returns its final report as text; it may throw"
+        ],
+        [
+          "`reviewer(question, findings)`",
+          "returns the list of gap descriptions (texts) still to be researched; an empty list means nothing is missing"
+        ],
+        [
+          "`synthesizer(question, findings)`",
+          "returns the final answer as text"
+        ],
+        [
+          "a finding",
+          "`{\"scope\": text, \"text\": the subagent's report}`"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working coordinator with eight small gaps cut out of it. The plan, the calls to the planner, subagent, reviewer and synthesizer, the failure handling and the result shapes are written and correct. Each gap is one function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the Java, Kotlin and TypeScript names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_wants_team` unlocks `e1`: does the plan ask for subagents.",
+        "`_drop_reason` unlocks `e3`: why a subtask is dropped (empty brief, duplicate scope, over limit), or none.",
+        "`_report_problem` unlocks `e4`: a report that is not text or is blank is an `empty report`.",
+        "`_clean_gaps` unlocks `e5` and `e6`: the reviewer's gaps stripped, deduplicated and capped.",
+        "`_follow_up` unlocks `e5`: the brief for one gap.",
+        "`_may_refine` unlocks `e5` and `e6`: gaps left and rounds below the limit.",
+        "`_final_status` unlocks `m1` and `e6`: `complete` or `partial`.",
+        "`_brief_of` unlocks `m1` and `e2`: the text a subagent is handed, which is its own brief and nothing else."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About a dozen lines in all. The sections below describe the whole coordinator."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "`coordinate(planner, subagent, reviewer, synthesizer, question, max_agents=4, max_rounds=2)` (`coordinate` in every language, with the same arguments) returns `{\"status\", \"answer\", \"findings\", \"failed\", \"dropped\", \"gaps\", \"rounds\", \"subagent_calls\"}`."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Call `planner` once. When `delegate` is false, return status `direct` with the planner's `answer`, no findings, and no subagent, reviewer or synthesizer call at all: a question that the coordinator can answer itself is not worth a team.",
+        "Clean the subtasks, in order. A subtask whose brief is empty or only spaces is dropped with the reason `empty brief`. A subtask whose scope (compared stripped and in lower case) was already kept is dropped with `duplicate scope`. Once `max_agents` subtasks are kept, every further one is dropped with `over limit`. A dropped entry is `{\"scope\": the scope as given, \"reason\"}`.",
+        "Call `subagent` once per kept subtask, in order, with **exactly its brief**: nothing from the plan, from the question or from another subagent's report is added. A report that is a non-blank string becomes a finding `{\"scope\", \"text\"}`. A call that throws, or a report that is blank, becomes a `failed` entry `{\"scope\", \"error\"}`: the exception's message, or `empty report`. The others still run. `subagent_calls` counts every call, successful or not.",
+        "When no subtask produced a finding (all failed, or none was kept), return status `failed`, answer null, and call neither the reviewer nor the synthesizer.",
+        "Review. Call `reviewer` with copies of the findings. Clean its answer: strip each gap, drop empty ones and repeats (the first stays) and keep at most `max_agents`. While gaps remain and fewer than `max_rounds` rounds were run: count a round, call `subagent` once per gap with the brief `Follow up: {gap}\\nQuestion: {question}` (the scope of the new finding is the gap text), and call `reviewer` again. Subtasks that already have findings are not run again.",
+        "Call `synthesizer` once with copies of all findings, in the order they arrived. Status is `complete` when no gaps remain and nothing failed, otherwise `partial`. `gaps` is what the last review still reported (empty when complete), `rounds` the number of refinement rounds."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each step is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Delegate only when it pays** (step 1). The exam expects a coordinator that chooses its subagents from the complexity of the query and does not send everything through the full pipeline. *You should see* a question the planner answers itself finish with no subagent call.",
+        "**Partition the scope** (step 2). The exam asks for distinct subtopics or sources to minimise duplicated work, and a cap on the team. *You should see* the empty and the repeated subtasks listed as dropped with their reasons, and the team no larger than `max_agents`.",
+        "**Send each subagent its own brief and nothing else** (step 3). Subagents work in isolated context and do not inherit what the coordinator knows. *You should see* the briefs received equal the briefs planned, whatever the other subagents found, and one failing subagent leave the others' findings in place.",
+        "**Do not synthesize from nothing** (step 4). An error message is not evidence. *You should see* status `failed` with no reviewer or synthesizer call when no subagent returned a finding.",
+        "**Refine where the gaps are** (step 5). The exam describes a loop in which the coordinator finds gaps, re-delegates targeted queries and stops when coverage is enough. *You should see* only the gaps sent out again, cleaned and capped, and the first-round subtasks left alone.",
+        "**End with an honest status** (step 6). *You should see* `complete` only when nothing failed and no gap is left, and `partial` with the remaining gaps when the round limit stopped the loop."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A hub sends one brief to each spoke, in order, and synthesizes what comes back"
+        ],
+        [
+          "`e1`",
+          "A question the planner answers itself starts no team"
+        ],
+        [
+          "`e2`",
+          "A subagent receives exactly its own brief"
+        ],
+        [
+          "`e3`",
+          "Empty briefs and duplicate scopes are dropped, the team is capped, a plan with nothing usable fails without calls"
+        ],
+        [
+          "`e4`",
+          "One failing subagent does not stop the others; a run with no findings neither reviews nor synthesizes"
+        ],
+        [
+          "`e5`",
+          "A review sends only the gaps out again, cleaned, and stops when none are left"
+        ],
+        [
+          "`e6`",
+          "The rounds are capped, the gaps that remain are reported and the status is `partial`"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"A coordinator that delegates to isolated subagents, reviews what comes back and synthesizes. See ../../statement.md.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef _drop_reason(brief, key, seen, kept_count, max_agents):\n    if not brief.strip():\n        return \"empty brief\"\n    if key in seen:\n        return \"duplicate scope\"\n    if kept_count >= max_agents:\n        return \"over limit\"\n    return None\n\n\ndef _report_problem(report):\n    if not isinstance(report, str) or not report.strip():\n        return \"empty report\"\n    return None\n\n\ndef _follow_up(gap, question):\n    return f\"Follow up: {gap}\\nQuestion: {question}\"\n\n\ndef _may_refine(gaps, rounds, max_rounds):\n    return bool(gaps) and rounds < max_rounds\n\n\ndef _final_status(gaps, failed):\n    return \"complete\" if not gaps and not failed else \"partial\"\n\n\ndef _wants_team(plan):\n    return bool(plan.get(\"delegate\"))\n\n\ndef _clean(subtasks, max_agents):\n    kept, dropped, seen = [], [], set()\n    for task in subtasks:\n        scope, brief = str(task.get(\"scope\", \"\")), str(task.get(\"brief\", \"\"))\n        key = scope.strip().lower()\n        reason = _drop_reason(brief, key, seen, len(kept), max_agents)\n        if reason:\n            dropped.append({\"scope\": scope, \"reason\": reason})\n        else:\n            seen.add(key)\n            kept.append({\"scope\": scope, \"brief\": brief})\n    return kept, dropped\n\n\ndef _clean_gaps(gaps, max_agents):\n    out = []\n    for gap in gaps or []:\n        gap = str(gap).strip()\n        if gap and gap not in out:\n            out.append(gap)\n    return out[:max_agents]\n\n\ndef _brief_of(brief):\n    \"\"\"What a subagent is told: its own brief and nothing the others found.\"\"\"\n    return brief\n\n\ndef coordinate(planner, subagent, reviewer, synthesizer, question, max_agents=4, max_rounds=2):\n    log.debug(\"coordinate input: %r\", question)\n    plan = planner(question)\n    if not _wants_team(plan):  # a question the coordinator can answer itself is not worth a team\n        return {\"status\": \"direct\", \"answer\": plan.get(\"answer\"), \"findings\": [], \"failed\": [], \"dropped\": [], \"gaps\": [], \"rounds\": 0, \"subagent_calls\": 0}\n    tasks, dropped = _clean(plan.get(\"subtasks\") or [], max_agents)\n    findings, failed, calls = [], [], 0\n\n    def run(scope, brief):\n        nonlocal calls\n        calls += 1\n        try:\n            report = subagent(brief)  # the brief is everything the subagent knows\n        except Exception as error:  # one subagent failing must not stop the others\n            failed.append({\"scope\": scope, \"error\": str(error)})\n            return\n        problem = _report_problem(report)\n        if problem:\n            failed.append({\"scope\": scope, \"error\": problem})\n        else:\n            findings.append({\"scope\": scope, \"text\": report})\n\n    for task in tasks:\n        run(task[\"scope\"], _brief_of(task[\"brief\"]))\n    if not findings:\n        return {\"status\": \"failed\", \"answer\": None, \"findings\": [], \"failed\": failed, \"dropped\": dropped, \"gaps\": [], \"rounds\": 0, \"subagent_calls\": calls}\n    rounds = 0\n    gaps = _clean_gaps(reviewer(question, [dict(f) for f in findings]), max_agents)\n    while _may_refine(gaps, rounds, max_rounds):\n        rounds += 1\n        for gap in gaps:\n            run(gap, _follow_up(gap, question))\n        gaps = _clean_gaps(reviewer(question, [dict(f) for f in findings]), max_agents)\n    answer = synthesizer(question, [dict(f) for f in findings])\n    status = _final_status(gaps, failed)\n    return {\"status\": status, \"answer\": answer, \"findings\": findings, \"failed\": failed, \"dropped\": dropped, \"gaps\": gaps, \"rounds\": rounds, \"subagent_calls\": calls}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom coordinator import coordinate\n\n# The four model roles are plain functions, like the ones the tests script.\ndef planner(question):\n    \"\"\"Splits the question into three subtasks, each with the brief its subagent will get.\"\"\"\n    return {\"delegate\": True, \"answer\": None, \"subtasks\": [\n        {\"scope\": \"chips\", \"brief\": \"chips: find 2024 chip supply news\"},\n        {\"scope\": \"cars\", \"brief\": \"cars: find 2024 car output news\"},\n        {\"scope\": \"rates\", \"brief\": \"rates: find 2024 interest rates\"}]}\n\n\ndef subagent(brief):\n    \"\"\"A subagent knows only its brief: here it just reports on the topic that starts it.\"\"\"\n    return brief.split(\":\")[0] + \" report\"\n\n\ndef reviewer(question, findings):\n    return []  # no gaps: nothing more to ask\n\n\ndef synthesizer(question, findings):\n    return \" | \".join(f[\"text\"] for f in findings)\n\n\nresult = coordinate(planner, subagent, reviewer, synthesizer, \"How did supply change?\") or {}\n\nprint(\"status:\", result.get(\"status\"), \"| subagent calls:\", result.get(\"subagent_calls\"), \"| rounds:\", result.get(\"rounds\"))\nprint(\"findings:\", result.get(\"findings\"))\nprint(\"answer:\", result.get(\"answer\"))\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"A coordinator that delegates to isolated subagents, reviews what comes back and synthesizes. See ../../statement.md.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef _drop_reason(brief, key, seen, kept_count, max_agents):\n    \"\"\"TODO 1 of 8 (unlocks e3): why a subtask is dropped, or None to keep it.\n\n    Receives the brief, the lower-cased scope key, the set of keys already kept, how many are kept and the limit. Returns\n    \"empty brief\" for a blank brief, else \"duplicate scope\" for a key already seen, else \"over limit\" when kept_count has reached\n    max_agents, else None. Example: _drop_reason(\"  \", \"a\", set(), 0, 3) -> \"empty brief\"\n    \"\"\"\n    return None\n\n\ndef _report_problem(report):\n    \"\"\"TODO 2 of 8 (unlocks e4): what is wrong with a subagent's report, or None.\n\n    Receives whatever the subagent returned. Returns \"empty report\" when it is not a string or only blank, else None.\n    Example: _report_problem(\"   \") -> \"empty report\"\n    \"\"\"\n    return None\n\n\ndef _follow_up(gap, question):\n    \"\"\"TODO 3 of 8 (unlocks e5): the brief for a follow-up on one gap.\n\n    Returns \"Follow up: <gap>\" then a newline then \"Question: <question>\". Example: _follow_up(\"2023\", \"q\") -> \"Follow up: 2023\\nQuestion: q\"\n    \"\"\"\n    return gap\n\n\ndef _may_refine(gaps, rounds, max_rounds):\n    \"\"\"TODO 4 of 8 (unlocks e5 and e6): is another refinement round allowed?\n\n    True while there are gaps and fewer than max_rounds rounds have run. Example: _may_refine([\"x\"], 2, 2) -> False\n    \"\"\"\n    return False\n\n\ndef _final_status(gaps, failed):\n    \"\"\"TODO 5 of 8 (unlocks m1 and e6): the status of a run that has an answer.\n\n    \"complete\" when no gaps remain and nothing failed, else \"partial\". Example: _final_status([\"x\"], []) -> \"partial\"\n    \"\"\"\n    return \"complete\"\n\n\ndef _wants_team(plan):\n    \"\"\"TODO 6 of 8 (unlocks e1): does the plan ask for subagents?\n\n    Receives the planner's dict. True when its \"delegate\" value is truthy, else False. Example: _wants_team({\"delegate\": False}) -> False\n    \"\"\"\n    return True\n\n\ndef _clean(subtasks, max_agents):\n    kept, dropped, seen = [], [], set()\n    for task in subtasks:\n        scope, brief = str(task.get(\"scope\", \"\")), str(task.get(\"brief\", \"\"))\n        key = scope.strip().lower()\n        reason = _drop_reason(brief, key, seen, len(kept), max_agents)\n        if reason:\n            dropped.append({\"scope\": scope, \"reason\": reason})\n        else:\n            seen.add(key)\n            kept.append({\"scope\": scope, \"brief\": brief})\n    return kept, dropped\n\n\ndef _clean_gaps(gaps, max_agents):\n    \"\"\"TODO 7 of 8 (unlocks e5 and e6): the reviewer's gaps, tidied.\n\n    Receives the reviewer's list (or None) and the limit. Returns the gaps stripped of blanks, without empty or repeated ones, in order, at most\n    max_agents of them. Example: _clean_gaps([\" a \", \"\", \"a\", \"b\"], 1) -> [\"a\"]\n    \"\"\"\n    return list(gaps or [])\n\n\ndef _brief_of(brief):\n    \"\"\"TODO 8 of 8 (unlocks m1 and e2): the text a subagent is handed.\n\n    Receives the subtask's brief. Returns exactly what the subagent is told: that brief and nothing else (no scope list, no earlier findings).\n    Example: _brief_of(\"cars: find 2024 car output news\") -> \"cars: find 2024 car output news\"\n    \"\"\"\n    return \"\"\n\n\ndef coordinate(planner, subagent, reviewer, synthesizer, question, max_agents=4, max_rounds=2):\n    log.debug(\"coordinate input: %r\", question)\n    plan = planner(question)\n    if not _wants_team(plan):  # a question the coordinator can answer itself is not worth a team\n        return {\"status\": \"direct\", \"answer\": plan.get(\"answer\"), \"findings\": [], \"failed\": [], \"dropped\": [], \"gaps\": [], \"rounds\": 0, \"subagent_calls\": 0}\n    tasks, dropped = _clean(plan.get(\"subtasks\") or [], max_agents)\n    findings, failed, calls = [], [], 0\n\n    def run(scope, brief):\n        nonlocal calls\n        calls += 1\n        try:\n            report = subagent(brief)  # the brief is everything the subagent knows\n        except Exception as error:  # one subagent failing must not stop the others\n            failed.append({\"scope\": scope, \"error\": str(error)})\n            return\n        problem = _report_problem(report)\n        if problem:\n            failed.append({\"scope\": scope, \"error\": problem})\n        else:\n            findings.append({\"scope\": scope, \"text\": report})\n\n    for task in tasks:\n        run(task[\"scope\"], _brief_of(task[\"brief\"]))\n    if not findings:\n        return {\"status\": \"failed\", \"answer\": None, \"findings\": [], \"failed\": failed, \"dropped\": dropped, \"gaps\": [], \"rounds\": 0, \"subagent_calls\": calls}\n    rounds = 0\n    gaps = _clean_gaps(reviewer(question, [dict(f) for f in findings]), max_agents)\n    while _may_refine(gaps, rounds, max_rounds):\n        rounds += 1\n        for gap in gaps:\n            run(gap, _follow_up(gap, question))\n        gaps = _clean_gaps(reviewer(question, [dict(f) for f in findings]), max_agents)\n    answer = synthesizer(question, [dict(f) for f in findings])\n    status = _final_status(gaps, failed)\n    return {\"status\": status, \"answer\": answer, \"findings\": findings, \"failed\": failed, \"dropped\": dropped, \"gaps\": gaps, \"rounds\": rounds, \"subagent_calls\": calls}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom coordinator import coordinate\n\n# The four model roles are plain functions, like the ones the tests script.\ndef planner(question):\n    \"\"\"Splits the question into three subtasks, each with the brief its subagent will get.\"\"\"\n    return {\"delegate\": True, \"answer\": None, \"subtasks\": [\n        {\"scope\": \"chips\", \"brief\": \"chips: find 2024 chip supply news\"},\n        {\"scope\": \"cars\", \"brief\": \"cars: find 2024 car output news\"},\n        {\"scope\": \"rates\", \"brief\": \"rates: find 2024 interest rates\"}]}\n\n\ndef subagent(brief):\n    \"\"\"A subagent knows only its brief: here it just reports on the topic that starts it.\"\"\"\n    return brief.split(\":\")[0] + \" report\"\n\n\ndef reviewer(question, findings):\n    return []  # no gaps: nothing more to ask\n\n\ndef synthesizer(question, findings):\n    return \" | \".join(f[\"text\"] for f in findings)\n\n\nresult = coordinate(planner, subagent, reviewer, synthesizer, \"How did supply change?\") or {}\n\nprint(\"status:\", result.get(\"status\"), \"| subagent calls:\", result.get(\"subagent_calls\"), \"| rounds:\", result.get(\"rounds\"))\nprint(\"findings:\", result.get(\"findings\"))\nprint(\"answer:\", result.get(\"answer\"))\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 5,
+    "code": 2,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "c9256a0942dba19999b74f72d63374ffe8baa86b14748080807c400e90672bb2",
+  "starting_code": "\"\"\"A coordinator that delegates to isolated subagents, reviews what comes back and synthesizes. See ../../statement.md.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef _drop_reason(brief, key, seen, kept_count, max_agents):\n    \"\"\"TODO 1 of 8 (unlocks e3): why a subtask is dropped, or None to keep it.\n\n    Receives the brief, the lower-cased scope key, the set of keys already kept, how many are kept and the limit. Returns\n    \"empty brief\" for a blank brief, else \"duplicate scope\" for a key already seen, else \"over limit\" when kept_count has reached\n    max_agents, else None. Example: _drop_reason(\"  \", \"a\", set(), 0, 3) -> \"empty brief\"\n    \"\"\"\n    return None\n\n\ndef _report_problem(report):\n    \"\"\"TODO 2 of 8 (unlocks e4): what is wrong with a subagent's report, or None.\n\n    Receives whatever the subagent returned. Returns \"empty report\" when it is not a string or only blank, else None.\n    Example: _report_problem(\"   \") -> \"empty report\"\n    \"\"\"\n    return None\n\n\ndef _follow_up(gap, question):\n    \"\"\"TODO 3 of 8 (unlocks e5): the brief for a follow-up on one gap.\n\n    Returns \"Follow up: <gap>\" then a newline then \"Question: <question>\". Example: _follow_up(\"2023\", \"q\") -> \"Follow up: 2023\\nQuestion: q\"\n    \"\"\"\n    return gap\n\n\ndef _may_refine(gaps, rounds, max_rounds):\n    \"\"\"TODO 4 of 8 (unlocks e5 and e6): is another refinement round allowed?\n\n    True while there are gaps and fewer than max_rounds rounds have run. Example: _may_refine([\"x\"], 2, 2) -> False\n    \"\"\"\n    return False\n\n\ndef _final_status(gaps, failed):\n    \"\"\"TODO 5 of 8 (unlocks m1 and e6): the status of a run that has an answer.\n\n    \"complete\" when no gaps remain and nothing failed, else \"partial\". Example: _final_status([\"x\"], []) -> \"partial\"\n    \"\"\"\n    return \"complete\"\n\n\ndef _wants_team(plan):\n    \"\"\"TODO 6 of 8 (unlocks e1): does the plan ask for subagents?\n\n    Receives the planner's dict. True when its \"delegate\" value is truthy, else False. Example: _wants_team({\"delegate\": False}) -> False\n    \"\"\"\n    return True\n\n\ndef _clean(subtasks, max_agents):\n    kept, dropped, seen = [], [], set()\n    for task in subtasks:\n        scope, brief = str(task.get(\"scope\", \"\")), str(task.get(\"brief\", \"\"))\n        key = scope.strip().lower()\n        reason = _drop_reason(brief, key, seen, len(kept), max_agents)\n        if reason:\n            dropped.append({\"scope\": scope, \"reason\": reason})\n        else:\n            seen.add(key)\n            kept.append({\"scope\": scope, \"brief\": brief})\n    return kept, dropped\n\n\ndef _clean_gaps(gaps, max_agents):\n    \"\"\"TODO 7 of 8 (unlocks e5 and e6): the reviewer's gaps, tidied.\n\n    Receives the reviewer's list (or None) and the limit. Returns the gaps stripped of blanks, without empty or repeated ones, in order, at most\n    max_agents of them. Example: _clean_gaps([\" a \", \"\", \"a\", \"b\"], 1) -> [\"a\"]\n    \"\"\"\n    return list(gaps or [])\n\n\ndef _brief_of(brief):\n    \"\"\"TODO 8 of 8 (unlocks m1 and e2): the text a subagent is handed.\n\n    Receives the subtask's brief. Returns exactly what the subagent is told: that brief and nothing else (no scope list, no earlier findings).\n    Example: _brief_of(\"cars: find 2024 car output news\") -> \"cars: find 2024 car output news\"\n    \"\"\"\n    return \"\"\n\n\ndef coordinate(planner, subagent, reviewer, synthesizer, question, max_agents=4, max_rounds=2):\n    log.debug(\"coordinate input: %r\", question)\n    plan = planner(question)\n    if not _wants_team(plan):  # a question the coordinator can answer itself is not worth a team\n        return {\"status\": \"direct\", \"answer\": plan.get(\"answer\"), \"findings\": [], \"failed\": [], \"dropped\": [], \"gaps\": [], \"rounds\": 0, \"subagent_calls\": 0}\n    tasks, dropped = _clean(plan.get(\"subtasks\") or [], max_agents)\n    findings, failed, calls = [], [], 0\n\n    def run(scope, brief):\n        nonlocal calls\n        calls += 1\n        try:\n            report = subagent(brief)  # the brief is everything the subagent knows\n        except Exception as error:  # one subagent failing must not stop the others\n            failed.append({\"scope\": scope, \"error\": str(error)})\n            return\n        problem = _report_problem(report)\n        if problem:\n            failed.append({\"scope\": scope, \"error\": problem})\n        else:\n            findings.append({\"scope\": scope, \"text\": report})\n\n    for task in tasks:\n        run(task[\"scope\"], _brief_of(task[\"brief\"]))\n    if not findings:\n        return {\"status\": \"failed\", \"answer\": None, \"findings\": [], \"failed\": failed, \"dropped\": dropped, \"gaps\": [], \"rounds\": 0, \"subagent_calls\": calls}\n    rounds = 0\n    gaps = _clean_gaps(reviewer(question, [dict(f) for f in findings]), max_agents)\n    while _may_refine(gaps, rounds, max_rounds):\n        rounds += 1\n        for gap in gaps:\n            run(gap, _follow_up(gap, question))\n        gaps = _clean_gaps(reviewer(question, [dict(f) for f in findings]), max_agents)\n    answer = synthesizer(question, [dict(f) for f in findings])\n    status = _final_status(gaps, failed)\n    return {\"status\": status, \"answer\": answer, \"findings\": findings, \"failed\": failed, \"dropped\": dropped, \"gaps\": gaps, \"rounds\": rounds, \"subagent_calls\": calls}\n",
+  "exercise": {
+    "main_path": "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-1/coordinator.py",
+    "test_path": "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-1/test_coordinator.py",
+    "run_command": [
+      "python3",
+      "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-1/test_coordinator.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_a_hub_sends_one_brief_to_each_spoke_and_synthesizes_what_comes_back",
+        "kind": "main",
+        "says": "A hub sends one brief to each spoke, in order, and synthesizes what comes back"
+      },
+      {
+        "id": "test_e1_a_question_the_coordinator_can_answer_itself_is_answered_without_any_subagent",
+        "kind": "edge",
+        "says": "A question the planner answers itself starts no team"
+      },
+      {
+        "id": "test_e2_a_subagent_sees_its_own_brief_and_nothing_the_others_found",
+        "kind": "main",
+        "says": "A subagent receives exactly its own brief"
+      },
+      {
+        "id": "test_e3_the_plan_is_cleaned_of_empty_briefs_and_duplicate_scopes_and_capped",
+        "kind": "edge",
+        "says": "Empty briefs and duplicate scopes are dropped, the team is capped, a plan with nothing usable fails without calls"
+      },
+      {
+        "id": "test_e4_a_failing_subagent_does_not_stop_the_others_and_a_run_with_no_findings_does_not_synthesize",
+        "kind": "edge",
+        "says": "One failing subagent does not stop the others; a run with no findings neither reviews nor synthesizes"
+      },
+      {
+        "id": "test_e5_a_review_sends_only_the_gaps_back_out_and_stops_when_none_are_left",
+        "kind": "edge",
+        "says": "A review sends only the gaps out again, cleaned, and stops when none are left"
+      },
+      {
+        "id": "test_e6_the_rounds_are_capped_and_the_gaps_that_remain_are_reported",
+        "kind": "edge",
+        "says": "The rounds are capped, the gaps that remain are reported and the status is partial"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/46-coordinator-and-subagents/02-review-iteration-failures-and-the-practice.md",
+    "concepts": [
+      "the practice of Review, iteration, failures and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "coordinator-and-subagents-u2"
+}

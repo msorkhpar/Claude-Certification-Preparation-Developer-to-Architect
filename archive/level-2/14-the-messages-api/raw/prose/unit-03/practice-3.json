@@ -1,0 +1,286 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "14-the-messages-api"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: a conversation client, graded on the state it keeps (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a conversation client, graded on the state it keeps"
+    },
+    {
+      "type": "para",
+      "text": "The Messages API is stateless: every request must carry the whole conversation. Write the client that keeps it."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working conversation client with eight gaps cut out of it. The plumbing is written and correct: the constructor, `say` itself (it calls the gaps in order), `totals` and `reset`. Each gap is a small method with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To see what a gap receives, debug it by logging its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (Python names; the TypeScript, Java and Kotlin names are the camel-case forms, `makeReply` for `_reply`):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_check_text` unlocks `e6`: a blank turn is refused.",
+        "`_request_body` unlocks `m1` and `e5`: the body with a deep copy of the whole history.",
+        "`_optional_fields` unlocks `e4`: the top-level `system` and the stop sequences.",
+        "`_send_or_roll_back` unlocks `e2`: no dangling user turn when the call fails.",
+        "`_assistant_turn` unlocks `m1`: the assistant turn with the content as received.",
+        "`_add_usage` unlocks `e1`: the running totals.",
+        "`_reply` unlocks `m1` and `e3`: the text, the stop reason and `truncated`.",
+        "`history` unlocks `e5`: the turns as a copy."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gaps 2, 5 and 7. A few lines each, about fifteen in all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given types"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`send`",
+          "an injected function: it takes the request body (a map) and returns a Messages API response (a map with `content`, `stop_reason` and `usage`); the tests pass a scripted one"
+        ],
+        [
+          "`Reply`",
+          "`text` (the text blocks joined), `stop_reason` and `truncated`; TypeScript, Java and Kotlin spell them `text`, `stopReason` and `truncated`"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "`Conversation(send, model, max_tokens, system=None, stop_sequences=None)`"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "**`say(text)`** adds a user turn, sends the request and returns a `Reply`.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "The request body has `model`, `max_tokens` and `messages`, where `messages` is the **whole history** so far, oldest first, ending with the new user turn. `system` is a **top-level field**, never a message with a system role, and it is left out when absent or blank. `stop_sequences` is passed on when given and non-empty.",
+              "The body handed to `send` is a **snapshot**: later turns must not change a request already sent.",
+              "The assistant turn is stored as `{\"role\": \"assistant\", \"content\": <the response's content, as received>}`.",
+              "`usage` is added to the running totals. `truncated` is true when `stop_reason` is `max_tokens`.",
+              "If `send` fails, the exception propagates and the history is left as it was before the call (no dangling user turn, so roles keep alternating on the next call).",
+              "Blank text (empty or only whitespace) is refused before anything is sent: `ValueError` (TypeScript `Error`, Java and Kotlin `IllegalArgumentException`)."
+            ]
+          }
+        ],
+        "**`history()`** returns a copy of the turns; changing the copy changes nothing.",
+        "**`totals()`** returns `input_tokens` and `output_tokens` summed over every successful turn.",
+        "**`reset()`** clears history and totals."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Every request carries the whole history in order, with assistant content as received"
+        ],
+        [
+          "`e1`",
+          "Usage adds up over the turns"
+        ],
+        [
+          "`e2`",
+          "A failed call leaves no dangling user turn"
+        ],
+        [
+          "`e3`",
+          "The stop reason is reported and `max_tokens` marks the reply truncated"
+        ],
+        [
+          "`e4`",
+          "`system` is top-level (and left out when absent); stop sequences are passed on"
+        ],
+        [
+          "`e5`",
+          "Each request is a snapshot, and `history()` is a copy"
+        ],
+        [
+          "`e6`",
+          "A blank turn is refused before anything is sent"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/** A conversation client that keeps the state the API does not. See ../../statement.md for the contract. */\nfinal class Conversation {\n    private static final System.Logger LOG = System.getLogger(Conversation.class.getName());\n    private final Send send;\n    private final String model;\n    private final int maxTokens;\n    private final String system;\n    private final List<String> stopSequences;\n    private List<Map<String, Object>> history = new ArrayList<>();\n    private long inputTokens;\n    private long outputTokens;\n\n    Conversation(Send send, String model, int maxTokens, String system, List<String> stopSequences) {\n        this.send = send;\n        this.model = model;\n        this.maxTokens = maxTokens;\n        this.system = system;\n        this.stopSequences = stopSequences;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static List<Map<String, Object>> copy(List<Map<String, Object>> turns) {\n        return (List<Map<String, Object>>) Json.parse(Json.stringify(turns));\n    }\n\n    private void checkText(String text) {\n        if (text == null || text.isBlank()) throw new IllegalArgumentException(\"a turn needs text\");\n    }\n\n    private Map<String, Object> requestBody() {\n        Map<String, Object> body = new LinkedHashMap<>();\n        body.put(\"model\", model);\n        body.put(\"max_tokens\", (long) maxTokens);\n        body.put(\"messages\", copy(history));\n        return body;\n    }\n\n    private void optionalFields(Map<String, Object> body) {\n        if (system != null && !system.isBlank()) body.put(\"system\", system);\n        if (stopSequences != null && !stopSequences.isEmpty()) body.put(\"stop_sequences\", new ArrayList<>(stopSequences));\n    }\n\n    private Map<String, Object> sendOrRollBack(Map<String, Object> body) {\n        try {\n            return send.send(body);\n        } catch (RuntimeException e) {\n            history.remove(history.size() - 1);\n            throw e;\n        }\n    }\n\n    private Map<String, Object> assistantTurn(Map<String, Object> response) {\n        Map<String, Object> assistant = new LinkedHashMap<>();\n        assistant.put(\"role\", \"assistant\");\n        assistant.put(\"content\", response.get(\"content\"));\n        return assistant;\n    }\n\n    private void addUsage(Object usageValue) {\n        if (usageValue instanceof Map<?, ?> usage) {\n            if (usage.get(\"input_tokens\") instanceof Number n) inputTokens += n.longValue();\n            if (usage.get(\"output_tokens\") instanceof Number n) outputTokens += n.longValue();\n        }\n    }\n\n    private Reply makeReply(Map<String, Object> response) {\n        StringBuilder replyText = new StringBuilder();\n        for (Object b : (List<?>) response.get(\"content\")) {\n            if (b instanceof Map<?, ?> block && \"text\".equals(block.get(\"type\"))) replyText.append(block.get(\"text\"));\n        }\n        String stop = (String) response.get(\"stop_reason\");\n        return new Reply(replyText.toString(), stop, \"max_tokens\".equals(stop));\n    }\n\n    Reply say(String text) {\n        LOG.log(System.Logger.Level.DEBUG, \"say input: {0}\", text);\n        checkText(text);\n        Map<String, Object> user = new LinkedHashMap<>();\n        user.put(\"role\", \"user\");\n        user.put(\"content\", text);\n        history.add(user);\n        Map<String, Object> body = requestBody();\n        optionalFields(body);\n        Map<String, Object> response = sendOrRollBack(body);\n        history.add(assistantTurn(response));\n        addUsage(response.get(\"usage\"));\n        return makeReply(response);\n    }\n\n    List<Map<String, Object>> history() {\n        return copy(history);\n    }\n\n    Map<String, Long> totals() {\n        Map<String, Long> totals = new LinkedHashMap<>();\n        totals.put(\"input_tokens\", inputTokens);\n        totals.put(\"output_tokens\", outputTokens);\n        return totals;\n    }\n\n    void reset() {\n        history = new ArrayList<>();\n        inputTokens = 0;\n        outputTokens = 0;\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // A stand-in for the API, like the one the tests use: it answers every request the same way.\n        Send fakeSend = body -> Map.of(\n            \"content\", List.of(Map.of(\"type\", \"text\", \"text\", \"Paris.\")),\n            \"stop_reason\", \"end_turn\",\n            \"usage\", Map.of(\"input_tokens\", 10L, \"output_tokens\", 5L));\n\n        Conversation chat = new Conversation(fakeSend, \"claude-sonnet-5-5\", 64, \"Be brief.\", null);\n        Reply reply = chat.say(\"Capital of France?\");\n        chat.say(\"Since when?\");\n\n        System.out.println(\"reply text: \" + reply.text());\n        System.out.println(\"stop reason: \" + reply.stopReason() + \" | truncated: \" + reply.truncated());\n        System.out.println(\"history size: \" + chat.history().size());\n        System.out.println(\"totals: \" + chat.totals());\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/** A conversation client that keeps the state the API does not. See ../../statement.md for the contract. */\nfinal class Conversation {\n    private static final System.Logger LOG = System.getLogger(Conversation.class.getName());\n    private final Send send;\n    private final String model;\n    private final int maxTokens;\n    private final String system;\n    private final List<String> stopSequences;\n    private List<Map<String, Object>> history = new ArrayList<>();\n    private long inputTokens;\n    private long outputTokens;\n\n    Conversation(Send send, String model, int maxTokens, String system, List<String> stopSequences) {\n        this.send = send;\n        this.model = model;\n        this.maxTokens = maxTokens;\n        this.system = system;\n        this.stopSequences = stopSequences;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static List<Map<String, Object>> copy(List<Map<String, Object>> turns) {\n        return (List<Map<String, Object>>) Json.parse(Json.stringify(turns));\n    }\n\n    private void checkText(String text) {\n        // TODO 1 of 8 (finish this to pass e6): refuse a blank turn before anything is sent.\n        // Receives the text of the turn. Throws IllegalArgumentException when it is null, empty or only whitespace; otherwise returns\n        // nothing. Example: checkText(\"   \") -> IllegalArgumentException, checkText(\"hi\") -> nothing\n    }\n\n    private Map<String, Object> requestBody() {\n        Map<String, Object> body = new LinkedHashMap<>();\n        body.put(\"model\", model);\n        body.put(\"max_tokens\", (long) maxTokens);\n        // TODO 2 of 8 (finish this to pass m1 and e5): the request body, a snapshot.\n        // Receives nothing (it reads the fields). Puts into body, next to model and max_tokens, \"messages\": copy(history), a deep copy\n        // of the whole history so far (the new user turn is already in it), so a later turn cannot change a request already sent.\n        // Example: after say(\"a\"), the first body has messages [{role=user, content=a}]\n        body.put(\"messages\", new ArrayList<>());\n        return body;\n    }\n\n    private void optionalFields(Map<String, Object> body) {\n        // TODO 3 of 8 (finish this to pass e4): the top-level fields that are only sometimes there.\n        // Receives the body and adds to it: \"system\" (a top-level field, never a message) when system is not blank, and\n        // \"stop_sequences\" (a copy of the list) when stopSequences is given and not empty. Returns nothing.\n        // Example: with system \"Be brief.\" the body gains system=Be brief.; with system \"  \" it gains nothing\n    }\n\n    private Map<String, Object> sendOrRollBack(Map<String, Object> body) {\n        // TODO 4 of 8 (finish this to pass e2): send the body, and leave no dangling user turn when the call fails.\n        // Receives the body. Returns send.send(body). When send throws a RuntimeException, removes the user turn that say added to\n        // history and throws the same exception again, so roles keep alternating on the next call.\n        return send.send(body);\n    }\n\n    private Map<String, Object> assistantTurn(Map<String, Object> response) {\n        Map<String, Object> assistant = new LinkedHashMap<>();\n        assistant.put(\"role\", \"assistant\");\n        // TODO 5 of 8 (finish this to pass m1): the turn to store for the reply.\n        // Receives the response. Fills assistant with \"role\" = \"assistant\" and \"content\" = the response's content list, as received.\n        // Example: content [{type=text, text=Paris.}] -> {role=assistant, content=[that same list]}\n        assistant.put(\"role\", \"assistant\");\n        assistant.put(\"content\", new ArrayList<>());\n        return assistant;\n    }\n\n    private void addUsage(Object usageValue) {\n        // TODO 6 of 8 (finish this to pass e1): keep the running totals.\n        // Receives the response's usage (a Map, or null; a key may be missing). Adds its input_tokens and output_tokens to the\n        // inputTokens and outputTokens fields. Returns nothing.\n        // Example: inputTokens 12 plus usage {input_tokens=30, output_tokens=9} -> inputTokens 42\n    }\n\n    private Reply makeReply(Map<String, Object> response) {\n        // TODO 7 of 8 (finish this to pass m1 and e3): what say returns.\n        // Receives the response. Returns a Reply: the text of the content blocks whose type is \"text\" joined with nothing between\n        // them, the response's stop_reason, and truncated, true only when the stop reason is \"max_tokens\".\n        // Example: stop_reason \"max_tokens\" -> truncated true; \"end_turn\" -> truncated false\n        return new Reply(\"\", \"\", false);\n    }\n\n    Reply say(String text) {\n        LOG.log(System.Logger.Level.DEBUG, \"say input: {0}\", text);\n        checkText(text);\n        Map<String, Object> user = new LinkedHashMap<>();\n        user.put(\"role\", \"user\");\n        user.put(\"content\", text);\n        history.add(user);\n        Map<String, Object> body = requestBody();\n        optionalFields(body);\n        Map<String, Object> response = sendOrRollBack(body);\n        history.add(assistantTurn(response));\n        addUsage(response.get(\"usage\"));\n        return makeReply(response);\n    }\n\n    List<Map<String, Object>> history() {\n        // TODO 8 of 8 (finish this to pass e5): the turns so far, as a copy.\n        // Returns copy(history), so changing what the caller gets changes nothing here.\n        // Example: chat.history().add(x) leaves chat.history().size() unchanged\n        return new ArrayList<>();\n    }\n\n    Map<String, Long> totals() {\n        Map<String, Long> totals = new LinkedHashMap<>();\n        totals.put(\"input_tokens\", inputTokens);\n        totals.put(\"output_tokens\", outputTokens);\n        return totals;\n    }\n\n    void reset() {\n        history = new ArrayList<>();\n        inputTokens = 0;\n        outputTokens = 0;\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // A stand-in for the API, like the one the tests use: it answers every request the same way.\n        Send fakeSend = body -> Map.of(\n            \"content\", List.of(Map.of(\"type\", \"text\", \"text\", \"Paris.\")),\n            \"stop_reason\", \"end_turn\",\n            \"usage\", Map.of(\"input_tokens\", 10L, \"output_tokens\", 5L));\n\n        Conversation chat = new Conversation(fakeSend, \"claude-sonnet-5-5\", 64, \"Be brief.\", null);\n        Reply reply = chat.say(\"Capital of France?\");\n        chat.say(\"Since when?\");\n\n        System.out.println(\"reply text: \" + reply.text());\n        System.out.println(\"stop reason: \" + reply.stopReason() + \" | truncated: \" + reply.truncated());\n        System.out.println(\"history size: \" + chat.history().size());\n        System.out.println(\"totals: \" + chat.totals());\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 4,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "b28a51227f6c438d4160f7f6e156e10bc971e14ba9e7014d265daaedee156d73",
+  "starting_code": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/** A conversation client that keeps the state the API does not. See ../../statement.md for the contract. */\nfinal class Conversation {\n    private static final System.Logger LOG = System.getLogger(Conversation.class.getName());\n    private final Send send;\n    private final String model;\n    private final int maxTokens;\n    private final String system;\n    private final List<String> stopSequences;\n    private List<Map<String, Object>> history = new ArrayList<>();\n    private long inputTokens;\n    private long outputTokens;\n\n    Conversation(Send send, String model, int maxTokens, String system, List<String> stopSequences) {\n        this.send = send;\n        this.model = model;\n        this.maxTokens = maxTokens;\n        this.system = system;\n        this.stopSequences = stopSequences;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static List<Map<String, Object>> copy(List<Map<String, Object>> turns) {\n        return (List<Map<String, Object>>) Json.parse(Json.stringify(turns));\n    }\n\n    private void checkText(String text) {\n        // TODO 1 of 8 (finish this to pass e6): refuse a blank turn before anything is sent.\n        // Receives the text of the turn. Throws IllegalArgumentException when it is null, empty or only whitespace; otherwise returns\n        // nothing. Example: checkText(\"   \") -> IllegalArgumentException, checkText(\"hi\") -> nothing\n    }\n\n    private Map<String, Object> requestBody() {\n        Map<String, Object> body = new LinkedHashMap<>();\n        body.put(\"model\", model);\n        body.put(\"max_tokens\", (long) maxTokens);\n        // TODO 2 of 8 (finish this to pass m1 and e5): the request body, a snapshot.\n        // Receives nothing (it reads the fields). Puts into body, next to model and max_tokens, \"messages\": copy(history), a deep copy\n        // of the whole history so far (the new user turn is already in it), so a later turn cannot change a request already sent.\n        // Example: after say(\"a\"), the first body has messages [{role=user, content=a}]\n        body.put(\"messages\", new ArrayList<>());\n        return body;\n    }\n\n    private void optionalFields(Map<String, Object> body) {\n        // TODO 3 of 8 (finish this to pass e4): the top-level fields that are only sometimes there.\n        // Receives the body and adds to it: \"system\" (a top-level field, never a message) when system is not blank, and\n        // \"stop_sequences\" (a copy of the list) when stopSequences is given and not empty. Returns nothing.\n        // Example: with system \"Be brief.\" the body gains system=Be brief.; with system \"  \" it gains nothing\n    }\n\n    private Map<String, Object> sendOrRollBack(Map<String, Object> body) {\n        // TODO 4 of 8 (finish this to pass e2): send the body, and leave no dangling user turn when the call fails.\n        // Receives the body. Returns send.send(body). When send throws a RuntimeException, removes the user turn that say added to\n        // history and throws the same exception again, so roles keep alternating on the next call.\n        return send.send(body);\n    }\n\n    private Map<String, Object> assistantTurn(Map<String, Object> response) {\n        Map<String, Object> assistant = new LinkedHashMap<>();\n        assistant.put(\"role\", \"assistant\");\n        // TODO 5 of 8 (finish this to pass m1): the turn to store for the reply.\n        // Receives the response. Fills assistant with \"role\" = \"assistant\" and \"content\" = the response's content list, as received.\n        // Example: content [{type=text, text=Paris.}] -> {role=assistant, content=[that same list]}\n        assistant.put(\"role\", \"assistant\");\n        assistant.put(\"content\", new ArrayList<>());\n        return assistant;\n    }\n\n    private void addUsage(Object usageValue) {\n        // TODO 6 of 8 (finish this to pass e1): keep the running totals.\n        // Receives the response's usage (a Map, or null; a key may be missing). Adds its input_tokens and output_tokens to the\n        // inputTokens and outputTokens fields. Returns nothing.\n        // Example: inputTokens 12 plus usage {input_tokens=30, output_tokens=9} -> inputTokens 42\n    }\n\n    private Reply makeReply(Map<String, Object> response) {\n        // TODO 7 of 8 (finish this to pass m1 and e3): what say returns.\n        // Receives the response. Returns a Reply: the text of the content blocks whose type is \"text\" joined with nothing between\n        // them, the response's stop_reason, and truncated, true only when the stop reason is \"max_tokens\".\n        // Example: stop_reason \"max_tokens\" -> truncated true; \"end_turn\" -> truncated false\n        return new Reply(\"\", \"\", false);\n    }\n\n    Reply say(String text) {\n        LOG.log(System.Logger.Level.DEBUG, \"say input: {0}\", text);\n        checkText(text);\n        Map<String, Object> user = new LinkedHashMap<>();\n        user.put(\"role\", \"user\");\n        user.put(\"content\", text);\n        history.add(user);\n        Map<String, Object> body = requestBody();\n        optionalFields(body);\n        Map<String, Object> response = sendOrRollBack(body);\n        history.add(assistantTurn(response));\n        addUsage(response.get(\"usage\"));\n        return makeReply(response);\n    }\n\n    List<Map<String, Object>> history() {\n        // TODO 8 of 8 (finish this to pass e5): the turns so far, as a copy.\n        // Returns copy(history), so changing what the caller gets changes nothing here.\n        // Example: chat.history().add(x) leaves chat.history().size() unchanged\n        return new ArrayList<>();\n    }\n\n    Map<String, Long> totals() {\n        Map<String, Long> totals = new LinkedHashMap<>();\n        totals.put(\"input_tokens\", inputTokens);\n        totals.put(\"output_tokens\", outputTokens);\n        return totals;\n    }\n\n    void reset() {\n        history = new ArrayList<>();\n        inputTokens = 0;\n        outputTokens = 0;\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/14-the-messages-api/prose/unit-03/practice-3/src/main/java/Conversation.java",
+    "test_path": "practice/level-2/14-the-messages-api/prose/unit-03/practice-3/src/test/java/ConversationTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/14-the-messages-api/prose/unit-03/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/14-the-messages-api/prose/unit-03/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_everyRequestCarriesTheWholeHistoryInOrder()",
+        "kind": "main",
+        "says": "Every request carries the whole history in order, with assistant content as received"
+      },
+      {
+        "id": "e1_usageAddsUpOverTheTurns()",
+        "kind": "edge",
+        "says": "Usage adds up over the turns"
+      },
+      {
+        "id": "e2_aFailedCallLeavesNoDanglingUserTurn()",
+        "kind": "edge",
+        "says": "A failed call leaves no dangling user turn"
+      },
+      {
+        "id": "e3_stopReasonIsReportedAndMaxTokensMarksTheReplyTruncated()",
+        "kind": "edge",
+        "says": "The stop reason is reported and max_tokens marks the reply truncated"
+      },
+      {
+        "id": "e4_systemIsATopLevelFieldAndStopSequencesArePassedOn()",
+        "kind": "edge",
+        "says": "system is top-level (and left out when absent); stop sequences are passed on"
+      },
+      {
+        "id": "e5_eachRequestIsASnapshotAndHistoryIsACopy()",
+        "kind": "edge",
+        "says": "Each request is a snapshot, and history() is a copy"
+      },
+      {
+        "id": "e6_aBlankTurnIsRefusedBeforeAnythingIsSent()",
+        "kind": "edge",
+        "says": "A blank turn is refused before anything is sent"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/14-the-messages-api/prose/unit-03/practice-3/target/test-results/test"
+    },
+    "origin": "course/14-the-messages-api/03-the-conversation-state-the-client-keeps.md",
+    "concepts": [
+      "the practice of The conversation state the client keeps, and a conversation client is solved"
+    ],
+    "files": [
+      "practice/level-2/14-the-messages-api/prose/unit-03/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "the-messages-api-u3"
+}

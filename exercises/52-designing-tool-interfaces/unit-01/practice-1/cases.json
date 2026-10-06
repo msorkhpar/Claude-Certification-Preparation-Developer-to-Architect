@@ -1,0 +1,197 @@
+{
+  "practice": "52-designing-tool-interfaces/unit-01/practice-1",
+  "name": "toolset",
+  "tests": {
+    "java": "ToolsetTest",
+    "kotlin": "ToolsetTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_well_made_tool_lints_clean_and_a_poor_one_is_named_for_every_rule_it_breaks",
+      "typescript": "m1 a well made tool lints clean and a poor one is named for every rule it breaks",
+      "java": "m1_aWellMadeToolLintsCleanAndAPoorOneIsNamedForEveryRuleItBreaks",
+      "kotlin": "m1_aWellMadeToolLintsCleanAndAPoorOneIsNamedForEveryRuleItBreaks"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_names_must_match_the_pattern_and_a_vague_name_is_flagged",
+      "typescript": "e1 names must match the pattern and a vague name is flagged",
+      "java": "e1_namesMustMatchThePatternAndAVagueNameIsFlagged",
+      "kotlin": "e1_namesMustMatchThePatternAndAVagueNameIsFlagged"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_description_needs_three_sentences_a_when_to_use_phrase_and_a_boundary_against_the_neighbour",
+      "typescript": "e2 a description needs three sentences a when to use phrase and a boundary against the neighbour",
+      "java": "e2_aDescriptionNeedsThreeSentencesAWhenToUsePhraseAndABoundaryAgainstTheNeighbour",
+      "kotlin": "e2_aDescriptionNeedsThreeSentencesAWhenToUsePhraseAndABoundaryAgainstTheNeighbour"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_parameters_are_described_and_required_names_exist_and_closed_sets_are_enums_and_examples_fit_the_schema",
+      "typescript": "e3 parameters are described and required names exist and closed sets are enums and examples fit the schema",
+      "java": "e3_parametersAreDescribedAndRequiredNamesExistAndClosedSetsAreEnumsAndExamplesFitTheSchema",
+      "kotlin": "e3_parametersAreDescribedAndRequiredNamesExistAndClosedSetsAreEnumsAndExamplesFitTheSchema"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_a_list_tool_needs_a_limit_and_a_cursor_and_a_hint_may_not_contradict_the_name",
+      "typescript": "e4 a list tool needs a limit and a cursor and a hint may not contradict the name",
+      "java": "e4_aListToolNeedsALimitAndACursorAndAHintMayNotContradictTheName",
+      "kotlin": "e4_aListToolNeedsALimitAndACursorAndAHintMayNotContradictTheName"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_set_is_graded_for_duplicate_names_overlapping_descriptions_and_size",
+      "typescript": "e5 a set is graded for duplicate names overlapping descriptions and size",
+      "java": "e5_aSetIsGradedForDuplicateNamesOverlappingDescriptionsAndSize",
+      "kotlin": "e5_aSetIsGradedForDuplicateNamesOverlappingDescriptionsAndSize"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_pages_carry_an_opaque_cursor_and_a_clamped_limit_and_a_note",
+      "typescript": "e6 pages carry an opaque cursor and a clamped limit and a note",
+      "java": "e6_pagesCarryAnOpaqueCursorAndAClampedLimitAndANote",
+      "kotlin": "e6_pagesCarryAnOpaqueCursorAndAClampedLimitAndANote"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_a_page_stops_at_the_size_cap_and_says_so_but_always_carries_one_item",
+      "typescript": "e7 a page stops at the size cap and says so but always carries one item",
+      "java": "e7_aPageStopsAtTheSizeCapAndSaysSoButAlwaysCarriesOneItem",
+      "kotlin": "e7_aPageStopsAtTheSizeCapAndSaysSoButAlwaysCarriesOneItem"
+    },
+    "e8": {
+      "kind": "edge",
+      "python": "test_e8_a_tools_own_hints_are_trusted_only_from_a_trusted_server_and_the_defaults_apply_otherwise",
+      "typescript": "e8 a tools own hints are trusted only from a trusted server and the defaults apply otherwise",
+      "java": "e8_aToolsOwnHintsAreTrustedOnlyFromATrustedServerAndTheDefaultsApplyOtherwise",
+      "kotlin": "e8_aToolsOwnHintsAreTrustedOnlyFromATrustedServerAndTheDefaultsApplyOtherwise"
+    }
+  },
+  "plants": {
+    "wrong-name-spaces-allowed": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "accepts a name with spaces, dots or a hash sign"
+    },
+    "wrong-vague-case-sensitive": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "flags a vague name only when it is written in lower case"
+    },
+    "wrong-two-sentences-ok": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "accepts a description of two sentences"
+    },
+    "wrong-boundary-do-not-only": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "accepts only the words do not use as a boundary against a neighbouring tool"
+    },
+    "wrong-required-unchecked": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "does not notice a required name that is not a property"
+    },
+    "wrong-example-enum-ignored": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "accepts an example whose value is outside the enum"
+    },
+    "wrong-bool-is-integer": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "accepts true as an integer example"
+    },
+    "wrong-undescribed-ok": {
+      "caught_by": [
+        "m1",
+        "e3"
+      ],
+      "defect": "does not notice a parameter without a description"
+    },
+    "wrong-limit-only": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "asks a list tool for a limit but not for a cursor"
+    },
+    "wrong-hint-readonly-only": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "checks the read-only hint against the name but not the destructive hint"
+    },
+    "wrong-duplicate-allowed": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "lets two tools share a name"
+    },
+    "wrong-overlap-strict": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "does not flag descriptions that overlap by exactly the threshold"
+    },
+    "wrong-count-off-by-one": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "flags a set that is exactly as large as the budget"
+    },
+    "wrong-limit-unclamped": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "lets the limit grow beyond the maximum page size"
+    },
+    "wrong-no-note": {
+      "caught_by": [
+        "e6",
+        "e7"
+      ],
+      "defect": "leaves out the note that tells the model how to continue"
+    },
+    "wrong-cursor-unchecked": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "starts from the beginning when the cursor is not valid"
+    },
+    "wrong-cap-exclusive": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "stops one item early when a page fills the size cap exactly"
+    },
+    "wrong-truncated-never": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "never reports that a page was cut by the size cap"
+    },
+    "wrong-untrusted-honoured": {
+      "caught_by": [
+        "e8"
+      ],
+      "defect": "reads the hints of a server that is not trusted"
+    },
+    "wrong-parallel-untrusted": {
+      "caught_by": [
+        "e8"
+      ],
+      "defect": "lets a tool of an untrusted server run in parallel on its own say so"
+    }
+  }
+}

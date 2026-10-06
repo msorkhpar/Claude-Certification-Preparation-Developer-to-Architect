@@ -1,0 +1,109 @@
+{
+  "practice": "46-coordinator-and-subagents/unit-01/practice-1",
+  "name": "coordinator",
+  "tests": {
+    "java": "CoordinatorTest",
+    "kotlin": "CoordinatorTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_hub_sends_one_brief_to_each_spoke_and_synthesizes_what_comes_back",
+      "typescript": "m1 a hub sends one brief to each spoke and synthesizes what comes back",
+      "java": "m1_aHubSendsOneBriefToEachSpokeAndSynthesizesWhatComesBack",
+      "kotlin": "m1_aHubSendsOneBriefToEachSpokeAndSynthesizesWhatComesBack"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_question_the_coordinator_can_answer_itself_is_answered_without_any_subagent",
+      "typescript": "e1 a question the coordinator can answer itself is answered without any subagent",
+      "java": "e1_aQuestionTheCoordinatorCanAnswerItselfIsAnsweredWithoutAnySubagent",
+      "kotlin": "e1_aQuestionTheCoordinatorCanAnswerItselfIsAnsweredWithoutAnySubagent"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_subagent_sees_its_own_brief_and_nothing_the_others_found",
+      "typescript": "e2 a subagent sees its own brief and nothing the others found",
+      "java": "e2_aSubagentSeesItsOwnBriefAndNothingTheOthersFound",
+      "kotlin": "e2_aSubagentSeesItsOwnBriefAndNothingTheOthersFound"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_the_plan_is_cleaned_of_empty_briefs_and_duplicate_scopes_and_capped",
+      "typescript": "e3 the plan is cleaned of empty briefs and duplicate scopes and capped",
+      "java": "e3_thePlanIsCleanedOfEmptyBriefsAndDuplicateScopesAndCapped",
+      "kotlin": "e3_thePlanIsCleanedOfEmptyBriefsAndDuplicateScopesAndCapped"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_a_failing_subagent_does_not_stop_the_others_and_a_run_with_no_findings_does_not_synthesize",
+      "typescript": "e4 a failing subagent does not stop the others and a run with no findings does not synthesize",
+      "java": "e4_aFailingSubagentDoesNotStopTheOthersAndARunWithNoFindingsDoesNotSynthesize",
+      "kotlin": "e4_aFailingSubagentDoesNotStopTheOthersAndARunWithNoFindingsDoesNotSynthesize"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_review_sends_only_the_gaps_back_out_and_stops_when_none_are_left",
+      "typescript": "e5 a review sends only the gaps back out and stops when none are left",
+      "java": "e5_aReviewSendsOnlyTheGapsBackOutAndStopsWhenNoneAreLeft",
+      "kotlin": "e5_aReviewSendsOnlyTheGapsBackOutAndStopsWhenNoneAreLeft"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_the_rounds_are_capped_and_the_gaps_that_remain_are_reported",
+      "typescript": "e6 the rounds are capped and the gaps that remain are reported",
+      "java": "e6_theRoundsAreCappedAndTheGapsThatRemainAreReported",
+      "kotlin": "e6_theRoundsAreCappedAndTheGapsThatRemainAreReported"
+    }
+  },
+  "plants": {
+    "wrong-leaks-context": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "appends what earlier subagents found to the briefs of a team of three or more"
+    },
+    "wrong-no-dedupe": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "runs two subagents on the same scope"
+    },
+    "wrong-empty-brief-sent": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "sends a subagent an empty brief"
+    },
+    "wrong-always-delegates": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "builds a team even when the planner answered the question itself"
+    },
+    "wrong-failure-as-finding": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "reports a subagent's error message as a finding"
+    },
+    "wrong-synthesizes-nothing": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "synthesizes an answer when every subagent failed"
+    },
+    "wrong-gaps-not-deduped": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "keeps a gap that the reviewer names twice and sends it out twice"
+    },
+    "wrong-rounds-off-by-one": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "runs one refinement round more than the limit"
+    }
+  }
+}

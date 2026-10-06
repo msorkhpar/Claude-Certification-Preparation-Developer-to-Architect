@@ -1,0 +1,78 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "15-errors-retries-and-timeouts"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: a retry policy, graded on scripted failures (Python)",
+  "lang": "python",
+  "main_file": "retry.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_retry.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-2/15-errors-retries-and-timeouts/prose/unit-02/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-2/15-errors-retries-and-timeouts/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-2/15-errors-retries-and-timeouts/prose/unit-02/practice-1/test_retry.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_overloaded_twice_then_success_returns_the_good_reply_after_two_waits",
+      "kind": "main",
+      "says": "Overloaded twice, then success: the good reply comes back after waits of 0.5 and 1.0"
+    },
+    {
+      "id": "test_e1_client_errors_are_not_retried",
+      "kind": "edge",
+      "says": "400, 401, 404 and 413 are not retried"
+    },
+    {
+      "id": "test_e2_retry_after_is_a_floor_for_the_wait",
+      "kind": "edge",
+      "says": "retry-after is a floor for the wait"
+    },
+    {
+      "id": "test_e3_delay_doubles_up_to_the_cap_and_the_jitter_is_applied_last",
+      "kind": "edge",
+      "says": "The delay doubles up to the cap, and the jitter is applied last"
+    },
+    {
+      "id": "test_e4_a_spend_cap_429_is_not_retried",
+      "kind": "edge",
+      "says": "A spend-cap 429 is not retried"
+    },
+    {
+      "id": "test_e5_connection_errors_are_retried_like_server_errors",
+      "kind": "edge",
+      "says": "Connection errors are retried like server errors, and give connection_error at the end"
+    },
+    {
+      "id": "test_e6_giving_up_reports_the_last_reply_and_does_not_wait_after_the_last_attempt",
+      "kind": "edge",
+      "says": "Giving up reports the last reply, makes exactly max_attempts calls and waits one time fewer"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/15-errors-retries-and-timeouts/02-retry-back-off-and-idempotency.md"
+}

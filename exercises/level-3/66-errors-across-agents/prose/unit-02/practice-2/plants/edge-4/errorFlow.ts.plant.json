@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "errorFlow.ts",
+      "old": "  for (const [topic, outcome] of Object.entries(results)) {\n    let action",
+      "new": "  if (Object.values(results).some((o: any) => o.status === \"failed\")) return Object.keys(results).map((t): [string, string] => [t, \"abort\"]);\n  for (const [topic, outcome] of Object.entries(results)) {\n    let action"
+    }
+  ]
+}

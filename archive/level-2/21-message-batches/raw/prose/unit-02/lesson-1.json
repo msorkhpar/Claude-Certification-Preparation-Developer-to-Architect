@@ -1,0 +1,507 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "21-message-batches"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Polling, results and retries",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Polling, results and retries"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Developer · **Module 21:** Message Batches · **Page 2 of 2** **Exams:** DV2"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** poll a batch to completion, read its result file safely, say which result types are billed, decide which failures to retry and which to fix first, and write the three functions around a batch."
+    },
+    {
+      "type": "para",
+      "text": "Checked against the Claude API documentation (Batch processing) on 2026-10-02, and by running the example and the practice offline in the course container (`anthropic` 1.11.0, `@anthropic-ai/sdk` 0.131.0). The batch in the example is an illustrative, scripted exchange in the API's shape, not a capture."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "The submission is the easy half. A batch of thousands of requests ends with a mixed result file: some answers, some errors, some requests that never ran. A program that assumes every line is an answer, or that the lines come back in order, loses data quietly. The exam asks how results are matched, what is billed and what is worth sending again."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Polling"
+    },
+    {
+      "type": "para",
+      "text": "A batch starts with `processing_status` of `in_progress` and moves to `ended` \"once all the requests in the batch have finished processing, and results are ready\". Poll the batch by its `id`, with a wait between polls. Its `request_counts` field shows how many requests are `processing`, `succeeded`, `errored`, `canceled` and `expired`, so a poll doubles as a progress bar. The example below waits a recorded sixty seconds between polls, without sleeping, so that it runs at once."
+    },
+    {
+      "type": "para",
+      "text": "Cancellation has one more state. Right after a cancel call the status is `canceling`; poll again until it ends. \"Canceled batches end up with a status of ended and may contain partial results for requests that were processed before cancellation.\" Cancellation may not be instant, and the requests that had already run are still billed."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The four result types"
+    },
+    {
+      "type": "para",
+      "text": "When processing has ended, every request has exactly one result:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Type",
+        "Meaning",
+        "Billed"
+      ],
+      "rows": [
+        [
+          "`succeeded`",
+          "the request worked and carries the message",
+          "yes"
+        ],
+        [
+          "`errored`",
+          "an error such as an invalid request or an internal server error",
+          "no"
+        ],
+        [
+          "`canceled`",
+          "the batch was canceled before this request was sent",
+          "no"
+        ],
+        [
+          "`expired`",
+          "the 24 hours passed before this request was sent",
+          "no"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "For the three failures the page says \"You will not be billed for these requests.\" The 50 percent discount applies to what is billed: \"All usage is charged at 50% of the standard API prices.\" The results are at the `results_url` of the batch, as a `.jsonl` file: each line is one JSON object, and \"it's recommended to stream results back rather than download them all at once\". The result lines carry `custom_id` and a `result` whose `type` is one of the four."
+    },
+    {
+      "type": "para",
+      "text": "The ordering rule is worth quoting in full:"
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "Batch results can be returned in any order, and may not match the ordering of requests when the batch was created."
+        }
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Source: Batch processing."
+    },
+    {
+      "type": "para",
+      "text": "The page continues \"always use the `custom_id` field\" to match them. Position in the file means nothing."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Which failures to retry"
+    },
+    {
+      "type": "para",
+      "text": "The four types are not all alike. The table is the course's own advice, built from the causes the page names:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Result",
+        "Cause",
+        "What to do"
+      ],
+      "rows": [
+        [
+          "`errored` with `invalid_request_error`",
+          "the request is wrong",
+          "fix it first; the same request fails again"
+        ],
+        [
+          "`errored` with another type",
+          "a fault that is not in the request",
+          "resubmit unchanged"
+        ],
+        [
+          "`expired`",
+          "the batch ran out of time first",
+          "resubmit unchanged"
+        ],
+        [
+          "`canceled`",
+          "you canceled the batch",
+          "resubmit if you still want it"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The page adds the isolation fact: \"the failure of one request in a batch does not affect the processing of other requests.\" So a batch with a hundred bad requests still returns the other answers. Collect the failures into a new, smaller batch."
+    },
+    {
+      "type": "para",
+      "text": "A request that appears in your list but has no line in the result file is a gap, and the practice calls it `missing`. A line whose `custom_id` matches no request is a stranger, and the practice reports it without using it."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Server tools in a batch"
+    },
+    {
+      "type": "para",
+      "text": "Server tools such as web search work in a batch. Because there is no open connection, \"the batch loop runs more iterations per turn than a synchronous request before it returns `stop_reason: \"pause_turn\"`\". A result with `pause_turn` did not finish: continue it by submitting the paused content again, in a batch or a synchronous request."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Keeping the results"
+    },
+    {
+      "type": "para",
+      "text": "Results live for 29 days after `created_at`, and the batch can be deleted earlier with `DELETE /v1/messages/batches/{batch_id}` after processing (cancel an in-progress batch first). Store what you need within the window. After that, \"you may still view the Batch, but its results will no longer be available for download.\" A submitted batch cannot be changed either: \"once a batch has been submitted, it cannot be modified\". Remember, too, the size rule from page 1: \"A Message Batch is limited to either 100,000 Message requests or 256 MB in size, whichever is reached first.\""
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "para",
+      "text": "The example submits four requests, polls twice, and reads a result file in which the lines are out of order, one request errored on an invalid request and one expired. It matches every line to its request and sorts the failures into those to fix and those to send again."
+    },
+    {
+      "type": "example",
+      "id": "m21-batch-round-trip",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/21-batch-round-trip/python/batch_round_trip.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/21-batch-round-trip/typescript/batchRoundTrip.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/21-batch-round-trip/java/BatchRoundTrip.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/21-batch-round-trip/kotlin/BatchRoundTrip.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"A Message Batch from submission to results, against a scripted server.\n\nThe replies are illustrative, hand-written bodies in the shapes of the batch processing page (claude-haiku-4-5), not\ncaptures. The results arrive out of order, as the page warns they may, and one request of each non-success kind is in\nthem. Waiting between polls is recorded, not slept.\n\"\"\"\nimport logging\nimport json\n\nimport httpx2\n\nfrom harness import scripted_client\nfrom harness.scripted import message, text\n\nlog = logging.getLogger(__name__)\n\nMODEL = \"claude-haiku-4-5-20251001\"\nTICKETS = {\"t-1\": \"My parcel never arrived.\", \"t-2\": \"How do I change my address?\", \"t-3\": \"Charge me twice? Refund please.\", \"t-4\": \"x\" * 10}\n\n\ndef batch(status, counts, results_url=None):\n    return {\"id\": \"msgbatch_illustrative\", \"type\": \"message_batch\", \"processing_status\": status, \"request_counts\": counts,\n            \"ended_at\": None if status != \"ended\" else \"2026-10-02T10:40:00Z\", \"created_at\": \"2026-10-02T10:00:00Z\",\n            \"expires_at\": \"2026-10-03T10:00:00Z\", \"cancel_initiated_at\": None, \"results_url\": results_url}\n\n\ndef counts(processing=0, succeeded=0, errored=0, canceled=0, expired=0):\n    return {\"processing\": processing, \"succeeded\": succeeded, \"errored\": errored, \"canceled\": canceled, \"expired\": expired}\n\n\ndef result_line(custom_id, result):\n    return json.dumps({\"custom_id\": custom_id, \"result\": result})\n\n\ndef succeeded(label):\n    return {\"type\": \"succeeded\", **{\"message\": message([text(label)], usage={\"input_tokens\": 30, \"output_tokens\": 3})}}\n\n\nRESULTS = \"\\n\".join([\n    result_line(\"t-3\", succeeded(\"billing\")),\n    result_line(\"t-1\", succeeded(\"shipping\")),\n    result_line(\"t-4\", {\"type\": \"errored\", \"error\": {\"type\": \"error\", \"error\": {\"type\": \"invalid_request_error\", \"message\": \"messages: at least one message is required\"}}}),\n    result_line(\"t-2\", {\"type\": \"expired\"}),\n]) + \"\\n\"\n\nSCRIPT = [\n    (200, batch(\"in_progress\", counts(processing=4))),\n    (200, batch(\"in_progress\", counts(processing=2, succeeded=2))),\n    (200, batch(\"ended\", counts(succeeded=2, errored=1, expired=1), \"https://api.anthropic.com/v1/messages/batches/msgbatch_illustrative/results\")),\n    (200, batch(\"ended\", counts(succeeded=2, errored=1, expired=1), \"https://api.anthropic.com/v1/messages/batches/msgbatch_illustrative/results\")),  # results() looks the batch up first\n    httpx2.Response(200, headers={\"content-type\": \"application/x-jsonl\"}, content=RESULTS.encode()),\n]\n\n\ndef main():\n    client, transport = scripted_client(*SCRIPT)\n    requests = [{\"custom_id\": cid, \"params\": {\"model\": MODEL, \"max_tokens\": 50, \"messages\": [{\"role\": \"user\", \"content\": f\"Label this ticket: {body}\"}]}}\n                for cid, body in TICKETS.items()]\n    created = client.messages.batches.create(requests=requests)\n    print(\"created:\", created.id, created.processing_status, \"| request ids sent:\", [r[\"custom_id\"] for r in transport.requests[0][\"requests\"]])\n    waits = []\n    status = created\n    while status.processing_status != \"ended\":\n        status = client.messages.batches.retrieve(created.id)\n        waits.append(60)\n        print(\"poll:\", status.processing_status, status.request_counts.model_dump())\n    print(\"waited between polls (recorded, not slept):\", waits, \"seconds\")\n    outcomes = {}\n    for item in client.messages.batches.results(created.id):\n        kind = item.result.type\n        detail = item.result.message.content[0].text if kind == \"succeeded\" else (item.result.error.error.type if kind == \"errored\" else \"\")\n        outcomes[item.custom_id] = (kind, detail)\n        print(f\"result: {item.custom_id} {kind} {detail}\")\n    print(\"in request order:\", [(cid, outcomes[cid][0]) for cid in TICKETS])\n    fix = [cid for cid, (kind, detail) in outcomes.items() if kind == \"errored\" and detail == \"invalid_request_error\"]\n    retry = [cid for cid, (kind, _) in outcomes.items() if kind in (\"expired\", \"canceled\") or (kind == \"errored\" and cid not in fix)]\n    print(\"fix before resubmitting:\", fix, \"| resubmit unchanged:\", retry)\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "created: msgbatch_illustrative in_progress | request ids sent: ['t-1', 't-2', 't-3', 't-4']\npoll: in_progress {'canceled': 0, 'errored': 0, 'expired': 0, 'processing': 2, 'succeeded': 2}\npoll: ended {'canceled': 0, 'errored': 1, 'expired': 1, 'processing': 0, 'succeeded': 2}\nwaited between polls (recorded, not slept): [60, 60] seconds\nresult: t-3 succeeded billing\nresult: t-1 succeeded shipping\nresult: t-4 errored invalid_request_error\nresult: t-2 expired \nin request order: [('t-1', 'succeeded'), ('t-2', 'expired'), ('t-3', 'succeeded'), ('t-4', 'errored')]\nfix before resubmitting: ['t-4'] | resubmit unchanged: ['t-2']"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// A Message Batch from submission to results, against a scripted server.\n// The replies are illustrative, hand-written bodies in the shapes of the batch processing page (claude-haiku-4-5), not\n// captures. The results arrive out of order, as the page warns they may, and one request of each non-success kind is in\n// them. Waiting between polls is recorded, not slept.\nimport Anthropic from \"@anthropic-ai/sdk\";\nimport { message, scriptedFetch, text } from \"../../../harness/ts/scriptedFetch.ts\";\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"batch_round_trip\");\n\nexport const MODEL = \"claude-haiku-4-5-20251001\";\nexport const TICKETS: Record<string, string> = { \"t-1\": \"My parcel never arrived.\", \"t-2\": \"How do I change my address?\", \"t-3\": \"Charge me twice? Refund please.\", \"t-4\": \"x\".repeat(10) };\n\nconst batch = (status: string, counts: object, resultsUrl: string | null = null) => ({\n  id: \"msgbatch_illustrative\", type: \"message_batch\", processing_status: status, request_counts: counts,\n  ended_at: status === \"ended\" ? \"2026-10-02T10:40:00Z\" : null, created_at: \"2026-10-02T10:00:00Z\",\n  expires_at: \"2026-10-03T10:00:00Z\", cancel_initiated_at: null, results_url: resultsUrl,\n});\nconst counts = (c: Partial<Record<\"processing\" | \"succeeded\" | \"errored\" | \"canceled\" | \"expired\", number>>) => ({ processing: 0, succeeded: 0, errored: 0, canceled: 0, expired: 0, ...c });\nconst line = (customId: string, result: unknown) => JSON.stringify({ custom_id: customId, result });\nconst succeeded = (label: string) => ({ type: \"succeeded\", message: message([text(label)], \"end_turn\", { input_tokens: 30, output_tokens: 3 }, MODEL) });\n\nexport const RESULTS =\n  [\n    line(\"t-3\", succeeded(\"billing\")),\n    line(\"t-1\", succeeded(\"shipping\")),\n    line(\"t-4\", { type: \"errored\", error: { type: \"error\", error: { type: \"invalid_request_error\", message: \"messages: at least one message is required\" } } }),\n    line(\"t-2\", { type: \"expired\" }),\n  ].join(\"\\n\") + \"\\n\";\n\nexport const script = () => [\n  { body: batch(\"in_progress\", counts({ processing: 4 })) },\n  { body: batch(\"in_progress\", counts({ processing: 2, succeeded: 2 })) },\n  { body: batch(\"ended\", counts({ succeeded: 2, errored: 1, expired: 1 }), \"https://api.anthropic.com/v1/messages/batches/msgbatch_illustrative/results\") },\n  { body: batch(\"ended\", counts({ succeeded: 2, errored: 1, expired: 1 }), \"https://api.anthropic.com/v1/messages/batches/msgbatch_illustrative/results\") }, // results() looks the batch up first\n  { text: RESULTS },\n];\n\nexport function clientFor(replies: Array<Record<string, unknown>>) {\n  const fake = scriptedFetch(replies as any);\n  return { fake, client: new Anthropic({ apiKey: \"placeholder\", maxRetries: 0, fetch: fake.fetch }) };\n}\n\nasync function main() {\n  const { fake, client } = clientFor(script());\n  const requests = Object.entries(TICKETS).map(([custom_id, body]) => ({ custom_id, params: { model: MODEL, max_tokens: 50, messages: [{ role: \"user\" as const, content: `Label this ticket: ${body}` }] } }));\n  const created = await client.messages.batches.create({ requests });\n  console.log(\"created:\", created.id, created.processing_status, \"| request ids sent:\", JSON.stringify(fake.seen[0].body.requests.map((r: any) => r.custom_id)));\n  const waits: number[] = [];\n  let status = created;\n  while (status.processing_status !== \"ended\") {\n    status = await client.messages.batches.retrieve(created.id);\n    waits.push(60);\n    console.log(\"poll:\", status.processing_status, JSON.stringify(status.request_counts));\n  }\n  console.log(\"waited between polls (recorded, not slept):\", JSON.stringify(waits), \"seconds\");\n  const outcomes: Record<string, [string, string]> = {};\n  for await (const item of await client.messages.batches.results(created.id)) {\n    const r: any = item.result;\n    const kind = r.type as string;\n    const detail = kind === \"succeeded\" ? r.message.content[0].text : kind === \"errored\" ? r.error.error.type : \"\";\n    outcomes[item.custom_id] = [kind, detail];\n    console.log(`result: ${item.custom_id} ${kind} ${detail}`.trimEnd());\n  }\n  console.log(\"in request order:\", JSON.stringify(Object.keys(TICKETS).map((cid) => [cid, outcomes[cid][0]])));\n  const ids = Object.keys(outcomes);\n  const fix = ids.filter((cid) => outcomes[cid][0] === \"errored\" && outcomes[cid][1] === \"invalid_request_error\");\n  const retry = ids.filter((cid) => [\"expired\", \"canceled\"].includes(outcomes[cid][0]) || (outcomes[cid][0] === \"errored\" && !fix.includes(cid)));\n  console.log(\"fix before resubmitting:\", JSON.stringify(fix), \"| resubmit unchanged:\", JSON.stringify(retry));\n}\n\nif (import.meta.main) await main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "created: msgbatch_illustrative in_progress | request ids sent: [\"t-1\",\"t-2\",\"t-3\",\"t-4\"]\npoll: in_progress {\"processing\":2,\"succeeded\":2,\"errored\":0,\"canceled\":0,\"expired\":0}\npoll: ended {\"processing\":0,\"succeeded\":2,\"errored\":1,\"canceled\":0,\"expired\":1}\nwaited between polls (recorded, not slept): [60,60] seconds\nresult: t-3 succeeded billing\nresult: t-1 succeeded shipping\nresult: t-4 errored invalid_request_error\nresult: t-2 expired\nin request order: [[\"t-1\",\"succeeded\"],[\"t-2\",\"expired\"],[\"t-3\",\"succeeded\"],[\"t-4\",\"errored\"]]\nfix before resubmitting: [\"t-4\"] | resubmit unchanged: [\"t-2\"]"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import static harness.Scripted.map;\nimport static harness.Scripted.message;\nimport static harness.Scripted.text;\nimport static harness.Show.py;\n\nimport com.anthropic.client.AnthropicClient;\nimport com.anthropic.core.ObjectMappers;\nimport com.anthropic.core.http.StreamResponse;\nimport com.anthropic.models.messages.batches.BatchCreateParams;\nimport com.anthropic.models.messages.batches.MessageBatch;\nimport com.anthropic.models.messages.batches.MessageBatchIndividualResponse;\nimport com.anthropic.models.messages.batches.MessageBatchResult;\nimport com.fasterxml.jackson.databind.JsonNode;\nimport harness.Reply;\nimport harness.Scripted;\nimport harness.ScriptedHttp;\nimport java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.stream.Collectors;\n\n/**\n * A Message Batch from submission to results, against a scripted server.\n *\n * <p>The replies are illustrative, hand-written bodies in the shapes of the batch processing page (claude-haiku-4-5), not\n * captures. The results arrive out of order, as the page warns they may, and one request of each non-success kind is in\n * them. Waiting between polls is recorded, not slept. The Java SDK asks for `/results` directly, so the script has no\n * batch look-up before the results (the Python SDK makes one).\n */\npublic final class BatchRoundTrip {\n    private static final System.Logger LOG = System.getLogger(BatchRoundTrip.class.getName());\n    static final String MODEL = \"claude-haiku-4-5-20251001\";\n    static final Map<String, String> TICKETS = new LinkedHashMap<>();\n\n    static {\n        TICKETS.put(\"t-1\", \"My parcel never arrived.\");\n        TICKETS.put(\"t-2\", \"How do I change my address?\");\n        TICKETS.put(\"t-3\", \"Charge me twice? Refund please.\");\n        TICKETS.put(\"t-4\", \"x\".repeat(10));\n    }\n\n    static Map<String, Object> batch(String status, Map<String, Object> counts, String resultsUrl) {\n        return map(\"id\", \"msgbatch_illustrative\", \"type\", \"message_batch\", \"processing_status\", status, \"request_counts\", counts,\n            \"ended_at\", status.equals(\"ended\") ? \"2026-10-02T10:40:00Z\" : null, \"created_at\", \"2026-10-02T10:00:00Z\",\n            \"expires_at\", \"2026-10-03T10:00:00Z\", \"cancel_initiated_at\", null, \"results_url\", resultsUrl);\n    }\n\n    static Map<String, Object> counts(int processing, int succeeded, int errored, int canceled, int expired) {\n        return map(\"processing\", processing, \"succeeded\", succeeded, \"errored\", errored, \"canceled\", canceled, \"expired\", expired);\n    }\n\n    static String resultLine(String customId, Map<String, Object> result) {\n        try {\n            return ObjectMappers.jsonMapper().writeValueAsString(map(\"custom_id\", customId, \"result\", result));\n        } catch (Exception e) {\n            throw new IllegalStateException(e);\n        }\n    }\n\n    static Map<String, Object> succeeded(String label) {\n        return map(\"type\", \"succeeded\", \"message\", message(List.of(text(label)), \"end_turn\", MODEL, map(\"input_tokens\", 30, \"output_tokens\", 3), null));\n    }\n\n    static final String RESULTS = String.join(\"\\n\",\n        resultLine(\"t-3\", succeeded(\"billing\")),\n        resultLine(\"t-1\", succeeded(\"shipping\")),\n        resultLine(\"t-4\", map(\"type\", \"errored\", \"error\", map(\"type\", \"error\", \"error\", map(\"type\", \"invalid_request_error\", \"message\", \"messages: at least one message is required\")))),\n        resultLine(\"t-2\", map(\"type\", \"expired\"))) + \"\\n\";\n\n    static final String RESULTS_URL = \"https://api.anthropic.com/v1/messages/batches/msgbatch_illustrative/results\";\n\n    static List<Object> script() {\n        return List.of(\n            Reply.json(200, batch(\"in_progress\", counts(4, 0, 0, 0, 0), null)),\n            Reply.json(200, batch(\"in_progress\", counts(2, 2, 0, 0, 0), null)),\n            Reply.json(200, batch(\"ended\", counts(0, 2, 1, 0, 1), RESULTS_URL)),\n            Reply.text(200, \"application/x-jsonl\", RESULTS));\n    }\n\n    static BatchCreateParams requests() {\n        BatchCreateParams.Builder builder = BatchCreateParams.builder();\n        TICKETS.forEach((cid, body) -> builder.addRequest(BatchCreateParams.Request.builder().customId(cid)\n            .params(BatchCreateParams.Request.Params.builder().model(MODEL).maxTokens(50).addUserMessage(\"Label this ticket: \" + body).build()).build()));\n        return builder.build();\n    }\n\n    /** What came back for one request: its kind (succeeded, errored, expired, canceled) and a detail. */\n    record Outcome(String kind, String detail) {}\n\n    static Outcome outcomeOf(MessageBatchResult result) {\n        if (result.succeeded().isPresent()) return new Outcome(\"succeeded\", result.succeeded().get().message().content().get(0).asText().text());\n        if (result.errored().isPresent()) {\n            JsonNode error = ObjectMappers.jsonMapper().valueToTree(result.errored().get().error());\n            return new Outcome(\"errored\", error.at(\"/error/type\").asText());\n        }\n        return new Outcome(result.canceled().isPresent() ? \"canceled\" : \"expired\", \"\");\n    }\n\n    /** The results in the order they arrived. */\n    static Map<String, Outcome> results(AnthropicClient client, String batchId) {\n        Map<String, Outcome> outcomes = new LinkedHashMap<>();\n        try (StreamResponse<MessageBatchIndividualResponse> stream = client.messages().batches().resultsStreaming(batchId)) {\n            stream.stream().forEach(item -> outcomes.put(item.customId(), outcomeOf(item.result())));\n        }\n        return outcomes;\n    }\n\n    private static String counts(MessageBatch status) {\n        var c = status.requestCounts();\n        return \"{'canceled': \" + c.canceled() + \", 'errored': \" + c.errored() + \", 'expired': \" + c.expired() + \", 'processing': \" + c.processing() + \", 'succeeded': \" + c.succeeded() + \"}\";\n    }\n\n    public static void main(String[] args) {\n        ScriptedHttp transport = Scripted.http(script().toArray());\n        AnthropicClient client = Scripted.clientOn(transport, 0);\n        MessageBatch created = client.messages().batches().create(requests());\n        List<String> sentIds = new ArrayList<>();\n        transport.requests.get(0).get(\"requests\").forEach(r -> sentIds.add(r.get(\"custom_id\").asText()));\n        System.out.println(\"created: \" + created.id() + \" \" + created.processingStatus().asString() + \" | request ids sent: \" + py(sentIds));\n        List<Integer> waits = new ArrayList<>();\n        MessageBatch status = created;\n        while (!status.processingStatus().asString().equals(\"ended\")) {\n            status = client.messages().batches().retrieve(created.id());\n            waits.add(60);\n            System.out.println(\"poll: \" + status.processingStatus().asString() + \" \" + counts(status));\n        }\n        System.out.println(\"waited between polls (recorded, not slept): \" + waits + \" seconds\");\n        Map<String, Outcome> outcomes = results(client, created.id());\n        outcomes.forEach((cid, o) -> System.out.println(\"result: \" + cid + \" \" + o.kind() + \" \" + o.detail()));\n        System.out.println(\"in request order: [\" + TICKETS.keySet().stream().map(cid -> \"('\" + cid + \"', '\" + outcomes.get(cid).kind() + \"')\").collect(Collectors.joining(\", \")) + \"]\");\n        List<String> fix = outcomes.entrySet().stream().filter(e -> e.getValue().kind().equals(\"errored\") && e.getValue().detail().equals(\"invalid_request_error\")).map(Map.Entry::getKey).toList();\n        List<String> retry = outcomes.entrySet().stream().filter(e -> List.of(\"expired\", \"canceled\").contains(e.getValue().kind())\n            || (e.getValue().kind().equals(\"errored\") && !fix.contains(e.getKey()))).map(Map.Entry::getKey).toList();\n        System.out.println(\"fix before resubmitting: \" + py(fix) + \" | resubmit unchanged: \" + py(retry));\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "created: msgbatch_illustrative in_progress | request ids sent: ['t-1', 't-2', 't-3', 't-4']\npoll: in_progress {'canceled': 0, 'errored': 0, 'expired': 0, 'processing': 2, 'succeeded': 2}\npoll: ended {'canceled': 0, 'errored': 1, 'expired': 1, 'processing': 0, 'succeeded': 2}\nwaited between polls (recorded, not slept): [60, 60] seconds\nresult: t-3 succeeded billing\nresult: t-1 succeeded shipping\nresult: t-4 errored invalid_request_error\nresult: t-2 expired \nin request order: [('t-1', 'succeeded'), ('t-2', 'expired'), ('t-3', 'succeeded'), ('t-4', 'errored')]\nfix before resubmitting: ['t-4'] | resubmit unchanged: ['t-2']"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import com.anthropic.client.AnthropicClient\nimport com.anthropic.core.jsonMapper\nimport com.anthropic.models.messages.batches.BatchCreateParams\nimport com.anthropic.models.messages.batches.MessageBatch\nimport com.anthropic.models.messages.batches.MessageBatchResult\nimport harness.Reply\nimport harness.Scripted\nimport harness.Scripted.map\nimport harness.Scripted.message\nimport harness.Scripted.text\nimport harness.Show.py\n\nprivate val log = System.getLogger(\"batch_round_trip\")\n\n/**\n * A Message Batch from submission to results, against a scripted server.\n *\n * The replies are illustrative, hand-written bodies in the shapes of the batch processing page (claude-haiku-4-5), not\n * captures. The results arrive out of order, as the page warns they may, and one request of each non-success kind is in\n * them. Waiting between polls is recorded, not slept. The Java SDK (used from Kotlin) asks for `/results` directly, so the\n * script has no batch look-up before the results (the Python SDK makes one).\n */\nconst val MODEL = \"claude-haiku-4-5-20251001\"\nval TICKETS = linkedMapOf(\"t-1\" to \"My parcel never arrived.\", \"t-2\" to \"How do I change my address?\", \"t-3\" to \"Charge me twice? Refund please.\", \"t-4\" to \"x\".repeat(10))\n\nfun batch(status: String, counts: Map<String, Any>, resultsUrl: String? = null) = map(\n    \"id\", \"msgbatch_illustrative\", \"type\", \"message_batch\", \"processing_status\", status, \"request_counts\", counts,\n    \"ended_at\", if (status == \"ended\") \"2026-10-02T10:40:00Z\" else null, \"created_at\", \"2026-10-02T10:00:00Z\",\n    \"expires_at\", \"2026-10-03T10:00:00Z\", \"cancel_initiated_at\", null, \"results_url\", resultsUrl,\n)\n\nfun counts(processing: Int = 0, succeeded: Int = 0, errored: Int = 0, canceled: Int = 0, expired: Int = 0) =\n    map(\"processing\", processing, \"succeeded\", succeeded, \"errored\", errored, \"canceled\", canceled, \"expired\", expired)\n\nfun resultLine(customId: String, result: Map<String, Any?>): String = jsonMapper().writeValueAsString(map(\"custom_id\", customId, \"result\", result))\n\nfun succeeded(label: String) = map(\"type\", \"succeeded\", \"message\", message(listOf(text(label)), \"end_turn\", MODEL, map(\"input_tokens\", 30, \"output_tokens\", 3), null))\n\nval RESULTS = listOf(\n    resultLine(\"t-3\", succeeded(\"billing\")),\n    resultLine(\"t-1\", succeeded(\"shipping\")),\n    resultLine(\"t-4\", map(\"type\", \"errored\", \"error\", map(\"type\", \"error\", \"error\", map(\"type\", \"invalid_request_error\", \"message\", \"messages: at least one message is required\")))),\n    resultLine(\"t-2\", map(\"type\", \"expired\")),\n).joinToString(\"\\n\") + \"\\n\"\n\nconst val RESULTS_URL = \"https://api.anthropic.com/v1/messages/batches/msgbatch_illustrative/results\"\n\nfun script(): List<Any> = listOf(\n    Reply.json(200, batch(\"in_progress\", counts(processing = 4))),\n    Reply.json(200, batch(\"in_progress\", counts(processing = 2, succeeded = 2))),\n    Reply.json(200, batch(\"ended\", counts(succeeded = 2, errored = 1, expired = 1), RESULTS_URL)),\n    Reply.text(200, \"application/x-jsonl\", RESULTS),\n)\n\nfun requests(): BatchCreateParams {\n    val builder = BatchCreateParams.builder()\n    TICKETS.forEach { (cid, body) ->\n        builder.addRequest(\n            BatchCreateParams.Request.builder().customId(cid)\n                .params(BatchCreateParams.Request.Params.builder().model(MODEL).maxTokens(50).addUserMessage(\"Label this ticket: $body\").build()).build(),\n        )\n    }\n    return builder.build()\n}\n\n/** What came back for one request: its kind (succeeded, errored, expired, canceled) and a detail. */\ndata class Outcome(val kind: String, val detail: String)\n\nfun outcomeOf(result: MessageBatchResult): Outcome = when {\n    result.succeeded().isPresent -> Outcome(\"succeeded\", result.succeeded().get().message().content()[0].asText().text())\n    result.errored().isPresent -> Outcome(\"errored\", jsonMapper().valueToTree<com.fasterxml.jackson.databind.JsonNode>(result.errored().get().error()).at(\"/error/type\").asText())\n    result.canceled().isPresent -> Outcome(\"canceled\", \"\")\n    else -> Outcome(\"expired\", \"\")\n}\n\n/** The results in the order they arrived. */\nfun results(client: AnthropicClient, batchId: String): Map<String, Outcome> {\n    val outcomes = linkedMapOf<String, Outcome>()\n    client.messages().batches().resultsStreaming(batchId).use { stream -> stream.stream().forEach { outcomes[it.customId()] = outcomeOf(it.result()) } }\n    return outcomes\n}\n\nprivate fun counts(status: MessageBatch): String = status.requestCounts().let {\n    \"{'canceled': ${it.canceled()}, 'errored': ${it.errored()}, 'expired': ${it.expired()}, 'processing': ${it.processing()}, 'succeeded': ${it.succeeded()}}\"\n}\n\nfun main() {\n    val transport = Scripted.http(*script().toTypedArray())\n    val client = Scripted.clientOn(transport, 0)\n    val created = client.messages().batches().create(requests())\n    println(\"created: ${created.id()} ${created.processingStatus().asString()} | request ids sent: ${py(transport.requests[0][\"requests\"].map { it[\"custom_id\"].asText() })}\")\n    val waits = mutableListOf<Int>()\n    var status = created\n    while (status.processingStatus().asString() != \"ended\") {\n        status = client.messages().batches().retrieve(created.id())\n        waits += 60\n        println(\"poll: ${status.processingStatus().asString()} ${counts(status)}\")\n    }\n    println(\"waited between polls (recorded, not slept): $waits seconds\")\n    val outcomes = results(client, created.id())\n    for ((cid, o) in outcomes) println(\"result: $cid ${o.kind} ${o.detail}\")\n    println(\"in request order: ${TICKETS.keys.joinToString(\", \", \"[\", \"]\") { \"('$it', '${outcomes.getValue(it).kind}')\" }}\")\n    val fix = outcomes.filter { it.value.kind == \"errored\" && it.value.detail == \"invalid_request_error\" }.keys.toList()\n    val retry = outcomes.filter { it.value.kind in listOf(\"expired\", \"canceled\") || (it.value.kind == \"errored\" && it.key !in fix) }.keys.toList()\n    println(\"fix before resubmitting: ${py(fix)} | resubmit unchanged: ${py(retry)}\")\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "created: msgbatch_illustrative in_progress | request ids sent: ['t-1', 't-2', 't-3', 't-4']\npoll: in_progress {'canceled': 0, 'errored': 0, 'expired': 0, 'processing': 2, 'succeeded': 2}\npoll: ended {'canceled': 0, 'errored': 1, 'expired': 1, 'processing': 0, 'succeeded': 2}\nwaited between polls (recorded, not slept): [60, 60] seconds\nresult: t-3 succeeded billing\nresult: t-1 succeeded shipping\nresult: t-4 errored invalid_request_error\nresult: t-2 expired \nin request order: [('t-1', 'succeeded'), ('t-2', 'expired'), ('t-3', 'succeeded'), ('t-4', 'errored')]\nfix before resubmitting: ['t-4'] | resubmit unchanged: ['t-2']"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Read the output. The first poll shows two still processing. The second shows `ended`, with one errored and one expired, and the two `waited` entries show the polls were sixty seconds apart. The result lines arrive in the order t-3, t-1, t-4, t-2, and the program restores the request order t-1 to t-4 by `custom_id`. Then the sorting: `t-4` errored with an invalid request, so it must be corrected before it is resubmitted, and `t-2` expired, so it can be sent again unchanged."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The practice: submit a batch and handle its results"
+    },
+    {
+      "type": "para",
+      "text": "You write three functions. `build_requests(items)` turns your items into batch requests and raises `BatchError` for an unsafe id, a missing `max_tokens`, or a `stream` or `speed` field. `split_batches(requests, max_requests, max_bytes)` cuts a big job into batches within both limits. `collect(requests, result_lines)` reads the result lines and returns the outcomes in request order, the ids to retry, the ids to fix, the strangers and the usage of the succeeded requests. The statement is in `exercises/21-message-batches/unit-01/practice-1/statement.md`; each language folder has a `starter`, the tests and a build file, and the starter fails every test."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Results are matched to requests by custom id, not by position"
+        ],
+        [
+          "`e1`",
+          "A custom id is 1 to 64 safe characters and unique"
+        ],
+        [
+          "`e2`",
+          "Parameters a batch cannot take are refused"
+        ],
+        [
+          "`e3`",
+          "A big job is cut in order by request count and by size"
+        ],
+        [
+          "`e4`",
+          "Invalid requests are fixed, the other failures are retried"
+        ],
+        [
+          "`e5`",
+          "A request with no result is missing and retried, and a stranger id is reported"
+        ],
+        [
+          "`e6`",
+          "Only succeeded requests count toward usage"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Case `e6` is the billing rule in code: the sums include a `succeeded` result's token fields and nothing from the errored, canceled and expired lines, since \"You will not be billed for these requests.\""
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Retrying every failure unchanged.** An `invalid_request_error` fails again each time and burns a day. Fix the request, then resubmit it.",
+        "**Treating a missing line as success.** A request without a result line is a gap. Compare the ids you sent with the ids you received.",
+        "**Counting every line in the usage totals.** Only the `succeeded` results carry tokens that are billed. Sum those."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "The first line of a result file carries the id of the request sent third. What should the program do?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Treat the file as corrupt, since entries must follow the order of submission",
+              "**b**: Pair every entry with its source through the label you assigned, as the order is arbitrary",
+              "**c**: Sort by finishing time, since that is the order that counts for the match",
+              "**d**: Match by position once the first entries are read, since the rest follow suit"
+            ]
+          }
+        ],
+        [
+          "A batch ends with 900 succeeded results, 50 errored, 30 canceled and 20 expired. Which results are billed?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The 900 and the 20 that timed out, as those had reached a queue",
+              "**b**: The 900 and the 50 that failed on an error, as both ran a model",
+              "**c**: All 1,000, as the discount is a flat half of the total",
+              "**d**: The 900 that worked, as the other three kinds carry no charge"
+            ]
+          }
+        ],
+        [
+          "A result line for one request shows an error of type invalid_request_error. What is the sound next step?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Resubmit it unchanged, since a failure is usually a one-off",
+              "**b**: Correct the body, then send it in a later batch",
+              "**c**: Wait for the same batch to retry it, since that is automatic",
+              "**d**: Drop it, since an errored entry cannot join a new batch"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**b**. The page says \"always use the `custom_id` field\" to match, since the file order carries no meaning. *a* is ruled out because the file \"may not match the ordering of requests when the batch was created\". *c* is ruled out because the page names the match key: \"always use the `custom_id` field\". *d* is ruled out because \"Batch results can be returned in any order\".",
+            "**d**. The page says \"You will not be billed for these requests.\" of the three failure types. *b* is ruled out because \"You will not be billed for these requests.\" is stated for the errored results too. *c* is ruled out because \"Only the `succeeded` results carry tokens that are billed.\" *a* is ruled out because an expired request means \"the 24 hours passed before this request was sent\", so it never ran.",
+            "**b**. The page's table says for this error \"fix it first; the same request fails again\", and then a new batch can carry it. *a* is ruled out because of \"fix it first; the same request fails again\". *c* is ruled out because \"once a batch has been submitted, it cannot be modified\", so a batch does not retry on its own. *d* is ruled out because the page says \"Collect the failures into a new, smaller batch.\""
+          ]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Module quiz"
+    },
+    {
+      "type": "para",
+      "text": "This quiz covers both pages of the module."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A nightly job has 180,000 requests and wants the answers by the next evening. Which plan fits the module?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Send one batch and read the results in the order they were sent",
+              "**b**: Split into at least two batches and match each result by its id",
+              "**c**: Send them live with `stream: true` and skip the batch route",
+              "**d**: Send one batch with `speed` fast to finish before the next evening"
+            ]
+          }
+        ],
+        [
+          "A team tries to download its output 35 days after the job was created. What do they find?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The record is still viewable, but the files are gone",
+              "**b**: The downloads are fine, since the 29 days count from the end of processing",
+              "**c**: The record is deleted, since it expires together with its downloads",
+              "**d**: The downloads cost extra, since they come from an archive"
+            ]
+          }
+        ],
+        [
+          "A batch of 3,000 requests ends with 2,700 succeeded and 300 expired. What is the sound handling?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Resend the timed-out part unchanged and keep the finished answers",
+              "**b**: Resubmit all 3,000 so the results come from one run",
+              "**c**: Drop the 300, since an expired request cannot be sent again",
+              "**d**: Fix the 300 first, since an expired request is an invalid one"
+            ]
+          }
+        ],
+        [
+          "A program sums `input_tokens` over every line of a result file, and the total exceeds the invoice. What is the likely cause?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: It counts the discount as a charge, since usage is reported at full rate",
+              "**b**: It counts cached tokens twice, since each entry repeats the prefix",
+              "**c**: It also adds entries for failures and cancellations, none of which are billed",
+              "**d**: It counts polling calls, since each poll is billed as a request"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**b**. The page says \"A Message Batch is limited to either 100,000 Message requests or 256 MB in size, whichever is reached first\", so 180,000 needs two, and the ids match the results. *a* is ruled out because \"Batch results can be returned in any order\". *c* is ruled out because \"it's recommended to stream results back rather than download them all at once\" applies to results, and a batch is the route for work nobody awaits. *d* is ruled out because the page 1 table marks `speed` as refused, and \"Fast mode tunes synchronous latency\" does not apply in a batch.",
+            "**a**. The page says \"you may still view the Batch, but its results will no longer be available for download\", after the 29-day window. *b* is ruled out because \"Results live for 29 days after `created_at`\", not after the end. *c* is ruled out because \"you may still view the Batch\" after the window. *d* is ruled out because the page says \"Store what you need within the window.\" and names no archive.",
+            "**a**. The page's table says an expired request is resubmitted unchanged, and the finished answers stay. *b* is ruled out because \"the failure of one request in a batch does not affect the processing of other requests.\" *c* is ruled out because an expired request means \"the 24 hours passed before this request was sent\", so it can go in again. *d* is ruled out because \"the batch ran out of time first\" is the cause of an expiry, not a bad request.",
+            "**c**. The page says \"You will not be billed for these requests.\" for the failures, and \"Only the `succeeded` results carry tokens that are billed.\" *b* is ruled out because the page says \"Only the `succeeded` results carry tokens that are billed.\" and names no repeated prefix. *a* is ruled out because \"All usage is charged at 50% of the standard API prices.\" *d* is ruled out because \"Poll the batch by its `id`, with a wait between polls.\" returns a status and no message, so no tokens."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 13,
+    "paras": 21,
+    "code": 0,
+    "tables": 3,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 1,
+    "html": 0,
+    "disclosures": 2,
+    "examples": 1
+  },
+  "content_sha256": "25518ef457c20f54c49a2908c6386fb45a152a23efa598d91d3059d43557920d"
+}

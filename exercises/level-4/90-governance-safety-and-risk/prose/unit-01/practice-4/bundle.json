@@ -1,0 +1,90 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-4",
+    "90-governance-safety-and-risk"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 4,
+  "title": "Practice: the governance files of a claims assistant (Kotlin)",
+  "lang": "kotlin",
+  "main_file": "project/governance/controls.json",
+  "files": [
+    "project/docs/risk-register.md",
+    "project/governance/retention.json",
+    "project/governance/routing.json"
+  ],
+  "test_file": "src/test/kotlin/GovernanceTest.kt",
+  "build": [
+    "libs/harness/build.gradle.kts",
+    "libs/harness/src/main/java/harness/Show.java",
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-4/check_files.py",
+    "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-4/project/docs/risk-register.md",
+    "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-4/project/governance/controls.json",
+    "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-4/project/governance/retention.json",
+    "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-4/project/governance/routing.json"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-4",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_noControlThatGuardsAnInputOrAnActionFailsOpen()",
+      "kind": "main",
+      "says": "No control that guards an input or an action fails open"
+    },
+    {
+      "id": "e1_everyHighConsequenceActionHasAHumanStepThatExistsAndHolds()",
+      "kind": "edge",
+      "says": "Every high-consequence action has a human step that exists, is high tier and holds"
+    },
+    {
+      "id": "e2_theAutomaticThresholdIsAtLeast95AndAHighConsequenceActionIsNeverAutomatic()",
+      "kind": "edge",
+      "says": "The automatic threshold is at least 95 (exactly 95 is allowed), a high-consequence action is never automatic and an unsupported answer is held"
+    },
+    {
+      "id": "e3_retentionKeepsAtLeast90DaysWithinTheCeilingAndStoresNoContent()",
+      "kind": "edge",
+      "says": "The audit floor is at least 90 days, the days kept lie within the ceiling, no content is stored and a legal hold wins"
+    },
+    {
+      "id": "e4_theRiskRegisterNamesAControlAndAnOwnerForEachOfFourFailureModes()",
+      "kind": "edge",
+      "says": "The register has four rows with a defined control, a named owner and the four failure modes"
+    },
+    {
+      "id": "e5_usersAreToldThatAiHelpedAndNoFileHoldsPersonalData()",
+      "kind": "edge",
+      "says": "The register says users are told that AI helped, and no file holds a personal path or address"
+    },
+    {
+      "id": "e6_erasureRemovesTheVaultMappingWithin30Days()",
+      "kind": "edge",
+      "says": "Erasure removes the vault mapping and completes within 30 days (exactly 30 is allowed)"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/90-governance-safety-and-risk/01-controls-that-fail-closed-and-a-person-before-the-irreversible.md"
+}

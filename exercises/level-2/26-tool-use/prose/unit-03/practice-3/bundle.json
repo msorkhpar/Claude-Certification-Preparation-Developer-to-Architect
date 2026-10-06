@@ -1,0 +1,89 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "26-tool-use"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 3,
+  "title": "Practice: a tool loop against a scripted model (Java)",
+  "lang": "java",
+  "main_file": "src/main/java/ToolLoop.java",
+  "files": [
+    "src/main/java/TryIt.java"
+  ],
+  "test_file": "src/test/java/ToolLoopTest.java",
+  "build": [
+    "src/main/java/Json.java",
+    "src/main/java/RequestError.java",
+    "src/main/java/Tool.java",
+    "src/main/java/ToolError.java",
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/26-tool-use/prose/unit-03/practice-3",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/26-tool-use/prose/unit-03/practice-3",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_aToolCallIsRunAndItsResultSentBackUntilTheModelEndsItsTurn()",
+      "kind": "main",
+      "says": "A tool call is run and its result sent back until the model ends its turn"
+    },
+    {
+      "id": "e1_parallelCallsGetOneUserMessageWithEveryResultInOrder()",
+      "kind": "edge",
+      "says": "Parallel calls get one user message with every result in order"
+    },
+    {
+      "id": "e2_aFailingUnknownOrMalformedCallBecomesAnErrorResultAndTheLoopGoesOn()",
+      "kind": "edge",
+      "says": "A failing, unknown or malformed call becomes an error result and the loop goes on"
+    },
+    {
+      "id": "e3_theNumberOfTurnsIsBounded()",
+      "kind": "edge",
+      "says": "The number of turns is bounded"
+    },
+    {
+      "id": "e4_refusalAndTruncationEndTheLoopAndAPausedTurnContinues()",
+      "kind": "edge",
+      "says": "Refusal and truncation end the loop, and a paused turn continues"
+    },
+    {
+      "id": "e5_toolChoiceIsValidatedForTheModelAndAForcedChoiceAppliesToTheFirstRequestOnly()",
+      "kind": "edge",
+      "says": "tool_choice is validated for the model, and a forced choice applies to the first request only"
+    },
+    {
+      "id": "e6_resultsThatAreNotTextAreSentAsJsonText()",
+      "kind": "edge",
+      "says": "Results that are not text are sent as JSON text"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/26-tool-use/03-parallel-calls-the-tool-runner-and-the-practice.md"
+}

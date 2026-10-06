@@ -1,0 +1,351 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "73-scenario-developer-productivity"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: one shared setup for exploring a legacy system and generating boilerplate (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: one shared setup for exploring a legacy system and generating boilerplate"
+    },
+    {
+      "type": "para",
+      "text": "A team uses Claude Code on a legacy system. They want an explorer that only reads, a scaffolder that writes boilerplate in one folder, a documentation server and a ticket server that agents may read but never change, and a note that tells the next person which environment variables to set and which kind of session to start. The files of the setup already exist as a draft, and the draft is wrong in several places: a token is typed into a file, a subagent inherits every tool, a permission rule approves a whole tool, a subagent names a server that is not configured. In this practice you correct the files. There is no program to write and no model is called: the tests read your files. The names, paths and rules the tests check are the documented ones of Claude Code (checked 2026-10-04) plus this course's own conventions for the note. It is in Python, TypeScript, Java and Kotlin; pick your language folder, open `starter/` and edit the files there; each language folder holds its own copy of the files."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is the draft of the setup with five gaps cut out of it: the files exist and are wrong or empty. The `docs` server is written. Each gap is marked by a `TODO n of 5` comment in the file where the format allows one (`.mcp.json` and `settings.json` are JSON and take none) that says what is missing, with one example and the cases it unlocks. Delete the comment when the file is done. A file holds no program, so there is no logger to write here: the tests read the files and report the failing case with its message. Write them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`.claude/agents/explorer.md` unlocks `m1` and `e2`: a read-only explorer that names only configured servers.",
+        "`.claude/agents/scaffolder.md` unlocks `e3`: the tools of the scaffolder, with no `Bash`.",
+        "`.claude/settings.json` unlocks `m1`, `e3`, `e4` and `e5`: the allow and deny rules.",
+        "`.mcp.json` unlocks `e1`: the ticket address with a default and the token read from the environment.",
+        "`docs/team-setup.md` unlocks `e6` and `e7`: the variables, the three sessions and no personal path."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About ten lines in all. The sections below describe the whole setup."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "The project folder holds five files."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`.mcp.json`: the servers `docs` (a local one) and `tickets` (a remote one). The ticket address may have a default, written `${TICKETS_URL:-https://tickets.example.com/mcp}`. The token comes from the environment as `Bearer ${TICKETS_TOKEN}` and has no default.",
+        "`.claude/agents/explorer.md` and `.claude/agents/scaffolder.md`: project subagents. Each has a `description` and a `tools` line.",
+        "`.claude/settings.json`: the `permissions` with `allow` and `deny` lists.",
+        "`docs/team-setup.md`: the note for the team."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Rules the files must follow:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "A tool of an MCP server is written `mcp__<server>__<tool>`, in a subagent's `tools` and in a permission rule. The server must exist in `.mcp.json`.",
+        "The explorer's description starts with `Use when`, and its tools are only `Read`, `Grep`, `Glob` and `mcp__docs__search`.",
+        "The scaffolder has `Edit` and no `Bash`. Every allow rule that edits or writes is limited to `src/generated/`.",
+        "Agents may read tickets (get, list, search) and may not create or delete them.",
+        "`Read(./.env)` is denied, and no allow rule approves a whole tool (`Bash`, `Edit`, `Write`, `Read`, or the whole ticket server).",
+        "The note lists every environment variable that `.mcp.json` refers to, and has a table with a row for each of three situations: continuing yesterday's migration when the files are as they were (`resume`), comparing two designs that start from the same analysis (`fork`) and starting after the code was rewritten (`fresh`).",
+        "No file holds a home path, an address other than `example.com`, or a key."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**A reference should point at something the project defines.** A subagent that lists `mcp__wiki__search` when no `wiki` server is configured names a server that `.mcp.json` does not have. *You should see* every reference resolve to a configured server.",
+        "**A credential belongs to the person, not to the repository.** *You should see* the token read from the environment, with no default that would end up in version control.",
+        "**A subagent that omits `tools` inherits every tool.** *You should see* both subagents list exactly what they need, the explorer reading only and the scaffolder editing only one folder.",
+        "**A deny rule is the last line.** *You should see* the ticket tools that change data denied, and the environment file protected.",
+        "**A setup nobody can start is not shared.** *You should see* a note that names the variables and says when to resume, fork or start fresh."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Every MCP tool reference, in the subagents and in the permission rules, names a configured server"
+        ],
+        [
+          "`e1`",
+          "No literal credential; the token is a `${VAR}` reference with no default"
+        ],
+        [
+          "`e2`",
+          "The explorer is read only, lists its tools and says when to use it"
+        ],
+        [
+          "`e3`",
+          "The scaffolder has no `Bash` and every edit or write rule is limited to the generated folder"
+        ],
+        [
+          "`e4`",
+          "Create and delete ticket tools are denied and only read tools of the ticket server are allowed"
+        ],
+        [
+          "`e5`",
+          "The environment file is denied and no allow rule approves a whole tool"
+        ],
+        [
+          "`e6`",
+          "The note lists every variable and maps three situations to resume, fork or fresh"
+        ],
+        [
+          "`e7`",
+          "No personal path, address or key in any file"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "{\n  \"mcpServers\": {\n    \"docs\": {\n      \"type\": \"stdio\",\n      \"command\": \"python3\",\n      \"args\": [\"tools/docs_server.py\"]\n    },\n    \"tickets\": {\n      \"type\": \"http\",\n      \"url\": \"${TICKETS_URL:-https://tickets.example.com/mcp}\",\n      \"headers\": {\n        \"Authorization\": \"Bearer ${TICKETS_TOKEN}\"\n      }\n    }\n  }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.claude/agents/explorer.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "---\nname: explorer\ndescription: Use when a question is about how the legacy system works and nothing has to change.\ntools: Read, Grep, Glob, mcp__docs__search\n---\n\nFind entry points with Grep, read them, and follow imports one hop at a time. Report what you found with file paths.\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.claude/agents/scaffolder.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "---\nname: scaffolder\ndescription: Use when boilerplate has to be generated for a new module.\ntools: Read, Glob, Edit, Write\n---\n\nGenerate the files of a new module from the existing patterns, inside src/generated only.\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.claude/settings.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"permissions\": {\n    \"allow\": [\"Edit(src/generated/**)\", \"mcp__docs__*\", \"mcp__tickets__get_ticket\"],\n    \"deny\": [\"Read(./.env)\", \"mcp__tickets__create_ticket\", \"mcp__tickets__delete_ticket\"]\n  }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/docs/team-setup.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "# Team setup\n\n## Environment variables\n\nSet these in your shell before you start Claude Code. Never commit a value.\n\n- `TICKETS_URL`: the ticket server's address (optional, `.mcp.json` sets a default)\n- `TICKETS_TOKEN`: your own access token for the ticket server\n\n## Which session to start\n\n| Situation | Session |\n|---|---|\n| Continue yesterday's migration; the files are as they were | resume |\n| Compare two designs that start from the same analysis | fork |\n| The code was rewritten since the last session | fresh |\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "{\n  \"mcpServers\": {\n    \"docs\": {\n      \"type\": \"stdio\",\n      \"command\": \"python3\",\n      \"args\": [\"tools/docs_server.py\"]\n    },\n    \"tickets\": {\n      \"type\": \"http\",\n      \"url\": \"https://tickets.example.com/mcp\",\n      \"headers\": {\n        \"Authorization\": \"Bearer <token>\"\n      }\n    }\n  }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.claude/agents/explorer.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "---\nname: explorer\ndescription: Explores the legacy system.\ntools: Read, Grep, Bash, mcp__wiki__search\n---\n\nFind out how the legacy system works.\n\n<!-- TODO 1 of 5 (unlocks m1 and e2): make the front matter a read-only explorer. The description starts with `Use when`, the `tools` line lists only Read, Grep, Glob and a tool of a configured server.\nExample: a tool of the server `docs` is written `mcp__docs__search`. Delete this comment. -->\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.claude/agents/scaffolder.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "---\nname: scaffolder\ndescription: Generates boilerplate.\n---\n\nGenerate the files of a new module.\n\n<!-- TODO 2 of 5 (unlocks e3): give the scaffolder a `tools` line with Edit and no Bash, and a description that says when to use it.\nExample: `tools: Read, Glob, Edit`. Delete this comment. -->\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.claude/settings.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"permissions\": {\n    \"allow\": [\"Edit\", \"Bash\"],\n    \"deny\": []\n  }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/docs/team-setup.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "# Team setup\n\nTODO: write this note. Draft kept in /home/dev/notes.\n\n<!-- TODO 5 of 5 (unlocks e6 and e7): write the note: a list of every environment variable that `.mcp.json` refers to, and a table with the columns Situation and Session and one row for each of resume, fork and fresh. Remove the personal path.\nExample of a variable line: a dash, the name in backticks, a colon and what it is for. Delete this comment. -->\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 9,
+    "code": 5,
+    "tables": 1,
+    "lists": 4,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "93333634634b2e72c7375d8900d41512bb53f3ce410672853073c3101d35e15b",
+  "starting_code": "{\n  \"mcpServers\": {\n    \"docs\": {\n      \"type\": \"stdio\",\n      \"command\": \"python3\",\n      \"args\": [\"tools/docs_server.py\"]\n    },\n    \"tickets\": {\n      \"type\": \"http\",\n      \"url\": \"https://tickets.example.com/mcp\",\n      \"headers\": {\n        \"Authorization\": \"Bearer <token>\"\n      }\n    }\n  }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/73-scenario-developer-productivity/prose/unit-02/practice-4/project/.mcp.json",
+    "test_path": "practice/level-3/73-scenario-developer-productivity/prose/unit-02/practice-4/src/test/kotlin/McpSetupTest.kt",
+    "run_command": [
+      "python3",
+      "practice/level-3/73-scenario-developer-productivity/prose/unit-02/practice-4/check_files.py",
+      "practice/level-3/73-scenario-developer-productivity/prose/unit-02/practice-4/project/.claude/agents/explorer.md",
+      "practice/level-3/73-scenario-developer-productivity/prose/unit-02/practice-4/project/.claude/agents/scaffolder.md",
+      "practice/level-3/73-scenario-developer-productivity/prose/unit-02/practice-4/project/.claude/settings.json",
+      "practice/level-3/73-scenario-developer-productivity/prose/unit-02/practice-4/project/.mcp.json",
+      "practice/level-3/73-scenario-developer-productivity/prose/unit-02/practice-4/project/docs/team-setup.md"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/73-scenario-developer-productivity/prose/unit-02/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_everyMcpToolReferenceBelongsToAConfiguredServer()",
+        "kind": "main",
+        "says": "Every MCP tool reference, in the subagents and in the permission rules, names a configured server"
+      },
+      {
+        "id": "e1_credentialsComeFromTheEnvironmentAndTheTokenHasNoDefault()",
+        "kind": "edge",
+        "says": "No literal credential; the token is a ${VAR} reference with no default"
+      },
+      {
+        "id": "e2_theExplorerIsReadOnlyAndSaysWhenToUseIt()",
+        "kind": "edge",
+        "says": "The explorer is read only, lists its tools and says when to use it"
+      },
+      {
+        "id": "e3_theScaffolderWritesOnlyInTheGeneratedFolder()",
+        "kind": "edge",
+        "says": "The scaffolder has no Bash and every edit or write rule is limited to the generated folder"
+      },
+      {
+        "id": "e4_theTicketsServerIsReadOnlyForAgents()",
+        "kind": "edge",
+        "says": "Create and delete ticket tools are denied and only read tools of the ticket server are allowed"
+      },
+      {
+        "id": "e5_theEnvironmentFileIsDeniedAndNoWholeToolIsApproved()",
+        "kind": "edge",
+        "says": "The environment file is denied and no allow rule approves a whole tool"
+      },
+      {
+        "id": "e6_theTeamNoteListsEveryVariableAndSaysWhichSessionToStart()",
+        "kind": "edge",
+        "says": "The note lists every variable and maps three situations to resume, fork or fresh"
+      },
+      {
+        "id": "e7_noFileHoldsAPersonalPathAnAddressOrAKey()",
+        "kind": "edge",
+        "says": "No personal path, address or key in any file"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/73-scenario-developer-productivity/prose/unit-02/practice-4/target/test-results/test"
+    },
+    "origin": "course/73-scenario-developer-productivity/02-sessions-variables-and-the-practice.md",
+    "concepts": [
+      "the practice of Sessions, environment variables and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/73-scenario-developer-productivity/prose/unit-02/practice-4/project/.claude/agents/explorer.md",
+      "practice/level-3/73-scenario-developer-productivity/prose/unit-02/practice-4/project/.claude/agents/scaffolder.md",
+      "practice/level-3/73-scenario-developer-productivity/prose/unit-02/practice-4/project/.claude/settings.json",
+      "practice/level-3/73-scenario-developer-productivity/prose/unit-02/practice-4/project/docs/team-setup.md"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "scenario-developer-productivity-u2"
+}

@@ -1,0 +1,298 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "42-evaluation"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: an eval harness (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an eval harness"
+    },
+    {
+      "type": "para",
+      "text": "An eval answers one question before you ship a change to a prompt, a model or a setting: did the application get better or worse, on the cases that matter? The harness is the code that asks it the same way every time. It runs each test case through your application, grades the output with a check that can be automated, adds the grades up by the dimension the success criteria name, and compares one run with the last so that a regression cannot hide behind a better average. In this practice you write that harness. Nothing here calls a model or the network: the application under test and the model-graded judge are plain functions that the tests pass in, so every run is exact."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "para",
+      "text": "The Java and Kotlin folders give you `Json` (parse text into maps, lists, strings, numbers, booleans and null, and write them back). Python and TypeScript have JSON built in. A case, a report and every result are plain data: a map with string keys in every language. Integers read from JSON are `Long` in Java and Kotlin; your code must accept any `Number` where a number is read."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working harness with nine small gaps cut out of it. The plumbing is written and correct: `judge_prompt`, the regex and JSON parsing steps of `grade`, the loop of `run_eval`, the report, and `meets` and `compare` around the helpers. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To see what a gap receives, log its input with the `log` line at the top of the file (`grade` already logs its output at debug level); a run shows the logged lines under the failing case. Write them in this order (the Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_norm` unlocks `e1`: the form in which an exact check compares two texts.",
+        "`_field_result` unlocks `e2`: the field check on a parsed JSON object, with the same typed value.",
+        "`_parse_score` unlocks `e3`: a judge reply that is exactly one digit from 1 to 5.",
+        "`_judged` unlocks `e3`: pass at the threshold, `below threshold` under it.",
+        "`_run_once` unlocks `e4`: a model that raises an error fails its own case and the run goes on.",
+        "`_outcome` unlocks `e7`: passed, flaky and reason from the runs of one case.",
+        "`_count_tags` unlocks `e5`: one case counted under each of its tags.",
+        "`_tag_failed` unlocks `e5`: whether a tag misses its minimum rate, including a tag no case carries.",
+        "`_changes` unlocks `e6`: regressions, fixed, added and removed cases of two runs."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole harness; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "Names are written in Python style; TypeScript uses camelCase (`runEval`). Java and Kotlin put the functions on `Harness` (`Harness.grade`, `Harness.runEval`, `Harness.meets`, `Harness.compare`) and take the model and the judge as functions from text to text (`Function<String, String>` in Java, `(String) -> String` in Kotlin; the judge may be null)."
+    },
+    {
+      "type": "para",
+      "text": "A **case** is `{\"id\", \"input\", \"tags\": [...] (optional), \"check\": {...}}`. The check is one of four kinds:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`{\"type\": \"exact\", \"expected\": text}`: the output equals the expected text after both are trimmed, every run of white space is one space, and both are lower-cased.",
+        "`{\"type\": \"regex\", \"pattern\": text}`: the pattern is found anywhere in the output (a search, not a whole-text match).",
+        "`{\"type\": \"json_field\", \"field\": name, \"equals\": value}`: the whole output, apart from surrounding white space, is one JSON object that has the field, and the field's value equals `equals` **with the same JSON type** (the string `\"3\"` is not the number `3`, and `1` is not `true`). The value is a string, an integer or a boolean.",
+        "`{\"type\": \"judge\", \"criterion\": text, \"threshold\": integer (optional, default 4)}`: a model-graded check."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`grade(case, output, judge)` returns `{\"passed\", \"reason\"}`. The reason is `ok` when the case passed; otherwise `mismatch` (exact, regex, or a field with another value), `not json` (the output is not a JSON object), `missing field`, `below threshold` or `ungradable`. A judge check also returns `\"score\"` (the integer, or null when there is none)."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "The judge is called with exactly this prompt, with the criterion and the output filled in, and its lines separated by `\\n`: `Rate this response on a scale of 1-5 for <criterion>:`, `<response><output></response>`, `1: Not at all <criterion>`, `5: Perfectly <criterion>`, `Output only the number.`",
+        "The judge's reply, once trimmed, must be one digit from 1 to 5. Anything else, a reply that raises an error, or no judge at all is `ungradable` and the case fails. A score at or above the threshold passes; a lower one is `below threshold`.",
+        "Exact, regex and json checks never call the judge."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`run_eval(cases, model, judge=None, repeats=1)` runs every case, in order, `repeats` times through `model(case[\"input\"])` and grades each output with `grade`. A run in which the model raises an error is a failed run with the reason `model error`; the other cases still run. A case **passes only if every one of its runs passes**; its reason is `ok`, or the reason of its first failed run. A case is **flaky** when some of its runs passed and some failed. The report is `{\"total\", \"passed\", \"pass_rate\", \"results\": [{\"id\", \"passed\", \"reason\", \"flaky\"}], \"by_tag\": {tag: {\"passed\", \"total\"}}, \"flaky\": [ids]}`: `pass_rate` is `passed / total` (0.0 with no cases), `by_tag` counts every case under each of its tags (tags in order of first appearance), and `flaky` lists the flaky case ids in order."
+    },
+    {
+      "type": "para",
+      "text": "`meets(report, criteria)` checks a report against success criteria and returns `{\"met\", \"failures\"}`. The criteria are `{\"min_pass_rate\": number, \"tags\": {tag: minimum rate}, \"max_flaky\": integer}`, and each key is optional. A criterion that is missing is not checked. Failures are listed in this order: `overall` when the pass rate is below `min_pass_rate`; `tag:<name>` for each tag, in the criteria's order, whose rate (`passed / total`) is below its minimum or that no case carries; `flaky` when more than `max_flaky` cases are flaky. A rate equal to its minimum passes. `met` is true when there are no failures."
+    },
+    {
+      "type": "para",
+      "text": "`compare(baseline, current)` compares two reports by case id and returns `{\"regressions\", \"fixed\", \"added\", \"removed\", \"pass_rate_delta\", \"ok\"}`: the ids that passed in the baseline and fail now, the ids that failed and pass now, the ids only in the current report, and the ids only in the baseline (each in report order, regressions, fixed and added in the current report's order and removed in the baseline's); the current pass rate minus the baseline's; and `ok`, which is true only when there are no regressions **and** no removed cases. A better average never excuses a regression, and a case that vanished from the set is not a pass."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A run grades each case with its own check (exact, regex), reports the pass rate and the order of the results, and an empty set has rate 0.0"
+        ],
+        [
+          "`e1`",
+          "An exact check ignores case and spacing only: a longer word, a different word and an empty output fail; a regex is a search, and an anchored one still fails on extra text"
+        ],
+        [
+          "`e2`",
+          "A json field check: a JSON object, the field present, the same typed value; a fenced block, prose around the JSON and an array are `not json`"
+        ],
+        [
+          "`e3`",
+          "A judge check: the exact prompt, a bare score at the threshold passes, a lower score fails, and a reply that is not a bare score, no judge or a judge that raises is `ungradable`"
+        ],
+        [
+          "`e4`",
+          "A model error fails its own case with `model error` and the run goes on"
+        ],
+        [
+          "`e5`",
+          "Tags report their own pass rates; `meets` judges the overall rate, each tag (a missing tag fails) and the flaky count, and a rate equal to its minimum passes"
+        ],
+        [
+          "`e6`",
+          "`compare` names regressions, fixes, added and removed cases; a better average with a regression is not ok; a removed case is not ok"
+        ],
+        [
+          "`e7`",
+          "Repeated runs: a case passes only if every run passes, a mixed case is flaky, a consistently failing case is not flaky, and the model is called once per run"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// An eval harness. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"harness\");\nexport type Check =\n  | { type: \"exact\"; expected: string }\n  | { type: \"regex\"; pattern: string }\n  | { type: \"json_field\"; field: string; equals: string | number | boolean }\n  | { type: \"judge\"; criterion: string; threshold?: number };\nexport type Case = { id: string; input: string; tags?: string[]; check: Check };\nexport type Verdict = { passed: boolean; reason: string; score?: number | null };\nexport type Judge = ((prompt: string) => string) | null | undefined;\nexport type Report = {\n  total: number;\n  passed: number;\n  pass_rate: number;\n  results: { id: string; passed: boolean; reason: string; flaky: boolean }[];\n  by_tag: Record<string, { passed: number; total: number }>;\n  flaky: string[];\n};\n\nfunction norm(text: string): string {\n  return text.split(/\\s+/).filter(Boolean).join(\" \").toLowerCase();\n}\n\nexport function judgePrompt(criterion: string, output: string): string {\n  return `Rate this response on a scale of 1-5 for ${criterion}:\\n<response>${output}</response>\\n` +\n    `1: Not at all ${criterion}\\n5: Perfectly ${criterion}\\nOutput only the number.`;\n}\n\nfunction fieldResult(obj: Record<string, unknown>, check: { field: string; equals: string | number | boolean }): Verdict {\n  if (!(check.field in obj)) return { passed: false, reason: \"missing field\" };\n  return obj[check.field] === check.equals ? { passed: true, reason: \"ok\" } : { passed: false, reason: \"mismatch\" };\n}\n\nfunction parseScore(reply: unknown): number | null {\n  const text = typeof reply === \"string\" ? reply.trim() : \"\";\n  return /^[1-5]$/.test(text) ? Number(text) : null;\n}\n\nfunction judged(score: number, threshold: number): Verdict {\n  return score >= threshold ? { passed: true, reason: \"ok\", score } : { passed: false, reason: \"below threshold\", score };\n}\n\n/** Grade one output against the case's check. */\nexport function grade(c: Case, output: string, judge?: Judge): Verdict {\n  log.debug(\"grade input\", output);\n  const check = c.check;\n  if (check.type === \"exact\") return norm(output) === norm(check.expected) ? { passed: true, reason: \"ok\" } : { passed: false, reason: \"mismatch\" };\n  if (check.type === \"regex\") return new RegExp(check.pattern).test(output) ? { passed: true, reason: \"ok\" } : { passed: false, reason: \"mismatch\" };\n  if (check.type === \"json_field\") {\n    let data: unknown;\n    try {\n      data = JSON.parse(output);\n    } catch {\n      return { passed: false, reason: \"not json\" };\n    }\n    if (typeof data !== \"object\" || data === null || Array.isArray(data)) return { passed: false, reason: \"not json\" };\n    const obj = data as Record<string, unknown>;\n    return fieldResult(obj, check);\n  }\n  if (check.type === \"judge\") {\n    if (!judge) return { passed: false, reason: \"ungradable\", score: null };\n    let reply: unknown;\n    try {\n      reply = judge(judgePrompt(check.criterion, output));\n    } catch {\n      return { passed: false, reason: \"ungradable\", score: null };\n    }\n    const score = parseScore(reply);\n    if (score === null) return { passed: false, reason: \"ungradable\", score: null };\n    return judged(score, check.threshold ?? 4);\n  }\n  return { passed: false, reason: \"ungradable\" };\n}\n\nfunction runOnce(model: (input: string) => string, judge: Judge, c: Case): Verdict {\n  let output: string;\n  try {\n    output = model(c.input);\n  } catch {\n    return { passed: false, reason: \"model error\" };\n  }\n  return grade(c, output, judge);\n}\n\nfunction outcome(runs: Verdict[]): { passed: boolean; mixed: boolean; reason: string } {\n  const passed = runs.every((r) => r.passed);\n  const mixed = runs.some((r) => r.passed) && !passed;\n  return { passed, mixed, reason: passed ? \"ok\" : runs.find((r) => !r.passed)!.reason };\n}\n\nfunction countTags(byTag: Report[\"by_tag\"], tags: string[], passed: boolean): void {\n  for (const tag of tags) {\n    const row = (byTag[tag] ??= { passed: 0, total: 0 });\n    row.total += 1;\n    row.passed += passed ? 1 : 0;\n  }\n}\n\n/** Run every case `repeats` times through the model and grade it. A case passes only if every run passes. */\nexport function runEval(cases: Case[], model: (input: string) => string, judge?: Judge, repeats = 1): Report {\n  const results: Report[\"results\"] = [];\n  const byTag: Report[\"by_tag\"] = {};\n  const flaky: string[] = [];\n  for (const c of cases) {\n    const runs: Verdict[] = [];\n    for (let i = 0; i < repeats; i++) runs.push(runOnce(model, judge, c));\n    const { passed, mixed, reason } = outcome(runs);\n    results.push({ id: c.id, passed, reason, flaky: mixed });\n    if (mixed) flaky.push(c.id);\n    countTags(byTag, c.tags ?? [], passed);\n  }\n  const total = results.length;\n  const passedCount = results.filter((r) => r.passed).length;\n  return { total, passed: passedCount, pass_rate: total ? passedCount / total : 0, results, by_tag: byTag, flaky };\n}\n\nfunction tagFailed(row: { passed: number; total: number } | undefined, minimum: number): boolean {\n  return !row || row.total === 0 || row.passed / row.total < minimum;\n}\n\n/** Compare a report with success criteria: min_pass_rate, tags {tag: minimum rate}, max_flaky. */\nexport function meets(report: Report, criteria: { min_pass_rate?: number; tags?: Record<string, number>; max_flaky?: number }) {\n  const failures: string[] = [];\n  if (criteria.min_pass_rate !== undefined && report.pass_rate < criteria.min_pass_rate) failures.push(\"overall\");\n  for (const [tag, minimum] of Object.entries(criteria.tags ?? {})) {\n    if (tagFailed(report.by_tag[tag], minimum)) failures.push(`tag:${tag}`);\n  }\n  if (criteria.max_flaky !== undefined && report.flaky.length > criteria.max_flaky) failures.push(\"flaky\");\n  return { met: failures.length === 0, failures };\n}\n\nfunction changes(before: Map<string, boolean>, now: Map<string, boolean>): { regressions: string[]; fixed: string[]; added: string[]; removed: string[] } {\n  const regressions = [...now.keys()].filter((i) => before.get(i) === true && now.get(i) === false);\n  const fixed = [...now.keys()].filter((i) => before.get(i) === false && now.get(i) === true);\n  const added = [...now.keys()].filter((i) => !before.has(i));\n  const removed = [...before.keys()].filter((i) => !now.has(i));\n  return { regressions, fixed, added, removed };\n}\n\n/** What changed between two reports: regressions, fixes, added and removed cases, the pass-rate change. */\nexport function compare(baseline: Pick<Report, \"pass_rate\" | \"results\">, current: Pick<Report, \"pass_rate\" | \"results\">) {\n  const before = new Map(baseline.results.map((r) => [r.id, r.passed]));\n  const now = new Map(current.results.map((r) => [r.id, r.passed]));\n  const { regressions, fixed, added, removed } = changes(before, now);\n  return { regressions, fixed, added, removed, pass_rate_delta: current.pass_rate - baseline.pass_rate, ok: regressions.length === 0 && removed.length === 0 };\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { runEval } from \"./harness.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// Four test cases, each with its own automated check, like the first main test case.\nconst cases: any[] = [\n  { id: \"c1\", input: \"I love it\", tags: [\"core\"], check: { type: \"exact\", expected: \"positive\" } },\n  { id: \"c2\", input: \"awful\", tags: [\"core\"], check: { type: \"exact\", expected: \"negative\" } },\n  { id: \"c3\", input: \"order 7\", tags: [\"extract\"], check: { type: \"regex\", pattern: \"ORD-\\\\d{4}\" } },\n  { id: \"c4\", input: \"meh\", tags: [\"core\", \"edge\"], check: { type: \"exact\", expected: \"neutral\" } },\n];\nconst answers: Record<string, string> = { \"I love it\": \"positive\", awful: \"negative\", \"order 7\": \"The order is ORD-0007.\", meh: \"positive\" };\n\n// The application under test is a plain function: here it just looks the answer up.\nconst report: any = runEval(cases, (text) => answers[text]) ?? {};\n\nconsole.log(\"passed:\", report.passed, \"of\", report.total, \"| pass rate:\", report.pass_rate);\nfor (const result of report.results ?? []) console.log(\" \", result.id, result.passed ? \"passed\" : \"failed\", \"-\", result.reason);\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// An eval harness. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"harness\");\nexport type Check =\n  | { type: \"exact\"; expected: string }\n  | { type: \"regex\"; pattern: string }\n  | { type: \"json_field\"; field: string; equals: string | number | boolean }\n  | { type: \"judge\"; criterion: string; threshold?: number };\nexport type Case = { id: string; input: string; tags?: string[]; check: Check };\nexport type Verdict = { passed: boolean; reason: string; score?: number | null };\nexport type Judge = ((prompt: string) => string) | null | undefined;\nexport type Report = {\n  total: number;\n  passed: number;\n  pass_rate: number;\n  results: { id: string; passed: boolean; reason: string; flaky: boolean }[];\n  by_tag: Record<string, { passed: number; total: number }>;\n  flaky: string[];\n};\n\nfunction norm(text: string): string {\n  // TODO 1 of 9 (unlocks e1): the form two texts are compared in for an exact check.\n  // Receives a text and returns it trimmed, every run of white space made one space, and lower-cased. Nothing else changes.\n  // Example: norm(\"  Paris \\n FRANCE \") -> \"paris france\"\n  return text;\n}\n\nexport function judgePrompt(criterion: string, output: string): string {\n  return `Rate this response on a scale of 1-5 for ${criterion}:\\n<response>${output}</response>\\n` +\n    `1: Not at all ${criterion}\\n5: Perfectly ${criterion}\\nOutput only the number.`;\n}\n\nfunction fieldResult(obj: Record<string, unknown>, check: { field: string; equals: string | number | boolean }): Verdict {\n  // TODO 2 of 9 (unlocks e2): grade a parsed JSON object against a json_field check.\n  // Receives the parsed object and the check { field, equals }. Returns a verdict: reason \"missing field\" when the field is absent;\n  // \"ok\" when the value equals `equals` with the same JSON type; otherwise \"mismatch\".\n  // Example: { n: \"3\" } against equals 3 -> { passed: false, reason: \"mismatch\" }\n  return { passed: false, reason: \"mismatch\" };\n}\n\nfunction parseScore(reply: unknown): number | null {\n  // TODO 3 of 9 (unlocks e3): read the judge's reply as a score.\n  // Receives the reply (any value). Returns the number when the trimmed reply is exactly one digit from 1 to 5, else null.\n  // Example: parseScore(\" 4\\n\") -> 4, parseScore(\"I give it a 4\") -> null\n  return null;\n}\n\nfunction judged(score: number, threshold: number): Verdict {\n  // TODO 4 of 9 (unlocks e3): the verdict for a judge score.\n  // Receives the score and the threshold. Returns { passed, reason, score }: \"ok\" at or above the threshold, else \"below threshold\".\n  // Example: judged(4, 4) -> { passed: true, reason: \"ok\", score: 4 }\n  return { passed: false, reason: \"below threshold\", score };\n}\n\n/** Grade one output against the case's check. */\nexport function grade(c: Case, output: string, judge?: Judge): Verdict {\n  log.debug(\"grade input\", output);\n  const check = c.check;\n  if (check.type === \"exact\") return norm(output) === norm(check.expected) ? { passed: true, reason: \"ok\" } : { passed: false, reason: \"mismatch\" };\n  if (check.type === \"regex\") return new RegExp(check.pattern).test(output) ? { passed: true, reason: \"ok\" } : { passed: false, reason: \"mismatch\" };\n  if (check.type === \"json_field\") {\n    let data: unknown;\n    try {\n      data = JSON.parse(output);\n    } catch {\n      return { passed: false, reason: \"not json\" };\n    }\n    if (typeof data !== \"object\" || data === null || Array.isArray(data)) return { passed: false, reason: \"not json\" };\n    const obj = data as Record<string, unknown>;\n    return fieldResult(obj, check);\n  }\n  if (check.type === \"judge\") {\n    if (!judge) return { passed: false, reason: \"ungradable\", score: null };\n    let reply: unknown;\n    try {\n      reply = judge(judgePrompt(check.criterion, output));\n    } catch {\n      return { passed: false, reason: \"ungradable\", score: null };\n    }\n    const score = parseScore(reply);\n    if (score === null) return { passed: false, reason: \"ungradable\", score: null };\n    return judged(score, check.threshold ?? 4);\n  }\n  return { passed: false, reason: \"ungradable\" };\n}\n\nfunction runOnce(model: (input: string) => string, judge: Judge, c: Case): Verdict {\n  // TODO 5 of 9 (unlocks e4): one run of one case.\n  // Receives the model, the judge and the case. Returns the verdict of `grade` for the model's output; when the model throws, the\n  // verdict is { passed: false, reason: \"model error\" } and nothing is thrown. Example: a model that throws -> { passed: false, reason: \"model error\" }\n  return { passed: false, reason: \"model error\" };\n}\n\nfunction outcome(runs: Verdict[]): { passed: boolean; mixed: boolean; reason: string } {\n  // TODO 6 of 9 (unlocks e7): combine the runs of one case.\n  // Receives the verdicts of its runs. Returns { passed, mixed, reason }: passed only if every run passed; mixed (flaky) when some\n  // passed and some failed; the reason is \"ok\", or the reason of the first failed run.\n  // Example: [ok, mismatch] -> { passed: false, mixed: true, reason: \"mismatch\" }\n  return { passed: false, mixed: false, reason: \"mismatch\" };\n}\n\nfunction countTags(byTag: Report[\"by_tag\"], tags: string[], passed: boolean): void {\n  // TODO 7 of 9 (unlocks e5): count one case under each of its tags.\n  // Receives the object `byTag` (changed in place), the case's tags and whether it passed. Every tag's `total` goes up by one, and its\n  // `passed` by one when the case passed. Example: tags [\"a\"], passed -> byTag.a is { passed: 1, total: 1 }\n}\n\n/** Run every case `repeats` times through the model and grade it. A case passes only if every run passes. */\nexport function runEval(cases: Case[], model: (input: string) => string, judge?: Judge, repeats = 1): Report {\n  const results: Report[\"results\"] = [];\n  const byTag: Report[\"by_tag\"] = {};\n  const flaky: string[] = [];\n  for (const c of cases) {\n    const runs: Verdict[] = [];\n    for (let i = 0; i < repeats; i++) runs.push(runOnce(model, judge, c));\n    const { passed, mixed, reason } = outcome(runs);\n    results.push({ id: c.id, passed, reason, flaky: mixed });\n    if (mixed) flaky.push(c.id);\n    countTags(byTag, c.tags ?? [], passed);\n  }\n  const total = results.length;\n  const passedCount = results.filter((r) => r.passed).length;\n  return { total, passed: passedCount, pass_rate: total ? passedCount / total : 0, results, by_tag: byTag, flaky };\n}\n\nfunction tagFailed(row: { passed: number; total: number } | undefined, minimum: number): boolean {\n  // TODO 8 of 9 (unlocks e5): does one tag fail its minimum rate?\n  // Receives the tag's row { passed, total } or undefined (no case carries the tag) and the minimum rate. Returns true for undefined,\n  // an empty row, or a rate below the minimum; a rate equal to the minimum is fine. Example: ({ passed: 1, total: 2 }, 0.5) -> false\n  return false;\n}\n\n/** Compare a report with success criteria: min_pass_rate, tags {tag: minimum rate}, max_flaky. */\nexport function meets(report: Report, criteria: { min_pass_rate?: number; tags?: Record<string, number>; max_flaky?: number }) {\n  const failures: string[] = [];\n  if (criteria.min_pass_rate !== undefined && report.pass_rate < criteria.min_pass_rate) failures.push(\"overall\");\n  for (const [tag, minimum] of Object.entries(criteria.tags ?? {})) {\n    if (tagFailed(report.by_tag[tag], minimum)) failures.push(`tag:${tag}`);\n  }\n  if (criteria.max_flaky !== undefined && report.flaky.length > criteria.max_flaky) failures.push(\"flaky\");\n  return { met: failures.length === 0, failures };\n}\n\nfunction changes(before: Map<string, boolean>, now: Map<string, boolean>): { regressions: string[]; fixed: string[]; added: string[]; removed: string[] } {\n  // TODO 9 of 9 (unlocks e6): what changed between two runs.\n  // Receives two maps { case id -> passed }, the baseline and the current run. Returns { regressions, fixed, added, removed }, arrays\n  // of ids: passed before and fails now; failed before and passes now; only in the current run; only in the baseline. The first three\n  // follow the current order, removed the baseline's. Example: before { a: true }, now { a: false, b: true } -> regressions [\"a\"], added [\"b\"]\n  return { regressions: [], fixed: [], added: [], removed: [] };\n}\n\n/** What changed between two reports: regressions, fixes, added and removed cases, the pass-rate change. */\nexport function compare(baseline: Pick<Report, \"pass_rate\" | \"results\">, current: Pick<Report, \"pass_rate\" | \"results\">) {\n  const before = new Map(baseline.results.map((r) => [r.id, r.passed]));\n  const now = new Map(current.results.map((r) => [r.id, r.passed]));\n  const { regressions, fixed, added, removed } = changes(before, now);\n  return { regressions, fixed, added, removed, pass_rate_delta: current.pass_rate - baseline.pass_rate, ok: regressions.length === 0 && removed.length === 0 };\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { runEval } from \"./harness.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// Four test cases, each with its own automated check, like the first main test case.\nconst cases: any[] = [\n  { id: \"c1\", input: \"I love it\", tags: [\"core\"], check: { type: \"exact\", expected: \"positive\" } },\n  { id: \"c2\", input: \"awful\", tags: [\"core\"], check: { type: \"exact\", expected: \"negative\" } },\n  { id: \"c3\", input: \"order 7\", tags: [\"extract\"], check: { type: \"regex\", pattern: \"ORD-\\\\d{4}\" } },\n  { id: \"c4\", input: \"meh\", tags: [\"core\", \"edge\"], check: { type: \"exact\", expected: \"neutral\" } },\n];\nconst answers: Record<string, string> = { \"I love it\": \"positive\", awful: \"negative\", \"order 7\": \"The order is ORD-0007.\", meh: \"positive\" };\n\n// The application under test is a plain function: here it just looks the answer up.\nconst report: any = runEval(cases, (text) => answers[text]) ?? {};\n\nconsole.log(\"passed:\", report.passed, \"of\", report.total, \"| pass rate:\", report.pass_rate);\nfor (const result of report.results ?? []) console.log(\" \", result.id, result.passed ? \"passed\" : \"failed\", \"-\", result.reason);\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 11,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "356859923b140a0df7eb62967fcc5415c04920811ee501031963130f1d06b964",
+  "starting_code": "// An eval harness. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"harness\");\nexport type Check =\n  | { type: \"exact\"; expected: string }\n  | { type: \"regex\"; pattern: string }\n  | { type: \"json_field\"; field: string; equals: string | number | boolean }\n  | { type: \"judge\"; criterion: string; threshold?: number };\nexport type Case = { id: string; input: string; tags?: string[]; check: Check };\nexport type Verdict = { passed: boolean; reason: string; score?: number | null };\nexport type Judge = ((prompt: string) => string) | null | undefined;\nexport type Report = {\n  total: number;\n  passed: number;\n  pass_rate: number;\n  results: { id: string; passed: boolean; reason: string; flaky: boolean }[];\n  by_tag: Record<string, { passed: number; total: number }>;\n  flaky: string[];\n};\n\nfunction norm(text: string): string {\n  // TODO 1 of 9 (unlocks e1): the form two texts are compared in for an exact check.\n  // Receives a text and returns it trimmed, every run of white space made one space, and lower-cased. Nothing else changes.\n  // Example: norm(\"  Paris \\n FRANCE \") -> \"paris france\"\n  return text;\n}\n\nexport function judgePrompt(criterion: string, output: string): string {\n  return `Rate this response on a scale of 1-5 for ${criterion}:\\n<response>${output}</response>\\n` +\n    `1: Not at all ${criterion}\\n5: Perfectly ${criterion}\\nOutput only the number.`;\n}\n\nfunction fieldResult(obj: Record<string, unknown>, check: { field: string; equals: string | number | boolean }): Verdict {\n  // TODO 2 of 9 (unlocks e2): grade a parsed JSON object against a json_field check.\n  // Receives the parsed object and the check { field, equals }. Returns a verdict: reason \"missing field\" when the field is absent;\n  // \"ok\" when the value equals `equals` with the same JSON type; otherwise \"mismatch\".\n  // Example: { n: \"3\" } against equals 3 -> { passed: false, reason: \"mismatch\" }\n  return { passed: false, reason: \"mismatch\" };\n}\n\nfunction parseScore(reply: unknown): number | null {\n  // TODO 3 of 9 (unlocks e3): read the judge's reply as a score.\n  // Receives the reply (any value). Returns the number when the trimmed reply is exactly one digit from 1 to 5, else null.\n  // Example: parseScore(\" 4\\n\") -> 4, parseScore(\"I give it a 4\") -> null\n  return null;\n}\n\nfunction judged(score: number, threshold: number): Verdict {\n  // TODO 4 of 9 (unlocks e3): the verdict for a judge score.\n  // Receives the score and the threshold. Returns { passed, reason, score }: \"ok\" at or above the threshold, else \"below threshold\".\n  // Example: judged(4, 4) -> { passed: true, reason: \"ok\", score: 4 }\n  return { passed: false, reason: \"below threshold\", score };\n}\n\n/** Grade one output against the case's check. */\nexport function grade(c: Case, output: string, judge?: Judge): Verdict {\n  log.debug(\"grade input\", output);\n  const check = c.check;\n  if (check.type === \"exact\") return norm(output) === norm(check.expected) ? { passed: true, reason: \"ok\" } : { passed: false, reason: \"mismatch\" };\n  if (check.type === \"regex\") return new RegExp(check.pattern).test(output) ? { passed: true, reason: \"ok\" } : { passed: false, reason: \"mismatch\" };\n  if (check.type === \"json_field\") {\n    let data: unknown;\n    try {\n      data = JSON.parse(output);\n    } catch {\n      return { passed: false, reason: \"not json\" };\n    }\n    if (typeof data !== \"object\" || data === null || Array.isArray(data)) return { passed: false, reason: \"not json\" };\n    const obj = data as Record<string, unknown>;\n    return fieldResult(obj, check);\n  }\n  if (check.type === \"judge\") {\n    if (!judge) return { passed: false, reason: \"ungradable\", score: null };\n    let reply: unknown;\n    try {\n      reply = judge(judgePrompt(check.criterion, output));\n    } catch {\n      return { passed: false, reason: \"ungradable\", score: null };\n    }\n    const score = parseScore(reply);\n    if (score === null) return { passed: false, reason: \"ungradable\", score: null };\n    return judged(score, check.threshold ?? 4);\n  }\n  return { passed: false, reason: \"ungradable\" };\n}\n\nfunction runOnce(model: (input: string) => string, judge: Judge, c: Case): Verdict {\n  // TODO 5 of 9 (unlocks e4): one run of one case.\n  // Receives the model, the judge and the case. Returns the verdict of `grade` for the model's output; when the model throws, the\n  // verdict is { passed: false, reason: \"model error\" } and nothing is thrown. Example: a model that throws -> { passed: false, reason: \"model error\" }\n  return { passed: false, reason: \"model error\" };\n}\n\nfunction outcome(runs: Verdict[]): { passed: boolean; mixed: boolean; reason: string } {\n  // TODO 6 of 9 (unlocks e7): combine the runs of one case.\n  // Receives the verdicts of its runs. Returns { passed, mixed, reason }: passed only if every run passed; mixed (flaky) when some\n  // passed and some failed; the reason is \"ok\", or the reason of the first failed run.\n  // Example: [ok, mismatch] -> { passed: false, mixed: true, reason: \"mismatch\" }\n  return { passed: false, mixed: false, reason: \"mismatch\" };\n}\n\nfunction countTags(byTag: Report[\"by_tag\"], tags: string[], passed: boolean): void {\n  // TODO 7 of 9 (unlocks e5): count one case under each of its tags.\n  // Receives the object `byTag` (changed in place), the case's tags and whether it passed. Every tag's `total` goes up by one, and its\n  // `passed` by one when the case passed. Example: tags [\"a\"], passed -> byTag.a is { passed: 1, total: 1 }\n}\n\n/** Run every case `repeats` times through the model and grade it. A case passes only if every run passes. */\nexport function runEval(cases: Case[], model: (input: string) => string, judge?: Judge, repeats = 1): Report {\n  const results: Report[\"results\"] = [];\n  const byTag: Report[\"by_tag\"] = {};\n  const flaky: string[] = [];\n  for (const c of cases) {\n    const runs: Verdict[] = [];\n    for (let i = 0; i < repeats; i++) runs.push(runOnce(model, judge, c));\n    const { passed, mixed, reason } = outcome(runs);\n    results.push({ id: c.id, passed, reason, flaky: mixed });\n    if (mixed) flaky.push(c.id);\n    countTags(byTag, c.tags ?? [], passed);\n  }\n  const total = results.length;\n  const passedCount = results.filter((r) => r.passed).length;\n  return { total, passed: passedCount, pass_rate: total ? passedCount / total : 0, results, by_tag: byTag, flaky };\n}\n\nfunction tagFailed(row: { passed: number; total: number } | undefined, minimum: number): boolean {\n  // TODO 8 of 9 (unlocks e5): does one tag fail its minimum rate?\n  // Receives the tag's row { passed, total } or undefined (no case carries the tag) and the minimum rate. Returns true for undefined,\n  // an empty row, or a rate below the minimum; a rate equal to the minimum is fine. Example: ({ passed: 1, total: 2 }, 0.5) -> false\n  return false;\n}\n\n/** Compare a report with success criteria: min_pass_rate, tags {tag: minimum rate}, max_flaky. */\nexport function meets(report: Report, criteria: { min_pass_rate?: number; tags?: Record<string, number>; max_flaky?: number }) {\n  const failures: string[] = [];\n  if (criteria.min_pass_rate !== undefined && report.pass_rate < criteria.min_pass_rate) failures.push(\"overall\");\n  for (const [tag, minimum] of Object.entries(criteria.tags ?? {})) {\n    if (tagFailed(report.by_tag[tag], minimum)) failures.push(`tag:${tag}`);\n  }\n  if (criteria.max_flaky !== undefined && report.flaky.length > criteria.max_flaky) failures.push(\"flaky\");\n  return { met: failures.length === 0, failures };\n}\n\nfunction changes(before: Map<string, boolean>, now: Map<string, boolean>): { regressions: string[]; fixed: string[]; added: string[]; removed: string[] } {\n  // TODO 9 of 9 (unlocks e6): what changed between two runs.\n  // Receives two maps { case id -> passed }, the baseline and the current run. Returns { regressions, fixed, added, removed }, arrays\n  // of ids: passed before and fails now; failed before and passes now; only in the current run; only in the baseline. The first three\n  // follow the current order, removed the baseline's. Example: before { a: true }, now { a: false, b: true } -> regressions [\"a\"], added [\"b\"]\n  return { regressions: [], fixed: [], added: [], removed: [] };\n}\n\n/** What changed between two reports: regressions, fixes, added and removed cases, the pass-rate change. */\nexport function compare(baseline: Pick<Report, \"pass_rate\" | \"results\">, current: Pick<Report, \"pass_rate\" | \"results\">) {\n  const before = new Map(baseline.results.map((r) => [r.id, r.passed]));\n  const now = new Map(current.results.map((r) => [r.id, r.passed]));\n  const { regressions, fixed, added, removed } = changes(before, now);\n  return { regressions, fixed, added, removed, pass_rate_delta: current.pass_rate - baseline.pass_rate, ok: regressions.length === 0 && removed.length === 0 };\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/42-evaluation/prose/unit-03/practice-2/harness.ts",
+    "test_path": "practice/level-2/42-evaluation/prose/unit-03/practice-2/harness.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-2/42-evaluation/prose/unit-03/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-2/42-evaluation/prose/unit-03/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-2/42-evaluation/prose/unit-03/practice-2/harness.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 a run grades every case with its own check and reports the pass rate",
+        "kind": "main",
+        "says": "A run grades each case with its own check (exact, regex), reports the pass rate and the order of the results, and an empty set has rate 0.0"
+      },
+      {
+        "id": "e1 an exact check ignores case and spacing but nothing else",
+        "kind": "edge",
+        "says": "An exact check ignores case and spacing only: a longer word, a different word and an empty output fail; a regex is a search, and an anchored one still fails on extra text"
+      },
+      {
+        "id": "e2 a json field check needs a json object with the field and the same typed value",
+        "kind": "edge",
+        "says": "A json field check: a JSON object, the field present, the same typed value; a fenced block, prose around the JSON and an array are not json"
+      },
+      {
+        "id": "e3 a judge check sends the rubric prompt and accepts only a bare score at the threshold",
+        "kind": "edge",
+        "says": "A judge check: the exact prompt, a bare score at the threshold passes, a lower score fails, and a reply that is not a bare score, no judge or a judge that raises is ungradable"
+      },
+      {
+        "id": "e4 a model that fails on one case does not stop the run",
+        "kind": "edge",
+        "says": "A model error fails its own case with model error and the run goes on"
+      },
+      {
+        "id": "e5 tags report their own rates and success criteria judge each dimension",
+        "kind": "edge",
+        "says": "Tags report their own pass rates; meets judges the overall rate, each tag (a missing tag fails) and the flaky count, and a rate equal to its minimum passes"
+      },
+      {
+        "id": "e6 a regression run names what broke what was fixed and what went missing",
+        "kind": "edge",
+        "says": "compare names regressions, fixes, added and removed cases; a better average with a regression is not ok; a removed case is not ok"
+      },
+      {
+        "id": "e7 repeated runs expose flaky cases and a case passes only if every run does",
+        "kind": "edge",
+        "says": "Repeated runs: a case passes only if every run passes, a mixed case is flaky, a consistently failing case is not flaky, and the model is called once per run"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/42-evaluation/prose/unit-03/practice-2/target/report.xml"
+    },
+    "origin": "course/42-evaluation/03-refining-against-a-set-and-regression-runs.md",
+    "concepts": [
+      "the practice of Refining against an eval set, regression runs and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/42-evaluation/prose/unit-03/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "evaluation-u3"
+}

@@ -1,0 +1,120 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-1",
+    "01-how-a-language-model-works"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Tokens, the context window and one token at a time",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A nightly job sends one request per report to a model with a one-million context window. The reports average about 650,000 words and are accepted. After the vendor moves the job to Claude Opus 5.5, which has the same window, the largest reports fail with \"prompt is too long\". The reports have not changed. What is the most likely cause?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The newer tokenizer turns identical prose into noticeably more tokens than before",
+            "correct": true,
+            "says": "Claude Opus 4.7 and later cut text with a newer tokenizer that yields about 30 percent more tokens for the same text, and 1M tokens is roughly 555k words on it against about 750k earlier, so a 650,000-word report fit before and does not now (the tokenizers section)."
+          },
+          {
+            "id": "b",
+            "text": "Earlier requests in the same batch are kept and slowly fill the window over time",
+            "correct": false,
+            "says": "Ruled out because the API keeps no state between requests, and \"your code resends the whole history on every request\" (the stateless section)."
+          },
+          {
+            "id": "c",
+            "text": "The output cap is now added into the size check before any request can be accepted",
+            "correct": false,
+            "says": "Ruled out because on Claude 4.5 models and newer an input plus an output cap beyond the window is not refused: \"the request is still accepted\" (the limit section)."
+          },
+          {
+            "id": "d",
+            "text": "Always-on thinking now fills part of the window before the input is even counted",
+            "correct": false,
+            "says": "Ruled out because the \"prompt is too long\" error is the input-only check: \"If the input alone exceeds the window\" the API refuses it, so output and thinking cannot be the cause (the limit section)."
+          }
+        ],
+        "origin": {
+          "path": "course/01-how-a-language-model-works/01-how-a-language-model-works.md",
+          "section": "The API remembers nothing"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A support chat built on the Messages API passes only the customer's latest question to the model. The customer gave an order number two exchanges ago, and the assistant now asks for it again. Which change fixes this at the right layer?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Add a system line telling the model to remember each customer who sends a message",
+            "correct": false,
+            "says": "Ruled out because a model sees only what the request carries, and without the earlier messages \"the model has no order number to talk about\"; a system line adds no history."
+          },
+          {
+            "id": "b",
+            "text": "Move to the model with the largest context window that is available",
+            "correct": false,
+            "says": "Ruled out because each turn's input is \"all previous conversation history plus the current user message\", so a larger window holds nothing that was never sent."
+          },
+          {
+            "id": "c",
+            "text": "Keep the dialogue in the application and replay it with every call",
+            "correct": true,
+            "says": "The API remembers nothing, so memory is the history your code sends again with each request (the scripted pair of requests)."
+          },
+          {
+            "id": "d",
+            "text": "Raise `max_tokens` so the assistant can hold earlier details of the chat",
+            "correct": false,
+            "says": "Ruled out because \"max_tokens is a cap on output, not on context\", so raising it holds no earlier details."
+          }
+        ],
+        "origin": {
+          "path": "course/01-how-a-language-model-works/01-how-a-language-model-works.md",
+          "section": "The API remembers nothing"
+        }
+      }
+    ],
+    "concepts": [
+      "The API remembers nothing, as the page teaches it"
+    ]
+  }
+}

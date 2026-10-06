@@ -1,0 +1,282 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "29-context-engineering"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: trimming, compacting and citing (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: trimming, compacting and citing"
+    },
+    {
+      "type": "para",
+      "text": "A long conversation outgrows its window, and the cheapest cure is code you control: clear the tool output nobody needs again, drop whole old turns, or replace the old part with a summary. The answer that comes out of a long document should also be checked: a citation is a claim about where text came from, and a claim can be wrong. Write both halves. The shapes come from the Claude documentation on context windows, context editing, compaction and citations, read on 2026-10-03; the lesson pages explain them. Nothing here touches the network: the messages are recorded or hand-written in the shape of the Messages API, and the summariser is a function that the tests pass in."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "message",
+          "`{\"role\", \"content\"}`; the content is a string or a list of blocks: `text`, `tool_use` (`id`, `name`, `input`), `tool_result` (`tool_use_id`, `content` as a string, optional `is_error`)"
+        ],
+        [
+          "`count_tokens(messages)`",
+          "a rough size, so that budgets are exact in the tests: 4 for every message, plus 1 for every 4 characters (rounded up) of text and of tool result content, plus 10 for every tool call"
+        ],
+        [
+          "`summarise(messages)`",
+          "a function from the older messages to the summary text"
+        ],
+        [
+          "citation",
+          "`{\"type\": \"char_location\", \"cited_text\", \"document_index\", \"start_char_index\", \"end_char_index\"}`; the span is `text[start:end]` of that document, end excluded"
+        ],
+        [
+          "document",
+          "`{\"title\", \"text\"}`"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is the working module with seven gaps cut out of it. Everything else is written and correct: the token count, the turn test, the cloning, the citation walk and the footnote text. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file (`split_turns` already logs its input at debug level); a run shows the logged lines under the failing case. Write them in this order (the Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`split_turns` unlocks `m1`, `e2` and `e3`: group the messages into turns.",
+        "`_clear_oldest` unlocks `e1`: replace the content of every result but the newest `keep`.",
+        "`_trim` unlocks `e2`: drop the oldest turns while the conversation is over budget, never the last.",
+        "`_leave_alone` unlocks `e3`: when compaction has nothing to do.",
+        "`_with_summary` unlocks `m1` and `e4`: put the summary block first in the first kept message.",
+        "`_span_problem` unlocks `e5`: `bad_range` or `text_mismatch` for a citation whose document exists.",
+        "`_number_for` unlocks `e6`: give a new span the next number."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole module; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`split_turns(messages)`: the messages as a list of turns. A turn starts at a user message that is not made only of tool result blocks (a string, or any other blocks) and runs up to the next such message, so a tool call and its result are always in one turn.",
+        "`clear_tool_results(messages, keep=2, exclude=(), placeholder=\"[cleared]\")`: a copy in which the content of every tool result is replaced by the placeholder, except the newest `keep` results. Results of a tool named in `exclude` are never cleared and do not count toward `keep` (the tool's name comes from the `tool_use` block with the same id). Calls, ids and `is_error` flags stay, and the input is not changed.",
+        "`window(messages, budget, pin=False)`: drop the oldest whole turns until `count_tokens` fits the budget. The newest turn always stays, even when it alone is over budget. With `pin` the first turn stays too and the next oldest turns are dropped.",
+        "`compact(messages, budget, summarise, keep_turns=1)`: when `count_tokens` is within the budget, or there are no more turns than `keep_turns`, return the messages unchanged and do not call `summarise`. Otherwise call `summarise` once with every message that comes before the newest `keep_turns` turns (an earlier summary is among them), and return the kept messages with the summary placed first in the first kept message: a text block `<summary>\\n` + the summary + `\\n</summary>`, followed by that message's own blocks (a string content becomes one text block). The roles keep alternating, and there is exactly one summary block in the result.",
+        "`verify_citations(blocks, documents)`: for every citation of every text block, in order, report `{\"block\", \"citation\", \"problem\"}` when it cannot be trusted: `unsupported_type` (not `char_location`), `unknown_document` (index outside the list), `bad_range` (start below 0, end not after start, or end past the text), `text_mismatch` (the span is not the cited text). Check in that order.",
+        "`footnotes(blocks, documents)`: the text blocks joined, with `[n]` right after the block of each citation, where `n` numbers the distinct cited spans (same document and offsets) from 1 in the order they first appear; then, if there are any, a blank line, `Sources:`, and one line `[n] <title>: \"<cited text>\"` per number. No citations gives just the text."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "An over-budget conversation becomes a summary and the newest turn"
+        ],
+        [
+          "`e1`",
+          "Old tool results are cleared, but their calls and flags stay"
+        ],
+        [
+          "`e2`",
+          "The window drops whole turns and never splits a tool call from its result"
+        ],
+        [
+          "`e3`",
+          "A conversation within budget, or with nothing older, is left alone"
+        ],
+        [
+          "`e4`",
+          "A second compaction folds the earlier summary into the new one"
+        ],
+        [
+          "`e5`",
+          "A citation that does not match its document is reported"
+        ],
+        [
+          "`e6`",
+          "Footnotes number each distinct source once, in order of appearance"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Keeping a conversation inside its budget, and checking the citations in an answer. See ../../statement.md.\"\"\"\nimport copy\nimport logging\n\nlog = logging.getLogger(__name__)\n\nSUMMARY_OPEN, SUMMARY_CLOSE = \"<summary>\\n\", \"\\n</summary>\"\n\n\ndef _tokens(text):\n    return (len(text) + 3) // 4\n\n\ndef count_tokens(messages):\n    \"\"\"Given: a rough size of a conversation. 4 per message, plus 1 per 4 characters of text and of tool result text, plus 10 per tool call.\"\"\"\n    total = 0\n    for message in messages:\n        total += 4\n        content = message[\"content\"]\n        if isinstance(content, str):\n            total += _tokens(content)\n            continue\n        for block in content:\n            if block[\"type\"] == \"text\":\n                total += _tokens(block[\"text\"])\n            elif block[\"type\"] == \"tool_result\":\n                total += _tokens(block.get(\"content\") or \"\")\n            elif block[\"type\"] == \"tool_use\":\n                total += 10\n    return total\n\n\ndef _blocks(message):\n    content = message[\"content\"]\n    return [{\"type\": \"text\", \"text\": content}] if isinstance(content, str) else copy.deepcopy(content)\n\n\ndef _starts_turn(message):\n    \"\"\"A user message that is not made only of tool results begins a turn.\"\"\"\n    if message[\"role\"] != \"user\":\n        return False\n    content = message[\"content\"]\n    return isinstance(content, str) or any(block[\"type\"] != \"tool_result\" for block in content)\n\n\ndef split_turns(messages):\n    \"\"\"The messages as a list of turns: each turn is a user message that is not a tool result, and everything up to the next one.\"\"\"\n    log.debug(\"split_turns input: %r\", messages)\n    turns = []\n    for message in messages:\n        if _starts_turn(message) or not turns:\n            turns.append([])\n        turns[-1].append(message)\n    return turns\n\n\ndef _clear_oldest(results, keep, placeholder):\n    \"\"\"Replace the content of every result but the newest `keep` with the placeholder.\"\"\"\n    for block in results[:max(len(results) - keep, 0)]:\n        block[\"content\"] = placeholder\n\n\ndef clear_tool_results(messages, keep=2, exclude=(), placeholder=\"[cleared]\"):\n    \"\"\"Copy of the conversation in which every tool result but the newest `keep` has its content replaced by the placeholder.\"\"\"\n    out = copy.deepcopy(messages)\n    names = {}\n    for message in out:\n        if isinstance(message[\"content\"], list):\n            for block in message[\"content\"]:\n                if block[\"type\"] == \"tool_use\":\n                    names[block[\"id\"]] = block[\"name\"]\n    results = [block for message in out if isinstance(message[\"content\"], list)\n               for block in message[\"content\"] if block[\"type\"] == \"tool_result\" and names.get(block[\"tool_use_id\"]) not in exclude]\n    _clear_oldest(results, keep, placeholder)\n    return out\n\n\ndef _trim(pinned, rest, budget):\n    \"\"\"The turns of `rest` that remain: the oldest are dropped while the conversation is over budget, the newest always stays.\"\"\"\n    while len(rest) > 1 and count_tokens([m for t in pinned + rest for m in t]) > budget:\n        rest = rest[1:]\n    return rest\n\n\ndef window(messages, budget, pin=False):\n    \"\"\"Drop the oldest whole turns until the conversation fits; the newest turn always stays. With pin, the first turn stays too.\"\"\"\n    turns = split_turns(messages)\n    pinned, rest = (turns[:1], turns[1:]) if pin else ([], turns)\n    rest = _trim(pinned, rest, budget)\n    return [m for t in pinned + rest for m in t]\n\n\ndef _leave_alone(messages, turns, budget, keep_turns):\n    \"\"\"Whether compaction has nothing to do: the conversation fits, or there are no more turns than `keep_turns`.\"\"\"\n    return count_tokens(messages) <= budget or len(turns) <= keep_turns\n\n\ndef _with_summary(kept, summary):\n    \"\"\"The first kept message with the summary block placed before its own blocks.\"\"\"\n    return {\"role\": kept[0][\"role\"], \"content\": [{\"type\": \"text\", \"text\": f\"{SUMMARY_OPEN}{summary}{SUMMARY_CLOSE}\"}] + _blocks(kept[0])}\n\n\ndef compact(messages, budget, summarise, keep_turns=1):\n    \"\"\"When the conversation is over budget, replace everything before the newest `keep_turns` turns by one summary.\"\"\"\n    turns = split_turns(messages)\n    if _leave_alone(messages, turns, budget, keep_turns):\n        return list(messages)\n    older = [m for t in turns[:-keep_turns] for m in t]\n    kept = [m for t in turns[-keep_turns:] for m in t]\n    summary = summarise(older)\n    return [_with_summary(kept, summary)] + kept[1:]\n\n\ndef _span_problem(text, cite):\n    \"\"\"The problem of a citation whose document exists, or None when it can be trusted.\"\"\"\n    start, end = cite[\"start_char_index\"], cite[\"end_char_index\"]\n    if start < 0 or end <= start or end > len(text):\n        return \"bad_range\"\n    if text[start:end] != cite[\"cited_text\"]:\n        return \"text_mismatch\"\n    return None\n\n\ndef verify_citations(blocks, documents):\n    \"\"\"One {\"block\", \"citation\", \"problem\"} per citation that cannot be trusted, in order.\"\"\"\n    problems = []\n    for i, block in enumerate(blocks):\n        for j, cite in enumerate(block.get(\"citations\") or []):\n            if cite.get(\"type\") != \"char_location\":\n                problem = \"unsupported_type\"\n            elif not 0 <= cite[\"document_index\"] < len(documents):\n                problem = \"unknown_document\"\n            else:\n                problem = _span_problem(documents[cite[\"document_index\"]][\"text\"], cite)\n            if problem:\n                problems.append({\"block\": i, \"citation\": j, \"problem\": problem})\n    return problems\n\n\ndef _number_for(numbers, key):\n    \"\"\"Give a new key the next number; True when the key was new.\"\"\"\n    if key not in numbers:\n        numbers[key] = len(numbers) + 1\n        return True\n    return False\n\n\ndef footnotes(blocks, documents):\n    \"\"\"The answer text with a [n] after each cited block and a Sources list; one number per distinct cited span, in order.\"\"\"\n    numbers, sources, out = {}, [], []\n    for block in blocks:\n        out.append(block[\"text\"])\n        for cite in block.get(\"citations\") or []:\n            key = (cite[\"document_index\"], cite[\"start_char_index\"], cite[\"end_char_index\"])\n            if _number_for(numbers, key):\n                sources.append(f'[{numbers.get(key, 0)}] {documents[cite[\"document_index\"]][\"title\"]}: \"{cite[\"cited_text\"]}\"')\n            out.append(f\"[{numbers.get(key, 0)}]\")\n    text = \"\".join(out)\n    return text + (\"\\n\\nSources:\\n\" + \"\\n\".join(sources) if sources else \"\")\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom context import compact, count_tokens\n\n\ndef user(text):\n    return {\"role\": \"user\", \"content\": text}\n\n\ndef said(text):\n    return {\"role\": \"assistant\", \"content\": [{\"type\": \"text\", \"text\": text}]}\n\n\ndef call(id, name):\n    return {\"role\": \"assistant\", \"content\": [{\"type\": \"tool_use\", \"id\": id, \"name\": name, \"input\": {}}]}\n\n\ndef result(id, text):\n    return {\"role\": \"user\", \"content\": [{\"type\": \"tool_result\", \"tool_use_id\": id, \"content\": text}]}\n\n\n# A conversation of four turns, like the one the tests compact.\nmessages = [user(\"first question\"), said(\"first answer \" + \"x\" * 80),\n            user(\"second question\"), call(\"a1\", \"search\"), result(\"a1\", \"R\" * 300), said(\"second answer\"),\n            user(\"third question\"), said(\"third answer \" + \"y\" * 60),\n            user(\"fourth question\"), call(\"a2\", \"search\"), result(\"a2\", \"S\" * 100), said(\"fourth answer\")]\n\n\ndef summarise(older):\n    \"\"\"A stand-in for the summariser model: it is told what to fold away and answers with a fixed text.\"\"\"\n    print(\"summariser asked to fold\", len(older), \"messages\")\n    return \"The user asked three things.\"\n\n\nbudget = count_tokens(messages) // 2\ndone = compact(messages, budget, summarise, 1) or []\n\nprint(\"tokens before:\", count_tokens(messages), \"| budget:\", budget)\nprint(\"messages before and after:\", len(messages), \"->\", len(done))\nprint(\"roles after:\", [m[\"role\"] for m in done])\nprint(\"first message:\", done[0][\"content\"] if done else None)\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Keeping a conversation inside its budget, and checking the citations in an answer. See ../../statement.md.\"\"\"\nimport copy\nimport logging\n\nlog = logging.getLogger(__name__)\n\nSUMMARY_OPEN, SUMMARY_CLOSE = \"<summary>\\n\", \"\\n</summary>\"\n\n\ndef _tokens(text):\n    return (len(text) + 3) // 4\n\n\ndef count_tokens(messages):\n    \"\"\"Given: a rough size of a conversation. 4 per message, plus 1 per 4 characters of text and of tool result text, plus 10 per tool call.\"\"\"\n    total = 0\n    for message in messages:\n        total += 4\n        content = message[\"content\"]\n        if isinstance(content, str):\n            total += _tokens(content)\n            continue\n        for block in content:\n            if block[\"type\"] == \"text\":\n                total += _tokens(block[\"text\"])\n            elif block[\"type\"] == \"tool_result\":\n                total += _tokens(block.get(\"content\") or \"\")\n            elif block[\"type\"] == \"tool_use\":\n                total += 10\n    return total\n\n\ndef _blocks(message):\n    content = message[\"content\"]\n    return [{\"type\": \"text\", \"text\": content}] if isinstance(content, str) else copy.deepcopy(content)\n\n\ndef _starts_turn(message):\n    \"\"\"A user message that is not made only of tool results begins a turn.\"\"\"\n    if message[\"role\"] != \"user\":\n        return False\n    content = message[\"content\"]\n    return isinstance(content, str) or any(block[\"type\"] != \"tool_result\" for block in content)\n\n\ndef split_turns(messages):\n    \"\"\"The messages as a list of turns: each turn is a user message that is not a tool result, and everything up to the next one.\"\"\"\n    log.debug(\"split_turns input: %r\", messages)\n    # TODO 1 of 7 (unlocks m1, e2, e3): group the messages into turns.\n    # Receives the list of messages (`_starts_turn(message)` says whether one begins a turn; the first message always does).\n    # Returns a list of turns, each a list of messages, in order.\n    # Example: [user \"q\", assistant tool_use, user tool_result, assistant \"a\", user \"q2\"] -> [[q, tool_use, tool_result, a], [q2]]\n    return [list(messages)]\n\n\ndef _clear_oldest(results, keep, placeholder):\n    \"\"\"TODO 2 of 7 (unlocks e1): replace the content of every result but the newest `keep` with the placeholder.\n\n    Receives the list of tool_result blocks in conversation order, `keep` and the placeholder; changes the blocks in place, returns nothing.\n    Example: three results with keep=2 -> the first one's content becomes \"[cleared]\".\n    \"\"\"\n\n\ndef clear_tool_results(messages, keep=2, exclude=(), placeholder=\"[cleared]\"):\n    \"\"\"Copy of the conversation in which every tool result but the newest `keep` has its content replaced by the placeholder.\"\"\"\n    out = copy.deepcopy(messages)\n    names = {}\n    for message in out:\n        if isinstance(message[\"content\"], list):\n            for block in message[\"content\"]:\n                if block[\"type\"] == \"tool_use\":\n                    names[block[\"id\"]] = block[\"name\"]\n    results = [block for message in out if isinstance(message[\"content\"], list)\n               for block in message[\"content\"] if block[\"type\"] == \"tool_result\" and names.get(block[\"tool_use_id\"]) not in exclude]\n    _clear_oldest(results, keep, placeholder)\n    return out\n\n\ndef _trim(pinned, rest, budget):\n    \"\"\"TODO 3 of 7 (unlocks e2): the turns of `rest` that remain.\n\n    Receives the pinned turns, the other turns oldest first, and the budget. Drops the oldest turn of `rest` while\n    `count_tokens` of pinned + rest is over the budget, but never the last one. Returns the remaining turns.\n    Example: three turns that are over budget by one turn's size -> the last two.\n    \"\"\"\n    return rest\n\n\ndef window(messages, budget, pin=False):\n    \"\"\"Drop the oldest whole turns until the conversation fits; the newest turn always stays. With pin, the first turn stays too.\"\"\"\n    turns = split_turns(messages)\n    pinned, rest = (turns[:1], turns[1:]) if pin else ([], turns)\n    rest = _trim(pinned, rest, budget)\n    return [m for t in pinned + rest for m in t]\n\n\ndef _leave_alone(messages, turns, budget, keep_turns):\n    \"\"\"TODO 4 of 7 (unlocks e3): whether compaction has nothing to do.\n\n    Receives the messages, their turns, the budget and keep_turns. True when the conversation fits the budget or there are no more\n    turns than `keep_turns`.\n    Example: a conversation of 40 tokens with budget 50 -> True.\n    \"\"\"\n    return False\n\n\ndef _with_summary(kept, summary):\n    \"\"\"TODO 5 of 7 (unlocks m1, e4): the first kept message with the summary block placed before its own blocks.\n\n    Receives the kept messages and the summary text. Returns one message with the role of `kept[0]` and as content the text block\n    `SUMMARY_OPEN + summary + SUMMARY_CLOSE` followed by `_blocks(kept[0])`.\n    Example: kept[0] = user \"q2\", summary \"S\" -> {\"role\": \"user\", \"content\": [<summary block>, {\"type\": \"text\", \"text\": \"q2\"}]}\n    \"\"\"\n    return {\"role\": kept[0][\"role\"], \"content\": []}\n\n\ndef compact(messages, budget, summarise, keep_turns=1):\n    \"\"\"When the conversation is over budget, replace everything before the newest `keep_turns` turns by one summary.\"\"\"\n    turns = split_turns(messages)\n    if _leave_alone(messages, turns, budget, keep_turns):\n        return list(messages)\n    older = [m for t in turns[:-keep_turns] for m in t]\n    kept = [m for t in turns[-keep_turns:] for m in t]\n    summary = summarise(older)\n    return [_with_summary(kept, summary)] + kept[1:]\n\n\ndef _span_problem(text, cite):\n    \"\"\"TODO 6 of 7 (unlocks e5): the problem of a citation whose document exists, or None when it can be trusted.\n\n    Receives the document text and the citation. Returns \"bad_range\" (start below 0, end not after start, or end past the text),\n    else \"text_mismatch\" (`text[start:end]` is not the cited text, end excluded), else None.\n    Example: text \"abcdef\", span 1 to 3, cited_text \"bc\" -> None; cited_text \"cd\" -> \"text_mismatch\"\n    \"\"\"\n    return None\n\n\ndef verify_citations(blocks, documents):\n    \"\"\"One {\"block\", \"citation\", \"problem\"} per citation that cannot be trusted, in order.\"\"\"\n    problems = []\n    for i, block in enumerate(blocks):\n        for j, cite in enumerate(block.get(\"citations\") or []):\n            if cite.get(\"type\") != \"char_location\":\n                problem = \"unsupported_type\"\n            elif not 0 <= cite[\"document_index\"] < len(documents):\n                problem = \"unknown_document\"\n            else:\n                problem = _span_problem(documents[cite[\"document_index\"]][\"text\"], cite)\n            if problem:\n                problems.append({\"block\": i, \"citation\": j, \"problem\": problem})\n    return problems\n\n\ndef _number_for(numbers, key):\n    \"\"\"TODO 7 of 7 (unlocks e6): give a new key the next number; True when the key was new.\n\n    Receives the dict of numbers so far and a key. A key not in it gets `len(numbers) + 1` and the answer is True; a known key keeps\n    its number and the answer is False. Example: {} and \"a\" -> True, numbers == {\"a\": 1}; then \"a\" again -> False\n    \"\"\"\n    return False\n\n\ndef footnotes(blocks, documents):\n    \"\"\"The answer text with a [n] after each cited block and a Sources list; one number per distinct cited span, in order.\"\"\"\n    numbers, sources, out = {}, [], []\n    for block in blocks:\n        out.append(block[\"text\"])\n        for cite in block.get(\"citations\") or []:\n            key = (cite[\"document_index\"], cite[\"start_char_index\"], cite[\"end_char_index\"])\n            if _number_for(numbers, key):\n                sources.append(f'[{numbers.get(key, 0)}] {documents[cite[\"document_index\"]][\"title\"]}: \"{cite[\"cited_text\"]}\"')\n            out.append(f\"[{numbers.get(key, 0)}]\")\n    text = \"\".join(out)\n    return text + (\"\\n\\nSources:\\n\" + \"\\n\".join(sources) if sources else \"\")\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom context import compact, count_tokens\n\n\ndef user(text):\n    return {\"role\": \"user\", \"content\": text}\n\n\ndef said(text):\n    return {\"role\": \"assistant\", \"content\": [{\"type\": \"text\", \"text\": text}]}\n\n\ndef call(id, name):\n    return {\"role\": \"assistant\", \"content\": [{\"type\": \"tool_use\", \"id\": id, \"name\": name, \"input\": {}}]}\n\n\ndef result(id, text):\n    return {\"role\": \"user\", \"content\": [{\"type\": \"tool_result\", \"tool_use_id\": id, \"content\": text}]}\n\n\n# A conversation of four turns, like the one the tests compact.\nmessages = [user(\"first question\"), said(\"first answer \" + \"x\" * 80),\n            user(\"second question\"), call(\"a1\", \"search\"), result(\"a1\", \"R\" * 300), said(\"second answer\"),\n            user(\"third question\"), said(\"third answer \" + \"y\" * 60),\n            user(\"fourth question\"), call(\"a2\", \"search\"), result(\"a2\", \"S\" * 100), said(\"fourth answer\")]\n\n\ndef summarise(older):\n    \"\"\"A stand-in for the summariser model: it is told what to fold away and answers with a fixed text.\"\"\"\n    print(\"summariser asked to fold\", len(older), \"messages\")\n    return \"The user asked three things.\"\n\n\nbudget = count_tokens(messages) // 2\ndone = compact(messages, budget, summarise, 1) or []\n\nprint(\"tokens before:\", count_tokens(messages), \"| budget:\", budget)\nprint(\"messages before and after:\", len(messages), \"->\", len(done))\nprint(\"roles after:\", [m[\"role\"] for m in done])\nprint(\"first message:\", done[0][\"content\"] if done else None)\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 4,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "33c837b2d9394edf3442ebb0218cbdb384f2ba46f2d21366490bcef9c40f78ac",
+  "starting_code": "\"\"\"Keeping a conversation inside its budget, and checking the citations in an answer. See ../../statement.md.\"\"\"\nimport copy\nimport logging\n\nlog = logging.getLogger(__name__)\n\nSUMMARY_OPEN, SUMMARY_CLOSE = \"<summary>\\n\", \"\\n</summary>\"\n\n\ndef _tokens(text):\n    return (len(text) + 3) // 4\n\n\ndef count_tokens(messages):\n    \"\"\"Given: a rough size of a conversation. 4 per message, plus 1 per 4 characters of text and of tool result text, plus 10 per tool call.\"\"\"\n    total = 0\n    for message in messages:\n        total += 4\n        content = message[\"content\"]\n        if isinstance(content, str):\n            total += _tokens(content)\n            continue\n        for block in content:\n            if block[\"type\"] == \"text\":\n                total += _tokens(block[\"text\"])\n            elif block[\"type\"] == \"tool_result\":\n                total += _tokens(block.get(\"content\") or \"\")\n            elif block[\"type\"] == \"tool_use\":\n                total += 10\n    return total\n\n\ndef _blocks(message):\n    content = message[\"content\"]\n    return [{\"type\": \"text\", \"text\": content}] if isinstance(content, str) else copy.deepcopy(content)\n\n\ndef _starts_turn(message):\n    \"\"\"A user message that is not made only of tool results begins a turn.\"\"\"\n    if message[\"role\"] != \"user\":\n        return False\n    content = message[\"content\"]\n    return isinstance(content, str) or any(block[\"type\"] != \"tool_result\" for block in content)\n\n\ndef split_turns(messages):\n    \"\"\"The messages as a list of turns: each turn is a user message that is not a tool result, and everything up to the next one.\"\"\"\n    log.debug(\"split_turns input: %r\", messages)\n    # TODO 1 of 7 (unlocks m1, e2, e3): group the messages into turns.\n    # Receives the list of messages (`_starts_turn(message)` says whether one begins a turn; the first message always does).\n    # Returns a list of turns, each a list of messages, in order.\n    # Example: [user \"q\", assistant tool_use, user tool_result, assistant \"a\", user \"q2\"] -> [[q, tool_use, tool_result, a], [q2]]\n    return [list(messages)]\n\n\ndef _clear_oldest(results, keep, placeholder):\n    \"\"\"TODO 2 of 7 (unlocks e1): replace the content of every result but the newest `keep` with the placeholder.\n\n    Receives the list of tool_result blocks in conversation order, `keep` and the placeholder; changes the blocks in place, returns nothing.\n    Example: three results with keep=2 -> the first one's content becomes \"[cleared]\".\n    \"\"\"\n\n\ndef clear_tool_results(messages, keep=2, exclude=(), placeholder=\"[cleared]\"):\n    \"\"\"Copy of the conversation in which every tool result but the newest `keep` has its content replaced by the placeholder.\"\"\"\n    out = copy.deepcopy(messages)\n    names = {}\n    for message in out:\n        if isinstance(message[\"content\"], list):\n            for block in message[\"content\"]:\n                if block[\"type\"] == \"tool_use\":\n                    names[block[\"id\"]] = block[\"name\"]\n    results = [block for message in out if isinstance(message[\"content\"], list)\n               for block in message[\"content\"] if block[\"type\"] == \"tool_result\" and names.get(block[\"tool_use_id\"]) not in exclude]\n    _clear_oldest(results, keep, placeholder)\n    return out\n\n\ndef _trim(pinned, rest, budget):\n    \"\"\"TODO 3 of 7 (unlocks e2): the turns of `rest` that remain.\n\n    Receives the pinned turns, the other turns oldest first, and the budget. Drops the oldest turn of `rest` while\n    `count_tokens` of pinned + rest is over the budget, but never the last one. Returns the remaining turns.\n    Example: three turns that are over budget by one turn's size -> the last two.\n    \"\"\"\n    return rest\n\n\ndef window(messages, budget, pin=False):\n    \"\"\"Drop the oldest whole turns until the conversation fits; the newest turn always stays. With pin, the first turn stays too.\"\"\"\n    turns = split_turns(messages)\n    pinned, rest = (turns[:1], turns[1:]) if pin else ([], turns)\n    rest = _trim(pinned, rest, budget)\n    return [m for t in pinned + rest for m in t]\n\n\ndef _leave_alone(messages, turns, budget, keep_turns):\n    \"\"\"TODO 4 of 7 (unlocks e3): whether compaction has nothing to do.\n\n    Receives the messages, their turns, the budget and keep_turns. True when the conversation fits the budget or there are no more\n    turns than `keep_turns`.\n    Example: a conversation of 40 tokens with budget 50 -> True.\n    \"\"\"\n    return False\n\n\ndef _with_summary(kept, summary):\n    \"\"\"TODO 5 of 7 (unlocks m1, e4): the first kept message with the summary block placed before its own blocks.\n\n    Receives the kept messages and the summary text. Returns one message with the role of `kept[0]` and as content the text block\n    `SUMMARY_OPEN + summary + SUMMARY_CLOSE` followed by `_blocks(kept[0])`.\n    Example: kept[0] = user \"q2\", summary \"S\" -> {\"role\": \"user\", \"content\": [<summary block>, {\"type\": \"text\", \"text\": \"q2\"}]}\n    \"\"\"\n    return {\"role\": kept[0][\"role\"], \"content\": []}\n\n\ndef compact(messages, budget, summarise, keep_turns=1):\n    \"\"\"When the conversation is over budget, replace everything before the newest `keep_turns` turns by one summary.\"\"\"\n    turns = split_turns(messages)\n    if _leave_alone(messages, turns, budget, keep_turns):\n        return list(messages)\n    older = [m for t in turns[:-keep_turns] for m in t]\n    kept = [m for t in turns[-keep_turns:] for m in t]\n    summary = summarise(older)\n    return [_with_summary(kept, summary)] + kept[1:]\n\n\ndef _span_problem(text, cite):\n    \"\"\"TODO 6 of 7 (unlocks e5): the problem of a citation whose document exists, or None when it can be trusted.\n\n    Receives the document text and the citation. Returns \"bad_range\" (start below 0, end not after start, or end past the text),\n    else \"text_mismatch\" (`text[start:end]` is not the cited text, end excluded), else None.\n    Example: text \"abcdef\", span 1 to 3, cited_text \"bc\" -> None; cited_text \"cd\" -> \"text_mismatch\"\n    \"\"\"\n    return None\n\n\ndef verify_citations(blocks, documents):\n    \"\"\"One {\"block\", \"citation\", \"problem\"} per citation that cannot be trusted, in order.\"\"\"\n    problems = []\n    for i, block in enumerate(blocks):\n        for j, cite in enumerate(block.get(\"citations\") or []):\n            if cite.get(\"type\") != \"char_location\":\n                problem = \"unsupported_type\"\n            elif not 0 <= cite[\"document_index\"] < len(documents):\n                problem = \"unknown_document\"\n            else:\n                problem = _span_problem(documents[cite[\"document_index\"]][\"text\"], cite)\n            if problem:\n                problems.append({\"block\": i, \"citation\": j, \"problem\": problem})\n    return problems\n\n\ndef _number_for(numbers, key):\n    \"\"\"TODO 7 of 7 (unlocks e6): give a new key the next number; True when the key was new.\n\n    Receives the dict of numbers so far and a key. A key not in it gets `len(numbers) + 1` and the answer is True; a known key keeps\n    its number and the answer is False. Example: {} and \"a\" -> True, numbers == {\"a\": 1}; then \"a\" again -> False\n    \"\"\"\n    return False\n\n\ndef footnotes(blocks, documents):\n    \"\"\"The answer text with a [n] after each cited block and a Sources list; one number per distinct cited span, in order.\"\"\"\n    numbers, sources, out = {}, [], []\n    for block in blocks:\n        out.append(block[\"text\"])\n        for cite in block.get(\"citations\") or []:\n            key = (cite[\"document_index\"], cite[\"start_char_index\"], cite[\"end_char_index\"])\n            if _number_for(numbers, key):\n                sources.append(f'[{numbers.get(key, 0)}] {documents[cite[\"document_index\"]][\"title\"]}: \"{cite[\"cited_text\"]}\"')\n            out.append(f\"[{numbers.get(key, 0)}]\")\n    text = \"\".join(out)\n    return text + (\"\\n\\nSources:\\n\" + \"\\n\".join(sources) if sources else \"\")\n",
+  "exercise": {
+    "main_path": "practice/level-2/29-context-engineering/prose/unit-03/practice-1/context.py",
+    "test_path": "practice/level-2/29-context-engineering/prose/unit-03/practice-1/test_context.py",
+    "run_command": [
+      "python3",
+      "practice/level-2/29-context-engineering/prose/unit-03/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-2/29-context-engineering/prose/unit-03/practice-1/target/report.xml",
+      "practice/level-2/29-context-engineering/prose/unit-03/practice-1/test_context.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_an_over_budget_conversation_becomes_a_summary_and_the_newest_turn",
+        "kind": "main",
+        "says": "An over-budget conversation becomes a summary and the newest turn"
+      },
+      {
+        "id": "test_e1_old_tool_results_are_cleared_but_their_calls_and_flags_stay",
+        "kind": "edge",
+        "says": "Old tool results are cleared, but their calls and flags stay"
+      },
+      {
+        "id": "test_e2_the_window_drops_whole_turns_and_never_splits_a_tool_call_from_its_result",
+        "kind": "edge",
+        "says": "The window drops whole turns and never splits a tool call from its result"
+      },
+      {
+        "id": "test_e3_a_conversation_within_budget_or_with_nothing_older_is_left_alone",
+        "kind": "edge",
+        "says": "A conversation within budget, or with nothing older, is left alone"
+      },
+      {
+        "id": "test_e4_a_second_compaction_folds_the_earlier_summary_into_the_new_one",
+        "kind": "main",
+        "says": "A second compaction folds the earlier summary into the new one"
+      },
+      {
+        "id": "test_e5_a_citation_that_does_not_match_its_document_is_reported",
+        "kind": "edge",
+        "says": "A citation that does not match its document is reported"
+      },
+      {
+        "id": "test_e6_footnotes_number_each_distinct_source_once_in_order_of_appearance",
+        "kind": "edge",
+        "says": "Footnotes number each distinct source once, in order of appearance"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/29-context-engineering/prose/unit-03/practice-1/target/report.xml"
+    },
+    "origin": "course/29-context-engineering/03-citations-the-files-api-and-the-practice.md",
+    "concepts": [
+      "the practice of Citations, the Files API and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/29-context-engineering/prose/unit-03/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "context-engineering-u3"
+}

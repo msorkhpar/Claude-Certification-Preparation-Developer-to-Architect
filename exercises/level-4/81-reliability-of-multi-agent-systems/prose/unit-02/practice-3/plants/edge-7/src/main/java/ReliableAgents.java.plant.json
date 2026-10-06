@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/java/ReliableAgents.java",
+      "old": "            return new Call(\"fatal\", e.getMessage());\n        }\n",
+      "new": "            return new Call(\"fatal\", e.getMessage());\n        } catch (RuntimeException e) {\n            return new Call(\"fatal\", String.valueOf(e.getMessage()));\n        }\n"
+    }
+  ]
+}

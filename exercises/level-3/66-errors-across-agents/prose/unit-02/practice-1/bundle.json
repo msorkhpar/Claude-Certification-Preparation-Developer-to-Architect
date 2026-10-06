@@ -1,0 +1,78 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "66-errors-across-agents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: subagents that recover locally, fail with context and leave the coordinator able to decide (Python)",
+  "lang": "python",
+  "main_file": "error_flow.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_error_flow.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/66-errors-across-agents/prose/unit-02/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-3/66-errors-across-agents/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-3/66-errors-across-agents/prose/unit-02/practice-1/test_error_flow.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_a_transient_failure_is_retried_locally_and_the_success_is_reported_with_its_attempts",
+      "kind": "main",
+      "says": "A transient failure is retried locally and the success is reported with its attempts"
+    },
+    {
+      "id": "test_e1_a_valid_empty_result_is_a_success_with_no_findings_and_never_an_error",
+      "kind": "edge",
+      "says": "A valid empty result is a success with no findings and never an error"
+    },
+    {
+      "id": "test_e2_a_permission_or_invalid_query_error_is_not_retried_and_carries_what_was_attempted_and_its_alternatives",
+      "kind": "edge",
+      "says": "A permission or invalid query error is not retried and carries what was attempted and its alternatives"
+    },
+    {
+      "id": "test_e3_a_failure_that_survives_the_retries_carries_the_partial_results_of_the_last_attempt",
+      "kind": "edge",
+      "says": "A failure that survives the retries carries the partial results of the last attempt"
+    },
+    {
+      "id": "test_e4_the_coordinator_uses_partial_results_tries_an_alternative_or_flags_a_gap_and_never_stops_the_run",
+      "kind": "edge",
+      "says": "The coordinator uses partial results, tries an alternative or flags a gap, and never stops the run"
+    },
+    {
+      "id": "test_e5_the_coverage_note_separates_supported_topics_from_gaps_and_names_the_cause",
+      "kind": "edge",
+      "says": "The coverage note separates supported topics from gaps and names the cause"
+    },
+    {
+      "id": "test_e6_a_topic_with_no_result_is_a_gap_that_was_not_searched",
+      "kind": "edge",
+      "says": "A topic with no result is a gap that was not searched"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/66-errors-across-agents/02-plans-partial-results-coverage-notes-and-the-practice.md"
+}

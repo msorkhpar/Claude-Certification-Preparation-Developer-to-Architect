@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "retrieval.py",
+      "old": "    found = {doc_of[cid] for cid in ids[:k]}\n    return len(found & set(relevant)) / len(set(relevant))\n",
+      "new": "    wanted = set(relevant)\n    return min(1.0, len([cid for cid in ids[:k] if doc_of[cid] in wanted]) / len(wanted))\n"
+    }
+  ]
+}

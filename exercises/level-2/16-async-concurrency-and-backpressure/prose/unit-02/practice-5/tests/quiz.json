@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "16-async-concurrency-and-backpressure"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 5,
+  "title": "Check yourself: Rate limits as a client concern, backpressure, and a worker pool",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A team's client sends bursts of requests at the start of every minute and gets 429 errors, although the daily total is far below the limit. Why does the page say this happens?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Capacity is restored at the start of each minute, so late requests are refused",
+            "correct": false,
+            "says": "Ruled out because the bucket \"refills continuously, not a counter that resets on the minute\"."
+          },
+          {
+            "id": "b",
+            "text": "Capacity refills steadily, so a sudden spike drains the allowance",
+            "correct": true,
+            "says": "The page says the limit is \"a bucket that refills continuously, not a counter that resets on the minute\", so a spike drains it."
+          },
+          {
+            "id": "c",
+            "text": "The provider counts the `max_tokens` setting of each request toward output tokens",
+            "correct": false,
+            "says": "Ruled out because the `max_tokens` setting \"does not factor into OTPM rate limit calculations\"."
+          },
+          {
+            "id": "d",
+            "text": "Capacity is shared with other organisations, so peaks collide with theirs",
+            "correct": false,
+            "says": "Ruled out because the limits are set per organisation: \"per organisation and per model class\"."
+          }
+        ],
+        "origin": {
+          "path": "course/16-async-concurrency-and-backpressure/02-rate-limits-and-backpressure.md",
+          "section": "What the limits are"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A job reads a very large file and starts one call per row before it processes any result, and the process runs out of memory. Which design is best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Add retries so that the rows that failed to start are begun again later",
+            "correct": false,
+            "says": "Ruled out because \"retrying a burst you could have avoided spends the time and the quota twice\"."
+          },
+          {
+            "id": "b",
+            "text": "Read all the rows first but start the calls in groups of a hundred rows",
+            "correct": false,
+            "says": "Ruled out because \"reading them all first puts the file in memory\", and groups do not change that."
+          },
+          {
+            "id": "c",
+            "text": "Compress the rows in memory so that more of them fit before the calls start",
+            "correct": false,
+            "says": "Ruled out because compression keeps every row in memory and leaves \"starts every call at once\" in place."
+          },
+          {
+            "id": "d",
+            "text": "Pull the next item only when a worker is free, under a fixed bound on parallel work",
+            "correct": true,
+            "says": "The page's mechanism is \"take the next item only when there is room for it\", with a worker pool that has \"at most limit workers\"."
+          }
+        ],
+        "origin": {
+          "path": "course/16-async-concurrency-and-backpressure/02-rate-limits-and-backpressure.md",
+          "section": "Backpressure: the slow stage holds back the fast one"
+        }
+      }
+    ]
+  }
+}

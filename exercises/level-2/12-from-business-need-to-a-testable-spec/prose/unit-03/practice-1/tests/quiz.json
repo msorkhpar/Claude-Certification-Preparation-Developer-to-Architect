@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "12-from-business-need-to-a-testable-spec"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 1,
+  "title": "Check yourself: The life cycle, and a spec you can test",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A team's nightly report job started returning slightly different summaries after a provider released an update. The code names its model with a moving alias. What does the page say is the underlying mistake?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The job should have been interactive, so that a person could review its output live",
+            "correct": false,
+            "says": "Ruled out because the symptom has nothing to do with live review, and the maintain routine is to \"re-run the evaluation set against the new model\"."
+          },
+          {
+            "id": "b",
+            "text": "A deliberate pin was missing, so behaviour moved without a regression run",
+            "correct": true,
+            "says": "An alias that moves \"changes behaviour under you\", and the routine is to pin an id and change it on purpose, with a regression run."
+          },
+          {
+            "id": "c",
+            "text": "The summaries were never written down as requirements before the first prompt was tried",
+            "correct": false,
+            "says": "Ruled out because a missing spec is a separate fault, while the symptom is described by \"a silent change of model is a silent change of behaviour\"."
+          },
+          {
+            "id": "d",
+            "text": "The nightly schedule should have been replaced by a fixed monthly cost budget for the job",
+            "correct": false,
+            "says": "Ruled out because a cost budget does not decide which model answers, and the page's fix is to \"pin the model id\" in configuration."
+          }
+        ],
+        "origin": {
+          "path": "course/12-from-business-need-to-a-testable-spec/03-the-life-cycle-and-a-spec-you-can-test.md",
+          "section": "Maintain: models retire and limits change"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A client library crashes whenever the API adds a new field to a response, although the API's documented rules allow additions. What is the best fix?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Pin an older API version header to stop any new property from appearing in the reply body",
+            "correct": false,
+            "says": "Ruled out because earlier versions are deprecated and \"may be unavailable for new users\", and additions arrive within the current one."
+          },
+          {
+            "id": "b",
+            "text": "Ask the provider to announce each new addition before it is released to the public",
+            "correct": false,
+            "says": "Ruled out because the policy already says Anthropic \"may add additional values to the output\", so no announcement is promised."
+          },
+          {
+            "id": "c",
+            "text": "Wrap every call in a retry so that the crash is repeated until it clears for good",
+            "correct": false,
+            "says": "Ruled out because \"a retry cannot help, because the same reply is parsed the same way again\"."
+          },
+          {
+            "id": "d",
+            "text": "Take only the properties the code needs and skip everything else in the reply",
+            "correct": true,
+            "says": "The page says to be tolerant of additions and strict about what you send, which means reading only what the code uses."
+          }
+        ],
+        "origin": {
+          "path": "course/12-from-business-need-to-a-testable-spec/03-the-life-cycle-and-a-spec-you-can-test.md",
+          "section": "Maintain: models retire and limits change"
+        }
+      }
+    ]
+  }
+}

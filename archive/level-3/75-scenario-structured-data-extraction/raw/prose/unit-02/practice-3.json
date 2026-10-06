@@ -1,0 +1,296 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "75-scenario-structured-data-extraction"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: audit an extraction run (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: audit an extraction run"
+    },
+    {
+      "type": "para",
+      "text": "A team extracts the vendor, the currency and the totals from invoices of three kinds: typed, scanned and handwritten. The pipeline forces an extraction tool, validates every record, retries once with feedback and sends what it cannot settle to a person. Its dashboard says 99 percent accurate, and the reviewers say the handwritten forms are a disaster. In this practice you write the audit that settles the argument: the accuracy on every document next to the accuracy on the validated ones, the accuracy of each kind of document and whether that kind may be automated, the failure shapes the run shows and the first fix to make. The model is not called: the tests give you the log of a run. The shapes of the log, of the policy and of the report are this course's own design for the capstone, not an Anthropic interface. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`audit`); TypeScript has the same name and the same snake-case fields. Java has the static method `RunAudit.audit` and the records `Run`, `Policy`, `Segment` and `Report` with camel-case fields (`retriedAbsent`, `sumOk`, `minN`, `needsReview`, `accuracyAll`); Kotlin has the top-level function `audit` and the data classes of the same names."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working audit with six gaps cut out of it. The counting of the statuses, the accuracies and the assembly of the report are written and correct. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`percent` unlocks `e8` (and the figures of `m1` and `e1`): the whole percentage, rounded half up.",
+        "`segments_of` unlocks `e3` and `e4`: one entry per kind, sorted, with the automate decision.",
+        "`failure_shapes` unlocks `e6`: the invented, wasted-retry and unchecked-total counts.",
+        "`meets` unlocks `e2` and `e1`: the target comparison, false for an empty run.",
+        "`is_overstated` unlocks `e5`: the validated accuracy against the all-document accuracy and the gap.",
+        "`choose_fix` unlocks `e7`: the first fix by the order of what costs most."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "A run is a list of documents `{id, kind, status, correct, invented, retried_absent, sum_ok}`: `status` is `valid`, `needs_review` or `failed`; `correct` says that the record the pipeline delivered matches the label (a document that was not delivered is not correct); `invented` says that a value was not in the document; `retried_absent` says that a retry was sent for a value the document does not contain; `sum_ok` says that the record's totals agree with its line items. The policy is `{target, min_n, gap}`, whole numbers: the target accuracy in percent, the fewest documents of a kind that may justify automating it, and the gap in percentage points."
+    },
+    {
+      "type": "para",
+      "text": "`audit(runs, policy)` returns a report with:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`n`, `valid`, `needs_review`, `failed`: the counts.",
+        "`accuracy_all`: the percentage of all documents that are correct. `accuracy_validated`: the percentage of the `valid` documents that are correct (0 when none is valid). Percentages are whole numbers rounded half up: `(200 * correct + total) // (2 * total)`, and 0 when the total is 0.",
+        "`meets_target`: true when the run has at least one document and `correct * 100 >= target * n`.",
+        "`segments`: one entry per kind, sorted by kind, `{kind, n, correct, percent, automate}`. `automate` is true when the kind has at least `min_n` documents and `correct * 100 >= target * n` for that kind.",
+        "`invented`, `wasted_retries`: the number of documents flagged `invented` and `retried_absent`. `unchecked_totals`: the number of `valid` documents whose `sum_ok` is false (a document that was never accepted is not counted).",
+        "`overstated`: true when `accuracy_validated - accuracy_all` is greater than `gap`.",
+        "`first_fix`: `none` for an empty run; otherwise the first that applies of `make_fields_nullable` (any invented value), `stop_retrying_absent` (any wasted retry), `add_semantic_checks` (any unchecked total), `measure_all_documents` (the figure is overstated), `improve_weak_segments` (the run does not meet the target) and `none`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Measure every document.** A document that failed validation is still a document the customer sent. *You should see* 100 percent on the validated ones next to 57 percent on all of them, and the gap named as the figure being overstated.",
+        "**A target is met at the target.** The goal is \"at least\", so a run exactly on it meets it. *You should see* 9 correct documents of 10 meet a target of 90, and 8 of 10 do not.",
+        "**Automate a kind only with evidence.** Too few documents prove nothing, and a kind below the target is not ready. *You should see* a kind with exactly `min_n` documents automated, one with one fewer held back, and 17 of 19 refused while 9 of 10 pass.",
+        "**Name the shape, then order the fixes.** An invented value is a schema fault, a wasted retry a loop fault, an unchecked total a missing check. *You should see* the cheapest fix that removes the most damage first."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A mixed run gets every count, both accuracies, the segments and the first fix"
+        ],
+        [
+          "`e1`",
+          "An empty run has zero figures, no segments and never meets the target"
+        ],
+        [
+          "`e2`",
+          "The run meets the target at exactly the target and not below it"
+        ],
+        [
+          "`e3`",
+          "A kind needs at least the minimum number of documents to be automated"
+        ],
+        [
+          "`e4`",
+          "A kind is automated at exactly the target accuracy and not below it"
+        ],
+        [
+          "`e5`",
+          "The figure is overstated only when the gap is exceeded, not when it is met"
+        ],
+        [
+          "`e6`",
+          "Each shape counts documents once, and an unchecked total counts only valid documents"
+        ],
+        [
+          "`e7`",
+          "The first fix follows the order of what costs most"
+        ],
+        [
+          "`e8`",
+          "Percentages are whole numbers rounded half up"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.List;\nimport java.util.TreeSet;\n\n/** Audit an extraction run: the accuracy on every document, the accuracy by kind of document, the failure shapes and the first fix. */\npublic final class RunAudit {\n    private static final System.Logger LOG = System.getLogger(RunAudit.class.getName());\n    public record Run(String id, String kind, String status, boolean correct, boolean invented, boolean retriedAbsent, boolean sumOk) {}\n\n    public record Policy(int target, int minN, int gap) {}\n\n    public record Segment(String kind, int n, int correct, int percent, boolean automate) {}\n\n    public record Report(int n, int valid, int needsReview, int failed, int accuracyAll, int accuracyValidated, boolean meetsTarget, List<Segment> segments,\n                         int invented, int wastedRetries, int uncheckedTotals, boolean overstated, String firstFix) {}\n\n    /** A whole percentage, rounded half up; 0 when there is nothing to divide. */\n    static int percent(int correct, int total) {\n        return total > 0 ? (200 * correct + total) / (2 * total) : 0;\n    }\n\n    /** One entry per kind, sorted by kind. */\n    static List<Segment> segmentsOf(List<Run> runs, Policy policy) {\n        return new TreeSet<>(runs.stream().map(Run::kind).toList()).stream().map(kind -> {\n            List<Run> group = runs.stream().filter(r -> r.kind().equals(kind)).toList();\n            int ok = (int) group.stream().filter(Run::correct).count();\n            return new Segment(kind, group.size(), ok, percent(ok, group.size()), group.size() >= policy.minN() && ok * 100 >= policy.target() * group.size());\n        }).toList();\n    }\n\n    /** {invented, wastedRetries, uncheckedTotals} counted in documents. */\n    static int[] failureShapes(List<Run> runs) {\n        int invented = (int) runs.stream().filter(Run::invented).count();\n        int wasted = (int) runs.stream().filter(Run::retriedAbsent).count();\n        int unchecked = (int) runs.stream().filter(r -> r.status().equals(\"valid\") && !r.sumOk()).count();\n        return new int[] {invented, wasted, unchecked};\n    }\n\n    /** True when the run has a document and right * 100 >= target * n. */\n    static boolean meets(int right, int n, int target) {\n        return n > 0 && right * 100 >= target * n;\n    }\n\n    /** True when the validated accuracy exceeds the all-document accuracy by more than the gap. */\n    static boolean isOverstated(int accuracyValidated, int accuracyAll, int gap) {\n        return accuracyValidated - accuracyAll > gap;\n    }\n\n    /** The first fix that applies, in the order of the statement. */\n    static String chooseFix(int n, int invented, int wasted, int unchecked, boolean overstated, boolean meetsTarget) {\n        if (n == 0) return \"none\";\n        if (invented > 0) return \"make_fields_nullable\";\n        if (wasted > 0) return \"stop_retrying_absent\";\n        if (unchecked > 0) return \"add_semantic_checks\";\n        if (overstated) return \"measure_all_documents\";\n        if (!meetsTarget) return \"improve_weak_segments\";\n        return \"none\";\n    }\n\n    public static Report audit(List<Run> runs, Policy policy) {\n        LOG.log(System.Logger.Level.DEBUG, \"audit input: {0}\", runs);\n        int n = runs.size();\n        int valid = (int) runs.stream().filter(r -> r.status().equals(\"valid\")).count();\n        int right = (int) runs.stream().filter(Run::correct).count();\n        int rightValid = (int) runs.stream().filter(r -> r.status().equals(\"valid\") && r.correct()).count();\n        int accuracyAll = percent(right, n);\n        int accuracyValidated = percent(rightValid, valid);\n        int[] shapes = failureShapes(runs);\n        boolean overstated = isOverstated(accuracyValidated, accuracyAll, policy.gap());\n        boolean meetsTarget = meets(right, n, policy.target());\n        return new Report(n, valid, (int) runs.stream().filter(r -> r.status().equals(\"needs_review\")).count(), (int) runs.stream().filter(r -> r.status().equals(\"failed\")).count(),\n            accuracyAll, accuracyValidated, meetsTarget, segmentsOf(runs, policy), shapes[0], shapes[1], shapes[2], overstated, chooseFix(n, shapes[0], shapes[1], shapes[2], overstated, meetsTarget));\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.*;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        RunAudit.Policy policy = new RunAudit.Policy(90, 3, 5);\n        // A run of seven documents: three typed ones right, two scans, two handwritten ones that went wrong.\n        List<RunAudit.Run> runs = new ArrayList<>();\n        for (int i = 0; i < 3; i++) runs.add(new RunAudit.Run(\"d\", \"typed\", \"valid\", true, false, false, true));\n        runs.add(new RunAudit.Run(\"d\", \"scanned\", \"valid\", true, false, false, true));\n        runs.add(new RunAudit.Run(\"d\", \"scanned\", \"needs_review\", false, false, false, true));\n        runs.add(new RunAudit.Run(\"d\", \"handwritten\", \"failed\", false, true, false, true));\n        runs.add(new RunAudit.Run(\"d\", \"handwritten\", \"needs_review\", false, false, true, true));\n        RunAudit.Report report = RunAudit.audit(runs, policy);\n        System.out.println(report);\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.List;\nimport java.util.TreeSet;\n\n/** Audit an extraction run: the accuracy on every document, the accuracy by kind of document, the failure shapes and the first fix. */\npublic final class RunAudit {\n    private static final System.Logger LOG = System.getLogger(RunAudit.class.getName());\n    public record Run(String id, String kind, String status, boolean correct, boolean invented, boolean retriedAbsent, boolean sumOk) {}\n\n    public record Policy(int target, int minN, int gap) {}\n\n    public record Segment(String kind, int n, int correct, int percent, boolean automate) {}\n\n    public record Report(int n, int valid, int needsReview, int failed, int accuracyAll, int accuracyValidated, boolean meetsTarget, List<Segment> segments,\n                         int invented, int wastedRetries, int uncheckedTotals, boolean overstated, String firstFix) {}\n\n    /**\n     * TODO 1 of 6 (unlocks m1, e1 and e8): a whole percentage, rounded half up.\n     * Receives the correct count and the total. Returns {@code (200 * correct + total) / (2 * total)} in integer arithmetic, and 0 when the total is 0.\n     * Example: percent(2, 3) -> 67, percent(1, 3) -> 33, percent(0, 0) -> 0\n     */\n    static int percent(int correct, int total) {\n        return 0;\n    }\n\n    /**\n     * TODO 2 of 6 (unlocks m1, e3 and e4): one entry per kind of document.\n     * Receives the runs and the policy. Returns a list sorted by kind of Segment(kind, n, correct, percent, automate); {@code automate} needs at\n     * least {@code minN} documents of the kind and {@code correct * 100 >= target * n} for it.\n     * Example: 9 of 10 typed documents with minN 5 and target 90 -> [Segment(\"typed\", 10, 9, 90, true)]\n     */\n    static List<Segment> segmentsOf(List<Run> runs, Policy policy) {\n        return List.of();\n    }\n\n    /**\n     * TODO 3 of 6 (unlocks m1 and e6): count the failure shapes in documents.\n     * Receives the runs. Returns {invented, wastedRetries, uncheckedTotals}: documents flagged {@code invented}, documents flagged\n     * {@code retriedAbsent}, and {@code valid} documents whose {@code sumOk} is false (a document never accepted is not counted).\n     * Example: one valid document with sumOk false and one failed document with sumOk false -> {0, 0, 1}\n     */\n    static int[] failureShapes(List<Run> runs) {\n        return new int[] {0, 0, 0};\n    }\n\n    /**\n     * TODO 4 of 6 (unlocks m1, e1 and e2): does the run meet the target?\n     * Receives the correct count, the document count and the target in percent. Returns true when there is at least one document\n     * and {@code right * 100 >= target * n}. Example: meets(9, 10, 90) -> true, meets(8, 10, 90) -> false, meets(0, 0, 90) -> false\n     */\n    static boolean meets(int right, int n, int target) {\n        return false;\n    }\n\n    /**\n     * TODO 5 of 6 (unlocks m1 and e5): is the figure overstated?\n     * Receives both accuracies and the gap in points. Returns true only when the validated accuracy exceeds the all-document\n     * accuracy by more than the gap. Example: isOverstated(100, 95, 5) -> false, isOverstated(100, 94, 5) -> true\n     */\n    static boolean isOverstated(int accuracyValidated, int accuracyAll, int gap) {\n        return false;\n    }\n\n    /**\n     * TODO 6 of 6 (unlocks m1, e1 and e7): the first fix that applies.\n     * Receives the document count, the three shape counts, {@code overstated} and {@code meetsTarget}. Returns {@code none} for an empty run, else the\n     * first that applies of make_fields_nullable (invented), stop_retrying_absent (wasted), add_semantic_checks (unchecked),\n     * measure_all_documents (overstated), improve_weak_segments (target not met), and {@code none}.\n     * Example: chooseFix(3, 0, 1, 1, false, true) -> \"stop_retrying_absent\"\n     */\n    static String chooseFix(int n, int invented, int wasted, int unchecked, boolean overstated, boolean meetsTarget) {\n        return \"\";\n    }\n\n    public static Report audit(List<Run> runs, Policy policy) {\n        LOG.log(System.Logger.Level.DEBUG, \"audit input: {0}\", runs);\n        int n = runs.size();\n        int valid = (int) runs.stream().filter(r -> r.status().equals(\"valid\")).count();\n        int right = (int) runs.stream().filter(Run::correct).count();\n        int rightValid = (int) runs.stream().filter(r -> r.status().equals(\"valid\") && r.correct()).count();\n        int accuracyAll = percent(right, n);\n        int accuracyValidated = percent(rightValid, valid);\n        int[] shapes = failureShapes(runs);\n        boolean overstated = isOverstated(accuracyValidated, accuracyAll, policy.gap());\n        boolean meetsTarget = meets(right, n, policy.target());\n        return new Report(n, valid, (int) runs.stream().filter(r -> r.status().equals(\"needs_review\")).count(), (int) runs.stream().filter(r -> r.status().equals(\"failed\")).count(),\n            accuracyAll, accuracyValidated, meetsTarget, segmentsOf(runs, policy), shapes[0], shapes[1], shapes[2], overstated, chooseFix(n, shapes[0], shapes[1], shapes[2], overstated, meetsTarget));\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.*;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        RunAudit.Policy policy = new RunAudit.Policy(90, 3, 5);\n        // A run of seven documents: three typed ones right, two scans, two handwritten ones that went wrong.\n        List<RunAudit.Run> runs = new ArrayList<>();\n        for (int i = 0; i < 3; i++) runs.add(new RunAudit.Run(\"d\", \"typed\", \"valid\", true, false, false, true));\n        runs.add(new RunAudit.Run(\"d\", \"scanned\", \"valid\", true, false, false, true));\n        runs.add(new RunAudit.Run(\"d\", \"scanned\", \"needs_review\", false, false, false, true));\n        runs.add(new RunAudit.Run(\"d\", \"handwritten\", \"failed\", false, true, false, true));\n        runs.add(new RunAudit.Run(\"d\", \"handwritten\", \"needs_review\", false, false, true, true));\n        RunAudit.Report report = RunAudit.audit(runs, policy);\n        System.out.println(report);\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 7,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "dad06da533e8cfd9b57e6e121a1eb04014f5b52a3117c3c0bb7830210fe0d4a3",
+  "starting_code": "import java.util.List;\nimport java.util.TreeSet;\n\n/** Audit an extraction run: the accuracy on every document, the accuracy by kind of document, the failure shapes and the first fix. */\npublic final class RunAudit {\n    private static final System.Logger LOG = System.getLogger(RunAudit.class.getName());\n    public record Run(String id, String kind, String status, boolean correct, boolean invented, boolean retriedAbsent, boolean sumOk) {}\n\n    public record Policy(int target, int minN, int gap) {}\n\n    public record Segment(String kind, int n, int correct, int percent, boolean automate) {}\n\n    public record Report(int n, int valid, int needsReview, int failed, int accuracyAll, int accuracyValidated, boolean meetsTarget, List<Segment> segments,\n                         int invented, int wastedRetries, int uncheckedTotals, boolean overstated, String firstFix) {}\n\n    /**\n     * TODO 1 of 6 (unlocks m1, e1 and e8): a whole percentage, rounded half up.\n     * Receives the correct count and the total. Returns {@code (200 * correct + total) / (2 * total)} in integer arithmetic, and 0 when the total is 0.\n     * Example: percent(2, 3) -> 67, percent(1, 3) -> 33, percent(0, 0) -> 0\n     */\n    static int percent(int correct, int total) {\n        return 0;\n    }\n\n    /**\n     * TODO 2 of 6 (unlocks m1, e3 and e4): one entry per kind of document.\n     * Receives the runs and the policy. Returns a list sorted by kind of Segment(kind, n, correct, percent, automate); {@code automate} needs at\n     * least {@code minN} documents of the kind and {@code correct * 100 >= target * n} for it.\n     * Example: 9 of 10 typed documents with minN 5 and target 90 -> [Segment(\"typed\", 10, 9, 90, true)]\n     */\n    static List<Segment> segmentsOf(List<Run> runs, Policy policy) {\n        return List.of();\n    }\n\n    /**\n     * TODO 3 of 6 (unlocks m1 and e6): count the failure shapes in documents.\n     * Receives the runs. Returns {invented, wastedRetries, uncheckedTotals}: documents flagged {@code invented}, documents flagged\n     * {@code retriedAbsent}, and {@code valid} documents whose {@code sumOk} is false (a document never accepted is not counted).\n     * Example: one valid document with sumOk false and one failed document with sumOk false -> {0, 0, 1}\n     */\n    static int[] failureShapes(List<Run> runs) {\n        return new int[] {0, 0, 0};\n    }\n\n    /**\n     * TODO 4 of 6 (unlocks m1, e1 and e2): does the run meet the target?\n     * Receives the correct count, the document count and the target in percent. Returns true when there is at least one document\n     * and {@code right * 100 >= target * n}. Example: meets(9, 10, 90) -> true, meets(8, 10, 90) -> false, meets(0, 0, 90) -> false\n     */\n    static boolean meets(int right, int n, int target) {\n        return false;\n    }\n\n    /**\n     * TODO 5 of 6 (unlocks m1 and e5): is the figure overstated?\n     * Receives both accuracies and the gap in points. Returns true only when the validated accuracy exceeds the all-document\n     * accuracy by more than the gap. Example: isOverstated(100, 95, 5) -> false, isOverstated(100, 94, 5) -> true\n     */\n    static boolean isOverstated(int accuracyValidated, int accuracyAll, int gap) {\n        return false;\n    }\n\n    /**\n     * TODO 6 of 6 (unlocks m1, e1 and e7): the first fix that applies.\n     * Receives the document count, the three shape counts, {@code overstated} and {@code meetsTarget}. Returns {@code none} for an empty run, else the\n     * first that applies of make_fields_nullable (invented), stop_retrying_absent (wasted), add_semantic_checks (unchecked),\n     * measure_all_documents (overstated), improve_weak_segments (target not met), and {@code none}.\n     * Example: chooseFix(3, 0, 1, 1, false, true) -> \"stop_retrying_absent\"\n     */\n    static String chooseFix(int n, int invented, int wasted, int unchecked, boolean overstated, boolean meetsTarget) {\n        return \"\";\n    }\n\n    public static Report audit(List<Run> runs, Policy policy) {\n        LOG.log(System.Logger.Level.DEBUG, \"audit input: {0}\", runs);\n        int n = runs.size();\n        int valid = (int) runs.stream().filter(r -> r.status().equals(\"valid\")).count();\n        int right = (int) runs.stream().filter(Run::correct).count();\n        int rightValid = (int) runs.stream().filter(r -> r.status().equals(\"valid\") && r.correct()).count();\n        int accuracyAll = percent(right, n);\n        int accuracyValidated = percent(rightValid, valid);\n        int[] shapes = failureShapes(runs);\n        boolean overstated = isOverstated(accuracyValidated, accuracyAll, policy.gap());\n        boolean meetsTarget = meets(right, n, policy.target());\n        return new Report(n, valid, (int) runs.stream().filter(r -> r.status().equals(\"needs_review\")).count(), (int) runs.stream().filter(r -> r.status().equals(\"failed\")).count(),\n            accuracyAll, accuracyValidated, meetsTarget, segmentsOf(runs, policy), shapes[0], shapes[1], shapes[2], overstated, chooseFix(n, shapes[0], shapes[1], shapes[2], overstated, meetsTarget));\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/75-scenario-structured-data-extraction/prose/unit-02/practice-3/src/main/java/RunAudit.java",
+    "test_path": "practice/level-3/75-scenario-structured-data-extraction/prose/unit-02/practice-3/src/test/java/RunAuditTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/75-scenario-structured-data-extraction/prose/unit-02/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/75-scenario-structured-data-extraction/prose/unit-02/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_aMixedRunGetsEveryCountBothAccuraciesTheSegmentsAndTheFirstFix()",
+        "kind": "main",
+        "says": "A mixed run gets every count, both accuracies, the segments and the first fix"
+      },
+      {
+        "id": "e1_anEmptyRunHasZeroFiguresNoSegmentsAndNeverMeetsTheTarget()",
+        "kind": "edge",
+        "says": "An empty run has zero figures, no segments and never meets the target"
+      },
+      {
+        "id": "e2_theRunMeetsTheTargetAtExactlyTheTargetAndNotBelowIt()",
+        "kind": "edge",
+        "says": "The run meets the target at exactly the target and not below it"
+      },
+      {
+        "id": "e3_aKindNeedsAtLeastTheMinimumNumberOfDocumentsToBeAutomated()",
+        "kind": "edge",
+        "says": "A kind needs at least the minimum number of documents to be automated"
+      },
+      {
+        "id": "e4_aKindIsAutomatedAtExactlyTheTargetAccuracyAndNotBelowIt()",
+        "kind": "edge",
+        "says": "A kind is automated at exactly the target accuracy and not below it"
+      },
+      {
+        "id": "e5_theFigureIsOverstatedOnlyWhenTheValidatedAccuracyExceedsTheAllDocumentAccuracyByMoreThanTheGap()",
+        "kind": "edge",
+        "says": "The figure is overstated only when the gap is exceeded, not when it is met"
+      },
+      {
+        "id": "e6_eachShapeCountsDocumentsOnceAndAnUncheckedTotalCountsOnlyDocumentsAcceptedAsValid()",
+        "kind": "edge",
+        "says": "Each shape counts documents once, and an unchecked total counts only valid documents"
+      },
+      {
+        "id": "e7_theFirstFixFollowsTheOrderOfWhatCostsMost()",
+        "kind": "edge",
+        "says": "The first fix follows the order of what costs most"
+      },
+      {
+        "id": "e8_percentagesAreWholeNumbersRoundedHalfUp()",
+        "kind": "edge",
+        "says": "Percentages are whole numbers rounded half up"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/75-scenario-structured-data-extraction/prose/unit-02/practice-3/target/test-results/test"
+    },
+    "origin": "course/75-scenario-structured-data-extraction/02-segments-gaps-and-the-practice.md",
+    "concepts": [
+      "the practice of Segments, gaps and the practice: what the audit decides is solved"
+    ],
+    "files": [
+      "practice/level-3/75-scenario-structured-data-extraction/prose/unit-02/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "scenario-structured-data-extraction-u2"
+}

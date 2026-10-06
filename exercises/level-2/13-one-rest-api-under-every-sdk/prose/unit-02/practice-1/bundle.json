@@ -1,0 +1,78 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "13-one-rest-api-under-every-sdk"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: a raw Messages API client, graded on the HTTP contract (Python)",
+  "lang": "python",
+  "main_file": "raw_client.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_raw_client.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-2/13-one-rest-api-under-every-sdk/prose/unit-02/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-2/13-one-rest-api-under-every-sdk/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-2/13-one-rest-api-under-every-sdk/prose/unit-02/practice-1/test_raw_client.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_request_has_method_url_three_headers_and_json_body",
+      "kind": "main",
+      "says": "The request has the right method, URL, exactly three headers and a JSON body"
+    },
+    {
+      "id": "test_e1_blank_or_absent_system_is_left_out_of_the_body",
+      "kind": "edge",
+      "says": "A blank or absent system is left out of the body"
+    },
+    {
+      "id": "test_e2_bad_input_is_refused_before_anything_is_sent",
+      "kind": "edge",
+      "says": "Bad input is refused before the transport is called"
+    },
+    {
+      "id": "test_e3_success_returns_the_message_and_text_joins_text_blocks_only",
+      "kind": "edge",
+      "says": "A good reply is parsed, and text_of joins text blocks only"
+    },
+    {
+      "id": "test_e4_an_error_reply_becomes_an_api_error_with_the_header_request_id",
+      "kind": "edge",
+      "says": "An error reply becomes an ApiError; the header's request id wins over the body's"
+    },
+    {
+      "id": "test_e5_a_reply_that_is_not_json_still_gives_an_api_error",
+      "kind": "edge",
+      "says": "A reply that is not JSON still gives an ApiError (unknown)"
+    },
+    {
+      "id": "test_e6_the_api_key_never_appears_in_an_error",
+      "kind": "edge",
+      "says": "The API key never appears in an error"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/13-one-rest-api-under-every-sdk/02-what-the-sdk-does-for-you.md"
+}

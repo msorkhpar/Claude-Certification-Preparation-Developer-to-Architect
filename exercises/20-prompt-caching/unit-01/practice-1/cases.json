@@ -1,0 +1,116 @@
+{
+  "practice": "20-prompt-caching/unit-01/practice-1",
+  "name": "cacheplan",
+  "tests": {
+    "java": "CachePlanTest",
+    "kotlin": "CachePlanTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_stable_content_comes_first_and_the_volatile_date_goes_last",
+      "typescript": "m1 stable content comes first and the volatile date goes last",
+      "java": "m1_stableContentComesFirstAndTheVolatileDateGoesLast",
+      "kotlin": "m1_stableContentComesFirstAndTheVolatileDateGoesLast"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_sections_follow_the_prefix_order_and_keep_their_own_order",
+      "typescript": "e1 sections follow the prefix order and keep their own order",
+      "java": "e1_sectionsFollowThePrefixOrderAndKeepTheirOwnOrder",
+      "kotlin": "e1_sectionsFollowThePrefixOrderAndKeepTheirOwnOrder"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_breakpoint_needs_the_stable_prefix_to_reach_the_minimum",
+      "typescript": "e2 a breakpoint needs the stable prefix to reach the minimum",
+      "java": "e2_aBreakpointNeedsTheStablePrefixToReachTheMinimum",
+      "kotlin": "e2_aBreakpointNeedsTheStablePrefixToReachTheMinimum"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_at_most_four_breakpoints_are_sent",
+      "typescript": "e3 at most four breakpoints are sent",
+      "java": "e3_atMostFourBreakpointsAreSent",
+      "kotlin": "e3_atMostFourBreakpointsAreSent"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_a_one_hour_breakpoint_may_not_follow_a_five_minute_one",
+      "typescript": "e4 a one hour breakpoint may not follow a five minute one",
+      "java": "e4_aOneHourBreakpointMayNotFollowAFiveMinuteOne",
+      "kotlin": "e4_aOneHourBreakpointMayNotFollowAFiveMinuteOne"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_volatile_blocks_never_carry_a_breakpoint_and_tools_cannot_be_volatile",
+      "typescript": "e5 volatile blocks never carry a breakpoint and tools cannot be volatile",
+      "java": "e5_volatileBlocksNeverCarryABreakpointAndToolsCannotBeVolatile",
+      "kotlin": "e5_volatileBlocksNeverCarryABreakpointAndToolsCannotBeVolatile"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_every_block_comes_out_once_and_the_input_is_not_changed",
+      "typescript": "e6 every block comes out once and the input is not changed",
+      "java": "e6_everyBlockComesOutOnceAndTheInputIsNotChanged",
+      "kotlin": "e6_everyBlockComesOutOnceAndTheInputIsNotChanged"
+    }
+  },
+  "plants": {
+    "wrong-no-reorder": {
+      "caught_by": [
+        "m1",
+        "e1"
+      ],
+      "defect": "keeps the blocks in the order they were given"
+    },
+    "wrong-sections-unsorted": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "moves the volatile blocks last but leaves the sections in the order given"
+    },
+    "wrong-volatile-first": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "puts the volatile blocks ahead of the stable ones"
+    },
+    "wrong-per-block-minimum": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "tests each block's own size against the minimum instead of the prefix"
+    },
+    "wrong-five-breakpoints": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "allows five breakpoints"
+    },
+    "wrong-ttl-unchecked": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "never checks the order of one hour and five minute breakpoints"
+    },
+    "wrong-volatile-cached": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "puts a breakpoint on a volatile block"
+    },
+    "wrong-volatile-tool-allowed": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "accepts a volatile tool definition"
+    },
+    "wrong-input-changed": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "leaves a mark on the first input block"
+    }
+  }
+}

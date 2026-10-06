@@ -1,0 +1,311 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "48-multi-step-workflows-with-guarantees"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: a refund desk that cannot skip identity (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a refund desk that cannot skip identity"
+    },
+    {
+      "type": "para",
+      "text": "A customer-support agent has four tools: verify the customer's identity, look up an order, process a refund and escalate to a person. A prompt can ask the model to verify identity first, but a prompt is a request, and requests fail at some small rate: on one conversation in a few hundred, the model calls `process_refund` first. Money has moved by then. The fix is not a stronger sentence. It is a gate in the code that runs the tools: the prerequisite is checked every time, the call that breaks it never reaches the backend, and the model receives an error it can act on. When the case needs a person, the agent hands over a structured record, not a transcript. Write that gate. Nothing here touches the network: the backend is a set of functions that the tests script, and the tests play the model by making the calls in the order it would."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`backend`",
+          "a map from a tool name (`verify_identity`, `lookup_order`, `process_refund`, `escalate`) to a function from the input map to a result map (string and whole-number values); it may throw"
+        ],
+        [
+          "`verify_identity` result",
+          "`verified` is `yes` or `no`; when yes it also has `customer_id`"
+        ],
+        [
+          "`lookup_order` result",
+          "`order_id`, `customer_id`, `total_cents` and `refunded_cents` (whole numbers)"
+        ],
+        [
+          "`process_refund` input",
+          "`order_id` and `amount_cents`; the result has a `refund_id`"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working refund desk with eight gaps cut out of it. Everything that is plumbing is written and correct: the desk's state and its snapshot, the refusal result with its messages, the backend call that turns an exception into an error result, the rendering of a result, the order lookup and refund bookkeeping, and the `handoff` record. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "The outcome of an identity check unlocks `m1`, `e5`: a successful `verify_identity` result makes its customer the verified one and resets the failures; any other result clears the verified customer, adds a failure and, at three in a row, locks the desk.",
+        "The identity prerequisite unlocks `e1`: every call but `verify_identity` and `escalate` is refused with `identity_required` while no customer is verified.",
+        "The ownership check unlocks `e2`: an order whose `customer_id` is not the verified customer is refused with `order_not_owned` and not kept.",
+        "The amount check unlocks `e3`: an amount that is not a whole number above zero is refused with `bad_amount`; a boolean, a decimal, a string or a missing amount counts as not whole.",
+        "The check against what is left unlocks `e3`: an amount above the order's `total_cents` minus its `refunded_cents` is refused with `exceeds_order`.",
+        "The limit unlocks `e4`: an amount above `limit_cents` is never executed: it is refused with `needs_human`.",
+        "The unknown tool unlocks `e6`: a name that is not one of the four tools is refused with `unknown_tool` and the message `Unknown tool: NAME`.",
+        "The recommended action unlocks `e4`, `e5`: `verify_identity_manually` when the desk is locked, otherwise `review_refund` when the most recent refusal was `needs_human`, otherwise `review_case`."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gap 1. Every other case needs it too, because each one starts by verifying a customer. About sixteen lines in all. The steps below describe the whole desk, so you can see how your gaps are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "A class `RefundDesk(backend, limit_cents=10000)` (`RefundDesk(backend, limitCents)` in TypeScript and Kotlin, a constructor with an optional limit in Java) with three methods. In Python and TypeScript the names are `state`, `call` and `handoff`; they are the same in the others."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`call(name, args)` returns `{\"content\": text, \"is_error\": bool, \"blocked\": code or null}`.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "A result that came from the backend has the content `key=value; key=value` (the result's pairs in order, joined by `; `), `is_error` false and `blocked` null. A backend call that throws gives the exception's message as content, `is_error` true and `blocked` null, and changes nothing in the desk. Every call that reaches the backend, even one that throws, is logged by name.",
+              "A call that the desk refuses never reaches the backend. Its result is `BLOCKED {code}: {message}` with `is_error` true and `blocked` set to the code. Every refusal is also kept, in order, as `{\"tool\", \"code\"}`.",
+              "Check in this order. A tool name that is not one of the four: `unknown_tool`, message `Unknown tool: NAME`. `escalate` is always allowed and goes straight to the backend. Otherwise, when the desk is locked: `locked`. `verify_identity` goes to the backend (see below). Every other call needs a verified customer: `identity_required`. Then `lookup_order` goes to the backend. Then `process_refund` is checked: the order must have been looked up in this session (`order_not_checked`); `amount_cents` must be a whole number above zero, and a boolean, a decimal, a string or a missing value is not (`bad_amount`); it must not be more than the order's `total_cents` minus its `refunded_cents` (`exceeds_order`); and it must not be above `limit_cents` (`needs_human`: a refund over the limit is never executed). Only then does the backend run.",
+              "Identity. A `verify_identity` result with `verified` equal to `yes` and a `customer_id` makes that customer the verified one and resets the count of failures. Any other result clears the verified customer, adds a failure and, at three failures in a row, locks the desk. The desk never trusts an earlier success once a check has failed.",
+              "Orders. A `lookup_order` result whose `customer_id` is not the verified customer is refused with `order_not_owned`, and nothing of it is kept or shown. A result that belongs to the customer is remembered, and its `refunded_cents` grows with each refund the desk makes.",
+              "The messages: `identity_required` \"Verify the customer's identity before this action.\"; `order_not_owned` \"That order does not belong to the verified customer.\"; `order_not_checked` \"Look up the order before refunding it.\"; `bad_amount` \"The amount must be a positive whole number of cents.\"; `exceeds_order` \"The amount is more than what is left to refund on the order.\"; `needs_human` \"Refunds over the limit need a person.\"; `locked` \"Too many failed identity checks; escalate to a person.\"",
+              "A successful refund is kept as `{\"order_id\", \"amount_cents\", \"refund_id\"}`."
+            ]
+          }
+        ],
+        "`state()` returns a snapshot: `{\"customer\": the verified id or null, \"locked\", \"failures\", \"orders\": {id: the order as looked up, with its current refunded_cents}, \"refunds\": [...], \"blocked\": [...], \"backend_calls\": [tool names]}`. A change to the snapshot must not change the desk.",
+        "`handoff(reason)` returns the record a person needs: `{\"customer_id\", \"identity_verified\": bool, \"reason\", \"orders_checked\": [ids], \"refunds_done\": [...], \"blocked\": [...], \"recommended_action\"}`. The recommended action is `verify_identity_manually` when the desk is locked, otherwise `review_refund` when the most recent refusal was `needs_human`, otherwise `review_case`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each step is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Check the prerequisite in code, every time.** The exam contrasts programmatic enforcement with prompt guidance, and says that where compliance must be deterministic a prompt has a non-zero failure rate. *You should see* a refund before verification refused with `identity_required`, and the backend log show that the call never arrived.",
+        "**Keep the facts in the desk, not in the model's report.** *You should see* the verified customer set only by a successful check, and cleared by a failed one, so that an earlier success cannot be reused.",
+        "**Check the object, the amount and the limit.** A chain of prerequisites is the architect's design: who, which object, how much, within what authority. *You should see* another customer's order refused and never remembered, and a refund beyond what is left, or of zero, refused with its own code.",
+        "**Return a refusal the model can act on.** The result carries a code for the logs and a sentence for the model. *You should see* `BLOCKED code: message` as an error result, and the model's next step possible from the message.",
+        "**Keep a way out.** *You should see* `escalate` work in every state, including a locked desk.",
+        "**Hand over a record, not a transcript.** The exam expects a structured hand-off with the customer, the cause and a recommended action for a person who cannot see the conversation. *You should see* the record built from the desk's state, with every refusal listed and the recommended action chosen by rule."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A verified customer looks up an order and is refunded within the limit; the desk records it"
+        ],
+        [
+          "`e1`",
+          "A refund before identity is verified is refused in code and never reaches the backend"
+        ],
+        [
+          "`e2`",
+          "Another customer's order is not shown, not remembered and not refundable; lookup also needs identity"
+        ],
+        [
+          "`e3`",
+          "A refund is checked against the looked-up order, the amount and what is left"
+        ],
+        [
+          "`e4`",
+          "A refund over the limit is not executed, and the hand-off says what a person needs to decide"
+        ],
+        [
+          "`e5`",
+          "A failed check unlocks nothing; three in a row lock the desk, and only escalation still works"
+        ],
+        [
+          "`e6`",
+          "Unknown tools and backend errors are reported, and the hand-off lists every refusal"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// A refund desk whose prerequisites are enforced in code, with a structured hand-off to a person. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"desk\");\nconst MESSAGES: Record<string, string> = {\n  identity_required: \"Verify the customer's identity before this action.\",\n  order_not_owned: \"That order does not belong to the verified customer.\",\n  order_not_checked: \"Look up the order before refunding it.\",\n  bad_amount: \"The amount must be a positive whole number of cents.\",\n  exceeds_order: \"The amount is more than what is left to refund on the order.\",\n  needs_human: \"Refunds over the limit need a person.\",\n  locked: \"Too many failed identity checks; escalate to a person.\",\n};\nconst TOOLS = [\"verify_identity\", \"lookup_order\", \"process_refund\", \"escalate\"];\n\ntype Result = { content: string; is_error: boolean; blocked: string | null };\ntype Backend = Record<string, (args: any) => Record<string, any>>;\n\nconst render = (result: Record<string, any>) => Object.entries(result).map(([k, v]) => `${k}=${v}`).join(\"; \");\n\nexport class RefundDesk {\n  private customer: string | null = null;\n  private locked = false;\n  private failures = 0;\n  private orders: Record<string, any> = {};\n  private refunds: Array<Record<string, any>> = [];\n  private blockedCalls: Array<{ tool: string; code: string }> = [];\n  private calls: string[] = [];\n\n  private backend: Backend;\n  private limitCents: number;\n\n  constructor(backend: Backend, limitCents = 10000) {\n    this.backend = backend;\n    this.limitCents = limitCents;\n  }\n\n  state(): any {\n    return { customer: this.customer, locked: this.locked, failures: this.failures, orders: structuredClone(this.orders), refunds: structuredClone(this.refunds),\n      blocked: structuredClone(this.blockedCalls), backend_calls: [...this.calls] };\n  }\n\n  private block(tool: string, code: string, message?: string): Result {\n    this.blockedCalls.push({ tool, code });\n    return { content: `BLOCKED ${code}: ${message ?? MESSAGES[code]}`, is_error: true, blocked: code };\n  }\n\n  private run(name: string, args: any): { result?: Record<string, any>; error?: Result } {\n    this.calls.push(name);\n    try {\n      return { result: this.backend[name](args) };\n    } catch (error) { // a backend failure is a result for the model and changes nothing here\n      return { error: { content: error instanceof Error ? error.message : String(error), is_error: true, blocked: null } };\n    }\n  }\n\n  private ok(result: Record<string, any>): Result {\n    return { content: render(result), is_error: false, blocked: null };\n  }\n\n  call(name: string, args: any): Result {\n    log.debug(\"call input\", args);\n    if (!TOOLS.includes(name)) return this.block(name, \"unknown_tool\", `Unknown tool: ${name}`);\n    if (name === \"escalate\") {\n      const { result, error } = this.run(name, args);\n      return error ?? this.ok(result!);\n    }\n    if (this.locked) return this.block(name, \"locked\");\n    if (name === \"verify_identity\") {\n      const { result, error } = this.run(name, args);\n      if (error) return error;\n      if (result!.verified === \"yes\" && result!.customer_id) {\n        this.customer = result!.customer_id;\n        this.failures = 0;\n      } else {\n        this.customer = null;\n        this.failures += 1;\n        this.locked = this.failures >= 3;\n      }\n      return this.ok(result!);\n    }\n    if (this.customer === null) return this.block(name, \"identity_required\");\n    if (name === \"lookup_order\") {\n      const { result, error } = this.run(name, args);\n      if (error) return error;\n      if (result!.customer_id !== this.customer) return this.block(name, \"order_not_owned\");\n      this.orders[result!.order_id] = { ...result };\n      return this.ok(result!);\n    }\n    const order = this.orders[args?.order_id];\n    if (order === undefined) return this.block(name, \"order_not_checked\");\n    const amount = args.amount_cents;\n    if (typeof amount !== \"number\" || !Number.isInteger(amount) || amount <= 0) return this.block(name, \"bad_amount\");\n    if (amount > order.total_cents - order.refunded_cents) return this.block(name, \"exceeds_order\");\n    if (amount > this.limitCents) return this.block(name, \"needs_human\");\n    const { result, error } = this.run(name, args);\n    if (error) return error;\n    order.refunded_cents += amount;\n    this.refunds.push({ order_id: order.order_id, amount_cents: amount, refund_id: result!.refund_id });\n    return this.ok(result!);\n  }\n\n  handoff(reason: string): any {\n    const last = this.blockedCalls.length > 0 ? this.blockedCalls[this.blockedCalls.length - 1].code : null;\n    const action = this.locked ? \"verify_identity_manually\" : last === \"needs_human\" ? \"review_refund\" : \"review_case\";\n    return { customer_id: this.customer, identity_verified: this.customer !== null, reason, orders_checked: Object.keys(this.orders), refunds_done: structuredClone(this.refunds),\n      blocked: structuredClone(this.blockedCalls), recommended_action: action };\n  }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { RefundDesk } from \"./desk.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\nconst ORDER = { order_id: \"O1\", customer_id: \"C1\", total_cents: 5000, refunded_cents: 0 };\nconst refunds: any[] = [];\n\n// A scripted backend, like the one the tests use: four functions that answer with fixed data.\nconst backend: any = {\n  verify_identity: (args: any) => (args.code === \"1234\" ? { verified: \"yes\", customer_id: \"C1\" } : { verified: \"no\" }),\n  lookup_order: (_args: any) => ({ ...ORDER }),\n  process_refund: (args: any) => { refunds.push(args); return { refund_id: `R${refunds.length}`, amount_cents: args.amount_cents }; },\n  escalate: (_args: any) => ({ ticket_id: \"T1\" }),\n};\nconst desk = new RefundDesk(backend);\n\n// The model breaks the order of the steps: a refund before identity is verified must be blocked in code.\nconst early: any = desk.call(\"process_refund\", { order_id: \"O1\", amount_cents: 2000 }) ?? {};\nconsole.log(\"refund before verifying:\", early.content, \"| is_error:\", early.is_error);\n\nfor (const [name, args] of [[\"verify_identity\", { code: \"1234\" }], [\"lookup_order\", { order_id: \"O1\" }],\n  [\"process_refund\", { order_id: \"O1\", amount_cents: 2000 }]] as [string, any][]) {\n  const out: any = desk.call(name, args) ?? {};\n  console.log(`${name}:`, out.content);\n}\nconsole.log(\"refunds that reached the backend:\", refunds.length);\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// A refund desk whose prerequisites are enforced in code, with a structured hand-off to a person. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"desk\");\nconst MESSAGES: Record<string, string> = {\n  identity_required: \"Verify the customer's identity before this action.\",\n  order_not_owned: \"That order does not belong to the verified customer.\",\n  order_not_checked: \"Look up the order before refunding it.\",\n  bad_amount: \"The amount must be a positive whole number of cents.\",\n  exceeds_order: \"The amount is more than what is left to refund on the order.\",\n  needs_human: \"Refunds over the limit need a person.\",\n  locked: \"Too many failed identity checks; escalate to a person.\",\n};\nconst TOOLS = [\"verify_identity\", \"lookup_order\", \"process_refund\", \"escalate\"];\n\ntype Result = { content: string; is_error: boolean; blocked: string | null };\ntype Backend = Record<string, (args: any) => Record<string, any>>;\n\nconst render = (result: Record<string, any>) => Object.entries(result).map(([k, v]) => `${k}=${v}`).join(\"; \");\n\nexport class RefundDesk {\n  private customer: string | null = null;\n  private locked = false;\n  private failures = 0;\n  private orders: Record<string, any> = {};\n  private refunds: Array<Record<string, any>> = [];\n  private blockedCalls: Array<{ tool: string; code: string }> = [];\n  private calls: string[] = [];\n\n  private backend: Backend;\n  private limitCents: number;\n\n  constructor(backend: Backend, limitCents = 10000) {\n    this.backend = backend;\n    this.limitCents = limitCents;\n  }\n\n  state(): any {\n    return { customer: this.customer, locked: this.locked, failures: this.failures, orders: structuredClone(this.orders), refunds: structuredClone(this.refunds),\n      blocked: structuredClone(this.blockedCalls), backend_calls: [...this.calls] };\n  }\n\n  private block(tool: string, code: string, message?: string): Result {\n    this.blockedCalls.push({ tool, code });\n    return { content: `BLOCKED ${code}: ${message ?? MESSAGES[code]}`, is_error: true, blocked: code };\n  }\n\n  private run(name: string, args: any): { result?: Record<string, any>; error?: Result } {\n    this.calls.push(name);\n    try {\n      return { result: this.backend[name](args) };\n    } catch (error) { // a backend failure is a result for the model and changes nothing here\n      return { error: { content: error instanceof Error ? error.message : String(error), is_error: true, blocked: null } };\n    }\n  }\n\n  private ok(result: Record<string, any>): Result {\n    return { content: render(result), is_error: false, blocked: null };\n  }\n\n  call(name: string, args: any): Result {\n    log.debug(\"call input\", args);\n    // TODO 7 of 8 (finish this to pass e6): the first check of call. When the tool name is not one of TOOLS, return the\n    //   refusal `unknown_tool` with the message \"Unknown tool: NAME\". Example: call(\"delete_everything\", {}) -> BLOCKED\n    //   unknown_tool: Unknown tool: delete_everything.\n    if (name === \"escalate\") {\n      const { result, error } = this.run(name, args);\n      return error ?? this.ok(result!);\n    }\n    if (this.locked) return this.block(name, \"locked\");\n    if (name === \"verify_identity\") {\n      const { result, error } = this.run(name, args);\n      if (error) return error;\n      // TODO 1 of 8 (finish this to pass m1, e5): what a `verify_identity` result does to the desk. Receives the\n      //   backend's result map. A result with `verified` equal to `yes` and a `customer_id` sets the verified customer and\n      //   resets the failure count to 0; any other result clears the verified customer, adds one failure and locks the\n      //   desk at three. Example: three results of {verified: no} lock the desk.\n      return this.ok(result!);\n    }\n    // TODO 2 of 8 (finish this to pass e1): the prerequisite check. When no customer is verified, return the refusal\n    //   `identity_required` for this call: block(name, \"identity_required\") builds and records it. Example: process_refund\n    //   before verify_identity -> BLOCKED identity_required, and the backend is never called.\n    if (name === \"lookup_order\") {\n      const { result, error } = this.run(name, args);\n      if (error) return error;\n      // TODO 3 of 8 (finish this to pass e2): the ownership check on a looked-up order. When the order's customer_id is\n      //   not the verified customer, return the refusal `order_not_owned` before the order is remembered. Example:\n      //   customer C1 looks up an order of C2 -> BLOCKED order_not_owned, and state()[\"orders\"] stays empty.\n      this.orders[result!.order_id] = { ...result };\n      return this.ok(result!);\n    }\n    const order = this.orders[args?.order_id];\n    if (order === undefined) return this.block(name, \"order_not_checked\");\n    const amount = args.amount_cents;\n    // TODO 4 of 8 (finish this to pass e3): the amount check. Receives the amount from the call. When it is not a whole\n    //   number above zero (a boolean, a decimal, a string, a missing value or 0), return the refusal `bad_amount`.\n    //   Example: amount_cents 0 or 12.5 or True -> BLOCKED bad_amount.\n    // TODO 5 of 8 (finish this to pass e3): the check against the order. When the amount is more than the order's\n    //   total_cents minus its refunded_cents, return the refusal `exceeds_order`. Example: 3000 refunded on a 5000 order,\n    //   then 2001 -> BLOCKED exceeds_order.\n    // TODO 6 of 8 (finish this to pass e4): the authority limit. When the amount is above the desk's limit, return the\n    //   refusal `needs_human` and do not call the backend. Example: limit 10000, amount 12000 on a 50000 order -> BLOCKED\n    //   needs_human.\n    const { result, error } = this.run(name, args);\n    if (error) return error;\n    order.refunded_cents += amount;\n    this.refunds.push({ order_id: order.order_id, amount_cents: amount, refund_id: result!.refund_id });\n    return this.ok(result!);\n  }\n\n  handoff(reason: string): any {\n    const last = this.blockedCalls.length > 0 ? this.blockedCalls[this.blockedCalls.length - 1].code : null;\n    // TODO 8 of 8 (finish this to pass e4, e5): the recommended action of the hand-off. `last` is the code of the most\n    //   recent refusal or none. Choose verify_identity_manually when the desk is locked, otherwise review_refund when last\n    //   is needs_human, otherwise review_case. Example: locked desk -> verify_identity_manually.\n    const action = \"review_case\";\n    return { customer_id: this.customer, identity_verified: this.customer !== null, reason, orders_checked: Object.keys(this.orders), refunds_done: structuredClone(this.refunds),\n      blocked: structuredClone(this.blockedCalls), recommended_action: action };\n  }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { RefundDesk } from \"./desk.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\nconst ORDER = { order_id: \"O1\", customer_id: \"C1\", total_cents: 5000, refunded_cents: 0 };\nconst refunds: any[] = [];\n\n// A scripted backend, like the one the tests use: four functions that answer with fixed data.\nconst backend: any = {\n  verify_identity: (args: any) => (args.code === \"1234\" ? { verified: \"yes\", customer_id: \"C1\" } : { verified: \"no\" }),\n  lookup_order: (_args: any) => ({ ...ORDER }),\n  process_refund: (args: any) => { refunds.push(args); return { refund_id: `R${refunds.length}`, amount_cents: args.amount_cents }; },\n  escalate: (_args: any) => ({ ticket_id: \"T1\" }),\n};\nconst desk = new RefundDesk(backend);\n\n// The model breaks the order of the steps: a refund before identity is verified must be blocked in code.\nconst early: any = desk.call(\"process_refund\", { order_id: \"O1\", amount_cents: 2000 }) ?? {};\nconsole.log(\"refund before verifying:\", early.content, \"| is_error:\", early.is_error);\n\nfor (const [name, args] of [[\"verify_identity\", { code: \"1234\" }], [\"lookup_order\", { order_id: \"O1\" }],\n  [\"process_refund\", { order_id: \"O1\", amount_cents: 2000 }]] as [string, any][]) {\n  const out: any = desk.call(name, args) ?? {};\n  console.log(`${name}:`, out.content);\n}\nconsole.log(\"refunds that reached the backend:\", refunds.length);\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 5,
+    "code": 2,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "bdbdf4cf3165111c6f36e68d4747f3ec012759f26d454d3c673d6f1ca255f7b3",
+  "starting_code": "// A refund desk whose prerequisites are enforced in code, with a structured hand-off to a person. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"desk\");\nconst MESSAGES: Record<string, string> = {\n  identity_required: \"Verify the customer's identity before this action.\",\n  order_not_owned: \"That order does not belong to the verified customer.\",\n  order_not_checked: \"Look up the order before refunding it.\",\n  bad_amount: \"The amount must be a positive whole number of cents.\",\n  exceeds_order: \"The amount is more than what is left to refund on the order.\",\n  needs_human: \"Refunds over the limit need a person.\",\n  locked: \"Too many failed identity checks; escalate to a person.\",\n};\nconst TOOLS = [\"verify_identity\", \"lookup_order\", \"process_refund\", \"escalate\"];\n\ntype Result = { content: string; is_error: boolean; blocked: string | null };\ntype Backend = Record<string, (args: any) => Record<string, any>>;\n\nconst render = (result: Record<string, any>) => Object.entries(result).map(([k, v]) => `${k}=${v}`).join(\"; \");\n\nexport class RefundDesk {\n  private customer: string | null = null;\n  private locked = false;\n  private failures = 0;\n  private orders: Record<string, any> = {};\n  private refunds: Array<Record<string, any>> = [];\n  private blockedCalls: Array<{ tool: string; code: string }> = [];\n  private calls: string[] = [];\n\n  private backend: Backend;\n  private limitCents: number;\n\n  constructor(backend: Backend, limitCents = 10000) {\n    this.backend = backend;\n    this.limitCents = limitCents;\n  }\n\n  state(): any {\n    return { customer: this.customer, locked: this.locked, failures: this.failures, orders: structuredClone(this.orders), refunds: structuredClone(this.refunds),\n      blocked: structuredClone(this.blockedCalls), backend_calls: [...this.calls] };\n  }\n\n  private block(tool: string, code: string, message?: string): Result {\n    this.blockedCalls.push({ tool, code });\n    return { content: `BLOCKED ${code}: ${message ?? MESSAGES[code]}`, is_error: true, blocked: code };\n  }\n\n  private run(name: string, args: any): { result?: Record<string, any>; error?: Result } {\n    this.calls.push(name);\n    try {\n      return { result: this.backend[name](args) };\n    } catch (error) { // a backend failure is a result for the model and changes nothing here\n      return { error: { content: error instanceof Error ? error.message : String(error), is_error: true, blocked: null } };\n    }\n  }\n\n  private ok(result: Record<string, any>): Result {\n    return { content: render(result), is_error: false, blocked: null };\n  }\n\n  call(name: string, args: any): Result {\n    log.debug(\"call input\", args);\n    // TODO 7 of 8 (finish this to pass e6): the first check of call. When the tool name is not one of TOOLS, return the\n    //   refusal `unknown_tool` with the message \"Unknown tool: NAME\". Example: call(\"delete_everything\", {}) -> BLOCKED\n    //   unknown_tool: Unknown tool: delete_everything.\n    if (name === \"escalate\") {\n      const { result, error } = this.run(name, args);\n      return error ?? this.ok(result!);\n    }\n    if (this.locked) return this.block(name, \"locked\");\n    if (name === \"verify_identity\") {\n      const { result, error } = this.run(name, args);\n      if (error) return error;\n      // TODO 1 of 8 (finish this to pass m1, e5): what a `verify_identity` result does to the desk. Receives the\n      //   backend's result map. A result with `verified` equal to `yes` and a `customer_id` sets the verified customer and\n      //   resets the failure count to 0; any other result clears the verified customer, adds one failure and locks the\n      //   desk at three. Example: three results of {verified: no} lock the desk.\n      return this.ok(result!);\n    }\n    // TODO 2 of 8 (finish this to pass e1): the prerequisite check. When no customer is verified, return the refusal\n    //   `identity_required` for this call: block(name, \"identity_required\") builds and records it. Example: process_refund\n    //   before verify_identity -> BLOCKED identity_required, and the backend is never called.\n    if (name === \"lookup_order\") {\n      const { result, error } = this.run(name, args);\n      if (error) return error;\n      // TODO 3 of 8 (finish this to pass e2): the ownership check on a looked-up order. When the order's customer_id is\n      //   not the verified customer, return the refusal `order_not_owned` before the order is remembered. Example:\n      //   customer C1 looks up an order of C2 -> BLOCKED order_not_owned, and state()[\"orders\"] stays empty.\n      this.orders[result!.order_id] = { ...result };\n      return this.ok(result!);\n    }\n    const order = this.orders[args?.order_id];\n    if (order === undefined) return this.block(name, \"order_not_checked\");\n    const amount = args.amount_cents;\n    // TODO 4 of 8 (finish this to pass e3): the amount check. Receives the amount from the call. When it is not a whole\n    //   number above zero (a boolean, a decimal, a string, a missing value or 0), return the refusal `bad_amount`.\n    //   Example: amount_cents 0 or 12.5 or True -> BLOCKED bad_amount.\n    // TODO 5 of 8 (finish this to pass e3): the check against the order. When the amount is more than the order's\n    //   total_cents minus its refunded_cents, return the refusal `exceeds_order`. Example: 3000 refunded on a 5000 order,\n    //   then 2001 -> BLOCKED exceeds_order.\n    // TODO 6 of 8 (finish this to pass e4): the authority limit. When the amount is above the desk's limit, return the\n    //   refusal `needs_human` and do not call the backend. Example: limit 10000, amount 12000 on a 50000 order -> BLOCKED\n    //   needs_human.\n    const { result, error } = this.run(name, args);\n    if (error) return error;\n    order.refunded_cents += amount;\n    this.refunds.push({ order_id: order.order_id, amount_cents: amount, refund_id: result!.refund_id });\n    return this.ok(result!);\n  }\n\n  handoff(reason: string): any {\n    const last = this.blockedCalls.length > 0 ? this.blockedCalls[this.blockedCalls.length - 1].code : null;\n    // TODO 8 of 8 (finish this to pass e4, e5): the recommended action of the hand-off. `last` is the code of the most\n    //   recent refusal or none. Choose verify_identity_manually when the desk is locked, otherwise review_refund when last\n    //   is needs_human, otherwise review_case. Example: locked desk -> verify_identity_manually.\n    const action = \"review_case\";\n    return { customer_id: this.customer, identity_verified: this.customer !== null, reason, orders_checked: Object.keys(this.orders), refunds_done: structuredClone(this.refunds),\n      blocked: structuredClone(this.blockedCalls), recommended_action: action };\n  }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/48-multi-step-workflows-with-guarantees/prose/unit-02/practice-2/desk.ts",
+    "test_path": "practice/level-3/48-multi-step-workflows-with-guarantees/prose/unit-02/practice-2/desk.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-3/48-multi-step-workflows-with-guarantees/prose/unit-02/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-3/48-multi-step-workflows-with-guarantees/prose/unit-02/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-3/48-multi-step-workflows-with-guarantees/prose/unit-02/practice-2/desk.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 a verified customer can look up an order and be refunded within the limit",
+        "kind": "main",
+        "says": "A verified customer looks up an order and is refunded within the limit; the desk records it"
+      },
+      {
+        "id": "e1 a refund before identity is verified is blocked in code and never reaches the backend",
+        "kind": "edge",
+        "says": "A refund before identity is verified is refused in code and never reaches the backend"
+      },
+      {
+        "id": "e2 an order that belongs to someone else is neither shown nor refundable",
+        "kind": "edge",
+        "says": "Another customer's order is not shown, not remembered and not refundable; lookup also needs identity"
+      },
+      {
+        "id": "e3 a refund is checked against the order its amount and what is left",
+        "kind": "edge",
+        "says": "A refund is checked against the looked-up order, the amount and what is left"
+      },
+      {
+        "id": "e4 a refund over the limit is not executed and becomes a structured hand off",
+        "kind": "edge",
+        "says": "A refund over the limit is not executed, and the hand-off says what a person needs to decide"
+      },
+      {
+        "id": "e5 a failed check does not unlock anything and three in a row lock the desk",
+        "kind": "edge",
+        "says": "A failed check unlocks nothing; three in a row lock the desk, and only escalation still works"
+      },
+      {
+        "id": "e6 unknown tools and backend errors are reported and the hand off lists every block",
+        "kind": "edge",
+        "says": "Unknown tools and backend errors are reported, and the hand-off lists every refusal"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/48-multi-step-workflows-with-guarantees/prose/unit-02/practice-2/target/report.xml"
+    },
+    "origin": "course/48-multi-step-workflows-with-guarantees/02-prerequisite-chains-limits-hand-offs-and-the-practice.md",
+    "concepts": [
+      "the practice of Prerequisite chains, limits, hand-offs and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/48-multi-step-workflows-with-guarantees/prose/unit-02/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "multi-step-workflows-with-guarantees-u2"
+}

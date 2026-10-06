@@ -1,0 +1,88 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "77-scenario-agentic-tool-builder"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: review a tool that an agent proposes (TypeScript)",
+  "lang": "typescript",
+  "main_file": "toolReview.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "toolReview.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-3/77-scenario-agentic-tool-builder/prose/unit-02/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-3/77-scenario-agentic-tool-builder/prose/unit-02/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-3/77-scenario-agentic-tool-builder/prose/unit-02/practice-2/toolReview.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 a well formed read only tool is approved and leaves an audit line",
+      "kind": "main",
+      "says": "A well-formed read-only tool is approved and leaves an audit line"
+    },
+    {
+      "id": "e1 a description needs at least the minimum number of words",
+      "kind": "edge",
+      "says": "A description needs at least the minimum number of words"
+    },
+    {
+      "id": "e2 the timeout and the memory may equal their limits and not exceed them",
+      "kind": "edge",
+      "says": "The timeout and the memory may equal their limits and not exceed them"
+    },
+    {
+      "id": "e3 a name is lower case snake case of at most sixty four characters",
+      "kind": "edge",
+      "says": "A name is lower-case snake case of at most 64 characters"
+    },
+    {
+      "id": "e4 forbidden calls in the code refuse the tool and are all listed in order",
+      "kind": "edge",
+      "says": "Forbidden calls in the code refuse the tool and are all listed in order"
+    },
+    {
+      "id": "e5 a permission the code uses without declaring it or a denied one refuses the tool",
+      "kind": "edge",
+      "says": "A permission the code uses without declaring it, or a denied one, refuses the tool"
+    },
+    {
+      "id": "e6 a declared write is approved only with a gate and a read alone is approved outright",
+      "kind": "edge",
+      "says": "A declared write is approved only behind a gate, and a read alone is approved outright"
+    },
+    {
+      "id": "e7 a refusal beats a revision and a revision beats a gate",
+      "kind": "edge",
+      "says": "A refusal beats a revision and a revision beats a gate"
+    },
+    {
+      "id": "e8 the permissions the code uses are reported in alphabetical order",
+      "kind": "edge",
+      "says": "The permissions the code uses are reported in alphabetical order"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/77-scenario-agentic-tool-builder/02-reviewing-a-proposal-and-the-practice.md"
+}

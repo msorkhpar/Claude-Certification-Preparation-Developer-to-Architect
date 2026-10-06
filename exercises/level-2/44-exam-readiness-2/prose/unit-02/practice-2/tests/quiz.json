@@ -1,0 +1,3437 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "44-exam-readiness-2"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Level 2 spaced-review question bank",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "rb-001",
+        "stem": "A compliance rule says a summary must never contain a card number. The prototype relies on one prompt line asking the model to omit them. What should the spec say about this rule?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Keep the prompt line and add a second line that repeats the request more firmly",
+            "correct": false,
+            "says": "A guarantee that must always hold belongs in code; a prompt line is only a request to the model, so the spec names which rules need the guarantee."
+          },
+          {
+            "id": "b",
+            "text": "Measure how often the model leaks a number and accept a low enough rate",
+            "correct": false,
+            "says": "A guarantee that must always hold belongs in code; a prompt line is only a request to the model, so the spec names which rules need the guarantee."
+          },
+          {
+            "id": "c",
+            "text": "Move the instruction to the start so the model weighs it more heavily",
+            "correct": false,
+            "says": "A guarantee that must always hold belongs in code; a prompt line is only a request to the model, so the spec names which rules need the guarantee."
+          },
+          {
+            "id": "d",
+            "text": "Enforce it with a pattern check in code, and test it with planted tickets",
+            "correct": true,
+            "says": "A guarantee that must always hold belongs in code; a prompt line is only a request to the model, so the spec names which rules need the guarantee."
+          }
+        ],
+        "origin": "course/12-from-business-need-to-a-testable-spec/01-requirements-for-a-claude-feature.md"
+      },
+      {
+        "id": "rb-002",
+        "stem": "A drafting feature takes nine seconds to deliver its whole answer, and the team wants it faster without changing the model tier. Which first step does the page rank highest?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Chain a second call that rewrites the draft more briefly than the first",
+            "correct": false,
+            "says": "Output length is the largest part of the wait. A higher tier does not make one call finish sooner, and streaming does not shorten the total time."
+          },
+          {
+            "id": "b",
+            "text": "Ask for a shorter output, since producing tokens dominates the wait",
+            "correct": true,
+            "says": "Output length is the largest part of the wait. A higher tier does not make one call finish sooner, and streaming does not shorten the total time."
+          },
+          {
+            "id": "c",
+            "text": "Buy a higher usage plan so that each single call finishes sooner",
+            "correct": false,
+            "says": "Output length is the largest part of the wait. A higher tier does not make one call finish sooner, and streaming does not shorten the total time."
+          },
+          {
+            "id": "d",
+            "text": "Stream the reply, which shortens the total time until it is complete",
+            "correct": false,
+            "says": "Output length is the largest part of the wait. A higher tier does not make one call finish sooner, and streaming does not shorten the total time."
+          }
+        ],
+        "origin": "course/12-from-business-need-to-a-testable-spec/02-budgets-and-matching-an-architecture.md"
+      },
+      {
+        "id": "rb-003",
+        "stem": "Alerts at a retail firm show a sharp rise in 400 responses right after a release. What does the page say this pattern indicates?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A defect in what the client code sends",
+            "correct": true,
+            "says": "A rise in 429s is a capacity story, a rise in 400s is a bug in your requests, and a rise in 5xx is a provider story."
+          },
+          {
+            "id": "b",
+            "text": "A capacity shortage that a higher tier would relieve",
+            "correct": false,
+            "says": "A rise in 429s is a capacity story, a rise in 400s is a bug in your requests, and a rise in 5xx is a provider story."
+          },
+          {
+            "id": "c",
+            "text": "A fault inside the provider that will clear unaided",
+            "correct": false,
+            "says": "A rise in 429s is a capacity story, a rise in 400s is a bug in your requests, and a rise in 5xx is a provider story."
+          },
+          {
+            "id": "d",
+            "text": "A burst that emptied the organisation's token bucket",
+            "correct": false,
+            "says": "A rise in 429s is a capacity story, a rise in 400s is a bug in your requests, and a rise in 5xx is a provider story."
+          }
+        ],
+        "origin": "course/12-from-business-need-to-a-testable-spec/03-the-life-cycle-and-a-spec-you-can-test.md"
+      },
+      {
+        "id": "rb-004",
+        "stem": "A team moves its summary feature to claude-sonnet-5-5 and keeps a call that sets temperature to 0.3. What does the page predict for those calls?",
+        "options": [
+          {
+            "id": "a",
+            "text": "They run unchanged, because sampling settings are honoured on every model",
+            "correct": false,
+            "says": "The sampling parameters temperature, top_p and top_k are rejected with a 400 error on Sonnet 5.5 for any non-default value, so the call must change."
+          },
+          {
+            "id": "b",
+            "text": "They run but with the value ignored, so the output stays the same",
+            "correct": false,
+            "says": "The sampling parameters temperature, top_p and top_k are rejected with a 400 error on Sonnet 5.5 for any non-default value, so the call must change."
+          },
+          {
+            "id": "c",
+            "text": "They are refused with a 400 error, because non-default sampling values are rejected",
+            "correct": true,
+            "says": "The sampling parameters temperature, top_p and top_k are rejected with a 400 error on Sonnet 5.5 for any non-default value, so the call must change."
+          },
+          {
+            "id": "d",
+            "text": "They are refused with a 429 error until the setting is removed",
+            "correct": false,
+            "says": "The sampling parameters temperature, top_p and top_k are rejected with a 400 error on Sonnet 5.5 for any non-default value, so the call must change."
+          }
+        ],
+        "origin": "course/12-from-business-need-to-a-testable-spec/03-the-life-cycle-and-a-spec-you-can-test.md"
+      },
+      {
+        "id": "rb-005",
+        "stem": "A hand-written client crashes with a JSON decode error on a failed call, although the API documents that its errors are JSON. Which explanation fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The service sometimes sends plain text instead of JSON, but only for 5xx statuses",
+            "correct": false,
+            "says": "The promise covers the API's own errors; a proxy or edge in front of it can answer with a page that is not JSON, and retrying gets the same page."
+          },
+          {
+            "id": "b",
+            "text": "An intermediary on the route sent back an HTML page instead of the service",
+            "correct": true,
+            "says": "The promise covers the API's own errors; a proxy or edge in front of it can answer with a page that is not JSON, and retrying gets the same page."
+          },
+          {
+            "id": "c",
+            "text": "The version header was wrong, which silently switches the format of every error body",
+            "correct": false,
+            "says": "The promise covers the API's own errors; a proxy or edge in front of it can answer with a page that is not JSON, and retrying gets the same page."
+          },
+          {
+            "id": "d",
+            "text": "The error type was new to the client, which forces a non-JSON reply",
+            "correct": false,
+            "says": "The promise covers the API's own errors; a proxy or edge in front of it can answer with a page that is not JSON, and retrying gets the same page."
+          }
+        ],
+        "origin": "course/13-one-rest-api-under-every-sdk/01-the-http-contract.md"
+      },
+      {
+        "id": "rb-006",
+        "stem": "A team assumes the SDK restricts how many requests run at once because it ships with sensible defaults. What does the page say about this?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It queues anything beyond ten simultaneous calls by default",
+            "correct": false,
+            "says": "The SDK does not bound concurrency: fifty parallel calls are fifty parallel calls, so the application adds the bound (module 16)."
+          },
+          {
+            "id": "b",
+            "text": "It spaces calls out whenever a retry is pending for an earlier one, from the outset",
+            "correct": false,
+            "says": "The SDK does not bound concurrency: fifty parallel calls are fifty parallel calls, so the application adds the bound (module 16)."
+          },
+          {
+            "id": "c",
+            "text": "Nothing in it caps parallelism, so the application must add that limit",
+            "correct": true,
+            "says": "The SDK does not bound concurrency: fifty parallel calls are fifty parallel calls, so the application adds the bound (module 16)."
+          },
+          {
+            "id": "d",
+            "text": "It limits parallelism only for streamed replies that share a pool",
+            "correct": false,
+            "says": "The SDK does not bound concurrency: fifty parallel calls are fifty parallel calls, so the application adds the bound (module 16)."
+          }
+        ],
+        "origin": "course/13-one-rest-api-under-every-sdk/02-what-the-sdk-does-for-you.md"
+      },
+      {
+        "id": "rb-007",
+        "stem": "A nightly job sets a very large max_tokens on a non-streaming call for a long report, and calls sometimes die after several minutes with no response. Which fix does the page give?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Raise the SDK timeout beyond ten minutes so the wait can complete",
+            "correct": false,
+            "says": "Networks may drop idle connections; incremental events keep bytes flowing, and a batch can be polled instead of holding a connection open."
+          },
+          {
+            "id": "b",
+            "text": "Lower the retry count so that failed attempts stop piling up",
+            "correct": false,
+            "says": "Networks may drop idle connections; incremental events keep bytes flowing, and a batch can be polled instead of holding a connection open."
+          },
+          {
+            "id": "c",
+            "text": "Reopen the link as a websocket so that either side may speak at any time",
+            "correct": false,
+            "says": "Networks may drop idle connections; incremental events keep bytes flowing, and a batch can be polled instead of holding a connection open."
+          },
+          {
+            "id": "d",
+            "text": "Receive incremental events so the link is never idle, or poll a batch for results",
+            "correct": true,
+            "says": "Networks may drop idle connections; incremental events keep bytes flowing, and a batch can be polled instead of holding a connection open."
+          }
+        ],
+        "origin": "course/13-one-rest-api-under-every-sdk/03-streaming-transport-and-connections.md"
+      },
+      {
+        "id": "rb-008",
+        "stem": "After a rollout, users behind a corporate proxy see streamed text arrive in one lump at the end. What does the page say describes this?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A device on the path is buffering the response",
+            "correct": true,
+            "says": "A proxy that buffers responses turns a stream into one lump and defeats its purpose."
+          },
+          {
+            "id": "b",
+            "text": "The stream was swapped for a websocket, whose frames are grouped by design",
+            "correct": false,
+            "says": "A proxy that buffers responses turns a stream into one lump and defeats its purpose."
+          },
+          {
+            "id": "c",
+            "text": "The model wrote everything first, because streaming only changes the format",
+            "correct": false,
+            "says": "A proxy that buffers responses turns a stream into one lump and defeats its purpose."
+          },
+          {
+            "id": "d",
+            "text": "The SDK holds every event back until the usage figures are known",
+            "correct": false,
+            "says": "A proxy that buffers responses turns a stream into one lump and defeats its purpose."
+          }
+        ],
+        "origin": "course/13-one-rest-api-under-every-sdk/03-streaming-transport-and-connections.md"
+      },
+      {
+        "id": "rb-009",
+        "stem": "A developer stores only the text of each assistant reply in a database and rebuilds the history from it. After enabling thinking with tools, requests start returning a 400. What does the page say causes it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The assistant turns should have been sent under the system role instead",
+            "correct": false,
+            "says": "If the latest assistant message holds thinking blocks, editing or dropping them returns a 400; the content list is stored as received."
+          },
+          {
+            "id": "b",
+            "text": "Reasoning blocks were dropped, and they must go back exactly as received",
+            "correct": true,
+            "says": "If the latest assistant message holds thinking blocks, editing or dropping them returns a 400; the content list is stored as received."
+          },
+          {
+            "id": "c",
+            "text": "Text-only storage doubles the token count, which breaches the context limit",
+            "correct": false,
+            "says": "If the latest assistant message holds thinking blocks, editing or dropping them returns a 400; the content list is stored as received."
+          },
+          {
+            "id": "d",
+            "text": "Thinking cannot be combined with any history that is longer than one turn",
+            "correct": false,
+            "says": "If the latest assistant message holds thinking blocks, editing or dropping them returns a 400; the content list is stored as received."
+          }
+        ],
+        "origin": "course/14-the-messages-api/01-turns-roles-and-content-blocks.md"
+      },
+      {
+        "id": "rb-010",
+        "stem": "A call that reuses a 200,000-token cached document and asks a 50-token question reports input_tokens of 50. A cost dashboard sums only that number. What does it understate?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The full volume sent, since prefixes read earlier or stored now sit in separate fields",
+            "correct": true,
+            "says": "input_tokens counts only what follows the last breakpoint; the total is cache reads plus cache creation plus input_tokens (here 200,050)."
+          },
+          {
+            "id": "b",
+            "text": "The output volume, which grows whenever the document in use is a long one",
+            "correct": false,
+            "says": "input_tokens counts only what follows the last breakpoint; the total is cache reads plus cache creation plus input_tokens (here 200,050)."
+          },
+          {
+            "id": "c",
+            "text": "The count of calls made, since cached ones are left out of the total tally",
+            "correct": false,
+            "says": "input_tokens counts only what follows the last breakpoint; the total is cache reads plus cache creation plus input_tokens (here 200,050)."
+          },
+          {
+            "id": "d",
+            "text": "Nothing, because that field already reports everything the call consumed",
+            "correct": false,
+            "says": "input_tokens counts only what follows the last breakpoint; the total is cache reads plus cache creation plus input_tokens (here 200,050)."
+          }
+        ],
+        "origin": "course/14-the-messages-api/02-limits-stop-reasons-and-usage.md"
+      },
+      {
+        "id": "rb-011",
+        "stem": "A reply arrives with status 200, stop_reason max_tokens and a half-written JSON object. What should the client do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Parse it leniently, since a 200 status means the answer is complete",
+            "correct": false,
+            "says": "A max_tokens reply stops where it stands, so the JSON is incomplete; check stop_reason before parsing. Ending the list with the cut text is a prefill, which returns a 400."
+          },
+          {
+            "id": "b",
+            "text": "Append the half-written text as an assistant turn and call again",
+            "correct": false,
+            "says": "A max_tokens reply stops where it stands, so the JSON is incomplete; check stop_reason before parsing. Ending the list with the cut text is a prefill, which returns a 400."
+          },
+          {
+            "id": "c",
+            "text": "Add a stop sequence so that the text ends at the closing brace",
+            "correct": false,
+            "says": "A max_tokens reply stops where it stands, so the JSON is incomplete; check stop_reason before parsing. Ending the list with the cut text is a prefill, which returns a 400."
+          },
+          {
+            "id": "d",
+            "text": "Mark it as cut, then retry with a higher ceiling",
+            "correct": true,
+            "says": "A max_tokens reply stops where it stands, so the JSON is incomplete; check stop_reason before parsing. Ending the list with the cut text is a prefill, which returns a 400."
+          }
+        ],
+        "origin": "course/14-the-messages-api/02-limits-stop-reasons-and-usage.md"
+      },
+      {
+        "id": "rb-012",
+        "stem": "A client appends the user's turn to its history, then the call times out. The retry sends two user turns in a row, a different conversation from the one the user saw. Which rule prevents this?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Retry with a longer timeout and leave the history exactly as it stands",
+            "correct": false,
+            "says": "Commit a turn only when the whole exchange succeeded: on any failure, remove the user turn before the error leaves the function."
+          },
+          {
+            "id": "b",
+            "text": "Store the conversation on the server so that the API remembers the earlier turns",
+            "correct": false,
+            "says": "Commit a turn only when the whole exchange succeeded: on any failure, remove the user turn before the error leaves the function."
+          },
+          {
+            "id": "c",
+            "text": "Hold the new message back from the record until the exchange has fully succeeded",
+            "correct": true,
+            "says": "Commit a turn only when the whole exchange succeeded: on any failure, remove the user turn before the error leaves the function."
+          },
+          {
+            "id": "d",
+            "text": "Send the unanswered message twice so that the retry cannot lose it",
+            "correct": false,
+            "says": "Commit a turn only when the whole exchange succeeded: on any failure, remove the user turn before the error leaves the function."
+          }
+        ],
+        "origin": "course/14-the-messages-api/03-the-conversation-state-the-client-keeps.md"
+      },
+      {
+        "id": "rb-013",
+        "stem": "At the end of the billing cycle, every call returns a 429 of type rate_limit_error that carries no retry-after header, and the SDK's retries all fail. The error code reads enforced_spend_limit_reached. What is the first action?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Add jitter to the retry delays so that the clients spread out over the hour",
+            "correct": false,
+            "says": "A spend cap pauses usage until the next month, has no retry-after, and the SDK's retries do not know it; a person must act."
+          },
+          {
+            "id": "b",
+            "text": "Switch to a cheaper model so that the same traffic fits inside the quota",
+            "correct": false,
+            "says": "A spend cap pauses usage until the next month, has no retry-after, and the SDK's retries do not know it; a person must act."
+          },
+          {
+            "id": "c",
+            "text": "Raise max_retries so that later attempts get through once capacity returns",
+            "correct": false,
+            "says": "A spend cap pauses usage until the next month, has no retry-after, and the SDK's retries do not know it; a person must act."
+          },
+          {
+            "id": "d",
+            "text": "Lift the organisation's monthly cap, since access stays paused until it resumes",
+            "correct": true,
+            "says": "A spend cap pauses usage until the next month, has no retry-after, and the SDK's retries do not know it; a person must act."
+          }
+        ],
+        "origin": "course/15-errors-retries-and-timeouts/01-error-classes-by-type-and-origin.md"
+      },
+      {
+        "id": "rb-014",
+        "stem": "A streamed reply opens with a 200, and later a fault is announced in the middle of it. How should the client treat the exchange?",
+        "options": [
+          {
+            "id": "a",
+            "text": "As a success, keeping the partial text because that code was already sent",
+            "correct": false,
+            "says": "Streaming adds an error that no status can express; the client reads the stream to its end and treats an error event or a missing message_stop as a failure."
+          },
+          {
+            "id": "b",
+            "text": "As a 4xx or 5xx case, using the usual branch that is keyed on the status",
+            "correct": false,
+            "says": "Streaming adds an error that no status can express; the client reads the stream to its end and treats an error event or a missing message_stop as a failure."
+          },
+          {
+            "id": "c",
+            "text": "As failed, whatever the initial code said",
+            "correct": true,
+            "says": "Streaming adds an error that no status can express; the client reads the stream to its end and treats an error event or a missing message_stop as a failure."
+          },
+          {
+            "id": "d",
+            "text": "As a transient glitch, resending at once without reading the rest of the stream",
+            "correct": false,
+            "says": "Streaming adds an error that no status can express; the client reads the stream to its end and treats an error event or a missing message_stop as a failure."
+          }
+        ],
+        "origin": "course/15-errors-retries-and-timeouts/01-error-classes-by-type-and-origin.md"
+      },
+      {
+        "id": "rb-015",
+        "stem": "A tool that files a support ticket runs inside a call that is retried. The first attempt had succeeded on the server before the timeout. How is a duplicate ticket avoided?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Give the action its own unique key, checked before acting",
+            "correct": true,
+            "says": "The Messages API documents no idempotency key, so the key is your design: check it before acting and store the result under it. Retry the call, never the side effect."
+          },
+          {
+            "id": "b",
+            "text": "Tell the model in the prompt never to file the same ticket twice",
+            "correct": false,
+            "says": "The Messages API documents no idempotency key, so the key is your design: check it before acting and store the result under it. Retry the call, never the side effect."
+          },
+          {
+            "id": "c",
+            "text": "Pass the SDK's idempotency parameter on the message creation request",
+            "correct": false,
+            "says": "The Messages API documents no idempotency key, so the key is your design: check it before acting and store the result under it. Retry the call, never the side effect."
+          },
+          {
+            "id": "d",
+            "text": "Disable retries for the whole application and accept the failure rate",
+            "correct": false,
+            "says": "The Messages API documents no idempotency key, so the key is your design: check it before acting and store the result under it. Retry the call, never the side effect."
+          }
+        ],
+        "origin": "course/15-errors-retries-and-timeouts/02-retry-back-off-and-idempotency.md"
+      },
+      {
+        "id": "rb-016",
+        "stem": "An interactive screen keeps the SDK defaults of a ten-minute timeout and two retries, and a connection hangs. How long can the user wait before seeing an error?",
+        "options": [
+          {
+            "id": "a",
+            "text": "About ten minutes, since only the first attempt is allowed to wait that long",
+            "correct": false,
+            "says": "Worst case is attempts times timeout plus the waits: three attempts of ten minutes, so thirty minutes. Set a total deadline from the latency budget."
+          },
+          {
+            "id": "b",
+            "text": "About half an hour",
+            "correct": true,
+            "says": "Worst case is attempts times timeout plus the waits: three attempts of ten minutes, so thirty minutes. Set a total deadline from the latency budget."
+          },
+          {
+            "id": "c",
+            "text": "About a second and a half, which is the length of the back-off alone",
+            "correct": false,
+            "says": "Worst case is attempts times timeout plus the waits: three attempts of ten minutes, so thirty minutes. Set a total deadline from the latency budget."
+          },
+          {
+            "id": "d",
+            "text": "About two minutes, because the retries share a single clock between them",
+            "correct": false,
+            "says": "Worst case is attempts times timeout plus the waits: three attempts of ten minutes, so thirty minutes. Set a total deadline from the latency budget."
+          }
+        ],
+        "origin": "course/15-errors-retries-and-timeouts/03-timeouts-logging-and-debugging.md"
+      },
+      {
+        "id": "rb-017",
+        "stem": "A job must send 600 requests a minute, and each call takes about 6 seconds to finish. What bound on calls in flight fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "About ten, since that is how many are started during each second",
+            "correct": false,
+            "says": "Little's law: requests in flight equal the rate times the duration, so 10 a second times 6 seconds is about 60."
+          },
+          {
+            "id": "b",
+            "text": "About six hundred, so that the whole minute's work can be waiting together",
+            "correct": false,
+            "says": "Little's law: requests in flight equal the rate times the duration, so 10 a second times 6 seconds is about 60."
+          },
+          {
+            "id": "c",
+            "text": "About sixty",
+            "correct": true,
+            "says": "Little's law: requests in flight equal the rate times the duration, so 10 a second times 6 seconds is about 60."
+          },
+          {
+            "id": "d",
+            "text": "About six, matching the time that each one needs to complete",
+            "correct": false,
+            "says": "Little's law: requests in flight equal the rate times the duration, so 10 a second times 6 seconds is about 60."
+          }
+        ],
+        "origin": "course/16-async-concurrency-and-backpressure/01-async-calls-and-bounded-concurrency.md"
+      },
+      {
+        "id": "rb-018",
+        "stem": "An async web endpoint uses the synchronous client, and while one visitor's reply is awaited, no other visitor is served. Why?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Nothing hands control back during the pause, so the single thread is held",
+            "correct": true,
+            "says": "A call that waits without yielding stops the event loop, and every other task waits with it; use the async client inside async code."
+          },
+          {
+            "id": "b",
+            "text": "The synchronous client opens a fresh connection pool for each visitor",
+            "correct": false,
+            "says": "A call that waits without yielding stops the event loop, and every other task waits with it; use the async client inside async code."
+          },
+          {
+            "id": "c",
+            "text": "Every visitor shares one rate limit, and the first request consumes all of it",
+            "correct": false,
+            "says": "A call that waits without yielding stops the event loop, and every other task waits with it; use the async client inside async code."
+          },
+          {
+            "id": "d",
+            "text": "The server runs tasks in parallel only when the replies are streamed",
+            "correct": false,
+            "says": "A call that waits without yielding stops the event loop, and every other task waits with it; use the async client inside async code."
+          }
+        ],
+        "origin": "course/16-async-concurrency-and-backpressure/01-async-calls-and-bounded-concurrency.md"
+      },
+      {
+        "id": "rb-019",
+        "stem": "A job reads a million-line file into a list and then hands items to a bounded pool. The tests pass, but production runs out of memory. Which property is missing?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A larger limit on workers so that the list drains faster, at least by default",
+            "correct": false,
+            "says": "Backpressure means taking the next item only when there is room for it; copying the input first passes every other test and fails the lazy-pull case."
+          },
+          {
+            "id": "b",
+            "text": "Pulling from the source only when a worker has room for more",
+            "correct": true,
+            "says": "Backpressure means taking the next item only when there is room for it; copying the input first passes every other test and fails the lazy-pull case."
+          },
+          {
+            "id": "c",
+            "text": "A retry loop around each worker's call to the model",
+            "correct": false,
+            "says": "Backpressure means taking the next item only when there is room for it; copying the input first passes every other test and fails the lazy-pull case."
+          },
+          {
+            "id": "d",
+            "text": "A client-side token bucket sized from the request limit",
+            "correct": false,
+            "says": "Backpressure means taking the next item only when there is room for it; copying the input first passes every other test and fails the lazy-pull case."
+          }
+        ],
+        "origin": "course/16-async-concurrency-and-backpressure/02-rate-limits-and-backpressure.md"
+      },
+      {
+        "id": "rb-020",
+        "stem": "A client sums the output_tokens of every message_delta in a stream, and its cost report is several times too high. What is the mistake?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Only the first of these events carries counts, and the rest repeat it",
+            "correct": false,
+            "says": "The output count in message_delta is cumulative: replace the stored one, do not add to it."
+          },
+          {
+            "id": "b",
+            "text": "Output counts belong to the opening event, which the client skipped",
+            "correct": false,
+            "says": "The output count in message_delta is cumulative: replace the stored one, do not add to it."
+          },
+          {
+            "id": "c",
+            "text": "The ping events were counted too, and each of them adds a small amount",
+            "correct": false,
+            "says": "The output count in message_delta is cumulative: replace the stored one, do not add to it."
+          },
+          {
+            "id": "d",
+            "text": "Each such event restates the running total, so the stored figure should be replaced",
+            "correct": true,
+            "says": "The output count in message_delta is cumulative: replace the stored one, do not add to it."
+          }
+        ],
+        "origin": "course/17-streaming/01-events-and-assembling-a-message.md"
+      },
+      {
+        "id": "rb-021",
+        "stem": "A developer parses each partial_json fragment as it arrives and gets exceptions on most of them. What is the fix?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Request smaller deltas by lowering the token ceiling of the call",
+            "correct": false,
+            "says": "The fragments of a tool input are text that is not valid JSON until the block ends; join them and parse once."
+          },
+          {
+            "id": "b",
+            "text": "Skip every fragment that fails and keep only the valid objects",
+            "correct": false,
+            "says": "The fragments of a tool input are text that is not valid JSON until the block ends; join them and parse once."
+          },
+          {
+            "id": "c",
+            "text": "Concatenate the pieces and decode once, after the block ends",
+            "correct": true,
+            "says": "The fragments of a tool input are text that is not valid JSON until the block ends; join them and parse once."
+          },
+          {
+            "id": "d",
+            "text": "Ask the model to emit complete objects by adding a stop sequence",
+            "correct": false,
+            "says": "The fragments of a tool input are text that is not valid JSON until the block ends; join them and parse once."
+          }
+        ],
+        "origin": "course/17-streaming/01-events-and-assembling-a-message.md"
+      },
+      {
+        "id": "rb-022",
+        "stem": "A nightly job classifies short texts into labels with no one waiting, and a colleague proposes streaming everything for safety. What does the page say?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Streaming lowers the per-token price, so it pays off at volume",
+            "correct": false,
+            "says": "Streaming changes when bytes arrive, not what tokens cost or what limits allow; with no waiting person, no very long answer and no idle-dropping proxy, the plain call is simpler."
+          },
+          {
+            "id": "b",
+            "text": "Streamed calls count against separate and higher limits",
+            "correct": false,
+            "says": "Streaming changes when bytes arrive, not what tokens cost or what limits allow; with no waiting person, no very long answer and no idle-dropping proxy, the plain call is simpler."
+          },
+          {
+            "id": "c",
+            "text": "Streaming is required whenever an answer may run past a few hundred tokens",
+            "correct": false,
+            "says": "Streaming changes when bytes arrive, not what tokens cost or what limits allow; with no waiting person, no very long answer and no idle-dropping proxy, the plain call is simpler."
+          },
+          {
+            "id": "d",
+            "text": "The plain call is simpler and has fewer ways to fail here",
+            "correct": true,
+            "says": "Streaming changes when bytes arrive, not what tokens cost or what limits allow; with no waiting person, no very long answer and no idle-dropping proxy, the plain call is simpler."
+          }
+        ],
+        "origin": "course/17-streaming/02-tool-use-errors-and-when-to-stream.md"
+      },
+      {
+        "id": "rb-023",
+        "stem": "A newer model lists a price 20 percent below its predecessor's per token, but its tokenizer yields about 30 percent more tokens for the same text. What happens to the cost of a task?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It runs slightly dearer, near 1.04 times the earlier one",
+            "correct": true,
+            "says": "Cost per task is 0.8 times 1.3, which is 1.04: compare on a sample, not per million tokens."
+          },
+          {
+            "id": "b",
+            "text": "It falls by 20 percent, since the listed price decides the outcome",
+            "correct": false,
+            "says": "Cost per task is 0.8 times 1.3, which is 1.04: compare on a sample, not per million tokens."
+          },
+          {
+            "id": "c",
+            "text": "It falls by about half, because both changes favour the buyer",
+            "correct": false,
+            "says": "Cost per task is 0.8 times 1.3, which is 1.04: compare on a sample, not per million tokens."
+          },
+          {
+            "id": "d",
+            "text": "It stays identical, because the two changes cancel each other exactly",
+            "correct": false,
+            "says": "Cost per task is 0.8 times 1.3, which is 1.04: compare on a sample, not per million tokens."
+          }
+        ],
+        "origin": "course/18-model-choice-cost-and-migration/01-matching-a-tier-to-a-workload.md"
+      },
+      {
+        "id": "rb-024",
+        "stem": "A team with no evaluation history must pick a model for a new feature. Which method does the page describe?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Start with the cheapest and move up only after customers complain",
+            "correct": false,
+            "says": "Begin capable so a failure means the task is hard, then move down a tier at a time and keep the last tier that held."
+          },
+          {
+            "id": "b",
+            "text": "Start with a capable one, measure on real cases, then step down while quality holds",
+            "correct": true,
+            "says": "Begin capable so a failure means the task is hard, then move down a tier at a time and keep the last tier that held."
+          },
+          {
+            "id": "c",
+            "text": "Pick the newest release, since later versions are always the cheaper ones",
+            "correct": false,
+            "says": "Begin capable so a failure means the task is hard, then move down a tier at a time and keep the last tier that held."
+          },
+          {
+            "id": "d",
+            "text": "Choose the largest available and keep it, because quality is the first concern in everyday use",
+            "correct": false,
+            "says": "Begin capable so a failure means the task is hard, then move down a tier at a time and keep the last tier that held."
+          }
+        ],
+        "origin": "course/18-model-choice-cost-and-migration/01-matching-a-tier-to-a-workload.md"
+      },
+      {
+        "id": "rb-025",
+        "stem": "A team wants to refuse oversized inputs before any paid call and considers the token counting endpoint. What does the page say about it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It returns the exact billed amount, including output and thinking tokens",
+            "correct": false,
+            "says": "Counting is free, an estimate, separately rate limited, and rejects some inputs such as server tools; exact figures come from usage afterwards."
+          },
+          {
+            "id": "b",
+            "text": "It costs nothing and gives an estimate, with limits of its own",
+            "correct": true,
+            "says": "Counting is free, an estimate, separately rate limited, and rejects some inputs such as server tools; exact figures come from usage afterwards."
+          },
+          {
+            "id": "c",
+            "text": "It shares one rate limit with message creation, so the two compete",
+            "correct": false,
+            "says": "Counting is free, an estimate, separately rate limited, and rejects some inputs such as server tools; exact figures come from usage afterwards."
+          },
+          {
+            "id": "d",
+            "text": "It accepts every input the Messages API accepts, including server tools",
+            "correct": false,
+            "says": "Counting is free, an estimate, separately rate limited, and rejects some inputs such as server tools; exact figures come from usage afterwards."
+          }
+        ],
+        "origin": "course/18-model-choice-cost-and-migration/02-usage-token-counting-and-a-cost-model.md"
+      },
+      {
+        "id": "rb-026",
+        "stem": "After a one-line change of model id to claude-opus-5-5, every request fails with a 400, and the logs show a manual thinking budget and a temperature of 0.3 in the body. What is the cause and cure?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The alias moved silently, so the id should be pinned to a dated snapshot",
+            "correct": false,
+            "says": "Opus 5.5 rejects manual thinking budgets and non-default sampling values with a 400; change the request builder together with the id."
+          },
+          {
+            "id": "b",
+            "text": "The tokenizer changed, so max_tokens must be doubled for every call",
+            "correct": false,
+            "says": "Opus 5.5 rejects manual thinking budgets and non-default sampling values with a 400; change the request builder together with the id."
+          },
+          {
+            "id": "c",
+            "text": "The retirement date has passed, so the old id returns errors for all callers in everyday use",
+            "correct": false,
+            "says": "Opus 5.5 rejects manual thinking budgets and non-default sampling values with a 400; change the request builder together with the id."
+          },
+          {
+            "id": "d",
+            "text": "The newer release refuses those settings, so the builder must adapt to each target",
+            "correct": true,
+            "says": "Opus 5.5 rejects manual thinking budgets and non-default sampling values with a 400; change the request builder together with the id."
+          }
+        ],
+        "origin": "course/18-model-choice-cost-and-migration/03-pinning-ids-and-migrating-safely.md"
+      },
+      {
+        "id": "rb-027",
+        "stem": "A reply to a thinking call shows a 250-token answer, while usage reports output_tokens of 1,900. How many tokens are billed?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Only the 250 shown, since the hidden part is free",
+            "correct": false,
+            "says": "Thinking tokens are billed as output tokens: you pay for the full process, and output_tokens is the total billed."
+          },
+          {
+            "id": "b",
+            "text": "The 250 shown plus a flat fee for each reasoning block",
+            "correct": false,
+            "says": "Thinking tokens are billed as output tokens: you pay for the full process, and output_tokens is the total billed."
+          },
+          {
+            "id": "c",
+            "text": "All 1,900, since hidden reasoning is charged at the generation rate",
+            "correct": true,
+            "says": "Thinking tokens are billed as output tokens: you pay for the full process, and output_tokens is the total billed."
+          },
+          {
+            "id": "d",
+            "text": "Only the 1,650 reasoning tokens, since answer text is billed with the input",
+            "correct": false,
+            "says": "Thinking tokens are billed as output tokens: you pay for the full process, and output_tokens is the total billed."
+          }
+        ],
+        "origin": "course/19-thinking-effort-and-speed/01-thinking-and-effort.md"
+      },
+      {
+        "id": "rb-028",
+        "stem": "Midway through a tool loop, the application switches the thinking mode. What does the API do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It quietly drops reasoning for that request",
+            "correct": true,
+            "says": "The API does not error: it silently disables thinking for that request. Toggle between turns, not within them."
+          },
+          {
+            "id": "b",
+            "text": "It returns a 400 error that names the unsupported change",
+            "correct": false,
+            "says": "The API does not error: it silently disables thinking for that request. Toggle between turns, not within them."
+          },
+          {
+            "id": "c",
+            "text": "It applies the new mode starting from the next turn",
+            "correct": false,
+            "says": "The API does not error: it silently disables thinking for that request. Toggle between turns, not within them."
+          },
+          {
+            "id": "d",
+            "text": "It restarts the loop from the first tool call",
+            "correct": false,
+            "says": "The API does not error: it silently disables thinking for that request. Toggle between turns, not within them."
+          }
+        ],
+        "origin": "course/19-thinking-effort-and-speed/02-fast-mode-tools-and-caching.md"
+      },
+      {
+        "id": "rb-029",
+        "stem": "Midway through a long conversation that uses a prompt cache, the application raises effort at the top level. What follows?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Nothing, since effort is a soft signal outside the cached content itself",
+            "correct": false,
+            "says": "Changing thinking or effort discards the cached messages because the resolved configuration is rendered into the prompt."
+          },
+          {
+            "id": "b",
+            "text": "The tool definitions are invalidated, while messages stay valid",
+            "correct": false,
+            "says": "Changing thinking or effort discards the cached messages because the resolved configuration is rendered into the prompt."
+          },
+          {
+            "id": "c",
+            "text": "The saving is kept, because effort is not a thinking parameter",
+            "correct": false,
+            "says": "Changing thinking or effort discards the cached messages because the resolved configuration is rendered into the prompt."
+          },
+          {
+            "id": "d",
+            "text": "Earlier messages must be written afresh, as the setting is baked into the prefix",
+            "correct": true,
+            "says": "Changing thinking or effort discards the cached messages because the resolved configuration is rendered into the prompt."
+          }
+        ],
+        "origin": "course/19-thinking-effort-and-speed/02-fast-mode-tools-and-caching.md"
+      },
+      {
+        "id": "rb-030",
+        "stem": "Every request carries a large static system prompt followed by one block holding a timestamp and the user's question, with the cache marker on that last block. Usage shows a write on every call and no reads. What fixes it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Move the breakpoint up to the final section that never changes",
+            "correct": true,
+            "says": "A marker on a block that varies makes the hash differ every time; move it to the last stable block, because the lookback only finds entries written at earlier breakpoints."
+          },
+          {
+            "id": "b",
+            "text": "Raise the lifetime to one hour so the entry outlasts the changing text",
+            "correct": false,
+            "says": "A marker on a block that varies makes the hash differ every time; move it to the last stable block, because the lookback only finds entries written at earlier breakpoints."
+          },
+          {
+            "id": "c",
+            "text": "Add a second marker on the question so that both parts are stored",
+            "correct": false,
+            "says": "A marker on a block that varies makes the hash differ every time; move it to the last stable block, because the lookback only finds entries written at earlier breakpoints."
+          },
+          {
+            "id": "d",
+            "text": "Switch on automatic caching, which skips any content that varies",
+            "correct": false,
+            "says": "A marker on a block that varies makes the hash differ every time; move it to the last stable block, because the lookback only finds entries written at earlier breakpoints."
+          }
+        ],
+        "origin": "course/20-prompt-caching/01-the-prefix-the-breakpoint-and-the-usage-fields.md"
+      },
+      {
+        "id": "rb-031",
+        "stem": "A system prompt of about 300 tokens on claude-sonnet-5-5 is marked for caching, yet both cache fields read 0 and no error appears. Why?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The model needs 4,096 tokens, so the prefix was far too short to qualify",
+            "correct": false,
+            "says": "A prefix shorter than the model's minimum is processed without caching and no error is returned; check for the two zeros in usage."
+          },
+          {
+            "id": "b",
+            "text": "Entries are only written once a second request repeats the same prefix",
+            "correct": false,
+            "says": "A prefix shorter than the model's minimum is processed without caching and no error is returned; check for the two zeros in usage."
+          },
+          {
+            "id": "c",
+            "text": "The prefix is under the 512 minimum, so nothing is stored and nothing warns you",
+            "correct": true,
+            "says": "A prefix shorter than the model's minimum is processed without caching and no error is returned; check for the two zeros in usage."
+          },
+          {
+            "id": "d",
+            "text": "An error was raised, but the SDK hides it unless verbose logging is turned up on most systems",
+            "correct": false,
+            "says": "A prefix shorter than the model's minimum is processed without caching and no error is returned; check for the two zeros in usage."
+          }
+        ],
+        "origin": "course/20-prompt-caching/01-the-prefix-the-breakpoint-and-the-usage-fields.md"
+      },
+      {
+        "id": "rb-032",
+        "stem": "A prefix is reused about once a minute all day. Which lifetime does the page favour?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The one-hour one, because its write is cheaper than the short one's write",
+            "correct": false,
+            "says": "A prompt used more often than every five minutes keeps its five-minute entry alive for free; the one-hour write costs 2 times base and needs a third request to pay back."
+          },
+          {
+            "id": "b",
+            "text": "The default short one, because every hit extends it at no added cost",
+            "correct": true,
+            "says": "A prompt used more often than every five minutes keeps its five-minute entry alive for free; the one-hour write costs 2 times base and needs a third request to pay back."
+          },
+          {
+            "id": "c",
+            "text": "The one-hour one, since a short entry otherwise lapses after a single minute",
+            "correct": false,
+            "says": "A prompt used more often than every five minutes keeps its five-minute entry alive for free; the one-hour write costs 2 times base and needs a third request to pay back."
+          },
+          {
+            "id": "d",
+            "text": "Neither, since an entry refreshes only after the response has been completed",
+            "correct": false,
+            "says": "A prompt used more often than every five minutes keeps its five-minute entry alive for free; the one-hour write costs 2 times base and needs a third request to pay back."
+          }
+        ],
+        "origin": "course/20-prompt-caching/02-prices-lifetimes-lookback-and-invalidation.md"
+      },
+      {
+        "id": "rb-033",
+        "stem": "A nightly job has 150,000 short prompts totalling about 40 MB. How many batches does it need at the least?",
+        "options": [
+          {
+            "id": "a",
+            "text": "One, since the 256 MB ceiling is nowhere near reached by this job in everyday use",
+            "correct": false,
+            "says": "A batch holds 100,000 requests or 256 MB, whichever is reached first; 150,000 requests exceed the count limit although the size is small."
+          },
+          {
+            "id": "b",
+            "text": "Two, because the count cap of 100,000 is reached before the size cap",
+            "correct": true,
+            "says": "A batch holds 100,000 requests or 256 MB, whichever is reached first; 150,000 requests exceed the count limit although the size is small."
+          },
+          {
+            "id": "c",
+            "text": "Three, because every batch may hold at most 50,000 entries",
+            "correct": false,
+            "says": "A batch holds 100,000 requests or 256 MB, whichever is reached first; 150,000 requests exceed the count limit although the size is small."
+          },
+          {
+            "id": "d",
+            "text": "Six, since each batch is limited to 25,000 entries of any size",
+            "correct": false,
+            "says": "A batch holds 100,000 requests or 256 MB, whichever is reached first; 150,000 requests exceed the count limit although the size is small."
+          }
+        ],
+        "origin": "course/21-message-batches/01-submitting-a-batch-limits-and-price.md"
+      },
+      {
+        "id": "rb-034",
+        "stem": "A batch includes a body copied from a live path that sets stream to true. When does the refusal surface?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Immediately, when the submission returns a 400 error",
+            "correct": false,
+            "says": "Validation of each request's params runs asynchronously, and validation errors are returned when processing of the entire batch has ended."
+          },
+          {
+            "id": "b",
+            "text": "Never, because the flag is silently ignored in bulk jobs, from the outset",
+            "correct": false,
+            "says": "Validation of each request's params runs asynchronously, and validation errors are returned when processing of the entire batch has ended."
+          },
+          {
+            "id": "c",
+            "text": "Only with the results, once processing of all entries has ended",
+            "correct": true,
+            "says": "Validation of each request's params runs asynchronously, and validation errors are returned when processing of the entire batch has ended."
+          },
+          {
+            "id": "d",
+            "text": "At the first poll, when the status changes to canceling",
+            "correct": false,
+            "says": "Validation of each request's params runs asynchronously, and validation errors are returned when processing of the entire batch has ended."
+          }
+        ],
+        "origin": "course/21-message-batches/01-submitting-a-batch-limits-and-price.md"
+      },
+      {
+        "id": "rb-035",
+        "stem": "A batch ends with 700 succeeded, 200 errored and 100 expired results. What is billed?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Only the completed ones, at half the standard price",
+            "correct": true,
+            "says": "You are not billed for errored, canceled or expired requests; usage on the rest is charged at 50 percent of standard prices."
+          },
+          {
+            "id": "b",
+            "text": "All 1,000, since expired entries had already been reserved",
+            "correct": false,
+            "says": "You are not billed for errored, canceled or expired requests; usage on the rest is charged at 50 percent of standard prices."
+          },
+          {
+            "id": "c",
+            "text": "The completed and the errored, since an error still used compute",
+            "correct": false,
+            "says": "You are not billed for errored, canceled or expired requests; usage on the rest is charged at 50 percent of standard prices."
+          },
+          {
+            "id": "d",
+            "text": "The 700 at full price, with the 200 errors at half",
+            "correct": false,
+            "says": "You are not billed for errored, canceled or expired requests; usage on the rest is charged at 50 percent of standard prices."
+          }
+        ],
+        "origin": "course/21-message-batches/02-polling-results-and-retries.md"
+      },
+      {
+        "id": "rb-036",
+        "stem": "A team sends a direct-API call to Google Cloud without changes, and it is rejected. What must differ?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The model name needs an anthropic. prefix, and the version stays in a header, from the outset",
+            "correct": false,
+            "says": "On Google Cloud the model is specified in the endpoint URL and anthropic_version is passed in the body, set to vertex-2023-10-16."
+          },
+          {
+            "id": "b",
+            "text": "The version header is dropped, and the model name stays where it was",
+            "correct": false,
+            "says": "On Google Cloud the model is specified in the endpoint URL and anthropic_version is passed in the body, set to vertex-2023-10-16."
+          },
+          {
+            "id": "c",
+            "text": "Only the credential changes, since the body shape is identical everywhere",
+            "correct": false,
+            "says": "On Google Cloud the model is specified in the endpoint URL and anthropic_version is passed in the body, set to vertex-2023-10-16."
+          },
+          {
+            "id": "d",
+            "text": "The model name goes into the endpoint path and the version moves into the payload",
+            "correct": true,
+            "says": "On Google Cloud the model is specified in the endpoint URL and anthropic_version is passed in the body, set to vertex-2023-10-16."
+          }
+        ],
+        "origin": "course/22-claude-on-the-cloud-platforms/01-one-messages-api-three-front-doors.md"
+      },
+      {
+        "id": "rb-037",
+        "stem": "A team on Amazon Bedrock plans a nightly job through the Message Batches API for half-price processing. What does the page say?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It is supported, but only through regional endpoints at a 10 percent premium",
+            "correct": false,
+            "says": "Bedrock lists the Message Batches API among its unsupported endpoints, so the discount that belongs to it is unavailable there."
+          },
+          {
+            "id": "b",
+            "text": "The integration offers no such endpoint, so that reduced rate cannot be had",
+            "correct": true,
+            "says": "Bedrock lists the Message Batches API among its unsupported endpoints, so the discount that belongs to it is unavailable there."
+          },
+          {
+            "id": "c",
+            "text": "It is supported, with a reduction of 25 percent in place of the usual half",
+            "correct": false,
+            "says": "Bedrock lists the Message Batches API among its unsupported endpoints, so the discount that belongs to it is unavailable there."
+          },
+          {
+            "id": "d",
+            "text": "It is supported on both clouds, though with a smaller maximum batch size",
+            "correct": false,
+            "says": "Bedrock lists the Message Batches API among its unsupported endpoints, so the discount that belongs to it is unavailable there."
+          }
+        ],
+        "origin": "course/22-claude-on-the-cloud-platforms/02-what-each-platform-lacks-where-it-runs-and-what-it-costs.md"
+      },
+      {
+        "id": "rb-038",
+        "stem": "A compliance rule demands that traffic is guaranteed to pass only through named geographic regions on Google Cloud. What does the page say about the price against the dynamic option?",
+        "options": [
+          {
+            "id": "a",
+            "text": "No difference, since every endpoint kind shares one rate",
+            "correct": false,
+            "says": "Regional and multi-region endpoints include a 10 percent pricing premium over global endpoints."
+          },
+          {
+            "id": "b",
+            "text": "A discount of 10 percent, since traffic is spread over fewer areas",
+            "correct": false,
+            "says": "Regional and multi-region endpoints include a 10 percent pricing premium over global endpoints."
+          },
+          {
+            "id": "c",
+            "text": "Double the rate, since guaranteed routing needs reserved capacity",
+            "correct": false,
+            "says": "Regional and multi-region endpoints include a 10 percent pricing premium over global endpoints."
+          },
+          {
+            "id": "d",
+            "text": "A premium of 10 percent over what global routing charges",
+            "correct": true,
+            "says": "Regional and multi-region endpoints include a 10 percent pricing premium over global endpoints."
+          }
+        ],
+        "origin": "course/22-claude-on-the-cloud-platforms/02-what-each-platform-lacks-where-it-runs-and-what-it-costs.md"
+      },
+      {
+        "id": "rb-039",
+        "stem": "A review finds an allow statement granting bedrock:* on * to an application's role. What change does the page require?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Keep the wildcard and add a Deny for every action that manages resources",
+            "correct": false,
+            "says": "A policy adds what a job needs and nothing more: a named action on a specific model, since a wildcard grants every action on every model."
+          },
+          {
+            "id": "b",
+            "text": "Replace the action wildcard with a resource wildcard across all inference profiles",
+            "correct": false,
+            "says": "A policy adds what a job needs and nothing more: a named action on a specific model, since a wildcard grants every action on every model."
+          },
+          {
+            "id": "c",
+            "text": "List the one invoke action and the one model ARN it needs",
+            "correct": true,
+            "says": "A policy adds what a job needs and nothing more: a named action on a specific model, since a wildcard grants every action on every model."
+          },
+          {
+            "id": "d",
+            "text": "Switch to an administrator role that the cloud vendor already maintains",
+            "correct": false,
+            "says": "A policy adds what a job needs and nothing more: a named action on a specific model, since a wildcard grants every action on every model."
+          }
+        ],
+        "origin": "course/23-setting-up-claude-on-the-cloud-platforms/01-least-privilege-for-bedrock-and-vertex.md"
+      },
+      {
+        "id": "rb-040",
+        "stem": "A service account needs to do nothing except invoke a Claude endpoint on Google Cloud. Which grant fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A custom role that holds just the predict permission",
+            "correct": true,
+            "says": "Predefined roles often contain more permissions than you need; a custom role with aiplatform.endpoints.predict lets the account call the endpoint but not control it."
+          },
+          {
+            "id": "b",
+            "text": "The predefined user role, which is easy to assign and tightly scoped",
+            "correct": false,
+            "says": "Predefined roles often contain more permissions than you need; a custom role with aiplatform.endpoints.predict lets the account call the endpoint but not control it."
+          },
+          {
+            "id": "c",
+            "text": "A basic Editor role that is limited to the one project",
+            "correct": false,
+            "says": "Predefined roles often contain more permissions than you need; a custom role with aiplatform.endpoints.predict lets the account call the endpoint but not control it."
+          },
+          {
+            "id": "d",
+            "text": "A predefined role combined with a deny on the deploy permission",
+            "correct": false,
+            "says": "Predefined roles often contain more permissions than you need; a custom role with aiplatform.endpoints.predict lets the account call the endpoint but not control it."
+          }
+        ],
+        "origin": "course/23-setting-up-claude-on-the-cloud-platforms/01-least-privilege-for-bedrock-and-vertex.md"
+      },
+      {
+        "id": "rb-041",
+        "stem": "A Google Cloud project must keep data in Europe while calling claude-sonnet-5-5. Which setup fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A specific europe- region, which serves every current model",
+            "correct": false,
+            "says": "A specific region serves claude-sonnet-4-6 only, so Sonnet 5.5 in the EU uses the eu multi-region endpoint at the premium."
+          },
+          {
+            "id": "b",
+            "text": "The global endpoint, which routes within Europe whenever capacity allows",
+            "correct": false,
+            "says": "A specific region serves claude-sonnet-4-6 only, so Sonnet 5.5 in the EU uses the eu multi-region endpoint at the premium."
+          },
+          {
+            "id": "c",
+            "text": "Any endpoint, as the residency rule applies only to Bedrock",
+            "correct": false,
+            "says": "A specific region serves claude-sonnet-4-6 only, so Sonnet 5.5 in the EU uses the eu multi-region endpoint at the premium."
+          },
+          {
+            "id": "d",
+            "text": "The multi-region eu endpoint, since a specific region serves only an older model",
+            "correct": true,
+            "says": "A specific region serves claude-sonnet-4-6 only, so Sonnet 5.5 in the EU uses the eu multi-region endpoint at the premium."
+          }
+        ],
+        "origin": "course/23-setting-up-claude-on-the-cloud-platforms/02-residency-quotas-logging-and-the-configuration-practice.md"
+      },
+      {
+        "id": "rb-042",
+        "stem": "A customer's message contains the literal characters {{question}}, and in the finished prompt those characters have been swapped for the application's own question text. What went wrong?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Filling ran repeatedly, so inserted data was read as part of the template",
+            "correct": true,
+            "says": "A template is filled in one pass, left to right, and never rescanned, so a value that looks like a placeholder stays data."
+          },
+          {
+            "id": "b",
+            "text": "The customer text should have gone into the system prompt instead",
+            "correct": false,
+            "says": "A template is filled in one pass, left to right, and never rescanned, so a value that looks like a placeholder stays data."
+          },
+          {
+            "id": "c",
+            "text": "The tags around the variable were not given a random identifier",
+            "correct": false,
+            "says": "A template is filled in one pass, left to right, and never rescanned, so a value that looks like a placeholder stays data."
+          },
+          {
+            "id": "d",
+            "text": "The placeholder syntax must be changed from braces to angle brackets",
+            "correct": false,
+            "says": "A template is filled in one pass, left to right, and never rescanned, so a value that looks like a placeholder stays data."
+          }
+        ],
+        "origin": "course/24-prompt-engineering-for-applications/01-templates-placement-and-instructions.md"
+      },
+      {
+        "id": "rb-043",
+        "stem": "A prompt rule says only \"never use ellipses\", and the replies are read aloud by a text-to-speech engine, yet ellipses still slip through now and then. What does the page suggest?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Repeat the rule in capital letters at the top and again at the end",
+            "correct": false,
+            "says": "A constraint with its reason works better than a bare one: Claude is smart enough to generalize from the explanation."
+          },
+          {
+            "id": "b",
+            "text": "Add the reason, so the model generalises beyond the cases it names",
+            "correct": true,
+            "says": "A constraint with its reason works better than a bare one: Claude is smart enough to generalize from the explanation."
+          },
+          {
+            "id": "c",
+            "text": "Replace it with a list of conditionals for each situation that produces one",
+            "correct": false,
+            "says": "A constraint with its reason works better than a bare one: Claude is smart enough to generalize from the explanation."
+          },
+          {
+            "id": "d",
+            "text": "Move the rule into the user turn, where it will be read more carefully",
+            "correct": false,
+            "says": "A constraint with its reason works better than a bare one: Claude is smart enough to generalize from the explanation."
+          }
+        ],
+        "origin": "course/24-prompt-engineering-for-applications/01-templates-placement-and-instructions.md"
+      },
+      {
+        "id": "rb-044",
+        "stem": "A classifier prompt includes five examples that all end with the label billing, and the model now answers billing for almost everything. What fix does the page give?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Add five more examples, all of them with the same billing label",
+            "correct": false,
+            "says": "Examples should be diverse: five that share one label teach \"answer billing\"; include a hard case, a no-match case and a case whose obvious reading is wrong."
+          },
+          {
+            "id": "b",
+            "text": "Replace the examples with the instruction to think step by step",
+            "correct": false,
+            "says": "Examples should be diverse: five that share one label teach \"answer billing\"; include a hard case, a no-match case and a case whose obvious reading is wrong."
+          },
+          {
+            "id": "c",
+            "text": "Diversify: add a hard case, a no-match case and a misleading one",
+            "correct": true,
+            "says": "Examples should be diverse: five that share one label teach \"answer billing\"; include a hard case, a no-match case and a case whose obvious reading is wrong."
+          },
+          {
+            "id": "d",
+            "text": "Move the examples below the question so the model attends to them less",
+            "correct": false,
+            "says": "Examples should be diverse: five that share one label teach \"answer billing\"; include a hard case, a no-match case and a case whose obvious reading is wrong."
+          }
+        ],
+        "origin": "course/24-prompt-engineering-for-applications/02-examples-reasoning-long-documents-and-chains.md"
+      },
+      {
+        "id": "rb-045",
+        "stem": "A structured-output call returns status 200 with stop_reason refusal, and the client crashes while parsing the body against the schema. What does the page say?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Retry the same request until a reply that follows the schema comes back, from the outset",
+            "correct": false,
+            "says": "On a refusal the output may not match the schema because the refusal message takes precedence; read stop_reason before the body and report it, do not repeat it."
+          },
+          {
+            "id": "b",
+            "text": "Raise max_tokens, since a refusal is a reply that was cut short",
+            "correct": false,
+            "says": "On a refusal the output may not match the schema because the refusal message takes precedence; read stop_reason before the body and report it, do not repeat it."
+          },
+          {
+            "id": "c",
+            "text": "Loosen the schema so that free text is accepted in every field",
+            "correct": false,
+            "says": "On a refusal the output may not match the schema because the refusal message takes precedence; read stop_reason before the body and report it, do not repeat it."
+          },
+          {
+            "id": "d",
+            "text": "Safety messages override the format promise, so inspect why it ended first",
+            "correct": true,
+            "says": "On a refusal the output may not match the schema because the refusal message takes precedence; read stop_reason before the body and report it, do not repeat it."
+          }
+        ],
+        "origin": "course/25-structured-output-and-defensive-parsing/01-getting-json-schemas-structured-outputs-and-strict-tools.md"
+      },
+      {
+        "id": "rb-046",
+        "stem": "A schema sent with output_config.format carries minimum and maxLength limits on fields, and the call fails with a 400. What is the remedy?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Raise the compilation limit by splitting the schema across several strict tools",
+            "correct": false,
+            "says": "Numerical and string constraints are unsupported and give a 400; helpers remove them, add them to the description, and a validating helper still enforces them in your code."
+          },
+          {
+            "id": "b",
+            "text": "Drop them from the version the API sees, describe them in text, and verify replies in code",
+            "correct": true,
+            "says": "Numerical and string constraints are unsupported and give a 400; helpers remove them, add them to the description, and a validating helper still enforces them in your code."
+          },
+          {
+            "id": "c",
+            "text": "Set additionalProperties to true, which turns each constraint into a hint",
+            "correct": false,
+            "says": "Numerical and string constraints are unsupported and give a 400; helpers remove them, add them to the description, and a validating helper still enforces them in your code."
+          },
+          {
+            "id": "d",
+            "text": "Switch to forced tool choice, which accepts every JSON Schema keyword",
+            "correct": false,
+            "says": "Numerical and string constraints are unsupported and give a 400; helpers remove them, add them to the description, and a validating helper still enforces them in your code."
+          }
+        ],
+        "origin": "course/25-structured-output-and-defensive-parsing/01-getting-json-schemas-structured-outputs-and-strict-tools.md"
+      },
+      {
+        "id": "rb-047",
+        "stem": "An extractor's first reply fails validation on three fields. What should the follow-up request hold?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Only the original prompt, repeated so that the same attempt runs afresh",
+            "correct": false,
+            "says": "Send the whole conversation: the first message, the reply as an assistant message, and a user message listing each problem with its path."
+          },
+          {
+            "id": "b",
+            "text": "Only the first issue, so that each call fixes one thing at a time",
+            "correct": false,
+            "says": "Send the whole conversation: the first message, the reply as an assistant message, and a user message listing each problem with its path."
+          },
+          {
+            "id": "c",
+            "text": "The model's own earlier text and every issue named with its path",
+            "correct": true,
+            "says": "Send the whole conversation: the first message, the reply as an assistant message, and a user message listing each problem with its path."
+          },
+          {
+            "id": "d",
+            "text": "The original prompt plus a request to answer more carefully this time",
+            "correct": false,
+            "says": "Send the whole conversation: the first message, the reply as an assistant message, and a user message listing each problem with its path."
+          }
+        ],
+        "origin": "course/25-structured-output-and-defensive-parsing/02-defensive-parsing-validation-and-the-re-prompt.md"
+      },
+      {
+        "id": "rb-048",
+        "stem": "To get reliably shaped JSON, a team sets tool_choice to a named function on claude-sonnet-5-5. What happens, and what does the page offer instead?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A 400 error comes back; auto selection with strict schemas gives the assurance",
+            "correct": true,
+            "says": "On Sonnet 5.5, any and tool return a 400 error; use auto with strict tool use, or structured outputs for a fixed JSON shape."
+          },
+          {
+            "id": "b",
+            "text": "The call succeeds, and the model writes an explanation before the function call",
+            "correct": false,
+            "says": "On Sonnet 5.5, any and tool return a 400 error; use auto with strict tool use, or structured outputs for a fixed JSON shape."
+          },
+          {
+            "id": "c",
+            "text": "The call succeeds, but the forced choice is dropped after the first request",
+            "correct": false,
+            "says": "On Sonnet 5.5, any and tool return a 400 error; use auto with strict tool use, or structured outputs for a fixed JSON shape."
+          },
+          {
+            "id": "d",
+            "text": "A 429 comes back, since forced selection counts against a separate limit",
+            "correct": false,
+            "says": "On Sonnet 5.5, any and tool return a 400 error; use auto with strict tool use, or structured outputs for a fixed JSON shape."
+          }
+        ],
+        "origin": "course/26-tool-use/01-tools-schemas-descriptions-and-tool-choice.md"
+      },
+      {
+        "id": "rb-049",
+        "stem": "A loop adds a sentence reading Here are the results before the first tool_result in the user message. What follows?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Nothing breaks, though the sentence costs a few extra input tokens",
+            "correct": false,
+            "says": "The tool_result blocks must come first in the content array; any text must come after all of them, or the request returns a 400 error."
+          },
+          {
+            "id": "b",
+            "text": "The model reads the sentence as a helpful label and answers more quickly",
+            "correct": false,
+            "says": "The tool_result blocks must come first in the content array; any text must come after all of them, or the request returns a 400 error."
+          },
+          {
+            "id": "c",
+            "text": "A silent loss of parallel calls in later turns, with no error at all",
+            "correct": false,
+            "says": "The tool_result blocks must come first in the content array; any text must come after all of them, or the request returns a 400 error."
+          },
+          {
+            "id": "d",
+            "text": "A 400 error, because content blocks that answer calls must lead and prose must trail",
+            "correct": true,
+            "says": "The tool_result blocks must come first in the content array; any text must come after all of them, or the request returns a 400 error."
+          }
+        ],
+        "origin": "course/26-tool-use/02-the-loop-results-errors-and-stop-reasons.md"
+      },
+      {
+        "id": "rb-050",
+        "stem": "A loop keyed only on stop_reason runs up cost because a confused model keeps invoking a function that keeps failing. What safeguard does the page add?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A longer description so the model stops calling the broken function in many setups",
+            "correct": false,
+            "says": "A loop keyed on stop_reason ends when the model decides to end it, so it needs its own limit of model calls and a status for reaching it."
+          },
+          {
+            "id": "b",
+            "text": "A retry with exponential back-off between each model request",
+            "correct": false,
+            "says": "A loop keyed on stop_reason ends when the model decides to end it, so it needs its own limit of model calls and a status for reaching it."
+          },
+          {
+            "id": "c",
+            "text": "A ceiling on iterations, with a distinct status reported when it is hit",
+            "correct": true,
+            "says": "A loop keyed on stop_reason ends when the model decides to end it, so it needs its own limit of model calls and a status for reaching it."
+          },
+          {
+            "id": "d",
+            "text": "A forced tool choice on every request so that the loop ends sooner",
+            "correct": false,
+            "says": "A loop keyed on stop_reason ends when the model decides to end it, so it needs its own limit of model calls and a status for reaching it."
+          }
+        ],
+        "origin": "course/26-tool-use/02-the-loop-results-errors-and-stop-reasons.md"
+      },
+      {
+        "id": "rb-051",
+        "stem": "A loop replies to three simultaneous requests from the model with three separate user messages, one answer in each. What does the page predict?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Concurrent invocation fades, since that layout trains it toward single calls",
+            "correct": true,
+            "says": "Formatting results as a separate user message for each one teaches Claude to avoid parallel calls; return all results together in one user message."
+          },
+          {
+            "id": "b",
+            "text": "Nothing changes, because answers are matched by identifier whatever the grouping",
+            "correct": false,
+            "says": "Formatting results as a separate user message for each one teaches Claude to avoid parallel calls; return all results together in one user message."
+          },
+          {
+            "id": "c",
+            "text": "The API merges them into one message before the next model turn",
+            "correct": false,
+            "says": "Formatting results as a separate user message for each one teaches Claude to avoid parallel calls; return all results together in one user message."
+          },
+          {
+            "id": "d",
+            "text": "Each later turn returns a 429 for exceeding the allowed message rate",
+            "correct": false,
+            "says": "Formatting results as a separate user message for each one teaches Claude to avoid parallel calls; return all results together in one user message."
+          }
+        ],
+        "origin": "course/26-tool-use/03-parallel-calls-the-tool-runner-and-the-practice.md"
+      },
+      {
+        "id": "rb-052",
+        "stem": "A team keeps a nine-hundred-line API reference in CLAUDE.md, and every session now feels slow and unfocused. What does the page recommend?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Split the document across several CLAUDE.md files so that each stays short",
+            "correct": false,
+            "says": "CLAUDE.md loads in full on every request, so keep it under 200 lines and move reference material to skills, which load on demand."
+          },
+          {
+            "id": "b",
+            "text": "Relocate the material into a skill, whose body loads on demand",
+            "correct": true,
+            "says": "CLAUDE.md loads in full on every request, so keep it under 200 lines and move reference material to skills, which load on demand."
+          },
+          {
+            "id": "c",
+            "text": "Convert the document into a hook that prints it at the start of each session",
+            "correct": false,
+            "says": "CLAUDE.md loads in full on every request, so keep it under 200 lines and move reference material to skills, which load on demand."
+          },
+          {
+            "id": "d",
+            "text": "Add a subagent that reads the file and answers every question about it",
+            "correct": false,
+            "says": "CLAUDE.md loads in full on every request, so keep it under 200 lines and move reference material to skills, which load on demand."
+          }
+        ],
+        "origin": "course/27-choosing-an-extension/01-the-extension-surface-and-what-each-costs.md"
+      },
+      {
+        "id": "rb-053",
+        "stem": "A rule never to touch the .env file sits in CLAUDE.md, yet Claude modified it in one session. What does the page advise for a rule that must hold?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Repeat the rule in a skill so that it is stated in two places",
+            "correct": false,
+            "says": "A sentence in CLAUDE.md is a request, not a guarantee; a PreToolUse hook that blocks the edit is enforcement."
+          },
+          {
+            "id": "b",
+            "text": "Add a hook before tool use that blocks the change, since triggers are guaranteed",
+            "correct": true,
+            "says": "A sentence in CLAUDE.md is a request, not a guarantee; a PreToolUse hook that blocks the edit is enforcement."
+          },
+          {
+            "id": "c",
+            "text": "Move the rule into an output style, which is enforced for the whole session, at least by default",
+            "correct": false,
+            "says": "A sentence in CLAUDE.md is a request, not a guarantee; a PreToolUse hook that blocks the edit is enforcement."
+          },
+          {
+            "id": "d",
+            "text": "Rephrase the rule in capital letters and explain why it matters",
+            "correct": false,
+            "says": "A sentence in CLAUDE.md is a request, not a guarantee; a PreToolUse hook that blocks the edit is enforcement."
+          }
+        ],
+        "origin": "course/27-choosing-an-extension/02-choosing-between-similar-features-and-combining-them.md"
+      },
+      {
+        "id": "rb-054",
+        "stem": "An investigation reads dozens of files, and the main conversation's context is filling up fast. Which feature fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A skill, which loads the file contents into the main window when invoked",
+            "correct": false,
+            "says": "A subagent uses a separate window with its own tokens and returns only a summary, while a skill adds to the main window."
+          },
+          {
+            "id": "b",
+            "text": "A larger CLAUDE.md that records what each file contains in detail",
+            "correct": false,
+            "says": "A subagent uses a separate window with its own tokens and returns only a summary, while a skill adds to the main window."
+          },
+          {
+            "id": "c",
+            "text": "An MCP server that exposes every file to the model as a callable function",
+            "correct": false,
+            "says": "A subagent uses a separate window with its own tokens and returns only a summary, while a skill adds to the main window."
+          },
+          {
+            "id": "d",
+            "text": "An isolated worker whose own window hands back only a summary",
+            "correct": true,
+            "says": "A subagent uses a separate window with its own tokens and returns only a summary, while a skill adds to the main window."
+          }
+        ],
+        "origin": "course/27-choosing-an-extension/02-choosing-between-similar-features-and-combining-them.md"
+      },
+      {
+        "id": "rb-055",
+        "stem": "Users search for the exact code E-4012, but a vector-only index ranks that page far down. What fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Add BM25 scoring, which matches literal strings, then merge both result lists",
+            "correct": true,
+            "says": "An embedding is weaker with exact strings such as error codes, while BM25 finds them; the two indexes fail on different questions, so use both. Anthropic offers no embedding model."
+          },
+          {
+            "id": "b",
+            "text": "Raise the chunk size so that each page is embedded as a single piece",
+            "correct": false,
+            "says": "An embedding is weaker with exact strings such as error codes, while BM25 finds them; the two indexes fail on different questions, so use both. Anthropic offers no embedding model."
+          },
+          {
+            "id": "c",
+            "text": "Add more overlap between neighbours so that the code is repeated around it",
+            "correct": false,
+            "says": "An embedding is weaker with exact strings such as error codes, while BM25 finds them; the two indexes fail on different questions, so use both. Anthropic offers no embedding model."
+          },
+          {
+            "id": "d",
+            "text": "Switch to a larger embedding model that Anthropic offers for retrieval",
+            "correct": false,
+            "says": "An embedding is weaker with exact strings such as error codes, while BM25 finds them; the two indexes fail on different questions, so use both. Anthropic offers no embedding model."
+          }
+        ],
+        "origin": "course/28-retrieval/01-chunks-bm25-and-embeddings.md"
+      },
+      {
+        "id": "rb-056",
+        "stem": "A reranker is given only the top five fused results, and the relevant chunk sits at rank twelve. What happens?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It is promoted to first, since the reranker scores the whole corpus",
+            "correct": false,
+            "says": "A reranker orders only the pool; a chunk outside it is never considered, so the pool must contain the answer and reranking cannot fix a retrieval that missed."
+          },
+          {
+            "id": "b",
+            "text": "It moves up by seven places, the difference between the two ranks",
+            "correct": false,
+            "says": "A reranker orders only the pool; a chunk outside it is never considered, so the pool must contain the answer and reranking cannot fix a retrieval that missed."
+          },
+          {
+            "id": "c",
+            "text": "It stays out of reach, because candidates beyond that group are never scored",
+            "correct": true,
+            "says": "A reranker orders only the pool; a chunk outside it is never considered, so the pool must contain the answer and reranking cannot fix a retrieval that missed."
+          },
+          {
+            "id": "d",
+            "text": "It is found by the keyword index, which takes over once the reranker runs, at least by default",
+            "correct": false,
+            "says": "A reranker orders only the pool; a chunk outside it is never considered, so the pool must contain the answer and reranking cannot fix a retrieval that missed."
+          }
+        ],
+        "origin": "course/28-retrieval/02-fusion-reranking-context-and-recall.md"
+      },
+      {
+        "id": "rb-057",
+        "stem": "A passage reading \"revenue grew 3 percent over the previous quarter\" names no company or period, and searches for one firm's results never surface it. What fix does Anthropic's write-up describe?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Use fewer words per window so that each carries a single number",
+            "correct": false,
+            "says": "Contextual retrieval prepends chunk-specific explanatory context to each chunk before embedding and before building the keyword index."
+          },
+          {
+            "id": "b",
+            "text": "Have a model add a situating sentence to each piece before indexing",
+            "correct": true,
+            "says": "Contextual retrieval prepends chunk-specific explanatory context to each chunk before embedding and before building the keyword index."
+          },
+          {
+            "id": "c",
+            "text": "Rely on a larger model for generation, since it will infer the company",
+            "correct": false,
+            "says": "Contextual retrieval prepends chunk-specific explanatory context to each chunk before embedding and before building the keyword index."
+          },
+          {
+            "id": "d",
+            "text": "Retrieve only five items so that vague ones are filtered out",
+            "correct": false,
+            "says": "Contextual retrieval prepends chunk-specific explanatory context to each chunk before embedding and before building the keyword index."
+          }
+        ],
+        "origin": "course/28-retrieval/02-fusion-reranking-context-and-recall.md"
+      },
+      {
+        "id": "rb-058",
+        "stem": "A trimming routine removes the oldest messages one at a time, and the next request returns a 400 error. What is the likely cause?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The window shrank below the size of the output limit",
+            "correct": false,
+            "says": "A tool result must immediately follow its tool use; keeping one without the other fails with a 400, so drop whole turns."
+          },
+          {
+            "id": "b",
+            "text": "Summaries stacked, leaving two of them in the conversation",
+            "correct": false,
+            "says": "A tool result must immediately follow its tool use; keeping one without the other fails with a 400, so drop whole turns."
+          },
+          {
+            "id": "c",
+            "text": "Caching misses pushed the input over the window",
+            "correct": false,
+            "says": "A tool result must immediately follow its tool use; keeping one without the other fails with a 400, so drop whole turns."
+          },
+          {
+            "id": "d",
+            "text": "A call to a function lost the answer that must follow it directly",
+            "correct": true,
+            "says": "A tool result must immediately follow its tool use; keeping one without the other fails with a 400, so drop whole turns."
+          }
+        ],
+        "origin": "course/29-context-engineering/01-the-window-context-rot-and-trimming-in-code.md"
+      },
+      {
+        "id": "rb-059",
+        "stem": "A team using compaction at a token threshold computes spend from top-level input_tokens and output_tokens, and invoices come out higher than its reports. Why?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Compaction doubles the price of every token that passes through it",
+            "correct": false,
+            "says": "The top-level counts do not include compaction iteration usage; sum across the usage.iterations array to find what was billed."
+          },
+          {
+            "id": "b",
+            "text": "Top-level counts show cached reads at full price, while billing discounts them in many setups",
+            "correct": false,
+            "says": "The top-level counts do not include compaction iteration usage; sum across the usage.iterations array to find what was billed."
+          },
+          {
+            "id": "c",
+            "text": "Those counters omit the condensing pass; the iterations list has the full figures",
+            "correct": true,
+            "says": "The top-level counts do not include compaction iteration usage; sum across the usage.iterations array to find what was billed."
+          },
+          {
+            "id": "d",
+            "text": "Summaries are billed to a separate workspace that the reports leave out",
+            "correct": false,
+            "says": "The top-level counts do not include compaction iteration usage; sum across the usage.iterations array to find what was billed."
+          }
+        ],
+        "origin": "course/29-context-engineering/02-context-editing-compaction-and-memory.md"
+      },
+      {
+        "id": "rb-060",
+        "stem": "A team needs answers that point at their source passages and also fit a fixed JSON layout. Which design does the page suggest?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Split it: cite in one call and shape the result in another that carries no documents",
+            "correct": true,
+            "says": "Citations and structured outputs are incompatible and return a 400 error together; separate the two steps, or ask for an evidence field and check it in code."
+          },
+          {
+            "id": "b",
+            "text": "Enable both in one call and let the API interleave pointers inside the schema, at least by default",
+            "correct": false,
+            "says": "Citations and structured outputs are incompatible and return a 400 error together; separate the two steps, or ask for an evidence field and check it in code."
+          },
+          {
+            "id": "c",
+            "text": "Enable pointers on half of the documents and the schema on the rest",
+            "correct": false,
+            "says": "Citations and structured outputs are incompatible and return a 400 error together; separate the two steps, or ask for an evidence field and check it in code."
+          },
+          {
+            "id": "d",
+            "text": "Put the layout in a system prompt, which the citation feature then enforces",
+            "correct": false,
+            "says": "Citations and structured outputs are incompatible and return a 400 error together; separate the two steps, or ask for an evidence field and check it in code."
+          }
+        ],
+        "origin": "course/29-context-engineering/03-citations-the-files-api-and-the-practice.md"
+      },
+      {
+        "id": "rb-061",
+        "stem": "A support app accepts a file_id typed by the end user to attach an earlier upload to a request. What risk does the page name?",
+        "options": [
+          {
+            "id": "a",
+            "text": "All stored items are shared workspace-wide, exposing one customer's data to another",
+            "correct": true,
+            "says": "Uploaded files are accessible to the entire workspace, not scoped to an end user; never accept file_id values from end users."
+          },
+          {
+            "id": "b",
+            "text": "Ids expire after an hour, so the attachment would then fail without any warning",
+            "correct": false,
+            "says": "Uploaded files are accessible to the entire workspace, not scoped to an end user; never accept file_id values from end users."
+          },
+          {
+            "id": "c",
+            "text": "The id can be downloaded back by anyone who happens to know it afterwards",
+            "correct": false,
+            "says": "Uploaded files are accessible to the entire workspace, not scoped to an end user; never accept file_id values from end users."
+          },
+          {
+            "id": "d",
+            "text": "Each reference doubles the stored size, which counts against the quota for storage",
+            "correct": false,
+            "says": "Uploaded files are accessible to the entire workspace, not scoped to an end user; never accept file_id values from end users."
+          }
+        ],
+        "origin": "course/29-context-engineering/03-citations-the-files-api-and-the-practice.md"
+      },
+      {
+        "id": "rb-062",
+        "stem": "Claude returns a point on an image that the API shrank and then padded to a multiple of 28 on the bottom and right. To map it back, which size is the divisor?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The padded dimensions, since that is the picture the model processed",
+            "correct": false,
+            "says": "Always normalize by the resized dimensions, not the padded ones: the padding sits on the bottom and right and holds no content."
+          },
+          {
+            "id": "b",
+            "text": "The reduced dimensions, since the added strip contains nothing",
+            "correct": true,
+            "says": "Always normalize by the resized dimensions, not the padded ones: the padding sits on the bottom and right and holds no content."
+          },
+          {
+            "id": "c",
+            "text": "The original dimensions, since the point is already in that space",
+            "correct": false,
+            "says": "Always normalize by the resized dimensions, not the padded ones: the padding sits on the bottom and right and holds no content."
+          },
+          {
+            "id": "d",
+            "text": "Either one, since the difference is under 28 pixels and negligible",
+            "correct": false,
+            "says": "Always normalize by the resized dimensions, not the padded ones: the padding sits on the bottom and right and holds no content."
+          }
+        ],
+        "origin": "course/30-vision-and-documents/01-images-limits-and-cost.md"
+      },
+      {
+        "id": "rb-063",
+        "stem": "A request carrying 25 images, one of them 3000 pixels wide, is rejected with an error that mentions many-image requests. What remedy does the page give?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Switch the pictures to base64, which the stricter limit does not cover",
+            "correct": false,
+            "says": "Above 20 images a stricter per-image dimension limit applies; resize so neither dimension exceeds 2000 px, or keep the request to 20 or fewer image and document blocks."
+          },
+          {
+            "id": "b",
+            "text": "Move the pictures after the text, since the order decides which limit applies",
+            "correct": false,
+            "says": "Above 20 images a stricter per-image dimension limit applies; resize so neither dimension exceeds 2000 px, or keep the request to 20 or fewer image and document blocks."
+          },
+          {
+            "id": "c",
+            "text": "Shrink each picture so no side passes 2000 px, or send at most 20 blocks",
+            "correct": true,
+            "says": "Above 20 images a stricter per-image dimension limit applies; resize so neither dimension exceeds 2000 px, or keep the request to 20 or fewer image and document blocks."
+          },
+          {
+            "id": "d",
+            "text": "Move to a model with a 1M window, which lifts the per-side cap",
+            "correct": false,
+            "says": "Above 20 images a stricter per-image dimension limit applies; resize so neither dimension exceeds 2000 px, or keep the request to 20 or fewer image and document blocks."
+          }
+        ],
+        "origin": "course/30-vision-and-documents/01-images-limits-and-cost.md"
+      },
+      {
+        "id": "rb-064",
+        "stem": "A team sends PDFs through the Converse API on Amazon Bedrock and finds that Claude cannot discuss the charts inside them. What is the usual reason?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Charts are removed from every PDF before it is converted into page pictures, at least by default",
+            "correct": false,
+            "says": "Without citations enabled, Converse falls back to basic text extraction, which is the usual reason charts seem to be missing."
+          },
+          {
+            "id": "b",
+            "text": "Bedrock supports only PDFs whose pages hold no more than 600 words",
+            "correct": false,
+            "says": "Without citations enabled, Converse falls back to basic text extraction, which is the usual reason charts seem to be missing."
+          },
+          {
+            "id": "c",
+            "text": "The model reads PDFs by URL only, so base64 uploads drop the pictures",
+            "correct": false,
+            "says": "Without citations enabled, Converse falls back to basic text extraction, which is the usual reason charts seem to be missing."
+          },
+          {
+            "id": "d",
+            "text": "Without the citation setting, only plain text extraction is applied to pages",
+            "correct": true,
+            "says": "Without citations enabled, Converse falls back to basic text extraction, which is the usual reason charts seem to be missing."
+          }
+        ],
+        "origin": "course/30-vision-and-documents/02-pdfs-documents-and-the-practice.md"
+      },
+      {
+        "id": "rb-065",
+        "stem": "A computer-use reply holds four actions in order, and the early click fails. How must the loop answer?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Return an error for that step and the fixed skipped notice for every later step",
+            "correct": true,
+            "says": "Run blocks in order and stop at the first failure: is_error with a description for the failed one and the fixed text \"Not executed: an earlier computer action in this turn failed.\" for each later one."
+          },
+          {
+            "id": "b",
+            "text": "Run the remaining actions anyway and report only the click's error",
+            "correct": false,
+            "says": "Run blocks in order and stop at the first failure: is_error with a description for the failed one and the fixed text \"Not executed: an earlier computer action in this turn failed.\" for each later one."
+          },
+          {
+            "id": "c",
+            "text": "Answer only the first block, since the rest were never reached",
+            "correct": false,
+            "says": "Run blocks in order and stop at the first failure: is_error with a description for the failed one and the fixed text \"Not executed: an earlier computer action in this turn failed.\" for each later one."
+          },
+          {
+            "id": "d",
+            "text": "Skip the failed action silently and answer the rest as normal",
+            "correct": false,
+            "says": "Run blocks in order and stop at the first failure: is_error with a description for the failed one and the fixed text \"Not executed: an earlier computer action in this turn failed.\" for each later one."
+          }
+        ],
+        "origin": "course/31-computer-use/01-the-toolset-the-loop-and-scaling.md"
+      },
+      {
+        "id": "rb-066",
+        "stem": "A loop returns reduced screenshots of a 2560 by 1440 display, and Claude answers with a click at 698, 73. What must the loop do before clicking?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Click exactly where Claude said, since the coordinates are in real pixel space",
+            "correct": false,
+            "says": "Coordinates are in the pixel space of the image Claude saw: if you scale screenshots down, scale Claude's coordinates back up before applying them, and clamp them into the screen."
+          },
+          {
+            "id": "b",
+            "text": "Multiply the numbers by the scale factor, since the picture was smaller",
+            "correct": false,
+            "says": "Coordinates are in the pixel space of the image Claude saw: if you scale screenshots down, scale Claude's coordinates back up before applying them, and clamp them into the screen."
+          },
+          {
+            "id": "c",
+            "text": "Resize the next picture back up to the full display before returning it",
+            "correct": false,
+            "says": "Coordinates are in the pixel space of the image Claude saw: if you scale screenshots down, scale Claude's coordinates back up before applying them, and clamp them into the screen."
+          },
+          {
+            "id": "d",
+            "text": "Divide by the applied scale factor and clamp the result to the physical panel",
+            "correct": true,
+            "says": "Coordinates are in the pixel space of the image Claude saw: if you scale screenshots down, scale Claude's coordinates back up before applying them, and clamp them into the screen."
+          }
+        ],
+        "origin": "course/31-computer-use/01-the-toolset-the-loop-and-scaling.md"
+      },
+      {
+        "id": "rb-067",
+        "stem": "A computer-use loop asks a person to approve once at the start of a task, yet a reply completed a payment that nobody reviewed. What does the page require?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Another approval at the end of the task, once all actions have run",
+            "correct": false,
+            "says": "A batch can complete a multistep action within one turn, so the check belongs before each block runs, not once per reply and not at the start."
+          },
+          {
+            "id": "b",
+            "text": "A check ahead of every risky block, since a single turn finishes several steps",
+            "correct": true,
+            "says": "A batch can complete a multistep action within one turn, so the check belongs before each block runs, not once per reply and not at the start."
+          },
+          {
+            "id": "c",
+            "text": "A classifier setting, which makes confirmations unnecessary",
+            "correct": false,
+            "says": "A batch can complete a multistep action within one turn, so the check belongs before each block runs, not once per reply and not at the start."
+          },
+          {
+            "id": "d",
+            "text": "A longer system prompt asking the model to avoid payment pages",
+            "correct": false,
+            "says": "A batch can complete a multistep action within one turn, so the check belongs before each block runs, not once per reply and not at the start."
+          }
+        ],
+        "origin": "course/31-computer-use/02-safety-sandboxing-and-the-practice.md"
+      },
+      {
+        "id": "rb-068",
+        "stem": "A long agent loop keeps every screenshot, and after a few dozen turns requests start failing on image size although each capture was accepted earlier. What does the page explain?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Screenshots expire from the Files API after an hour and must be re-uploaded",
+            "correct": false,
+            "says": "Once a request carries more than 20 images, every image in it is held to a stricter per-side limit; resize to 2000 px or prune."
+          },
+          {
+            "id": "b",
+            "text": "The toolset downsizes old captures by half each turn until they are rejected, as a rule of thumb",
+            "correct": false,
+            "says": "Once a request carries more than 20 images, every image in it is held to a stricter per-side limit; resize to 2000 px or prune."
+          },
+          {
+            "id": "c",
+            "text": "Beyond twenty pictures in a single call, a tighter per-side cap applies to each",
+            "correct": true,
+            "says": "Once a request carries more than 20 images, every image in it is held to a stricter per-side limit; resize to 2000 px or prune."
+          },
+          {
+            "id": "d",
+            "text": "Each capture's cost doubles after the tenth, which breaches the size cap",
+            "correct": false,
+            "says": "Once a request carries more than 20 images, every image in it is held to a stricter per-side limit; resize to 2000 px or prune."
+          }
+        ],
+        "origin": "course/31-computer-use/02-safety-sandboxing-and-the-practice.md"
+      },
+      {
+        "id": "rb-069",
+        "stem": "A team wants read-only schema information that the application itself chooses how to use, with no model decision involved. Which primitive fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A tool, because the model should discover and invoke it automatically on demand",
+            "correct": false,
+            "says": "Resources are passive, read-only data sources controlled by the application; tools are model-controlled and prompts are user-controlled."
+          },
+          {
+            "id": "b",
+            "text": "A prompt, because a person picks it from a menu before each session starts",
+            "correct": false,
+            "says": "Resources are passive, read-only data sources controlled by the application; tools are model-controlled and prompts are user-controlled."
+          },
+          {
+            "id": "c",
+            "text": "A sampling request, because the server should ask the client for that context",
+            "correct": false,
+            "says": "Resources are passive, read-only data sources controlled by the application; tools are model-controlled and prompts are user-controlled."
+          },
+          {
+            "id": "d",
+            "text": "A resource, which the hosting program selects and consumes directly",
+            "correct": true,
+            "says": "Resources are passive, read-only data sources controlled by the application; tools are model-controlled and prompts are user-controlled."
+          }
+        ],
+        "origin": "course/32-mcp-fundamentals/01-hosts-clients-servers-and-primitives.md"
+      },
+      {
+        "id": "rb-070",
+        "stem": "A Python server function raises a plain ValueError whose message explains what to fix, but the model never retries with a better value. Why?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Only ToolError carries its wording to the client; other exceptions are reported without it",
+            "correct": true,
+            "says": "In the Python SDK, raise ToolError for an expected failure: the message of an exception that is not a ToolError is not shown to the client."
+          },
+          {
+            "id": "b",
+            "text": "ValueError is converted into a JSON-RPC protocol error that models are told to ignore in many setups",
+            "correct": false,
+            "says": "In the Python SDK, raise ToolError for an expected failure: the message of an exception that is not a ToolError is not shown to the client."
+          },
+          {
+            "id": "c",
+            "text": "The SDK retries ValueError on the server, so the model never sees a failure at all",
+            "correct": false,
+            "says": "In the Python SDK, raise ToolError for an expected failure: the message of an exception that is not a ToolError is not shown to the client."
+          },
+          {
+            "id": "d",
+            "text": "Messages longer than a single line are cut off before they reach the model",
+            "correct": false,
+            "says": "In the Python SDK, raise ToolError for an expected failure: the message of an exception that is not a ToolError is not shown to the client."
+          }
+        ],
+        "origin": "course/32-mcp-fundamentals/02-writing-a-server.md"
+      },
+      {
+        "id": "rb-071",
+        "stem": "A stdio server prints progress with print() and every client now fails to parse its messages. What is the fix?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Flush stdout after every print so that the lines are delivered whole",
+            "correct": false,
+            "says": "The server must not write anything to stdout that is not a valid MCP message; everything else goes to stderr."
+          },
+          {
+            "id": "b",
+            "text": "Direct diagnostics to a logger that writes to stderr",
+            "correct": true,
+            "says": "The server must not write anything to stdout that is not a valid MCP message; everything else goes to stderr."
+          },
+          {
+            "id": "c",
+            "text": "Prefix each printed line with a JSON-RPC version field to look valid",
+            "correct": false,
+            "says": "The server must not write anything to stdout that is not a valid MCP message; everything else goes to stderr."
+          },
+          {
+            "id": "d",
+            "text": "Run the server inside a container so that its output is kept isolated",
+            "correct": false,
+            "says": "The server must not write anything to stdout that is not a valid MCP message; everything else goes to stderr."
+          }
+        ],
+        "origin": "course/32-mcp-fundamentals/02-writing-a-server.md"
+      },
+      {
+        "id": "rb-072",
+        "stem": "A stdio server reads ./data.json and works in the developer's shell, but fails when a host starts it. What is the likely cause and fix?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The host strips file reads, so the data must be moved into a resource instead, as a rule of thumb",
+            "correct": false,
+            "says": "A client-launched server's working directory may be undefined, so use absolute paths in the configuration; command-line tests use the directory where you run them."
+          },
+          {
+            "id": "b",
+            "text": "The server inherits every environment variable, which hides the file from it",
+            "correct": false,
+            "says": "A client-launched server's working directory may be undefined, so use absolute paths in the configuration; command-line tests use the directory where you run them."
+          },
+          {
+            "id": "c",
+            "text": "The launch directory differs, so absolute paths belong in the client configuration",
+            "correct": true,
+            "says": "A client-launched server's working directory may be undefined, so use absolute paths in the configuration; command-line tests use the directory where you run them."
+          },
+          {
+            "id": "d",
+            "text": "Relative paths fail only on Windows, so forward slashes must replace them",
+            "correct": false,
+            "says": "A client-launched server's working directory may be undefined, so use absolute paths in the configuration; command-line tests use the directory where you run them."
+          }
+        ],
+        "origin": "course/32-mcp-fundamentals/03-clients-testing-and-debugging.md"
+      },
+      {
+        "id": "rb-073",
+        "stem": "A client parses the opaque string returned with an input-required result, adds a field to it, and sends it on retry. What does the specification say?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It is permitted, since the string is only a hint that the client may extend",
+            "correct": false,
+            "says": "The client MUST echo back the exact value and MUST NOT inspect, parse or modify it."
+          },
+          {
+            "id": "b",
+            "text": "It is permitted if the client signs the new version with its own key",
+            "correct": false,
+            "says": "The client MUST echo back the exact value and MUST NOT inspect, parse or modify it."
+          },
+          {
+            "id": "c",
+            "text": "It is required, since the client must add its own user identifier",
+            "correct": false,
+            "says": "The client MUST echo back the exact value and MUST NOT inspect, parse or modify it."
+          },
+          {
+            "id": "d",
+            "text": "It breaks the contract: the value must come back byte for byte, untouched",
+            "correct": true,
+            "says": "The client MUST echo back the exact value and MUST NOT inspect, parse or modify it."
+          }
+        ],
+        "origin": "course/33-mcp-advanced/01-round-trips-elicitation-and-notifications.md"
+      },
+      {
+        "id": "rb-074",
+        "stem": "A server must collect a person's payment credentials in the middle of a call. Which elicitation mode may it use?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The out-of-band link variant, which keeps the data away from the client and the LLM",
+            "correct": true,
+            "says": "Form mode must not request sensitive information; passwords, keys and payment credentials belong in URL mode, which keeps data out of band."
+          },
+          {
+            "id": "b",
+            "text": "Form mode, because a flat schema validates card numbers reliably enough",
+            "correct": false,
+            "says": "Form mode must not request sensitive information; passwords, keys and payment credentials belong in URL mode, which keeps data out of band."
+          },
+          {
+            "id": "c",
+            "text": "Either mode, since both are protected by the transport that the host uses",
+            "correct": false,
+            "says": "Form mode must not request sensitive information; passwords, keys and payment credentials belong in URL mode, which keeps data out of band."
+          },
+          {
+            "id": "d",
+            "text": "Neither mode, since elicitation may only ask a person for confirmations",
+            "correct": false,
+            "says": "Form mode must not request sensitive information; passwords, keys and payment credentials belong in URL mode, which keeps data out of band."
+          }
+        ],
+        "origin": "course/33-mcp-advanced/01-round-trips-elicitation-and-notifications.md"
+      },
+      {
+        "id": "rb-075",
+        "stem": "A remote MCP server takes any valid token from its authorization server, whatever service they were made for, and forwards it to a downstream API. What does the security guidance say?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Taking them is fine when the signature is valid and the issuer is trusted",
+            "correct": false,
+            "says": "Servers MUST validate that tokens were issued specifically for them and MUST NOT accept or transit any other tokens; passthrough is explicitly forbidden."
+          },
+          {
+            "id": "b",
+            "text": "Forwarding is fine when the downstream API is operated by the same company in many setups",
+            "correct": false,
+            "says": "Servers MUST validate that tokens were issued specifically for them and MUST NOT accept or transit any other tokens; passthrough is explicitly forbidden."
+          },
+          {
+            "id": "c",
+            "text": "Only those issued for that very endpoint are admitted, and none are relayed",
+            "correct": true,
+            "says": "Servers MUST validate that tokens were issued specifically for them and MUST NOT accept or transit any other tokens; passthrough is explicitly forbidden."
+          },
+          {
+            "id": "d",
+            "text": "Accepting them is fine if the list of supported scopes is kept short",
+            "correct": false,
+            "says": "Servers MUST validate that tokens were issued specifically for them and MUST NOT accept or transit any other tokens; passthrough is explicitly forbidden."
+          }
+        ],
+        "origin": "course/33-mcp-advanced/02-streamable-http-state-and-authorization.md"
+      },
+      {
+        "id": "rb-076",
+        "stem": "A system calls a model at each of three steps whose order is hard-wired, and its team calls it an agent. How does the article classify it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "An agent, because it calls a model several times during one task",
+            "correct": false,
+            "says": "The test is who decides the next step: a system whose sequence is written in code is a workflow, however much it calls itself an agent."
+          },
+          {
+            "id": "b",
+            "text": "A workflow, because the program rather than the LLM picks what runs next",
+            "correct": true,
+            "says": "The test is who decides the next step: a system whose sequence is written in code is a workflow, however much it calls itself an agent."
+          },
+          {
+            "id": "c",
+            "text": "An agent, because every step uses tools and feeds on earlier output on most systems",
+            "correct": false,
+            "says": "The test is who decides the next step: a system whose sequence is written in code is a workflow, however much it calls itself an agent."
+          },
+          {
+            "id": "d",
+            "text": "A router, since the sequence depends on which step ran just before",
+            "correct": false,
+            "says": "The test is who decides the next step: a system whose sequence is written in code is a workflow, however much it calls itself an agent."
+          }
+        ],
+        "origin": "course/34-workflows-and-agents/01-workflow-or-agent-and-the-first-patterns.md"
+      },
+      {
+        "id": "rb-077",
+        "stem": "A write-and-judge loop stops after its maximum rounds and returns the final draft, though a previous one was rated higher by the judge. What should it return?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The final draft, since it has had the most rounds of feedback",
+            "correct": false,
+            "says": "A refinement loop can get worse: keep the best-scoring draft, and when two tie the earliest wins."
+          },
+          {
+            "id": "b",
+            "text": "A blend of the best two drafts produced by one more writer call",
+            "correct": false,
+            "says": "A refinement loop can get worse: keep the best-scoring draft, and when two tie the earliest wins."
+          },
+          {
+            "id": "c",
+            "text": "No draft at all, since the loop did not reach the acceptance threshold",
+            "correct": false,
+            "says": "A refinement loop can get worse: keep the best-scoring draft, and when two tie the earliest wins."
+          },
+          {
+            "id": "d",
+            "text": "The top-scoring candidate, with the first of any ties winning",
+            "correct": true,
+            "says": "A refinement loop can get worse: keep the best-scoring draft, and when two tie the earliest wins."
+          }
+        ],
+        "origin": "course/34-workflows-and-agents/02-orchestrators-evaluators-agents-and-the-practice.md"
+      },
+      {
+        "id": "rb-078",
+        "stem": "In an orchestrator-workers run, every subtask fails. What does the page say should happen next?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The orchestrator writes the answer itself from the original task alone",
+            "correct": false,
+            "says": "When every worker failed nothing is combined, because a synthesis over no results is a made-up answer; a partial result is reported as partial."
+          },
+          {
+            "id": "b",
+            "text": "Nothing is combined, because synthesising over no results produces an invented answer",
+            "correct": true,
+            "says": "When every worker failed nothing is combined, because a synthesis over no results is a made-up answer; a partial result is reported as partial."
+          },
+          {
+            "id": "c",
+            "text": "The synthesis runs anyway on the empty list so that the caller sees a reply",
+            "correct": false,
+            "says": "When every worker failed nothing is combined, because a synthesis over no results is a made-up answer; a partial result is reported as partial."
+          },
+          {
+            "id": "d",
+            "text": "The whole run is retried with no limit on the number of attempts",
+            "correct": false,
+            "says": "When every worker failed nothing is combined, because a synthesis over no results is a made-up answer; a partial result is reported as partial."
+          }
+        ],
+        "origin": "course/34-workflows-and-agents/02-orchestrators-evaluators-agents-and-the-practice.md"
+      },
+      {
+        "id": "rb-079",
+        "stem": "A caller reads the final text from the last message of every run without looking at the subtype, and sometimes finds it absent. Why?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The SDK removes it whenever token usage is reported alongside the cost",
+            "correct": false,
+            "says": "The result field holds the final text and is only present on the success variant, so always check the subtype before reading it."
+          },
+          {
+            "id": "b",
+            "text": "It is returned only to callers that enable partial messages in the options",
+            "correct": false,
+            "says": "The result field holds the final text and is only present on the success variant, so always check the subtype before reading it."
+          },
+          {
+            "id": "c",
+            "text": "That field is present only on a normal finish, so check how it ended first",
+            "correct": true,
+            "says": "The result field holds the final text and is only present on the success variant, so always check the subtype before reading it."
+          },
+          {
+            "id": "d",
+            "text": "It appears just in the last streamed event, which most loops skip",
+            "correct": false,
+            "says": "The result field holds the final text and is only present on the success variant, so always check the subtype before reading it."
+          }
+        ],
+        "origin": "course/35-the-claude-agent-sdk/01-the-sdk-and-its-loop.md"
+      },
+      {
+        "id": "rb-080",
+        "stem": "A developer lists only Read in allowed_tools, expecting Claude to be unable to run Bash, but Bash calls still reach the permission callback. Why?",
+        "options": [
+          {
+            "id": "a",
+            "text": "That setting only grants approval in advance; it removes nothing from availability",
+            "correct": true,
+            "says": "allowed_tools auto-approves the tools you list and does not restrict Claude to only these tools; other tools fall through to the mode and the callback."
+          },
+          {
+            "id": "b",
+            "text": "Bash is built in, so no option can ever remove it from a running session",
+            "correct": false,
+            "says": "allowed_tools auto-approves the tools you list and does not restrict Claude to only these tools; other tools fall through to the mode and the callback."
+          },
+          {
+            "id": "c",
+            "text": "The callback runs before the list and overrides it for all shell tools",
+            "correct": false,
+            "says": "allowed_tools auto-approves the tools you list and does not restrict Claude to only these tools; other tools fall through to the mode and the callback."
+          },
+          {
+            "id": "d",
+            "text": "The list applies only when bypassPermissions is active",
+            "correct": false,
+            "says": "allowed_tools auto-approves the tools you list and does not restrict Claude to only these tools; other tools fall through to the mode and the callback."
+          }
+        ],
+        "origin": "course/35-the-claude-agent-sdk/02-tools-permissions-hooks-and-custom-tools.md"
+      },
+      {
+        "id": "rb-081",
+        "stem": "A path check sits in a permission callback, yet edits made under acceptEdits skip it. Where should a check that must run on every call live?",
+        "options": [
+          {
+            "id": "a",
+            "text": "In a hook attached before tool use, which is consulted ahead of all other steps",
+            "correct": true,
+            "says": "Auto-approved tools never reach canUseTool; to gate every call, use a PreToolUse hook, which runs before every other step."
+          },
+          {
+            "id": "b",
+            "text": "In an allow rule, since those are evaluated before the permission mode",
+            "correct": false,
+            "says": "Auto-approved tools never reach canUseTool; to gate every call, use a PreToolUse hook, which runs before every other step."
+          },
+          {
+            "id": "c",
+            "text": "In a second callback registered with a higher priority than the first",
+            "correct": false,
+            "says": "Auto-approved tools never reach canUseTool; to gate every call, use a PreToolUse hook, which runs before every other step."
+          },
+          {
+            "id": "d",
+            "text": "In the system prompt, which the SDK applies before any tool is requested",
+            "correct": false,
+            "says": "Auto-approved tools never reach canUseTool; to gate every call, use a PreToolUse hook, which runs before every other step."
+          }
+        ],
+        "origin": "course/35-the-claude-agent-sdk/02-tools-permissions-hooks-and-custom-tools.md"
+      },
+      {
+        "id": "rb-082",
+        "stem": "A team unit-tests only its policy function and ships, but in production an allow list pre-approves tools that the policy forbids. What should the tests have exercised?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Only the callback, with a real model run on live traffic for a few long hours, as a rule of thumb",
+            "correct": false,
+            "says": "The policy function can be right while the options builder leaves an allow list in; run the SDK against the stand-in so the whole path is exercised."
+          },
+          {
+            "id": "b",
+            "text": "The version of the SDK package, as it is pinned in a lock file",
+            "correct": false,
+            "says": "The policy function can be right while the options builder leaves an allow list in; run the SDK against the stand-in so the whole path is exercised."
+          },
+          {
+            "id": "c",
+            "text": "The whole path through the SDK, driven against a scripted stand-in for the binary",
+            "correct": true,
+            "says": "The policy function can be right while the options builder leaves an allow list in; run the SDK against the stand-in so the whole path is exercised."
+          },
+          {
+            "id": "d",
+            "text": "The hook alone, since the callback cannot be reached at all in tests",
+            "correct": false,
+            "says": "The policy function can be right while the options builder leaves an allow list in; run the SDK against the stand-in so the whole path is exercised."
+          }
+        ],
+        "origin": "course/35-the-claude-agent-sdk/03-driving-the-sdk-offline-and-the-practice.md"
+      },
+      {
+        "id": "rb-083",
+        "stem": "A session sets its own tools entry naming a single tool. What happens to the agent's other tools?",
+        "options": [
+          {
+            "id": "a",
+            "text": "They stay available, since the entry adds to the saved configuration",
+            "correct": false,
+            "says": "Overrides never merge with the agent's configuration, so a tools override must list every tool the session should have; the agent resource is untouched."
+          },
+          {
+            "id": "b",
+            "text": "They are absent for that run, because such settings replace rather than merge",
+            "correct": true,
+            "says": "Overrides never merge with the agent's configuration, so a tools override must list every tool the session should have; the agent resource is untouched."
+          },
+          {
+            "id": "c",
+            "text": "They are removed from the agent permanently, and its version number rises on most systems",
+            "correct": false,
+            "says": "Overrides never merge with the agent's configuration, so a tools override must list every tool the session should have; the agent resource is untouched."
+          },
+          {
+            "id": "d",
+            "text": "They remain, but each one switches to the always_ask policy",
+            "correct": false,
+            "says": "Overrides never merge with the agent's configuration, so a tools override must list every tool the session should have; the agent resource is untouched."
+          }
+        ],
+        "origin": "course/36-managed-and-self-hosted-agents/01-what-managed-agents-is.md"
+      },
+      {
+        "id": "rb-084",
+        "stem": "A request creating a cloud environment leaves out the field that controls outbound access. What does the API apply?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Closed access to everything except the package managers listed in packages",
+            "correct": false,
+            "says": "A create request that omits networking gets unrestricted: full outbound access except a general safety blocklist, so set it explicitly."
+          },
+          {
+            "id": "b",
+            "text": "Access limited to the hosts that the agent's MCP servers declare",
+            "correct": false,
+            "says": "A create request that omits networking gets unrestricted: full outbound access except a general safety blocklist, so set it explicitly."
+          },
+          {
+            "id": "c",
+            "text": "A rejected request, because the field is required on every cloud environment, as a rule of thumb",
+            "correct": false,
+            "says": "A create request that omits networking gets unrestricted: full outbound access except a general safety blocklist, so set it explicitly."
+          },
+          {
+            "id": "d",
+            "text": "Open connectivity to nearly every host, apart from a general safety blocklist",
+            "correct": true,
+            "says": "A create request that omits networking gets unrestricted: full outbound access except a general safety blocklist, so set it explicitly."
+          }
+        ],
+        "origin": "course/36-managed-and-self-hosted-agents/02-environments-policies-budgets-and-self-hosting.md"
+      },
+      {
+        "id": "rb-085",
+        "stem": "A compliance rule says a person must review each shell command before it executes in a hosted agent. Which permission policy fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "auto, because the server evaluates every call as a human checkpoint would, at least at the start",
+            "correct": false,
+            "says": "auto is not a human checkpoint: if the server judges a call safe it runs before anyone sees it, and its effects might not be reversible."
+          },
+          {
+            "id": "b",
+            "text": "always_ask, because the automatic setting lets calls it deems safe run unseen",
+            "correct": true,
+            "says": "auto is not a human checkpoint: if the server judges a call safe it runs before anyone sees it, and its effects might not be reversible."
+          },
+          {
+            "id": "c",
+            "text": "always_allow, because the person can review the event stream afterwards",
+            "correct": false,
+            "says": "auto is not a human checkpoint: if the server judges a call safe it runs before anyone sees it, and its effects might not be reversible."
+          },
+          {
+            "id": "d",
+            "text": "auto, because denials cannot be overridden by the client application",
+            "correct": false,
+            "says": "auto is not a human checkpoint: if the server judges a call safe it runs before anyone sees it, and its effects might not be reversible."
+          }
+        ],
+        "origin": "course/36-managed-and-self-hosted-agents/02-environments-policies-budgets-and-self-hosting.md"
+      },
+      {
+        "id": "rb-086",
+        "stem": "A graph-based run crashes in its third node after two nodes have finished. What does restarting from the last checkpoint avoid?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Repeating the completed steps, and paying again for their model calls",
+            "correct": true,
+            "says": "A checkpoint is a copy of the state at a point in the graph; the run resumes without repeating earlier nodes, so model calls already paid for are not made again."
+          },
+          {
+            "id": "b",
+            "text": "Any failure in the third node, since the checkpoint contains its result",
+            "correct": false,
+            "says": "A checkpoint is a copy of the state at a point in the graph; the run resumes without repeating earlier nodes, so model calls already paid for are not made again."
+          },
+          {
+            "id": "c",
+            "text": "Loading the prompts again from the vendor's hosted service",
+            "correct": false,
+            "says": "A checkpoint is a copy of the state at a point in the graph; the run resumes without repeating earlier nodes, so model calls already paid for are not made again."
+          },
+          {
+            "id": "d",
+            "text": "Writing the route again, since the checkpoint stores the edges",
+            "correct": false,
+            "says": "A checkpoint is a copy of the state at a point in the graph; the run resumes without repeating earlier nodes, so model calls already paid for are not made again."
+          }
+        ],
+        "origin": "course/37-agent-frameworks-compared/01-three-families-of-agent-frameworks.md"
+      },
+      {
+        "id": "rb-087",
+        "stem": "In a typed agent framework, a reply fails validation against the declared output type. What happens next in the usual design?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The invalid reply is returned to the caller, flagged as unverified on most systems",
+            "correct": false,
+            "says": "A reply that does not validate is refused, and the failure goes back to the model as a retry message so the run continues."
+          },
+          {
+            "id": "b",
+            "text": "The framework switches to a graph and re-routes to a repair node",
+            "correct": false,
+            "says": "A reply that does not validate is refused, and the failure goes back to the model as a retry message so the run continues."
+          },
+          {
+            "id": "c",
+            "text": "The run ends at once, because validation failures are not retried",
+            "correct": false,
+            "says": "A reply that does not validate is refused, and the failure goes back to the model as a retry message so the run continues."
+          },
+          {
+            "id": "d",
+            "text": "The refusal goes back to the model as feedback, and the loop proceeds",
+            "correct": true,
+            "says": "A reply that does not validate is refused, and the failure goes back to the model as a retry message so the run continues."
+          }
+        ],
+        "origin": "course/37-agent-frameworks-compared/01-three-families-of-agent-frameworks.md"
+      },
+      {
+        "id": "rb-088",
+        "stem": "A task runs for hours, must survive a restart of the team's own service, and the team wants no sandbox to operate. Which option does the page's table favour?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A Messages API loop, since it gives exact control over every step",
+            "correct": false,
+            "says": "Managed Agents is for long-running or asynchronous tasks when you want no sandbox to run; the session stores history server-side."
+          },
+          {
+            "id": "b",
+            "text": "The Agent SDK, since it embeds the loop in the team's own process",
+            "correct": false,
+            "says": "Managed Agents is for long-running or asynchronous tasks when you want no sandbox to run; the session stores history server-side."
+          },
+          {
+            "id": "c",
+            "text": "A hosted harness, which stores the history on the provider's side",
+            "correct": true,
+            "says": "Managed Agents is for long-running or asynchronous tasks when you want no sandbox to run; the session stores history server-side."
+          },
+          {
+            "id": "d",
+            "text": "A typed framework, since validated output makes restarts safe",
+            "correct": false,
+            "says": "Managed Agents is for long-running or asynchronous tasks when you want no sandbox to run; the session stores history server-side."
+          }
+        ],
+        "origin": "course/37-agent-frameworks-compared/02-framework-or-sdk.md"
+      },
+      {
+        "id": "rb-089",
+        "stem": "A cloned project's committed configuration sets defaultMode to bypassPermissions. In which mode does a session start?",
+        "options": [
+          {
+            "id": "a",
+            "text": "bypassPermissions, because the committed value applies from any settings file",
+            "correct": false,
+            "says": "A bypassPermissions value in .claude/settings.json or settings.local.json does not take effect, and the session starts in Manual mode."
+          },
+          {
+            "id": "b",
+            "text": "plan, since an ignored value falls back to read-only exploration",
+            "correct": false,
+            "says": "A bypassPermissions value in .claude/settings.json or settings.local.json does not take effect, and the session starts in Manual mode."
+          },
+          {
+            "id": "c",
+            "text": "auto, because the classifier takes over whenever bypass is refused",
+            "correct": false,
+            "says": "A bypassPermissions value in .claude/settings.json or settings.local.json does not take effect, and the session starts in Manual mode."
+          },
+          {
+            "id": "d",
+            "text": "Manual, because a repository-supplied file cannot grant that value",
+            "correct": true,
+            "says": "A bypassPermissions value in .claude/settings.json or settings.local.json does not take effect, and the session starts in Manual mode."
+          }
+        ],
+        "origin": "course/38-claude-code-for-developers/01-install-the-loop-and-permission-modes.md"
+      },
+      {
+        "id": "rb-090",
+        "stem": "One layer denies Bash(aws *) while another allows the narrower Bash(aws s3 ls). What happens to that exact command?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It runs, because the narrower rule is more specific and so takes precedence",
+            "correct": false,
+            "says": "Rules are evaluated deny, then ask, then allow, and specificity does not change the order: an allow rule cannot carve an exception out of a deny rule."
+          },
+          {
+            "id": "b",
+            "text": "It is blocked, since prohibitions are checked first, however specific the other rule",
+            "correct": true,
+            "says": "Rules are evaluated deny, then ask, then allow, and specificity does not change the order: an allow rule cannot carve an exception out of a deny rule."
+          },
+          {
+            "id": "c",
+            "text": "It asks, since the two conflicting rules cancel and fall back to the mode",
+            "correct": false,
+            "says": "Rules are evaluated deny, then ask, then allow, and specificity does not change the order: an allow rule cannot carve an exception out of a deny rule."
+          },
+          {
+            "id": "d",
+            "text": "It runs after workspace trust, which lifts the broader rule for the session",
+            "correct": false,
+            "says": "Rules are evaluated deny, then ask, then allow, and specificity does not change the order: an allow rule cannot carve an exception out of a deny rule."
+          }
+        ],
+        "origin": "course/38-claude-code-for-developers/02-memory-settings-and-permission-rules.md"
+      },
+      {
+        "id": "rb-091",
+        "stem": "A project memory file has grown to 600 lines and Claude follows its instructions less closely. What does the documentation advise?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Split it using imports, which removes the added context cost",
+            "correct": false,
+            "says": "Target under 200 lines per file: longer files consume more context and reduce adherence, and imports do not reduce the context cost."
+          },
+          {
+            "id": "b",
+            "text": "Move every rule into the user-level file so that the project copy stays short",
+            "correct": false,
+            "says": "Target under 200 lines per file: longer files consume more context and reduce adherence, and imports do not reduce the context cost."
+          },
+          {
+            "id": "c",
+            "text": "Aim below two hundred, since extra length costs context and lowers adherence",
+            "correct": true,
+            "says": "Target under 200 lines per file: longer files consume more context and reduce adherence, and imports do not reduce the context cost."
+          },
+          {
+            "id": "d",
+            "text": "Add emphasis words to the most important rules to restore adherence",
+            "correct": false,
+            "says": "Target under 200 lines per file: longer files consume more context and reduce adherence, and imports do not reduce the context cost."
+          }
+        ],
+        "origin": "course/38-claude-code-for-developers/02-memory-settings-and-permission-rules.md"
+      },
+      {
+        "id": "rb-092",
+        "stem": "A pipeline step runs claude -p with --output-format json, and its output differs between developers' machines. What explains it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "No flag skips auto-discovery, so each checkout adds its own hooks and servers",
+            "correct": true,
+            "says": "--bare skips auto-discovery of hooks, skills, MCP servers and CLAUDE.md, so you get the same result on every machine; without it the working directory configures the run."
+          },
+          {
+            "id": "b",
+            "text": "JSON output is generated with a random key order unless every key gets sorted",
+            "correct": false,
+            "says": "--bare skips auto-discovery of hooks, skills, MCP servers and CLAUDE.md, so you get the same result on every machine; without it the working directory configures the run."
+          },
+          {
+            "id": "c",
+            "text": "The -p sessions share one global conversation that other users have extended",
+            "correct": false,
+            "says": "--bare skips auto-discovery of hooks, skills, MCP servers and CLAUDE.md, so you get the same result on every machine; without it the working directory configures the run."
+          },
+          {
+            "id": "d",
+            "text": "The default permission mode differs for each operating system in use",
+            "correct": false,
+            "says": "--bare skips auto-discovery of hooks, skills, MCP servers and CLAUDE.md, so you get the same result on every machine; without it the working directory configures the run."
+          }
+        ],
+        "origin": "course/38-claude-code-for-developers/03-commands-headless-runs-and-the-practice.md"
+      },
+      {
+        "id": "rb-093",
+        "stem": "A skill's description reads only \"Release helper\", and Claude never starts it when people ask to ship a version. What does the page advise?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Move the folder to the enterprise location, which always outranks other matches",
+            "correct": false,
+            "says": "Claude matches the request against the description, so it needs keywords users would naturally say and the key use case first."
+          },
+          {
+            "id": "b",
+            "text": "Set disable-model-invocation to true so that Claude treats it as a priority",
+            "correct": false,
+            "says": "Claude matches the request against the description, so it needs keywords users would naturally say and the key use case first."
+          },
+          {
+            "id": "c",
+            "text": "State when it applies, using phrases a user would naturally say",
+            "correct": true,
+            "says": "Claude matches the request against the description, so it needs keywords users would naturally say and the key use case first."
+          },
+          {
+            "id": "d",
+            "text": "Lengthen the body of the file, since matching reads the instructions first",
+            "correct": false,
+            "says": "Claude matches the request against the description, so it needs keywords users would naturally say and the key use case first."
+          }
+        ],
+        "origin": "course/39-extending-claude-code/01-skills-and-how-they-compare.md"
+      },
+      {
+        "id": "rb-094",
+        "stem": "A skill that tags releases declares allowed-tools as the bare name of the shell tool. What does that grant for the turn?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Approval for any command whatsoever, which is why patterns should be listed instead",
+            "correct": true,
+            "says": "A bare Bash approves every shell command for that turn, turning a narrow skill into an open one; the grant goes through the normal permission flow, so a deny rule still wins."
+          },
+          {
+            "id": "b",
+            "text": "Approval for just the commands that the skill body mentions explicitly by name, at least at the start",
+            "correct": false,
+            "says": "A bare Bash approves every shell command for that turn, turning a narrow skill into an open one; the grant goes through the normal permission flow, so a deny rule still wins."
+          },
+          {
+            "id": "c",
+            "text": "Nothing at all, because a pre-approval needs a pattern to take effect",
+            "correct": false,
+            "says": "A bare Bash approves every shell command for that turn, turning a narrow skill into an open one; the grant goes through the normal permission flow, so a deny rule still wins."
+          },
+          {
+            "id": "d",
+            "text": "Approval that overrides any matching deny rule for the same turn",
+            "correct": false,
+            "says": "A bare Bash approves every shell command for that turn, turning a narrow skill into an open one; the grant goes through the normal permission flow, so a deny rule still wins."
+          }
+        ],
+        "origin": "course/39-extending-claude-code/01-skills-and-how-they-compare.md"
+      },
+      {
+        "id": "rb-095",
+        "stem": "A PreToolUse hook script prints a reason and exits with status 1 when it sees a forbidden command. What happens to the call?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It is blocked, because any nonzero code means that the check failed",
+            "correct": false,
+            "says": "Only exit 2, or exit 0 with a JSON deny, blocks; any other code is a non-blocking error, so treat it as a bug in the hook."
+          },
+          {
+            "id": "b",
+            "text": "It is blocked only if standard error holds the reason text",
+            "correct": false,
+            "says": "Only exit 2, or exit 0 with a JSON deny, blocks; any other code is a non-blocking error, so treat it as a bug in the hook."
+          },
+          {
+            "id": "c",
+            "text": "It asks the person, since code 1 maps to the ask decision",
+            "correct": false,
+            "says": "Only exit 2, or exit 0 with a JSON deny, blocks; any other code is a non-blocking error, so treat it as a bug in the hook."
+          },
+          {
+            "id": "d",
+            "text": "It goes ahead as a non-blocking error; only code 2 or a JSON deny stops it",
+            "correct": true,
+            "says": "Only exit 2, or exit 0 with a JSON deny, blocks; any other code is a non-blocking error, so treat it as a bug in the hook."
+          }
+        ],
+        "origin": "course/39-extending-claude-code/02-subagents-and-hooks.md"
+      },
+      {
+        "id": "rb-096",
+        "stem": "A plugin lists another plugin as a dependency by bare name. The dependency's next release renames a tool the first one calls. What happens when users update?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Nothing changes, since a dependency is locked at the version first installed",
+            "correct": false,
+            "says": "Without a version constraint a dependency moves to each new release, which breaks your plugin; with ~2.1.0 users keep receiving 2.1.x patches."
+          },
+          {
+            "id": "b",
+            "text": "Everyone moves up automatically and breaks; a patch-only range such as ~2.1.0 would hold them back",
+            "correct": true,
+            "says": "Without a version constraint a dependency moves to each new release, which breaks your plugin; with ~2.1.0 users keep receiving 2.1.x patches."
+          },
+          {
+            "id": "c",
+            "text": "The update is refused until the author publishes a new version of the plugin",
+            "correct": false,
+            "says": "Without a version constraint a dependency moves to each new release, which breaks your plugin; with ~2.1.0 users keep receiving 2.1.x patches."
+          },
+          {
+            "id": "d",
+            "text": "Only users on another marketplace are affected, because cross-marketplace installs are automatic, at least at the start",
+            "correct": false,
+            "says": "Without a version constraint a dependency moves to each new release, which breaks your plugin; with ~2.1.0 users keep receiving 2.1.x patches."
+          }
+        ],
+        "origin": "course/39-extending-claude-code/03-plugins-sharing-and-the-practice.md"
+      },
+      {
+        "id": "rb-097",
+        "stem": "One developer's preferred model and a path on their own machine were committed in the team-wide configuration, and teammates now inherit them. Where do such values belong?",
+        "options": [
+          {
+            "id": "a",
+            "text": "In the user-level file, which the repository's team then reads on every checkout",
+            "correct": false,
+            "says": "Personal overrides go in the git-ignored .claude/settings.local.json; shared choices go in .claude/settings.json, which is committed and reviewed like code."
+          },
+          {
+            "id": "b",
+            "text": "In CLAUDE.md, since the memory file is private to each contributor",
+            "correct": false,
+            "says": "Personal overrides go in the git-ignored .claude/settings.local.json; shared choices go in .claude/settings.json, which is committed and reviewed like code."
+          },
+          {
+            "id": "c",
+            "text": "In the untracked counterpart named settings.local.json, which stays out of version control",
+            "correct": true,
+            "says": "Personal overrides go in the git-ignored .claude/settings.local.json; shared choices go in .claude/settings.json, which is committed and reviewed like code."
+          },
+          {
+            "id": "d",
+            "text": "In managed settings, which individual developers can still override at will",
+            "correct": false,
+            "says": "Personal overrides go in the git-ignored .claude/settings.local.json; shared choices go in .claude/settings.json, which is committed and reviewed like code."
+          }
+        ],
+        "origin": "course/40-claude-in-the-software-life-cycle/01-git-committed-configuration-and-versioned-prompts.md"
+      },
+      {
+        "id": "rb-098",
+        "stem": "A workflow meant to answer comments addressed to the bot starts a runner for every comment in the repository, and the minutes add up. What is missing?",
+        "options": [
+          {
+            "id": "a",
+            "text": "An if condition on the job that tests the posted text for the @claude handle",
+            "correct": true,
+            "says": "Without the if guard a runner starts for every comment, so cost follows comment volume; the job should start only when the comment mentions @claude."
+          },
+          {
+            "id": "b",
+            "text": "A concurrency group keyed on the comment author's login name",
+            "correct": false,
+            "says": "Without the if guard a runner starts for every comment, so cost follows comment volume; the job should start only when the comment mentions @claude."
+          },
+          {
+            "id": "c",
+            "text": "A timeout on the job, which stops runners from starting for unrelated events",
+            "correct": false,
+            "says": "Without the if guard a runner starts for every comment, so cost follows comment volume; the job should start only when the comment mentions @claude."
+          },
+          {
+            "id": "d",
+            "text": "A lower value of --max-turns, which makes each run cheaper to operate",
+            "correct": false,
+            "says": "Without the if guard a runner starts for every comment, so cost follows comment volume; the job should start only when the comment mentions @claude."
+          }
+        ],
+        "origin": "course/40-claude-in-the-software-life-cycle/02-ci-code-review-and-repository-events.md"
+      },
+      {
+        "id": "rb-099",
+        "stem": "A team enables Anthropic's pull request review product and expects a failing finding to stop the merge button. What does the page say?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It blocks only when a finding is tagged at the highest severity level",
+            "correct": false,
+            "says": "The check run always completes with a neutral conclusion so it never blocks merging through branch protection rules; it advises, and a person merges."
+          },
+          {
+            "id": "b",
+            "text": "Its check always finishes neutral, so protection rules never block on its comments",
+            "correct": true,
+            "says": "The check run always completes with a neutral conclusion so it never blocks merging through branch protection rules; it advises, and a person merges."
+          },
+          {
+            "id": "c",
+            "text": "It blocks if REVIEW.md lists the changed file as a mandatory check",
+            "correct": false,
+            "says": "The check run always completes with a neutral conclusion so it never blocks merging through branch protection rules; it advises, and a person merges."
+          },
+          {
+            "id": "d",
+            "text": "It blocks until a person approves each inline comment that it posted",
+            "correct": false,
+            "says": "The check run always completes with a neutral conclusion so it never blocks merging through branch protection rules; it advises, and a person merges."
+          }
+        ],
+        "origin": "course/40-claude-in-the-software-life-cycle/02-ci-code-review-and-repository-events.md"
+      },
+      {
+        "id": "rb-100",
+        "stem": "An application pastes inbound email text between its own delimiter tags, and one email closes the tag and adds a fake system block. What structure does the page prescribe?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A longer and more unusual pair of tags that an attacker is unlikely to guess, at least at the start",
+            "correct": false,
+            "says": "JSON escaping provides unambiguous delimiters, so an attacker cannot close a quote or a tag and break out; deliver untrusted content inside tool results and say where it came from."
+          },
+          {
+            "id": "b",
+            "text": "A line in the user turn telling Claude to disregard anything inside the tags",
+            "correct": false,
+            "says": "JSON escaping provides unambiguous delimiters, so an attacker cannot close a quote or a tag and break out; deliver untrusted content inside tool results and say where it came from."
+          },
+          {
+            "id": "c",
+            "text": "A pattern list that blocks any text containing the word system",
+            "correct": false,
+            "says": "JSON escaping provides unambiguous delimiters, so an attacker cannot close a quote or a tag and break out; deliver untrusted content inside tool results and say where it came from."
+          },
+          {
+            "id": "d",
+            "text": "A JSON-encoded string inside a tool result that names the origin of its content",
+            "correct": true,
+            "says": "JSON escaping provides unambiguous delimiters, so an attacker cannot close a quote or a tag and break out; deliver untrusted content inside tool results and say where it came from."
+          }
+        ],
+        "origin": "course/41-security-and-safety/01-injection-jailbreaks-and-untrusted-input.md"
+      },
+      {
+        "id": "rb-101",
+        "stem": "A team configures the Bash sandbox to deny reads of its secrets folder, yet the agent still opens that folder through its own document viewer. Why?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Sandbox deny entries apply only after a full restart of the whole session",
+            "correct": false,
+            "says": "The sandbox covers shell commands only; Claude's file tools, MCP servers and hooks run outside it, and the built-in file tools follow permission rules."
+          },
+          {
+            "id": "b",
+            "text": "The sandbox protects writes on disk but never restricts any reads at all",
+            "correct": false,
+            "says": "The sandbox covers shell commands only; Claude's file tools, MCP servers and hooks run outside it, and the built-in file tools follow permission rules."
+          },
+          {
+            "id": "c",
+            "text": "Native Windows enforces deny entries more loosely than Linux does for shells",
+            "correct": false,
+            "says": "The sandbox covers shell commands only; Claude's file tools, MCP servers and hooks run outside it, and the built-in file tools follow permission rules."
+          },
+          {
+            "id": "d",
+            "text": "Only shell commands are confined; the other capabilities obey permission rules instead",
+            "correct": true,
+            "says": "The sandbox covers shell commands only; Claude's file tools, MCP servers and hooks run outside it, and the built-in file tools follow permission rules."
+          }
+        ],
+        "origin": "course/41-security-and-safety/02-least-privilege-hooks-sandboxes-and-secrets.md"
+      },
+      {
+        "id": "rb-102",
+        "stem": "A team's only defence against injected instructions is a list of regular expressions for known attack wording. What does the page conclude?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It is sufficient when the list is extended each time a new wording is reported",
+            "correct": false,
+            "says": "A list of patterns catches the phrasing someone thought of and misses the paraphrase, so it is one layer beside structure and privilege."
+          },
+          {
+            "id": "b",
+            "text": "It is the weakest layer, since a paraphrase slips past it; add structure and privilege",
+            "correct": true,
+            "says": "A list of patterns catches the phrasing someone thought of and misses the paraphrase, so it is one layer beside structure and privilege."
+          },
+          {
+            "id": "c",
+            "text": "It is stronger than a model-based screen because patterns are exact",
+            "correct": false,
+            "says": "A list of patterns catches the phrasing someone thought of and misses the paraphrase, so it is one layer beside structure and privilege."
+          },
+          {
+            "id": "d",
+            "text": "It is unnecessary once the system prompt says that tool output is data",
+            "correct": false,
+            "says": "A list of patterns catches the phrasing someone thought of and misses the paraphrase, so it is one layer beside structure and privilege."
+          }
+        ],
+        "origin": "course/41-security-and-safety/03-guardrails-monitoring-and-the-practice.md"
+      },
+      {
+        "id": "rb-103",
+        "stem": "A team's monitoring raises an alert after three denials by one actor, but it also counts every request for human approval as a denial, and real attacks get buried. What fix does the page imply?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Raise the threshold to thirty denials so that alerts become rare",
+            "correct": false,
+            "says": "An ask is the gate working, and alerts on it bury the real ones; the practice treats a question to a person as a normal event and not a denial."
+          },
+          {
+            "id": "b",
+            "text": "Stop recording arguments so that the log volume drops",
+            "correct": false,
+            "says": "An ask is the gate working, and alerts on it bury the real ones; the practice treats a question to a person as a normal event and not a denial."
+          },
+          {
+            "id": "c",
+            "text": "Treat queries to a person as ordinary events and leave them out of the tally",
+            "correct": true,
+            "says": "An ask is the gate working, and alerts on it bury the real ones; the practice treats a question to a person as a normal event and not a denial."
+          },
+          {
+            "id": "d",
+            "text": "Switch the gate to allow mode for actors who were asked before",
+            "correct": false,
+            "says": "An ask is the gate working, and alerts on it bury the real ones; the practice treats a question to a person as a normal event and not a denial."
+          }
+        ],
+        "origin": "course/41-security-and-safety/03-guardrails-monitoring-and-the-practice.md"
+      },
+      {
+        "id": "rb-104",
+        "stem": "A team can hand-grade ten items with great care or auto-grade a hundred items with less signal per item. Which does the page favour?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The bigger scripted collection, since breadth outweighs polish on each",
+            "correct": true,
+            "says": "More questions with slightly lower signal and automated grading is better than fewer questions with high-quality human hand-graded evals."
+          },
+          {
+            "id": "b",
+            "text": "The small hand-graded set, since every grade carries more signal than a scripted one",
+            "correct": false,
+            "says": "More questions with slightly lower signal and automated grading is better than fewer questions with high-quality human hand-graded evals."
+          },
+          {
+            "id": "c",
+            "text": "Either, provided both are graded by the same person every time",
+            "correct": false,
+            "says": "More questions with slightly lower signal and automated grading is better than fewer questions with high-quality human hand-graded evals."
+          },
+          {
+            "id": "d",
+            "text": "Neither, since a held-out slice replaces any set that the team builds",
+            "correct": false,
+            "says": "More questions with slightly lower signal and automated grading is better than fewer questions with high-quality human hand-graded evals."
+          }
+        ],
+        "origin": "course/42-evaluation/01-success-criteria-and-test-sets.md"
+      },
+      {
+        "id": "rb-105",
+        "stem": "A model-graded check receives the reply \"Score: 4, because it is polite\" instead of a bare number. How does the course treat it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "As unreadable, which fails the case and is tallied in the report",
+            "correct": true,
+            "says": "A reply that is not a bare score counts as ungradable and an ungradable case fails; count them so a drift in the grader is visible."
+          },
+          {
+            "id": "b",
+            "text": "As a pass, because the number four is clearly present in the text",
+            "correct": false,
+            "says": "A reply that is not a bare score counts as ungradable and an ungradable case fails; count them so a drift in the grader is visible."
+          },
+          {
+            "id": "c",
+            "text": "As a pass if four meets the threshold, ignoring the explanation that follows it",
+            "correct": false,
+            "says": "A reply that is not a bare score counts as ungradable and an ungradable case fails; count them so a drift in the grader is visible."
+          },
+          {
+            "id": "d",
+            "text": "As a retry of the grader with a higher temperature setting each time",
+            "correct": false,
+            "says": "A reply that is not a bare score counts as ungradable and an ungradable case fails; count them so a drift in the grader is visible."
+          }
+        ],
+        "origin": "course/42-evaluation/02-code-graded-and-model-graded-evals.md"
+      },
+      {
+        "id": "rb-106",
+        "stem": "A prompt edit raises the overall pass rate, fixes two edge cases and breaks a third that passed before. What does the page say?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Ship it, since the average improved and two failures became passes",
+            "correct": false,
+            "says": "An average never excuses a regression: if a case passed before and fails now, a person looks at it, and a removed case fails the comparison."
+          },
+          {
+            "id": "b",
+            "text": "Someone must examine the newly failing item, since an average never excuses a regression",
+            "correct": true,
+            "says": "An average never excuses a regression: if a case passed before and fails now, a person looks at it, and a removed case fails the comparison."
+          },
+          {
+            "id": "c",
+            "text": "Revert it automatically, since any change that breaks a case is rejected",
+            "correct": false,
+            "says": "An average never excuses a regression: if a case passed before and fails now, a person looks at it, and a removed case fails the comparison."
+          },
+          {
+            "id": "d",
+            "text": "Delete the failing case from the set so that the comparison is clean",
+            "correct": false,
+            "says": "An average never excuses a regression: if a case passed before and fails now, a person looks at it, and a removed case fails the comparison."
+          }
+        ],
+        "origin": "course/42-evaluation/03-refining-against-a-set-and-regression-runs.md"
+      },
+      {
+        "id": "rb-107",
+        "stem": "A migration to a newer model id is planned for next week. Where does the page place the eval run?",
+        "options": [
+          {
+            "id": "a",
+            "text": "After the switch, once production traffic has produced enough real failures",
+            "correct": false,
+            "says": "A new model id changes behaviour, so the regression run sits before the id is changed in configuration; each rejected setting becomes a failed case the same afternoon."
+          },
+          {
+            "id": "b",
+            "text": "Only when the prompt text is edited, since ids do not change behaviour",
+            "correct": false,
+            "says": "A new model id changes behaviour, so the regression run sits before the id is changed in configuration; each rejected setting becomes a failed case the same afternoon."
+          },
+          {
+            "id": "c",
+            "text": "Nightly only, because per-change runs are too slow to be useful",
+            "correct": false,
+            "says": "A new model id changes behaviour, so the regression run sits before the id is changed in configuration; each rejected setting becomes a failed case the same afternoon."
+          },
+          {
+            "id": "d",
+            "text": "Ahead of the switch, so rejected settings fail a case instead of a request in production",
+            "correct": true,
+            "says": "A new model id changes behaviour, so the regression run sits before the id is changed in configuration; each rejected setting becomes a failed case the same afternoon."
+          }
+        ],
+        "origin": "course/42-evaluation/03-refining-against-a-set-and-regression-runs.md"
+      },
+      {
+        "id": "rb-108",
+        "stem": "Dashboards built on error rates show nothing wrong, yet some replies carry stop_reason refusal. What does the page say about handling them?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Count them in the error rate by raising an exception on any non-end_turn stop",
+            "correct": false,
+            "says": "Refusals are responses, not errors, so error-rate monitoring will not surface them; re-sending to the same model usually repeats the refusal."
+          },
+          {
+            "id": "b",
+            "text": "Resend each one unchanged to the same model, which will usually agree to answer in everyday use",
+            "correct": false,
+            "says": "Refusals are responses, not errors, so error-rate monitoring will not surface them; re-sending to the same model usually repeats the refusal."
+          },
+          {
+            "id": "c",
+            "text": "Track them as their own signal and answer with a fallback model or a fresh context",
+            "correct": true,
+            "says": "Refusals are responses, not errors, so error-rate monitoring will not surface them; re-sending to the same model usually repeats the refusal."
+          },
+          {
+            "id": "d",
+            "text": "Increase max_tokens, since refusals indicate that the limit was too low",
+            "correct": false,
+            "says": "Refusals are responses, not errors, so error-rate monitoring will not surface them; re-sending to the same model usually repeats the refusal."
+          }
+        ],
+        "origin": "course/43-debugging-claude-applications/01-failure-types-origins-and-recoveries.md"
+      },
+      {
+        "id": "rb-109",
+        "stem": "Right after a model id changed, every call fails with a 400 whose message points to adaptive thinking and effort. Which recovery fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Rewrite the request body to drop the rejected setting; retrying cannot succeed",
+            "correct": true,
+            "says": "A migration error is an integration failure the new model reveals; the recovery is to change the request, and no retry, timeout or prompt change cures it."
+          },
+          {
+            "id": "b",
+            "text": "Back off with jitter and retry, since the service is turning away the load for now",
+            "correct": false,
+            "says": "A migration error is an integration failure the new model reveals; the recovery is to change the request, and no retry, timeout or prompt change cures it."
+          },
+          {
+            "id": "c",
+            "text": "Stream the call, because the error means that the generation is too long",
+            "correct": false,
+            "says": "A migration error is an integration failure the new model reveals; the recovery is to change the request, and no retry, timeout or prompt change cures it."
+          },
+          {
+            "id": "d",
+            "text": "Escalate to a person who can raise the account's limits",
+            "correct": false,
+            "says": "A migration error is an integration failure the new model reveals; the recovery is to change the request, and no retry, timeout or prompt change cures it."
+          }
+        ],
+        "origin": "course/43-debugging-claude-applications/01-failure-types-origins-and-recoveries.md"
+      },
+      {
+        "id": "rb-110",
+        "stem": "A parse step fails on reply text that holds a JSON object wrapped in a code fence. Who owns the fault?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The model, since it should never wrap its output in a fence",
+            "correct": false,
+            "says": "If there is a JSON object in the text from the first { to the last }, the integration's parser was too strict, so extract the object first."
+          },
+          {
+            "id": "b",
+            "text": "Your own reading logic, which should cut out the braces before decoding",
+            "correct": true,
+            "says": "If there is a JSON object in the text from the first { to the last }, the integration's parser was too strict, so extract the object first."
+          },
+          {
+            "id": "c",
+            "text": "The service, since a proxy altered the body on its way back",
+            "correct": false,
+            "says": "If there is a JSON object in the text from the first { to the last }, the integration's parser was too strict, so extract the object first."
+          },
+          {
+            "id": "d",
+            "text": "The account, because structured output is limited by the plan",
+            "correct": false,
+            "says": "If there is a JSON object in the text from the first { to the last }, the integration's parser was too strict, so extract the object first."
+          }
+        ],
+        "origin": "course/43-debugging-claude-applications/02-reading-a-trace-and-the-practice.md"
+      }
+    ],
+    "review": {
+      "intervals_days": [
+        1,
+        3,
+        7,
+        14,
+        30
+      ]
+    }
+  }
+}

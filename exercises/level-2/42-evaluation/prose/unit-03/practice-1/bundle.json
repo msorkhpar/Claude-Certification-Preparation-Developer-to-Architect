@@ -1,0 +1,83 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "42-evaluation"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 1,
+  "title": "Practice: an eval harness (Python)",
+  "lang": "python",
+  "main_file": "harness.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_harness.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-2/42-evaluation/prose/unit-03/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-2/42-evaluation/prose/unit-03/practice-1/target/report.xml",
+    "practice/level-2/42-evaluation/prose/unit-03/practice-1/test_harness.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_a_run_grades_every_case_with_its_own_check_and_reports_the_pass_rate",
+      "kind": "main",
+      "says": "A run grades each case with its own check (exact, regex), reports the pass rate and the order of the results, and an empty set has rate 0.0"
+    },
+    {
+      "id": "test_e1_an_exact_check_ignores_case_and_spacing_but_nothing_else",
+      "kind": "edge",
+      "says": "An exact check ignores case and spacing only: a longer word, a different word and an empty output fail; a regex is a search, and an anchored one still fails on extra text"
+    },
+    {
+      "id": "test_e2_a_json_field_check_needs_a_json_object_with_the_field_and_the_same_typed_value",
+      "kind": "edge",
+      "says": "A json field check: a JSON object, the field present, the same typed value; a fenced block, prose around the JSON and an array are not json"
+    },
+    {
+      "id": "test_e3_a_judge_check_sends_the_rubric_prompt_and_accepts_only_a_bare_score_at_the_threshold",
+      "kind": "edge",
+      "says": "A judge check: the exact prompt, a bare score at the threshold passes, a lower score fails, and a reply that is not a bare score, no judge or a judge that raises is ungradable"
+    },
+    {
+      "id": "test_e4_a_model_that_fails_on_one_case_does_not_stop_the_run",
+      "kind": "edge",
+      "says": "A model error fails its own case with model error and the run goes on"
+    },
+    {
+      "id": "test_e5_tags_report_their_own_rates_and_success_criteria_judge_each_dimension",
+      "kind": "edge",
+      "says": "Tags report their own pass rates; meets judges the overall rate, each tag (a missing tag fails) and the flaky count, and a rate equal to its minimum passes"
+    },
+    {
+      "id": "test_e6_a_regression_run_names_what_broke_what_was_fixed_and_what_went_missing",
+      "kind": "edge",
+      "says": "compare names regressions, fixes, added and removed cases; a better average with a regression is not ok; a removed case is not ok"
+    },
+    {
+      "id": "test_e7_repeated_runs_expose_flaky_cases_and_a_case_passes_only_if_every_run_does",
+      "kind": "edge",
+      "says": "Repeated runs: a case passes only if every run passes, a mixed case is flaky, a consistently failing case is not flaky, and the model is called once per run"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/42-evaluation/03-refining-against-a-set-and-regression-runs.md"
+}

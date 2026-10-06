@@ -1,0 +1,89 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "47-invoking-subagents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: invoking subagents with the Agent SDK (Python)",
+  "lang": "python",
+  "main_file": "subagents.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_subagents.py",
+  "build": [
+    "harness/fake_claude.py",
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/47-invoking-subagents/prose/unit-02/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-3/47-invoking-subagents/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-3/47-invoking-subagents/prose/unit-02/practice-1/test_subagents.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_the_options_register_each_named_agent_with_its_description_prompt_tools_and_model",
+      "kind": "main",
+      "says": "The options register each agent with its description, prompt, tools and model, and auto-approve the spawn"
+    },
+    {
+      "id": "test_e1_a_subagent_gets_read_only_tools_by_default_and_never_the_right_to_spawn_another",
+      "kind": "edge",
+      "says": "A subagent gets read-only tools by default and never the right to spawn another"
+    },
+    {
+      "id": "test_e2_a_definition_with_a_bad_name_or_no_description_or_no_prompt_is_refused",
+      "kind": "edge",
+      "says": "A bad name, a blank description or a missing prompt is refused"
+    },
+    {
+      "id": "test_e3_depth_concurrency_budget_and_turn_limits_are_set_on_the_options",
+      "kind": "edge",
+      "says": "Depth, concurrency, budget and turn limits are set on the options"
+    },
+    {
+      "id": "test_e4_a_spawn_is_recognised_under_the_new_and_the_old_tool_name_and_nothing_else_is",
+      "kind": "edge",
+      "says": "A spawn is recognised under both tool names, and nothing else is"
+    },
+    {
+      "id": "test_e5_messages_from_inside_a_subagent_are_grouped_under_the_call_that_started_it",
+      "kind": "edge",
+      "says": "Messages from inside a subagent are grouped under the call that started it"
+    },
+    {
+      "id": "test_e6_a_brief_carries_the_task_and_every_fact_the_subagent_needs_in_a_fixed_layout",
+      "kind": "edge",
+      "says": "A brief holds the task and every fact in a fixed layout"
+    },
+    {
+      "id": "test_e7_findings_keep_the_claim_apart_from_its_source_and_merging_keeps_every_source",
+      "kind": "edge",
+      "says": "A finding keeps its source apart, and merging keeps every source"
+    },
+    {
+      "id": "test_e8_a_run_through_the_sdk_shows_the_spawn_the_inner_messages_and_the_agents_sent_to_the_binary",
+      "kind": "edge",
+      "says": "A run through the SDK shows the spawn, the inner messages and the agents sent to the binary"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/47-invoking-subagents/02-context-parallel-subagents-and-the-practice.md"
+}

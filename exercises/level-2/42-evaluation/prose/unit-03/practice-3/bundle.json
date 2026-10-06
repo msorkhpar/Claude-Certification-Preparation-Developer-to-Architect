@@ -1,0 +1,91 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "42-evaluation"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 3,
+  "title": "Practice: an eval harness (Java)",
+  "lang": "java",
+  "main_file": "src/main/java/Harness.java",
+  "files": [
+    "src/main/java/TryIt.java"
+  ],
+  "test_file": "src/test/java/HarnessTest.java",
+  "build": [
+    "src/main/java/Json.java",
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/42-evaluation/prose/unit-03/practice-3",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/42-evaluation/prose/unit-03/practice-3",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_aRunGradesEveryCaseWithItsOwnCheckAndReportsThePassRate()",
+      "kind": "main",
+      "says": "A run grades each case with its own check (exact, regex), reports the pass rate and the order of the results, and an empty set has rate 0.0"
+    },
+    {
+      "id": "e1_anExactCheckIgnoresCaseAndSpacingButNothingElse()",
+      "kind": "edge",
+      "says": "An exact check ignores case and spacing only: a longer word, a different word and an empty output fail; a regex is a search, and an anchored one still fails on extra text"
+    },
+    {
+      "id": "e2_aJsonFieldCheckNeedsAJsonObjectWithTheFieldAndTheSameTypedValue()",
+      "kind": "edge",
+      "says": "A json field check: a JSON object, the field present, the same typed value; a fenced block, prose around the JSON and an array are not json"
+    },
+    {
+      "id": "e3_aJudgeCheckSendsTheRubricPromptAndAcceptsOnlyABareScoreAtTheThreshold()",
+      "kind": "edge",
+      "says": "A judge check: the exact prompt, a bare score at the threshold passes, a lower score fails, and a reply that is not a bare score, no judge or a judge that raises is ungradable"
+    },
+    {
+      "id": "e4_aModelThatFailsOnOneCaseDoesNotStopTheRun()",
+      "kind": "edge",
+      "says": "A model error fails its own case with model error and the run goes on"
+    },
+    {
+      "id": "e5_tagsReportTheirOwnRatesAndSuccessCriteriaJudgeEachDimension()",
+      "kind": "edge",
+      "says": "Tags report their own pass rates; meets judges the overall rate, each tag (a missing tag fails) and the flaky count, and a rate equal to its minimum passes"
+    },
+    {
+      "id": "e6_aRegressionRunNamesWhatBrokeWhatWasFixedAndWhatWentMissing()",
+      "kind": "edge",
+      "says": "compare names regressions, fixes, added and removed cases; a better average with a regression is not ok; a removed case is not ok"
+    },
+    {
+      "id": "e7_repeatedRunsExposeFlakyCasesAndACasePassesOnlyIfEveryRunDoes()",
+      "kind": "edge",
+      "says": "Repeated runs: a case passes only if every run passes, a mixed case is flaky, a consistently failing case is not flaky, and the model is called once per run"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/42-evaluation/03-refining-against-a-set-and-regression-runs.md"
+}

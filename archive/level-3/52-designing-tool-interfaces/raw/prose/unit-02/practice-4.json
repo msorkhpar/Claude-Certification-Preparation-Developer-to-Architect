@@ -1,0 +1,385 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "52-designing-tool-interfaces"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: grade a tool set on schema rules (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: grade a tool set on schema rules"
+    },
+    {
+      "type": "para",
+      "text": "The model chooses a tool from its name, its description and its schema, so those are the interface, and they can be checked like code. This practice has you write the grader: a linter for one tool and for a whole set, a pager for a result that is too long, and the rule for how far a tool's own annotations may be trusted. The rules are the course's own, built on the documented guidance (a description of at least three or four sentences, when to use the tool and when not, a description on every parameter, valid examples, namespacing, a bounded list); their thresholds are stated below so the tests can pin them. The model is never called. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`lint_tool`, `lint_tool_set`, `page_results`, `effective_hints`, `parallel_safe`); TypeScript has `lintTool`, `lintToolSet`, `pageResults`, `effectiveHints` and `parallelSafe` (arguments `maxTools`, `maxChars`); Java has `Toolset.lintTool` and so on, with overloads for the defaults; Kotlin has top-level functions with default arguments. A tool is a map: `name`, `description`, `input_schema` (`properties`, each with `type`, `description` and optionally `enum`; and `required`), optionally `input_examples` (a list of example inputs), `annotations` (a map of Boolean hints) and, for a tool that came from a server, `server`."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working grader with eight gaps cut out of it. Everything that is plumbing is written and correct: the constants, the type check for examples, the word extraction, the cursor encoding and decoding, the paging loop and its note, the pairing and sorting of a tool set, the hint defaults and `parallel_safe`, and the rules that are not listed below. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_name_rules` unlocks `e1`: `bad-name` and `vague-name`.",
+        "`_description_rules` unlocks `e2`: `short-description` and `no-boundary`.",
+        "`_parameter_rules` unlocks `e3`: `param-undescribed` and `required-unknown`.",
+        "`_list_and_hint_rules` unlocks `e4`: `list-unbounded` and `hint-contradicts-name`.",
+        "`_similar` unlocks `e5`: the overlap threshold of two descriptions.",
+        "`_check_limit` unlocks `e6`: the limit that is refused below 1 and cut to 50.",
+        "`_over_cap` unlocks `e7`: when the size cap ends a page, and the first item that is always taken.",
+        "`effective_hints` unlocks `e8`: a tool's own hints count only from a trusted server."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs the first four. About twenty lines in all. The steps below describe the whole grader, so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Step 1: `lint_tool(tool)`"
+    },
+    {
+      "type": "para",
+      "text": "Return the sorted list of rule ids the tool breaks, without repeats; `[]` for a clean tool."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Rule",
+        "A tool breaks it when"
+      ],
+      "rows": [
+        [
+          "`bad-name`",
+          "the name does not match `[A-Za-z0-9_-]{1,128}` in full"
+        ],
+        [
+          "`vague-name`",
+          "the name, in lower case, is one of `tool`, `helper`, `do`, `run`, `process`, `handle`, `data`, `util`, `utils`, `query`"
+        ],
+        [
+          "`short-description`",
+          "the description has fewer than 3 sentences, a sentence ending at `.`, `!` or `?` followed by white space or the end"
+        ],
+        [
+          "`no-use-when`",
+          "the lower-cased description lacks `use when`"
+        ],
+        [
+          "`no-boundary`",
+          "it lacks all of `do not use`, `not for` and `instead of` (the boundary against the neighbouring tool)"
+        ],
+        [
+          "`param-undescribed`",
+          "a property has no description, or a blank one"
+        ],
+        [
+          "`required-unknown`",
+          "`required` names something that is not a property"
+        ],
+        [
+          "`open-set`",
+          "a string property without an `enum` has a description containing `one of` or `either`"
+        ],
+        [
+          "`reasoning-param`",
+          "a property name or description contains `reasoning` or `thinking`"
+        ],
+        [
+          "`bad-example`",
+          "an `input_examples` entry is not a map, lacks a required key, has a key that is not a property, has a value of the wrong type (`string`, `integer` without booleans, `number`, `boolean`, `array`, `object`) or outside the property's `enum`"
+        ],
+        [
+          "`list-unbounded`",
+          "the name starts with `list_`, `search_` or `find_` and the properties lack `limit` or lack `cursor`"
+        ],
+        [
+          "`hint-contradicts-name`",
+          "`readOnlyHint` is true and the name starts with `create_`, `update_`, `delete_`, `remove_`, `send_` or `write_`, or `destructiveHint` is false and the name starts with `delete_` or `remove_`"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "**Why the exam cares.** The guide says tool descriptions are the primary mechanism for tool selection, and asks for input formats, example queries, edge cases and boundaries against similar tools. A rule that a script can check is a rule a team can keep. **What you should see when it works:** a tool of four sentences with a when-to-use phrase, a boundary, described parameters and valid examples is clean; a tool called `helper` with the description \"Gets stuff.\" is named for five rules."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Step 2: `lint_tool_set(tools, max_tools=20)`"
+    },
+    {
+      "type": "para",
+      "text": "Return sorted `[tool name, rule]` pairs: every pair `lint_tool` finds, plus `duplicate-name` (once per name used by more than one tool), `overlap:<other name>` on both tools of a pair with different names whose descriptions share at least 0.6 of their words (the words are the runs of three or more letters a to z in the lower-cased description; the share is the size of the common words over the size of all the words), and `[\"*\", \"too-many-tools\"]` when the set has more than `max_tools` tools. Sort by name, then by rule."
+    },
+    {
+      "type": "para",
+      "text": "**Why the exam cares.** Overlapping descriptions cause misrouting (the guide's `analyze_content` and `analyze_document`), and the documentation says that tool selection accuracy degrades with more than 30 to 50 tools loaded at once. **What you should see when it works:** two tools with the same description point at each other, two with different ones do not, and a set at exactly the budget is not too large."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Step 3: `page_results(items, cursor=None, limit=10, max_chars=2000)`"
+    },
+    {
+      "type": "para",
+      "text": "`items` is a list of text. Return `{\"items\", \"next_cursor\", \"truncated\", \"note\"}`."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`limit` must be a whole number of at least 1, else raise `ValueError` (TypeScript: an `Error`; Java and Kotlin: `IllegalArgumentException`); a limit above 50 is cut to 50.",
+        "The cursor is opaque: build it from the offset of the first item not returned (the reference encodes `offset:<n>` in base64, and any encoding that hides the number passes). A missing cursor starts at the beginning; a cursor that does not decode to an offset between 0 and the number of items is refused as above.",
+        "Take up to `limit` items from the offset, but stop before the item that would push the total length of the page over `max_chars`; the first item is always taken, however long. `truncated` is true when the size cap made the page shorter than the limit and the items left allowed.",
+        "`next_cursor` is null on the last page. `note` is null then too; otherwise it is `Showing N of M results; pass next_cursor to continue, or narrow the query with a filter.`"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "**Why the exam cares.** A tool that returns everything fills the context; the documentation advises pagination, filtering and truncation with sensible defaults, and a truncation message that steers the agent. **What you should see when it works:** 25 rows come back in pages of 10, 10 and 5; the last page has no cursor and no note; a limit of 500 returns at most 50; and a page that hit the size cap says so."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Step 4: `effective_hints(tool, trusted_server)` and `parallel_safe(tools, trusted_servers)`"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`effective_hints` returns the four hints `readOnlyHint` (default false), `destructiveHint` (true), `idempotentHint` (false) and `openWorldHint` (true). The tool's own Boolean values replace the defaults only when its server is trusted; values that are not Booleans are ignored.",
+        "`parallel_safe` returns the names of the tools whose effective `readOnlyHint` is true, taking each tool's `server` and the set of trusted servers, in the order given."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "**Why the exam cares.** The MCP specification says that clients \"MUST consider tool annotations to be untrusted unless they come from trusted servers\", and the Agent SDK uses the read-only hint only to decide which tools may run side by side. A hint is a claim, not a control. **What you should see when it works:** a read-only hint from an unknown server changes nothing, and the same hint from a trusted server lets the tool run in parallel."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A well made tool is clean and a poor one is named for every rule it breaks"
+        ],
+        [
+          "`e1`",
+          "Names must match the pattern, and a vague name is flagged in any case"
+        ],
+        [
+          "`e2`",
+          "A description needs three sentences, a when-to-use phrase and a boundary"
+        ],
+        [
+          "`e3`",
+          "Parameters are described, required names exist, closed sets are enums, examples fit the schema"
+        ],
+        [
+          "`e4`",
+          "A list tool needs a limit and a cursor, and a hint may not contradict the name"
+        ],
+        [
+          "`e5`",
+          "A set is graded for duplicate names, overlapping descriptions at the threshold, and size at the budget"
+        ],
+        [
+          "`e6`",
+          "Pages carry an opaque cursor, a clamped limit and a note, and refuse a bad limit or cursor"
+        ],
+        [
+          "`e7`",
+          "A page stops at the size cap, says so, and always carries one item"
+        ],
+        [
+          "`e8`",
+          "A tool's own hints count only from a trusted server"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.Base64\n\nprivate val log = System.getLogger(\"toolset\")\n\n/** Tool interfaces graded on rules: lint a tool and a tool set, page large results, and weigh a tool's annotations. See ../../statement.md. Tools are JSON-like maps. */\n\nprivate val NAME = Regex(\"[A-Za-z0-9_-]{1,128}\")\nprivate val VAGUE = setOf(\"tool\", \"helper\", \"do\", \"run\", \"process\", \"handle\", \"data\", \"util\", \"utils\", \"query\")\nprivate val READ_PREFIXES = listOf(\"list_\", \"search_\", \"find_\")\nprivate val WRITE_PREFIXES = listOf(\"create_\", \"update_\", \"delete_\", \"remove_\", \"send_\", \"write_\")\nprivate val DELETE_PREFIXES = listOf(\"delete_\", \"remove_\")\nprivate const val OVERLAP = 0.6 // token overlap of two descriptions from which the tools count as overlapping\nprivate const val MAX_LIMIT = 50\n\nprivate fun str(value: Any?): String = value?.toString() ?: \"\"\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun obj(value: Any?): Map<String, Any?> = (value as? Map<String, Any?>) ?: emptyMap()\n\nprivate fun startsWithAny(text: String, prefixes: List<String>) = prefixes.any { text.startsWith(it) }\n\nprivate fun valid(value: Any?, schema: Map<String, Any?>): Boolean {\n    when (str(schema[\"type\"])) {\n        \"string\" -> if (value !is String) return false\n        \"integer\" -> if (!(value is Int || value is Long)) return false\n        \"number\" -> if (value !is Number) return false\n        \"boolean\" -> if (value !is Boolean) return false\n        \"array\" -> if (value !is List<*>) return false\n        \"object\" -> if (value !is Map<*, *>) return false\n    }\n    @Suppress(\"UNCHECKED_CAST\")\n    val allowed = schema[\"enum\"] as? Collection<Any?>\n    return allowed == null || allowed.contains(value)\n}\n\nprivate fun exampleOk(example: Any?, properties: Map<String, Any?>, required: List<*>): Boolean {\n    if (example !is Map<*, *>) return false\n    val given = example.entries.associate { str(it.key) to it.value }\n    if (required.any { str(it) !in given }) return false\n    return given.all { (key, value) -> key in properties && valid(value, obj(properties[key])) }\n}\n\nprivate fun nameRules(name: String): Set<String> {\n    val found = sortedSetOf<String>()\n    if (!NAME.matches(name)) found.add(\"bad-name\")\n    if (name.lowercase() in VAGUE) found.add(\"vague-name\")\n    return found\n}\n\nprivate fun descriptionRules(description: String): Set<String> {\n    val found = sortedSetOf<String>()\n    val low = description.lowercase()\n    if (Regex(\"[.!?](?:\\\\s|$)\").findAll(description).count() < 3) found.add(\"short-description\")\n    if (listOf(\"do not use\", \"not for\", \"instead of\").none { low.contains(it) }) found.add(\"no-boundary\")\n    return found\n}\n\nprivate fun parameterRules(properties: Map<String, Any?>, required: List<*>): Set<String> {\n    val found = sortedSetOf<String>()\n    val specs = properties.values.map { obj(it) }\n    if (specs.any { str(it[\"description\"]).isBlank() }) found.add(\"param-undescribed\")\n    if (required.any { str(it) !in properties }) found.add(\"required-unknown\")\n    return found\n}\n\nprivate fun listAndHintRules(name: String, properties: Map<String, Any?>, hints: Map<String, Any?>): Set<String> {\n    val found = sortedSetOf<String>()\n    if (startsWithAny(name, READ_PREFIXES) && !(properties.containsKey(\"limit\") && properties.containsKey(\"cursor\"))) found.add(\"list-unbounded\")\n    if ((hints[\"readOnlyHint\"] == true && startsWithAny(name, WRITE_PREFIXES)) || (hints[\"destructiveHint\"] == false && startsWithAny(name, DELETE_PREFIXES))) found.add(\"hint-contradicts-name\")\n    return found\n}\n\nfun lintTool(tool: Map<String, Any?>): List<String>? {\n    log.log(System.Logger.Level.DEBUG, \"lintTool input: {0}\", tool)\n    val found = sortedSetOf<String>()\n    val name = str(tool[\"name\"])\n    val description = str(tool[\"description\"])\n    val schema = obj(tool[\"input_schema\"])\n    val properties = obj(schema[\"properties\"])\n    val required = (schema[\"required\"] as? List<*>) ?: emptyList<Any?>()\n    val specs = properties.values.map { obj(it) }\n    found.addAll(nameRules(name))\n    found.addAll(descriptionRules(description))\n    if (!description.lowercase().contains(\"use when\")) found.add(\"no-use-when\")\n    found.addAll(parameterRules(properties, required))\n    if (specs.any { str(it[\"type\"]) == \"string\" && !it.containsKey(\"enum\") && Regex(\"one of|either\").containsMatchIn(str(it[\"description\"]).lowercase()) }) found.add(\"open-set\")\n    if (properties.entries.any { (key, spec) -> Regex(\"reasoning|thinking\").containsMatchIn((key + \" \" + str(obj(spec)[\"description\"])).lowercase()) }) found.add(\"reasoning-param\")\n    if ((tool[\"input_examples\"] as? List<*>)?.any { !exampleOk(it, properties, required) } == true) found.add(\"bad-example\")\n    found.addAll(listAndHintRules(name, properties, obj(tool[\"annotations\"])))\n    return found.toList()\n}\n\nprivate fun words(text: Any?): Set<String> = Regex(\"[a-z]{3,}\").findAll(str(text).lowercase()).map { it.value }.toSet()\n\nprivate fun similar(wa: Set<String>, wb: Set<String>): Boolean {\n    val union = wa + wb\n    return union.isNotEmpty() && wa.count { it in wb }.toDouble() / union.size >= OVERLAP\n}\n\nfun lintToolSet(tools: List<Map<String, Any?>>, maxTools: Int = 20): List<List<String>>? {\n    val found = linkedSetOf<List<String>>()\n    for (tool in tools) for (rule in lintTool(tool)!!) found.add(listOf(str(tool[\"name\"]), rule))\n    val names = tools.map { str(it[\"name\"]) }\n    for (name in names.toSet()) if (names.count { it == name } > 1) found.add(listOf(name, \"duplicate-name\"))\n    for (i in tools.indices) {\n        for (j in i + 1 until tools.size) {\n            val a = tools[i]\n            val b = tools[j]\n            val wa = words(a[\"description\"])\n            val wb = words(b[\"description\"])\n            if (str(a[\"name\"]) != str(b[\"name\"]) && similar(wa, wb)) {\n                found.add(listOf(str(a[\"name\"]), \"overlap:\" + str(b[\"name\"])))\n                found.add(listOf(str(b[\"name\"]), \"overlap:\" + str(a[\"name\"])))\n            }\n        }\n    }\n    if (tools.size > maxTools) found.add(listOf(\"*\", \"too-many-tools\"))\n    return found.sortedWith(compareBy({ it[0] }, { it[1] }))\n}\n\nprivate fun encode(offset: Int): String = Base64.getEncoder().encodeToString(\"offset:$offset\".toByteArray())\n\nprivate fun decode(cursor: String, total: Int): Int {\n    var offset = -1\n    try {\n        val text = String(Base64.getDecoder().decode(cursor))\n        if (Regex(\"offset:\\\\d{1,9}\").matches(text)) offset = text.substring(7).toInt()\n    } catch (error: IllegalArgumentException) {\n        offset = -1\n    }\n    if (offset < 0 || offset > total) throw IllegalArgumentException(\"invalid cursor\")\n    return offset\n}\n\nprivate fun checkLimit(limit: Int): Int {\n    if (limit < 1) throw IllegalArgumentException(\"limit must be a whole number of at least 1\")\n    val size = minOf(limit, MAX_LIMIT)\n    return size\n}\n\nprivate fun overCap(page: List<String>, used: Int, item: String, maxChars: Int): Boolean {\n    return page.isNotEmpty() && used + item.length > maxChars\n}\n\nfun pageResults(items: List<String>, cursor: String? = null, limit: Int = 10, maxChars: Int = 2000): Map<String, Any?>? {\n    val size = checkLimit(limit)\n    val offset = if (cursor == null) 0 else decode(cursor, items.size)\n    val page = mutableListOf<String>()\n    var used = 0\n    for (item in items.subList(offset, minOf(items.size, offset + size))) {\n        if (overCap(page, used, item, maxChars)) break\n        page.add(item)\n        used += item.length\n    }\n    val taken = offset + page.size\n    val nextCursor = if (taken < items.size) encode(taken) else null\n    val note = if (nextCursor != null) \"Showing ${page.size} of ${items.size} results; pass next_cursor to continue, or narrow the query with a filter.\" else null\n    return linkedMapOf(\"items\" to page, \"next_cursor\" to nextCursor, \"truncated\" to (page.size < minOf(size, items.size - offset)), \"note\" to note)\n}\n\nfun effectiveHints(tool: Map<String, Any?>, trustedServer: Boolean): Map<String, Boolean>? {\n    val hints = linkedMapOf(\"readOnlyHint\" to false, \"destructiveHint\" to true, \"idempotentHint\" to false, \"openWorldHint\" to true)\n    if (trustedServer) {\n        val own = obj(tool[\"annotations\"])\n        for (key in hints.keys.toList()) (own[key] as? Boolean)?.let { hints[key] = it }\n    }\n    return hints\n}\n\nfun parallelSafe(tools: List<Map<String, Any?>>, trustedServers: Set<String>): List<String>? =\n    tools.filter { effectiveHints(it, str(it[\"server\"]) in trustedServers)!![\"readOnlyHint\"] == true }.map { str(it[\"name\"]) }\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // A well-made tool, like the one the tests start from: a clear description with when to use it and when not.\n    val good = mapOf(\n        \"name\" to \"lookup_order\",\n        \"description\" to (\"Looks up one order by its id and returns its status, items and total in cents. Use when the customer gives an order id \" +\n            \"such as A-1042 or asks where an order is. Do not use it to find a customer by name; use get_customer instead of \" +\n            \"this tool for that. It returns no payment details.\"),\n        \"input_schema\" to mapOf(\"type\" to \"object\", \"required\" to listOf(\"order_id\"),\n            \"properties\" to mapOf(\"order_id\" to mapOf(\"type\" to \"string\", \"description\" to \"The order id, for example A-1042.\"))),\n        \"input_examples\" to listOf(mapOf(\"order_id\" to \"A-1042\")),\n        \"annotations\" to mapOf(\"readOnlyHint\" to true),\n    )\n    // A poor one: a vague name, a short description and a parameter nobody explained.\n    val poor = mapOf(\"name\" to \"helper\", \"description\" to \"Gets stuff.\",\n        \"input_schema\" to mapOf(\"type\" to \"object\", \"properties\" to mapOf(\"q\" to mapOf(\"type\" to \"string\")), \"required\" to listOf(\"q\")))\n\n    println(\"good tool: ${lintTool(good)}\")\n    val poorRules = lintTool(poor)\n    println(\"poor tool: $poorRules\")\n    println(\"rules the poor tool breaks: ${poorRules?.size ?: 0}\")\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.Base64\n\nprivate val log = System.getLogger(\"toolset\")\n\n/** Tool interfaces graded on rules: lint a tool and a tool set, page large results, and weigh a tool's annotations. See ../../statement.md. Tools are JSON-like maps. */\n\nprivate val NAME = Regex(\"[A-Za-z0-9_-]{1,128}\")\nprivate val VAGUE = setOf(\"tool\", \"helper\", \"do\", \"run\", \"process\", \"handle\", \"data\", \"util\", \"utils\", \"query\")\nprivate val READ_PREFIXES = listOf(\"list_\", \"search_\", \"find_\")\nprivate val WRITE_PREFIXES = listOf(\"create_\", \"update_\", \"delete_\", \"remove_\", \"send_\", \"write_\")\nprivate val DELETE_PREFIXES = listOf(\"delete_\", \"remove_\")\nprivate const val OVERLAP = 0.6 // token overlap of two descriptions from which the tools count as overlapping\nprivate const val MAX_LIMIT = 50\n\nprivate fun str(value: Any?): String = value?.toString() ?: \"\"\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun obj(value: Any?): Map<String, Any?> = (value as? Map<String, Any?>) ?: emptyMap()\n\nprivate fun startsWithAny(text: String, prefixes: List<String>) = prefixes.any { text.startsWith(it) }\n\nprivate fun valid(value: Any?, schema: Map<String, Any?>): Boolean {\n    when (str(schema[\"type\"])) {\n        \"string\" -> if (value !is String) return false\n        \"integer\" -> if (!(value is Int || value is Long)) return false\n        \"number\" -> if (value !is Number) return false\n        \"boolean\" -> if (value !is Boolean) return false\n        \"array\" -> if (value !is List<*>) return false\n        \"object\" -> if (value !is Map<*, *>) return false\n    }\n    @Suppress(\"UNCHECKED_CAST\")\n    val allowed = schema[\"enum\"] as? Collection<Any?>\n    return allowed == null || allowed.contains(value)\n}\n\nprivate fun exampleOk(example: Any?, properties: Map<String, Any?>, required: List<*>): Boolean {\n    if (example !is Map<*, *>) return false\n    val given = example.entries.associate { str(it.key) to it.value }\n    if (required.any { str(it) !in given }) return false\n    return given.all { (key, value) -> key in properties && valid(value, obj(properties[key])) }\n}\n\nprivate fun nameRules(name: String): Set<String> {\n    // TODO 1 of 8 (finish this to pass e1): the rule ids a tool name breaks.\n    // Receives the tool's name. Returns a set with \"bad-name\" when the name does not match NAME in full, and \"vague-name\" when the name\n    // in lower case is in VAGUE. Example: nameRules(\"Helper\") -> [vague-name], nameRules(\"my tool\") -> [bad-name]\n    val found = sortedSetOf<String>()\n    return found\n}\n\nprivate fun descriptionRules(description: String): Set<String> {\n    // TODO 2 of 8 (finish this to pass e2): the rule ids a description breaks.\n    // Receives the description text. Returns a set with \"short-description\" when it has fewer than 3 sentences (a `.`, `!` or `?` followed\n    // by white space or the end) and \"no-boundary\" when the lower-cased text has none of \"do not use\", \"not for\", \"instead of\".\n    // Example: descriptionRules(\"Gets stuff.\") -> [no-boundary, short-description]\n    val found = sortedSetOf<String>()\n    return found\n}\n\nprivate fun parameterRules(properties: Map<String, Any?>, required: List<*>): Set<String> {\n    // TODO 3 of 8 (finish this to pass e3): the rule ids the parameters break.\n    // Receives the schema's `properties` (name -> spec map) and the `required` list. Returns a set with \"param-undescribed\" when a property\n    // has no description or a blank one, and \"required-unknown\" when `required` names something that is not a property.\n    // Example: a property q without description and required [\"limit\"] -> [param-undescribed, required-unknown]\n    val found = sortedSetOf<String>()\n    return found\n}\n\nprivate fun listAndHintRules(name: String, properties: Map<String, Any?>, hints: Map<String, Any?>): Set<String> {\n    // TODO 4 of 8 (finish this to pass e4): the rule ids a list tool and its annotations break.\n    // Receives the name, the `properties` and the tool's `annotations` map. Returns a set with \"list-unbounded\" when the name starts with a\n    // READ_PREFIXES entry and `properties` lacks \"limit\" or \"cursor\", and \"hint-contradicts-name\" when readOnlyHint is true and the name\n    // starts with a WRITE_PREFIXES entry, or destructiveHint is false and it starts with a DELETE_PREFIXES entry.\n    // Example: listAndHintRules(\"list_users\", mapOf(\"limit\" to emptyMap<String, Any?>()), emptyMap()) -> [list-unbounded]\n    val found = sortedSetOf<String>()\n    return found\n}\n\nfun lintTool(tool: Map<String, Any?>): List<String>? {\n    log.log(System.Logger.Level.DEBUG, \"lintTool input: {0}\", tool)\n    val found = sortedSetOf<String>()\n    val name = str(tool[\"name\"])\n    val description = str(tool[\"description\"])\n    val schema = obj(tool[\"input_schema\"])\n    val properties = obj(schema[\"properties\"])\n    val required = (schema[\"required\"] as? List<*>) ?: emptyList<Any?>()\n    val specs = properties.values.map { obj(it) }\n    found.addAll(nameRules(name))\n    found.addAll(descriptionRules(description))\n    if (!description.lowercase().contains(\"use when\")) found.add(\"no-use-when\")\n    found.addAll(parameterRules(properties, required))\n    if (specs.any { str(it[\"type\"]) == \"string\" && !it.containsKey(\"enum\") && Regex(\"one of|either\").containsMatchIn(str(it[\"description\"]).lowercase()) }) found.add(\"open-set\")\n    if (properties.entries.any { (key, spec) -> Regex(\"reasoning|thinking\").containsMatchIn((key + \" \" + str(obj(spec)[\"description\"])).lowercase()) }) found.add(\"reasoning-param\")\n    if ((tool[\"input_examples\"] as? List<*>)?.any { !exampleOk(it, properties, required) } == true) found.add(\"bad-example\")\n    found.addAll(listAndHintRules(name, properties, obj(tool[\"annotations\"])))\n    return found.toList()\n}\n\nprivate fun words(text: Any?): Set<String> = Regex(\"[a-z]{3,}\").findAll(str(text).lowercase()).map { it.value }.toSet()\n\nprivate fun similar(wa: Set<String>, wb: Set<String>): Boolean {\n    // TODO 5 of 8 (finish this to pass e5): do two descriptions overlap?\n    // Receives two sets of words. Returns true when the share of common words over all the words is at least OVERLAP (0.6), and false when\n    // both sets are empty. Example: similar(setOf(\"a\", \"b\", \"c\"), setOf(\"a\", \"b\", \"c\", \"d\")) -> true (3 of 4),\n    // similar(setOf(\"a\", \"b\"), setOf(\"c\", \"d\")) -> false\n    return false\n}\n\nfun lintToolSet(tools: List<Map<String, Any?>>, maxTools: Int = 20): List<List<String>>? {\n    val found = linkedSetOf<List<String>>()\n    for (tool in tools) for (rule in lintTool(tool)!!) found.add(listOf(str(tool[\"name\"]), rule))\n    val names = tools.map { str(it[\"name\"]) }\n    for (name in names.toSet()) if (names.count { it == name } > 1) found.add(listOf(name, \"duplicate-name\"))\n    for (i in tools.indices) {\n        for (j in i + 1 until tools.size) {\n            val a = tools[i]\n            val b = tools[j]\n            val wa = words(a[\"description\"])\n            val wb = words(b[\"description\"])\n            if (str(a[\"name\"]) != str(b[\"name\"]) && similar(wa, wb)) {\n                found.add(listOf(str(a[\"name\"]), \"overlap:\" + str(b[\"name\"])))\n                found.add(listOf(str(b[\"name\"]), \"overlap:\" + str(a[\"name\"])))\n            }\n        }\n    }\n    if (tools.size > maxTools) found.add(listOf(\"*\", \"too-many-tools\"))\n    return found.sortedWith(compareBy({ it[0] }, { it[1] }))\n}\n\nprivate fun encode(offset: Int): String = Base64.getEncoder().encodeToString(\"offset:$offset\".toByteArray())\n\nprivate fun decode(cursor: String, total: Int): Int {\n    var offset = -1\n    try {\n        val text = String(Base64.getDecoder().decode(cursor))\n        if (Regex(\"offset:\\\\d{1,9}\").matches(text)) offset = text.substring(7).toInt()\n    } catch (error: IllegalArgumentException) {\n        offset = -1\n    }\n    if (offset < 0 || offset > total) throw IllegalArgumentException(\"invalid cursor\")\n    return offset\n}\n\nprivate fun checkLimit(limit: Int): Int {\n    // TODO 6 of 8 (finish this to pass e6): validate and clamp a page limit.\n    // Receives the requested limit. Throws IllegalArgumentException unless it is at least 1; otherwise returns it cut to MAX_LIMIT.\n    // Example: checkLimit(500) -> 50, checkLimit(0) throws IllegalArgumentException\n    return limit\n}\n\nprivate fun overCap(page: List<String>, used: Int, item: String, maxChars: Int): Boolean {\n    // TODO 7 of 8 (finish this to pass e7): would this item push the page over the size cap?\n    // Receives the items already in the page, their total length `used`, the next item and `maxChars`. Returns true when the page is not\n    // empty and adding the item would make the total longer than maxChars; the first item is always taken, however long.\n    // Example: overCap(listOf(\"aaaaa\"), 5, \"bbbbbb\", 10) -> true, overCap(emptyList(), 0, \"b\".repeat(99), 10) -> false\n    return false\n}\n\nfun pageResults(items: List<String>, cursor: String? = null, limit: Int = 10, maxChars: Int = 2000): Map<String, Any?>? {\n    val size = checkLimit(limit)\n    val offset = if (cursor == null) 0 else decode(cursor, items.size)\n    val page = mutableListOf<String>()\n    var used = 0\n    for (item in items.subList(offset, minOf(items.size, offset + size))) {\n        if (overCap(page, used, item, maxChars)) break\n        page.add(item)\n        used += item.length\n    }\n    val taken = offset + page.size\n    val nextCursor = if (taken < items.size) encode(taken) else null\n    val note = if (nextCursor != null) \"Showing ${page.size} of ${items.size} results; pass next_cursor to continue, or narrow the query with a filter.\" else null\n    return linkedMapOf(\"items\" to page, \"next_cursor\" to nextCursor, \"truncated\" to (page.size < minOf(size, items.size - offset)), \"note\" to note)\n}\n\nfun effectiveHints(tool: Map<String, Any?>, trustedServer: Boolean): Map<String, Boolean>? {\n    val hints = linkedMapOf(\"readOnlyHint\" to false, \"destructiveHint\" to true, \"idempotentHint\" to false, \"openWorldHint\" to true)\n    // TODO 8 of 8 (finish this to pass e8): the four annotation hints a client acts on.\n    // `hints` holds the defaults. When the server is trusted, the tool's own Boolean value in its \"annotations\" map replaces the default for\n    // each of the four keys (values that are not Booleans are ignored); an untrusted server keeps the defaults.\n    // Example: a tool with readOnlyHint true -> readOnlyHint stays false when untrusted, becomes true when trusted.\n    return hints\n}\n\nfun parallelSafe(tools: List<Map<String, Any?>>, trustedServers: Set<String>): List<String>? =\n    tools.filter { effectiveHints(it, str(it[\"server\"]) in trustedServers)!![\"readOnlyHint\"] == true }.map { str(it[\"name\"]) }\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // A well-made tool, like the one the tests start from: a clear description with when to use it and when not.\n    val good = mapOf(\n        \"name\" to \"lookup_order\",\n        \"description\" to (\"Looks up one order by its id and returns its status, items and total in cents. Use when the customer gives an order id \" +\n            \"such as A-1042 or asks where an order is. Do not use it to find a customer by name; use get_customer instead of \" +\n            \"this tool for that. It returns no payment details.\"),\n        \"input_schema\" to mapOf(\"type\" to \"object\", \"required\" to listOf(\"order_id\"),\n            \"properties\" to mapOf(\"order_id\" to mapOf(\"type\" to \"string\", \"description\" to \"The order id, for example A-1042.\"))),\n        \"input_examples\" to listOf(mapOf(\"order_id\" to \"A-1042\")),\n        \"annotations\" to mapOf(\"readOnlyHint\" to true),\n    )\n    // A poor one: a vague name, a short description and a parameter nobody explained.\n    val poor = mapOf(\"name\" to \"helper\", \"description\" to \"Gets stuff.\",\n        \"input_schema\" to mapOf(\"type\" to \"object\", \"properties\" to mapOf(\"q\" to mapOf(\"type\" to \"string\")), \"required\" to listOf(\"q\")))\n\n    println(\"good tool: ${lintTool(good)}\")\n    val poorRules = lintTool(poor)\n    println(\"poor tool: $poorRules\")\n    println(\"rules the poor tool breaks: ${poorRules?.size ?: 0}\")\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 11,
+    "paras": 12,
+    "code": 2,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "bf19fd24a1befb6f54945ee17bf4caf8fc206fe797be2401a5b85b2cc6c363e7",
+  "starting_code": "import java.util.Base64\n\nprivate val log = System.getLogger(\"toolset\")\n\n/** Tool interfaces graded on rules: lint a tool and a tool set, page large results, and weigh a tool's annotations. See ../../statement.md. Tools are JSON-like maps. */\n\nprivate val NAME = Regex(\"[A-Za-z0-9_-]{1,128}\")\nprivate val VAGUE = setOf(\"tool\", \"helper\", \"do\", \"run\", \"process\", \"handle\", \"data\", \"util\", \"utils\", \"query\")\nprivate val READ_PREFIXES = listOf(\"list_\", \"search_\", \"find_\")\nprivate val WRITE_PREFIXES = listOf(\"create_\", \"update_\", \"delete_\", \"remove_\", \"send_\", \"write_\")\nprivate val DELETE_PREFIXES = listOf(\"delete_\", \"remove_\")\nprivate const val OVERLAP = 0.6 // token overlap of two descriptions from which the tools count as overlapping\nprivate const val MAX_LIMIT = 50\n\nprivate fun str(value: Any?): String = value?.toString() ?: \"\"\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun obj(value: Any?): Map<String, Any?> = (value as? Map<String, Any?>) ?: emptyMap()\n\nprivate fun startsWithAny(text: String, prefixes: List<String>) = prefixes.any { text.startsWith(it) }\n\nprivate fun valid(value: Any?, schema: Map<String, Any?>): Boolean {\n    when (str(schema[\"type\"])) {\n        \"string\" -> if (value !is String) return false\n        \"integer\" -> if (!(value is Int || value is Long)) return false\n        \"number\" -> if (value !is Number) return false\n        \"boolean\" -> if (value !is Boolean) return false\n        \"array\" -> if (value !is List<*>) return false\n        \"object\" -> if (value !is Map<*, *>) return false\n    }\n    @Suppress(\"UNCHECKED_CAST\")\n    val allowed = schema[\"enum\"] as? Collection<Any?>\n    return allowed == null || allowed.contains(value)\n}\n\nprivate fun exampleOk(example: Any?, properties: Map<String, Any?>, required: List<*>): Boolean {\n    if (example !is Map<*, *>) return false\n    val given = example.entries.associate { str(it.key) to it.value }\n    if (required.any { str(it) !in given }) return false\n    return given.all { (key, value) -> key in properties && valid(value, obj(properties[key])) }\n}\n\nprivate fun nameRules(name: String): Set<String> {\n    // TODO 1 of 8 (finish this to pass e1): the rule ids a tool name breaks.\n    // Receives the tool's name. Returns a set with \"bad-name\" when the name does not match NAME in full, and \"vague-name\" when the name\n    // in lower case is in VAGUE. Example: nameRules(\"Helper\") -> [vague-name], nameRules(\"my tool\") -> [bad-name]\n    val found = sortedSetOf<String>()\n    return found\n}\n\nprivate fun descriptionRules(description: String): Set<String> {\n    // TODO 2 of 8 (finish this to pass e2): the rule ids a description breaks.\n    // Receives the description text. Returns a set with \"short-description\" when it has fewer than 3 sentences (a `.`, `!` or `?` followed\n    // by white space or the end) and \"no-boundary\" when the lower-cased text has none of \"do not use\", \"not for\", \"instead of\".\n    // Example: descriptionRules(\"Gets stuff.\") -> [no-boundary, short-description]\n    val found = sortedSetOf<String>()\n    return found\n}\n\nprivate fun parameterRules(properties: Map<String, Any?>, required: List<*>): Set<String> {\n    // TODO 3 of 8 (finish this to pass e3): the rule ids the parameters break.\n    // Receives the schema's `properties` (name -> spec map) and the `required` list. Returns a set with \"param-undescribed\" when a property\n    // has no description or a blank one, and \"required-unknown\" when `required` names something that is not a property.\n    // Example: a property q without description and required [\"limit\"] -> [param-undescribed, required-unknown]\n    val found = sortedSetOf<String>()\n    return found\n}\n\nprivate fun listAndHintRules(name: String, properties: Map<String, Any?>, hints: Map<String, Any?>): Set<String> {\n    // TODO 4 of 8 (finish this to pass e4): the rule ids a list tool and its annotations break.\n    // Receives the name, the `properties` and the tool's `annotations` map. Returns a set with \"list-unbounded\" when the name starts with a\n    // READ_PREFIXES entry and `properties` lacks \"limit\" or \"cursor\", and \"hint-contradicts-name\" when readOnlyHint is true and the name\n    // starts with a WRITE_PREFIXES entry, or destructiveHint is false and it starts with a DELETE_PREFIXES entry.\n    // Example: listAndHintRules(\"list_users\", mapOf(\"limit\" to emptyMap<String, Any?>()), emptyMap()) -> [list-unbounded]\n    val found = sortedSetOf<String>()\n    return found\n}\n\nfun lintTool(tool: Map<String, Any?>): List<String>? {\n    log.log(System.Logger.Level.DEBUG, \"lintTool input: {0}\", tool)\n    val found = sortedSetOf<String>()\n    val name = str(tool[\"name\"])\n    val description = str(tool[\"description\"])\n    val schema = obj(tool[\"input_schema\"])\n    val properties = obj(schema[\"properties\"])\n    val required = (schema[\"required\"] as? List<*>) ?: emptyList<Any?>()\n    val specs = properties.values.map { obj(it) }\n    found.addAll(nameRules(name))\n    found.addAll(descriptionRules(description))\n    if (!description.lowercase().contains(\"use when\")) found.add(\"no-use-when\")\n    found.addAll(parameterRules(properties, required))\n    if (specs.any { str(it[\"type\"]) == \"string\" && !it.containsKey(\"enum\") && Regex(\"one of|either\").containsMatchIn(str(it[\"description\"]).lowercase()) }) found.add(\"open-set\")\n    if (properties.entries.any { (key, spec) -> Regex(\"reasoning|thinking\").containsMatchIn((key + \" \" + str(obj(spec)[\"description\"])).lowercase()) }) found.add(\"reasoning-param\")\n    if ((tool[\"input_examples\"] as? List<*>)?.any { !exampleOk(it, properties, required) } == true) found.add(\"bad-example\")\n    found.addAll(listAndHintRules(name, properties, obj(tool[\"annotations\"])))\n    return found.toList()\n}\n\nprivate fun words(text: Any?): Set<String> = Regex(\"[a-z]{3,}\").findAll(str(text).lowercase()).map { it.value }.toSet()\n\nprivate fun similar(wa: Set<String>, wb: Set<String>): Boolean {\n    // TODO 5 of 8 (finish this to pass e5): do two descriptions overlap?\n    // Receives two sets of words. Returns true when the share of common words over all the words is at least OVERLAP (0.6), and false when\n    // both sets are empty. Example: similar(setOf(\"a\", \"b\", \"c\"), setOf(\"a\", \"b\", \"c\", \"d\")) -> true (3 of 4),\n    // similar(setOf(\"a\", \"b\"), setOf(\"c\", \"d\")) -> false\n    return false\n}\n\nfun lintToolSet(tools: List<Map<String, Any?>>, maxTools: Int = 20): List<List<String>>? {\n    val found = linkedSetOf<List<String>>()\n    for (tool in tools) for (rule in lintTool(tool)!!) found.add(listOf(str(tool[\"name\"]), rule))\n    val names = tools.map { str(it[\"name\"]) }\n    for (name in names.toSet()) if (names.count { it == name } > 1) found.add(listOf(name, \"duplicate-name\"))\n    for (i in tools.indices) {\n        for (j in i + 1 until tools.size) {\n            val a = tools[i]\n            val b = tools[j]\n            val wa = words(a[\"description\"])\n            val wb = words(b[\"description\"])\n            if (str(a[\"name\"]) != str(b[\"name\"]) && similar(wa, wb)) {\n                found.add(listOf(str(a[\"name\"]), \"overlap:\" + str(b[\"name\"])))\n                found.add(listOf(str(b[\"name\"]), \"overlap:\" + str(a[\"name\"])))\n            }\n        }\n    }\n    if (tools.size > maxTools) found.add(listOf(\"*\", \"too-many-tools\"))\n    return found.sortedWith(compareBy({ it[0] }, { it[1] }))\n}\n\nprivate fun encode(offset: Int): String = Base64.getEncoder().encodeToString(\"offset:$offset\".toByteArray())\n\nprivate fun decode(cursor: String, total: Int): Int {\n    var offset = -1\n    try {\n        val text = String(Base64.getDecoder().decode(cursor))\n        if (Regex(\"offset:\\\\d{1,9}\").matches(text)) offset = text.substring(7).toInt()\n    } catch (error: IllegalArgumentException) {\n        offset = -1\n    }\n    if (offset < 0 || offset > total) throw IllegalArgumentException(\"invalid cursor\")\n    return offset\n}\n\nprivate fun checkLimit(limit: Int): Int {\n    // TODO 6 of 8 (finish this to pass e6): validate and clamp a page limit.\n    // Receives the requested limit. Throws IllegalArgumentException unless it is at least 1; otherwise returns it cut to MAX_LIMIT.\n    // Example: checkLimit(500) -> 50, checkLimit(0) throws IllegalArgumentException\n    return limit\n}\n\nprivate fun overCap(page: List<String>, used: Int, item: String, maxChars: Int): Boolean {\n    // TODO 7 of 8 (finish this to pass e7): would this item push the page over the size cap?\n    // Receives the items already in the page, their total length `used`, the next item and `maxChars`. Returns true when the page is not\n    // empty and adding the item would make the total longer than maxChars; the first item is always taken, however long.\n    // Example: overCap(listOf(\"aaaaa\"), 5, \"bbbbbb\", 10) -> true, overCap(emptyList(), 0, \"b\".repeat(99), 10) -> false\n    return false\n}\n\nfun pageResults(items: List<String>, cursor: String? = null, limit: Int = 10, maxChars: Int = 2000): Map<String, Any?>? {\n    val size = checkLimit(limit)\n    val offset = if (cursor == null) 0 else decode(cursor, items.size)\n    val page = mutableListOf<String>()\n    var used = 0\n    for (item in items.subList(offset, minOf(items.size, offset + size))) {\n        if (overCap(page, used, item, maxChars)) break\n        page.add(item)\n        used += item.length\n    }\n    val taken = offset + page.size\n    val nextCursor = if (taken < items.size) encode(taken) else null\n    val note = if (nextCursor != null) \"Showing ${page.size} of ${items.size} results; pass next_cursor to continue, or narrow the query with a filter.\" else null\n    return linkedMapOf(\"items\" to page, \"next_cursor\" to nextCursor, \"truncated\" to (page.size < minOf(size, items.size - offset)), \"note\" to note)\n}\n\nfun effectiveHints(tool: Map<String, Any?>, trustedServer: Boolean): Map<String, Boolean>? {\n    val hints = linkedMapOf(\"readOnlyHint\" to false, \"destructiveHint\" to true, \"idempotentHint\" to false, \"openWorldHint\" to true)\n    // TODO 8 of 8 (finish this to pass e8): the four annotation hints a client acts on.\n    // `hints` holds the defaults. When the server is trusted, the tool's own Boolean value in its \"annotations\" map replaces the default for\n    // each of the four keys (values that are not Booleans are ignored); an untrusted server keeps the defaults.\n    // Example: a tool with readOnlyHint true -> readOnlyHint stays false when untrusted, becomes true when trusted.\n    return hints\n}\n\nfun parallelSafe(tools: List<Map<String, Any?>>, trustedServers: Set<String>): List<String>? =\n    tools.filter { effectiveHints(it, str(it[\"server\"]) in trustedServers)!![\"readOnlyHint\"] == true }.map { str(it[\"name\"]) }\n",
+  "exercise": {
+    "main_path": "practice/level-3/52-designing-tool-interfaces/prose/unit-02/practice-4/src/main/kotlin/Toolset.kt",
+    "test_path": "practice/level-3/52-designing-tool-interfaces/prose/unit-02/practice-4/src/test/kotlin/ToolsetTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/52-designing-tool-interfaces/prose/unit-02/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/52-designing-tool-interfaces/prose/unit-02/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_aWellMadeToolLintsCleanAndAPoorOneIsNamedForEveryRuleItBreaks()",
+        "kind": "main",
+        "says": "A well made tool is clean and a poor one is named for every rule it breaks"
+      },
+      {
+        "id": "e1_namesMustMatchThePatternAndAVagueNameIsFlagged()",
+        "kind": "edge",
+        "says": "Names must match the pattern, and a vague name is flagged in any case"
+      },
+      {
+        "id": "e2_aDescriptionNeedsThreeSentencesAWhenToUsePhraseAndABoundaryAgainstTheNeighbour()",
+        "kind": "edge",
+        "says": "A description needs three sentences, a when-to-use phrase and a boundary"
+      },
+      {
+        "id": "e3_parametersAreDescribedAndRequiredNamesExistAndClosedSetsAreEnumsAndExamplesFitTheSchema()",
+        "kind": "edge",
+        "says": "Parameters are described, required names exist, closed sets are enums, examples fit the schema"
+      },
+      {
+        "id": "e4_aListToolNeedsALimitAndACursorAndAHintMayNotContradictTheName()",
+        "kind": "edge",
+        "says": "A list tool needs a limit and a cursor, and a hint may not contradict the name"
+      },
+      {
+        "id": "e5_aSetIsGradedForDuplicateNamesOverlappingDescriptionsAndSize()",
+        "kind": "edge",
+        "says": "A set is graded for duplicate names, overlapping descriptions at the threshold, and size at the budget"
+      },
+      {
+        "id": "e6_pagesCarryAnOpaqueCursorAndAClampedLimitAndANote()",
+        "kind": "edge",
+        "says": "Pages carry an opaque cursor, a clamped limit and a note, and refuse a bad limit or cursor"
+      },
+      {
+        "id": "e7_aPageStopsAtTheSizeCapAndSaysSoButAlwaysCarriesOneItem()",
+        "kind": "edge",
+        "says": "A page stops at the size cap, says so, and always carries one item"
+      },
+      {
+        "id": "e8_aToolsOwnHintsAreTrustedOnlyFromATrustedServerAndTheDefaultsApplyOtherwise()",
+        "kind": "edge",
+        "says": "A tool's own hints count only from a trusted server"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/52-designing-tool-interfaces/prose/unit-02/practice-4/target/test-results/test"
+    },
+    "origin": "course/52-designing-tool-interfaces/02-results-annotations-large-tool-sets-and-the-practice.md",
+    "concepts": [
+      "the practice of Results, annotations and large tool sets, and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/52-designing-tool-interfaces/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "designing-tool-interfaces-u2"
+}

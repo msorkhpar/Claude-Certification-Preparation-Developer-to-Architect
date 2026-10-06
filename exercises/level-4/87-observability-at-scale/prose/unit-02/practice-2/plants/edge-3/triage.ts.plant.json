@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "triage.ts",
+      "old": "  const failed = spans.filter((s) => s.status === \"error\");\n  if (failed.length > 0) {",
+      "new": "  const failed = spans.filter((s) => s.status === \"error\");\n  const b = blamedRetrieval(spans);\n  if (b !== undefined) return { layer: \"retrieval\", name: b.name, why: b.note, path: [spans[0].name, b.name] };\n  if (failed.length > 0) {"
+    }
+  ]
+}

@@ -1,0 +1,158 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "42-evaluation"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 5,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Refining against an eval set, regression runs and the practice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A new prompt raises the overall pass rate from 0.78 to 0.84. The per-item comparison shows that one input which passed before now fails. What should the team do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Review that regression, then accept or repair it",
+            "correct": true,
+            "says": "The page says that \"An average never excuses a regression\": \"If a case passed before and fails now, a person looks at it\", and then the decision is made."
+          },
+          {
+            "id": "b",
+            "text": "Ship it, because the pass rate rose",
+            "correct": false,
+            "says": "Ruled out because the example's v2 also raised the average and still failed its gate, and the rule for step 5 is to keep a change \"only if every success dimension still holds and nothing regressed without a reason you accept\"."
+          },
+          {
+            "id": "c",
+            "text": "Delete the failing item from the set, since it is noisy",
+            "correct": false,
+            "says": "Ruled out because \"A case that disappears is not a pass\", and dropping the case that fails \"is the easiest way to improve a score\"."
+          },
+          {
+            "id": "d",
+            "text": "Rerun the set until that input passes",
+            "correct": false,
+            "says": "Ruled out because a rerun until the input passes treats a signal as noise, while the page says \"a flaky case is a finding\"."
+          }
+        ],
+        "origin": {
+          "path": "course/42-evaluation/03-refining-against-a-set-and-regression-runs.md",
+          "section": "A run, a gate and a comparison"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A regression run is scheduled for the day a team changes the model id in its configuration. Which failure does that run catch that a prompt-only check would not?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A prefilled assistant turn that the new release rejects",
+            "correct": true,
+            "says": "The page says a prefilled assistant message \"returns a 400 on Claude 4.6 and later models\", and that a regression run on the new id \"turns each of those into a failed case the same afternoon\"."
+          },
+          {
+            "id": "b",
+            "text": "A typo that crept into an example sentence in the prompt",
+            "correct": false,
+            "says": "Ruled out because an example sentence typo is a prompt edit, which the table already puts \"Before the merge, as a check on the pull request\"."
+          },
+          {
+            "id": "c",
+            "text": "An edit that fixes one case and breaks another",
+            "correct": false,
+            "says": "Ruled out because the table gives the prompt edit its own run, where \"The edit fixes one case and breaks another\", with no model id involved."
+          },
+          {
+            "id": "d",
+            "text": "A label that was copied wrongly from a spreadsheet into the set",
+            "correct": false,
+            "says": "Ruled out because a wrongly copied label is a data error, and \"The set lives in the repository beside the prompt\", so a review of the diff finds it."
+          }
+        ],
+        "origin": {
+          "path": "course/42-evaluation/03-refining-against-a-set-and-regression-runs.md",
+          "section": "Regression runs: when they run"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A team re-grades 800 items with a model every night, and nobody waits for the result. Which option cuts the price of that job the most while every item is still graded each night?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Grade a random tenth of the items each night",
+            "correct": false,
+            "says": "Ruled out because grading a sample drops cases, and \"A case that disappears is not a pass\"."
+          },
+          {
+            "id": "b",
+            "text": "Rerun the work on every commit instead of nightly",
+            "correct": false,
+            "says": "Ruled out because a run on every commit multiplies the requests, and the page says \"A quick check on a pull request stays synchronous and small\"."
+          },
+          {
+            "id": "c",
+            "text": "Submit the work through the Message Batches API",
+            "correct": true,
+            "says": "The page says the Message Batches API \"charges half the standard price for work that can wait up to a day\", and calls a nightly regression run \"the typical batch job\"."
+          },
+          {
+            "id": "d",
+            "text": "Send the items as parallel synchronous requests",
+            "correct": false,
+            "says": "Ruled out because the discount is for work that can wait, and synchronous calls take none of it: the Batches API \"charges half the standard price for work that can wait up to a day\"."
+          }
+        ],
+        "origin": {
+          "path": "course/42-evaluation/03-refining-against-a-set-and-regression-runs.md",
+          "section": "What an eval run costs"
+        }
+      }
+    ],
+    "concepts": [
+      "A run, a gate and a comparison, as the page teaches it",
+      "Refining against an eval set, regression runs and the practice, as the page teaches it",
+      "Regression runs: when they run, as the page teaches it",
+      "What an eval run costs, as the page teaches it",
+      "Why it matters, as the page teaches it"
+    ]
+  }
+}

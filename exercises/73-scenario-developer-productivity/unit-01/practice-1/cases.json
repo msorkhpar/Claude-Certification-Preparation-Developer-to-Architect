@@ -1,0 +1,158 @@
+{
+  "practice": "73-scenario-developer-productivity/unit-01/practice-1",
+  "name": "mcp_setup",
+  "tests": {
+    "java": "McpSetupTest",
+    "kotlin": "McpSetupTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_every_mcp_tool_reference_belongs_to_a_configured_server",
+      "typescript": "m1 every mcp tool reference belongs to a configured server",
+      "java": "m1_everyMcpToolReferenceBelongsToAConfiguredServer",
+      "kotlin": "m1_everyMcpToolReferenceBelongsToAConfiguredServer"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_credentials_come_from_the_environment_and_the_token_has_no_default",
+      "typescript": "e1 credentials come from the environment and the token has no default",
+      "java": "e1_credentialsComeFromTheEnvironmentAndTheTokenHasNoDefault",
+      "kotlin": "e1_credentialsComeFromTheEnvironmentAndTheTokenHasNoDefault"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_the_explorer_is_read_only_and_says_when_to_use_it",
+      "typescript": "e2 the explorer is read only and says when to use it",
+      "java": "e2_theExplorerIsReadOnlyAndSaysWhenToUseIt",
+      "kotlin": "e2_theExplorerIsReadOnlyAndSaysWhenToUseIt"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_the_scaffolder_writes_only_in_the_generated_folder",
+      "typescript": "e3 the scaffolder writes only in the generated folder",
+      "java": "e3_theScaffolderWritesOnlyInTheGeneratedFolder",
+      "kotlin": "e3_theScaffolderWritesOnlyInTheGeneratedFolder"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_the_tickets_server_is_read_only_for_agents",
+      "typescript": "e4 the tickets server is read only for agents",
+      "java": "e4_theTicketsServerIsReadOnlyForAgents",
+      "kotlin": "e4_theTicketsServerIsReadOnlyForAgents"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_the_environment_file_is_denied_and_no_whole_tool_is_approved",
+      "typescript": "e5 the environment file is denied and no whole tool is approved",
+      "java": "e5_theEnvironmentFileIsDeniedAndNoWholeToolIsApproved",
+      "kotlin": "e5_theEnvironmentFileIsDeniedAndNoWholeToolIsApproved"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_the_team_note_lists_every_variable_and_says_which_session_to_start",
+      "typescript": "e6 the team note lists every variable and says which session to start",
+      "java": "e6_theTeamNoteListsEveryVariableAndSaysWhichSessionToStart",
+      "kotlin": "e6_theTeamNoteListsEveryVariableAndSaysWhichSessionToStart"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_no_file_holds_a_personal_path_an_address_or_a_key",
+      "typescript": "e7 no file holds a personal path an address or a key",
+      "java": "e7_noFileHoldsAPersonalPathAnAddressOrAKey",
+      "kotlin": "e7_noFileHoldsAPersonalPathAnAddressOrAKey"
+    }
+  },
+  "plants": {
+    "wrong-settings-ghost": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "allows a ticket tool under a server name that is not configured"
+    },
+    "wrong-literal-token": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "writes the token into the header"
+    },
+    "wrong-token-default": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "gives the token variable a default value"
+    },
+    "wrong-explorer-bash": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "gives the explorer the Bash tool"
+    },
+    "wrong-explorer-inherits": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "leaves the tools line out, so the explorer inherits every tool"
+    },
+    "wrong-explorer-description": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "describes the explorer without saying when to use it"
+    },
+    "wrong-scaffolder-bash": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "gives the scaffolder the Bash tool"
+    },
+    "wrong-write-wide": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "adds a Write path rule for the source folder, which Claude Code never consults"
+    },
+    "wrong-tickets-wildcard": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "allows every ticket tool, creating and deleting included"
+    },
+    "wrong-no-delete-deny": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "leaves deleting a ticket open"
+    },
+    "wrong-no-env-deny": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "leaves the environment file readable"
+    },
+    "wrong-bash-allow": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "approves the whole Bash tool"
+    },
+    "wrong-note-missing-variable": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "leaves one variable out of the team note"
+    },
+    "wrong-rewritten-resumes": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "tells the team to resume a session after the code was rewritten"
+    },
+    "wrong-home-path": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "writes a personal home path into the team note"
+    }
+  }
+}

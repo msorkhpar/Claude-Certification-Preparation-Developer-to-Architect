@@ -1,0 +1,88 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "65-escalation-and-ambiguity"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: an agent that escalates for the right reasons, asks which customer is meant and hands off what the person needs (Python)",
+  "lang": "python",
+  "main_file": "escalation.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_escalation.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/65-escalation-and-ambiguity/prose/unit-02/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-3/65-escalation-and-ambiguity/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-3/65-escalation-and-ambiguity/prose/unit-02/practice-1/test_escalation.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_a_customer_who_asks_for_a_person_is_escalated_at_once_even_when_the_agent_could_resolve_it",
+      "kind": "main",
+      "says": "A customer who asks for a person is escalated at once even when the agent could resolve it"
+    },
+    {
+      "id": "test_e1_frustration_alone_does_not_escalate_and_the_reply_acknowledges_it",
+      "kind": "edge",
+      "says": "Frustration alone does not escalate and the reply acknowledges it"
+    },
+    {
+      "id": "test_e2_a_request_the_policy_does_not_cover_is_escalated_and_a_covered_one_is_resolved",
+      "kind": "edge",
+      "says": "A request the policy does not cover is escalated and a covered one is resolved"
+    },
+    {
+      "id": "test_e3_several_matching_records_need_a_clarifying_question_and_never_a_guess",
+      "kind": "edge",
+      "says": "Several matching records need a clarifying question and never a guess"
+    },
+    {
+      "id": "test_e4_an_explicit_request_for_a_person_outranks_an_ambiguous_match",
+      "kind": "edge",
+      "says": "An explicit request for a person outranks an ambiguous match"
+    },
+    {
+      "id": "test_e5_no_progress_after_the_attempt_limit_escalates_and_below_it_does_not",
+      "kind": "edge",
+      "says": "No progress after the attempt limit escalates and below it does not"
+    },
+    {
+      "id": "test_e6_sentiment_and_confidence_scores_never_change_the_decision",
+      "kind": "edge",
+      "says": "Sentiment and confidence scores never change the decision"
+    },
+    {
+      "id": "test_e7_the_clarifying_question_names_only_the_fields_that_tell_the_matches_apart",
+      "kind": "edge",
+      "says": "The clarifying question names only the fields that tell the matches apart"
+    },
+    {
+      "id": "test_e8_the_hand_off_carries_the_structured_facts_and_no_transcript_and_refuses_a_case_without_an_id",
+      "kind": "edge",
+      "says": "The hand-off carries the structured facts and no transcript and refuses a case without an id"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/65-escalation-and-ambiguity/02-ambiguous-matches-hand-offs-and-the-practice.md"
+}

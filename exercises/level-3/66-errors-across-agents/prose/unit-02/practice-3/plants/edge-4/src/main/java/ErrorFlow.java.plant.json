@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/java/ErrorFlow.java",
+      "old": "        for (Map.Entry<String, Outcome> e : results.entrySet()) {\n            Outcome o = e.getValue();\n",
+      "new": "        for (Map.Entry<String, Outcome> e : results.entrySet()) {\n            if (e.getValue().status().equals(\"failed\")) {\n                List<Step> aborted = new ArrayList<>();\n                for (String t : results.keySet()) aborted.add(new Step(t, \"abort\"));\n                return aborted;\n            }\n        }\n        for (Map.Entry<String, Outcome> e : results.entrySet()) {\n            Outcome o = e.getValue();\n"
+    }
+  ]
+}

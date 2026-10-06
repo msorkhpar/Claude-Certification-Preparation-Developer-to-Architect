@@ -1,0 +1,83 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-4",
+    "81-reliability-of-multi-agent-systems"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: a multi-agent run graded on injected failures (TypeScript)",
+  "lang": "typescript",
+  "main_file": "reliableAgents.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "reliableAgents.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-4/81-reliability-of-multi-agent-systems/prose/unit-02/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-4/81-reliability-of-multi-agent-systems/prose/unit-02/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-4/81-reliability-of-multi-agent-systems/prose/unit-02/practice-2/reliableAgents.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 tasks run in order and receive the results of the tasks they need",
+      "kind": "main",
+      "says": "Tasks run in order and receive the results of the tasks they need"
+    },
+    {
+      "id": "e1 every retry of a task carries the same idempotency key",
+      "kind": "edge",
+      "says": "Every retry of a task carries the same idempotency key"
+    },
+    {
+      "id": "e2 retries stop at the limit and a fatal failure is not retried",
+      "kind": "edge",
+      "says": "Retries stop at the limit and a fatal failure is not retried"
+    },
+    {
+      "id": "e3 a failure stays inside its branch and dependents are skipped",
+      "kind": "edge",
+      "says": "A failure stays inside its branch and dependents are skipped"
+    },
+    {
+      "id": "e4 a breaker stops calls to an agent that keeps failing and a success resets it",
+      "kind": "edge",
+      "says": "A breaker stops calls to an agent that keeps failing, and a success resets it"
+    },
+    {
+      "id": "e5 a fallback degrades one task with its own key and is not checkpointed",
+      "kind": "edge",
+      "says": "A fallback degrades one task with its own key and is not checkpointed"
+    },
+    {
+      "id": "e6 a second run resumes from the checkpoint and retries only what failed",
+      "kind": "edge",
+      "says": "A second run resumes from the checkpoint and retries only what failed"
+    },
+    {
+      "id": "e7 an unexpected crash is not swallowed and keeps the work already checkpointed",
+      "kind": "edge",
+      "says": "An unexpected crash is not swallowed and keeps the work already checkpointed"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/81-reliability-of-multi-agent-systems/02-isolation-fallbacks-and-resuming-a-run.md"
+}

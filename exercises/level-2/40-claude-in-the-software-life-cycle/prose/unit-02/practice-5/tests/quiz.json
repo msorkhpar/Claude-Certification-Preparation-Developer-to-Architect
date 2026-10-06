@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "40-claude-in-the-software-life-cycle"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 5,
+  "title": "Check yourself: CI, code review and workflows triggered by repository events",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A workflow starts a runner whenever anyone posts anything, and the bill follows the volume. Which line fixes it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A longer `timeout-minutes` value on the job that runs the step",
+            "correct": false,
+            "says": "Ruled out because the timeout bounds one run and does not stop runs from starting: the page lists it with \"workflow-level timeouts to avoid runaway jobs\"."
+          },
+          {
+            "id": "b",
+            "text": "An `if` on the job that tests the comment body for `@claude`",
+            "correct": true,
+            "says": "The page says \"Without the `if`, a runner starts for every comment in the repository\", and the guard is `if: contains(github.event.comment.body, '@claude')`."
+          },
+          {
+            "id": "c",
+            "text": "A larger `--max-turns` value in the arguments of the action step",
+            "correct": false,
+            "says": "Ruled out because \"Set `--max-turns` in `claude_args` to limit iterations\", which acts inside a run and does not stop one from starting."
+          },
+          {
+            "id": "d",
+            "text": "A write permission on the contents of the repository for the job",
+            "correct": false,
+            "says": "Ruled out because write access is a permission and not a trigger filter, and the page says \"Grant the least a job needs\"."
+          }
+        ],
+        "origin": {
+          "path": "course/40-claude-in-the-software-life-cycle/02-ci-code-review-and-repository-events.md",
+          "section": "Setting up the Action"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A review job should inspect the code and post findings. Which permission set fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Write on the contents, with scopes for comments and authentication",
+            "correct": false,
+            "says": "Ruled out because \"A job that implements changes needs `contents: write`, `pull-requests: write` and `issues: write`\", and a review only reads, so the extra write access lets a compromised run change the repository."
+          },
+          {
+            "id": "b",
+            "text": "No access to the contents, with scopes for comments and authentication",
+            "correct": false,
+            "says": "Ruled out because \"A job that only reviews needs `contents: read`\", so some access to the code is required."
+          },
+          {
+            "id": "c",
+            "text": "Read on the contents alone, with nothing else granted to the job",
+            "correct": false,
+            "says": "Ruled out because the review example includes `id-token: write`, which the documentation calls \"required for the Claude Code GitHub Action's default GitHub App authentication\"."
+          },
+          {
+            "id": "d",
+            "text": "Read on the contents, with scopes for comments and authentication",
+            "correct": true,
+            "says": "The page says \"A job that only reviews needs `contents: read`\", and the review example reads pull requests and issues as well, and has the `id-token: write` permission for authentication."
+          }
+        ],
+        "origin": {
+          "path": "course/40-claude-in-the-software-life-cycle/02-ci-code-review-and-repository-events.md",
+          "section": "Setting up the Action"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "Code Review's findings are posted on a pull request, and a team wants them to hold up the merge button. What does the review's check run do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It fails whenever a finding is rated important, so merging stops",
+            "correct": false,
+            "says": "Ruled out because the check run \"always completes with a neutral conclusion\", so no rating makes it fail."
+          },
+          {
+            "id": "b",
+            "text": "It ends neutral every time, so nothing waits on it",
+            "correct": true,
+            "says": "The page says \"The check run always completes with a neutral conclusion so it never blocks merging through branch protection rules.\""
+          },
+          {
+            "id": "c",
+            "text": "It approves the pull request, so a clean review lifts any block",
+            "correct": false,
+            "says": "Ruled out because findings \"don't approve or block your PR\", so a clean review approves nothing either."
+          },
+          {
+            "id": "d",
+            "text": "It requests changes from the author, so each finding must be fixed",
+            "correct": false,
+            "says": "Ruled out because findings are posted \"as inline comments\", and the page says \"So it advises, and a person merges.\""
+          }
+        ],
+        "origin": {
+          "path": "course/40-claude-in-the-software-life-cycle/02-ci-code-review-and-repository-events.md",
+          "section": "Code Review, and tuning it"
+        }
+      }
+    ]
+  }
+}

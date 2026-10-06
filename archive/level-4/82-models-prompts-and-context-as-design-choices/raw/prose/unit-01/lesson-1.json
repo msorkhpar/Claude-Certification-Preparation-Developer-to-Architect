@@ -1,0 +1,300 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "82-models-prompts-and-context-as-design-choices"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Assembling a prompt in cache-friendly order",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Assembling a prompt in cache-friendly order"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Architect Professional · **Module 82:** Models, prompts and context as design choices · **Page 1 of 2** **Exams:** P2"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** treat a request as modules with a fixed order instead of one string, put what never changes first so that the cache can read it, find the one edit that breaks the cached prefix, estimate whether a prefix is long enough to be cached, and drop the least useful context first when a budget is exceeded."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-04 against the Claude API documentation page \"Prompt caching\" (including the minimum cacheable length for Claude Sonnet 5.5), the page \"Prompting best practices\", and the Claude Certified Architect, Professional exam guide v1.0 (July 2026), domain 2. The example ran in the course's container in Python, TypeScript, Java and Kotlin with the same output. It calls no model and estimates tokens as one per four characters, a rough rule and not the model's tokenizer, so its counts show the mechanism and are not what the API would bill."
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "**Exam guide and current product.** *What the guide states, and so what the exam keys:* domain 2 treats model choice, prompt design and context as architecture decisions with cost and latency consequences. *What the current documentation says (checked 2026-10-04):* a cached prefix is built \"in the following order: tools, system, then messages\"; a prompt shorter than the model's minimum \"cannot be cached, even if marked with cache_control\", and for Claude Sonnet 5.5 that minimum is 512 tokens; the prompting guide advises putting long documents \"near the top of your prompt, above your query\". *How to read both:* the exam keys the design in which stable content comes first and the variable content last, and rejects a design that puts a changing value ahead of a stable block. The numbers (512 tokens, the model it applies to) change between models and releases: read the documentation page for the model you use."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "A support assistant sends the same role text and the same forty-page policy on every request, then the customer's record and question. The policy is thousands of tokens. If the cache can read it, those tokens are cheaper and faster on every call after the first. If one changing word sits above it, such as a timestamp in the first line, the cache can never match, and the system pays full price on every call without anyone noticing. The prompt looks the same to a reader. Its order is what decides the bill, and the order is an architecture decision."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "A request is modules, not a string"
+    },
+    {
+      "type": "para",
+      "text": "Build the request from named **modules**, each marked static (the same on every request) or dynamic (it changes with the customer, the question or the history). A small function assembles them in a fixed order: static modules first, in the order given, then the dynamic ones with their variables filled in. Three habits follow."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Variables belong in dynamic modules only.** A static module whose text holds a `{variable}` is refused when the request is assembled, because a value that changes in the prefix breaks the cache.",
+        "**A missing variable is an error.** A request that goes out with `{customer}` in its text is a defect that no model will report; the assembler refuses it.",
+        "**The order is the same every time.** Shuffling the modules changes the prefix, so the assembler decides the order and callers cannot."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Why the order matters: the cached prefix"
+    },
+    {
+      "type": "para",
+      "text": "The cache works on a **prefix**: the request from its start up to a marked breakpoint. Two requests share a cache entry only when everything up to the breakpoint is identical, character for character. In the example, the role and the policy are static and the customer and the question are dynamic, so the breakpoint goes after the policy."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Edit",
+        "Prefix identical?",
+        "Why"
+      ],
+      "rows": [
+        [
+          "A different customer and question",
+          "Yes",
+          "Only the dynamic modules changed, and they come after the breakpoint"
+        ],
+        [
+          "One number changed in the policy",
+          "No",
+          "The edit is inside the prefix, so everything from there on is a new entry"
+        ],
+        [
+          "A timestamp added to the role text",
+          "No",
+          "A changing value in the prefix breaks every match, on every request"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The documentation fixes the order of the whole request as tools, then system, then messages, so a change to a tool definition invalidates the system prompt and the messages that follow it. That is a reason to treat the tool list as a stable asset and not to edit it on a whim."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The minimum: a short prefix is not cached"
+    },
+    {
+      "type": "para",
+      "text": "A prefix can be marked and still not be cached. Each model has a minimum length, and below it the marking has no effect and does not report an error. The example shows both sides. With the policy, the static prefix is 587 tokens, above the 512-token minimum, so a breakpoint is set. Without the policy, the prefix is 21 tokens, the assembler reports no breakpoint, and the reason is printed. The lesson for the architect is to know the minimum for the model in use and to count the prefix, rather than assume caching is on because it was requested. A cache that was never active shows up only in the bill, and the check is to read the usage figures the API returns for cache writes and cache reads."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "A budget drops the least useful context first"
+    },
+    {
+      "type": "para",
+      "text": "Context is limited, and a request that exceeds a budget must lose something. Decide beforehand what: each dynamic module has a **priority**, and the assembler drops the lowest first, and among equal priorities the later one. The static modules are never dropped, since they hold the rules, and when only static modules remain and they still exceed the budget, the assembler refuses the request and does not send a truncated policy. A silent truncation would be worse than a refusal."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "example",
+      "id": "m82-prompt-budget",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/82-prompt-budget/python/prompt_budget.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/82-prompt-budget/typescript/promptBudget.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/82-prompt-budget/java/PromptBudget.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/82-prompt-budget/kotlin/PromptBudget.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"A prompt assembled from modules in cache-friendly order, with a token budget and the cache breakpoint.\n\nThe Claude documentation on prompt caching (read on 2026-10-04) says cache prefixes are created \"in the following order: tools, system,\nthen messages\" and that a prompt shorter than the model's minimum \"cannot be cached, even if marked with cache_control\" (512 tokens for\nClaude Sonnet 5.5). The prompting guide says to put long documents \"near the top of your prompt, above your query\". This file orders\nthe modules of a request that way, estimates tokens as one per four characters (a rough rule, not the model's tokenizer), marks the\nbreakpoint after the last static module and shows which edits keep the cached prefix and which break it. No model is called.\n\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\nMIN_CACHEABLE = 512  # tokens, Claude Sonnet 5.5\n\nPOLICY = \"Refunds above 200 are approved by a supervisor. Gift cards are never refunded in cash. \" * 26\nMODULES = [\n    {\"name\": \"role\", \"static\": True, \"text\": \"You are the support assistant of Northwind Outfitters. Answer from the policy only.\"},\n    {\"name\": \"policy\", \"static\": True, \"text\": POLICY},\n    {\"name\": \"customer\", \"static\": False, \"text\": \"Customer: {customer}. Tier: {tier}.\"},\n    {\"name\": \"question\", \"static\": False, \"text\": \"Question: {question}\"},\n]\n\n\ndef tokens(text):\n    return -(-len(text) // 4)  # ceiling of characters over four\n\n\ndef assemble(modules, variables):\n    \"\"\"Static modules first, in the order given, then the dynamic ones with their variables filled in.\"\"\"\n    log.debug(\"assemble input: %r\", modules)\n    ordered = [m for m in modules if m[\"static\"]] + [m for m in modules if not m[\"static\"]]\n    blocks = [{\"name\": m[\"name\"], \"static\": m[\"static\"], \"text\": m[\"text\"].format(**variables) if not m[\"static\"] else m[\"text\"]} for m in ordered]\n    prefix = sum(tokens(b[\"text\"]) for b in blocks if b[\"static\"])\n    last_static = max((i for i, b in enumerate(blocks) if b[\"static\"]), default=None)\n    return {\"blocks\": blocks, \"tokens\": sum(tokens(b[\"text\"]) for b in blocks), \"prefix_tokens\": prefix,\n            \"breakpoint\": last_static if prefix >= MIN_CACHEABLE else None}\n\n\ndef cached_prefix(prompt):\n    return \"\".join(b[\"text\"] for b in prompt[\"blocks\"][: prompt[\"breakpoint\"] + 1]) if prompt[\"breakpoint\"] is not None else \"\"\n\n\ndef main():\n    first = assemble(MODULES, {\"customer\": \"Ana\", \"tier\": \"gold\", \"question\": \"Can I return a gift card?\"})\n    print(\"order:\", \" > \".join(b[\"name\"] for b in first[\"blocks\"]))\n    print(f\"tokens: {first['tokens']} in all, {first['prefix_tokens']} in the static prefix, minimum {MIN_CACHEABLE}\")\n    print(\"breakpoint after:\", first[\"blocks\"][first[\"breakpoint\"]][\"name\"])\n    second = assemble(MODULES, {\"customer\": \"Ben\", \"tier\": \"basic\", \"question\": \"Where is my parcel?\"})\n    print(\"next request, other customer: prefix identical:\", cached_prefix(second) == cached_prefix(first))\n    edited = [dict(m, text=m[\"text\"].replace(\"200\", \"300\")) if m[\"name\"] == \"policy\" else m for m in MODULES]\n    third = assemble(edited, {\"customer\": \"Ana\", \"tier\": \"gold\", \"question\": \"Can I return a gift card?\"})\n    print(\"after a policy edit: prefix identical:\", cached_prefix(third) == cached_prefix(first))\n    short = assemble(MODULES[:1] + MODULES[2:], {\"customer\": \"Ana\", \"tier\": \"gold\", \"question\": \"Hi\"})\n    print(\"without the policy: breakpoint\", short[\"breakpoint\"], \"because\", short[\"prefix_tokens\"], \"tokens is under\", MIN_CACHEABLE)\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "order: role > policy > customer > question\ntokens: 603 in all, 587 in the static prefix, minimum 512\nbreakpoint after: policy\nnext request, other customer: prefix identical: True\nafter a policy edit: prefix identical: False\nwithout the policy: breakpoint None because 21 tokens is under 512"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// A prompt assembled from modules in cache-friendly order, with a token budget and the cache breakpoint.\n//\n// The Claude documentation on prompt caching (read on 2026-10-04) says cache prefixes are created \"in the following order: tools, system,\n// then messages\" and that a prompt shorter than the model's minimum \"cannot be cached, even if marked with cache_control\" (512 tokens for\n// Claude Sonnet 5.5). The prompting guide says to put long documents \"near the top of your prompt, above your query\". This file orders\n// the modules of a request that way, estimates tokens as one per four characters (a rough rule, not the model's tokenizer), marks the\n// breakpoint after the last static module and shows which edits keep the cached prefix and which break it. No model is called.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"prompt_budget\");\n\nexport type Module = { name: string; static: boolean; text: string };\nexport type Prompt = { blocks: Module[]; tokens: number; prefix_tokens: number; breakpoint: number | null };\n\nexport const MIN_CACHEABLE = 512; // tokens, Claude Sonnet 5.5\n\nexport const POLICY = \"Refunds above 200 are approved by a supervisor. Gift cards are never refunded in cash. \".repeat(26);\nexport const MODULES: Module[] = [\n  { name: \"role\", static: true, text: \"You are the support assistant of Northwind Outfitters. Answer from the policy only.\" },\n  { name: \"policy\", static: true, text: POLICY },\n  { name: \"customer\", static: false, text: \"Customer: {customer}. Tier: {tier}.\" },\n  { name: \"question\", static: false, text: \"Question: {question}\" },\n];\n\nexport const tokens = (text: string): number => Math.ceil(text.length / 4); // characters over four, rounded up\n\nconst fill = (text: string, variables: Record<string, string>) => text.replace(/\\{(\\w+)\\}/g, (_m, name) => variables[name]);\n\n/** Static modules first, in the order given, then the dynamic ones with their variables filled in. */\nexport function assemble(modules: Module[], variables: Record<string, string>): Prompt {\n  log.debug(\"assemble input\", modules);\n  const ordered = [...modules.filter((m) => m.static), ...modules.filter((m) => !m.static)];\n  const blocks = ordered.map((m) => ({ ...m, text: m.static ? m.text : fill(m.text, variables) }));\n  const prefix = blocks.filter((b) => b.static).reduce((sum, b) => sum + tokens(b.text), 0);\n  const lastStatic = blocks.reduce((last, b, i) => (b.static ? i : last), -1);\n  return { blocks, tokens: blocks.reduce((sum, b) => sum + tokens(b.text), 0), prefix_tokens: prefix, breakpoint: lastStatic >= 0 && prefix >= MIN_CACHEABLE ? lastStatic : null };\n}\n\nexport function cachedPrefix(prompt: Prompt): string {\n  return prompt.breakpoint === null ? \"\" : prompt.blocks.slice(0, prompt.breakpoint + 1).map((b) => b.text).join(\"\");\n}\n\nconst flag = (b: boolean) => (b ? \"True\" : \"False\");\n\nfunction main() {\n  const ana = { customer: \"Ana\", tier: \"gold\", question: \"Can I return a gift card?\" };\n  const first = assemble(MODULES, ana);\n  console.log(\"order:\", first.blocks.map((b) => b.name).join(\" > \"));\n  console.log(`tokens: ${first.tokens} in all, ${first.prefix_tokens} in the static prefix, minimum ${MIN_CACHEABLE}`);\n  console.log(\"breakpoint after:\", first.blocks[first.breakpoint!].name);\n  const second = assemble(MODULES, { customer: \"Ben\", tier: \"basic\", question: \"Where is my parcel?\" });\n  console.log(\"next request, other customer: prefix identical:\", flag(cachedPrefix(second) === cachedPrefix(first)));\n  const edited = MODULES.map((m) => (m.name === \"policy\" ? { ...m, text: m.text.replaceAll(\"200\", \"300\") } : m));\n  console.log(\"after a policy edit: prefix identical:\", flag(cachedPrefix(assemble(edited, ana)) === cachedPrefix(first)));\n  const short = assemble([MODULES[0], ...MODULES.slice(2)], { customer: \"Ana\", tier: \"gold\", question: \"Hi\" });\n  console.log(\"without the policy: breakpoint\", short.breakpoint === null ? \"None\" : short.breakpoint, \"because\", short.prefix_tokens, \"tokens is under\", MIN_CACHEABLE);\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "order: role > policy > customer > question\ntokens: 603 in all, 587 in the static prefix, minimum 512\nbreakpoint after: policy\nnext request, other customer: prefix identical: True\nafter a policy edit: prefix identical: False\nwithout the policy: breakpoint None because 21 tokens is under 512"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.List;\nimport java.util.Map;\n\n/**\n * A prompt assembled from modules in cache-friendly order, with a token budget and the cache breakpoint.\n *\n * <p>The Claude documentation on prompt caching (read on 2026-10-04) says cache prefixes are created \"in the following order: tools, system,\n * then messages\" and that a prompt shorter than the model's minimum \"cannot be cached, even if marked with cache_control\" (512 tokens for\n * Claude Sonnet 5.5). The prompting guide says to put long documents \"near the top of your prompt, above your query\". This file orders\n * the modules of a request that way, estimates tokens as one per four characters (a rough rule, not the model's tokenizer), marks the\n * breakpoint after the last static module and shows which edits keep the cached prefix and which break it. No model is called.\n */\npublic final class PromptBudget {\n    private static final System.Logger LOG = System.getLogger(PromptBudget.class.getName());\n    record Module(String name, boolean isStatic, String text) {}\n\n    /** blocks in order, the estimated tokens, the tokens of the static prefix and the index of the breakpoint (null when there is none). */\n    record Prompt(List<Module> blocks, int tokens, int prefixTokens, Integer breakpoint) {}\n\n    static final int MIN_CACHEABLE = 512; // tokens, Claude Sonnet 5.5\n\n    static final String POLICY = \"Refunds above 200 are approved by a supervisor. Gift cards are never refunded in cash. \".repeat(26);\n    static final List<Module> MODULES = List.of(\n        new Module(\"role\", true, \"You are the support assistant of Northwind Outfitters. Answer from the policy only.\"),\n        new Module(\"policy\", true, POLICY),\n        new Module(\"customer\", false, \"Customer: {customer}. Tier: {tier}.\"),\n        new Module(\"question\", false, \"Question: {question}\"));\n\n    /** The ceiling of characters over four. */\n    static int tokens(String text) {\n        return (text.length() + 3) / 4;\n    }\n\n    private static String fill(String text, Map<String, String> variables) {\n        String out = text;\n        for (Map.Entry<String, String> v : variables.entrySet()) out = out.replace(\"{\" + v.getKey() + \"}\", v.getValue());\n        return out;\n    }\n\n    /** Static modules first, in the order given, then the dynamic ones with their variables filled in. */\n    static Prompt assemble(List<Module> modules, Map<String, String> variables) {\n        LOG.log(System.Logger.Level.DEBUG, \"assemble input: {0}\", modules);\n        List<Module> blocks = new ArrayList<>();\n        for (Module m : modules) if (m.isStatic()) blocks.add(m);\n        for (Module m : modules) if (!m.isStatic()) blocks.add(new Module(m.name(), false, fill(m.text(), variables)));\n        int prefix = 0;\n        int total = 0;\n        int lastStatic = -1;\n        for (int i = 0; i < blocks.size(); i++) {\n            total += tokens(blocks.get(i).text());\n            if (blocks.get(i).isStatic()) {\n                prefix += tokens(blocks.get(i).text());\n                lastStatic = i;\n            }\n        }\n        return new Prompt(blocks, total, prefix, lastStatic >= 0 && prefix >= MIN_CACHEABLE ? lastStatic : null);\n    }\n\n    static String cachedPrefix(Prompt prompt) {\n        if (prompt.breakpoint() == null) return \"\";\n        StringBuilder out = new StringBuilder();\n        for (int i = 0; i <= prompt.breakpoint(); i++) out.append(prompt.blocks().get(i).text());\n        return out.toString();\n    }\n\n    private static String py(boolean value) {\n        return value ? \"True\" : \"False\";\n    }\n\n    public static void main(String[] args) {\n        Map<String, String> ana = Map.of(\"customer\", \"Ana\", \"tier\", \"gold\", \"question\", \"Can I return a gift card?\");\n        Prompt first = assemble(MODULES, ana);\n        StringBuilder order = new StringBuilder();\n        for (Module b : first.blocks()) order.append(order.length() == 0 ? \"\" : \" > \").append(b.name());\n        System.out.println(\"order: \" + order);\n        System.out.println(\"tokens: \" + first.tokens() + \" in all, \" + first.prefixTokens() + \" in the static prefix, minimum \" + MIN_CACHEABLE);\n        System.out.println(\"breakpoint after: \" + first.blocks().get(first.breakpoint()).name());\n        Prompt second = assemble(MODULES, Map.of(\"customer\", \"Ben\", \"tier\", \"basic\", \"question\", \"Where is my parcel?\"));\n        System.out.println(\"next request, other customer: prefix identical: \" + py(cachedPrefix(second).equals(cachedPrefix(first))));\n        List<Module> edited = new ArrayList<>();\n        for (Module m : MODULES) edited.add(m.name().equals(\"policy\") ? new Module(m.name(), true, m.text().replace(\"200\", \"300\")) : m);\n        System.out.println(\"after a policy edit: prefix identical: \" + py(cachedPrefix(assemble(edited, ana)).equals(cachedPrefix(first))));\n        List<Module> noPolicy = new ArrayList<>(MODULES);\n        noPolicy.remove(1);\n        Prompt shortPrompt = assemble(noPolicy, Map.of(\"customer\", \"Ana\", \"tier\", \"gold\", \"question\", \"Hi\"));\n        System.out.println(\"without the policy: breakpoint \" + (shortPrompt.breakpoint() == null ? \"None\" : shortPrompt.breakpoint()) + \" because \" + shortPrompt.prefixTokens() + \" tokens is under \" + MIN_CACHEABLE);\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "order: role > policy > customer > question\ntokens: 603 in all, 587 in the static prefix, minimum 512\nbreakpoint after: policy\nnext request, other customer: prefix identical: True\nafter a policy edit: prefix identical: False\nwithout the policy: breakpoint None because 21 tokens is under 512"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "private val log = System.getLogger(\"prompt_budget\")\n\n/**\n * A prompt assembled from modules in cache-friendly order, with a token budget and the cache breakpoint.\n *\n * The Claude documentation on prompt caching (read on 2026-10-04) says cache prefixes are created \"in the following order: tools, system,\n * then messages\" and that a prompt shorter than the model's minimum \"cannot be cached, even if marked with cache_control\" (512 tokens for\n * Claude Sonnet 5.5). The prompting guide says to put long documents \"near the top of your prompt, above your query\". This file orders\n * the modules of a request that way, estimates tokens as one per four characters (a rough rule, not the model's tokenizer), marks the\n * breakpoint after the last static module and shows which edits keep the cached prefix and which break it. No model is called.\n */\ndata class Module(val name: String, val isStatic: Boolean, val text: String)\n\n/** The blocks in order, the estimated tokens, the tokens of the static prefix and the index of the breakpoint (null when there is none). */\ndata class Prompt(val blocks: List<Module>, val tokens: Int, val prefixTokens: Int, val breakpoint: Int?)\n\nconst val MIN_CACHEABLE = 512 // tokens, Claude Sonnet 5.5\n\nval POLICY = \"Refunds above 200 are approved by a supervisor. Gift cards are never refunded in cash. \".repeat(26)\nval MODULES = listOf(\n    Module(\"role\", true, \"You are the support assistant of Northwind Outfitters. Answer from the policy only.\"),\n    Module(\"policy\", true, POLICY),\n    Module(\"customer\", false, \"Customer: {customer}. Tier: {tier}.\"),\n    Module(\"question\", false, \"Question: {question}\"),\n)\n\n/** The ceiling of characters over four. */\nfun tokens(text: String): Int = (text.length + 3) / 4\n\nprivate fun fill(text: String, variables: Map<String, String>): String = variables.entries.fold(text) { acc, (k, v) -> acc.replace(\"{$k}\", v) }\n\n/** Static modules first, in the order given, then the dynamic ones with their variables filled in. */\nfun assemble(modules: List<Module>, variables: Map<String, String>): Prompt {\n    log.log(System.Logger.Level.DEBUG, \"assemble input: {0}\", modules)\n    val blocks = modules.filter { it.isStatic } + modules.filter { !it.isStatic }.map { it.copy(text = fill(it.text, variables)) }\n    val prefix = blocks.filter { it.isStatic }.sumOf { tokens(it.text) }\n    val lastStatic = blocks.indexOfLast { it.isStatic }\n    return Prompt(blocks, blocks.sumOf { tokens(it.text) }, prefix, if (lastStatic >= 0 && prefix >= MIN_CACHEABLE) lastStatic else null)\n}\n\nfun cachedPrefix(prompt: Prompt): String = prompt.breakpoint?.let { prompt.blocks.take(it + 1).joinToString(\"\") { b -> b.text } } ?: \"\"\n\nprivate fun py(value: Boolean) = if (value) \"True\" else \"False\"\n\nfun main() {\n    val ana = mapOf(\"customer\" to \"Ana\", \"tier\" to \"gold\", \"question\" to \"Can I return a gift card?\")\n    val first = assemble(MODULES, ana)\n    println(\"order: \" + first.blocks.joinToString(\" > \") { it.name })\n    println(\"tokens: ${first.tokens} in all, ${first.prefixTokens} in the static prefix, minimum $MIN_CACHEABLE\")\n    println(\"breakpoint after: \" + first.blocks[first.breakpoint!!].name)\n    val second = assemble(MODULES, mapOf(\"customer\" to \"Ben\", \"tier\" to \"basic\", \"question\" to \"Where is my parcel?\"))\n    println(\"next request, other customer: prefix identical: \" + py(cachedPrefix(second) == cachedPrefix(first)))\n    val edited = MODULES.map { if (it.name == \"policy\") it.copy(text = it.text.replace(\"200\", \"300\")) else it }\n    println(\"after a policy edit: prefix identical: \" + py(cachedPrefix(assemble(edited, ana)) == cachedPrefix(first)))\n    val short = assemble(MODULES.filter { it.name != \"policy\" }, mapOf(\"customer\" to \"Ana\", \"tier\" to \"gold\", \"question\" to \"Hi\"))\n    println(\"without the policy: breakpoint ${short.breakpoint ?: \"None\"} because ${short.prefixTokens} tokens is under $MIN_CACHEABLE\")\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "order: role > policy > customer > question\ntokens: 603 in all, 587 in the static prefix, minimum 512\nbreakpoint after: policy\nnext request, other customer: prefix identical: True\nafter a policy edit: prefix identical: False\nwithout the policy: breakpoint None because 21 tokens is under 512"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Read the output from the top. The order is role, policy, customer, question. The static prefix is 587 of 603 tokens, so most of the request is cacheable. The next request from another customer has an identical prefix, and after an edit to the policy it is not identical. The last line is the failure that goes unseen without a count: with the policy removed, the breakpoint is `None` because 21 tokens is under 512."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "para",
+      "text": "These are the wrong answers the exam's options for this domain offer, each with the reason it is rejected."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**\"Put today's date and the customer's name at the top of the system prompt, since the model reads it first.\"** It is tempting because the top feels like the place for the important facts. The exam rejects it: a changing value in the prefix breaks the cache on every request, so the stable content goes first and the variables go after the breakpoint.",
+        "**\"Mark the system prompt for caching; the cost problem is then solved.\"** It is tempting because the marking is one line. The exam rejects it: a prefix below the model's minimum is not cached and reports no error, so the architect counts the tokens and reads the cache figures in the usage.",
+        "**\"When the request is too long, truncate the end of the system prompt.\"** It is tempting because it keeps the request under the limit. The exam rejects it: static modules hold the rules and are never cut, so the design drops the lowest-priority dynamic context first and refuses a request that cannot fit."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "Scenario: Egret Support's request holds fixed rules, a conversation history at priority 5 and marketing blurbs at priority 1. It exceeds its token budget by a small margin. What does the assembler do?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Truncates the end of the rules until the whole request fits within the budget",
+              "**b**: Drops the conversation history first, because it is the largest block of the three",
+              "**c**: Refuses the request at once, since it is over budget by any amount at all",
+              "**d**: Sheds the least important block first, stopping as soon as it fits"
+            ]
+          }
+        ],
+        [
+          "Scenario: Heron Retail has four teams that each write the support prompt by hand as one string, with a slightly different order, and the cache hit rate is low. Which change helps most?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: A reminder in the team wiki that the policy text ought to come first in the prompt",
+              "**b**: A longer cache lifetime, so that the different strings are all kept for longer",
+              "**c**: A standard header that every team adds to the start of its own prompt",
+              "**d**: A single assembler that arranges named modules, with callers passing only values"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**d**. The lowest-priority dynamic block goes first, and the assembler climbs only while the request is still over. *a* is ruled out because \"The static modules are never dropped\". *b* is ruled out because \"the assembler drops the lowest first\", by priority and not by size. *c* is ruled out because refusal is for when \"only static modules remain and they still exceed the budget, the assembler refuses the request\".",
+            "**d**. One assembler fixes the order, so every team's prefix matches. *a* is ruled out because a reminder leaves the order to each caller, where \"the assembler decides the order and callers cannot\". *b* is ruled out because \"Two requests share a cache entry only when everything up to the breakpoint is identical\", and a longer lifetime does not make the strings identical. *c* is ruled out because a header does not fix the order that follows it: \"The order is the same every time\" only when one assembler decides it."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 10,
+    "paras": 11,
+    "code": 0,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 1,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "af8a696da5d68580675be862a2ab8b6b3ec5bb05a96c740216ac6ad4ba156dbf"
+}

@@ -1,0 +1,488 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "43-debugging-claude-applications"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Reading a trace, isolating the origin and the practice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Reading a trace, isolating the origin and the practice"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Developer · **Module 43:** Debugging Claude applications · **Page 2 of 2** **Exams:** DV8"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** read a trace of a Claude application from its first failing event, tell whether the integration or the model is at fault with a question that has a checkable answer, keep the evidence that support and your own team need, turn a fixed bug into a regression case, and write the module's practice, a failure diagnosis."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-03 against the Claude API documentation pages \"Claude API errors\", \"Stop reasons and fallback\" and \"Handle streaming refusals\", and against the Developer exam guide (version 1.0). The traces in the example and the practice are hand-written, shaped like the documented replies, and carry no live output. The example and the practice run offline in Python, TypeScript, Java and Kotlin."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "A trace is what you have at 2 a.m.: a list of what the application sent, what came back and what it did next. The exam's trace question gives you a few lines of one and asks what failed and who owns it. The skill is not to match a symptom to a story. It is to read the events in order, stop at the first one that went wrong, and ask the question that separates your code from the model's output."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What a trace holds"
+    },
+    {
+      "type": "para",
+      "text": "A useful trace is an ordered list of events, each small enough to read at a glance:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "**Requests:** the model id, `max_tokens`, the tool names offered, and the kinds of block in the last user message (a tool result? text after it?).",
+        "**Responses and errors:** the status, the `type` and `message` of an error, the `stop_reason` of a success, and the content blocks.",
+        "**Tool calls and results:** the tool name and input, whether the result was flagged as an error, and the exception if your own tool code raised one.",
+        "**Parse steps:** whether your code could read the model's output, and the text it was given.",
+        "**The request id** of every call. The errors page says \"Every API response includes a unique `request-id` header\", and the same value is the `request_id` field of an error body. The Python and TypeScript SDKs expose it as `_request_id` on a top-level response object. Log it, and give it to support when a fault is the provider's."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The logging rules of module 15 apply: record the shape and the ids, and never a key or a customer's text in the clear."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The reading routine"
+    },
+    {
+      "type": "para",
+      "text": "This routine is the course's own. It is short enough to run in your head, and the practice encodes it."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Find the first failure.** Later events are often consequences: a parse error after a truncated reply, a second 400 after a bad retry. Diagnose the first event that went wrong.",
+        "**Is there a status?** An `error` event has one, and the table of page 1 gives its origin and recovery. A dropped connection has none: it is the network, and it belongs to the service side.",
+        "**Was a 200 really a success?** Read `stop_reason`. A refusal, a `max_tokens` stop, a context-window stop or a pause is a failure of a successful response.",
+        "**Is the content there?** An `end_turn` with no content blocks is an empty reply. Look at the request before it.",
+        "**Did your code read it?** A parse step that failed is the next question, below.",
+        "**Did a tool misbehave?** Compare the tool name the model called with the list you offered, and look for an exception in your own tool code.",
+        "**Name the origin, pick the recovery, and note whether the application recovered.** A later good response means the failure was survived, which still matters for the capacity plan."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Integration or model: the question that decides"
+    },
+    {
+      "type": "para",
+      "text": "An integration fault and a model fault can look the same in the output, so each needs a question whose answer is in the trace."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Symptom",
+        "Ask",
+        "If yes",
+        "If no"
+      ],
+      "rows": [
+        [
+          "An empty `end_turn`",
+          "Did a text block follow a `tool_result` in the last user message?",
+          "The integration: send the tool result alone",
+          "The model: add a new user message that asks it to continue"
+        ],
+        [
+          "A parse step failed",
+          "Is there a JSON object in the text, from the first `{` to the last `}`?",
+          "The integration: the parser was too strict, so extract the object first",
+          "The model: it did not produce JSON, so validate and ask again"
+        ],
+        [
+          "A tool call came back as an error",
+          "Is the tool name one that the request offered?",
+          "The tool's own code is next to check",
+          "The model: it invented a name, so return an error result and let it correct itself"
+        ],
+        [
+          "A tool result carries an exception",
+          "Did your tool code raise it?",
+          "The integration: fix the tool",
+          "Not applicable: a tool that reports an error as designed is not a failure"
+        ],
+        [
+          "A reply is cut off",
+          "Is the stop reason `max_tokens`?",
+          "The integration's limit",
+          "Look elsewhere"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Two replay techniques turn these questions into evidence. **Replay the same request:** a bug in your request fails the same way each time, and an output problem varies. **Replace the model with a script:** if your code fails against a scripted reply that has the right shape, the fault is in your code, and if it holds, the fault is in the output the model gave. Module 15 made this its most valuable tool: reproduce the failure offline."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Cascades and the first failure"
+    },
+    {
+      "type": "para",
+      "text": "A trace often holds several failures. A 529 is retried and succeeds, so the application recovered. A truncated reply is parsed, and the parse fails: the parse error is a symptom, and the first failure is the stop reason. Read from the top. The diagnosis names the first failing event, and a flag says whether a later response recovered, so a dashboard can tell \"survived a blip\" from \"down\"."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "A trace read in the container"
+    },
+    {
+      "type": "para",
+      "text": "The example reads three hand-written traces, each a list of events. Trace A is a tool loop that ends in an empty reply, and the last user message had text after the tool result. Trace B is a 529 followed by a retry that succeeded. Trace C is a parse failure on JSON inside a code fence. The function that reads them is a small version of the practice's: it returns the first failure, its origin and the next action. The source of all four languages is shown, and under each is what it printed in the container."
+    },
+    {
+      "type": "example",
+      "id": "m43-read-a-trace",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/43-read-a-trace/python/read_a_trace.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/43-read-a-trace/typescript/readATrace.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/43-read-a-trace/java/ReadATrace.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/43-read-a-trace/kotlin/ReadATrace.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Reading a trace: where did it fail, in the integration or in the model, and what should happen next?\n\nThe Claude documentation on API errors and on stop reasons (read on 2026-10-03) lists the error types and says that a stop reason is part of\na successful response (\"Response contains valid content\") while an error is a 4xx or 5xx status. It also says that adding text right after\na tool result can make Claude end its turn with an empty reply. This file reads three hand-written traces, each a list of events, and names\nthe first failure, its origin and the next action. The traces are scripted and carry no live output.\n\"\"\"\nimport logging\nimport json\n\nlog = logging.getLogger(__name__)\n\nORIGIN = {\"invalid_request_error\": \"integration\", \"authentication_error\": \"account\", \"rate_limit_error\": \"service\", \"api_error\": \"service\",\n          \"overloaded_error\": \"service\", \"timeout_error\": \"service\"}\nNEXT = {\"invalid_request_error\": \"fix the request, do not retry\", \"authentication_error\": \"fix the credential\", \"rate_limit_error\": \"wait, then retry\",\n        \"api_error\": \"retry with back-off\", \"overloaded_error\": \"retry with back-off\", \"timeout_error\": \"stream the request\"}\n\nTRACES = {\n    \"A: a tool loop that ends in silence\": [\n        {\"kind\": \"request\", \"last_user_blocks\": [\"text\"]},\n        {\"kind\": \"response\", \"status\": 200, \"stop_reason\": \"tool_use\", \"content\": [{\"type\": \"tool_use\"}]},\n        {\"kind\": \"request\", \"last_user_blocks\": [\"tool_result\", \"text\"]},\n        {\"kind\": \"response\", \"status\": 200, \"stop_reason\": \"end_turn\", \"content\": []},\n    ],\n    \"B: a busy service and a retry\": [\n        {\"kind\": \"request\", \"last_user_blocks\": [\"text\"]},\n        {\"kind\": \"error\", \"status\": 529, \"error_type\": \"overloaded_error\"},\n        {\"kind\": \"request\", \"last_user_blocks\": [\"text\"]},\n        {\"kind\": \"response\", \"status\": 200, \"stop_reason\": \"end_turn\", \"content\": [{\"type\": \"text\"}]},\n    ],\n    \"C: JSON in a code fence\": [\n        {\"kind\": \"request\", \"last_user_blocks\": [\"text\"]},\n        {\"kind\": \"response\", \"status\": 200, \"stop_reason\": \"end_turn\", \"content\": [{\"type\": \"text\"}]},\n        {\"kind\": \"parse\", \"ok\": False, \"text\": '```json\\n{\"label\": \"spam\"}\\n```'},\n    ],\n}\n\n\ndef first_failure(trace):\n    \"\"\"(index, what, origin, next action) of the first failing event, or None.\"\"\"\n    last_blocks = []\n    for i, e in enumerate(trace):\n        if e[\"kind\"] == \"request\":\n            last_blocks = e[\"last_user_blocks\"]\n        elif e[\"kind\"] == \"error\":\n            return i, e[\"error_type\"], ORIGIN[e[\"error_type\"]], NEXT[e[\"error_type\"]]\n        elif e[\"kind\"] == \"response\" and e[\"stop_reason\"] == \"end_turn\" and not e[\"content\"]:\n            if \"tool_result\" in last_blocks and \"text\" in last_blocks[last_blocks.index(\"tool_result\"):]:\n                return i, \"empty reply\", \"integration\", \"send the tool result alone, with no text after it\"\n            return i, \"empty reply\", \"model\", \"add a new user message that asks it to continue\"\n        elif e[\"kind\"] == \"parse\" and not e[\"ok\"]:\n            start, end = e[\"text\"].find(\"{\"), e[\"text\"].rfind(\"}\")\n            try:\n                json.loads(e[\"text\"][start:end + 1])\n                return i, \"parse failure\", \"integration\", \"extract the JSON object before parsing\"\n            except ValueError:\n                return i, \"parse failure\", \"model\", \"validate the output and retry\"\n    return None\n\n\ndef main():\n    for name, trace in TRACES.items():\n        found = first_failure(trace)\n        recovered = found is not None and any(e[\"kind\"] == \"response\" and e[\"stop_reason\"] == \"end_turn\" and e[\"content\"] for e in trace[found[0] + 1:])\n        print(name)\n        print(f\"  first failure: event {found[0]}, {found[1]}; origin: {found[2]}; next: {found[3]}; recovered later: {recovered}\")\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "A: a tool loop that ends in silence\n  first failure: event 3, empty reply; origin: integration; next: send the tool result alone, with no text after it; recovered later: False\nB: a busy service and a retry\n  first failure: event 1, overloaded_error; origin: service; next: retry with back-off; recovered later: True\nC: JSON in a code fence\n  first failure: event 2, parse failure; origin: integration; next: extract the JSON object before parsing; recovered later: False"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Reading a trace: where did it fail, in the integration or in the model, and what should happen next?\n//\n// The Claude documentation on API errors and on stop reasons (read on 2026-10-03) lists the error types and says that a stop reason is part of\n// a successful response (\"Response contains valid content\") while an error is a 4xx or 5xx status. It also says that adding text right after\n// a tool result can make Claude end its turn with an empty reply. This file reads three hand-written traces, each a list of events, and names\n// the first failure, its origin and the next action. The traces are scripted and carry no live output.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"read_a_trace\");\n\ntype Event = Record<string, any>;\n\nconst ORIGIN: Record<string, string> = {\n  invalid_request_error: \"integration\", authentication_error: \"account\", rate_limit_error: \"service\", api_error: \"service\",\n  overloaded_error: \"service\", timeout_error: \"service\",\n};\nconst NEXT: Record<string, string> = {\n  invalid_request_error: \"fix the request, do not retry\", authentication_error: \"fix the credential\", rate_limit_error: \"wait, then retry\",\n  api_error: \"retry with back-off\", overloaded_error: \"retry with back-off\", timeout_error: \"stream the request\",\n};\n\nexport const TRACES: Record<string, Event[]> = {\n  \"A: a tool loop that ends in silence\": [\n    { kind: \"request\", last_user_blocks: [\"text\"] },\n    { kind: \"response\", status: 200, stop_reason: \"tool_use\", content: [{ type: \"tool_use\" }] },\n    { kind: \"request\", last_user_blocks: [\"tool_result\", \"text\"] },\n    { kind: \"response\", status: 200, stop_reason: \"end_turn\", content: [] },\n  ],\n  \"B: a busy service and a retry\": [\n    { kind: \"request\", last_user_blocks: [\"text\"] },\n    { kind: \"error\", status: 529, error_type: \"overloaded_error\" },\n    { kind: \"request\", last_user_blocks: [\"text\"] },\n    { kind: \"response\", status: 200, stop_reason: \"end_turn\", content: [{ type: \"text\" }] },\n  ],\n  \"C: JSON in a code fence\": [\n    { kind: \"request\", last_user_blocks: [\"text\"] },\n    { kind: \"response\", status: 200, stop_reason: \"end_turn\", content: [{ type: \"text\" }] },\n    { kind: \"parse\", ok: false, text: '```json\\n{\"label\": \"spam\"}\\n```' },\n  ],\n};\n\n/** [index, what, origin, next action] of the first failing event, or null. */\nexport function firstFailure(trace: Event[]): [number, string, string, string] | null {\n  let lastBlocks: string[] = [];\n  for (let i = 0; i < trace.length; i++) {\n    const e = trace[i];\n    if (e.kind === \"request\") {\n      lastBlocks = e.last_user_blocks;\n    } else if (e.kind === \"error\") {\n      return [i, e.error_type, ORIGIN[e.error_type], NEXT[e.error_type]];\n    } else if (e.kind === \"response\" && e.stop_reason === \"end_turn\" && e.content.length === 0) {\n      const at = lastBlocks.indexOf(\"tool_result\");\n      if (at >= 0 && lastBlocks.slice(at).includes(\"text\")) return [i, \"empty reply\", \"integration\", \"send the tool result alone, with no text after it\"];\n      return [i, \"empty reply\", \"model\", \"add a new user message that asks it to continue\"];\n    } else if (e.kind === \"parse\" && !e.ok) {\n      const start = e.text.indexOf(\"{\");\n      const end = e.text.lastIndexOf(\"}\");\n      try {\n        JSON.parse(e.text.slice(start, end + 1));\n        return [i, \"parse failure\", \"integration\", \"extract the JSON object before parsing\"];\n      } catch {\n        return [i, \"parse failure\", \"model\", \"validate the output and retry\"];\n      }\n    }\n  }\n  return null;\n}\n\nfunction main() {\n  for (const [name, trace] of Object.entries(TRACES)) {\n    const found = firstFailure(trace)!;\n    const recovered = trace.slice(found[0] + 1).some((e) => e.kind === \"response\" && e.stop_reason === \"end_turn\" && e.content.length > 0);\n    console.log(name);\n    console.log(`  first failure: event ${found[0]}, ${found[1]}; origin: ${found[2]}; next: ${found[3]}; recovered later: ${recovered ? \"True\" : \"False\"}`);\n  }\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "A: a tool loop that ends in silence\n  first failure: event 3, empty reply; origin: integration; next: send the tool result alone, with no text after it; recovered later: False\nB: a busy service and a retry\n  first failure: event 1, overloaded_error; origin: service; next: retry with back-off; recovered later: True\nC: JSON in a code fence\n  first failure: event 2, parse failure; origin: integration; next: extract the JSON object before parsing; recovered later: False"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import com.fasterxml.jackson.databind.DeserializationFeature;\nimport com.fasterxml.jackson.databind.ObjectMapper;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Optional;\n\n/**\n * Reading a trace: where did it fail, in the integration or in the model, and what should happen next?\n *\n * <p>The Claude documentation on API errors and on stop reasons (read on 2026-10-03) lists the error types and says that a stop reason is part of\n * a successful response (\"Response contains valid content\") while an error is a 4xx or 5xx status. It also says that adding text right after\n * a tool result can make Claude end its turn with an empty reply. This file reads three hand-written traces, each a list of events, and names\n * the first failure, its origin and the next action. The traces are scripted and carry no live output.\n */\npublic final class ReadATrace {\n    private static final System.Logger LOG = System.getLogger(ReadATrace.class.getName());\n    sealed interface Event permits Request, Response, ApiError, Parse {}\n\n    /** A request; only the kinds of block in its last user message matter here. */\n    record Request(List<String> lastUserBlocks) implements Event {}\n\n    /** A successful reply; `content` holds the kinds of its blocks. */\n    record Response(int status, String stopReason, List<String> content) implements Event {}\n\n    record ApiError(int status, String errorType) implements Event {}\n\n    record Parse(boolean ok, String text) implements Event {}\n\n    record Failure(int index, String what, String origin, String next) {}\n\n    static final Map<String, String> ORIGIN = Map.of(\n        \"invalid_request_error\", \"integration\", \"authentication_error\", \"account\", \"rate_limit_error\", \"service\",\n        \"api_error\", \"service\", \"overloaded_error\", \"service\", \"timeout_error\", \"service\");\n    static final Map<String, String> NEXT = Map.of(\n        \"invalid_request_error\", \"fix the request, do not retry\", \"authentication_error\", \"fix the credential\",\n        \"rate_limit_error\", \"wait, then retry\", \"api_error\", \"retry with back-off\", \"overloaded_error\", \"retry with back-off\",\n        \"timeout_error\", \"stream the request\");\n\n    static final Map<String, List<Event>> TRACES = new LinkedHashMap<>();\n\n    static {\n        TRACES.put(\"A: a tool loop that ends in silence\", List.of(\n            new Request(List.of(\"text\")),\n            new Response(200, \"tool_use\", List.of(\"tool_use\")),\n            new Request(List.of(\"tool_result\", \"text\")),\n            new Response(200, \"end_turn\", List.of())));\n        TRACES.put(\"B: a busy service and a retry\", List.of(\n            new Request(List.of(\"text\")),\n            new ApiError(529, \"overloaded_error\"),\n            new Request(List.of(\"text\")),\n            new Response(200, \"end_turn\", List.of(\"text\"))));\n        TRACES.put(\"C: JSON in a code fence\", List.of(\n            new Request(List.of(\"text\")),\n            new Response(200, \"end_turn\", List.of(\"text\")),\n            new Parse(false, \"```json\\n{\\\"label\\\": \\\"spam\\\"}\\n```\")));\n    }\n\n    private static final ObjectMapper JSON = new ObjectMapper().enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);\n\n    private static boolean isJson(String text) {\n        try {\n            JSON.readValue(text, Object.class);\n            return true;\n        } catch (Exception e) {\n            return false;\n        }\n    }\n\n    /** The first failing event with its origin and next action, or empty. */\n    static Optional<Failure> firstFailure(List<Event> trace) {\n        List<String> lastBlocks = List.of();\n        for (int i = 0; i < trace.size(); i++) {\n            Event e = trace.get(i);\n            if (e instanceof Request r) {\n                lastBlocks = r.lastUserBlocks();\n            } else if (e instanceof ApiError err) {\n                return Optional.of(new Failure(i, err.errorType(), ORIGIN.get(err.errorType()), NEXT.get(err.errorType())));\n            } else if (e instanceof Response r && r.stopReason().equals(\"end_turn\") && r.content().isEmpty()) {\n                int at = lastBlocks.indexOf(\"tool_result\");\n                if (at >= 0 && lastBlocks.subList(at, lastBlocks.size()).contains(\"text\")) {\n                    return Optional.of(new Failure(i, \"empty reply\", \"integration\", \"send the tool result alone, with no text after it\"));\n                }\n                return Optional.of(new Failure(i, \"empty reply\", \"model\", \"add a new user message that asks it to continue\"));\n            } else if (e instanceof Parse p && !p.ok()) {\n                int start = p.text().indexOf('{');\n                int end = p.text().lastIndexOf('}');\n                String candidate = start >= 0 && end >= start ? p.text().substring(start, end + 1) : \"\";\n                return Optional.of(isJson(candidate)\n                    ? new Failure(i, \"parse failure\", \"integration\", \"extract the JSON object before parsing\")\n                    : new Failure(i, \"parse failure\", \"model\", \"validate the output and retry\"));\n            }\n        }\n        return Optional.empty();\n    }\n\n    public static void main(String[] args) {\n        for (Map.Entry<String, List<Event>> entry : TRACES.entrySet()) {\n            List<Event> trace = entry.getValue();\n            Failure found = firstFailure(trace).orElseThrow();\n            boolean recovered = trace.subList(found.index() + 1, trace.size()).stream()\n                .anyMatch(e -> e instanceof Response r && r.stopReason().equals(\"end_turn\") && !r.content().isEmpty());\n            System.out.println(entry.getKey());\n            System.out.println(\"  first failure: event \" + found.index() + \", \" + found.what() + \"; origin: \" + found.origin()\n                + \"; next: \" + found.next() + \"; recovered later: \" + (recovered ? \"True\" : \"False\"));\n        }\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "A: a tool loop that ends in silence\n  first failure: event 3, empty reply; origin: integration; next: send the tool result alone, with no text after it; recovered later: False\nB: a busy service and a retry\n  first failure: event 1, overloaded_error; origin: service; next: retry with back-off; recovered later: True\nC: JSON in a code fence\n  first failure: event 2, parse failure; origin: integration; next: extract the JSON object before parsing; recovered later: False"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import com.fasterxml.jackson.databind.DeserializationFeature\nimport com.fasterxml.jackson.databind.ObjectMapper\n\nprivate val log = System.getLogger(\"read_a_trace\")\n\n/**\n * Reading a trace: where did it fail, in the integration or in the model, and what should happen next?\n *\n * The Claude documentation on API errors and on stop reasons (read on 2026-10-03) lists the error types and says that a stop reason is part of\n * a successful response (\"Response contains valid content\") while an error is a 4xx or 5xx status. It also says that adding text right after\n * a tool result can make Claude end its turn with an empty reply. This file reads three hand-written traces, each a list of events, and names\n * the first failure, its origin and the next action. The traces are scripted and carry no live output.\n */\nsealed interface Event\n\n/** A request; only the kinds of block in its last user message matter here. */\ndata class Request(val lastUserBlocks: List<String>) : Event\n\n/** A successful reply; `content` holds the kinds of its blocks. */\ndata class Response(val status: Int, val stopReason: String, val content: List<String>) : Event\n\ndata class ApiError(val status: Int, val errorType: String) : Event\n\ndata class Parse(val ok: Boolean, val text: String) : Event\n\ndata class Failure(val index: Int, val what: String, val origin: String, val next: String)\n\nval ORIGIN = mapOf(\n    \"invalid_request_error\" to \"integration\", \"authentication_error\" to \"account\", \"rate_limit_error\" to \"service\",\n    \"api_error\" to \"service\", \"overloaded_error\" to \"service\", \"timeout_error\" to \"service\",\n)\nval NEXT = mapOf(\n    \"invalid_request_error\" to \"fix the request, do not retry\", \"authentication_error\" to \"fix the credential\",\n    \"rate_limit_error\" to \"wait, then retry\", \"api_error\" to \"retry with back-off\", \"overloaded_error\" to \"retry with back-off\",\n    \"timeout_error\" to \"stream the request\",\n)\n\nval TRACES: Map<String, List<Event>> = linkedMapOf(\n    \"A: a tool loop that ends in silence\" to listOf(\n        Request(listOf(\"text\")),\n        Response(200, \"tool_use\", listOf(\"tool_use\")),\n        Request(listOf(\"tool_result\", \"text\")),\n        Response(200, \"end_turn\", emptyList()),\n    ),\n    \"B: a busy service and a retry\" to listOf(\n        Request(listOf(\"text\")),\n        ApiError(529, \"overloaded_error\"),\n        Request(listOf(\"text\")),\n        Response(200, \"end_turn\", listOf(\"text\")),\n    ),\n    \"C: JSON in a code fence\" to listOf(\n        Request(listOf(\"text\")),\n        Response(200, \"end_turn\", listOf(\"text\")),\n        Parse(false, \"```json\\n{\\\"label\\\": \\\"spam\\\"}\\n```\"),\n    ),\n)\n\nprivate val JSON = ObjectMapper().enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)\n\nprivate fun isJson(text: String) = runCatching { JSON.readValue(text, Any::class.java) }.isSuccess\n\n/** The first failing event with its origin and next action, or null. */\nfun firstFailure(trace: List<Event>): Failure? {\n    var lastBlocks = emptyList<String>()\n    for ((i, e) in trace.withIndex()) {\n        when {\n            e is Request -> lastBlocks = e.lastUserBlocks\n            e is ApiError -> return Failure(i, e.errorType, ORIGIN.getValue(e.errorType), NEXT.getValue(e.errorType))\n            e is Response && e.stopReason == \"end_turn\" && e.content.isEmpty() -> {\n                val at = lastBlocks.indexOf(\"tool_result\")\n                return if (at >= 0 && \"text\" in lastBlocks.drop(at)) Failure(i, \"empty reply\", \"integration\", \"send the tool result alone, with no text after it\")\n                else Failure(i, \"empty reply\", \"model\", \"add a new user message that asks it to continue\")\n            }\n            e is Parse && !e.ok -> {\n                val start = e.text.indexOf('{')\n                val end = e.text.lastIndexOf('}')\n                val candidate = if (start >= 0 && end >= start) e.text.substring(start, end + 1) else \"\"\n                return if (isJson(candidate)) Failure(i, \"parse failure\", \"integration\", \"extract the JSON object before parsing\")\n                else Failure(i, \"parse failure\", \"model\", \"validate the output and retry\")\n            }\n        }\n    }\n    return null\n}\n\nfun main() {\n    for ((name, trace) in TRACES) {\n        val found = firstFailure(trace)!!\n        val recovered = trace.drop(found.index + 1).any { it is Response && it.stopReason == \"end_turn\" && it.content.isNotEmpty() }\n        println(name)\n        println(\"  first failure: event ${found.index}, ${found.what}; origin: ${found.origin}; next: ${found.next}; recovered later: ${if (recovered) \"True\" else \"False\"}\")\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "A: a tool loop that ends in silence\n  first failure: event 3, empty reply; origin: integration; next: send the tool result alone, with no text after it; recovered later: False\nB: a busy service and a retry\n  first failure: event 1, overloaded_error; origin: service; next: retry with back-off; recovered later: True\nC: JSON in a code fence\n  first failure: event 2, parse failure; origin: integration; next: extract the JSON object before parsing; recovered later: False"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The three outputs show the three cases of the table. The example's table of origins is simpler than the practice's: it files every `rate_limit_error` under the service, and the spend-cap 429 that page 1 sends to the account is a case it leaves out. The practice tells the two apart by the `retry-after` header and the error code. Trace A's empty reply is the integration's: the page on stop reasons says text after a tool result teaches the model to end its turn, so the fix is to send the tool result alone, and a prompt change would not help. Trace B's 529 is the service's, the next action is a retry with back-off, and the example reports that a later response recovered. Trace C's JSON was in the text, inside a fence, so the integration's parser was too strict and the fix is to extract the object. The same text with no object in it would have been the model's, with a different recovery: validate the output and ask again. All four languages print the same text."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Fix at the right layer, then keep the case"
+    },
+    {
+      "type": "para",
+      "text": "A fix belongs where the origin is. An integration fault is fixed in code and proved with a test that scripts the trace. A model fault is handled with a prompt, a validation step, a fallback model or a retry with the specific error, and it is measured with an eval (module 42). A service fault gets back-off and a budget (module 15). An account fault goes to a person."
+    },
+    {
+      "type": "para",
+      "text": "Then keep the evidence. A trace that went wrong in production is the best test case you will ever get: scrub it, give it an id and a tag, and add it to the eval set or the test suite. The bug cannot return unseen, and the set grows toward the real distribution of inputs."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The practice"
+    },
+    {
+      "type": "para",
+      "text": "The practice is the diagnosis function. You write, in the language of your choice (Python, TypeScript, Java or Kotlin), `diagnose`, which reads a trace of events (requests, responses, errors, network errors, tool calls and results, parse steps) and returns the first failure: its position, type, origin and recovery, and whether a later response recovered. The statement lists the events and every rule: the HTTP table, the two kinds of 429, the 400 spend limit, the stop reasons, the empty reply, the parse failure, the tool failures and the network error. The Java and Kotlin folders give you a small `Json` helper, because those two have no JSON library in the course's offline image. The starter fails every test, the reference passes, and each planted wrong solution fails on an assertion. The statement is at `exercises/43-debugging-claude-applications/unit-01/practice-1/statement.md`."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Case",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Each documented HTTP error maps to a type, an origin and a recovery"
+        ],
+        [
+          "`e1`",
+          "The two kinds of 429, the 400 spend limit and the fallback by class"
+        ],
+        [
+          "`e2`",
+          "A 200 response that fails by its stop reason"
+        ],
+        [
+          "`e3`",
+          "An empty reply: the integration or the model"
+        ],
+        [
+          "`e4`",
+          "A parse failure: the integration or the model"
+        ],
+        [
+          "`e5`",
+          "A tool name the model invented against a tool that raised"
+        ],
+        [
+          "`e6`",
+          "The first failure, its position and whether it recovered"
+        ],
+        [
+          "`e7`",
+          "A dropped connection"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Diagnosing the last symptom.** A parse error after a truncated reply is not the cause. Start at the first failing event.",
+        "**Assuming the model when the output is odd.** Check your own message structure and parser first: they are cheaper to test and they are yours to fix.",
+        "**Treating a tool-reported error as a failure of your code.** A tool that returns an error result is the loop working as designed. Look for an exception instead.",
+        "**Fixing and forgetting.** A bug that is fixed without a test or an eval case will return. Keep the trace as a case."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "In a trace, the final user entry carried a tool's output and then a line of commentary. The reply came back as `end_turn` with an empty content list. Which diagnosis fits?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The model chose to stop, so add a user message asking it to continue",
+              "**b**: The request layout is at fault, so return the result unaccompanied",
+              "**c**: The account reached a limit, so raise the quota before anything else",
+              "**d**: The service dropped the output, so retry the same call unchanged"
+            ]
+          }
+        ],
+        [
+          "A team's code could not read this reply: \"Sure! Here is the answer: {\"label\": \"spam\"} Hope it helps.\" What does the routine conclude?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The account lacks access to structured output, so request it",
+              "**b**: The model failed to produce JSON, so validate and ask it again",
+              "**c**: The service truncated the body, so retry the call with back-off",
+              "**d**: The parser was too strict, so pull out the object first"
+            ]
+          }
+        ],
+        [
+          "A trace holds a 529, then a retry that returns a good response, then nothing else. What is the finding?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: A service failure, which ended without recovery",
+              "**b**: A service failure, which the application survived",
+              "**c**: A model failure, which the application survived",
+              "**d**: An integration failure, which needs a fix in code"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**b**. The table says that when text follows the tool result the origin is \"The integration: send the tool result alone\", and the routine's step 4 says \"An `end_turn` with no content blocks is an empty reply. Look at the request before it.\" *a* is ruled out because that is the answer only when no text followed: the table gives \"The model: add a new user message that asks it to continue\" for \"If no\". *d* is ruled out because \"A dropped connection has none: it is the network, and it belongs to the service side\", while here a response arrived with a stop reason. *c* is ruled out because a limit arrives as an error: \"An `error` event has one, and the table of page 1 gives its origin and recovery\".",
+            "**d**. The table says that an object in the text makes it \"The integration: the parser was too strict, so extract the object first\". *b* is ruled out because \"The model: it did not produce JSON, so validate and ask again\" applies only when no object is in the text, and here one is. *c* is ruled out because a cut-off arrives as a stop reason: \"A refusal, a `max_tokens` stop, a context-window stop or a pause is a failure of a successful response\". *a* is ruled out because an access failure arrives as an error status: \"An `error` event has one, and the table of page 1 gives its origin and recovery\".",
+            "**b**. The page says \"A 529 is retried and succeeds, so the application recovered\", and \"A later good response means the failure was survived\". *a* is ruled out because \"A later good response means the failure was survived\", so the trace did recover. *c* is ruled out because \"Trace B's 529 is the service's\", and a 529 is not model output. *d* is ruled out because \"a bug in your request fails the same way each time\", while this request succeeded on the retry."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Module quiz"
+    },
+    {
+      "type": "para",
+      "text": "This quiz covers both pages of the module."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A call returns a 429 that carries no `retry-after` header, and its error code says the organisation reached its monthly spend ceiling. What does the module advise?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Back off with jitter, since capacity frees up within seconds",
+              "**b**: Hand it to a person, since only a higher limit or the reset restores access",
+              "**c**: Split the work into smaller calls so that each one fits beneath the ceiling",
+              "**d**: Move the call to a fallback model, since this one is overloaded"
+            ]
+          }
+        ],
+        [
+          "After switching the model id, every call returns a 400 whose message says that a forced invocation is not supported for the model. The incident notes list four suspects. Which should the team investigate first?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The `tool_choice` field that the new release rejects",
+              "**b**: The prefilled turn that the new release rejects",
+              "**c**: The thinking mode that the new release rejects",
+              "**d**: The capacity that the provider holds in that region"
+            ]
+          }
+        ],
+        [
+          "A reply ends cleanly with stop reason `end_turn`, but the downstream code throws on it, and the logged output is a sentence followed by a fenced block of JSON. Which statement is true?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The fault is the integration's parser, so a test should script this sample",
+              "**b**: The fault is the service's, so the call should be repeated until it is clean",
+              "**c**: The fault is the model's, so the system prompt should forbid code fences",
+              "**d**: The fault is the integration's limit, so `max_tokens` should be raised"
+            ]
+          }
+        ],
+        [
+          "A bug in a tool-use loop is fixed in production on a Friday evening. Which follow-up does the module recommend?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Close the incident, since the fix was deployed",
+              "**b**: Add a note to the runbook and rely on the next on-call",
+              "**c**: Scrub the trace and add it to the eval set as a case",
+              "**d**: Lower the retry budget so that the failure is less visible"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**b**. The table sends \"Your credential or account (401, 402, 403, a spend cap)\" to a person, because \"a spend cap lifts only at the monthly reset or with a higher limit\", and \"No retry can supply a key or a payment\". *a* is ruled out because capacity failures are the ones where you \"Wait for the header, or back off with jitter, then retry\", and this response has no such header. *c* is ruled out because the module's rule is to \"retry only what can change by itself\", and smaller calls do not change an organisation's ceiling. *d* is ruled out because a fallback model is the recovery for a refusal, where the table says \"Use a fallback model, or reset the context\", and this is not an overload.",
+            "**a**. The migration table lists `tool_choice` of `any` or a named tool as returning a 400 on Claude Opus 5.5, Sonnet 5.5, Fable 5.1 and Mythos 5.1, with the message \"forced tool use is not supported for those models\". *b* is ruled out because the rejected prefill has its own message: \"This model does not support assistant message prefill\". *c* is ruled out because a rejected thinking mode is a \"400, with a message that points to adaptive thinking and `output_config.effort`\". *d* is ruled out because a 400 is a request status and capacity failures are \"429 with `retry-after`, 529\".",
+            "**a**. The table says an object between the first `{` and the last `}` makes it \"The integration: the parser was too strict, so extract the object first\", and the page says to prove a fix \"with a test that scripts the trace\". *c* is ruled out because the trap warns \"Assuming the model when the output is odd\", and the output does hold the JSON. *b* is ruled out because the module's rule is to \"retry only what can change by itself\", and a repeat gives the same shape. *d* is ruled out because a limit shows as a cut-off: \"A reply that stops mid-sentence with status 200 is the integration's configuration\", while this reply ends cleanly with `end_turn`.",
+            "**c**. The page says \"A trace that went wrong in production is the best test case you will ever get: scrub it, give it an id and a tag, and add it to the eval set or the test suite.\" *a* is ruled out because \"A bug that is fixed without a test or an eval case will return\", as the last trap puts it. *b* is ruled out because a runbook note records the bug and does not test for it, and the page says \"The bug cannot return unseen\" once it is a case. *d* is ruled out because a smaller budget hides failures, while the routine says to \"note whether the application recovered\"."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 13,
+    "paras": 16,
+    "code": 0,
+    "tables": 2,
+    "lists": 5,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 2,
+    "examples": 1
+  },
+  "content_sha256": "0be92dffb26018016306afa414eb2e1337e2c0f389ddebb194ed00167475609c"
+}

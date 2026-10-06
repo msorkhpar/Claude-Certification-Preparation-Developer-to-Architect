@@ -1,0 +1,310 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "49-hooks"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: hooks that decide in code (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: hooks that decide in code"
+    },
+    {
+      "type": "para",
+      "text": "A hook is code that the harness runs at a fixed point of an agent run, so it does not depend on the model remembering an instruction. Two kinds are in the practice: callbacks that you pass to the Agent SDK, and a command hook that Claude Code runs as a separate process from its settings file. Write the refund gate that runs before a tool, the normaliser that runs after another, the options that register them, the command hook and its settings block. The practice is in Python and TypeScript only, because the callbacks belong to the Agent SDK; a Java or Kotlin team writes the command hook in any language, since the protocol is standard input, standard output and an exit code. The tests never call a model: the last case runs the real SDK against the course's stand-in for the Claude Code binary."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working set of hooks with ten gaps cut out of it. Everything that is plumbing is written and correct: the constants, the `_answer` helper, the date conversion, the parsing of a tool's output, the shape of the returned objects, and the structure of the options and of the settings block. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript names are the camel-case forms where a name is given):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "The three tiers (unlocks `m1`, `e1`): a refund up to 200 is allowed (written), one up to 500 asks a person, and a larger one is denied, each with a reason that names the amount; each limit belongs to the lower tier.",
+        "The tool filter (unlocks `e2`): a call to any other tool is left alone: the hook answers `{}`.",
+        "The amount check (unlocks `e2`): a missing, boolean, text, zero, negative or infinite amount is denied with a reason, never allowed.",
+        "The date and the status word (unlocks `e3`): a numeric `created` becomes a `YYYY-MM-DD` date (a value above 1e11 is read as milliseconds) and an integer `status` becomes its word from STATUS, or `unknown`.",
+        "The amount (unlocks `e3`): an integer `amount_cents` is removed and replaced by `amount` as a decimal text with two places; a value that is not an integer stays where it is.",
+        "The already readable output (unlocks `e4`): when the normalised output equals the input, the hook answers `{}` and does not rewrite it.",
+        "The registered hooks (unlocks `e5`, `e8`): the refund gate is registered on the matcher `process_refund` and the normaliser on `get_order|get_refund`, each with a timeout of at most 10 seconds.",
+        "Bad hook input (unlocks `e6`): input that is not a JSON object blocks the call with exit code 2 and a reason (fail closed).",
+        "The blocked commands (unlocks `e6`): a Bash command that matches a pattern of BLOCKED_COMMANDS blocks with exit code 2 and that pattern's reason.",
+        "The settings block (unlocks `e7`): the `PreToolUse` entry for the matcher `Bash` runs the command with the given timeout."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gap 1. About twenty-two lines in all. The steps below describe the whole module, so you can see how your gaps are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's; the TypeScript names are `preRefund`, `postNormalise`, `buildOptions`, `commandHook` and `settingsHooks`, and `cli_path` is `cliPath`."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`pre_refund(input_data, tool_use_id, context)` (async) is a PreToolUse callback for the tool `process_refund`. For any other tool it returns `{}`. It reads `tool_input[\"amount\"]` and answers with `{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": ..., \"permissionDecisionReason\": ...}}`:",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`allow` when the amount is at most 200, `ask` when it is above 200 and at most 500, `deny` above 500. The reason of a denial names the amount and the limit of 500.",
+              "`deny` when the amount is missing, not a number, a boolean, not finite, zero or negative: a gate that cannot read its input must not let the call through."
+            ]
+          }
+        ],
+        [
+          "`post_normalise(input_data, tool_use_id, context)` (async) is a PostToolUse callback. `input_data[\"tool_response\"]` is the output of the tool, normally a JSON object as text. Return `{\"hookSpecificOutput\": {\"hookEventName\": \"PostToolUse\", \"updatedToolOutput\": <JSON text>}}` with the object changed:",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`created`, a number of seconds since 1970, becomes the UTC date `YYYY-MM-DD`; a number above 100 billion is milliseconds.",
+              "`status`, a whole number, becomes a word: `0` is `pending`, `1` is `approved`, `2` is `declined`, anything else is `unknown`.",
+              "`amount_cents`, a whole number, is removed and replaced by `amount`, a text with two decimals (`12950` becomes `\"129.50\"`).",
+              "Every other field stays as it was. When nothing changes, or the output is not a JSON object, return `{}`, so a second run changes nothing."
+            ]
+          }
+        ],
+        "`build_options(cwd, cli_path=None)` returns the SDK options with `cwd`, the allowed tools `get_order` and `process_refund`, permission mode `default`, no setting sources, and two hooks: PreToolUse with the matcher `process_refund` and `pre_refund`, PostToolUse with the matcher `get_order|get_refund` and `post_normalise`, each with a timeout of 5 seconds. A matcher is matched against the tool name.",
+        "`command_hook(stdin_text)` is what a command hook does with the JSON that Claude Code writes to its standard input. It returns `{\"exit\": code, \"stderr\": text}`. Exit code `2` blocks the call and the text on standard error goes to the model; exit code `0` lets it go on; exit code `1` would be a non-blocking error, so a guard never uses it. For the tool `Bash`, a command that contains `git push` or `rm -rf` blocks, with a reason that says why. Every other call exits `0`. Input that is not a JSON object blocks with exit `2`.",
+        "`settings_hooks(script=\"python3 .claude/hooks/guard.py\", timeout=10)` returns the `hooks` block of `.claude/settings.json`: a PreToolUse entry with the matcher `Bash` and one hook `{\"type\": \"command\", \"command\": script, \"timeout\": timeout}`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each step is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**`pre_refund`: the guarantee before the tool.** The exam asks for a hook on the outgoing call that blocks a policy violation, such as a refund above a threshold, and sends the case toward a person; a prompt cannot promise that. *You should see* three tiers (allow, ask, deny), a denial whose reason names the amount and the limit so that the model can escalate, and a denial for an amount that cannot be read.",
+        "**`post_normalise`: one format for the model.** The exam asks for a PostToolUse hook that turns the formats of different tools (timestamps, status codes, amounts) into one before the model processes them. *You should see* the date, the status word and the decimal amount, and plain text or already readable output left alone, so that a second run changes nothing.",
+        "**`build_options`: register on tool names.** *You should see* the two hooks under their events, matchers that name tools and not paths, and a timeout on each.",
+        "**`command_hook` and `settings_hooks`: the same idea in Claude Code.** A command hook speaks through its exit code, and only 2 blocks. *You should see* exit 2 with a reason for the pushes and deletes, exit 0 for the rest, exit 2 for input that is not JSON, and the settings block that runs it.",
+        "**The SDK case.** *You should see* the real SDK, against the stand-in, give the model an order with a date and a status word, and never run the refund of 900."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "The gate allows a small refund, asks about a middle one and denies a large one"
+        ],
+        [
+          "`e1`",
+          "Each limit belongs to the lower tier and the next cent goes up"
+        ],
+        [
+          "`e2`",
+          "A missing or invalid amount is denied and other tools are left alone"
+        ],
+        [
+          "`e3`",
+          "The output gets a date, a status word and a decimal amount"
+        ],
+        [
+          "`e4`",
+          "Output that is not JSON or is already readable is left alone"
+        ],
+        [
+          "`e5`",
+          "The hooks are registered on tool name matchers with a timeout"
+        ],
+        [
+          "`e6`",
+          "A command hook blocks with exit two and a reason, and fails closed on bad input"
+        ],
+        [
+          "`e7`",
+          "The settings block runs the command hook on Bash with a timeout"
+        ],
+        [
+          "`e8`",
+          "A run through the SDK denies the large refund and shows the model a readable order"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Hooks with the Agent SDK and Claude Code: a refund gate, output normalisation, the options that register them, and a command hook. See ../../statement.md.\"\"\"\nimport json\nimport math\nimport re\nfrom datetime import datetime, timezone\n\nfrom claude_agent_sdk import ClaudeAgentOptions, HookMatcher\nimport logging\n\nlog = logging.getLogger(__name__)\n\nAUTO_LIMIT = 200\nASK_LIMIT = 500\nSTATUS = {0: \"pending\", 1: \"approved\", 2: \"declined\"}\nBLOCKED_COMMANDS = ((r\"\\bgit\\s+push\\b\", \"Nothing is pushed from an agent session\"), (r\"\\brm\\s+-rf\\b\", \"Recursive deletes are not allowed\"))\n\n\ndef _answer(event, **fields):\n    return {\"hookSpecificOutput\": {\"hookEventName\": event, **fields}}\n\n\nasync def pre_refund(input_data, tool_use_id, context):\n    \"\"\"PreToolUse for process_refund: allow small refunds, ask a person for middle ones, deny large ones, and fail closed on a bad amount.\"\"\"\n    log.debug(\"pre_refund input: %r\", input_data)\n    if input_data.get(\"tool_name\") != \"process_refund\":\n        return {}\n    amount = (input_data.get(\"tool_input\") or {}).get(\"amount\")\n    if isinstance(amount, bool) or not isinstance(amount, (int, float)) or not math.isfinite(amount) or amount <= 0:\n        return _answer(\"PreToolUse\", permissionDecision=\"deny\", permissionDecisionReason=\"The refund amount is missing or invalid\")\n    if amount <= AUTO_LIMIT:\n        return _answer(\"PreToolUse\", permissionDecision=\"allow\", permissionDecisionReason=f\"{amount} is within the automatic limit of {AUTO_LIMIT}\")\n    if amount <= ASK_LIMIT:\n        return _answer(\"PreToolUse\", permissionDecision=\"ask\", permissionDecisionReason=f\"{amount} needs a person's approval\")\n    return _answer(\"PreToolUse\", permissionDecision=\"deny\", permissionDecisionReason=f\"{amount} is above the limit of {ASK_LIMIT}; escalate the case to a person\")\n\n\ndef _date(value):\n    seconds = value / 1000 if value > 1e11 else value\n    return datetime.fromtimestamp(seconds, timezone.utc).strftime(\"%Y-%m-%d\")\n\n\nasync def post_normalise(input_data, tool_use_id, context):\n    \"\"\"PostToolUse: give the model readable values in place of epoch seconds, numeric status codes and cents.\"\"\"\n    raw = input_data.get(\"tool_response\")\n    try:\n        data = json.loads(raw) if isinstance(raw, str) else raw\n    except ValueError:\n        return {}\n    if not isinstance(data, dict):\n        return {}\n    out = dict(data)\n    created = out.get(\"created\")\n    if isinstance(created, (int, float)) and not isinstance(created, bool):\n        out[\"created\"] = _date(created)\n    status = out.get(\"status\")\n    if isinstance(status, int) and not isinstance(status, bool):\n        out[\"status\"] = STATUS.get(status, \"unknown\")\n    cents = out.pop(\"amount_cents\", None)\n    if isinstance(cents, int) and not isinstance(cents, bool):\n        out[\"amount\"] = f\"{cents // 100}.{cents % 100:02d}\"\n    elif cents is not None:\n        out[\"amount_cents\"] = cents\n    if out == data:\n        return {}\n    return _answer(\"PostToolUse\", updatedToolOutput=json.dumps(out))\n\n\ndef build_options(cwd, cli_path=None):\n    \"\"\"Options that register both hooks; a matcher is a tool name pattern, never a path.\"\"\"\n    return ClaudeAgentOptions(\n        cwd=cwd, cli_path=cli_path, allowed_tools=[\"get_order\", \"process_refund\"], permission_mode=\"default\", setting_sources=[], max_turns=6,\n        hooks={\"PreToolUse\": [HookMatcher(matcher=\"process_refund\", hooks=[pre_refund], timeout=5)],\n               \"PostToolUse\": [HookMatcher(matcher=\"get_order|get_refund\", hooks=[post_normalise], timeout=5)]})\n\n\ndef command_hook(stdin_text):\n    \"\"\"What a Claude Code command hook does with its stdin: exit 2 blocks (the reason goes to stderr), 0 lets the call go on, and bad input blocks.\"\"\"\n    try:\n        data = json.loads(stdin_text)\n    except ValueError:\n        data = None\n    if not isinstance(data, dict):\n        return {\"exit\": 2, \"stderr\": \"The hook input is not valid JSON, so the call is blocked to be safe\"}\n    if data.get(\"tool_name\") != \"Bash\":\n        return {\"exit\": 0, \"stderr\": \"\"}\n    command = str((data.get(\"tool_input\") or {}).get(\"command\", \"\"))\n    for pattern, reason in BLOCKED_COMMANDS:\n        if re.search(pattern, command):\n            return {\"exit\": 2, \"stderr\": reason}\n    return {\"exit\": 0, \"stderr\": \"\"}\n\n\ndef settings_hooks(script=\"python3 .claude/hooks/guard.py\", timeout=10):\n    \"\"\"The hooks block of .claude/settings.json that runs the command hook before every Bash call.\"\"\"\n    return {\"hooks\": {\"PreToolUse\": [{\"matcher\": \"Bash\", \"hooks\": [{\"type\": \"command\", \"command\": script, \"timeout\": timeout}]}]}}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nimport asyncio\n\nfrom hooks import pre_refund\n\n\ndef check(amount):\n    \"\"\"Run the refund gate the way the Agent SDK does: with the event of one tool call about to run.\"\"\"\n    event = {\"hook_event_name\": \"PreToolUse\", \"tool_name\": \"process_refund\", \"tool_input\": {\"amount\": amount}}\n    out = asyncio.run(pre_refund(event, \"t1\", None)) or {}\n    return out.get(\"hookSpecificOutput\", {})\n\n\n# A small refund goes through, a middle one asks a person, a large one is denied.\nfor amount in (50, 350, 900):\n    verdict = check(amount)\n    print(f\"refund of {amount}:\", verdict.get(\"permissionDecision\"), \"-\", verdict.get(\"permissionDecisionReason\", \"\"))\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Hooks with the Agent SDK and Claude Code: a refund gate, output normalisation, the options that register them, and a command hook. See ../../statement.md.\"\"\"\nimport json\nimport math\nimport re\nfrom datetime import datetime, timezone\n\nfrom claude_agent_sdk import ClaudeAgentOptions, HookMatcher\nimport logging\n\nlog = logging.getLogger(__name__)\n\nAUTO_LIMIT = 200\nASK_LIMIT = 500\nSTATUS = {0: \"pending\", 1: \"approved\", 2: \"declined\"}\nBLOCKED_COMMANDS = ((r\"\\bgit\\s+push\\b\", \"Nothing is pushed from an agent session\"), (r\"\\brm\\s+-rf\\b\", \"Recursive deletes are not allowed\"))\n\n\ndef _answer(event, **fields):\n    return {\"hookSpecificOutput\": {\"hookEventName\": event, **fields}}\n\n\nasync def pre_refund(input_data, tool_use_id, context):\n    \"\"\"PreToolUse for process_refund: allow small refunds, ask a person for middle ones, deny large ones, and fail closed on a bad amount.\"\"\"\n    log.debug(\"pre_refund input: %r\", input_data)\n    # TODO 2 of 10 (finish this to pass e2): the tool filter. When the tool name is not process_refund, return an empty\n    #   answer so that the call goes on untouched. Example: a get_order call with an amount of 9999 -> {}.\n    amount = (input_data.get(\"tool_input\") or {}).get(\"amount\")\n    # TODO 3 of 10 (finish this to pass e2): the fail-closed check. When the amount is missing, a boolean, not a number,\n    #   not finite or not above zero, return a deny answer with the reason \"The refund amount is missing or invalid\".\n    #   Example: amount \"12\" or True or 0 -> deny.\n    if not isinstance(amount, (int, float)):\n        amount = 0\n    if amount <= AUTO_LIMIT:\n        return _answer(\"PreToolUse\", permissionDecision=\"allow\", permissionDecisionReason=f\"{amount} is within the automatic limit of {AUTO_LIMIT}\")\n    # TODO 1 of 10 (finish this to pass m1, e1): the two upper tiers of the refund gate (the allow tier above is\n    #   written, to show the shape of the answer). `amount` is above AUTO_LIMIT here. Return the hook answer with\n    #   permissionDecision ask up to ASK_LIMIT, otherwise deny, each with a permissionDecisionReason that names the\n    #   amount. Example: 200 -> allow, 200.01 -> ask, 500 -> ask, 501 -> deny.\n    return {}\n\n\ndef _date(value):\n    seconds = value / 1000 if value > 1e11 else value\n    return datetime.fromtimestamp(seconds, timezone.utc).strftime(\"%Y-%m-%d\")\n\n\nasync def post_normalise(input_data, tool_use_id, context):\n    \"\"\"PostToolUse: give the model readable values in place of epoch seconds, numeric status codes and cents.\"\"\"\n    raw = input_data.get(\"tool_response\")\n    try:\n        data = json.loads(raw) if isinstance(raw, str) else raw\n    except ValueError:\n        return {}\n    if not isinstance(data, dict):\n        return {}\n    out = dict(data)\n    # TODO 4 of 10 (finish this to pass e3): the date and the status word. When `created` is a number (not a boolean),\n    #   replace it with the text from the date helper; when `status` is an integer (not a boolean), replace it with its\n    #   word from STATUS, or \"unknown\". Example: created 1700000000 -> \"2023-11-14\", status 1 -> \"approved\", status 9 ->\n    #   \"unknown\".\n    cents = out.pop(\"amount_cents\", None)\n    # TODO 5 of 10 (finish this to pass e3): the amount. When `amount_cents` is an integer (not a boolean), remove it\n    #   and add `amount` as text with two decimals; leave a value that is not an integer untouched. Example: 12950 ->\n    #   amount \"129.50\", and 5 -> \"0.05\".\n    # TODO 6 of 10 (finish this to pass e4): the idempotence rule. When nothing changed, return an empty answer instead\n    #   of a replacement. Example: {\"status\": \"approved\"} -> {} (and output that is not JSON is already left alone above).\n    return _answer(\"PostToolUse\", updatedToolOutput=json.dumps(out))\n\n\ndef build_options(cwd, cli_path=None):\n    \"\"\"Options that register both hooks; a matcher is a tool name pattern, never a path.\"\"\"\n    return ClaudeAgentOptions(\n        cwd=cwd, cli_path=cli_path, allowed_tools=[\"get_order\", \"process_refund\"], permission_mode=\"default\", setting_sources=[], max_turns=6,\n        # TODO 7 of 10 (finish this to pass e5, e8): the hook registration. Fill the `hooks` map of the options: a\n        #   HookMatcher (Python) or {matcher, hooks, timeout} object (TypeScript) for PreToolUse with the matcher\n        #   process_refund and the refund gate, and one for PostToolUse with the matcher get_order|get_refund and the\n        #   normaliser, each with a timeout of 5.\n        hooks={\"PreToolUse\": [HookMatcher(hooks=[pre_refund])], \"PostToolUse\": [HookMatcher(hooks=[post_normalise])]})\n\n\ndef command_hook(stdin_text):\n    \"\"\"What a Claude Code command hook does with its stdin: exit 2 blocks (the reason goes to stderr), 0 lets the call go on, and bad input blocks.\"\"\"\n    try:\n        data = json.loads(stdin_text)\n    except ValueError:\n        data = None\n    # TODO 8 of 10 (finish this to pass e6): the fail-closed rule. When the parsed input is not an object, return exit 2\n    #   with the reason \"The hook input is not valid JSON, so the call is blocked to be safe\". Example: \"not json\" ->\n    #   {exit: 2, stderr: ...}.\n    data = data if isinstance(data, dict) else {}\n    if data.get(\"tool_name\") != \"Bash\":\n        return {\"exit\": 0, \"stderr\": \"\"}\n    command = str((data.get(\"tool_input\") or {}).get(\"command\", \"\"))\n    # TODO 9 of 10 (finish this to pass e6): the command rules. For each (pattern, reason) of BLOCKED_COMMANDS, when the\n    #   pattern matches the command return exit 2 with the reason. Example: \"git push origin main\" -> {exit: 2, stderr:\n    #   \"Nothing is pushed from an agent session\"}.\n    return {\"exit\": 0, \"stderr\": \"\"}\n\n\ndef settings_hooks(script=\"python3 .claude/hooks/guard.py\", timeout=10):\n    \"\"\"The hooks block of .claude/settings.json that runs the command hook before every Bash call.\"\"\"\n    # TODO 10 of 10 (finish this to pass e7): the settings block. Return the hooks block for .claude/settings.json:\n    #   PreToolUse with one entry whose matcher is Bash and whose hooks list has one command hook carrying the script and\n    #   the timeout. Example: settings_hooks(\"sh guard.sh\", 3) -> a command hook with command \"sh guard.sh\" and timeout 3.\n    return {\"hooks\": {\"PreToolUse\": [{\"matcher\": \"\", \"hooks\": [{\"type\": \"command\", \"command\": script}]}]}}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nimport asyncio\n\nfrom hooks import pre_refund\n\n\ndef check(amount):\n    \"\"\"Run the refund gate the way the Agent SDK does: with the event of one tool call about to run.\"\"\"\n    event = {\"hook_event_name\": \"PreToolUse\", \"tool_name\": \"process_refund\", \"tool_input\": {\"amount\": amount}}\n    out = asyncio.run(pre_refund(event, \"t1\", None)) or {}\n    return out.get(\"hookSpecificOutput\", {})\n\n\n# A small refund goes through, a middle one asks a person, a large one is denied.\nfor amount in (50, 350, 900):\n    verdict = check(amount)\n    print(f\"refund of {amount}:\", verdict.get(\"permissionDecision\"), \"-\", verdict.get(\"permissionDecisionReason\", \"\"))\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "6180f47f68c7dab48f2dab1160f9bf5fe7b801baf0b81a6ed5f5a97ff8ee20c1",
+  "starting_code": "\"\"\"Hooks with the Agent SDK and Claude Code: a refund gate, output normalisation, the options that register them, and a command hook. See ../../statement.md.\"\"\"\nimport json\nimport math\nimport re\nfrom datetime import datetime, timezone\n\nfrom claude_agent_sdk import ClaudeAgentOptions, HookMatcher\nimport logging\n\nlog = logging.getLogger(__name__)\n\nAUTO_LIMIT = 200\nASK_LIMIT = 500\nSTATUS = {0: \"pending\", 1: \"approved\", 2: \"declined\"}\nBLOCKED_COMMANDS = ((r\"\\bgit\\s+push\\b\", \"Nothing is pushed from an agent session\"), (r\"\\brm\\s+-rf\\b\", \"Recursive deletes are not allowed\"))\n\n\ndef _answer(event, **fields):\n    return {\"hookSpecificOutput\": {\"hookEventName\": event, **fields}}\n\n\nasync def pre_refund(input_data, tool_use_id, context):\n    \"\"\"PreToolUse for process_refund: allow small refunds, ask a person for middle ones, deny large ones, and fail closed on a bad amount.\"\"\"\n    log.debug(\"pre_refund input: %r\", input_data)\n    # TODO 2 of 10 (finish this to pass e2): the tool filter. When the tool name is not process_refund, return an empty\n    #   answer so that the call goes on untouched. Example: a get_order call with an amount of 9999 -> {}.\n    amount = (input_data.get(\"tool_input\") or {}).get(\"amount\")\n    # TODO 3 of 10 (finish this to pass e2): the fail-closed check. When the amount is missing, a boolean, not a number,\n    #   not finite or not above zero, return a deny answer with the reason \"The refund amount is missing or invalid\".\n    #   Example: amount \"12\" or True or 0 -> deny.\n    if not isinstance(amount, (int, float)):\n        amount = 0\n    if amount <= AUTO_LIMIT:\n        return _answer(\"PreToolUse\", permissionDecision=\"allow\", permissionDecisionReason=f\"{amount} is within the automatic limit of {AUTO_LIMIT}\")\n    # TODO 1 of 10 (finish this to pass m1, e1): the two upper tiers of the refund gate (the allow tier above is\n    #   written, to show the shape of the answer). `amount` is above AUTO_LIMIT here. Return the hook answer with\n    #   permissionDecision ask up to ASK_LIMIT, otherwise deny, each with a permissionDecisionReason that names the\n    #   amount. Example: 200 -> allow, 200.01 -> ask, 500 -> ask, 501 -> deny.\n    return {}\n\n\ndef _date(value):\n    seconds = value / 1000 if value > 1e11 else value\n    return datetime.fromtimestamp(seconds, timezone.utc).strftime(\"%Y-%m-%d\")\n\n\nasync def post_normalise(input_data, tool_use_id, context):\n    \"\"\"PostToolUse: give the model readable values in place of epoch seconds, numeric status codes and cents.\"\"\"\n    raw = input_data.get(\"tool_response\")\n    try:\n        data = json.loads(raw) if isinstance(raw, str) else raw\n    except ValueError:\n        return {}\n    if not isinstance(data, dict):\n        return {}\n    out = dict(data)\n    # TODO 4 of 10 (finish this to pass e3): the date and the status word. When `created` is a number (not a boolean),\n    #   replace it with the text from the date helper; when `status` is an integer (not a boolean), replace it with its\n    #   word from STATUS, or \"unknown\". Example: created 1700000000 -> \"2023-11-14\", status 1 -> \"approved\", status 9 ->\n    #   \"unknown\".\n    cents = out.pop(\"amount_cents\", None)\n    # TODO 5 of 10 (finish this to pass e3): the amount. When `amount_cents` is an integer (not a boolean), remove it\n    #   and add `amount` as text with two decimals; leave a value that is not an integer untouched. Example: 12950 ->\n    #   amount \"129.50\", and 5 -> \"0.05\".\n    # TODO 6 of 10 (finish this to pass e4): the idempotence rule. When nothing changed, return an empty answer instead\n    #   of a replacement. Example: {\"status\": \"approved\"} -> {} (and output that is not JSON is already left alone above).\n    return _answer(\"PostToolUse\", updatedToolOutput=json.dumps(out))\n\n\ndef build_options(cwd, cli_path=None):\n    \"\"\"Options that register both hooks; a matcher is a tool name pattern, never a path.\"\"\"\n    return ClaudeAgentOptions(\n        cwd=cwd, cli_path=cli_path, allowed_tools=[\"get_order\", \"process_refund\"], permission_mode=\"default\", setting_sources=[], max_turns=6,\n        # TODO 7 of 10 (finish this to pass e5, e8): the hook registration. Fill the `hooks` map of the options: a\n        #   HookMatcher (Python) or {matcher, hooks, timeout} object (TypeScript) for PreToolUse with the matcher\n        #   process_refund and the refund gate, and one for PostToolUse with the matcher get_order|get_refund and the\n        #   normaliser, each with a timeout of 5.\n        hooks={\"PreToolUse\": [HookMatcher(hooks=[pre_refund])], \"PostToolUse\": [HookMatcher(hooks=[post_normalise])]})\n\n\ndef command_hook(stdin_text):\n    \"\"\"What a Claude Code command hook does with its stdin: exit 2 blocks (the reason goes to stderr), 0 lets the call go on, and bad input blocks.\"\"\"\n    try:\n        data = json.loads(stdin_text)\n    except ValueError:\n        data = None\n    # TODO 8 of 10 (finish this to pass e6): the fail-closed rule. When the parsed input is not an object, return exit 2\n    #   with the reason \"The hook input is not valid JSON, so the call is blocked to be safe\". Example: \"not json\" ->\n    #   {exit: 2, stderr: ...}.\n    data = data if isinstance(data, dict) else {}\n    if data.get(\"tool_name\") != \"Bash\":\n        return {\"exit\": 0, \"stderr\": \"\"}\n    command = str((data.get(\"tool_input\") or {}).get(\"command\", \"\"))\n    # TODO 9 of 10 (finish this to pass e6): the command rules. For each (pattern, reason) of BLOCKED_COMMANDS, when the\n    #   pattern matches the command return exit 2 with the reason. Example: \"git push origin main\" -> {exit: 2, stderr:\n    #   \"Nothing is pushed from an agent session\"}.\n    return {\"exit\": 0, \"stderr\": \"\"}\n\n\ndef settings_hooks(script=\"python3 .claude/hooks/guard.py\", timeout=10):\n    \"\"\"The hooks block of .claude/settings.json that runs the command hook before every Bash call.\"\"\"\n    # TODO 10 of 10 (finish this to pass e7): the settings block. Return the hooks block for .claude/settings.json:\n    #   PreToolUse with one entry whose matcher is Bash and whose hooks list has one command hook carrying the script and\n    #   the timeout. Example: settings_hooks(\"sh guard.sh\", 3) -> a command hook with command \"sh guard.sh\" and timeout 3.\n    return {\"hooks\": {\"PreToolUse\": [{\"matcher\": \"\", \"hooks\": [{\"type\": \"command\", \"command\": script}]}]}}\n",
+  "exercise": {
+    "main_path": "practice/level-3/49-hooks/prose/unit-02/practice-1/hooks.py",
+    "test_path": "practice/level-3/49-hooks/prose/unit-02/practice-1/test_hooks.py",
+    "run_command": [
+      "python3",
+      "practice/level-3/49-hooks/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-3/49-hooks/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-3/49-hooks/prose/unit-02/practice-1/test_hooks.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_the_gate_allows_a_small_refund_asks_about_a_middle_one_and_denies_a_large_one",
+        "kind": "main",
+        "says": "The gate allows a small refund, asks about a middle one and denies a large one"
+      },
+      {
+        "id": "test_e1_each_limit_belongs_to_the_lower_tier_and_the_next_cent_goes_up",
+        "kind": "edge",
+        "says": "Each limit belongs to the lower tier and the next cent goes up"
+      },
+      {
+        "id": "test_e2_a_missing_or_invalid_amount_is_denied_and_other_tools_are_left_alone",
+        "kind": "edge",
+        "says": "A missing or invalid amount is denied and other tools are left alone"
+      },
+      {
+        "id": "test_e3_the_output_gets_a_date_a_status_word_and_a_decimal_amount",
+        "kind": "edge",
+        "says": "The output gets a date, a status word and a decimal amount"
+      },
+      {
+        "id": "test_e4_output_that_is_not_json_or_is_already_readable_is_left_alone",
+        "kind": "edge",
+        "says": "Output that is not JSON or is already readable is left alone"
+      },
+      {
+        "id": "test_e5_the_hooks_are_registered_on_tool_name_matchers_with_a_timeout",
+        "kind": "edge",
+        "says": "The hooks are registered on tool name matchers with a timeout"
+      },
+      {
+        "id": "test_e6_a_command_hook_blocks_with_exit_two_and_a_reason_and_fails_closed_on_bad_input",
+        "kind": "edge",
+        "says": "A command hook blocks with exit two and a reason, and fails closed on bad input"
+      },
+      {
+        "id": "test_e7_the_settings_block_runs_the_command_hook_on_bash_with_a_timeout",
+        "kind": "edge",
+        "says": "The settings block runs the command hook on Bash with a timeout"
+      },
+      {
+        "id": "test_e8_a_run_through_the_sdk_denies_the_large_refund_and_shows_the_model_a_readable_order",
+        "kind": "edge",
+        "says": "A run through the SDK denies the large refund and shows the model a readable order"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/49-hooks/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/49-hooks/02-normalising-results-command-hooks-and-the-practice.md",
+    "concepts": [
+      "the practice of Normalising results, command hooks and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/49-hooks/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "hooks-u2"
+}

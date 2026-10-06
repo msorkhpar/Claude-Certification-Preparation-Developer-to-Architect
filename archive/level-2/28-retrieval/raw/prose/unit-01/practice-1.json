@@ -1,0 +1,156 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "28-retrieval"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Chunks, BM25 and embeddings",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A support bot must find the passage that contains the error code E-4012. Which approach is the reliable one?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Only a reranker, since the earlier stages cannot see digits",
+            "correct": false,
+            "says": "Ruled out because the reranker is the optional fifth stage, and the page says the keyword index \"finds `E-4012` when the query holds it\"."
+          },
+          {
+            "id": "b",
+            "text": "An embedding of every passage, because a code has a meaning like other codes",
+            "correct": false,
+            "says": "Ruled out because an embedding \"is weaker with exact strings\"."
+          },
+          {
+            "id": "c",
+            "text": "Neither, because a code is too short to be indexed at all",
+            "correct": false,
+            "says": "Ruled out because \"A rare word such as an error code outweighs common words\"."
+          },
+          {
+            "id": "d",
+            "text": "A keyword index, because it matches the exact term as written",
+            "correct": true,
+            "says": "The page says \"BM25 is exact. It finds `E-4012` when the query holds it.\""
+          }
+        ],
+        "origin": {
+          "path": "course/28-retrieval/01-chunks-bm25-and-embeddings.md",
+          "section": "BM25: a keyword score"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A team asks where to get embeddings for Claude-based retrieval. What does the documentation say?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Anthropic has no model of its own, and names Voyage AI as a provider",
+            "correct": true,
+            "says": "The page quotes \"Anthropic does not offer its own embedding model.\" and names Voyage AI."
+          },
+          {
+            "id": "b",
+            "text": "Use the embedding endpoint of the Messages API, which every model has",
+            "correct": false,
+            "says": "Ruled out because \"Anthropic does not offer its own embedding model\", so no endpoint exists."
+          },
+          {
+            "id": "c",
+            "text": "Ask Claude to write the vectors, since it understands the text",
+            "correct": false,
+            "says": "Ruled out because an embedding model is a trained model that \"turns text into a vector of numbers\", not a text generator."
+          },
+          {
+            "id": "d",
+            "text": "Train a model on the Claude API's logs, which are provided for this",
+            "correct": false,
+            "says": "Ruled out because the documentation tells you to \"assess a variety of embeddings vendors\", and says nothing about logs."
+          }
+        ],
+        "origin": {
+          "path": "course/28-retrieval/01-chunks-bm25-and-embeddings.md",
+          "section": "Where embeddings come from"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A cut falls in the middle of a key sentence of three words, and the overlap is four words. What does overlap do about it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The sentence is stored twice, as a single longer chunk of its own",
+            "correct": false,
+            "says": "Ruled out because each window \"repeats the last `overlap` words of the one before it\", and does not build a separate chunk."
+          },
+          {
+            "id": "b",
+            "text": "The sentence is dropped from every chunk so that no half survives",
+            "correct": false,
+            "says": "Ruled out because \"a sentence cut at a boundary loses its meaning on both sides\", and overlap keeps it."
+          },
+          {
+            "id": "c",
+            "text": "At least one window keeps it intact, as the repeated span is longer",
+            "correct": true,
+            "says": "The page says \"with an overlap at least as long as the sentence, at least one chunk holds it whole\"."
+          },
+          {
+            "id": "d",
+            "text": "The cut moves to the next paragraph without being asked",
+            "correct": false,
+            "says": "Ruled out because windows are cut by words: \"the last window ends at the last word\"."
+          }
+        ],
+        "origin": {
+          "path": "course/28-retrieval/01-chunks-bm25-and-embeddings.md",
+          "section": "Chunking"
+        }
+      }
+    ],
+    "concepts": [
+      "BM25: a keyword score, as the page teaches it",
+      "Chunking, as the page teaches it",
+      "Where embeddings come from, as the page teaches it"
+    ]
+  }
+}

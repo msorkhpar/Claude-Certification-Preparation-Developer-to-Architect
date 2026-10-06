@@ -1,0 +1,123 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "15-errors-retries-and-timeouts"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Timeouts, logging without secrets, and debugging by type and origin",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A screen that a user watches calls the API with the SDK defaults, and a stuck connection now leaves users waiting for about half an hour. Which change does the page recommend first?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Raise the number of retries so that a stuck call is more likely to succeed in the end",
+            "correct": false,
+            "says": "Ruled out because \"three attempts of ten minutes each\" is the cause of the half hour, and more retries lengthen it."
+          },
+          {
+            "id": "b",
+            "text": "Set a total deadline from the latency budget and fit the timeout and attempts under it",
+            "correct": true,
+            "says": "The page says to \"set the total deadline from the latency budget of module 12, then choose a per-attempt timeout and an attempt count that fit under it\"."
+          },
+          {
+            "id": "c",
+            "text": "Turn on debug logging so that the stuck call is recorded in full for later reading",
+            "correct": false,
+            "says": "Ruled out because logging records the wait and does not shorten it, and \"debug logging is a development tool\"."
+          },
+          {
+            "id": "d",
+            "text": "Lower only the connect timeout, since the stall happens while the connection opens",
+            "correct": false,
+            "says": "Ruled out because a stall on an open connection is the read clock: \"Read: how long to wait between bytes of the reply\"."
+          }
+        ],
+        "origin": {
+          "path": "course/15-errors-retries-and-timeouts/03-timeouts-logging-and-debugging.md",
+          "section": "The worst case is a product"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A support engineer asks for one item from a failing call so that the provider can find it. Which item should the log have kept?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The reply text, so that the provider can see what the model wrote in answer",
+            "correct": false,
+            "says": "Ruled out because \"neither job needs a secret or a customer's text\", and the reply is customer-facing text."
+          },
+          {
+            "id": "b",
+            "text": "The complete request body, so that the call can be replayed from the log later",
+            "correct": false,
+            "says": "Ruled out because \"prompts and replies unless the spec says they may be stored\" stay out of the log."
+          },
+          {
+            "id": "c",
+            "text": "The key used for the call, so that the provider can match the account at once",
+            "correct": false,
+            "says": "Ruled out because the log must not hold \"the API key and the authorization or x-api-key header\"."
+          },
+          {
+            "id": "d",
+            "text": "The request id from the response, so that the team behind the API can trace the exchange",
+            "correct": true,
+            "says": "The page calls the request id \"the one handle the provider's support can use\"."
+          }
+        ],
+        "origin": {
+          "path": "course/15-errors-retries-and-timeouts/03-timeouts-logging-and-debugging.md",
+          "section": "Logging a call without leaking"
+        }
+      }
+    ],
+    "concepts": [
+      "Debugging by type and origin, as the page teaches it",
+      "Logging a call without leaking, as the page teaches it",
+      "The worst case is a product, as the page teaches it",
+      "Timeouts, logging without secrets, and debugging by type and origin, as the page teaches it"
+    ]
+  }
+}

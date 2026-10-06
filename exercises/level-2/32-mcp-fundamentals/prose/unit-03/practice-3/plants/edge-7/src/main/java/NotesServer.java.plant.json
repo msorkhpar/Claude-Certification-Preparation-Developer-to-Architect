@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/java/NotesServer.java",
+      "old": "        NOTES.add(new Note(title, text));\n        return ok(\"Saved note \" + NOTES.size() + \": \" + title);",
+      "new": "        String rawTitle = String.valueOf(args.getOrDefault(\"title\", \"\")), rawText = String.valueOf(args.getOrDefault(\"text\", \"\"));\n        NOTES.add(new Note(rawTitle, rawText));\n        return ok(\"Saved note \" + NOTES.size() + \": \" + rawTitle);"
+    }
+  ]
+}

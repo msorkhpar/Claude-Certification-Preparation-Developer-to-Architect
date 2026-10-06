@@ -1,0 +1,156 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "29-context-engineering"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Context editing, compaction and memory",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A team wants old tool output cleared once the conversation passes a size, while the calls stay. Which feature and header fit?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Compaction on demand, enabled with `compact-2026-09-04`",
+            "correct": false,
+            "says": "Ruled out because on-demand compaction summarizes: \"Compaction replaces the older turns of a conversation with a summary\"."
+          },
+          {
+            "id": "b",
+            "text": "Context editing, enabled with `context-management-2025-06-27`",
+            "correct": true,
+            "says": "The page says \"Context editing allows you to selectively clear specific content from conversation history as it grows.\" It is enabled with the header `context-management-2025-06-27`."
+          },
+          {
+            "id": "c",
+            "text": "Threshold compaction, enabled with `compact-2026-01-12`",
+            "correct": false,
+            "says": "Ruled out because for the threshold form \"the response carries a `compaction` block\", a summary and not a clearing."
+          },
+          {
+            "id": "d",
+            "text": "The memory tool, enabled with `memory_20250818` and no header",
+            "correct": false,
+            "says": "Ruled out because the memory tool is \"state outside the window\", and does not clear anything."
+          }
+        ],
+        "origin": {
+          "path": "course/29-context-engineering/02-context-editing-compaction-and-memory.md",
+          "section": "Context editing: clear by rule"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A response arrives after the API summarized a conversation at its threshold, and the application reads only the top-level counts. What is missing?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Nothing, since the top-level fields cover every call",
+            "correct": false,
+            "says": "Ruled out because of the sentence \"do **not** include compaction iteration usage\"."
+          },
+          {
+            "id": "b",
+            "text": "The tokens of the final reply, which sit in the content blocks",
+            "correct": false,
+            "says": "Ruled out because the total is found by the rule \"to find what was billed\", which adds the entries and not the content blocks."
+          },
+          {
+            "id": "c",
+            "text": "The cache tokens, which are kept in a separate response header",
+            "correct": false,
+            "says": "Ruled out because the page says to \"sum across the `usage.iterations` array\", and names no response header."
+          },
+          {
+            "id": "d",
+            "text": "The tokens of the extra call that wrote the digest",
+            "correct": true,
+            "says": "The page says the top-level fields \"do **not** include compaction iteration usage\", and to \"sum across the `usage.iterations` array\"."
+          }
+        ],
+        "origin": {
+          "path": "course/29-context-engineering/02-context-editing-compaction-and-memory.md",
+          "section": "Compaction: summarise on the server"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "An agent must remember a customer's preference across two sessions. Which feature does the page name for that?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Clearing tool results, which keeps facts in the window",
+            "correct": false,
+            "says": "Ruled out because clearing is for \"Old tool output is noise, the calls should stay\", not for facts that must survive."
+          },
+          {
+            "id": "b",
+            "text": "The memory tool, with files that the application stores",
+            "correct": true,
+            "says": "The page says \"The memory tool lets Claude store and retrieve information across conversations in a directory of memory files.\""
+          },
+          {
+            "id": "c",
+            "text": "Threshold compaction, which stores summaries on the server for good",
+            "correct": false,
+            "says": "Ruled out because the memory tool exists for facts that must survive summarization: \"memory preserves the information that must survive summarization\"."
+          },
+          {
+            "id": "d",
+            "text": "A longer system prompt, since the window is reset between sessions",
+            "correct": false,
+            "says": "Ruled out because the page warns that \"Your context window might be reset at any moment\", so a prompt cannot hold state."
+          }
+        ],
+        "origin": {
+          "path": "course/29-context-engineering/02-context-editing-compaction-and-memory.md",
+          "section": "The memory tool: state outside the window"
+        }
+      }
+    ],
+    "concepts": [
+      "Compaction: summarise on the server, as the page teaches it",
+      "Context editing: clear by rule, as the page teaches it",
+      "The memory tool: state outside the window, as the page teaches it"
+    ]
+  }
+}

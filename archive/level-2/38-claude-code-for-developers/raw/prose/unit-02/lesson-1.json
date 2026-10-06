@@ -1,0 +1,311 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "38-claude-code-for-developers"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "The memory file, settings layers and permission rules",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "The memory file, settings layers and permission rules"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Developer · **Module 38:** Claude Code for developers · **Page 2 of 3** **Exams:** DV7; A3"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** write a project memory file that Claude follows, say in which order memory files and settings files apply, decide which layer a setting belongs in, write permission rules that do what you mean, and predict the outcome of a call against merged rules."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-03 against the Claude Code documentation (memory, settings and precedence, permissions and permission modes), which mention behaviour up to Claude Code v2.1.286. The example is the course's own model of the documented rules, written to be tested offline in Python, TypeScript, Java and Kotlin. It is not Claude Code's code, and it covers the rules this page states and no others."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "Most of the configuration an exam asks about lives in three places: a memory file that tells Claude how the project works, settings files that say what runs freely, and permission rules inside the settings. People get each of them wrong in a predictable way. They write a memory file that is too long to be followed, they put a personal choice in the shared file, and they write an allow rule that a deny rule silently beats."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The memory file"
+    },
+    {
+      "type": "para",
+      "text": "CLAUDE.md carries persistent instructions. Claude Code's memory systems \"are loaded at the start of every conversation\", and \"Claude treats them as context, not enforced configuration.\" The consequence is stated in the same place: \"To block an action regardless of what Claude decides, use a PreToolUse hook instead.\" A memory file asks and a hook enforces."
+    },
+    {
+      "type": "para",
+      "text": "What goes in it follows from that. The documentation says to \"target under 200 lines per CLAUDE.md file\", because \"Longer files consume more context and reduce adherence.\" It should state what Claude would otherwise get wrong, such as the exact commands for tests and lint, in concrete and checkable words. Run `/init` to generate a starting file: \"Claude analyzes your codebase and creates a file with build commands, test instructions, and project conventions it discovers.\" If one exists, `/init` \"suggests improvements rather than overwriting it\". Then refine it by hand with \"instructions Claude wouldn't discover on its own\". The command `/memory` opens it for editing."
+    },
+    {
+      "type": "para",
+      "text": "Files load by location. Managed policy comes first, then the user file in `~/.claude/`, then the project's `CLAUDE.md` files from the repository root down to the working directory, and `CLAUDE.local.md` follows its `CLAUDE.md` for personal, project-specific notes that belong in `.gitignore`. Files in subdirectories below the working directory load on demand, when Claude reads files there. The later files are the more specific, and they are read last."
+    },
+    {
+      "type": "para",
+      "text": "A memory file can import others with `@path/to/import`. \"Imported files are expanded and loaded into context at launch alongside the CLAUDE.md that references them\", and they \"can recursively import other files, with a maximum depth of four hops.\" Two details matter. Imports organise a long file but \"don't reduce its context cost, because imported files also load at launch\", so an import is not a way to hide length. And \"Import parsing skips Markdown code spans and fenced code blocks\": writing a path in backticks keeps it literal, and the same text outside backticks imports the file."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Settings: five layers"
+    },
+    {
+      "type": "para",
+      "text": "Settings are JSON files. The settings page gives their order, highest first: managed settings, the command line, project local (`.claude/settings.local.json`), shared project (`.claude/settings.json`) and user (`~/.claude/settings.json`). \"A key set at a higher level overrides the same key set lower down.\" Lists, such as the allow and deny arrays, are not replaced: they combine across layers, which is why a deny rule written anywhere reaches every session."
+    },
+    {
+      "type": "para",
+      "text": "Pick the layer by who the setting is for. The team's choices go in the shared project file, which is committed: the permission rules that every developer needs, the default model for the repository. A personal override goes in the local file, which belongs in `.gitignore`: this developer's preferred model, a path on their machine. A choice for every project that one person works on goes in the user file. A rule that must hold regardless of what any developer writes goes in managed settings, which nothing below it can override."
+    },
+    {
+      "type": "para",
+      "text": "Two safeguards live here. A shared or local file cannot set `defaultMode` to `auto` or `bypassPermissions`, as page 1 showed. And project allow rules wait for workspace trust: an allow rule in a repository you have just cloned does not apply before you have trusted the folder, while deny and ask rules apply at once, since they only restrict."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Permission rules"
+    },
+    {
+      "type": "para",
+      "text": "A rule names a tool and optionally a pattern, and it has one of three effects. \"Rules are evaluated in order: deny, then ask, then allow. The first match in that order determines the outcome, and rule specificity doesn't change the order.\" So \"An allow rule can't carve an exception out of a deny rule\": a broad deny of `Bash(aws *)` blocks `aws s3 ls` even when a narrower allow names it. A call that no rule matches falls to the mode: in Manual, a read runs and anything else asks. The Agent SDK page of module 35 lists the mode as its own step between the ask and allow rules; for a mode that only falls through, such as the default, the result is the same."
+    },
+    {
+      "type": "para",
+      "text": "The shapes to know:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Rule",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`Bash` or `Bash(*)`",
+          "Every shell command. As an allow rule, that approves all of them. As a deny rule, it removes the tool from Claude's context"
+        ],
+        [
+          "`Bash(npm run build)`",
+          "That exact command"
+        ],
+        [
+          "`Bash(git log *)`",
+          "`git log` with any arguments, and not `git push`"
+        ],
+        [
+          "`Read(./.env)`",
+          "Reading that file"
+        ],
+        [
+          "`WebFetch(domain:example.com)`",
+          "Fetches to one domain"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "In `Bash(git log *)` the space before the `*` matters: the words before it are matched as written, so the rule allows only that subcommand. `Bash(ls *)` also matches the bare `ls` and does not match `lsof`. The compound command `npm run build && git push origin main` is not covered by an allow rule for `npm run build`, because each part is checked. Two more rules of thumb: a `Write(...)` path rule is not consulted, so protect files with `Edit` or `Read` rules, and a deny on `Read` for a path also stops Edit and Write on it."
+    },
+    {
+      "type": "para",
+      "text": "A bare `Bash` allow rule is the commonest serious mistake. It approves every command that no deny or ask rule catches, which turns a careful configuration into an open one."
+    },
+    {
+      "type": "example",
+      "id": "m38-settings-layers",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/38-settings-layers/python/settings_layers.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/38-settings-layers/typescript/settingsLayers.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/38-settings-layers/java/SettingsLayers.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/38-settings-layers/kotlin/SettingsLayers.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Claude Code settings layers, permission rules and memory files, resolved offline.\n\nThree small functions that follow what the Claude Code documentation says (read on 2026-10-03): settings merge from five levels with\nthe highest level winning a scalar key and lists combining; permission rules are checked deny, then ask, then allow, with the first\nmatch deciding; and CLAUDE.md files are concatenated from the broadest scope to the most specific, with @imports expanded. It is a\nteaching model of the documented behaviour, not the product's code: Read and Edit patterns use a reduced form of the gitignore rules.\n\"\"\"\nimport logging\nimport re\n\nlog = logging.getLogger(__name__)\n\nLEVELS = [\"managed\", \"command line\", \"local\", \"project\", \"user\"]  # highest precedence first\nREPO_LEVELS = (\"project\", \"local\")  # files that live in the repository\n\n\ndef merge(low, high):\n    out = dict(low)\n    for key, value in high.items():\n        if isinstance(value, dict) and isinstance(out.get(key), dict):\n            out[key] = merge(out[key], value)\n        elif isinstance(value, list) and isinstance(out.get(key), list):\n            out[key] = out[key] + [v for v in value if v not in out[key]]\n        else:\n            out[key] = value\n    return out\n\n\ndef effective_settings(layers, trusted=True):\n    \"\"\"Merge the five levels. A repository file cannot set defaultMode auto or bypassPermissions, and its allow rules wait for trust.\"\"\"\n    result = {}\n    for level in reversed(LEVELS):\n        part = {k: (dict(v) if isinstance(v, dict) else v) for k, v in layers.get(level, {}).items()}\n        perms = part.get(\"permissions\")\n        if level in REPO_LEVELS and perms:\n            if perms.get(\"defaultMode\") in (\"auto\", \"bypassPermissions\"):\n                perms.pop(\"defaultMode\")\n            if not trusted:\n                perms.pop(\"allow\", None)\n        result = merge(result, part)\n    return result\n\n\ndef _bash_regex(rule):\n    rule = rule[:-2] + \" *\" if rule.endswith(\":*\") else rule\n    if rule.endswith(\" *\") and \"*\" not in rule[:-2]:\n        return re.compile(re.escape(rule[:-2]) + r\"(?: .*)?\", re.S)\n    return re.compile(\".*\".join(re.escape(part) for part in rule.split(\"*\")), re.S)\n\n\ndef _glob(p):\n    out, i = \"\", 0\n    while i < len(p):\n        if p.startswith(\"**/\", i):\n            out, i = out + \"(?:.*/)?\", i + 3\n        elif p.startswith(\"**\", i):\n            out, i = out + \".*\", i + 2\n        elif p[i] == \"*\":\n            out, i = out + \"[^/]*\", i + 1\n        else:\n            out, i = out + re.escape(p[i]), i + 1\n    return out\n\n\ndef _path_matches(pattern, path, kind):\n    pattern, path = pattern.removeprefix(\"./\"), path.removeprefix(\"./\")\n    if pattern.startswith(\"//\"):\n        return re.fullmatch(_glob(pattern[1:]), path) is not None\n    if pattern.startswith(\"/\"):\n        return re.fullmatch(_glob(pattern[1:]), path) is not None\n    if \"/\" not in pattern:\n        return re.fullmatch(\"(?:.*/)?\" + _glob(pattern), path) is not None\n    first = pattern.split(\"/\")[0]\n    deep = kind != \"allow\" and \"*\" not in first and pattern.count(\"/\") >= 1 and not pattern.startswith(\"**\")\n    return re.fullmatch((\"(?:.*/)?\" if deep else \"\") + _glob(pattern), path) is not None\n\n\ndef _rule_matches(rule, tool, arg, kind):\n    m = re.fullmatch(r\"(\\w+)(?:\\((.*)\\))?\", rule, re.S)\n    if not m or m.group(1) != tool:\n        return False\n    if m.group(2) is None:\n        return True\n    return bool(_bash_regex(m.group(2)).fullmatch(arg)) if tool == \"Bash\" else _path_matches(m.group(2), arg, kind)\n\n\ndef decide(settings, tool, arg=\"\", mode=\"default\"):\n    \"\"\"allow, ask or deny. Deny first, then ask, then allow; a Bash call is split at && || ; | & and newlines and every part must pass.\n    In acceptEdits mode an edit that no rule decided is accepted instead of asked.\"\"\"\n    perms = settings.get(\"permissions\", {})\n    rules = {kind: perms.get(kind, []) for kind in (\"deny\", \"ask\", \"allow\")}\n    if tool == \"Bash\":\n        parts = [p.strip() for p in re.split(r\"&&|\\|\\||;|\\||&|\\n\", arg) if p.strip()]\n    else:\n        parts = [arg]\n    for kind in (\"deny\", \"ask\"):\n        if any(_rule_matches(r, tool, p, kind) for r in rules[kind] for p in parts):\n            return kind\n    if tool in (\"Edit\", \"Write\") and any(_rule_matches(r.replace(\"Read(\", \"Edit(\", 1), \"Edit\", arg, \"deny\") for r in rules[\"deny\"] if r.startswith(\"Read(\")):\n        return \"deny\"  # a Read deny rule also blocks edits and writes on the same path\n    if all(any(_rule_matches(r, tool, p, \"allow\") for r in rules[\"allow\"]) for p in parts):\n        return \"allow\"\n    if tool in (\"Read\", \"Grep\", \"Glob\"):\n        return \"allow\"  # read-only tools inside the working directory need no approval\n    if mode == \"acceptEdits\" and tool in (\"Edit\", \"Write\"):\n        return \"allow\"\n    return \"ask\"  # nothing matched: Manual mode asks\n\n\ndef load_memory(files, cwd, managed=None, user=None):\n    \"\"\"The memory files in the order they reach the context: managed, user, then each directory from the root down to cwd, where\n    CLAUDE.md comes before CLAUDE.local.md. files maps a path to its text; @path lines import files (relative to the importing file,\n    at most four hops deep) and a path inside backticks is not an import.\"\"\"\n    order = [p for p in (managed, user) if p in files]\n    parts = cwd.strip(\"/\").split(\"/\")\n    for depth in range(len(parts) + 1):\n        base = \"/\" + \"/\".join(parts[:depth])\n        base = base.rstrip(\"/\")\n        order += [p for p in (f\"{base}/CLAUDE.md\", f\"{base}/CLAUDE.local.md\") if p in files]\n    loaded = []\n\n    def add(path, hops):\n        loaded.append(path)\n        if hops == 4:\n            return\n        for token in re.findall(r\"(?<![`\\w])@([\\w./-]+)\", re.sub(r\"`[^`]*`\", \"\", files[path])):\n            target = token if token.startswith(\"/\") else _join(path, token)\n            if target in files:\n                add(target, hops + 1)\n\n    for path in order:\n        add(path, 0)\n    return loaded\n\n\ndef _join(path, rel):\n    stack = path.split(\"/\")[:-1]\n    for part in rel.split(\"/\"):\n        if part == \"..\":\n            stack.pop()\n        elif part != \".\":\n            stack.append(part)\n    return \"/\".join(stack)\n\n\ndef main():\n    layers = {\n        \"managed\": {\"permissions\": {\"deny\": [\"Bash(curl *)\"]}},\n        \"user\": {\"model\": \"sonnet\", \"permissions\": {\"allow\": [\"Bash(git status *)\"]}},\n        \"project\": {\"model\": \"opus\", \"permissions\": {\"defaultMode\": \"bypassPermissions\", \"allow\": [\"Bash(npm run *)\", \"Bash(curl *)\"],\n                                                     \"ask\": [\"Bash(git push *)\"], \"deny\": [\"Read(./.env)\"]}},\n        \"local\": {\"permissions\": {\"allow\": [\"Bash(git push *)\"]}},\n    }\n    s = effective_settings(layers)\n    print(\"model:\", s[\"model\"], \"| defaultMode:\", s[\"permissions\"].get(\"defaultMode\", \"(not set)\"))\n    print(\"allow rules:\", s[\"permissions\"][\"allow\"])\n    calls = [(\"Bash\", \"npm run build\"), (\"Bash\", \"npm run build && git push origin main\"), (\"Bash\", \"curl https://example.com\"),\n             (\"Read\", \"./.env\"), (\"Edit\", \".env\"), (\"Bash\", \"git status\"), (\"Bash\", \"rm -rf build\")]\n    for tool, arg in calls:\n        print(f\"{tool}({arg}) -> {decide(s, tool, arg)}\")\n    print(\"project not trusted yet: npm run build ->\", decide(effective_settings(layers, trusted=False), \"Bash\", \"npm run build\"))\n    files = {\"/etc/claude-code/CLAUDE.md\": \"managed\", \"/home/dev/.claude/CLAUDE.md\": \"user\", \"/repo/CLAUDE.md\": \"See @docs/git.md and `@README` here\",\n             \"/repo/docs/git.md\": \"git rules\", \"/repo/svc/CLAUDE.md\": \"service\", \"/repo/svc/CLAUDE.local.md\": \"mine\", \"/repo/other/CLAUDE.md\": \"other\"}\n    print(\"memory order for /repo/svc:\", load_memory(files, \"/repo/svc\", \"/etc/claude-code/CLAUDE.md\", \"/home/dev/.claude/CLAUDE.md\"))\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "model: opus | defaultMode: (not set)\nallow rules: ['Bash(git status *)', 'Bash(npm run *)', 'Bash(curl *)', 'Bash(git push *)']\nBash(npm run build) -> allow\nBash(npm run build && git push origin main) -> ask\nBash(curl https://example.com) -> deny\nRead(./.env) -> deny\nEdit(.env) -> deny\nBash(git status) -> allow\nBash(rm -rf build) -> ask\nproject not trusted yet: npm run build -> ask\nmemory order for /repo/svc: ['/etc/claude-code/CLAUDE.md', '/home/dev/.claude/CLAUDE.md', '/repo/CLAUDE.md', '/repo/docs/git.md', '/repo/svc/CLAUDE.md', '/repo/svc/CLAUDE.local.md']"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Claude Code settings layers, permission rules and memory files, resolved offline.\n//\n// Three small functions that follow what the Claude Code documentation says (read on 2026-10-03): settings merge from five levels with\n// the highest level winning a scalar key and lists combining; permission rules are checked deny, then ask, then allow, with the first\n// match deciding; and CLAUDE.md files are concatenated from the broadest scope to the most specific, with @imports expanded. It is a\n// teaching model of the documented behaviour, not the product's code: Read and Edit patterns use a reduced form of the gitignore rules.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"settings_layers\");\n\ntype Json = Record<string, any>;\ntype Kind = \"allow\" | \"ask\" | \"deny\";\n\nexport const LEVELS = [\"managed\", \"command line\", \"local\", \"project\", \"user\"]; // highest precedence first\nconst REPO_LEVELS = [\"project\", \"local\"]; // files that live in the repository\n\nexport function merge(low: Json, high: Json): Json {\n  const out: Json = { ...low };\n  for (const [key, value] of Object.entries(high)) {\n    if (value && typeof value === \"object\" && !Array.isArray(value) && out[key] && typeof out[key] === \"object\" && !Array.isArray(out[key])) out[key] = merge(out[key], value);\n    else if (Array.isArray(value) && Array.isArray(out[key])) out[key] = [...out[key], ...value.filter((v) => !out[key].includes(v))];\n    else out[key] = value;\n  }\n  return out;\n}\n\n/** Merge the five levels. A repository file cannot set defaultMode auto or bypassPermissions, and its allow rules wait for trust. */\nexport function effectiveSettings(layers: Record<string, Json>, trusted = true): Json {\n  let result: Json = {};\n  for (const level of [...LEVELS].reverse()) {\n    const part: Json = {};\n    for (const [k, v] of Object.entries(layers[level] ?? {})) part[k] = v && typeof v === \"object\" && !Array.isArray(v) ? { ...v } : v;\n    const perms = part.permissions;\n    if (REPO_LEVELS.includes(level) && perms) {\n      if (perms.defaultMode === \"auto\" || perms.defaultMode === \"bypassPermissions\") delete perms.defaultMode;\n      if (!trusted) delete perms.allow;\n    }\n    result = merge(result, part);\n  }\n  return result;\n}\n\nconst escape = (s: string) => s.replace(/[.*+?^${}()|[\\]\\\\\\/-]/g, \"\\\\$&\");\n\nfunction bashRegex(ruleIn: string): RegExp {\n  const rule = ruleIn.endsWith(\":*\") ? ruleIn.slice(0, -2) + \" *\" : ruleIn;\n  if (rule.endsWith(\" *\") && !rule.slice(0, -2).includes(\"*\")) return new RegExp(\"^\" + escape(rule.slice(0, -2)) + \"(?: [\\\\s\\\\S]*)?$\");\n  return new RegExp(\"^\" + rule.split(\"*\").map(escape).join(\"[\\\\s\\\\S]*\") + \"$\");\n}\n\nfunction glob(p: string): string {\n  let out = \"\";\n  let i = 0;\n  while (i < p.length) {\n    if (p.startsWith(\"**/\", i)) { out += \"(?:.*/)?\"; i += 3; }\n    else if (p.startsWith(\"**\", i)) { out += \".*\"; i += 2; }\n    else if (p[i] === \"*\") { out += \"[^/]*\"; i += 1; }\n    else { out += escape(p[i]); i += 1; }\n  }\n  return out;\n}\n\nfunction pathMatches(patternIn: string, pathIn: string, kind: Kind): boolean {\n  const pattern = patternIn.replace(/^\\.\\//, \"\");\n  const path = pathIn.replace(/^\\.\\//, \"\");\n  if (pattern.startsWith(\"//\")) return new RegExp(\"^\" + glob(pattern.slice(1)) + \"$\").test(path);\n  if (pattern.startsWith(\"/\")) return new RegExp(\"^\" + glob(pattern.slice(1)) + \"$\").test(path);\n  if (!pattern.includes(\"/\")) return new RegExp(\"^(?:.*/)?\" + glob(pattern) + \"$\").test(path);\n  const first = pattern.split(\"/\")[0];\n  const deep = kind !== \"allow\" && !first.includes(\"*\") && !pattern.startsWith(\"**\");\n  return new RegExp(\"^\" + (deep ? \"(?:.*/)?\" : \"\") + glob(pattern) + \"$\").test(path);\n}\n\nfunction ruleMatches(rule: string, tool: string, arg: string, kind: Kind): boolean {\n  const m = /^(\\w+)(?:\\(([\\s\\S]*)\\))?$/.exec(rule);\n  if (!m || m[1] !== tool) return false;\n  if (m[2] === undefined) return true;\n  return tool === \"Bash\" ? bashRegex(m[2]).test(arg) : pathMatches(m[2], arg, kind);\n}\n\n/** allow, ask or deny. Deny first, then ask, then allow; a Bash call is split at && || ; | & and newlines and every part must pass.\n * In acceptEdits mode an edit that no rule decided is accepted instead of asked. */\nexport function decide(settings: Json, tool: string, arg = \"\", mode = \"default\"): Kind {\n  const perms = settings.permissions ?? {};\n  const rules: Record<Kind, string[]> = { deny: perms.deny ?? [], ask: perms.ask ?? [], allow: perms.allow ?? [] };\n  const parts = tool === \"Bash\" ? arg.split(/&&|\\|\\||;|\\||&|\\n/).map((p) => p.trim()).filter(Boolean) : [arg];\n  for (const kind of [\"deny\", \"ask\"] as Kind[]) {\n    if (rules[kind].some((r) => parts.some((p) => ruleMatches(r, tool, p, kind)))) return kind;\n  }\n  if ((tool === \"Edit\" || tool === \"Write\") && rules.deny.some((r) => r.startsWith(\"Read(\") && ruleMatches(r.replace(\"Read(\", \"Edit(\"), \"Edit\", arg, \"deny\"))) return \"deny\"; // a Read deny rule also blocks edits and writes on the same path\n  if (parts.every((p) => rules.allow.some((r) => ruleMatches(r, tool, p, \"allow\")))) return \"allow\";\n  if (tool === \"Read\" || tool === \"Grep\" || tool === \"Glob\") return \"allow\"; // read-only tools inside the working directory need no approval\n  if (mode === \"acceptEdits\" && (tool === \"Edit\" || tool === \"Write\")) return \"allow\";\n  return \"ask\"; // nothing matched: Manual mode asks\n}\n\nfunction join(path: string, rel: string): string {\n  const stack = path.split(\"/\").slice(0, -1);\n  for (const part of rel.split(\"/\")) {\n    if (part === \"..\") stack.pop();\n    else if (part !== \".\") stack.push(part);\n  }\n  return stack.join(\"/\");\n}\n\n/** The memory files in the order they reach the context: managed, user, then each directory from the root down to cwd, where\n * CLAUDE.md comes before CLAUDE.local.md. files maps a path to its text; @path lines import files (relative to the importing file,\n * at most four hops deep) and a path inside backticks is not an import. */\nexport function loadMemory(files: Record<string, string>, cwd: string, managed?: string, user?: string): string[] {\n  const order = [managed, user].filter((p): p is string => !!p && p in files);\n  const parts = cwd.replace(/^\\/+|\\/+$/g, \"\").split(\"/\");\n  for (let depth = 0; depth <= parts.length; depth++) {\n    const base = (\"/\" + parts.slice(0, depth).join(\"/\")).replace(/\\/+$/, \"\");\n    for (const p of [`${base}/CLAUDE.md`, `${base}/CLAUDE.local.md`]) if (p in files) order.push(p);\n  }\n  const loaded: string[] = [];\n  const add = (path: string, hops: number) => {\n    loaded.push(path);\n    if (hops === 4) return;\n    for (const m of files[path].replace(/`[^`]*`/g, \"\").matchAll(/(?<![`\\w])@([\\w./-]+)/g)) {\n      const target = m[1].startsWith(\"/\") ? m[1] : join(path, m[1]);\n      if (target in files) add(target, hops + 1);\n    }\n  };\n  for (const p of order) add(p, 0);\n  return loaded;\n}\n\nfunction main() {\n  const layers: Record<string, Json> = {\n    managed: { permissions: { deny: [\"Bash(curl *)\"] } },\n    user: { model: \"sonnet\", permissions: { allow: [\"Bash(git status *)\"] } },\n    project: { model: \"opus\", permissions: { defaultMode: \"bypassPermissions\", allow: [\"Bash(npm run *)\", \"Bash(curl *)\"], ask: [\"Bash(git push *)\"], deny: [\"Read(./.env)\"] } },\n    local: { permissions: { allow: [\"Bash(git push *)\"] } },\n  };\n  const s = effectiveSettings(layers);\n  console.log(\"model:\", s.model, \"| defaultMode:\", s.permissions.defaultMode ?? \"(not set)\");\n  console.log(\"allow rules:\", `[${s.permissions.allow.map((r: string) => `'${r}'`).join(\", \")}]`);\n  const calls: Array<[string, string]> = [[\"Bash\", \"npm run build\"], [\"Bash\", \"npm run build && git push origin main\"], [\"Bash\", \"curl https://example.com\"],\n    [\"Read\", \"./.env\"], [\"Edit\", \".env\"], [\"Bash\", \"git status\"], [\"Bash\", \"rm -rf build\"]];\n  for (const [tool, arg] of calls) console.log(`${tool}(${arg}) -> ${decide(s, tool, arg)}`);\n  console.log(\"project not trusted yet: npm run build ->\", decide(effectiveSettings(layers, false), \"Bash\", \"npm run build\"));\n  const files: Record<string, string> = { \"/etc/claude-code/CLAUDE.md\": \"managed\", \"/home/dev/.claude/CLAUDE.md\": \"user\", \"/repo/CLAUDE.md\": \"See @docs/git.md and `@README` here\",\n    \"/repo/docs/git.md\": \"git rules\", \"/repo/svc/CLAUDE.md\": \"service\", \"/repo/svc/CLAUDE.local.md\": \"mine\", \"/repo/other/CLAUDE.md\": \"other\" };\n  const order = loadMemory(files, \"/repo/svc\", \"/etc/claude-code/CLAUDE.md\", \"/home/dev/.claude/CLAUDE.md\");\n  console.log(\"memory order for /repo/svc:\", `[${order.map((p) => `'${p}'`).join(\", \")}]`);\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "model: opus | defaultMode: (not set)\nallow rules: ['Bash(git status *)', 'Bash(npm run *)', 'Bash(curl *)', 'Bash(git push *)']\nBash(npm run build) -> allow\nBash(npm run build && git push origin main) -> ask\nBash(curl https://example.com) -> deny\nRead(./.env) -> deny\nEdit(.env) -> deny\nBash(git status) -> allow\nBash(rm -rf build) -> ask\nproject not trusted yet: npm run build -> ask\nmemory order for /repo/svc: ['/etc/claude-code/CLAUDE.md', '/home/dev/.claude/CLAUDE.md', '/repo/CLAUDE.md', '/repo/docs/git.md', '/repo/svc/CLAUDE.md', '/repo/svc/CLAUDE.local.md']"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import com.fasterxml.jackson.databind.ObjectMapper;\nimport java.util.ArrayList;\nimport java.util.Arrays;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.regex.Matcher;\nimport java.util.regex.Pattern;\nimport java.util.stream.Collectors;\n\n/**\n * Claude Code settings layers, permission rules and memory files, resolved offline.\n *\n * <p>Three small functions that follow what the Claude Code documentation says (read on 2026-10-03): settings merge from five levels with\n * the highest level winning a scalar key and lists combining; permission rules are checked deny, then ask, then allow, with the first\n * match deciding; and CLAUDE.md files are concatenated from the broadest scope to the most specific, with @imports expanded. It is a\n * teaching model of the documented behaviour, not the product's code: Read and Edit patterns use a reduced form of the gitignore rules.\n * The settings files are JSON, read with Jackson into maps.\n */\npublic final class SettingsLayers {\n    private static final System.Logger LOG = System.getLogger(SettingsLayers.class.getName());\n    static final List<String> LEVELS = List.of(\"managed\", \"command line\", \"local\", \"project\", \"user\"); // highest precedence first\n    static final List<String> REPO_LEVELS = List.of(\"project\", \"local\"); // files that live in the repository\n    private static final ObjectMapper JSON = new ObjectMapper();\n\n    /** A JSON object (a settings file) as a map. */\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> json(String text) {\n        try {\n            return JSON.readValue(text, LinkedHashMap.class);\n        } catch (Exception e) {\n            throw new IllegalArgumentException(e);\n        }\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static Map<String, Object> map(Object o) {\n        return (Map<String, Object>) o;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static List<Object> list(Object o) {\n        return (List<Object>) o;\n    }\n\n    static Map<String, Object> merge(Map<String, Object> low, Map<String, Object> high) {\n        Map<String, Object> out = new LinkedHashMap<>(low);\n        for (Map.Entry<String, Object> e : high.entrySet()) {\n            Object value = e.getValue();\n            Object current = out.get(e.getKey());\n            if (value instanceof Map<?, ?> && current instanceof Map<?, ?>) {\n                out.put(e.getKey(), merge(map(current), map(value)));\n            } else if (value instanceof List<?> && current instanceof List<?>) {\n                List<Object> combined = new ArrayList<>(list(current));\n                for (Object v : list(value)) if (!list(current).contains(v)) combined.add(v);\n                out.put(e.getKey(), combined);\n            } else {\n                out.put(e.getKey(), value);\n            }\n        }\n        return out;\n    }\n\n    /** Merge the five levels. A repository file cannot set defaultMode auto or bypassPermissions, and its allow rules wait for trust. */\n    static Map<String, Object> effectiveSettings(Map<String, Map<String, Object>> layers, boolean trusted) {\n        Map<String, Object> result = new LinkedHashMap<>();\n        for (int i = LEVELS.size() - 1; i >= 0; i--) {\n            String level = LEVELS.get(i);\n            Map<String, Object> part = new LinkedHashMap<>();\n            for (Map.Entry<String, Object> e : layers.getOrDefault(level, Map.of()).entrySet()) {\n                part.put(e.getKey(), e.getValue() instanceof Map<?, ?> m ? new LinkedHashMap<>(map(m)) : e.getValue());\n            }\n            Map<String, Object> perms = part.get(\"permissions\") == null ? null : map(part.get(\"permissions\"));\n            if (REPO_LEVELS.contains(level) && perms != null && !perms.isEmpty()) {\n                if (\"auto\".equals(perms.get(\"defaultMode\")) || \"bypassPermissions\".equals(perms.get(\"defaultMode\"))) perms.remove(\"defaultMode\");\n                if (!trusted) perms.remove(\"allow\");\n            }\n            result = merge(result, part);\n        }\n        return result;\n    }\n\n    private static Pattern bashRegex(String ruleText) {\n        String rule = ruleText.endsWith(\":*\") ? ruleText.substring(0, ruleText.length() - 2) + \" *\" : ruleText;\n        if (rule.endsWith(\" *\") && !rule.substring(0, rule.length() - 2).contains(\"*\")) {\n            return Pattern.compile(Pattern.quote(rule.substring(0, rule.length() - 2)) + \"(?: .*)?\", Pattern.DOTALL);\n        }\n        return Pattern.compile(Arrays.stream(rule.split(\"\\\\*\", -1)).map(Pattern::quote).collect(Collectors.joining(\".*\")), Pattern.DOTALL);\n    }\n\n    private static String glob(String p) {\n        StringBuilder out = new StringBuilder();\n        int i = 0;\n        while (i < p.length()) {\n            if (p.startsWith(\"**/\", i)) {\n                out.append(\"(?:.*/)?\");\n                i += 3;\n            } else if (p.startsWith(\"**\", i)) {\n                out.append(\".*\");\n                i += 2;\n            } else if (p.charAt(i) == '*') {\n                out.append(\"[^/]*\");\n                i += 1;\n            } else {\n                out.append(Pattern.quote(String.valueOf(p.charAt(i))));\n                i += 1;\n            }\n        }\n        return out.toString();\n    }\n\n    private static String withoutDotSlash(String s) {\n        return s.startsWith(\"./\") ? s.substring(2) : s;\n    }\n\n    private static boolean pathMatches(String patternText, String pathText, String kind) {\n        String pattern = withoutDotSlash(patternText);\n        String path = withoutDotSlash(pathText);\n        if (pattern.startsWith(\"/\")) return path.matches(glob(pattern.substring(1))); // \"//x\" and \"/x\" both drop one slash\n        if (!pattern.contains(\"/\")) return path.matches(\"(?:.*/)?\" + glob(pattern));\n        String first = pattern.split(\"/\")[0];\n        long slashes = pattern.chars().filter(c -> c == '/').count();\n        boolean deep = !kind.equals(\"allow\") && !first.contains(\"*\") && slashes >= 1 && !pattern.startsWith(\"**\");\n        return path.matches((deep ? \"(?:.*/)?\" : \"\") + glob(pattern));\n    }\n\n    private static final Pattern RULE = Pattern.compile(\"(\\\\w+)(?:\\\\((.*)\\\\))?\", Pattern.DOTALL);\n\n    private static boolean ruleMatches(String rule, String tool, String arg, String kind) {\n        Matcher m = RULE.matcher(rule);\n        if (!m.matches() || !m.group(1).equals(tool)) return false;\n        if (m.group(2) == null) return true;\n        return tool.equals(\"Bash\") ? bashRegex(m.group(2)).matcher(arg).matches() : pathMatches(m.group(2), arg, kind);\n    }\n\n    /**\n     * allow, ask or deny. Deny first, then ask, then allow; a Bash call is split at && || ; | & and newlines and every part must pass.\n     * In acceptEdits mode an edit that no rule decided is accepted instead of asked.\n     */\n    static String decide(Map<String, Object> settings, String tool, String arg, String mode) {\n        Map<String, Object> perms = settings.get(\"permissions\") == null ? Map.of() : map(settings.get(\"permissions\"));\n        Map<String, List<String>> rules = new LinkedHashMap<>();\n        for (String kind : List.of(\"deny\", \"ask\", \"allow\")) {\n            rules.put(kind, list(perms.getOrDefault(kind, List.of())).stream().map(String.class::cast).toList());\n        }\n        List<String> parts = tool.equals(\"Bash\")\n            ? Arrays.stream(arg.split(\"&&|\\\\|\\\\||;|\\\\||&|\\n\")).map(String::strip).filter(p -> !p.isEmpty()).toList()\n            : List.of(arg);\n        for (String kind : List.of(\"deny\", \"ask\")) {\n            if (rules.get(kind).stream().anyMatch(r -> parts.stream().anyMatch(p -> ruleMatches(r, tool, p, kind)))) return kind;\n        }\n        if ((tool.equals(\"Edit\") || tool.equals(\"Write\"))\n            && rules.get(\"deny\").stream().filter(r -> r.startsWith(\"Read(\")).anyMatch(r -> ruleMatches(\"Edit(\" + r.substring(5), \"Edit\", arg, \"deny\"))) {\n            return \"deny\"; // a Read deny rule also blocks edits and writes on the same path\n        }\n        if (parts.stream().allMatch(p -> rules.get(\"allow\").stream().anyMatch(r -> ruleMatches(r, tool, p, \"allow\")))) return \"allow\";\n        if (List.of(\"Read\", \"Grep\", \"Glob\").contains(tool)) return \"allow\"; // read-only tools inside the working directory need no approval\n        if (mode.equals(\"acceptEdits\") && (tool.equals(\"Edit\") || tool.equals(\"Write\"))) return \"allow\";\n        return \"ask\"; // nothing matched: Manual mode asks\n    }\n\n    static String decide(Map<String, Object> settings, String tool, String arg) {\n        return decide(settings, tool, arg, \"default\");\n    }\n\n    /**\n     * The memory files in the order they reach the context: managed, user, then each directory from the root down to cwd, where\n     * CLAUDE.md comes before CLAUDE.local.md. files maps a path to its text; @path lines import files (relative to the importing file,\n     * at most four hops deep) and a path inside backticks is not an import.\n     */\n    static List<String> loadMemory(Map<String, String> files, String cwd, String managed, String user) {\n        List<String> order = new ArrayList<>();\n        for (String p : new String[] {managed, user}) if (p != null && files.containsKey(p)) order.add(p);\n        String[] parts = cwd.replaceAll(\"^/+|/+$\", \"\").split(\"/\");\n        for (int depth = 0; depth <= parts.length; depth++) {\n            String base = (\"/\" + String.join(\"/\", Arrays.copyOfRange(parts, 0, depth))).replaceAll(\"/+$\", \"\");\n            for (String p : new String[] {base + \"/CLAUDE.md\", base + \"/CLAUDE.local.md\"}) if (files.containsKey(p)) order.add(p);\n        }\n        List<String> loaded = new ArrayList<>();\n        for (String path : order) add(files, loaded, path, 0);\n        return loaded;\n    }\n\n    private static final Pattern IMPORT = Pattern.compile(\"(?<![`\\\\w])@([\\\\w./-]+)\");\n\n    private static void add(Map<String, String> files, List<String> loaded, String path, int hops) {\n        loaded.add(path);\n        if (hops == 4) return;\n        Matcher m = IMPORT.matcher(files.get(path).replaceAll(\"`[^`]*`\", \"\"));\n        while (m.find()) {\n            String token = m.group(1);\n            String target = token.startsWith(\"/\") ? token : join(path, token);\n            if (files.containsKey(target)) add(files, loaded, target, hops + 1);\n        }\n    }\n\n    private static String join(String path, String rel) {\n        List<String> stack = new ArrayList<>(Arrays.asList(path.split(\"/\")));\n        stack.remove(stack.size() - 1);\n        for (String part : rel.split(\"/\")) {\n            if (part.equals(\"..\")) stack.remove(stack.size() - 1);\n            else if (!part.equals(\".\")) stack.add(part);\n        }\n        return String.join(\"/\", stack);\n    }\n\n    /** Python's repr of strings and lists of strings, so every language of the course prints the same text. */\n    static String py(Object v) {\n        if (v instanceof List<?> l) return l.stream().map(SettingsLayers::py).collect(Collectors.joining(\", \", \"[\", \"]\"));\n        String s = String.valueOf(v);\n        String q = s.contains(\"'\") && !s.contains(\"\\\"\") ? \"\\\"\" : \"'\";\n        return q + s.replace(\"\\\\\", \"\\\\\\\\\").replace(\"\\n\", \"\\\\n\").replace(q, \"\\\\\" + q) + q;\n    }\n\n    public static void main(String[] args) {\n        Map<String, Map<String, Object>> layers = new LinkedHashMap<>();\n        layers.put(\"managed\", json(\"{\\\"permissions\\\": {\\\"deny\\\": [\\\"Bash(curl *)\\\"]}}\"));\n        layers.put(\"user\", json(\"{\\\"model\\\": \\\"sonnet\\\", \\\"permissions\\\": {\\\"allow\\\": [\\\"Bash(git status *)\\\"]}}\"));\n        layers.put(\"project\", json(\"\"\"\n            {\"model\": \"opus\", \"permissions\": {\"defaultMode\": \"bypassPermissions\", \"allow\": [\"Bash(npm run *)\", \"Bash(curl *)\"],\n                                              \"ask\": [\"Bash(git push *)\"], \"deny\": [\"Read(./.env)\"]}}\"\"\"));\n        layers.put(\"local\", json(\"{\\\"permissions\\\": {\\\"allow\\\": [\\\"Bash(git push *)\\\"]}}\"));\n        Map<String, Object> s = effectiveSettings(layers, true);\n        System.out.println(\"model: \" + s.get(\"model\") + \" | defaultMode: \" + map(s.get(\"permissions\")).getOrDefault(\"defaultMode\", \"(not set)\"));\n        System.out.println(\"allow rules: \" + py(map(s.get(\"permissions\")).get(\"allow\")));\n        String[][] calls = {{\"Bash\", \"npm run build\"}, {\"Bash\", \"npm run build && git push origin main\"}, {\"Bash\", \"curl https://example.com\"},\n            {\"Read\", \"./.env\"}, {\"Edit\", \".env\"}, {\"Bash\", \"git status\"}, {\"Bash\", \"rm -rf build\"}};\n        for (String[] call : calls) System.out.println(call[0] + \"(\" + call[1] + \") -> \" + decide(s, call[0], call[1]));\n        System.out.println(\"project not trusted yet: npm run build -> \" + decide(effectiveSettings(layers, false), \"Bash\", \"npm run build\"));\n        Map<String, String> files = new LinkedHashMap<>();\n        files.put(\"/etc/claude-code/CLAUDE.md\", \"managed\");\n        files.put(\"/home/dev/.claude/CLAUDE.md\", \"user\");\n        files.put(\"/repo/CLAUDE.md\", \"See @docs/git.md and `@README` here\");\n        files.put(\"/repo/docs/git.md\", \"git rules\");\n        files.put(\"/repo/svc/CLAUDE.md\", \"service\");\n        files.put(\"/repo/svc/CLAUDE.local.md\", \"mine\");\n        files.put(\"/repo/other/CLAUDE.md\", \"other\");\n        System.out.println(\"memory order for /repo/svc: \" + py(loadMemory(files, \"/repo/svc\", \"/etc/claude-code/CLAUDE.md\", \"/home/dev/.claude/CLAUDE.md\")));\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "model: opus | defaultMode: (not set)\nallow rules: ['Bash(git status *)', 'Bash(npm run *)', 'Bash(curl *)', 'Bash(git push *)']\nBash(npm run build) -> allow\nBash(npm run build && git push origin main) -> ask\nBash(curl https://example.com) -> deny\nRead(./.env) -> deny\nEdit(.env) -> deny\nBash(git status) -> allow\nBash(rm -rf build) -> ask\nproject not trusted yet: npm run build -> ask\nmemory order for /repo/svc: ['/etc/claude-code/CLAUDE.md', '/home/dev/.claude/CLAUDE.md', '/repo/CLAUDE.md', '/repo/docs/git.md', '/repo/svc/CLAUDE.md', '/repo/svc/CLAUDE.local.md']"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import com.fasterxml.jackson.databind.ObjectMapper\n\nprivate val log = System.getLogger(\"settings_layers\")\n\n/**\n * Claude Code settings layers, permission rules and memory files, resolved offline.\n *\n * Three small functions that follow what the Claude Code documentation says (read on 2026-10-03): settings merge from five levels with\n * the highest level winning a scalar key and lists combining; permission rules are checked deny, then ask, then allow, with the first\n * match deciding; and CLAUDE.md files are concatenated from the broadest scope to the most specific, with @imports expanded. It is a\n * teaching model of the documented behaviour, not the product's code: Read and Edit patterns use a reduced form of the gitignore rules.\n * The settings files are JSON, read with Jackson into maps.\n */\ntypealias Settings = Map<String, Any?>\n\nval LEVELS = listOf(\"managed\", \"command line\", \"local\", \"project\", \"user\") // highest precedence first\nval REPO_LEVELS = listOf(\"project\", \"local\") // files that live in the repository\n\n/** A JSON object (a settings file) as a map. */\n@Suppress(\"UNCHECKED_CAST\")\nfun json(text: String): Settings = ObjectMapper().readValue(text, LinkedHashMap::class.java) as Settings\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun map(o: Any?): Settings = o as Settings\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun list(o: Any?): List<Any?> = o as List<Any?>\n\nfun merge(low: Settings, high: Settings): Settings {\n    val out = LinkedHashMap(low)\n    for ((key, value) in high) {\n        val current = out[key]\n        out[key] = when {\n            value is Map<*, *> && current is Map<*, *> -> merge(map(current), map(value))\n            value is List<*> && current is List<*> -> list(current) + list(value).filter { it !in list(current) }\n            else -> value\n        }\n    }\n    return out\n}\n\n/** Merge the five levels. A repository file cannot set defaultMode auto or bypassPermissions, and its allow rules wait for trust. */\nfun effectiveSettings(layers: Map<String, Settings>, trusted: Boolean = true): Settings {\n    var result: Settings = emptyMap()\n    for (level in LEVELS.reversed()) {\n        val part = LinkedHashMap<String, Any?>()\n        for ((k, v) in layers[level] ?: emptyMap()) part[k] = if (v is Map<*, *>) LinkedHashMap(map(v)) else v\n        @Suppress(\"UNCHECKED_CAST\") val perms = part[\"permissions\"] as MutableMap<String, Any?>?\n        if (level in REPO_LEVELS && !perms.isNullOrEmpty()) {\n            if (perms[\"defaultMode\"] in listOf(\"auto\", \"bypassPermissions\")) perms.remove(\"defaultMode\")\n            if (!trusted) perms.remove(\"allow\")\n        }\n        result = merge(result, part)\n    }\n    return result\n}\n\nprivate fun bashRegex(ruleText: String): Regex {\n    val rule = if (ruleText.endsWith(\":*\")) ruleText.dropLast(2) + \" *\" else ruleText\n    if (rule.endsWith(\" *\") && \"*\" !in rule.dropLast(2)) return Regex(Regex.escape(rule.dropLast(2)) + \"(?: .*)?\", RegexOption.DOT_MATCHES_ALL)\n    return Regex(rule.split(\"*\").joinToString(\".*\") { Regex.escape(it) }, RegexOption.DOT_MATCHES_ALL)\n}\n\nprivate fun glob(p: String): String {\n    val out = StringBuilder()\n    var i = 0\n    while (i < p.length) {\n        when {\n            p.startsWith(\"**/\", i) -> { out.append(\"(?:.*/)?\"); i += 3 }\n            p.startsWith(\"**\", i) -> { out.append(\".*\"); i += 2 }\n            p[i] == '*' -> { out.append(\"[^/]*\"); i += 1 }\n            else -> { out.append(Regex.escape(p[i].toString())); i += 1 }\n        }\n    }\n    return out.toString()\n}\n\nprivate fun pathMatches(patternText: String, pathText: String, kind: String): Boolean {\n    val pattern = patternText.removePrefix(\"./\")\n    val path = pathText.removePrefix(\"./\")\n    if (pattern.startsWith(\"/\")) return Regex(glob(pattern.substring(1))).matches(path) // \"//x\" and \"/x\" both drop one slash\n    if (\"/\" !in pattern) return Regex(\"(?:.*/)?\" + glob(pattern)).matches(path)\n    val first = pattern.split(\"/\")[0]\n    val deep = kind != \"allow\" && \"*\" !in first && pattern.count { it == '/' } >= 1 && !pattern.startsWith(\"**\")\n    return Regex((if (deep) \"(?:.*/)?\" else \"\") + glob(pattern)).matches(path)\n}\n\nprivate val RULE = Regex(\"\"\"(\\w+)(?:\\((.*)\\))?\"\"\", RegexOption.DOT_MATCHES_ALL)\n\nprivate fun ruleMatches(rule: String, tool: String, arg: String, kind: String): Boolean {\n    val m = RULE.matchEntire(rule)\n    if (m == null || m.groupValues[1] != tool) return false\n    val inner = m.groups[2]?.value ?: return true\n    return if (tool == \"Bash\") bashRegex(inner).matches(arg) else pathMatches(inner, arg, kind)\n}\n\n/**\n * allow, ask or deny. Deny first, then ask, then allow; a Bash call is split at && || ; | & and newlines and every part must pass.\n * In acceptEdits mode an edit that no rule decided is accepted instead of asked.\n */\nfun decide(settings: Settings, tool: String, arg: String = \"\", mode: String = \"default\"): String {\n    val perms = settings[\"permissions\"]?.let { map(it) } ?: emptyMap()\n    val rules = listOf(\"deny\", \"ask\", \"allow\").associateWith { kind -> list(perms[kind] ?: emptyList<Any?>()).map { it as String } }\n    val parts = if (tool == \"Bash\") arg.split(Regex(\"&&|\\\\|\\\\||;|\\\\||&|\\n\")).map { it.trim() }.filter { it.isNotEmpty() } else listOf(arg)\n    for (kind in listOf(\"deny\", \"ask\")) {\n        if (rules.getValue(kind).any { r -> parts.any { p -> ruleMatches(r, tool, p, kind) } }) return kind\n    }\n    if (tool in listOf(\"Edit\", \"Write\") && rules.getValue(\"deny\").filter { it.startsWith(\"Read(\") }.any { ruleMatches(\"Edit(\" + it.substring(5), \"Edit\", arg, \"deny\") }) {\n        return \"deny\" // a Read deny rule also blocks edits and writes on the same path\n    }\n    if (parts.all { p -> rules.getValue(\"allow\").any { r -> ruleMatches(r, tool, p, \"allow\") } }) return \"allow\"\n    if (tool in listOf(\"Read\", \"Grep\", \"Glob\")) return \"allow\" // read-only tools inside the working directory need no approval\n    if (mode == \"acceptEdits\" && tool in listOf(\"Edit\", \"Write\")) return \"allow\"\n    return \"ask\" // nothing matched: Manual mode asks\n}\n\n/**\n * The memory files in the order they reach the context: managed, user, then each directory from the root down to cwd, where\n * CLAUDE.md comes before CLAUDE.local.md. files maps a path to its text; @path lines import files (relative to the importing file,\n * at most four hops deep) and a path inside backticks is not an import.\n */\nfun loadMemory(files: Map<String, String>, cwd: String, managed: String? = null, user: String? = null): List<String> {\n    val order = listOfNotNull(managed, user).filter { it in files }.toMutableList()\n    val parts = cwd.trim('/').split(\"/\")\n    for (depth in 0..parts.size) {\n        val base = (\"/\" + parts.take(depth).joinToString(\"/\")).trimEnd('/')\n        order += listOf(\"$base/CLAUDE.md\", \"$base/CLAUDE.local.md\").filter { it in files }\n    }\n    val loaded = mutableListOf<String>()\n    fun add(path: String, hops: Int) {\n        loaded += path\n        if (hops == 4) return\n        for (m in Regex(\"\"\"(?<![`\\w])@([\\w./-]+)\"\"\").findAll(files.getValue(path).replace(Regex(\"`[^`]*`\"), \"\"))) {\n            val token = m.groupValues[1]\n            val target = if (token.startsWith(\"/\")) token else join(path, token)\n            if (target in files) add(target, hops + 1)\n        }\n    }\n    for (path in order) add(path, 0)\n    return loaded\n}\n\nprivate fun join(path: String, rel: String): String {\n    val stack = path.split(\"/\").dropLast(1).toMutableList()\n    for (part in rel.split(\"/\")) {\n        if (part == \"..\") stack.removeLast() else if (part != \".\") stack += part\n    }\n    return stack.joinToString(\"/\")\n}\n\n/** Python's repr of strings and lists of strings, so every language of the course prints the same text. */\nfun py(v: Any?): String {\n    if (v is List<*>) return v.joinToString(\", \", \"[\", \"]\") { py(it) }\n    val s = v.toString()\n    val q = if (\"'\" in s && \"\\\"\" !in s) \"\\\"\" else \"'\"\n    return q + s.replace(\"\\\\\", \"\\\\\\\\\").replace(\"\\n\", \"\\\\n\").replace(q, \"\\\\\" + q) + q\n}\n\nfun main() {\n    val layers = linkedMapOf(\n        \"managed\" to json(\"\"\"{\"permissions\": {\"deny\": [\"Bash(curl *)\"]}}\"\"\"),\n        \"user\" to json(\"\"\"{\"model\": \"sonnet\", \"permissions\": {\"allow\": [\"Bash(git status *)\"]}}\"\"\"),\n        \"project\" to json(\n            \"\"\"{\"model\": \"opus\", \"permissions\": {\"defaultMode\": \"bypassPermissions\", \"allow\": [\"Bash(npm run *)\", \"Bash(curl *)\"],\n                                                 \"ask\": [\"Bash(git push *)\"], \"deny\": [\"Read(./.env)\"]}}\"\"\",\n        ),\n        \"local\" to json(\"\"\"{\"permissions\": {\"allow\": [\"Bash(git push *)\"]}}\"\"\"),\n    )\n    val s = effectiveSettings(layers)\n    println(\"model: ${s[\"model\"]} | defaultMode: ${map(s[\"permissions\"]).getOrDefault(\"defaultMode\", \"(not set)\")}\")\n    println(\"allow rules: ${py(map(s[\"permissions\"])[\"allow\"])}\")\n    val calls = listOf(\"Bash\" to \"npm run build\", \"Bash\" to \"npm run build && git push origin main\", \"Bash\" to \"curl https://example.com\",\n        \"Read\" to \"./.env\", \"Edit\" to \".env\", \"Bash\" to \"git status\", \"Bash\" to \"rm -rf build\")\n    for ((tool, arg) in calls) println(\"$tool($arg) -> ${decide(s, tool, arg)}\")\n    println(\"project not trusted yet: npm run build -> ${decide(effectiveSettings(layers, trusted = false), \"Bash\", \"npm run build\")}\")\n    val files = linkedMapOf(\n        \"/etc/claude-code/CLAUDE.md\" to \"managed\", \"/home/dev/.claude/CLAUDE.md\" to \"user\", \"/repo/CLAUDE.md\" to \"See @docs/git.md and `@README` here\",\n        \"/repo/docs/git.md\" to \"git rules\", \"/repo/svc/CLAUDE.md\" to \"service\", \"/repo/svc/CLAUDE.local.md\" to \"mine\", \"/repo/other/CLAUDE.md\" to \"other\",\n    )\n    println(\"memory order for /repo/svc: ${py(loadMemory(files, \"/repo/svc\", \"/etc/claude-code/CLAUDE.md\", \"/home/dev/.claude/CLAUDE.md\"))}\")\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "model: opus | defaultMode: (not set)\nallow rules: ['Bash(git status *)', 'Bash(npm run *)', 'Bash(curl *)', 'Bash(git push *)']\nBash(npm run build) -> allow\nBash(npm run build && git push origin main) -> ask\nBash(curl https://example.com) -> deny\nRead(./.env) -> deny\nEdit(.env) -> deny\nBash(git status) -> allow\nBash(rm -rf build) -> ask\nproject not trusted yet: npm run build -> ask\nmemory order for /repo/svc: ['/etc/claude-code/CLAUDE.md', '/home/dev/.claude/CLAUDE.md', '/repo/CLAUDE.md', '/repo/docs/git.md', '/repo/svc/CLAUDE.md', '/repo/svc/CLAUDE.local.md']"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The example merges layers and decides calls. It starts with a user file that allows `Bash(npm run *)` and a project file that adds `git push` and `curl` rules, and the first line shows the winning `model`. A call to `npm run build` is allowed. The compound command with `git push` asks, and `curl` is denied. A read of `.env` is denied, and so is an edit of it, because the read deny covers both. When the project is not yet trusted, even `npm run build` falls back to asking. The last line prints the memory order for a service folder: the managed file, the user file, the repository `CLAUDE.md`, an imported note, the service's own `CLAUDE.md` and last its `CLAUDE.local.md`. All four languages print the same text."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Writing instructions as if they were enforcement.** A memory line asks. For anything that must hold, use a deny rule or a hook.",
+        "**Putting a personal choice in the shared file.** The next teammate inherits it. Personal values go in `settings.local.json`, which is ignored by git.",
+        "**Expecting a narrower allow to beat a broader deny.** Deny is checked first and wins whatever the specificity.",
+        "**Writing a path rule for `Write`.** It is never consulted. Use `Edit` and `Read` for the files you want to protect."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A repository holds credentials in `.env`, and Claude must never open them. One teammate writes a sentence about it in the memory file, and another adds a path block to the shared configuration. Which one actually stops it?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The `Read` rule, which is checked before each call runs",
+              "**b**: The memory sentence, which Claude Code enforces once it loads",
+              "**c**: Both entries equally, since each is read before any tool call",
+              "**d**: Neither entry, since a project file never beats a user file"
+            ]
+          }
+        ],
+        [
+          "A settings file allows `Bash(git log *)` and another layer lists `Bash(git *)` under deny. What happens when Claude runs `git log --oneline`?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: It is allowed, because the allow rule names the narrower command here",
+              "**b**: It is allowed, because the later layer replaces the earlier one in full",
+              "**c**: It asks, because the two rules cancel each other out in the end",
+              "**d**: It is refused, because rules of that kind are checked first and win"
+            ]
+          }
+        ],
+        [
+          "A developer wants to use a cheaper model on their own machine without changing it for the team. Where does the setting go?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The shared project file, which is committed with the code of the team",
+              "**b**: The managed settings, which override every other layer of the settings",
+              "**c**: The local project file, which is kept out of version control",
+              "**d**: The memory file, which names the model in one plain sentence of text"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**a**. The page says \"Claude treats them as context, not enforced configuration\", while \"Rules are evaluated in order: deny, then ask, then allow.\" *b* is ruled out because memory files are \"context, not enforced configuration\", so the sentence only asks. *c* is ruled out because a memory file is loaded \"at the start of every conversation\" and still only asks, while a deny rule sits first in \"deny, then ask, then allow\". *d* is ruled out because \"A key set at a higher level overrides the same key set lower down\" is about the same key, and since \"they combine across layers\", a project deny still applies.",
+            "**d**. The page says \"Rules are evaluated in order: deny, then ask, then allow. The first match in that order determines the outcome, and rule specificity doesn't change the order.\" *a* is ruled out because \"rule specificity doesn't change the order\", so a narrower allow does not win. *c* is ruled out because the first match decides and the rules never cancel: \"An allow rule can't carve an exception out of a deny rule\". *b* is ruled out because \"they combine across layers\", so the later layer does not replace the earlier one.",
+            "**c**. The page puts \"A personal override\" in the local file, which \"belongs in `.gitignore`\". *a* is ruled out because \"The team's choices go in the shared project file, which is committed\", so the choice would reach the whole team. *b* is ruled out because managed settings are for \"A rule that must hold regardless of what any developer writes\", and are not a personal file. *d* is ruled out because the memory file \"asks\" and does not set a model: \"A memory file asks and a hook enforces.\""
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 16,
+    "code": 0,
+    "tables": 1,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "c66f160673e0166a1d2e93b242b9cc256e60319e28932e09e6d3b5648d748fe2"
+}

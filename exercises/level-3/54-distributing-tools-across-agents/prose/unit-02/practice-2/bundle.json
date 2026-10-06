@@ -1,0 +1,83 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "54-distributing-tools-across-agents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: distributing tools across agents (TypeScript)",
+  "lang": "typescript",
+  "main_file": "distribute.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "distribute.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-3/54-distributing-tools-across-agents/prose/unit-02/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-3/54-distributing-tools-across-agents/prose/unit-02/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-3/54-distributing-tools-across-agents/prose/unit-02/practice-2/distribute.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 each role gets only the tools of its specialisation in catalog order",
+      "kind": "main",
+      "says": "Each role gets only the tools of its specialisation, in catalog order"
+    },
+    {
+      "id": "e1 a role over its budget or given an unknown or unscoped outside tool or a duplicate catalog name is refused",
+      "kind": "edge",
+      "says": "A role over its budget, an unknown or unscoped outside tool, a duplicate catalog name and a role with no specialisation are refused"
+    },
+    {
+      "id": "e2 an irreversible tool is given only by an explicit grant",
+      "kind": "edge",
+      "says": "An irreversible tool is given only by an explicit grant"
+    },
+    {
+      "id": "e3 a model that accepts forcing gets the native choice and the others get auto with strict tools and one named tool",
+      "kind": "edge",
+      "says": "The tool choice follows the model: native forcing where accepted, auto with strict tools and one named tool elsewhere"
+    },
+    {
+      "id": "e4 a change of tool choice costs the cached messages a change of tools costs everything and a repeat costs nothing",
+      "kind": "edge",
+      "says": "A changed tool choice costs the cached messages, a changed tool list costs the whole cache, and a repeat costs nothing"
+    },
+    {
+      "id": "e5 a reply is checked against the call that was required",
+      "kind": "edge",
+      "says": "A reply is checked against the call that was required"
+    },
+    {
+      "id": "e6 an unknown tool a wrong owner or a bad amount is refused",
+      "kind": "edge",
+      "says": "An unknown tool, a wrong owner and a bad amount are refused, in that precedence"
+    },
+    {
+      "id": "e7 the cap is inclusive and an irreversible call needs approval that never lifts the cap",
+      "kind": "edge",
+      "says": "The cap is inclusive, an approval is needed for an irreversible call and never lifts the cap"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/54-distributing-tools-across-agents/02-tool-choice-the-call-that-must-happen-caps-and-the-practice.md"
+}

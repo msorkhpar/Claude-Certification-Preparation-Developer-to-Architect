@@ -1,0 +1,340 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "57-memory-files-and-rules"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Where instructions live and what loads when",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Where instructions live and what loads when"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Architect · **Module 57:** Memory files and rules · **Page 1 of 2** **Exams:** A3.1; S2"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** say which file an instruction belongs in (managed, user, project, local or directory), predict which memory files are in context for a session started in a given folder, write `@` imports that expand, explain when `AGENTS.md` is read, and check what loaded with `/memory` and `/context` instead of guessing."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-03 against the Claude Code documentation pages \"How Claude remembers your project\" (memory) and \"Best practices for Claude Code\", which document behaviour up to Claude Code v2.1.286. The `InstructionsLoaded` sentence is quoted from the troubleshooting section of the memory page; the hook's own reference page was not read, so nothing here says what the hook receives. Nothing here was run against a live session: the example is a model of the documented loading rules, written as plain code over file paths and texts. This page deepens module 38 (the memory file, its size and where the layers sit) and module 27 (what each extension costs), and it does not repeat them. Rules with `paths` and the size of the files are the second page."
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "**Exam guide and current product.** *What the guide states (task statement 3.1), and so what the exam keys:* the hierarchy has three levels, user (`~/.claude/CLAUDE.md`), project (`.claude/CLAUDE.md` or the root file) and directory (CLAUDE.md files in subdirectories); user-level instructions \"are not shared with teammates via version control\"; `@import` keeps a file modular; `.claude/rules/` is the alternative to one monolithic file; and the `/memory` command is how you \"verify which memory files are loaded\". *What the current product does (documentation checked 2026-10-03):* there are more places than three. A managed policy file sits above the user file, `./CLAUDE.local.md` holds personal notes for one project, `AGENTS.md` is read in one situation, and auto memory is a fourth kind of memory that Claude writes itself. `/memory` \"lists your CLAUDE.md, CLAUDE.local.md, and other memory file locations across user and project scopes\", including entries \"for files that don't exist yet\"; the command that shows what loaded into the current session is `/context`. On the exam, answer the scoping question with the guide's three levels and its rule that a user-level file never reaches a teammate; when you debug a real session, run `/context`."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "A new engineer joins a team and Claude Code in their checkout ignores the team's rule that every endpoint validates its input. The rule exists: a senior engineer wrote it into their own `~/.claude/CLAUDE.md` months ago and has been getting the right behaviour ever since. Nothing in the repository carries it, so nobody else gets it. This is the exam's scenario S2 in its simplest form, and the question behind it is always the same one: at which level does an instruction live, and who receives it. The remaining failures come from the same ignorance of loading: a file in a subdirectory that has not been read yet, an import with a typo that imports nothing, and an `AGENTS.md` that is never read because a `CLAUDE.md` sits one folder up."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Five places, one load order"
+    },
+    {
+      "type": "para",
+      "text": "Memory files are plain Markdown that Claude reads \"at the start of every session\". The documentation lists them \"in load order, from broadest scope to most specific, so a project instruction appears in context after a user instruction\"."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Scope",
+        "Where",
+        "Who gets it"
+      ],
+      "rows": [
+        [
+          "Managed policy",
+          "`/etc/claude-code/CLAUDE.md` on Linux and WSL, `/Library/Application Support/ClaudeCode/CLAUDE.md` on macOS",
+          "Everyone on the machine, and individual settings cannot exclude it"
+        ],
+        [
+          "User",
+          "`~/.claude/CLAUDE.md`",
+          "You, in every project"
+        ],
+        [
+          "Project",
+          "`./CLAUDE.md` or `./.claude/CLAUDE.md`",
+          "The team, \"via source control\""
+        ],
+        [
+          "Local",
+          "`./CLAUDE.local.md`, added to `.gitignore`",
+          "You, in this project"
+        ],
+        [
+          "Directory",
+          "`CLAUDE.md` in a subdirectory",
+          "Whoever works in that subdirectory"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The first three rows are the guide's hierarchy plus the organisation layer the product added. The two questions the exam asks of the table are who receives the instruction and whether it travels with the repository. A user-level instruction does not, which is the reason the engineer in the scenario never shared it, and the fix is to move the rule into the project file and commit it. A personal note about one project, such as a sandbox address, belongs in the local file, which is why that file is ignored by git."
+    },
+    {
+      "type": "para",
+      "text": "The managed layer has a companion that is easy to confuse with it. A managed CLAUDE.md is for behaviour (\"Code style and quality guidelines\", \"Data handling and compliance reminders\"); blocking a tool, a command or a path is done with managed settings, because \"Claude treats them as context, not enforced configuration\"."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What loads at launch and what loads later"
+    },
+    {
+      "type": "para",
+      "text": "Files in the directory hierarchy \"above the working directory are loaded at launch\". Start in `web/ui/` and Claude loads `web/ui/CLAUDE.md`, `web/CLAUDE.md` and the root file, plus any `CLAUDE.local.md` beside them. The files are not alternatives: \"All discovered files are concatenated into context rather than overriding each other\", ordered from the filesystem root down to the working directory, so \"instructions closer to where you launched Claude are read last\". In each folder the local file comes after the shared one."
+    },
+    {
+      "type": "para",
+      "text": "Files below the working directory behave differently. A CLAUDE.md in a subdirectory \"load[s] on demand when Claude reads files in those directories\". Start in the repository root, and `web/CLAUDE.md` is not in context until Claude reads something under `web/`. Two consequences follow. A convention that must hold from the first message cannot live in a subdirectory file, and an instruction can seem to appear halfway through a session, which is the file loading the moment Claude opened a file there. The same on-demand behaviour is why the documentation tells you, after `/compact`, that nested files \"reload as Claude reads files they apply to\" while the root file is re-read from disk at once."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Imports keep a file modular and save nothing"
+    },
+    {
+      "type": "para",
+      "text": "A CLAUDE.md \"can import additional files using `@path/to/import` syntax\". Imported files \"are expanded and loaded into context at launch alongside the CLAUDE.md that references them\". Relative paths \"resolve relative to the file containing the import, not the working directory\", and imports can import others \"with a maximum depth of four hops\". Import parsing \"skips Markdown code spans and fenced code blocks\", so writing `` `@README` `` mentions a file without importing it, and writing `@README` outside backticks imports it."
+    },
+    {
+      "type": "para",
+      "text": "Two properties matter for the exam. An import changes where text is kept and not how much of it is loaded: imports \"help you organize a long file but don't reduce its context cost, because imported files also load at launch\". A path that names no file imports nothing and says nothing about it, so a typo is a silent loss; the example's `unresolved_imports` finds it, and in a real session `/context` shows what actually loaded. Imports that point outside the project (a file in your home folder) trigger an approval dialog the first time, because a committed file could otherwise pull in anything."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "AGENTS.md is read in one situation"
+    },
+    {
+      "type": "para",
+      "text": "Claude Code \"can read `AGENTS.md` as your project instructions\", with a rule that surprises people: \"By default, Claude reads `AGENTS.md` only when you have no `CLAUDE.md` in your working directory or above it.\" A `CLAUDE.md`, a `.claude/CLAUDE.md` or a `CLAUDE.local.md` in the working directory or any directory above it counts, so adding a personal local file to a repository that relies on `AGENTS.md` quietly stops Claude from reading it. The user file and the managed file do not count. The documented ways out are to import it (`@AGENTS.md` in the CLAUDE.md, which then reads both) or to set **Project instructions** to `claude-md-and-agents-md` in `/config`. A version note belongs with the claim: reading `AGENTS.md` directly \"requires Claude Code v2.1.277 or later\"."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Context, not enforcement"
+    },
+    {
+      "type": "para",
+      "text": "Memory is advice with good delivery. The documentation says it plainly: \"CLAUDE.md content is delivered as a user message after the system prompt, not as part of the system prompt itself. Claude reads it and tries to follow it, but there's no guarantee of strict compliance, especially for vague or conflicting instructions.\" For an instruction that \"must run at a specific point, such as before every commit or after each file edit\", the documented answer is a hook, and for a path or command that must not be touched it is a permission rule (module 38, module 49). If two files give different guidance for the same behaviour, \"Claude may pick one arbitrarily\", so the review of memory files includes a search for contradictions across the levels."
+    },
+    {
+      "type": "para",
+      "text": "Auto memory is the other kind. Claude writes its own notes to `~/.claude/projects/<project>/memory/`, loads \"the first 200 lines of `MEMORY.md`, or the first 25KB, whichever comes first\" at the start of every conversation, and keeps them on the machine: the files \"are not shared across machines or cloud environments\". It is a place where Claude records what it learned, and not a place for the team's rules."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Seeing what loaded"
+    },
+    {
+      "type": "para",
+      "text": "Three tools answer \"what does Claude actually have\". `/context` lists the memory files that loaded into the session under **Memory files**; if a file is missing there, \"Claude can't see it\". `/memory` lists the memory file locations and opens them in your editor, including ones you have not created yet. The `InstructionsLoaded` hook logs \"which `CLAUDE.md` and rules files are loaded, when they load, and why\", which is the way to watch lazy loading from a script. `AGENTS.md` shows in `/memory` when Claude read it, from v2.1.280."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "para",
+      "text": "The example is a model of the loading rules over paths and texts, in the same style as module 38's: the launch set for a folder, the files that join when Claude reads below it, whether `AGENTS.md` is read, the rules a set of touched files brings in (the second page), glob matching, and the import expansion with its hop limit and its report of references that name no file."
+    },
+    {
+      "type": "example",
+      "id": "m57-memory-loading",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/57-memory-loading/python/memory_loading.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/57-memory-loading/typescript/memoryLoading.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/57-memory-loading/java/MemoryLoading.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/57-memory-loading/kotlin/MemoryLoading.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Which instruction files are in Claude Code's context, and when: the launch set, the files that load on demand, path-scoped rules, imports and AGENTS.md.\n\nThe model follows the memory documentation read on 2026-10-03 (Claude Code v2.1.286): files in the directories above the working directory load at\nlaunch, root first; files below it load when Claude reads there; a rule with `paths` loads when a matching file is read, written or edited; an\nimport expands at launch to at most four hops; AGENTS.md is read only when no CLAUDE.md file exists in the working directory or above it.\nNothing here starts Claude Code: the \"project\" is a list of file paths and a dict of file texts.\n\"\"\"\nimport re\nimport logging\n\nlog = logging.getLogger(__name__)\n\nMAX_IMPORT_HOPS = 4\nIMPORT = re.compile(r\"(?<![\\w`])@([\\w./-]+)\")\n\n\ndef expand_braces(pattern):\n    match = re.search(r\"\\{([^{}]*)\\}\", pattern)\n    if not match:\n        return [pattern]\n    return [p for option in match.group(1).split(\",\") for p in expand_braces(pattern[: match.start()] + option + pattern[match.end():])]\n\n\ndef glob_regex(pattern):\n    out, i = \"\", 0\n    while i < len(pattern):\n        if pattern.startswith(\"**/\", i):\n            out, i = out + \"(?:.*/)?\", i + 3\n        elif pattern.startswith(\"**\", i):\n            out, i = out + \".*\", i + 2\n        elif pattern[i] == \"*\":\n            out, i = out + \"[^/]*\", i + 1\n        elif pattern[i] == \"?\":\n            out, i = out + \"[^/]\", i + 1\n        else:\n            out, i = out + re.escape(pattern[i]), i + 1\n    return re.compile(out + \"$\")\n\n\ndef glob_match(pattern, path):\n    \"\"\"`*` stays inside one folder, `**/` crosses folders, braces expand: `*.md` is the project root only, `**/*.ts` is every folder.\"\"\"\n    return any(glob_regex(p).match(path) for p in expand_braces(pattern))\n\n\ndef rules_loaded(rules, touched):\n    \"\"\"Rule files in context after Claude read or edited the `touched` files. A rule with no `paths` is always loaded.\"\"\"\n    return [name for name, paths in rules.items() if paths is None or any(glob_match(p, f) for p in paths for f in touched)]\n\n\ndef launch_files(tree, cwd=\"\"):\n    \"\"\"Memory files loaded when a session starts in `cwd`: the directories from the root down to cwd, CLAUDE.md then CLAUDE.local.md in each.\"\"\"\n    parts = [p for p in cwd.split(\"/\") if p]\n    folders = [\"\"] + [\"/\".join(parts[: i + 1]) for i in range(len(parts))]\n    found = []\n    for folder in folders:\n        for name in (\"CLAUDE.md\", \".claude/CLAUDE.md\", \"CLAUDE.local.md\"):\n            path = f\"{folder}/{name}\".lstrip(\"/\")\n            if path in tree:\n                found.append(path)\n    return found\n\n\ndef on_demand_files(tree, cwd, touched):\n    \"\"\"Memory files below cwd that join the context when Claude reads a file in their folder (or below it), nearest to cwd first.\"\"\"\n    found = []\n    for file in touched:\n        parts = file.split(\"/\")[:-1]\n        for i in range(len([p for p in cwd.split(\"/\") if p]) + 1, len(parts) + 1):\n            for name in (\"CLAUDE.md\", \"CLAUDE.local.md\"):\n                path = \"/\".join(parts[:i] + [name])\n                if path in tree and path not in found:\n                    found.append(path)\n    return found\n\n\ndef agents_md_read(tree, cwd=\"\"):\n    \"\"\"AGENTS.md is read only when no CLAUDE.md or CLAUDE.local.md is found in the working directory or above it.\"\"\"\n    return not launch_files(tree, cwd) and \"AGENTS.md\" in tree\n\n\ndef imports_of(path, texts, hops=MAX_IMPORT_HOPS):\n    \"\"\"Files pulled in by @path imports, in load order, relative to the importing file, at most `hops` deep; code spans and fences are skipped.\"\"\"\n    found = []\n\n    def visit(file, left):\n        text = re.sub(r\"```.*?```|`[^`]*`\", \"\", texts.get(file, \"\"), flags=re.S)\n        base = file.rsplit(\"/\", 1)[0] if \"/\" in file else \"\"\n        for ref in IMPORT.findall(text):\n            target = \"/\".join(p for p in f\"{base}/{ref}\".split(\"/\") if p)\n            if target in texts and target not in found:\n                found.append(target)\n                if left > 1:\n                    visit(target, left - 1)\n\n    visit(path, hops)\n    return found\n\n\ndef unresolved_imports(path, texts):\n    \"\"\"The @path references of a file that name no file: a typo here silently imports nothing.\"\"\"\n    text = re.sub(r\"```.*?```|`[^`]*`\", \"\", texts.get(path, \"\"), flags=re.S)\n    base = path.rsplit(\"/\", 1)[0] if \"/\" in path else \"\"\n    return [ref for ref in IMPORT.findall(text) if \"/\".join(p for p in f\"{base}/{ref}\".split(\"/\") if p) not in texts]\n\n\ndef context_lines(paths, texts):\n    \"\"\"Lines the files put into context. An import does not save any: the imported file loads at launch too.\"\"\"\n    return sum(len(texts[p].splitlines()) for p in paths)\n\n\ndef main():\n    tree = {\"CLAUDE.md\", \"CLAUDE.local.md\", \"AGENTS.md\", \"web/CLAUDE.md\", \"web/ui/CLAUDE.md\", \"api/CLAUDE.md\"}\n    rules = {\"commit.md\": None, \"testing.md\": [\"**/*.test.{ts,tsx}\"], \"terraform.md\": [\"terraform/**/*\"]}\n    print(\"launch in web/:\", launch_files(tree, \"web\"))\n    print(\"reading web/ui/Button.tsx adds:\", on_demand_files(tree, \"web\", [\"web/ui/Button.tsx\"]))\n    print(\"AGENTS.md read:\", agents_md_read(tree), \"- without any CLAUDE.md:\", agents_md_read({\"AGENTS.md\"}))\n    for touched in ([\"web/ui/Button.test.tsx\"], [\"terraform/main.tf\"], [\"README.md\"]):\n        print(f\"touching {touched[0]}: {rules_loaded(rules, touched)}\")\n    for pattern, path in ((\"*.md\", \"README.md\"), (\"*.md\", \"docs/guide.md\"), (\"**/*.ts\", \"a/b/c.ts\"), (\"src/**/*.{ts,tsx}\", \"src/ui/x.tsx\")):\n        print(f\"{pattern} matches {path}: {glob_match(pattern, path)}\")\n    texts = {\"CLAUDE.md\": \"See @docs/a.md and `@not-an-import`\", \"docs/a.md\": \"@b.md\", \"docs/b.md\": \"@c.md\", \"docs/c.md\": \"@d.md\", \"docs/d.md\": \"@e.md\", \"docs/e.md\": \"x\"}\n    print(\"imports:\", imports_of(\"CLAUDE.md\", texts))\n    print(\"unresolved:\", unresolved_imports(\"CLAUDE.md\", {**texts, \"CLAUDE.md\": texts[\"CLAUDE.md\"] + \" and @docs/typo.md\"}))\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "launch in web/: ['CLAUDE.md', 'CLAUDE.local.md', 'web/CLAUDE.md']\nreading web/ui/Button.tsx adds: ['web/ui/CLAUDE.md']\nAGENTS.md read: False - without any CLAUDE.md: True\ntouching web/ui/Button.test.tsx: ['commit.md', 'testing.md']\ntouching terraform/main.tf: ['commit.md', 'terraform.md']\ntouching README.md: ['commit.md']\n*.md matches README.md: True\n*.md matches docs/guide.md: False\n**/*.ts matches a/b/c.ts: True\nsrc/**/*.{ts,tsx} matches src/ui/x.tsx: True\nimports: ['docs/a.md', 'docs/b.md', 'docs/c.md', 'docs/d.md']\nunresolved: ['docs/typo.md']"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "import { logger } from \"./logger.ts\";\nconst log = logger(\"memory_loading\");\n/**\n * Which instruction files are in Claude Code's context, and when: the launch set, the files that load on demand, path-scoped rules, imports and AGENTS.md.\n *\n * The model follows the memory documentation read on 2026-10-03 (Claude Code v2.1.286): files in the directories above the working directory load at\n * launch, root first; files below it load when Claude reads there; a rule with `paths` loads when a matching file is read, written or edited; an\n * import expands at launch to at most four hops; AGENTS.md is read only when no CLAUDE.md file exists in the working directory or above it.\n * Nothing here starts Claude Code: the \"project\" is a set of file paths and a map of file texts.\n */\nexport const MAX_IMPORT_HOPS = 4;\nconst IMPORT = /(?<![\\w`])@([\\w./-]+)/g;\n\nexport function expandBraces(pattern: string): string[] {\n  const match = /\\{([^{}]*)\\}/.exec(pattern);\n  if (!match) return [pattern];\n  return match[1].split(\",\").flatMap((option) => expandBraces(pattern.slice(0, match.index) + option + pattern.slice(match.index + match[0].length)));\n}\n\nfunction escapeRegex(c: string): string {\n  return c.replace(/[.*+?^${}()|[\\]\\\\]/g, \"\\\\$&\");\n}\n\nexport function globRegex(pattern: string): RegExp {\n  let out = \"\";\n  let i = 0;\n  while (i < pattern.length) {\n    if (pattern.startsWith(\"**/\", i)) {\n      out += \"(?:.*/)?\";\n      i += 3;\n    } else if (pattern.startsWith(\"**\", i)) {\n      out += \".*\";\n      i += 2;\n    } else if (pattern[i] === \"*\") {\n      out += \"[^/]*\";\n      i += 1;\n    } else if (pattern[i] === \"?\") {\n      out += \"[^/]\";\n      i += 1;\n    } else {\n      out += escapeRegex(pattern[i]);\n      i += 1;\n    }\n  }\n  return new RegExp(\"^\" + out + \"$\");\n}\n\n/** `*` stays inside one folder, `**\\/` crosses folders, braces expand: `*.md` is the project root only, `**\\/*.ts` is every folder. */\nexport function globMatch(pattern: string, path: string): boolean {\n  return expandBraces(pattern).some((p) => globRegex(p).test(path));\n}\n\n/** Rule files in context after Claude read or edited the `touched` files. A rule with no `paths` is always loaded. */\nexport function rulesLoaded(rules: Record<string, string[] | null>, touched: string[]): string[] {\n  return Object.entries(rules)\n    .filter(([, paths]) => paths === null || paths.some((p) => touched.some((f) => globMatch(p, f))))\n    .map(([name]) => name);\n}\n\nconst words = (path: string) => path.split(\"/\").filter((p) => p !== \"\");\n\n/** Memory files loaded when a session starts in `cwd`: the directories from the root down to cwd, CLAUDE.md then CLAUDE.local.md in each. */\nexport function launchFiles(tree: Set<string>, cwd = \"\"): string[] {\n  const parts = words(cwd);\n  const folders = [\"\"].concat(parts.map((_, i) => parts.slice(0, i + 1).join(\"/\")));\n  const found: string[] = [];\n  for (const folder of folders) {\n    for (const name of [\"CLAUDE.md\", \".claude/CLAUDE.md\", \"CLAUDE.local.md\"]) {\n      const path = `${folder}/${name}`.replace(/^\\/+/, \"\");\n      if (tree.has(path)) found.push(path);\n    }\n  }\n  return found;\n}\n\n/** Memory files below cwd that join the context when Claude reads a file in their folder (or below it), nearest to cwd first. */\nexport function onDemandFiles(tree: Set<string>, cwd: string, touched: string[]): string[] {\n  const found: string[] = [];\n  for (const file of touched) {\n    const parts = file.split(\"/\").slice(0, -1);\n    for (let i = words(cwd).length + 1; i <= parts.length; i++) {\n      for (const name of [\"CLAUDE.md\", \"CLAUDE.local.md\"]) {\n        const path = parts.slice(0, i).concat([name]).join(\"/\");\n        if (tree.has(path) && !found.includes(path)) found.push(path);\n      }\n    }\n  }\n  return found;\n}\n\n/** AGENTS.md is read only when no CLAUDE.md or CLAUDE.local.md is found in the working directory or above it. */\nexport function agentsMdRead(tree: Set<string>, cwd = \"\"): boolean {\n  return launchFiles(tree, cwd).length === 0 && tree.has(\"AGENTS.md\");\n}\n\n/** Files pulled in by @path imports, in load order, relative to the importing file, at most `hops` deep; code spans and fences are skipped. */\nexport function importsOf(path: string, texts: Record<string, string>, hops = MAX_IMPORT_HOPS): string[] {\n  const found: string[] = [];\n  const visit = (file: string, left: number) => {\n    const text = (texts[file] ?? \"\").replace(/```[\\s\\S]*?```|`[^`]*`/g, \"\");\n    const base = file.includes(\"/\") ? file.slice(0, file.lastIndexOf(\"/\")) : \"\";\n    for (const m of text.matchAll(IMPORT)) {\n      const target = words(`${base}/${m[1]}`).join(\"/\");\n      if (target in texts && !found.includes(target)) {\n        found.push(target);\n        if (left > 1) visit(target, left - 1);\n      }\n    }\n  };\n  visit(path, hops);\n  return found;\n}\n\n/** The @path references of a file that name no file: a typo here silently imports nothing. */\nexport function unresolvedImports(path: string, texts: Record<string, string>): string[] {\n  const text = (texts[path] ?? \"\").replace(/```[\\s\\S]*?```|`[^`]*`/g, \"\");\n  const base = path.includes(\"/\") ? path.slice(0, path.lastIndexOf(\"/\")) : \"\";\n  return [...text.matchAll(IMPORT)].map((m) => m[1]).filter((ref) => !(words(`${base}/${ref}`).join(\"/\") in texts));\n}\n\n/** Lines the files put into context. An import does not save any: the imported file loads at launch too. */\nexport function contextLines(paths: string[], texts: Record<string, string>): number {\n  return paths.reduce((sum, p) => sum + texts[p].split(\"\\n\").length, 0);\n}\n\nfunction main() {\n  const tree = new Set([\"CLAUDE.md\", \"CLAUDE.local.md\", \"AGENTS.md\", \"web/CLAUDE.md\", \"web/ui/CLAUDE.md\", \"api/CLAUDE.md\"]);\n  const rules = { \"commit.md\": null, \"testing.md\": [\"**/*.test.{ts,tsx}\"], \"terraform.md\": [\"terraform/**/*\"] };\n  const show = (v: unknown) => JSON.stringify(v);\n  console.log(\"launch in web/:\", show(launchFiles(tree, \"web\")));\n  console.log(\"reading web/ui/Button.tsx adds:\", show(onDemandFiles(tree, \"web\", [\"web/ui/Button.tsx\"])));\n  console.log(\"AGENTS.md read:\", agentsMdRead(tree), \"- without any CLAUDE.md:\", agentsMdRead(new Set([\"AGENTS.md\"])));\n  for (const touched of [[\"web/ui/Button.test.tsx\"], [\"terraform/main.tf\"], [\"README.md\"]]) console.log(`touching ${touched[0]}:`, show(rulesLoaded(rules, touched)));\n  for (const [pattern, path] of [[\"*.md\", \"README.md\"], [\"*.md\", \"docs/guide.md\"], [\"**/*.ts\", \"a/b/c.ts\"], [\"src/**/*.{ts,tsx}\", \"src/ui/x.tsx\"]]) {\n    console.log(`${pattern} matches ${path}: ${globMatch(pattern, path)}`);\n  }\n  const texts = { \"CLAUDE.md\": \"See @docs/a.md and `@not-an-import`\", \"docs/a.md\": \"@b.md\", \"docs/b.md\": \"@c.md\", \"docs/c.md\": \"@d.md\", \"docs/d.md\": \"@e.md\", \"docs/e.md\": \"x\" };\n  console.log(\"imports:\", show(importsOf(\"CLAUDE.md\", texts)));\n  console.log(\"unresolved:\", show(unresolvedImports(\"CLAUDE.md\", { ...texts, \"CLAUDE.md\": texts[\"CLAUDE.md\"] + \" and @docs/typo.md\" })));\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "launch in web/: [\"CLAUDE.md\",\"CLAUDE.local.md\",\"web/CLAUDE.md\"]\nreading web/ui/Button.tsx adds: [\"web/ui/CLAUDE.md\"]\nAGENTS.md read: false - without any CLAUDE.md: true\ntouching web/ui/Button.test.tsx: [\"commit.md\",\"testing.md\"]\ntouching terraform/main.tf: [\"commit.md\",\"terraform.md\"]\ntouching README.md: [\"commit.md\"]\n*.md matches README.md: true\n*.md matches docs/guide.md: false\n**/*.ts matches a/b/c.ts: true\nsrc/**/*.{ts,tsx} matches src/ui/x.tsx: true\nimports: [\"docs/a.md\",\"docs/b.md\",\"docs/c.md\",\"docs/d.md\"]\nunresolved: [\"docs/typo.md\"]"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import static harness.Show.py;\n\nimport java.util.ArrayList;\nimport java.util.Arrays;\nimport java.util.LinkedHashMap;\nimport java.util.LinkedHashSet;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\nimport java.util.regex.Matcher;\nimport java.util.regex.Pattern;\n\n/**\n * Which instruction files are in Claude Code's context, and when: the launch set, the files that load on demand, path-scoped rules, imports and AGENTS.md.\n *\n * <p>The model follows the memory documentation read on 2026-10-03 (Claude Code v2.1.286): files in the directories above the working directory load at\n * launch, root first; files below it load when Claude reads there; a rule with `paths` loads when a matching file is read, written or edited; an\n * import expands at launch to at most four hops; AGENTS.md is read only when no CLAUDE.md file exists in the working directory or above it.\n * Nothing here starts Claude Code: the \"project\" is a list of file paths and a map of file texts.\n */\npublic final class MemoryLoading {\n    private static final System.Logger LOG = System.getLogger(MemoryLoading.class.getName());\n    static final int MAX_IMPORT_HOPS = 4;\n    static final Pattern IMPORT = Pattern.compile(\"(?<![\\\\w`])@([\\\\w./-]+)\");\n    private static final Pattern CODE = Pattern.compile(\"```.*?```|`[^`]*`\", Pattern.DOTALL);\n    private static final Pattern BRACES = Pattern.compile(\"\\\\{([^{}]*)\\\\}\");\n\n    static List<String> expandBraces(String pattern) {\n        Matcher match = BRACES.matcher(pattern);\n        if (!match.find()) return List.of(pattern);\n        List<String> out = new ArrayList<>();\n        for (String option : match.group(1).split(\",\", -1)) out.addAll(expandBraces(pattern.substring(0, match.start()) + option + pattern.substring(match.end())));\n        return out;\n    }\n\n    static Pattern globRegex(String pattern) {\n        StringBuilder out = new StringBuilder();\n        int i = 0;\n        while (i < pattern.length()) {\n            if (pattern.startsWith(\"**/\", i)) { out.append(\"(?:.*/)?\"); i += 3; }\n            else if (pattern.startsWith(\"**\", i)) { out.append(\".*\"); i += 2; }\n            else if (pattern.charAt(i) == '*') { out.append(\"[^/]*\"); i += 1; }\n            else if (pattern.charAt(i) == '?') { out.append(\"[^/]\"); i += 1; }\n            else { out.append(Pattern.quote(String.valueOf(pattern.charAt(i)))); i += 1; }\n        }\n        return Pattern.compile(out.toString());\n    }\n\n    /** `*` stays inside one folder, a `**` folder segment crosses folders, braces expand: `*.md` is the project root only, any-folder-prefix plus `*.ts` is every folder. */\n    static boolean globMatch(String pattern, String path) {\n        return expandBraces(pattern).stream().anyMatch(p -> globRegex(p).matcher(path).matches());\n    }\n\n    /** Rule files in context after Claude read or edited the `touched` files. A rule with no `paths` is always loaded. */\n    static List<String> rulesLoaded(Map<String, List<String>> rules, List<String> touched) {\n        List<String> out = new ArrayList<>();\n        for (Map.Entry<String, List<String>> r : rules.entrySet()) {\n            if (r.getValue() == null || r.getValue().stream().anyMatch(p -> touched.stream().anyMatch(f -> globMatch(p, f)))) out.add(r.getKey());\n        }\n        return out;\n    }\n\n    private static List<String> segments(String path) {\n        return Arrays.stream(path.split(\"/\")).filter(p -> !p.isEmpty()).toList();\n    }\n\n    /** Memory files loaded when a session starts in `cwd`: the directories from the root down to cwd, CLAUDE.md then CLAUDE.local.md in each. */\n    static List<String> launchFiles(Set<String> tree, String cwd) {\n        List<String> parts = segments(cwd);\n        List<String> folders = new ArrayList<>(List.of(\"\"));\n        for (int i = 0; i < parts.size(); i++) folders.add(String.join(\"/\", parts.subList(0, i + 1)));\n        List<String> found = new ArrayList<>();\n        for (String folder : folders) {\n            for (String name : List.of(\"CLAUDE.md\", \".claude/CLAUDE.md\", \"CLAUDE.local.md\")) {\n                String path = (folder + \"/\" + name).replaceFirst(\"^/+\", \"\");\n                if (tree.contains(path)) found.add(path);\n            }\n        }\n        return found;\n    }\n\n    /** Memory files below cwd that join the context when Claude reads a file in their folder (or below it), nearest to cwd first. */\n    static List<String> onDemandFiles(Set<String> tree, String cwd, List<String> touched) {\n        List<String> found = new ArrayList<>();\n        for (String file : touched) {\n            String[] all = file.split(\"/\");\n            List<String> parts = Arrays.asList(all).subList(0, all.length - 1);\n            for (int i = segments(cwd).size() + 1; i <= parts.size(); i++) {\n                for (String name : List.of(\"CLAUDE.md\", \"CLAUDE.local.md\")) {\n                    List<String> p = new ArrayList<>(parts.subList(0, i));\n                    p.add(name);\n                    String path = String.join(\"/\", p);\n                    if (tree.contains(path) && !found.contains(path)) found.add(path);\n                }\n            }\n        }\n        return found;\n    }\n\n    /** AGENTS.md is read only when no CLAUDE.md or CLAUDE.local.md is found in the working directory or above it. */\n    static boolean agentsMdRead(Set<String> tree, String cwd) {\n        return launchFiles(tree, cwd).isEmpty() && tree.contains(\"AGENTS.md\");\n    }\n\n    static boolean agentsMdRead(Set<String> tree) {\n        return agentsMdRead(tree, \"\");\n    }\n\n    private static String target(String file, String ref) {\n        String base = file.contains(\"/\") ? file.substring(0, file.lastIndexOf('/')) : \"\";\n        return String.join(\"/\", segments(base + \"/\" + ref));\n    }\n\n    private static void visit(String file, int left, Map<String, String> texts, List<String> found) {\n        String text = CODE.matcher(texts.getOrDefault(file, \"\")).replaceAll(\"\");\n        Matcher m = IMPORT.matcher(text);\n        while (m.find()) {\n            String target = target(file, m.group(1));\n            if (texts.containsKey(target) && !found.contains(target)) {\n                found.add(target);\n                if (left > 1) visit(target, left - 1, texts, found);\n            }\n        }\n    }\n\n    /** Files pulled in by @path imports, in load order, relative to the importing file, at most `hops` deep; code spans and fences are skipped. */\n    static List<String> importsOf(String path, Map<String, String> texts, int hops) {\n        List<String> found = new ArrayList<>();\n        visit(path, hops, texts, found);\n        return found;\n    }\n\n    static List<String> importsOf(String path, Map<String, String> texts) {\n        return importsOf(path, texts, MAX_IMPORT_HOPS);\n    }\n\n    /** The @path references of a file that name no file: a typo here silently imports nothing. */\n    static List<String> unresolvedImports(String path, Map<String, String> texts) {\n        String text = CODE.matcher(texts.getOrDefault(path, \"\")).replaceAll(\"\");\n        List<String> out = new ArrayList<>();\n        Matcher m = IMPORT.matcher(text);\n        while (m.find()) if (!texts.containsKey(target(path, m.group(1)))) out.add(m.group(1));\n        return out;\n    }\n\n    /** Lines the files put into context. An import does not save any: the imported file loads at launch too. */\n    static long contextLines(List<String> paths, Map<String, String> texts) {\n        return paths.stream().mapToLong(p -> texts.get(p).lines().count()).sum();\n    }\n\n    static Map<String, String> texts(String... kv) {\n        Map<String, String> m = new LinkedHashMap<>();\n        for (int i = 0; i + 1 < kv.length; i += 2) m.put(kv[i], kv[i + 1]);\n        return m;\n    }\n\n    public static void main(String[] args) {\n        Set<String> tree = new LinkedHashSet<>(List.of(\"CLAUDE.md\", \"CLAUDE.local.md\", \"AGENTS.md\", \"web/CLAUDE.md\", \"web/ui/CLAUDE.md\", \"api/CLAUDE.md\"));\n        Map<String, List<String>> rules = new LinkedHashMap<>();\n        rules.put(\"commit.md\", null);\n        rules.put(\"testing.md\", List.of(\"**/*.test.{ts,tsx}\"));\n        rules.put(\"terraform.md\", List.of(\"terraform/**/*\"));\n        System.out.println(\"launch in web/: \" + py(launchFiles(tree, \"web\")));\n        System.out.println(\"reading web/ui/Button.tsx adds: \" + py(onDemandFiles(tree, \"web\", List.of(\"web/ui/Button.tsx\"))));\n        System.out.println(\"AGENTS.md read: \" + py(agentsMdRead(tree)) + \" - without any CLAUDE.md: \" + py(agentsMdRead(Set.of(\"AGENTS.md\"))));\n        for (String touched : List.of(\"web/ui/Button.test.tsx\", \"terraform/main.tf\", \"README.md\")) {\n            System.out.println(\"touching \" + touched + \": \" + py(rulesLoaded(rules, List.of(touched))));\n        }\n        String[][] globs = {{\"*.md\", \"README.md\"}, {\"*.md\", \"docs/guide.md\"}, {\"**/*.ts\", \"a/b/c.ts\"}, {\"src/**/*.{ts,tsx}\", \"src/ui/x.tsx\"}};\n        for (String[] g : globs) System.out.println(g[0] + \" matches \" + g[1] + \": \" + py(globMatch(g[0], g[1])));\n        Map<String, String> texts = texts(\"CLAUDE.md\", \"See @docs/a.md and `@not-an-import`\", \"docs/a.md\", \"@b.md\", \"docs/b.md\", \"@c.md\", \"docs/c.md\", \"@d.md\", \"docs/d.md\", \"@e.md\", \"docs/e.md\", \"x\");\n        System.out.println(\"imports: \" + py(importsOf(\"CLAUDE.md\", texts)));\n        Map<String, String> withTypo = new LinkedHashMap<>(texts);\n        withTypo.put(\"CLAUDE.md\", texts.get(\"CLAUDE.md\") + \" and @docs/typo.md\");\n        System.out.println(\"unresolved: \" + py(unresolvedImports(\"CLAUDE.md\", withTypo)));\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "launch in web/: ['CLAUDE.md', 'CLAUDE.local.md', 'web/CLAUDE.md']\nreading web/ui/Button.tsx adds: ['web/ui/CLAUDE.md']\nAGENTS.md read: False - without any CLAUDE.md: True\ntouching web/ui/Button.test.tsx: ['commit.md', 'testing.md']\ntouching terraform/main.tf: ['commit.md', 'terraform.md']\ntouching README.md: ['commit.md']\n*.md matches README.md: True\n*.md matches docs/guide.md: False\n**/*.ts matches a/b/c.ts: True\nsrc/**/*.{ts,tsx} matches src/ui/x.tsx: True\nimports: ['docs/a.md', 'docs/b.md', 'docs/c.md', 'docs/d.md']\nunresolved: ['docs/typo.md']"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import harness.Show.py\n\nprivate val log = System.getLogger(\"memory_loading\")\n\n/**\n * Which instruction files are in Claude Code's context, and when: the launch set, the files that load on demand, path-scoped rules, imports and AGENTS.md.\n *\n * The model follows the memory documentation read on 2026-10-03 (Claude Code v2.1.286): files in the directories above the working directory load at\n * launch, root first; files below it load when Claude reads there; a rule with `paths` loads when a matching file is read, written or edited; an\n * import expands at launch to at most four hops; AGENTS.md is read only when no CLAUDE.md file exists in the working directory or above it.\n * Nothing here starts Claude Code: the \"project\" is a list of file paths and a map of file texts.\n */\nconst val MAX_IMPORT_HOPS = 4\nval IMPORT = Regex(\"\"\"(?<![\\w`])@([\\w./-]+)\"\"\")\nprivate val CODE = Regex(\"\"\"```.*?```|`[^`]*`\"\"\", RegexOption.DOT_MATCHES_ALL)\nprivate val BRACES = Regex(\"\"\"\\{([^{}]*)\\}\"\"\")\n\nfun expandBraces(pattern: String): List<String> {\n    val match = BRACES.find(pattern) ?: return listOf(pattern)\n    return match.groupValues[1].split(\",\").flatMap { option -> expandBraces(pattern.substring(0, match.range.first) + option + pattern.substring(match.range.last + 1)) }\n}\n\nfun globRegex(pattern: String): Regex {\n    val out = StringBuilder()\n    var i = 0\n    while (i < pattern.length) {\n        when {\n            pattern.startsWith(\"**/\", i) -> { out.append(\"(?:.*/)?\"); i += 3 }\n            pattern.startsWith(\"**\", i) -> { out.append(\".*\"); i += 2 }\n            pattern[i] == '*' -> { out.append(\"[^/]*\"); i += 1 }\n            pattern[i] == '?' -> { out.append(\"[^/]\"); i += 1 }\n            else -> { out.append(Regex.escape(pattern[i].toString())); i += 1 }\n        }\n    }\n    return Regex(out.toString())\n}\n\n/** `*` stays inside one folder, a `**` folder segment crosses folders, braces expand: `*.md` is the project root only, any-folder-prefix plus `*.ts` is every folder. */\nfun globMatch(pattern: String, path: String): Boolean = expandBraces(pattern).any { globRegex(it).matches(path) }\n\n/** Rule files in context after Claude read or edited the `touched` files. A rule with no `paths` is always loaded. */\nfun rulesLoaded(rules: Map<String, List<String>?>, touched: List<String>): List<String> =\n    rules.filter { (_, paths) -> paths == null || paths.any { p -> touched.any { f -> globMatch(p, f) } } }.keys.toList()\n\nprivate fun segments(path: String): List<String> = path.split(\"/\").filter { it.isNotEmpty() }\n\n/** Memory files loaded when a session starts in `cwd`: the directories from the root down to cwd, CLAUDE.md then CLAUDE.local.md in each. */\nfun launchFiles(tree: Set<String>, cwd: String = \"\"): List<String> {\n    val parts = segments(cwd)\n    val folders = listOf(\"\") + parts.indices.map { parts.subList(0, it + 1).joinToString(\"/\") }\n    val found = mutableListOf<String>()\n    for (folder in folders) {\n        for (name in listOf(\"CLAUDE.md\", \".claude/CLAUDE.md\", \"CLAUDE.local.md\")) {\n            val path = \"$folder/$name\".trimStart('/')\n            if (path in tree) found += path\n        }\n    }\n    return found\n}\n\n/** Memory files below cwd that join the context when Claude reads a file in their folder (or below it), nearest to cwd first. */\nfun onDemandFiles(tree: Set<String>, cwd: String, touched: List<String>): List<String> {\n    val found = mutableListOf<String>()\n    for (file in touched) {\n        val parts = file.split(\"/\").dropLast(1)\n        for (i in segments(cwd).size + 1..parts.size) {\n            for (name in listOf(\"CLAUDE.md\", \"CLAUDE.local.md\")) {\n                val path = (parts.take(i) + name).joinToString(\"/\")\n                if (path in tree && path !in found) found += path\n            }\n        }\n    }\n    return found\n}\n\n/** AGENTS.md is read only when no CLAUDE.md or CLAUDE.local.md is found in the working directory or above it. */\nfun agentsMdRead(tree: Set<String>, cwd: String = \"\"): Boolean = launchFiles(tree, cwd).isEmpty() && \"AGENTS.md\" in tree\n\nprivate fun target(file: String, ref: String): String = segments(\"${if (\"/\" in file) file.substringBeforeLast(\"/\") else \"\"}/$ref\").joinToString(\"/\")\n\n/** Files pulled in by @path imports, in load order, relative to the importing file, at most `hops` deep; code spans and fences are skipped. */\nfun importsOf(path: String, texts: Map<String, String>, hops: Int = MAX_IMPORT_HOPS): List<String> {\n    val found = mutableListOf<String>()\n    fun visit(file: String, left: Int) {\n        val text = CODE.replace(texts[file] ?: \"\", \"\")\n        for (ref in IMPORT.findAll(text).map { it.groupValues[1] }) {\n            val target = target(file, ref)\n            if (target in texts && target !in found) {\n                found += target\n                if (left > 1) visit(target, left - 1)\n            }\n        }\n    }\n    visit(path, hops)\n    return found\n}\n\n/** The @path references of a file that name no file: a typo here silently imports nothing. */\nfun unresolvedImports(path: String, texts: Map<String, String>): List<String> {\n    val text = CODE.replace(texts[path] ?: \"\", \"\")\n    return IMPORT.findAll(text).map { it.groupValues[1] }.filter { target(path, it) !in texts }.toList()\n}\n\n/** Lines the files put into context. An import does not save any: the imported file loads at launch too. */\nfun contextLines(paths: List<String>, texts: Map<String, String>): Int = paths.sumOf { texts.getValue(it).lines().size - (if (texts.getValue(it).endsWith(\"\\n\")) 1 else 0) }\n\nfun main() {\n    val tree = setOf(\"CLAUDE.md\", \"CLAUDE.local.md\", \"AGENTS.md\", \"web/CLAUDE.md\", \"web/ui/CLAUDE.md\", \"api/CLAUDE.md\")\n    val rules = linkedMapOf(\"commit.md\" to null, \"testing.md\" to listOf(\"**/*.test.{ts,tsx}\"), \"terraform.md\" to listOf(\"terraform/**/*\"))\n    println(\"launch in web/: ${py(launchFiles(tree, \"web\"))}\")\n    println(\"reading web/ui/Button.tsx adds: ${py(onDemandFiles(tree, \"web\", listOf(\"web/ui/Button.tsx\")))}\")\n    println(\"AGENTS.md read: ${py(agentsMdRead(tree))} - without any CLAUDE.md: ${py(agentsMdRead(setOf(\"AGENTS.md\")))}\")\n    for (touched in listOf(\"web/ui/Button.test.tsx\", \"terraform/main.tf\", \"README.md\")) println(\"touching $touched: ${py(rulesLoaded(rules, listOf(touched)))}\")\n    for ((pattern, path) in listOf(\"*.md\" to \"README.md\", \"*.md\" to \"docs/guide.md\", \"**/*.ts\" to \"a/b/c.ts\", \"src/**/*.{ts,tsx}\" to \"src/ui/x.tsx\")) {\n        println(\"$pattern matches $path: ${py(globMatch(pattern, path))}\")\n    }\n    val texts = linkedMapOf(\n        \"CLAUDE.md\" to \"See @docs/a.md and `@not-an-import`\", \"docs/a.md\" to \"@b.md\", \"docs/b.md\" to \"@c.md\", \"docs/c.md\" to \"@d.md\", \"docs/d.md\" to \"@e.md\", \"docs/e.md\" to \"x\",\n    )\n    println(\"imports: ${py(importsOf(\"CLAUDE.md\", texts))}\")\n    println(\"unresolved: ${py(unresolvedImports(\"CLAUDE.md\", texts + (\"CLAUDE.md\" to texts.getValue(\"CLAUDE.md\") + \" and @docs/typo.md\")))}\")\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "launch in web/: ['CLAUDE.md', 'CLAUDE.local.md', 'web/CLAUDE.md']\nreading web/ui/Button.tsx adds: ['web/ui/CLAUDE.md']\nAGENTS.md read: False - without any CLAUDE.md: True\ntouching web/ui/Button.test.tsx: ['commit.md', 'testing.md']\ntouching terraform/main.tf: ['commit.md', 'terraform.md']\ntouching README.md: ['commit.md']\n*.md matches README.md: True\n*.md matches docs/guide.md: False\n**/*.ts matches a/b/c.ts: True\nsrc/**/*.{ts,tsx} matches src/ui/x.tsx: True\nimports: ['docs/a.md', 'docs/b.md', 'docs/c.md', 'docs/d.md']\nunresolved: ['docs/typo.md']"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "para",
+      "text": "These are the wrong answers that the exam's options for this task statement offer, each with the reason it is rejected."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**\"Put the team's rule in `~/.claude/CLAUDE.md`; every developer has one.\"** It is tempting because the user file loads in every project. The exam rejects it: that file is personal and is \"not shared with teammates via version control\", so a new teammate never receives it. The rule goes in the project file, committed.",
+        "**\"Split the 600-line file into imports; the context cost falls.\"** It is tempting because the root file becomes short. The exam, and the documentation, reject it: imports \"don't reduce its context cost, because imported files also load at launch\". Path-scoped rules, which load only on a match, are the split that saves context (page 2).",
+        "**\"Put the convention in the subdirectory's CLAUDE.md; Claude will have it from the start.\"** It is tempting because the file sits next to the code. The exam rejects it: a subdirectory file loads \"on demand when Claude reads files in those directories\", so from the repository root it is absent until Claude opens a file there.",
+        "**\"Add a `CLAUDE.local.md` for my notes; the repository's `AGENTS.md` still loads.\"** It is tempting because the local file looks additive. The product rejects it: the local file counts as a CLAUDE.md, so Claude \"reads only your CLAUDE.md files\" and `AGENTS.md` is skipped unless you import it or change the setting."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "An engineer wants a reminder about a private test server to guide Claude in one repository on their own machine, and never to reach teammates. Where does it go?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The committed instruction file, under a heading for personal items",
+              "**b**: A git-ignored local note beside the root instruction file",
+              "**c**: The personal file in the home folder, applying to every project",
+              "**d**: The organisation policy file, which only that engineer edits"
+            ]
+          }
+        ],
+        [
+          "A session starts at the top of a project, and an instruction file sits two levels down in `web/ui/`. When do its lines reach the model?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: At launch, together with the root file",
+              "**b**: Only after a restart that begins inside that directory",
+              "**c**: When the user runs the memory command",
+              "**d**: Once Claude opens something beneath that directory"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**b**. The local file is personal to one project and is kept out of version control. *a* is ruled out because \"A personal note about one project, such as a sandbox address, belongs in the local file\", and a committed file would share it. *c* is ruled out because that file reaches \"You, in every project\", and the reminder concerns one repository. *d* is ruled out because that layer reaches \"Everyone on the machine, and individual settings cannot exclude it\", so it is not a private note.",
+            "**d**. A file below the starting directory loads on demand. *a* is ruled out because the files that load first are the ones \"above the working directory are loaded at launch\", and this one is below it. *b* is ruled out because a lower file loads \"on demand when Claude reads files in those directories\", with no restart. *c* is ruled out because the memory command \"lists your CLAUDE.md, CLAUDE.local.md, and other memory file locations\" and loads nothing."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Adapted from the Claude Certified Architect - Foundations exam preparation guide by Daron Yondem (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/), changed for this course."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 12,
+    "paras": 18,
+    "code": 0,
+    "tables": 1,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 1,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "e78225c98943e3d3db7155bf5a4bd616167f8c3f5df9e2383a52662ec9f63b59"
+}

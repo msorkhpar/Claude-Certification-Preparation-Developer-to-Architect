@@ -1,0 +1,304 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "34-workflows-and-agents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: four workflow patterns around a model (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: four workflow patterns around a model"
+    },
+    {
+      "type": "para",
+      "text": "A workflow is code that decides the steps and calls the model inside them, as opposed to an agent, where the model decides the steps. Most production systems that \"use agents\" are workflows, and the patterns are small enough to write by hand: an orchestrator that splits a task and hands the pieces to workers, an evaluator that sends a draft back until it is good enough, a router that picks a path, and a vote that asks the same question several times. Each has a failure that the plain version hides: a plan the model wrote badly, a worker that fails, a judge that answers in prose, a tie. Write all four, with those failures handled. The patterns come from the Claude documentation and Anthropic's engineering write-up on building effective agents; the lesson pages explain them and what the course checked. Nothing here touches the network: the model is a function from a prompt (text) to a reply (text) that the tests script."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`ask`, `write`, `judge`",
+          "the model: a function that takes the prompt text and returns the reply text; it may throw"
+        ],
+        [
+          "`routes`",
+          "a map from a label to a handler, a function of the text that returns text; its key order is the label order"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working set of four workflows with nine small gaps cut out of it. The plumbing is written and correct: the two defensive readers (`_slice`, `parse_plan`, `read_judgement`), the loops, the counting of calls and the results of `orchestrate`, `refine`, `route` and `vote`. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms, `cleanSteps` and so on):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_clean_steps` unlocks `e1`: the string subtasks of the plan, stripped, without empty ones or repeats.",
+        "`_run_worker` unlocks `m1` and `e2`: one worker call that never raises and reports `ok` or `failed`.",
+        "`_combine_prompt` unlocks `m1`: the combine prompt with one line per subtask.",
+        "`_score_ok` unlocks `e4`: which judge scores count (a number from 0 to 10, never a boolean).",
+        "`_writer_prompt` unlocks `e3`: the first prompt, and the revision prompt with the previous draft and the feedback.",
+        "`_is_better` unlocks `e4`: when a draft replaces the best one (strictly higher, so the earliest wins a tie).",
+        "`_error_result` unlocks `e7`: the result when the writer raises.",
+        "`_normalise_label` unlocks `e5`: the label read from the classifier's reply.",
+        "`_pick_winner` unlocks `e6`: the most frequent answer, the first seen on a tie."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About a dozen lines in all. The sections below describe the whole workflows; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "Prompts are part of the contract, so that a test can answer by the start of a prompt. Write them exactly; `\\n` is a newline."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`orchestrate(ask, task, max_subtasks=5)` returns `{\"status\", \"plan\", \"fallback\", \"results\", \"answer\", \"calls\"}`.",
+          {
+            "type": "list",
+            "ordered": true,
+            "items": [
+              "Plan with one call: `Plan: split the task into at most {max_subtasks} independent subtasks. Reply with a JSON array of strings only.\\nTask: {task}`. Read the reply defensively: take the text from the first `[` to the last `]` and parse it. Keep the string items, stripped, dropping empty ones and repeats (the first of a repeat stays), then keep at most `max_subtasks`. When nothing is usable (no array, bad JSON, no string items) the plan is just `[task]` and `fallback` is true.",
+              "Run one worker call per subtask, in order: `Subtask: {subtask}\\nTask: {task}`. A reply that is empty or only spaces, or a call that throws, makes that subtask `{\"subtask\", \"status\": \"failed\", \"error\"}` (the error text is the exception's message, or `empty reply`) and the others still run. A good one is `{\"subtask\", \"status\": \"ok\", \"output\"}`.",
+              "When every subtask failed, do not combine: status `failed`, `answer` null. Otherwise combine with one call, `Combine: write one answer to the task from the results.\\nTask: {task}` followed by one line per subtask in plan order, `\\n{i}. {subtask} -> {output}` or `\\n{i}. {subtask} -> FAILED` (i from 1), and return status `done`, or `partial` when some failed, with the reply as `answer`. `calls` counts every model call made."
+            ]
+          }
+        ],
+        [
+          "`refine(write, judge, task, max_rounds=3, threshold=8)` returns `{\"status\", \"draft\", \"score\", \"rounds\", \"history\"}` and, on an error, `\"error\"`. Each round, the writer prompt is `Task: {task}` in round 1 and afterwards `Task: {task}\\nPrevious draft: {draft}\\nFeedback: {feedback}\\nRevise the draft.` (the latest draft and the judge's latest feedback). Then judge the draft with `Judge: score the draft from 0 to 10 and reply with JSON {\"score\": n, \"feedback\": \"...\"}.\\nTask: {task}\\nDraft: {draft}`. Read the judge's reply the same defensive way, from the first `{` to the last `}`: it is readable when it is an object whose `score` is a number from 0 to 10 (a boolean is not a number); `feedback` is its text, or empty when missing. An unreadable reply scores 0 with the feedback `The judge reply could not be read.` and the loop goes on. Every round adds `{\"round\", \"score\", \"feedback\"}` to `history`.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "A score at or above `threshold` ends the loop: status `accepted`, the current draft, its score, the round number.",
+              "After `max_rounds` without that: status `max_rounds`, the best-scoring draft (the earliest on a tie), its score, `rounds` equal to `max_rounds`.",
+              "When the writer throws, stop at once: status `error`, the best draft so far and its score (both null before any draft was judged), `rounds` is the number of rounds completed, and `error` is the exception's message."
+            ]
+          }
+        ],
+        "`route(ask, text, routes, default)` returns `{\"label\", \"output\", \"fallback\"}`. Classify with one call, `Classify: {text}\\nLabels: {labels joined by \", \"}`. The label is the reply stripped of spaces, then of the punctuation `.,;:!\"'` and the backtick at both ends, then of spaces again, in lower case. When it is not a key of `routes`, use `default` and set `fallback` to true. `output` is the handler's result for the text.",
+        "`vote(ask, prompt, n=5)` returns `{\"answer\", \"votes\", \"agreement\"}`: ask the same prompt `n` times, count the replies stripped and in lower case (in order of first appearance), and answer with the most frequent one; on a tie the one seen first. `agreement` is the winner's count divided by `n`. With `n` of 0 the answer is null, the votes are empty and `agreement` is 0."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "An orchestrator plans, runs a worker per subtask and combines"
+        ],
+        [
+          "`e1`",
+          "The plan is read from prose, cleaned, capped, and replaced when unusable"
+        ],
+        [
+          "`e2`",
+          "One failing worker does not stop the others or the answer"
+        ],
+        [
+          "`e3`",
+          "A draft is revised with the feedback until the judge accepts it"
+        ],
+        [
+          "`e4`",
+          "When the rounds run out the best draft wins, and an unreadable judge scores zero"
+        ],
+        [
+          "`e5`",
+          "A label is read from the reply, and anything else takes the default route"
+        ],
+        [
+          "`e6`",
+          "The majority answer wins, and a tie goes to the one seen first"
+        ],
+        [
+          "`e7`",
+          "A writer that fails ends the loop with the best draft so far"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Workflow patterns around a model: orchestrator and workers, evaluator and optimiser, routing and voting. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"workflows\");\ntype Ask = (prompt: string) => string;\ntype Result = { subtask: string; status: string; output?: string; error?: string };\n\nfunction slice(text: string, open: string, close: string): string {\n  const first = text.indexOf(open), last = text.lastIndexOf(close);\n  return first !== -1 && last > first ? text.slice(first, last + 1) : \"\";\n}\n\nfunction parseJson(text: string): unknown {\n  try {\n    return JSON.parse(text);\n  } catch {\n    return null;\n  }\n}\n\nfunction cleanSteps(data: unknown): string[] {\n  const steps: string[] = [];\n  if (Array.isArray(data)) {\n    for (const item of data) if (typeof item === \"string\" && item.trim() && !steps.includes(item.trim())) steps.push(item.trim());\n  }\n  return steps;\n}\n\n/** Subtasks from the planner's reply, or [[task], true] when the reply cannot be used. */\nexport function parsePlan(text: string, task: string, maxSubtasks: number): [string[], boolean] {\n  const data = parseJson(slice(text, \"[\", \"]\"));\n  const steps = cleanSteps(data);\n  if (steps.length === 0) return [[task], true];\n  return [steps.slice(0, maxSubtasks), false];\n}\n\nfunction runWorker(ask: Ask, subtask: string, task: string): Result {\n  log.debug(\"runWorker input\", subtask);\n  try {\n    const output = ask(`Subtask: ${subtask}\\nTask: ${task}`);\n    if (typeof output !== \"string\" || !output.trim()) throw new Error(\"empty reply\");\n    return { subtask, status: \"ok\", output };\n  } catch (err) {\n    return { subtask, status: \"failed\", error: (err as Error).message }; // one worker failing must not stop the others\n  }\n}\n\nfunction combinePrompt(task: string, results: Result[]): string {\n  const lines = results.map((r, i) => `${i + 1}. ${r.subtask} -> ${r.status === \"ok\" ? r.output : \"FAILED\"}`);\n  return \"Combine: write one answer to the task from the results.\\nTask: \" + task + \"\\n\" + lines.join(\"\\n\");\n}\n\nexport function orchestrate(ask: Ask, task: string, maxSubtasks = 5) {\n  let calls = 1;\n  const [plan, fallback] = parsePlan(ask(`Plan: split the task into at most ${maxSubtasks} independent subtasks. Reply with a JSON array of strings only.\\nTask: ${task}`), task, maxSubtasks);\n  const results: Result[] = [];\n  for (const subtask of plan) {\n    calls++;\n    results.push(runWorker(ask, subtask, task));\n  }\n  const ok = results.filter((r) => r.status === \"ok\");\n  if (ok.length === 0) return { status: \"failed\", plan, fallback, results, answer: null, calls };\n  const answer = ask(combinePrompt(task, results));\n  return { status: ok.length === results.length ? \"done\" : \"partial\", plan, fallback, results, answer, calls: calls + 1 };\n}\n\nfunction scoreOk(score: unknown): boolean {\n  return typeof score === \"number\" && score >= 0 && score <= 10;\n}\n\n/** [score, feedback] from the judge's reply; [0, a fixed note] when the reply cannot be read. */\nexport function readJudgement(text: string): [number, string] {\n  const data: any = parseJson(slice(text, \"{\", \"}\"));\n  const score = data !== null && typeof data === \"object\" && !Array.isArray(data) ? data.score : undefined;\n  if (!scoreOk(score)) return [0, \"The judge reply could not be read.\"];\n  return [score, typeof data.feedback === \"string\" ? data.feedback : \"\"];\n}\n\nfunction writerPrompt(task: string, draft: string | null, feedback: string, round: number): string {\n  return round === 1 ? `Task: ${task}` : `Task: ${task}\\nPrevious draft: ${draft}\\nFeedback: ${feedback}\\nRevise the draft.`;\n}\n\nfunction isBetter(score: number, bestScore: number | null): boolean {\n  return bestScore === null || score > bestScore;\n}\n\nfunction errorResult(best: string | null, bestScore: number | null, rounds: number, history: unknown[], err: unknown) {\n  return { status: \"error\", draft: best, score: bestScore, rounds, history, error: (err as Error).message };\n}\n\nexport function refine(write: Ask, judge: Ask, task: string, maxRounds = 3, threshold = 8) {\n  const history: { round: number; score: number; feedback: string }[] = [];\n  let best: string | null = null, bestScore: number | null = null, draft: string | null = null, feedback = \"\";\n  for (let round = 1; round <= maxRounds; round++) {\n    const prompt = writerPrompt(task, draft, feedback, round);\n    try {\n      draft = write(prompt);\n    } catch (err) {\n      return errorResult(best, bestScore, round - 1, history, err);\n    }\n    let score: number;\n    [score, feedback] = readJudgement(judge(`Judge: score the draft from 0 to 10 and reply with JSON {\"score\": n, \"feedback\": \"...\"}.\\nTask: ${task}\\nDraft: ${draft}`));\n    history.push({ round, score, feedback });\n    if (isBetter(score, bestScore)) [best, bestScore] = [draft, score];\n    if (score >= threshold) return { status: \"accepted\", draft, score, rounds: round, history };\n  }\n  return { status: \"max_rounds\", draft: best, score: bestScore, rounds: maxRounds, history };\n}\n\nfunction normaliseLabel(reply: unknown): string {\n  return typeof reply === \"string\" ? reply.trim().replace(/^[.,;:!\"'`]+|[.,;:!\"'`]+$/g, \"\").trim().toLowerCase() : \"\";\n}\n\n/** Classify the text with one model call, then run the handler of the label. `routes` maps label to a function of the text. */\nexport function route(ask: Ask, text: string, routes: Record<string, (text: string) => string>, fallbackLabel: string) {\n  const reply = ask(`Classify: ${text}\\nLabels: ${Object.keys(routes).join(\", \")}`);\n  let label = normaliseLabel(reply);\n  const fallback = !Object.hasOwn(routes, label);\n  if (fallback) label = fallbackLabel;\n  return { label, output: routes[label](text), fallback };\n}\n\nfunction pickWinner(counts: Map<string, number>, top: number): string {\n  return [...counts].find(([, c]) => c === top)![0];\n}\n\nexport function vote(ask: Ask, prompt: string, n = 5) {\n  const counts = new Map<string, number>();\n  for (let i = 0; i < n; i++) {\n    const answer = ask(prompt).trim().toLowerCase();\n    counts.set(answer, (counts.get(answer) ?? 0) + 1);\n  }\n  if (counts.size === 0) return { answer: null, votes: {}, agreement: 0.0 };\n  const top = Math.max(...counts.values());\n  const winner = pickWinner(counts, top);\n  return { answer: winner, votes: Object.fromEntries(counts), agreement: top / n };\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { orchestrate } from \"./workflows.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\nconst PLAN = '[\"research the topic\", \"draft the outline\", \"check the facts\"]';\n\n// A stand-in for the model, like the one the tests script: the start of the prompt says which step is asking.\nconst model = (prompt: string): string => {\n  if (prompt.startsWith(\"Plan\")) return PLAN;\n  if (prompt.startsWith(\"Subtask\")) return \"done: \" + prompt.split(\"\\n\")[0].slice(\"Subtask: \".length);\n  return \"FINAL\";\n};\n\n// The orchestrator asks for a plan, runs one worker per subtask, then combines the results.\nconst result: any = orchestrate(model, \"Write a guide\") ?? {};\n\nconsole.log(\"status:\", result.status, \"| fallback:\", result.fallback, \"| calls:\", result.calls);\nconsole.log(\"plan:\", JSON.stringify(result.plan));\nconsole.log(\"results:\", JSON.stringify((result.results ?? []).map((r: any) => [r.subtask, r.status])));\nconsole.log(\"answer:\", result.answer);\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Workflow patterns around a model: orchestrator and workers, evaluator and optimiser, routing and voting. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"workflows\");\ntype Ask = (prompt: string) => string;\ntype Result = { subtask: string; status: string; output?: string; error?: string };\n\nfunction slice(text: string, open: string, close: string): string {\n  const first = text.indexOf(open), last = text.lastIndexOf(close);\n  return first !== -1 && last > first ? text.slice(first, last + 1) : \"\";\n}\n\nfunction parseJson(text: string): unknown {\n  try {\n    return JSON.parse(text);\n  } catch {\n    return null;\n  }\n}\n\n/**\n * TODO 1 of 9 (unlocks e1): the usable subtasks from the parsed plan.\n * Receives whatever JSON.parse gave (an array, or anything else) and returns the string items of an array, trimmed, with empty\n * ones and repeats dropped (the first of a repeat stays), in order; anything that is not an array gives [].\n * Example: cleanSteps([\"a\", \" a \", \"\", 3, \"b\"]) -> [\"a\", \"b\"]\n */\nfunction cleanSteps(data: unknown): string[] {\n  return [];\n}\n\n/** Subtasks from the planner's reply, or [[task], true] when the reply cannot be used. */\nexport function parsePlan(text: string, task: string, maxSubtasks: number): [string[], boolean] {\n  const data = parseJson(slice(text, \"[\", \"]\"));\n  const steps = cleanSteps(data);\n  if (steps.length === 0) return [[task], true];\n  return [steps.slice(0, maxSubtasks), false];\n}\n\n/**\n * TODO 2 of 9 (unlocks m1 and e2): run one worker call for one subtask.\n * Receives `ask`, the subtask and the task. Calls `ask` with `Subtask: ${subtask}\\nTask: ${task}` and returns\n * { subtask, status: \"ok\", output } for a good reply, or { subtask, status: \"failed\", error } when the reply is empty or only\n * spaces (error `empty reply`) or the call throws (error: the exception's message). It never throws.\n * Example: a worker that replies \"  \" -> { subtask: \"s\", status: \"failed\", error: \"empty reply\" }\n */\nfunction runWorker(ask: Ask, subtask: string, task: string): Result {\n  log.debug(\"runWorker input\", subtask);\n  return { subtask, status: \"failed\", error: \"\" };\n}\n\n/**\n * TODO 3 of 9 (unlocks m1): the prompt of the combine call.\n * Receives the task and the results in plan order. Returns `Combine: write one answer to the task from the results.\\nTask: ${task}`\n * followed by one line per result, `\\n${i}. ${subtask} -> ${output}` or `\\n${i}. ${subtask} -> FAILED` (i from 1).\n * Example: task \"T\", one ok result \"a\" with output \"x\" -> \"Combine: write one answer to the task from the results.\\nTask: T\\n1. a -> x\"\n */\nfunction combinePrompt(task: string, results: Result[]): string {\n  return \"\";\n}\n\nexport function orchestrate(ask: Ask, task: string, maxSubtasks = 5) {\n  let calls = 1;\n  const [plan, fallback] = parsePlan(ask(`Plan: split the task into at most ${maxSubtasks} independent subtasks. Reply with a JSON array of strings only.\\nTask: ${task}`), task, maxSubtasks);\n  const results: Result[] = [];\n  for (const subtask of plan) {\n    calls++;\n    results.push(runWorker(ask, subtask, task));\n  }\n  const ok = results.filter((r) => r.status === \"ok\");\n  if (ok.length === 0) return { status: \"failed\", plan, fallback, results, answer: null, calls };\n  const answer = ask(combinePrompt(task, results));\n  return { status: ok.length === results.length ? \"done\" : \"partial\", plan, fallback, results, answer, calls: calls + 1 };\n}\n\n/**\n * TODO 4 of 9 (unlocks e4): is this a usable judge score?\n * Receives the `score` field of the judge's JSON (any value, or undefined). Returns true for a number from 0 to 10 and false for\n * anything else, a boolean included.\n * Example: scoreOk(7.5) -> true, scoreOk(true) -> false, scoreOk(11) -> false\n */\nfunction scoreOk(score: unknown): boolean {\n  return typeof score === \"number\"; // a number of any size; add the range and the NaN exclusion\n}\n\n/** [score, feedback] from the judge's reply; [0, a fixed note] when the reply cannot be read. */\nexport function readJudgement(text: string): [number, string] {\n  const data: any = parseJson(slice(text, \"{\", \"}\"));\n  const score = data !== null && typeof data === \"object\" && !Array.isArray(data) ? data.score : undefined;\n  if (!scoreOk(score)) return [0, \"The judge reply could not be read.\"];\n  return [score, typeof data.feedback === \"string\" ? data.feedback : \"\"];\n}\n\n/**\n * TODO 5 of 9 (unlocks e3): the prompt for the writer in one round.\n * Receives the task, the latest draft, the judge's latest feedback and the round number (from 1). Returns `Task: ${task}` in round 1\n * and afterwards `Task: ${task}\\nPrevious draft: ${draft}\\nFeedback: ${feedback}\\nRevise the draft.`\n * Example: writerPrompt(\"T\", \"d\", \"f\", 2) -> \"Task: T\\nPrevious draft: d\\nFeedback: f\\nRevise the draft.\"\n */\nfunction writerPrompt(task: string, draft: string | null, feedback: string, round: number): string {\n  return `Task: ${task}`;\n}\n\n/**\n * TODO 6 of 9 (unlocks e4): does this draft replace the best one so far?\n * Receives the new score and the best score so far (null before any draft was judged). Returns true when there is no best yet or\n * the new score is strictly higher (so the earliest wins a tie).\n * Example: isBetter(5, null) -> true, isBetter(5, 5) -> false\n */\nfunction isBetter(score: number, bestScore: number | null): boolean {\n  return false;\n}\n\n/**\n * TODO 7 of 9 (unlocks e7): the result when the writer threw.\n * Receives the best draft and score so far (null, null before any), the rounds completed, the history and the error. Returns the\n * object { status: \"error\", draft, score, rounds, history, error: <the error's message> }.\n * Example: errorResult(\"d\", 4, 1, [], new Error(\"boom\")).error -> \"boom\"\n */\nfunction errorResult(best: string | null, bestScore: number | null, rounds: number, history: unknown[], err: unknown) {\n  return { status: \"error\", draft: best, score: bestScore, rounds, history, error: \"\" };\n}\n\nexport function refine(write: Ask, judge: Ask, task: string, maxRounds = 3, threshold = 8) {\n  const history: { round: number; score: number; feedback: string }[] = [];\n  let best: string | null = null, bestScore: number | null = null, draft: string | null = null, feedback = \"\";\n  for (let round = 1; round <= maxRounds; round++) {\n    const prompt = writerPrompt(task, draft, feedback, round);\n    try {\n      draft = write(prompt);\n    } catch (err) {\n      return errorResult(best, bestScore, round - 1, history, err);\n    }\n    let score: number;\n    [score, feedback] = readJudgement(judge(`Judge: score the draft from 0 to 10 and reply with JSON {\"score\": n, \"feedback\": \"...\"}.\\nTask: ${task}\\nDraft: ${draft}`));\n    history.push({ round, score, feedback });\n    if (isBetter(score, bestScore)) [best, bestScore] = [draft, score];\n    if (score >= threshold) return { status: \"accepted\", draft, score, rounds: round, history };\n  }\n  return { status: \"max_rounds\", draft: best, score: bestScore, rounds: maxRounds, history };\n}\n\n/**\n * TODO 8 of 9 (unlocks e5): the label in a classifier's reply.\n * Receives the reply (a string, or anything else). Returns it trimmed of spaces, then of the punctuation `.,;:!\"'` and the backtick\n * at both ends, then of spaces again, in lower case; \"\" when the reply is not a string.\n * Example: normaliseLabel('  \"Billing.\" ') -> \"billing\"\n */\nfunction normaliseLabel(reply: unknown): string {\n  return \"\";\n}\n\n/** Classify the text with one model call, then run the handler of the label. `routes` maps label to a function of the text. */\nexport function route(ask: Ask, text: string, routes: Record<string, (text: string) => string>, fallbackLabel: string) {\n  const reply = ask(`Classify: ${text}\\nLabels: ${Object.keys(routes).join(\", \")}`);\n  let label = normaliseLabel(reply);\n  const fallback = !Object.hasOwn(routes, label);\n  if (fallback) label = fallbackLabel;\n  return { label, output: routes[label](text), fallback };\n}\n\n/**\n * TODO 9 of 9 (unlocks e6): the answer that wins the vote.\n * Receives the counts (answer -> count, in order of first appearance) and the highest count. Returns the first answer whose count\n * is that highest count, so a tie goes to the one seen first.\n * Example: pickWinner(new Map([[\"a\", 2], [\"b\", 2]]), 2) -> \"a\"\n */\nfunction pickWinner(counts: Map<string, number>, top: number): string {\n  return \"\";\n}\n\nexport function vote(ask: Ask, prompt: string, n = 5) {\n  const counts = new Map<string, number>();\n  for (let i = 0; i < n; i++) {\n    const answer = ask(prompt).trim().toLowerCase();\n    counts.set(answer, (counts.get(answer) ?? 0) + 1);\n  }\n  if (counts.size === 0) return { answer: null, votes: {}, agreement: 0.0 };\n  const top = Math.max(...counts.values());\n  const winner = pickWinner(counts, top);\n  return { answer: winner, votes: Object.fromEntries(counts), agreement: top / n };\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { orchestrate } from \"./workflows.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\nconst PLAN = '[\"research the topic\", \"draft the outline\", \"check the facts\"]';\n\n// A stand-in for the model, like the one the tests script: the start of the prompt says which step is asking.\nconst model = (prompt: string): string => {\n  if (prompt.startsWith(\"Plan\")) return PLAN;\n  if (prompt.startsWith(\"Subtask\")) return \"done: \" + prompt.split(\"\\n\")[0].slice(\"Subtask: \".length);\n  return \"FINAL\";\n};\n\n// The orchestrator asks for a plan, runs one worker per subtask, then combines the results.\nconst result: any = orchestrate(model, \"Write a guide\") ?? {};\n\nconsole.log(\"status:\", result.status, \"| fallback:\", result.fallback, \"| calls:\", result.calls);\nconsole.log(\"plan:\", JSON.stringify(result.plan));\nconsole.log(\"results:\", JSON.stringify((result.results ?? []).map((r: any) => [r.subtask, r.status])));\nconsole.log(\"answer:\", result.answer);\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "9f76321cfb0dc97052dd64e7319edf8e1521d4453ecd65bd31013cfde82b0150",
+  "starting_code": "// Workflow patterns around a model: orchestrator and workers, evaluator and optimiser, routing and voting. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"workflows\");\ntype Ask = (prompt: string) => string;\ntype Result = { subtask: string; status: string; output?: string; error?: string };\n\nfunction slice(text: string, open: string, close: string): string {\n  const first = text.indexOf(open), last = text.lastIndexOf(close);\n  return first !== -1 && last > first ? text.slice(first, last + 1) : \"\";\n}\n\nfunction parseJson(text: string): unknown {\n  try {\n    return JSON.parse(text);\n  } catch {\n    return null;\n  }\n}\n\n/**\n * TODO 1 of 9 (unlocks e1): the usable subtasks from the parsed plan.\n * Receives whatever JSON.parse gave (an array, or anything else) and returns the string items of an array, trimmed, with empty\n * ones and repeats dropped (the first of a repeat stays), in order; anything that is not an array gives [].\n * Example: cleanSteps([\"a\", \" a \", \"\", 3, \"b\"]) -> [\"a\", \"b\"]\n */\nfunction cleanSteps(data: unknown): string[] {\n  return [];\n}\n\n/** Subtasks from the planner's reply, or [[task], true] when the reply cannot be used. */\nexport function parsePlan(text: string, task: string, maxSubtasks: number): [string[], boolean] {\n  const data = parseJson(slice(text, \"[\", \"]\"));\n  const steps = cleanSteps(data);\n  if (steps.length === 0) return [[task], true];\n  return [steps.slice(0, maxSubtasks), false];\n}\n\n/**\n * TODO 2 of 9 (unlocks m1 and e2): run one worker call for one subtask.\n * Receives `ask`, the subtask and the task. Calls `ask` with `Subtask: ${subtask}\\nTask: ${task}` and returns\n * { subtask, status: \"ok\", output } for a good reply, or { subtask, status: \"failed\", error } when the reply is empty or only\n * spaces (error `empty reply`) or the call throws (error: the exception's message). It never throws.\n * Example: a worker that replies \"  \" -> { subtask: \"s\", status: \"failed\", error: \"empty reply\" }\n */\nfunction runWorker(ask: Ask, subtask: string, task: string): Result {\n  log.debug(\"runWorker input\", subtask);\n  return { subtask, status: \"failed\", error: \"\" };\n}\n\n/**\n * TODO 3 of 9 (unlocks m1): the prompt of the combine call.\n * Receives the task and the results in plan order. Returns `Combine: write one answer to the task from the results.\\nTask: ${task}`\n * followed by one line per result, `\\n${i}. ${subtask} -> ${output}` or `\\n${i}. ${subtask} -> FAILED` (i from 1).\n * Example: task \"T\", one ok result \"a\" with output \"x\" -> \"Combine: write one answer to the task from the results.\\nTask: T\\n1. a -> x\"\n */\nfunction combinePrompt(task: string, results: Result[]): string {\n  return \"\";\n}\n\nexport function orchestrate(ask: Ask, task: string, maxSubtasks = 5) {\n  let calls = 1;\n  const [plan, fallback] = parsePlan(ask(`Plan: split the task into at most ${maxSubtasks} independent subtasks. Reply with a JSON array of strings only.\\nTask: ${task}`), task, maxSubtasks);\n  const results: Result[] = [];\n  for (const subtask of plan) {\n    calls++;\n    results.push(runWorker(ask, subtask, task));\n  }\n  const ok = results.filter((r) => r.status === \"ok\");\n  if (ok.length === 0) return { status: \"failed\", plan, fallback, results, answer: null, calls };\n  const answer = ask(combinePrompt(task, results));\n  return { status: ok.length === results.length ? \"done\" : \"partial\", plan, fallback, results, answer, calls: calls + 1 };\n}\n\n/**\n * TODO 4 of 9 (unlocks e4): is this a usable judge score?\n * Receives the `score` field of the judge's JSON (any value, or undefined). Returns true for a number from 0 to 10 and false for\n * anything else, a boolean included.\n * Example: scoreOk(7.5) -> true, scoreOk(true) -> false, scoreOk(11) -> false\n */\nfunction scoreOk(score: unknown): boolean {\n  return typeof score === \"number\"; // a number of any size; add the range and the NaN exclusion\n}\n\n/** [score, feedback] from the judge's reply; [0, a fixed note] when the reply cannot be read. */\nexport function readJudgement(text: string): [number, string] {\n  const data: any = parseJson(slice(text, \"{\", \"}\"));\n  const score = data !== null && typeof data === \"object\" && !Array.isArray(data) ? data.score : undefined;\n  if (!scoreOk(score)) return [0, \"The judge reply could not be read.\"];\n  return [score, typeof data.feedback === \"string\" ? data.feedback : \"\"];\n}\n\n/**\n * TODO 5 of 9 (unlocks e3): the prompt for the writer in one round.\n * Receives the task, the latest draft, the judge's latest feedback and the round number (from 1). Returns `Task: ${task}` in round 1\n * and afterwards `Task: ${task}\\nPrevious draft: ${draft}\\nFeedback: ${feedback}\\nRevise the draft.`\n * Example: writerPrompt(\"T\", \"d\", \"f\", 2) -> \"Task: T\\nPrevious draft: d\\nFeedback: f\\nRevise the draft.\"\n */\nfunction writerPrompt(task: string, draft: string | null, feedback: string, round: number): string {\n  return `Task: ${task}`;\n}\n\n/**\n * TODO 6 of 9 (unlocks e4): does this draft replace the best one so far?\n * Receives the new score and the best score so far (null before any draft was judged). Returns true when there is no best yet or\n * the new score is strictly higher (so the earliest wins a tie).\n * Example: isBetter(5, null) -> true, isBetter(5, 5) -> false\n */\nfunction isBetter(score: number, bestScore: number | null): boolean {\n  return false;\n}\n\n/**\n * TODO 7 of 9 (unlocks e7): the result when the writer threw.\n * Receives the best draft and score so far (null, null before any), the rounds completed, the history and the error. Returns the\n * object { status: \"error\", draft, score, rounds, history, error: <the error's message> }.\n * Example: errorResult(\"d\", 4, 1, [], new Error(\"boom\")).error -> \"boom\"\n */\nfunction errorResult(best: string | null, bestScore: number | null, rounds: number, history: unknown[], err: unknown) {\n  return { status: \"error\", draft: best, score: bestScore, rounds, history, error: \"\" };\n}\n\nexport function refine(write: Ask, judge: Ask, task: string, maxRounds = 3, threshold = 8) {\n  const history: { round: number; score: number; feedback: string }[] = [];\n  let best: string | null = null, bestScore: number | null = null, draft: string | null = null, feedback = \"\";\n  for (let round = 1; round <= maxRounds; round++) {\n    const prompt = writerPrompt(task, draft, feedback, round);\n    try {\n      draft = write(prompt);\n    } catch (err) {\n      return errorResult(best, bestScore, round - 1, history, err);\n    }\n    let score: number;\n    [score, feedback] = readJudgement(judge(`Judge: score the draft from 0 to 10 and reply with JSON {\"score\": n, \"feedback\": \"...\"}.\\nTask: ${task}\\nDraft: ${draft}`));\n    history.push({ round, score, feedback });\n    if (isBetter(score, bestScore)) [best, bestScore] = [draft, score];\n    if (score >= threshold) return { status: \"accepted\", draft, score, rounds: round, history };\n  }\n  return { status: \"max_rounds\", draft: best, score: bestScore, rounds: maxRounds, history };\n}\n\n/**\n * TODO 8 of 9 (unlocks e5): the label in a classifier's reply.\n * Receives the reply (a string, or anything else). Returns it trimmed of spaces, then of the punctuation `.,;:!\"'` and the backtick\n * at both ends, then of spaces again, in lower case; \"\" when the reply is not a string.\n * Example: normaliseLabel('  \"Billing.\" ') -> \"billing\"\n */\nfunction normaliseLabel(reply: unknown): string {\n  return \"\";\n}\n\n/** Classify the text with one model call, then run the handler of the label. `routes` maps label to a function of the text. */\nexport function route(ask: Ask, text: string, routes: Record<string, (text: string) => string>, fallbackLabel: string) {\n  const reply = ask(`Classify: ${text}\\nLabels: ${Object.keys(routes).join(\", \")}`);\n  let label = normaliseLabel(reply);\n  const fallback = !Object.hasOwn(routes, label);\n  if (fallback) label = fallbackLabel;\n  return { label, output: routes[label](text), fallback };\n}\n\n/**\n * TODO 9 of 9 (unlocks e6): the answer that wins the vote.\n * Receives the counts (answer -> count, in order of first appearance) and the highest count. Returns the first answer whose count\n * is that highest count, so a tie goes to the one seen first.\n * Example: pickWinner(new Map([[\"a\", 2], [\"b\", 2]]), 2) -> \"a\"\n */\nfunction pickWinner(counts: Map<string, number>, top: number): string {\n  return \"\";\n}\n\nexport function vote(ask: Ask, prompt: string, n = 5) {\n  const counts = new Map<string, number>();\n  for (let i = 0; i < n; i++) {\n    const answer = ask(prompt).trim().toLowerCase();\n    counts.set(answer, (counts.get(answer) ?? 0) + 1);\n  }\n  if (counts.size === 0) return { answer: null, votes: {}, agreement: 0.0 };\n  const top = Math.max(...counts.values());\n  const winner = pickWinner(counts, top);\n  return { answer: winner, votes: Object.fromEntries(counts), agreement: top / n };\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/34-workflows-and-agents/prose/unit-02/practice-2/workflows.ts",
+    "test_path": "practice/level-2/34-workflows-and-agents/prose/unit-02/practice-2/workflows.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-2/34-workflows-and-agents/prose/unit-02/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-2/34-workflows-and-agents/prose/unit-02/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-2/34-workflows-and-agents/prose/unit-02/practice-2/workflows.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 an orchestrator plans runs a worker per subtask and combines",
+        "kind": "main",
+        "says": "An orchestrator plans, runs a worker per subtask and combines"
+      },
+      {
+        "id": "e1 the plan is read from prose cleaned capped and replaced when unusable",
+        "kind": "edge",
+        "says": "The plan is read from prose, cleaned, capped, and replaced when unusable"
+      },
+      {
+        "id": "e2 one failing worker does not stop the others or the answer",
+        "kind": "edge",
+        "says": "One failing worker does not stop the others or the answer"
+      },
+      {
+        "id": "e3 a draft is revised with the feedback until the judge accepts it",
+        "kind": "edge",
+        "says": "A draft is revised with the feedback until the judge accepts it"
+      },
+      {
+        "id": "e4 when the rounds run out the best draft wins and an unreadable judge scores zero",
+        "kind": "edge",
+        "says": "When the rounds run out the best draft wins, and an unreadable judge scores zero"
+      },
+      {
+        "id": "e5 a label is read from the reply and anything else takes the default route",
+        "kind": "edge",
+        "says": "A label is read from the reply, and anything else takes the default route"
+      },
+      {
+        "id": "e6 the majority answer wins and a tie goes to the one seen first",
+        "kind": "edge",
+        "says": "The majority answer wins, and a tie goes to the one seen first"
+      },
+      {
+        "id": "e7 a writer that fails ends the loop with the best draft so far",
+        "kind": "edge",
+        "says": "A writer that fails ends the loop with the best draft so far"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/34-workflows-and-agents/prose/unit-02/practice-2/target/report.xml"
+    },
+    "origin": "course/34-workflows-and-agents/02-orchestrators-evaluators-agents-and-the-practice.md",
+    "concepts": [
+      "the practice of Orchestrators, evaluators, agents and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/34-workflows-and-agents/prose/unit-02/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "workflows-and-agents-u2"
+}

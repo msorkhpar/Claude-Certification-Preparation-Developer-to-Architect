@@ -1,0 +1,288 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "68-human-review-and-calibrated-confidence"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Measuring accuracy by segment, sampling, and making a confidence score honest",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Measuring accuracy by segment, sampling, and making a confidence score honest"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Architect · **Module 68:** Human review and calibrated confidence · **Page 1 of 2** **Exams:** A5.5; S6"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** explain why one accuracy figure can hide a weak document type or field, check each segment before reducing human review, decide when a segment has too few labelled examples to judge, sample the auto-accepted items by stratum to measure the error rate and find new kinds of error, and calibrate a confidence threshold against a labelled validation set."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-04 against the exam guide's task statement 5.5 and scenario S6 (structured data extraction). Nothing here called a model: the example generates 200 extractions by a fixed rule and does arithmetic over them (`examples/68-calibration-table`), and the practice is graded by test suites. This module builds on module 63, which showed that a model's confidence about its own work carries its blind spots, and on module 65, which said that calibrated confidence is a measured thing. This page is the measurement."
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "**Exam guide and current product.** *What the guide states, and so what the exam keys:* \"aggregate accuracy metrics (e.g., 97% overall) may mask poor performance on specific document types or fields\"; accuracy must be validated \"by document type and field segment\" before high-confidence extractions are automated; \"stratified random sampling\" of high-confidence extractions measures the error rate and detects novel error patterns; and field-level confidence scores are \"calibrated using labeled validation sets\" before they route review attention. *What the product offers now:* none of the documentation pages read for modules 61 to 67 describes a built-in facility that measures or calibrates a model's confidence. A confidence value is a field of your own extraction schema that the model fills in, and the segments, the sample and the calibration table are computed over your own labelled data. The method here is therefore the exam's and standard evaluation practice, and the example is arithmetic you can run. On the exam, a question about relaxing human review has the answer: measure per segment first, sample the accepted items by stratum, and calibrate the threshold against labels."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "A team extracts totals and dates from scanned documents and reports 98% accuracy over a validation set. The set is mostly typed invoices. Handwritten delivery notes are one document in ten in production, and the pipeline gets four of them in ten wrong. The overall figure is true and misleading at once: it averages a segment that is nearly perfect with one that is not. The team removes the human reviewers, and the errors that follow are concentrated where the average was not looking. The scenario (S6) tests whether the design measures where it matters before it takes the safety net away."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "One figure hides the weak segment"
+    },
+    {
+      "type": "para",
+      "text": "An overall accuracy is an average weighted by how many records each segment contributes. A large, easy segment dominates it. The remedy is to compute the figure for every segment that could behave differently, at the least each document type and each field, and to read the lowest one next to the overall number. The practice's `accuracy_by` returns the overall row followed by a row for every `type/field` pair for exactly that reason: the second table is the one that finds the problem."
+    },
+    {
+      "type": "para",
+      "text": "A bigger validation set of the same mix gives the same hidden figure, only with more decimals. And a handful of random documents are mostly typed invoices, because random samples reflect the mix. What changes the picture is looking at the segments one at a time."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "A segment needs enough evidence"
+    },
+    {
+      "type": "para",
+      "text": "A segment that scores 100% on four examples has shown very little. Before automating a segment, require a minimum number of labelled examples as well as a minimum accuracy. The practice's `can_automate` separates the two failures: a segment below the threshold is `failing`, and a segment with fewer than `min_n` labelled records is `undersampled`. Both stop automation, and they call for different actions: fix the pipeline for the first, label more examples for the second. The overall figure plays no part in the decision. A segment is automated when it, itself, has been shown to work."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Sample the accepted items by stratum"
+    },
+    {
+      "type": "para",
+      "text": "Suppose a segment is automated, and its high-confidence extractions go through without a person. Two things can still go wrong: the true error rate among accepted items is unknown, and new kinds of error appear when document formats change. Both are measured the same way: keep checking a sample of the accepted items."
+    },
+    {
+      "type": "para",
+      "text": "The sample must be random within each stratum (a stratum is a document type, a field, or any slice you want to guarantee coverage of), and it must take items from every stratum. A single random pull from the whole stream is mostly easy cases and says almost nothing about the small, hard strata. Drawing the same number per stratum means a rare segment is checked as often as a common one, so a decay in it shows up. The practice's `stratified_sample` takes a fixed number per stratum. It picks the lowest-ranked items in each, which makes the result testable. In production the pick within a stratum is random, and the point of the stratification is the same."
+    },
+    {
+      "type": "para",
+      "text": "Checking the accepted sample does two jobs. The share found wrong is the measured error rate of automation, and a wrong item that fits no known pattern is a novel error, which is the signal to change the pipeline."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Calibrating a confidence threshold"
+    },
+    {
+      "type": "para",
+      "text": "The model can be asked to output a confidence for each field. The number is only a score: whether 90 means \"right nine times in ten\" is an empirical question. Calibration answers it with a labelled validation set, a set where the right answer is known:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Group the labelled items by the confidence they were given.",
+        "For a candidate threshold, take every item at or above it, and measure how many are right. This is the precision of automation at that threshold.",
+        "Pick the lowest threshold whose precision reaches the target. Everything below it goes to a person."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The lowest qualifying threshold automates the most work while meeting the target. If no threshold reaches the target, there is no honest cut-off: every item needs review until the pipeline improves. The practice's `calibrate_threshold` is these three steps, and returns nothing when none qualifies. A calibration table (confidence bucket, what it claimed, how often it was right) shows where the score is overconfident, and the gap between the two columns is the point of the exercise."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "example",
+      "id": "m68-calibration-table",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/68-calibration-table/python/calibration_table.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/68-calibration-table/typescript/calibrationTable.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/68-calibration-table/java/CalibrationTable.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/68-calibration-table/kotlin/CalibrationTable.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Reading a review process honestly: one accuracy figure hides the weak segment, and a confidence score is only worth what a calibration table says it is.\n\nThe exam guide (task 5.5) says that stratified random sampling of high-confidence extractions measures the error rate and catches new patterns, that aggregate accuracy can mask poor performance on specific document types or fields,\nand that field-level confidence scores should be calibrated using labelled validation sets. Below, 200 extractions are generated by a fixed rule (nothing here calls a model): the invoices are mostly right, the handwritten\ndocuments are wrong more often, and the confidence says one thing while the labels say another. The numbers are invented for the illustration; the arithmetic is the lesson.\n\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef make_records(n=200):\n    \"\"\"(document type, stated confidence, was it correct) for n extractions, from a fixed rule.\"\"\"\n    records = []\n    for i in range(n):\n        doc_type = \"handwritten\" if i % 5 == 0 else \"invoice\"\n        confidence = 50 + (i * 37) % 51\n        penalty = 30 if doc_type == \"handwritten\" else 0\n        records.append((doc_type, confidence, (i * 53) % 100 < confidence - 12 - penalty))\n    return records\n\n\ndef ratio(part, whole):\n    \"\"\"A whole-number percentage, rounded half up; 0 for an empty whole.\"\"\"\n    return (200 * part + whole) // (2 * whole) if whole else 0\n\n\ndef overall_accuracy(records):\n    return ratio(sum(1 for _, _, ok in records if ok), len(records))\n\n\ndef accuracy_by_type(records):\n    groups = {}\n    for doc_type, _, ok in records:\n        c, n = groups.get(doc_type, (0, 0))\n        groups[doc_type] = (c + (1 if ok else 0), n + 1)\n    return [(t, c, n, ratio(c, n)) for t, (c, n) in sorted(groups.items())]\n\n\ndef calibration_table(records):\n    \"\"\"One row per non-empty confidence bucket: (label, count, confidence it claimed, how often it was right).\"\"\"\n    buckets = {}\n    for _, confidence, ok in records:\n        low = min(confidence // 10 * 10, 90)\n        count, conf_sum, right = buckets.get(low, (0, 0, 0))\n        buckets[low] = (count + 1, conf_sum + confidence, right + (1 if ok else 0))\n    rows = []\n    for low in sorted(buckets):\n        count, conf_sum, right = buckets[low]\n        label = \"90-100\" if low == 90 else f\"{low}-{low + 9}\"\n        rows.append((label, count, ratio(conf_sum, 100 * count), ratio(right, count)))\n    return rows\n\n\ndef precision_above(records, threshold):\n    \"\"\"(how many extractions would be accepted without review, how often those are right).\"\"\"\n    kept = [ok for _, confidence, ok in records if confidence >= threshold]\n    return len(kept), ratio(sum(1 for ok in kept if ok), len(kept))\n\n\ndef main():\n    records = make_records()\n    print(f\"overall accuracy: {overall_accuracy(records)}%\")\n    for doc_type, correct, total, percent in accuracy_by_type(records):\n        print(f\"{doc_type}: {correct} of {total} correct, {percent}%\")\n    for label, count, said, right in calibration_table(records):\n        print(f\"bucket {label}: {count} extractions, said {said}%, right {right}%\")\n    for threshold in (60, 70, 80, 90):\n        kept, precision = precision_above(records, threshold)\n        print(f\"accept at {threshold} or above: {kept} extractions, {precision}% right\")\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "overall accuracy: 57%\nhandwritten: 13 of 40 correct, 33%\ninvoice: 100 of 160 correct, 63%\nbucket 50-59: 39 extractions, said 54%, right 41%\nbucket 60-69: 39 extractions, said 65%, right 54%\nbucket 70-79: 39 extractions, said 74%, right 46%\nbucket 80-89: 40 extractions, said 85%, right 60%\nbucket 90-100: 43 extractions, said 95%, right 79%\naccept at 60 or above: 161 extractions, 60% right\naccept at 70 or above: 122 extractions, 62% right\naccept at 80 or above: 83 extractions, 70% right\naccept at 90 or above: 43 extractions, 79% right"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "import { logger } from \"./logger.ts\";\nconst log = logger(\"calibration_table\");\n/**\n * Reading a review process honestly: one accuracy figure hides the weak segment, and a confidence score is only worth what a calibration table says it is.\n *\n * The exam guide (task 5.5) says that stratified random sampling of high-confidence extractions measures the error rate and catches new patterns, that aggregate accuracy can mask poor performance on specific document types or fields,\n * and that field-level confidence scores should be calibrated using labelled validation sets. Below, 200 extractions are generated by a fixed rule (nothing here calls a model): the invoices are mostly right, the handwritten\n * documents are wrong more often, and the confidence says one thing while the labels say another. The numbers are invented for the illustration; the arithmetic is the lesson.\n */\nexport type Rec = [string, number, boolean];\n\n/** (document type, stated confidence, was it correct) for n extractions, from a fixed rule. */\nexport function makeRecords(n = 200): Rec[] {\n  const records: Rec[] = [];\n  for (let i = 0; i < n; i++) {\n    const docType = i % 5 === 0 ? \"handwritten\" : \"invoice\";\n    const confidence = 50 + ((i * 37) % 51);\n    const penalty = docType === \"handwritten\" ? 30 : 0;\n    records.push([docType, confidence, (i * 53) % 100 < confidence - 12 - penalty]);\n  }\n  return records;\n}\n\n/** A whole-number percentage, rounded half up; 0 for an empty whole. */\nexport function ratio(part: number, whole: number): number {\n  return whole ? Math.floor((200 * part + whole) / (2 * whole)) : 0;\n}\n\nexport function overallAccuracy(records: Rec[]): number {\n  return ratio(records.filter(([, , ok]) => ok).length, records.length);\n}\n\nexport function accuracyByType(records: Rec[]): Array<[string, number, number, number]> {\n  const groups = new Map<string, [number, number]>();\n  for (const [docType, , ok] of records) {\n    const [c, n] = groups.get(docType) ?? [0, 0];\n    groups.set(docType, [c + (ok ? 1 : 0), n + 1]);\n  }\n  return [...groups.keys()].sort().map((t) => [t, groups.get(t)![0], groups.get(t)![1], ratio(groups.get(t)![0], groups.get(t)![1])]);\n}\n\n/** One row per non-empty confidence bucket: (label, count, confidence it claimed, how often it was right). */\nexport function calibrationTable(records: Rec[]): Array<[string, number, number, number]> {\n  const buckets = new Map<number, [number, number, number]>();\n  for (const [, confidence, ok] of records) {\n    const low = Math.min(Math.floor(confidence / 10) * 10, 90);\n    const [count, confSum, right] = buckets.get(low) ?? [0, 0, 0];\n    buckets.set(low, [count + 1, confSum + confidence, right + (ok ? 1 : 0)]);\n  }\n  return [...buckets.keys()].sort((a, b) => a - b).map((low) => {\n    const [count, confSum, right] = buckets.get(low)!;\n    return [low === 90 ? \"90-100\" : `${low}-${low + 9}`, count, ratio(confSum, 100 * count), ratio(right, count)];\n  });\n}\n\n/** (how many extractions would be accepted without review, how often those are right). */\nexport function precisionAbove(records: Rec[], threshold: number): [number, number] {\n  const kept = records.filter(([, confidence]) => confidence >= threshold);\n  return [kept.length, ratio(kept.filter(([, , ok]) => ok).length, kept.length)];\n}\n\nexport function main(): void {\n  const records = makeRecords();\n  console.log(`overall accuracy: ${overallAccuracy(records)}%`);\n  for (const [docType, correct, total, percent] of accuracyByType(records)) console.log(`${docType}: ${correct} of ${total} correct, ${percent}%`);\n  for (const [label, count, said, right] of calibrationTable(records)) console.log(`bucket ${label}: ${count} extractions, said ${said}%, right ${right}%`);\n  for (const threshold of [60, 70, 80, 90]) {\n    const [kept, precision] = precisionAbove(records, threshold);\n    console.log(`accept at ${threshold} or above: ${kept} extractions, ${precision}% right`);\n  }\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "overall accuracy: 57%\nhandwritten: 13 of 40 correct, 33%\ninvoice: 100 of 160 correct, 63%\nbucket 50-59: 39 extractions, said 54%, right 41%\nbucket 60-69: 39 extractions, said 65%, right 54%\nbucket 70-79: 39 extractions, said 74%, right 46%\nbucket 80-89: 40 extractions, said 85%, right 60%\nbucket 90-100: 43 extractions, said 95%, right 79%\naccept at 60 or above: 161 extractions, 60% right\naccept at 70 or above: 122 extractions, 62% right\naccept at 80 or above: 83 extractions, 70% right\naccept at 90 or above: 43 extractions, 79% right"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.TreeMap;\n\n/**\n * Reading a review process honestly: one accuracy figure hides the weak segment, and a confidence score is only worth what a calibration table says it is.\n *\n * <p>The exam guide (task 5.5) says that stratified random sampling of high-confidence extractions measures the error rate and catches new patterns, that aggregate accuracy can mask poor performance on specific document types or fields,\n * and that field-level confidence scores should be calibrated using labelled validation sets. Below, 200 extractions are generated by a fixed rule (nothing here calls a model): the invoices are mostly right, the handwritten\n * documents are wrong more often, and the confidence says one thing while the labels say another. The numbers are invented for the illustration; the arithmetic is the lesson.\n */\npublic final class CalibrationTable {\n    private static final System.Logger LOG = System.getLogger(CalibrationTable.class.getName());\n    record Rec(String docType, int confidence, boolean correct) {}\n\n    record TypeRow(String docType, int correct, int total, int percent) {}\n\n    record Bucket(String label, int count, int said, int right) {}\n\n    record Kept(int count, int precision) {}\n\n    /** (document type, stated confidence, was it correct) for n extractions, from a fixed rule. */\n    static List<Rec> makeRecords(int n) {\n        List<Rec> records = new ArrayList<>();\n        for (int i = 0; i < n; i++) {\n            String docType = i % 5 == 0 ? \"handwritten\" : \"invoice\";\n            int confidence = 50 + (i * 37) % 51;\n            int penalty = docType.equals(\"handwritten\") ? 30 : 0;\n            records.add(new Rec(docType, confidence, (i * 53) % 100 < confidence - 12 - penalty));\n        }\n        return records;\n    }\n\n    /** A whole-number percentage, rounded half up; 0 for an empty whole. */\n    static int ratio(int part, int whole) {\n        return whole > 0 ? (200 * part + whole) / (2 * whole) : 0;\n    }\n\n    static int overallAccuracy(List<Rec> records) {\n        return ratio((int) records.stream().filter(Rec::correct).count(), records.size());\n    }\n\n    static List<TypeRow> accuracyByType(List<Rec> records) {\n        Map<String, int[]> groups = new TreeMap<>();\n        for (Rec r : records) {\n            int[] g = groups.computeIfAbsent(r.docType(), k -> new int[2]);\n            if (r.correct()) g[0]++;\n            g[1]++;\n        }\n        List<TypeRow> rows = new ArrayList<>();\n        for (Map.Entry<String, int[]> e : groups.entrySet()) rows.add(new TypeRow(e.getKey(), e.getValue()[0], e.getValue()[1], ratio(e.getValue()[0], e.getValue()[1])));\n        return rows;\n    }\n\n    /** One row per non-empty confidence bucket: label, count, confidence it claimed, how often it was right. */\n    static List<Bucket> calibrationTable(List<Rec> records) {\n        Map<Integer, int[]> buckets = new TreeMap<>();\n        for (Rec r : records) {\n            int[] b = buckets.computeIfAbsent(Math.min(r.confidence() / 10 * 10, 90), k -> new int[3]);\n            b[0]++;\n            b[1] += r.confidence();\n            if (r.correct()) b[2]++;\n        }\n        List<Bucket> rows = new ArrayList<>();\n        for (Map.Entry<Integer, int[]> e : buckets.entrySet()) {\n            int low = e.getKey();\n            int[] b = e.getValue();\n            rows.add(new Bucket(low == 90 ? \"90-100\" : low + \"-\" + (low + 9), b[0], ratio(b[1], 100 * b[0]), ratio(b[2], b[0])));\n        }\n        return rows;\n    }\n\n    /** How many extractions would be accepted without review, and how often those are right. */\n    static Kept precisionAbove(List<Rec> records, int threshold) {\n        int kept = 0;\n        int right = 0;\n        for (Rec r : records) {\n            if (r.confidence() >= threshold) {\n                kept++;\n                if (r.correct()) right++;\n            }\n        }\n        return new Kept(kept, ratio(right, kept));\n    }\n\n    public static void main(String[] args) {\n        List<Rec> records = makeRecords(200);\n        System.out.println(\"overall accuracy: \" + overallAccuracy(records) + \"%\");\n        for (TypeRow t : accuracyByType(records)) System.out.println(t.docType() + \": \" + t.correct() + \" of \" + t.total() + \" correct, \" + t.percent() + \"%\");\n        for (Bucket b : calibrationTable(records)) System.out.println(\"bucket \" + b.label() + \": \" + b.count() + \" extractions, said \" + b.said() + \"%, right \" + b.right() + \"%\");\n        for (int threshold : new int[] {60, 70, 80, 90}) {\n            Kept k = precisionAbove(records, threshold);\n            System.out.println(\"accept at \" + threshold + \" or above: \" + k.count() + \" extractions, \" + k.precision() + \"% right\");\n        }\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "overall accuracy: 57%\nhandwritten: 13 of 40 correct, 33%\ninvoice: 100 of 160 correct, 63%\nbucket 50-59: 39 extractions, said 54%, right 41%\nbucket 60-69: 39 extractions, said 65%, right 54%\nbucket 70-79: 39 extractions, said 74%, right 46%\nbucket 80-89: 40 extractions, said 85%, right 60%\nbucket 90-100: 43 extractions, said 95%, right 79%\naccept at 60 or above: 161 extractions, 60% right\naccept at 70 or above: 122 extractions, 62% right\naccept at 80 or above: 83 extractions, 70% right\naccept at 90 or above: 43 extractions, 79% right"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "private val log = System.getLogger(\"calibration_table\")\n\n/**\n * Reading a review process honestly: one accuracy figure hides the weak segment, and a confidence score is only worth what a calibration table says it is.\n *\n * The exam guide (task 5.5) says that stratified random sampling of high-confidence extractions measures the error rate and catches new patterns, that aggregate accuracy can mask poor performance on specific document types or fields,\n * and that field-level confidence scores should be calibrated using labelled validation sets. Below, 200 extractions are generated by a fixed rule (nothing here calls a model): the invoices are mostly right, the handwritten\n * documents are wrong more often, and the confidence says one thing while the labels say another. The numbers are invented for the illustration; the arithmetic is the lesson.\n */\ndata class Rec(val docType: String, val confidence: Int, val correct: Boolean)\n\ndata class TypeRow(val docType: String, val correct: Int, val total: Int, val percent: Int)\n\ndata class Bucket(val label: String, val count: Int, val said: Int, val right: Int)\n\ndata class Kept(val count: Int, val precision: Int)\n\n/** (document type, stated confidence, was it correct) for n extractions, from a fixed rule. */\nfun makeRecords(n: Int = 200): List<Rec> = List(n) { i ->\n    val docType = if (i % 5 == 0) \"handwritten\" else \"invoice\"\n    val confidence = 50 + (i * 37) % 51\n    val penalty = if (docType == \"handwritten\") 30 else 0\n    Rec(docType, confidence, (i * 53) % 100 < confidence - 12 - penalty)\n}\n\n/** A whole-number percentage, rounded half up; 0 for an empty whole. */\nfun ratio(part: Int, whole: Int): Int = if (whole > 0) (200 * part + whole) / (2 * whole) else 0\n\nfun overallAccuracy(records: List<Rec>): Int = ratio(records.count { it.correct }, records.size)\n\nfun accuracyByType(records: List<Rec>): List<TypeRow> =\n    records.groupBy { it.docType }.toSortedMap().map { (t, rs) -> TypeRow(t, rs.count { it.correct }, rs.size, ratio(rs.count { it.correct }, rs.size)) }\n\n/** One row per non-empty confidence bucket: label, count, confidence it claimed, how often it was right. */\nfun calibrationTable(records: List<Rec>): List<Bucket> =\n    records.groupBy { minOf(it.confidence / 10 * 10, 90) }.toSortedMap().map { (low, rs) ->\n        Bucket(if (low == 90) \"90-100\" else \"$low-${low + 9}\", rs.size, ratio(rs.sumOf { it.confidence }, 100 * rs.size), ratio(rs.count { it.correct }, rs.size))\n    }\n\n/** How many extractions would be accepted without review, and how often those are right. */\nfun precisionAbove(records: List<Rec>, threshold: Int): Kept {\n    val kept = records.filter { it.confidence >= threshold }\n    return Kept(kept.size, ratio(kept.count { it.correct }, kept.size))\n}\n\nfun main() {\n    val records = makeRecords()\n    println(\"overall accuracy: ${overallAccuracy(records)}%\")\n    for (t in accuracyByType(records)) println(\"${t.docType}: ${t.correct} of ${t.total} correct, ${t.percent}%\")\n    for (b in calibrationTable(records)) println(\"bucket ${b.label}: ${b.count} extractions, said ${b.said}%, right ${b.right}%\")\n    for (threshold in listOf(60, 70, 80, 90)) {\n        val k = precisionAbove(records, threshold)\n        println(\"accept at $threshold or above: ${k.count} extractions, ${k.precision}% right\")\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "overall accuracy: 57%\nhandwritten: 13 of 40 correct, 33%\ninvoice: 100 of 160 correct, 63%\nbucket 50-59: 39 extractions, said 54%, right 41%\nbucket 60-69: 39 extractions, said 65%, right 54%\nbucket 70-79: 39 extractions, said 74%, right 46%\nbucket 80-89: 40 extractions, said 85%, right 60%\nbucket 90-100: 43 extractions, said 95%, right 79%\naccept at 60 or above: 161 extractions, 60% right\naccept at 70 or above: 122 extractions, 62% right\naccept at 80 or above: 83 extractions, 70% right\naccept at 90 or above: 43 extractions, 79% right"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The records are generated by a fixed rule, and nothing calls a model. The overall accuracy is 57%, a figure that describes neither type: the handwritten type is at 33% and the invoices at 63%. The calibration table shows that the score overstates: the top bucket said 95% and was right 79% of the time, and every other bucket says more than it delivers. The last block shows the cost of automating at each threshold: accepting only items scored 90 or above leaves 43 of the 200 extractions and is right 79% of the time, and none of the four thresholds reaches 90%, so for a target of 90% the honest answer here is that there is no cut-off yet. The numbers are invented for the illustration, and they describe this generated set only; the point is the method, and the figures that matter are the ones computed over your own labelled data."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**\"The accuracy is 97%, so reduce the reviewers.\"** It is tempting because the number is high and true. The exam rejects it: an aggregate hides the weak document type or field, so measure each segment before relaxing review.",
+        "**\"Take a random sample of all the accepted items.\"** It is tempting because random sampling sounds rigorous. The exam rejects it: one pull from the stream is mostly easy cases. Stratify, so that every document type and field is sampled.",
+        "**\"A score of 90 means it is right 90% of the time.\"** It is tempting because the number looks like a probability. The exam rejects it: the model wrote the number, and only a labelled validation set says how often that score is right.",
+        "**\"A segment with all its examples correct is safe to automate.\"** It is tempting because 100% is the best possible score. The exam rejects it: a handful of examples is too little evidence, so such a segment needs more labels first."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "Scenario S6, structured data extraction. A pipeline gets 97% of extracted values right across a validation set that is mostly typed invoices, and the team plans to drop human checks on all of them. What should happen first?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Break the results down by document kind and by field name before relaxing oversight",
+              "**b**: Confirm that the model reports high confidence on most of the validation set",
+              "**c**: Double the validation set and confirm that the overall figure holds up",
+              "**d**: Ask the reviewers to confirm the model's answers on a handful of randomly chosen documents"
+            ]
+          }
+        ],
+        [
+          "Scenario S6, structured data extraction. Everything scored 90 or above is accepted untouched. The team wants the true wrong-rate of that stream and an early warning when a supplier changes its layout. Which sampling fits?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Pull random documents from the whole stream in a single draw, with no regard to kind",
+              "**b**: Pull the documents that scored just under the cut-off every week",
+              "**c**: Pull random documents of each kind that passed with no human look",
+              "**d**: Pull one fixed set of old documents on a regular schedule"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**a**. The overall figure is an average that the large easy segment dominates, so each document type and field is measured on its own before any review is removed. *b* is ruled out because \"the model wrote the number, and only a labelled validation set says how often that score is right\". *c* is ruled out because \"A bigger validation set of the same mix gives the same hidden figure\". *d* is ruled out because \"a handful of random documents are mostly typed invoices, because random samples reflect the mix\".",
+            "**c**. A random draw inside every stratum of the unreviewed stream measures the wrong-rate of automation and exposes a new pattern, as the page puts it: \"Drawing the same number per stratum means a rare segment is checked as often as a common one\". *b* is ruled out because \"Everything below it goes to a person\", so those documents are reviewed already. *a* is ruled out because \"A single random pull from the whole stream is mostly easy cases\". *d* is ruled out because \"new kinds of error appear when document formats change\", and a fixed set only repeats what is known."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Adapted from the Claude Certified Architect - Foundations exam preparation guide by Daron Yondem (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/), changed for this course."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 10,
+    "paras": 14,
+    "code": 0,
+    "tables": 0,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 1,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "d3af4d2a207583db52606a285e8ac056a7e6c994a172473ee2a7c527b787e6fa"
+}

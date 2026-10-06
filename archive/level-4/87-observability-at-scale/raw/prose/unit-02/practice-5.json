@@ -1,0 +1,123 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "87-observability-at-scale"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 5,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Drift, alerts and the practice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "After a change of model, the error rate and the latency look the same. Yet tokens per answer are up by 40 percent and retrieval hits are down by 40 percent, and nobody was told. Which practice would have caught it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Page the on-call engineer when the error rate passes a fixed ceiling, which covers every failure",
+            "correct": false,
+            "says": "Ruled out because \"An error rate alone misses a system that is wrong without failing\"."
+          },
+          {
+            "id": "b",
+            "text": "Hold a stored baseline for each metric and flag any move beyond a tolerance, rising or falling",
+            "correct": true,
+            "says": "A baseline for each metric, compared in both directions with a tolerance, flags a system that got worse without failing."
+          },
+          {
+            "id": "c",
+            "text": "Read a sample of the conversations each week and note anything that looks odd to the reader",
+            "correct": false,
+            "says": "Ruled out because \"Reading a sample of conversations each week finds what a reader happens to see, and it does not scale to two million conversations\"."
+          },
+          {
+            "id": "d",
+            "text": "Watch only the metrics that moved down, since a rise just means that the product is used more",
+            "correct": false,
+            "says": "Ruled out because \"a rise is as likely to be a fault as growth\"."
+          }
+        ],
+        "origin": {
+          "path": "course/87-observability-at-scale/02-drift-alerts-and-the-practice.md",
+          "section": "Metrics for each layer"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A team pages its on-call engineer whenever a single minute of tool errors passes the threshold. The pages come nightly and are mostly noise. Which change fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Raise the threshold until the nightly pages stop coming",
+            "correct": false,
+            "says": "Ruled out because \"Raising the threshold until the pages stop hides the real incident with the noise\"."
+          },
+          {
+            "id": "b",
+            "text": "Average the error rate over a full day before comparing",
+            "correct": false,
+            "says": "Ruled out because \"A daily average smooths a one-hour outage into a normal day\"."
+          },
+          {
+            "id": "c",
+            "text": "Send the alert to a channel that is read in the morning",
+            "correct": false,
+            "says": "Ruled out because \"A message nobody reads at night turns a page into a log line\"."
+          },
+          {
+            "id": "d",
+            "text": "Fire only when several windows in a row cross the line",
+            "correct": true,
+            "says": "An alert on a change that lasts, several windows in a row, removes the one-window spikes at the price of delay."
+          }
+        ],
+        "origin": {
+          "path": "course/87-observability-at-scale/02-drift-alerts-and-the-practice.md",
+          "section": "Alerts that mean something"
+        }
+      }
+    ],
+    "concepts": [
+      "Alerts that mean something, as the page teaches it",
+      "Drift, alerts and the practice, as the page teaches it",
+      "Metrics for each layer, as the page teaches it",
+      "The cost of telemetry, as the page teaches it"
+    ]
+  }
+}

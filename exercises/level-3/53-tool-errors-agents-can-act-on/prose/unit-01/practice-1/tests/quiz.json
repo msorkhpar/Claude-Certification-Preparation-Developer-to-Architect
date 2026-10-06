@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "53-tool-errors-agents-can-act-on"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: The error result, and what the loop does with each kind",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A refund tool meets a slow card service, and each time it answers with the text \"Operation failed\". The agent tries three more times and then apologises, though a colleague could have settled the case. Which change helps most?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Raise the attempts from three to ten, with a longer wait between them",
+            "correct": false,
+            "says": "Ruled out because more attempts do not help when the reply gives no reason: \"Retry every failed call a few times, whatever the reason\"."
+          },
+          {
+            "id": "b",
+            "text": "Add a prompt rule on retries and a second rule on when to give up",
+            "correct": false,
+            "says": "Ruled out because a model with nothing to go on can only guess: \"A model that has to guess will retry a request that can never succeed\"."
+          },
+          {
+            "id": "c",
+            "text": "Reply with a category, a retry flag and a message that says what to do",
+            "correct": true,
+            "says": "The agent can only choose a recovery if the reply says which one applies."
+          },
+          {
+            "id": "d",
+            "text": "Return an empty list marked as a success and let the run continue",
+            "correct": false,
+            "says": "Ruled out because an empty success hides the failure: \"an empty list marked as a success tells the agent that the search found nothing\"."
+          }
+        ],
+        "origin": {
+          "path": "course/53-tool-errors-agents-can-act-on/01-the-error-result-and-what-the-loop-does-with-it.md",
+          "section": "Traps"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A calendar service gets three requests: one asks for a function that it lacks, one gives a date as \"next Friday\" where a calendar date is needed, and one reaches a backend that answers 503. Which request alone is a protocol error?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The one that has nowhere to be routed",
+            "correct": true,
+            "says": "Only a request with nothing to run is a protocol error; the other two reached the tool."
+          },
+          {
+            "id": "b",
+            "text": "The one whose date has the wrong format",
+            "correct": false,
+            "says": "Ruled out because \"an input validation failure\" is a tool execution error, which the model can repair."
+          },
+          {
+            "id": "c",
+            "text": "The one that met the busy backend",
+            "correct": false,
+            "says": "Ruled out because a failed backend call is an \"API failure\" that comes back with the flag and a message that allows \"retry with adjusted parameters\"."
+          },
+          {
+            "id": "d",
+            "text": "All three, because each of them ended in a failure",
+            "correct": false,
+            "says": "Ruled out because the specification wants execution errors passed on: \"Clients SHOULD provide tool execution errors to language models to enable self-correction.\""
+          }
+        ],
+        "origin": {
+          "path": "course/53-tool-errors-agents-can-act-on/01-the-error-result-and-what-the-loop-does-with-it.md",
+          "section": "Two kinds of failure, and the flag"
+        }
+      }
+    ]
+  }
+}

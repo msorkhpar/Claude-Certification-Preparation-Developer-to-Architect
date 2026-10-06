@@ -1,0 +1,122 @@
+{
+  "practice": "81-reliability-of-multi-agent-systems/unit-01/practice-1",
+  "name": "reliable_agents",
+  "tests": {
+    "java": "ReliableAgentsTest",
+    "kotlin": "ReliableAgentsTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_tasks_run_in_order_and_receive_the_results_of_the_tasks_they_need",
+      "typescript": "m1 tasks run in order and receive the results of the tasks they need",
+      "java": "m1_tasksRunInOrderAndReceiveTheResultsOfTheTasksTheyNeed",
+      "kotlin": "m1_tasksRunInOrderAndReceiveTheResultsOfTheTasksTheyNeed"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_every_retry_of_a_task_carries_the_same_idempotency_key",
+      "typescript": "e1 every retry of a task carries the same idempotency key",
+      "java": "e1_everyRetryOfATaskCarriesTheSameIdempotencyKey",
+      "kotlin": "e1_everyRetryOfATaskCarriesTheSameIdempotencyKey"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_retries_stop_at_the_limit_and_a_fatal_failure_is_not_retried",
+      "typescript": "e2 retries stop at the limit and a fatal failure is not retried",
+      "java": "e2_retriesStopAtTheLimitAndAFatalFailureIsNotRetried",
+      "kotlin": "e2_retriesStopAtTheLimitAndAFatalFailureIsNotRetried"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_failure_stays_inside_its_branch_and_dependents_are_skipped",
+      "typescript": "e3 a failure stays inside its branch and dependents are skipped",
+      "java": "e3_aFailureStaysInsideItsBranchAndDependentsAreSkipped",
+      "kotlin": "e3_aFailureStaysInsideItsBranchAndDependentsAreSkipped"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_a_breaker_stops_calls_to_an_agent_that_keeps_failing_and_a_success_resets_it",
+      "typescript": "e4 a breaker stops calls to an agent that keeps failing and a success resets it",
+      "java": "e4_aBreakerStopsCallsToAnAgentThatKeepsFailingAndASuccessResetsIt",
+      "kotlin": "e4_aBreakerStopsCallsToAnAgentThatKeepsFailingAndASuccessResetsIt"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_fallback_degrades_one_task_with_its_own_key_and_is_not_checkpointed",
+      "typescript": "e5 a fallback degrades one task with its own key and is not checkpointed",
+      "java": "e5_aFallbackDegradesOneTaskWithItsOwnKeyAndIsNotCheckpointed",
+      "kotlin": "e5_aFallbackDegradesOneTaskWithItsOwnKeyAndIsNotCheckpointed"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_a_second_run_resumes_from_the_checkpoint_and_retries_only_what_failed",
+      "typescript": "e6 a second run resumes from the checkpoint and retries only what failed",
+      "java": "e6_aSecondRunResumesFromTheCheckpointAndRetriesOnlyWhatFailed",
+      "kotlin": "e6_aSecondRunResumesFromTheCheckpointAndRetriesOnlyWhatFailed"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_an_unexpected_crash_is_not_swallowed_and_keeps_the_work_already_checkpointed",
+      "typescript": "e7 an unexpected crash is not swallowed and keeps the work already checkpointed",
+      "java": "e7_anUnexpectedCrashIsNotSwallowedAndKeepsTheWorkAlreadyCheckpointed",
+      "kotlin": "e7_anUnexpectedCrashIsNotSwallowedAndKeepsTheWorkAlreadyCheckpointed"
+    }
+  },
+  "plants": {
+    "wrong-key-changes-late": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "sends a new idempotency key from the third attempt on"
+    },
+    "wrong-one-more-attempt": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "makes one call more than the limit when the limit is three"
+    },
+    "wrong-dependents-still-run": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "runs a task whose dependency failed"
+    },
+    "wrong-breaker-total": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "counts every failure of an agent and never resets on a success"
+    },
+    "wrong-breaker-never-opens": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "keeps calling an agent that has failed past the threshold"
+    },
+    "wrong-fallback-same-key": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "sends the primary's idempotency key to the fallback agent"
+    },
+    "wrong-fallback-checkpointed": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "checkpoints a degraded result as if it were final"
+    },
+    "wrong-resume-reruns": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "runs the tasks that the checkpoint already holds"
+    },
+    "wrong-crash-swallowed": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "turns an unexpected crash into a failed task"
+    }
+  }
+}

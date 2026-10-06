@@ -1,0 +1,332 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "90-governance-safety-and-risk"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Controls that fail closed, and a person before the irreversible",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Controls that fail closed, and a person before the irreversible"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Architect Professional · **Module 90:** Governance, safety and risk · **Page 1 of 2** **Exams:** P5, P4"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** place a control at each layer of a design (the input, the output, the action and the monitor), decide for each control what happens when it fails, put a person in front of every action that cannot be undone, name the failure modes of a model system and match each to a control that really exists, and tell a control from a line in a prompt."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-04 against the Claude documentation pages \"Mitigate jailbreaks and prompt injections\", \"Handle streaming refusals\" and \"Reduce prompt leak\", the Claude Certified Architect, Professional exam guide (version 1.0, domain 5), and by running the example offline in the course container. Nothing here called a model, and the requests, answers, thresholds and counts are invented. This page deepens module 41 (security and safety) and module 68 (human review and calibrated confidence) to a design that must stay safe when a part of it is down. What a design keeps, for how long, and how it is explained to users is the second page."
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "**Exam guide and current product.** *What the guide states:* domain 5 asks the candidate to \"Implement guardrails and safety controls\", to \"Identify risks, limitations, and failure modes of LLM systems\" and to \"Apply human-in-the-loop validation strategies\". *What the current product's documentation says (pages read 2026-10-04):* the jailbreak page lists harmlessness screens with a lightweight model, input validation, prompt engineering, and a response to repeat offenders, and for third-party content it advises to put untrusted content only in tool results, to JSON-encode it, to limit access with least privilege and to screen tool outputs; the refusals page says a streamed request can end with a `refusal` stop reason, after which the context must be reset or the request retried on another model. The documentation describes the building blocks. It does not say what a design does when a screen is down or how a person is placed before an action; that is design judgement, taught here as the exam's strategy, and the confidence threshold and the cases are this course's values to tune to your own error costs."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "A claims assistant drafts replies, answers policy questions and can issue refunds. Its input screen is a small service, and one afternoon it times out. The code that calls it reads a timeout as \"no problem found\" and lets the request through, because a failed check had to be treated as something. For three hours every request skips the screen, and one of them is a document that tells the assistant to refund an account. Nobody decided to turn the control off. The design decided, in the line that says what happens when the check fails. The exam asks where a design puts its controls, what each one does when it breaks, and where a person stands."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Four layers, and what each guards"
+    },
+    {
+      "type": "para",
+      "text": "A control is a part of the system that stops, changes or records something, independent of the model's own judgement. Place them in four layers."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "**Input.** What reaches the model. A harmlessness screen with a small model and a structured verdict; validation for known injection patterns; the rule that untrusted content travels only in tool results, JSON-encoded, with its source named.",
+        "**Output.** What leaves. A grounding check that the answer's quote exists in the source; a format check; the handling of a refusal.",
+        "**Action.** What the system does in the world. The tools a role may call (least privilege, module 86), and the approval a risky call needs.",
+        "**Monitor.** What is watched afterwards: drift, a parity report across groups, alerts (module 87)."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The layers answer different attackers and different mistakes. An input control cannot catch a confident wrong answer, and an output control cannot stop a tool call that already happened. A design with all its controls on one layer has a gap on the others, and \"the model is told in the system prompt\" is a weak instance of one layer: it is a request to the model and not a control that the model cannot argue with."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What a control does when it fails"
+    },
+    {
+      "type": "para",
+      "text": "Every control has a failure mode of its own, and the design must say it. The two choices are to **hold** (stop the request or the action until the control works) and to **proceed, flagged** (let it go on and record that the check did not run). The rule of the example is by consequence: a control holds whenever the action it guards is high-consequence, and every control on the action layer holds. A control that guards a low-consequence reply may proceed with a flag. The example's router applies it to the screen: with the screen down, a high-consequence action holds, and a low-consequence reply goes on, flagged."
+    },
+    {
+      "type": "para",
+      "text": "The reason is the cost of a wrong guess. A screen that is down and lets a request through is the opening an attacker waits for. A drift alert that is down and lets the answers go on flagged costs a delay in noticing, and the answers themselves are still checked by other controls. The example shows both: with the screen down, a refund is held (`hold: screen down`), and a low-consequence reply goes on with a mark (`auto (unscreened)`) so that the gap shows in the record. \"Fail open to keep the service up\" is a business decision for the second kind of control and never for the first."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "A person before the irreversible"
+    },
+    {
+      "type": "para",
+      "text": "A refund paid, an account closed and a record deleted cannot be undone by a better answer next time. For a **high-consequence action** the design puts a person in front of it, and the person is a control: it exists as a step in the system, it holds when it cannot be reached, and nothing the model says skips it. The example's rule for the route is short: a high-consequence action goes to `human` whatever the confidence; a low-consequence action goes out unreviewed only at a confidence of at least 95, and below it goes to `review`."
+    },
+    {
+      "type": "para",
+      "text": "Two things make this real. First, **confidence is not evidence.** An answer whose quote is not in the source is held (`hold: unsupported`) even at confidence 99, because a model can be certain and wrong; module 69 shows the quote check. Second, **the threshold is a decision about error cost.** At 95 the example lets an answer through at exactly 95 and reviews one at 94. It is a design value, set so that the cost of reviewing the rest is below the cost of the errors in the part sent out (module 79 gives the arithmetic), and it is checked against a measured sample (module 88), not copied."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Failure modes, and a control that exists"
+    },
+    {
+      "type": "para",
+      "text": "The guide asks you to identify the failure modes of language-model systems. Four recur in every design review, and each gets a control, an owner and a stated residual."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Failure mode",
+        "What it looks like",
+        "A control of the right layer"
+      ],
+      "rows": [
+        [
+          "Hallucination",
+          "a fluent answer the source does not support",
+          "a grounding check on the output (hold when unsupported)"
+        ],
+        [
+          "Prompt injection",
+          "instructions inside a document, an email or a tool result",
+          "untrusted content only in tool results, JSON-encoded; screen tool output; least privilege"
+        ],
+        [
+          "Privacy leak",
+          "personal data in a prompt, a log or an answer",
+          "identifiers swapped for tokens before the call (module 83); no content in the audit log"
+        ],
+        [
+          "Unfair outcome",
+          "different results for different groups",
+          "a parity report by segment on the monitor layer"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "A register that names a control which is not defined anywhere is a wish. The check is mechanical: every control in the register is a control in the design, with a layer and a failure mode. Two limits belong in the register too, because the documentation is candid about them. A screen with a small model reduces risk and does not remove it, and the page on prompt leaks says that \"no method is foolproof\" and advises trying monitoring techniques first, since leak-proofing the prompt can degrade the task. So the residual column says what is left: low because an unsupported answer is held, medium because patterns do not find names."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Refusals are a result to handle"
+    },
+    {
+      "type": "para",
+      "text": "A streamed request can end with `stop_reason: \"refusal\"`. The design treats it as an outcome with its own branch: the context is reset (the turn that caused it removed or rephrased) before the conversation continues, or the request is retried on a different model; the `stop_details` fields can be null, so the user-facing message comes from the application and not from an assumption that a category is present. Counting refusals per user also feeds the response to repeat offenders that the jailbreak page describes: tell the user the action violates the usage policy, and throttle or end the access."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "para",
+      "text": "The example is a router for the claims assistant, and its first half is this page. It takes an action with a consequence, an answer with a confidence and a quote, the source text and the state of the screen, and it returns what happens: `human`, `auto`, `review`, or a hold with its reason. It runs seven cases: a supported refund goes to a person; a reply goes out automatically at confidences 99 and 95 and to review at 94; a confident but unsupported reply is held; and with the screen down a refund is held and a reply goes on marked unscreened. The second page covers its audit record and the erasure. It ran offline in every language."
+    },
+    {
+      "type": "example",
+      "id": "m90-control-chain",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/90-control-chain/python/control_chain.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/90-control-chain/typescript/controlChain.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/90-control-chain/java/ControlChain.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/90-control-chain/kotlin/ControlChain.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Governing a model call: a control that fails closed where the cost of an error is high, an independent check against the source that a confident answer must pass, and an audit record that holds no content.\n\nThe requests, answers and thresholds are invented; the confidence threshold of 95 is a value to tune to your own error costs. Nothing here calls a model.\n\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\nfrom collections import namedtuple\n\nAction = namedtuple(\"Action\", \"name consequence\")\nAnswer = namedtuple(\"Answer\", \"text confidence quote\")\nAUTO_CONFIDENCE = 95\n\n\ndef route(action, answer, source, screen_up, confidence_min=AUTO_CONFIDENCE):\n    \"\"\"Decide what happens to an answer. A down screen holds a high-consequence action, an unsupported answer is held whatever its confidence, and only a confident, supported, low-consequence answer goes out unreviewed.\"\"\"\n    log.debug(\"route input: %r\", action)\n    if not screen_up and action.consequence == \"high\":\n        return \"hold: screen down\"\n    flag = \"\" if screen_up else \" (unscreened)\"\n    if answer.quote not in source:\n        return \"hold: unsupported\" + flag\n    if action.consequence == \"high\":\n        return \"human\" + flag\n    return (\"auto\" if answer.confidence >= confidence_min else \"review\") + flag\n\n\ndef audit_record(request_id, action, outcome, text):\n    \"\"\"Proof of what happened without a copy of the data: who, what, how big and the outcome, and never the text.\"\"\"\n    return {\"request\": request_id, \"action\": action.name, \"consequence\": action.consequence, \"outcome\": outcome, \"chars\": len(text), \"content_stored\": False}\n\n\ndef erase(vault, subject):\n    \"\"\"Erasure removes the map from a token to a person, so the audit entries that carry only tokens can no longer be linked to anyone.\"\"\"\n    kept = {token: person for token, person in vault.items() if person != subject}\n    return kept, len(vault) - len(kept)\n\n\ndef main():\n    source = \"Water damage is covered up to 5,000 per claim. Flood damage is excluded.\"\n    reply = Action(\"draft_reply\", \"low\")\n    refund = Action(\"issue_refund\", \"high\")\n    good = Answer(\"Water damage is covered up to 5,000.\", 99, \"Water damage is covered up to 5,000 per claim.\")\n    edge = Answer(\"Water damage is covered up to 5,000.\", 95, \"Water damage is covered up to 5,000 per claim.\")\n    unsure = Answer(\"Water damage is covered up to 5,000.\", 94, \"Water damage is covered up to 5,000 per claim.\")\n    wrong = Answer(\"Water damage is covered up to 8,000.\", 99, \"Water damage is covered up to 8,000 per claim.\")\n    cases = [\n        (\"screen up, refund, supported\", refund, good, True),\n        (\"screen up, reply, confidence 99\", reply, good, True),\n        (\"screen up, reply, confidence 95\", reply, edge, True),\n        (\"screen up, reply, confidence 94\", reply, unsure, True),\n        (\"screen up, reply, confident but unsupported\", reply, wrong, True),\n        (\"screen down, refund\", refund, good, False),\n        (\"screen down, reply\", reply, good, False),\n    ]\n    for label, action, answer, up in cases:\n        print(f\"{label}: {route(action, answer, source, up)}\")\n    record = audit_record(\"r-1001\", refund, \"human\", good.text)\n    print(\"audit record:\", \", \".join(f\"{k}={v}\" for k, v in record.items()))\n    vault = {\"<EMAIL_1>\": \"person-a\", \"<EMAIL_2>\": \"person-b\", \"<MEMBER_1>\": \"person-a\"}\n    kept, removed = erase(vault, \"person-a\")\n    print(f\"erasure removed {removed} of {len(vault)} mappings; the audit entries stay, with {len(kept)} token still linkable\")\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "screen up, refund, supported: human\nscreen up, reply, confidence 99: auto\nscreen up, reply, confidence 95: auto\nscreen up, reply, confidence 94: review\nscreen up, reply, confident but unsupported: hold: unsupported\nscreen down, refund: hold: screen down\nscreen down, reply: auto (unscreened)\naudit record: request=r-1001, action=issue_refund, consequence=high, outcome=human, chars=36, content_stored=False\nerasure removed 2 of 3 mappings; the audit entries stay, with 1 token still linkable"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "import { logger } from \"./logger.ts\";\nconst log = logger(\"control_chain\");\n/**\n * Governing a model call: a control that fails closed where the cost of an error is high, an independent check against the source that a confident answer must pass, and an audit record that holds no content.\n *\n * The requests, answers and thresholds are invented; the confidence threshold of 95 is a value to tune to your own error costs. Nothing here calls a model.\n */\nexport type Action = { name: string; consequence: string };\nexport type Answer = { text: string; confidence: number; quote: string };\n\nexport const AUTO_CONFIDENCE = 95;\n\n/** Decide what happens to an answer. A down screen holds a high-consequence action, an unsupported answer is held whatever its confidence, and only a confident, supported, low-consequence answer goes out unreviewed. */\nexport function route(action: Action, answer: Answer, source: string, screenUp: boolean, confidenceMin = AUTO_CONFIDENCE): string {\n  log.debug(\"route input\", action);\n  if (!screenUp && action.consequence === \"high\") return \"hold: screen down\";\n  const flag = screenUp ? \"\" : \" (unscreened)\";\n  if (!source.includes(answer.quote)) return \"hold: unsupported\" + flag;\n  if (action.consequence === \"high\") return \"human\" + flag;\n  return (answer.confidence >= confidenceMin ? \"auto\" : \"review\") + flag;\n}\n\n/** Proof of what happened without a copy of the data: who, what, how big and the outcome, and never the text. */\nexport function auditRecord(requestId: string, action: Action, outcome: string, text: string): Record<string, string | number | boolean> {\n  return { request: requestId, action: action.name, consequence: action.consequence, outcome, chars: text.length, content_stored: false };\n}\n\n/** Erasure removes the map from a token to a person, so the audit entries that carry only tokens can no longer be linked to anyone. */\nexport function erase(vault: Record<string, string>, subject: string): [Record<string, string>, number] {\n  const kept: Record<string, string> = {};\n  for (const [token, person] of Object.entries(vault)) if (person !== subject) kept[token] = person;\n  return [kept, Object.keys(vault).length - Object.keys(kept).length];\n}\n\nfunction main(): void {\n  const source = \"Water damage is covered up to 5,000 per claim. Flood damage is excluded.\";\n  const reply: Action = { name: \"draft_reply\", consequence: \"low\" };\n  const refund: Action = { name: \"issue_refund\", consequence: \"high\" };\n  const supported = \"Water damage is covered up to 5,000 per claim.\";\n  const good: Answer = { text: \"Water damage is covered up to 5,000.\", confidence: 99, quote: supported };\n  const edge: Answer = { text: \"Water damage is covered up to 5,000.\", confidence: 95, quote: supported };\n  const unsure: Answer = { text: \"Water damage is covered up to 5,000.\", confidence: 94, quote: supported };\n  const wrong: Answer = { text: \"Water damage is covered up to 8,000.\", confidence: 99, quote: \"Water damage is covered up to 8,000 per claim.\" };\n  const cases: [string, Action, Answer, boolean][] = [\n    [\"screen up, refund, supported\", refund, good, true],\n    [\"screen up, reply, confidence 99\", reply, good, true],\n    [\"screen up, reply, confidence 95\", reply, edge, true],\n    [\"screen up, reply, confidence 94\", reply, unsure, true],\n    [\"screen up, reply, confident but unsupported\", reply, wrong, true],\n    [\"screen down, refund\", refund, good, false],\n    [\"screen down, reply\", reply, good, false],\n  ];\n  for (const [label, action, answer, up] of cases) console.log(`${label}: ${route(action, answer, source, up)}`);\n  const record = auditRecord(\"r-1001\", refund, \"human\", good.text);\n  console.log(\"audit record:\", Object.entries(record).map(([k, v]) => `${k}=${v === true ? \"True\" : v === false ? \"False\" : v}`).join(\", \"));\n  const vault = { \"<EMAIL_1>\": \"person-a\", \"<EMAIL_2>\": \"person-b\", \"<MEMBER_1>\": \"person-a\" };\n  const [kept, removed] = erase(vault, \"person-a\");\n  console.log(`erasure removed ${removed} of ${Object.keys(vault).length} mappings; the audit entries stay, with ${Object.keys(kept).length} token still linkable`);\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "screen up, refund, supported: human\nscreen up, reply, confidence 99: auto\nscreen up, reply, confidence 95: auto\nscreen up, reply, confidence 94: review\nscreen up, reply, confident but unsupported: hold: unsupported\nscreen down, refund: hold: screen down\nscreen down, reply: auto (unscreened)\naudit record: request=r-1001, action=issue_refund, consequence=high, outcome=human, chars=36, content_stored=False\nerasure removed 2 of 3 mappings; the audit entries stay, with 1 token still linkable"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.stream.Collectors;\n\n/**\n * Governing a model call: a control that fails closed where the cost of an error is high, an independent check against the source that a confident answer must pass, and an audit record that holds no content.\n *\n * The requests, answers and thresholds are invented; the confidence threshold of 95 is a value to tune to your own error costs. Nothing here calls a model.\n */\npublic class ControlChain {\n    private static final System.Logger LOG = System.getLogger(ControlChain.class.getName());\n    record Action(String name, String consequence) {}\n\n    record Answer(String text, int confidence, String quote) {}\n\n    record Case(String label, Action action, Answer answer, boolean screenUp) {}\n\n    record Erased(Map<String, String> kept, int removed) {}\n\n    static final int AUTO_CONFIDENCE = 95;\n\n    /** Decide what happens to an answer. A down screen holds a high-consequence action, an unsupported answer is held whatever its confidence, and only a confident, supported, low-consequence answer goes out unreviewed. */\n    static String route(Action action, Answer answer, String source, boolean screenUp, int confidenceMin) {\n        LOG.log(System.Logger.Level.DEBUG, \"route input: {0}\", action);\n        if (!screenUp && action.consequence().equals(\"high\")) return \"hold: screen down\";\n        String flag = screenUp ? \"\" : \" (unscreened)\";\n        if (!source.contains(answer.quote())) return \"hold: unsupported\" + flag;\n        if (action.consequence().equals(\"high\")) return \"human\" + flag;\n        return (answer.confidence() >= confidenceMin ? \"auto\" : \"review\") + flag;\n    }\n\n    static String route(Action action, Answer answer, String source, boolean screenUp) {\n        return route(action, answer, source, screenUp, AUTO_CONFIDENCE);\n    }\n\n    /** Proof of what happened without a copy of the data: who, what, how big and the outcome, and never the text. */\n    static Map<String, Object> auditRecord(String requestId, Action action, String outcome, String text) {\n        Map<String, Object> record = new LinkedHashMap<>();\n        record.put(\"request\", requestId);\n        record.put(\"action\", action.name());\n        record.put(\"consequence\", action.consequence());\n        record.put(\"outcome\", outcome);\n        record.put(\"chars\", text.length());\n        record.put(\"content_stored\", false);\n        return record;\n    }\n\n    /** Erasure removes the map from a token to a person, so the audit entries that carry only tokens can no longer be linked to anyone. */\n    static Erased erase(Map<String, String> vault, String subject) {\n        Map<String, String> kept = new LinkedHashMap<>();\n        for (Map.Entry<String, String> e : vault.entrySet()) if (!e.getValue().equals(subject)) kept.put(e.getKey(), e.getValue());\n        return new Erased(kept, vault.size() - kept.size());\n    }\n\n    static String flag(Object value) {\n        return value instanceof Boolean b ? (b ? \"True\" : \"False\") : String.valueOf(value);\n    }\n\n    public static void main(String[] args) {\n        String source = \"Water damage is covered up to 5,000 per claim. Flood damage is excluded.\";\n        Action reply = new Action(\"draft_reply\", \"low\");\n        Action refund = new Action(\"issue_refund\", \"high\");\n        String supported = \"Water damage is covered up to 5,000 per claim.\";\n        Answer good = new Answer(\"Water damage is covered up to 5,000.\", 99, supported);\n        Answer edge = new Answer(\"Water damage is covered up to 5,000.\", 95, supported);\n        Answer unsure = new Answer(\"Water damage is covered up to 5,000.\", 94, supported);\n        Answer wrong = new Answer(\"Water damage is covered up to 8,000.\", 99, \"Water damage is covered up to 8,000 per claim.\");\n        List<Case> cases = List.of(\n            new Case(\"screen up, refund, supported\", refund, good, true),\n            new Case(\"screen up, reply, confidence 99\", reply, good, true),\n            new Case(\"screen up, reply, confidence 95\", reply, edge, true),\n            new Case(\"screen up, reply, confidence 94\", reply, unsure, true),\n            new Case(\"screen up, reply, confident but unsupported\", reply, wrong, true),\n            new Case(\"screen down, refund\", refund, good, false),\n            new Case(\"screen down, reply\", reply, good, false));\n        for (Case c : cases) System.out.println(c.label() + \": \" + route(c.action(), c.answer(), source, c.screenUp()));\n        Map<String, Object> record = auditRecord(\"r-1001\", refund, \"human\", good.text());\n        System.out.println(\"audit record: \" + record.entrySet().stream().map(e -> e.getKey() + \"=\" + flag(e.getValue())).collect(Collectors.joining(\", \")));\n        Map<String, String> vault = new LinkedHashMap<>();\n        vault.put(\"<EMAIL_1>\", \"person-a\");\n        vault.put(\"<EMAIL_2>\", \"person-b\");\n        vault.put(\"<MEMBER_1>\", \"person-a\");\n        Erased erased = erase(vault, \"person-a\");\n        System.out.println(\"erasure removed \" + erased.removed() + \" of \" + vault.size() + \" mappings; the audit entries stay, with \" + erased.kept().size() + \" token still linkable\");\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "screen up, refund, supported: human\nscreen up, reply, confidence 99: auto\nscreen up, reply, confidence 95: auto\nscreen up, reply, confidence 94: review\nscreen up, reply, confident but unsupported: hold: unsupported\nscreen down, refund: hold: screen down\nscreen down, reply: auto (unscreened)\naudit record: request=r-1001, action=issue_refund, consequence=high, outcome=human, chars=36, content_stored=False\nerasure removed 2 of 3 mappings; the audit entries stay, with 1 token still linkable"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "/**\n * Governing a model call: a control that fails closed where the cost of an error is high, an independent check against the source that a confident answer must pass, and an audit record that holds no content.\n *\n * The requests, answers and thresholds are invented; the confidence threshold of 95 is a value to tune to your own error costs. Nothing here calls a model.\n */\n\nprivate val log = System.getLogger(\"control_chain\")\n\ndata class Action(val name: String, val consequence: String)\n\ndata class Answer(val text: String, val confidence: Int, val quote: String)\n\ndata class Case(val label: String, val action: Action, val answer: Answer, val screenUp: Boolean)\n\ndata class Erased(val kept: Map<String, String>, val removed: Int)\n\nconst val AUTO_CONFIDENCE = 95\n\n/** Decide what happens to an answer. A down screen holds a high-consequence action, an unsupported answer is held whatever its confidence, and only a confident, supported, low-consequence answer goes out unreviewed. */\nfun route(action: Action, answer: Answer, source: String, screenUp: Boolean, confidenceMin: Int = AUTO_CONFIDENCE): String {\n    log.log(System.Logger.Level.DEBUG, \"route input: {0}\", action)\n    if (!screenUp && action.consequence == \"high\") return \"hold: screen down\"\n    val flag = if (screenUp) \"\" else \" (unscreened)\"\n    if (answer.quote !in source) return \"hold: unsupported$flag\"\n    if (action.consequence == \"high\") return \"human$flag\"\n    return (if (answer.confidence >= confidenceMin) \"auto\" else \"review\") + flag\n}\n\n/** Proof of what happened without a copy of the data: who, what, how big and the outcome, and never the text. */\nfun auditRecord(requestId: String, action: Action, outcome: String, text: String): Map<String, Any> =\n    linkedMapOf(\"request\" to requestId, \"action\" to action.name, \"consequence\" to action.consequence, \"outcome\" to outcome, \"chars\" to text.length, \"content_stored\" to false)\n\n/** Erasure removes the map from a token to a person, so the audit entries that carry only tokens can no longer be linked to anyone. */\nfun erase(vault: Map<String, String>, subject: String): Erased {\n    val kept = vault.filterValues { it != subject }\n    return Erased(kept, vault.size - kept.size)\n}\n\nfun flag(value: Any): String = if (value is Boolean) (if (value) \"True\" else \"False\") else value.toString()\n\nfun main() {\n    val source = \"Water damage is covered up to 5,000 per claim. Flood damage is excluded.\"\n    val reply = Action(\"draft_reply\", \"low\")\n    val refund = Action(\"issue_refund\", \"high\")\n    val supported = \"Water damage is covered up to 5,000 per claim.\"\n    val good = Answer(\"Water damage is covered up to 5,000.\", 99, supported)\n    val edge = Answer(\"Water damage is covered up to 5,000.\", 95, supported)\n    val unsure = Answer(\"Water damage is covered up to 5,000.\", 94, supported)\n    val wrong = Answer(\"Water damage is covered up to 8,000.\", 99, \"Water damage is covered up to 8,000 per claim.\")\n    val cases = listOf(\n        Case(\"screen up, refund, supported\", refund, good, true),\n        Case(\"screen up, reply, confidence 99\", reply, good, true),\n        Case(\"screen up, reply, confidence 95\", reply, edge, true),\n        Case(\"screen up, reply, confidence 94\", reply, unsure, true),\n        Case(\"screen up, reply, confident but unsupported\", reply, wrong, true),\n        Case(\"screen down, refund\", refund, good, false),\n        Case(\"screen down, reply\", reply, good, false),\n    )\n    for (c in cases) println(\"${c.label}: ${route(c.action, c.answer, source, c.screenUp)}\")\n    val record = auditRecord(\"r-1001\", refund, \"human\", good.text)\n    println(\"audit record: \" + record.entries.joinToString(\", \") { \"${it.key}=${flag(it.value)}\" })\n    val vault = linkedMapOf(\"<EMAIL_1>\" to \"person-a\", \"<EMAIL_2>\" to \"person-b\", \"<MEMBER_1>\" to \"person-a\")\n    val erased = erase(vault, \"person-a\")\n    println(\"erasure removed ${erased.removed} of ${vault.size} mappings; the audit entries stay, with ${erased.kept.size} token still linkable\")\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "screen up, refund, supported: human\nscreen up, reply, confidence 99: auto\nscreen up, reply, confidence 95: auto\nscreen up, reply, confidence 94: review\nscreen up, reply, confident but unsupported: hold: unsupported\nscreen down, refund: hold: screen down\nscreen down, reply: auto (unscreened)\naudit record: request=r-1001, action=issue_refund, consequence=high, outcome=human, chars=36, content_stored=False\nerasure removed 2 of 3 mappings; the audit entries stay, with 1 token still linkable"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The practice: the governance files"
+    },
+    {
+      "type": "para",
+      "text": "The practice is in [`exercises/90-governance-safety-and-risk`](../../exercises/90-governance-safety-and-risk/unit-01/practice-1/statement.md). The draft governance files of a claims assistant are wrong in several places: a screen that fails open, a refund with no person in front of it, an automatic threshold of 80, an audit log that keeps content, and a register with two rows and an invented control. You correct the files, and the tests read them. It is graded in Python, TypeScript, Java and Kotlin; the statement lists seven cases, each saying what you should see."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**\"If the screen is down, let the request through so customers are not blocked.\"** It is tempting because availability is measured and a blocked request is visible. The exam rejects it because a failed input or action control that proceeds on a high-consequence request is the gap an attacker waits for; hold, and say so in the response. Only a control that guards a low-consequence reply may proceed with a flag.",
+        "**\"The system prompt says to ask a person before refunds, so a person is in the loop.\"** It is tempting because the instruction is written and the model usually follows it. The exam rejects it because a line in a prompt is a request, and a control is a step the model cannot skip; build the approval into the action layer as a step that holds.",
+        "**\"A confidence of 99 means the answer can go out without a check.\"** It is tempting because the score is high and the threshold is 95. The exam rejects it because confidence is not evidence: an answer whose quote is not in the source is held at any confidence, and a high-consequence action goes to a person at any confidence."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "Scenario: Dana runs the refund flow of a claims assistant. The service that screens incoming requests stops answering, and the code must choose between two behaviours for a request that asks for a refund. Which one fits the design rules on this page?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Hold it and tell the caller that the check is unavailable",
+              "**b**: Let the request pass and flag it for a person to look at tomorrow",
+              "**c**: Run the request once more through the model's own safety training",
+              "**d**: Let the request pass because the later approval step will catch it"
+            ]
+          }
+        ],
+        [
+          "Scenario: Ravi reviews a design in which a model must \"always ask a person before closing an account\", a rule written in the system prompt. What is the main weakness of that design?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The sentence is too short for the model to follow it reliably under load",
+              "**b**: The rule should sit in the user turn so that the model reads it last",
+              "**c**: Nothing forces the step to happen, because an instruction only asks",
+              "**d**: The sentence repeats a rule the platform already applies to every account"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**a**. A refund is a high-consequence action and the screen is an input control, so the design holds. *b* is ruled out because \"A screen that is down and lets a request through is the opening an attacker waits for\". *c* is ruled out because the layers \"answer different attackers and different mistakes\", and the model's own training is not the missing screen. *d* is ruled out because \"an output control cannot stop a tool call that already happened\", and a later step does not repair a gap on an earlier layer.",
+            "**c**. A line in a prompt is a request and a control is a step the model cannot skip. *a* is ruled out because the page grants that \"the model usually follows it\", so reliability of following is not the weakness. *b* is ruled out because the sentence stays \"a request to the model and not a control\" wherever it sits. *d* is ruled out because \"Every control has a failure mode of its own, and the design must say it\", and no platform rule is assumed to hold it."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 12,
+    "paras": 15,
+    "code": 0,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 1,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "64936f50ae3876dc6148b244eff6dd1af82cc32ed26245e4c125744d4629efdb"
+}

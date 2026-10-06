@@ -1,0 +1,228 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "35-the-claude-agent-sdk"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "The Agent SDK: tools, permissions, hooks and custom tools",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "The Agent SDK: tools, permissions, hooks and custom tools"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Developer · **Module 35:** The Claude Agent SDK · **Page 2 of 3** **Exams:** DV3; A1"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** tell which tools exist from which are pre-approved, apply the order in which the SDK evaluates a tool call, choose between a hook, a rule and a callback, write a custom tool with the in-process MCP server and report its errors on purpose, and avoid the permission settings that silently do less than they look."
+    },
+    {
+      "type": "para",
+      "text": "Checked against the Agent SDK pages of the Claude Code documentation (agent loop, permissions, hooks, custom tools and the Python and TypeScript references) on 2026-10-03, with `claude-agent-sdk` 0.2.163 and `@anthropic-ai/claude-agent-sdk` 0.3.287. The behaviour shown in the example on the next page ran against the course's scripted stand-in, which applies a simplified copy of these rules. The real binary and a real model were not run."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "An agent that can run shell commands and edit files is only as safe as the policy around it, and the SDK's policy has several layers that interact: availability, pre-approval, deny rules, modes, hooks and a callback. Most mistakes are one layer doing less than its author assumed. The exam asks which layer decides, and in what order."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Availability is not approval"
+    },
+    {
+      "type": "para",
+      "text": "Two settings sound alike and do different things."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "**Which tools exist.** `tools` sets the built-in tools that are available. A bare name in `disallowed_tools` (such as `Bash`) removes the tool from Claude's context altogether, so Claude cannot even attempt it.",
+        "**Which calls are pre-approved.** `allowed_tools` auto-approves the tools you list, and the documentation is explicit that \"This does not restrict Claude to only these tools.\" Other unlisted tools fall through to `permission_mode` and `can_use_tool`. The documentation's agent loop page says: \"Tools not listed are still available, and calls to them that need approval fall through to the permission mode and canUseTool.\""
+      ]
+    },
+    {
+      "type": "para",
+      "text": "A scoped deny rule is different again. `disallowed_tools=[\"Bash(rm *)\"]` leaves `Bash` available and denies matching calls in every permission mode, `bypassPermissions` included. The match is on the command as written, so another spelling of the same command falls through to the mode. A deny rule is a guard against the obvious, not a sandbox."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The order of evaluation"
+    },
+    {
+      "type": "para",
+      "text": "When Claude requests a tool, the SDK checks in this order: hooks, deny rules, ask rules, the permission mode, allow rules and, last, the `canUseTool` callback. Each step can end the decision. Hooks run first, so a hook can deny a call outright, and the warning on the permissions page is plain that \"hooks run before every other step, and a hook deny applies even in bypassPermissions mode\". A deny rule blocks even in `bypassPermissions`. An allow rule approves a call before the callback is consulted. The callback sees only what nothing earlier decided. Among the rules, a deny is checked before an ask and an ask before an allow, and a call that no rule matches is left to the mode and then the callback; module 38 gives the same rule order for Claude Code."
+    },
+    {
+      "type": "para",
+      "text": "Three consequences follow, and the documentation states each."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "\"Auto-approved tools never reach canUseTool.\" A call that `allowed_tools`, `acceptEdits` or `bypassPermissions` approved skips the callback, so a check placed there is silently bypassed for that tool. To gate every call, use a `PreToolUse` hook.",
+        "\"allowed_tools does not constrain bypassPermissions.\" Listing `Read` alongside `bypassPermissions` still approves every tool, `Bash`, `Write` and `Edit` included (apart from calls that an ask rule or a critical-path removal sends to the callback). To block specific tools in that mode, use deny rules.",
+        "In the TypeScript SDK, passing a callback in a configuration where an earlier step would approve first emits a process warning, with the code `CLAUDE_SDK_CAN_USE_TOOL_SHADOWED`. It triggers for `bypassPermissions` and for each bare `allowedTools` entry. A scoped entry such as `Bash(ls *)` does not trigger it."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The permission modes are `default` (calls that need approval go to your callback, and with no callback they are denied), `acceptEdits`, `plan`, `dontAsk` (never prompts, denies what would prompt), `auto` (a model classifier reviews actions) and `bypassPermissions` (for isolated environments only; in the TypeScript SDK it also needs `allowDangerouslySkipPermissions`). Say the mode explicitly. The TypeScript reference notes that \"If you omit it, the session can start in auto mode\", so an agent whose safety depends on the default mode should not rely on the default."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Hooks"
+    },
+    {
+      "type": "para",
+      "text": "Hooks are callbacks that run your code at events in the agent's life: before a tool runs (`PreToolUse`), after it (`PostToolUse`, `PostToolUseFailure`), at prompt submission, when a subagent starts or stops, before compaction, at a permission request and at stop. A hook has an optional `matcher` that filters by tool name, for example `Write|Edit`, and a callback that receives the event and returns an output object. For `PreToolUse` the output sets `permissionDecision` to `allow`, `deny`, `ask` or `defer`, a `permissionDecisionReason` that tells the model why, and optionally `updatedInput`. Some events exist only in the TypeScript SDK."
+    },
+    {
+      "type": "para",
+      "text": "When several hooks match they run in parallel, and the most restrictive result applies: \"If any hook returns deny, the operation is blocked regardless of other hooks.\" That is also why each hook should act on its own and not rely on another having run first. The right tool for each job:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "**A hook** for a check that must run on every call, for logging and auditing, and for changing an input (it runs before the permission steps, so a veto is final).",
+        "**A rule** for a fixed fact about a tool or a pattern.",
+        "**The callback** for a decision that needs your program's judgement and was not settled earlier."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Custom tools"
+    },
+    {
+      "type": "para",
+      "text": "A custom tool is a function that Claude can call, defined with the SDK's in-process MCP server: the `@tool` decorator in Python (the `tool()` helper in TypeScript), wrapped by `create_sdk_mcp_server` (TypeScript: `createSdkMcpServer`). The server \"runs in-process inside your application, not as a separate process\". You pass it in `mcp_servers`, and the key you choose becomes the server name in each tool's full name: `mcp__{server_name}__{tool_name}`, so `add` on a server `calc` is `mcp__calc__add`. A pattern such as `mcp__calc__*` names every tool of the server in an allow rule."
+    },
+    {
+      "type": "para",
+      "text": "Two details of tools matter in production. First, annotations. Setting `readOnlyHint` lets the tool run in parallel with other read-only tools, and the documentation adds that \"Annotations are metadata, not enforcement.\" A tool marked read-only can still write if its handler does. Second, errors. \"A handler error doesn't stop the agent loop.\" The in-process server catches an uncaught exception and returns it as an error result that carries the raw exception message, and the loop goes on. (This is the Agent SDK's in-process server; a Python server built with the MCP SDK in module 32 reports an escaped exception without its message.) If the handler catches the error and returns `is_error` (TypeScript: `isError`), Claude sees the message you compose, which can say which request failed and what to try instead. So how you report an error decides what Claude reads, and not whether the query fails. In Python the decorator forwards only `content` and `is_error` from your return value."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Using `allowed_tools` as a whitelist.** It pre-approves. It does not remove anything, so other tools stay available and fall through to the mode and the callback.",
+        "**Putting the safety check in the callback.** Anything an earlier step approved never reaches it. Put checks that must run on every call in a `PreToolUse` hook.",
+        "**Pairing `bypassPermissions` with an allow list.** The list does not limit that mode. Use deny rules, and run it only in an isolated environment.",
+        "**Trusting a read-only annotation.** It is a hint for scheduling, and the handler is what decides whether the tool writes.",
+        "**Raising from a handler when the message matters.** An uncaught exception reaches Claude as its raw message. Catch and return `is_error` with a message written for the model."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A developer lists Read and Grep in allowed_tools, and expects shell commands to be out of reach. What happens?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Bash is removed from the agent's context before the first turn",
+              "**b**: Bash remains available, and its calls fall through to the mode",
+              "**c**: Bash calls are denied in every permission mode",
+              "**d**: Bash calls are approved automatically with no prompt"
+            ]
+          }
+        ],
+        [
+          "A PreToolUse hook returns deny for a call that a matching allow rule would approve, in acceptEdits mode. What happens to the call?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: It runs, and the allow rule wins",
+              "**b**: It goes to the callback, which decides",
+              "**c**: It waits for the permission mode to decide",
+              "**d**: It is blocked, and no later step is consulted"
+            ]
+          }
+        ],
+        [
+          "A custom in-process tool divides by zero and the handler throws without catching. What does Claude see?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Nothing, because the query aborts before any result is produced",
+              "**b**: The raw exception message as an error result, and the loop continues",
+              "**c**: A message that you compose, since uncaught errors are reported as written",
+              "**d**: A generic failure notice with the message stripped for safety"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**b**. The page says allowed_tools \"does not restrict Claude to only these tools\", and that unlisted tools \"fall through to permission_mode and can_use_tool\". *a* is ruled out because only a bare name in disallowed_tools \"removes the tool from Claude's context altogether\", and allowed_tools is not that setting. *c* is ruled out because allowed_tools \"auto-approves the tools you list\", so it approves and does not deny. *d* is ruled out because \"Tools not listed are still available, and calls to them that need approval fall through to the permission mode and canUseTool.\"",
+            "**d**. The page says \"Hooks run first, so a hook can deny a call outright\", and \"Each step can end the decision.\" *a* is ruled out because \"hooks run before every other step, and a hook deny applies even in bypassPermissions mode\", so an allow rule cannot override it. *b* is ruled out because \"The callback sees only what nothing earlier decided.\", and the hook has decided. *c* is ruled out because the mode is checked after the hooks, and \"Hooks run first, so a hook can deny a call outright\".",
+            "**b**. The page says the in-process server catches an uncaught exception and returns it as an error result that carries the raw exception message, and the loop goes on. *a* is ruled out because \"A handler error doesn't stop the agent loop.\" *d* is ruled out because the result is an error result \"that carries the raw exception message\", not a stripped one. *c* is ruled out because \"Claude sees the message you compose\" only when the handler catches the error and returns is_error, and an uncaught exception does not do that."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 13,
+    "code": 0,
+    "tables": 0,
+    "lists": 5,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "a7c1490a6da3694ae38795cbd8dd6389d784f15d769d0d4608397febd4a3f6a8"
+}

@@ -1,0 +1,93 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "74-scenario-claude-code-in-ci"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 3,
+  "title": "Practice: the design of a pull request pipeline that uses Claude (Java)",
+  "lang": "java",
+  "main_file": "project/ci/pipeline.json",
+  "files": [
+    "project/ci/review-criteria.md",
+    "project/ci/review.schema.json",
+    "project/ci/testgen-prompt.md"
+  ],
+  "test_file": "src/test/java/CiSetupTest.java",
+  "build": [
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-3/check_files.py",
+    "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-3/project/ci/pipeline.json",
+    "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-3/project/ci/review-criteria.md",
+    "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-3/project/ci/review.schema.json",
+    "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-3/project/ci/testgen-prompt.md"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-3",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_whoWaitsDecidesBetweenRealTimeAndBatch()",
+      "kind": "main",
+      "says": "A job a person waits for is real time, a job nobody waits for is a batch"
+    },
+    {
+      "id": "e1_aReviewHasAPassForEachFileAndThenAnIntegrationPass()",
+      "kind": "edge",
+      "says": "The review has a pass per file, then an integration pass"
+    },
+    {
+      "id": "e2_aReviewRunsInAFreshSessionAndIsGivenTheEarlierFindings()",
+      "kind": "edge",
+      "says": "The review runs in a fresh session and is given the earlier findings"
+    },
+    {
+      "id": "e3_everyClaudeCommandIsHeadlessJsonAndBounded()",
+      "kind": "edge",
+      "says": "Every claude command is headless, JSON and bounded; the schema has a closed severity and required fields"
+    },
+    {
+      "id": "e4_theReviewCanOnlyRead()",
+      "kind": "edge",
+      "says": "The review has read tools only, in its list and in its command"
+    },
+    {
+      "id": "e5_theCriteriaNameWhatToReportWhatToSkipAndAnExampleForEachSeverity()",
+      "kind": "edge",
+      "says": "The criteria list what to report and skip, give an example for each severity and use no vague phrase"
+    },
+    {
+      "id": "e6_theTestPromptPassesTheExistingTestsAndSaysWhatAUsefulTestIs()",
+      "kind": "edge",
+      "says": "The test prompt passes the changed files and the existing tests and defines a useful test"
+    },
+    {
+      "id": "e7_noFileHoldsAPersonalPathAnAddressOrAKey()",
+      "kind": "edge",
+      "says": "No personal path, address or key in any file"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/74-scenario-claude-code-in-ci/02-review-passes-criteria-test-generation-and-the-practice.md"
+}

@@ -1,0 +1,417 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "43-debugging-claude-applications"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: diagnose a failure from a trace (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: diagnose a failure from a trace"
+    },
+    {
+      "type": "para",
+      "text": "A Claude application fails in ways that look alike from outside: \"it did not work\". The fix depends on two answers. **Where did it fail:** in your integration (the request you built, the code that parses the output, the tool you run), in the model's output, in the service or the network, or in your account? **What should happen next:** fix and resend, retry with back-off, wait for a header, use a fallback model, or hand the problem to a person? In this practice you write the function that reads a trace of what happened and answers both. It is the course's own decision table, built from the documented error types, stop reasons and loop rules; nothing here calls a model or the network."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "para",
+      "text": "The Java and Kotlin folders give you `Json` (parse text into maps, lists, strings, numbers, booleans and null, and write them back). Python and TypeScript have JSON built in. A trace is a list of events, and an event is a map with string keys. A number read from JSON is a `Long` in Java and Kotlin; read numbers as `Number`."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The events"
+    },
+    {
+      "type": "para",
+      "text": "Every event has a `kind`. Fields not listed for a kind are ignored, and a listed field may be missing."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Kind",
+        "Fields"
+      ],
+      "rows": [
+        [
+          "`request`",
+          "`model`, `max_tokens`, `tools` (a list of tool names), `last_user_blocks` (the block types of the last user message, in order, for example `[\"tool_result\", \"text\"]`)"
+        ],
+        [
+          "`response`",
+          "`status` (200), `stop_reason`, `content` (a list of blocks)"
+        ],
+        [
+          "`error`",
+          "`status`, `error_type`, `message`, `headers` (a map), `error_code`"
+        ],
+        [
+          "`network_error`",
+          "`message`"
+        ],
+        [
+          "`tool_call`",
+          "`name`, `input`"
+        ],
+        [
+          "`tool_result`",
+          "`name`, `is_error`, `exception` (text, present when our own tool code raised)"
+        ],
+        [
+          "`parse`",
+          "`ok`, `text` (the model output our code tried to parse)"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working diagnosis with seven gaps cut out of it. Everything that is plumbing is written and correct: the HTTP and stop reason tables, the request tracking, the classification of each event kind, the loop that finds the first failure and the final answer. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_rate_limit` unlocks `e1`: the diagnosis of a 429 (`retry-after` wins, then the spend cap, then the plain rate limit).",
+        "`_by_status` unlocks `m1` and `e1`: the table row for a status and the fallback by class.",
+        "`_has_json_object` unlocks `e4`: whether the text holds a JSON object between its first `{` and last `}`.",
+        "`_empty_origin` unlocks `e3`: integration or model for an empty end turn, from the block order.",
+        "`_tool_failure` unlocks `e5`: the unknown tool and the tool that raised.",
+        "`_recovered` unlocks `e6` and `e7`: whether a later good response recovered the run.",
+        "`_stop_failure` unlocks `e2`: the table row for a response that succeeded but stopped for a bad reason, and nothing for the fine ones."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole function; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "`diagnose(trace)` returns the **first failure** in the trace as `{\"index\", \"type\", \"origin\", \"recovery\", \"recovered\"}`. `index` is the event's position. The origin is one of `integration` (what you built or sent), `model` (what the model produced), `service` (capacity, the provider or the network) and `account` (credential, billing, access, limits). A trace with no failure returns `{\"index\": -1, \"type\": \"ok\", \"origin\": \"none\", \"recovery\": \"none\", \"recovered\": false}`, and so does an empty trace. The `request` events are not failures; each one sets the tool list and the last-user blocks that later events are judged against (a trace with no request yet has no tool list, so no tool call is unknown)."
+    },
+    {
+      "type": "para",
+      "text": "**An `error` event** is classified by status; the result is `type | origin | recovery`:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Status",
+        "Result"
+      ],
+      "rows": [
+        [
+          "400",
+          "`invalid_request` `integration` `fix_request`"
+        ],
+        [
+          "401",
+          "`authentication` `account` `fix_credentials`"
+        ],
+        [
+          "402",
+          "`billing` `account` `fix_billing`"
+        ],
+        [
+          "403",
+          "`permission` `account` `fix_access`"
+        ],
+        [
+          "404",
+          "`not_found` `integration` `fix_request`"
+        ],
+        [
+          "409",
+          "`conflict` `integration` `resolve_then_retry`"
+        ],
+        [
+          "413",
+          "`request_too_large` `integration` `shrink_request`"
+        ],
+        [
+          "429",
+          "with a `retry-after` header: `rate_limit` `service` `wait_retry_after`; otherwise with `error_code` equal to `enforced_spend_limit_reached`: `spend_cap` `account` `wait_for_reset`; otherwise `rate_limit` `service` `retry_backoff`"
+        ],
+        [
+          "500",
+          "`server_error` `service` `retry_backoff`"
+        ],
+        [
+          "504",
+          "`timeout` `service` `stream_or_batch`"
+        ],
+        [
+          "529",
+          "`overloaded` `service` `retry_backoff`"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Two more rules. A 400 whose message contains `spend limit`, in any letter case, is `spend_limit` `account` `raise_limit`. Any other status is classed like the nearest documented one: 500 and above like 500, anything else like 400."
+    },
+    {
+      "type": "para",
+      "text": "**A `network_error` event** is `network` `service` `retry_backoff`."
+    },
+    {
+      "type": "para",
+      "text": "**A `response` event with status 200** fails by its `stop_reason`:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Stop reason",
+        "Result"
+      ],
+      "rows": [
+        [
+          "`max_tokens`",
+          "`truncated` `integration` `raise_max_tokens`"
+        ],
+        [
+          "`model_context_window_exceeded`",
+          "`context_exceeded` `integration` `trim_context`"
+        ],
+        [
+          "`refusal`",
+          "`refusal` `model` `fallback_model`"
+        ],
+        [
+          "`pause_turn`",
+          "`paused` `integration` `continue_turn`"
+        ],
+        [
+          "`end_turn` with no content blocks",
+          "`empty_response`, and the origin depends on the most recent `request`: when its `last_user_blocks` has a `text` block after a `tool_result` block, `integration` `remove_text_after_tool_result`; otherwise `model` `add_continue_prompt`"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Any other stop reason (`end_turn` with content, `stop_sequence`, `tool_use`) is not a failure."
+    },
+    {
+      "type": "para",
+      "text": "**A `tool_call`** whose `name` is not in the most recent request's `tools` is `unknown_tool` `model` `return_error_result`. **A `tool_result`** with a non-empty `exception` is `tool_exception` `integration` `fix_tool_code`; one that is flagged `is_error` without an exception is a tool reporting an error as designed, and is not a failure. **A `parse` event** with `ok` false is `parse_failure`. When the text holds a JSON object (the text from its first `{` to its last `}` parses as a JSON object) the integration's parser was too strict: `integration` `extract_json`. Otherwise the model did not produce JSON: `model` `validate_and_retry`."
+    },
+    {
+      "type": "para",
+      "text": "`recovered` is true when a later event is a `response` with status 200, stop reason `end_turn` and at least one content block."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Each documented HTTP error maps to its type, origin and recovery"
+        ],
+        [
+          "`e1`",
+          "The two kinds of 429, the 400 spend limit, and the fallback by class for statuses the table does not list"
+        ],
+        [
+          "`e2`",
+          "A 200 response with a failing stop reason, and the stop reasons that are fine"
+        ],
+        [
+          "`e3`",
+          "An empty `end_turn`: our message structure or the model, by the last user message's blocks"
+        ],
+        [
+          "`e4`",
+          "A parse failure: our parser or the model, by whether a JSON object is in the text"
+        ],
+        [
+          "`e5`",
+          "A tool name the model invented against our own tool raising; a tool-reported error is not a failure"
+        ],
+        [
+          "`e6`",
+          "The first failure wins, with its index; a later good response means it recovered; a clean or empty trace is `ok`"
+        ],
+        [
+          "`e7`",
+          "A dropped connection has no status and belongs to the service side, and may recover"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/** Diagnose a failure from a trace. See ../../statement.md. */\nfinal class Diagnose {\n    private static final System.Logger LOG = System.getLogger(Diagnose.class.getName());\n    private static final Map<Integer, String[]> HTTP = Map.of(\n        400, new String[] {\"invalid_request\", \"integration\", \"fix_request\"},\n        401, new String[] {\"authentication\", \"account\", \"fix_credentials\"},\n        402, new String[] {\"billing\", \"account\", \"fix_billing\"},\n        403, new String[] {\"permission\", \"account\", \"fix_access\"},\n        404, new String[] {\"not_found\", \"integration\", \"fix_request\"},\n        409, new String[] {\"conflict\", \"integration\", \"resolve_then_retry\"},\n        413, new String[] {\"request_too_large\", \"integration\", \"shrink_request\"},\n        500, new String[] {\"server_error\", \"service\", \"retry_backoff\"},\n        504, new String[] {\"timeout\", \"service\", \"stream_or_batch\"},\n        529, new String[] {\"overloaded\", \"service\", \"retry_backoff\"});\n    private static final Map<String, String[]> STOP = Map.of(\n        \"max_tokens\", new String[] {\"truncated\", \"integration\", \"raise_max_tokens\"},\n        \"model_context_window_exceeded\", new String[] {\"context_exceeded\", \"integration\", \"trim_context\"},\n        \"refusal\", new String[] {\"refusal\", \"model\", \"fallback_model\"},\n        \"pause_turn\", new String[] {\"paused\", \"integration\", \"continue_turn\"});\n\n    private static Map<String, Object> map(Object... kv) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);\n        return m;\n    }\n\n    private static String[] rateLimit(Map<String, Object> event) {\n        if (event.get(\"headers\") instanceof Map<?, ?> h && h.containsKey(\"retry-after\")) return new String[] {\"rate_limit\", \"service\", \"wait_retry_after\"};\n        if (\"enforced_spend_limit_reached\".equals(event.get(\"error_code\"))) return new String[] {\"spend_cap\", \"account\", \"wait_for_reset\"};\n        return new String[] {\"rate_limit\", \"service\", \"retry_backoff\"};\n    }\n\n    private static String[] byStatus(int status) {\n        if (HTTP.containsKey(status)) return HTTP.get(status);\n        return status >= 500 ? HTTP.get(500) : HTTP.get(400);\n    }\n    private static String[] http(Map<String, Object> event) {\n        int status = event.get(\"status\") instanceof Number n ? n.intValue() : 0;\n        if (status == 429) return rateLimit(event);\n        if (status == 400 && String.valueOf(event.getOrDefault(\"message\", \"\")).toLowerCase().contains(\"spend limit\")) return new String[] {\"spend_limit\", \"account\", \"raise_limit\"};\n        return byStatus(status);\n    }\n\n    private static boolean hasJsonObject(String text) {\n        int start = text.indexOf('{'), end = text.lastIndexOf('}');\n        if (start < 0 || end < start) return false;\n        try {\n            return Json.parse(text.substring(start, end + 1)) instanceof Map<?, ?>;\n        } catch (RuntimeException e) {\n            return false;\n        }\n    }\n\n    private static String[] emptyOrigin(List<String> lastBlocks) {\n        int at = lastBlocks.indexOf(\"tool_result\");\n        if (at >= 0 && lastBlocks.subList(at, lastBlocks.size()).contains(\"text\")) return new String[] {\"empty_response\", \"integration\", \"remove_text_after_tool_result\"};\n        return new String[] {\"empty_response\", \"model\", \"add_continue_prompt\"};\n    }\n\n    private static String[] toolFailure(Map<String, Object> event, List<String> tools) {\n        Object kind = event.get(\"kind\");\n        if (\"tool_call\".equals(kind) && tools != null && !tools.contains(event.get(\"name\"))) return new String[] {\"unknown_tool\", \"model\", \"return_error_result\"};\n        if (\"tool_result\".equals(kind) && event.get(\"exception\") instanceof String s && !s.isEmpty()) return new String[] {\"tool_exception\", \"integration\", \"fix_tool_code\"};\n        return null;\n    }\n\n    private static boolean recoveredAfter(List<Map<String, Object>> trace, int i) {\n        for (Map<String, Object> e : trace.subList(i + 1, trace.size())) {\n            if (\"response\".equals(e.get(\"kind\")) && e.get(\"status\") instanceof Number n && n.intValue() == 200 && \"end_turn\".equals(e.get(\"stop_reason\"))\n                && e.get(\"content\") instanceof List<?> c && !c.isEmpty()) return true;\n        }\n        return false;\n    }\n\n    /** The triple for a successful response that still failed by its stop reason, or null. */\n    private static String[] stopFailure(String reason) {\n        return reason == null ? null : STOP.get(reason);\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static String[] classify(Map<String, Object> event, List<String> tools, List<String> lastBlocks) {\n        String kind = (String) event.get(\"kind\");\n        if (kind == null) return null;\n        switch (kind) {\n            case \"error\":\n                return http(event);\n            case \"network_error\":\n                return new String[] {\"network\", \"service\", \"retry_backoff\"};\n            case \"response\":\n                if (event.get(\"status\") instanceof Number n && n.intValue() == 200) {\n                    String reason = (String) event.get(\"stop_reason\");\n                    String[] stopped = stopFailure(reason);\n                    if (stopped != null) return stopped;\n                    if (\"end_turn\".equals(reason) && !(event.get(\"content\") instanceof List<?> c && !c.isEmpty())) return emptyOrigin(lastBlocks);\n                }\n                return null;\n            case \"tool_call\":\n            case \"tool_result\":\n                return toolFailure(event, tools);\n            case \"parse\":\n                if (Boolean.FALSE.equals(event.get(\"ok\"))) {\n                    return hasJsonObject(String.valueOf(event.getOrDefault(\"text\", \"\"))) ? new String[] {\"parse_failure\", \"integration\", \"extract_json\"}\n                        : new String[] {\"parse_failure\", \"model\", \"validate_and_retry\"};\n                }\n                return null;\n            default:\n                return null;\n        }\n    }\n\n    /** The first failure in the trace: its index, type, origin, recovery, and whether a later response recovered. */\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> diagnose(List<Map<String, Object>> trace) {\n        LOG.log(System.Logger.Level.DEBUG, \"diagnose input: {0}\", trace);\n        List<String> tools = null, lastBlocks = List.of();\n        for (int i = 0; i < trace.size(); i++) {\n            Map<String, Object> event = trace.get(i);\n            if (\"request\".equals(event.get(\"kind\"))) {\n                tools = event.get(\"tools\") instanceof List<?> t ? (List<String>) t : null;\n                lastBlocks = event.get(\"last_user_blocks\") instanceof List<?> b ? (List<String>) b : List.of();\n                continue;\n            }\n            String[] found = classify(event, tools, lastBlocks);\n            if (found != null) {\n                boolean recovered = recoveredAfter(trace, i);\n                return map(\"index\", i, \"type\", found[0], \"origin\", found[1], \"recovery\", found[2], \"recovered\", recovered);\n            }\n        }\n        return map(\"index\", -1, \"type\", \"ok\", \"origin\", \"none\", \"recovery\", \"none\", \"recovered\", false);\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // A trace is the list of what happened: the request, then what came back.\n        Map<String, Object> request = Map.of(\"kind\", \"request\", \"model\", \"claude-sonnet-5-5\", \"max_tokens\", 1024,\n            \"tools\", List.of(\"get_weather\"), \"last_user_blocks\", List.of(\"text\"));\n\n        for (Object[] failure : new Object[][] {{401, \"authentication_error\"}, {504, \"timeout_error\"}, {529, \"overloaded_error\"}}) {\n            Map<String, Object> error = Map.of(\"kind\", \"error\", \"status\", failure[0], \"error_type\", failure[1], \"message\", \"m\");\n            Map<String, Object> d = Diagnose.diagnose(List.of(request, error));\n            System.out.println(\"HTTP \" + failure[0] + \": type=\" + (d == null ? null : d.get(\"type\")) + \" origin=\" + (d == null ? null : d.get(\"origin\"))\n                + \" recovery=\" + (d == null ? null : d.get(\"recovery\")));\n        }\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/** Diagnose a failure from a trace. See ../../statement.md. */\nfinal class Diagnose {\n    private static final System.Logger LOG = System.getLogger(Diagnose.class.getName());\n    private static final Map<Integer, String[]> HTTP = Map.of(\n        400, new String[] {\"invalid_request\", \"integration\", \"fix_request\"},\n        401, new String[] {\"authentication\", \"account\", \"fix_credentials\"},\n        402, new String[] {\"billing\", \"account\", \"fix_billing\"},\n        403, new String[] {\"permission\", \"account\", \"fix_access\"},\n        404, new String[] {\"not_found\", \"integration\", \"fix_request\"},\n        409, new String[] {\"conflict\", \"integration\", \"resolve_then_retry\"},\n        413, new String[] {\"request_too_large\", \"integration\", \"shrink_request\"},\n        500, new String[] {\"server_error\", \"service\", \"retry_backoff\"},\n        504, new String[] {\"timeout\", \"service\", \"stream_or_batch\"},\n        529, new String[] {\"overloaded\", \"service\", \"retry_backoff\"});\n    private static final Map<String, String[]> STOP = Map.of(\n        \"max_tokens\", new String[] {\"truncated\", \"integration\", \"raise_max_tokens\"},\n        \"model_context_window_exceeded\", new String[] {\"context_exceeded\", \"integration\", \"trim_context\"},\n        \"refusal\", new String[] {\"refusal\", \"model\", \"fallback_model\"},\n        \"pause_turn\", new String[] {\"paused\", \"integration\", \"continue_turn\"});\n\n    private static Map<String, Object> map(Object... kv) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);\n        return m;\n    }\n\n    // TODO 1 of 7 (unlocks e1): the diagnosis of a 429.\n    // Receives the error event. Returns {\"rate_limit\", \"service\", \"wait_retry_after\"} when its \"headers\" map has a \"retry-after\" key (this wins),\n    // else {\"spend_cap\", \"account\", \"wait_for_reset\"} when \"error_code\" is \"enforced_spend_limit_reached\", else {\"rate_limit\", \"service\",\n    // \"retry_backoff\"}. Example: a 429 with error_code enforced_spend_limit_reached and no headers -> the spend_cap triple\n    private static String[] rateLimit(Map<String, Object> event) {\n        return new String[] {\"rate_limit\", \"service\", \"retry_backoff\"};\n    }\n\n    // TODO 6 of 7 (unlocks e1 and m1): the triple for a status.\n    // Receives the status number. Returns HTTP.get(status) for a documented status; any other status falls back by class: 500 and above\n    // use the 500 row, everything else the 400 row. Example: byStatus(502) -> HTTP.get(500), byStatus(418) -> HTTP.get(400)\n    private static String[] byStatus(int status) {\n        return HTTP.get(400);\n    }\n    private static String[] http(Map<String, Object> event) {\n        int status = event.get(\"status\") instanceof Number n ? n.intValue() : 0;\n        if (status == 429) return rateLimit(event);\n        if (status == 400 && String.valueOf(event.getOrDefault(\"message\", \"\")).toLowerCase().contains(\"spend limit\")) return new String[] {\"spend_limit\", \"account\", \"raise_limit\"};\n        return byStatus(status);\n    }\n\n    // TODO 2 of 7 (unlocks e4): does the text hold a JSON object?\n    // Receives a text. Returns true when the span from the first '{' to the last '}' parses as JSON (use Json.parse) and is an object\n    // (a Map, not a list or a number); false for no braces, a broken span or another JSON type.\n    // Example: hasJsonObject(\"ok {\\\"a\\\": 1} done\") -> true, hasJsonObject(\"see {nope}\") -> false\n    private static boolean hasJsonObject(String text) {\n        return false;\n    }\n\n    // TODO 3 of 7 (unlocks e3): who is to blame for an empty end turn?\n    // Receives the block types of the last user message, in order. Returns {\"empty_response\", \"integration\", \"remove_text_after_tool_result\"}\n    // when a \"text\" block comes after a \"tool_result\" block, else {\"empty_response\", \"model\", \"add_continue_prompt\"}.\n    // Example: [\"tool_result\", \"text\"] -> integration; [\"text\", \"tool_result\"] -> model\n    private static String[] emptyOrigin(List<String> lastBlocks) {\n        return new String[] {\"empty_response\", \"model\", \"add_continue_prompt\"};\n    }\n\n    // TODO 4 of 7 (unlocks e5): is this tool event a failure, and whose?\n    // Receives an event and the tool names of the last request (null when unknown). Returns {\"unknown_tool\", \"model\", \"return_error_result\"}\n    // for a \"tool_call\" whose name is not in tools, {\"tool_exception\", \"integration\", \"fix_tool_code\"} for a \"tool_result\" with a non-empty\n    // \"exception\" string, and null otherwise (an is_error flag alone is not our failure).\n    // Example: a tool_call named get_wether with tools [get_weather] -> the unknown_tool triple\n    private static String[] toolFailure(Map<String, Object> event, List<String> tools) {\n        return null;\n    }\n\n    // TODO 5 of 7 (unlocks e6): did a later response recover from the failure at index i?\n    // Receives the trace and the index of the failure. Returns true when a later event is a response with status 200, stop_reason\n    // \"end_turn\" and a non-empty content list; false otherwise. Example: a failure at 1 and a good end_turn at 5 -> true\n    private static boolean recoveredAfter(List<Map<String, Object>> trace, int i) {\n        return false;\n    }\n\n    // TODO 7 of 7 (unlocks e2): the triple for a response that succeeded but stopped for a bad reason.\n    // Receives the stop_reason (maybe null). Returns STOP.get(reason) when the reason is in the STOP table, else null (end_turn, stop_sequence and tool_use are fine).\n    // Example: stopFailure(\"refusal\") -> {\"refusal\", \"model\", \"fallback_model\"}, stopFailure(\"end_turn\") -> null\n    private static String[] stopFailure(String reason) {\n        return null;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static String[] classify(Map<String, Object> event, List<String> tools, List<String> lastBlocks) {\n        String kind = (String) event.get(\"kind\");\n        if (kind == null) return null;\n        switch (kind) {\n            case \"error\":\n                return http(event);\n            case \"network_error\":\n                return new String[] {\"network\", \"service\", \"retry_backoff\"};\n            case \"response\":\n                if (event.get(\"status\") instanceof Number n && n.intValue() == 200) {\n                    String reason = (String) event.get(\"stop_reason\");\n                    String[] stopped = stopFailure(reason);\n                    if (stopped != null) return stopped;\n                    if (\"end_turn\".equals(reason) && !(event.get(\"content\") instanceof List<?> c && !c.isEmpty())) return emptyOrigin(lastBlocks);\n                }\n                return null;\n            case \"tool_call\":\n            case \"tool_result\":\n                return toolFailure(event, tools);\n            case \"parse\":\n                if (Boolean.FALSE.equals(event.get(\"ok\"))) {\n                    return hasJsonObject(String.valueOf(event.getOrDefault(\"text\", \"\"))) ? new String[] {\"parse_failure\", \"integration\", \"extract_json\"}\n                        : new String[] {\"parse_failure\", \"model\", \"validate_and_retry\"};\n                }\n                return null;\n            default:\n                return null;\n        }\n    }\n\n    /** The first failure in the trace: its index, type, origin, recovery, and whether a later response recovered. */\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> diagnose(List<Map<String, Object>> trace) {\n        LOG.log(System.Logger.Level.DEBUG, \"diagnose input: {0}\", trace);\n        List<String> tools = null, lastBlocks = List.of();\n        for (int i = 0; i < trace.size(); i++) {\n            Map<String, Object> event = trace.get(i);\n            if (\"request\".equals(event.get(\"kind\"))) {\n                tools = event.get(\"tools\") instanceof List<?> t ? (List<String>) t : null;\n                lastBlocks = event.get(\"last_user_blocks\") instanceof List<?> b ? (List<String>) b : List.of();\n                continue;\n            }\n            String[] found = classify(event, tools, lastBlocks);\n            if (found != null) {\n                boolean recovered = recoveredAfter(trace, i);\n                return map(\"index\", i, \"type\", found[0], \"origin\", found[1], \"recovery\", found[2], \"recovered\", recovered);\n            }\n        }\n        return map(\"index\", -1, \"type\", \"ok\", \"origin\", \"none\", \"recovery\", \"none\", \"recovered\", false);\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // A trace is the list of what happened: the request, then what came back.\n        Map<String, Object> request = Map.of(\"kind\", \"request\", \"model\", \"claude-sonnet-5-5\", \"max_tokens\", 1024,\n            \"tools\", List.of(\"get_weather\"), \"last_user_blocks\", List.of(\"text\"));\n\n        for (Object[] failure : new Object[][] {{401, \"authentication_error\"}, {504, \"timeout_error\"}, {529, \"overloaded_error\"}}) {\n            Map<String, Object> error = Map.of(\"kind\", \"error\", \"status\", failure[0], \"error_type\", failure[1], \"message\", \"m\");\n            Map<String, Object> d = Diagnose.diagnose(List.of(request, error));\n            System.out.println(\"HTTP \" + failure[0] + \": type=\" + (d == null ? null : d.get(\"type\")) + \" origin=\" + (d == null ? null : d.get(\"origin\"))\n                + \" recovery=\" + (d == null ? null : d.get(\"recovery\")));\n        }\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 14,
+    "code": 2,
+    "tables": 4,
+    "lists": 1,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "58e121e4d73d2f9bd05414d4ad2b27956f1607c5eb919da552398410cd3ae7de",
+  "starting_code": "import java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/** Diagnose a failure from a trace. See ../../statement.md. */\nfinal class Diagnose {\n    private static final System.Logger LOG = System.getLogger(Diagnose.class.getName());\n    private static final Map<Integer, String[]> HTTP = Map.of(\n        400, new String[] {\"invalid_request\", \"integration\", \"fix_request\"},\n        401, new String[] {\"authentication\", \"account\", \"fix_credentials\"},\n        402, new String[] {\"billing\", \"account\", \"fix_billing\"},\n        403, new String[] {\"permission\", \"account\", \"fix_access\"},\n        404, new String[] {\"not_found\", \"integration\", \"fix_request\"},\n        409, new String[] {\"conflict\", \"integration\", \"resolve_then_retry\"},\n        413, new String[] {\"request_too_large\", \"integration\", \"shrink_request\"},\n        500, new String[] {\"server_error\", \"service\", \"retry_backoff\"},\n        504, new String[] {\"timeout\", \"service\", \"stream_or_batch\"},\n        529, new String[] {\"overloaded\", \"service\", \"retry_backoff\"});\n    private static final Map<String, String[]> STOP = Map.of(\n        \"max_tokens\", new String[] {\"truncated\", \"integration\", \"raise_max_tokens\"},\n        \"model_context_window_exceeded\", new String[] {\"context_exceeded\", \"integration\", \"trim_context\"},\n        \"refusal\", new String[] {\"refusal\", \"model\", \"fallback_model\"},\n        \"pause_turn\", new String[] {\"paused\", \"integration\", \"continue_turn\"});\n\n    private static Map<String, Object> map(Object... kv) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);\n        return m;\n    }\n\n    // TODO 1 of 7 (unlocks e1): the diagnosis of a 429.\n    // Receives the error event. Returns {\"rate_limit\", \"service\", \"wait_retry_after\"} when its \"headers\" map has a \"retry-after\" key (this wins),\n    // else {\"spend_cap\", \"account\", \"wait_for_reset\"} when \"error_code\" is \"enforced_spend_limit_reached\", else {\"rate_limit\", \"service\",\n    // \"retry_backoff\"}. Example: a 429 with error_code enforced_spend_limit_reached and no headers -> the spend_cap triple\n    private static String[] rateLimit(Map<String, Object> event) {\n        return new String[] {\"rate_limit\", \"service\", \"retry_backoff\"};\n    }\n\n    // TODO 6 of 7 (unlocks e1 and m1): the triple for a status.\n    // Receives the status number. Returns HTTP.get(status) for a documented status; any other status falls back by class: 500 and above\n    // use the 500 row, everything else the 400 row. Example: byStatus(502) -> HTTP.get(500), byStatus(418) -> HTTP.get(400)\n    private static String[] byStatus(int status) {\n        return HTTP.get(400);\n    }\n    private static String[] http(Map<String, Object> event) {\n        int status = event.get(\"status\") instanceof Number n ? n.intValue() : 0;\n        if (status == 429) return rateLimit(event);\n        if (status == 400 && String.valueOf(event.getOrDefault(\"message\", \"\")).toLowerCase().contains(\"spend limit\")) return new String[] {\"spend_limit\", \"account\", \"raise_limit\"};\n        return byStatus(status);\n    }\n\n    // TODO 2 of 7 (unlocks e4): does the text hold a JSON object?\n    // Receives a text. Returns true when the span from the first '{' to the last '}' parses as JSON (use Json.parse) and is an object\n    // (a Map, not a list or a number); false for no braces, a broken span or another JSON type.\n    // Example: hasJsonObject(\"ok {\\\"a\\\": 1} done\") -> true, hasJsonObject(\"see {nope}\") -> false\n    private static boolean hasJsonObject(String text) {\n        return false;\n    }\n\n    // TODO 3 of 7 (unlocks e3): who is to blame for an empty end turn?\n    // Receives the block types of the last user message, in order. Returns {\"empty_response\", \"integration\", \"remove_text_after_tool_result\"}\n    // when a \"text\" block comes after a \"tool_result\" block, else {\"empty_response\", \"model\", \"add_continue_prompt\"}.\n    // Example: [\"tool_result\", \"text\"] -> integration; [\"text\", \"tool_result\"] -> model\n    private static String[] emptyOrigin(List<String> lastBlocks) {\n        return new String[] {\"empty_response\", \"model\", \"add_continue_prompt\"};\n    }\n\n    // TODO 4 of 7 (unlocks e5): is this tool event a failure, and whose?\n    // Receives an event and the tool names of the last request (null when unknown). Returns {\"unknown_tool\", \"model\", \"return_error_result\"}\n    // for a \"tool_call\" whose name is not in tools, {\"tool_exception\", \"integration\", \"fix_tool_code\"} for a \"tool_result\" with a non-empty\n    // \"exception\" string, and null otherwise (an is_error flag alone is not our failure).\n    // Example: a tool_call named get_wether with tools [get_weather] -> the unknown_tool triple\n    private static String[] toolFailure(Map<String, Object> event, List<String> tools) {\n        return null;\n    }\n\n    // TODO 5 of 7 (unlocks e6): did a later response recover from the failure at index i?\n    // Receives the trace and the index of the failure. Returns true when a later event is a response with status 200, stop_reason\n    // \"end_turn\" and a non-empty content list; false otherwise. Example: a failure at 1 and a good end_turn at 5 -> true\n    private static boolean recoveredAfter(List<Map<String, Object>> trace, int i) {\n        return false;\n    }\n\n    // TODO 7 of 7 (unlocks e2): the triple for a response that succeeded but stopped for a bad reason.\n    // Receives the stop_reason (maybe null). Returns STOP.get(reason) when the reason is in the STOP table, else null (end_turn, stop_sequence and tool_use are fine).\n    // Example: stopFailure(\"refusal\") -> {\"refusal\", \"model\", \"fallback_model\"}, stopFailure(\"end_turn\") -> null\n    private static String[] stopFailure(String reason) {\n        return null;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static String[] classify(Map<String, Object> event, List<String> tools, List<String> lastBlocks) {\n        String kind = (String) event.get(\"kind\");\n        if (kind == null) return null;\n        switch (kind) {\n            case \"error\":\n                return http(event);\n            case \"network_error\":\n                return new String[] {\"network\", \"service\", \"retry_backoff\"};\n            case \"response\":\n                if (event.get(\"status\") instanceof Number n && n.intValue() == 200) {\n                    String reason = (String) event.get(\"stop_reason\");\n                    String[] stopped = stopFailure(reason);\n                    if (stopped != null) return stopped;\n                    if (\"end_turn\".equals(reason) && !(event.get(\"content\") instanceof List<?> c && !c.isEmpty())) return emptyOrigin(lastBlocks);\n                }\n                return null;\n            case \"tool_call\":\n            case \"tool_result\":\n                return toolFailure(event, tools);\n            case \"parse\":\n                if (Boolean.FALSE.equals(event.get(\"ok\"))) {\n                    return hasJsonObject(String.valueOf(event.getOrDefault(\"text\", \"\"))) ? new String[] {\"parse_failure\", \"integration\", \"extract_json\"}\n                        : new String[] {\"parse_failure\", \"model\", \"validate_and_retry\"};\n                }\n                return null;\n            default:\n                return null;\n        }\n    }\n\n    /** The first failure in the trace: its index, type, origin, recovery, and whether a later response recovered. */\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> diagnose(List<Map<String, Object>> trace) {\n        LOG.log(System.Logger.Level.DEBUG, \"diagnose input: {0}\", trace);\n        List<String> tools = null, lastBlocks = List.of();\n        for (int i = 0; i < trace.size(); i++) {\n            Map<String, Object> event = trace.get(i);\n            if (\"request\".equals(event.get(\"kind\"))) {\n                tools = event.get(\"tools\") instanceof List<?> t ? (List<String>) t : null;\n                lastBlocks = event.get(\"last_user_blocks\") instanceof List<?> b ? (List<String>) b : List.of();\n                continue;\n            }\n            String[] found = classify(event, tools, lastBlocks);\n            if (found != null) {\n                boolean recovered = recoveredAfter(trace, i);\n                return map(\"index\", i, \"type\", found[0], \"origin\", found[1], \"recovery\", found[2], \"recovered\", recovered);\n            }\n        }\n        return map(\"index\", -1, \"type\", \"ok\", \"origin\", \"none\", \"recovery\", \"none\", \"recovered\", false);\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/43-debugging-claude-applications/prose/unit-02/practice-3/src/main/java/Diagnose.java",
+    "test_path": "practice/level-2/43-debugging-claude-applications/prose/unit-02/practice-3/src/test/java/DiagnoseTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/43-debugging-claude-applications/prose/unit-02/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/43-debugging-claude-applications/prose/unit-02/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_eachDocumentedHttpErrorMapsToATypeAnOriginAndARecovery()",
+        "kind": "main",
+        "says": "Each documented HTTP error maps to its type, origin and recovery"
+      },
+      {
+        "id": "e1_a429IsARateLimitOrASpendCapAndOtherStatusesFallBackByClass()",
+        "kind": "edge",
+        "says": "The two kinds of 429, the 400 spend limit, and the fallback by class for statuses the table does not list"
+      },
+      {
+        "id": "e2_aSuccessfulResponseCanStillFailByItsStopReason()",
+        "kind": "edge",
+        "says": "A 200 response with a failing stop reason, and the stop reasons that are fine"
+      },
+      {
+        "id": "e3_anEmptyEndTurnIsTheIntegrationWhenTextFollowedTheToolResultAndTheModelOtherwise()",
+        "kind": "edge",
+        "says": "An empty end_turn: our message structure or the model, by the last user message's blocks"
+      },
+      {
+        "id": "e4_aParseFailureIsTheIntegrationWhenAJsonObjectIsInTheTextAndTheModelWhenNot()",
+        "kind": "edge",
+        "says": "A parse failure: our parser or the model, by whether a JSON object is in the text"
+      },
+      {
+        "id": "e5_toolFailuresSplitIntoAModelThatCalledAMissingToolAndOurToolThatRaised()",
+        "kind": "edge",
+        "says": "A tool name the model invented against our own tool raising; a tool-reported error is not a failure"
+      },
+      {
+        "id": "e6_theFirstFailureNamesTheCauseAndALaterGoodResponseMarksItRecovered()",
+        "kind": "edge",
+        "says": "The first failure wins, with its index; a later good response means it recovered; a clean or empty trace is ok"
+      },
+      {
+        "id": "e7_aDroppedConnectionHasNoStatusAndBelongsToTheServiceSide()",
+        "kind": "edge",
+        "says": "A dropped connection has no status and belongs to the service side, and may recover"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/43-debugging-claude-applications/prose/unit-02/practice-3/target/test-results/test"
+    },
+    "origin": "course/43-debugging-claude-applications/02-reading-a-trace-and-the-practice.md",
+    "concepts": [
+      "the practice of Reading a trace, isolating the origin and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/43-debugging-claude-applications/prose/unit-02/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "debugging-claude-applications-u2"
+}

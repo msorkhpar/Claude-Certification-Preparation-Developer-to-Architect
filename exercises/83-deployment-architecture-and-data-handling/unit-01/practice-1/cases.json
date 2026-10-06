@@ -1,0 +1,171 @@
+{
+  "practice": "83-deployment-architecture-and-data-handling/unit-01/practice-1",
+  "name": "data_policy",
+  "tests": {
+    "java": "DataPolicyTest",
+    "kotlin": "DataPolicyTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_compliant_deployment_has_no_findings",
+      "typescript": "m1 a compliant deployment has no findings",
+      "java": "m1_aCompliantDeploymentHasNoFindings",
+      "kotlin": "m1_aCompliantDeploymentHasNoFindings"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_residency_is_pinned_by_the_request_or_by_the_region_the_platform_allows",
+      "typescript": "e1 residency is pinned by the request or by the region the platform allows",
+      "java": "e1_residencyIsPinnedByTheRequestOrByTheRegionThePlatformAllows",
+      "kotlin": "e1_residencyIsPinnedByTheRequestOrByTheRegionThePlatformAllows"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_zero_data_retention_is_an_arrangement_of_the_providers_own_platforms_and_not_of_every_model",
+      "typescript": "e2 zero data retention is an arrangement of the providers own platforms and not of every model",
+      "java": "e2_zeroDataRetentionIsAnArrangementOfTheProvidersOwnPlatformsAndNotOfEveryModel",
+      "kotlin": "e2_zeroDataRetentionIsAnArrangementOfTheProvidersOwnPlatformsAndNotOfEveryModel"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_protected_health_information_needs_a_covered_platform_an_agreement_and_deidentified_input",
+      "typescript": "e3 protected health information needs a covered platform an agreement and deidentified input",
+      "java": "e3_protectedHealthInformationNeedsACoveredPlatformAnAgreementAndDeidentifiedInput",
+      "kotlin": "e3_protectedHealthInformationNeedsACoveredPlatformAnAgreementAndDeidentifiedInput"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_a_multi_tenant_service_needs_a_workspace_for_each_tenant",
+      "typescript": "e4 a multi tenant service needs a workspace for each tenant",
+      "java": "e4_aMultiTenantServiceNeedsAWorkspaceForEachTenant",
+      "kotlin": "e4_aMultiTenantServiceNeedsAWorkspaceForEachTenant"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_an_audit_log_must_not_store_prompts_that_hold_sensitive_data",
+      "typescript": "e5 an audit log must not store prompts that hold sensitive data",
+      "java": "e5_anAuditLogMustNotStorePromptsThatHoldSensitiveData",
+      "kotlin": "e5_anAuditLogMustNotStorePromptsThatHoldSensitiveData"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_audit_retention_stays_between_the_minimum_and_the_maximum",
+      "typescript": "e6 audit retention stays between the minimum and the maximum",
+      "java": "e6_auditRetentionStaysBetweenTheMinimumAndTheMaximum",
+      "kotlin": "e6_auditRetentionStaysBetweenTheMinimumAndTheMaximum"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_purge_only_what_is_past_the_retention_limit_and_not_on_hold",
+      "typescript": "e7 purge only what is past the retention limit and not on hold",
+      "java": "e7_purgeOnlyWhatIsPastTheRetentionLimitAndNotOnHold",
+      "kotlin": "e7_purgeOnlyWhatIsPastTheRetentionLimitAndNotOnHold"
+    },
+    "e8": {
+      "kind": "edge",
+      "python": "test_e8_a_request_is_served_only_by_a_deployment_that_keeps_its_data_in_the_region",
+      "typescript": "e8 a request is served only by a deployment that keeps its data in the region",
+      "java": "e8_aRequestIsServedOnlyByADeploymentThatKeepsItsDataInTheRegion",
+      "kotlin": "e8_aRequestIsServedOnlyByADeploymentThatKeepsItsDataInTheRegion"
+    }
+  },
+  "plants": {
+    "wrong-geo-unset-passes": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "treats a request with no inference geo as pinned to the US"
+    },
+    "wrong-eu-pin-allowed": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "accepts a European residency requirement on the first-party API"
+    },
+    "wrong-any-region-for-us": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "accepts any cloud region for a US residency requirement"
+    },
+    "wrong-cloud-zdr-ok": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "treats the zero data retention flag as valid on a cloud provider's platform"
+    },
+    "wrong-fable-zdr-ok": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "ignores that the top-tier model needs 30-day retention"
+    },
+    "wrong-baa-optional": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "does not ask for a signed agreement for protected health information on the API"
+    },
+    "wrong-aws-hipaa-ok": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "accepts protected health information on a platform without HIPAA readiness"
+    },
+    "wrong-redact-not-safe": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "accepts only tokenising and rejects redaction as de-identification"
+    },
+    "wrong-tenancy-ignored": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "does not check the isolation of tenants"
+    },
+    "wrong-audit-phi-only": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "flags stored prompts only when health data is in scope and not for other identifiers"
+    },
+    "wrong-retention-long-inclusive": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "flags a retention equal to the maximum as too long"
+    },
+    "wrong-retention-short-inclusive": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "flags a retention equal to the minimum as too short"
+    },
+    "wrong-purge-held": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "purges an entry that is on legal hold"
+    },
+    "wrong-purge-boundary": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "purges an entry that is exactly at the limit"
+    },
+    "wrong-global-fallback": {
+      "caught_by": [
+        "e8"
+      ],
+      "defect": "serves a request from a global deployment when the regional one is missing"
+    },
+    "wrong-pick-first-listed": {
+      "caught_by": [
+        "e8"
+      ],
+      "defect": "picks the first listed deployment and not the first by name"
+    }
+  }
+}

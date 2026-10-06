@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "capability.py",
+      "old": "    if request[\"model\"] not in policy[\"models\"][team]:\n        return \"deny\", \"model not allowed\"\n",
+      "new": "    if request[\"recent\"] >= policy[\"limits\"][team]:\n        return \"deny\", \"rate limited\"\n    if request[\"model\"] not in policy[\"models\"][team]:\n        return \"deny\", \"model not allowed\"\n"
+    }
+  ]
+}

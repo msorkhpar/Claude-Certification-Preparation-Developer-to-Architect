@@ -1,0 +1,15 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "pipeline.ts",
+      "old": "    if (!visible(chunk, allowedDocs)) return;\n",
+      "new": ""
+    },
+    {
+      "file": "pipeline.ts",
+      "old": "  return scored.slice(0, k).map((s) => s[2]);",
+      "new": "  return scored.slice(0, k).map((s) => s[2]).filter((id) => chunks.some((c) => c.id === id && visible(c, allowedDocs)));"
+    }
+  ]
+}

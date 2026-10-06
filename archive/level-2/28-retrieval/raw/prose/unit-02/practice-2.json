@@ -1,0 +1,288 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "28-retrieval"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: a retrieval pipeline graded on recall (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a retrieval pipeline graded on recall"
+    },
+    {
+      "type": "para",
+      "text": "A retrieval pipeline cuts documents into chunks, finds the chunks that match a question by two different indexes, merges the two rankings, and optionally lets a second model re-order the best few. You do not judge it by how it reads: you measure it, by recall, over questions whose answers you know. The ideas come from the Claude documentation on embeddings and search results, read on 2026-10-03, and from the Anthropic write-up on contextual retrieval; the lesson pages explain them."
+    },
+    {
+      "type": "para",
+      "text": "**The embedding here is a toy.** Anthropic offers no embedding model, and nothing in this practice touches a network or a vendor. `embed(text)` is given: it counts letter trigrams of the tokenised text into 64 buckets with a fixed hash (FNV-1a over the UTF-8 bytes of the trigram, modulo 64) and scales the vector to length 1. It sees spelling, not meaning, so \"delete\" and \"deleting\" are close and \"delete\" and \"remove\" are not. It stands in for a real embedding model so that the tests are deterministic; the reranker is likewise a function the tests pass in. The fusion, BM25 and recall code you write is the real thing."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`tokenize(text)`",
+          "lower-case words and numbers: the runs of `[a-z0-9]`"
+        ],
+        [
+          "`embed(text)`",
+          "the toy embedding above: 64 numbers of length 1"
+        ],
+        [
+          "chunk",
+          "`{id: \"<doc>#<n>\", doc, text}`"
+        ],
+        [
+          "`scorer(query, text)`",
+          "a reranker: a number, higher is more relevant"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working pipeline with seven gaps cut out of it. Everything that is plumbing is written and correct: `tokenize`, the toy `embed`, the argument check of `chunk`, `build_chunks`, the BM25 bookkeeping (token counts, document frequencies, the average length, the loop over chunks and terms), `bm25_rank`, `embedding_rank`, the ordering helper that sorts scores best first with ties by id, `retrieve` with its modes and its pool, and `evaluate`. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value (an empty list, an empty dict, 0), so the starter runs and fails the cases on an assertion. The names below are Python's; TypeScript, Java and Kotlin have the camel-case forms (`windows`, `termScore`, `dot`, `fuse`, `rerank`, `recallAtK`, `indexedText`). Write them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_windows` unlocks `e1`: the windows over a list of words, ending at the last word.",
+        "`_term_score` unlocks `e2`: the BM25 score of one term in one chunk, with its idf and its length normalisation.",
+        "`_dot` unlocks `m1`: the dot product that `embedding_rank` ranks by.",
+        "`fuse` unlocks `e3`: reciprocal rank fusion, ties by id.",
+        "`rerank` unlocks `e4`: the ids ordered by the scorer, equal scores in input order, cut to `top_n`.",
+        "`recall_at_k` unlocks `e5`: documents found among the first `k` chunks, each counted once.",
+        "`_indexed_text` unlocks `e6`: the context sentence put in front of the chunk's text for indexing."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs all of them. About twenty lines in all. To see what a gap receives, log its input with the `log` line at the top of the file; `retrieve` already logs its own input, and a run shows the lines under the failing case."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`chunk(text, size, overlap)`: split the text on whitespace into words and return windows of `size` words that start `size - overlap` words apart; the windows stop at the first one that reaches the last word, so the last window ends at the last word and no window is repeated. No words gives an empty list. A `size` below 1, or an `overlap` below 0 or not below `size`, is an error (`ValueError` in Python, `RangeError` in TypeScript, `IllegalArgumentException` in Java and Kotlin).",
+        "`build_chunks(corpus, size, overlap)`: every document `{id, text}` becomes its chunks, with ids `<doc>#0`, `<doc>#1` and so on.",
+        "`bm25_rank(chunks, query, index_text=None)`: chunk ids by BM25 with `k1 = 1.5`, `b = 0.75` and `idf = ln(1 + (N - df + 0.5) / (df + 0.5))`; a distinct query term scores `idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * len / avg_len))` and a chunk's score is the sum, adding the terms in the order they first appear in the query. `N` is the number of chunks, `len` a chunk's token count. Best first, ties by id, score 0 left out. When `index_text` maps a chunk id to a string, that string is indexed instead of the chunk's text.",
+        "`embedding_rank(chunks, query, index_text=None)`: chunk ids by the dot product of the `embed` vectors (they have length 1, so it is the cosine), best first, ties by id, a similarity of 0 or less left out; `index_text` as above.",
+        "`fuse(rankings, k=60)`: reciprocal rank fusion. An id's score is the sum, over the lists that hold it, of `1 / (k + rank)`, where rank starts at 1 and a repeat of an id in one list is ignored. Best first, ties by id.",
+        "`rerank(query, ids, texts, scorer, top_n=None)`: the given ids, ordered by `scorer(query, texts[id])` from high to low; ids with equal scores keep their input order; cut to `top_n` when it is given. Only the given ids take part.",
+        "`recall_at_k(ids, doc_of, relevant, k)`: the share of the relevant documents that appear among the documents of the first `k` chunk ids. A document counts once however many of its chunks are there. No relevant documents is an error.",
+        "`retrieve(chunks, query, mode=\"hybrid\", k=3, pool=10, contexts=None, scorer=None)`: the ids of the best `k` chunks. Mode `bm25` and `embedding` use one ranking, `hybrid` fuses both. `contexts` maps chunk ids to a sentence that is indexed in front of the chunk's text (the sentence, a space, the text) for both indexes; the chunk itself is not changed. With a `scorer`, take the first `pool` ids of the ranking and rerank them to `k`.",
+        "`evaluate(chunks, queries, mode, k, ...)`: the mean `recall_at_k` over `[{query, relevant}]`, with the remaining arguments passed on to `retrieve`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Hybrid search finds what each single index misses, measured on a small knowledge base"
+        ],
+        [
+          "`e1`",
+          "Chunks overlap and end at the last word"
+        ],
+        [
+          "`e2`",
+          "A rare word outweighs common ones, and short chunks win"
+        ],
+        [
+          "`e3`",
+          "Fusion rewards agreement between lists and breaks ties by id"
+        ],
+        [
+          "`e4`",
+          "Reranking orders only the pool by the scorer"
+        ],
+        [
+          "`e5`",
+          "Recall counts documents, not chunks"
+        ],
+        [
+          "`e6`",
+          "A context sentence makes a bare chunk findable"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The tests read the knowledge base from `tests/fixture.json`."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// A retrieval pipeline: chunking, lexical and embedding search, fusion, reranking and recall. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\n\nconst log = logger(\"retrieval\");\n\nexport type Chunk = { id: string; doc: string; text: string };\nexport type Doc = { id: string; text: string };\nexport type Query = { query: string; relevant: string[] };\nexport type Scorer = (query: string, text: string) => number;\nexport type Options = { pool?: number; contexts?: Record<string, string>; scorer?: Scorer };\n\n/** Lower-case words and numbers: the runs of [a-z0-9] in the text. */\nexport function tokenize(text: string): string[] {\n  return text.toLowerCase().match(/[a-z0-9]+/g) ?? [];\n}\n\n// ---- given: a deterministic toy embedding (not a real model) -------------------------------------------------------\nconst DIMS = 64;\n\nfunction fnv1a(text: string): number {\n  let h = 2166136261;\n  for (const byte of new TextEncoder().encode(text)) h = Math.imul(h ^ byte, 16777619) >>> 0;\n  return h;\n}\n\n/** 64 numbers: letter-trigram counts of the tokenised text hashed into buckets, scaled to length 1.\n *  It sees spelling, not meaning: 'delete' and 'deleting' are close, 'delete' and 'remove' are not. */\nexport function embed(text: string): number[] {\n  const padded = \" \" + tokenize(text).join(\" \") + \" \";\n  const vector = new Array<number>(DIMS).fill(0);\n  for (let i = 0; i < padded.length - 2; i++) vector[fnv1a(padded.slice(i, i + 3)) % DIMS] += 1;\n  const length = Math.sqrt(vector.reduce((sum, x) => sum + x * x, 0));\n  return length ? vector.map((x) => x / length) : vector;\n}\n// ---------------------------------------------------------------------------------------------------------------------\n\n/** Windows of `size` words that start `size - overlap` words apart; the last window ends at the last word. */\nexport function chunk(text: string, size: number, overlap: number): string[] {\n  if (size < 1 || overlap < 0 || overlap >= size) throw new RangeError(\"size must be at least 1 and overlap must be in 0 .. size - 1\");\n  return windows(text.split(/\\s+/).filter((w) => w.length > 0), size, overlap);\n}\n\nfunction windows(words: string[], size: number, overlap: number): string[] {\n  const chunks: string[] = [];\n  for (let start = 0; start < words.length; start += size - overlap) {\n    chunks.push(words.slice(start, start + size).join(\" \"));\n    if (start + size >= words.length) break;\n  }\n  return chunks;\n}\n\n/** [{ id: \"<doc>#<n>\", doc, text }] for every document, in order. */\nexport function buildChunks(corpus: Doc[], size: number, overlap: number): Chunk[] {\n  return corpus.flatMap((doc) => chunk(doc.text, size, overlap).map((text, n) => ({ id: `${doc.id}#${n}`, doc: doc.id, text })));\n}\n\nconst texts = (chunks: Chunk[], indexText?: Record<string, string>) => new Map(chunks.map((c) => [c.id, indexText?.[c.id] ?? c.text] as const));\n\nfunction ordered(scores: Map<string, number>): string[] {\n  return [...scores].filter(([, s]) => s > 0).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)).map(([id]) => id);\n}\n\nfunction termScore(tf: number, df: number, n: number, length: number, average: number, k1: number, b: number): number {\n  const idf = Math.log(1 + (n - df + 0.5) / (df + 0.5));\n  return (idf * tf * (k1 + 1)) / (tf + k1 * (1 - b + (b * length) / average));\n}\n\n/** Chunk ids by BM25 score, best first, ties by id, chunks that share no word with the query left out. */\nexport function bm25Rank(chunks: Chunk[], query: string, indexText?: Record<string, string>, k1 = 1.5, b = 0.75): string[] {\n  const docs = new Map([...texts(chunks, indexText)].map(([id, text]) => [id, tokenize(text)] as const));\n  const n = docs.size;\n  const average = n ? [...docs.values()].reduce((sum, d) => sum + d.length, 0) / n : 0;\n  const df = new Map<string, number>();\n  for (const tokens of docs.values()) for (const term of new Set(tokens)) df.set(term, (df.get(term) ?? 0) + 1);\n  const terms = [...new Set(tokenize(query))];\n  const scores = new Map<string, number>();\n  for (const [id, tokens] of docs) {\n    let score = 0;\n    for (const term of terms) {\n      const tf = tokens.filter((t) => t === term).length;\n      if (tf === 0) continue;\n      score += termScore(tf, df.get(term)!, n, tokens.length, average, k1, b);\n    }\n    scores.set(id, score);\n  }\n  return ordered(scores);\n}\n\nfunction dot(a: number[], b: number[]): number {\n  let total = 0;\n  for (let i = 0; i < a.length; i++) total += a[i] * b[i];\n  return total;\n}\n\n/** Chunk ids by cosine similarity of embed() vectors, best first, ties by id, zero similarity left out. */\nexport function embeddingRank(chunks: Chunk[], query: string, indexText?: Record<string, string>): string[] {\n  const q = embed(query);\n  const scores = new Map<string, number>();\n  for (const [id, text] of texts(chunks, indexText)) {\n    scores.set(id, dot(q, embed(text)));\n  }\n  return ordered(scores);\n}\n\n/** Reciprocal rank fusion: each id scores the sum of 1 / (k + rank) over the lists that hold it (rank from 1, a repeat in\n *  one list ignored); best first, ties by id. */\nexport function fuse(rankings: string[][], k = 60): string[] {\n  const scores = new Map<string, number>();\n  for (const ranking of rankings) {\n    [...new Set(ranking)].forEach((id, i) => scores.set(id, (scores.get(id) ?? 0) + 1 / (k + i + 1)));\n  }\n  return ordered(scores);\n}\n\n/** The given ids reordered by scorer(query, text) high to low (equal scores keep their input order), cut to topN. */\nexport function rerank(query: string, ids: string[], textOf: Record<string, string>, scorer: Scorer, topN?: number): string[] {\n  const sorted = ids.map((id, i) => ({ id, i, s: scorer(query, textOf[id]) })).sort((a, b) => b.s - a.s || a.i - b.i).map((x) => x.id);\n  return topN === undefined ? sorted : sorted.slice(0, topN);\n}\n\n/** The share of the relevant documents that appear among the documents of the first k chunk ids. */\nexport function recallAtK(ids: string[], docOf: Record<string, string>, relevant: string[], k: number): number {\n  if (relevant.length === 0) throw new RangeError(\"relevant must not be empty\");\n  const found = new Set(ids.slice(0, k).map((id) => docOf[id]));\n  const wanted = new Set(relevant);\n  return [...wanted].filter((d) => found.has(d)).length / wanted.size;\n}\n\nfunction indexedText(chunks: Chunk[], contexts?: Record<string, string>): Record<string, string> {\n  const indexText: Record<string, string> = {};\n  for (const c of chunks) if (contexts && c.id in contexts) indexText[c.id] = `${contexts[c.id]} ${c.text}`;\n  return indexText;\n}\n\n/** The ids of the best k chunks. mode is bm25, embedding or hybrid (fusion of both). `contexts` maps chunk ids to a sentence\n *  that is indexed in front of the chunk's text; `scorer` reranks the first `pool` ids of the ranking. */\nexport function retrieve(chunks: Chunk[], query: string, mode = \"hybrid\", k = 3, options: Options = {}): string[] {\n  const { pool = 10, contexts, scorer } = options;\n  log.debug(\"retrieve input\", { mode, k, query });\n  const indexText = indexedText(chunks, contexts);\n  const lexical = bm25Rank(chunks, query, indexText);\n  const semantic = embeddingRank(chunks, query, indexText);\n  const ranked = mode === \"bm25\" ? lexical : mode === \"embedding\" ? semantic : fuse([lexical, semantic]);\n  if (!scorer) return ranked.slice(0, k);\n  return rerank(query, ranked.slice(0, pool), Object.fromEntries(chunks.map((c) => [c.id, c.text])), scorer, k);\n}\n\n/** The mean recall@k over [{ query, relevant }]. */\nexport function evaluate(chunks: Chunk[], queries: Query[], mode = \"hybrid\", k = 3, options: Options = {}): number {\n  const docOf = Object.fromEntries(chunks.map((c) => [c.id, c.doc]));\n  const scores = queries.map((q) => recallAtK(retrieve(chunks, q.query, mode, k, options), docOf, q.relevant, k));\n  return scores.reduce((a, b) => a + b, 0) / scores.length;\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { buildChunks, evaluate, retrieve } from \"./retrieval.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// A tiny corpus like the test fixture: two documents, cut into windows of 14 words that overlap by 4.\nconst corpus = [\n  { id: \"refunds\", text: \"Refund policy: customers may request a refund within 30 days of purchase. Refunds are issued to the \" +\n    \"original payment method within five business days. Digital goods are not refundable after download.\" },\n  { id: \"shipping\", text: \"Shipping: orders over 50 euros ship free of charge. Standard delivery takes three to five business \" +\n    \"days, express delivery takes one day.\" },\n];\nconst chunks = buildChunks(corpus, 14, 4) ?? [];\nconsole.log(\"chunks:\", chunks.map((c) => c.id).join(\", \"));\n\nconst query = \"free shipping threshold\";\nfor (const mode of [\"bm25\", \"embedding\", \"hybrid\"]) {\n  console.log(`${mode} top 3:`, retrieve(chunks, query, mode, 3).join(\", \"));\n}\n\n// Recall@3 over one question whose answer we know.\nconsole.log(\"hybrid recall@3:\", chunks.length ? evaluate(chunks, [{ query, relevant: [\"shipping\"] }], \"hybrid\", 3) : null);\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// A retrieval pipeline: chunking, lexical and embedding search, fusion, reranking and recall. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\n\nconst log = logger(\"retrieval\");\n\nexport type Chunk = { id: string; doc: string; text: string };\nexport type Doc = { id: string; text: string };\nexport type Query = { query: string; relevant: string[] };\nexport type Scorer = (query: string, text: string) => number;\nexport type Options = { pool?: number; contexts?: Record<string, string>; scorer?: Scorer };\n\n/** Lower-case words and numbers: the runs of [a-z0-9] in the text. */\nexport function tokenize(text: string): string[] {\n  return text.toLowerCase().match(/[a-z0-9]+/g) ?? [];\n}\n\n// ---- given: a deterministic toy embedding (not a real model) -------------------------------------------------------\nconst DIMS = 64;\n\nfunction fnv1a(text: string): number {\n  let h = 2166136261;\n  for (const byte of new TextEncoder().encode(text)) h = Math.imul(h ^ byte, 16777619) >>> 0;\n  return h;\n}\n\n/** 64 numbers: letter-trigram counts of the tokenised text hashed into buckets, scaled to length 1.\n *  It sees spelling, not meaning: 'delete' and 'deleting' are close, 'delete' and 'remove' are not. */\nexport function embed(text: string): number[] {\n  const padded = \" \" + tokenize(text).join(\" \") + \" \";\n  const vector = new Array<number>(DIMS).fill(0);\n  for (let i = 0; i < padded.length - 2; i++) vector[fnv1a(padded.slice(i, i + 3)) % DIMS] += 1;\n  const length = Math.sqrt(vector.reduce((sum, x) => sum + x * x, 0));\n  return length ? vector.map((x) => x / length) : vector;\n}\n// ---------------------------------------------------------------------------------------------------------------------\n\n/** Windows of `size` words that start `size - overlap` words apart; the last window ends at the last word. */\nexport function chunk(text: string, size: number, overlap: number): string[] {\n  if (size < 1 || overlap < 0 || overlap >= size) throw new RangeError(\"size must be at least 1 and overlap must be in 0 .. size - 1\");\n  return windows(text.split(/\\s+/).filter((w) => w.length > 0), size, overlap);\n}\n\nfunction windows(words: string[], size: number, overlap: number): string[] {\n  // TODO 1 of 7 (finish this to pass e1): the windows over a list of words.\n  // Receives the words, size and overlap (already checked). Returns the windows as strings of the words joined by one space: each holds\n  // `size` words, the next starts `size - overlap` words later, and the loop stops at the first window that reaches the last word (so the\n  // last window ends at the last word and none is repeated). No words gives [].\n  // Example: windows([\"a\", \"b\", \"c\", \"d\", \"e\"], 3, 1) -> [\"a b c\", \"c d e\"]\n  return [];\n}\n\n/** [{ id: \"<doc>#<n>\", doc, text }] for every document, in order. */\nexport function buildChunks(corpus: Doc[], size: number, overlap: number): Chunk[] {\n  return corpus.flatMap((doc) => chunk(doc.text, size, overlap).map((text, n) => ({ id: `${doc.id}#${n}`, doc: doc.id, text })));\n}\n\nconst texts = (chunks: Chunk[], indexText?: Record<string, string>) => new Map(chunks.map((c) => [c.id, indexText?.[c.id] ?? c.text] as const));\n\nfunction ordered(scores: Map<string, number>): string[] {\n  return [...scores].filter(([, s]) => s > 0).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)).map(([id]) => id);\n}\n\nfunction termScore(tf: number, df: number, n: number, length: number, average: number, k1: number, b: number): number {\n  // TODO 2 of 7 (finish this to pass e2): the BM25 score one query term gives one chunk.\n  // Receives the term's count in the chunk (tf, at least 1), the number of chunks that hold the term (df), the number of chunks (n), the\n  // chunk's length in tokens, the average length, k1 and b. Returns idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * length / average)) with\n  // idf = ln(1 + (n - df + 0.5) / (df + 0.5)). A rare term has a large idf; a short chunk gets a larger score than a long one.\n  // Example: termScore(1, 1, 4, 5, 5, 1.5, 0.75) is about 1.2 times ln(1 + 3.5 / 1.5)\n  return 0;\n}\n\n/** Chunk ids by BM25 score, best first, ties by id, chunks that share no word with the query left out. */\nexport function bm25Rank(chunks: Chunk[], query: string, indexText?: Record<string, string>, k1 = 1.5, b = 0.75): string[] {\n  const docs = new Map([...texts(chunks, indexText)].map(([id, text]) => [id, tokenize(text)] as const));\n  const n = docs.size;\n  const average = n ? [...docs.values()].reduce((sum, d) => sum + d.length, 0) / n : 0;\n  const df = new Map<string, number>();\n  for (const tokens of docs.values()) for (const term of new Set(tokens)) df.set(term, (df.get(term) ?? 0) + 1);\n  const terms = [...new Set(tokenize(query))];\n  const scores = new Map<string, number>();\n  for (const [id, tokens] of docs) {\n    let score = 0;\n    for (const term of terms) {\n      const tf = tokens.filter((t) => t === term).length;\n      if (tf === 0) continue;\n      score += termScore(tf, df.get(term)!, n, tokens.length, average, k1, b);\n    }\n    scores.set(id, score);\n  }\n  return ordered(scores);\n}\n\nfunction dot(a: number[], b: number[]): number {\n  // TODO 3 of 7 (finish this to pass m1): the dot product of two vectors of the same length.\n  // Receives two arrays of numbers. Returns the sum of the products of the numbers in the same place (the vectors of embed() have length 1,\n  // so this is their cosine). Example: dot([1, 2], [3, 4]) -> 11\n  return 0;\n}\n\n/** Chunk ids by cosine similarity of embed() vectors, best first, ties by id, zero similarity left out. */\nexport function embeddingRank(chunks: Chunk[], query: string, indexText?: Record<string, string>): string[] {\n  const q = embed(query);\n  const scores = new Map<string, number>();\n  for (const [id, text] of texts(chunks, indexText)) {\n    scores.set(id, dot(q, embed(text)));\n  }\n  return ordered(scores);\n}\n\n/** Reciprocal rank fusion: each id scores the sum of 1 / (k + rank) over the lists that hold it (rank from 1, a repeat in\n *  one list ignored); best first, ties by id. */\nexport function fuse(rankings: string[][], k = 60): string[] {\n  // TODO 4 of 7 (finish this to pass e3): reciprocal rank fusion of the lists in `rankings`.\n  // Returns the ids best first: an id scores the sum of 1 / (k + rank) over the lists that hold it (rank starts at 1, a repeat in one list is\n  // ignored); ordered(scores) sorts a Map of scores best first, ties by id, and leaves out scores of 0 or less.\n  // Example: fuse([[\"a\", \"b\"], [\"b\", \"c\"]]) -> [\"b\", \"a\", \"c\"]\n  return [];\n}\n\n/** The given ids reordered by scorer(query, text) high to low (equal scores keep their input order), cut to topN. */\nexport function rerank(query: string, ids: string[], textOf: Record<string, string>, scorer: Scorer, topN?: number): string[] {\n  // TODO 5 of 7 (finish this to pass e4): the ids ordered by scorer(query, textOf[id]) high to low.\n  // Equal scores keep their input order (sort with the input position as the tie-break); cut to topN when it is given. Only the given ids take part.\n  // Example: rerank(\"q\", [\"a\", \"b\"], { a: \"x\", b: \"xx\" }, (q, t) => t.length) -> [\"b\", \"a\"]\n  return [...ids];\n}\n\n/** The share of the relevant documents that appear among the documents of the first k chunk ids. */\nexport function recallAtK(ids: string[], docOf: Record<string, string>, relevant: string[], k: number): number {\n  if (relevant.length === 0) throw new RangeError(\"relevant must not be empty\");\n  // TODO 6 of 7 (finish this to pass e5): the share of the relevant documents found among the documents of the first k chunk ids.\n  // A document counts once however many of its chunks are there; `relevant` is not empty here. Returns a number from 0 to 1.\n  // Example: recallAtK([\"a#0\", \"a#1\", \"b#0\"], { \"a#0\": \"a\", \"a#1\": \"a\", \"b#0\": \"b\" }, [\"a\", \"c\"], 3) -> 0.5\n  return 0;\n}\n\nfunction indexedText(chunks: Chunk[], contexts?: Record<string, string>): Record<string, string> {\n  // TODO 7 of 7 (finish this to pass e6): the text each chunk is indexed under when it has a context sentence.\n  // Receives the chunks and `contexts` (undefined or an object from chunk id to a sentence). Returns an object from chunk id to the sentence, a\n  // space and the chunk's text, for the chunks that have a sentence only; the chunks themselves are not changed.\n  // Example: indexedText([{ id: \"a#0\", doc: \"a\", text: \"x\" }], { \"a#0\": \"About a.\" }) -> { \"a#0\": \"About a. x\" }\n  return {};\n}\n\n/** The ids of the best k chunks. mode is bm25, embedding or hybrid (fusion of both). `contexts` maps chunk ids to a sentence\n *  that is indexed in front of the chunk's text; `scorer` reranks the first `pool` ids of the ranking. */\nexport function retrieve(chunks: Chunk[], query: string, mode = \"hybrid\", k = 3, options: Options = {}): string[] {\n  const { pool = 10, contexts, scorer } = options;\n  log.debug(\"retrieve input\", { mode, k, query });\n  const indexText = indexedText(chunks, contexts);\n  const lexical = bm25Rank(chunks, query, indexText);\n  const semantic = embeddingRank(chunks, query, indexText);\n  const ranked = mode === \"bm25\" ? lexical : mode === \"embedding\" ? semantic : fuse([lexical, semantic]);\n  if (!scorer) return ranked.slice(0, k);\n  return rerank(query, ranked.slice(0, pool), Object.fromEntries(chunks.map((c) => [c.id, c.text])), scorer, k);\n}\n\n/** The mean recall@k over [{ query, relevant }]. */\nexport function evaluate(chunks: Chunk[], queries: Query[], mode = \"hybrid\", k = 3, options: Options = {}): number {\n  const docOf = Object.fromEntries(chunks.map((c) => [c.id, c.doc]));\n  const scores = queries.map((q) => recallAtK(retrieve(chunks, q.query, mode, k, options), docOf, q.relevant, k));\n  return scores.reduce((a, b) => a + b, 0) / scores.length;\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { buildChunks, evaluate, retrieve } from \"./retrieval.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// A tiny corpus like the test fixture: two documents, cut into windows of 14 words that overlap by 4.\nconst corpus = [\n  { id: \"refunds\", text: \"Refund policy: customers may request a refund within 30 days of purchase. Refunds are issued to the \" +\n    \"original payment method within five business days. Digital goods are not refundable after download.\" },\n  { id: \"shipping\", text: \"Shipping: orders over 50 euros ship free of charge. Standard delivery takes three to five business \" +\n    \"days, express delivery takes one day.\" },\n];\nconst chunks = buildChunks(corpus, 14, 4) ?? [];\nconsole.log(\"chunks:\", chunks.map((c) => c.id).join(\", \"));\n\nconst query = \"free shipping threshold\";\nfor (const mode of [\"bm25\", \"embedding\", \"hybrid\"]) {\n  console.log(`${mode} top 3:`, retrieve(chunks, query, mode, 3).join(\", \"));\n}\n\n// Recall@3 over one question whose answer we know.\nconsole.log(\"hybrid recall@3:\", chunks.length ? evaluate(chunks, [{ query, relevant: [\"shipping\"] }], \"hybrid\", 3) : null);\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 6,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "8ebe28e892b8fb327a8ac06b2bc81cd7c0ed5ebc225e7490c27bddd88b516ddc",
+  "starting_code": "// A retrieval pipeline: chunking, lexical and embedding search, fusion, reranking and recall. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\n\nconst log = logger(\"retrieval\");\n\nexport type Chunk = { id: string; doc: string; text: string };\nexport type Doc = { id: string; text: string };\nexport type Query = { query: string; relevant: string[] };\nexport type Scorer = (query: string, text: string) => number;\nexport type Options = { pool?: number; contexts?: Record<string, string>; scorer?: Scorer };\n\n/** Lower-case words and numbers: the runs of [a-z0-9] in the text. */\nexport function tokenize(text: string): string[] {\n  return text.toLowerCase().match(/[a-z0-9]+/g) ?? [];\n}\n\n// ---- given: a deterministic toy embedding (not a real model) -------------------------------------------------------\nconst DIMS = 64;\n\nfunction fnv1a(text: string): number {\n  let h = 2166136261;\n  for (const byte of new TextEncoder().encode(text)) h = Math.imul(h ^ byte, 16777619) >>> 0;\n  return h;\n}\n\n/** 64 numbers: letter-trigram counts of the tokenised text hashed into buckets, scaled to length 1.\n *  It sees spelling, not meaning: 'delete' and 'deleting' are close, 'delete' and 'remove' are not. */\nexport function embed(text: string): number[] {\n  const padded = \" \" + tokenize(text).join(\" \") + \" \";\n  const vector = new Array<number>(DIMS).fill(0);\n  for (let i = 0; i < padded.length - 2; i++) vector[fnv1a(padded.slice(i, i + 3)) % DIMS] += 1;\n  const length = Math.sqrt(vector.reduce((sum, x) => sum + x * x, 0));\n  return length ? vector.map((x) => x / length) : vector;\n}\n// ---------------------------------------------------------------------------------------------------------------------\n\n/** Windows of `size` words that start `size - overlap` words apart; the last window ends at the last word. */\nexport function chunk(text: string, size: number, overlap: number): string[] {\n  if (size < 1 || overlap < 0 || overlap >= size) throw new RangeError(\"size must be at least 1 and overlap must be in 0 .. size - 1\");\n  return windows(text.split(/\\s+/).filter((w) => w.length > 0), size, overlap);\n}\n\nfunction windows(words: string[], size: number, overlap: number): string[] {\n  // TODO 1 of 7 (finish this to pass e1): the windows over a list of words.\n  // Receives the words, size and overlap (already checked). Returns the windows as strings of the words joined by one space: each holds\n  // `size` words, the next starts `size - overlap` words later, and the loop stops at the first window that reaches the last word (so the\n  // last window ends at the last word and none is repeated). No words gives [].\n  // Example: windows([\"a\", \"b\", \"c\", \"d\", \"e\"], 3, 1) -> [\"a b c\", \"c d e\"]\n  return [];\n}\n\n/** [{ id: \"<doc>#<n>\", doc, text }] for every document, in order. */\nexport function buildChunks(corpus: Doc[], size: number, overlap: number): Chunk[] {\n  return corpus.flatMap((doc) => chunk(doc.text, size, overlap).map((text, n) => ({ id: `${doc.id}#${n}`, doc: doc.id, text })));\n}\n\nconst texts = (chunks: Chunk[], indexText?: Record<string, string>) => new Map(chunks.map((c) => [c.id, indexText?.[c.id] ?? c.text] as const));\n\nfunction ordered(scores: Map<string, number>): string[] {\n  return [...scores].filter(([, s]) => s > 0).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)).map(([id]) => id);\n}\n\nfunction termScore(tf: number, df: number, n: number, length: number, average: number, k1: number, b: number): number {\n  // TODO 2 of 7 (finish this to pass e2): the BM25 score one query term gives one chunk.\n  // Receives the term's count in the chunk (tf, at least 1), the number of chunks that hold the term (df), the number of chunks (n), the\n  // chunk's length in tokens, the average length, k1 and b. Returns idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * length / average)) with\n  // idf = ln(1 + (n - df + 0.5) / (df + 0.5)). A rare term has a large idf; a short chunk gets a larger score than a long one.\n  // Example: termScore(1, 1, 4, 5, 5, 1.5, 0.75) is about 1.2 times ln(1 + 3.5 / 1.5)\n  return 0;\n}\n\n/** Chunk ids by BM25 score, best first, ties by id, chunks that share no word with the query left out. */\nexport function bm25Rank(chunks: Chunk[], query: string, indexText?: Record<string, string>, k1 = 1.5, b = 0.75): string[] {\n  const docs = new Map([...texts(chunks, indexText)].map(([id, text]) => [id, tokenize(text)] as const));\n  const n = docs.size;\n  const average = n ? [...docs.values()].reduce((sum, d) => sum + d.length, 0) / n : 0;\n  const df = new Map<string, number>();\n  for (const tokens of docs.values()) for (const term of new Set(tokens)) df.set(term, (df.get(term) ?? 0) + 1);\n  const terms = [...new Set(tokenize(query))];\n  const scores = new Map<string, number>();\n  for (const [id, tokens] of docs) {\n    let score = 0;\n    for (const term of terms) {\n      const tf = tokens.filter((t) => t === term).length;\n      if (tf === 0) continue;\n      score += termScore(tf, df.get(term)!, n, tokens.length, average, k1, b);\n    }\n    scores.set(id, score);\n  }\n  return ordered(scores);\n}\n\nfunction dot(a: number[], b: number[]): number {\n  // TODO 3 of 7 (finish this to pass m1): the dot product of two vectors of the same length.\n  // Receives two arrays of numbers. Returns the sum of the products of the numbers in the same place (the vectors of embed() have length 1,\n  // so this is their cosine). Example: dot([1, 2], [3, 4]) -> 11\n  return 0;\n}\n\n/** Chunk ids by cosine similarity of embed() vectors, best first, ties by id, zero similarity left out. */\nexport function embeddingRank(chunks: Chunk[], query: string, indexText?: Record<string, string>): string[] {\n  const q = embed(query);\n  const scores = new Map<string, number>();\n  for (const [id, text] of texts(chunks, indexText)) {\n    scores.set(id, dot(q, embed(text)));\n  }\n  return ordered(scores);\n}\n\n/** Reciprocal rank fusion: each id scores the sum of 1 / (k + rank) over the lists that hold it (rank from 1, a repeat in\n *  one list ignored); best first, ties by id. */\nexport function fuse(rankings: string[][], k = 60): string[] {\n  // TODO 4 of 7 (finish this to pass e3): reciprocal rank fusion of the lists in `rankings`.\n  // Returns the ids best first: an id scores the sum of 1 / (k + rank) over the lists that hold it (rank starts at 1, a repeat in one list is\n  // ignored); ordered(scores) sorts a Map of scores best first, ties by id, and leaves out scores of 0 or less.\n  // Example: fuse([[\"a\", \"b\"], [\"b\", \"c\"]]) -> [\"b\", \"a\", \"c\"]\n  return [];\n}\n\n/** The given ids reordered by scorer(query, text) high to low (equal scores keep their input order), cut to topN. */\nexport function rerank(query: string, ids: string[], textOf: Record<string, string>, scorer: Scorer, topN?: number): string[] {\n  // TODO 5 of 7 (finish this to pass e4): the ids ordered by scorer(query, textOf[id]) high to low.\n  // Equal scores keep their input order (sort with the input position as the tie-break); cut to topN when it is given. Only the given ids take part.\n  // Example: rerank(\"q\", [\"a\", \"b\"], { a: \"x\", b: \"xx\" }, (q, t) => t.length) -> [\"b\", \"a\"]\n  return [...ids];\n}\n\n/** The share of the relevant documents that appear among the documents of the first k chunk ids. */\nexport function recallAtK(ids: string[], docOf: Record<string, string>, relevant: string[], k: number): number {\n  if (relevant.length === 0) throw new RangeError(\"relevant must not be empty\");\n  // TODO 6 of 7 (finish this to pass e5): the share of the relevant documents found among the documents of the first k chunk ids.\n  // A document counts once however many of its chunks are there; `relevant` is not empty here. Returns a number from 0 to 1.\n  // Example: recallAtK([\"a#0\", \"a#1\", \"b#0\"], { \"a#0\": \"a\", \"a#1\": \"a\", \"b#0\": \"b\" }, [\"a\", \"c\"], 3) -> 0.5\n  return 0;\n}\n\nfunction indexedText(chunks: Chunk[], contexts?: Record<string, string>): Record<string, string> {\n  // TODO 7 of 7 (finish this to pass e6): the text each chunk is indexed under when it has a context sentence.\n  // Receives the chunks and `contexts` (undefined or an object from chunk id to a sentence). Returns an object from chunk id to the sentence, a\n  // space and the chunk's text, for the chunks that have a sentence only; the chunks themselves are not changed.\n  // Example: indexedText([{ id: \"a#0\", doc: \"a\", text: \"x\" }], { \"a#0\": \"About a.\" }) -> { \"a#0\": \"About a. x\" }\n  return {};\n}\n\n/** The ids of the best k chunks. mode is bm25, embedding or hybrid (fusion of both). `contexts` maps chunk ids to a sentence\n *  that is indexed in front of the chunk's text; `scorer` reranks the first `pool` ids of the ranking. */\nexport function retrieve(chunks: Chunk[], query: string, mode = \"hybrid\", k = 3, options: Options = {}): string[] {\n  const { pool = 10, contexts, scorer } = options;\n  log.debug(\"retrieve input\", { mode, k, query });\n  const indexText = indexedText(chunks, contexts);\n  const lexical = bm25Rank(chunks, query, indexText);\n  const semantic = embeddingRank(chunks, query, indexText);\n  const ranked = mode === \"bm25\" ? lexical : mode === \"embedding\" ? semantic : fuse([lexical, semantic]);\n  if (!scorer) return ranked.slice(0, k);\n  return rerank(query, ranked.slice(0, pool), Object.fromEntries(chunks.map((c) => [c.id, c.text])), scorer, k);\n}\n\n/** The mean recall@k over [{ query, relevant }]. */\nexport function evaluate(chunks: Chunk[], queries: Query[], mode = \"hybrid\", k = 3, options: Options = {}): number {\n  const docOf = Object.fromEntries(chunks.map((c) => [c.id, c.doc]));\n  const scores = queries.map((q) => recallAtK(retrieve(chunks, q.query, mode, k, options), docOf, q.relevant, k));\n  return scores.reduce((a, b) => a + b, 0) / scores.length;\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/28-retrieval/prose/unit-02/practice-2/retrieval.ts",
+    "test_path": "practice/level-2/28-retrieval/prose/unit-02/practice-2/retrieval.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-2/28-retrieval/prose/unit-02/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-2/28-retrieval/prose/unit-02/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-2/28-retrieval/prose/unit-02/practice-2/retrieval.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 hybrid search finds what each single index misses",
+        "kind": "main",
+        "says": "Hybrid search finds what each single index misses, measured on a small knowledge base"
+      },
+      {
+        "id": "e1 chunks overlap and end at the last word",
+        "kind": "edge",
+        "says": "Chunks overlap and end at the last word"
+      },
+      {
+        "id": "e2 a rare word outweighs common ones and short chunks win",
+        "kind": "edge",
+        "says": "A rare word outweighs common ones, and short chunks win"
+      },
+      {
+        "id": "e3 fusion rewards agreement and breaks ties by id",
+        "kind": "edge",
+        "says": "Fusion rewards agreement between lists and breaks ties by id"
+      },
+      {
+        "id": "e4 reranking orders the pool by the scorer",
+        "kind": "edge",
+        "says": "Reranking orders only the pool by the scorer"
+      },
+      {
+        "id": "e5 recall counts documents not chunks",
+        "kind": "edge",
+        "says": "Recall counts documents, not chunks"
+      },
+      {
+        "id": "e6 a context sentence makes a bare chunk findable",
+        "kind": "edge",
+        "says": "A context sentence makes a bare chunk findable"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/28-retrieval/prose/unit-02/practice-2/target/report.xml"
+    },
+    "origin": "course/28-retrieval/02-fusion-reranking-context-and-recall.md",
+    "concepts": [
+      "the practice of Fusion, reranking, context and recall is solved"
+    ],
+    "files": [
+      "practice/level-2/28-retrieval/prose/unit-02/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "retrieval-u2"
+}

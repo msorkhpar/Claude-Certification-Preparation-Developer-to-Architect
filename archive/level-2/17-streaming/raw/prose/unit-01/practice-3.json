@@ -1,0 +1,287 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "17-streaming"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: assemble a streamed message (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: assemble a streamed message"
+    },
+    {
+      "type": "para",
+      "text": "A streamed reply arrives as events. Write the function that folds them into the message a non-streaming call would have returned. The events are the parsed `data:` objects, in order; the tests supply them."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The function"
+    },
+    {
+      "type": "para",
+      "text": "**`assemble(events)`** returns a message (a map) with `id`, `type`, `role`, `model`, `content`, `stop_reason`, `stop_sequence` and `usage`. `StreamError` is given in the starter (`error_type` and `message`; TypeScript, Java and Kotlin spell them `errorType` and `detail`). Java and Kotlin also get the `Json` helper."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Event",
+        "What to do"
+      ],
+      "rows": [
+        [
+          "`message_start`",
+          "Take the message from it (`id`, `role`, `model`, `usage`...) with an empty `content`"
+        ],
+        [
+          "`content_block_start`",
+          "Start the block at `index` from its `content_block`"
+        ],
+        [
+          "`content_block_delta`",
+          "`text_delta`: append `text`. `thinking_delta`: append `thinking`. `signature_delta`: set `signature`. `input_json_delta`: keep the `partial_json` fragment for the block"
+        ],
+        [
+          "`content_block_stop`",
+          "For a `tool_use` block, join its fragments and parse them as the block's `input`; no fragments (or only empty ones) mean `{}`"
+        ],
+        [
+          "`message_delta`",
+          "Set `stop_reason` and `stop_sequence` from its `delta`; each key in its `usage` replaces the same key in the message's usage (the output count is **cumulative**: replace, do not add)"
+        ],
+        [
+          "`message_stop`",
+          "The stream finished normally"
+        ],
+        [
+          "`error`",
+          "Raise `StreamError` with the error's `type` and `message`"
+        ],
+        [
+          "`ping`, and any other type",
+          "Ignore it: the API may add event types"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`content` lists the blocks in **index order**. A stream that ends **without `message_stop`** raises `StreamError` with error type `incomplete_stream`."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working assembler with six gaps cut out of it. The event loop, the block start, the stop flag, the index order of `content` and the `StreamError` type are written and correct. Each gap is one small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails every case on an assertion. To see what a gap receives, log its input with the `log` line at the top of the file (`log.debug(...)`); a run shows the lines under the failing case. The names below are Python's; TypeScript, Java and Kotlin use the camel-case forms (`startMessage`, `applyDelta`, `finishBlock`, `applyMessageDelta`, `raiseError`, `checkComplete`)."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_start_message` unlocks `m1` and `e5`: the message a `message_start` begins, with an empty `content` and a copy of its usage.",
+        "`_apply_delta` unlocks `m1` and `e6`: fold one delta (text, thinking, signature or a JSON fragment) into its block.",
+        "`_finish_block` unlocks `e1`: join and parse a tool block's fragments, `{}` when there are none.",
+        "`_apply_message_delta` unlocks `m1` and `e5`: the stop reason and sequence, and the cumulative usage keys.",
+        "`_raise_error` unlocks `e3`: an `error` event raises `StreamError`.",
+        "`_check_complete` unlocks `e4`: a stream that never reached `message_stop` raises `StreamError`."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`e2` needs the loop to leave `ping` and unknown events alone, and it is written, so it passes once the others do. About twenty lines in all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Text deltas are joined and the message is complete"
+        ],
+        [
+          "`e1`",
+          "Tool input is the fragments joined, then parsed; empty input is `{}`"
+        ],
+        [
+          "`e2`",
+          "`ping` and unknown event types are ignored"
+        ],
+        [
+          "`e3`",
+          "An error event raises with its type and message"
+        ],
+        [
+          "`e4`",
+          "A stream that ends before `message_stop` is an error, not a short message"
+        ],
+        [
+          "`e5`",
+          "Usage: input tokens from the start, the cumulative output tokens from the end"
+        ],
+        [
+          "`e6`",
+          "Blocks keep their index order; thinking fields are assembled"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.HashMap;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.TreeMap;\n\n/** Assemble a streamed Messages reply from its events. See ../../statement.md for the contract. */\nfinal class Assemble {\n    private static final System.Logger LOG = System.getLogger(Assemble.class.getName());\n    private Assemble() {}\n\n    /** The message a message_start event begins: its fields except content, an empty content list and a copy of its usage. */\n    @SuppressWarnings(\"unchecked\")\n    private static Map<String, Object> startMessage(Map<String, Object> start) {\n        Map<String, Object> message = new LinkedHashMap<>(start);\n        message.put(\"content\", new ArrayList<>());\n        Map<String, Object> usage = new LinkedHashMap<>();\n        if (start.get(\"usage\") instanceof Map<?, ?> u) usage.putAll((Map<String, Object>) u);\n        message.put(\"usage\", usage);\n        return message;\n    }\n\n    /** Fold one content_block_delta into its block; `pieces` is the fragment builder of a tool_use block. */\n    private static void applyDelta(Map<String, Object> block, StringBuilder pieces, Map<String, Object> delta) {\n        switch ((String) delta.get(\"type\")) {\n            case \"text_delta\" -> block.put(\"text\", String.valueOf(block.getOrDefault(\"text\", \"\")) + delta.get(\"text\"));\n            case \"input_json_delta\" -> pieces.append((String) delta.get(\"partial_json\"));\n            case \"thinking_delta\" -> block.put(\"thinking\", String.valueOf(block.getOrDefault(\"thinking\", \"\")) + delta.get(\"thinking\"));\n            case \"signature_delta\" -> block.put(\"signature\", delta.get(\"signature\"));\n            default -> { }\n        }\n    }\n\n    /** At content_block_stop: a tool_use block (it has `pieces`) gets its input, the fragments joined and parsed, an empty map when empty. */\n    private static void finishBlock(Map<String, Object> block, StringBuilder pieces) {\n        if (pieces == null) return;\n        String joined = pieces.toString();\n        block.put(\"input\", joined.isBlank() ? new LinkedHashMap<String, Object>() : Json.parse(joined));\n    }\n\n    /** Fold a message_delta event: the stop reason and sequence, and each usage key replaces the same key (the output count is cumulative). */\n    @SuppressWarnings(\"unchecked\")\n    private static void applyMessageDelta(Map<String, Object> message, Map<String, Object> event) {\n        Map<String, Object> delta = (Map<String, Object>) event.get(\"delta\");\n        message.put(\"stop_reason\", delta.get(\"stop_reason\"));\n        message.put(\"stop_sequence\", delta.get(\"stop_sequence\"));\n        if (event.get(\"usage\") instanceof Map<?, ?> u) ((Map<String, Object>) message.get(\"usage\")).putAll((Map<String, Object>) u);\n    }\n\n    /** An error event ends the assembly with a StreamError carrying the error's type and message. */\n    @SuppressWarnings(\"unchecked\")\n    private static void raiseError(Map<String, Object> event) {\n        Map<String, Object> error = (Map<String, Object>) event.get(\"error\");\n        throw new StreamError(String.valueOf(error.getOrDefault(\"type\", \"unknown\")), String.valueOf(error.getOrDefault(\"message\", \"\")));\n    }\n\n    /** A stream that never started or never reached message_stop is an error, not a short message. */\n    private static void checkComplete(Map<String, Object> message, boolean stopped) {\n        if (message == null || !stopped) throw new StreamError(\"incomplete_stream\", \"the stream ended before message_stop\");\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> assemble(List<Map<String, Object>> events) {\n        LOG.log(System.Logger.Level.DEBUG, \"assemble input: {0}\", events);\n        Map<String, Object> message = null;\n        TreeMap<Integer, Map<String, Object>> blocks = new TreeMap<>();\n        Map<Integer, StringBuilder> fragments = new HashMap<>();\n        boolean stopped = false;\n        for (Map<String, Object> event : events) {\n            String kind = (String) event.get(\"type\");\n            if (kind == null) continue;\n            switch (kind) {\n                case \"message_start\" -> message = startMessage((Map<String, Object>) event.get(\"message\"));\n                case \"content_block_start\" -> {\n                    int index = ((Number) event.get(\"index\")).intValue();\n                    Map<String, Object> block = new LinkedHashMap<>((Map<String, Object>) event.get(\"content_block\"));\n                    blocks.put(index, block);\n                    if (\"tool_use\".equals(block.get(\"type\"))) fragments.put(index, new StringBuilder());\n                }\n                case \"content_block_delta\" -> {\n                    int index = ((Number) event.get(\"index\")).intValue();\n                    applyDelta(blocks.get(index), fragments.get(index), (Map<String, Object>) event.get(\"delta\"));\n                }\n                case \"content_block_stop\" -> {\n                    int index = ((Number) event.get(\"index\")).intValue();\n                    finishBlock(blocks.get(index), fragments.get(index));\n                }\n                case \"message_delta\" -> applyMessageDelta(message, event);\n                case \"message_stop\" -> stopped = true;\n                case \"error\" -> raiseError(event);\n                default -> { } // ping and event types this client does not know are skipped: new types may be added\n            }\n        }\n        checkComplete(message, stopped);\n        message.put(\"content\", new ArrayList<>(blocks.values()));\n        return message;\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // The parsed `data:` events of one streamed reply, like the ones the tests build: start, one text block in three deltas, finish.\n        @SuppressWarnings(\"unchecked\")\n        List<Map<String, Object>> events = (List<Map<String, Object>>) Json.parse(\"\"\"\n            [\n              {\"type\":\"message_start\",\"message\":{\"id\":\"msg_x\",\"type\":\"message\",\"role\":\"assistant\",\"model\":\"claude-sonnet-5-5\",\"content\":[],\"stop_reason\":null,\"stop_sequence\":null,\"usage\":{\"input_tokens\":25,\"output_tokens\":1}}},\n              {\"type\":\"content_block_start\",\"index\":0,\"content_block\":{\"type\":\"text\",\"text\":\"\"}},\n              {\"type\":\"content_block_delta\",\"index\":0,\"delta\":{\"type\":\"text_delta\",\"text\":\"Hel\"}},\n              {\"type\":\"content_block_delta\",\"index\":0,\"delta\":{\"type\":\"text_delta\",\"text\":\"lo, \"}},\n              {\"type\":\"content_block_delta\",\"index\":0,\"delta\":{\"type\":\"text_delta\",\"text\":\"world.\"}},\n              {\"type\":\"content_block_stop\",\"index\":0},\n              {\"type\":\"message_delta\",\"delta\":{\"stop_reason\":\"end_turn\",\"stop_sequence\":null},\"usage\":{\"output_tokens\":15}},\n              {\"type\":\"message_stop\"}\n            ]\n            \"\"\");\n\n        try {\n            Map<String, Object> message = Assemble.assemble(events);\n            System.out.println(\"content: \" + message.get(\"content\"));\n            System.out.println(\"stop reason: \" + message.get(\"stop_reason\"));\n            System.out.println(\"usage: \" + message.get(\"usage\"));\n        } catch (StreamError err) {\n            System.out.println(\"stream error: \" + err.getMessage());\n        }\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.ArrayList;\nimport java.util.HashMap;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.TreeMap;\n\n/** Assemble a streamed Messages reply from its events. See ../../statement.md for the contract. */\nfinal class Assemble {\n    private static final System.Logger LOG = System.getLogger(Assemble.class.getName());\n    private Assemble() {}\n\n    private static Map<String, Object> startMessage(Map<String, Object> start) {\n        // TODO 1 of 6 (finish this to pass m1 and e5): the message a message_start event begins.\n        // Receives the `message` object of the event. Returns a new map with its fields except \"content\", then \"content\" as an empty list and \"usage\" as a COPY of its usage.\n        // Example: startMessage({id: m, content: [], usage: {input_tokens: 5}}) -> {id: m, content: [], usage: {input_tokens: 5}}\n        return new LinkedHashMap<>();\n    }\n\n    private static void applyDelta(Map<String, Object> block, StringBuilder pieces, Map<String, Object> delta) {\n        // TODO 2 of 6 (finish this to pass m1 and e6): fold one content_block_delta into its block.\n        // Receives the block, `pieces` (the fragment builder of a tool_use block, else null) and the delta. \"text_delta\" appends \"text\" to the block's text,\n        // \"thinking_delta\" appends \"thinking\", \"signature_delta\" sets \"signature\", \"input_json_delta\" appends \"partial_json\" to `pieces`. Returns nothing.\n        // Example: block {text: He}, delta {type: text_delta, text: llo} -> block {text: Hello}\n    }\n\n    private static void finishBlock(Map<String, Object> block, StringBuilder pieces) {\n        // TODO 3 of 6 (finish this to pass e1): at content_block_stop, give a tool_use block its input.\n        // Receives the block and its fragment builder `pieces` (null for a block that is not tool_use). When `pieces` is not null, puts \"input\" into the block: the\n        // fragments joined and parsed with Json.parse, or an empty map when the joined text is empty or only white space. Returns nothing.\n        // Example: pieces {\"ci + ty\": \"Pa + ris\"} -> block \"input\" is {city=Paris}; pieces \"\" -> {}\n    }\n\n    private static void applyMessageDelta(Map<String, Object> message, Map<String, Object> event) {\n        // TODO 4 of 6 (finish this to pass m1 and e5): fold a message_delta event into the message.\n        // Receives the message and the event. Puts \"stop_reason\" and \"stop_sequence\" from event \"delta\", and each key of event \"usage\" replaces the same key in\n        // the message's \"usage\" map (the output count is cumulative: replace, do not add). Returns nothing.\n        // Example: usage {input_tokens: 52, output_tokens: 1} and event usage {output_tokens: 38} -> {input_tokens: 52, output_tokens: 38}\n    }\n\n    private static void raiseError(Map<String, Object> event) {\n        // TODO 5 of 6 (finish this to pass e3): an error event ends the assembly.\n        // Receives the event, whose \"error\" map holds a \"type\" and a \"message\". Throws new StreamError(type, message).\n        // Example: {error: {type: overloaded_error, message: Overloaded}} throws StreamError(\"overloaded_error\", \"Overloaded\")\n    }\n\n    private static void checkComplete(Map<String, Object> message, boolean stopped) {\n        // TODO 6 of 6 (finish this to pass e4): a stream that never started or never reached message_stop is an error.\n        // Receives the message (null before message_start) and whether message_stop was seen. Throws new StreamError(\"incomplete_stream\", ...) unless both hold.\n        // Example: checkComplete(message, false) throws a StreamError with errorType \"incomplete_stream\"\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> assemble(List<Map<String, Object>> events) {\n        LOG.log(System.Logger.Level.DEBUG, \"assemble input: {0}\", events);\n        Map<String, Object> message = null;\n        TreeMap<Integer, Map<String, Object>> blocks = new TreeMap<>();\n        Map<Integer, StringBuilder> fragments = new HashMap<>();\n        boolean stopped = false;\n        for (Map<String, Object> event : events) {\n            String kind = (String) event.get(\"type\");\n            if (kind == null) continue;\n            switch (kind) {\n                case \"message_start\" -> message = startMessage((Map<String, Object>) event.get(\"message\"));\n                case \"content_block_start\" -> {\n                    int index = ((Number) event.get(\"index\")).intValue();\n                    Map<String, Object> block = new LinkedHashMap<>((Map<String, Object>) event.get(\"content_block\"));\n                    blocks.put(index, block);\n                    if (\"tool_use\".equals(block.get(\"type\"))) fragments.put(index, new StringBuilder());\n                }\n                case \"content_block_delta\" -> {\n                    int index = ((Number) event.get(\"index\")).intValue();\n                    applyDelta(blocks.get(index), fragments.get(index), (Map<String, Object>) event.get(\"delta\"));\n                }\n                case \"content_block_stop\" -> {\n                    int index = ((Number) event.get(\"index\")).intValue();\n                    finishBlock(blocks.get(index), fragments.get(index));\n                }\n                case \"message_delta\" -> applyMessageDelta(message, event);\n                case \"message_stop\" -> stopped = true;\n                case \"error\" -> raiseError(event);\n                default -> { } // ping and event types this client does not know are skipped: new types may be added\n            }\n        }\n        checkComplete(message, stopped);\n        message.put(\"content\", new ArrayList<>(blocks.values()));\n        return message;\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // The parsed `data:` events of one streamed reply, like the ones the tests build: start, one text block in three deltas, finish.\n        @SuppressWarnings(\"unchecked\")\n        List<Map<String, Object>> events = (List<Map<String, Object>>) Json.parse(\"\"\"\n            [\n              {\"type\":\"message_start\",\"message\":{\"id\":\"msg_x\",\"type\":\"message\",\"role\":\"assistant\",\"model\":\"claude-sonnet-5-5\",\"content\":[],\"stop_reason\":null,\"stop_sequence\":null,\"usage\":{\"input_tokens\":25,\"output_tokens\":1}}},\n              {\"type\":\"content_block_start\",\"index\":0,\"content_block\":{\"type\":\"text\",\"text\":\"\"}},\n              {\"type\":\"content_block_delta\",\"index\":0,\"delta\":{\"type\":\"text_delta\",\"text\":\"Hel\"}},\n              {\"type\":\"content_block_delta\",\"index\":0,\"delta\":{\"type\":\"text_delta\",\"text\":\"lo, \"}},\n              {\"type\":\"content_block_delta\",\"index\":0,\"delta\":{\"type\":\"text_delta\",\"text\":\"world.\"}},\n              {\"type\":\"content_block_stop\",\"index\":0},\n              {\"type\":\"message_delta\",\"delta\":{\"stop_reason\":\"end_turn\",\"stop_sequence\":null},\"usage\":{\"output_tokens\":15}},\n              {\"type\":\"message_stop\"}\n            ]\n            \"\"\");\n\n        try {\n            Map<String, Object> message = Assemble.assemble(events);\n            System.out.println(\"content: \" + message.get(\"content\"));\n            System.out.println(\"stop reason: \" + message.get(\"stop_reason\"));\n            System.out.println(\"usage: \" + message.get(\"usage\"));\n        } catch (StreamError err) {\n            System.out.println(\"stream error: \" + err.getMessage());\n        }\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 7,
+    "paras": 6,
+    "code": 2,
+    "tables": 2,
+    "lists": 1,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "865b5a6d207a8b07becbf0d99249a346d23986f1e4a8ad3ec08edd66ba807282",
+  "starting_code": "import java.util.ArrayList;\nimport java.util.HashMap;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.TreeMap;\n\n/** Assemble a streamed Messages reply from its events. See ../../statement.md for the contract. */\nfinal class Assemble {\n    private static final System.Logger LOG = System.getLogger(Assemble.class.getName());\n    private Assemble() {}\n\n    private static Map<String, Object> startMessage(Map<String, Object> start) {\n        // TODO 1 of 6 (finish this to pass m1 and e5): the message a message_start event begins.\n        // Receives the `message` object of the event. Returns a new map with its fields except \"content\", then \"content\" as an empty list and \"usage\" as a COPY of its usage.\n        // Example: startMessage({id: m, content: [], usage: {input_tokens: 5}}) -> {id: m, content: [], usage: {input_tokens: 5}}\n        return new LinkedHashMap<>();\n    }\n\n    private static void applyDelta(Map<String, Object> block, StringBuilder pieces, Map<String, Object> delta) {\n        // TODO 2 of 6 (finish this to pass m1 and e6): fold one content_block_delta into its block.\n        // Receives the block, `pieces` (the fragment builder of a tool_use block, else null) and the delta. \"text_delta\" appends \"text\" to the block's text,\n        // \"thinking_delta\" appends \"thinking\", \"signature_delta\" sets \"signature\", \"input_json_delta\" appends \"partial_json\" to `pieces`. Returns nothing.\n        // Example: block {text: He}, delta {type: text_delta, text: llo} -> block {text: Hello}\n    }\n\n    private static void finishBlock(Map<String, Object> block, StringBuilder pieces) {\n        // TODO 3 of 6 (finish this to pass e1): at content_block_stop, give a tool_use block its input.\n        // Receives the block and its fragment builder `pieces` (null for a block that is not tool_use). When `pieces` is not null, puts \"input\" into the block: the\n        // fragments joined and parsed with Json.parse, or an empty map when the joined text is empty or only white space. Returns nothing.\n        // Example: pieces {\"ci + ty\": \"Pa + ris\"} -> block \"input\" is {city=Paris}; pieces \"\" -> {}\n    }\n\n    private static void applyMessageDelta(Map<String, Object> message, Map<String, Object> event) {\n        // TODO 4 of 6 (finish this to pass m1 and e5): fold a message_delta event into the message.\n        // Receives the message and the event. Puts \"stop_reason\" and \"stop_sequence\" from event \"delta\", and each key of event \"usage\" replaces the same key in\n        // the message's \"usage\" map (the output count is cumulative: replace, do not add). Returns nothing.\n        // Example: usage {input_tokens: 52, output_tokens: 1} and event usage {output_tokens: 38} -> {input_tokens: 52, output_tokens: 38}\n    }\n\n    private static void raiseError(Map<String, Object> event) {\n        // TODO 5 of 6 (finish this to pass e3): an error event ends the assembly.\n        // Receives the event, whose \"error\" map holds a \"type\" and a \"message\". Throws new StreamError(type, message).\n        // Example: {error: {type: overloaded_error, message: Overloaded}} throws StreamError(\"overloaded_error\", \"Overloaded\")\n    }\n\n    private static void checkComplete(Map<String, Object> message, boolean stopped) {\n        // TODO 6 of 6 (finish this to pass e4): a stream that never started or never reached message_stop is an error.\n        // Receives the message (null before message_start) and whether message_stop was seen. Throws new StreamError(\"incomplete_stream\", ...) unless both hold.\n        // Example: checkComplete(message, false) throws a StreamError with errorType \"incomplete_stream\"\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> assemble(List<Map<String, Object>> events) {\n        LOG.log(System.Logger.Level.DEBUG, \"assemble input: {0}\", events);\n        Map<String, Object> message = null;\n        TreeMap<Integer, Map<String, Object>> blocks = new TreeMap<>();\n        Map<Integer, StringBuilder> fragments = new HashMap<>();\n        boolean stopped = false;\n        for (Map<String, Object> event : events) {\n            String kind = (String) event.get(\"type\");\n            if (kind == null) continue;\n            switch (kind) {\n                case \"message_start\" -> message = startMessage((Map<String, Object>) event.get(\"message\"));\n                case \"content_block_start\" -> {\n                    int index = ((Number) event.get(\"index\")).intValue();\n                    Map<String, Object> block = new LinkedHashMap<>((Map<String, Object>) event.get(\"content_block\"));\n                    blocks.put(index, block);\n                    if (\"tool_use\".equals(block.get(\"type\"))) fragments.put(index, new StringBuilder());\n                }\n                case \"content_block_delta\" -> {\n                    int index = ((Number) event.get(\"index\")).intValue();\n                    applyDelta(blocks.get(index), fragments.get(index), (Map<String, Object>) event.get(\"delta\"));\n                }\n                case \"content_block_stop\" -> {\n                    int index = ((Number) event.get(\"index\")).intValue();\n                    finishBlock(blocks.get(index), fragments.get(index));\n                }\n                case \"message_delta\" -> applyMessageDelta(message, event);\n                case \"message_stop\" -> stopped = true;\n                case \"error\" -> raiseError(event);\n                default -> { } // ping and event types this client does not know are skipped: new types may be added\n            }\n        }\n        checkComplete(message, stopped);\n        message.put(\"content\", new ArrayList<>(blocks.values()));\n        return message;\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/17-streaming/prose/unit-01/practice-3/src/main/java/Assemble.java",
+    "test_path": "practice/level-2/17-streaming/prose/unit-01/practice-3/src/test/java/AssembleTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/17-streaming/prose/unit-01/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/17-streaming/prose/unit-01/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_textDeltasAreJoinedAndTheMessageIsComplete()",
+        "kind": "main",
+        "says": "Text deltas are joined and the message is complete"
+      },
+      {
+        "id": "e1_toolInputIsTheFragmentsJoinedThenParsedAndEmptyInputIsAnEmptyObject()",
+        "kind": "edge",
+        "says": "Tool input is the fragments joined, then parsed; empty input is {}"
+      },
+      {
+        "id": "e2_pingAndUnknownEventTypesAreIgnored()",
+        "kind": "edge",
+        "says": "ping and unknown event types are ignored"
+      },
+      {
+        "id": "e3_anErrorEventRaisesWithItsTypeAndMessage()",
+        "kind": "edge",
+        "says": "An error event raises with its type and message"
+      },
+      {
+        "id": "e4_aStreamThatEndsBeforeMessageStopIsAnErrorNotAShortMessage()",
+        "kind": "edge",
+        "says": "A stream that ends before message_stop is an error, not a short message"
+      },
+      {
+        "id": "e5_usageTakesInputTokensFromTheStartAndTheCumulativeOutputFromTheEnd()",
+        "kind": "edge",
+        "says": "Usage: input tokens from the start, the cumulative output tokens from the end"
+      },
+      {
+        "id": "e6_blocksKeepTheirIndexOrderAndThinkingFieldsAreAssembled()",
+        "kind": "edge",
+        "says": "Blocks keep their index order; thinking fields are assembled"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/17-streaming/prose/unit-01/practice-3/target/test-results/test"
+    },
+    "origin": "course/17-streaming/01-events-and-assembling-a-message.md",
+    "concepts": [
+      "the practice of Streaming events and assembling a message is solved"
+    ],
+    "files": [
+      "practice/level-2/17-streaming/prose/unit-01/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "streaming-u1"
+}

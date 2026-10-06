@@ -1,0 +1,156 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "26-tool-use"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Tools: where they run, schemas, descriptions and tool_choice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A team wants Claude Opus 5.5 to call a function that they wrote. Who executes it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Anthropic's servers, after the tool is named in the request",
+            "correct": false,
+            "says": "Ruled out because Anthropic's servers run only the server tools, where \"you never construct a `tool_result` block\"."
+          },
+          {
+            "id": "b",
+            "text": "The SDK client, without any involvement from their program at all",
+            "correct": false,
+            "says": "Ruled out because Claude \"never sees your implementation\", and the SDK has no handler for an operation that only the program defines."
+          },
+          {
+            "id": "c",
+            "text": "The model, inside the reply that it is generating for the user",
+            "correct": false,
+            "says": "Ruled out because \"The model never executes anything on its own.\""
+          },
+          {
+            "id": "d",
+            "text": "Their program, after it reads the `tool_use` block in the reply",
+            "correct": true,
+            "says": "The page says a client tool call ends with `stop_reason: \"tool_use\"` and \"your code drives a loop\"."
+          }
+        ],
+        "origin": {
+          "path": "course/26-tool-use/01-tools-schemas-descriptions-and-tool-choice.md",
+          "section": "Where tools run"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "Which description follows the documentation's advice for a tool named `get_stock_price`?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Returns the latest USD quote for a listed ticker, for current quotes only and never for history",
+            "correct": true,
+            "says": "The page asks for a description that explains what the tool does, when to use it and when not to, and what it does not return, and this one says what it does, when to use it, and that history is not returned."
+          },
+          {
+            "id": "b",
+            "text": "A general finance tool that the model may call for anything about companies, markets, prices or news anywhere in the world",
+            "correct": false,
+            "says": "Ruled out because it never says \"what the tool does not return\"."
+          },
+          {
+            "id": "c",
+            "text": "Gets the stock price for a ticker symbol, so the model can call it whenever any ticker is named in a message",
+            "correct": false,
+            "says": "Ruled out because a short description is the pattern to avoid: \"Provide extremely detailed descriptions.\""
+          },
+          {
+            "id": "d",
+            "text": "Price lookup tool, which the model should call on every single message that it receives from any user of the application",
+            "correct": false,
+            "says": "Ruled out because the page asks for \"when to use it and when not to\", not for a call on every message."
+          }
+        ],
+        "origin": {
+          "path": "course/26-tool-use/01-tools-schemas-descriptions-and-tool-choice.md",
+          "section": "A tool definition"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A request to Claude Sonnet 5.5 sets `tool_choice` to `{\"type\": \"any\"}`. What is the outcome?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A reply that explains the plan and then calls a tool",
+            "correct": false,
+            "says": "Ruled out because for the values that work, \"the API prefills the assistant message to force a tool to be used\", so no explanation comes first."
+          },
+          {
+            "id": "b",
+            "text": "A call to the first tool in the list, whatever the user said",
+            "correct": false,
+            "says": "Ruled out because `any` \"doesn't force a particular tool\", and the request is rejected before any tool is chosen."
+          },
+          {
+            "id": "c",
+            "text": "A 400 error, because the model does not support that value",
+            "correct": true,
+            "says": "The page says that for Claude Opus 5.5, Claude Sonnet 5.5, Claude Fable 5.1 and Claude Mythos 5.1, \"`any` and `tool` return a 400 error\"."
+          },
+          {
+            "id": "d",
+            "text": "A silent fall back to `auto`, with a warning in the response header",
+            "correct": false,
+            "says": "Ruled out because the page's advice is to choose it yourself: \"Use `auto` with strict tools or structured outputs.\""
+          }
+        ],
+        "origin": {
+          "path": "course/26-tool-use/01-tools-schemas-descriptions-and-tool-choice.md",
+          "section": "Forced choice is not available everywhere"
+        }
+      }
+    ],
+    "concepts": [
+      "A tool definition, as the page teaches it",
+      "Forced choice is not available everywhere, as the page teaches it",
+      "Where tools run, as the page teaches it"
+    ]
+  }
+}

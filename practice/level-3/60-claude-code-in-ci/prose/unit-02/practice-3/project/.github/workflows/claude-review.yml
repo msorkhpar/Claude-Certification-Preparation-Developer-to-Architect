@@ -1,0 +1,20 @@
+name: Claude review
+on:
+  pull_request:
+    types: [opened, synchronize]
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Review the pull request
+        env:
+          ANTHROPIC_API_KEY: sk-ant-api03-EXAMPLEKEY123456
+        run: |
+          git diff origin/${{ github.base_ref }}...HEAD | claude -p "Review the change on standard input." \
+            --append-system-prompt-file CLAUDE.md \
+            --allowedTools "Bash,Edit" > review.json

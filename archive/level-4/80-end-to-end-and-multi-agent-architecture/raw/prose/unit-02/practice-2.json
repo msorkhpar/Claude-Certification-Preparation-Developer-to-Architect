@@ -1,0 +1,300 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "80-end-to-end-and-multi-agent-architecture"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: an architecture review against a rubric (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an architecture review against a rubric"
+    },
+    {
+      "type": "para",
+      "text": "A solution architect is asked to review three proposed designs for the same claims-intake service before the board meets: a plain workflow, a single agent and a team of agents. The review has to be the same for every design, so the rubric is code: the findings it raises, the verdict that follows from them, and the pick of the cheapest design that the rubric does not reject. The model is not called: the tests give you design descriptions. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`review`, `verdict`, `cheapest_adequate`); TypeScript has `review`, `verdict` and `cheapestAdequate`; Java has the same camel-case names as static methods of `ArchitectureReview` and Kotlin has top-level functions. A design is a map (JSON-like) and so is a finding, as the starters show."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The design"
+    },
+    {
+      "type": "para",
+      "text": "A design has `name`, `pattern` (`workflow`, `augmented`, `agent` or `multi-agent`), `agents` (a count, default 1), `cost` (a whole number, the relative price of one task), `path_known`, `parallel_independent`, `shared_context`, `needs_audit` and `writes_without_approval` (booleans; a missing one is false), and `stages`: a map with the lists `input`, `processing`, `output` and `feedback`. An empty list or a missing key means the stage is absent."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working review with eight gaps cut out of it. The severity table, the helper that builds a finding and `review`, which joins the findings of the rules and orders them, are written and correct. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`stage_findings` unlocks `e1`: the absent stages and the missing feedback loop.",
+        "`team_findings` unlocks `e3`: more than one agent needs independent parts and no shared context.",
+        "`write_findings` unlocks `e4`: an unapproved write when an audit is needed.",
+        "`autonomy_findings` unlocks `e2`: an agent or a team on a known path.",
+        "`output_findings` unlocks `e5`: an output stage with no validation step.",
+        "`order_findings` unlocks `e6`: severity first, then rule name.",
+        "`verdict` unlocks `m1` and `e6`: reject, revise or approve from the worst finding.",
+        "`cheapest_adequate` unlocks `e7`: the cheapest design that is not rejected, ties by name."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About fifteen lines in all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`review(design)` returns a list of findings `{\"rule\", \"severity\"}`. The rubric:",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`missing-stage:input`, `missing-stage:processing` and `missing-stage:output` (one finding per absent stage), severity `high`.",
+              "`no-feedback` when the `feedback` stage is absent, severity `high`.",
+              "`team-without-independence` when there is more than one agent and either the context is shared or the parts are not independent, severity `high`.",
+              "`unapproved-write` when the design writes without approval and an audit is needed, severity `high`.",
+              "`autonomy-without-need` when the pattern is `agent` or `multi-agent` and the path is known, severity `medium`.",
+              "`unvalidated-output` when the `output` stage is present and does not contain `validate`, severity `medium`.",
+              "The findings are ordered by severity (`high` first) and then by rule name."
+            ]
+          }
+        ],
+        "`verdict(findings)` is `reject` when any finding is `high`, otherwise `revise` when any is `medium`, otherwise `approve`.",
+        "`cheapest_adequate(designs)` is the name of the design with the lowest `cost` among those whose verdict is not `reject`; equal costs are broken by the lower name. It is `None` (TypeScript: `null`; Java and Kotlin: `null`) when every design is rejected or the list is empty."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**The loop is part of the design.** A design that takes input, processes and answers, but never learns from its output, is a pipeline and not a system. *You should see* `no-feedback`, and a finding for each absent stage, both `high`.",
+        "**Autonomy has to be bought.** An agent or a team on a path that is already known costs several times a workflow's tokens for nothing. *You should see* a `medium` finding for a known path and none for an open one.",
+        "**A team needs parts that do not depend on each other.** *You should see* `team-without-independence` for a shared context and for dependent parts, and none for one agent.",
+        "**An unapproved write is judged by what the audit needs.** *You should see* `high` when an audit is needed and nothing when it is not.",
+        "**Output is checked before it leaves.** *You should see* `unvalidated-output` for an output stage without a validation step, and none when the stage is absent (the missing stage is already reported).",
+        "**The verdict follows the worst finding.** *You should see* `reject`, `revise` and `approve`, and the exact order of the findings.",
+        "**Price decides only among designs that pass.** *You should see* the cheapest design that is not rejected, ties broken by name, and `None` when none passes."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A sound design passes review with no findings and is approved"
+        ],
+        [
+          "`e1`",
+          "A missing feedback loop or a missing stage is a `high` finding"
+        ],
+        [
+          "`e2`",
+          "Autonomy is flagged only when the path is known"
+        ],
+        [
+          "`e3`",
+          "A team needs independent parts and no shared context; one agent is exempt"
+        ],
+        [
+          "`e4`",
+          "An unapproved write is a finding only when an audit is needed"
+        ],
+        [
+          "`e5`",
+          "Output without a validation step is flagged; an absent output stage is not flagged twice"
+        ],
+        [
+          "`e6`",
+          "The findings are ordered by severity and then rule, and the verdict follows the worst"
+        ],
+        [
+          "`e7`",
+          "The cheapest design that is not rejected wins, ties go by name, and none passing gives no name"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "/** An architecture review against a rubric: the findings, the verdict and the cheapest design that is not rejected. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"architecture_review\");\n\ntype Finding = { rule: string; severity: string };\n\nconst SEVERITY_ORDER: Record<string, number> = { high: 0, medium: 1 };\nexport const AUTONOMOUS = [\"agent\", \"multi-agent\"];\n\nconst empty = (value: unknown): boolean => value === undefined || value === null || (Array.isArray(value) && value.length === 0);\n\nconst finding = (rule: string, severity: string): Finding => ({ rule, severity });\n\n/** missing-stage:<stage> for each absent stage, then no-feedback when the feedback stage is absent; all high. */\nexport function stageFindings(stages: any): Finding[] {\n  const found = [\"input\", \"processing\", \"output\"].filter((stage) => empty(stages[stage])).map((stage) => finding(`missing-stage:${stage}`, \"high\"));\n  if (empty(stages.feedback)) found.push(finding(\"no-feedback\", \"high\"));\n  return found;\n}\n\n/** team-without-independence (high) for more than one agent with a shared context or parts that are not independent. */\nexport function teamFindings(design: any): Finding[] {\n  return (design.agents ?? 1) > 1 && (design.shared_context || !design.parallel_independent) ? [finding(\"team-without-independence\", \"high\")] : [];\n}\n\n/** unapproved-write (high) when the design writes without approval and an audit is needed. */\nexport function writeFindings(design: any): Finding[] {\n  return design.writes_without_approval && design.needs_audit ? [finding(\"unapproved-write\", \"high\")] : [];\n}\n\n/** autonomy-without-need (medium) when an agent or a team is used on a known path. */\nexport function autonomyFindings(design: any): Finding[] {\n  return AUTONOMOUS.includes(design.pattern) && design.path_known ? [finding(\"autonomy-without-need\", \"medium\")] : [];\n}\n\n/** unvalidated-output (medium) when the output stage is present and has no validate step. */\nexport function outputFindings(stages: any): Finding[] {\n  return !empty(stages.output) && !stages.output.includes(\"validate\") ? [finding(\"unvalidated-output\", \"medium\")] : [];\n}\n\n/** High first, then by rule name. */\nexport function orderFindings(findings: Finding[]): Finding[] {\n  return [...findings].sort((a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity] || (a.rule < b.rule ? -1 : a.rule > b.rule ? 1 : 0));\n}\n\n/** reject for any high finding, revise for any medium finding, otherwise approve. */\nexport function verdict(findings: Finding[]): string {\n  const severities = new Set(findings.map((f) => f.severity));\n  return severities.has(\"high\") ? \"reject\" : severities.has(\"medium\") ? \"revise\" : \"approve\";\n}\n\nexport function review(design: any): Finding[] {\n  log.debug(\"review input\", design);\n  const stages = design.stages ?? {};\n  return orderFindings([...stageFindings(stages), ...teamFindings(design), ...writeFindings(design), ...autonomyFindings(design), ...outputFindings(stages)]);\n}\n\n/** The name of the cheapest design whose verdict is not reject; ties go to the lower name; null when none qualifies. */\nexport function cheapestAdequate(designs: any[]): string | null {\n  const adequate = designs.filter((d) => verdict(review(d)) !== \"reject\");\n  if (adequate.length === 0) return null;\n  return [...adequate].sort((a, b) => a.cost - b.cost || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))[0].name;\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { cheapestAdequate, review, verdict } from \"./architectureReview.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\nconst stages = { input: [\"parse\"], processing: [\"classify\", \"route\"], output: [\"validate\", \"send\"], feedback: [\"review a sample\"] };\nconst design = (over: Record<string, any> = {}) => ({\n  name: \"intake\", pattern: \"workflow\", agents: 1, cost: 3, path_known: true, parallel_independent: false,\n  shared_context: false, needs_audit: true, writes_without_approval: false, stages, ...over,\n});\n\n// A sound workflow design passes; a multi-agent design that writes without approval and has no feedback loop does not.\nconst sound = design();\nconst risky = design({ name: \"research\", pattern: \"multi-agent\", agents: 4, writes_without_approval: true, stages: { ...stages, feedback: [] } });\nfor (const d of [sound, risky]) {\n  const findings = review(d);\n  console.log(d.name, \"->\", verdict(findings), findings.map((f: any) => f.rule));\n}\nconsole.log(\"cheapest design that is not rejected:\", cheapestAdequate([sound, risky]));\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "/** An architecture review against a rubric: the findings, the verdict and the cheapest design that is not rejected. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"architecture_review\");\n\ntype Finding = { rule: string; severity: string };\n\nconst SEVERITY_ORDER: Record<string, number> = { high: 0, medium: 1 };\nexport const AUTONOMOUS = [\"agent\", \"multi-agent\"];\n\nconst empty = (value: unknown): boolean => value === undefined || value === null || (Array.isArray(value) && value.length === 0);\n\nconst finding = (rule: string, severity: string): Finding => ({ rule, severity });\n\n/**\n * TODO 1 of 8 (unlocks e1): the findings about absent stages.\n * Receives the design's `stages` object. Returns a list of findings: `missing-stage:input`, `missing-stage:processing` and `missing-stage:output` for each of\n * those stages that is absent or empty, then `no-feedback` when `feedback` is absent or empty; every one with severity `high`.\n * Example: { input: [\"parse\"], processing: [\"act\"], output: [\"send\"] } -> [{ rule: \"no-feedback\", severity: \"high\" }]\n */\nexport function stageFindings(stages: any): Finding[] {\n  return [];\n}\n\n/**\n * TODO 2 of 8 (unlocks e3): the finding about a team.\n * Receives the design. Returns [`team-without-independence`, severity `high`] when there is more than one agent (`agents`, default 1) and either\n * `shared_context` is true or `parallel_independent` is not true; otherwise an empty list.\n * Example: { agents: 3, shared_context: true, parallel_independent: true } -> one finding; { agents: 1, shared_context: true } -> []\n */\nexport function teamFindings(design: any): Finding[] {\n  return [];\n}\n\n/**\n * TODO 3 of 8 (unlocks e4): the finding about an unapproved write.\n * Receives the design. Returns [`unapproved-write`, severity `high`] when `writes_without_approval` and `needs_audit` are both true; otherwise an empty list.\n * Example: { writes_without_approval: true, needs_audit: false } -> []\n */\nexport function writeFindings(design: any): Finding[] {\n  return [];\n}\n\n/**\n * TODO 4 of 8 (unlocks e2): the finding about autonomy.\n * Receives the design. Returns [`autonomy-without-need`, severity `medium`] when `pattern` is in `AUTONOMOUS` and `path_known` is true; otherwise an empty list.\n * Example: { pattern: \"agent\", path_known: false } -> []\n */\nexport function autonomyFindings(design: any): Finding[] {\n  return [];\n}\n\n/**\n * TODO 5 of 8 (unlocks e5): the finding about unvalidated output.\n * Receives the design's `stages` object. Returns [`unvalidated-output`, severity `medium`] when the `output` stage is present and does not contain `validate`;\n * otherwise an empty list (an absent output stage is already reported as a missing stage).\n * Example: { output: [\"send\"] } -> one finding; { output: [\"validate\", \"send\"] } -> []\n */\nexport function outputFindings(stages: any): Finding[] {\n  return [];\n}\n\n/**\n * TODO 6 of 8 (unlocks e6): order the findings.\n * Receives a list of findings. Returns them ordered by severity (`high` before `medium`, see `SEVERITY_ORDER`) and then by rule name.\n * Example: [medium \"autonomy-without-need\", high \"no-feedback\"] -> the high one first\n */\nexport function orderFindings(findings: Finding[]): Finding[] {\n  return findings;\n}\n\n/**\n * TODO 7 of 8 (unlocks m1 and e6): the verdict.\n * Receives a list of findings. Returns `reject` when any is `high`, otherwise `revise` when any is `medium`, otherwise `approve`.\n * Example: verdict([]) -> \"approve\"\n */\nexport function verdict(findings: Finding[]): string {\n  return \"\";\n}\n\nexport function review(design: any): Finding[] {\n  log.debug(\"review input\", design);\n  const stages = design.stages ?? {};\n  return orderFindings([...stageFindings(stages), ...teamFindings(design), ...writeFindings(design), ...autonomyFindings(design), ...outputFindings(stages)]);\n}\n\n/**\n * TODO 8 of 8 (unlocks e7): the cheapest design that is not rejected.\n * Receives a list of designs, each with `name` and `cost`. Returns the name of the one with the lowest `cost` among those whose `verdict(review(d))` is not\n * `reject`; equal costs go to the lower name; `null` when none qualifies or the list is empty.\n * Example: costs 2 (name \"zeta\") and 2 (name \"alpha\"), both sound -> \"alpha\"\n */\nexport function cheapestAdequate(designs: any[]): string | null {\n  return null;\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { cheapestAdequate, review, verdict } from \"./architectureReview.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\nconst stages = { input: [\"parse\"], processing: [\"classify\", \"route\"], output: [\"validate\", \"send\"], feedback: [\"review a sample\"] };\nconst design = (over: Record<string, any> = {}) => ({\n  name: \"intake\", pattern: \"workflow\", agents: 1, cost: 3, path_known: true, parallel_independent: false,\n  shared_context: false, needs_audit: true, writes_without_approval: false, stages, ...over,\n});\n\n// A sound workflow design passes; a multi-agent design that writes without approval and has no feedback loop does not.\nconst sound = design();\nconst risky = design({ name: \"research\", pattern: \"multi-agent\", agents: 4, writes_without_approval: true, stages: { ...stages, feedback: [] } });\nfor (const d of [sound, risky]) {\n  const findings = review(d);\n  console.log(d.name, \"->\", verdict(findings), findings.map((f: any) => f.rule));\n}\nconsole.log(\"cheapest design that is not rejected:\", cheapestAdequate([sound, risky]));\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 6,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "de66ab097226e9c815bc4c53d0aa4fa1ace5235bcd168a5ac33d464f31e84deb",
+  "starting_code": "/** An architecture review against a rubric: the findings, the verdict and the cheapest design that is not rejected. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"architecture_review\");\n\ntype Finding = { rule: string; severity: string };\n\nconst SEVERITY_ORDER: Record<string, number> = { high: 0, medium: 1 };\nexport const AUTONOMOUS = [\"agent\", \"multi-agent\"];\n\nconst empty = (value: unknown): boolean => value === undefined || value === null || (Array.isArray(value) && value.length === 0);\n\nconst finding = (rule: string, severity: string): Finding => ({ rule, severity });\n\n/**\n * TODO 1 of 8 (unlocks e1): the findings about absent stages.\n * Receives the design's `stages` object. Returns a list of findings: `missing-stage:input`, `missing-stage:processing` and `missing-stage:output` for each of\n * those stages that is absent or empty, then `no-feedback` when `feedback` is absent or empty; every one with severity `high`.\n * Example: { input: [\"parse\"], processing: [\"act\"], output: [\"send\"] } -> [{ rule: \"no-feedback\", severity: \"high\" }]\n */\nexport function stageFindings(stages: any): Finding[] {\n  return [];\n}\n\n/**\n * TODO 2 of 8 (unlocks e3): the finding about a team.\n * Receives the design. Returns [`team-without-independence`, severity `high`] when there is more than one agent (`agents`, default 1) and either\n * `shared_context` is true or `parallel_independent` is not true; otherwise an empty list.\n * Example: { agents: 3, shared_context: true, parallel_independent: true } -> one finding; { agents: 1, shared_context: true } -> []\n */\nexport function teamFindings(design: any): Finding[] {\n  return [];\n}\n\n/**\n * TODO 3 of 8 (unlocks e4): the finding about an unapproved write.\n * Receives the design. Returns [`unapproved-write`, severity `high`] when `writes_without_approval` and `needs_audit` are both true; otherwise an empty list.\n * Example: { writes_without_approval: true, needs_audit: false } -> []\n */\nexport function writeFindings(design: any): Finding[] {\n  return [];\n}\n\n/**\n * TODO 4 of 8 (unlocks e2): the finding about autonomy.\n * Receives the design. Returns [`autonomy-without-need`, severity `medium`] when `pattern` is in `AUTONOMOUS` and `path_known` is true; otherwise an empty list.\n * Example: { pattern: \"agent\", path_known: false } -> []\n */\nexport function autonomyFindings(design: any): Finding[] {\n  return [];\n}\n\n/**\n * TODO 5 of 8 (unlocks e5): the finding about unvalidated output.\n * Receives the design's `stages` object. Returns [`unvalidated-output`, severity `medium`] when the `output` stage is present and does not contain `validate`;\n * otherwise an empty list (an absent output stage is already reported as a missing stage).\n * Example: { output: [\"send\"] } -> one finding; { output: [\"validate\", \"send\"] } -> []\n */\nexport function outputFindings(stages: any): Finding[] {\n  return [];\n}\n\n/**\n * TODO 6 of 8 (unlocks e6): order the findings.\n * Receives a list of findings. Returns them ordered by severity (`high` before `medium`, see `SEVERITY_ORDER`) and then by rule name.\n * Example: [medium \"autonomy-without-need\", high \"no-feedback\"] -> the high one first\n */\nexport function orderFindings(findings: Finding[]): Finding[] {\n  return findings;\n}\n\n/**\n * TODO 7 of 8 (unlocks m1 and e6): the verdict.\n * Receives a list of findings. Returns `reject` when any is `high`, otherwise `revise` when any is `medium`, otherwise `approve`.\n * Example: verdict([]) -> \"approve\"\n */\nexport function verdict(findings: Finding[]): string {\n  return \"\";\n}\n\nexport function review(design: any): Finding[] {\n  log.debug(\"review input\", design);\n  const stages = design.stages ?? {};\n  return orderFindings([...stageFindings(stages), ...teamFindings(design), ...writeFindings(design), ...autonomyFindings(design), ...outputFindings(stages)]);\n}\n\n/**\n * TODO 8 of 8 (unlocks e7): the cheapest design that is not rejected.\n * Receives a list of designs, each with `name` and `cost`. Returns the name of the one with the lowest `cost` among those whose `verdict(review(d))` is not\n * `reject`; equal costs go to the lower name; `null` when none qualifies or the list is empty.\n * Example: costs 2 (name \"zeta\") and 2 (name \"alpha\"), both sound -> \"alpha\"\n */\nexport function cheapestAdequate(designs: any[]): string | null {\n  return null;\n}\n",
+  "exercise": {
+    "main_path": "practice/level-4/80-end-to-end-and-multi-agent-architecture/prose/unit-02/practice-2/architectureReview.ts",
+    "test_path": "practice/level-4/80-end-to-end-and-multi-agent-architecture/prose/unit-02/practice-2/architectureReview.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-4/80-end-to-end-and-multi-agent-architecture/prose/unit-02/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-4/80-end-to-end-and-multi-agent-architecture/prose/unit-02/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-4/80-end-to-end-and-multi-agent-architecture/prose/unit-02/practice-2/architectureReview.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 a sound design passes review with no findings",
+        "kind": "main",
+        "says": "A sound design passes review with no findings and is approved"
+      },
+      {
+        "id": "e1 a design without a feedback loop or a stage is rejected",
+        "kind": "edge",
+        "says": "A missing feedback loop or a missing stage is a high finding"
+      },
+      {
+        "id": "e2 autonomy is flagged only when the path is known",
+        "kind": "edge",
+        "says": "Autonomy is flagged only when the path is known"
+      },
+      {
+        "id": "e3 several agents need independent parts and no shared context",
+        "kind": "edge",
+        "says": "A team needs independent parts and no shared context; one agent is exempt"
+      },
+      {
+        "id": "e4 an unapproved write is a finding only when an audit is needed",
+        "kind": "edge",
+        "says": "An unapproved write is a finding only when an audit is needed"
+      },
+      {
+        "id": "e5 output that nobody validates is flagged",
+        "kind": "edge",
+        "says": "Output without a validation step is flagged; an absent output stage is not flagged twice"
+      },
+      {
+        "id": "e6 findings are ordered by severity then rule and the verdict follows the worst",
+        "kind": "edge",
+        "says": "The findings are ordered by severity and then rule, and the verdict follows the worst"
+      },
+      {
+        "id": "e7 the cheapest design that is not rejected wins and ties go by name",
+        "kind": "edge",
+        "says": "The cheapest design that is not rejected wins, ties go by name, and none passing gives no name"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-4/80-end-to-end-and-multi-agent-architecture/prose/unit-02/practice-2/target/report.xml"
+    },
+    "origin": "course/80-end-to-end-and-multi-agent-architecture/02-contracts-between-parts-and-the-review.md",
+    "concepts": [
+      "the practice of Contracts between parts, and the review is solved"
+    ],
+    "files": [
+      "practice/level-4/80-end-to-end-and-multi-agent-architecture/prose/unit-02/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "end-to-end-and-multi-agent-architecture-u2"
+}

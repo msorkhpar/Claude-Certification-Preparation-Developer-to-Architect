@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-4",
+    "92-enabling-teams-and-operations"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 5,
+  "title": "Check yourself: One setting in five places: precedence, locks and managed-only keys",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "Scenario: Dmitri's company wants developers limited to two approved models. The platform team sets `model` to the first of them in the managed file and tells the developers to use only those two. What happens when a developer picks another model?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It is allowed, since only a list restricts a choice",
+            "correct": true,
+            "says": "A managed `model` is a default, and the lock is the list."
+          },
+          {
+            "id": "b",
+            "text": "The choice is refused, because the managed file outranks the developer's own picks",
+            "correct": false,
+            "says": "Ruled out because \"A managed `model` is a **default**: a developer can still pick another model\"."
+          },
+          {
+            "id": "c",
+            "text": "The pick is refused for the session and restored after the next restart",
+            "correct": false,
+            "says": "Ruled out because \"a default is overridden at once\", so no refusal appears that a restart could lift."
+          },
+          {
+            "id": "d",
+            "text": "The pick stands only if the project file also names that model",
+            "correct": false,
+            "says": "Ruled out because \"a managed list applies as it is: a project file's list cannot widen it\", and nothing here makes a project file's model decide."
+          }
+        ],
+        "origin": {
+          "path": "course/92-enabling-teams-and-operations/01-one-setting-in-five-places-precedence-locks-and-managed-only-keys.md",
+          "section": "Locks you build from lists, and security exceptions"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "Scenario: Amara adds `allowManagedHooksOnly: true` to the shared project file that Amara's team commits, expecting every developer to be limited to the hooks of the organisation. What is the effect?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Hooks from the project run, since the team's file is read after the user file",
+            "correct": false,
+            "says": "Ruled out because \"A lower file that sets one of these has **no effect**\"."
+          },
+          {
+            "id": "b",
+            "text": "Every hook is switched off in the project until the managed file confirms it",
+            "correct": false,
+            "says": "Ruled out because the page describes \"a lock written in the shared project file looks like policy and does nothing\", not a switch that waits for confirmation."
+          },
+          {
+            "id": "c",
+            "text": "Nothing happens, since only the top tier reads that key",
+            "correct": true,
+            "says": "A lower file that sets a managed-only key has no effect."
+          },
+          {
+            "id": "d",
+            "text": "Only the hooks of the project run, since the team's choice is the closest",
+            "correct": false,
+            "says": "Ruled out because \"Some keys are read only from managed settings, because their purpose is to be out of a developer's reach\"."
+          }
+        ],
+        "origin": {
+          "path": "course/92-enabling-teams-and-operations/01-one-setting-in-five-places-precedence-locks-and-managed-only-keys.md",
+          "section": "Keys that only an organisation can set"
+        }
+      }
+    ]
+  }
+}

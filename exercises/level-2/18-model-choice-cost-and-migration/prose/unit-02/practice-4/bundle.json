@@ -1,0 +1,85 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "18-model-choice-cost-and-migration"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 4,
+  "title": "Practice: a cost model and a model router, graded on a cost table (Kotlin)",
+  "lang": "kotlin",
+  "main_file": "src/main/kotlin/Router.kt",
+  "files": [
+    "src/main/kotlin/TryIt.kt"
+  ],
+  "test_file": "src/test/kotlin/RouterTest.kt",
+  "build": [
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/18-model-choice-cost-and-migration/prose/unit-02/practice-4",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/18-model-choice-cost-and-migration/prose/unit-02/practice-4",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_costOfAPlainRequestAndTheCheapestModelThatMeetsTheTier()",
+      "kind": "main",
+      "says": "A plain request is priced from input and output, and the router returns the cheapest model at or above the tier"
+    },
+    {
+      "id": "e1_cacheReadsAndWritesArePricedByTheirOwnMultipliers()",
+      "kind": "edge",
+      "says": "Cache writes cost 1.25 and 2 times input, reads use the model's own multiplier, and an unsplit write is the 5-minute kind"
+    },
+    {
+      "id": "e2_theBatchDiscountHalvesEveryPartOfTheCost()",
+      "kind": "edge",
+      "says": "The batch discount halves every part of the cost, cache parts included"
+    },
+    {
+      "id": "e3_theRouterPicksByCostAndTierNotByTheOrderOfTheCatalog()",
+      "kind": "edge",
+      "says": "The router picks by cost and tier, whatever the order of the catalog"
+    },
+    {
+      "id": "e4_aModelWhoseContextOrOutputLimitIsTooSmallIsSkipped()",
+      "kind": "edge",
+      "says": "A model with too small a context window or output limit is skipped"
+    },
+    {
+      "id": "e5_deprecatedModelsAreSkippedAndAnEmptyChoiceRaises()",
+      "kind": "edge",
+      "says": "Deprecated models are skipped, and a choice with no model raises NoModelError"
+    },
+    {
+      "id": "e6_aTieGoesToTheLowerTier()",
+      "kind": "edge",
+      "says": "A cost tie goes to the lower tier"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/18-model-choice-cost-and-migration/02-usage-token-counting-and-a-cost-model.md"
+}

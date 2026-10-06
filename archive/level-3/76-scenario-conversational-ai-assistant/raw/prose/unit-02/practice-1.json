@@ -1,0 +1,304 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "76-scenario-conversational-ai-assistant"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: review a batch of assistant conversations (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: review a batch of assistant conversations"
+    },
+    {
+      "type": "para",
+      "text": "A team runs a conversational assistant for a book shop. It has a persona, remembers a customer between sessions and hands over to a person when it should. Before each release the team reads a batch of conversations that reviewers have labelled, and decides whether the assistant may ship. In this practice you write that review: how many conversations the assistant settled alone, whether every signal of risk reached a person as a safety hand-off, whether conversations ran too long, how often the assistant asked the same question twice, which kinds of conversation are weak, and the verdict with its first reason. The model is not called: the tests give you the labelled batch. The shapes of the batch, of the policy and of the report are this course's own design for the capstone, not an Anthropic interface. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`review`); TypeScript has the same name and the same snake-case fields. Java has the static method `ConversationReview.review` and the records `Conversation`, `Policy`, `Segment` and `Report` with camel-case fields (`neededPerson`, `maxTurns`, `resolvedPct`); Kotlin has the top-level function `review` and the data classes of the same names."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working review with eight gaps cut out of it. The reading of the policy, the repeated count and the assembly of the report are written and correct. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`percent` unlocks `e9` (and the figures of `m1` and `e1`): the whole percentage, rounded half up.",
+        "`settled` unlocks `e8`: whether the assistant settled a conversation alone.",
+        "`count_safety_missed` unlocks `e2`: risk signals that did not reach a person as a safety hand-off.",
+        "`count_overlong` unlocks `e3`: conversations above the turn limit that nobody took over.",
+        "`is_repeat_ok` unlocks `e4` (and `e1`): the repeated-question limit, met at the limit.",
+        "`count_escalations` unlocks `e7`: over- and under-escalation.",
+        "`segments_of` unlocks `e5` and `e6`: the segments and when one is weak.",
+        "`choose_verdict` unlocks `e1`, `e2` and the verdict of `m1`: the hold or ship decision and its reason."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About fifteen lines in all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "A conversation is `{id, segment, turns, resolved, handoff, needed_person, repeated, risk}`: `handoff` is `none`, `requested` (the customer asked for a person), `safety` (a signal of risk was routed to a person) or `stalled` (the assistant gave up after repeated misunderstanding); `resolved` says that the customer's problem was solved; `needed_person` is the reviewers' label that a person was needed; `repeated` says that the assistant asked the same question twice; `risk` says that the customer said something that signals risk to their safety. The policy is `{max_turns, max_repeat, min_resolved, min_n}`: the longest conversation without a hand-off, the most repeated questions in percent, the lowest resolution rate of a segment in percent, and the fewest conversations that may justify calling a segment weak."
+    },
+    {
+      "type": "para",
+      "text": "`review(conversations, policy)` returns a report with:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`n`: the number of conversations. `resolved`: those that are `resolved` **and** have `handoff` `none` (a conversation a person settled is not one the assistant settled). `resolved_pct`: that count as a whole percentage rounded half up, `(200 * count + total) // (2 * total)`, and 0 when the total is 0.",
+        "`safety_missed`: the conversations with `risk` whose `handoff` is not `safety`.",
+        "`overlong`: the conversations with more than `max_turns` turns and `handoff` `none`.",
+        "`repeat_pct`: the percentage with `repeated`, rounded the same way. `repeat_ok`: true when `repeated * 100 <= max_repeat * n` (true for an empty batch).",
+        "`over_escalated`: the hand-offs (any `handoff` other than `none`) with no `needed_person` and no `risk`. `under_escalated`: the conversations with `handoff` `none` and `needed_person`.",
+        "`segments`: one entry per segment, sorted by name, `{segment, n, resolved, percent, weak}` with `resolved` counted as above. `weak` is true when the segment has at least `min_n` conversations and `resolved * 100 < min_resolved * n` for that segment.",
+        "`verdict` and `reason`: `hold` with `no_data` for an empty batch; otherwise the first that applies of `safety` (any `safety_missed`), `weak_segment` (any weak segment) and `repeats` (not `repeat_ok`), with verdict `hold`; when none applies the reason is `none` and the verdict is `ship`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**A safety signal is a hand-off in code.** The assistant may be warm and still miss a signal of risk; a person has to receive it. *You should see* a risk that reached a person only because the customer asked for one counted as missed, and a hold whatever else is good.",
+        "**Limits are limits.** A limit is met at the limit. *You should see* exactly 12 turns acceptable and 13 not, exactly 10 percent repeated questions acceptable and 20 not, and a segment exactly at the resolution floor not weak.",
+        "**Small segments prove nothing.** A weak segment needs enough conversations behind it. *You should see* two unresolved conversations left alone and three called weak.",
+        "**Say who settled it.** A conversation a person took over is not an assistant success. *You should see* it left out of the resolved count."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A mixed batch gets every count, the segments and a verdict"
+        ],
+        [
+          "`e1`",
+          "An empty batch has zero figures and is held for lack of data"
+        ],
+        [
+          "`e2`",
+          "A safety signal counts as missed unless it went to a person as a safety hand-off"
+        ],
+        [
+          "`e3`",
+          "A conversation is overlong only above the turn limit and only when nobody took over"
+        ],
+        [
+          "`e4`",
+          "Repeated questions are acceptable at exactly the limit and not above it"
+        ],
+        [
+          "`e5`",
+          "A segment is weak only below the resolution floor and not at it"
+        ],
+        [
+          "`e6`",
+          "A segment needs the minimum number of conversations before it can be called weak"
+        ],
+        [
+          "`e7`",
+          "A hand-off is over-escalation only when no person was needed and no safety signal was present"
+        ],
+        [
+          "`e8`",
+          "Only conversations the assistant settled alone count as resolved"
+        ],
+        [
+          "`e9`",
+          "Percentages are whole numbers rounded half up"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Review a batch of assistant conversations: how many the assistant settled, whether every safety signal reached a person, and whether the assistant may ship.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef percent(count, total):\n    \"\"\"A whole percentage, rounded half up; 0 when there is nothing to divide.\"\"\"\n    return (200 * count + total) // (2 * total) if total else 0\n\n\ndef settled(c):\n    \"\"\"True when the assistant settled the conversation alone: resolved and no hand-off.\"\"\"\n    return c[\"resolved\"] and c[\"handoff\"] == \"none\"\n\n\ndef count_safety_missed(conversations):\n    \"\"\"The conversations with a risk signal whose hand-off is not a safety hand-off.\"\"\"\n    return sum(1 for c in conversations if c[\"risk\"] and c[\"handoff\"] != \"safety\")\n\n\ndef count_overlong(conversations, max_turns):\n    \"\"\"The conversations above the turn limit that nobody took over.\"\"\"\n    return sum(1 for c in conversations if c[\"turns\"] > max_turns and c[\"handoff\"] == \"none\")\n\n\ndef is_repeat_ok(repeated, n, max_repeat):\n    \"\"\"True when the repeated questions are at most max_repeat percent of the batch (true for an empty batch).\"\"\"\n    return repeated * 100 <= max_repeat * n\n\n\ndef count_escalations(conversations):\n    \"\"\"(over_escalated, under_escalated): hand-offs nobody needed, and conversations that needed a person and got none.\"\"\"\n    over = sum(1 for c in conversations if c[\"handoff\"] != \"none\" and not c[\"needed_person\"] and not c[\"risk\"])\n    under = sum(1 for c in conversations if c[\"handoff\"] == \"none\" and c[\"needed_person\"])\n    return over, under\n\n\ndef segments_of(conversations, policy):\n    \"\"\"One entry per segment, sorted by name: {segment, n, resolved, percent, weak}.\"\"\"\n    result = []\n    for name in sorted({c[\"segment\"] for c in conversations}):\n        group = [c for c in conversations if c[\"segment\"] == name]\n        done = sum(1 for c in group if settled(c))\n        result.append({\"segment\": name, \"n\": len(group), \"resolved\": done, \"percent\": percent(done, len(group)),\n                       \"weak\": len(group) >= policy[\"min_n\"] and done * 100 < policy[\"min_resolved\"] * len(group)})\n    return result\n\n\ndef choose_verdict(n, safety_missed, segments, repeat_ok):\n    \"\"\"(verdict, reason): hold for no data, then for a missed safety signal, a weak segment and repeats; otherwise ship.\"\"\"\n    if n == 0:\n        return \"hold\", \"no_data\"\n    if safety_missed:\n        return \"hold\", \"safety\"\n    if any(s[\"weak\"] for s in segments):\n        return \"hold\", \"weak_segment\"\n    if not repeat_ok:\n        return \"hold\", \"repeats\"\n    return \"ship\", \"none\"\n\n\ndef review(conversations, policy):\n    log.debug(\"review input: %r\", conversations)\n    n = len(conversations)\n    resolved = sum(1 for c in conversations if settled(c))\n    safety_missed = count_safety_missed(conversations)\n    repeated = sum(1 for c in conversations if c[\"repeated\"])\n    repeat_ok = is_repeat_ok(repeated, n, policy[\"max_repeat\"])\n    over_escalated, under_escalated = count_escalations(conversations)\n    segments = segments_of(conversations, policy)\n    verdict, reason = choose_verdict(n, safety_missed, segments, repeat_ok)\n    return {\"n\": n, \"resolved\": resolved, \"resolved_pct\": percent(resolved, n), \"safety_missed\": safety_missed,\n            \"overlong\": count_overlong(conversations, policy[\"max_turns\"]), \"repeat_pct\": percent(repeated, n), \"repeat_ok\": repeat_ok,\n            \"over_escalated\": over_escalated, \"under_escalated\": under_escalated, \"segments\": segments, \"verdict\": verdict, \"reason\": reason}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom conversation_review import review\n\nPOLICY = {\"max_turns\": 12, \"max_repeat\": 10, \"min_resolved\": 80, \"min_n\": 3}\n\ndef conv(segment=\"billing\", turns=5, resolved=True, handoff=\"none\", needed=False, repeated=False, risk=False):\n    return {\"id\": \"c\", \"segment\": segment, \"turns\": turns, \"resolved\": resolved, \"handoff\": handoff,\n            \"needed_person\": needed, \"repeated\": repeated, \"risk\": risk}\n\n# A batch of conversations: billing mostly resolved, a safety case handed off, one overlong smalltalk.\nbatch = [conv() for _ in range(3)] + [conv(resolved=False, handoff=\"requested\", needed=True), conv(\"smalltalk\"),\n                                       conv(\"smalltalk\", turns=15), conv(\"safety\", resolved=False, handoff=\"safety\", needed=True, risk=True),\n                                       conv(repeated=True)]\nreport = review(batch, POLICY)\nprint(\"conversations:\", report[\"n\"], \"| resolved:\", report[\"resolved\"], f\"({report['resolved_pct']}%)\")\nprint(\"safety missed:\", report[\"safety_missed\"], \"| overlong:\", report[\"overlong\"], \"| repeat %:\", report[\"repeat_pct\"])\nprint(\"segments:\", report[\"segments\"])\nprint(\"verdict:\", report[\"verdict\"], \"-\", report[\"reason\"])\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Review a batch of assistant conversations: how many the assistant settled, whether every safety signal reached a person, and whether the assistant may ship.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef percent(count, total):\n    \"\"\"TODO 1 of 8 (unlocks m1, e1 and e9): a whole percentage, rounded half up.\n\n    Receives a count and a total. Returns `(200 * count + total) // (2 * total)`, and 0 when the total is 0.\n    Example: percent(2, 3) -> 67, percent(1, 8) -> 13, percent(0, 0) -> 0\n    \"\"\"\n    return 0\n\n\ndef settled(c):\n    \"\"\"TODO 2 of 8 (unlocks m1 and e8): did the assistant settle this conversation alone?\n\n    Receives one conversation. Returns True only when `resolved` is true and `handoff` is `none` (a conversation a person settled is not one the assistant settled).\n    Example: settled({\"resolved\": True, \"handoff\": \"requested\", ...}) -> False\n    \"\"\"\n    return False\n\n\ndef count_safety_missed(conversations):\n    \"\"\"TODO 3 of 8 (unlocks e2): count the safety signals that did not reach a person as a safety hand-off.\n\n    Receives the conversations. Returns how many have `risk` and a `handoff` other than `safety` (`none` and `requested` both count as missed).\n    Example: one risk conversation with handoff \"requested\" and one with \"safety\" -> 1\n    \"\"\"\n    return 0\n\n\ndef count_overlong(conversations, max_turns):\n    \"\"\"TODO 4 of 8 (unlocks e3): count the overlong conversations.\n\n    Receives the conversations and the limit. Returns how many have more than `max_turns` turns and `handoff` `none`.\n    Example: with a limit of 12, turns 12 -> 0, turns 13 -> 1, turns 30 with handoff \"stalled\" -> 0\n    \"\"\"\n    return 0\n\n\ndef is_repeat_ok(repeated, n, max_repeat):\n    \"\"\"TODO 5 of 8 (unlocks e1 and e4): are the repeated questions within the limit?\n\n    Receives the repeated count, the batch size and the limit in percent. Returns True when `repeated * 100 <= max_repeat * n` (so true for an empty batch).\n    Example: is_repeat_ok(1, 10, 10) -> True, is_repeat_ok(2, 10, 10) -> False\n    \"\"\"\n    return False\n\n\ndef count_escalations(conversations):\n    \"\"\"TODO 6 of 8 (unlocks e7): count over- and under-escalation.\n\n    Receives the conversations. Returns (over_escalated, under_escalated): hand-offs (any `handoff` but `none`) with no `needed_person` and no `risk`,\n    and conversations with `handoff` `none` that had `needed_person`.\n    Example: a \"requested\" hand-off nobody needed -> (1, 0); a \"safety\" hand-off with risk -> (0, 0)\n    \"\"\"\n    return 0, 0\n\n\ndef segments_of(conversations, policy):\n    \"\"\"TODO 7 of 8 (unlocks m1, e5 and e6): one entry per segment.\n\n    Receives the conversations and the policy. Returns a list sorted by segment name of {segment, n, resolved, percent, weak}, with `resolved` counted by `settled`.\n    `weak` needs at least `min_n` conversations and `resolved * 100 < min_resolved * n` for the segment.\n    Example: 3 unresolved \"refunds\" conversations with min_n 3 -> [{\"segment\": \"refunds\", \"n\": 3, \"resolved\": 0, \"percent\": 0, \"weak\": True}]\n    \"\"\"\n    return [{\"segment\": \"\", \"n\": 0, \"resolved\": 0, \"percent\": 0, \"weak\": False}]\n\n\ndef choose_verdict(n, safety_missed, segments, repeat_ok):\n    \"\"\"TODO 8 of 8 (unlocks m1, e1, e2 and e4): the verdict and its reason.\n\n    Receives the batch size, the missed safety count, the segments and `repeat_ok`. Returns (verdict, reason): (\"hold\", \"no_data\") for an empty batch,\n    otherwise the first that applies of (\"hold\", \"safety\"), (\"hold\", \"weak_segment\") and (\"hold\", \"repeats\"), and (\"ship\", \"none\") when none does.\n    Example: choose_verdict(5, 0, [], False) -> (\"hold\", \"repeats\")\n    \"\"\"\n    return \"\", \"\"\n\n\ndef review(conversations, policy):\n    log.debug(\"review input: %r\", conversations)\n    n = len(conversations)\n    resolved = sum(1 for c in conversations if settled(c))\n    safety_missed = count_safety_missed(conversations)\n    repeated = sum(1 for c in conversations if c[\"repeated\"])\n    repeat_ok = is_repeat_ok(repeated, n, policy[\"max_repeat\"])\n    over_escalated, under_escalated = count_escalations(conversations)\n    segments = segments_of(conversations, policy)\n    verdict, reason = choose_verdict(n, safety_missed, segments, repeat_ok)\n    return {\"n\": n, \"resolved\": resolved, \"resolved_pct\": percent(resolved, n), \"safety_missed\": safety_missed,\n            \"overlong\": count_overlong(conversations, policy[\"max_turns\"]), \"repeat_pct\": percent(repeated, n), \"repeat_ok\": repeat_ok,\n            \"over_escalated\": over_escalated, \"under_escalated\": under_escalated, \"segments\": segments, \"verdict\": verdict, \"reason\": reason}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom conversation_review import review\n\nPOLICY = {\"max_turns\": 12, \"max_repeat\": 10, \"min_resolved\": 80, \"min_n\": 3}\n\ndef conv(segment=\"billing\", turns=5, resolved=True, handoff=\"none\", needed=False, repeated=False, risk=False):\n    return {\"id\": \"c\", \"segment\": segment, \"turns\": turns, \"resolved\": resolved, \"handoff\": handoff,\n            \"needed_person\": needed, \"repeated\": repeated, \"risk\": risk}\n\n# A batch of conversations: billing mostly resolved, a safety case handed off, one overlong smalltalk.\nbatch = [conv() for _ in range(3)] + [conv(resolved=False, handoff=\"requested\", needed=True), conv(\"smalltalk\"),\n                                       conv(\"smalltalk\", turns=15), conv(\"safety\", resolved=False, handoff=\"safety\", needed=True, risk=True),\n                                       conv(repeated=True)]\nreport = review(batch, POLICY)\nprint(\"conversations:\", report[\"n\"], \"| resolved:\", report[\"resolved\"], f\"({report['resolved_pct']}%)\")\nprint(\"safety missed:\", report[\"safety_missed\"], \"| overlong:\", report[\"overlong\"], \"| repeat %:\", report[\"repeat_pct\"])\nprint(\"segments:\", report[\"segments\"])\nprint(\"verdict:\", report[\"verdict\"], \"-\", report[\"reason\"])\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 7,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "692aa27a5394fb0f71e7cbb2efbacb07d638565c3ecc740fe2cbdb071f51aa4b",
+  "starting_code": "\"\"\"Review a batch of assistant conversations: how many the assistant settled, whether every safety signal reached a person, and whether the assistant may ship.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef percent(count, total):\n    \"\"\"TODO 1 of 8 (unlocks m1, e1 and e9): a whole percentage, rounded half up.\n\n    Receives a count and a total. Returns `(200 * count + total) // (2 * total)`, and 0 when the total is 0.\n    Example: percent(2, 3) -> 67, percent(1, 8) -> 13, percent(0, 0) -> 0\n    \"\"\"\n    return 0\n\n\ndef settled(c):\n    \"\"\"TODO 2 of 8 (unlocks m1 and e8): did the assistant settle this conversation alone?\n\n    Receives one conversation. Returns True only when `resolved` is true and `handoff` is `none` (a conversation a person settled is not one the assistant settled).\n    Example: settled({\"resolved\": True, \"handoff\": \"requested\", ...}) -> False\n    \"\"\"\n    return False\n\n\ndef count_safety_missed(conversations):\n    \"\"\"TODO 3 of 8 (unlocks e2): count the safety signals that did not reach a person as a safety hand-off.\n\n    Receives the conversations. Returns how many have `risk` and a `handoff` other than `safety` (`none` and `requested` both count as missed).\n    Example: one risk conversation with handoff \"requested\" and one with \"safety\" -> 1\n    \"\"\"\n    return 0\n\n\ndef count_overlong(conversations, max_turns):\n    \"\"\"TODO 4 of 8 (unlocks e3): count the overlong conversations.\n\n    Receives the conversations and the limit. Returns how many have more than `max_turns` turns and `handoff` `none`.\n    Example: with a limit of 12, turns 12 -> 0, turns 13 -> 1, turns 30 with handoff \"stalled\" -> 0\n    \"\"\"\n    return 0\n\n\ndef is_repeat_ok(repeated, n, max_repeat):\n    \"\"\"TODO 5 of 8 (unlocks e1 and e4): are the repeated questions within the limit?\n\n    Receives the repeated count, the batch size and the limit in percent. Returns True when `repeated * 100 <= max_repeat * n` (so true for an empty batch).\n    Example: is_repeat_ok(1, 10, 10) -> True, is_repeat_ok(2, 10, 10) -> False\n    \"\"\"\n    return False\n\n\ndef count_escalations(conversations):\n    \"\"\"TODO 6 of 8 (unlocks e7): count over- and under-escalation.\n\n    Receives the conversations. Returns (over_escalated, under_escalated): hand-offs (any `handoff` but `none`) with no `needed_person` and no `risk`,\n    and conversations with `handoff` `none` that had `needed_person`.\n    Example: a \"requested\" hand-off nobody needed -> (1, 0); a \"safety\" hand-off with risk -> (0, 0)\n    \"\"\"\n    return 0, 0\n\n\ndef segments_of(conversations, policy):\n    \"\"\"TODO 7 of 8 (unlocks m1, e5 and e6): one entry per segment.\n\n    Receives the conversations and the policy. Returns a list sorted by segment name of {segment, n, resolved, percent, weak}, with `resolved` counted by `settled`.\n    `weak` needs at least `min_n` conversations and `resolved * 100 < min_resolved * n` for the segment.\n    Example: 3 unresolved \"refunds\" conversations with min_n 3 -> [{\"segment\": \"refunds\", \"n\": 3, \"resolved\": 0, \"percent\": 0, \"weak\": True}]\n    \"\"\"\n    return [{\"segment\": \"\", \"n\": 0, \"resolved\": 0, \"percent\": 0, \"weak\": False}]\n\n\ndef choose_verdict(n, safety_missed, segments, repeat_ok):\n    \"\"\"TODO 8 of 8 (unlocks m1, e1, e2 and e4): the verdict and its reason.\n\n    Receives the batch size, the missed safety count, the segments and `repeat_ok`. Returns (verdict, reason): (\"hold\", \"no_data\") for an empty batch,\n    otherwise the first that applies of (\"hold\", \"safety\"), (\"hold\", \"weak_segment\") and (\"hold\", \"repeats\"), and (\"ship\", \"none\") when none does.\n    Example: choose_verdict(5, 0, [], False) -> (\"hold\", \"repeats\")\n    \"\"\"\n    return \"\", \"\"\n\n\ndef review(conversations, policy):\n    log.debug(\"review input: %r\", conversations)\n    n = len(conversations)\n    resolved = sum(1 for c in conversations if settled(c))\n    safety_missed = count_safety_missed(conversations)\n    repeated = sum(1 for c in conversations if c[\"repeated\"])\n    repeat_ok = is_repeat_ok(repeated, n, policy[\"max_repeat\"])\n    over_escalated, under_escalated = count_escalations(conversations)\n    segments = segments_of(conversations, policy)\n    verdict, reason = choose_verdict(n, safety_missed, segments, repeat_ok)\n    return {\"n\": n, \"resolved\": resolved, \"resolved_pct\": percent(resolved, n), \"safety_missed\": safety_missed,\n            \"overlong\": count_overlong(conversations, policy[\"max_turns\"]), \"repeat_pct\": percent(repeated, n), \"repeat_ok\": repeat_ok,\n            \"over_escalated\": over_escalated, \"under_escalated\": under_escalated, \"segments\": segments, \"verdict\": verdict, \"reason\": reason}\n",
+  "exercise": {
+    "main_path": "practice/level-3/76-scenario-conversational-ai-assistant/prose/unit-02/practice-1/conversation_review.py",
+    "test_path": "practice/level-3/76-scenario-conversational-ai-assistant/prose/unit-02/practice-1/test_conversation_review.py",
+    "run_command": [
+      "python3",
+      "practice/level-3/76-scenario-conversational-ai-assistant/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-3/76-scenario-conversational-ai-assistant/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-3/76-scenario-conversational-ai-assistant/prose/unit-02/practice-1/test_conversation_review.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_a_mixed_batch_gets_every_count_the_segments_and_a_verdict",
+        "kind": "main",
+        "says": "A mixed batch gets every count, the segments and a verdict"
+      },
+      {
+        "id": "test_e1_an_empty_batch_has_zero_figures_and_is_held_for_lack_of_data",
+        "kind": "edge",
+        "says": "An empty batch has zero figures and is held for lack of data"
+      },
+      {
+        "id": "test_e2_a_safety_signal_counts_as_missed_unless_it_went_to_a_person_as_a_safety_hand_off",
+        "kind": "edge",
+        "says": "A safety signal counts as missed unless it went to a person as a safety hand-off"
+      },
+      {
+        "id": "test_e3_a_conversation_is_overlong_only_above_the_turn_limit_and_only_when_nobody_took_over",
+        "kind": "edge",
+        "says": "A conversation is overlong only above the turn limit and only when nobody took over"
+      },
+      {
+        "id": "test_e4_repeated_questions_are_acceptable_at_exactly_the_limit_and_not_above_it",
+        "kind": "edge",
+        "says": "Repeated questions are acceptable at exactly the limit and not above it"
+      },
+      {
+        "id": "test_e5_a_segment_is_weak_only_below_the_resolution_floor_and_not_at_it",
+        "kind": "edge",
+        "says": "A segment is weak only below the resolution floor and not at it"
+      },
+      {
+        "id": "test_e6_a_segment_needs_the_minimum_number_of_conversations_before_it_can_be_called_weak",
+        "kind": "edge",
+        "says": "A segment needs the minimum number of conversations before it can be called weak"
+      },
+      {
+        "id": "test_e7_a_hand_off_is_over_escalation_only_when_no_person_was_needed_and_no_safety_signal_was_present",
+        "kind": "edge",
+        "says": "A hand-off is over-escalation only when no person was needed and no safety signal was present"
+      },
+      {
+        "id": "test_e8_only_conversations_the_assistant_settled_alone_count_as_resolved",
+        "kind": "edge",
+        "says": "Only conversations the assistant settled alone count as resolved"
+      },
+      {
+        "id": "test_e9_percentages_are_whole_numbers_rounded_half_up",
+        "kind": "edge",
+        "says": "Percentages are whole numbers rounded half up"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/76-scenario-conversational-ai-assistant/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/76-scenario-conversational-ai-assistant/02-sensitive-talk-hand-offs-and-judging-a-conversation.md",
+    "concepts": [
+      "the practice of Sensitive talk, hand-offs and judging a conversation is solved"
+    ],
+    "files": [
+      "practice/level-3/76-scenario-conversational-ai-assistant/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "scenario-conversational-ai-assistant-u2"
+}

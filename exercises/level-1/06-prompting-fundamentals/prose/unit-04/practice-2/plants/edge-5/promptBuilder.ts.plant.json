@@ -1,0 +1,20 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "promptBuilder.ts",
+      "old": "function renderDocument(index: number, doc: Doc): string {",
+      "new": "function renderDocument(index: number, doc: Doc, variables: Record<string, string> = {}): string {"
+    },
+    {
+      "file": "promptBuilder.ts",
+      "old": "${escapeText(doc.text)}",
+      "new": "${escapeText(fill(doc.text, variables))}"
+    },
+    {
+      "file": "promptBuilder.ts",
+      "old": "renderDocument(i + 1, doc))",
+      "new": "renderDocument(i + 1, doc, variables))"
+    }
+  ]
+}

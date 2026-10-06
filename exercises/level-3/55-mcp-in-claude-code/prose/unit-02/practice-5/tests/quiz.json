@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "55-mcp-in-claude-code"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 5,
+  "title": "Check yourself: Tools together, descriptions that steer, resources and the practice",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "An agent keeps answering documentation questions with Grep on the checkout, although the team's documentation server has a search tool whose description reads `Searches docs`. What is the best fix?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Make the documentation server load at the start of each session",
+            "correct": false,
+            "says": "Ruled out because loading at the start only makes the definition visible: \"makes the definition visible and does not say when to prefer it\"."
+          },
+          {
+            "id": "b",
+            "text": "Open its text with when to prefer it over pattern matching",
+            "correct": true,
+            "says": "The description is what the model chooses by, so it must say when to prefer the tool, with the point first and the boundary against the competing tool near the start."
+          },
+          {
+            "id": "c",
+            "text": "Remove the competing tool from the agent's list of tools",
+            "correct": false,
+            "says": "Ruled out because \"Removing Grep is a blunt answer, because the agent then cannot search the code in the checkout\"."
+          },
+          {
+            "id": "d",
+            "text": "Lengthen the text until it covers every detail of the tool",
+            "correct": false,
+            "says": "Ruled out because \"Claude Code truncates each tool description and each server's instructions at 2,048 characters by default\"."
+          }
+        ],
+        "origin": {
+          "path": "course/55-mcp-in-claude-code/02-tools-together-descriptions-resources-and-the-practice.md",
+          "section": "A description is what steers the model"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A support agent calls three listing tools before each database question, only to learn which tables exist. Which change cuts those calls?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Expose the schemas as a resource mentioned in the prompt",
+            "correct": true,
+            "says": "A catalog is wanted before work starts, and a resource can be attached to the prompt so that no discovery calls are needed."
+          },
+          {
+            "id": "b",
+            "text": "Raise the output limit on the listing tools to return more rows",
+            "correct": false,
+            "says": "Ruled out because \"The limit concerns the size of one result and does nothing for the number of calls\"."
+          },
+          {
+            "id": "c",
+            "text": "Mark the listing tools read-only and let them run side by side",
+            "correct": false,
+            "says": "Ruled out because a hint \"does not change this: it describes the tool to a client and does not tell the model what exists\"."
+          },
+          {
+            "id": "d",
+            "text": "Move the database server into the user scope to load everywhere",
+            "correct": false,
+            "says": "Ruled out because \"it decides where a server loads and not what it exposes\"."
+          }
+        ],
+        "origin": {
+          "path": "course/55-mcp-in-claude-code/02-tools-together-descriptions-resources-and-the-practice.md",
+          "section": "What a tool may return"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A team gives the agent its whole orders database through one MCP tool that runs any SQL it is given, and the job is to report on open orders. What is the architectural concern?",
+        "options": [
+          {
+            "id": "a",
+            "text": "An oversized result is lost, and the agent never sees any of the rows",
+            "correct": false,
+            "says": "Ruled out because an oversized result is kept: \"Claude Code saves it to a file and replaces it in the conversation with a message that names the file path\"."
+          },
+          {
+            "id": "b",
+            "text": "The description is cut at the limit, and the agent cannot use it",
+            "correct": false,
+            "says": "Ruled out because truncation is handled by wording: \"put critical details near the start\"."
+          },
+          {
+            "id": "c",
+            "text": "Access stays all-or-nothing, with no permission rule to scope it",
+            "correct": true,
+            "says": "A permission rule can allow or deny a tool by name, so one tool that does everything leaves nothing to scope."
+          },
+          {
+            "id": "d",
+            "text": "Tool search hides the definition, and the agent cannot find it",
+            "correct": false,
+            "says": "Ruled out because a definition is found by the model and not by a person: \"a definition is loaded when Claude needs it\"."
+          }
+        ],
+        "origin": {
+          "path": "course/55-mcp-in-claude-code/02-tools-together-descriptions-resources-and-the-practice.md",
+          "section": "What a tool may return"
+        }
+      }
+    ]
+  }
+}

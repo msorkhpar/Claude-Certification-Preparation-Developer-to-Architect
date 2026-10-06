@@ -1,0 +1,90 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "53-tool-errors-agents-can-act-on"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 4,
+  "title": "Practice: tool errors that an agent can act on (Kotlin)",
+  "lang": "kotlin",
+  "main_file": "src/main/kotlin/Errors.kt",
+  "files": [
+    "src/main/kotlin/TryIt.kt"
+  ],
+  "test_file": "src/test/kotlin/ErrorsTest.kt",
+  "build": [
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/53-tool-errors-agents-can-act-on/prose/unit-02/practice-4",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/53-tool-errors-agents-can-act-on/prose/unit-02/practice-4",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_aFailedCallBecomesAStructuredErrorWithACategoryARetryFlagAndAnErrorFlag()",
+      "kind": "main",
+      "says": "A failed call becomes an error with a category, a retry flag and a message, and an error result with the error flag"
+    },
+    {
+      "id": "e1_aGenericMessageOrAnUnknownCategoryIsRefused()",
+      "kind": "edge",
+      "says": "A generic message and an unknown category are refused"
+    },
+    {
+      "id": "e2_onlyTransientFailuresAreRetriedWithGrowingWaitsAndTheOtherKindsReturnAtOnce()",
+      "kind": "edge",
+      "says": "Only transient failures are retried, with doubling waits; the other kinds return at once, with their message and explanation"
+    },
+    {
+      "id": "e3_theRetriesAreBoundedAndAWaitTheServiceAsksForIsHonoured()",
+      "kind": "edge",
+      "says": "The retries are bounded, the wait a service asks for is honoured and the give-up message names the attempts"
+    },
+    {
+      "id": "e4_aValidEmptyResultIsASuccessAndNotAnError()",
+      "kind": "edge",
+      "says": "A valid empty result is a success, not an error"
+    },
+    {
+      "id": "e5_aTimeoutOnAWriteIsAnUnknownOutcomeAndIsRetriedOnlyWhenRepeatingItIsSafe()",
+      "kind": "edge",
+      "says": "A timed out write is an unknown outcome and is retried only with a key or when read only, with the same key each time and the caller's map untouched"
+    },
+    {
+      "id": "e6_theNextActionFollowsTheCategory()",
+      "kind": "edge",
+      "says": "The next action follows the category"
+    },
+    {
+      "id": "e7_anUnexpectedExceptionBecomesAnInternalErrorAndTheRunGoesOn()",
+      "kind": "edge",
+      "says": "An unexpected exception becomes an internal error and the run goes on"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/53-tool-errors-agents-can-act-on/02-a-call-with-an-unknown-outcome-retries-and-the-practice.md"
+}

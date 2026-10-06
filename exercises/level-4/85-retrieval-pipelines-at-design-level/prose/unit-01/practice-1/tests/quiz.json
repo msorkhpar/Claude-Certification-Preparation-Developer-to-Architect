@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-4",
+    "85-retrieval-pipelines-at-design-level"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: Where to cut, what a chunk carries and which mechanism answers",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A returns policy states a rule and, two lines later, its exception. The pipeline indexes windows of fixed length, and the assistant gives the rule without the exception. Which change addresses the cause?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Break the text at section boundaries so related sentences stay together",
+            "correct": true,
+            "says": "The cut ignored the structure of the data, and a heading is a joint at which a rule and its exception stay together."
+          },
+          {
+            "id": "b",
+            "text": "Shrink each window so that every single sentence is indexed entirely on its own",
+            "correct": false,
+            "says": "Ruled out because \"A smaller window cuts in more places and separates more sentences from their neighbours\"."
+          },
+          {
+            "id": "c",
+            "text": "Return more windows for each question so that both halves can arrive together",
+            "correct": false,
+            "says": "Ruled out because returning more chunks \"does not help either, because no chunk holds the whole rule\"."
+          },
+          {
+            "id": "d",
+            "text": "Swap the keyword index for an embedding index to match the meaning of the text",
+            "correct": false,
+            "says": "Ruled out because changing the index \"changes how the pieces are scored, not where they were cut\"."
+          }
+        ],
+        "origin": {
+          "path": "course/85-retrieval-pipelines-at-design-level/01-where-to-cut-what-to-carry-and-which-index.md",
+          "section": "Cut where the data has joints"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A platform serves several customers from one index. An employee of one customer, cleared for two contracts, asks a question that matches fifty passages across all customers, yet the application returns a single result. Which fault explains the single result?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It keeps one index for every customer instead of one index for each",
+            "correct": false,
+            "says": "Ruled out because \"Chunks carry metadata: the document, its owner or tenant, its version, its date\" and that is how one index serves many customers."
+          },
+          {
+            "id": "b",
+            "text": "It lets the system prompt ask the model to ignore the other tenants",
+            "correct": false,
+            "says": "Ruled out because the shortfall arises \"because the top places went to chunks that were then removed\", and a prompt instruction has no part in it."
+          },
+          {
+            "id": "c",
+            "text": "It trims the list to the person's rights after taking the best few",
+            "correct": true,
+            "says": "The filter ran after the cut, so passages the person may not see took the top places and were removed afterwards."
+          },
+          {
+            "id": "d",
+            "text": "It stores each contract twice, so that duplicate passages fill the list",
+            "correct": false,
+            "says": "Ruled out because a reader gets \"fewer than k results although many visible chunks matched\", which is the signature of a late filter and not of duplicates."
+          }
+        ],
+        "origin": {
+          "path": "course/85-retrieval-pipelines-at-design-level/01-where-to-cut-what-to-carry-and-which-index.md",
+          "section": "Access control belongs in the retrieval step"
+        }
+      }
+    ]
+  }
+}

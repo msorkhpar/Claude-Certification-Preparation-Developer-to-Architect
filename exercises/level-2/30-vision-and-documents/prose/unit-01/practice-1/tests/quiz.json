@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "30-vision-and-documents"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: Images: sources, limits, cost and the picture Claude actually sees",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A review service sends thirty scanned pages, each 3000 pixels wide, in a single call, and the API refuses it with an invalid_request_error that cites a stricter limit for crowded requests. Which repair does the page document?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Send the pages through Amazon Bedrock, which has no per-image limit at all",
+            "correct": false,
+            "says": "Ruled out because the limits table gives Amazon Bedrock its own cap, \"Size of one image, Amazon Bedrock and Google Cloud (base64)\", so a per-image limit exists there too."
+          },
+          {
+            "id": "b",
+            "text": "Raise the output limit so that the reply has room to describe all thirty of them",
+            "correct": false,
+            "says": "Ruled out because the stricter limit is \"a stricter per-image dimension limit\", which concerns the size of each file and not the reply."
+          },
+          {
+            "id": "c",
+            "text": "Convert each page to GIF so that the stricter size limit stops counting it",
+            "correct": false,
+            "says": "Ruled out because \"Every `image` block counts\" toward the stricter limit, whatever its format."
+          },
+          {
+            "id": "d",
+            "text": "Downscale every file until neither side is longer than 2000 px, keeping all of them together",
+            "correct": true,
+            "says": "The page says to resize each image \"so that neither dimension exceeds 2000 px, or keep the request to 20 or fewer image and document blocks.\""
+          }
+        ],
+        "origin": {
+          "path": "course/30-vision-and-documents/01-images-limits-and-cost.md",
+          "section": "Limits that end in an error"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A scanned A4 page is 1075 by 1520 pixels, both sides under the 1568 edge limit. On a standard-tier model, Claude points at (462, 654) for the signature line, yet the click lands above and to the left of the line on the original. What explains the miss?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The picture it viewed was 924 by 1307, so every returned value needs rescaling by that size",
+            "correct": true,
+            "says": "The page works the example: 1075 by 1520 costs 2145 tokens, so on the standard tier it \"is resized to 924 by 1307\" and the point is in that picture."
+          },
+          {
+            "id": "b",
+            "text": "The reply was normalized to a 0 to 1000 grid and was then used as plain pixels",
+            "correct": false,
+            "says": "Ruled out because \"Claude does not work well when you ask for normalized coordinates\", and it returns pixel positions."
+          },
+          {
+            "id": "c",
+            "text": "Claude pads every image on the top and left, which moved the origin downward",
+            "correct": false,
+            "says": "Ruled out because the padding sits \"on the bottom and right\", so the origin does not move."
+          },
+          {
+            "id": "d",
+            "text": "Pictures under the edge limit are returned untouched, so the model misjudged the line",
+            "correct": false,
+            "says": "Ruled out because \"The token limit can resize an image whose sides are both under the edge limit.\""
+          }
+        ],
+        "origin": {
+          "path": "course/30-vision-and-documents/01-images-limits-and-cost.md",
+          "section": "The size Claude saw, and why coordinates depend on it"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A support agent keeps ten screenshots in a long chat and attaches all of them as base64 on every turn. Latency climbs with each turn. What does the page recommend?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Re-encode them as heavily compressed JPEG until the payload shrinks to a few hundred kilobytes",
+            "correct": false,
+            "says": "Ruled out because \"Lossy compression can add artifacts that hurt text\"."
+          },
+          {
+            "id": "b",
+            "text": "Move to a model with a larger window, which makes the repeated bytes cost nothing",
+            "correct": false,
+            "says": "Ruled out because the problem is that \"each request resends the full conversation history\", whatever the window size."
+          },
+          {
+            "id": "c",
+            "text": "Upload each one once and refer to it by id, so the payload stays small",
+            "correct": true,
+            "says": "The page says that an uploaded file keeps the payload small \"regardless of how many images accumulate in the conversation history.\""
+          },
+          {
+            "id": "d",
+            "text": "Place the screenshots after the text, because that order shortens the transfer",
+            "correct": false,
+            "says": "Ruled out because the placement advice is only that Claude \"works best when images come before text\"."
+          }
+        ],
+        "origin": {
+          "path": "course/30-vision-and-documents/01-images-limits-and-cost.md",
+          "section": "Three ways to send an image"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,400 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "70-scenario-customer-support-agent"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "The support agent: the scenario, its layers and the first fix",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "The support agent: the scenario, its layers and the first fix"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Architect · **Module 70:** Scenario: customer support agent · **Page 1 of 2** **Exams:** A1, A2, A5; S1"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** describe the exam's support agent and the four tools it works through, route a symptom in its logs to the failure shape behind it and to the first fix, say which layer of the dispatcher stops which failure and in which order the layers run, and read a run of seven incidents through that dispatcher."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-04 against Anthropic's engineering article on building effective agents and the Architect exam guide (version 1.0, scenario 1 and its sample questions). The example runs offline in Python, TypeScript, Java and Kotlin with no model and no client: the model is a script of the calls it asks for, so the example is about the code that runs the tools. The page is a capstone: it uses what modules 45, 48, 52, 53 and 54 taught, and it names modules 64 (Keeping what matters in long conversations) and 65 (Escalation and ambiguity) where the exam's third domain needs them."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "The Architect exam draws four of its six scenarios for each sitting, so a given scenario has a two-in-three chance of being among them, if the draw is even. The support agent is the one that touches every domain: the loop and its prerequisites, the tool descriptions and errors, and the judgement of when to hand a case to a person. Its questions have one shape. A log line is shown, a team member proposes a fix, and the options are four fixes of very different weight. The skill is not knowing that a gate exists. It is naming the failure behind the line and picking the proportionate fix first, and knowing which of the four candidate fixes cannot work at all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The scenario in plain words"
+    },
+    {
+      "type": "para",
+      "text": "A company builds a customer support resolution agent on the Claude Agent SDK. It handles requests that are ambiguous by nature: returns, billing disputes, account problems. It reaches the company's systems through four custom tools served over the Model Context Protocol: `get_customer`, `lookup_order`, `process_refund` and `escalate_to_human`. The target is a first-contact resolution of 80 percent or better, together with the discipline to escalate what an agent should not decide. Those two aims pull against each other: an agent that never escalates reaches a high rate by deciding things it should not, and one that escalates everything is safe and useless."
+    },
+    {
+      "type": "para",
+      "text": "The four tools sort into three kinds. `get_customer` and `lookup_order` read. `process_refund` changes the world and cannot be undone. `escalate_to_human` is the way out. The design of the agent follows that sort: reading is cheap and free, the money tool sits behind everything that can be checked, and the way out is never gated."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Read a symptom as a failure shape"
+    },
+    {
+      "type": "para",
+      "text": "Every question of the scenario starts from something a team would see in production. The table gives the shapes this course has taught, with the fix to make first and where it was taught."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "What the logs show",
+        "The failure shape",
+        "The first fix",
+        "Taught in"
+      ],
+      "rows": [
+        [
+          "In some conversations the agent calls `lookup_order` or `process_refund` without ever calling `get_customer`, and refunds land on the wrong account",
+          "A step order that is only requested",
+          "A prerequisite enforced in the code that runs the tools",
+          "Module 48"
+        ],
+        [
+          "`check my order #4471` often gets `get_customer`, and both tools have a one-line description and accept similar identifiers",
+          "Descriptions that leave the model nothing to choose by",
+          "Longer descriptions: the formats each tool accepts, an example request and when to use its neighbour instead",
+          "Module 52"
+        ],
+        [
+          "A lookup times out and the agent apologises, or retries a call that cannot work",
+          "An error with no category",
+          "A structured error: what failed, whether it can be retried, what to try next",
+          "Module 53"
+        ],
+        [
+          "A refund above the limit was issued",
+          "A limit that lives in the prompt",
+          "A cap in the dispatcher, and a person above it",
+          "Modules 48 and 54"
+        ],
+        [
+          "The agent escalates easy cases and settles policy exceptions alone, and the rate sits well under 80 percent",
+          "Unclear decision boundaries",
+          "Explicit escalation criteria with worked examples",
+          "Module 61 and module 65 (Escalation and ambiguity)"
+        ],
+        [
+          "Two customers share a name and the agent acts on the first",
+          "An ambiguous match treated as a unique one",
+          "Return the matches and ask the customer for something that tells them apart",
+          "Module 65 (Escalation and ambiguity)"
+        ],
+        [
+          "Late in a long chat the order number is forgotten, or facts of an earlier customer show up",
+          "Case facts that live only in the transcript, and a state shared between cases",
+          "Keep the facts outside the transcript, and one state per case",
+          "Module 64 (Keeping what matters in long conversations)"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The sixth and seventh rows are where this module goes beyond what the earlier pages built: the example runs the sixth as an incident and answers the shared state of the seventh with one desk per case. The last column is the answer to \"where did we learn this\", and the rest of this page is about the order in which the fixes are made."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Money before rate, and the proportionate fix before the large one"
+    },
+    {
+      "type": "para",
+      "text": "When two failure shapes appear together, the order of the fixes is not the order of how many sessions each affects. A refund that moved without a check cannot be called back, and a session that escalated for no reason cost a person a few minutes. The first fix goes to what cannot be undone. Within the rest, the first fix is the cheapest change that addresses the cause the logs show. The exam's third sample question for this scenario is built on exactly this: an agent escalates simple replacements with photo evidence and tries to settle cases that need a policy exception, and the options are explicit criteria with examples, a self-reported confidence score, a separate classifier trained on past tickets, and sentiment analysis. The key is the criteria, because the cause is a decision boundary nobody wrote down. The score is rejected because the model is already confidently wrong on the hard cases, the classifier because it is machinery for a problem nobody has tried to fix with words, and sentiment because how upset a customer is does not tell you how hard the case is."
+    },
+    {
+      "type": "para",
+      "text": "The practice on page 2 turns this reasoning into a function: it reads a month of recorded sessions, counts each failure shape, and returns the first fix in that order."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The layers of the dispatcher"
+    },
+    {
+      "type": "para",
+      "text": "Page 1 of module 48 put the checks of an agent in the code that runs its tools. For the whole support agent the dispatcher has more to do, and the order in which it does it matters. The example's dispatcher runs these steps for each call the model asks for:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**The way out first.** `escalate_to_human` is answered at once, with no prerequisite, from the state the dispatcher holds. A person must be reachable even when identity cannot be established.",
+        "**The stall guard.** If the same call, with the same arguments, has been made three times in a row, the dispatcher stops the run and escalates with the trigger `stalled`. This is the iteration cap of module 45 made useful: the cap only ends a run, and the guard ends it with a hand-off.",
+        "**Identity.** `get_customer` finds the customer. One match sets the verified customer. Several matches set nothing and return the refusal `ambiguous_match` with a sentence that tells the model to ask for an e-mail address and not to pick one. No match returns `not_found` with the same advice.",
+        "**Everything that needs a customer is refused until there is one.** The refusal is `identity_required`, and it names the next step.",
+        "**Ownership.** An order that belongs to someone else is refused as `order_not_owned`, and the message does not say whose it is.",
+        "**The order was looked up** before a refund (`order_not_checked`), and **the amount is within the limit**; above it the refusal is `needs_human`, which tells the model that the next step is to escalate.",
+        "**The backend call**, and a result with a code, a flag for whether a retry can help, and a sentence. A retryable error (a timeout of the order service) is retried once by the loop, which is the loop's business, not the model's. A permanent error is never retried."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Two properties hold the layers together. First, the state belongs to the case: the example builds a new desk for each conversation, so a customer's identity, the orders looked up and the refunds made cannot reach another case, which is the scope isolation that module 65 (Escalation and ambiguity) teaches against cross-customer contamination, and the reason a long-lived shared state is a defect. Second, the hand-off record is built from the desk's own state. It carries the trigger, the model's reason as one field, whether identity was verified, the orders checked, the refunds made and the refusals, so a person does not read the transcript to find out what happened (module 48, page 2)."
+    },
+    {
+      "type": "para",
+      "text": "What stays outside the dispatcher is judgement. Whether a damaged-item claim deserves a refund, how to word a refusal kindly, and whether a request falls into a gap the policy does not cover are decisions for the model, guided by criteria and examples in the prompt, and above the limit for a person. The line between the two is the one module 48 drew: a rule with a right answer goes in code, and a judgement goes to the model."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The three triggers for a person"
+    },
+    {
+      "type": "para",
+      "text": "The exam names three reasons to escalate, and each has a different home."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Trigger",
+        "What decides it",
+        "In the example"
+      ],
+      "rows": [
+        [
+          "The customer asks for a person",
+          "Nothing but the request: the agent honours it, and does not first investigate or argue",
+          "The model's `escalate_to_human` call is accepted with no prerequisite"
+        ],
+        [
+          "A gap or a conflict in the policy",
+          "The model's judgement, from criteria and examples written down",
+          "A refund above the limit: the dispatcher refuses with `needs_human` and the model escalates"
+        ],
+        [
+          "Stalled progress",
+          "Code, from the calls themselves",
+          "The same call three times in a row"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The building-effective-agents article gives the idea its general form: \"Agents can then pause for human feedback at checkpoints or when encountering blockers.\" The same article names what an agent should rely on while it works: \"it's crucial for the agents to gain 'ground truth' from the environment at each step (such as tool call results or code execution) to assess its progress.\" The dispatcher's results are that ground truth, and the stall guard is a rule about it: when the results stop changing, there is no progress."
+    },
+    {
+      "type": "para",
+      "text": "Sentiment, a count of exclamation marks and the model's own confidence are not on the list. They are the tempting triggers the exam rejects, because none of them says whether the case is within what the agent may decide."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "para",
+      "text": "The example runs seven incidents, each a script of the calls a model asked for, through the dispatcher above. It prints one line per incident, and an extra line with the hand-off record when the case was escalated. The incidents are the ones from the table: a model that skips identity, a transient fault, a refund over the limit, someone else's order, two customers with the same name, a customer who asks for a person, and a run that makes no progress. The customers, the orders and the incidents are invented, and the limit of 100.00, the stall count of three and the codes are this course's design."
+    },
+    {
+      "type": "example",
+      "id": "m70-support-desk",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/70-support-desk/python/support_desk.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/70-support-desk/typescript/supportDesk.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/70-support-desk/java/SupportDesk.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/70-support-desk/kotlin/SupportDesk.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"A support agent's whole control surface in one dispatcher: the identity gate, errors the loop can act on, a stall guard and the three escalation triggers.\n\nThe model is a script of the calls it asks for, in the shapes of the tool_use blocks of module 26, without the client: this example is about the code that\nruns the tools, not about what a model says. Customers, orders and the incidents are made up. The limit, the stall count and the codes are this course's own\ndesign, not an Anthropic interface.\n\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\nLIMIT = 10_000  # cents: a refund above it is a person's decision\nSTALL = 3       # the same call this many times in a row is no progress\n\nCUSTOMERS = {\"C1\": (\"Ana Silva\", \"ana@example.com\"), \"C2\": (\"Ana Silva\", \"ana.s@example.com\"), \"C3\": (\"Ben Ortiz\", \"ben@example.com\")}\nORDERS = {\"O1\": (\"C3\", 5000), \"O2\": (\"C3\", 30000), \"O3\": (\"C1\", 4000)}\n\n\nclass Desk:\n    \"\"\"One conversation's state. A new case gets a new Desk, so nothing of one customer reaches another.\"\"\"\n\n    def __init__(self):\n        self.customer, self.checked, self.refunds, self.refused = None, [], [], []\n        self.backend, self.recent, self.escalation, self.last_code, self.retries = [], [], None, None, 0\n        self.flaky = {\"O2\"}  # the first lookup of this order fails with a transient fault\n\n    def fail(self, code, message, retryable=False):\n        self.last_code = code\n        if code not in (\"transient\", \"not_found\"):\n            self.refused.append(code)\n        return {\"ok\": False, \"code\": code, \"retryable\": retryable, \"message\": message}\n\n    def escalate(self, trigger, reason):\n        \"\"\"The record a person reads, built from the desk's own state and not from the model's account.\"\"\"\n        self.escalation = {\"trigger\": trigger, \"reason\": reason, \"customer\": self.customer, \"verified\": self.customer is not None,\n                           \"orders\": sorted(self.checked), \"refunds\": list(self.refunds), \"refused\": list(self.refused)}\n        return {\"ok\": True, \"content\": \"handed over\"}\n\n    def call(self, tool, args):\n        self.last_code = None\n        self.recent = (self.recent + [(tool, sorted(args.items()))])[-STALL:]\n        if tool == \"escalate_to_human\":  # the way to a person never waits for a prerequisite\n            return self.escalate(args[\"trigger\"], args[\"reason\"])\n        if len(self.recent) == STALL and len(set(map(str, self.recent))) == 1:\n            return self.escalate(\"stalled\", f\"{tool} repeated {STALL} times without progress\")\n        if tool == \"get_customer\":\n            found = [c for c, (name, email) in CUSTOMERS.items() if args[\"query\"] in (name, email)]\n            if len(found) > 1:\n                return self.fail(\"ambiguous_match\", f\"{len(found)} customers match. Ask for the e-mail address. Do not pick one.\")\n            if not found:\n                return self.fail(\"not_found\", \"No customer matches. Ask for the e-mail address.\")\n            self.customer = found[0]\n            return {\"ok\": True, \"content\": f\"customer_id={found[0]}\"}\n        if self.customer is None:\n            return self.fail(\"identity_required\", \"Identify the customer with get_customer before this action.\")\n        owner, total = ORDERS.get(args.get(\"order_id\"), (None, 0))\n        if tool == \"lookup_order\":\n            self.backend.append(tool)\n            if args[\"order_id\"] in self.flaky:\n                self.flaky.discard(args[\"order_id\"])\n                return self.fail(\"transient\", \"The order service timed out. Retry.\", retryable=True)\n            if owner is None:\n                return self.fail(\"not_found\", \"No such order.\")\n            if owner != self.customer:\n                return self.fail(\"order_not_owned\", \"That order does not belong to the verified customer.\")\n            self.checked.append(args[\"order_id\"])\n            return {\"ok\": True, \"content\": f\"total_cents={total}\"}\n        if tool == \"process_refund\":\n            if args[\"order_id\"] not in self.checked:\n                return self.fail(\"order_not_checked\", \"Look up the order before refunding it.\")\n            if args[\"amount_cents\"] > LIMIT:\n                return self.fail(\"needs_human\", \"A refund above the limit is decided by a person. Escalate.\")\n            self.backend.append(tool)\n            self.refunds.append(f\"{args['order_id']}:{args['amount_cents']}\")\n            return {\"ok\": True, \"content\": f\"refund_id=R{len(self.refunds)}\"}\n        return self.fail(\"unknown_tool\", f\"No tool named {tool}.\")\n\n\ndef run(script):\n    \"\"\"The loop: each call goes through the desk, a retryable error is retried once, and the outcome is read from the desk.\"\"\"\n    desk = Desk()\n    for tool, args in script:\n        result = desk.call(tool, args)\n        if not result[\"ok\"] and result.get(\"retryable\"):\n            desk.retries += 1\n            result = desk.call(tool, args)\n    outcome = \"escalated\" if desk.escalation else \"asked\" if desk.last_code == \"ambiguous_match\" else \"resolved\"\n    return desk, outcome\n\n\ndef join(items):\n    return \",\".join(items) or \"-\"\n\n\nINCIDENTS = [\n    (\"skips identity\", [(\"lookup_order\", {\"order_id\": \"O1\"}), (\"get_customer\", {\"query\": \"ben@example.com\"}), (\"lookup_order\", {\"order_id\": \"O1\"}),\n                        (\"process_refund\", {\"order_id\": \"O1\", \"amount_cents\": 2000})]),\n    (\"transient fault\", [(\"get_customer\", {\"query\": \"ben@example.com\"}), (\"lookup_order\", {\"order_id\": \"O2\"}), (\"process_refund\", {\"order_id\": \"O2\", \"amount_cents\": 8000})]),\n    (\"over the limit\", [(\"get_customer\", {\"query\": \"ben@example.com\"}), (\"lookup_order\", {\"order_id\": \"O2\"}), (\"process_refund\", {\"order_id\": \"O2\", \"amount_cents\": 25000}),\n                        (\"escalate_to_human\", {\"trigger\": \"needs_human\", \"reason\": \"refund of 250.00 asked\"})]),\n    (\"someone else's order\", [(\"get_customer\", {\"query\": \"ana@example.com\"}), (\"lookup_order\", {\"order_id\": \"O1\"})]),\n    (\"two customers match\", [(\"get_customer\", {\"query\": \"Ana Silva\"})]),\n    (\"asks for a person\", [(\"escalate_to_human\", {\"trigger\": \"customer_request\", \"reason\": \"customer asked for a person\"})]),\n    (\"no progress\", [(\"get_customer\", {\"query\": \"ben@example.com\"})] + [(\"lookup_order\", {\"order_id\": \"O9\"})] * 3),\n]\n\n\ndef main():\n    for name, script in INCIDENTS:\n        desk, outcome = run(script)\n        print(f\"{name:<21} outcome={outcome:<9} refused={join(desk.refused)} retries={desk.retries} refunds={join(desk.refunds)} backend={join(desk.backend)}\")\n        if desk.escalation:\n            e = desk.escalation\n            print(f\"  handoff: trigger={e['trigger']} verified={'yes' if e['verified'] else 'no'} customer={e['customer'] or '-'} orders={join(e['orders'])} refunds={join(e['refunds'])} refused={join(e['refused'])}\")\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "skips identity        outcome=resolved  refused=identity_required retries=0 refunds=O1:2000 backend=lookup_order,process_refund\ntransient fault       outcome=resolved  refused=- retries=1 refunds=O2:8000 backend=lookup_order,lookup_order,process_refund\nover the limit        outcome=escalated refused=needs_human retries=1 refunds=- backend=lookup_order,lookup_order\n  handoff: trigger=needs_human verified=yes customer=C3 orders=O2 refunds=- refused=needs_human\nsomeone else's order  outcome=resolved  refused=order_not_owned retries=0 refunds=- backend=lookup_order\ntwo customers match   outcome=asked     refused=ambiguous_match retries=0 refunds=- backend=-\nasks for a person     outcome=escalated refused=- retries=0 refunds=- backend=-\n  handoff: trigger=customer_request verified=no customer=- orders=- refunds=- refused=-\nno progress           outcome=escalated refused=- retries=0 refunds=- backend=lookup_order,lookup_order\n  handoff: trigger=stalled verified=yes customer=C3 orders=- refunds=- refused=-"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// A support agent's whole control surface in one dispatcher: the identity gate, errors the loop can act on, a stall guard and the three escalation triggers.\n//\n// The model is a script of the calls it asks for, in the shapes of the tool_use blocks of module 26, without the client: this example is about the code that\n// runs the tools, not about what a model says. Customers, orders and the incidents are made up. The limit, the stall count and the codes are this course's own\n// design, not an Anthropic interface.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"support_desk\");\n\nexport const LIMIT = 10_000; // cents: a refund above it is a person's decision\nexport const STALL = 3; // the same call this many times in a row is no progress\n\nconst CUSTOMERS: Record<string, [string, string]> = { C1: [\"Ana Silva\", \"ana@example.com\"], C2: [\"Ana Silva\", \"ana.s@example.com\"], C3: [\"Ben Ortiz\", \"ben@example.com\"] };\nconst ORDERS: Record<string, [string, number]> = { O1: [\"C3\", 5000], O2: [\"C3\", 30000], O3: [\"C1\", 4000] };\n\nexport type Args = Record<string, any>;\nexport type Call = [string, Args];\nexport type Result = { ok: boolean; code?: string; retryable?: boolean; message?: string; content?: string };\nexport type Escalation = { trigger: string; reason: string; customer: string | null; verified: boolean; orders: string[]; refunds: string[]; refused: string[] };\n\n/** One conversation's state. A new case gets a new Desk, so nothing of one customer reaches another. */\nexport class Desk {\n  customer: string | null = null;\n  checked: string[] = [];\n  refunds: string[] = [];\n  refused: string[] = [];\n  backend: string[] = [];\n  recent: string[] = [];\n  escalation: Escalation | null = null;\n  lastCode: string | null = null;\n  retries = 0;\n  flaky = new Set([\"O2\"]); // the first lookup of this order fails with a transient fault\n\n  fail(code: string, message: string, retryable = false): Result {\n    this.lastCode = code;\n    if (code !== \"transient\" && code !== \"not_found\") this.refused.push(code);\n    return { ok: false, code, retryable, message };\n  }\n\n  /** The record a person reads, built from the desk's own state and not from the model's account. */\n  escalate(trigger: string, reason: string): Result {\n    this.escalation = { trigger, reason, customer: this.customer, verified: this.customer !== null, orders: [...this.checked].sort(), refunds: [...this.refunds], refused: [...this.refused] };\n    return { ok: true, content: \"handed over\" };\n  }\n\n  call(tool: string, args: Args): Result {\n    this.lastCode = null;\n    this.recent = [...this.recent, JSON.stringify([tool, Object.entries(args).sort()])].slice(-STALL);\n    if (tool === \"escalate_to_human\") return this.escalate(args.trigger, args.reason); // the way to a person never waits for a prerequisite\n    if (this.recent.length === STALL && new Set(this.recent).size === 1) return this.escalate(\"stalled\", `${tool} repeated ${STALL} times without progress`);\n    if (tool === \"get_customer\") {\n      const found = Object.entries(CUSTOMERS).filter(([, [name, email]]) => args.query === name || args.query === email).map(([id]) => id);\n      if (found.length > 1) return this.fail(\"ambiguous_match\", `${found.length} customers match. Ask for the e-mail address. Do not pick one.`);\n      if (found.length === 0) return this.fail(\"not_found\", \"No customer matches. Ask for the e-mail address.\");\n      this.customer = found[0];\n      return { ok: true, content: `customer_id=${found[0]}` };\n    }\n    if (this.customer === null) return this.fail(\"identity_required\", \"Identify the customer with get_customer before this action.\");\n    const [owner, total] = ORDERS[args.order_id] ?? [null, 0];\n    if (tool === \"lookup_order\") {\n      this.backend.push(tool);\n      if (this.flaky.delete(args.order_id)) return this.fail(\"transient\", \"The order service timed out. Retry.\", true);\n      if (owner === null) return this.fail(\"not_found\", \"No such order.\");\n      if (owner !== this.customer) return this.fail(\"order_not_owned\", \"That order does not belong to the verified customer.\");\n      this.checked.push(args.order_id);\n      return { ok: true, content: `total_cents=${total}` };\n    }\n    if (tool === \"process_refund\") {\n      if (!this.checked.includes(args.order_id)) return this.fail(\"order_not_checked\", \"Look up the order before refunding it.\");\n      if (args.amount_cents > LIMIT) return this.fail(\"needs_human\", \"A refund above the limit is decided by a person. Escalate.\");\n      this.backend.push(tool);\n      this.refunds.push(`${args.order_id}:${args.amount_cents}`);\n      return { ok: true, content: `refund_id=R${this.refunds.length}` };\n    }\n    return this.fail(\"unknown_tool\", `No tool named ${tool}.`);\n  }\n}\n\n/** The loop: each call goes through the desk, a retryable error is retried once, and the outcome is read from the desk. */\nexport function run(script: Call[]): [Desk, string] {\n  const desk = new Desk();\n  for (const [tool, args] of script) {\n    const result = desk.call(tool, args);\n    if (!result.ok && result.retryable) {\n      desk.retries += 1;\n      desk.call(tool, args);\n    }\n  }\n  const outcome = desk.escalation ? \"escalated\" : desk.lastCode === \"ambiguous_match\" ? \"asked\" : \"resolved\";\n  return [desk, outcome];\n}\n\nconst join = (items: string[]) => items.join(\",\") || \"-\";\nconst BEN: Call = [\"get_customer\", { query: \"ben@example.com\" }];\nexport const INCIDENTS: Array<[string, Call[]]> = [\n  [\"skips identity\", [[\"lookup_order\", { order_id: \"O1\" }], BEN, [\"lookup_order\", { order_id: \"O1\" }], [\"process_refund\", { order_id: \"O1\", amount_cents: 2000 }]]],\n  [\"transient fault\", [BEN, [\"lookup_order\", { order_id: \"O2\" }], [\"process_refund\", { order_id: \"O2\", amount_cents: 8000 }]]],\n  [\"over the limit\", [BEN, [\"lookup_order\", { order_id: \"O2\" }], [\"process_refund\", { order_id: \"O2\", amount_cents: 25000 }],\n    [\"escalate_to_human\", { trigger: \"needs_human\", reason: \"refund of 250.00 asked\" }]]],\n  [\"someone else's order\", [[\"get_customer\", { query: \"ana@example.com\" }], [\"lookup_order\", { order_id: \"O1\" }]]],\n  [\"two customers match\", [[\"get_customer\", { query: \"Ana Silva\" }]]],\n  [\"asks for a person\", [[\"escalate_to_human\", { trigger: \"customer_request\", reason: \"customer asked for a person\" }]]],\n  [\"no progress\", [BEN, ...Array.from({ length: 3 }, (): Call => [\"lookup_order\", { order_id: \"O9\" }])]],\n];\n\nfunction main() {\n  for (const [name, script] of INCIDENTS) {\n    const [desk, outcome] = run(script);\n    console.log(`${name.padEnd(21)} outcome=${outcome.padEnd(9)} refused=${join(desk.refused)} retries=${desk.retries} refunds=${join(desk.refunds)} backend=${join(desk.backend)}`);\n    if (desk.escalation) {\n      const e = desk.escalation;\n      console.log(`  handoff: trigger=${e.trigger} verified=${e.verified ? \"yes\" : \"no\"} customer=${e.customer ?? \"-\"} orders=${join(e.orders)} refunds=${join(e.refunds)} refused=${join(e.refused)}`);\n    }\n  }\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "skips identity        outcome=resolved  refused=identity_required retries=0 refunds=O1:2000 backend=lookup_order,process_refund\ntransient fault       outcome=resolved  refused=- retries=1 refunds=O2:8000 backend=lookup_order,lookup_order,process_refund\nover the limit        outcome=escalated refused=needs_human retries=1 refunds=- backend=lookup_order,lookup_order\n  handoff: trigger=needs_human verified=yes customer=C3 orders=O2 refunds=- refused=needs_human\nsomeone else's order  outcome=resolved  refused=order_not_owned retries=0 refunds=- backend=lookup_order\ntwo customers match   outcome=asked     refused=ambiguous_match retries=0 refunds=- backend=-\nasks for a person     outcome=escalated refused=- retries=0 refunds=- backend=-\n  handoff: trigger=customer_request verified=no customer=- orders=- refunds=- refused=-\nno progress           outcome=escalated refused=- retries=0 refunds=- backend=lookup_order,lookup_order\n  handoff: trigger=stalled verified=yes customer=C3 orders=- refunds=- refused=-"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.TreeMap;\n\n/**\n * A support agent's whole control surface in one dispatcher: the identity gate, errors the loop can act on, a stall guard and the three escalation triggers.\n *\n * <p>The model is a script of the calls it asks for, in the shapes of the tool_use blocks of module 26, without the client: this example is about the code that\n * runs the tools, not about what a model says. Customers, orders and the incidents are made up. The limit, the stall count and the codes are this course's own\n * design, not an Anthropic interface.\n */\npublic final class SupportDesk {\n    private static final System.Logger LOG = System.getLogger(SupportDesk.class.getName());\n    static final int LIMIT = 10_000; // cents: a refund above it is a person's decision\n    static final int STALL = 3; // the same call this many times in a row is no progress\n\n    static final Map<String, String[]> CUSTOMERS = new LinkedHashMap<>();\n    static final Map<String, Object[]> ORDERS = new LinkedHashMap<>();\n\n    static {\n        CUSTOMERS.put(\"C1\", new String[] {\"Ana Silva\", \"ana@example.com\"});\n        CUSTOMERS.put(\"C2\", new String[] {\"Ana Silva\", \"ana.s@example.com\"});\n        CUSTOMERS.put(\"C3\", new String[] {\"Ben Ortiz\", \"ben@example.com\"});\n        ORDERS.put(\"O1\", new Object[] {\"C3\", 5000});\n        ORDERS.put(\"O2\", new Object[] {\"C3\", 30000});\n        ORDERS.put(\"O3\", new Object[] {\"C1\", 4000});\n    }\n\n    record Call(String tool, Map<String, Object> args) {}\n\n    record Result(boolean ok, String code, boolean retryable, String message, String content) {}\n\n    record Escalation(String trigger, String reason, String customer, boolean verified, List<String> orders, List<String> refunds, List<String> refused) {}\n\n    /** One conversation's state. A new case gets a new Desk, so nothing of one customer reaches another. */\n    static final class Desk {\n        String customer;\n        final List<String> checked = new ArrayList<>(), refunds = new ArrayList<>(), refused = new ArrayList<>(), backend = new ArrayList<>(), recent = new ArrayList<>();\n        Escalation escalation;\n        String lastCode;\n        int retries;\n        final java.util.Set<String> flaky = new java.util.HashSet<>(List.of(\"O2\")); // the first lookup of this order fails with a transient fault\n\n        Result fail(String code, String message, boolean retryable) {\n            lastCode = code;\n            if (!code.equals(\"transient\") && !code.equals(\"not_found\")) refused.add(code);\n            return new Result(false, code, retryable, message, null);\n        }\n\n        Result fail(String code, String message) {\n            return fail(code, message, false);\n        }\n\n        /** The record a person reads, built from the desk's own state and not from the model's account. */\n        Result escalate(String trigger, String reason) {\n            escalation = new Escalation(trigger, reason, customer, customer != null, checked.stream().sorted().toList(), List.copyOf(refunds), List.copyOf(refused));\n            return new Result(true, null, false, null, \"handed over\");\n        }\n\n        Result call(String tool, Map<String, Object> args) {\n            lastCode = null;\n            recent.add(tool + new TreeMap<>(args));\n            if (recent.size() > STALL) recent.remove(0);\n            if (tool.equals(\"escalate_to_human\")) return escalate((String) args.get(\"trigger\"), (String) args.get(\"reason\")); // the way to a person never waits for a prerequisite\n            if (recent.size() == STALL && recent.stream().distinct().count() == 1) return escalate(\"stalled\", tool + \" repeated \" + STALL + \" times without progress\");\n            if (tool.equals(\"get_customer\")) {\n                List<String> found = new ArrayList<>();\n                CUSTOMERS.forEach((id, c) -> {\n                    if (args.get(\"query\").equals(c[0]) || args.get(\"query\").equals(c[1])) found.add(id);\n                });\n                if (found.size() > 1) return fail(\"ambiguous_match\", found.size() + \" customers match. Ask for the e-mail address. Do not pick one.\");\n                if (found.isEmpty()) return fail(\"not_found\", \"No customer matches. Ask for the e-mail address.\");\n                customer = found.get(0);\n                return new Result(true, null, false, null, \"customer_id=\" + found.get(0));\n            }\n            if (customer == null) return fail(\"identity_required\", \"Identify the customer with get_customer before this action.\");\n            String id = (String) args.get(\"order_id\");\n            Object[] order = ORDERS.get(id);\n            if (tool.equals(\"lookup_order\")) {\n                backend.add(tool);\n                if (flaky.remove(id)) return fail(\"transient\", \"The order service timed out. Retry.\", true);\n                if (order == null) return fail(\"not_found\", \"No such order.\");\n                if (!order[0].equals(customer)) return fail(\"order_not_owned\", \"That order does not belong to the verified customer.\");\n                checked.add(id);\n                return new Result(true, null, false, null, \"total_cents=\" + order[1]);\n            }\n            if (tool.equals(\"process_refund\")) {\n                if (!checked.contains(id)) return fail(\"order_not_checked\", \"Look up the order before refunding it.\");\n                int amount = (Integer) args.get(\"amount_cents\");\n                if (amount > LIMIT) return fail(\"needs_human\", \"A refund above the limit is decided by a person. Escalate.\");\n                backend.add(tool);\n                refunds.add(id + \":\" + amount);\n                return new Result(true, null, false, null, \"refund_id=R\" + refunds.size());\n            }\n            return fail(\"unknown_tool\", \"No tool named \" + tool + \".\");\n        }\n    }\n\n    /** The loop: each call goes through the desk, a retryable error is retried once, and the outcome is read from the desk. */\n    static Map.Entry<Desk, String> run(List<Call> script) {\n        Desk desk = new Desk();\n        for (Call c : script) {\n            Result result = desk.call(c.tool(), c.args());\n            if (!result.ok() && result.retryable()) {\n                desk.retries++;\n                desk.call(c.tool(), c.args());\n            }\n        }\n        String outcome = desk.escalation != null ? \"escalated\" : \"ambiguous_match\".equals(desk.lastCode) ? \"asked\" : \"resolved\";\n        return Map.entry(desk, outcome);\n    }\n\n    static String join(List<String> items) {\n        return items.isEmpty() ? \"-\" : String.join(\",\", items);\n    }\n\n    static Call call(String tool, Object... kv) {\n        Map<String, Object> args = new LinkedHashMap<>();\n        for (int i = 0; i < kv.length; i += 2) args.put((String) kv[i], kv[i + 1]);\n        return new Call(tool, args);\n    }\n\n    static final Call BEN = call(\"get_customer\", \"query\", \"ben@example.com\");\n\n    static final Map<String, List<Call>> INCIDENTS = new LinkedHashMap<>();\n\n    static {\n        INCIDENTS.put(\"skips identity\", List.of(call(\"lookup_order\", \"order_id\", \"O1\"), BEN, call(\"lookup_order\", \"order_id\", \"O1\"), call(\"process_refund\", \"order_id\", \"O1\", \"amount_cents\", 2000)));\n        INCIDENTS.put(\"transient fault\", List.of(BEN, call(\"lookup_order\", \"order_id\", \"O2\"), call(\"process_refund\", \"order_id\", \"O2\", \"amount_cents\", 8000)));\n        INCIDENTS.put(\"over the limit\", List.of(BEN, call(\"lookup_order\", \"order_id\", \"O2\"), call(\"process_refund\", \"order_id\", \"O2\", \"amount_cents\", 25000),\n            call(\"escalate_to_human\", \"trigger\", \"needs_human\", \"reason\", \"refund of 250.00 asked\")));\n        INCIDENTS.put(\"someone else's order\", List.of(call(\"get_customer\", \"query\", \"ana@example.com\"), call(\"lookup_order\", \"order_id\", \"O1\")));\n        INCIDENTS.put(\"two customers match\", List.of(call(\"get_customer\", \"query\", \"Ana Silva\")));\n        INCIDENTS.put(\"asks for a person\", List.of(call(\"escalate_to_human\", \"trigger\", \"customer_request\", \"reason\", \"customer asked for a person\")));\n        INCIDENTS.put(\"no progress\", List.of(BEN, call(\"lookup_order\", \"order_id\", \"O9\"), call(\"lookup_order\", \"order_id\", \"O9\"), call(\"lookup_order\", \"order_id\", \"O9\")));\n    }\n\n    public static void main(String[] args) {\n        INCIDENTS.forEach((name, script) -> {\n            var run = run(script);\n            Desk desk = run.getKey();\n            System.out.println(String.format(\"%-21s outcome=%-9s refused=%s retries=%d refunds=%s backend=%s\", name, run.getValue(), join(desk.refused), desk.retries, join(desk.refunds), join(desk.backend)));\n            if (desk.escalation != null) {\n                Escalation e = desk.escalation;\n                System.out.println(\"  handoff: trigger=\" + e.trigger() + \" verified=\" + (e.verified() ? \"yes\" : \"no\") + \" customer=\" + (e.customer() == null ? \"-\" : e.customer())\n                    + \" orders=\" + join(e.orders()) + \" refunds=\" + join(e.refunds()) + \" refused=\" + join(e.refused()));\n            }\n        });\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "skips identity        outcome=resolved  refused=identity_required retries=0 refunds=O1:2000 backend=lookup_order,process_refund\ntransient fault       outcome=resolved  refused=- retries=1 refunds=O2:8000 backend=lookup_order,lookup_order,process_refund\nover the limit        outcome=escalated refused=needs_human retries=1 refunds=- backend=lookup_order,lookup_order\n  handoff: trigger=needs_human verified=yes customer=C3 orders=O2 refunds=- refused=needs_human\nsomeone else's order  outcome=resolved  refused=order_not_owned retries=0 refunds=- backend=lookup_order\ntwo customers match   outcome=asked     refused=ambiguous_match retries=0 refunds=- backend=-\nasks for a person     outcome=escalated refused=- retries=0 refunds=- backend=-\n  handoff: trigger=customer_request verified=no customer=- orders=- refunds=- refused=-\nno progress           outcome=escalated refused=- retries=0 refunds=- backend=lookup_order,lookup_order\n  handoff: trigger=stalled verified=yes customer=C3 orders=- refunds=- refused=-"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "private val log = System.getLogger(\"support_desk\")\n\n/**\n * A support agent's whole control surface in one dispatcher: the identity gate, errors the loop can act on, a stall guard and the three escalation triggers.\n *\n * The model is a script of the calls it asks for, in the shapes of the tool_use blocks of module 26, without the client: this example is about the code that\n * runs the tools, not about what a model says. Customers, orders and the incidents are made up. The limit, the stall count and the codes are this course's own\n * design, not an Anthropic interface.\n */\nconst val LIMIT = 10_000 // cents: a refund above it is a person's decision\nconst val STALL = 3 // the same call this many times in a row is no progress\n\nval CUSTOMERS = mapOf(\"C1\" to (\"Ana Silva\" to \"ana@example.com\"), \"C2\" to (\"Ana Silva\" to \"ana.s@example.com\"), \"C3\" to (\"Ben Ortiz\" to \"ben@example.com\"))\nval ORDERS = mapOf(\"O1\" to (\"C3\" to 5000), \"O2\" to (\"C3\" to 30000), \"O3\" to (\"C1\" to 4000))\n\ndata class Call(val tool: String, val args: Map<String, Any>)\n\ndata class Result(val ok: Boolean, val code: String? = null, val retryable: Boolean = false, val message: String? = null, val content: String? = null)\n\ndata class Escalation(val trigger: String, val reason: String, val customer: String?, val verified: Boolean, val orders: List<String>, val refunds: List<String>, val refused: List<String>)\n\n/** One conversation's state. A new case gets a new Desk, so nothing of one customer reaches another. */\nclass Desk {\n    var customer: String? = null\n    val checked = mutableListOf<String>()\n    val refunds = mutableListOf<String>()\n    val refused = mutableListOf<String>()\n    val backend = mutableListOf<String>()\n    val recent = mutableListOf<String>()\n    var escalation: Escalation? = null\n    var lastCode: String? = null\n    var retries = 0\n    val flaky = mutableSetOf(\"O2\") // the first lookup of this order fails with a transient fault\n\n    fun fail(code: String, message: String, retryable: Boolean = false): Result {\n        lastCode = code\n        if (code != \"transient\" && code != \"not_found\") refused += code\n        return Result(false, code, retryable, message)\n    }\n\n    /** The record a person reads, built from the desk's own state and not from the model's account. */\n    fun escalate(trigger: String, reason: String): Result {\n        escalation = Escalation(trigger, reason, customer, customer != null, checked.sorted(), refunds.toList(), refused.toList())\n        return Result(true, content = \"handed over\")\n    }\n\n    fun call(tool: String, args: Map<String, Any>): Result {\n        lastCode = null\n        recent += tool + args.toSortedMap()\n        if (recent.size > STALL) recent.removeAt(0)\n        if (tool == \"escalate_to_human\") return escalate(args[\"trigger\"] as String, args[\"reason\"] as String) // the way to a person never waits for a prerequisite\n        if (recent.size == STALL && recent.distinct().size == 1) return escalate(\"stalled\", \"$tool repeated $STALL times without progress\")\n        if (tool == \"get_customer\") {\n            val found = CUSTOMERS.filter { (_, c) -> args[\"query\"] == c.first || args[\"query\"] == c.second }.keys.toList()\n            if (found.size > 1) return fail(\"ambiguous_match\", \"${found.size} customers match. Ask for the e-mail address. Do not pick one.\")\n            if (found.isEmpty()) return fail(\"not_found\", \"No customer matches. Ask for the e-mail address.\")\n            customer = found[0]\n            return Result(true, content = \"customer_id=${found[0]}\")\n        }\n        if (customer == null) return fail(\"identity_required\", \"Identify the customer with get_customer before this action.\")\n        val id = args[\"order_id\"] as String? ?: \"\"\n        val order = ORDERS[id]\n        if (tool == \"lookup_order\") {\n            backend += tool\n            if (flaky.remove(id)) return fail(\"transient\", \"The order service timed out. Retry.\", true)\n            if (order == null) return fail(\"not_found\", \"No such order.\")\n            if (order.first != customer) return fail(\"order_not_owned\", \"That order does not belong to the verified customer.\")\n            checked += id\n            return Result(true, content = \"total_cents=${order.second}\")\n        }\n        if (tool == \"process_refund\") {\n            if (id !in checked) return fail(\"order_not_checked\", \"Look up the order before refunding it.\")\n            val amount = args[\"amount_cents\"] as Int\n            if (amount > LIMIT) return fail(\"needs_human\", \"A refund above the limit is decided by a person. Escalate.\")\n            backend += tool\n            refunds += \"$id:$amount\"\n            return Result(true, content = \"refund_id=R${refunds.size}\")\n        }\n        return fail(\"unknown_tool\", \"No tool named $tool.\")\n    }\n}\n\n/** The loop: each call goes through the desk, a retryable error is retried once, and the outcome is read from the desk. */\nfun run(script: List<Call>): Pair<Desk, String> {\n    val desk = Desk()\n    for ((tool, args) in script) {\n        val result = desk.call(tool, args)\n        if (!result.ok && result.retryable) {\n            desk.retries += 1\n            desk.call(tool, args)\n        }\n    }\n    val outcome = if (desk.escalation != null) \"escalated\" else if (desk.lastCode == \"ambiguous_match\") \"asked\" else \"resolved\"\n    return desk to outcome\n}\n\nfun join(items: List<String>) = items.joinToString(\",\").ifEmpty { \"-\" }\n\nfun call(tool: String, vararg kv: Pair<String, Any>) = Call(tool, mapOf(*kv))\n\nval BEN = call(\"get_customer\", \"query\" to \"ben@example.com\")\n\nval INCIDENTS = listOf(\n    \"skips identity\" to listOf(call(\"lookup_order\", \"order_id\" to \"O1\"), BEN, call(\"lookup_order\", \"order_id\" to \"O1\"), call(\"process_refund\", \"order_id\" to \"O1\", \"amount_cents\" to 2000)),\n    \"transient fault\" to listOf(BEN, call(\"lookup_order\", \"order_id\" to \"O2\"), call(\"process_refund\", \"order_id\" to \"O2\", \"amount_cents\" to 8000)),\n    \"over the limit\" to listOf(BEN, call(\"lookup_order\", \"order_id\" to \"O2\"), call(\"process_refund\", \"order_id\" to \"O2\", \"amount_cents\" to 25000),\n        call(\"escalate_to_human\", \"trigger\" to \"needs_human\", \"reason\" to \"refund of 250.00 asked\")),\n    \"someone else's order\" to listOf(call(\"get_customer\", \"query\" to \"ana@example.com\"), call(\"lookup_order\", \"order_id\" to \"O1\")),\n    \"two customers match\" to listOf(call(\"get_customer\", \"query\" to \"Ana Silva\")),\n    \"asks for a person\" to listOf(call(\"escalate_to_human\", \"trigger\" to \"customer_request\", \"reason\" to \"customer asked for a person\")),\n    \"no progress\" to listOf(BEN, call(\"lookup_order\", \"order_id\" to \"O9\"), call(\"lookup_order\", \"order_id\" to \"O9\"), call(\"lookup_order\", \"order_id\" to \"O9\")),\n)\n\nfun main() {\n    for ((name, script) in INCIDENTS) {\n        val (desk, outcome) = run(script)\n        println(\"${name.padEnd(21)} outcome=${outcome.padEnd(9)} refused=${join(desk.refused)} retries=${desk.retries} refunds=${join(desk.refunds)} backend=${join(desk.backend)}\")\n        desk.escalation?.let { e ->\n            println(\"  handoff: trigger=${e.trigger} verified=${if (e.verified) \"yes\" else \"no\"} customer=${e.customer ?: \"-\"} orders=${join(e.orders)} refunds=${join(e.refunds)} refused=${join(e.refused)}\")\n        }\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "skips identity        outcome=resolved  refused=identity_required retries=0 refunds=O1:2000 backend=lookup_order,process_refund\ntransient fault       outcome=resolved  refused=- retries=1 refunds=O2:8000 backend=lookup_order,lookup_order,process_refund\nover the limit        outcome=escalated refused=needs_human retries=1 refunds=- backend=lookup_order,lookup_order\n  handoff: trigger=needs_human verified=yes customer=C3 orders=O2 refunds=- refused=needs_human\nsomeone else's order  outcome=resolved  refused=order_not_owned retries=0 refunds=- backend=lookup_order\ntwo customers match   outcome=asked     refused=ambiguous_match retries=0 refunds=- backend=-\nasks for a person     outcome=escalated refused=- retries=0 refunds=- backend=-\n  handoff: trigger=customer_request verified=no customer=- orders=- refunds=- refused=-\nno progress           outcome=escalated refused=- retries=0 refunds=- backend=lookup_order,lookup_order\n  handoff: trigger=stalled verified=yes customer=C3 orders=- refunds=- refused=-"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The first incident shows the gate: the refusal is counted, and the model's later calls, in the right order, produce the refund. The transient fault shows one retry done by the loop and the case resolved. The third incident shows the limit: its order lookup meets the same transient fault and is retried once, the refund is refused with `needs_human`, nothing reached the backend for it, and the escalation record names the verified customer, the order looked up, no refund made and the one refusal. The fourth shows an order of another customer refused, and the fifth shows two matches become a question, with no customer set and the outcome `asked`. The sixth shows that a person can be reached with no identity at all, and that the record says so (`verified=no`). The last shows the stall guard turning three identical lookups into a hand-off. All four languages print the same lines."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "para",
+      "text": "These are the wrong answers that the exam's options for this scenario offer, each with the reason it is rejected."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**\"Add a routing layer that enables only the tools suited to the request type.\"** It is tempting because fewer tools sound safer. The exam rejects it for the skipped-identity problem: it changes which tools exist, and the fault is the order in which they are called. The rule belongs in the code that runs them.",
+        "**\"Add examples that show `get_customer` being called first.\"** It is tempting because examples are cheap. The exam rejects it: examples make the order more likely and not certain, and money moves when they fail.",
+        "**\"Merge the two lookup tools into one.\"** It is tempting because the model confuses them. The exam rejects it as a first step: it is a valid design that costs far more than the cause needs, and the cause (a thin description) is fixed by writing a better one.",
+        "**\"Escalate when the customer sounds upset, or when the agent reports low confidence.\"** It is tempting because both are easy to measure. The exam rejects both: neither tells whether the case needs a person, and a confidence the model reports itself is already wrong on the cases that matter."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A month of support-agent sessions shows two problems: in 3 percent a refund was issued before the customer was identified, and in 9 percent the agent escalated cases that policy lets it settle. Which fix is made first?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Train a separate model on past tickets first, so it can decide which cases need a person",
+              "**b**: Write escalation criteria first, because that problem touches the larger share of sessions",
+              "**c**: Rewrite the descriptions of the tools first, since both problems start with tool choice",
+              "**d**: Enforce the call sequence in the dispatcher, because moved money cannot be recalled"
+            ]
+          }
+        ],
+        [
+          "A customer asks about a purchase that belongs to someone else. How does the support example's dispatcher refuse the call?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: As `order_not_owned`, and the message does not name the owner",
+              "**b**: As `order_not_owned`, and the message names the owner of the order",
+              "**c**: As `not_found`, and the message says that the order does not exist",
+              "**d**: As `needs_human`, and the message tells the model to escalate"
+            ]
+          }
+        ],
+        [
+          "Two customers share a name, the lookup tool returns both, and the agent proceeds with the first. What should the dispatcher have done?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Choose the customer whose order is the most recent one on file",
+              "**b**: Verify both customers, and let either be served as the case unfolds",
+              "**c**: Set nobody as verified, and have the model ask what tells them apart",
+              "**d**: Raise the retry count of the lookup until it returns one match"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**d**. Money that moved wrongly cannot be called back, so its cause is fixed first. *b* is ruled out because the size of a count does not set the order: \"The first fix goes to what cannot be undone.\" *c* is ruled out because the skipped step is a step order and not a tool choice: \"A step order that is only requested\". *a* is ruled out because a trained model comes before words were tried: \"machinery for a problem nobody has tried to fix with words\".",
+            "**a**. The refusal is `order_not_owned` and keeps the owner out of it: \"An order that belongs to someone else is refused as `order_not_owned`, and the message does not say whose it is.\" *b* is ruled out by the same sentence: \"the message does not say whose it is\". *c* is ruled out because `not_found` is the answer of the identity step: \"No match returns `not_found` with the same advice.\" *d* is ruled out because that refusal belongs to the amount: \"above it the refusal is `needs_human`, which tells the model that the next step is to escalate\".",
+            "**c**. Several matches are a question for the customer, and nothing is set. *a* is ruled out because the dispatcher does not pick: \"Several matches set nothing and return the refusal\". *b* is ruled out because the desk holds one verified customer, set only by a single match: \"One match sets the verified customer.\" *d* is ruled out because the refusal is not a fault that a retry can clear: \"A retryable error (a timeout of the order service) is retried once by the loop, which is the loop's business, not the model's.\""
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 11,
+    "paras": 19,
+    "code": 0,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "f0ab6a09409912ca4cc11ff6b819d6310b4fc100055b371eb3bc052ec69c034c"
+}

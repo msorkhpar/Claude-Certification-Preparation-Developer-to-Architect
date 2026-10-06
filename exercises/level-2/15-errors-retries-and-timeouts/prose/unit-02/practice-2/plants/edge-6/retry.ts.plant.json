@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "retry.ts",
+      "old": "      if (!retryable(response) || attempt >= maxAttempts) throw failure(response, attempt);",
+      "new": "      if (!retryable(response)) throw failure(response, attempt);\n      if (attempt >= maxAttempts) {\n        sleep(baseDelay);\n        throw failure(response, attempt);\n      }"
+    }
+  ]
+}

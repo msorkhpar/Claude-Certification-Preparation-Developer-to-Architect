@@ -1,0 +1,156 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "42-evaluation"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Code-graded and model-graded evals",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A fraud-triage step must output one of three fixed words, and 2,000 stored cases are scored overnight with nobody waiting on a person. Which grader fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A model grader that rates each answer on a scale",
+            "correct": false,
+            "says": "Ruled out because a model grader belongs to \"A judgement no code can make\", and a fixed word is not that."
+          },
+          {
+            "id": "b",
+            "text": "Matching after trimming white space and lower-casing",
+            "correct": true,
+            "says": "The table lists exact match for \"A categorical answer: a label, a choice\", and the course's rule is to \"use the first one that can decide the case\"."
+          },
+          {
+            "id": "c",
+            "text": "A person who reads a sample of the output",
+            "correct": false,
+            "says": "Ruled out because a human grader decides \"Anything, slowly\", and 2,000 overnight cases need an automated grader, since the page says to \"Structure questions to allow for automated grading\"."
+          },
+          {
+            "id": "d",
+            "text": "Cosine similarity between embeddings of both texts",
+            "correct": false,
+            "says": "Ruled out because similarity scores answer \"Whether two texts say the same thing\", which is a different question from whether two fixed words are equal."
+          }
+        ],
+        "origin": {
+          "path": "course/42-evaluation/02-code-graded-and-model-graded-evals.md",
+          "section": "Pick the cheapest grader that can tell the difference"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A judge model replies \"Score: 4, because the tone is polite\" for one case, while the harness expects a bare number. How should the harness record that case?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A pass at score 4, read from the digit in the text",
+            "correct": false,
+            "says": "Ruled out because \"a lenient parse that fishes a digit out of prose will sometimes read a digit that was never the grade\"."
+          },
+          {
+            "id": "b",
+            "text": "A skipped case, kept out of the pass rate",
+            "correct": false,
+            "says": "Ruled out because a skipped case would hide the grader's drift, and the course says to \"Count the ungradable cases in the report\"."
+          },
+          {
+            "id": "c",
+            "text": "A grader retry, repeated until a bare number returns",
+            "correct": false,
+            "says": "Ruled out because the contract is \"Output only the number\" and the page says \"an ungradable case fails\", so a reply that breaks it is not retried until it passes."
+          },
+          {
+            "id": "d",
+            "text": "A failure, marked ungradable in the report",
+            "correct": true,
+            "says": "The page says \"a reply that is not a bare score counts as ungradable, and an ungradable case fails\", and to \"Count the ungradable cases in the report\"."
+          }
+        ],
+        "origin": {
+          "path": "course/42-evaluation/02-code-graded-and-model-graded-evals.md",
+          "section": "Model-graded checks"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A check expects the field `count` to equal the number 3, and the application's output holds the string \"3\". The grader compares both sides as text and passes it. What is wrong?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The check is too strict, so it should accept both forms of the value",
+            "correct": false,
+            "says": "Ruled out because \"A structure check also compares types\", and a check that accepts both forms would pass the failure it exists to catch."
+          },
+          {
+            "id": "b",
+            "text": "The types differ, so a program reading the value would reject it",
+            "correct": true,
+            "says": "The page says that a grader comparing both sides as text \"passes values that a program reading the field would reject\"."
+          },
+          {
+            "id": "c",
+            "text": "The grader is code, so a model should judge the number instead",
+            "correct": false,
+            "says": "Ruled out because a structure check decides this by parsing, and a model grader belongs to \"A judgement no code can make\"."
+          },
+          {
+            "id": "d",
+            "text": "The expectation is wrong, so it should be written as a string",
+            "correct": false,
+            "says": "Ruled out because the criterion fixes the expected type, and a grader that follows the output instead of the contract would pass the very failure it exists to catch, as trap 2 describes: \"Comparing JSON fields as text\"."
+          }
+        ],
+        "origin": {
+          "path": "course/42-evaluation/02-code-graded-and-model-graded-evals.md",
+          "section": "Code-graded checks"
+        }
+      }
+    ],
+    "concepts": [
+      "Code-graded checks, as the page teaches it",
+      "Model-graded checks, as the page teaches it",
+      "Pick the cheapest grader that can tell the difference, as the page teaches it"
+    ]
+  }
+}

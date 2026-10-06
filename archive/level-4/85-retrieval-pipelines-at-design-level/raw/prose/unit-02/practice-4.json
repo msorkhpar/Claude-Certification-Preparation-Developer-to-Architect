@@ -1,0 +1,284 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "85-retrieval-pipelines-at-design-level"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: a retrieval pipeline graded on recall and staleness (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a retrieval pipeline graded on recall and staleness"
+    },
+    {
+      "type": "para",
+      "text": "A support assistant answers from a handbook that changes every week. Its pipeline cuts documents at fixed lengths, so a rule lands in one chunk and its exception in the next; its chunks carry nothing but their own text, so two plans with a section called Cancellation look the same; its search filters by the reader's rights after it has taken the best results, so a reader gets one answer where fifty matched; its nightly job adds the new chunks of a changed document and leaves the old ones, so half the answers quote last month's policy; and its report counts recall only over the questions that returned something. In this practice you write the pieces that fix all of that: chunks that carry their title, section and the version of their document, the split of a long section, a search that scores a code above plain words and applies access before ranking, the choice of retrieval mechanism, a re-index that keeps, replaces, adds and removes, the stale check, and recall over every labelled question. The model is not called and there is no embedding service: the tests give you documents, queries and labels. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`chunk_sections`, `search`, `choose_retrieval`, `reindex`, `stale`, `recall_at_k`); TypeScript has the camel-case names (`chunkSections`, `chooseRetrieval`, `recallAtK`); Java has the same camel-case names as static methods of `Pipeline`; Kotlin has top-level functions. A chunk is `Chunk(id, doc, version, text)`; the starter shows it in each language, with `doc_version` and `tokens` already written."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working pipeline with eight gaps cut out of it. Everything that is plumbing is written and correct: `doc_version` and `tokens`, the cutting of a document into sections with their ids and versions, the search loop that collects and ranks scores, and the re-index loop that builds the report. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value (the unchanged text, an empty result, `None`), so the starter runs and fails every case on an assertion. Debug a gap by logging its input with the `log` line at the top of the file (the starter already logs the input of one function; add your own `log.debug` lines the same way); a run shows the lines you logged under the failing case. Write the gaps in this order (the Java and Kotlin names are the camel-case forms, TypeScript has no leading underscore):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_chunk_text` unlocks `m1`: the text of a chunk with its title and section in front.",
+        "`_split_section` unlocks `e1`: the parts of a long section, split at sentence ends under the word limit.",
+        "`_score` unlocks `e2`: a code outweighs a plain word.",
+        "`_visible` unlocks `e3`: a reader sees only the chunks of the documents allowed.",
+        "`choose_retrieval` unlocks `e4`: the mechanism by corpus size, data shape and query pattern.",
+        "`_status` unlocks `e5`: what a re-index does with one document (added, kept or replaced).",
+        "`stale` unlocks `e6`: the chunks whose document changed or vanished.",
+        "`recall_at_k` unlocks `e7`: recall over every labelled question."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole pipeline."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`chunk_sections(doc_id, text, max_words=30)` cuts a document of the form `# Title`, then `## Section` headings, each followed by its body. Each section becomes one chunk with the id `<doc_id>/<Section>`, the version `doc_version(text)` and the text `<Title> > <Section>. <body>`. When a body has more than `max_words` words, split it at sentence ends (a full stop followed by a space) into parts that each hold at most `max_words` words, packed greedily; a single sentence longer than the limit stays whole. Every part keeps the prefix, and the ids of a split section end in `#1`, `#2` and so on (an unsplit section has no suffix).",
+        "`search(chunks, query, k=3, allowed_docs=None)` returns the ids of the `k` best chunks. Tokens come from `tokens`; a distinct query token that appears in a chunk adds 1 to its score, or 3 when it contains a digit (a code or an id). A chunk with score 0 is not a result, ties keep the order of `chunks`, and when `allowed_docs` is given (even an empty set) only chunks of those documents are candidates at all.",
+        "`choose_retrieval(corpus_tokens, shape, pattern)` returns one of `cached prompt` (a corpus of fewer than 200,000 tokens), `structured query` (the shape is `table`), `agentic search` (the pattern is `multi-hop`), `keyword index` (`identifier`), `embedding index` (`paraphrase`) or `hybrid index` (anything else), checked in that order.",
+        "`reindex(chunks, docs)` brings the chunks in line with `docs` (document id to text) and returns the new chunks with a report. A document whose chunks carry the version of its current text keeps them unchanged; a document whose version differs gets all its old chunks replaced by new ones; a document that has no chunks yet is added; a document with chunks that is no longer in `docs` is removed. The new list follows the order of `docs`. The report maps `added`, `replaced`, `removed` and `kept` to lists of document ids.",
+        "`stale(chunks, docs)` returns the ids of the chunks whose document is gone from `docs` or whose version differs from `doc_version` of its current text, in chunk order.",
+        "`recall_at_k(results, relevant, k)` returns the share of the labelled questions (`relevant` maps a question to the id of its relevant chunk) whose relevant chunk is among the first `k` ids of its result list, rounded to two decimals. A question with no entry in `results` is a miss, and with no labelled questions the result is 0."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Chunks that stand alone.** A chunk that names its title and section can be found and read without its document. *You should see* the text start with the title and the section.",
+        "**Cut at the joints, split at sentences.** *You should see* a long section become parts that each keep the prefix and never cut a sentence, except one that is longer than the limit.",
+        "**Codes outweigh words.** *You should see* a query with one code and two plain words rank the chunk with the code first.",
+        "**Access before ranking.** *You should see* a reader with a narrow set of documents get every visible match, not what is left of the best few.",
+        "**The mechanism follows the data and the question.** *You should see* a small corpus go into a cached prompt before any index is considered, and a table queried and not searched.",
+        "**A re-index removes what changed.** *You should see* the old chunks of a changed document gone, and the chunks of a removed document gone with it.",
+        "**Staleness is checked against the source.** *You should see* an old chunk listed, and nothing listed after a correct re-index.",
+        "**Recall over every question.** *You should see* a question with no results lower the figure."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Sections become chunks that carry their title and section and the version of their document"
+        ],
+        [
+          "`e1`",
+          "A long section splits at sentence ends under the word limit and every part keeps the prefix"
+        ],
+        [
+          "`e2`",
+          "A code outweighs a word and a word in no chunk matches nothing"
+        ],
+        [
+          "`e3`",
+          "A search for a reader never returns a chunk of a document that reader may not see, even with fewer matches than `k`"
+        ],
+        [
+          "`e4`",
+          "The mechanism follows the corpus size, then the data shape, then the query pattern"
+        ],
+        [
+          "`e5`",
+          "A reindex keeps unchanged documents, replaces changed ones, adds new ones and drops removed ones"
+        ],
+        [
+          "`e6`",
+          "Stale lists the chunks whose document changed or vanished"
+        ],
+        [
+          "`e7`",
+          "Recall counts every labelled question and a question with no results is a miss"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "private val log = System.getLogger(\"pipeline\")\n\n/** A retrieval pipeline: chunks that carry their context, a search that respects access, rank fusion, a re-index that removes what changed, and recall over every question. See ../../statement.md. */\n\n/** A chunk of a document: its id, the document it came from, that document's version and its text. */\ndata class Chunk(val id: String, val doc: String, val version: Int, val text: String)\n\n/** The chunks after a re-index and what happened to each document: the keys added, replaced, removed and kept. */\ndata class Reindexed(val chunks: List<Chunk>, val report: Map<String, List<String>>)\n\nval STOP = setOf(\"a\", \"an\", \"the\", \"is\", \"are\", \"can\", \"i\", \"what\", \"does\", \"do\", \"how\", \"my\", \"it\", \"of\", \"to\", \"for\", \"and\", \"or\", \"in\", \"when\", \"will\", \"be\", \"that\", \"this\", \"with\", \"by\", \"at\")\nprivate val TOKEN = Regex(\"[a-z0-9]+(?:-[a-z0-9]+)*\")\n\n/** A cheap fingerprint of a document's text: when it changes, the document changed. */\nfun docVersion(text: String): Int = (text.sumOf { it.code.toLong() } % 1000003).toInt()\n\nfun tokens(text: String): List<String> = TOKEN.findAll(text.lowercase()).map { it.value }.filter { it !in STOP }.toList()\n\nprivate fun chunkText(title: String, name: String, part: String): String {\n    return \"$title > $name. $part\"\n}\n\nprivate fun splitSection(body: String, maxWords: Int): List<String> {\n    val pieces = mutableListOf<String>()\n    var current = mutableListOf<String>()\n    for (sentence in Regex(\"(?<=\\\\.) \").split(body)) {\n        if (current.isNotEmpty() && (current.joinToString(\" \") + \" \" + sentence).split(Regex(\"\\\\s+\")).size > maxWords) {\n            pieces += current.joinToString(\" \")\n            current = mutableListOf()\n        }\n        current.add(sentence)\n    }\n    pieces += current.joinToString(\" \")\n    return pieces\n}\n\nfun chunkSections(docId: String, text: String, maxWords: Int = 30): List<Chunk>? {\n    log.log(System.Logger.Level.DEBUG, \"chunkSections input: {0}\", text)\n    val parts = text.split(\"\\n## \")\n    val title = parts[0].removePrefix(\"# \")\n    val version = docVersion(text)\n    val chunks = mutableListOf<Chunk>()\n    for (section in parts.drop(1)) {\n        val cut = section.indexOf('\\n')\n        val name = section.substring(0, cut)\n        val pieces = splitSection(section.substring(cut + 1), maxWords)\n        pieces.forEachIndexed { n, piece -> chunks += Chunk(\"$docId/$name\" + (if (pieces.size == 1) \"\" else \"#${n + 1}\"), docId, version, chunkText(title, name, piece)) }\n    }\n    return chunks\n}\n\nprivate fun score(wanted: Set<String>, have: Set<String>): Int {\n    return wanted.filter { it in have }.map { t -> if (t.any { c -> c.isDigit() }) 3 else 1 }.sum()\n}\n\nprivate fun visible(chunk: Chunk, allowedDocs: Set<String>?): Boolean {\n    return allowedDocs == null || chunk.doc in allowedDocs\n}\n\nfun search(chunks: List<Chunk>, query: String, k: Int = 3, allowedDocs: Set<String>? = null): List<String>? {\n    log.log(System.Logger.Level.DEBUG, \"search input: {0}\", query)\n    val wanted = tokens(query).toSet()\n    val scored = chunks.mapIndexedNotNull { n, chunk ->\n        if (!visible(chunk, allowedDocs)) return@mapIndexedNotNull null\n        val points = score(wanted, tokens(chunk.text).toSet())\n        if (points > 0) Triple(-points, n, chunk.id) else null\n    }\n    return scored.sortedWith(compareBy({ it.first }, { it.second })).take(k).map { it.third }\n}\n\nfun chooseRetrieval(corpusTokens: Int, shape: String, pattern: String): String? {\n    return when {\n        corpusTokens < 200000 -> \"cached prompt\"\n        shape == \"table\" -> \"structured query\"\n        pattern == \"multi-hop\" -> \"agentic search\"\n        pattern == \"identifier\" -> \"keyword index\"\n        pattern == \"paraphrase\" -> \"embedding index\"\n        else -> \"hybrid index\"\n    }\n}\n\nprivate fun status(oldChunks: List<Chunk>, text: String): String {\n    if (oldChunks.isEmpty()) return \"added\"\n    return if (oldChunks[0].version == docVersion(text)) \"kept\" else \"replaced\"\n}\n\nfun reindex(chunks: List<Chunk>, docs: Map<String, String>): Reindexed? {\n    val old = chunks.groupBy { it.doc }\n    val report = linkedMapOf(\"added\" to mutableListOf<String>(), \"replaced\" to mutableListOf(), \"removed\" to old.keys.filter { it !in docs }.toMutableList(), \"kept\" to mutableListOf())\n    val result = mutableListOf<Chunk>()\n    for ((docId, text) in docs) {\n        val state = status(old[docId] ?: emptyList(), text)\n        report.getValue(state) += docId\n        result += if (state == \"kept\") old.getValue(docId) else chunkSections(docId, text)!!\n    }\n    return Reindexed(result, report)\n}\n\nfun stale(chunks: List<Chunk>, docs: Map<String, String>): List<String>? {\n    return chunks.filter { it.doc !in docs || it.version != docVersion(docs.getValue(it.doc)) }.map { it.id }\n}\n\nfun recallAtK(results: Map<String, List<String>>, relevant: Map<String, String>, k: Int): Double? {\n    if (relevant.isEmpty()) return 0.0\n    val hits = relevant.count { (query, id) -> id in (results[query] ?: emptyList()).take(k) }\n    return Math.round(hits * 100.0 / relevant.size) / 100.0\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // Two documents, split into chunks that carry their title and section.\n    val annual = \"# Annual plan\\n## Cancellation\\nYou can cancel within 14 days for a full refund.\"\n    val monthly = \"# Monthly plan\\n## Cancellation\\nYou can cancel at any time.\"\n    val chunks = (chunkSections(\"annual\", annual) ?: emptyList()) + (chunkSections(\"monthly\", monthly) ?: emptyList())\n    for (chunk in chunks) println(\"chunk: ${chunk.id} | ${chunk.text}\")\n\n    // Search ranks the chunks that share the most (and the most specific) words with the question.\n    println(\"search: ${search(chunks, \"can I cancel within 14 days\", 2)}\")\n    println(\"search, annual only: ${search(chunks, \"cancel\", 2, setOf(\"annual\"))}\")\n\n    // The annual document changes: reindex replaces its chunks and leaves the other alone.\n    val changed = annual.replace(\"14 days\", \"30 days\")\n    val result = reindex(chunks, mapOf(\"annual\" to changed, \"monthly\" to monthly))\n    println(\"reindex report: ${result?.report}\")\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "private val log = System.getLogger(\"pipeline\")\n\n/** A retrieval pipeline: chunks that carry their context, a search that respects access, rank fusion, a re-index that removes what changed, and recall over every question. See ../../statement.md. */\n\n/** A chunk of a document: its id, the document it came from, that document's version and its text. */\ndata class Chunk(val id: String, val doc: String, val version: Int, val text: String)\n\n/** The chunks after a re-index and what happened to each document: the keys added, replaced, removed and kept. */\ndata class Reindexed(val chunks: List<Chunk>, val report: Map<String, List<String>>)\n\nval STOP = setOf(\"a\", \"an\", \"the\", \"is\", \"are\", \"can\", \"i\", \"what\", \"does\", \"do\", \"how\", \"my\", \"it\", \"of\", \"to\", \"for\", \"and\", \"or\", \"in\", \"when\", \"will\", \"be\", \"that\", \"this\", \"with\", \"by\", \"at\")\nprivate val TOKEN = Regex(\"[a-z0-9]+(?:-[a-z0-9]+)*\")\n\n/** A cheap fingerprint of a document's text: when it changes, the document changed. */\nfun docVersion(text: String): Int = (text.sumOf { it.code.toLong() } % 1000003).toInt()\n\nfun tokens(text: String): List<String> = TOKEN.findAll(text.lowercase()).map { it.value }.filter { it !in STOP }.toList()\n\nprivate fun chunkText(title: String, name: String, part: String): String {\n    // TODO 1 of 8 (unlocks m1): the text of one chunk.\n    // Receives the document title, the section name and one part of the section's text. Returns the part with its context in front, as\n    // \"<title> > <name>. <part>\", so a chunk still says where it came from.\n    // Example: chunkText(\"Annual plan\", \"Cancellation\", \"You can cancel.\") -> \"Annual plan > Cancellation. You can cancel.\"\n    return part\n}\n\nprivate fun splitSection(body: String, maxWords: Int): List<String> {\n    // TODO 2 of 8 (unlocks e1): the parts of a long section.\n    // Receives the text of one section and the word limit. Splits the text after each sentence end (a full stop followed by a space) and fills parts\n    // with whole sentences: a part is closed before the sentence that would push it over `maxWords` words, and a single sentence longer than the limit\n    // stays whole. Returns the parts as a list of strings (a short section is one part).\n    // Example: \"Install it. Configure it. Restart it.\" with maxWords 4 -> [\"Install it. Configure it.\", \"Restart it.\"]\n    return listOf(body)\n}\n\nfun chunkSections(docId: String, text: String, maxWords: Int = 30): List<Chunk>? {\n    log.log(System.Logger.Level.DEBUG, \"chunkSections input: {0}\", text)\n    val parts = text.split(\"\\n## \")\n    val title = parts[0].removePrefix(\"# \")\n    val version = docVersion(text)\n    val chunks = mutableListOf<Chunk>()\n    for (section in parts.drop(1)) {\n        val cut = section.indexOf('\\n')\n        val name = section.substring(0, cut)\n        val pieces = splitSection(section.substring(cut + 1), maxWords)\n        pieces.forEachIndexed { n, piece -> chunks += Chunk(\"$docId/$name\" + (if (pieces.size == 1) \"\" else \"#${n + 1}\"), docId, version, chunkText(title, name, piece)) }\n    }\n    return chunks\n}\n\nprivate fun score(wanted: Set<String>, have: Set<String>): Int {\n    // TODO 3 of 8 (unlocks e2): how well a chunk matches a query.\n    // Receives the set of query words and the set of words of one chunk. Returns the sum, over the query words that the chunk has, of 3 for a code (a word that\n    // contains a digit, such as E-7310) and 1 for any other word; 0 when the chunk has none of them.\n    // Example: wanted {\"cancel\", \"e-7310\"}, have {\"cancel\", \"e-7310\", \"card\"} -> 4\n    return 0\n}\n\nprivate fun visible(chunk: Chunk, allowedDocs: Set<String>?): Boolean {\n    // TODO 4 of 8 (unlocks e3): may this reader see this chunk?\n    // Receives a chunk and the set of document ids the reader may read, or null when the reader may read all of them. Returns true when the chunk's `doc` is allowed.\n    // Example: visible(chunk of \"annual\", setOf(\"monthly\")) -> false, visible(chunk of \"annual\", null) -> true\n    return true\n}\n\nfun search(chunks: List<Chunk>, query: String, k: Int = 3, allowedDocs: Set<String>? = null): List<String>? {\n    log.log(System.Logger.Level.DEBUG, \"search input: {0}\", query)\n    val wanted = tokens(query).toSet()\n    val scored = chunks.mapIndexedNotNull { n, chunk ->\n        if (!visible(chunk, allowedDocs)) return@mapIndexedNotNull null\n        val points = score(wanted, tokens(chunk.text).toSet())\n        if (points > 0) Triple(-points, n, chunk.id) else null\n    }\n    return scored.sortedWith(compareBy({ it.first }, { it.second })).take(k).map { it.third }\n}\n\nfun chooseRetrieval(corpusTokens: Int, shape: String, pattern: String): String? {\n    // TODO 5 of 8 (unlocks e4): the retrieval mechanism.\n    // Receives the corpus size in tokens, the data shape (\"text\" or \"table\") and the query pattern. Decide in this order: under 200000 tokens \"cached prompt\";\n    // a table \"structured query\"; a \"multi-hop\" pattern \"agentic search\"; then \"identifier\" gives \"keyword index\", \"paraphrase\" gives \"embedding index\" and any other pattern \"hybrid index\".\n    // Example: chooseRetrieval(2000000, \"text\", \"identifier\") -> \"keyword index\"\n    return null\n}\n\nprivate fun status(oldChunks: List<Chunk>, text: String): String {\n    // TODO 6 of 8 (unlocks e5): what a re-index does with one document.\n    // Receives the chunks the index already holds for the document (an empty list when it has none) and the document's current text. Returns \"added\" when\n    // there are no chunks, \"kept\" when the version of the first chunk equals `docVersion(text)`, and \"replaced\" when it differs.\n    // Example: no chunks -> \"added\"; chunks made from the same text -> \"kept\"\n    return \"added\"\n}\n\nfun reindex(chunks: List<Chunk>, docs: Map<String, String>): Reindexed? {\n    val old = chunks.groupBy { it.doc }\n    val report = linkedMapOf(\"added\" to mutableListOf<String>(), \"replaced\" to mutableListOf(), \"removed\" to old.keys.filter { it !in docs }.toMutableList(), \"kept\" to mutableListOf())\n    val result = mutableListOf<Chunk>()\n    for ((docId, text) in docs) {\n        val state = status(old[docId] ?: emptyList(), text)\n        report.getValue(state) += docId\n        result += if (state == \"kept\") old.getValue(docId) else chunkSections(docId, text)!!\n    }\n    return Reindexed(result, report)\n}\n\nfun stale(chunks: List<Chunk>, docs: Map<String, String>): List<String>? {\n    // TODO 7 of 8 (unlocks e6): the chunks that no longer match their source.\n    // Receives the chunks and a map of the current documents (id to text). Returns the ids of the chunks, in order, whose document is gone or whose\n    // version differs from `docVersion` of the current text.\n    // Example: a chunk of a document that is no longer in `docs` is stale\n    return null\n}\n\nfun recallAtK(results: Map<String, List<String>>, relevant: Map<String, String>, k: Int): Double? {\n    // TODO 8 of 8 (unlocks e7): the share of questions answered in the first k results.\n    // Receives `results` (question to the list of chunk ids returned) and `relevant` (every labelled question to the chunk id that answers it). Returns the\n    // number of labelled questions whose relevant id is among the first k results, divided by the number of labelled questions, rounded to two decimals;\n    // a question with no results counts as a miss, and 0.0 when there are no labelled questions.\n    // Example: 2 of 3 questions hit -> 0.67\n    return null\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // Two documents, split into chunks that carry their title and section.\n    val annual = \"# Annual plan\\n## Cancellation\\nYou can cancel within 14 days for a full refund.\"\n    val monthly = \"# Monthly plan\\n## Cancellation\\nYou can cancel at any time.\"\n    val chunks = (chunkSections(\"annual\", annual) ?: emptyList()) + (chunkSections(\"monthly\", monthly) ?: emptyList())\n    for (chunk in chunks) println(\"chunk: ${chunk.id} | ${chunk.text}\")\n\n    // Search ranks the chunks that share the most (and the most specific) words with the question.\n    println(\"search: ${search(chunks, \"can I cancel within 14 days\", 2)}\")\n    println(\"search, annual only: ${search(chunks, \"cancel\", 2, setOf(\"annual\"))}\")\n\n    // The annual document changes: reindex replaces its chunks and leaves the other alone.\n    val changed = annual.replace(\"14 days\", \"30 days\")\n    val result = reindex(chunks, mapOf(\"annual\" to changed, \"monthly\" to monthly))\n    println(\"reindex report: ${result?.report}\")\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "5c30b036d4216ee2ee154db4488a5853adf884fe856811fb1aa9bcdba432977c",
+  "starting_code": "private val log = System.getLogger(\"pipeline\")\n\n/** A retrieval pipeline: chunks that carry their context, a search that respects access, rank fusion, a re-index that removes what changed, and recall over every question. See ../../statement.md. */\n\n/** A chunk of a document: its id, the document it came from, that document's version and its text. */\ndata class Chunk(val id: String, val doc: String, val version: Int, val text: String)\n\n/** The chunks after a re-index and what happened to each document: the keys added, replaced, removed and kept. */\ndata class Reindexed(val chunks: List<Chunk>, val report: Map<String, List<String>>)\n\nval STOP = setOf(\"a\", \"an\", \"the\", \"is\", \"are\", \"can\", \"i\", \"what\", \"does\", \"do\", \"how\", \"my\", \"it\", \"of\", \"to\", \"for\", \"and\", \"or\", \"in\", \"when\", \"will\", \"be\", \"that\", \"this\", \"with\", \"by\", \"at\")\nprivate val TOKEN = Regex(\"[a-z0-9]+(?:-[a-z0-9]+)*\")\n\n/** A cheap fingerprint of a document's text: when it changes, the document changed. */\nfun docVersion(text: String): Int = (text.sumOf { it.code.toLong() } % 1000003).toInt()\n\nfun tokens(text: String): List<String> = TOKEN.findAll(text.lowercase()).map { it.value }.filter { it !in STOP }.toList()\n\nprivate fun chunkText(title: String, name: String, part: String): String {\n    // TODO 1 of 8 (unlocks m1): the text of one chunk.\n    // Receives the document title, the section name and one part of the section's text. Returns the part with its context in front, as\n    // \"<title> > <name>. <part>\", so a chunk still says where it came from.\n    // Example: chunkText(\"Annual plan\", \"Cancellation\", \"You can cancel.\") -> \"Annual plan > Cancellation. You can cancel.\"\n    return part\n}\n\nprivate fun splitSection(body: String, maxWords: Int): List<String> {\n    // TODO 2 of 8 (unlocks e1): the parts of a long section.\n    // Receives the text of one section and the word limit. Splits the text after each sentence end (a full stop followed by a space) and fills parts\n    // with whole sentences: a part is closed before the sentence that would push it over `maxWords` words, and a single sentence longer than the limit\n    // stays whole. Returns the parts as a list of strings (a short section is one part).\n    // Example: \"Install it. Configure it. Restart it.\" with maxWords 4 -> [\"Install it. Configure it.\", \"Restart it.\"]\n    return listOf(body)\n}\n\nfun chunkSections(docId: String, text: String, maxWords: Int = 30): List<Chunk>? {\n    log.log(System.Logger.Level.DEBUG, \"chunkSections input: {0}\", text)\n    val parts = text.split(\"\\n## \")\n    val title = parts[0].removePrefix(\"# \")\n    val version = docVersion(text)\n    val chunks = mutableListOf<Chunk>()\n    for (section in parts.drop(1)) {\n        val cut = section.indexOf('\\n')\n        val name = section.substring(0, cut)\n        val pieces = splitSection(section.substring(cut + 1), maxWords)\n        pieces.forEachIndexed { n, piece -> chunks += Chunk(\"$docId/$name\" + (if (pieces.size == 1) \"\" else \"#${n + 1}\"), docId, version, chunkText(title, name, piece)) }\n    }\n    return chunks\n}\n\nprivate fun score(wanted: Set<String>, have: Set<String>): Int {\n    // TODO 3 of 8 (unlocks e2): how well a chunk matches a query.\n    // Receives the set of query words and the set of words of one chunk. Returns the sum, over the query words that the chunk has, of 3 for a code (a word that\n    // contains a digit, such as E-7310) and 1 for any other word; 0 when the chunk has none of them.\n    // Example: wanted {\"cancel\", \"e-7310\"}, have {\"cancel\", \"e-7310\", \"card\"} -> 4\n    return 0\n}\n\nprivate fun visible(chunk: Chunk, allowedDocs: Set<String>?): Boolean {\n    // TODO 4 of 8 (unlocks e3): may this reader see this chunk?\n    // Receives a chunk and the set of document ids the reader may read, or null when the reader may read all of them. Returns true when the chunk's `doc` is allowed.\n    // Example: visible(chunk of \"annual\", setOf(\"monthly\")) -> false, visible(chunk of \"annual\", null) -> true\n    return true\n}\n\nfun search(chunks: List<Chunk>, query: String, k: Int = 3, allowedDocs: Set<String>? = null): List<String>? {\n    log.log(System.Logger.Level.DEBUG, \"search input: {0}\", query)\n    val wanted = tokens(query).toSet()\n    val scored = chunks.mapIndexedNotNull { n, chunk ->\n        if (!visible(chunk, allowedDocs)) return@mapIndexedNotNull null\n        val points = score(wanted, tokens(chunk.text).toSet())\n        if (points > 0) Triple(-points, n, chunk.id) else null\n    }\n    return scored.sortedWith(compareBy({ it.first }, { it.second })).take(k).map { it.third }\n}\n\nfun chooseRetrieval(corpusTokens: Int, shape: String, pattern: String): String? {\n    // TODO 5 of 8 (unlocks e4): the retrieval mechanism.\n    // Receives the corpus size in tokens, the data shape (\"text\" or \"table\") and the query pattern. Decide in this order: under 200000 tokens \"cached prompt\";\n    // a table \"structured query\"; a \"multi-hop\" pattern \"agentic search\"; then \"identifier\" gives \"keyword index\", \"paraphrase\" gives \"embedding index\" and any other pattern \"hybrid index\".\n    // Example: chooseRetrieval(2000000, \"text\", \"identifier\") -> \"keyword index\"\n    return null\n}\n\nprivate fun status(oldChunks: List<Chunk>, text: String): String {\n    // TODO 6 of 8 (unlocks e5): what a re-index does with one document.\n    // Receives the chunks the index already holds for the document (an empty list when it has none) and the document's current text. Returns \"added\" when\n    // there are no chunks, \"kept\" when the version of the first chunk equals `docVersion(text)`, and \"replaced\" when it differs.\n    // Example: no chunks -> \"added\"; chunks made from the same text -> \"kept\"\n    return \"added\"\n}\n\nfun reindex(chunks: List<Chunk>, docs: Map<String, String>): Reindexed? {\n    val old = chunks.groupBy { it.doc }\n    val report = linkedMapOf(\"added\" to mutableListOf<String>(), \"replaced\" to mutableListOf(), \"removed\" to old.keys.filter { it !in docs }.toMutableList(), \"kept\" to mutableListOf())\n    val result = mutableListOf<Chunk>()\n    for ((docId, text) in docs) {\n        val state = status(old[docId] ?: emptyList(), text)\n        report.getValue(state) += docId\n        result += if (state == \"kept\") old.getValue(docId) else chunkSections(docId, text)!!\n    }\n    return Reindexed(result, report)\n}\n\nfun stale(chunks: List<Chunk>, docs: Map<String, String>): List<String>? {\n    // TODO 7 of 8 (unlocks e6): the chunks that no longer match their source.\n    // Receives the chunks and a map of the current documents (id to text). Returns the ids of the chunks, in order, whose document is gone or whose\n    // version differs from `docVersion` of the current text.\n    // Example: a chunk of a document that is no longer in `docs` is stale\n    return null\n}\n\nfun recallAtK(results: Map<String, List<String>>, relevant: Map<String, String>, k: Int): Double? {\n    // TODO 8 of 8 (unlocks e7): the share of questions answered in the first k results.\n    // Receives `results` (question to the list of chunk ids returned) and `relevant` (every labelled question to the chunk id that answers it). Returns the\n    // number of labelled questions whose relevant id is among the first k results, divided by the number of labelled questions, rounded to two decimals;\n    // a question with no results counts as a miss, and 0.0 when there are no labelled questions.\n    // Example: 2 of 3 questions hit -> 0.67\n    return null\n}\n",
+  "exercise": {
+    "main_path": "practice/level-4/85-retrieval-pipelines-at-design-level/prose/unit-02/practice-4/src/main/kotlin/Pipeline.kt",
+    "test_path": "practice/level-4/85-retrieval-pipelines-at-design-level/prose/unit-02/practice-4/src/test/kotlin/PipelineTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-4/85-retrieval-pipelines-at-design-level/prose/unit-02/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-4/85-retrieval-pipelines-at-design-level/prose/unit-02/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_sectionsBecomeChunksThatCarryTheirTitleAndSectionAndTheVersionOfTheirDocument()",
+        "kind": "main",
+        "says": "Sections become chunks that carry their title and section and the version of their document"
+      },
+      {
+        "id": "e1_aLongSectionSplitsAtSentenceEndsUnderTheWordLimitAndEveryPartKeepsThePrefix()",
+        "kind": "edge",
+        "says": "A long section splits at sentence ends under the word limit and every part keeps the prefix"
+      },
+      {
+        "id": "e2_aCodeOutweighsAWordAndAWordInNoChunkMatchesNothing()",
+        "kind": "edge",
+        "says": "A code outweighs a word and a word in no chunk matches nothing"
+      },
+      {
+        "id": "e3_aSearchForAReaderNeverReturnsAChunkOfADocumentThatReaderMayNotSee()",
+        "kind": "edge",
+        "says": "A search for a reader never returns a chunk of a document that reader may not see, even with fewer matches than k"
+      },
+      {
+        "id": "e4_theMechanismFollowsTheCorpusSizeThenTheDataShapeThenTheQueryPattern()",
+        "kind": "edge",
+        "says": "The mechanism follows the corpus size, then the data shape, then the query pattern"
+      },
+      {
+        "id": "e5_aReindexKeepsUnchangedDocumentsReplacesChangedOnesAddsNewOnesAndDropsRemovedOnes()",
+        "kind": "edge",
+        "says": "A reindex keeps unchanged documents, replaces changed ones, adds new ones and drops removed ones"
+      },
+      {
+        "id": "e6_staleListsTheChunksWhoseDocumentChangedOrVanished()",
+        "kind": "edge",
+        "says": "Stale lists the chunks whose document changed or vanished"
+      },
+      {
+        "id": "e7_recallCountsEveryLabelledQuestionAndAQuestionWithNoResultsIsAMiss()",
+        "kind": "edge",
+        "says": "Recall counts every labelled question and a question with no results is a miss"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-4/85-retrieval-pipelines-at-design-level/prose/unit-02/practice-4/target/test-results/test"
+    },
+    "origin": "course/85-retrieval-pipelines-at-design-level/02-freshness-measurement-and-the-practice.md",
+    "concepts": [
+      "the practice of Freshness after a re-index, measuring retrieval alone and the practice is solved"
+    ],
+    "files": [
+      "practice/level-4/85-retrieval-pipelines-at-design-level/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "retrieval-pipelines-at-design-level-u2"
+}

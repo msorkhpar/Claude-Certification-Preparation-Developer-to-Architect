@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-1",
+    "04-capabilities-and-limits"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: What Claude does well, and where it slips",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A finance team pastes forty invoice amounts into a prompt and asks Claude for the sum. The reply reads fluently and is off by a few cents. What is the most dependable correction?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Let it call a code tool and pass on the tool's result",
+            "correct": true,
+            "says": "Exact arithmetic is a task for a tool, because the model works on tokens (the maths and counting section), and the first trap says to move such work into code."
+          },
+          {
+            "id": "b",
+            "text": "Add a closing line asking Claude to flag how sure it is of the total",
+            "correct": false,
+            "says": "Ruled out because reasoning \"needs a check that does not come from the same reasoning\", and the model's own report of certainty is not one."
+          },
+          {
+            "id": "c",
+            "text": "Reformat the amounts into one column so the sum is easier to follow",
+            "correct": false,
+            "says": "Ruled out because exact arithmetic on long numbers is \"approximate unless the model does the work in a tool\", however the amounts are laid out."
+          },
+          {
+            "id": "d",
+            "text": "Ask for the sum again with an instruction to double-check each step",
+            "correct": false,
+            "says": "Ruled out because a re-check request \"does not change that the model sees pieces\", and the section says the fix is not a better prompt."
+          }
+        ],
+        "origin": {
+          "path": "course/04-capabilities-and-limits/01-what-claude-does-well-and-where-it-slips.md",
+          "section": "Reasoning"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "An inspection app sends shelf photographs and asks Claude how many bottles are visible. Totals are sometimes wrong on crowded shelves, and the total feeds a purchasing decision. Which design response fits what the documentation says?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Shrink each photo heavily so the scene looks simpler to the model",
+            "correct": false,
+            "says": "Ruled out because Claude \"might hallucinate or make mistakes when interpreting low-quality, rotated, or very small images under 200 pixels\", so heavy shrinking makes it worse."
+          },
+          {
+            "id": "b",
+            "text": "Take the coordinates it returns for each bottle as exact positions to count",
+            "correct": false,
+            "says": "Ruled out because the vision list says \"Coordinates and localisation outputs are approximate\", so they cannot give an exact count either."
+          },
+          {
+            "id": "c",
+            "text": "Label the figures approximate and verify the important ones against real stock",
+            "correct": true,
+            "says": "The vision page says counts can be approximate, and its closing advice is to verify interpretations in high-stakes cases, so the figures are labelled as estimates and the ones that matter are checked."
+          },
+          {
+            "id": "d",
+            "text": "Switch to a larger model and treat its counts as final in the weekly purchasing report",
+            "correct": false,
+            "says": "Ruled out because the page says \"Do not use Claude for tasks requiring perfect precision or sensitive image analysis without human oversight\", for any tier."
+          }
+        ],
+        "origin": {
+          "path": "course/04-capabilities-and-limits/01-what-claude-does-well-and-where-it-slips.md",
+          "section": "Vision"
+        }
+      }
+    ]
+  }
+}

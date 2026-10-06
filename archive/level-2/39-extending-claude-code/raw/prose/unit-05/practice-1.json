@@ -1,0 +1,413 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "39-extending-claude-code"
+  ],
+  "variant": "prose",
+  "unit": 5,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: one person's Claude Code setup, in the right files (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: one person's Claude Code setup, in the right files"
+    },
+    {
+      "type": "para",
+      "text": "A developer wants shorter replies, the context percentage always in view and one key changed. A team lead wants the same repository to keep its permission rules in one shared file. Each of these goes wrong quietly: a style name in the wrong case selects the default style, a misspelled field is ignored, a reserved key cannot be rebound, a personal style committed to the shared file overrides every teammate. In this practice you write the files of the page \"Making Claude Code yours\". Nothing is installed and Claude Code is not started: the tests read your files and check them against the documented rules. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "The folder has two parts. `home/` stands for the user's `~` and `project/` for a repository."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "File",
+        "What it holds"
+      ],
+      "rows": [
+        [
+          "`home/.claude/settings.json`",
+          "the user's settings: `outputStyle` and `statusLine`"
+        ],
+        [
+          "`home/.claude/output-styles/terse-review.md`",
+          "a custom output style"
+        ],
+        [
+          "`home/.claude/statusline.sh`",
+          "the status line script, which reads the session JSON on standard input"
+        ],
+        [
+          "`home/.claude/keybindings.json`",
+          "the user's keybindings"
+        ],
+        [
+          "`project/.claude/settings.json`",
+          "the team's shared settings"
+        ],
+        [
+          "`project/.claude/settings.local.json`",
+          "the developer's personal override for this project"
+        ],
+        [
+          "`project/.gitignore`",
+          "the repository's ignore file"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The starter holds the files unfinished. The settings files are strict JSON: a comment or a trailing comma is an error."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is the setup with seven gaps cut out. The shape of every file is written: the keybindings file with its schema and its `Chat` block, the user settings with the `statusLine` object, the style file with its name and description, the status line script with its shebang and its first field, and the two project settings files. JSON cannot carry a comment, so the JSON gaps are listed here; each is an empty value (`\"\"`, `0`, `{}` or `[]`) in the file named, and a gap in a script, a style file or the ignore file is a comment that says what to write. The starter loads and fails the cases on an assertion. Write them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`home/.claude/settings.json` unlocks `m1` and `e2`: the style name, the script path in `~/.claude/` and the `padding` and `refreshInterval` numbers.",
+        "`home/.claude/output-styles/terse-review.md` unlocks `e1`: `keep-coding-instructions: true` and the instructions, at least three lines.",
+        "`home/.claude/statusline.sh` unlocks `e2` and `e6`: the context percentage and the branch, read from documented fields only.",
+        "`home/.claude/keybindings.json` unlocks `e3`: one key rebound to an action and one freed with `null`, in the `Chat` block.",
+        "`project/.claude/settings.json` unlocks `e4`: the team's `permissions.allow` rules, and nothing personal.",
+        "`project/.claude/settings.local.json` unlocks `e4`: the exact style name for this project.",
+        "`project/.gitignore` unlocks `e5`: the line that keeps the local settings file out of git."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About nine lines in all. These files have no code to log from; a failing case shows the assertion message, which names the file and the rule."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**The user's settings.** `outputStyle` names the style, exactly as its file or its built-in name spells it. `statusLine` is an object with `type` `\"command\"`, a `command` that points at the script in `~/.claude/`, an optional `padding` (0 or more) and an optional `refreshInterval` (seconds, 1 or more).",
+        "**The style file.** Front matter with `name`, `description` and `keep-coding-instructions` set to `true` (the style only changes how replies read), and no other field. Then the instructions: at least three lines that say how a reply is written (the result first, evidence only, full length when an explanation is asked for).",
+        "**The status line script.** A script with a shebang line that reads the session JSON with `jq -r '...'` and prints one line. It may read only fields the session sends, such as `model.display_name`, `context_window.used_percentage` and `workspace.current_dir`.",
+        "**The keybindings.** An object with a `bindings` array of blocks. Each block names a `context` exactly as the documentation spells it (`Chat`, not `chat`), and maps keystrokes to actions: at least one key rebound to a `namespace:action` name and at least one key freed with `null`. Keystrokes use the modifiers `ctrl`, `shift`, `alt`, `meta` or `cmd`. The keys Ctrl+C, Ctrl+D, Ctrl+M, Ctrl+I, Ctrl+H and Ctrl+[ cannot be rebound.",
+        "**The shared project file.** It carries the team's `permissions.allow` rules and no `outputStyle` or `statusLine`: those are personal and a committed file would override every teammate.",
+        "**The local override.** `project/.claude/settings.local.json` sets `outputStyle` to an exact style name for this project only, and `project/.gitignore` lists the file so it stays out of git.",
+        "**Nothing personal, nothing unfinished.** No file holds a home folder path, an e-mail address, a key that starts like an API key, or a TODO marker."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Names are exact.** *You should see* the user's `outputStyle` find a style, and a style name written in another case rejected.",
+        "**A style keeps the engineering.** *You should see* `keep-coding-instructions: true` and only the four documented fields, because a misspelled field is ignored without an error.",
+        "**The script reads what is sent.** *You should see* only documented JSON fields, and a refresh interval of at least one second.",
+        "**Keys have rules.** *You should see* real contexts, real modifiers, a `namespace:action` name for each rebinding, a `null` that frees a key, and no reserved key rebound.",
+        "**Scopes keep choices apart.** *You should see* the shared file with permissions only, the personal style in the local file, and the local file listed in the ignore file.",
+        "**Nothing leaks.** *You should see* no personal path, address or key in any file."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "The user level holds a style, a status line and a keybindings file that fit together"
+        ],
+        [
+          "`e1`",
+          "The style file keeps the coding instructions and carries only documented fields"
+        ],
+        [
+          "`e2`",
+          "The status line reads only fields the session sends and refreshes no faster than every second"
+        ],
+        [
+          "`e3`",
+          "The keybindings use real contexts and actions, free keys and a null to unbind"
+        ],
+        [
+          "`e4`",
+          "Personal settings stay in the user files and the project file stays shared"
+        ],
+        [
+          "`e5`",
+          "The local settings file is kept out of git"
+        ],
+        [
+          "`e6`",
+          "No file holds a personal path, an address, a key or an unfinished marker"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "{\n  \"outputStyle\": \"terse-review\",\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"~/.claude/statusline.sh\",\n    \"padding\": 1,\n    \"refreshInterval\": 30\n  }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/home/.claude/keybindings.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"$schema\": \"https://www.schemastore.org/claude-code-keybindings.json\",\n  \"$docs\": \"https://code.claude.com/docs/en/keybindings\",\n  \"bindings\": [\n    {\n      \"context\": \"Chat\",\n      \"bindings\": {\n        \"ctrl+e\": \"chat:externalEditor\",\n        \"ctrl+s\": null\n      }\n    }\n  ]\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/home/.claude/output-styles/terse-review.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "---\nname: terse-review\ndescription: Lead with the verdict, then the evidence, with no narration\nkeep-coding-instructions: true\n---\nStart every reply with the result in one sentence: what was done, or what the answer is.\nAfter it, give only the evidence the reader needs in order to act, as a short list with one line per finding and the file and line of each.\nLeave out the lead-in, the step-by-step narration and the closing recap, and answer a simple question in one to three sentences.\nWrite at full length whenever the reader asks for an explanation, and for any warning about lost data.\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/home/.claude/statusline.sh"
+        },
+        {
+          "type": "code",
+          "lang": "bash",
+          "text": "#!/bin/sh\n# Reads the session JSON on standard input and prints one line: the model, the share of the context window used, and the branch.\ninput=$(cat)\nmodel=$(echo \"$input\" | jq -r '.model.display_name')\nused=$(echo \"$input\" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)\ndir=$(echo \"$input\" | jq -r '.workspace.current_dir')\nbranch=$(git -C \"$dir\" branch --show-current 2>/dev/null)\necho \"[$model] ${used}% context ${branch:+| $branch}\"\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/project/.claude/settings.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"permissions\": {\n    \"allow\": [\"Bash(git diff *)\", \"Bash(git log *)\"]\n  }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/project/.claude/settings.local.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"outputStyle\": \"Explanatory\"\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/project/.gitignore"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": ".claude/settings.local.json\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "{\n  \"outputStyle\": \"\",\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"\",\n    \"padding\": 0,\n    \"refreshInterval\": 0\n  }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/home/.claude/keybindings.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"$schema\": \"https://www.schemastore.org/claude-code-keybindings.json\",\n  \"$docs\": \"https://code.claude.com/docs/en/keybindings\",\n  \"bindings\": [\n    {\n      \"context\": \"Chat\",\n      \"bindings\": {}\n    }\n  ]\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/home/.claude/output-styles/terse-review.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "---\nname: terse-review\ndescription: Lead with the verdict, then the evidence, with no narration\nkeep-coding-instructions: false\n---\n<!-- Gap: write at least three lines that say how a reply is written, and keep the coding instructions with `keep-coding-instructions: true`. -->\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/home/.claude/statusline.sh"
+    },
+    {
+      "type": "code",
+      "lang": "bash",
+      "text": "#!/bin/sh\n# Reads the session JSON on standard input and prints one line: the model, the share of the context window used, and the branch.\n# TODO: also read `.context_window.used_percentage` (a number that may be missing; show 0 then and drop the decimals) and the branch of\n# `.workspace.current_dir`, and print them after the model. Example line: [Sonnet] 42% context | main\ninput=$(cat)\nmodel=$(echo \"$input\" | jq -r '.model.display_name')\necho \"[$model]\"\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/project/.claude/settings.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"permissions\": {\n    \"allow\": []\n  }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/project/.claude/settings.local.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": ""
+    },
+    {
+      "type": "para",
+      "text": "File: project/project/.gitignore"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "# Gap: list the personal settings file of this project so that git leaves it out\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 11,
+    "code": 7,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "a150085ac679ba43abef595676dfb08d175f60aeebb7c6980fa3443f6944fd86",
+  "starting_code": "{\n  \"outputStyle\": \"\",\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"\",\n    \"padding\": 0,\n    \"refreshInterval\": 0\n  }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/39-extending-claude-code/prose/unit-05/practice-1/project/home/.claude/settings.json",
+    "test_path": "practice/level-2/39-extending-claude-code/prose/unit-05/practice-1/tests/test_personal_setup.py",
+    "run_command": [
+      "python3",
+      "practice/level-2/39-extending-claude-code/prose/unit-05/practice-1/check_files.py",
+      "practice/level-2/39-extending-claude-code/prose/unit-05/practice-1/project/home/.claude/keybindings.json",
+      "practice/level-2/39-extending-claude-code/prose/unit-05/practice-1/project/home/.claude/output-styles/terse-review.md",
+      "practice/level-2/39-extending-claude-code/prose/unit-05/practice-1/project/home/.claude/settings.json",
+      "practice/level-2/39-extending-claude-code/prose/unit-05/practice-1/project/home/.claude/statusline.sh",
+      "practice/level-2/39-extending-claude-code/prose/unit-05/practice-1/project/project/.claude/settings.json",
+      "practice/level-2/39-extending-claude-code/prose/unit-05/practice-1/project/project/.claude/settings.local.json",
+      "practice/level-2/39-extending-claude-code/prose/unit-05/practice-1/project/project/.gitignore"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-2/39-extending-claude-code/prose/unit-05/practice-1/target/report.xml",
+      "practice/level-2/39-extending-claude-code/prose/unit-05/practice-1/tests/test_personal_setup.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_the_user_level_holds_a_style_a_status_line_and_a_keybindings_file_that_fit_together",
+        "kind": "main",
+        "says": "The user level holds a style, a status line and a keybindings file that fit together"
+      },
+      {
+        "id": "test_e1_the_style_file_keeps_the_coding_instructions_and_carries_only_documented_fields",
+        "kind": "edge",
+        "says": "The style file keeps the coding instructions and carries only documented fields"
+      },
+      {
+        "id": "test_e2_the_status_line_reads_only_fields_the_session_sends_and_refreshes_no_faster_than_every_second",
+        "kind": "edge",
+        "says": "The status line reads only fields the session sends and refreshes no faster than every second"
+      },
+      {
+        "id": "test_e3_the_keybindings_use_real_contexts_and_actions_free_keys_and_a_null_to_unbind",
+        "kind": "edge",
+        "says": "The keybindings use real contexts and actions, free keys and a null to unbind"
+      },
+      {
+        "id": "test_e4_personal_settings_stay_in_the_user_files_and_the_project_file_stays_shared",
+        "kind": "edge",
+        "says": "Personal settings stay in the user files and the project file stays shared"
+      },
+      {
+        "id": "test_e5_the_local_settings_file_is_kept_out_of_git",
+        "kind": "edge",
+        "says": "The local settings file is kept out of git"
+      },
+      {
+        "id": "test_e6_no_file_holds_a_personal_path_an_address_a_key_or_an_unfinished_marker",
+        "kind": "edge",
+        "says": "No file holds a personal path, an address, a key or an unfinished marker"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/39-extending-claude-code/prose/unit-05/practice-1/target/report.xml"
+    },
+    "origin": "course/39-extending-claude-code/05-making-claude-code-yours-output-styles-the-status-line-and-keybindings.md",
+    "concepts": [
+      "the practice of Making Claude Code yours: output styles, the status line, keybindings and where each setting lives is solved"
+    ],
+    "files": [
+      "practice/level-2/39-extending-claude-code/prose/unit-05/practice-1/project/home/.claude/keybindings.json",
+      "practice/level-2/39-extending-claude-code/prose/unit-05/practice-1/project/home/.claude/output-styles/terse-review.md",
+      "practice/level-2/39-extending-claude-code/prose/unit-05/practice-1/project/home/.claude/statusline.sh",
+      "practice/level-2/39-extending-claude-code/prose/unit-05/practice-1/project/project/.claude/settings.json",
+      "practice/level-2/39-extending-claude-code/prose/unit-05/practice-1/project/project/.claude/settings.local.json",
+      "practice/level-2/39-extending-claude-code/prose/unit-05/practice-1/project/project/.gitignore"
+    ]
+  },
+  "lang": "python",
+  "edition": "extending-claude-code-u5"
+}

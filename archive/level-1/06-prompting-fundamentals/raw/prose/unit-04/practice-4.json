@@ -1,0 +1,321 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-1",
+    "06-prompting-fundamentals"
+  ],
+  "variant": "prose",
+  "unit": 4,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: a prompt template builder, graded on structure (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a prompt template builder, graded on structure"
+    },
+    {
+      "type": "para",
+      "text": "Write `build_prompt` (Python), `buildPrompt` (TypeScript), `PromptBuilder.build` (Java) or `buildPrompt` (Kotlin): it turns a prompt **spec** into one prompt string. The tests check the structure of the string, exactly, so the format below is the contract."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working prompt builder with eight gaps cut out of it. The plumbing is written and correct: the spec handling, the order of the sections, the placeholder pass, the block helper and the numbering loops. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To see what a gap receives, debug it by logging its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (Python names, with a leading underscore; the TypeScript, Java and Kotlin names are the camel-case forms, `renderDocument` for `_render_document`, and so on):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_join` unlocks every case: the sections separated by one blank line.",
+        "`_present` unlocks `e1`: an absent, empty or whitespace-only text is not there.",
+        "`_lookup` unlocks `e2`: a placeholder's value, or an error that names the variable.",
+        "`_escape` unlocks `e4`: `&`, `<` and `>` made harmless.",
+        "`_render_document` unlocks `e4`, `e5` and `e6`: one document, escaped and never filled.",
+        "`_render_example` unlocks `m1` and `e6`: one example with its input and output blocks.",
+        "`_constraint_lines` unlocks `m1`: one `- ` line per constraint.",
+        "`_check_task` unlocks `e3`: a blank task is refused."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gaps 1, 2, 3, 5, 6 and 7. A few lines each, about ten in all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The spec"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Field",
+        "Type",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`task`",
+          "text",
+          "The ask. **Required.**"
+        ],
+        [
+          "`role`",
+          "text, optional",
+          "Who Claude is for this task"
+        ],
+        [
+          "`context`",
+          "text, optional",
+          "Why and for whom"
+        ],
+        [
+          "`documents`",
+          "list of `name` and `text`, optional",
+          "Source material (untrusted data)"
+        ],
+        [
+          "`examples`",
+          "list of `input` and `output`, optional",
+          "Worked examples"
+        ],
+        [
+          "`constraints`",
+          "list of text, optional",
+          "Rules the answer must obey"
+        ],
+        [
+          "`output_format`",
+          "text, optional",
+          "The shape of the answer"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Plus a `variables` map from names to text. (TypeScript, Java and Kotlin name the field `outputFormat`.)"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The output"
+    },
+    {
+      "type": "para",
+      "text": "Sections appear in this order, separated by one blank line, with no trailing newline. A section is **omitted entirely** when its field is absent, `null`, empty or only whitespace; `task` is never omitted."
+    },
+    {
+      "type": "code",
+      "lang": "text",
+      "text": "<role>\n{role}\n</role>\n\n<documents>\n<document index=\"1\" name=\"{name}\">\n{text}\n</document>\n<document index=\"2\" name=\"{name}\">\n{text}\n</document>\n</documents>\n\n<context>\n{context}\n</context>\n\n<examples>\n<example index=\"1\">\n<input>\n{input}\n</input>\n<output>\n{output}\n</output>\n</example>\n</examples>\n\n<constraints>\n- {first constraint}\n- {second constraint}\n</constraints>\n\n<output_format>\n{output_format}\n</output_format>\n\n<task>\n{task}\n</task>"
+    },
+    {
+      "type": "para",
+      "text": "Documents and examples keep the order they were given, numbered from 1."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Rules"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Variables.** `{{name}}` in `role`, `context`, `constraints`, `output_format`, `task`, and the `input` and `output` of examples is replaced by the variable's value, in one pass: a value that itself contains `{{other}}` is inserted as it is. A placeholder with no value is an error that names the variable (Python `ValueError`, TypeScript `Error`, Java and Kotlin `IllegalArgumentException`; the message contains the variable's name).",
+        "**Documents are data.** In a document's `text` and `name`, replace `&` with `&amp;`, `<` with `&lt;` and `>` with `&gt;`, and in the `name` also `\"` with `&quot;`, so a document can never close its own tag. Placeholders inside documents are **not** replaced.",
+        "**A blank task is refused** with the same error type: missing, empty or only whitespace."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A full spec renders every section in the order above"
+        ],
+        [
+          "`e1`",
+          "Absent, empty and whitespace-only optional sections are omitted, not rendered empty"
+        ],
+        [
+          "`e2`",
+          "Variables are filled in one pass; a missing variable is named in the error"
+        ],
+        [
+          "`e3`",
+          "A missing, empty or whitespace-only task is refused"
+        ],
+        [
+          "`e4`",
+          "Document text and names are escaped, so a document cannot close its own tag"
+        ],
+        [
+          "`e5`",
+          "Placeholders inside document text stay literal"
+        ],
+        [
+          "`e6`",
+          "Documents and examples keep their order and their numbering"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "// Build a structured prompt from a spec. See ../../statement.md for the exact format.\nprivate val log = System.getLogger(\"promptBuilder\")\n\nprivate val VAR = Regex(\"\"\"\\{\\{(\\w+)\\}\\}\"\"\")\n\nprivate fun fill(text: String, variables: Map<String, String>): String =\n    VAR.replace(text) { m -> lookup(m.groupValues[1], variables) }\n\nprivate fun block(tag: String, body: String) = \"<$tag>\\n$body\\n</$tag>\"\n\nprivate fun join(parts: List<String>): String = parts.joinToString(\"\\n\\n\")\n\nprivate fun present(value: String?) = value != null && value.isNotBlank()\n\nprivate fun lookup(name: String, variables: Map<String, String>): String {\n    require(name in variables) { \"missing variable: $name\" }\n    return variables.getValue(name)\n}\n\nprivate fun escape(text: String) = text.replace(\"&\", \"&amp;\").replace(\"<\", \"&lt;\").replace(\">\", \"&gt;\")\n\nprivate fun renderDocument(index: Int, doc: Doc): String {\n    val name = escape(doc.name).replace(\"\\\"\", \"&quot;\")\n    return \"<document index=\\\"$index\\\" name=\\\"$name\\\">\\n${escape(doc.text)}\\n</document>\"\n}\n\nprivate fun renderExample(index: Int, ex: Example, variables: Map<String, String>): String =\n    \"<example index=\\\"$index\\\">\\n\" +\n        block(\"input\", fill(ex.input, variables)) + \"\\n\" +\n        block(\"output\", fill(ex.output, variables)) + \"\\n</example>\"\n\nprivate fun constraintLines(constraints: List<String>, variables: Map<String, String>): String =\n    constraints.joinToString(\"\\n\") { \"- \" + fill(it, variables) }\n\nprivate fun checkTask(task: String?) {\n    require(present(task)) { \"task is required\" }\n}\n\nfun buildPrompt(spec: Spec, variables: Map<String, String> = emptyMap()): String {\n    log.log(System.Logger.Level.DEBUG, \"buildPrompt input: {0} {1}\", spec, variables)\n    checkTask(spec.task)\n    val parts = mutableListOf<String>()\n    if (present(spec.role)) parts += block(\"role\", fill(spec.role!!, variables))\n    if (spec.documents.isNotEmpty()) {\n        val rendered = spec.documents.mapIndexed { i, doc -> renderDocument(i + 1, doc) }\n        parts += block(\"documents\", rendered.joinToString(\"\\n\"))\n    }\n    if (present(spec.context)) parts += block(\"context\", fill(spec.context!!, variables))\n    if (spec.examples.isNotEmpty()) {\n        val rendered = spec.examples.mapIndexed { i, ex -> renderExample(i + 1, ex, variables) }\n        parts += block(\"examples\", rendered.joinToString(\"\\n\"))\n    }\n    if (spec.constraints.isNotEmpty()) parts += block(\"constraints\", constraintLines(spec.constraints, variables))\n    if (present(spec.outputFormat)) parts += block(\"output_format\", fill(spec.outputFormat!!, variables))\n    parts += block(\"task\", fill(spec.task!!, variables))\n    return join(parts)\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // A small spec like the first main test case: a role, one document, one constraint and a task with a placeholder.\n    val spec = Spec(\n        task = \"Classify the message about {{topic}}.\",\n        role = \"You are a careful support analyst for {{company}}.\",\n        documents = listOf(Doc(\"policy.txt\", \"Refunds within 30 days.\")),\n        constraints = listOf(\"Answer in one word.\"),\n    )\n    val prompt = buildPrompt(spec, mapOf(\"company\" to \"Acme\", \"topic\" to \"delivery\"))\n\n    println(\"prompt length: ${prompt.length}\")\n    println(\"starts with: ${prompt.take(20).replace(\"\\n\", \"\\\\n\")}\")\n    println(\"has task block: ${prompt.contains(\"<task>\\nClassify the message about delivery.\\n</task>\")}\")\n    println(prompt)\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "// Build a structured prompt from a spec. See ../../statement.md for the exact format.\nprivate val log = System.getLogger(\"promptBuilder\")\n\nprivate val VAR = Regex(\"\"\"\\{\\{(\\w+)\\}\\}\"\"\")\n\nprivate fun fill(text: String, variables: Map<String, String>): String =\n    VAR.replace(text) { m -> lookup(m.groupValues[1], variables) }\n\nprivate fun block(tag: String, body: String) = \"<$tag>\\n$body\\n</$tag>\"\n\nprivate fun join(parts: List<String>): String {\n    // TODO 1 of 8 (finish this to pass every case): the finished prompt from its rendered sections.\n    // Receives the rendered sections, in order. Returns them separated by one blank line, with no trailing newline.\n    // Example: join(listOf(\"<a>\", \"<b>\")) -> \"<a>\\n\\n<b>\"\n    return \"\"\n}\n\nprivate fun present(value: String?): Boolean {\n    // TODO 2 of 8 (finish this to pass e1): is an optional text really there?\n    // Receives a text or null. Returns true unless it is null, empty or only whitespace.\n    // Example: present(\"  \") -> false, present(\"x\") -> true\n    return false\n}\n\nprivate fun lookup(name: String, variables: Map<String, String>): String {\n    // TODO 3 of 8 (finish this to pass e2): the value of one placeholder.\n    // Receives the placeholder name and the variables. Returns the value; when the name has no value throws an\n    // IllegalArgumentException (use require) whose message contains the name.\n    // Example: lookup(\"who\", mapOf(\"who\" to \"Ann\")) -> \"Ann\", lookup(\"place\", emptyMap()) -> IllegalArgumentException(\"missing variable: place\")\n    return \"\"\n}\n\nprivate fun escape(text: String): String {\n    // TODO 4 of 8 (finish this to pass e4): make document text harmless.\n    // Receives a text. Returns it with & as &amp;, < as &lt; and > as &gt; (the ampersand first).\n    // Example: escape(\"a </document> & b\") -> \"a &lt;/document&gt; &amp; b\"\n    return text\n}\n\nprivate fun renderDocument(index: Int, doc: Doc): String {\n    // TODO 5 of 8 (finish this to pass e4, e5 and e6): one rendered document.\n    // Receives its number (from 1) and a Doc. Returns <document index=\"N\" name=\"NAME\">, a newline, the text, a newline and\n    // </document>. Name and text are escaped (the name also turns \" into &quot;); placeholders in them are NOT filled.\n    // Example: renderDocument(1, Doc(\"a\", \"x\")) -> \"<document index=\\\"1\\\" name=\\\"a\\\">\\nx\\n</document>\"\n    return \"\"\n}\n\nprivate fun renderExample(index: Int, ex: Example, variables: Map<String, String>): String {\n    // TODO 6 of 8 (finish this to pass m1 and e6): one rendered example.\n    // Receives its number (from 1), an Example and the variables. Returns <example index=\"N\">, the input block, the output block\n    // (placeholders filled in both) and </example>, each on its own line.\n    // Example: renderExample(1, Example(\"i\", \"o\"), emptyMap()) -> \"<example index=\\\"1\\\">\\n<input>\\ni\\n</input>\\n<output>\\no\\n</output>\\n</example>\"\n    return \"\"\n}\n\nprivate fun constraintLines(constraints: List<String>, variables: Map<String, String>): String {\n    // TODO 7 of 8 (finish this to pass m1): the body of the constraints section.\n    // Receives the constraint texts and the variables. Returns one line per constraint, \"- \" then the text with placeholders\n    // filled, joined by newlines. Example: constraintLines(listOf(\"Be brief.\"), emptyMap()) -> \"- Be brief.\"\n    return \"\"\n}\n\nprivate fun checkTask(task: String?) {\n    // TODO 8 of 8 (finish this to pass e3): refuse a blank task.\n    // Receives the task, which may be null. Throws IllegalArgumentException(\"task is required\") (use require) when it is null, empty\n    // or only whitespace; otherwise returns nothing. Example: checkTask(\"  \") -> IllegalArgumentException, checkTask(\"Say hi.\") -> nothing\n}\n\nfun buildPrompt(spec: Spec, variables: Map<String, String> = emptyMap()): String {\n    log.log(System.Logger.Level.DEBUG, \"buildPrompt input: {0} {1}\", spec, variables)\n    checkTask(spec.task)\n    val parts = mutableListOf<String>()\n    if (present(spec.role)) parts += block(\"role\", fill(spec.role!!, variables))\n    if (spec.documents.isNotEmpty()) {\n        val rendered = spec.documents.mapIndexed { i, doc -> renderDocument(i + 1, doc) }\n        parts += block(\"documents\", rendered.joinToString(\"\\n\"))\n    }\n    if (present(spec.context)) parts += block(\"context\", fill(spec.context!!, variables))\n    if (spec.examples.isNotEmpty()) {\n        val rendered = spec.examples.mapIndexed { i, ex -> renderExample(i + 1, ex, variables) }\n        parts += block(\"examples\", rendered.joinToString(\"\\n\"))\n    }\n    if (spec.constraints.isNotEmpty()) parts += block(\"constraints\", constraintLines(spec.constraints, variables))\n    if (present(spec.outputFormat)) parts += block(\"output_format\", fill(spec.outputFormat!!, variables))\n    parts += block(\"task\", fill(spec.task!!, variables))\n    return join(parts)\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // A small spec like the first main test case: a role, one document, one constraint and a task with a placeholder.\n    val spec = Spec(\n        task = \"Classify the message about {{topic}}.\",\n        role = \"You are a careful support analyst for {{company}}.\",\n        documents = listOf(Doc(\"policy.txt\", \"Refunds within 30 days.\")),\n        constraints = listOf(\"Answer in one word.\"),\n    )\n    val prompt = buildPrompt(spec, mapOf(\"company\" to \"Acme\", \"topic\" to \"delivery\"))\n\n    println(\"prompt length: ${prompt.length}\")\n    println(\"starts with: ${prompt.take(20).replace(\"\\n\", \"\\\\n\")}\")\n    println(\"has task block: ${prompt.contains(\"<task>\\nClassify the message about delivery.\\n</task>\")}\")\n    println(prompt)\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 7,
+    "code": 3,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "e3519031b91b57299497d0f89889dc33bab4ccfbc84dba98ae256e7e01894632",
+  "starting_code": "// Build a structured prompt from a spec. See ../../statement.md for the exact format.\nprivate val log = System.getLogger(\"promptBuilder\")\n\nprivate val VAR = Regex(\"\"\"\\{\\{(\\w+)\\}\\}\"\"\")\n\nprivate fun fill(text: String, variables: Map<String, String>): String =\n    VAR.replace(text) { m -> lookup(m.groupValues[1], variables) }\n\nprivate fun block(tag: String, body: String) = \"<$tag>\\n$body\\n</$tag>\"\n\nprivate fun join(parts: List<String>): String {\n    // TODO 1 of 8 (finish this to pass every case): the finished prompt from its rendered sections.\n    // Receives the rendered sections, in order. Returns them separated by one blank line, with no trailing newline.\n    // Example: join(listOf(\"<a>\", \"<b>\")) -> \"<a>\\n\\n<b>\"\n    return \"\"\n}\n\nprivate fun present(value: String?): Boolean {\n    // TODO 2 of 8 (finish this to pass e1): is an optional text really there?\n    // Receives a text or null. Returns true unless it is null, empty or only whitespace.\n    // Example: present(\"  \") -> false, present(\"x\") -> true\n    return false\n}\n\nprivate fun lookup(name: String, variables: Map<String, String>): String {\n    // TODO 3 of 8 (finish this to pass e2): the value of one placeholder.\n    // Receives the placeholder name and the variables. Returns the value; when the name has no value throws an\n    // IllegalArgumentException (use require) whose message contains the name.\n    // Example: lookup(\"who\", mapOf(\"who\" to \"Ann\")) -> \"Ann\", lookup(\"place\", emptyMap()) -> IllegalArgumentException(\"missing variable: place\")\n    return \"\"\n}\n\nprivate fun escape(text: String): String {\n    // TODO 4 of 8 (finish this to pass e4): make document text harmless.\n    // Receives a text. Returns it with & as &amp;, < as &lt; and > as &gt; (the ampersand first).\n    // Example: escape(\"a </document> & b\") -> \"a &lt;/document&gt; &amp; b\"\n    return text\n}\n\nprivate fun renderDocument(index: Int, doc: Doc): String {\n    // TODO 5 of 8 (finish this to pass e4, e5 and e6): one rendered document.\n    // Receives its number (from 1) and a Doc. Returns <document index=\"N\" name=\"NAME\">, a newline, the text, a newline and\n    // </document>. Name and text are escaped (the name also turns \" into &quot;); placeholders in them are NOT filled.\n    // Example: renderDocument(1, Doc(\"a\", \"x\")) -> \"<document index=\\\"1\\\" name=\\\"a\\\">\\nx\\n</document>\"\n    return \"\"\n}\n\nprivate fun renderExample(index: Int, ex: Example, variables: Map<String, String>): String {\n    // TODO 6 of 8 (finish this to pass m1 and e6): one rendered example.\n    // Receives its number (from 1), an Example and the variables. Returns <example index=\"N\">, the input block, the output block\n    // (placeholders filled in both) and </example>, each on its own line.\n    // Example: renderExample(1, Example(\"i\", \"o\"), emptyMap()) -> \"<example index=\\\"1\\\">\\n<input>\\ni\\n</input>\\n<output>\\no\\n</output>\\n</example>\"\n    return \"\"\n}\n\nprivate fun constraintLines(constraints: List<String>, variables: Map<String, String>): String {\n    // TODO 7 of 8 (finish this to pass m1): the body of the constraints section.\n    // Receives the constraint texts and the variables. Returns one line per constraint, \"- \" then the text with placeholders\n    // filled, joined by newlines. Example: constraintLines(listOf(\"Be brief.\"), emptyMap()) -> \"- Be brief.\"\n    return \"\"\n}\n\nprivate fun checkTask(task: String?) {\n    // TODO 8 of 8 (finish this to pass e3): refuse a blank task.\n    // Receives the task, which may be null. Throws IllegalArgumentException(\"task is required\") (use require) when it is null, empty\n    // or only whitespace; otherwise returns nothing. Example: checkTask(\"  \") -> IllegalArgumentException, checkTask(\"Say hi.\") -> nothing\n}\n\nfun buildPrompt(spec: Spec, variables: Map<String, String> = emptyMap()): String {\n    log.log(System.Logger.Level.DEBUG, \"buildPrompt input: {0} {1}\", spec, variables)\n    checkTask(spec.task)\n    val parts = mutableListOf<String>()\n    if (present(spec.role)) parts += block(\"role\", fill(spec.role!!, variables))\n    if (spec.documents.isNotEmpty()) {\n        val rendered = spec.documents.mapIndexed { i, doc -> renderDocument(i + 1, doc) }\n        parts += block(\"documents\", rendered.joinToString(\"\\n\"))\n    }\n    if (present(spec.context)) parts += block(\"context\", fill(spec.context!!, variables))\n    if (spec.examples.isNotEmpty()) {\n        val rendered = spec.examples.mapIndexed { i, ex -> renderExample(i + 1, ex, variables) }\n        parts += block(\"examples\", rendered.joinToString(\"\\n\"))\n    }\n    if (spec.constraints.isNotEmpty()) parts += block(\"constraints\", constraintLines(spec.constraints, variables))\n    if (present(spec.outputFormat)) parts += block(\"output_format\", fill(spec.outputFormat!!, variables))\n    parts += block(\"task\", fill(spec.task!!, variables))\n    return join(parts)\n}\n",
+  "exercise": {
+    "main_path": "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-4/src/main/kotlin/PromptBuilder.kt",
+    "test_path": "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-4/src/test/kotlin/PromptBuilderTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_fullPromptHasEverySectionInOrder()",
+        "kind": "main",
+        "says": "A full spec renders every section in the order above"
+      },
+      {
+        "id": "e1_absentOptionalSectionsAreOmittedNotEmpty()",
+        "kind": "edge",
+        "says": "Absent, empty and whitespace-only optional sections are omitted, not rendered empty"
+      },
+      {
+        "id": "e2_variablesFillOnceAndAMissingOneIsNamed()",
+        "kind": "edge",
+        "says": "Variables are filled in one pass; a missing variable is named in the error"
+      },
+      {
+        "id": "e3_blankTaskIsRefused()",
+        "kind": "edge",
+        "says": "A missing, empty or whitespace-only task is refused"
+      },
+      {
+        "id": "e4_documentTextCannotCloseItsOwnTag()",
+        "kind": "edge",
+        "says": "Document text and names are escaped, so a document cannot close its own tag"
+      },
+      {
+        "id": "e5_placeholdersInsideDocumentsStayLiteral()",
+        "kind": "edge",
+        "says": "Placeholders inside document text stay literal"
+      },
+      {
+        "id": "e6_documentsAndExamplesKeepTheirOrderAndIndex()",
+        "kind": "edge",
+        "says": "Documents and examples keep their order and their numbering"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-4/target/test-results/test"
+    },
+    "origin": "course/06-prompting-fundamentals/04-diagnosing-a-weak-output.md",
+    "concepts": [
+      "the practice of Diagnosing a weak output, and a template builder is solved"
+    ],
+    "files": [
+      "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "prompting-fundamentals-u4"
+}

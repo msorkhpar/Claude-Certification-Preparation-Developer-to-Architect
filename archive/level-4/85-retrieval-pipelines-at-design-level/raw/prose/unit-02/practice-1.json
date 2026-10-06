@@ -1,0 +1,281 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "85-retrieval-pipelines-at-design-level"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: a retrieval pipeline graded on recall and staleness (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a retrieval pipeline graded on recall and staleness"
+    },
+    {
+      "type": "para",
+      "text": "A support assistant answers from a handbook that changes every week. Its pipeline cuts documents at fixed lengths, so a rule lands in one chunk and its exception in the next; its chunks carry nothing but their own text, so two plans with a section called Cancellation look the same; its search filters by the reader's rights after it has taken the best results, so a reader gets one answer where fifty matched; its nightly job adds the new chunks of a changed document and leaves the old ones, so half the answers quote last month's policy; and its report counts recall only over the questions that returned something. In this practice you write the pieces that fix all of that: chunks that carry their title, section and the version of their document, the split of a long section, a search that scores a code above plain words and applies access before ranking, the choice of retrieval mechanism, a re-index that keeps, replaces, adds and removes, the stale check, and recall over every labelled question. The model is not called and there is no embedding service: the tests give you documents, queries and labels. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`chunk_sections`, `search`, `choose_retrieval`, `reindex`, `stale`, `recall_at_k`); TypeScript has the camel-case names (`chunkSections`, `chooseRetrieval`, `recallAtK`); Java has the same camel-case names as static methods of `Pipeline`; Kotlin has top-level functions. A chunk is `Chunk(id, doc, version, text)`; the starter shows it in each language, with `doc_version` and `tokens` already written."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working pipeline with eight gaps cut out of it. Everything that is plumbing is written and correct: `doc_version` and `tokens`, the cutting of a document into sections with their ids and versions, the search loop that collects and ranks scores, and the re-index loop that builds the report. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value (the unchanged text, an empty result, `None`), so the starter runs and fails every case on an assertion. Debug a gap by logging its input with the `log` line at the top of the file (the starter already logs the input of one function; add your own `log.debug` lines the same way); a run shows the lines you logged under the failing case. Write the gaps in this order (the Java and Kotlin names are the camel-case forms, TypeScript has no leading underscore):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_chunk_text` unlocks `m1`: the text of a chunk with its title and section in front.",
+        "`_split_section` unlocks `e1`: the parts of a long section, split at sentence ends under the word limit.",
+        "`_score` unlocks `e2`: a code outweighs a plain word.",
+        "`_visible` unlocks `e3`: a reader sees only the chunks of the documents allowed.",
+        "`choose_retrieval` unlocks `e4`: the mechanism by corpus size, data shape and query pattern.",
+        "`_status` unlocks `e5`: what a re-index does with one document (added, kept or replaced).",
+        "`stale` unlocks `e6`: the chunks whose document changed or vanished.",
+        "`recall_at_k` unlocks `e7`: recall over every labelled question."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole pipeline."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`chunk_sections(doc_id, text, max_words=30)` cuts a document of the form `# Title`, then `## Section` headings, each followed by its body. Each section becomes one chunk with the id `<doc_id>/<Section>`, the version `doc_version(text)` and the text `<Title> > <Section>. <body>`. When a body has more than `max_words` words, split it at sentence ends (a full stop followed by a space) into parts that each hold at most `max_words` words, packed greedily; a single sentence longer than the limit stays whole. Every part keeps the prefix, and the ids of a split section end in `#1`, `#2` and so on (an unsplit section has no suffix).",
+        "`search(chunks, query, k=3, allowed_docs=None)` returns the ids of the `k` best chunks. Tokens come from `tokens`; a distinct query token that appears in a chunk adds 1 to its score, or 3 when it contains a digit (a code or an id). A chunk with score 0 is not a result, ties keep the order of `chunks`, and when `allowed_docs` is given (even an empty set) only chunks of those documents are candidates at all.",
+        "`choose_retrieval(corpus_tokens, shape, pattern)` returns one of `cached prompt` (a corpus of fewer than 200,000 tokens), `structured query` (the shape is `table`), `agentic search` (the pattern is `multi-hop`), `keyword index` (`identifier`), `embedding index` (`paraphrase`) or `hybrid index` (anything else), checked in that order.",
+        "`reindex(chunks, docs)` brings the chunks in line with `docs` (document id to text) and returns the new chunks with a report. A document whose chunks carry the version of its current text keeps them unchanged; a document whose version differs gets all its old chunks replaced by new ones; a document that has no chunks yet is added; a document with chunks that is no longer in `docs` is removed. The new list follows the order of `docs`. The report maps `added`, `replaced`, `removed` and `kept` to lists of document ids.",
+        "`stale(chunks, docs)` returns the ids of the chunks whose document is gone from `docs` or whose version differs from `doc_version` of its current text, in chunk order.",
+        "`recall_at_k(results, relevant, k)` returns the share of the labelled questions (`relevant` maps a question to the id of its relevant chunk) whose relevant chunk is among the first `k` ids of its result list, rounded to two decimals. A question with no entry in `results` is a miss, and with no labelled questions the result is 0."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Chunks that stand alone.** A chunk that names its title and section can be found and read without its document. *You should see* the text start with the title and the section.",
+        "**Cut at the joints, split at sentences.** *You should see* a long section become parts that each keep the prefix and never cut a sentence, except one that is longer than the limit.",
+        "**Codes outweigh words.** *You should see* a query with one code and two plain words rank the chunk with the code first.",
+        "**Access before ranking.** *You should see* a reader with a narrow set of documents get every visible match, not what is left of the best few.",
+        "**The mechanism follows the data and the question.** *You should see* a small corpus go into a cached prompt before any index is considered, and a table queried and not searched.",
+        "**A re-index removes what changed.** *You should see* the old chunks of a changed document gone, and the chunks of a removed document gone with it.",
+        "**Staleness is checked against the source.** *You should see* an old chunk listed, and nothing listed after a correct re-index.",
+        "**Recall over every question.** *You should see* a question with no results lower the figure."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Sections become chunks that carry their title and section and the version of their document"
+        ],
+        [
+          "`e1`",
+          "A long section splits at sentence ends under the word limit and every part keeps the prefix"
+        ],
+        [
+          "`e2`",
+          "A code outweighs a word and a word in no chunk matches nothing"
+        ],
+        [
+          "`e3`",
+          "A search for a reader never returns a chunk of a document that reader may not see, even with fewer matches than `k`"
+        ],
+        [
+          "`e4`",
+          "The mechanism follows the corpus size, then the data shape, then the query pattern"
+        ],
+        [
+          "`e5`",
+          "A reindex keeps unchanged documents, replaces changed ones, adds new ones and drops removed ones"
+        ],
+        [
+          "`e6`",
+          "Stale lists the chunks whose document changed or vanished"
+        ],
+        [
+          "`e7`",
+          "Recall counts every labelled question and a question with no results is a miss"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"A retrieval pipeline: chunks that carry their context, a search that respects access, rank fusion, a re-index that removes what changed, and recall over every question. See ../../statement.md.\"\"\"\nimport logging\nimport re\nfrom collections import namedtuple\n\nlog = logging.getLogger(__name__)\n\nChunk = namedtuple(\"Chunk\", \"id doc version text\")\nSTOP = {\"a\", \"an\", \"the\", \"is\", \"are\", \"can\", \"i\", \"what\", \"does\", \"do\", \"how\", \"my\", \"it\", \"of\", \"to\", \"for\", \"and\", \"or\", \"in\", \"when\", \"will\", \"be\", \"that\", \"this\", \"with\", \"by\", \"at\"}\n\n\ndef doc_version(text):\n    \"\"\"A cheap fingerprint of a document's text: when it changes, the document changed.\"\"\"\n    return sum(ord(c) for c in text) % 1000003\n\n\ndef tokens(text):\n    return [t for t in re.findall(r\"[a-z0-9]+(?:-[a-z0-9]+)*\", text.lower()) if t not in STOP]\n\n\ndef _chunk_text(title, name, part):\n    return f\"{title} > {name}. {part}\"\n\n\ndef _split_section(body, max_words):\n    parts, current = [], []\n    for sentence in re.split(r\"(?<=\\.) \", body):\n        if current and len(\" \".join(current + [sentence]).split()) > max_words:\n            parts.append(\" \".join(current))\n            current = []\n        current.append(sentence)\n    parts.append(\" \".join(current))\n    return parts\n\n\ndef chunk_sections(doc_id, text, max_words=30):\n    log.debug(\"chunk_sections input: %r\", text)\n    head, *sections = text.split(\"\\n## \")\n    title = head.removeprefix(\"# \")\n    version = doc_version(text)\n    chunks = []\n    for section in sections:\n        name, body = section.split(\"\\n\", 1)\n        parts = _split_section(body, max_words)\n        for n, part in enumerate(parts, 1):\n            suffix = \"\" if len(parts) == 1 else f\"#{n}\"\n            chunks.append(Chunk(f\"{doc_id}/{name}{suffix}\", doc_id, version, _chunk_text(title, name, part)))\n    return chunks\n\n\ndef _score(wanted, have):\n    return sum(3 if any(c.isdigit() for c in t) else 1 for t in wanted if t in have)\n\n\ndef _visible(chunk, allowed_docs):\n    return allowed_docs is None or chunk.doc in allowed_docs\n\n\ndef search(chunks, query, k=3, allowed_docs=None):\n    log.debug(\"search input: %r\", query)\n    wanted = set(tokens(query))\n    scored = []\n    for n, chunk in enumerate(chunks):\n        if not _visible(chunk, allowed_docs):\n            continue\n        score = _score(wanted, set(tokens(chunk.text)))\n        if score:\n            scored.append((-score, n, chunk.id))\n    return [chunk_id for _, _, chunk_id in sorted(scored)[:k]]\n\n\ndef choose_retrieval(corpus_tokens, shape, pattern):\n    if corpus_tokens < 200000:\n        return \"cached prompt\"\n    if shape == \"table\":\n        return \"structured query\"\n    if pattern == \"multi-hop\":\n        return \"agentic search\"\n    return {\"identifier\": \"keyword index\", \"paraphrase\": \"embedding index\"}.get(pattern, \"hybrid index\")\n\n\ndef _status(old_chunks, text):\n    if not old_chunks:\n        return \"added\"\n    return \"kept\" if old_chunks[0].version == doc_version(text) else \"replaced\"\n\n\ndef reindex(chunks, docs):\n    old = {}\n    for chunk in chunks:\n        old.setdefault(chunk.doc, []).append(chunk)\n    report = {\"added\": [], \"replaced\": [], \"removed\": [d for d in old if d not in docs], \"kept\": []}\n    result = []\n    for doc_id, text in docs.items():\n        status = _status(old.get(doc_id, []), text)\n        report[status].append(doc_id)\n        result += old[doc_id] if status == \"kept\" else chunk_sections(doc_id, text)\n    return result, report\n\n\ndef stale(chunks, docs):\n    return [c.id for c in chunks if c.doc not in docs or c.version != doc_version(docs[c.doc])]\n\n\ndef recall_at_k(results, relevant, k):\n    if not relevant:\n        return 0.0\n    hits = sum(1 for query, chunk_id in relevant.items() if chunk_id in results.get(query, [])[:k])\n    return round(hits / len(relevant), 2)\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom pipeline import chunk_sections, reindex, search\n\n# Two documents, split into chunks that carry their title and section.\nannual = \"# Annual plan\\n## Cancellation\\nYou can cancel within 14 days for a full refund.\"\nmonthly = \"# Monthly plan\\n## Cancellation\\nYou can cancel at any time.\"\nchunks = chunk_sections(\"annual\", annual) + chunk_sections(\"monthly\", monthly)\nfor chunk in chunks:\n    print(\"chunk:\", chunk.id, \"|\", chunk.text)\n\n# Search ranks the chunks that share the most (and the most specific) words with the question.\nprint(\"search:\", search(chunks, \"can I cancel within 14 days\", k=2))\nprint(\"search, annual only:\", search(chunks, \"cancel\", k=2, allowed_docs={\"annual\"}))\n\n# The annual document changes: reindex replaces its chunks and leaves the other alone.\nchanged = annual.replace(\"14 days\", \"30 days\")\nnew_chunks, report = reindex(chunks, {\"annual\": changed, \"monthly\": monthly})\nprint(\"reindex report:\", report)\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"A retrieval pipeline: chunks that carry their context, a search that respects access, rank fusion, a re-index that removes what changed, and recall over every question. See ../../statement.md.\"\"\"\nimport logging\nimport re\nfrom collections import namedtuple\n\nlog = logging.getLogger(__name__)\n\nChunk = namedtuple(\"Chunk\", \"id doc version text\")\nSTOP = {\"a\", \"an\", \"the\", \"is\", \"are\", \"can\", \"i\", \"what\", \"does\", \"do\", \"how\", \"my\", \"it\", \"of\", \"to\", \"for\", \"and\", \"or\", \"in\", \"when\", \"will\", \"be\", \"that\", \"this\", \"with\", \"by\", \"at\"}\n\n\ndef doc_version(text):\n    \"\"\"A cheap fingerprint of a document's text: when it changes, the document changed.\"\"\"\n    return sum(ord(c) for c in text) % 1000003\n\n\ndef tokens(text):\n    return [t for t in re.findall(r\"[a-z0-9]+(?:-[a-z0-9]+)*\", text.lower()) if t not in STOP]\n\n\ndef _chunk_text(title, name, part):\n    \"\"\"TODO 1 of 8 (unlocks m1): the text of one chunk.\n\n    Receives the document title, the section name and one part of the section's text. Returns the part with its context in front, as\n    \"<title> > <name>. <part>\", so a chunk still says where it came from.\n    Example: _chunk_text(\"Annual plan\", \"Cancellation\", \"You can cancel.\") -> \"Annual plan > Cancellation. You can cancel.\"\n    \"\"\"\n    return part\n\n\ndef _split_section(body, max_words):\n    \"\"\"TODO 2 of 8 (unlocks e1): the parts of a long section.\n\n    Receives the text of one section and the word limit. Splits the text after each sentence end (a full stop followed by a space) and fills parts\n    with whole sentences: a part is closed before the sentence that would push it over `max_words` words, and a single sentence longer than the limit\n    stays whole. Returns the parts as a list of strings (a short section is one part).\n    Example: \"Install it. Configure it. Restart it.\" with max_words 4 -> [\"Install it. Configure it.\", \"Restart it.\"]\n    \"\"\"\n    return [body]\n\n\ndef chunk_sections(doc_id, text, max_words=30):\n    log.debug(\"chunk_sections input: %r\", text)\n    head, *sections = text.split(\"\\n## \")\n    title = head.removeprefix(\"# \")\n    version = doc_version(text)\n    chunks = []\n    for section in sections:\n        name, body = section.split(\"\\n\", 1)\n        parts = _split_section(body, max_words)\n        for n, part in enumerate(parts, 1):\n            suffix = \"\" if len(parts) == 1 else f\"#{n}\"\n            chunks.append(Chunk(f\"{doc_id}/{name}{suffix}\", doc_id, version, _chunk_text(title, name, part)))\n    return chunks\n\n\ndef _score(wanted, have):\n    \"\"\"TODO 3 of 8 (unlocks e2): how well a chunk matches a query.\n\n    Receives the set of query words and the set of words of one chunk. Returns the sum, over the query words that the chunk has, of 3 for a code (a word that\n    contains a digit, such as E-7310) and 1 for any other word; 0 when the chunk has none of them.\n    Example: wanted {\"cancel\", \"e-7310\"}, have {\"cancel\", \"e-7310\", \"card\"} -> 4\n    \"\"\"\n    return 0\n\n\ndef _visible(chunk, allowed_docs):\n    \"\"\"TODO 4 of 8 (unlocks e3): may this reader see this chunk?\n\n    Receives a chunk and the set of document ids the reader may read, or None when the reader may read all of them. Returns True when the chunk's `doc` is allowed.\n    Example: _visible(chunk of \"annual\", {\"monthly\"}) -> False, _visible(chunk of \"annual\", None) -> True\n    \"\"\"\n    return True\n\n\ndef search(chunks, query, k=3, allowed_docs=None):\n    log.debug(\"search input: %r\", query)\n    wanted = set(tokens(query))\n    scored = []\n    for n, chunk in enumerate(chunks):\n        if not _visible(chunk, allowed_docs):\n            continue\n        score = _score(wanted, set(tokens(chunk.text)))\n        if score:\n            scored.append((-score, n, chunk.id))\n    return [chunk_id for _, _, chunk_id in sorted(scored)[:k]]\n\n\ndef choose_retrieval(corpus_tokens, shape, pattern):\n    \"\"\"TODO 5 of 8 (unlocks e4): the retrieval mechanism.\n\n    Receives the corpus size in tokens, the data shape (\"text\" or \"table\") and the query pattern. Decide in this order: under 200000 tokens \"cached prompt\";\n    a table \"structured query\"; a \"multi-hop\" pattern \"agentic search\"; then \"identifier\" gives \"keyword index\", \"paraphrase\" gives \"embedding index\" and any other pattern \"hybrid index\".\n    Example: choose_retrieval(2000000, \"text\", \"identifier\") -> \"keyword index\"\n    \"\"\"\n    return None\n\n\ndef _status(old_chunks, text):\n    \"\"\"TODO 6 of 8 (unlocks e5): what a re-index does with one document.\n\n    Receives the chunks the index already holds for the document (an empty list when it has none) and the document's current text. Returns \"added\" when\n    there are no chunks, \"kept\" when the version of the first chunk equals `doc_version(text)`, and \"replaced\" when it differs.\n    Example: no chunks -> \"added\"; chunks made from the same text -> \"kept\"\n    \"\"\"\n    return \"added\"\n\n\ndef reindex(chunks, docs):\n    old = {}\n    for chunk in chunks:\n        old.setdefault(chunk.doc, []).append(chunk)\n    report = {\"added\": [], \"replaced\": [], \"removed\": [d for d in old if d not in docs], \"kept\": []}\n    result = []\n    for doc_id, text in docs.items():\n        status = _status(old.get(doc_id, []), text)\n        report[status].append(doc_id)\n        result += old[doc_id] if status == \"kept\" else chunk_sections(doc_id, text)\n    return result, report\n\n\ndef stale(chunks, docs):\n    \"\"\"TODO 7 of 8 (unlocks e6): the chunks that no longer match their source.\n\n    Receives the chunks and a dict of the current documents (id to text). Returns the ids of the chunks, in order, whose document is gone or whose\n    version differs from `doc_version` of the current text.\n    Example: a chunk of a document that is no longer in `docs` is stale\n    \"\"\"\n    return None\n\n\ndef recall_at_k(results, relevant, k):\n    \"\"\"TODO 8 of 8 (unlocks e7): the share of questions answered in the first k results.\n\n    Receives `results` (question to the list of chunk ids returned) and `relevant` (every labelled question to the chunk id that answers it). Returns the\n    number of labelled questions whose relevant id is among the first k results, divided by the number of labelled questions, rounded to two decimals;\n    a question with no results counts as a miss, and 0.0 when there are no labelled questions.\n    Example: 2 of 3 questions hit -> 0.67\n    \"\"\"\n    return None\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom pipeline import chunk_sections, reindex, search\n\n# Two documents, split into chunks that carry their title and section.\nannual = \"# Annual plan\\n## Cancellation\\nYou can cancel within 14 days for a full refund.\"\nmonthly = \"# Monthly plan\\n## Cancellation\\nYou can cancel at any time.\"\nchunks = chunk_sections(\"annual\", annual) + chunk_sections(\"monthly\", monthly)\nfor chunk in chunks:\n    print(\"chunk:\", chunk.id, \"|\", chunk.text)\n\n# Search ranks the chunks that share the most (and the most specific) words with the question.\nprint(\"search:\", search(chunks, \"can I cancel within 14 days\", k=2))\nprint(\"search, annual only:\", search(chunks, \"cancel\", k=2, allowed_docs={\"annual\"}))\n\n# The annual document changes: reindex replaces its chunks and leaves the other alone.\nchanged = annual.replace(\"14 days\", \"30 days\")\nnew_chunks, report = reindex(chunks, {\"annual\": changed, \"monthly\": monthly})\nprint(\"reindex report:\", report)\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "ca46a8522e4f744e7e160dc95a0e719731a5a83c7836f26769d8a118217262cb",
+  "starting_code": "\"\"\"A retrieval pipeline: chunks that carry their context, a search that respects access, rank fusion, a re-index that removes what changed, and recall over every question. See ../../statement.md.\"\"\"\nimport logging\nimport re\nfrom collections import namedtuple\n\nlog = logging.getLogger(__name__)\n\nChunk = namedtuple(\"Chunk\", \"id doc version text\")\nSTOP = {\"a\", \"an\", \"the\", \"is\", \"are\", \"can\", \"i\", \"what\", \"does\", \"do\", \"how\", \"my\", \"it\", \"of\", \"to\", \"for\", \"and\", \"or\", \"in\", \"when\", \"will\", \"be\", \"that\", \"this\", \"with\", \"by\", \"at\"}\n\n\ndef doc_version(text):\n    \"\"\"A cheap fingerprint of a document's text: when it changes, the document changed.\"\"\"\n    return sum(ord(c) for c in text) % 1000003\n\n\ndef tokens(text):\n    return [t for t in re.findall(r\"[a-z0-9]+(?:-[a-z0-9]+)*\", text.lower()) if t not in STOP]\n\n\ndef _chunk_text(title, name, part):\n    \"\"\"TODO 1 of 8 (unlocks m1): the text of one chunk.\n\n    Receives the document title, the section name and one part of the section's text. Returns the part with its context in front, as\n    \"<title> > <name>. <part>\", so a chunk still says where it came from.\n    Example: _chunk_text(\"Annual plan\", \"Cancellation\", \"You can cancel.\") -> \"Annual plan > Cancellation. You can cancel.\"\n    \"\"\"\n    return part\n\n\ndef _split_section(body, max_words):\n    \"\"\"TODO 2 of 8 (unlocks e1): the parts of a long section.\n\n    Receives the text of one section and the word limit. Splits the text after each sentence end (a full stop followed by a space) and fills parts\n    with whole sentences: a part is closed before the sentence that would push it over `max_words` words, and a single sentence longer than the limit\n    stays whole. Returns the parts as a list of strings (a short section is one part).\n    Example: \"Install it. Configure it. Restart it.\" with max_words 4 -> [\"Install it. Configure it.\", \"Restart it.\"]\n    \"\"\"\n    return [body]\n\n\ndef chunk_sections(doc_id, text, max_words=30):\n    log.debug(\"chunk_sections input: %r\", text)\n    head, *sections = text.split(\"\\n## \")\n    title = head.removeprefix(\"# \")\n    version = doc_version(text)\n    chunks = []\n    for section in sections:\n        name, body = section.split(\"\\n\", 1)\n        parts = _split_section(body, max_words)\n        for n, part in enumerate(parts, 1):\n            suffix = \"\" if len(parts) == 1 else f\"#{n}\"\n            chunks.append(Chunk(f\"{doc_id}/{name}{suffix}\", doc_id, version, _chunk_text(title, name, part)))\n    return chunks\n\n\ndef _score(wanted, have):\n    \"\"\"TODO 3 of 8 (unlocks e2): how well a chunk matches a query.\n\n    Receives the set of query words and the set of words of one chunk. Returns the sum, over the query words that the chunk has, of 3 for a code (a word that\n    contains a digit, such as E-7310) and 1 for any other word; 0 when the chunk has none of them.\n    Example: wanted {\"cancel\", \"e-7310\"}, have {\"cancel\", \"e-7310\", \"card\"} -> 4\n    \"\"\"\n    return 0\n\n\ndef _visible(chunk, allowed_docs):\n    \"\"\"TODO 4 of 8 (unlocks e3): may this reader see this chunk?\n\n    Receives a chunk and the set of document ids the reader may read, or None when the reader may read all of them. Returns True when the chunk's `doc` is allowed.\n    Example: _visible(chunk of \"annual\", {\"monthly\"}) -> False, _visible(chunk of \"annual\", None) -> True\n    \"\"\"\n    return True\n\n\ndef search(chunks, query, k=3, allowed_docs=None):\n    log.debug(\"search input: %r\", query)\n    wanted = set(tokens(query))\n    scored = []\n    for n, chunk in enumerate(chunks):\n        if not _visible(chunk, allowed_docs):\n            continue\n        score = _score(wanted, set(tokens(chunk.text)))\n        if score:\n            scored.append((-score, n, chunk.id))\n    return [chunk_id for _, _, chunk_id in sorted(scored)[:k]]\n\n\ndef choose_retrieval(corpus_tokens, shape, pattern):\n    \"\"\"TODO 5 of 8 (unlocks e4): the retrieval mechanism.\n\n    Receives the corpus size in tokens, the data shape (\"text\" or \"table\") and the query pattern. Decide in this order: under 200000 tokens \"cached prompt\";\n    a table \"structured query\"; a \"multi-hop\" pattern \"agentic search\"; then \"identifier\" gives \"keyword index\", \"paraphrase\" gives \"embedding index\" and any other pattern \"hybrid index\".\n    Example: choose_retrieval(2000000, \"text\", \"identifier\") -> \"keyword index\"\n    \"\"\"\n    return None\n\n\ndef _status(old_chunks, text):\n    \"\"\"TODO 6 of 8 (unlocks e5): what a re-index does with one document.\n\n    Receives the chunks the index already holds for the document (an empty list when it has none) and the document's current text. Returns \"added\" when\n    there are no chunks, \"kept\" when the version of the first chunk equals `doc_version(text)`, and \"replaced\" when it differs.\n    Example: no chunks -> \"added\"; chunks made from the same text -> \"kept\"\n    \"\"\"\n    return \"added\"\n\n\ndef reindex(chunks, docs):\n    old = {}\n    for chunk in chunks:\n        old.setdefault(chunk.doc, []).append(chunk)\n    report = {\"added\": [], \"replaced\": [], \"removed\": [d for d in old if d not in docs], \"kept\": []}\n    result = []\n    for doc_id, text in docs.items():\n        status = _status(old.get(doc_id, []), text)\n        report[status].append(doc_id)\n        result += old[doc_id] if status == \"kept\" else chunk_sections(doc_id, text)\n    return result, report\n\n\ndef stale(chunks, docs):\n    \"\"\"TODO 7 of 8 (unlocks e6): the chunks that no longer match their source.\n\n    Receives the chunks and a dict of the current documents (id to text). Returns the ids of the chunks, in order, whose document is gone or whose\n    version differs from `doc_version` of the current text.\n    Example: a chunk of a document that is no longer in `docs` is stale\n    \"\"\"\n    return None\n\n\ndef recall_at_k(results, relevant, k):\n    \"\"\"TODO 8 of 8 (unlocks e7): the share of questions answered in the first k results.\n\n    Receives `results` (question to the list of chunk ids returned) and `relevant` (every labelled question to the chunk id that answers it). Returns the\n    number of labelled questions whose relevant id is among the first k results, divided by the number of labelled questions, rounded to two decimals;\n    a question with no results counts as a miss, and 0.0 when there are no labelled questions.\n    Example: 2 of 3 questions hit -> 0.67\n    \"\"\"\n    return None\n",
+  "exercise": {
+    "main_path": "practice/level-4/85-retrieval-pipelines-at-design-level/prose/unit-02/practice-1/pipeline.py",
+    "test_path": "practice/level-4/85-retrieval-pipelines-at-design-level/prose/unit-02/practice-1/test_pipeline.py",
+    "run_command": [
+      "python3",
+      "practice/level-4/85-retrieval-pipelines-at-design-level/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-4/85-retrieval-pipelines-at-design-level/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-4/85-retrieval-pipelines-at-design-level/prose/unit-02/practice-1/test_pipeline.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_sections_become_chunks_that_carry_their_title_and_section_and_the_version_of_their_document",
+        "kind": "main",
+        "says": "Sections become chunks that carry their title and section and the version of their document"
+      },
+      {
+        "id": "test_e1_a_long_section_splits_at_sentence_ends_under_the_word_limit_and_every_part_keeps_the_prefix",
+        "kind": "edge",
+        "says": "A long section splits at sentence ends under the word limit and every part keeps the prefix"
+      },
+      {
+        "id": "test_e2_a_code_outweighs_a_word_and_a_word_in_no_chunk_matches_nothing",
+        "kind": "edge",
+        "says": "A code outweighs a word and a word in no chunk matches nothing"
+      },
+      {
+        "id": "test_e3_a_search_for_a_reader_never_returns_a_chunk_of_a_document_that_reader_may_not_see",
+        "kind": "edge",
+        "says": "A search for a reader never returns a chunk of a document that reader may not see, even with fewer matches than k"
+      },
+      {
+        "id": "test_e4_the_mechanism_follows_the_corpus_size_then_the_data_shape_then_the_query_pattern",
+        "kind": "edge",
+        "says": "The mechanism follows the corpus size, then the data shape, then the query pattern"
+      },
+      {
+        "id": "test_e5_a_reindex_keeps_unchanged_documents_replaces_changed_ones_adds_new_ones_and_drops_removed_ones",
+        "kind": "edge",
+        "says": "A reindex keeps unchanged documents, replaces changed ones, adds new ones and drops removed ones"
+      },
+      {
+        "id": "test_e6_stale_lists_the_chunks_whose_document_changed_or_vanished",
+        "kind": "edge",
+        "says": "Stale lists the chunks whose document changed or vanished"
+      },
+      {
+        "id": "test_e7_recall_counts_every_labelled_question_and_a_question_with_no_results_is_a_miss",
+        "kind": "edge",
+        "says": "Recall counts every labelled question and a question with no results is a miss"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-4/85-retrieval-pipelines-at-design-level/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/85-retrieval-pipelines-at-design-level/02-freshness-measurement-and-the-practice.md",
+    "concepts": [
+      "the practice of Freshness after a re-index, measuring retrieval alone and the practice is solved"
+    ],
+    "files": [
+      "practice/level-4/85-retrieval-pipelines-at-design-level/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "retrieval-pipelines-at-design-level-u2"
+}

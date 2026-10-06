@@ -1,0 +1,302 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "42-evaluation"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: an eval harness (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an eval harness"
+    },
+    {
+      "type": "para",
+      "text": "An eval answers one question before you ship a change to a prompt, a model or a setting: did the application get better or worse, on the cases that matter? The harness is the code that asks it the same way every time. It runs each test case through your application, grades the output with a check that can be automated, adds the grades up by the dimension the success criteria name, and compares one run with the last so that a regression cannot hide behind a better average. In this practice you write that harness. Nothing here calls a model or the network: the application under test and the model-graded judge are plain functions that the tests pass in, so every run is exact."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "para",
+      "text": "The Java and Kotlin folders give you `Json` (parse text into maps, lists, strings, numbers, booleans and null, and write them back). Python and TypeScript have JSON built in. A case, a report and every result are plain data: a map with string keys in every language. Integers read from JSON are `Long` in Java and Kotlin; your code must accept any `Number` where a number is read."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working harness with nine small gaps cut out of it. The plumbing is written and correct: `judge_prompt`, the regex and JSON parsing steps of `grade`, the loop of `run_eval`, the report, and `meets` and `compare` around the helpers. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To see what a gap receives, log its input with the `log` line at the top of the file (`grade` already logs its output at debug level); a run shows the logged lines under the failing case. Write them in this order (the Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_norm` unlocks `e1`: the form in which an exact check compares two texts.",
+        "`_field_result` unlocks `e2`: the field check on a parsed JSON object, with the same typed value.",
+        "`_parse_score` unlocks `e3`: a judge reply that is exactly one digit from 1 to 5.",
+        "`_judged` unlocks `e3`: pass at the threshold, `below threshold` under it.",
+        "`_run_once` unlocks `e4`: a model that raises an error fails its own case and the run goes on.",
+        "`_outcome` unlocks `e7`: passed, flaky and reason from the runs of one case.",
+        "`_count_tags` unlocks `e5`: one case counted under each of its tags.",
+        "`_tag_failed` unlocks `e5`: whether a tag misses its minimum rate, including a tag no case carries.",
+        "`_changes` unlocks `e6`: regressions, fixed, added and removed cases of two runs."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole harness; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "Names are written in Python style; TypeScript uses camelCase (`runEval`). Java and Kotlin put the functions on `Harness` (`Harness.grade`, `Harness.runEval`, `Harness.meets`, `Harness.compare`) and take the model and the judge as functions from text to text (`Function<String, String>` in Java, `(String) -> String` in Kotlin; the judge may be null)."
+    },
+    {
+      "type": "para",
+      "text": "A **case** is `{\"id\", \"input\", \"tags\": [...] (optional), \"check\": {...}}`. The check is one of four kinds:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`{\"type\": \"exact\", \"expected\": text}`: the output equals the expected text after both are trimmed, every run of white space is one space, and both are lower-cased.",
+        "`{\"type\": \"regex\", \"pattern\": text}`: the pattern is found anywhere in the output (a search, not a whole-text match).",
+        "`{\"type\": \"json_field\", \"field\": name, \"equals\": value}`: the whole output, apart from surrounding white space, is one JSON object that has the field, and the field's value equals `equals` **with the same JSON type** (the string `\"3\"` is not the number `3`, and `1` is not `true`). The value is a string, an integer or a boolean.",
+        "`{\"type\": \"judge\", \"criterion\": text, \"threshold\": integer (optional, default 4)}`: a model-graded check."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`grade(case, output, judge)` returns `{\"passed\", \"reason\"}`. The reason is `ok` when the case passed; otherwise `mismatch` (exact, regex, or a field with another value), `not json` (the output is not a JSON object), `missing field`, `below threshold` or `ungradable`. A judge check also returns `\"score\"` (the integer, or null when there is none)."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "The judge is called with exactly this prompt, with the criterion and the output filled in, and its lines separated by `\\n`: `Rate this response on a scale of 1-5 for <criterion>:`, `<response><output></response>`, `1: Not at all <criterion>`, `5: Perfectly <criterion>`, `Output only the number.`",
+        "The judge's reply, once trimmed, must be one digit from 1 to 5. Anything else, a reply that raises an error, or no judge at all is `ungradable` and the case fails. A score at or above the threshold passes; a lower one is `below threshold`.",
+        "Exact, regex and json checks never call the judge."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`run_eval(cases, model, judge=None, repeats=1)` runs every case, in order, `repeats` times through `model(case[\"input\"])` and grades each output with `grade`. A run in which the model raises an error is a failed run with the reason `model error`; the other cases still run. A case **passes only if every one of its runs passes**; its reason is `ok`, or the reason of its first failed run. A case is **flaky** when some of its runs passed and some failed. The report is `{\"total\", \"passed\", \"pass_rate\", \"results\": [{\"id\", \"passed\", \"reason\", \"flaky\"}], \"by_tag\": {tag: {\"passed\", \"total\"}}, \"flaky\": [ids]}`: `pass_rate` is `passed / total` (0.0 with no cases), `by_tag` counts every case under each of its tags (tags in order of first appearance), and `flaky` lists the flaky case ids in order."
+    },
+    {
+      "type": "para",
+      "text": "`meets(report, criteria)` checks a report against success criteria and returns `{\"met\", \"failures\"}`. The criteria are `{\"min_pass_rate\": number, \"tags\": {tag: minimum rate}, \"max_flaky\": integer}`, and each key is optional. A criterion that is missing is not checked. Failures are listed in this order: `overall` when the pass rate is below `min_pass_rate`; `tag:<name>` for each tag, in the criteria's order, whose rate (`passed / total`) is below its minimum or that no case carries; `flaky` when more than `max_flaky` cases are flaky. A rate equal to its minimum passes. `met` is true when there are no failures."
+    },
+    {
+      "type": "para",
+      "text": "`compare(baseline, current)` compares two reports by case id and returns `{\"regressions\", \"fixed\", \"added\", \"removed\", \"pass_rate_delta\", \"ok\"}`: the ids that passed in the baseline and fail now, the ids that failed and pass now, the ids only in the current report, and the ids only in the baseline (each in report order, regressions, fixed and added in the current report's order and removed in the baseline's); the current pass rate minus the baseline's; and `ok`, which is true only when there are no regressions **and** no removed cases. A better average never excuses a regression, and a case that vanished from the set is not a pass."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A run grades each case with its own check (exact, regex), reports the pass rate and the order of the results, and an empty set has rate 0.0"
+        ],
+        [
+          "`e1`",
+          "An exact check ignores case and spacing only: a longer word, a different word and an empty output fail; a regex is a search, and an anchored one still fails on extra text"
+        ],
+        [
+          "`e2`",
+          "A json field check: a JSON object, the field present, the same typed value; a fenced block, prose around the JSON and an array are `not json`"
+        ],
+        [
+          "`e3`",
+          "A judge check: the exact prompt, a bare score at the threshold passes, a lower score fails, and a reply that is not a bare score, no judge or a judge that raises is `ungradable`"
+        ],
+        [
+          "`e4`",
+          "A model error fails its own case with `model error` and the run goes on"
+        ],
+        [
+          "`e5`",
+          "Tags report their own pass rates; `meets` judges the overall rate, each tag (a missing tag fails) and the flaky count, and a rate equal to its minimum passes"
+        ],
+        [
+          "`e6`",
+          "`compare` names regressions, fixes, added and removed cases; a better average with a regression is not ok; a removed case is not ok"
+        ],
+        [
+          "`e7`",
+          "Repeated runs: a case passes only if every run passes, a mixed case is flaky, a consistently failing case is not flaky, and the model is called once per run"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "private val log = System.getLogger(\"harness\")\n\n/** An eval harness. See ../../statement.md. */\nobject Harness {\n    private fun norm(text: String): String = text.trim().replace(Regex(\"\\\\s+\"), \" \").lowercase()\n\n    @Suppress(\"UNCHECKED_CAST\")\n    private fun asMap(o: Any?): Map<String, Any?> = o as Map<String, Any?>\n\n    private fun verdict(ok: Boolean, failReason: String): Map<String, Any?> = linkedMapOf(\"passed\" to ok, \"reason\" to if (ok) \"ok\" else failReason)\n\n    private fun ungradable(): Map<String, Any?> = linkedMapOf(\"passed\" to false, \"reason\" to \"ungradable\", \"score\" to null)\n\n    fun judgePrompt(criterion: String, output: String) =\n        \"Rate this response on a scale of 1-5 for $criterion:\\n<response>$output</response>\\n\" +\n            \"1: Not at all $criterion\\n5: Perfectly $criterion\\nOutput only the number.\"\n\n    private fun fieldResult(obj: Map<String, Any?>, check: Map<String, Any?>): Map<String, Any?> {\n        val field = check[\"field\"] as String\n        if (field !in obj) return verdict(false, \"missing field\")\n        return verdict(obj[field] == check[\"equals\"], \"mismatch\")\n    }\n\n    private fun parseScore(reply: String): Int? {\n        val text = reply.trim()\n        return if (Regex(\"[1-5]\").matches(text)) text.toInt() else null\n    }\n\n    private fun judged(score: Int, threshold: Long): Map<String, Any?> =\n        if (score >= threshold) linkedMapOf(\"passed\" to true, \"reason\" to \"ok\", \"score\" to score)\n        else linkedMapOf(\"passed\" to false, \"reason\" to \"below threshold\", \"score\" to score)\n\n    /** Grade one output against the case's check: {\"passed\", \"reason\"} (and \"score\" for a judge check). */\n    fun grade(c: Map<String, Any?>, output: String, judge: ((String) -> String)?): Map<String, Any?> {\n        log.log(System.Logger.Level.DEBUG, \"grade input: {0}\", output)\n        val check = asMap(c[\"check\"])\n        when (check[\"type\"] as String) {\n            \"exact\" -> return verdict(norm(output) == norm(check[\"expected\"] as String), \"mismatch\")\n            \"regex\" -> return verdict(Regex(check[\"pattern\"] as String).containsMatchIn(output), \"mismatch\")\n            \"json_field\" -> {\n                val data = try { Json.parse(output) } catch (e: RuntimeException) { return verdict(false, \"not json\") }\n                if (data !is Map<*, *>) return verdict(false, \"not json\")\n                val obj = asMap(data)\n                return fieldResult(obj, check)\n            }\n            \"judge\" -> {\n                if (judge == null) return ungradable()\n                val reply = try { judge(judgePrompt(check[\"criterion\"] as String, output)) } catch (e: RuntimeException) { return ungradable() }\n                val score = parseScore(reply) ?: return ungradable()\n                return judged(score, (check[\"threshold\"] as? Number)?.toLong() ?: 4L)\n            }\n            else -> return verdict(false, \"ungradable\")\n        }\n    }\n\n    private fun runOnce(model: (String) -> String, judge: ((String) -> String)?, c: Map<String, Any?>): Map<String, Any?> {\n        val output = try { model(c[\"input\"] as String) } catch (e: RuntimeException) { return linkedMapOf(\"passed\" to false, \"reason\" to \"model error\") }\n        return grade(c, output, judge)\n    }\n\n    private fun outcome(runs: List<Map<String, Any?>>): Triple<Boolean, Boolean, Any?> {\n        val passed = runs.all { it[\"passed\"] == true }\n        val mixed = runs.any { it[\"passed\"] == true } && !passed\n        return Triple(passed, mixed, if (passed) \"ok\" else runs.first { it[\"passed\"] != true }[\"reason\"])\n    }\n\n    private fun countTags(byTag: MutableMap<String, MutableMap<String, Any?>>, tags: List<*>, passed: Boolean) {\n        for (tag in tags) {\n            val row = byTag.getOrPut(tag as String) { linkedMapOf(\"passed\" to 0, \"total\" to 0) }\n            row[\"total\"] = (row[\"total\"] as Int) + 1\n            row[\"passed\"] = (row[\"passed\"] as Int) + if (passed) 1 else 0\n        }\n    }\n\n    /** Run every case `repeats` times through the model and grade it. A case passes only if every run passes. */\n    fun runEval(cases: List<Map<String, Any?>>, model: (String) -> String, judge: ((String) -> String)?, repeats: Int): Map<String, Any?> {\n        val results = mutableListOf<Any?>()\n        val byTag = linkedMapOf<String, MutableMap<String, Any?>>()\n        val flaky = mutableListOf<Any?>()\n        for (c in cases) {\n            val runs = (0 until repeats).map { runOnce(model, judge, c) }\n            val (passed, mixed, reason) = outcome(runs)\n            results.add(linkedMapOf(\"id\" to c[\"id\"], \"passed\" to passed, \"reason\" to reason, \"flaky\" to mixed))\n            if (mixed) flaky.add(c[\"id\"])\n            countTags(byTag, (c[\"tags\"] as? List<*>) ?: emptyList<Any?>(), passed)\n        }\n        val total = results.size\n        val passedCount = results.count { asMap(it)[\"passed\"] == true }\n        return linkedMapOf(\"total\" to total, \"passed\" to passedCount, \"pass_rate\" to if (total == 0) 0.0 else passedCount.toDouble() / total,\n            \"results\" to results, \"by_tag\" to byTag, \"flaky\" to flaky)\n    }\n\n    private fun tagFailed(row: Map<String, Any?>?, minimum: Double): Boolean {\n        val total = (row?.get(\"total\") as? Number)?.toDouble() ?: 0.0\n        return row == null || total == 0.0 || (row[\"passed\"] as Number).toDouble() / total < minimum\n    }\n\n    /** Compare a report with success criteria: min_pass_rate, tags {tag: minimum rate}, max_flaky. */\n    fun meets(report: Map<String, Any?>, criteria: Map<String, Any?>): Map<String, Any?> {\n        val failures = mutableListOf<Any?>()\n        val min = criteria[\"min_pass_rate\"] as? Number\n        if (min != null && (report[\"pass_rate\"] as Number).toDouble() < min.toDouble()) failures.add(\"overall\")\n        val byTag = asMap(report[\"by_tag\"])\n        for ((tag, minimum) in (criteria[\"tags\"] as? Map<*, *>) ?: emptyMap<Any?, Any?>()) {\n            if (tagFailed(byTag[tag as String]?.let { asMap(it) }, (minimum as Number).toDouble())) failures.add(\"tag:$tag\")\n        }\n        val maxFlaky = criteria[\"max_flaky\"] as? Number\n        if (maxFlaky != null && (report[\"flaky\"] as List<*>).size > maxFlaky.toLong()) failures.add(\"flaky\")\n        return linkedMapOf(\"met\" to failures.isEmpty(), \"failures\" to failures)\n    }\n\n    private fun outcomes(report: Map<String, Any?>): Map<String, Boolean> =\n        (report[\"results\"] as List<*>).associate { asMap(it)[\"id\"] as String to (asMap(it)[\"passed\"] == true) }\n\n    private fun changes(before: Map<String, Boolean>, now: Map<String, Boolean>): List<List<String>> {\n        val regressions = now.keys.filter { before[it] == true && now[it] == false }\n        val fixed = now.keys.filter { before[it] == false && now[it] == true }\n        val added = now.keys.filter { it !in before }\n        val removed = before.keys.filter { it !in now }\n        return listOf(regressions, fixed, added, removed)\n    }\n\n    /** What changed between two reports: regressions, fixes, added and removed cases, the pass-rate change. */\n    fun compare(baseline: Map<String, Any?>, current: Map<String, Any?>): Map<String, Any?> {\n        val before = outcomes(baseline)\n        val now = outcomes(current)\n        val (regressions, fixed, added, removed) = changes(before, now)\n        val delta = (current[\"pass_rate\"] as Number).toDouble() - (baseline[\"pass_rate\"] as Number).toDouble()\n        return linkedMapOf(\"regressions\" to regressions, \"fixed\" to fixed, \"added\" to added, \"removed\" to removed,\n            \"pass_rate_delta\" to delta, \"ok\" to (regressions.isEmpty() && removed.isEmpty()))\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // Four test cases, each with its own automated check, like the first main test case.\n    @Suppress(\"UNCHECKED_CAST\")\n    val cases = Json.parse(\"\"\"\n        [{\"id\":\"c1\",\"input\":\"I love it\",\"tags\":[\"core\"],\"check\":{\"type\":\"exact\",\"expected\":\"positive\"}},\n         {\"id\":\"c2\",\"input\":\"awful\",\"tags\":[\"core\"],\"check\":{\"type\":\"exact\",\"expected\":\"negative\"}},\n         {\"id\":\"c3\",\"input\":\"order 7\",\"tags\":[\"extract\"],\"check\":{\"type\":\"regex\",\"pattern\":\"ORD-\\\\d{4}\"}},\n         {\"id\":\"c4\",\"input\":\"meh\",\"tags\":[\"core\",\"edge\"],\"check\":{\"type\":\"exact\",\"expected\":\"neutral\"}}]\"\"\") as List<Map<String, Any?>>\n    val answers = mapOf(\"I love it\" to \"positive\", \"awful\" to \"negative\", \"order 7\" to \"The order is ORD-0007.\", \"meh\" to \"positive\")\n\n    // The application under test is a plain function: here it just looks the answer up.\n    val report = Harness.runEval(cases, { text -> answers.getValue(text) }, null, 1)\n\n    println(\"passed: ${report[\"passed\"]} of ${report[\"total\"]} | pass rate: ${report[\"pass_rate\"]}\")\n    for (result in report[\"results\"] as? List<*> ?: emptyList<Any?>()) {\n        result as Map<*, *>\n        println(\"  ${result[\"id\"]} ${if (result[\"passed\"] == true) \"passed\" else \"failed\"} - ${result[\"reason\"]}\")\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "private val log = System.getLogger(\"harness\")\n\n/** An eval harness. See ../../statement.md. */\nobject Harness {\n    private fun norm(text: String): String {\n        // TODO 1 of 9 (unlocks e1): the form two texts are compared in for an exact check.\n        // Receives a text and returns it trimmed, every run of white space made one space, and lower-cased. Nothing else changes.\n        // Example: norm(\"  Paris   FRANCE \") -> \"paris france\"\n        return text\n    }\n\n    @Suppress(\"UNCHECKED_CAST\")\n    private fun asMap(o: Any?): Map<String, Any?> = o as Map<String, Any?>\n\n    private fun verdict(ok: Boolean, failReason: String): Map<String, Any?> = linkedMapOf(\"passed\" to ok, \"reason\" to if (ok) \"ok\" else failReason)\n\n    private fun ungradable(): Map<String, Any?> = linkedMapOf(\"passed\" to false, \"reason\" to \"ungradable\", \"score\" to null)\n\n    fun judgePrompt(criterion: String, output: String) =\n        \"Rate this response on a scale of 1-5 for $criterion:\\n<response>$output</response>\\n\" +\n            \"1: Not at all $criterion\\n5: Perfectly $criterion\\nOutput only the number.\"\n\n    private fun fieldResult(obj: Map<String, Any?>, check: Map<String, Any?>): Map<String, Any?> {\n        // TODO 2 of 9 (unlocks e2): grade a parsed JSON object against a json_field check.\n        // Receives the parsed object and the check {field, equals}. Returns `verdict(passed, reason)`: \"missing field\" when the field is\n        // absent; \"ok\" when the value equals `equals` with the same JSON type (== on the parsed values does that); otherwise \"mismatch\".\n        // Example: {\"n\": \"3\"} against equals 3 -> {passed=false, reason=mismatch}\n        return verdict(false, \"mismatch\")\n    }\n\n    private fun parseScore(reply: String): Int? {\n        // TODO 3 of 9 (unlocks e3): read the judge's reply as a score.\n        // Receives the reply. Returns the number when the trimmed reply is exactly one digit from 1 to 5, else null.\n        // Example: parseScore(\" 4 \") -> 4, parseScore(\"I give it a 4\") -> null\n        return null\n    }\n\n    private fun judged(score: Int, threshold: Long): Map<String, Any?> {\n        // TODO 4 of 9 (unlocks e3): the verdict for a judge score.\n        // Receives the score and the threshold. Returns a map {passed, reason, score}: \"ok\" at or above the threshold, else \"below threshold\".\n        // Example: judged(4, 4) -> {passed=true, reason=ok, score=4}\n        return linkedMapOf(\"passed\" to false, \"reason\" to \"below threshold\", \"score\" to score)\n    }\n\n    /** Grade one output against the case's check: {\"passed\", \"reason\"} (and \"score\" for a judge check). */\n    fun grade(c: Map<String, Any?>, output: String, judge: ((String) -> String)?): Map<String, Any?> {\n        log.log(System.Logger.Level.DEBUG, \"grade input: {0}\", output)\n        val check = asMap(c[\"check\"])\n        when (check[\"type\"] as String) {\n            \"exact\" -> return verdict(norm(output) == norm(check[\"expected\"] as String), \"mismatch\")\n            \"regex\" -> return verdict(Regex(check[\"pattern\"] as String).containsMatchIn(output), \"mismatch\")\n            \"json_field\" -> {\n                val data = try { Json.parse(output) } catch (e: RuntimeException) { return verdict(false, \"not json\") }\n                if (data !is Map<*, *>) return verdict(false, \"not json\")\n                val obj = asMap(data)\n                return fieldResult(obj, check)\n            }\n            \"judge\" -> {\n                if (judge == null) return ungradable()\n                val reply = try { judge(judgePrompt(check[\"criterion\"] as String, output)) } catch (e: RuntimeException) { return ungradable() }\n                val score = parseScore(reply) ?: return ungradable()\n                return judged(score, (check[\"threshold\"] as? Number)?.toLong() ?: 4L)\n            }\n            else -> return verdict(false, \"ungradable\")\n        }\n    }\n\n    private fun runOnce(model: (String) -> String, judge: ((String) -> String)?, c: Map<String, Any?>): Map<String, Any?> {\n        // TODO 5 of 9 (unlocks e4): one run of one case.\n        // Receives the model, the judge and the case. Returns the verdict of `grade` for the model's output; when the model throws, the\n        // verdict is {passed=false, reason=model error} and nothing is thrown. Example: a model that throws -> {passed=false, reason=model error}\n        return linkedMapOf(\"passed\" to false, \"reason\" to \"model error\")\n    }\n\n    private fun outcome(runs: List<Map<String, Any?>>): Triple<Boolean, Boolean, Any?> {\n        // TODO 6 of 9 (unlocks e7): combine the runs of one case.\n        // Receives the verdicts of its runs. Returns Triple(passed, mixed, reason): passed only if every run passed; mixed (flaky) when\n        // some passed and some failed; the reason is \"ok\", or the reason of the first failed run.\n        // Example: [ok, mismatch] -> Triple(false, true, \"mismatch\")\n        return Triple(false, false, \"mismatch\")\n    }\n\n    private fun countTags(byTag: MutableMap<String, MutableMap<String, Any?>>, tags: List<*>, passed: Boolean) {\n        // TODO 7 of 9 (unlocks e5): count one case under each of its tags.\n        // Receives the map `byTag` (changed in place), the case's tags and whether it passed. For every tag, make a row\n        // {passed=0, total=0} when there is none (getOrPut), then `total` goes up by one and `passed` by one when the case passed.\n        // Example: tags [\"a\"], passed -> byTag[\"a\"] is {passed=1, total=1}\n    }\n\n    /** Run every case `repeats` times through the model and grade it. A case passes only if every run passes. */\n    fun runEval(cases: List<Map<String, Any?>>, model: (String) -> String, judge: ((String) -> String)?, repeats: Int): Map<String, Any?> {\n        val results = mutableListOf<Any?>()\n        val byTag = linkedMapOf<String, MutableMap<String, Any?>>()\n        val flaky = mutableListOf<Any?>()\n        for (c in cases) {\n            val runs = (0 until repeats).map { runOnce(model, judge, c) }\n            val (passed, mixed, reason) = outcome(runs)\n            results.add(linkedMapOf(\"id\" to c[\"id\"], \"passed\" to passed, \"reason\" to reason, \"flaky\" to mixed))\n            if (mixed) flaky.add(c[\"id\"])\n            countTags(byTag, (c[\"tags\"] as? List<*>) ?: emptyList<Any?>(), passed)\n        }\n        val total = results.size\n        val passedCount = results.count { asMap(it)[\"passed\"] == true }\n        return linkedMapOf(\"total\" to total, \"passed\" to passedCount, \"pass_rate\" to if (total == 0) 0.0 else passedCount.toDouble() / total,\n            \"results\" to results, \"by_tag\" to byTag, \"flaky\" to flaky)\n    }\n\n    private fun tagFailed(row: Map<String, Any?>?, minimum: Double): Boolean {\n        // TODO 8 of 9 (unlocks e5): does one tag fail its minimum rate?\n        // Receives the tag's row {passed, total} or null (no case carries the tag) and the minimum rate. Returns true for null, an empty\n        // row, or a rate below the minimum; a rate equal to the minimum is fine. Example: ({passed=1, total=2}, 0.5) -> false\n        return false\n    }\n\n    /** Compare a report with success criteria: min_pass_rate, tags {tag: minimum rate}, max_flaky. */\n    fun meets(report: Map<String, Any?>, criteria: Map<String, Any?>): Map<String, Any?> {\n        val failures = mutableListOf<Any?>()\n        val min = criteria[\"min_pass_rate\"] as? Number\n        if (min != null && (report[\"pass_rate\"] as Number).toDouble() < min.toDouble()) failures.add(\"overall\")\n        val byTag = asMap(report[\"by_tag\"])\n        for ((tag, minimum) in (criteria[\"tags\"] as? Map<*, *>) ?: emptyMap<Any?, Any?>()) {\n            if (tagFailed(byTag[tag as String]?.let { asMap(it) }, (minimum as Number).toDouble())) failures.add(\"tag:$tag\")\n        }\n        val maxFlaky = criteria[\"max_flaky\"] as? Number\n        if (maxFlaky != null && (report[\"flaky\"] as List<*>).size > maxFlaky.toLong()) failures.add(\"flaky\")\n        return linkedMapOf(\"met\" to failures.isEmpty(), \"failures\" to failures)\n    }\n\n    private fun outcomes(report: Map<String, Any?>): Map<String, Boolean> =\n        (report[\"results\"] as List<*>).associate { asMap(it)[\"id\"] as String to (asMap(it)[\"passed\"] == true) }\n\n    private fun changes(before: Map<String, Boolean>, now: Map<String, Boolean>): List<List<String>> {\n        // TODO 9 of 9 (unlocks e6): what changed between two runs.\n        // Receives two maps {case id -> passed}, the baseline and the current run. Returns a list of four id lists: regressions (passed\n        // before, fails now), fixed (failed before, passes now), added (only in the current run), removed (only in the baseline). The\n        // first three follow the current order, removed the baseline's. Example: before {a=true}, now {a=false, b=true} -> [[a], [], [b], []]\n        return listOf(emptyList(), emptyList(), emptyList(), emptyList())\n    }\n\n    /** What changed between two reports: regressions, fixes, added and removed cases, the pass-rate change. */\n    fun compare(baseline: Map<String, Any?>, current: Map<String, Any?>): Map<String, Any?> {\n        val before = outcomes(baseline)\n        val now = outcomes(current)\n        val (regressions, fixed, added, removed) = changes(before, now)\n        val delta = (current[\"pass_rate\"] as Number).toDouble() - (baseline[\"pass_rate\"] as Number).toDouble()\n        return linkedMapOf(\"regressions\" to regressions, \"fixed\" to fixed, \"added\" to added, \"removed\" to removed,\n            \"pass_rate_delta\" to delta, \"ok\" to (regressions.isEmpty() && removed.isEmpty()))\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // Four test cases, each with its own automated check, like the first main test case.\n    @Suppress(\"UNCHECKED_CAST\")\n    val cases = Json.parse(\"\"\"\n        [{\"id\":\"c1\",\"input\":\"I love it\",\"tags\":[\"core\"],\"check\":{\"type\":\"exact\",\"expected\":\"positive\"}},\n         {\"id\":\"c2\",\"input\":\"awful\",\"tags\":[\"core\"],\"check\":{\"type\":\"exact\",\"expected\":\"negative\"}},\n         {\"id\":\"c3\",\"input\":\"order 7\",\"tags\":[\"extract\"],\"check\":{\"type\":\"regex\",\"pattern\":\"ORD-\\\\d{4}\"}},\n         {\"id\":\"c4\",\"input\":\"meh\",\"tags\":[\"core\",\"edge\"],\"check\":{\"type\":\"exact\",\"expected\":\"neutral\"}}]\"\"\") as List<Map<String, Any?>>\n    val answers = mapOf(\"I love it\" to \"positive\", \"awful\" to \"negative\", \"order 7\" to \"The order is ORD-0007.\", \"meh\" to \"positive\")\n\n    // The application under test is a plain function: here it just looks the answer up.\n    val report = Harness.runEval(cases, { text -> answers.getValue(text) }, null, 1)\n\n    println(\"passed: ${report[\"passed\"]} of ${report[\"total\"]} | pass rate: ${report[\"pass_rate\"]}\")\n    for (result in report[\"results\"] as? List<*> ?: emptyList<Any?>()) {\n        result as Map<*, *>\n        println(\"  ${result[\"id\"]} ${if (result[\"passed\"] == true) \"passed\" else \"failed\"} - ${result[\"reason\"]}\")\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 11,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "45302e0c0fd1d270f166342d8eea92f824104902180bc48a5095a41491c5ad26",
+  "starting_code": "private val log = System.getLogger(\"harness\")\n\n/** An eval harness. See ../../statement.md. */\nobject Harness {\n    private fun norm(text: String): String {\n        // TODO 1 of 9 (unlocks e1): the form two texts are compared in for an exact check.\n        // Receives a text and returns it trimmed, every run of white space made one space, and lower-cased. Nothing else changes.\n        // Example: norm(\"  Paris   FRANCE \") -> \"paris france\"\n        return text\n    }\n\n    @Suppress(\"UNCHECKED_CAST\")\n    private fun asMap(o: Any?): Map<String, Any?> = o as Map<String, Any?>\n\n    private fun verdict(ok: Boolean, failReason: String): Map<String, Any?> = linkedMapOf(\"passed\" to ok, \"reason\" to if (ok) \"ok\" else failReason)\n\n    private fun ungradable(): Map<String, Any?> = linkedMapOf(\"passed\" to false, \"reason\" to \"ungradable\", \"score\" to null)\n\n    fun judgePrompt(criterion: String, output: String) =\n        \"Rate this response on a scale of 1-5 for $criterion:\\n<response>$output</response>\\n\" +\n            \"1: Not at all $criterion\\n5: Perfectly $criterion\\nOutput only the number.\"\n\n    private fun fieldResult(obj: Map<String, Any?>, check: Map<String, Any?>): Map<String, Any?> {\n        // TODO 2 of 9 (unlocks e2): grade a parsed JSON object against a json_field check.\n        // Receives the parsed object and the check {field, equals}. Returns `verdict(passed, reason)`: \"missing field\" when the field is\n        // absent; \"ok\" when the value equals `equals` with the same JSON type (== on the parsed values does that); otherwise \"mismatch\".\n        // Example: {\"n\": \"3\"} against equals 3 -> {passed=false, reason=mismatch}\n        return verdict(false, \"mismatch\")\n    }\n\n    private fun parseScore(reply: String): Int? {\n        // TODO 3 of 9 (unlocks e3): read the judge's reply as a score.\n        // Receives the reply. Returns the number when the trimmed reply is exactly one digit from 1 to 5, else null.\n        // Example: parseScore(\" 4 \") -> 4, parseScore(\"I give it a 4\") -> null\n        return null\n    }\n\n    private fun judged(score: Int, threshold: Long): Map<String, Any?> {\n        // TODO 4 of 9 (unlocks e3): the verdict for a judge score.\n        // Receives the score and the threshold. Returns a map {passed, reason, score}: \"ok\" at or above the threshold, else \"below threshold\".\n        // Example: judged(4, 4) -> {passed=true, reason=ok, score=4}\n        return linkedMapOf(\"passed\" to false, \"reason\" to \"below threshold\", \"score\" to score)\n    }\n\n    /** Grade one output against the case's check: {\"passed\", \"reason\"} (and \"score\" for a judge check). */\n    fun grade(c: Map<String, Any?>, output: String, judge: ((String) -> String)?): Map<String, Any?> {\n        log.log(System.Logger.Level.DEBUG, \"grade input: {0}\", output)\n        val check = asMap(c[\"check\"])\n        when (check[\"type\"] as String) {\n            \"exact\" -> return verdict(norm(output) == norm(check[\"expected\"] as String), \"mismatch\")\n            \"regex\" -> return verdict(Regex(check[\"pattern\"] as String).containsMatchIn(output), \"mismatch\")\n            \"json_field\" -> {\n                val data = try { Json.parse(output) } catch (e: RuntimeException) { return verdict(false, \"not json\") }\n                if (data !is Map<*, *>) return verdict(false, \"not json\")\n                val obj = asMap(data)\n                return fieldResult(obj, check)\n            }\n            \"judge\" -> {\n                if (judge == null) return ungradable()\n                val reply = try { judge(judgePrompt(check[\"criterion\"] as String, output)) } catch (e: RuntimeException) { return ungradable() }\n                val score = parseScore(reply) ?: return ungradable()\n                return judged(score, (check[\"threshold\"] as? Number)?.toLong() ?: 4L)\n            }\n            else -> return verdict(false, \"ungradable\")\n        }\n    }\n\n    private fun runOnce(model: (String) -> String, judge: ((String) -> String)?, c: Map<String, Any?>): Map<String, Any?> {\n        // TODO 5 of 9 (unlocks e4): one run of one case.\n        // Receives the model, the judge and the case. Returns the verdict of `grade` for the model's output; when the model throws, the\n        // verdict is {passed=false, reason=model error} and nothing is thrown. Example: a model that throws -> {passed=false, reason=model error}\n        return linkedMapOf(\"passed\" to false, \"reason\" to \"model error\")\n    }\n\n    private fun outcome(runs: List<Map<String, Any?>>): Triple<Boolean, Boolean, Any?> {\n        // TODO 6 of 9 (unlocks e7): combine the runs of one case.\n        // Receives the verdicts of its runs. Returns Triple(passed, mixed, reason): passed only if every run passed; mixed (flaky) when\n        // some passed and some failed; the reason is \"ok\", or the reason of the first failed run.\n        // Example: [ok, mismatch] -> Triple(false, true, \"mismatch\")\n        return Triple(false, false, \"mismatch\")\n    }\n\n    private fun countTags(byTag: MutableMap<String, MutableMap<String, Any?>>, tags: List<*>, passed: Boolean) {\n        // TODO 7 of 9 (unlocks e5): count one case under each of its tags.\n        // Receives the map `byTag` (changed in place), the case's tags and whether it passed. For every tag, make a row\n        // {passed=0, total=0} when there is none (getOrPut), then `total` goes up by one and `passed` by one when the case passed.\n        // Example: tags [\"a\"], passed -> byTag[\"a\"] is {passed=1, total=1}\n    }\n\n    /** Run every case `repeats` times through the model and grade it. A case passes only if every run passes. */\n    fun runEval(cases: List<Map<String, Any?>>, model: (String) -> String, judge: ((String) -> String)?, repeats: Int): Map<String, Any?> {\n        val results = mutableListOf<Any?>()\n        val byTag = linkedMapOf<String, MutableMap<String, Any?>>()\n        val flaky = mutableListOf<Any?>()\n        for (c in cases) {\n            val runs = (0 until repeats).map { runOnce(model, judge, c) }\n            val (passed, mixed, reason) = outcome(runs)\n            results.add(linkedMapOf(\"id\" to c[\"id\"], \"passed\" to passed, \"reason\" to reason, \"flaky\" to mixed))\n            if (mixed) flaky.add(c[\"id\"])\n            countTags(byTag, (c[\"tags\"] as? List<*>) ?: emptyList<Any?>(), passed)\n        }\n        val total = results.size\n        val passedCount = results.count { asMap(it)[\"passed\"] == true }\n        return linkedMapOf(\"total\" to total, \"passed\" to passedCount, \"pass_rate\" to if (total == 0) 0.0 else passedCount.toDouble() / total,\n            \"results\" to results, \"by_tag\" to byTag, \"flaky\" to flaky)\n    }\n\n    private fun tagFailed(row: Map<String, Any?>?, minimum: Double): Boolean {\n        // TODO 8 of 9 (unlocks e5): does one tag fail its minimum rate?\n        // Receives the tag's row {passed, total} or null (no case carries the tag) and the minimum rate. Returns true for null, an empty\n        // row, or a rate below the minimum; a rate equal to the minimum is fine. Example: ({passed=1, total=2}, 0.5) -> false\n        return false\n    }\n\n    /** Compare a report with success criteria: min_pass_rate, tags {tag: minimum rate}, max_flaky. */\n    fun meets(report: Map<String, Any?>, criteria: Map<String, Any?>): Map<String, Any?> {\n        val failures = mutableListOf<Any?>()\n        val min = criteria[\"min_pass_rate\"] as? Number\n        if (min != null && (report[\"pass_rate\"] as Number).toDouble() < min.toDouble()) failures.add(\"overall\")\n        val byTag = asMap(report[\"by_tag\"])\n        for ((tag, minimum) in (criteria[\"tags\"] as? Map<*, *>) ?: emptyMap<Any?, Any?>()) {\n            if (tagFailed(byTag[tag as String]?.let { asMap(it) }, (minimum as Number).toDouble())) failures.add(\"tag:$tag\")\n        }\n        val maxFlaky = criteria[\"max_flaky\"] as? Number\n        if (maxFlaky != null && (report[\"flaky\"] as List<*>).size > maxFlaky.toLong()) failures.add(\"flaky\")\n        return linkedMapOf(\"met\" to failures.isEmpty(), \"failures\" to failures)\n    }\n\n    private fun outcomes(report: Map<String, Any?>): Map<String, Boolean> =\n        (report[\"results\"] as List<*>).associate { asMap(it)[\"id\"] as String to (asMap(it)[\"passed\"] == true) }\n\n    private fun changes(before: Map<String, Boolean>, now: Map<String, Boolean>): List<List<String>> {\n        // TODO 9 of 9 (unlocks e6): what changed between two runs.\n        // Receives two maps {case id -> passed}, the baseline and the current run. Returns a list of four id lists: regressions (passed\n        // before, fails now), fixed (failed before, passes now), added (only in the current run), removed (only in the baseline). The\n        // first three follow the current order, removed the baseline's. Example: before {a=true}, now {a=false, b=true} -> [[a], [], [b], []]\n        return listOf(emptyList(), emptyList(), emptyList(), emptyList())\n    }\n\n    /** What changed between two reports: regressions, fixes, added and removed cases, the pass-rate change. */\n    fun compare(baseline: Map<String, Any?>, current: Map<String, Any?>): Map<String, Any?> {\n        val before = outcomes(baseline)\n        val now = outcomes(current)\n        val (regressions, fixed, added, removed) = changes(before, now)\n        val delta = (current[\"pass_rate\"] as Number).toDouble() - (baseline[\"pass_rate\"] as Number).toDouble()\n        return linkedMapOf(\"regressions\" to regressions, \"fixed\" to fixed, \"added\" to added, \"removed\" to removed,\n            \"pass_rate_delta\" to delta, \"ok\" to (regressions.isEmpty() && removed.isEmpty()))\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/42-evaluation/prose/unit-03/practice-4/src/main/kotlin/Harness.kt",
+    "test_path": "practice/level-2/42-evaluation/prose/unit-03/practice-4/src/test/kotlin/HarnessTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/42-evaluation/prose/unit-03/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/42-evaluation/prose/unit-03/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_aRunGradesEveryCaseWithItsOwnCheckAndReportsThePassRate()",
+        "kind": "main",
+        "says": "A run grades each case with its own check (exact, regex), reports the pass rate and the order of the results, and an empty set has rate 0.0"
+      },
+      {
+        "id": "e1_anExactCheckIgnoresCaseAndSpacingButNothingElse()",
+        "kind": "edge",
+        "says": "An exact check ignores case and spacing only: a longer word, a different word and an empty output fail; a regex is a search, and an anchored one still fails on extra text"
+      },
+      {
+        "id": "e2_aJsonFieldCheckNeedsAJsonObjectWithTheFieldAndTheSameTypedValue()",
+        "kind": "edge",
+        "says": "A json field check: a JSON object, the field present, the same typed value; a fenced block, prose around the JSON and an array are not json"
+      },
+      {
+        "id": "e3_aJudgeCheckSendsTheRubricPromptAndAcceptsOnlyABareScoreAtTheThreshold()",
+        "kind": "edge",
+        "says": "A judge check: the exact prompt, a bare score at the threshold passes, a lower score fails, and a reply that is not a bare score, no judge or a judge that raises is ungradable"
+      },
+      {
+        "id": "e4_aModelThatFailsOnOneCaseDoesNotStopTheRun()",
+        "kind": "edge",
+        "says": "A model error fails its own case with model error and the run goes on"
+      },
+      {
+        "id": "e5_tagsReportTheirOwnRatesAndSuccessCriteriaJudgeEachDimension()",
+        "kind": "edge",
+        "says": "Tags report their own pass rates; meets judges the overall rate, each tag (a missing tag fails) and the flaky count, and a rate equal to its minimum passes"
+      },
+      {
+        "id": "e6_aRegressionRunNamesWhatBrokeWhatWasFixedAndWhatWentMissing()",
+        "kind": "edge",
+        "says": "compare names regressions, fixes, added and removed cases; a better average with a regression is not ok; a removed case is not ok"
+      },
+      {
+        "id": "e7_repeatedRunsExposeFlakyCasesAndACasePassesOnlyIfEveryRunDoes()",
+        "kind": "edge",
+        "says": "Repeated runs: a case passes only if every run passes, a mixed case is flaky, a consistently failing case is not flaky, and the model is called once per run"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/42-evaluation/prose/unit-03/practice-4/target/test-results/test"
+    },
+    "origin": "course/42-evaluation/03-refining-against-a-set-and-regression-runs.md",
+    "concepts": [
+      "the practice of Refining against an eval set, regression runs and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/42-evaluation/prose/unit-03/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "evaluation-u3"
+}

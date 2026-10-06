@@ -1,0 +1,15 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "pipeline.py",
+      "old": "        if not _visible(chunk, allowed_docs):\n            continue\n",
+      "new": ""
+    },
+    {
+      "file": "pipeline.py",
+      "old": "    return [chunk_id for _, _, chunk_id in sorted(scored)[:k]]",
+      "new": "    allowed = {c.id for c in chunks if _visible(c, allowed_docs)}\n    return [chunk_id for _, _, chunk_id in sorted(scored)[:k] if chunk_id in allowed]"
+    }
+  ]
+}

@@ -1,0 +1,428 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "60-claude-code-in-ci"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: choose how a job runs unattended or on a rhythm (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: choose how a job runs unattended or on a rhythm"
+    },
+    {
+      "type": "para",
+      "text": "A team wants Claude Code to watch a pull request, check a deployment every few minutes, triage an alert at night and review every merge. Each of these can be started in at least three ways, and each way has a limit that decides it: a loop dies with its session, a routine never runs more often than hourly, a headless run has nobody to answer a prompt. In this practice you write the decision function of the page \"Running on a rhythm\": a job described by a few features goes in, and the mechanism that fits, a reason code and the interval in minutes come out. The model is not called, no schedule is created and nothing is installed. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Python has `choose(job)` in `rhythm_plan.py`; TypeScript has `choose` in `rhythmPlan.ts`; Java has the static method `RhythmPlan.choose` and the record `Choice`; Kotlin has the top-level function `choose` and the data class `Choice`. Python and TypeScript take a plain object, and Java and Kotlin take a map from the key to its value. The keys are the same strings in every language, and a missing key has the default shown below. The result has the fields `mechanism`, `reason` and `interval_minutes` (`intervalMinutes` in Java and Kotlin)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working planner of unattended and scheduled runs with eight gaps cut out of it. Everything that is plumbing is written and correct: the constants, the reading of a job's fields with their defaults, the rows for a condition, a background command, a closed machine and a closed session, the local desktop task and the fixed and self-paced loops. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript, Java and Kotlin names are the camel-case forms where a name is given):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "The routine's interval (unlocks `m1`): a cloud routine carries its interval in whole minutes, rounded up from the job's seconds.",
+        "The pipeline job (unlocks `e1`): a job that runs in a pipeline is a `headless-run` with the reason `no-person-present`, whatever else is true of it.",
+        "The event trigger (unlocks `e2`): an event that is a repository event, or that must run while the machine is off, is a `routine` (`react-to-event-unattended`); any other event is watched with a `monitor` (`push-not-poll`).",
+        "The one-off job and the closed session (unlocks `e3`): a one-off job on a machine that stays on, whose session is closed, is a durable `desktop-task` (`durable-and-local`).",
+        "The hourly floor (unlocks `e4`): a cloud schedule below one hour (3,600 seconds) is refused with an error; exactly one hour is allowed.",
+        "Whole minutes (unlocks `e5`): seconds are rounded up to whole minutes (90 seconds are 2 minutes).",
+        "The seven days (unlocks `e6`): a recurring job that lasts more than 7 days cannot stay a loop of a session: it goes to a desktop task when it needs local files and to a cloud routine otherwise (`outlives-seven-days`).",
+        "The refusals (unlocks `e7`): an unknown trigger, a negative interval, a duration below 1 day, and a job that needs a closed machine and local files are refused with an error."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gap 1. About twenty lines in all. The steps below describe the whole planner, so you can see how your gaps are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Key",
+        "Meaning",
+        "Default"
+      ],
+      "rows": [
+        [
+          "`trigger`",
+          "what starts a run: `interval` (every so often), `event` (something happens), `condition` (keep going until a check holds), `once` (a single run later) or `background` (a long command Claude started and does not wait for)",
+          "`interval`"
+        ],
+        [
+          "`interval_seconds`",
+          "the wanted gap between runs, in seconds; 0 means no fixed gap",
+          "0"
+        ],
+        [
+          "`lasts_days`",
+          "how long the job must keep running, at least 1",
+          "1"
+        ],
+        [
+          "`machine_off`",
+          "the job must run while the computer is off or asleep",
+          "false"
+        ],
+        [
+          "`local_files`",
+          "the job needs files on this machine, uncommitted changes included",
+          "false"
+        ],
+        [
+          "`session_open`",
+          "a Claude Code session stays open for the job",
+          "true"
+        ],
+        [
+          "`repo_event`",
+          "the event is a pull request or a release in a repository",
+          "false"
+        ],
+        [
+          "`ci`",
+          "the job runs inside a pipeline, with nobody to answer a prompt",
+          "false"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The mechanisms, with their reason codes and what the interval means:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Mechanism",
+        "Reason code",
+        "When",
+        "`interval_minutes`"
+      ],
+      "rows": [
+        [
+          "`headless-run`",
+          "`no-person-present`",
+          "a pipeline job",
+          "0"
+        ],
+        [
+          "`goal`",
+          "`until-condition-holds`",
+          "keep working until a check holds",
+          "0"
+        ],
+        [
+          "`background-task`",
+          "`work-while-it-runs`",
+          "a long command Claude does not wait for",
+          "0"
+        ],
+        [
+          "`monitor`",
+          "`push-not-poll`",
+          "react to each line of an event stream in the session",
+          "0"
+        ],
+        [
+          "`routine`",
+          "`react-to-event-unattended`",
+          "an event that is a repository event, or that must run with the machine off",
+          "0"
+        ],
+        [
+          "`routine`",
+          "`survives-closed-machine`",
+          "a run with the machine off",
+          "the interval in minutes (0 for a single run)"
+        ],
+        [
+          "`routine`",
+          "`outlives-seven-days`",
+          "an interval job that must last more than seven days and needs no local files",
+          "the interval in minutes"
+        ],
+        [
+          "`desktop-task`",
+          "`durable-and-local`",
+          "a job that outlives its session and needs local files, or a job with no open session",
+          "the interval in minutes (0 for a single run)"
+        ],
+        [
+          "`one-shot-task`",
+          "`single-fire`",
+          "one run later, in the open session",
+          "0"
+        ],
+        [
+          "`loop-fixed`",
+          "`fixed-cadence`",
+          "a fixed interval in the open session",
+          "the interval rounded up to whole minutes, at least 1"
+        ],
+        [
+          "`loop-self-paced`",
+          "`pace-by-what-is-seen`",
+          "no interval in the open session",
+          "0"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The rules apply in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "An unknown `trigger`, a negative `interval_seconds`, `lasts_days` below 1, or `machine_off` together with `local_files` (a cloud run starts from a fresh clone) is an error. Say so with the language's usual argument error (`ValueError` in Python, `Error` in TypeScript, `IllegalArgumentException` in Java and Kotlin).",
+        "`ci` gives `headless-run`, whatever else is true.",
+        "`trigger` `condition` gives `goal`; then `background` gives `background-task`.",
+        "`trigger` `event` gives `routine` with `react-to-event-unattended` when `repo_event` or `machine_off`, and `monitor` otherwise. The interval is ignored.",
+        "`trigger` `once`: `machine_off` gives `routine` with `survives-closed-machine`; no open session gives `desktop-task`; otherwise `one-shot-task`. The interval and `lasts_days` are ignored.",
+        [
+          "`trigger` `interval`, the first match wins:",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`machine_off` gives `routine` with `survives-closed-machine`;",
+              "`lasts_days` above 7 gives `desktop-task` when `local_files`, and `routine` with `outlives-seven-days` otherwise;",
+              "no open session gives `desktop-task`;",
+              "`interval_seconds` 0 gives `loop-self-paced`;",
+              "anything else gives `loop-fixed`."
+            ]
+          }
+        ],
+        "A `routine` on an interval needs `interval_seconds` of at least 3600, and a `desktop-task` on an interval needs at least 60; below that is an error. A loop has no such error: seconds round up to the next whole minute, with a minimum of 1."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Nobody to ask.** A pipeline job cannot answer a prompt, so it is a headless run whatever the schedule says. *You should see* `headless-run` for every combination of the other keys.",
+        "**A condition is not a clock.** Keeping on until a check holds, and a command that runs while Claude works, are not intervals. *You should see* `goal` and `background-task` before any event or interval rule, and an event watched with `monitor` unless it must run unattended.",
+        "**A loop belongs to its session.** It stops when the session ends and a recurring one expires after seven days. *You should see* a loop only with an open session, up to seven days.",
+        "**A schedule has a floor.** A routine runs at most hourly; a desktop task at most every minute. *You should see* an error, not a silent change of the interval.",
+        "**Rounding goes up.** A loop fires at whole minutes. *You should see* 30 seconds become 1 minute and 61 seconds become 2.",
+        "**Unknown means error.** *You should see* an error for a value that is not in the tables, and the default for a key that is missing."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Each of the fourteen jobs of the page's bank gets its mechanism, its reason code and its interval"
+        ],
+        [
+          "`e1`",
+          "A pipeline job is a headless run whatever else is true"
+        ],
+        [
+          "`e2`",
+          "A condition or a background command decides before an event, and an event is watched unless it must run unattended"
+        ],
+        [
+          "`e3`",
+          "A one-off job fires in the session unless the machine is off or the session is closed"
+        ],
+        [
+          "`e4`",
+          "A cloud schedule is refused below one hour and a desktop schedule below one minute"
+        ],
+        [
+          "`e5`",
+          "A fixed loop rounds seconds up to whole minutes, and no interval means self-paced"
+        ],
+        [
+          "`e6`",
+          "A recurring loop lasts seven days, so a longer job needs a durable home"
+        ],
+        [
+          "`e7`",
+          "An unknown value is an error, a cloud run cannot see local files, and a missing key takes its default"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Which way of running Claude Code unattended or on a rhythm a job calls for, and why. See ../../statement.md.\"\"\"\nimport math\nimport logging\n\nlog = logging.getLogger(__name__)\n\nTRIGGERS = (\"interval\", \"event\", \"condition\", \"once\", \"background\")\nCLOUD_MIN_SECONDS = 3600  # a routine never runs more often than hourly\nLOCAL_MIN_SECONDS = 60  # a desktop task or a loop never runs more often than every minute\nLOOP_EXPIRY_DAYS = 7  # a recurring task of a session expires after seven days\n\n\ndef _pick(mechanism, reason, minutes=0):\n    return {\"mechanism\": mechanism, \"reason\": reason, \"interval_minutes\": minutes}\n\n\ndef _minutes(seconds):\n    return math.ceil(seconds / 60)\n\n\ndef _cloud(seconds, reason):\n    if seconds < CLOUD_MIN_SECONDS:\n        raise ValueError(\"a routine runs at most once an hour\")\n    return _pick(\"routine\", reason, _minutes(seconds))\n\n\ndef _local(seconds):\n    if seconds < LOCAL_MIN_SECONDS:\n        raise ValueError(\"a desktop task runs at most once a minute\")\n    return _pick(\"desktop-task\", \"durable-and-local\", _minutes(seconds))\n\n\ndef choose(job):\n    log.debug(\"choose input: %r\", job)\n    trigger = job.get(\"trigger\", \"interval\")\n    seconds = job.get(\"interval_seconds\", 0)\n    days = job.get(\"lasts_days\", 1)\n    machine_off = job.get(\"machine_off\", False)\n    local_files = job.get(\"local_files\", False)\n    session_open = job.get(\"session_open\", True)\n    if trigger not in TRIGGERS:\n        raise ValueError(f\"unknown trigger: {trigger}\")\n    if seconds < 0:\n        raise ValueError(\"interval_seconds cannot be negative\")\n    if days < 1:\n        raise ValueError(\"lasts_days starts at 1\")\n    if machine_off and local_files:\n        raise ValueError(\"a cloud run starts from a fresh clone and sees no local files\")\n    if job.get(\"ci\", False):\n        return _pick(\"headless-run\", \"no-person-present\")\n    if trigger == \"condition\":\n        return _pick(\"goal\", \"until-condition-holds\")\n    if trigger == \"background\":\n        return _pick(\"background-task\", \"work-while-it-runs\")\n    if trigger == \"event\":\n        if job.get(\"repo_event\", False) or machine_off:\n            return _pick(\"routine\", \"react-to-event-unattended\")\n        return _pick(\"monitor\", \"push-not-poll\")\n    if trigger == \"once\":\n        if machine_off:\n            return _pick(\"routine\", \"survives-closed-machine\")\n        if not session_open:\n            return _pick(\"desktop-task\", \"durable-and-local\")\n        return _pick(\"one-shot-task\", \"single-fire\")\n    if machine_off:\n        return _cloud(seconds, \"survives-closed-machine\")\n    if days > LOOP_EXPIRY_DAYS:\n        return _local(seconds) if local_files else _cloud(seconds, \"outlives-seven-days\")\n    if not session_open:\n        return _local(seconds)\n    if seconds == 0:\n        return _pick(\"loop-self-paced\", \"pace-by-what-is-seen\")\n    return _pick(\"loop-fixed\", \"fixed-cadence\", max(1, _minutes(seconds)))\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom rhythm_plan import choose\n\n# Jobs a team wants to repeat: each is a small dictionary of what is known about it.\njobs = {\n    \"check the build while I watch\": {},\n    \"poll a status page every 5 minutes\": {\"interval_seconds\": 300},\n    \"nightly report, laptop may be closed\": {\"interval_seconds\": 86400, \"machine_off\": True},\n    \"react to a pull request unattended\": {\"trigger\": \"event\", \"repo_event\": True},\n    \"run in a pipeline\": {\"ci\": True, \"interval_seconds\": 600},\n}\nfor name, job in jobs.items():\n    print(f\"{name}: {choose(job)}\")\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Which way of running Claude Code unattended or on a rhythm a job calls for, and why. See ../../statement.md.\"\"\"\nimport math\nimport logging\n\nlog = logging.getLogger(__name__)\n\nTRIGGERS = (\"interval\", \"event\", \"condition\", \"once\", \"background\")\nCLOUD_MIN_SECONDS = 3600  # a routine never runs more often than hourly\nLOCAL_MIN_SECONDS = 60  # a desktop task or a loop never runs more often than every minute\nLOOP_EXPIRY_DAYS = 7  # a recurring task of a session expires after seven days\n\n\ndef _pick(mechanism, reason, minutes=0):\n    return {\"mechanism\": mechanism, \"reason\": reason, \"interval_minutes\": minutes}\n\n\ndef _minutes(seconds):\n    # TODO 6 of 8 (finish this to pass e5): the rounding. Receives seconds and returns whole minutes, rounding up.\n    #   Example: 59 -> 1, 60 -> 1, 61 -> 2.\n    return seconds // 60\n\n\ndef _cloud(seconds, reason):\n    # TODO 5 of 8 (finish this to pass e4): the floor of a cloud routine. Refuse with an error (\"a routine runs at most\n    #   once an hour\") when the interval is below CLOUD_MIN_SECONDS. Example: 1800 seconds -> refused; 3600 -> allowed.\n    # TODO 1 of 8 (finish this to pass m1): the plan of a cloud routine. Return the plan with mechanism routine, the\n    #   given reason and the interval in minutes (the helper that rounds seconds up). Example: 7200 seconds -> routine,\n    #   120 minutes.\n    return _pick(\"routine\", reason)\n\n\ndef _local(seconds):\n    if seconds < LOCAL_MIN_SECONDS:\n        raise ValueError(\"a desktop task runs at most once a minute\")\n    return _pick(\"desktop-task\", \"durable-and-local\", _minutes(seconds))\n\n\ndef choose(job):\n    log.debug(\"choose input: %r\", job)\n    trigger = job.get(\"trigger\", \"interval\")\n    seconds = job.get(\"interval_seconds\", 0)\n    days = job.get(\"lasts_days\", 1)\n    machine_off = job.get(\"machine_off\", False)\n    local_files = job.get(\"local_files\", False)\n    session_open = job.get(\"session_open\", True)\n    # TODO 8 of 8 (finish this to pass e7): the refusals. Refuse with an error when the trigger is not one of TRIGGERS,\n    #   when the interval is negative, when lasts_days is below 1, and when the job needs the machine off and local files\n    #   at once (a cloud run starts from a fresh clone). Example: trigger weekly -> refused.\n    # TODO 2 of 8 (finish this to pass e1): the pipeline rule. When the job runs in CI, return mechanism headless-run\n    #   with the reason no-person-present, whatever its trigger, interval or machine. Example: ci true with machine_off\n    #   true -> headless-run.\n    if trigger == \"condition\":\n        return _pick(\"goal\", \"until-condition-holds\")\n    if trigger == \"background\":\n        return _pick(\"background-task\", \"work-while-it-runs\")\n    # TODO 3 of 8 (finish this to pass e2): the event rows. For an event trigger: a routine with the reason react-to-\n    #   event-unattended when the job is a repository event or the machine is off, otherwise a monitor with the reason\n    #   push-not-poll. Example: event with the machine on and no repo event -> monitor.\n    if trigger == \"once\":\n        if machine_off:\n            return _pick(\"routine\", \"survives-closed-machine\")\n        # TODO 4 of 8 (finish this to pass e3): the one-off rows. For a once trigger on a machine that stays on, when\n        #   the session is closed return a desktop-task with the reason durable-and-local; with the session open it fires\n        #   there as a one-shot-task. Example: once, session closed -> desktop-task.\n        return _pick(\"one-shot-task\", \"single-fire\")\n    if machine_off:\n        return _cloud(seconds, \"survives-closed-machine\")\n    # TODO 7 of 8 (finish this to pass e6): the expiry of a loop. When the job lasts more than LOOP_EXPIRY_DAYS days,\n    #   use a local desktop task if it needs local files, otherwise a cloud routine with the reason outlives-seven-days.\n    #   Example: 10 days, no local files -> routine.\n    if not session_open:\n        return _local(seconds)\n    if seconds == 0:\n        return _pick(\"loop-self-paced\", \"pace-by-what-is-seen\")\n    return _pick(\"loop-fixed\", \"fixed-cadence\", max(1, _minutes(seconds)))\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom rhythm_plan import choose\n\n# Jobs a team wants to repeat: each is a small dictionary of what is known about it.\njobs = {\n    \"check the build while I watch\": {},\n    \"poll a status page every 5 minutes\": {\"interval_seconds\": 300},\n    \"nightly report, laptop may be closed\": {\"interval_seconds\": 86400, \"machine_off\": True},\n    \"react to a pull request unattended\": {\"trigger\": \"event\", \"repo_event\": True},\n    \"run in a pipeline\": {\"ci\": True, \"interval_seconds\": 600},\n}\nfor name, job in jobs.items():\n    print(f\"{name}: {choose(job)}\")\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 7,
+    "code": 2,
+    "tables": 3,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "994d1111855adb670c6a576b379cd331ea41779b1c7de456cec8f506cc32d0c1",
+  "starting_code": "\"\"\"Which way of running Claude Code unattended or on a rhythm a job calls for, and why. See ../../statement.md.\"\"\"\nimport math\nimport logging\n\nlog = logging.getLogger(__name__)\n\nTRIGGERS = (\"interval\", \"event\", \"condition\", \"once\", \"background\")\nCLOUD_MIN_SECONDS = 3600  # a routine never runs more often than hourly\nLOCAL_MIN_SECONDS = 60  # a desktop task or a loop never runs more often than every minute\nLOOP_EXPIRY_DAYS = 7  # a recurring task of a session expires after seven days\n\n\ndef _pick(mechanism, reason, minutes=0):\n    return {\"mechanism\": mechanism, \"reason\": reason, \"interval_minutes\": minutes}\n\n\ndef _minutes(seconds):\n    # TODO 6 of 8 (finish this to pass e5): the rounding. Receives seconds and returns whole minutes, rounding up.\n    #   Example: 59 -> 1, 60 -> 1, 61 -> 2.\n    return seconds // 60\n\n\ndef _cloud(seconds, reason):\n    # TODO 5 of 8 (finish this to pass e4): the floor of a cloud routine. Refuse with an error (\"a routine runs at most\n    #   once an hour\") when the interval is below CLOUD_MIN_SECONDS. Example: 1800 seconds -> refused; 3600 -> allowed.\n    # TODO 1 of 8 (finish this to pass m1): the plan of a cloud routine. Return the plan with mechanism routine, the\n    #   given reason and the interval in minutes (the helper that rounds seconds up). Example: 7200 seconds -> routine,\n    #   120 minutes.\n    return _pick(\"routine\", reason)\n\n\ndef _local(seconds):\n    if seconds < LOCAL_MIN_SECONDS:\n        raise ValueError(\"a desktop task runs at most once a minute\")\n    return _pick(\"desktop-task\", \"durable-and-local\", _minutes(seconds))\n\n\ndef choose(job):\n    log.debug(\"choose input: %r\", job)\n    trigger = job.get(\"trigger\", \"interval\")\n    seconds = job.get(\"interval_seconds\", 0)\n    days = job.get(\"lasts_days\", 1)\n    machine_off = job.get(\"machine_off\", False)\n    local_files = job.get(\"local_files\", False)\n    session_open = job.get(\"session_open\", True)\n    # TODO 8 of 8 (finish this to pass e7): the refusals. Refuse with an error when the trigger is not one of TRIGGERS,\n    #   when the interval is negative, when lasts_days is below 1, and when the job needs the machine off and local files\n    #   at once (a cloud run starts from a fresh clone). Example: trigger weekly -> refused.\n    # TODO 2 of 8 (finish this to pass e1): the pipeline rule. When the job runs in CI, return mechanism headless-run\n    #   with the reason no-person-present, whatever its trigger, interval or machine. Example: ci true with machine_off\n    #   true -> headless-run.\n    if trigger == \"condition\":\n        return _pick(\"goal\", \"until-condition-holds\")\n    if trigger == \"background\":\n        return _pick(\"background-task\", \"work-while-it-runs\")\n    # TODO 3 of 8 (finish this to pass e2): the event rows. For an event trigger: a routine with the reason react-to-\n    #   event-unattended when the job is a repository event or the machine is off, otherwise a monitor with the reason\n    #   push-not-poll. Example: event with the machine on and no repo event -> monitor.\n    if trigger == \"once\":\n        if machine_off:\n            return _pick(\"routine\", \"survives-closed-machine\")\n        # TODO 4 of 8 (finish this to pass e3): the one-off rows. For a once trigger on a machine that stays on, when\n        #   the session is closed return a desktop-task with the reason durable-and-local; with the session open it fires\n        #   there as a one-shot-task. Example: once, session closed -> desktop-task.\n        return _pick(\"one-shot-task\", \"single-fire\")\n    if machine_off:\n        return _cloud(seconds, \"survives-closed-machine\")\n    # TODO 7 of 8 (finish this to pass e6): the expiry of a loop. When the job lasts more than LOOP_EXPIRY_DAYS days,\n    #   use a local desktop task if it needs local files, otherwise a cloud routine with the reason outlives-seven-days.\n    #   Example: 10 days, no local files -> routine.\n    if not session_open:\n        return _local(seconds)\n    if seconds == 0:\n        return _pick(\"loop-self-paced\", \"pace-by-what-is-seen\")\n    return _pick(\"loop-fixed\", \"fixed-cadence\", max(1, _minutes(seconds)))\n",
+  "exercise": {
+    "main_path": "practice/level-3/60-claude-code-in-ci/prose/unit-03/practice-1/rhythm_plan.py",
+    "test_path": "practice/level-3/60-claude-code-in-ci/prose/unit-03/practice-1/test_rhythm_plan.py",
+    "run_command": [
+      "python3",
+      "practice/level-3/60-claude-code-in-ci/prose/unit-03/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-3/60-claude-code-in-ci/prose/unit-03/practice-1/target/report.xml",
+      "practice/level-3/60-claude-code-in-ci/prose/unit-03/practice-1/test_rhythm_plan.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_every_job_of_the_bank_gets_its_mechanism_its_reason_and_its_interval",
+        "kind": "main",
+        "says": "Each of the fourteen jobs of the page's bank gets its mechanism, its reason code and its interval"
+      },
+      {
+        "id": "test_e1_a_pipeline_job_is_a_headless_run_whatever_else_is_true",
+        "kind": "edge",
+        "says": "A pipeline job is a headless run whatever else is true"
+      },
+      {
+        "id": "test_e2_a_condition_or_a_background_command_decides_before_an_event_and_an_event_is_watched_unless_it_must_run_unattended",
+        "kind": "edge",
+        "says": "A condition or a background command decides before an event, and an event is watched unless it must run unattended"
+      },
+      {
+        "id": "test_e3_a_one_off_job_fires_in_the_session_unless_the_machine_is_off_or_the_session_is_closed",
+        "kind": "edge",
+        "says": "A one-off job fires in the session unless the machine is off or the session is closed"
+      },
+      {
+        "id": "test_e4_a_cloud_schedule_is_refused_below_one_hour_and_a_desktop_schedule_below_one_minute",
+        "kind": "edge",
+        "says": "A cloud schedule is refused below one hour and a desktop schedule below one minute"
+      },
+      {
+        "id": "test_e5_a_fixed_loop_rounds_seconds_up_to_whole_minutes_and_no_interval_means_self_paced",
+        "kind": "edge",
+        "says": "A fixed loop rounds seconds up to whole minutes, and no interval means self-paced"
+      },
+      {
+        "id": "test_e6_a_recurring_loop_lasts_seven_days_so_a_longer_job_needs_a_durable_home",
+        "kind": "edge",
+        "says": "A recurring loop lasts seven days, so a longer job needs a durable home"
+      },
+      {
+        "id": "test_e7_an_unknown_value_is_an_error_a_cloud_run_cannot_see_local_files_and_a_missing_key_takes_its_default",
+        "kind": "edge",
+        "says": "An unknown value is an error, a cloud run cannot see local files, and a missing key takes its default"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/60-claude-code-in-ci/prose/unit-03/practice-1/target/report.xml"
+    },
+    "origin": "course/60-claude-code-in-ci/03-running-unattended-and-on-a-rhythm.md",
+    "concepts": [
+      "the practice of Running unattended and on a rhythm: loops, schedules, background work and headless runs is solved"
+    ],
+    "files": [
+      "practice/level-3/60-claude-code-in-ci/prose/unit-03/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "claude-code-in-ci-u3"
+}

@@ -1,0 +1,83 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "53-tool-errors-agents-can-act-on"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: tool errors that an agent can act on (TypeScript)",
+  "lang": "typescript",
+  "main_file": "errors.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "errors.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-3/53-tool-errors-agents-can-act-on/prose/unit-02/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-3/53-tool-errors-agents-can-act-on/prose/unit-02/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-3/53-tool-errors-agents-can-act-on/prose/unit-02/practice-2/errors.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 a failed call becomes a structured error with a category a retry flag and an error flag",
+      "kind": "main",
+      "says": "A failed call becomes an error with a category, a retry flag and a message, and an error result with the error flag"
+    },
+    {
+      "id": "e1 a generic message or an unknown category is refused",
+      "kind": "edge",
+      "says": "A generic message and an unknown category are refused"
+    },
+    {
+      "id": "e2 only transient failures are retried with growing waits and the other kinds return at once",
+      "kind": "edge",
+      "says": "Only transient failures are retried, with doubling waits; the other kinds return at once, with their message and explanation"
+    },
+    {
+      "id": "e3 the retries are bounded and a wait the service asks for is honoured",
+      "kind": "edge",
+      "says": "The retries are bounded, the wait a service asks for is honoured and the give-up message names the attempts"
+    },
+    {
+      "id": "e4 a valid empty result is a success and not an error",
+      "kind": "edge",
+      "says": "A valid empty result is a success, not an error"
+    },
+    {
+      "id": "e5 a timeout on a write is an unknown outcome and is retried only when repeating it is safe",
+      "kind": "edge",
+      "says": "A timed out write is an unknown outcome and is retried only with a key or when read only, with the same key each time and the caller's map untouched"
+    },
+    {
+      "id": "e6 the next action follows the category",
+      "kind": "edge",
+      "says": "The next action follows the category"
+    },
+    {
+      "id": "e7 an unexpected exception becomes an internal error and the run goes on",
+      "kind": "edge",
+      "says": "An unexpected exception becomes an internal error and the run goes on"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/53-tool-errors-agents-can-act-on/02-a-call-with-an-unknown-outcome-retries-and-the-practice.md"
+}

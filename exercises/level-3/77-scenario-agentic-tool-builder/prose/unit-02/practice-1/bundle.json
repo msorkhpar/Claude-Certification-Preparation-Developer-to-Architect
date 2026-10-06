@@ -1,0 +1,88 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "77-scenario-agentic-tool-builder"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: review a tool that an agent proposes (Python)",
+  "lang": "python",
+  "main_file": "tool_review.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_tool_review.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/77-scenario-agentic-tool-builder/prose/unit-02/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-3/77-scenario-agentic-tool-builder/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-3/77-scenario-agentic-tool-builder/prose/unit-02/practice-1/test_tool_review.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_a_well_formed_read_only_tool_is_approved_and_leaves_an_audit_line",
+      "kind": "main",
+      "says": "A well-formed read-only tool is approved and leaves an audit line"
+    },
+    {
+      "id": "test_e1_a_description_needs_at_least_the_minimum_number_of_words",
+      "kind": "edge",
+      "says": "A description needs at least the minimum number of words"
+    },
+    {
+      "id": "test_e2_the_timeout_and_the_memory_may_equal_their_limits_and_not_exceed_them",
+      "kind": "edge",
+      "says": "The timeout and the memory may equal their limits and not exceed them"
+    },
+    {
+      "id": "test_e3_a_name_is_lower_case_snake_case_of_at_most_sixty_four_characters",
+      "kind": "edge",
+      "says": "A name is lower-case snake case of at most 64 characters"
+    },
+    {
+      "id": "test_e4_forbidden_calls_in_the_code_refuse_the_tool_and_are_all_listed_in_order",
+      "kind": "edge",
+      "says": "Forbidden calls in the code refuse the tool and are all listed in order"
+    },
+    {
+      "id": "test_e5_a_permission_the_code_uses_without_declaring_it_or_a_denied_one_refuses_the_tool",
+      "kind": "edge",
+      "says": "A permission the code uses without declaring it, or a denied one, refuses the tool"
+    },
+    {
+      "id": "test_e6_a_declared_write_is_approved_only_with_a_gate_and_a_read_alone_is_approved_outright",
+      "kind": "edge",
+      "says": "A declared write is approved only behind a gate, and a read alone is approved outright"
+    },
+    {
+      "id": "test_e7_a_refusal_beats_a_revision_and_a_revision_beats_a_gate",
+      "kind": "edge",
+      "says": "A refusal beats a revision and a revision beats a gate"
+    },
+    {
+      "id": "test_e8_the_permissions_the_code_uses_are_reported_in_alphabetical_order",
+      "kind": "edge",
+      "says": "The permissions the code uses are reported in alphabetical order"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/77-scenario-agentic-tool-builder/02-reviewing-a-proposal-and-the-practice.md"
+}

@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "72-scenario-multi-agent-research-system"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 5,
+  "title": "Check yourself: Failures, conflicts, the coverage note and the practice",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "Under the module's bounded policy for failures, a search subagent times out and its error offers an alternative query. What should the coordinator do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Retry the same query until it succeeds, however many attempts that takes in total",
+            "correct": false,
+            "says": "Ruled out because the retry is bounded: \"The coordinator retries once through an alternative and then stops.\""
+          },
+          {
+            "id": "b",
+            "text": "Retry with the suggested substitute once, then report the scope as not covered",
+            "correct": true,
+            "says": "One retry through the alternative, then an honest gap."
+          },
+          {
+            "id": "c",
+            "text": "Stop the whole run and return the error to the caller, who will decide",
+            "correct": false,
+            "says": "Ruled out because one failed scope does not end the run: \"A failure of one subagent does not end the run: the other scopes are still worth reporting.\""
+          },
+          {
+            "id": "d",
+            "text": "Mark the scope as covered and let the synthesis agent fill the gap",
+            "correct": false,
+            "says": "Ruled out because a scope without findings is not covered: \"A scope that is marked covered without findings is a claim that nothing supports.\""
+          }
+        ],
+        "origin": {
+          "path": "course/72-scenario-multi-agent-research-system/02-failures-conflicts-the-coverage-note-and-the-practice.md",
+          "section": "A failure is a result with context"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "Two publications report 12 and 14 for the same statistic, a year apart. How should the report treat them?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Report the value that more of the other documents seem to support, whichever it is",
+            "correct": false,
+            "says": "Ruled out because the report does not settle a conflict by a vote of other documents: \"a vote of sources is not evidence about the statistic, so both values stay\"."
+          },
+          {
+            "id": "b",
+            "text": "Report the newer value alone, since a more recent figure replaces an older one",
+            "correct": false,
+            "says": "Ruled out because the newer value is not picked in silence: \"A conflict is two different values for one claim, not two sources for the same value\"."
+          },
+          {
+            "id": "c",
+            "text": "Report the average of the two figures, since each is probably close to the truth",
+            "correct": false,
+            "says": "Ruled out because the values are not blended: \"the report does not average them and does not pick the newer one in silence\"."
+          },
+          {
+            "id": "d",
+            "text": "Show both values with their sources and dates, and give neither as the answer",
+            "correct": true,
+            "says": "A conflict is shown with both values, both sources and both dates."
+          }
+        ],
+        "origin": {
+          "path": "course/72-scenario-multi-agent-research-system/02-failures-conflicts-the-coverage-note-and-the-practice.md",
+          "section": "Conflicts, and why the dates matter"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A search failed after it had already returned two usable results for its topic. How should the report record that topic?",
+        "options": [
+          {
+            "id": "a",
+            "text": "As covered, because some usable results were returned for it",
+            "correct": false,
+            "says": "Ruled out because partial is not coverage: \"A partial result is information, and it is not coverage\"."
+          },
+          {
+            "id": "b",
+            "text": "As uncovered, keeping what arrived but marking it incomplete",
+            "correct": true,
+            "says": "Partial findings are kept and flagged, and the topic is still a gap."
+          },
+          {
+            "id": "c",
+            "text": "As covered once the synthesis agent has accepted the results",
+            "correct": false,
+            "says": "Ruled out because acceptance is not the test: \"coverage is a property of the question and not of what happened to arrive\"."
+          },
+          {
+            "id": "d",
+            "text": "As missing, with the two results dropped so that they cannot mislead",
+            "correct": false,
+            "says": "Ruled out because the findings are worth keeping: \"Partial findings stay in the claims, flagged, so a reader can use them and can see that they are incomplete.\""
+          }
+        ],
+        "origin": {
+          "path": "course/72-scenario-multi-agent-research-system/02-failures-conflicts-the-coverage-note-and-the-practice.md",
+          "section": "Partial is information and it is not coverage"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,277 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "84-cost-and-capacity-engineering"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: the decisions of an internal gateway (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: the decisions of an internal gateway"
+    },
+    {
+      "type": "para",
+      "text": "Four product teams call Claude through one internal gateway that holds the credentials, so that the platform team can route requests, enforce budgets, show each team what it spent and protect callers that cannot wait. In this practice you write the four decisions that gateway makes: the model a request is sent to, whether a request is admitted against the team's budget, the cost table that each team sees, and whether a caller gets its answer on the same connection or through accept-and-poll. The model is not called: the tests give you requests, policies and usage rows. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`route`, `admit`, `showback`, `delivery`); TypeScript has the same names; Java has the same names as static methods of `GatewayBudget` and Kotlin has top-level functions. Numbers are whole numbers (money in cents, tokens, seconds, percent), so that every language gives the same figures. Maps and lists are JSON-like, as the starters show. A refusal is `ValueError` (TypeScript: an `Error`; Java and Kotlin: `IllegalArgumentException`)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working gateway with six gaps cut out of it. Everything that is plumbing is written and correct: the grouping of rows by team, the ordering of the showback and the rows of the result. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value (`None`, `null`, `0`), so the starter runs and fails every case on an assertion. Debug a gap by logging its input with the `log` line at the top of the file (the starter already logs the input of one function; add your own `log.debug` lines the same way); a run shows the lines you logged under the failing case. Write the gaps in this order (the Java and Kotlin names are the camel-case forms, TypeScript has no leading underscore):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_chosen_model` unlocks `m1` and `e6`: the model the policy picks for a request, with a pin honoured only when allowed.",
+        "`route` unlocks `e1`: the model once the budget status is known (refused when blocked, cheaper when warned).",
+        "`admit` unlocks `e2`: allow, warn or block against the budget.",
+        "`_cost` unlocks `e3`: what one row of tokens costs, and the refusal of a model without a price.",
+        "`_to_cents` unlocks `e4`: a team's total rounded to a cent, once.",
+        "`delivery` unlocks `e5`: sync or accept-and-poll."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About fifteen lines in all. The sections below describe the whole gateway."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`route(request, policy, status)`: `request` is `{task, model}` (`model` is an optional pin), `policy` is `{allowed, routes, default, cheaper}`, `status` is the result of `admit`.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`block` gives `None` (null): the request is refused.",
+              "A pinned model is used only when it is in `policy.allowed`; otherwise the model is `policy.routes[task]`, or `policy.default` for a task the table does not know.",
+              "On `warn` the model is replaced by `policy.cheaper[model]` when it has an entry, and kept when it has none."
+            ]
+          }
+        ],
+        "`admit(spend, budget, estimate)`: one more request that is estimated to cost `estimate` cents, for a team that has spent `spend` of `budget`. `block` when the budget is not positive or when `spend + estimate` is **more than** the budget; `warn` when it reaches 80 percent of the budget (80 percent itself warns) and is not over; otherwise `allow`.",
+        "`showback(rows, prices)`: a row is `{team, model, input, cache_read, output}` (token counts), `prices[model]` has `input`, `cache_read` and `output` in cents per million tokens. For each team add up tokens times price over all of its rows, divide by one million and round **once**, to the nearest cent with halves up. Return `[{team, cents}]`, most expensive first and by team name among equals. A row whose model has no price is refused with `unknown model: <name>`: a gateway never guesses a price.",
+        "`delivery(p95_seconds, timeout_seconds, margin_percent)`: `sync` when `p95_seconds` plus the margin (in percent) fits within `timeout_seconds`, with an exact fit allowed; otherwise `accept-and-poll`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**The gateway owns the model choice.** One table beats each team's habit. *You should see* each task go to its model and an unknown task to the default.",
+        "**A budget degrades before it stops.** *You should see* the cheaper model for a team near its limit and a refusal for a team over it.",
+        "**Admission is exact at the edges.** *You should see* 80 percent warn, 100 percent warn and one cent over block, and a team without a budget blocked.",
+        "**Showback prices every token kind.** Cache reads are cheap and output is dear; a bill that ignores either is wrong. *You should see* 450 and 700 cents.",
+        "**Rounding happens once.** Rounding each row first loses or gains cents. *You should see* two rows of 0.4 cent become 1 cent.",
+        "**A hard latency limit changes the shape of the call.** *You should see* `accept-and-poll` as soon as the slow case, with its margin, no longer fits.",
+        "**A pin is a request, not a right.** *You should see* a pin outside the allowed list ignored."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A request follows the route table of the gateway"
+        ],
+        [
+          "`e1`",
+          "A team near its budget is moved to a cheaper model, and a team over it is refused"
+        ],
+        [
+          "`e2`",
+          "A request is admitted, warned or blocked against the budget"
+        ],
+        [
+          "`e3`",
+          "Showback adds each team's tokens at the price of the model and refuses an unknown model"
+        ],
+        [
+          "`e4`",
+          "Showback rounds each team's total to a cent once"
+        ],
+        [
+          "`e5`",
+          "A caller with a hard latency limit gets accept-and-poll when the slow case does not fit"
+        ],
+        [
+          "`e6`",
+          "A model pinned by a team is honoured only when the policy allows it"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "/** The decisions of an internal gateway: route a request, admit it against a budget, show back what each team spent and choose sync or accept-and-poll. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"gateway_budget\");\n\nfunction chosenModel(request: any, policy: any): string | null {\n  const wanted = request.model;\n  return policy.allowed.includes(wanted) ? wanted : (policy.routes[request.task] ?? policy.default);\n}\n\nexport function route(request: any, policy: any, status: string): string | null {\n  log.debug(\"route input\", request);\n  if (status === \"block\") return null;\n  const model = chosenModel(request, policy) as string;\n  return status === \"warn\" ? (policy.cheaper[model] ?? model) : model;\n}\n\nexport function admit(spend: number, budget: number, estimate: number): string | null {\n  if (budget <= 0) return \"block\";\n  const after = spend + estimate;\n  if (after > budget) return \"block\";\n  if (after * 100 >= budget * 80) return \"warn\";\n  return \"allow\";\n}\n\nfunction cost(row: any, prices: any): number {\n  if (!(row.model in prices)) throw new Error(`unknown model: ${row.model}`);\n  const p = prices[row.model];\n  return row.input * p.input + row.cache_read * p.cache_read + row.output * p.output;\n}\n\nfunction toCents(value: number): number {\n  return Math.floor((value + 500_000) / 1_000_000);\n}\n\nexport function showback(rows: any[], prices: any): Array<{ team: string; cents: number }> | null {\n  const totals = new Map<string, number>();\n  for (const r of rows) totals.set(r.team, (totals.get(r.team) ?? 0) + cost(r, prices));\n  const result = [...totals].map(([team, value]) => ({ team, cents: toCents(value) }));\n  return result.sort((a, b) => b.cents - a.cents || (a.team < b.team ? -1 : a.team > b.team ? 1 : 0));\n}\n\nexport function delivery(p95Seconds: number, timeoutSeconds: number, marginPercent: number): string | null {\n  return p95Seconds * (100 + marginPercent) <= timeoutSeconds * 100 ? \"sync\" : \"accept-and-poll\";\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { admit, delivery, route } from \"./gatewayBudget.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\nconst policy = { allowed: [\"haiku\", \"sonnet\"], routes: { classify: \"haiku\", draft: \"sonnet\", review: \"opus\" }, default: \"sonnet\",\n  cheaper: { opus: \"sonnet\", sonnet: \"haiku\" } };\n\n// The gateway first checks the team's budget, then routes the request: near the limit it picks a cheaper model.\nfor (const spend of [0, 850, 990]) {\n  const status = admit(spend, 1000, 100);\n  console.log(`spend ${spend}/1000 -> ${status}: a review request goes to`, route({ task: \"review\" }, policy, status as string));\n}\n\n// A delivery check: does a 95th-percentile latency of 40 s leave 20 percent of margin under a 60 s timeout?\nconsole.log(\"delivery:\", delivery(40, 60, 20));\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "/** The decisions of an internal gateway: route a request, admit it against a budget, show back what each team spent and choose sync or accept-and-poll. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"gateway_budget\");\n\nfunction chosenModel(request: any, policy: any): string | null {\n  // TODO 1 of 6 (unlocks m1 and e6): the model the policy picks for a request.\n  // Receives the request (`task`, and perhaps `model`, a pin) and the policy (`allowed`, `routes`, `default`). Returns the pinned model when it is in\n  // `policy.allowed`; otherwise the model `policy.routes` names for the task, or `policy.default` for a task that is not listed.\n  // Example: task \"review\" with no pin -> \"opus\"; task \"classify\" pinned to \"opus\" (not allowed) -> \"haiku\"\n  return null;\n}\n\nexport function route(request: any, policy: any, status: string): string | null {\n  log.debug(\"route input\", request);\n  // TODO 2 of 6 (unlocks e1): the model for the request once the budget status is known.\n  // Receives the request, the policy and the budget status (\"allow\", \"warn\" or \"block\"). Returns null when the status is \"block\"; the model from\n  // `chosenModel` when it is \"allow\"; for \"warn\" the cheaper model that `policy.cheaper` names for it (the model itself when none is named).\n  // Example: status \"warn\", chosen model \"opus\", cheaper { opus: \"sonnet\" } -> \"sonnet\"\n  return null;\n}\n\nexport function admit(spend: number, budget: number, estimate: number): string | null {\n  // TODO 3 of 6 (unlocks e2): admit one more request against the budget.\n  // Receives what the team has spent, its budget and the estimated cost of the request, all in cents. Returns \"block\" when the budget is not positive or\n  // `spend + estimate` is more than the budget; \"warn\" when it reaches 80 percent of the budget (80 percent itself warns) and is not over; else \"allow\".\n  // Example: admit(700, 1000, 100) -> \"warn\", admit(900, 1000, 101) -> \"block\"\n  return null;\n}\n\nfunction cost(row: any, prices: any): number {\n  // TODO 4 of 6 (unlocks e3): what one row of tokens costs.\n  // Receives a row (`model`, `input`, `cache_read`, `output`: token counts) and `prices`, which maps a model to cents per million tokens for the same three\n  // kinds. Returns tokens times price, summed over the three kinds (not yet divided by a million). Throws Error(`unknown model: ${name}`) for a model without a price.\n  // Example: input 1_000_000 at price 200 and nothing else -> 200_000_000\n  return 0;\n}\n\nfunction toCents(value: number): number {\n  // TODO 5 of 6 (unlocks e4): a team's total in whole cents.\n  // Receives a total in cents times a million. Returns it divided by one million and rounded to the nearest cent, halves up.\n  // Example: toCents(500_000) -> 1, toCents(499_999) -> 0\n  return 0;\n}\n\nexport function showback(rows: any[], prices: any): Array<{ team: string; cents: number }> | null {\n  const totals = new Map<string, number>();\n  for (const r of rows) totals.set(r.team, (totals.get(r.team) ?? 0) + cost(r, prices));\n  const result = [...totals].map(([team, value]) => ({ team, cents: toCents(value) }));\n  return result.sort((a, b) => b.cents - a.cents || (a.team < b.team ? -1 : a.team > b.team ? 1 : 0));\n}\n\nexport function delivery(p95Seconds: number, timeoutSeconds: number, marginPercent: number): string | null {\n  // TODO 6 of 6 (unlocks e5): sync or accept-and-poll.\n  // Receives the p95 latency and the caller's timeout in seconds and a safety margin in percent. Returns \"sync\" when the p95 plus the margin fits within the\n  // timeout (an exact fit counts), otherwise \"accept-and-poll\". Compare p95 * (100 + margin) with timeout * 100.\n  // Example: delivery(8, 10, 25) -> \"sync\", delivery(8, 10, 26) -> \"accept-and-poll\"\n  return null;\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { admit, delivery, route } from \"./gatewayBudget.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\nconst policy = { allowed: [\"haiku\", \"sonnet\"], routes: { classify: \"haiku\", draft: \"sonnet\", review: \"opus\" }, default: \"sonnet\",\n  cheaper: { opus: \"sonnet\", sonnet: \"haiku\" } };\n\n// The gateway first checks the team's budget, then routes the request: near the limit it picks a cheaper model.\nfor (const spend of [0, 850, 990]) {\n  const status = admit(spend, 1000, 100);\n  console.log(`spend ${spend}/1000 -> ${status}: a review request goes to`, route({ task: \"review\" }, policy, status as string));\n}\n\n// A delivery check: does a 95th-percentile latency of 40 s leave 20 percent of margin under a 60 s timeout?\nconsole.log(\"delivery:\", delivery(40, 60, 20));\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "240a7e68afa1023a146d064a6e8c205df5d55067351172639e0bd00c28602df4",
+  "starting_code": "/** The decisions of an internal gateway: route a request, admit it against a budget, show back what each team spent and choose sync or accept-and-poll. See ../../statement.md. */\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"gateway_budget\");\n\nfunction chosenModel(request: any, policy: any): string | null {\n  // TODO 1 of 6 (unlocks m1 and e6): the model the policy picks for a request.\n  // Receives the request (`task`, and perhaps `model`, a pin) and the policy (`allowed`, `routes`, `default`). Returns the pinned model when it is in\n  // `policy.allowed`; otherwise the model `policy.routes` names for the task, or `policy.default` for a task that is not listed.\n  // Example: task \"review\" with no pin -> \"opus\"; task \"classify\" pinned to \"opus\" (not allowed) -> \"haiku\"\n  return null;\n}\n\nexport function route(request: any, policy: any, status: string): string | null {\n  log.debug(\"route input\", request);\n  // TODO 2 of 6 (unlocks e1): the model for the request once the budget status is known.\n  // Receives the request, the policy and the budget status (\"allow\", \"warn\" or \"block\"). Returns null when the status is \"block\"; the model from\n  // `chosenModel` when it is \"allow\"; for \"warn\" the cheaper model that `policy.cheaper` names for it (the model itself when none is named).\n  // Example: status \"warn\", chosen model \"opus\", cheaper { opus: \"sonnet\" } -> \"sonnet\"\n  return null;\n}\n\nexport function admit(spend: number, budget: number, estimate: number): string | null {\n  // TODO 3 of 6 (unlocks e2): admit one more request against the budget.\n  // Receives what the team has spent, its budget and the estimated cost of the request, all in cents. Returns \"block\" when the budget is not positive or\n  // `spend + estimate` is more than the budget; \"warn\" when it reaches 80 percent of the budget (80 percent itself warns) and is not over; else \"allow\".\n  // Example: admit(700, 1000, 100) -> \"warn\", admit(900, 1000, 101) -> \"block\"\n  return null;\n}\n\nfunction cost(row: any, prices: any): number {\n  // TODO 4 of 6 (unlocks e3): what one row of tokens costs.\n  // Receives a row (`model`, `input`, `cache_read`, `output`: token counts) and `prices`, which maps a model to cents per million tokens for the same three\n  // kinds. Returns tokens times price, summed over the three kinds (not yet divided by a million). Throws Error(`unknown model: ${name}`) for a model without a price.\n  // Example: input 1_000_000 at price 200 and nothing else -> 200_000_000\n  return 0;\n}\n\nfunction toCents(value: number): number {\n  // TODO 5 of 6 (unlocks e4): a team's total in whole cents.\n  // Receives a total in cents times a million. Returns it divided by one million and rounded to the nearest cent, halves up.\n  // Example: toCents(500_000) -> 1, toCents(499_999) -> 0\n  return 0;\n}\n\nexport function showback(rows: any[], prices: any): Array<{ team: string; cents: number }> | null {\n  const totals = new Map<string, number>();\n  for (const r of rows) totals.set(r.team, (totals.get(r.team) ?? 0) + cost(r, prices));\n  const result = [...totals].map(([team, value]) => ({ team, cents: toCents(value) }));\n  return result.sort((a, b) => b.cents - a.cents || (a.team < b.team ? -1 : a.team > b.team ? 1 : 0));\n}\n\nexport function delivery(p95Seconds: number, timeoutSeconds: number, marginPercent: number): string | null {\n  // TODO 6 of 6 (unlocks e5): sync or accept-and-poll.\n  // Receives the p95 latency and the caller's timeout in seconds and a safety margin in percent. Returns \"sync\" when the p95 plus the margin fits within the\n  // timeout (an exact fit counts), otherwise \"accept-and-poll\". Compare p95 * (100 + margin) with timeout * 100.\n  // Example: delivery(8, 10, 25) -> \"sync\", delivery(8, 10, 26) -> \"accept-and-poll\"\n  return null;\n}\n",
+  "exercise": {
+    "main_path": "practice/level-4/84-cost-and-capacity-engineering/prose/unit-02/practice-2/gatewayBudget.ts",
+    "test_path": "practice/level-4/84-cost-and-capacity-engineering/prose/unit-02/practice-2/gatewayBudget.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-4/84-cost-and-capacity-engineering/prose/unit-02/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-4/84-cost-and-capacity-engineering/prose/unit-02/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-4/84-cost-and-capacity-engineering/prose/unit-02/practice-2/gatewayBudget.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 a request follows the route table of the gateway",
+        "kind": "main",
+        "says": "A request follows the route table of the gateway"
+      },
+      {
+        "id": "e1 a team near its budget is moved to a cheaper model and a team over it is refused",
+        "kind": "edge",
+        "says": "A team near its budget is moved to a cheaper model, and a team over it is refused"
+      },
+      {
+        "id": "e2 a request is admitted warned or blocked against the budget",
+        "kind": "edge",
+        "says": "A request is admitted, warned or blocked against the budget"
+      },
+      {
+        "id": "e3 showback adds each teams tokens at the price of the model and refuses an unknown model",
+        "kind": "edge",
+        "says": "Showback adds each team's tokens at the price of the model and refuses an unknown model"
+      },
+      {
+        "id": "e4 showback rounds each teams total to a cent once",
+        "kind": "edge",
+        "says": "Showback rounds each team's total to a cent once"
+      },
+      {
+        "id": "e5 a caller with a hard latency limit gets accept and poll when the slow case does not fit",
+        "kind": "edge",
+        "says": "A caller with a hard latency limit gets accept-and-poll when the slow case does not fit"
+      },
+      {
+        "id": "e6 a model pinned by a team is honoured only when the policy allows it",
+        "kind": "edge",
+        "says": "A model pinned by a team is honoured only when the policy allows it"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-4/84-cost-and-capacity-engineering/prose/unit-02/practice-2/target/report.xml"
+    },
+    "origin": "course/84-cost-and-capacity-engineering/02-the-gateway-budgets-and-callers-that-cannot-wait.md",
+    "concepts": [
+      "the practice of The gateway, budgets and callers that cannot wait is solved"
+    ],
+    "files": [
+      "practice/level-4/84-cost-and-capacity-engineering/prose/unit-02/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "cost-and-capacity-engineering-u2"
+}

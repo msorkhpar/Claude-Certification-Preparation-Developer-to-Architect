@@ -1,0 +1,73 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "16-async-concurrency-and-backpressure"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: bounded concurrency with backpressure (TypeScript)",
+  "lang": "typescript",
+  "main_file": "bounded.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "bounded.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-2/16-async-concurrency-and-backpressure/prose/unit-02/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-2/16-async-concurrency-and-backpressure/prose/unit-02/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-2/16-async-concurrency-and-backpressure/prose/unit-02/practice-2/bounded.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 results come back for every item and never more than limit run at once",
+      "kind": "main",
+      "says": "Every item is processed, and never more than limit run at once"
+    },
+    {
+      "id": "e1 results keep the input order even when later items finish first",
+      "kind": "edge",
+      "says": "Results keep the input order even when later items finish first"
+    },
+    {
+      "id": "e2 a failing item is reported and the others still finish",
+      "kind": "edge",
+      "says": "A failing item is reported and the others still finish"
+    },
+    {
+      "id": "e3 a limit above the item count and an empty input both work",
+      "kind": "edge",
+      "says": "A limit above the item count and an empty input both work"
+    },
+    {
+      "id": "e4 a limit below one is refused",
+      "kind": "edge",
+      "says": "A limit below one is refused"
+    },
+    {
+      "id": "e5 items are pulled lazily so a slow consumer holds the producer back",
+      "kind": "edge",
+      "says": "Items are pulled lazily: while all workers are blocked, only limit items have been taken"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/16-async-concurrency-and-backpressure/02-rate-limits-and-backpressure.md"
+}

@@ -1,0 +1,242 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "38-claude-code-for-developers"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Install, the working loop and permission modes",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Install, the working loop and permission modes"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Developer · **Module 38:** Claude Code for developers · **Page 1 of 3** **Exams:** DV7; A3"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** install Claude Code and check it, run the explore, plan, code and commit loop, name the six permission modes and what each lets run without a prompt, say which mode a session starts in, and resume, fork or rewind a session."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-03 against the Claude Code documentation (setup, how Claude Code works, common workflows, permission modes and the sessions pages), which mention behaviour up to Claude Code v2.1.286. Nothing on this page was run against a live session: the course environment has no key and no network, and the commands are described and not run. The practice at the end of the module checks the configuration files offline."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "Module 35 drove the Claude Code loop from code. This module is about the person who uses it daily and the repository that has to be ready for them. The exam asks developer questions: how a session starts, what a permission mode lets through, where an instruction belongs, and what to do when a long conversation goes wrong. Each answer is a fact about the product, so each is quoted."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Install and check"
+    },
+    {
+      "type": "para",
+      "text": "The setup page recommends the native installer for your platform. \"When the installer finishes, open a new terminal window and run `claude --version`.\" A working installation prints a version number. If the shell says `claude` is not found, the install directory is not on the `PATH` yet. Homebrew and WinGet installations \"do not auto-update\", while \"Native installations automatically update in the background\", so a team that pins a version chooses a package manager and one that wants the newest chooses the native installer. After installation you open a terminal in the project and start `claude`."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The loop: explore, plan, code, commit"
+    },
+    {
+      "type": "para",
+      "text": "Claude Code works on a whole project and not on a single file. When you ask it to fix a bug, \"it searches for relevant files, reads multiple files to understand context, makes coordinated edits across them, runs tests to verify the fix, and commits the changes if you ask.\" A habit that fits this has four steps."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Explore.** Ask Claude to read and explain before it changes anything. It reads files in the session's context window, so you can ask where a behaviour lives.",
+        "**Plan.** For a change you want to review before it touches disk, switch to plan mode: \"Claude reads files and proposes a plan but makes no edits until you approve.\" Press `Shift+Tab` until the status bar shows `⏸ plan mode on`, or start with `claude --permission-mode plan`.",
+        "**Code.** Approve the plan, let Claude edit, and have it run the tests. A test run is the evidence that the change works, so name the command in the project's memory file (page 2).",
+        "**Commit.** Ask for the commit when the change is reviewed. Claude commits the changes only \"if you ask\"."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Two limits shape the loop. The context window fills up. \"Claude compacts automatically, but instructions from early in the conversation can get lost\", so \"Put persistent rules in CLAUDE.md\", and use `/context` to see what fills the window and `/compact` to summarise it. And file edits are reversible: \"Before Claude edits a file, it snapshots the current contents. If something goes wrong, press `Esc` twice to rewind to a previous state, or ask Claude to undo.\" The command `/rewind` rolls code and conversation back to a checkpoint. Checkpoints \"only cover file changes\", and \"Actions that affect remote systems (databases, APIs, deployments) can't be checkpointed\", so a pushed commit or a changed database is not undone by a rewind."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Sessions"
+    },
+    {
+      "type": "para",
+      "text": "\"Sessions are independent.\" Each new session starts with a fresh context window and none of the earlier conversation. Claude Code saves each conversation locally, and `claude --continue` or `claude --resume` reopens one \"under the same session ID and appends new messages to the existing conversation.\" Forking with `--fork-session` or `/branch` \"copies the history into a new session ID, leaving the original unchanged\", which is how you try a second approach without losing the first. `/clear` starts fresh on a new task while keeping project memory."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Permission modes"
+    },
+    {
+      "type": "para",
+      "text": "A mode \"sets which actions Claude can take in a session without asking you first.\" There are six, and the table is the part to know by heart."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Mode",
+        "What runs without asking",
+        "Best for"
+      ],
+      "rows": [
+        [
+          "`default` (Manual)",
+          "Reads only",
+          "Reviewing every action yourself"
+        ],
+        [
+          "`acceptEdits`",
+          "Reads, file edits, and common filesystem commands",
+          "Iterating on code you review"
+        ],
+        [
+          "`plan`",
+          "Reads, plus classifier-approved commands when auto mode is available",
+          "Exploring before changing"
+        ],
+        [
+          "`auto`",
+          "Everything, with background safety checks",
+          "Long tasks, fewer prompts"
+        ],
+        [
+          "`dontAsk`",
+          "Reads and pre-approved tools; anything that would prompt is denied",
+          "Locked-down CI and scripts"
+        ],
+        [
+          "`bypassPermissions`",
+          "Everything",
+          "Isolated containers and VMs only"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "In auto mode \"a second model, the classifier, reviews actions instead of you.\" That is a review by a model, and a person still decides the rules around it. Modes set the baseline and rules adjust it: \"Deny rules block in every mode, including `bypassPermissions`.\" And \"Allow rules have no effect in `bypassPermissions`.\" An action matched by an ask rule is not auto-approved in any mode."
+    },
+    {
+      "type": "para",
+      "text": "Which mode a session starts in follows an order: the `--permission-mode` flag first, then `permissions.defaultMode` in a settings file, then the built-in default. One rule protects a clone from a hostile repository: \"If you set `\"auto\"` in `.claude/settings.json` or `.claude/settings.local.json`, the value doesn't take effect\", and Claude Code uses the built-in default instead. A `\"bypassPermissions\"` set in those two files \"doesn't take effect either, and the session starts in Manual mode\". The other values apply from any settings file. The built-in default is `auto` in a terminal with v2.1.283 or later, and `default` in `claude -p` in most sessions."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Treating plan mode as a sandbox.** It stops edits until you approve a plan, and it does not stop reads. It is for exploring, and it is not a defence against a hostile repository.",
+        "**Assuming a project can switch itself to auto or bypass mode.** A shared or local project file cannot set those two values. The user's own file or the command line can.",
+        "**Relying on a rewind for outside effects.** Checkpoints restore the files Claude edited. A pushed commit or a changed database is outside them."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A developer wants Claude to study a repository and show a written draft before any file on disk changes. Which start fits?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The `default` mode, which asks about each action one by one",
+              "**b**: The `acceptEdits` mode, which writes edits without asking",
+              "**c**: The `plan` mode, entered by pressing `Shift+Tab`",
+              "**d**: The `dontAsk` mode, which denies whatever would prompt"
+            ]
+          }
+        ],
+        [
+          "A repository's shared settings file sets the starting permission mode to `bypassPermissions`. What happens when a teammate opens it?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The session starts in auto mode for every teammate who opens it",
+              "**b**: The value is ignored, and each edit and command asks first",
+              "**c**: The session starts in plan mode until the file is approved",
+              "**d**: Every teammate is asked once to accept the project file's mode"
+            ]
+          }
+        ],
+        [
+          "Rules given early in a long conversation stop being followed. Where should a rule that must always apply be kept?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: In a `/compact` summary, which condenses the thread so far",
+              "**b**: In a `/clear` command, which starts fresh on a new task",
+              "**c**: In a rewind checkpoint, which snapshots files before each edit",
+              "**d**: In `CLAUDE.md`, which sits outside the running chat"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**c**. The page says \"Claude reads files and proposes a plan but makes no edits until you approve\", and `claude --permission-mode plan` starts there. *a* is ruled out because the table lists `default` (Manual) for \"Reviewing every action yourself\", so it prompts action by action and no draft comes first. *b* is ruled out because `acceptEdits` runs \"Reads, file edits, and common filesystem commands\" without asking, so edits land on disk at once. *d* is ruled out because `dontAsk` runs \"Reads and pre-approved tools; anything that would prompt is denied\", so it denies and shows no draft.",
+            "**b**. The page says a `\"bypassPermissions\"` set in those two files \"doesn't take effect either, and the session starts in Manual mode\". *a* is ruled out because that is exactly what the rule prevents, since \"the value doesn't take effect\". *c* is ruled out because the page names Manual mode and not plan mode: \"the session starts in Manual mode\". *d* is ruled out because \"The other values apply from any settings file\", and these two are the exceptions, so no prompt is shown.",
+            "**d**. The page says \"Put persistent rules in CLAUDE.md\", because \"Claude compacts automatically, but instructions from early in the conversation can get lost.\" *a* is ruled out because \"Claude compacts automatically, but instructions from early in the conversation can get lost\", so a summary is where they are lost. *b* is ruled out because `/clear` is described as one that \"starts fresh on a new task while keeping project memory\", so the rules must already be in the memory file. *c* is ruled out because checkpoints \"only cover file changes\", so a checkpoint holds files and not rules."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 11,
+    "code": 0,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "41699e76c56fdfcb48151a7fd029ae2bdcfc96b320dd0b0a1bb75fb309f2d1ce"
+}

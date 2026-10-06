@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-4",
+    "86-integration-choices-access-and-capability-bloat"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: Which mechanism connects it, what a gateway centralises and whose rights a call uses",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A nightly job always does the same three things in the same order: fetch invoices, ask Claude to label each one, write the labels to a ledger. How should the invoice system be reached?",
+        "options": [
+          {
+            "id": "a",
+            "text": "As a plain function call made by the code that runs the sequence",
+            "correct": true,
+            "says": "The path is fixed, so the code calls the invoice system and the model is not asked whether to."
+          },
+          {
+            "id": "b",
+            "text": "As an MCP server that the model decides to call when it needs invoices",
+            "correct": false,
+            "says": "Ruled out because \"Workflows are systems where LLMs and tools are orchestrated through predefined code paths\", and a fixed step needs no model decision."
+          },
+          {
+            "id": "c",
+            "text": "As a tool in the model's list, left for the model to call when it sees fit",
+            "correct": false,
+            "says": "Ruled out because for a known path \"the code calls, so the step is testable\", which a tool left to the model's choice is not."
+          },
+          {
+            "id": "d",
+            "text": "As a remote agent that the job reaches over an agent-to-agent protocol",
+            "correct": false,
+            "says": "Ruled out because agent-to-agent suits \"The counterpart is another agent with its own goals and owner\", and an invoice system is not one."
+          }
+        ],
+        "origin": {
+          "path": "course/86-integration-choices-access-and-capability-bloat/01-which-mechanism-a-gateway-and-whose-rights.md",
+          "section": "Four mechanisms, four situations"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A support agent runs under one service account that may issue refunds, and supervisors legitimately use the same agent for them. A clerk who may only read tickets asks it for a refund, and it is paid. What closes the gap?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Take the refund tool out of the agent's configuration for every user",
+            "correct": false,
+            "says": "Ruled out because \"it also stops the supervisors who are allowed to use it\"."
+          },
+          {
+            "id": "b",
+            "text": "Record each refund so that the clerk's request can be found later",
+            "correct": false,
+            "says": "Ruled out because \"A record is written after the refund is paid\", so it detects and does not prevent."
+          },
+          {
+            "id": "c",
+            "text": "Allow the call only if the asker also holds that scope",
+            "correct": true,
+            "says": "The call is allowed only when the user holds the scope and the agent does too, so the agent's rights are a ceiling."
+          },
+          {
+            "id": "d",
+            "text": "Add a line to the system prompt telling clerks not to ask for refunds",
+            "correct": false,
+            "says": "Ruled out because \"a line in the system prompt is a request to the model and not a control\", and an agent that holds the right can still grant the request."
+          }
+        ],
+        "origin": {
+          "path": "course/86-integration-choices-access-and-capability-bloat/01-which-mechanism-a-gateway-and-whose-rights.md",
+          "section": "Whose rights a call uses"
+        }
+      }
+    ]
+  }
+}

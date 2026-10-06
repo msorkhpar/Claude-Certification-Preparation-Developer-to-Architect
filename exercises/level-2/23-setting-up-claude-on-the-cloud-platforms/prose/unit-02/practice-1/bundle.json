@@ -1,0 +1,88 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "23-setting-up-claude-on-the-cloud-platforms"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: platform access as configuration, graded by tests (Python)",
+  "lang": "python",
+  "main_file": "project/bedrock-policy.json",
+  "files": [
+    "project/quotas.json",
+    "project/vertex.json"
+  ],
+  "test_file": "tests/test_platformconfig.py",
+  "build": [
+    "pytest.ini",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-1/check_files.py",
+    "practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-1/project/bedrock-policy.json",
+    "practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-1/project/quotas.json",
+    "practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-1/project/vertex.json"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-1/tests/test_platformconfig.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_the_policy_allows_invoking_one_model_in_one_region_and_nothing_else",
+      "kind": "main",
+      "says": "The policy has one statement that allows an invoke action on the one model in the one region"
+    },
+    {
+      "id": "test_e1_no_action_is_a_wildcard_and_every_action_is_an_invoke_action",
+      "kind": "edge",
+      "says": "No action is a wildcard and every action is an invoke action, so nothing else is allowed"
+    },
+    {
+      "id": "test_e2_every_resource_arn_names_one_documented_region_and_one_model",
+      "kind": "edge",
+      "says": "Every resource is a Bedrock model ARN with a documented region and no wildcard"
+    },
+    {
+      "id": "test_e3_every_statement_allows_and_the_policy_uses_the_current_version",
+      "kind": "edge",
+      "says": "Every statement allows, and the policy uses the current version"
+    },
+    {
+      "id": "test_e4_the_vertex_role_is_a_custom_role_that_can_only_predict",
+      "kind": "edge",
+      "says": "The Vertex role is a custom role that can only predict"
+    },
+    {
+      "id": "test_e5_the_vertex_endpoint_keeps_the_data_where_residency_says_and_serves_the_model",
+      "kind": "edge",
+      "says": "The Vertex endpoint keeps the data where residency says and serves the model"
+    },
+    {
+      "id": "test_e6_model_ids_use_each_platforms_own_form",
+      "kind": "edge",
+      "says": "Model ids use each platform's own form: anthropic. on Bedrock, a Vertex id on Vertex"
+    },
+    {
+      "id": "test_e7_the_quota_request_stays_under_the_self_service_ceiling",
+      "kind": "edge",
+      "says": "The quota request stays under the self-service ceiling"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/23-setting-up-claude-on-the-cloud-platforms/02-residency-quotas-logging-and-the-configuration-practice.md"
+}

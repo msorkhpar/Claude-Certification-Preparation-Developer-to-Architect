@@ -1,0 +1,89 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "40-claude-in-the-software-life-cycle"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: Claude in a repository's workflow (TypeScript)",
+  "lang": "typescript",
+  "main_file": "project/.github/workflows/claude.yml",
+  "files": [
+    "project/.github/workflows/review.yml",
+    "project/.gitignore",
+    "project/CLAUDE.md",
+    "project/REVIEW.md",
+    "project/prompts/CHANGELOG.md",
+    "project/prompts/triage.md"
+  ],
+  "test_file": "tests/pipelineSetup.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "tests/examples/40-workflow-lint/typescript/miniyaml.ts",
+    "tests/examples/40-workflow-lint/typescript/workflowLint.ts",
+    "tests/examples/40-workflow-lint/typescript/example-logger.ts",
+    "logger.ts",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-2/40-claude-in-the-software-life-cycle/prose/unit-02/practice-2/check_files.py",
+    "practice/level-2/40-claude-in-the-software-life-cycle/prose/unit-02/practice-2/project/.github/workflows/claude.yml",
+    "practice/level-2/40-claude-in-the-software-life-cycle/prose/unit-02/practice-2/project/.github/workflows/review.yml",
+    "practice/level-2/40-claude-in-the-software-life-cycle/prose/unit-02/practice-2/project/.gitignore",
+    "practice/level-2/40-claude-in-the-software-life-cycle/prose/unit-02/practice-2/project/CLAUDE.md",
+    "practice/level-2/40-claude-in-the-software-life-cycle/prose/unit-02/practice-2/project/REVIEW.md",
+    "practice/level-2/40-claude-in-the-software-life-cycle/prose/unit-02/practice-2/project/prompts/CHANGELOG.md",
+    "practice/level-2/40-claude-in-the-software-life-cycle/prose/unit-02/practice-2/project/prompts/triage.md"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-2/40-claude-in-the-software-life-cycle/prose/unit-02/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-2/40-claude-in-the-software-life-cycle/prose/unit-02/practice-2/tests/pipelineSetup.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 the mention workflow answers only claude comments and holds no key",
+      "kind": "main",
+      "says": "The mention workflow answers only @claude comments, checks the code out, uses the stable action version, holds no key and passes the course's linter"
+    },
+    {
+      "id": "e1 the review workflow reads the code and posts the review",
+      "kind": "edge",
+      "says": "The review workflow reads the code, runs the review skill with --comment, names the inline comment tool and installs the plugin"
+    },
+    {
+      "id": "e2 each prompt file carries a version that its changelog explains",
+      "kind": "edge",
+      "says": "Each prompt file carries a version that the changelog's newest entry matches"
+    },
+    {
+      "id": "e3 the review guidance and the git workflow are files the reviewer and claude read",
+      "kind": "edge",
+      "says": "The review guidance and the git workflow are files with the required sections"
+    },
+    {
+      "id": "e4 every run is bounded by turns time and concurrency",
+      "kind": "edge",
+      "says": "Every run is bounded by turns, time and concurrency, and a new push replaces a running review"
+    },
+    {
+      "id": "e5 no file holds a key a personal path or an address",
+      "kind": "edge",
+      "says": "No file holds a key, a personal path or an address"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/40-claude-in-the-software-life-cycle/02-ci-code-review-and-repository-events.md"
+}

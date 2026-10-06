@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-1",
+    "01-how-a-language-model-works"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Check yourself: Sampling, knowledge and hallucination",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A ticket router asks Claude to put each support ticket into one category. In testing, the same ticket lands in \"billing\" on one run and \"account\" on the next, though the prompt never changes. Which change best addresses the cause?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Append a line asking for the same category every time, however the ticket reads",
+            "correct": false,
+            "says": "Ruled out because a prompt line \"can make a behaviour much more likely; it cannot make it certain\" (the steerability section)."
+          },
+          {
+            "id": "b",
+            "text": "Constrain replies to an allowed set of labels and validate each one in code",
+            "correct": true,
+            "says": "Variation comes from sampling and infrastructure (the sampling section), so a sentence cannot remove it; narrowing what the model may output and checking it in code can."
+          },
+          {
+            "id": "c",
+            "text": "Set the temperature to zero and treat the output as fixed",
+            "correct": false,
+            "says": "Ruled out because the glossary warns that \"even with temperature set to 0, the results will not be fully deterministic\", and the current models reject any non-default value anyway (the sampling section)."
+          },
+          {
+            "id": "d",
+            "text": "Compare three runs and keep whichever category wins the vote",
+            "correct": false,
+            "says": "Ruled out because comparing runs only reveals the variation: \"Comparing detects the variation; it does not remove it\" (the hallucination list)."
+          }
+        ],
+        "origin": {
+          "path": "course/01-how-a-language-model-works/02-sampling-knowledge-and-hallucination.md",
+          "section": "Steerability"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A refund bot is not given the company's policy file. It states firmly that refunds are allowed for 45 days, while the real policy says 30. What best explains the firm wrong answer?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Its reliable knowledge cutoff predates the policy, so the answer is stale",
+            "correct": false,
+            "says": "Ruled out because the knowledge section says \"anything private (your tickets, your policies), is unknown to it\" whatever the cutoff, so a cutoff date does not decide this."
+          },
+          {
+            "id": "b",
+            "text": "Earlier text overflowed the window and pushed the policy out of view",
+            "correct": false,
+            "says": "Ruled out because the scenario never supplied the file, and private material is unknown to the model \"unless you supply it in the context\", so nothing was pushed out of view."
+          },
+          {
+            "id": "c",
+            "text": "It ignored a policy instruction because the system prompt was worded too weakly",
+            "correct": false,
+            "says": "Ruled out because the scenario never supplied a policy file, and private material is unknown to the model \"unless you supply it in the context\", so there was no instruction to ignore."
+          },
+          {
+            "id": "d",
+            "text": "It produced a typical-sounding number because nothing supplied the true one",
+            "correct": true,
+            "says": "The policy is private material, unknown to the model unless it is placed in the context, and a plausible figure is a likely continuation (the hallucination section)."
+          }
+        ],
+        "origin": {
+          "path": "course/01-how-a-language-model-works/02-sampling-knowledge-and-hallucination.md",
+          "section": "What the model knows, and when it stopped knowing"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,318 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "92-enabling-teams-and-operations"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: rolling Claude Code out to an organisation (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: rolling Claude Code out to an organisation"
+    },
+    {
+      "type": "para",
+      "text": "A company is about to give three hundred developers Claude Code. The platform team has drafted the policy and the plan, and the draft is wrong in several places: the lock that makes managed permissions the only ones sits in a project file where it does nothing, plugins can come from anywhere, a managed default model is mistaken for a lock, the spend limits do not add up, and the adoption targets count lines and prompts. In this practice you correct the files. There is no program to write and no model is called: the tests read your files. The names of the settings are the documented ones of Claude Code (settings and managed-settings pages, read 2026-10-04); the numbers (an effort cap of at most `high`, a baseline of at least 4 weeks, group limits that add up to the organisation limit) are this course's design values. It is in Python, TypeScript, Java and Kotlin; pick your language folder, open `starter/` and edit the files there; each language folder holds its own copy of the files."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The three files exist as a draft that a reader can open and that the tests can parse: the permission deny list, the model setting and the section headings are there. You change values and fill in sections; there is no code to write and no function to log from, because the tests read the files. The draft is wrong in these places, in this order, and each fix unlocks the cases named:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "The managed file does not lock permission rules or turn off bypass mode (`m1`; its deny list already protects the environment file).",
+        "The project file holds the managed-only keys `allowManagedHooksOnly` and `strictKnownMarketplaces`, where they do nothing: move them to the managed file and set `allowManagedHooksOnly` to `true` there (`e1`).",
+        "`strictKnownMarketplaces` is empty and `disableSideloadFlags` is missing: list the company's marketplace and set the flag (`e2`).",
+        "There is no managed MCP allowlist: make it exclusive, give it valid entries and keep the denylist apart (`e3`).",
+        "`model` is set with no `availableModels`, and `maxEffortLevel` is `max`: list the models, keep the default inside the list and cap the effort (`e4`).",
+        "The Spend limits section has one sentence and no table: write the table of limits that add up, and say that usage credits are on (`e5`).",
+        "The Adoption section sets activity as its targets and has no baseline: state the baseline and replace the targets with outcomes (`e6`).",
+        "The Precedence section has the table of the five levels and a `TODO` where the note about groups belongs: write the note, in the words of the rules below (`e7`)."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The sections below describe the whole set of files."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "The project folder holds three files."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`managed/managed-settings.json`: the organisation's policy, as it would be delivered from the admin console or placed on each machine.",
+        "`.claude/settings.json`: the shared project file that the team commits.",
+        "`docs/rollout.md`: the plan, with the sections Precedence, Spend limits and Adoption."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Rules the files must follow:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "The managed file makes managed settings the only source of permission rules (`allowManagedPermissionRulesOnly`), turns off bypass mode (`permissions.disableBypassPermissionsMode` set to `disable`) and denies `Read(./.env)`.",
+        "The keys only an organisation can set (`allowManagedPermissionRulesOnly`, `allowManagedHooksOnly`, `allowManagedMcpServersOnly`, `strictKnownMarketplaces`, `disableSideloadFlags`) are never in the project file, because they have no effect there. Only managed hooks run: `allowManagedHooksOnly` is `true` in the managed file.",
+        "`strictKnownMarketplaces` is a non-empty list of sources the company owns (a `github` repository under `example-org/`, or a `url` under `https://plugins.example.com/`), and `disableSideloadFlags` is `true`.",
+        "`allowManagedMcpServersOnly` is `true`; `allowedMcpServers` has at least one entry; each entry has exactly one of `serverName`, `serverCommand` or `serverUrl`, and a name holds letters, numbers, hyphens and underscores only; no server is both allowed and denied.",
+        "`availableModels` is a non-empty list, a `model` default is one of them, and `maxEffortLevel` is `low`, `medium` or `high` (exactly `high` is allowed; `max` sets no cap).",
+        "The Spend limits section says that usage credits are on and has a table with the columns Level, Name and Monthly limit: one `organization` row, `group` rows whose limits add up to the organisation limit or less (exactly equal is allowed), and a `member` row no larger than the smallest group.",
+        "The Adoption section has a line `Baseline: N weeks` with N at least 4, and an `Outcome targets:` list of at least two lines, each an outcome (pull requests, time to merge, review, defects) and none a measure of activity (lines accepted, prompts, suggestions accepted).",
+        "The Precedence section has a table of the five levels, in order: Managed settings, Command line, Project local, Shared project, User. The plan says that server-managed settings cannot target a group yet (`per-group ... not yet supported`).",
+        "No file holds a home path or an address other than `example.com`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**A lock that sits in the wrong file is no lock.** *You should see* `allowManagedPermissionRulesOnly` and the bypass switch in the managed file, and the environment file denied.",
+        "**A key that a project file cannot set must not be written there.** *You should see* the five managed-only keys in the managed file alone.",
+        "**A plugin is code that runs on a developer's machine.** *You should see* the company's own marketplace allowed, nothing else, and no flag that loads a plugin from a folder.",
+        "**An allowlist that a user can widen is a suggestion.** *You should see* the managed MCP list as the only one that applies, with valid entries and no server in both lists.",
+        "**A managed default model is not a lock.** *You should see* the choice locked by `availableModels` and an effort cap that is a cap.",
+        "**Budgets are checked by adding.** *You should see* group limits that add up to the organisation limit, and a member limit inside every group's.",
+        "**Enablement is measured by what the work produces.** *You should see* outcome targets against a baseline, with activity reported and never set as a target.",
+        "**People need to know which setting wins.** *You should see* the five levels in the documented order and the note about groups."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "The managed file locks permission rules, turns off bypass mode and denies `Read(./.env)`"
+        ],
+        [
+          "`e1`",
+          "The managed-only keys are absent from the project file and `allowManagedHooksOnly` is `true` in the managed file"
+        ],
+        [
+          "`e2`",
+          "`strictKnownMarketplaces` lists only sources the company owns and `disableSideloadFlags` is `true`"
+        ],
+        [
+          "`e3`",
+          "The managed MCP allowlist is exclusive, well formed and disjoint from the denylist"
+        ],
+        [
+          "`e4`",
+          "`availableModels` is set, the default model is in it and the effort cap is at most `high` (exactly `high` is allowed)"
+        ],
+        [
+          "`e5`",
+          "The group limits add up to the organisation limit or less (exactly equal is allowed) and a member's limit is within the smallest group's"
+        ],
+        [
+          "`e6`",
+          "The baseline is at least 4 weeks (exactly 4 is allowed) and the outcome targets are outcomes"
+        ],
+        [
+          "`e7`",
+          "The precedence table has the documented order, the group note is present and no file holds personal data"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "{\n  \"permissions\": {\n    \"deny\": [\"Read(./.env)\", \"Read(./secrets/**)\"],\n    \"disableBypassPermissionsMode\": \"disable\"\n  },\n  \"allowManagedPermissionRulesOnly\": true,\n  \"allowManagedHooksOnly\": true,\n  \"strictKnownMarketplaces\": [\n    {\"source\": \"github\", \"repo\": \"example-org/claude-plugins\"}\n  ],\n  \"disableSideloadFlags\": true,\n  \"allowManagedMcpServersOnly\": true,\n  \"allowedMcpServers\": [{\"serverName\": \"docs\"}, {\"serverName\": \"tickets\"}],\n  \"deniedMcpServers\": [{\"serverName\": \"scratch\"}],\n  \"availableModels\": [\"sonnet\", \"haiku\"],\n  \"model\": \"sonnet\",\n  \"maxEffortLevel\": \"high\"\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.claude/settings.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"permissions\": {\n    \"allow\": [\"Bash(npm test)\", \"Bash(git status)\"]\n  },\n  \"enabledPlugins\": {\"team-tools@example-org-plugins\": true}\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/docs/rollout.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "# Rollout plan\n\n## Precedence\n\nWhen a key is set in more than one place, the highest level wins.\n\n| Level | Source | Who controls it |\n|---|---|---|\n| 1 | Managed settings | The organisation |\n| 2 | Command line | The developer, for one session |\n| 3 | Project local | The developer, for one project |\n| 4 | Shared project | The team, in version control |\n| 5 | User | The developer |\n\nServer-managed settings apply to everyone in the organisation, and per-group policy is not yet supported there. To give one group a different policy, deploy a different file or profile to that group.\n\n## Spend limits\n\nUsage credits are on, so members can continue past their seat allowance, and limits are set at three levels. The group limits add up to the organisation limit and no more.\n\n| Level | Name | Monthly limit |\n|---|---|---|\n| organization | all members | 20000 |\n| group | Platform | 6000 |\n| group | Product | 8000 |\n| group | Data | 6000 |\n| member | default | 500 |\n\n## Adoption\n\nBaseline: 4 weeks of data taken before the rollout.\n\nOutcome targets:\n- Share of merged pull requests with Claude Code assistance\n- Time to merge for pull requests\n\nReported, not targeted: lines accepted and suggestions accepted, because they measure activity and not a result.\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "{\n  \"permissions\": {\n    \"deny\": [\"Read(./.env)\"]\n  },\n  \"strictKnownMarketplaces\": [],\n  \"model\": \"opus\",\n  \"maxEffortLevel\": \"max\"\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.claude/settings.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"permissions\": {\n    \"allow\": [\"Bash(npm test)\", \"Bash(git status)\"]\n  },\n  \"allowManagedHooksOnly\": true,\n  \"strictKnownMarketplaces\": [{\"source\": \"github\", \"repo\": \"example-org/claude-plugins\"}]\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/docs/rollout.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "# Rollout plan\n\n## Precedence\n\nWhen a key is set in more than one place, the highest level wins.\n\n| Level | Source | Who controls it |\n|---|---|---|\n| 1 | Managed settings | The organisation |\n| 2 | Command line | The developer, for one session |\n| 3 | Project local | The developer, for one project |\n| 4 | Shared project | The team, in version control |\n| 5 | User | The developer |\n\nTODO: say what server-managed settings can and cannot do for one group.\n\n## Spend limits\n\nMembers have the seat allowance and nothing else.\n\n## Adoption\n\nTargets:\n- Lines accepted per developer\n- Prompts sent per week\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 7,
+    "code": 3,
+    "tables": 1,
+    "lists": 4,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "3bb0cd65196923a8f322201484812a3abc509f3f6aa68fdec3a3efac6b6922be",
+  "starting_code": "{\n  \"permissions\": {\n    \"deny\": [\"Read(./.env)\"]\n  },\n  \"strictKnownMarketplaces\": [],\n  \"model\": \"opus\",\n  \"maxEffortLevel\": \"max\"\n}\n",
+  "exercise": {
+    "main_path": "practice/level-4/92-enabling-teams-and-operations/prose/unit-01/practice-4/project/managed/managed-settings.json",
+    "test_path": "practice/level-4/92-enabling-teams-and-operations/prose/unit-01/practice-4/src/test/kotlin/RolloutTest.kt",
+    "run_command": [
+      "python3",
+      "practice/level-4/92-enabling-teams-and-operations/prose/unit-01/practice-4/check_files.py",
+      "practice/level-4/92-enabling-teams-and-operations/prose/unit-01/practice-4/project/.claude/settings.json",
+      "practice/level-4/92-enabling-teams-and-operations/prose/unit-01/practice-4/project/docs/rollout.md",
+      "practice/level-4/92-enabling-teams-and-operations/prose/unit-01/practice-4/project/managed/managed-settings.json"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-4/92-enabling-teams-and-operations/prose/unit-01/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_theManagedFileLocksPermissionsAndProtectsTheEnvironmentFile()",
+        "kind": "main",
+        "says": "The managed file locks permission rules, turns off bypass mode and denies Read(./.env)"
+      },
+      {
+        "id": "e1_keysOnlyAnOrganisationCanSetLiveInTheManagedFileAndNeverInTheProjectFile()",
+        "kind": "edge",
+        "says": "The managed-only keys are absent from the project file and allowManagedHooksOnly is true in the managed file"
+      },
+      {
+        "id": "e2_pluginsComeOnlyFromTheCompanysMarketplaceAndCannotBeSideloaded()",
+        "kind": "edge",
+        "says": "strictKnownMarketplaces lists only sources the company owns and disableSideloadFlags is true"
+      },
+      {
+        "id": "e3_onlyTheManagedMcpAllowlistAppliesAndAServerIsNeverAllowedAndDenied()",
+        "kind": "edge",
+        "says": "The managed MCP allowlist is exclusive, well formed and disjoint from the denylist"
+      },
+      {
+        "id": "e4_theModelChoiceIsLockedByAListAndTheEffortCapIsAtMostHigh()",
+        "kind": "edge",
+        "says": "availableModels is set, the default model is in it and the effort cap is at most high (exactly high is allowed)"
+      },
+      {
+        "id": "e5_theGroupSpendLimitsAddUpToTheOrganisationLimitAndNoMore()",
+        "kind": "edge",
+        "says": "The group limits add up to the organisation limit or less (exactly equal is allowed) and a member's limit is within the smallest group's"
+      },
+      {
+        "id": "e6_adoptionIsMeasuredByOutcomesAgainstABaselineOfAtLeast4Weeks()",
+        "kind": "edge",
+        "says": "The baseline is at least 4 weeks (exactly 4 is allowed) and the outcome targets are outcomes"
+      },
+      {
+        "id": "e7_thePrecedenceTableIsInTheDocumentedOrderAndNoFileHoldsPersonalData()",
+        "kind": "edge",
+        "says": "The precedence table has the documented order, the group note is present and no file holds personal data"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-4/92-enabling-teams-and-operations/prose/unit-01/practice-4/target/test-results/test"
+    },
+    "origin": "course/92-enabling-teams-and-operations/01-one-setting-in-five-places-precedence-locks-and-managed-only-keys.md",
+    "concepts": [
+      "the practice of One setting in five places: precedence, locks and managed-only keys is solved"
+    ],
+    "files": [
+      "practice/level-4/92-enabling-teams-and-operations/prose/unit-01/practice-4/project/.claude/settings.json",
+      "practice/level-4/92-enabling-teams-and-operations/prose/unit-01/practice-4/project/docs/rollout.md"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "enabling-teams-and-operations-u1"
+}

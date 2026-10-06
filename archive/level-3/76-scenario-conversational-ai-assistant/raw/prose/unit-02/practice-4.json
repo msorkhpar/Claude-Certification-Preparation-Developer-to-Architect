@@ -1,0 +1,307 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "76-scenario-conversational-ai-assistant"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: review a batch of assistant conversations (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: review a batch of assistant conversations"
+    },
+    {
+      "type": "para",
+      "text": "A team runs a conversational assistant for a book shop. It has a persona, remembers a customer between sessions and hands over to a person when it should. Before each release the team reads a batch of conversations that reviewers have labelled, and decides whether the assistant may ship. In this practice you write that review: how many conversations the assistant settled alone, whether every signal of risk reached a person as a safety hand-off, whether conversations ran too long, how often the assistant asked the same question twice, which kinds of conversation are weak, and the verdict with its first reason. The model is not called: the tests give you the labelled batch. The shapes of the batch, of the policy and of the report are this course's own design for the capstone, not an Anthropic interface. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`review`); TypeScript has the same name and the same snake-case fields. Java has the static method `ConversationReview.review` and the records `Conversation`, `Policy`, `Segment` and `Report` with camel-case fields (`neededPerson`, `maxTurns`, `resolvedPct`); Kotlin has the top-level function `review` and the data classes of the same names."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working review with eight gaps cut out of it. The reading of the policy, the repeated count and the assembly of the report are written and correct. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`percent` unlocks `e9` (and the figures of `m1` and `e1`): the whole percentage, rounded half up.",
+        "`settled` unlocks `e8`: whether the assistant settled a conversation alone.",
+        "`count_safety_missed` unlocks `e2`: risk signals that did not reach a person as a safety hand-off.",
+        "`count_overlong` unlocks `e3`: conversations above the turn limit that nobody took over.",
+        "`is_repeat_ok` unlocks `e4` (and `e1`): the repeated-question limit, met at the limit.",
+        "`count_escalations` unlocks `e7`: over- and under-escalation.",
+        "`segments_of` unlocks `e5` and `e6`: the segments and when one is weak.",
+        "`choose_verdict` unlocks `e1`, `e2` and the verdict of `m1`: the hold or ship decision and its reason."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About fifteen lines in all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "A conversation is `{id, segment, turns, resolved, handoff, needed_person, repeated, risk}`: `handoff` is `none`, `requested` (the customer asked for a person), `safety` (a signal of risk was routed to a person) or `stalled` (the assistant gave up after repeated misunderstanding); `resolved` says that the customer's problem was solved; `needed_person` is the reviewers' label that a person was needed; `repeated` says that the assistant asked the same question twice; `risk` says that the customer said something that signals risk to their safety. The policy is `{max_turns, max_repeat, min_resolved, min_n}`: the longest conversation without a hand-off, the most repeated questions in percent, the lowest resolution rate of a segment in percent, and the fewest conversations that may justify calling a segment weak."
+    },
+    {
+      "type": "para",
+      "text": "`review(conversations, policy)` returns a report with:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`n`: the number of conversations. `resolved`: those that are `resolved` **and** have `handoff` `none` (a conversation a person settled is not one the assistant settled). `resolved_pct`: that count as a whole percentage rounded half up, `(200 * count + total) // (2 * total)`, and 0 when the total is 0.",
+        "`safety_missed`: the conversations with `risk` whose `handoff` is not `safety`.",
+        "`overlong`: the conversations with more than `max_turns` turns and `handoff` `none`.",
+        "`repeat_pct`: the percentage with `repeated`, rounded the same way. `repeat_ok`: true when `repeated * 100 <= max_repeat * n` (true for an empty batch).",
+        "`over_escalated`: the hand-offs (any `handoff` other than `none`) with no `needed_person` and no `risk`. `under_escalated`: the conversations with `handoff` `none` and `needed_person`.",
+        "`segments`: one entry per segment, sorted by name, `{segment, n, resolved, percent, weak}` with `resolved` counted as above. `weak` is true when the segment has at least `min_n` conversations and `resolved * 100 < min_resolved * n` for that segment.",
+        "`verdict` and `reason`: `hold` with `no_data` for an empty batch; otherwise the first that applies of `safety` (any `safety_missed`), `weak_segment` (any weak segment) and `repeats` (not `repeat_ok`), with verdict `hold`; when none applies the reason is `none` and the verdict is `ship`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**A safety signal is a hand-off in code.** The assistant may be warm and still miss a signal of risk; a person has to receive it. *You should see* a risk that reached a person only because the customer asked for one counted as missed, and a hold whatever else is good.",
+        "**Limits are limits.** A limit is met at the limit. *You should see* exactly 12 turns acceptable and 13 not, exactly 10 percent repeated questions acceptable and 20 not, and a segment exactly at the resolution floor not weak.",
+        "**Small segments prove nothing.** A weak segment needs enough conversations behind it. *You should see* two unresolved conversations left alone and three called weak.",
+        "**Say who settled it.** A conversation a person took over is not an assistant success. *You should see* it left out of the resolved count."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A mixed batch gets every count, the segments and a verdict"
+        ],
+        [
+          "`e1`",
+          "An empty batch has zero figures and is held for lack of data"
+        ],
+        [
+          "`e2`",
+          "A safety signal counts as missed unless it went to a person as a safety hand-off"
+        ],
+        [
+          "`e3`",
+          "A conversation is overlong only above the turn limit and only when nobody took over"
+        ],
+        [
+          "`e4`",
+          "Repeated questions are acceptable at exactly the limit and not above it"
+        ],
+        [
+          "`e5`",
+          "A segment is weak only below the resolution floor and not at it"
+        ],
+        [
+          "`e6`",
+          "A segment needs the minimum number of conversations before it can be called weak"
+        ],
+        [
+          "`e7`",
+          "A hand-off is over-escalation only when no person was needed and no safety signal was present"
+        ],
+        [
+          "`e8`",
+          "Only conversations the assistant settled alone count as resolved"
+        ],
+        [
+          "`e9`",
+          "Percentages are whole numbers rounded half up"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "private val log = System.getLogger(\"conversation_review\")\n\ndata class Conversation(val id: String, val segment: String, val turns: Int, val resolved: Boolean, val handoff: String, val neededPerson: Boolean, val repeated: Boolean, val risk: Boolean)\n\ndata class Policy(val maxTurns: Int, val maxRepeat: Int, val minResolved: Int, val minN: Int)\n\ndata class Segment(val segment: String, val n: Int, val resolved: Int, val percent: Int, val weak: Boolean)\n\ndata class Report(\n    val n: Int, val resolved: Int, val resolvedPct: Int, val safetyMissed: Int, val overlong: Int, val repeatPct: Int, val repeatOk: Boolean, val overEscalated: Int,\n    val underEscalated: Int, val segments: List<Segment>, val verdict: String, val reason: String,\n)\n\n/** A whole percentage, rounded half up; 0 when there is nothing to divide. */\nfun percent(count: Int, total: Int): Int = if (total > 0) (200 * count + total) / (2 * total) else 0\n\n/** True when the assistant settled the conversation alone: resolved and no hand-off. */\nfun settled(c: Conversation): Boolean = c.resolved && c.handoff == \"none\"\n\n/** The conversations with a risk signal whose hand-off is not a safety hand-off. */\nfun countSafetyMissed(conversations: List<Conversation>): Int = conversations.count { it.risk && it.handoff != \"safety\" }\n\n/** The conversations above the turn limit that nobody took over. */\nfun countOverlong(conversations: List<Conversation>, maxTurns: Int): Int = conversations.count { it.turns > maxTurns && it.handoff == \"none\" }\n\n/** True when the repeated questions are at most maxRepeat percent of the batch (true for an empty batch). */\nfun isRepeatOk(repeated: Int, n: Int, maxRepeat: Int): Boolean = repeated * 100 <= maxRepeat * n\n\n/** Pair(overEscalated, underEscalated): hand-offs nobody needed, and conversations that needed a person and got none. */\nfun countEscalations(conversations: List<Conversation>): Pair<Int, Int> =\n    Pair(conversations.count { it.handoff != \"none\" && !it.neededPerson && !it.risk }, conversations.count { it.handoff == \"none\" && it.neededPerson })\n\n/** One entry per segment, sorted by name. */\nfun segmentsOf(conversations: List<Conversation>, policy: Policy): List<Segment> = conversations.map { it.segment }.toSortedSet().map { name ->\n    val group = conversations.filter { it.segment == name }\n    val done = group.count { settled(it) }\n    Segment(name, group.size, done, percent(done, group.size), group.size >= policy.minN && done * 100 < policy.minResolved * group.size)\n}\n\n/** Pair(verdict, reason): hold for no data, then for a missed safety signal, a weak segment and repeats; otherwise ship. */\nfun chooseVerdict(n: Int, safetyMissed: Int, segments: List<Segment>, repeatOk: Boolean): Pair<String, String> = when {\n    n == 0 -> Pair(\"hold\", \"no_data\")\n    safetyMissed > 0 -> Pair(\"hold\", \"safety\")\n    segments.any { it.weak } -> Pair(\"hold\", \"weak_segment\")\n    !repeatOk -> Pair(\"hold\", \"repeats\")\n    else -> Pair(\"ship\", \"none\")\n}\n\n/** Review a batch of assistant conversations: how many the assistant settled, whether every safety signal reached a person, and whether the assistant may ship. */\nfun review(conversations: List<Conversation>, policy: Policy): Report {\n    log.log(System.Logger.Level.DEBUG, \"review input: {0}\", conversations)\n    val n = conversations.size\n    val resolved = conversations.count { settled(it) }\n    val safetyMissed = countSafetyMissed(conversations)\n    val repeated = conversations.count { it.repeated }\n    val repeatOk = isRepeatOk(repeated, n, policy.maxRepeat)\n    val (overEscalated, underEscalated) = countEscalations(conversations)\n    val segments = segmentsOf(conversations, policy)\n    val (verdict, reason) = chooseVerdict(n, safetyMissed, segments, repeatOk)\n    return Report(n, resolved, percent(resolved, n), safetyMissed, countOverlong(conversations, policy.maxTurns), percent(repeated, n), repeatOk, overEscalated, underEscalated, segments,\n        verdict, reason)\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    val policy = Policy(12, 10, 80, 3)\n    // A batch of conversations: billing mostly resolved, a safety case handed off, one overlong smalltalk.\n    val batch = List(3) { Conversation(\"c\", \"billing\", 5, true, \"none\", false, false, false) } + listOf(\n        Conversation(\"c\", \"billing\", 5, false, \"requested\", true, false, false),\n        Conversation(\"c\", \"smalltalk\", 5, true, \"none\", false, false, false),\n        Conversation(\"c\", \"smalltalk\", 15, true, \"none\", false, false, false),\n        Conversation(\"c\", \"safety\", 5, false, \"safety\", true, false, true),\n        Conversation(\"c\", \"billing\", 5, true, \"none\", false, true, false))\n    println(review(batch, policy))\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "private val log = System.getLogger(\"conversation_review\")\n\ndata class Conversation(val id: String, val segment: String, val turns: Int, val resolved: Boolean, val handoff: String, val neededPerson: Boolean, val repeated: Boolean, val risk: Boolean)\n\ndata class Policy(val maxTurns: Int, val maxRepeat: Int, val minResolved: Int, val minN: Int)\n\ndata class Segment(val segment: String, val n: Int, val resolved: Int, val percent: Int, val weak: Boolean)\n\ndata class Report(\n    val n: Int, val resolved: Int, val resolvedPct: Int, val safetyMissed: Int, val overlong: Int, val repeatPct: Int, val repeatOk: Boolean, val overEscalated: Int,\n    val underEscalated: Int, val segments: List<Segment>, val verdict: String, val reason: String,\n)\n\n/**\n * TODO 1 of 8 (unlocks m1, e1 and e9): a whole percentage, rounded half up.\n * Receives a count and a total. Returns `(200 * count + total) / (2 * total)` in integer arithmetic, and 0 when the total is 0.\n * Example: percent(2, 3) -> 67, percent(1, 8) -> 13, percent(0, 0) -> 0\n */\nfun percent(count: Int, total: Int): Int = 0\n\n/**\n * TODO 2 of 8 (unlocks m1 and e8): did the assistant settle this conversation alone?\n * Receives one conversation. Returns true only when `resolved` is true and `handoff` is `none` (a conversation a person settled is not one the assistant settled).\n * Example: a resolved conversation with handoff \"requested\" -> false\n */\nfun settled(c: Conversation): Boolean = false\n\n/**\n * TODO 3 of 8 (unlocks e2): count the safety signals that did not reach a person as a safety hand-off.\n * Receives the conversations. Returns how many have `risk` and a `handoff` other than `safety` (`none` and `requested` both count as missed).\n * Example: one risk conversation with handoff \"requested\" and one with \"safety\" -> 1\n */\nfun countSafetyMissed(conversations: List<Conversation>): Int = 0\n\n/**\n * TODO 4 of 8 (unlocks e3): count the overlong conversations.\n * Receives the conversations and the limit. Returns how many have more than `maxTurns` turns and `handoff` `none`.\n * Example: with a limit of 12, turns 12 -> 0, turns 13 -> 1, turns 30 with handoff \"stalled\" -> 0\n */\nfun countOverlong(conversations: List<Conversation>, maxTurns: Int): Int = 0\n\n/**\n * TODO 5 of 8 (unlocks e1 and e4): are the repeated questions within the limit?\n * Receives the repeated count, the batch size and the limit in percent. Returns true when `repeated * 100 <= maxRepeat * n` (so true for an empty batch).\n * Example: isRepeatOk(1, 10, 10) -> true, isRepeatOk(2, 10, 10) -> false\n */\nfun isRepeatOk(repeated: Int, n: Int, maxRepeat: Int): Boolean = false\n\n/**\n * TODO 6 of 8 (unlocks e7): count over- and under-escalation.\n * Receives the conversations. Returns Pair(overEscalated, underEscalated): hand-offs (any `handoff` but `none`) with no `neededPerson` and no `risk`,\n * and conversations with `handoff` `none` that had `neededPerson`.\n * Example: a \"requested\" hand-off nobody needed -> Pair(1, 0); a \"safety\" hand-off with risk -> Pair(0, 0)\n */\nfun countEscalations(conversations: List<Conversation>): Pair<Int, Int> = Pair(0, 0)\n\n/**\n * TODO 7 of 8 (unlocks m1, e5 and e6): one entry per segment.\n * Receives the conversations and the policy. Returns a list sorted by segment name of Segment(segment, n, resolved, percent, weak), with `resolved` counted by `settled`.\n * `weak` needs at least `minN` conversations and `resolved * 100 < minResolved * n` for the segment.\n * Example: 3 unresolved \"refunds\" conversations with minN 3 -> [Segment(\"refunds\", 3, 0, 0, true)]\n */\nfun segmentsOf(conversations: List<Conversation>, policy: Policy): List<Segment> = listOf(Segment(\"\", 0, 0, 0, false))\n\n/**\n * TODO 8 of 8 (unlocks m1, e1, e2 and e4): the verdict and its reason.\n * Receives the batch size, the missed safety count, the segments and `repeatOk`. Returns Pair(verdict, reason): Pair(\"hold\", \"no_data\") for an empty batch,\n * otherwise the first that applies of Pair(\"hold\", \"safety\"), Pair(\"hold\", \"weak_segment\") and Pair(\"hold\", \"repeats\"), and Pair(\"ship\", \"none\") when none does.\n * Example: chooseVerdict(5, 0, emptyList(), false) -> Pair(\"hold\", \"repeats\")\n */\nfun chooseVerdict(n: Int, safetyMissed: Int, segments: List<Segment>, repeatOk: Boolean): Pair<String, String> = Pair(\"\", \"\")\n\n/** Review a batch of assistant conversations: how many the assistant settled, whether every safety signal reached a person, and whether the assistant may ship. */\nfun review(conversations: List<Conversation>, policy: Policy): Report {\n    log.log(System.Logger.Level.DEBUG, \"review input: {0}\", conversations)\n    val n = conversations.size\n    val resolved = conversations.count { settled(it) }\n    val safetyMissed = countSafetyMissed(conversations)\n    val repeated = conversations.count { it.repeated }\n    val repeatOk = isRepeatOk(repeated, n, policy.maxRepeat)\n    val (overEscalated, underEscalated) = countEscalations(conversations)\n    val segments = segmentsOf(conversations, policy)\n    val (verdict, reason) = chooseVerdict(n, safetyMissed, segments, repeatOk)\n    return Report(n, resolved, percent(resolved, n), safetyMissed, countOverlong(conversations, policy.maxTurns), percent(repeated, n), repeatOk, overEscalated, underEscalated, segments,\n        verdict, reason)\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    val policy = Policy(12, 10, 80, 3)\n    // A batch of conversations: billing mostly resolved, a safety case handed off, one overlong smalltalk.\n    val batch = List(3) { Conversation(\"c\", \"billing\", 5, true, \"none\", false, false, false) } + listOf(\n        Conversation(\"c\", \"billing\", 5, false, \"requested\", true, false, false),\n        Conversation(\"c\", \"smalltalk\", 5, true, \"none\", false, false, false),\n        Conversation(\"c\", \"smalltalk\", 15, true, \"none\", false, false, false),\n        Conversation(\"c\", \"safety\", 5, false, \"safety\", true, false, true),\n        Conversation(\"c\", \"billing\", 5, true, \"none\", false, true, false))\n    println(review(batch, policy))\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 7,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "f49e1903f8c0b3e87395449f643232c743574551c0920de8a15017b412bc2737",
+  "starting_code": "private val log = System.getLogger(\"conversation_review\")\n\ndata class Conversation(val id: String, val segment: String, val turns: Int, val resolved: Boolean, val handoff: String, val neededPerson: Boolean, val repeated: Boolean, val risk: Boolean)\n\ndata class Policy(val maxTurns: Int, val maxRepeat: Int, val minResolved: Int, val minN: Int)\n\ndata class Segment(val segment: String, val n: Int, val resolved: Int, val percent: Int, val weak: Boolean)\n\ndata class Report(\n    val n: Int, val resolved: Int, val resolvedPct: Int, val safetyMissed: Int, val overlong: Int, val repeatPct: Int, val repeatOk: Boolean, val overEscalated: Int,\n    val underEscalated: Int, val segments: List<Segment>, val verdict: String, val reason: String,\n)\n\n/**\n * TODO 1 of 8 (unlocks m1, e1 and e9): a whole percentage, rounded half up.\n * Receives a count and a total. Returns `(200 * count + total) / (2 * total)` in integer arithmetic, and 0 when the total is 0.\n * Example: percent(2, 3) -> 67, percent(1, 8) -> 13, percent(0, 0) -> 0\n */\nfun percent(count: Int, total: Int): Int = 0\n\n/**\n * TODO 2 of 8 (unlocks m1 and e8): did the assistant settle this conversation alone?\n * Receives one conversation. Returns true only when `resolved` is true and `handoff` is `none` (a conversation a person settled is not one the assistant settled).\n * Example: a resolved conversation with handoff \"requested\" -> false\n */\nfun settled(c: Conversation): Boolean = false\n\n/**\n * TODO 3 of 8 (unlocks e2): count the safety signals that did not reach a person as a safety hand-off.\n * Receives the conversations. Returns how many have `risk` and a `handoff` other than `safety` (`none` and `requested` both count as missed).\n * Example: one risk conversation with handoff \"requested\" and one with \"safety\" -> 1\n */\nfun countSafetyMissed(conversations: List<Conversation>): Int = 0\n\n/**\n * TODO 4 of 8 (unlocks e3): count the overlong conversations.\n * Receives the conversations and the limit. Returns how many have more than `maxTurns` turns and `handoff` `none`.\n * Example: with a limit of 12, turns 12 -> 0, turns 13 -> 1, turns 30 with handoff \"stalled\" -> 0\n */\nfun countOverlong(conversations: List<Conversation>, maxTurns: Int): Int = 0\n\n/**\n * TODO 5 of 8 (unlocks e1 and e4): are the repeated questions within the limit?\n * Receives the repeated count, the batch size and the limit in percent. Returns true when `repeated * 100 <= maxRepeat * n` (so true for an empty batch).\n * Example: isRepeatOk(1, 10, 10) -> true, isRepeatOk(2, 10, 10) -> false\n */\nfun isRepeatOk(repeated: Int, n: Int, maxRepeat: Int): Boolean = false\n\n/**\n * TODO 6 of 8 (unlocks e7): count over- and under-escalation.\n * Receives the conversations. Returns Pair(overEscalated, underEscalated): hand-offs (any `handoff` but `none`) with no `neededPerson` and no `risk`,\n * and conversations with `handoff` `none` that had `neededPerson`.\n * Example: a \"requested\" hand-off nobody needed -> Pair(1, 0); a \"safety\" hand-off with risk -> Pair(0, 0)\n */\nfun countEscalations(conversations: List<Conversation>): Pair<Int, Int> = Pair(0, 0)\n\n/**\n * TODO 7 of 8 (unlocks m1, e5 and e6): one entry per segment.\n * Receives the conversations and the policy. Returns a list sorted by segment name of Segment(segment, n, resolved, percent, weak), with `resolved` counted by `settled`.\n * `weak` needs at least `minN` conversations and `resolved * 100 < minResolved * n` for the segment.\n * Example: 3 unresolved \"refunds\" conversations with minN 3 -> [Segment(\"refunds\", 3, 0, 0, true)]\n */\nfun segmentsOf(conversations: List<Conversation>, policy: Policy): List<Segment> = listOf(Segment(\"\", 0, 0, 0, false))\n\n/**\n * TODO 8 of 8 (unlocks m1, e1, e2 and e4): the verdict and its reason.\n * Receives the batch size, the missed safety count, the segments and `repeatOk`. Returns Pair(verdict, reason): Pair(\"hold\", \"no_data\") for an empty batch,\n * otherwise the first that applies of Pair(\"hold\", \"safety\"), Pair(\"hold\", \"weak_segment\") and Pair(\"hold\", \"repeats\"), and Pair(\"ship\", \"none\") when none does.\n * Example: chooseVerdict(5, 0, emptyList(), false) -> Pair(\"hold\", \"repeats\")\n */\nfun chooseVerdict(n: Int, safetyMissed: Int, segments: List<Segment>, repeatOk: Boolean): Pair<String, String> = Pair(\"\", \"\")\n\n/** Review a batch of assistant conversations: how many the assistant settled, whether every safety signal reached a person, and whether the assistant may ship. */\nfun review(conversations: List<Conversation>, policy: Policy): Report {\n    log.log(System.Logger.Level.DEBUG, \"review input: {0}\", conversations)\n    val n = conversations.size\n    val resolved = conversations.count { settled(it) }\n    val safetyMissed = countSafetyMissed(conversations)\n    val repeated = conversations.count { it.repeated }\n    val repeatOk = isRepeatOk(repeated, n, policy.maxRepeat)\n    val (overEscalated, underEscalated) = countEscalations(conversations)\n    val segments = segmentsOf(conversations, policy)\n    val (verdict, reason) = chooseVerdict(n, safetyMissed, segments, repeatOk)\n    return Report(n, resolved, percent(resolved, n), safetyMissed, countOverlong(conversations, policy.maxTurns), percent(repeated, n), repeatOk, overEscalated, underEscalated, segments,\n        verdict, reason)\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/76-scenario-conversational-ai-assistant/prose/unit-02/practice-4/src/main/kotlin/ConversationReview.kt",
+    "test_path": "practice/level-3/76-scenario-conversational-ai-assistant/prose/unit-02/practice-4/src/test/kotlin/ConversationReviewTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/76-scenario-conversational-ai-assistant/prose/unit-02/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/76-scenario-conversational-ai-assistant/prose/unit-02/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_aMixedBatchGetsEveryCountTheSegmentsAndAVerdict()",
+        "kind": "main",
+        "says": "A mixed batch gets every count, the segments and a verdict"
+      },
+      {
+        "id": "e1_anEmptyBatchHasZeroFiguresAndIsHeldForLackOfData()",
+        "kind": "edge",
+        "says": "An empty batch has zero figures and is held for lack of data"
+      },
+      {
+        "id": "e2_aSafetySignalCountsAsMissedUnlessItWentToAPersonAsASafetyHandOff()",
+        "kind": "edge",
+        "says": "A safety signal counts as missed unless it went to a person as a safety hand-off"
+      },
+      {
+        "id": "e3_aConversationIsOverlongOnlyAboveTheTurnLimitAndOnlyWhenNobodyTookOver()",
+        "kind": "edge",
+        "says": "A conversation is overlong only above the turn limit and only when nobody took over"
+      },
+      {
+        "id": "e4_repeatedQuestionsAreAcceptableAtExactlyTheLimitAndNotAboveIt()",
+        "kind": "edge",
+        "says": "Repeated questions are acceptable at exactly the limit and not above it"
+      },
+      {
+        "id": "e5_aSegmentIsWeakOnlyBelowTheResolutionFloorAndNotAtIt()",
+        "kind": "edge",
+        "says": "A segment is weak only below the resolution floor and not at it"
+      },
+      {
+        "id": "e6_aSegmentNeedsTheMinimumNumberOfConversationsBeforeItCanBeCalledWeak()",
+        "kind": "edge",
+        "says": "A segment needs the minimum number of conversations before it can be called weak"
+      },
+      {
+        "id": "e7_aHandOffIsOverEscalationOnlyWhenNoPersonWasNeededAndNoSafetySignalWasPresent()",
+        "kind": "edge",
+        "says": "A hand-off is over-escalation only when no person was needed and no safety signal was present"
+      },
+      {
+        "id": "e8_onlyConversationsTheAssistantSettledAloneCountAsResolved()",
+        "kind": "edge",
+        "says": "Only conversations the assistant settled alone count as resolved"
+      },
+      {
+        "id": "e9_percentagesAreWholeNumbersRoundedHalfUp()",
+        "kind": "edge",
+        "says": "Percentages are whole numbers rounded half up"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/76-scenario-conversational-ai-assistant/prose/unit-02/practice-4/target/test-results/test"
+    },
+    "origin": "course/76-scenario-conversational-ai-assistant/02-sensitive-talk-hand-offs-and-judging-a-conversation.md",
+    "concepts": [
+      "the practice of Sensitive talk, hand-offs and judging a conversation is solved"
+    ],
+    "files": [
+      "practice/level-3/76-scenario-conversational-ai-assistant/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "scenario-conversational-ai-assistant-u2"
+}

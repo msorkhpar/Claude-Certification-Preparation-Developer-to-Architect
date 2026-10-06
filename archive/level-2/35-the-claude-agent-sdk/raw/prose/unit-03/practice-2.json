@@ -1,0 +1,296 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "35-the-claude-agent-sdk"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: an agent that may read, but not do harm (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an agent that may read, but not do harm"
+    },
+    {
+      "type": "para",
+      "text": "The Claude Agent SDK runs the same agent loop as Claude Code, as a library: your program calls `query()`, and the SDK starts the Claude Code binary as a child process and exchanges messages with it. The model and the tools live in that binary. What you own is the part around it: which tools exist, which calls are allowed, what a hook may veto, how long the run may last, and what you make of the stream of messages that comes back. Write that part. The options, the permission order, the hook output and the message types come from the Agent SDK documentation and the SDK's own type definitions at the versions in `docs/VERSIONS.md`, read on 2026-10-03; the lesson pages explain them. The tests never call the model. They start `harness/fake_claude.py`, a scripted stand-in for the binary that speaks the same protocol, through the SDK's own path option (`cli_path` in Python, `pathToClaudeCodeExecutable` in TypeScript), so the SDK code you call is the real one."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`READ_TOOLS`, `EDIT_TOOLS`, `SAFE_COMMANDS`, `STATUS`",
+          "the read tools (`Read`, `Grep`, `Glob`), the edit tools (`Edit`, `Write`), the shell words that may run (`ls`, `cat`, `pytest`), and the map from a result subtype to the course status"
+        ],
+        [
+          "`project_dir`",
+          "the one directory the agent may touch"
+        ],
+        [
+          "`mode`",
+          "`readonly` (the default) or `edit`"
+        ],
+        [
+          "`cli_path`",
+          "the executable that the SDK starts; the tests pass the stand-in"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is the working code with nine small gaps cut out. The path helpers, the options plumbing, `decide`, the hook, `summarize` and `run_agent` are written and correct; each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file (`log.debug(...)` in Python, `log.debug(...)` on the `logger` in TypeScript); a run shows the lines under the failing case. The names are in Python style; TypeScript uses camelCase (`isSecretName`, `makeCanUseTool`)."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_is_secret_name` unlocks `e2`: which file names hold secrets.",
+        "`_dangerous` unlocks `e3`: `sudo` and `rm -rf`.",
+        "`_chained` unlocks `e3`: chaining, pipes, redirection and substitution.",
+        "`_command_allowed` unlocks `e3`: the first word against `SAFE_COMMANDS`.",
+        "`make_can_use_tool` unlocks `m1` and `e7`: the callback that turns `decide()` into the SDK's allow or deny result.",
+        "`_is_push` unlocks `e4`: the whole-word `git push` test.",
+        "`build_options` unlocks `e1`: the options that reach the CLI as flags.",
+        "`_denied` unlocks `e5` and `e7`: counting the tool results marked as errors.",
+        "`_status` unlocks `e5`: the course status of a result subtype."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The sections below describe the whole program; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`decide(tool_name, tool_input, project_dir, mode)` is the permission policy as plain data: `{\"behavior\": \"allow\"}` or `{\"behavior\": \"deny\", \"message\", \"interrupt\"}`.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`Read`, `Grep`, `Glob`, `Edit` and `Write` take the path from `file_path` or else `path`; a call with no path is allowed (a search of the project). `Edit` and `Write` in `readonly` mode: deny, `Edits are not allowed in readonly mode`, checked first.",
+              "A path outside the project (relative paths are taken from `project_dir`, `..` is resolved, and a sibling folder whose name merely starts like the project's is outside): deny, `{path} is outside the project`, with the path as given.",
+              "A file whose name starts with `.env`, except `.env.example`: deny, `{name} holds secrets and is never read`, with the file name only. An edit of a path that has a `.git` folder in it: deny, `{path} is inside .git`.",
+              "`Bash` looks at `command`. When it contains the word `sudo` or the text `rm -rf`: deny, `Dangerous command`, with `interrupt` true (the whole run stops). Otherwise when it contains `;`, `&`, `|`, `<`, `>`, a backtick or `$(`: deny, `Command not allowed: no chaining or redirection`. Otherwise it is allowed when its first word is one of `SAFE_COMMANDS`; else deny, `Command not allowed: only ls, cat and pytest`.",
+              "Any other tool: deny, `{tool} is not allowed`. `interrupt` is false for every denial except the dangerous command."
+            ]
+          }
+        ],
+        "`make_can_use_tool(project_dir, mode)` returns the callback the SDK calls for a tool that is not already decided: it turns `decide()` into the SDK's allow result (carrying the input back as the updated input) or deny result (message and interrupt).",
+        "`bash_guard` is a `PreToolUse` hook. When the command of a `Bash` call runs `git push` (the two words, with any white space between, and as whole words: `git pushd` and `legit push` are not pushes), it returns the hook output that denies the call, with the reason `Nothing is pushed from an agent`; otherwise it returns an empty result. A hook runs before the permission callback.",
+        "`build_options(project_dir, cli_path, mode)` builds the SDK options: the CLI path, `cwd` the project, the available tools (`Read`, `Grep`, `Glob`, `Bash`, plus `Edit` and `Write` in `edit` mode), **no pre-approved tools** (an allow list would let those tools run without the callback being asked), `Bash(rm *)` disallowed, at most 6 turns, a budget of 0.5 US dollars, permission mode `default`, no setting sources (the run does not read user or project settings), the callback and the hook for `Bash`.",
+        "`summarize(messages)` folds the messages of one run into `{\"status\", \"text\", \"tools\", \"turns\", \"cost\", \"denied\"}`: `tools` lists the name of every tool call in order; `denied` counts the tool results marked as errors; `text` is the result text, or when that is empty or missing the last text the assistant wrote; `turns` and `cost` come from the result message (a missing cost is 0). The status is `STATUS[subtype]`, or the subtype itself when it is not in `STATUS`. A run with no result message is `{\"status\": \"incomplete\", ..., \"turns\": 0, \"cost\": 0}`.",
+        "`run_agent(prompt, project_dir, cli_path, mode)` runs `query()` with those options, collects every message and returns the summary. A single-shot `query()` that ends on an error result (the turn limit, the budget) yields that result and then raises, because the process exits with a nonzero code; that raise is not a failure of the run, so a summary is still returned once a result message has arrived. An error with no result message before it (the process died) is not hidden: it propagates."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Every tool call goes through the permission callback, and the run is summarised"
+        ],
+        [
+          "`e1`",
+          "The options reach the CLI as flags, and the run starts in the project"
+        ],
+        [
+          "`e2`",
+          "File tools stay inside the project and away from secrets"
+        ],
+        [
+          "`e3`",
+          "Bash is limited to a few commands, and dangerous ones stop the run"
+        ],
+        [
+          "`e4`",
+          "A hook blocks a push before the permission callback is asked"
+        ],
+        [
+          "`e5`",
+          "The messages of a run fold into a summary"
+        ],
+        [
+          "`e6`",
+          "An error result still gives its summary, and a crash is not hidden"
+        ],
+        [
+          "`e7`",
+          "Denied calls are counted, and the run still ends with a result"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Code around the Claude Agent SDK: options, a permission callback, a hook and the message handling. See ../../statement.md.\nimport { posix as path } from \"node:path\";\nimport { query } from \"@anthropic-ai/claude-agent-sdk\";\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"agent\");\n\nexport const READ_TOOLS = [\"Read\", \"Grep\", \"Glob\"];\nexport const EDIT_TOOLS = [\"Edit\", \"Write\"];\nexport const SAFE_COMMANDS = [\"ls\", \"cat\", \"pytest\"];\nexport const STATUS: Record<string, string> = { success: \"done\", error_max_turns: \"max_turns\", error_max_budget_usd: \"budget\", error_during_execution: \"failed\" };\n\nconst absolute = (projectDir: string, p: string) => (p.startsWith(\"/\") ? path.normalize(p).replace(/(.)\\/$/, \"$1\") : path.normalize(path.join(projectDir, p)).replace(/(.)\\/$/, \"$1\"));\n\nfunction inside(projectDir: string, p: string): boolean {\n  const full = absolute(projectDir, p), root = path.normalize(projectDir).replace(/(.)\\/$/, \"$1\");\n  return full === root || full.startsWith(root + \"/\");\n}\n\nexport type Verdict = { behavior: \"allow\" } | { behavior: \"deny\"; message: string; interrupt: boolean };\n\nconst isSecretName = (base: string): boolean => base.startsWith(\".env\") && base !== \".env.example\";\nconst isDangerous = (command: string): boolean => /\\bsudo\\b/.test(command) || command.includes(\"rm -rf\");\nconst isChained = (command: string): boolean => /[;&|<>`]|\\$\\(/.test(command);\nconst commandAllowed = (command: string): boolean => SAFE_COMMANDS.includes(command.trim().split(/\\s+/)[0]);\n\n/** The permission policy as plain data. */\nexport function decide(toolName: string, toolInput: Record<string, any>, projectDir: string, mode = \"readonly\"): Verdict {\n  log.debug(\"decide input\", toolInput);\n  const deny = (message: string, interrupt = false): Verdict => ({ behavior: \"deny\", message, interrupt });\n  if (READ_TOOLS.includes(toolName) || EDIT_TOOLS.includes(toolName)) {\n    const p: string | undefined = toolInput.file_path || toolInput.path;\n    if (EDIT_TOOLS.includes(toolName) && mode !== \"edit\") return deny(\"Edits are not allowed in readonly mode\");\n    if (p !== undefined) {\n      if (!inside(projectDir, p)) return deny(`${p} is outside the project`);\n      const full = absolute(projectDir, p);\n      const base = path.basename(full);\n      if (isSecretName(base)) return deny(`${base} holds secrets and is never read`);\n      if (EDIT_TOOLS.includes(toolName) && full.split(\"/\").includes(\".git\")) return deny(`${p} is inside .git`);\n    }\n    return { behavior: \"allow\" };\n  }\n  if (toolName === \"Bash\") {\n    const command: string = toolInput.command ?? \"\";\n    if (isDangerous(command)) return deny(\"Dangerous command\", true);\n    if (isChained(command)) return deny(\"Command not allowed: no chaining or redirection\");\n    if (commandAllowed(command)) return { behavior: \"allow\" };\n    return deny(\"Command not allowed: only ls, cat and pytest\");\n  }\n  return deny(`${toolName} is not allowed`);\n}\n\nexport function makeCanUseTool(projectDir: string, mode = \"readonly\") {\n  return async (toolName: string, toolInput: Record<string, unknown>) => {\n    const verdict = decide(toolName, toolInput, projectDir, mode);\n    return verdict.behavior === \"allow\" ? { behavior: \"allow\" as const, updatedInput: toolInput } : { behavior: \"deny\" as const, message: verdict.message, interrupt: verdict.interrupt };\n  };\n}\n\nconst isPush = (command: string): boolean => /\\bgit\\s+push\\b/.test(command);\n\n/** A PreToolUse hook: nothing is pushed from an agent. */\nexport async function bashGuard(input: any) {\n  if (isPush(input?.tool_input?.command ?? \"\")) {\n    return { hookSpecificOutput: { hookEventName: \"PreToolUse\" as const, permissionDecision: \"deny\" as const, permissionDecisionReason: \"Nothing is pushed from an agent\" } };\n  }\n  return {};\n}\n\nexport function buildOptions(projectDir: string, cliPath: string, mode = \"readonly\") {\n  return {\n    pathToClaudeCodeExecutable: cliPath, cwd: projectDir, tools: [...READ_TOOLS, \"Bash\", ...(mode === \"edit\" ? EDIT_TOOLS : [])], allowedTools: [] as string[],\n    disallowedTools: [\"Bash(rm *)\"], maxTurns: 6, maxBudgetUsd: 0.5, permissionMode: \"default\" as const, settingSources: [] as (\"user\" | \"project\" | \"local\")[],\n    canUseTool: makeCanUseTool(projectDir, mode), hooks: { PreToolUse: [{ matcher: \"Bash\", hooks: [bashGuard] }] },\n  };\n}\n\nconst countDenied = (content: any[]): number => content.filter((b: any) => b.type === \"tool_result\" && b.is_error).length;\nconst statusOf = (subtype: string): string => STATUS[subtype] ?? subtype;\n\nexport function summarize(messages: any[]) {\n  let text = \"\", denied = 0, result: any = null;\n  const tools: string[] = [];\n  for (const m of messages) {\n    if (m.type === \"assistant\") {\n      for (const block of m.message?.content ?? []) {\n        if (block.type === \"text\") text = block.text;\n        else if (block.type === \"tool_use\") tools.push(block.name);\n      }\n    } else if (m.type === \"user\" && Array.isArray(m.message?.content)) {\n      denied += countDenied(m.message.content);\n    } else if (m.type === \"result\") {\n      result = m;\n    }\n  }\n  if (result === null) return { status: \"incomplete\", text, tools, turns: 0, cost: 0.0, denied };\n  return { status: statusOf(result.subtype), text: result.result || text, tools, turns: result.num_turns, cost: result.total_cost_usd ?? 0.0, denied };\n}\n\nexport async function runAgent(prompt: string, projectDir: string, cliPath: string, mode = \"readonly\") {\n  const messages: any[] = [];\n  try {\n    for await (const m of query({ prompt, options: buildOptions(projectDir, cliPath, mode) as any })) messages.push(m);\n  } catch (error) {\n    // After an error result (turn limit, budget) a single-shot query() yields the result and then raises, because the process exits with a\n    // nonzero code. That is not a failure of the run; a crash before any result message is, and is not hidden.\n    if (!messages.some((m) => m.type === \"result\")) throw error;\n  }\n  return summarize(messages);\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { chmodSync, copyFileSync, existsSync, mkdtempSync, writeFileSync } from \"node:fs\";\nimport { tmpdir } from \"node:os\";\nimport { dirname, join, resolve } from \"node:path\";\nimport { fileURLToPath } from \"node:url\";\nimport { runAgent } from \"./agent.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// The tests never call the model: they start harness/fake_claude.py, a scripted stand-in for the Claude Code binary.\n// Search upward from this file, as Run starts it from the workspace root, not from its own folder.\nconst candidates = [\"/w/harness/fake_claude.py\"];\nfor (let d = dirname(fileURLToPath(import.meta.url)), i = 0; i < 8; i++, d = resolve(d, \"..\")) candidates.push(join(d, \"harness\", \"fake_claude.py\"));\nconst found = candidates.find((c) => existsSync(c)) as string;\n\n// The script: the agent reads a file, runs the tests with Bash, then finishes.\nconst steps = [\n  { tool: { id: \"t1\", name: \"Read\", input: { file_path: \"a.txt\" }, output: \"Read ok\" } },\n  { tool: { id: \"t2\", name: \"Bash\", input: { command: \"pytest -q\" }, output: \"Bash ok\" } },\n  { say: \"All done.\" },\n  { result: { subtype: \"success\", result: \"All done.\", cost: 0.02, turns: 3 } },\n];\nconst project = mkdtempSync(join(tmpdir(), \"agent-\"));\n// The SDK starts the stand-in as a program, so it must be executable: use a copy marked so (the harness folder may be read-only).\nconst fake = join(project, \"fake_claude.py\");\ncopyFileSync(found, fake);\nchmodSync(fake, 0o755);\nwriteFileSync(join(project, \"script.json\"), JSON.stringify({ session_id: \"s1\", turns: [steps] }));\nprocess.env.FAKE_CLAUDE_SCRIPT = join(project, \"script.json\");\nprocess.env.FAKE_CLAUDE_RECORD = join(project, \"record.jsonl\");\n\ntry {\n  const summary: any = (await runAgent(\"go\", project, fake, \"readonly\")) ?? {};\n  console.log(\"status:\", summary.status);\n  console.log(\"tools used:\", JSON.stringify(summary.tools));\n  console.log(\"turns and cost:\", summary.turns, summary.cost);\n  console.log(\"calls denied:\", summary.denied);\n} catch (err) {\n  console.log(\"raised:\", String(err));\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Code around the Claude Agent SDK: options, a permission callback, a hook and the message handling. See ../../statement.md.\nimport { posix as path } from \"node:path\";\nimport { query } from \"@anthropic-ai/claude-agent-sdk\";\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"agent\");\n\nexport const READ_TOOLS = [\"Read\", \"Grep\", \"Glob\"];\nexport const EDIT_TOOLS = [\"Edit\", \"Write\"];\nexport const SAFE_COMMANDS = [\"ls\", \"cat\", \"pytest\"];\nexport const STATUS: Record<string, string> = { success: \"done\", error_max_turns: \"max_turns\", error_max_budget_usd: \"budget\", error_during_execution: \"failed\" };\n\nconst absolute = (projectDir: string, p: string) => (p.startsWith(\"/\") ? path.normalize(p).replace(/(.)\\/$/, \"$1\") : path.normalize(path.join(projectDir, p)).replace(/(.)\\/$/, \"$1\"));\n\nfunction inside(projectDir: string, p: string): boolean {\n  const full = absolute(projectDir, p), root = path.normalize(projectDir).replace(/(.)\\/$/, \"$1\");\n  return full === root || full.startsWith(root + \"/\");\n}\n\nexport type Verdict = { behavior: \"allow\" } | { behavior: \"deny\"; message: string; interrupt: boolean };\n\nfunction isSecretName(base: string): boolean {\n  // TODO 1 of 9 (unlocks e2): does this file name hold secrets?\n  // Receives a file name (no folders). Returns true when it starts with `.env` unless it is `.env.example`.\n  // Example: isSecretName(\".env.local\") -> true, isSecretName(\".env.example\") -> false\n  return false;\n}\nfunction isDangerous(command: string): boolean {\n  // TODO 2 of 9 (unlocks e3): is this shell command dangerous enough to stop the run?\n  // Receives a command. Returns true when it contains the word `sudo` (as a whole word) or the text `rm -rf`.\n  // Example: isDangerous(\"pytest && sudo reboot\") -> true, isDangerous(\"ls\") -> false\n  return false;\n}\nfunction isChained(command: string): boolean {\n  // TODO 3 of 9 (unlocks e3): does this command chain, pipe, redirect or substitute?\n  // Receives a command. Returns true when it contains `;`, `&`, `|`, `<`, `>`, a backtick or `$(`.\n  // Example: isChained(\"ls | wc\") -> true, isChained(\"ls -la\") -> false\n  return false;\n}\nfunction commandAllowed(command: string): boolean {\n  // TODO 4 of 9 (unlocks e3): is the first word of the command one of SAFE_COMMANDS?\n  // Receives a command. Returns true when its first word is in SAFE_COMMANDS; false for anything else, including an empty command.\n  // Example: commandAllowed(\"  pytest -q\") -> true, commandAllowed(\"python x.py\") -> false\n  return false;\n}\n\n/** The permission policy as plain data. */\nexport function decide(toolName: string, toolInput: Record<string, any>, projectDir: string, mode = \"readonly\"): Verdict {\n  log.debug(\"decide input\", toolInput);\n  const deny = (message: string, interrupt = false): Verdict => ({ behavior: \"deny\", message, interrupt });\n  if (READ_TOOLS.includes(toolName) || EDIT_TOOLS.includes(toolName)) {\n    const p: string | undefined = toolInput.file_path || toolInput.path;\n    if (EDIT_TOOLS.includes(toolName) && mode !== \"edit\") return deny(\"Edits are not allowed in readonly mode\");\n    if (p !== undefined) {\n      if (!inside(projectDir, p)) return deny(`${p} is outside the project`);\n      const full = absolute(projectDir, p);\n      const base = path.basename(full);\n      if (isSecretName(base)) return deny(`${base} holds secrets and is never read`);\n      if (EDIT_TOOLS.includes(toolName) && full.split(\"/\").includes(\".git\")) return deny(`${p} is inside .git`);\n    }\n    return { behavior: \"allow\" };\n  }\n  if (toolName === \"Bash\") {\n    const command: string = toolInput.command ?? \"\";\n    if (isDangerous(command)) return deny(\"Dangerous command\", true);\n    if (isChained(command)) return deny(\"Command not allowed: no chaining or redirection\");\n    if (commandAllowed(command)) return { behavior: \"allow\" };\n    return deny(\"Command not allowed: only ls, cat and pytest\");\n  }\n  return deny(`${toolName} is not allowed`);\n}\n\nexport function makeCanUseTool(projectDir: string, mode = \"readonly\") {\n  // TODO 5 of 9 (unlocks m1 and e7): the callback the SDK asks for a tool that is not already decided.\n  // Receives the project directory and the mode. Returns an async function (toolName, toolInput) that turns `decide()` into\n  // { behavior: \"allow\", updatedInput: toolInput } or { behavior: \"deny\", message, interrupt }.\n  // Example: for { behavior: \"deny\", message: \"no\", interrupt: false } it returns { behavior: \"deny\", message: \"no\", interrupt: false }\n  return async (toolName: string, toolInput: Record<string, unknown>) => ({ behavior: \"deny\" as const, message: \"not written yet\", interrupt: false });\n}\n\nfunction isPush(command: string): boolean {\n  // TODO 6 of 9 (unlocks e4): does this command run `git push`?\n  // Receives a command. Returns true when it has the two words `git` and `push` with any white space between them, as whole words.\n  // Example: isPush(\"echo ok && git  push origin\") -> true, isPush(\"git pushd\") -> false, isPush(\"legit push\") -> false\n  return false;\n}\n\n/** A PreToolUse hook: nothing is pushed from an agent. */\nexport async function bashGuard(input: any) {\n  if (isPush(input?.tool_input?.command ?? \"\")) {\n    return { hookSpecificOutput: { hookEventName: \"PreToolUse\" as const, permissionDecision: \"deny\" as const, permissionDecisionReason: \"Nothing is pushed from an agent\" } };\n  }\n  return {};\n}\n\nexport function buildOptions(projectDir: string, cliPath: string, mode = \"readonly\") {\n  // TODO 7 of 9 (unlocks e1): the SDK options of the agent.\n  // Receives the project directory, the CLI path and the mode. Returns an options object with pathToClaudeCodeExecutable, cwd (the project),\n  // tools (the read tools, \"Bash\", and the edit tools in \"edit\" mode), no allowedTools, \"Bash(rm *)\" disallowed, maxTurns 6, maxBudgetUsd 0.5,\n  // permissionMode \"default\", no settingSources, canUseTool from makeCanUseTool and a PreToolUse hook for \"Bash\" (bashGuard).\n  // Example: buildOptions(\"/proj\", \"/bin/cli\").maxTurns -> 6\n  return { pathToClaudeCodeExecutable: cliPath, cwd: projectDir };\n}\n\nfunction countDenied(content: any[]): number {\n  // TODO 8 of 9 (unlocks e5 and e7): how many tool results in this list of blocks are errors?\n  // Receives a list of content blocks. Returns how many have type \"tool_result\" and a true is_error (a missing flag is not an error).\n  // Example: [{ type: \"tool_result\", is_error: true }, { type: \"tool_result\", is_error: false }] -> 1\n  return 0;\n}\nfunction statusOf(subtype: string): string {\n  // TODO 9 of 9 (unlocks e5): the course status of a result subtype.\n  // Receives a result subtype. Returns STATUS[subtype], or the subtype itself when it is not in STATUS.\n  // Example: statusOf(\"error_max_turns\") -> \"max_turns\", statusOf(\"something_new\") -> \"something_new\"\n  return \"\";\n}\n\nexport function summarize(messages: any[]) {\n  let text = \"\", denied = 0, result: any = null;\n  const tools: string[] = [];\n  for (const m of messages) {\n    if (m.type === \"assistant\") {\n      for (const block of m.message?.content ?? []) {\n        if (block.type === \"text\") text = block.text;\n        else if (block.type === \"tool_use\") tools.push(block.name);\n      }\n    } else if (m.type === \"user\" && Array.isArray(m.message?.content)) {\n      denied += countDenied(m.message.content);\n    } else if (m.type === \"result\") {\n      result = m;\n    }\n  }\n  if (result === null) return { status: \"incomplete\", text, tools, turns: 0, cost: 0.0, denied };\n  return { status: statusOf(result.subtype), text: result.result || text, tools, turns: result.num_turns, cost: result.total_cost_usd ?? 0.0, denied };\n}\n\nexport async function runAgent(prompt: string, projectDir: string, cliPath: string, mode = \"readonly\") {\n  const messages: any[] = [];\n  try {\n    for await (const m of query({ prompt, options: buildOptions(projectDir, cliPath, mode) as any })) messages.push(m);\n  } catch (error) {\n    // After an error result (turn limit, budget) a single-shot query() yields the result and then raises, because the process exits with a\n    // nonzero code. That is not a failure of the run; a crash before any result message is, and is not hidden.\n    if (!messages.some((m) => m.type === \"result\")) throw error;\n  }\n  return summarize(messages);\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { chmodSync, copyFileSync, existsSync, mkdtempSync, writeFileSync } from \"node:fs\";\nimport { tmpdir } from \"node:os\";\nimport { dirname, join, resolve } from \"node:path\";\nimport { fileURLToPath } from \"node:url\";\nimport { runAgent } from \"./agent.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// The tests never call the model: they start harness/fake_claude.py, a scripted stand-in for the Claude Code binary.\n// Search upward from this file, as Run starts it from the workspace root, not from its own folder.\nconst candidates = [\"/w/harness/fake_claude.py\"];\nfor (let d = dirname(fileURLToPath(import.meta.url)), i = 0; i < 8; i++, d = resolve(d, \"..\")) candidates.push(join(d, \"harness\", \"fake_claude.py\"));\nconst found = candidates.find((c) => existsSync(c)) as string;\n\n// The script: the agent reads a file, runs the tests with Bash, then finishes.\nconst steps = [\n  { tool: { id: \"t1\", name: \"Read\", input: { file_path: \"a.txt\" }, output: \"Read ok\" } },\n  { tool: { id: \"t2\", name: \"Bash\", input: { command: \"pytest -q\" }, output: \"Bash ok\" } },\n  { say: \"All done.\" },\n  { result: { subtype: \"success\", result: \"All done.\", cost: 0.02, turns: 3 } },\n];\nconst project = mkdtempSync(join(tmpdir(), \"agent-\"));\n// The SDK starts the stand-in as a program, so it must be executable: use a copy marked so (the harness folder may be read-only).\nconst fake = join(project, \"fake_claude.py\");\ncopyFileSync(found, fake);\nchmodSync(fake, 0o755);\nwriteFileSync(join(project, \"script.json\"), JSON.stringify({ session_id: \"s1\", turns: [steps] }));\nprocess.env.FAKE_CLAUDE_SCRIPT = join(project, \"script.json\");\nprocess.env.FAKE_CLAUDE_RECORD = join(project, \"record.jsonl\");\n\ntry {\n  const summary: any = (await runAgent(\"go\", project, fake, \"readonly\")) ?? {};\n  console.log(\"status:\", summary.status);\n  console.log(\"tools used:\", JSON.stringify(summary.tools));\n  console.log(\"turns and cost:\", summary.turns, summary.cost);\n  console.log(\"calls denied:\", summary.denied);\n} catch (err) {\n  console.log(\"raised:\", String(err));\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 4,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "68884e28f5819f4de35f5786dd914329a1e899864dda2f4f10add711e1e4bece",
+  "starting_code": "// Code around the Claude Agent SDK: options, a permission callback, a hook and the message handling. See ../../statement.md.\nimport { posix as path } from \"node:path\";\nimport { query } from \"@anthropic-ai/claude-agent-sdk\";\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"agent\");\n\nexport const READ_TOOLS = [\"Read\", \"Grep\", \"Glob\"];\nexport const EDIT_TOOLS = [\"Edit\", \"Write\"];\nexport const SAFE_COMMANDS = [\"ls\", \"cat\", \"pytest\"];\nexport const STATUS: Record<string, string> = { success: \"done\", error_max_turns: \"max_turns\", error_max_budget_usd: \"budget\", error_during_execution: \"failed\" };\n\nconst absolute = (projectDir: string, p: string) => (p.startsWith(\"/\") ? path.normalize(p).replace(/(.)\\/$/, \"$1\") : path.normalize(path.join(projectDir, p)).replace(/(.)\\/$/, \"$1\"));\n\nfunction inside(projectDir: string, p: string): boolean {\n  const full = absolute(projectDir, p), root = path.normalize(projectDir).replace(/(.)\\/$/, \"$1\");\n  return full === root || full.startsWith(root + \"/\");\n}\n\nexport type Verdict = { behavior: \"allow\" } | { behavior: \"deny\"; message: string; interrupt: boolean };\n\nfunction isSecretName(base: string): boolean {\n  // TODO 1 of 9 (unlocks e2): does this file name hold secrets?\n  // Receives a file name (no folders). Returns true when it starts with `.env` unless it is `.env.example`.\n  // Example: isSecretName(\".env.local\") -> true, isSecretName(\".env.example\") -> false\n  return false;\n}\nfunction isDangerous(command: string): boolean {\n  // TODO 2 of 9 (unlocks e3): is this shell command dangerous enough to stop the run?\n  // Receives a command. Returns true when it contains the word `sudo` (as a whole word) or the text `rm -rf`.\n  // Example: isDangerous(\"pytest && sudo reboot\") -> true, isDangerous(\"ls\") -> false\n  return false;\n}\nfunction isChained(command: string): boolean {\n  // TODO 3 of 9 (unlocks e3): does this command chain, pipe, redirect or substitute?\n  // Receives a command. Returns true when it contains `;`, `&`, `|`, `<`, `>`, a backtick or `$(`.\n  // Example: isChained(\"ls | wc\") -> true, isChained(\"ls -la\") -> false\n  return false;\n}\nfunction commandAllowed(command: string): boolean {\n  // TODO 4 of 9 (unlocks e3): is the first word of the command one of SAFE_COMMANDS?\n  // Receives a command. Returns true when its first word is in SAFE_COMMANDS; false for anything else, including an empty command.\n  // Example: commandAllowed(\"  pytest -q\") -> true, commandAllowed(\"python x.py\") -> false\n  return false;\n}\n\n/** The permission policy as plain data. */\nexport function decide(toolName: string, toolInput: Record<string, any>, projectDir: string, mode = \"readonly\"): Verdict {\n  log.debug(\"decide input\", toolInput);\n  const deny = (message: string, interrupt = false): Verdict => ({ behavior: \"deny\", message, interrupt });\n  if (READ_TOOLS.includes(toolName) || EDIT_TOOLS.includes(toolName)) {\n    const p: string | undefined = toolInput.file_path || toolInput.path;\n    if (EDIT_TOOLS.includes(toolName) && mode !== \"edit\") return deny(\"Edits are not allowed in readonly mode\");\n    if (p !== undefined) {\n      if (!inside(projectDir, p)) return deny(`${p} is outside the project`);\n      const full = absolute(projectDir, p);\n      const base = path.basename(full);\n      if (isSecretName(base)) return deny(`${base} holds secrets and is never read`);\n      if (EDIT_TOOLS.includes(toolName) && full.split(\"/\").includes(\".git\")) return deny(`${p} is inside .git`);\n    }\n    return { behavior: \"allow\" };\n  }\n  if (toolName === \"Bash\") {\n    const command: string = toolInput.command ?? \"\";\n    if (isDangerous(command)) return deny(\"Dangerous command\", true);\n    if (isChained(command)) return deny(\"Command not allowed: no chaining or redirection\");\n    if (commandAllowed(command)) return { behavior: \"allow\" };\n    return deny(\"Command not allowed: only ls, cat and pytest\");\n  }\n  return deny(`${toolName} is not allowed`);\n}\n\nexport function makeCanUseTool(projectDir: string, mode = \"readonly\") {\n  // TODO 5 of 9 (unlocks m1 and e7): the callback the SDK asks for a tool that is not already decided.\n  // Receives the project directory and the mode. Returns an async function (toolName, toolInput) that turns `decide()` into\n  // { behavior: \"allow\", updatedInput: toolInput } or { behavior: \"deny\", message, interrupt }.\n  // Example: for { behavior: \"deny\", message: \"no\", interrupt: false } it returns { behavior: \"deny\", message: \"no\", interrupt: false }\n  return async (toolName: string, toolInput: Record<string, unknown>) => ({ behavior: \"deny\" as const, message: \"not written yet\", interrupt: false });\n}\n\nfunction isPush(command: string): boolean {\n  // TODO 6 of 9 (unlocks e4): does this command run `git push`?\n  // Receives a command. Returns true when it has the two words `git` and `push` with any white space between them, as whole words.\n  // Example: isPush(\"echo ok && git  push origin\") -> true, isPush(\"git pushd\") -> false, isPush(\"legit push\") -> false\n  return false;\n}\n\n/** A PreToolUse hook: nothing is pushed from an agent. */\nexport async function bashGuard(input: any) {\n  if (isPush(input?.tool_input?.command ?? \"\")) {\n    return { hookSpecificOutput: { hookEventName: \"PreToolUse\" as const, permissionDecision: \"deny\" as const, permissionDecisionReason: \"Nothing is pushed from an agent\" } };\n  }\n  return {};\n}\n\nexport function buildOptions(projectDir: string, cliPath: string, mode = \"readonly\") {\n  // TODO 7 of 9 (unlocks e1): the SDK options of the agent.\n  // Receives the project directory, the CLI path and the mode. Returns an options object with pathToClaudeCodeExecutable, cwd (the project),\n  // tools (the read tools, \"Bash\", and the edit tools in \"edit\" mode), no allowedTools, \"Bash(rm *)\" disallowed, maxTurns 6, maxBudgetUsd 0.5,\n  // permissionMode \"default\", no settingSources, canUseTool from makeCanUseTool and a PreToolUse hook for \"Bash\" (bashGuard).\n  // Example: buildOptions(\"/proj\", \"/bin/cli\").maxTurns -> 6\n  return { pathToClaudeCodeExecutable: cliPath, cwd: projectDir };\n}\n\nfunction countDenied(content: any[]): number {\n  // TODO 8 of 9 (unlocks e5 and e7): how many tool results in this list of blocks are errors?\n  // Receives a list of content blocks. Returns how many have type \"tool_result\" and a true is_error (a missing flag is not an error).\n  // Example: [{ type: \"tool_result\", is_error: true }, { type: \"tool_result\", is_error: false }] -> 1\n  return 0;\n}\nfunction statusOf(subtype: string): string {\n  // TODO 9 of 9 (unlocks e5): the course status of a result subtype.\n  // Receives a result subtype. Returns STATUS[subtype], or the subtype itself when it is not in STATUS.\n  // Example: statusOf(\"error_max_turns\") -> \"max_turns\", statusOf(\"something_new\") -> \"something_new\"\n  return \"\";\n}\n\nexport function summarize(messages: any[]) {\n  let text = \"\", denied = 0, result: any = null;\n  const tools: string[] = [];\n  for (const m of messages) {\n    if (m.type === \"assistant\") {\n      for (const block of m.message?.content ?? []) {\n        if (block.type === \"text\") text = block.text;\n        else if (block.type === \"tool_use\") tools.push(block.name);\n      }\n    } else if (m.type === \"user\" && Array.isArray(m.message?.content)) {\n      denied += countDenied(m.message.content);\n    } else if (m.type === \"result\") {\n      result = m;\n    }\n  }\n  if (result === null) return { status: \"incomplete\", text, tools, turns: 0, cost: 0.0, denied };\n  return { status: statusOf(result.subtype), text: result.result || text, tools, turns: result.num_turns, cost: result.total_cost_usd ?? 0.0, denied };\n}\n\nexport async function runAgent(prompt: string, projectDir: string, cliPath: string, mode = \"readonly\") {\n  const messages: any[] = [];\n  try {\n    for await (const m of query({ prompt, options: buildOptions(projectDir, cliPath, mode) as any })) messages.push(m);\n  } catch (error) {\n    // After an error result (turn limit, budget) a single-shot query() yields the result and then raises, because the process exits with a\n    // nonzero code. That is not a failure of the run; a crash before any result message is, and is not hidden.\n    if (!messages.some((m) => m.type === \"result\")) throw error;\n  }\n  return summarize(messages);\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/35-the-claude-agent-sdk/prose/unit-03/practice-2/agent.ts",
+    "test_path": "practice/level-2/35-the-claude-agent-sdk/prose/unit-03/practice-2/agent.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-2/35-the-claude-agent-sdk/prose/unit-03/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "practice/level-2/35-the-claude-agent-sdk/prose/unit-03/practice-2/run-tests.mjs"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 every tool call goes through the permission callback and the run is summarised",
+        "kind": "main",
+        "says": "Every tool call goes through the permission callback, and the run is summarised"
+      },
+      {
+        "id": "e1 the options reach the cli as flags and the run starts in the project",
+        "kind": "edge",
+        "says": "The options reach the CLI as flags, and the run starts in the project"
+      },
+      {
+        "id": "e2 file tools stay inside the project and away from secrets",
+        "kind": "edge",
+        "says": "File tools stay inside the project and away from secrets"
+      },
+      {
+        "id": "e3 bash is limited to a few commands and dangerous ones stop the run",
+        "kind": "edge",
+        "says": "Bash is limited to a few commands, and dangerous ones stop the run"
+      },
+      {
+        "id": "e4 a hook blocks a push before the permission callback is asked",
+        "kind": "edge",
+        "says": "A hook blocks a push before the permission callback is asked"
+      },
+      {
+        "id": "e5 the messages of a run fold into a summary",
+        "kind": "edge",
+        "says": "The messages of a run fold into a summary"
+      },
+      {
+        "id": "e6 an error result still gives its summary and a crash is not hidden",
+        "kind": "edge",
+        "says": "An error result still gives its summary, and a crash is not hidden"
+      },
+      {
+        "id": "e7 denied calls are counted and the run still ends with a result",
+        "kind": "edge",
+        "says": "Denied calls are counted, and the run still ends with a result"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/35-the-claude-agent-sdk/prose/unit-03/practice-2/target/report.xml"
+    },
+    "origin": "course/35-the-claude-agent-sdk/03-driving-the-sdk-offline-and-the-practice.md",
+    "concepts": [
+      "the practice of Driving the Agent SDK offline, and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/35-the-claude-agent-sdk/prose/unit-03/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "the-claude-agent-sdk-u3"
+}

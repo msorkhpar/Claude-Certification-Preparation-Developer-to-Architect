@@ -1,0 +1,121 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "83-deployment-architecture-and-data-handling"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Where the data goes: platform, region and retention",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "Scenario: Linden Clinics asks a vendor to serve its patients from Europe and offers the Claude API with `inference_geo` set to `us` as the compliant option. Which assessment is right?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It meets the need, as long as the audit log itself is kept in a data store located in Europe",
+            "correct": false,
+            "says": "Ruled out because the audit log is separate from where inference runs, and \"the request carries an inference geography\" that the log store does not change."
+          },
+          {
+            "id": "b",
+            "text": "It fails the need, because the pin sends the processing to the United States",
+            "correct": true,
+            "says": "The `us` pin is a United States geography, and the API has no European one."
+          },
+          {
+            "id": "c",
+            "text": "It meets the need, since the geography of the workspace can still be set to Europe separately",
+            "correct": false,
+            "says": "Ruled out because \"The workspace geography is set per workspace\" and the page says it is `us` only."
+          },
+          {
+            "id": "d",
+            "text": "It fails the need only if the clinics have not yet signed the business associate agreement in full",
+            "correct": false,
+            "says": "Ruled out because the agreement concerns health data and does not move the processing: \"there is no European pin\"."
+          }
+        ],
+        "origin": {
+          "path": "course/83-deployment-architecture-and-data-handling/01-where-the-data-goes-platform-region-and-retention.md",
+          "section": "Region: pin it where the platform lets you"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "Scenario: Harrow Insurance runs Claude on Amazon Bedrock and writes in its design that \"zero data retention is enabled with Anthropic\". What is the problem?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The statement is correct, since every platform shares one retention arrangement with the model maker",
+            "correct": false,
+            "says": "Ruled out because \"Their retention, compliance and region rules are the provider's\", so no arrangement is shared."
+          },
+          {
+            "id": "b",
+            "text": "The statement holds only once a second approval has been given by the cloud provider's own sales team",
+            "correct": false,
+            "says": "Ruled out because the page gives no such approval, and says the provider's rules are \"the provider's own documentation\"."
+          },
+          {
+            "id": "c",
+            "text": "The arrangement belongs to the model maker, and on that platform the cloud provider does the processing",
+            "correct": true,
+            "says": "Zero data retention is an arrangement with Anthropic, and on Bedrock the cloud provider is the processor."
+          },
+          {
+            "id": "d",
+            "text": "The statement is correct, but it must be repeated for each separate model that the company uses in production",
+            "correct": false,
+            "says": "Ruled out because the model is a separate rule (\"A model that requires 30-day retention cannot satisfy a zero-retention requirement\") and does not change who the processor is."
+          }
+        ],
+        "origin": {
+          "path": "course/83-deployment-architecture-and-data-handling/01-where-the-data-goes-platform-region-and-retention.md",
+          "section": "Who is the data processor"
+        }
+      }
+    ],
+    "concepts": [
+      "Region: pin it where the platform lets you, as the page teaches it",
+      "Who is the data processor, as the page teaches it"
+    ]
+  }
+}

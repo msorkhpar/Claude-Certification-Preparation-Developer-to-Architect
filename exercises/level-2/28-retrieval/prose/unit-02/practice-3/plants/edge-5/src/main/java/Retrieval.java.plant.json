@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/java/Retrieval.java",
+      "old": "        Set<String> found = new LinkedHashSet<>();\n        for (String id : ids.subList(0, Math.min(k, ids.size()))) found.add(docOf.get(id));\n        Set<String> wanted = new LinkedHashSet<>(relevant);\n        int hits = 0;\n        for (String d : wanted) if (found.contains(d)) hits++;\n        return (double) hits / wanted.size();\n",
+      "new": "        Set<String> wanted = new LinkedHashSet<>(relevant);\n        int hits = 0;\n        for (String id : ids.subList(0, Math.min(k, ids.size()))) if (wanted.contains(docOf.get(id))) hits++;\n        return Math.min(1.0, (double) hits / wanted.size());\n"
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-4",
+    "80-end-to-end-and-multi-agent-architecture"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: an architecture review against a rubric (Python)",
+  "lang": "python",
+  "main_file": "architecture_review.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_architecture_review.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-4/80-end-to-end-and-multi-agent-architecture/prose/unit-02/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-4/80-end-to-end-and-multi-agent-architecture/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-4/80-end-to-end-and-multi-agent-architecture/prose/unit-02/practice-1/test_architecture_review.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_a_sound_design_passes_review_with_no_findings",
+      "kind": "main",
+      "says": "A sound design passes review with no findings and is approved"
+    },
+    {
+      "id": "test_e1_a_design_without_a_feedback_loop_or_a_stage_is_rejected",
+      "kind": "edge",
+      "says": "A missing feedback loop or a missing stage is a high finding"
+    },
+    {
+      "id": "test_e2_autonomy_is_flagged_only_when_the_path_is_known",
+      "kind": "edge",
+      "says": "Autonomy is flagged only when the path is known"
+    },
+    {
+      "id": "test_e3_several_agents_need_independent_parts_and_no_shared_context",
+      "kind": "edge",
+      "says": "A team needs independent parts and no shared context; one agent is exempt"
+    },
+    {
+      "id": "test_e4_an_unapproved_write_is_a_finding_only_when_an_audit_is_needed",
+      "kind": "edge",
+      "says": "An unapproved write is a finding only when an audit is needed"
+    },
+    {
+      "id": "test_e5_output_that_nobody_validates_is_flagged",
+      "kind": "edge",
+      "says": "Output without a validation step is flagged; an absent output stage is not flagged twice"
+    },
+    {
+      "id": "test_e6_findings_are_ordered_by_severity_then_rule_and_the_verdict_follows_the_worst",
+      "kind": "edge",
+      "says": "The findings are ordered by severity and then rule, and the verdict follows the worst"
+    },
+    {
+      "id": "test_e7_the_cheapest_design_that_is_not_rejected_wins_and_ties_go_by_name",
+      "kind": "edge",
+      "says": "The cheapest design that is not rejected wins, ties go by name, and none passing gives no name"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/80-end-to-end-and-multi-agent-architecture/02-contracts-between-parts-and-the-review.md"
+}

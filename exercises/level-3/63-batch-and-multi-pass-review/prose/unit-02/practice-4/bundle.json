@@ -1,0 +1,90 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "63-batch-and-multi-pass-review"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 4,
+  "title": "Practice: a review pipeline that picks the right interface, resubmits only what failed and combines independent passes (Kotlin)",
+  "lang": "kotlin",
+  "main_file": "src/main/kotlin/BatchReview.kt",
+  "files": [
+    "src/main/kotlin/TryIt.kt"
+  ],
+  "test_file": "src/test/kotlin/BatchReviewTest.kt",
+  "build": [
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/63-batch-and-multi-pass-review/prose/unit-02/practice-4",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/63-batch-and-multi-pass-review/prose/unit-02/practice-4",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_theIntervalBetweenSubmissionsLeavesRoomForTheWindowAndTheHandling()",
+      "kind": "main",
+      "says": "The interval leaves room for the window and the handling"
+    },
+    {
+      "id": "e1_anSlaWithoutRoomForABatchIsRefused()",
+      "kind": "edge",
+      "says": "An SLA with no room for a batch is refused"
+    },
+    {
+      "id": "e2_aBlockingCheckOrAToolLoopNeedsTheSynchronousApi()",
+      "kind": "edge",
+      "says": "A blocking check or a tool loop needs the synchronous API"
+    },
+    {
+      "id": "e3_onlyTheItemsThatDidNotSucceedAreResubmittedByCustomId()",
+      "kind": "edge",
+      "says": "Only the entries that did not succeed are resubmitted, by custom_id"
+    },
+    {
+      "id": "e4_anItemOverTheLimitIsChunkedAndARejectedRequestIsFixedFirst()",
+      "kind": "edge",
+      "says": "An entry over the limit is chunked and a rejected request is fixed first"
+    },
+    {
+      "id": "e5_aMultiFileReviewGetsALocalPassPerFileAndOneIntegrationPass()",
+      "kind": "edge",
+      "says": "A multi-file review gets a local pass per file and one integration pass"
+    },
+    {
+      "id": "e6_theSameFindingFromTwoPassesIsOneFindingWithTheHighestSeverityAndTheLowestConfidence()",
+      "kind": "edge",
+      "says": "The same finding from two passes is one finding with the highest severity and the lowest confidence"
+    },
+    {
+      "id": "e7_aFindingIsAcceptedOnlyWhenTwoIndependentPassesAgreeWithConfidence()",
+      "kind": "edge",
+      "says": "A finding is accepted only when two independent passes agree with confidence"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/63-batch-and-multi-pass-review/02-independent-passes-combined-verdicts-and-the-practice.md"
+}

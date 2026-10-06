@@ -1,0 +1,83 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "43-debugging-claude-applications"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: diagnose a failure from a trace (Python)",
+  "lang": "python",
+  "main_file": "diagnose.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_diagnose.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-2/43-debugging-claude-applications/prose/unit-02/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-2/43-debugging-claude-applications/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-2/43-debugging-claude-applications/prose/unit-02/practice-1/test_diagnose.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_each_documented_http_error_maps_to_a_type_an_origin_and_a_recovery",
+      "kind": "main",
+      "says": "Each documented HTTP error maps to its type, origin and recovery"
+    },
+    {
+      "id": "test_e1_a_429_is_a_rate_limit_or_a_spend_cap_and_other_statuses_fall_back_by_class",
+      "kind": "edge",
+      "says": "The two kinds of 429, the 400 spend limit, and the fallback by class for statuses the table does not list"
+    },
+    {
+      "id": "test_e2_a_successful_response_can_still_fail_by_its_stop_reason",
+      "kind": "edge",
+      "says": "A 200 response with a failing stop reason, and the stop reasons that are fine"
+    },
+    {
+      "id": "test_e3_an_empty_end_turn_is_the_integration_when_text_followed_the_tool_result_and_the_model_otherwise",
+      "kind": "edge",
+      "says": "An empty end_turn: our message structure or the model, by the last user message's blocks"
+    },
+    {
+      "id": "test_e4_a_parse_failure_is_the_integration_when_a_json_object_is_in_the_text_and_the_model_when_not",
+      "kind": "edge",
+      "says": "A parse failure: our parser or the model, by whether a JSON object is in the text"
+    },
+    {
+      "id": "test_e5_tool_failures_split_into_a_model_that_called_a_missing_tool_and_our_tool_that_raised",
+      "kind": "edge",
+      "says": "A tool name the model invented against our own tool raising; a tool-reported error is not a failure"
+    },
+    {
+      "id": "test_e6_the_first_failure_names_the_cause_and_a_later_good_response_marks_it_recovered",
+      "kind": "edge",
+      "says": "The first failure wins, with its index; a later good response means it recovered; a clean or empty trace is ok"
+    },
+    {
+      "id": "test_e7_a_dropped_connection_has_no_status_and_belongs_to_the_service_side",
+      "kind": "edge",
+      "says": "A dropped connection has no status and belongs to the service side, and may recover"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/43-debugging-claude-applications/02-reading-a-trace-and-the-practice.md"
+}

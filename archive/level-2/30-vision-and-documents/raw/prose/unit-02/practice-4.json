@@ -1,0 +1,309 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "30-vision-and-documents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: planning a request with images and PDFs (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: planning a request with images and PDFs"
+    },
+    {
+      "type": "para",
+      "text": "An image or a PDF is cheap to attach and easy to get wrong: a format the API refuses, a screenshot that is silently shrunk so that every coordinate Claude returns is off, a request with more images than the model accepts, a PDF placed after the question. Write the planner that checks all of it before a request is sent, and builds the user content in the order Claude reads best. The limits and the sizing rule come from the Claude documentation on vision, coordinates and bounding boxes, and PDF support, read on 2026-10-03; the lesson pages explain them. Nothing here touches the network: the planner only builds and checks a request."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`MODELS`",
+          "model id to its resolution tier, its context window and its input price in dollars per million tokens"
+        ],
+        [
+          "`TIERS`",
+          "tier to the longest edge in pixels and the visual token budget"
+        ],
+        [
+          "`RequestError`",
+          "what your code throws, before any call, for a request the API would reject; `field` names the part"
+        ],
+        [
+          "item",
+          "`{\"kind\": \"image\" or \"pdf\", \"name\", \"media_type\", \"size\", \"source\": \"base64\", \"url\" or \"file\", \"value\"}`; an image also has `width` and `height` in pixels, a PDF has `pages`. `size` is the payload size in bytes. `value` is the base64 text, the URL or the file id"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working planner with eight gaps cut out of it. Everything that is plumbing is written and correct: the tables, the `RequestError`, `resized_size` with its search, and the whole of `plan_request` with its checks in order. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file (`log.debug(...)`); a run shows the lines under the failing case. Write them in this order (the other languages use the camel-case forms, and TypeScript, Java and Kotlin keep the helpers private to the file):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`visual_tokens` unlocks `e1` and `e7`: one token per 28 x 28 pixel patch.",
+        "`image_cost_usd` unlocks `e7`: tokens times the model's price per million, rounded.",
+        "`to_original_coordinates` unlocks `e7`: clamp into the resized size, then scale onto the original.",
+        "`_max_count` unlocks `e2` and `e5`: 100 or 600 images or PDF pages, by the context window.",
+        "`_max_image_size` unlocks `e2` and `e6`: 10 MiB, or 5 MiB on bedrock and vertex.",
+        "`_many` unlocks `e3`: more than twenty image blocks, PDFs counted on bedrock and vertex.",
+        "`_image_blocks` unlocks `m1` and `e4`: the `Image n:` label and the image block, with the `transformations` entry when `exact`.",
+        "`_source` unlocks `m1`, `e5` and `e6`: the base64, url or file source of an item."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About ten lines in all. The list below describes the whole planner; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`visual_tokens(width, height)`: one visual token per 28 by 28 pixel patch, so `ceil(width / 28) * ceil(height / 28)`.",
+        "`resized_size(width, height, tier)`: the size the model sees. An image that fits is unchanged. It fits when each side rounded up to a multiple of 28 is at most the tier's edge limit **and** its visual tokens are at most the tier's budget. Otherwise it is scaled, keeping its aspect ratio, to the largest size that fits (the long edge is searched downward; the short edge is `long edge / aspect ratio` rounded half to even, and at least 1). A portrait image is handled as its landscape twin with the sides swapped back.",
+        "`image_cost_usd(model, tokens)`: `tokens * price / 1,000,000`, rounded to 6 decimals.",
+        "`to_original_coordinates(x, y, width, height, model)`: Claude returned a point for the image it saw, which is the resized image (never the padded one). Clamp the point into the resized size, then scale it onto the original `width` by `height` image.",
+        [
+          "`plan_request(model, items, question, exact=False, platform=\"api\")` returns `{\"content\", \"image_tokens\", \"resized\", \"pdf_pages\"}`. Check in this order and throw `RequestError` with the field named here, at the first problem:",
+          {
+            "type": "list",
+            "ordered": true,
+            "items": [
+              "`model` is not in `MODELS`: field `model`. 2. `question` is empty or only spaces: field `question`.",
+              "More images than the model accepts, 100 for a model whose context window is under 1,000,000 tokens and 600 otherwise: field `items`. 4. More PDF pages in total than the same limit: field `items`. 5. The `size` of all items together is more than 32 MiB (32 * 1,048,576 bytes): field `items`.",
+              "Then each item in order, at its index `i`: on `platform` `bedrock` or `vertex` a source other than `base64`: `items[i].source`. A PDF whose `media_type` is not `application/pdf`: `items[i].media_type`. An image whose `media_type` is not one of the four in `IMAGE_TYPES`: `items[i].media_type`. A side above 8000 pixels: `items[i].dimensions`. A `size` above 10 MiB, or 5 MiB on `bedrock` and `vertex`: `items[i].size`. When the request holds **more than 20** image blocks (on `bedrock` and `vertex` the PDFs count as well), a side above 2000 pixels: `items[i].dimensions`. When `exact` is true and the image would be resized for this model's tier: `items[i].dimensions`."
+            ]
+          },
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`image_tokens` is the sum of the visual tokens of every image at the size the model sees. `resized` lists the names of the images that would be resized (an empty list when none). `pdf_pages` is the total number of PDF pages.",
+              "`content` keeps the order of `items`, one block per item, and ends with the question as a text block. An image is `{\"type\": \"image\", \"source\": ...}` and a PDF is `{\"type\": \"document\", \"source\": ...}`; the source is `{\"type\": \"base64\", \"media_type\", \"data\"}`, `{\"type\": \"url\", \"url\"}` or `{\"type\": \"file\", \"file_id\"}`. When there are two or more images, each one is preceded by a text block `Image n:` (n counts the images from 1; PDFs get no label). When `exact` is true each image block also carries `\"transformations\": {\"oversized_image\": \"error\"}`."
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Images come first with labels, and the question comes last"
+        ],
+        [
+          "`e1`",
+          "The token cost follows the model's resolution tier"
+        ],
+        [
+          "`e2`",
+          "Formats, dimensions, sizes and counts are checked before any call"
+        ],
+        [
+          "`e3`",
+          "More than twenty images lower the side limit to 2000 pixels"
+        ],
+        [
+          "`e4`",
+          "An image whose size matters is rejected instead of resized"
+        ],
+        [
+          "`e5`",
+          "PDFs become document blocks in order and are limited by pages"
+        ],
+        [
+          "`e6`",
+          "Bedrock and Vertex take only base64 sources and smaller images"
+        ],
+        [
+          "`e7`",
+          "Coordinates map back to the original, and cost follows the price"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import kotlin.math.ceil\nimport kotlin.math.max\nimport kotlin.math.min\n\nprivate val log = System.getLogger(\"vision\")\n\n/** Planning a request that carries images and PDFs. See ../../statement.md. Items, blocks and results are JSON-like maps. */\n\nconst val MIB = 1024 * 1024\nval IMAGE_TYPES = listOf(\"image/jpeg\", \"image/png\", \"image/gif\", \"image/webp\")\n\n/** Given: model id to (tier, context window in tokens, input price in dollars per million tokens). */\nval MODELS: Map<String, Triple<String, Int, Double>> = mapOf(\n    \"claude-fable-5-1\" to Triple(\"high\", 1_000_000, 10.0),\n    \"claude-opus-5-5\" to Triple(\"high\", 1_000_000, 4.0),\n    \"claude-sonnet-5-5\" to Triple(\"high\", 1_000_000, 2.0),\n    \"claude-haiku-4-5\" to Triple(\"standard\", 200_000, 1.0),\n    \"claude-haiku-4-5-20251001\" to Triple(\"standard\", 200_000, 1.0),\n)\n\n/** Given: tier to (longest edge in pixels, visual token budget). */\nval TIERS: Map<String, Pair<Int, Int>> = mapOf(\"standard\" to Pair(1568, 1568), \"high\" to Pair(2576, 4784))\n\n/** What your code throws, before any call, for a request the API would reject; `field` names the part. */\nclass RequestError(val field: String, reason: String) : RuntimeException(\"$field: $reason\")\n\nfun visualTokens(width: Int, height: Int): Int = ceil(width / 28.0).toInt() * ceil(height / 28.0).toInt()\n\nprivate fun fits(w: Int, h: Int, maxEdge: Int, maxTokens: Int) =\n    ceil(w / 28.0).toInt() * 28 <= maxEdge && ceil(h / 28.0).toInt() * 28 <= maxEdge && visualTokens(w, h) <= maxTokens\n\n/** The (width, height) the model sees: the largest aspect-preserving size within the tier's edge and token limits. */\nfun resizedSize(width: Int, height: Int, tier: String): Pair<Int, Int> {\n    val (maxEdge, maxTokens) = TIERS.getValue(tier)\n    if (fits(width, height, maxEdge, maxTokens)) return Pair(width, height)\n    if (height > width) {\n        val (h, w) = resizedSize(height, width, tier)\n        return Pair(w, h)\n    }\n    val ratio = width.toDouble() / height\n    for (longEdge in width - 1 downTo 1) {\n        val short = max(Math.rint(longEdge / ratio).toInt(), 1) // half to even, like the API\n        if (fits(longEdge, short, maxEdge, maxTokens)) return Pair(longEdge, short)\n    }\n    return Pair(1, 1)\n}\n\nfun imageCostUsd(model: String, tokens: Int): Double = Math.rint(tokens * MODELS.getValue(model).third / 1_000_000 * 1e6) / 1e6\n\nfun toOriginalCoordinates(x: Double, y: Double, width: Int, height: Int, model: String): Pair<Double, Double> {\n    val (rw, rh) = resizedSize(width, height, MODELS.getValue(model).first)\n    val cx = min(max(x, 0.0), rw.toDouble())\n    val cy = min(max(y, 0.0), rh.toDouble())\n    return Pair(cx / rw * width, cy / rh * height)\n}\n\nprivate fun sourceOf(item: Map<String, Any?>): Map<String, Any?> {\n    val value = item[\"value\"]\n    return when (item[\"source\"]) {\n        \"base64\" -> mapOf(\"type\" to \"base64\", \"media_type\" to item[\"media_type\"], \"data\" to value)\n        \"url\" -> mapOf(\"type\" to \"url\", \"url\" to value)\n        else -> mapOf(\"type\" to \"file\", \"file_id\" to value)\n    }\n}\n\nprivate fun maxCount(context: Int): Int = if (context < 1_000_000) 100 else 600\n\nprivate fun maxImageSize(cloud: Boolean): Int = (if (cloud) 5 else 10) * MIB\n\nprivate fun isMany(images: Int, pdfs: Int, cloud: Boolean): Boolean = images + (if (cloud) pdfs else 0) > 20\n\nprivate fun imageBlocks(item: Map<String, Any?>, n: Int, imageCount: Int, exact: Boolean): List<Map<String, Any?>> {\n    val blocks = mutableListOf<Map<String, Any?>>()\n    if (imageCount > 1) blocks.add(mapOf(\"type\" to \"text\", \"text\" to \"Image $n:\"))\n    val block = linkedMapOf<String, Any?>(\"type\" to \"image\", \"source\" to sourceOf(item))\n    if (exact) block[\"transformations\"] = mapOf(\"oversized_image\" to \"error\")\n    blocks.add(block)\n    return blocks\n}\n\nprivate fun num(item: Map<String, Any?>, key: String) = (item[key] as Number).toInt()\n\nfun planRequest(model: String, items: List<Map<String, Any?>>, question: String, exact: Boolean = false, platform: String = \"api\"): Map<String, Any?> {\n    log.log(System.Logger.Level.DEBUG, \"planRequest input: {0}\", items)\n    val spec = MODELS[model] ?: throw RequestError(\"model\", \"unknown model $model\")\n    val (tier, context, _) = spec\n    if (question.isBlank()) throw RequestError(\"question\", \"the question must be a non-empty string\")\n    val cloud = platform == \"bedrock\" || platform == \"vertex\"\n    val images = items.count { it[\"kind\"] == \"image\" }\n    val pdfs = items.count { it[\"kind\"] == \"pdf\" }\n    val pages = items.filter { it[\"kind\"] == \"pdf\" }.sumOf { num(it, \"pages\") }\n    val limit = maxCount(context)\n    if (images > limit) throw RequestError(\"items\", \"too many images for $model\")\n    if (pages > limit) throw RequestError(\"items\", \"too many PDF pages for $model\")\n    if (items.sumOf { num(it, \"size\").toLong() } > 32L * MIB) throw RequestError(\"items\", \"the request would be larger than 32 MiB\")\n    val many = isMany(images, pdfs, cloud)\n    var tokens = 0\n    val resized = mutableListOf<Any?>()\n    items.forEachIndexed { i, it ->\n        if (cloud && it[\"source\"] != \"base64\") throw RequestError(\"items[$i].source\", \"$platform accepts base64 sources only\")\n        if (it[\"kind\"] == \"pdf\") {\n            if (it[\"media_type\"] != \"application/pdf\") throw RequestError(\"items[$i].media_type\", \"a PDF must be application/pdf\")\n            return@forEachIndexed\n        }\n        val w = num(it, \"width\")\n        val h = num(it, \"height\")\n        if (it[\"media_type\"] !in IMAGE_TYPES) throw RequestError(\"items[$i].media_type\", \"${it[\"media_type\"]} is not a supported image format\")\n        if (w > 8000 || h > 8000) throw RequestError(\"items[$i].dimensions\", \"an image may not exceed 8000 x 8000 pixels\")\n        if (num(it, \"size\") > maxImageSize(cloud)) throw RequestError(\"items[$i].size\", \"the image is too large\")\n        if (many && max(w, h) > 2000) throw RequestError(\"items[$i].dimensions\", \"with more than 20 images, no side may exceed 2000 pixels\")\n        val seen = resizedSize(w, h, tier)\n        if (seen != Pair(w, h)) {\n            if (exact) throw RequestError(\"items[$i].dimensions\", \"would be resized to ${seen.first}x${seen.second}\")\n            resized.add(it[\"name\"])\n        }\n        tokens += visualTokens(seen.first, seen.second)\n    }\n    val content = mutableListOf<Map<String, Any?>>()\n    var n = 0\n    for (it in items) {\n        if (it[\"kind\"] == \"image\") {\n            n++\n            content.addAll(imageBlocks(it, n, images, exact))\n        } else {\n            content.add(mapOf(\"type\" to \"document\", \"source\" to sourceOf(it)))\n        }\n    }\n    content.add(mapOf(\"type\" to \"text\", \"text\" to question))\n    return linkedMapOf(\"content\" to content, \"image_tokens\" to tokens, \"resized\" to resized, \"pdf_pages\" to pages)\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    fun img(name: String, w: Int, h: Int, mediaType: String = \"image/png\", source: String = \"base64\", value: String = \"AAAA\"): Map<String, Any?> =\n        mapOf(\"kind\" to \"image\", \"name\" to name, \"media_type\" to mediaType, \"width\" to w, \"height\" to h, \"size\" to 1000, \"source\" to source, \"value\" to value)\n\n    // Two images and a question: the planner puts the images first, each labelled, and the question last.\n    val items = listOf(img(\"chart\", 1000, 1000), img(\"photo\", 200, 200, \"image/jpeg\", \"url\", \"https://example.invalid/p.jpg\"))\n    try {\n        val plan = planRequest(\"claude-opus-5-5\", items, \"What changed?\")\n        println(\"blocks: ${(plan[\"content\"] as? List<*> ?: emptyList<Any?>()).map { (it as Map<*, *>).let { b -> b[\"text\"] ?: b[\"type\"] } }}\")\n        println(\"image tokens: ${plan[\"image_tokens\"]}\")\n        println(\"resized: ${plan[\"resized\"]}\")\n    } catch (err: RequestError) {\n        println(\"refused: ${err.message}\")\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import kotlin.math.ceil\nimport kotlin.math.max\nimport kotlin.math.min\n\nprivate val log = System.getLogger(\"vision\")\n\n/** Planning a request that carries images and PDFs. See ../../statement.md. Items, blocks and results are JSON-like maps. */\n\nconst val MIB = 1024 * 1024\nval IMAGE_TYPES = listOf(\"image/jpeg\", \"image/png\", \"image/gif\", \"image/webp\")\n\n/** Given: model id to (tier, context window in tokens, input price in dollars per million tokens). */\nval MODELS: Map<String, Triple<String, Int, Double>> = mapOf(\n    \"claude-fable-5-1\" to Triple(\"high\", 1_000_000, 10.0),\n    \"claude-opus-5-5\" to Triple(\"high\", 1_000_000, 4.0),\n    \"claude-sonnet-5-5\" to Triple(\"high\", 1_000_000, 2.0),\n    \"claude-haiku-4-5\" to Triple(\"standard\", 200_000, 1.0),\n    \"claude-haiku-4-5-20251001\" to Triple(\"standard\", 200_000, 1.0),\n)\n\n/** Given: tier to (longest edge in pixels, visual token budget). */\nval TIERS: Map<String, Pair<Int, Int>> = mapOf(\"standard\" to Pair(1568, 1568), \"high\" to Pair(2576, 4784))\n\n/** What your code throws, before any call, for a request the API would reject; `field` names the part. */\nclass RequestError(val field: String, reason: String) : RuntimeException(\"$field: $reason\")\n\nfun visualTokens(width: Int, height: Int): Int {\n    // TODO 1 of 8 (unlocks e1 and e7): the visual tokens of an image of this size.\n    // Receives the width and height in pixels. Returns one token per 28 x 28 pixel patch, each side rounded up to whole patches.\n    // Example: visualTokens(29, 28) -> 2\n    return 0\n}\n\nprivate fun fits(w: Int, h: Int, maxEdge: Int, maxTokens: Int) =\n    ceil(w / 28.0).toInt() * 28 <= maxEdge && ceil(h / 28.0).toInt() * 28 <= maxEdge && visualTokens(w, h) <= maxTokens\n\n/** The (width, height) the model sees: the largest aspect-preserving size within the tier's edge and token limits. */\nfun resizedSize(width: Int, height: Int, tier: String): Pair<Int, Int> {\n    val (maxEdge, maxTokens) = TIERS.getValue(tier)\n    if (fits(width, height, maxEdge, maxTokens)) return Pair(width, height)\n    if (height > width) {\n        val (h, w) = resizedSize(height, width, tier)\n        return Pair(w, h)\n    }\n    val ratio = width.toDouble() / height\n    for (longEdge in width - 1 downTo 1) {\n        val short = max(Math.rint(longEdge / ratio).toInt(), 1) // half to even, like the API\n        if (fits(longEdge, short, maxEdge, maxTokens)) return Pair(longEdge, short)\n    }\n    return Pair(1, 1)\n}\n\nfun imageCostUsd(model: String, tokens: Int): Double {\n    // TODO 2 of 8 (unlocks e7): the input cost in dollars of that many tokens for the model.\n    // Receives a model id and a token count. Returns tokens * price / 1,000,000 rounded to 6 decimals (Math.rint); the price is\n    // MODELS.getValue(model).third. Example: imageCostUsd(\"claude-haiku-4-5\", 1000) -> 0.001\n    return 0.0\n}\n\nfun toOriginalCoordinates(x: Double, y: Double, width: Int, height: Int, model: String): Pair<Double, Double> {\n    val (rw, rh) = resizedSize(width, height, MODELS.getValue(model).first)\n    // TODO 3 of 8 (unlocks e7): a point Claude returned for the image it saw, as a point on the original width x height image.\n    // Clamp x and y into the resized size rw x rh, then scale them onto the original size. Example: a 3000 x 2000 image on a\n    // \"high\" model is seen as 2576 x 1717 (not padded), so the point (1288.0, 0.0) becomes about (1500.0, 0.0).\n    return Pair(x, y)\n}\n\nprivate fun sourceOf(item: Map<String, Any?>): Map<String, Any?> {\n    // TODO 8 of 8 (unlocks m1, e5 and e6): the \"source\" object of an item.\n    // Returns {type: base64, media_type, data} for source \"base64\", {type: url, url} for \"url\" and {type: file, file_id} for\n    // \"file\"; the text is item[\"value\"].\n    // Example: source \"url\", value \"https://example.invalid/a.png\" -> {type=url, url=https://example.invalid/a.png}\n    return emptyMap()\n}\n\nprivate fun maxCount(context: Int): Int {\n    // TODO 4 of 8 (unlocks e2 and e5): how many images, and how many PDF pages, a request may hold.\n    // Receives the model's context window in tokens. Returns 100 when it is under 1,000,000 and 600 otherwise.\n    // Example: maxCount(200_000) -> 100\n    return Int.MAX_VALUE\n}\n\nprivate fun maxImageSize(cloud: Boolean): Int {\n    // TODO 5 of 8 (unlocks e2 and e6): the largest image payload in bytes.\n    // Receives true on bedrock and vertex. Returns 10 MiB, or 5 MiB when it is true.\n    // Example: maxImageSize(true) -> 5 * MIB\n    return Int.MAX_VALUE\n}\n\nprivate fun isMany(images: Int, pdfs: Int, cloud: Boolean): Boolean {\n    // TODO 6 of 8 (unlocks e3): does the request hold more than 20 image blocks?\n    // Receives the image count, the PDF count and the cloud flag; on bedrock and vertex the PDFs count as well.\n    // Example: isMany(18, 3, true) -> true, isMany(18, 3, false) -> false\n    return false\n}\n\nprivate fun imageBlocks(item: Map<String, Any?>, n: Int, imageCount: Int, exact: Boolean): List<Map<String, Any?>> {\n    // TODO 7 of 8 (unlocks m1 and e4): the content blocks of the n-th image (counting from 1).\n    // Returns a text block \"Image n:\" first when there are two or more images, then the image block {type: image, source:\n    // sourceOf(item)}, which also carries transformations: {oversized_image: error} when exact is true.\n    // Example: imageBlocks(item, 2, 2, false) -> [{type=text, text=Image 2:}, {type=image, source={...}}]\n    return emptyList()\n}\n\nprivate fun num(item: Map<String, Any?>, key: String) = (item[key] as Number).toInt()\n\nfun planRequest(model: String, items: List<Map<String, Any?>>, question: String, exact: Boolean = false, platform: String = \"api\"): Map<String, Any?> {\n    log.log(System.Logger.Level.DEBUG, \"planRequest input: {0}\", items)\n    val spec = MODELS[model] ?: throw RequestError(\"model\", \"unknown model $model\")\n    val (tier, context, _) = spec\n    if (question.isBlank()) throw RequestError(\"question\", \"the question must be a non-empty string\")\n    val cloud = platform == \"bedrock\" || platform == \"vertex\"\n    val images = items.count { it[\"kind\"] == \"image\" }\n    val pdfs = items.count { it[\"kind\"] == \"pdf\" }\n    val pages = items.filter { it[\"kind\"] == \"pdf\" }.sumOf { num(it, \"pages\") }\n    val limit = maxCount(context)\n    if (images > limit) throw RequestError(\"items\", \"too many images for $model\")\n    if (pages > limit) throw RequestError(\"items\", \"too many PDF pages for $model\")\n    if (items.sumOf { num(it, \"size\").toLong() } > 32L * MIB) throw RequestError(\"items\", \"the request would be larger than 32 MiB\")\n    val many = isMany(images, pdfs, cloud)\n    var tokens = 0\n    val resized = mutableListOf<Any?>()\n    items.forEachIndexed { i, it ->\n        if (cloud && it[\"source\"] != \"base64\") throw RequestError(\"items[$i].source\", \"$platform accepts base64 sources only\")\n        if (it[\"kind\"] == \"pdf\") {\n            if (it[\"media_type\"] != \"application/pdf\") throw RequestError(\"items[$i].media_type\", \"a PDF must be application/pdf\")\n            return@forEachIndexed\n        }\n        val w = num(it, \"width\")\n        val h = num(it, \"height\")\n        if (it[\"media_type\"] !in IMAGE_TYPES) throw RequestError(\"items[$i].media_type\", \"${it[\"media_type\"]} is not a supported image format\")\n        if (w > 8000 || h > 8000) throw RequestError(\"items[$i].dimensions\", \"an image may not exceed 8000 x 8000 pixels\")\n        if (num(it, \"size\") > maxImageSize(cloud)) throw RequestError(\"items[$i].size\", \"the image is too large\")\n        if (many && max(w, h) > 2000) throw RequestError(\"items[$i].dimensions\", \"with more than 20 images, no side may exceed 2000 pixels\")\n        val seen = resizedSize(w, h, tier)\n        if (seen != Pair(w, h)) {\n            if (exact) throw RequestError(\"items[$i].dimensions\", \"would be resized to ${seen.first}x${seen.second}\")\n            resized.add(it[\"name\"])\n        }\n        tokens += visualTokens(seen.first, seen.second)\n    }\n    val content = mutableListOf<Map<String, Any?>>()\n    var n = 0\n    for (it in items) {\n        if (it[\"kind\"] == \"image\") {\n            n++\n            content.addAll(imageBlocks(it, n, images, exact))\n        } else {\n            content.add(mapOf(\"type\" to \"document\", \"source\" to sourceOf(it)))\n        }\n    }\n    content.add(mapOf(\"type\" to \"text\", \"text\" to question))\n    return linkedMapOf(\"content\" to content, \"image_tokens\" to tokens, \"resized\" to resized, \"pdf_pages\" to pages)\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    fun img(name: String, w: Int, h: Int, mediaType: String = \"image/png\", source: String = \"base64\", value: String = \"AAAA\"): Map<String, Any?> =\n        mapOf(\"kind\" to \"image\", \"name\" to name, \"media_type\" to mediaType, \"width\" to w, \"height\" to h, \"size\" to 1000, \"source\" to source, \"value\" to value)\n\n    // Two images and a question: the planner puts the images first, each labelled, and the question last.\n    val items = listOf(img(\"chart\", 1000, 1000), img(\"photo\", 200, 200, \"image/jpeg\", \"url\", \"https://example.invalid/p.jpg\"))\n    try {\n        val plan = planRequest(\"claude-opus-5-5\", items, \"What changed?\")\n        println(\"blocks: ${(plan[\"content\"] as? List<*> ?: emptyList<Any?>()).map { (it as Map<*, *>).let { b -> b[\"text\"] ?: b[\"type\"] } }}\")\n        println(\"image tokens: ${plan[\"image_tokens\"]}\")\n        println(\"resized: ${plan[\"resized\"]}\")\n    } catch (err: RequestError) {\n        println(\"refused: ${err.message}\")\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 4,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "afc15b2c45a63b1432bc9b69d02e37cd3e336a4463b8fc1fa1f012f7670f3941",
+  "starting_code": "import kotlin.math.ceil\nimport kotlin.math.max\nimport kotlin.math.min\n\nprivate val log = System.getLogger(\"vision\")\n\n/** Planning a request that carries images and PDFs. See ../../statement.md. Items, blocks and results are JSON-like maps. */\n\nconst val MIB = 1024 * 1024\nval IMAGE_TYPES = listOf(\"image/jpeg\", \"image/png\", \"image/gif\", \"image/webp\")\n\n/** Given: model id to (tier, context window in tokens, input price in dollars per million tokens). */\nval MODELS: Map<String, Triple<String, Int, Double>> = mapOf(\n    \"claude-fable-5-1\" to Triple(\"high\", 1_000_000, 10.0),\n    \"claude-opus-5-5\" to Triple(\"high\", 1_000_000, 4.0),\n    \"claude-sonnet-5-5\" to Triple(\"high\", 1_000_000, 2.0),\n    \"claude-haiku-4-5\" to Triple(\"standard\", 200_000, 1.0),\n    \"claude-haiku-4-5-20251001\" to Triple(\"standard\", 200_000, 1.0),\n)\n\n/** Given: tier to (longest edge in pixels, visual token budget). */\nval TIERS: Map<String, Pair<Int, Int>> = mapOf(\"standard\" to Pair(1568, 1568), \"high\" to Pair(2576, 4784))\n\n/** What your code throws, before any call, for a request the API would reject; `field` names the part. */\nclass RequestError(val field: String, reason: String) : RuntimeException(\"$field: $reason\")\n\nfun visualTokens(width: Int, height: Int): Int {\n    // TODO 1 of 8 (unlocks e1 and e7): the visual tokens of an image of this size.\n    // Receives the width and height in pixels. Returns one token per 28 x 28 pixel patch, each side rounded up to whole patches.\n    // Example: visualTokens(29, 28) -> 2\n    return 0\n}\n\nprivate fun fits(w: Int, h: Int, maxEdge: Int, maxTokens: Int) =\n    ceil(w / 28.0).toInt() * 28 <= maxEdge && ceil(h / 28.0).toInt() * 28 <= maxEdge && visualTokens(w, h) <= maxTokens\n\n/** The (width, height) the model sees: the largest aspect-preserving size within the tier's edge and token limits. */\nfun resizedSize(width: Int, height: Int, tier: String): Pair<Int, Int> {\n    val (maxEdge, maxTokens) = TIERS.getValue(tier)\n    if (fits(width, height, maxEdge, maxTokens)) return Pair(width, height)\n    if (height > width) {\n        val (h, w) = resizedSize(height, width, tier)\n        return Pair(w, h)\n    }\n    val ratio = width.toDouble() / height\n    for (longEdge in width - 1 downTo 1) {\n        val short = max(Math.rint(longEdge / ratio).toInt(), 1) // half to even, like the API\n        if (fits(longEdge, short, maxEdge, maxTokens)) return Pair(longEdge, short)\n    }\n    return Pair(1, 1)\n}\n\nfun imageCostUsd(model: String, tokens: Int): Double {\n    // TODO 2 of 8 (unlocks e7): the input cost in dollars of that many tokens for the model.\n    // Receives a model id and a token count. Returns tokens * price / 1,000,000 rounded to 6 decimals (Math.rint); the price is\n    // MODELS.getValue(model).third. Example: imageCostUsd(\"claude-haiku-4-5\", 1000) -> 0.001\n    return 0.0\n}\n\nfun toOriginalCoordinates(x: Double, y: Double, width: Int, height: Int, model: String): Pair<Double, Double> {\n    val (rw, rh) = resizedSize(width, height, MODELS.getValue(model).first)\n    // TODO 3 of 8 (unlocks e7): a point Claude returned for the image it saw, as a point on the original width x height image.\n    // Clamp x and y into the resized size rw x rh, then scale them onto the original size. Example: a 3000 x 2000 image on a\n    // \"high\" model is seen as 2576 x 1717 (not padded), so the point (1288.0, 0.0) becomes about (1500.0, 0.0).\n    return Pair(x, y)\n}\n\nprivate fun sourceOf(item: Map<String, Any?>): Map<String, Any?> {\n    // TODO 8 of 8 (unlocks m1, e5 and e6): the \"source\" object of an item.\n    // Returns {type: base64, media_type, data} for source \"base64\", {type: url, url} for \"url\" and {type: file, file_id} for\n    // \"file\"; the text is item[\"value\"].\n    // Example: source \"url\", value \"https://example.invalid/a.png\" -> {type=url, url=https://example.invalid/a.png}\n    return emptyMap()\n}\n\nprivate fun maxCount(context: Int): Int {\n    // TODO 4 of 8 (unlocks e2 and e5): how many images, and how many PDF pages, a request may hold.\n    // Receives the model's context window in tokens. Returns 100 when it is under 1,000,000 and 600 otherwise.\n    // Example: maxCount(200_000) -> 100\n    return Int.MAX_VALUE\n}\n\nprivate fun maxImageSize(cloud: Boolean): Int {\n    // TODO 5 of 8 (unlocks e2 and e6): the largest image payload in bytes.\n    // Receives true on bedrock and vertex. Returns 10 MiB, or 5 MiB when it is true.\n    // Example: maxImageSize(true) -> 5 * MIB\n    return Int.MAX_VALUE\n}\n\nprivate fun isMany(images: Int, pdfs: Int, cloud: Boolean): Boolean {\n    // TODO 6 of 8 (unlocks e3): does the request hold more than 20 image blocks?\n    // Receives the image count, the PDF count and the cloud flag; on bedrock and vertex the PDFs count as well.\n    // Example: isMany(18, 3, true) -> true, isMany(18, 3, false) -> false\n    return false\n}\n\nprivate fun imageBlocks(item: Map<String, Any?>, n: Int, imageCount: Int, exact: Boolean): List<Map<String, Any?>> {\n    // TODO 7 of 8 (unlocks m1 and e4): the content blocks of the n-th image (counting from 1).\n    // Returns a text block \"Image n:\" first when there are two or more images, then the image block {type: image, source:\n    // sourceOf(item)}, which also carries transformations: {oversized_image: error} when exact is true.\n    // Example: imageBlocks(item, 2, 2, false) -> [{type=text, text=Image 2:}, {type=image, source={...}}]\n    return emptyList()\n}\n\nprivate fun num(item: Map<String, Any?>, key: String) = (item[key] as Number).toInt()\n\nfun planRequest(model: String, items: List<Map<String, Any?>>, question: String, exact: Boolean = false, platform: String = \"api\"): Map<String, Any?> {\n    log.log(System.Logger.Level.DEBUG, \"planRequest input: {0}\", items)\n    val spec = MODELS[model] ?: throw RequestError(\"model\", \"unknown model $model\")\n    val (tier, context, _) = spec\n    if (question.isBlank()) throw RequestError(\"question\", \"the question must be a non-empty string\")\n    val cloud = platform == \"bedrock\" || platform == \"vertex\"\n    val images = items.count { it[\"kind\"] == \"image\" }\n    val pdfs = items.count { it[\"kind\"] == \"pdf\" }\n    val pages = items.filter { it[\"kind\"] == \"pdf\" }.sumOf { num(it, \"pages\") }\n    val limit = maxCount(context)\n    if (images > limit) throw RequestError(\"items\", \"too many images for $model\")\n    if (pages > limit) throw RequestError(\"items\", \"too many PDF pages for $model\")\n    if (items.sumOf { num(it, \"size\").toLong() } > 32L * MIB) throw RequestError(\"items\", \"the request would be larger than 32 MiB\")\n    val many = isMany(images, pdfs, cloud)\n    var tokens = 0\n    val resized = mutableListOf<Any?>()\n    items.forEachIndexed { i, it ->\n        if (cloud && it[\"source\"] != \"base64\") throw RequestError(\"items[$i].source\", \"$platform accepts base64 sources only\")\n        if (it[\"kind\"] == \"pdf\") {\n            if (it[\"media_type\"] != \"application/pdf\") throw RequestError(\"items[$i].media_type\", \"a PDF must be application/pdf\")\n            return@forEachIndexed\n        }\n        val w = num(it, \"width\")\n        val h = num(it, \"height\")\n        if (it[\"media_type\"] !in IMAGE_TYPES) throw RequestError(\"items[$i].media_type\", \"${it[\"media_type\"]} is not a supported image format\")\n        if (w > 8000 || h > 8000) throw RequestError(\"items[$i].dimensions\", \"an image may not exceed 8000 x 8000 pixels\")\n        if (num(it, \"size\") > maxImageSize(cloud)) throw RequestError(\"items[$i].size\", \"the image is too large\")\n        if (many && max(w, h) > 2000) throw RequestError(\"items[$i].dimensions\", \"with more than 20 images, no side may exceed 2000 pixels\")\n        val seen = resizedSize(w, h, tier)\n        if (seen != Pair(w, h)) {\n            if (exact) throw RequestError(\"items[$i].dimensions\", \"would be resized to ${seen.first}x${seen.second}\")\n            resized.add(it[\"name\"])\n        }\n        tokens += visualTokens(seen.first, seen.second)\n    }\n    val content = mutableListOf<Map<String, Any?>>()\n    var n = 0\n    for (it in items) {\n        if (it[\"kind\"] == \"image\") {\n            n++\n            content.addAll(imageBlocks(it, n, images, exact))\n        } else {\n            content.add(mapOf(\"type\" to \"document\", \"source\" to sourceOf(it)))\n        }\n    }\n    content.add(mapOf(\"type\" to \"text\", \"text\" to question))\n    return linkedMapOf(\"content\" to content, \"image_tokens\" to tokens, \"resized\" to resized, \"pdf_pages\" to pages)\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/30-vision-and-documents/prose/unit-02/practice-4/src/main/kotlin/Vision.kt",
+    "test_path": "practice/level-2/30-vision-and-documents/prose/unit-02/practice-4/src/test/kotlin/VisionTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/30-vision-and-documents/prose/unit-02/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/30-vision-and-documents/prose/unit-02/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_imagesComeFirstWithLabelsAndTheQuestionLast()",
+        "kind": "main",
+        "says": "Images come first with labels, and the question comes last"
+      },
+      {
+        "id": "e1_theTokenCostFollowsTheModelsResolutionTier()",
+        "kind": "edge",
+        "says": "The token cost follows the model's resolution tier"
+      },
+      {
+        "id": "e2_formatsDimensionsSizesAndCountsAreCheckedBeforeAnyCall()",
+        "kind": "edge",
+        "says": "Formats, dimensions, sizes and counts are checked before any call"
+      },
+      {
+        "id": "e3_moreThanTwentyImagesLowerTheSideLimitTo2000Pixels()",
+        "kind": "edge",
+        "says": "More than twenty images lower the side limit to 2000 pixels"
+      },
+      {
+        "id": "e4_anImageWhoseSizeMattersIsRejectedInsteadOfResized()",
+        "kind": "edge",
+        "says": "An image whose size matters is rejected instead of resized"
+      },
+      {
+        "id": "e5_pdfsBecomeDocumentBlocksInOrderAndAreLimitedByPages()",
+        "kind": "edge",
+        "says": "PDFs become document blocks in order and are limited by pages"
+      },
+      {
+        "id": "e6_bedrockAndVertexTakeOnlyBase64SourcesAndSmallerImages()",
+        "kind": "edge",
+        "says": "Bedrock and Vertex take only base64 sources and smaller images"
+      },
+      {
+        "id": "e7_coordinatesMapBackToTheOriginalAndCostFollowsThePrice()",
+        "kind": "edge",
+        "says": "Coordinates map back to the original, and cost follows the price"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/30-vision-and-documents/prose/unit-02/practice-4/target/test-results/test"
+    },
+    "origin": "course/30-vision-and-documents/02-pdfs-documents-and-the-practice.md",
+    "concepts": [
+      "the practice of PDFs and documents: limits, cost and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/30-vision-and-documents/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "vision-and-documents-u2"
+}

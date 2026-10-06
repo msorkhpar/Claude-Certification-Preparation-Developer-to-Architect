@@ -1,0 +1,97 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "56-the-built-in-tools"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: set up a read-mostly explorer for an unfamiliar codebase (TypeScript)",
+  "lang": "typescript",
+  "main_file": "project/.claude/settings.json",
+  "files": [
+    "project/.claude/agents/explorer.md",
+    "project/agent-options.json",
+    "project/docs/exploration-plan.md"
+  ],
+  "test_file": "tests/explorerSetup.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "tests/examples/56-builtin-tools/typescript/builtinTools.ts",
+    "tests/examples/39-hook-gate/typescript/hookGate.ts",
+    "tests/examples/39-hook-gate/typescript/miniyaml.ts",
+    "tests/examples/38-settings-layers/typescript/settingsLayers.ts",
+    "tests/examples/38-settings-layers/typescript/example-logger.ts",
+    "tests/examples/39-hook-gate/typescript/example-logger.ts",
+    "tests/examples/56-builtin-tools/typescript/example-logger.ts",
+    "logger.ts",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-2/check_files.py",
+    "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-2/project/.claude/agents/explorer.md",
+    "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-2/project/.claude/settings.json",
+    "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-2/project/agent-options.json",
+    "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-2/project/docs/exploration-plan.md"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-3/56-the-built-in-tools/prose/unit-02/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-2/tests/explorerSetup.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 the permission rules let an explorer read search and take notes but not change the source",
+      "kind": "main",
+      "says": "Thirteen sample calls get the right answer from your rules: read and search freely, notes yes, source no"
+    },
+    {
+      "id": "e1 a read rule protects secrets from reading searching and writing",
+      "kind": "edge",
+      "says": "A read rule protects secrets from reading, searching and writing"
+    },
+    {
+      "id": "e2 only rule forms that are consulted are used and no whole tool that changes things is allowed",
+      "kind": "edge",
+      "says": "Only rule forms that are consulted, and no whole tool that changes things allowed"
+    },
+    {
+      "id": "e3 the explorer agent reads and searches and says when to use it",
+      "kind": "edge",
+      "says": "The explorer agent reads and searches, says when to use it and is bounded"
+    },
+    {
+      "id": "e4 the sdk options make the search tools available and remove the tools that change things",
+      "kind": "edge",
+      "says": "The SDK options make the search tools available and remove the tools that change things"
+    },
+    {
+      "id": "e5 the exploration plan starts with a search then reads and never reads everything first",
+      "kind": "edge",
+      "says": "The plan starts with a search, then reads, and never reads everything first"
+    },
+    {
+      "id": "e6 the edit fallback widens the anchor then replaces all then rewrites the file",
+      "kind": "edge",
+      "says": "The edit remedies come in order: longer anchor, replace_all, whole-file rewrite"
+    },
+    {
+      "id": "e7 no file holds a personal path an address or a key",
+      "kind": "edge",
+      "says": "No file holds a personal path, an address or a key"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/56-the-built-in-tools/02-permissions-exploring-a-codebase-and-the-practice.md"
+}

@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/kotlin/Capability.kt",
+      "old": "        request.model !in policy.models.getValue(team) -> \"deny\" to \"model not allowed\"\n",
+      "new": "        request.recent >= policy.limits.getValue(team) -> \"deny\" to \"rate limited\"\n        request.model !in policy.models.getValue(team) -> \"deny\" to \"model not allowed\"\n"
+    }
+  ]
+}

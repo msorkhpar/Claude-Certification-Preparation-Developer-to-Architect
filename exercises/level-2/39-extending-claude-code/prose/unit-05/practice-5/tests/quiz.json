@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "39-extending-claude-code"
+  ],
+  "variant": "prose",
+  "unit": 5,
+  "ordinal": 5,
+  "title": "Check yourself: Making Claude Code yours: output styles, the status line, keybindings and where each setting lives",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A developer selects a built-in style in a settings file with `\"outputStyle\": \"explanatory\"`. Replies keep Claude Code's standard wording and no error appears. What is the cause?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The value must match a name exactly, or the default applies without a message",
+            "correct": true,
+            "says": "The page says \"A value that doesn't match a style name exactly, such as `explanatory`, gives you the Default style\", with no error."
+          },
+          {
+            "id": "b",
+            "text": "The session must be restarted first, because styles are read only at launch",
+            "correct": false,
+            "says": "Ruled out because \"Claude uses the new style starting with your next message\", and a built-in style needs no restart; only a style file created in a running session does."
+          },
+          {
+            "id": "c",
+            "text": "Project files cannot set a style at all, so the value belongs in the user folder",
+            "correct": false,
+            "says": "Ruled out because \"A project's own settings files take precedence over that value\", so a project file can set a style."
+          },
+          {
+            "id": "d",
+            "text": "A hook must apply the choice on each reply, because settings only suggest it to Claude",
+            "correct": false,
+            "says": "Ruled out because a style is applied by Claude Code itself: \"Claude Code sends the active style's instructions with every request\", and no hook is involved."
+          }
+        ],
+        "origin": {
+          "path": "course/39-extending-claude-code/05-making-claude-code-yours-output-styles-the-status-line-and-keybindings.md",
+          "section": "Output styles"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A keybindings file sets `ctrl+s` to `null` and `ctrl+c` to a custom action. What results?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Both keys change as written, and a warning appears on the screen at once",
+            "correct": false,
+            "says": "Ruled out because Claude Code \"writes a warning to the debug log\", not to the screen, and the reserved key does not change."
+          },
+          {
+            "id": "b",
+            "text": "Ctrl+C is rebound as written, and Ctrl+S keeps stashing the prompt as before",
+            "correct": false,
+            "says": "Ruled out because `null` \"frees the one key it is written against\", so Ctrl+S stops stashing."
+          },
+          {
+            "id": "c",
+            "text": "Ctrl+S is freed, and Ctrl+C keeps its default because it is reserved",
+            "correct": true,
+            "says": "The page says `null` \"frees the one key it is written against\", and that reserved keys cannot be rebound: \"These shortcuts cannot be rebound.\""
+          },
+          {
+            "id": "d",
+            "text": "Both keys are freed together, and Ctrl+C then does nothing at all in the chat",
+            "correct": false,
+            "says": "Ruled out because \"These shortcuts cannot be rebound\", and Ctrl+C is reserved, so it keeps interrupting."
+          }
+        ],
+        "origin": {
+          "path": "course/39-extending-claude-code/05-making-claude-code-yours-output-styles-the-status-line-and-keybindings.md",
+          "section": "Keybindings"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "One developer's `~/.claude/settings.json` names an output style, while the repository's `.claude/settings.json` names a different one. Which does the session use?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The personal choice, because a developer's own file always wins for that person",
+            "correct": false,
+            "says": "Ruled out because \"A key at a higher level overrides the same key anywhere below it\", and the user level is the lowest of the files."
+          },
+          {
+            "id": "b",
+            "text": "The project's choice, because that level outranks the user level",
+            "correct": true,
+            "says": "The page says \"Claude Code uses the value from the highest level that sets it\", and the shared project settings sit above the user settings."
+          },
+          {
+            "id": "c",
+            "text": "Whichever file was saved last, because Claude Code compares modification times",
+            "correct": false,
+            "says": "Ruled out because the documentation gives \"their order, highest precedence first\", and no file date is involved."
+          },
+          {
+            "id": "d",
+            "text": "Neither choice, because a key set at two levels is rejected as a conflict",
+            "correct": false,
+            "says": "Ruled out because \"Claude Code uses the value from the highest level that sets it\", so two levels are resolved by order and not rejected."
+          }
+        ],
+        "origin": {
+          "path": "course/39-extending-claude-code/05-making-claude-code-yours-output-styles-the-status-line-and-keybindings.md",
+          "section": "Where each setting lives: the scopes"
+        }
+      }
+    ]
+  }
+}

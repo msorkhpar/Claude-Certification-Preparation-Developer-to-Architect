@@ -1,0 +1,381 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "52-designing-tool-interfaces"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: grade a tool set on schema rules (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: grade a tool set on schema rules"
+    },
+    {
+      "type": "para",
+      "text": "The model chooses a tool from its name, its description and its schema, so those are the interface, and they can be checked like code. This practice has you write the grader: a linter for one tool and for a whole set, a pager for a result that is too long, and the rule for how far a tool's own annotations may be trusted. The rules are the course's own, built on the documented guidance (a description of at least three or four sentences, when to use the tool and when not, a description on every parameter, valid examples, namespacing, a bounded list); their thresholds are stated below so the tests can pin them. The model is never called. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`lint_tool`, `lint_tool_set`, `page_results`, `effective_hints`, `parallel_safe`); TypeScript has `lintTool`, `lintToolSet`, `pageResults`, `effectiveHints` and `parallelSafe` (arguments `maxTools`, `maxChars`); Java has `Toolset.lintTool` and so on, with overloads for the defaults; Kotlin has top-level functions with default arguments. A tool is a map: `name`, `description`, `input_schema` (`properties`, each with `type`, `description` and optionally `enum`; and `required`), optionally `input_examples` (a list of example inputs), `annotations` (a map of Boolean hints) and, for a tool that came from a server, `server`."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working grader with eight gaps cut out of it. Everything that is plumbing is written and correct: the constants, the type check for examples, the word extraction, the cursor encoding and decoding, the paging loop and its note, the pairing and sorting of a tool set, the hint defaults and `parallel_safe`, and the rules that are not listed below. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_name_rules` unlocks `e1`: `bad-name` and `vague-name`.",
+        "`_description_rules` unlocks `e2`: `short-description` and `no-boundary`.",
+        "`_parameter_rules` unlocks `e3`: `param-undescribed` and `required-unknown`.",
+        "`_list_and_hint_rules` unlocks `e4`: `list-unbounded` and `hint-contradicts-name`.",
+        "`_similar` unlocks `e5`: the overlap threshold of two descriptions.",
+        "`_check_limit` unlocks `e6`: the limit that is refused below 1 and cut to 50.",
+        "`_over_cap` unlocks `e7`: when the size cap ends a page, and the first item that is always taken.",
+        "`effective_hints` unlocks `e8`: a tool's own hints count only from a trusted server."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs the first four. About twenty lines in all. The steps below describe the whole grader, so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Step 1: `lint_tool(tool)`"
+    },
+    {
+      "type": "para",
+      "text": "Return the sorted list of rule ids the tool breaks, without repeats; `[]` for a clean tool."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Rule",
+        "A tool breaks it when"
+      ],
+      "rows": [
+        [
+          "`bad-name`",
+          "the name does not match `[A-Za-z0-9_-]{1,128}` in full"
+        ],
+        [
+          "`vague-name`",
+          "the name, in lower case, is one of `tool`, `helper`, `do`, `run`, `process`, `handle`, `data`, `util`, `utils`, `query`"
+        ],
+        [
+          "`short-description`",
+          "the description has fewer than 3 sentences, a sentence ending at `.`, `!` or `?` followed by white space or the end"
+        ],
+        [
+          "`no-use-when`",
+          "the lower-cased description lacks `use when`"
+        ],
+        [
+          "`no-boundary`",
+          "it lacks all of `do not use`, `not for` and `instead of` (the boundary against the neighbouring tool)"
+        ],
+        [
+          "`param-undescribed`",
+          "a property has no description, or a blank one"
+        ],
+        [
+          "`required-unknown`",
+          "`required` names something that is not a property"
+        ],
+        [
+          "`open-set`",
+          "a string property without an `enum` has a description containing `one of` or `either`"
+        ],
+        [
+          "`reasoning-param`",
+          "a property name or description contains `reasoning` or `thinking`"
+        ],
+        [
+          "`bad-example`",
+          "an `input_examples` entry is not a map, lacks a required key, has a key that is not a property, has a value of the wrong type (`string`, `integer` without booleans, `number`, `boolean`, `array`, `object`) or outside the property's `enum`"
+        ],
+        [
+          "`list-unbounded`",
+          "the name starts with `list_`, `search_` or `find_` and the properties lack `limit` or lack `cursor`"
+        ],
+        [
+          "`hint-contradicts-name`",
+          "`readOnlyHint` is true and the name starts with `create_`, `update_`, `delete_`, `remove_`, `send_` or `write_`, or `destructiveHint` is false and the name starts with `delete_` or `remove_`"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "**Why the exam cares.** The guide says tool descriptions are the primary mechanism for tool selection, and asks for input formats, example queries, edge cases and boundaries against similar tools. A rule that a script can check is a rule a team can keep. **What you should see when it works:** a tool of four sentences with a when-to-use phrase, a boundary, described parameters and valid examples is clean; a tool called `helper` with the description \"Gets stuff.\" is named for five rules."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Step 2: `lint_tool_set(tools, max_tools=20)`"
+    },
+    {
+      "type": "para",
+      "text": "Return sorted `[tool name, rule]` pairs: every pair `lint_tool` finds, plus `duplicate-name` (once per name used by more than one tool), `overlap:<other name>` on both tools of a pair with different names whose descriptions share at least 0.6 of their words (the words are the runs of three or more letters a to z in the lower-cased description; the share is the size of the common words over the size of all the words), and `[\"*\", \"too-many-tools\"]` when the set has more than `max_tools` tools. Sort by name, then by rule."
+    },
+    {
+      "type": "para",
+      "text": "**Why the exam cares.** Overlapping descriptions cause misrouting (the guide's `analyze_content` and `analyze_document`), and the documentation says that tool selection accuracy degrades with more than 30 to 50 tools loaded at once. **What you should see when it works:** two tools with the same description point at each other, two with different ones do not, and a set at exactly the budget is not too large."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Step 3: `page_results(items, cursor=None, limit=10, max_chars=2000)`"
+    },
+    {
+      "type": "para",
+      "text": "`items` is a list of text. Return `{\"items\", \"next_cursor\", \"truncated\", \"note\"}`."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`limit` must be a whole number of at least 1, else raise `ValueError` (TypeScript: an `Error`; Java and Kotlin: `IllegalArgumentException`); a limit above 50 is cut to 50.",
+        "The cursor is opaque: build it from the offset of the first item not returned (the reference encodes `offset:<n>` in base64, and any encoding that hides the number passes). A missing cursor starts at the beginning; a cursor that does not decode to an offset between 0 and the number of items is refused as above.",
+        "Take up to `limit` items from the offset, but stop before the item that would push the total length of the page over `max_chars`; the first item is always taken, however long. `truncated` is true when the size cap made the page shorter than the limit and the items left allowed.",
+        "`next_cursor` is null on the last page. `note` is null then too; otherwise it is `Showing N of M results; pass next_cursor to continue, or narrow the query with a filter.`"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "**Why the exam cares.** A tool that returns everything fills the context; the documentation advises pagination, filtering and truncation with sensible defaults, and a truncation message that steers the agent. **What you should see when it works:** 25 rows come back in pages of 10, 10 and 5; the last page has no cursor and no note; a limit of 500 returns at most 50; and a page that hit the size cap says so."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Step 4: `effective_hints(tool, trusted_server)` and `parallel_safe(tools, trusted_servers)`"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`effective_hints` returns the four hints `readOnlyHint` (default false), `destructiveHint` (true), `idempotentHint` (false) and `openWorldHint` (true). The tool's own Boolean values replace the defaults only when its server is trusted; values that are not Booleans are ignored.",
+        "`parallel_safe` returns the names of the tools whose effective `readOnlyHint` is true, taking each tool's `server` and the set of trusted servers, in the order given."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "**Why the exam cares.** The MCP specification says that clients \"MUST consider tool annotations to be untrusted unless they come from trusted servers\", and the Agent SDK uses the read-only hint only to decide which tools may run side by side. A hint is a claim, not a control. **What you should see when it works:** a read-only hint from an unknown server changes nothing, and the same hint from a trusted server lets the tool run in parallel."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A well made tool is clean and a poor one is named for every rule it breaks"
+        ],
+        [
+          "`e1`",
+          "Names must match the pattern, and a vague name is flagged in any case"
+        ],
+        [
+          "`e2`",
+          "A description needs three sentences, a when-to-use phrase and a boundary"
+        ],
+        [
+          "`e3`",
+          "Parameters are described, required names exist, closed sets are enums, examples fit the schema"
+        ],
+        [
+          "`e4`",
+          "A list tool needs a limit and a cursor, and a hint may not contradict the name"
+        ],
+        [
+          "`e5`",
+          "A set is graded for duplicate names, overlapping descriptions at the threshold, and size at the budget"
+        ],
+        [
+          "`e6`",
+          "Pages carry an opaque cursor, a clamped limit and a note, and refuse a bad limit or cursor"
+        ],
+        [
+          "`e7`",
+          "A page stops at the size cap, says so, and always carries one item"
+        ],
+        [
+          "`e8`",
+          "A tool's own hints count only from a trusted server"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Tool interfaces graded on rules: lint a tool and a tool set, page large results, and weigh a tool's annotations. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"toolset\");\n\nconst NAME = /^[A-Za-z0-9_-]{1,128}$/;\nconst VAGUE = new Set([\"tool\", \"helper\", \"do\", \"run\", \"process\", \"handle\", \"data\", \"util\", \"utils\", \"query\"]);\nconst READ_PREFIXES = [\"list_\", \"search_\", \"find_\"];\nconst WRITE_PREFIXES = [\"create_\", \"update_\", \"delete_\", \"remove_\", \"send_\", \"write_\"];\nconst DELETE_PREFIXES = [\"delete_\", \"remove_\"];\nconst OVERLAP = 0.6; // token overlap of two descriptions from which the tools count as overlapping\nconst MAX_LIMIT = 50;\nconst DEFAULT_HINTS: { [key: string]: boolean } = { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: true };\n\ntype Obj = { [key: string]: any };\n\nconst startsWithAny = (text: string, prefixes: string[]) => prefixes.some((p) => text.startsWith(p));\n\nfunction valid(value: any, schema: Obj): boolean {\n  const kind = schema.type;\n  if (kind === \"string\" && typeof value !== \"string\") return false;\n  if (kind === \"integer\" && !Number.isInteger(value)) return false;\n  if (kind === \"number\" && !(typeof value === \"number\" && Number.isFinite(value))) return false;\n  if (kind === \"boolean\" && typeof value !== \"boolean\") return false;\n  if (kind === \"array\" && !Array.isArray(value)) return false;\n  if (kind === \"object\" && !(typeof value === \"object\" && value !== null && !Array.isArray(value))) return false;\n  return !(\"enum\" in schema) || schema.enum.includes(value);\n}\n\nfunction exampleOk(example: any, properties: Obj, required: string[]): boolean {\n  if (typeof example !== \"object\" || example === null || Array.isArray(example) || required.some((name) => !(name in example))) return false;\n  return Object.entries(example).every(([name, value]) => name in properties && valid(value, properties[name]));\n}\n\nfunction nameRules(name: string): Set<string> {\n  const found = new Set<string>();\n  if (!NAME.test(name)) found.add(\"bad-name\");\n  if (VAGUE.has(name.toLowerCase())) found.add(\"vague-name\");\n  return found;\n}\n\nfunction descriptionRules(description: string): Set<string> {\n  const found = new Set<string>();\n  const low = description.toLowerCase();\n  if ((description.match(/[.!?](?:\\s|$)/g) ?? []).length < 3) found.add(\"short-description\");\n  if (![\"do not use\", \"not for\", \"instead of\"].some((phrase) => low.includes(phrase))) found.add(\"no-boundary\");\n  return found;\n}\n\nfunction parameterRules(properties: Obj, required: string[]): Set<string> {\n  const found = new Set<string>();\n  const specs: Obj[] = Object.values(properties).map((s) => s ?? {});\n  if (specs.some((spec) => !String(spec.description ?? \"\").trim())) found.add(\"param-undescribed\");\n  if (required.some((item) => !(item in properties))) found.add(\"required-unknown\");\n  return found;\n}\n\nfunction listAndHintRules(name: string, properties: Obj, hints: Obj): Set<string> {\n  const found = new Set<string>();\n  if (startsWithAny(name, READ_PREFIXES) && !(\"limit\" in properties && \"cursor\" in properties)) found.add(\"list-unbounded\");\n  if ((hints.readOnlyHint === true && startsWithAny(name, WRITE_PREFIXES)) || (hints.destructiveHint === false && startsWithAny(name, DELETE_PREFIXES))) found.add(\"hint-contradicts-name\");\n  return found;\n}\n\n/** The rules one tool breaks, sorted and without repeats. */\nexport function lintTool(tool: Obj): string[] {\n  log.debug(\"lintTool input\", tool);\n  const found = new Set<string>();\n  const name = String(tool.name ?? \"\");\n  const description = String(tool.description ?? \"\");\n  const schema = tool.input_schema ?? {};\n  const properties: Obj = schema.properties ?? {};\n  const required: string[] = schema.required ?? [];\n  const specs: Obj[] = Object.values(properties).map((s) => s ?? {});\n  nameRules(name).forEach((rule) => found.add(rule));\n  descriptionRules(description).forEach((rule) => found.add(rule));\n  if (!description.toLowerCase().includes(\"use when\")) found.add(\"no-use-when\");\n  parameterRules(properties, required).forEach((rule) => found.add(rule));\n  if (specs.some((spec) => spec.type === \"string\" && !(\"enum\" in spec) && /one of|either/.test(String(spec.description ?? \"\").toLowerCase()))) found.add(\"open-set\");\n  if (Object.entries(properties).some(([key, spec]) => /reasoning|thinking/.test(key.toLowerCase() + \" \" + String((spec ?? {}).description ?? \"\").toLowerCase()))) found.add(\"reasoning-param\");\n  if ((tool.input_examples ?? []).some((example: any) => !exampleOk(example, properties, required))) found.add(\"bad-example\");\n  listAndHintRules(name, properties, tool.annotations ?? {}).forEach((rule) => found.add(rule));\n  return [...found].sort();\n}\n\nconst words = (text: unknown) => new Set(String(text ?? \"\").toLowerCase().match(/[a-z]{3,}/g) ?? []);\n\nfunction similar(wa: Set<string>, wb: Set<string>): boolean {\n  const union = new Set([...wa, ...wb]);\n  const shared = [...wa].filter((w) => wb.has(w)).length;\n  return union.size > 0 && shared / union.size >= OVERLAP;\n}\n\n/** [tool name, rule] pairs, sorted: each tool's own rules, duplicate names, overlapping descriptions and a set that is too large. */\nexport function lintToolSet(tools: Obj[], maxTools = 20): string[][] {\n  const found = new Map<string, string[]>();\n  const add = (name: string, rule: string) => found.set(JSON.stringify([name, rule]), [name, rule]);\n  for (const tool of tools) for (const rule of lintTool(tool)) add(tool.name, rule);\n  const names = tools.map((tool) => tool.name);\n  for (const name of new Set(names)) if (names.filter((n) => n === name).length > 1) add(name, \"duplicate-name\");\n  tools.forEach((a, i) => {\n    for (const b of tools.slice(i + 1)) {\n      const wa = words(a.description), wb = words(b.description);\n      if (a.name !== b.name && similar(wa, wb)) {\n        add(a.name, `overlap:${b.name}`);\n        add(b.name, `overlap:${a.name}`);\n      }\n    }\n  });\n  if (tools.length > maxTools) add(\"*\", \"too-many-tools\");\n  return [...found.values()].sort((x, y) => (x[0] < y[0] ? -1 : x[0] > y[0] ? 1 : x[1] < y[1] ? -1 : x[1] > y[1] ? 1 : 0));\n}\n\nconst encode = (offset: number) => Buffer.from(`offset:${offset}`).toString(\"base64\");\n\nfunction decode(cursor: string, total: number): number {\n  let offset = -1;\n  if (/^[A-Za-z0-9+/]*={0,2}$/.test(cursor) && cursor.length % 4 === 0) {\n    const m = /^offset:(\\d+)$/.exec(Buffer.from(cursor, \"base64\").toString());\n    if (m) offset = Number(m[1]);\n  }\n  if (offset < 0 || offset > total) throw new Error(\"invalid cursor\");\n  return offset;\n}\n\nfunction checkLimit(limit: number): number {\n  if (!Number.isInteger(limit) || limit < 1) throw new Error(\"limit must be a whole number of at least 1\");\n  limit = Math.min(limit, MAX_LIMIT);\n  return limit;\n}\n\nfunction overCap(page: string[], used: number, item: string, maxChars: number): boolean {\n  return page.length > 0 && used + item.length > maxChars;\n}\n\n/** One page of a long list: an opaque cursor, a limit that is clamped, a size cap, and a note that tells the model how to go on. */\nexport function pageResults(items: string[], cursor: string | null = null, limit = 10, maxChars = 2000): { items: string[]; next_cursor: string | null; truncated: boolean; note: string | null } {\n  limit = checkLimit(limit);\n  const offset = cursor === null ? 0 : decode(cursor, items.length);\n  const page: string[] = [];\n  let used = 0;\n  for (const item of items.slice(offset, offset + limit)) {\n    if (overCap(page, used, item, maxChars)) break;\n    page.push(item);\n    used += item.length;\n  }\n  const taken = offset + page.length;\n  const nextCursor = taken < items.length ? encode(taken) : null;\n  const note = nextCursor ? `Showing ${page.length} of ${items.length} results; pass next_cursor to continue, or narrow the query with a filter.` : null;\n  return { items: page, next_cursor: nextCursor, truncated: page.length < Math.min(limit, items.length - offset), note };\n}\n\n/** The four annotation hints a client acts on: the tool's own only when its server is trusted, the defaults otherwise. */\nexport function effectiveHints(tool: Obj, trustedServer: boolean): { [key: string]: boolean } {\n  const hints = { ...DEFAULT_HINTS };\n  if (trustedServer) {\n    for (const key of Object.keys(hints)) {\n      const value = (tool.annotations ?? {})[key];\n      if (typeof value === \"boolean\") hints[key] = value;\n    }\n  }\n  return hints;\n}\n\n/** Names of the tools that may run beside other read-only tools: a read-only hint from a trusted server. */\nexport function parallelSafe(tools: Obj[], trustedServers: Set<string>): string[] {\n  return tools.filter((tool) => effectiveHints(tool, trustedServers.has(tool.server)).readOnlyHint).map((tool) => tool.name);\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { lintTool } from \"./toolset.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// A well-made tool, like the one the tests start from: a clear description with when to use it and when not.\nconst good = {\n  name: \"lookup_order\",\n  description: \"Looks up one order by its id and returns its status, items and total in cents. Use when the customer gives an order id \" +\n    \"such as A-1042 or asks where an order is. Do not use it to find a customer by name; use get_customer instead of \" +\n    \"this tool for that. It returns no payment details.\",\n  input_schema: { type: \"object\", required: [\"order_id\"],\n    properties: { order_id: { type: \"string\", description: \"The order id, for example A-1042.\" } } },\n  input_examples: [{ order_id: \"A-1042\" }],\n  annotations: { readOnlyHint: true },\n};\n// A poor one: a vague name, a short description and a parameter nobody explained.\nconst poor = { name: \"helper\", description: \"Gets stuff.\", input_schema: { type: \"object\", properties: { q: { type: \"string\" } }, required: [\"q\"] } };\n\nconsole.log(\"good tool:\", JSON.stringify(lintTool(good)));\nconst poorRules = lintTool(poor) ?? [];\nconsole.log(\"poor tool:\", JSON.stringify(poorRules));\nconsole.log(\"rules the poor tool breaks:\", poorRules.length);\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Tool interfaces graded on rules: lint a tool and a tool set, page large results, and weigh a tool's annotations. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"toolset\");\n\nconst NAME = /^[A-Za-z0-9_-]{1,128}$/;\nconst VAGUE = new Set([\"tool\", \"helper\", \"do\", \"run\", \"process\", \"handle\", \"data\", \"util\", \"utils\", \"query\"]);\nconst READ_PREFIXES = [\"list_\", \"search_\", \"find_\"];\nconst WRITE_PREFIXES = [\"create_\", \"update_\", \"delete_\", \"remove_\", \"send_\", \"write_\"];\nconst DELETE_PREFIXES = [\"delete_\", \"remove_\"];\nconst OVERLAP = 0.6; // token overlap of two descriptions from which the tools count as overlapping\nconst MAX_LIMIT = 50;\nconst DEFAULT_HINTS: { [key: string]: boolean } = { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: true };\n\ntype Obj = { [key: string]: any };\n\nconst startsWithAny = (text: string, prefixes: string[]) => prefixes.some((p) => text.startsWith(p));\n\nfunction valid(value: any, schema: Obj): boolean {\n  const kind = schema.type;\n  if (kind === \"string\" && typeof value !== \"string\") return false;\n  if (kind === \"integer\" && !Number.isInteger(value)) return false;\n  if (kind === \"number\" && !(typeof value === \"number\" && Number.isFinite(value))) return false;\n  if (kind === \"boolean\" && typeof value !== \"boolean\") return false;\n  if (kind === \"array\" && !Array.isArray(value)) return false;\n  if (kind === \"object\" && !(typeof value === \"object\" && value !== null && !Array.isArray(value))) return false;\n  return !(\"enum\" in schema) || schema.enum.includes(value);\n}\n\nfunction exampleOk(example: any, properties: Obj, required: string[]): boolean {\n  if (typeof example !== \"object\" || example === null || Array.isArray(example) || required.some((name) => !(name in example))) return false;\n  return Object.entries(example).every(([name, value]) => name in properties && valid(value, properties[name]));\n}\n\nfunction nameRules(name: string): Set<string> {\n  // TODO 1 of 8 (finish this to pass e1): the rule ids a tool name breaks.\n  // Receives the tool's name. Returns a set with \"bad-name\" when the name does not match NAME in full, and \"vague-name\" when the name\n  // in lower case is in VAGUE. Example: nameRules(\"Helper\") -> Set {\"vague-name\"}, nameRules(\"my tool\") -> Set {\"bad-name\"}\n  const found = new Set<string>();\n  return found;\n}\n\nfunction descriptionRules(description: string): Set<string> {\n  // TODO 2 of 8 (finish this to pass e2): the rule ids a description breaks.\n  // Receives the description text. Returns a set with \"short-description\" when it has fewer than 3 sentences (a `.`, `!` or `?` followed\n  // by white space or the end) and \"no-boundary\" when the lower-cased text has none of \"do not use\", \"not for\", \"instead of\".\n  // Example: descriptionRules(\"Gets stuff.\") -> Set {\"short-description\", \"no-boundary\"}\n  const found = new Set<string>();\n  return found;\n}\n\nfunction parameterRules(properties: Obj, required: string[]): Set<string> {\n  // TODO 3 of 8 (finish this to pass e3): the rule ids the parameters break.\n  // Receives the schema's `properties` (name -> spec) and the `required` list. Returns a set with \"param-undescribed\" when a property has\n  // no description or a blank one, and \"required-unknown\" when `required` names something that is not a property.\n  // Example: parameterRules({ q: { type: \"string\" } }, [\"limit\"]) -> Set {\"param-undescribed\", \"required-unknown\"}\n  const found = new Set<string>();\n  return found;\n}\n\nfunction listAndHintRules(name: string, properties: Obj, hints: Obj): Set<string> {\n  // TODO 4 of 8 (finish this to pass e4): the rule ids a list tool and its annotations break.\n  // Receives the name, the `properties` and the tool's `annotations` object. Returns a set with \"list-unbounded\" when the name starts with\n  // a READ_PREFIXES entry and `properties` lacks \"limit\" or \"cursor\", and \"hint-contradicts-name\" when readOnlyHint is true and the name\n  // starts with a WRITE_PREFIXES entry, or destructiveHint is false and it starts with a DELETE_PREFIXES entry.\n  // Example: listAndHintRules(\"list_users\", { limit: {} }, {}) -> Set {\"list-unbounded\"}\n  const found = new Set<string>();\n  return found;\n}\n\n/** The rules one tool breaks, sorted and without repeats. */\nexport function lintTool(tool: Obj): string[] {\n  log.debug(\"lintTool input\", tool);\n  const found = new Set<string>();\n  const name = String(tool.name ?? \"\");\n  const description = String(tool.description ?? \"\");\n  const schema = tool.input_schema ?? {};\n  const properties: Obj = schema.properties ?? {};\n  const required: string[] = schema.required ?? [];\n  const specs: Obj[] = Object.values(properties).map((s) => s ?? {});\n  nameRules(name).forEach((rule) => found.add(rule));\n  descriptionRules(description).forEach((rule) => found.add(rule));\n  if (!description.toLowerCase().includes(\"use when\")) found.add(\"no-use-when\");\n  parameterRules(properties, required).forEach((rule) => found.add(rule));\n  if (specs.some((spec) => spec.type === \"string\" && !(\"enum\" in spec) && /one of|either/.test(String(spec.description ?? \"\").toLowerCase()))) found.add(\"open-set\");\n  if (Object.entries(properties).some(([key, spec]) => /reasoning|thinking/.test(key.toLowerCase() + \" \" + String((spec ?? {}).description ?? \"\").toLowerCase()))) found.add(\"reasoning-param\");\n  if ((tool.input_examples ?? []).some((example: any) => !exampleOk(example, properties, required))) found.add(\"bad-example\");\n  listAndHintRules(name, properties, tool.annotations ?? {}).forEach((rule) => found.add(rule));\n  return [...found].sort();\n}\n\nconst words = (text: unknown) => new Set(String(text ?? \"\").toLowerCase().match(/[a-z]{3,}/g) ?? []);\n\nfunction similar(wa: Set<string>, wb: Set<string>): boolean {\n  // TODO 5 of 8 (finish this to pass e5): do two descriptions overlap?\n  // Receives two sets of words. Returns true when the share of common words over all the words is at least OVERLAP (0.6), and false when\n  // both sets are empty. Example: similar(new Set([\"a\", \"b\", \"c\"]), new Set([\"a\", \"b\", \"c\", \"d\"])) -> true (3 of 4),\n  // similar(new Set([\"a\", \"b\"]), new Set([\"c\", \"d\"])) -> false\n  return false;\n}\n\n/** [tool name, rule] pairs, sorted: each tool's own rules, duplicate names, overlapping descriptions and a set that is too large. */\nexport function lintToolSet(tools: Obj[], maxTools = 20): string[][] {\n  const found = new Map<string, string[]>();\n  const add = (name: string, rule: string) => found.set(JSON.stringify([name, rule]), [name, rule]);\n  for (const tool of tools) for (const rule of lintTool(tool)) add(tool.name, rule);\n  const names = tools.map((tool) => tool.name);\n  for (const name of new Set(names)) if (names.filter((n) => n === name).length > 1) add(name, \"duplicate-name\");\n  tools.forEach((a, i) => {\n    for (const b of tools.slice(i + 1)) {\n      const wa = words(a.description), wb = words(b.description);\n      if (a.name !== b.name && similar(wa, wb)) {\n        add(a.name, `overlap:${b.name}`);\n        add(b.name, `overlap:${a.name}`);\n      }\n    }\n  });\n  if (tools.length > maxTools) add(\"*\", \"too-many-tools\");\n  return [...found.values()].sort((x, y) => (x[0] < y[0] ? -1 : x[0] > y[0] ? 1 : x[1] < y[1] ? -1 : x[1] > y[1] ? 1 : 0));\n}\n\nconst encode = (offset: number) => Buffer.from(`offset:${offset}`).toString(\"base64\");\n\nfunction decode(cursor: string, total: number): number {\n  let offset = -1;\n  if (/^[A-Za-z0-9+/]*={0,2}$/.test(cursor) && cursor.length % 4 === 0) {\n    const m = /^offset:(\\d+)$/.exec(Buffer.from(cursor, \"base64\").toString());\n    if (m) offset = Number(m[1]);\n  }\n  if (offset < 0 || offset > total) throw new Error(\"invalid cursor\");\n  return offset;\n}\n\nfunction checkLimit(limit: number): number {\n  // TODO 6 of 8 (finish this to pass e6): validate and clamp a page limit.\n  // Receives the requested limit. Throws an Error unless it is a whole number of at least 1; otherwise returns it cut to MAX_LIMIT.\n  // Example: checkLimit(500) -> 50, checkLimit(0) throws\n  return limit;\n}\n\nfunction overCap(page: string[], used: number, item: string, maxChars: number): boolean {\n  // TODO 7 of 8 (finish this to pass e7): would this item push the page over the size cap?\n  // Receives the items already in the page, their total length `used`, the next item and `maxChars`. Returns true when the page is not\n  // empty and adding the item would make the total longer than maxChars; the first item is always taken, however long.\n  // Example: overCap([\"aaaaa\"], 5, \"bbbbbb\", 10) -> true, overCap([], 0, \"b\".repeat(99), 10) -> false\n  return false;\n}\n\n/** One page of a long list: an opaque cursor, a limit that is clamped, a size cap, and a note that tells the model how to go on. */\nexport function pageResults(items: string[], cursor: string | null = null, limit = 10, maxChars = 2000): { items: string[]; next_cursor: string | null; truncated: boolean; note: string | null } {\n  limit = checkLimit(limit);\n  const offset = cursor === null ? 0 : decode(cursor, items.length);\n  const page: string[] = [];\n  let used = 0;\n  for (const item of items.slice(offset, offset + limit)) {\n    if (overCap(page, used, item, maxChars)) break;\n    page.push(item);\n    used += item.length;\n  }\n  const taken = offset + page.length;\n  const nextCursor = taken < items.length ? encode(taken) : null;\n  const note = nextCursor ? `Showing ${page.length} of ${items.length} results; pass next_cursor to continue, or narrow the query with a filter.` : null;\n  return { items: page, next_cursor: nextCursor, truncated: page.length < Math.min(limit, items.length - offset), note };\n}\n\n/** The four annotation hints a client acts on: the tool's own only when its server is trusted, the defaults otherwise. */\nexport function effectiveHints(tool: Obj, trustedServer: boolean): { [key: string]: boolean } {\n  const hints = { ...DEFAULT_HINTS };\n  // TODO 8 of 8 (finish this to pass e8): the four annotation hints a client acts on.\n  // `hints` holds the defaults. When the server is trusted, the tool's own boolean value in tool.annotations replaces the default for each\n  // of the four keys (values that are not booleans are ignored); an untrusted server keeps the defaults.\n  // Example: a tool with readOnlyHint true -> readOnlyHint stays false when untrusted, becomes true when trusted.\n  return hints;\n}\n\n/** Names of the tools that may run beside other read-only tools: a read-only hint from a trusted server. */\nexport function parallelSafe(tools: Obj[], trustedServers: Set<string>): string[] {\n  return tools.filter((tool) => effectiveHints(tool, trustedServers.has(tool.server)).readOnlyHint).map((tool) => tool.name);\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { lintTool } from \"./toolset.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// A well-made tool, like the one the tests start from: a clear description with when to use it and when not.\nconst good = {\n  name: \"lookup_order\",\n  description: \"Looks up one order by its id and returns its status, items and total in cents. Use when the customer gives an order id \" +\n    \"such as A-1042 or asks where an order is. Do not use it to find a customer by name; use get_customer instead of \" +\n    \"this tool for that. It returns no payment details.\",\n  input_schema: { type: \"object\", required: [\"order_id\"],\n    properties: { order_id: { type: \"string\", description: \"The order id, for example A-1042.\" } } },\n  input_examples: [{ order_id: \"A-1042\" }],\n  annotations: { readOnlyHint: true },\n};\n// A poor one: a vague name, a short description and a parameter nobody explained.\nconst poor = { name: \"helper\", description: \"Gets stuff.\", input_schema: { type: \"object\", properties: { q: { type: \"string\" } }, required: [\"q\"] } };\n\nconsole.log(\"good tool:\", JSON.stringify(lintTool(good)));\nconst poorRules = lintTool(poor) ?? [];\nconsole.log(\"poor tool:\", JSON.stringify(poorRules));\nconsole.log(\"rules the poor tool breaks:\", poorRules.length);\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 11,
+    "paras": 12,
+    "code": 2,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "e226c08b45cf832cde36e8b656cdf2cdc93fcea758c6afc6c936fa980c90fa92",
+  "starting_code": "// Tool interfaces graded on rules: lint a tool and a tool set, page large results, and weigh a tool's annotations. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"toolset\");\n\nconst NAME = /^[A-Za-z0-9_-]{1,128}$/;\nconst VAGUE = new Set([\"tool\", \"helper\", \"do\", \"run\", \"process\", \"handle\", \"data\", \"util\", \"utils\", \"query\"]);\nconst READ_PREFIXES = [\"list_\", \"search_\", \"find_\"];\nconst WRITE_PREFIXES = [\"create_\", \"update_\", \"delete_\", \"remove_\", \"send_\", \"write_\"];\nconst DELETE_PREFIXES = [\"delete_\", \"remove_\"];\nconst OVERLAP = 0.6; // token overlap of two descriptions from which the tools count as overlapping\nconst MAX_LIMIT = 50;\nconst DEFAULT_HINTS: { [key: string]: boolean } = { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: true };\n\ntype Obj = { [key: string]: any };\n\nconst startsWithAny = (text: string, prefixes: string[]) => prefixes.some((p) => text.startsWith(p));\n\nfunction valid(value: any, schema: Obj): boolean {\n  const kind = schema.type;\n  if (kind === \"string\" && typeof value !== \"string\") return false;\n  if (kind === \"integer\" && !Number.isInteger(value)) return false;\n  if (kind === \"number\" && !(typeof value === \"number\" && Number.isFinite(value))) return false;\n  if (kind === \"boolean\" && typeof value !== \"boolean\") return false;\n  if (kind === \"array\" && !Array.isArray(value)) return false;\n  if (kind === \"object\" && !(typeof value === \"object\" && value !== null && !Array.isArray(value))) return false;\n  return !(\"enum\" in schema) || schema.enum.includes(value);\n}\n\nfunction exampleOk(example: any, properties: Obj, required: string[]): boolean {\n  if (typeof example !== \"object\" || example === null || Array.isArray(example) || required.some((name) => !(name in example))) return false;\n  return Object.entries(example).every(([name, value]) => name in properties && valid(value, properties[name]));\n}\n\nfunction nameRules(name: string): Set<string> {\n  // TODO 1 of 8 (finish this to pass e1): the rule ids a tool name breaks.\n  // Receives the tool's name. Returns a set with \"bad-name\" when the name does not match NAME in full, and \"vague-name\" when the name\n  // in lower case is in VAGUE. Example: nameRules(\"Helper\") -> Set {\"vague-name\"}, nameRules(\"my tool\") -> Set {\"bad-name\"}\n  const found = new Set<string>();\n  return found;\n}\n\nfunction descriptionRules(description: string): Set<string> {\n  // TODO 2 of 8 (finish this to pass e2): the rule ids a description breaks.\n  // Receives the description text. Returns a set with \"short-description\" when it has fewer than 3 sentences (a `.`, `!` or `?` followed\n  // by white space or the end) and \"no-boundary\" when the lower-cased text has none of \"do not use\", \"not for\", \"instead of\".\n  // Example: descriptionRules(\"Gets stuff.\") -> Set {\"short-description\", \"no-boundary\"}\n  const found = new Set<string>();\n  return found;\n}\n\nfunction parameterRules(properties: Obj, required: string[]): Set<string> {\n  // TODO 3 of 8 (finish this to pass e3): the rule ids the parameters break.\n  // Receives the schema's `properties` (name -> spec) and the `required` list. Returns a set with \"param-undescribed\" when a property has\n  // no description or a blank one, and \"required-unknown\" when `required` names something that is not a property.\n  // Example: parameterRules({ q: { type: \"string\" } }, [\"limit\"]) -> Set {\"param-undescribed\", \"required-unknown\"}\n  const found = new Set<string>();\n  return found;\n}\n\nfunction listAndHintRules(name: string, properties: Obj, hints: Obj): Set<string> {\n  // TODO 4 of 8 (finish this to pass e4): the rule ids a list tool and its annotations break.\n  // Receives the name, the `properties` and the tool's `annotations` object. Returns a set with \"list-unbounded\" when the name starts with\n  // a READ_PREFIXES entry and `properties` lacks \"limit\" or \"cursor\", and \"hint-contradicts-name\" when readOnlyHint is true and the name\n  // starts with a WRITE_PREFIXES entry, or destructiveHint is false and it starts with a DELETE_PREFIXES entry.\n  // Example: listAndHintRules(\"list_users\", { limit: {} }, {}) -> Set {\"list-unbounded\"}\n  const found = new Set<string>();\n  return found;\n}\n\n/** The rules one tool breaks, sorted and without repeats. */\nexport function lintTool(tool: Obj): string[] {\n  log.debug(\"lintTool input\", tool);\n  const found = new Set<string>();\n  const name = String(tool.name ?? \"\");\n  const description = String(tool.description ?? \"\");\n  const schema = tool.input_schema ?? {};\n  const properties: Obj = schema.properties ?? {};\n  const required: string[] = schema.required ?? [];\n  const specs: Obj[] = Object.values(properties).map((s) => s ?? {});\n  nameRules(name).forEach((rule) => found.add(rule));\n  descriptionRules(description).forEach((rule) => found.add(rule));\n  if (!description.toLowerCase().includes(\"use when\")) found.add(\"no-use-when\");\n  parameterRules(properties, required).forEach((rule) => found.add(rule));\n  if (specs.some((spec) => spec.type === \"string\" && !(\"enum\" in spec) && /one of|either/.test(String(spec.description ?? \"\").toLowerCase()))) found.add(\"open-set\");\n  if (Object.entries(properties).some(([key, spec]) => /reasoning|thinking/.test(key.toLowerCase() + \" \" + String((spec ?? {}).description ?? \"\").toLowerCase()))) found.add(\"reasoning-param\");\n  if ((tool.input_examples ?? []).some((example: any) => !exampleOk(example, properties, required))) found.add(\"bad-example\");\n  listAndHintRules(name, properties, tool.annotations ?? {}).forEach((rule) => found.add(rule));\n  return [...found].sort();\n}\n\nconst words = (text: unknown) => new Set(String(text ?? \"\").toLowerCase().match(/[a-z]{3,}/g) ?? []);\n\nfunction similar(wa: Set<string>, wb: Set<string>): boolean {\n  // TODO 5 of 8 (finish this to pass e5): do two descriptions overlap?\n  // Receives two sets of words. Returns true when the share of common words over all the words is at least OVERLAP (0.6), and false when\n  // both sets are empty. Example: similar(new Set([\"a\", \"b\", \"c\"]), new Set([\"a\", \"b\", \"c\", \"d\"])) -> true (3 of 4),\n  // similar(new Set([\"a\", \"b\"]), new Set([\"c\", \"d\"])) -> false\n  return false;\n}\n\n/** [tool name, rule] pairs, sorted: each tool's own rules, duplicate names, overlapping descriptions and a set that is too large. */\nexport function lintToolSet(tools: Obj[], maxTools = 20): string[][] {\n  const found = new Map<string, string[]>();\n  const add = (name: string, rule: string) => found.set(JSON.stringify([name, rule]), [name, rule]);\n  for (const tool of tools) for (const rule of lintTool(tool)) add(tool.name, rule);\n  const names = tools.map((tool) => tool.name);\n  for (const name of new Set(names)) if (names.filter((n) => n === name).length > 1) add(name, \"duplicate-name\");\n  tools.forEach((a, i) => {\n    for (const b of tools.slice(i + 1)) {\n      const wa = words(a.description), wb = words(b.description);\n      if (a.name !== b.name && similar(wa, wb)) {\n        add(a.name, `overlap:${b.name}`);\n        add(b.name, `overlap:${a.name}`);\n      }\n    }\n  });\n  if (tools.length > maxTools) add(\"*\", \"too-many-tools\");\n  return [...found.values()].sort((x, y) => (x[0] < y[0] ? -1 : x[0] > y[0] ? 1 : x[1] < y[1] ? -1 : x[1] > y[1] ? 1 : 0));\n}\n\nconst encode = (offset: number) => Buffer.from(`offset:${offset}`).toString(\"base64\");\n\nfunction decode(cursor: string, total: number): number {\n  let offset = -1;\n  if (/^[A-Za-z0-9+/]*={0,2}$/.test(cursor) && cursor.length % 4 === 0) {\n    const m = /^offset:(\\d+)$/.exec(Buffer.from(cursor, \"base64\").toString());\n    if (m) offset = Number(m[1]);\n  }\n  if (offset < 0 || offset > total) throw new Error(\"invalid cursor\");\n  return offset;\n}\n\nfunction checkLimit(limit: number): number {\n  // TODO 6 of 8 (finish this to pass e6): validate and clamp a page limit.\n  // Receives the requested limit. Throws an Error unless it is a whole number of at least 1; otherwise returns it cut to MAX_LIMIT.\n  // Example: checkLimit(500) -> 50, checkLimit(0) throws\n  return limit;\n}\n\nfunction overCap(page: string[], used: number, item: string, maxChars: number): boolean {\n  // TODO 7 of 8 (finish this to pass e7): would this item push the page over the size cap?\n  // Receives the items already in the page, their total length `used`, the next item and `maxChars`. Returns true when the page is not\n  // empty and adding the item would make the total longer than maxChars; the first item is always taken, however long.\n  // Example: overCap([\"aaaaa\"], 5, \"bbbbbb\", 10) -> true, overCap([], 0, \"b\".repeat(99), 10) -> false\n  return false;\n}\n\n/** One page of a long list: an opaque cursor, a limit that is clamped, a size cap, and a note that tells the model how to go on. */\nexport function pageResults(items: string[], cursor: string | null = null, limit = 10, maxChars = 2000): { items: string[]; next_cursor: string | null; truncated: boolean; note: string | null } {\n  limit = checkLimit(limit);\n  const offset = cursor === null ? 0 : decode(cursor, items.length);\n  const page: string[] = [];\n  let used = 0;\n  for (const item of items.slice(offset, offset + limit)) {\n    if (overCap(page, used, item, maxChars)) break;\n    page.push(item);\n    used += item.length;\n  }\n  const taken = offset + page.length;\n  const nextCursor = taken < items.length ? encode(taken) : null;\n  const note = nextCursor ? `Showing ${page.length} of ${items.length} results; pass next_cursor to continue, or narrow the query with a filter.` : null;\n  return { items: page, next_cursor: nextCursor, truncated: page.length < Math.min(limit, items.length - offset), note };\n}\n\n/** The four annotation hints a client acts on: the tool's own only when its server is trusted, the defaults otherwise. */\nexport function effectiveHints(tool: Obj, trustedServer: boolean): { [key: string]: boolean } {\n  const hints = { ...DEFAULT_HINTS };\n  // TODO 8 of 8 (finish this to pass e8): the four annotation hints a client acts on.\n  // `hints` holds the defaults. When the server is trusted, the tool's own boolean value in tool.annotations replaces the default for each\n  // of the four keys (values that are not booleans are ignored); an untrusted server keeps the defaults.\n  // Example: a tool with readOnlyHint true -> readOnlyHint stays false when untrusted, becomes true when trusted.\n  return hints;\n}\n\n/** Names of the tools that may run beside other read-only tools: a read-only hint from a trusted server. */\nexport function parallelSafe(tools: Obj[], trustedServers: Set<string>): string[] {\n  return tools.filter((tool) => effectiveHints(tool, trustedServers.has(tool.server)).readOnlyHint).map((tool) => tool.name);\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/52-designing-tool-interfaces/prose/unit-02/practice-2/toolset.ts",
+    "test_path": "practice/level-3/52-designing-tool-interfaces/prose/unit-02/practice-2/toolset.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-3/52-designing-tool-interfaces/prose/unit-02/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-3/52-designing-tool-interfaces/prose/unit-02/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-3/52-designing-tool-interfaces/prose/unit-02/practice-2/toolset.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 a well made tool lints clean and a poor one is named for every rule it breaks",
+        "kind": "main",
+        "says": "A well made tool is clean and a poor one is named for every rule it breaks"
+      },
+      {
+        "id": "e1 names must match the pattern and a vague name is flagged",
+        "kind": "edge",
+        "says": "Names must match the pattern, and a vague name is flagged in any case"
+      },
+      {
+        "id": "e2 a description needs three sentences a when to use phrase and a boundary against the neighbour",
+        "kind": "edge",
+        "says": "A description needs three sentences, a when-to-use phrase and a boundary"
+      },
+      {
+        "id": "e3 parameters are described and required names exist and closed sets are enums and examples fit the schema",
+        "kind": "edge",
+        "says": "Parameters are described, required names exist, closed sets are enums, examples fit the schema"
+      },
+      {
+        "id": "e4 a list tool needs a limit and a cursor and a hint may not contradict the name",
+        "kind": "edge",
+        "says": "A list tool needs a limit and a cursor, and a hint may not contradict the name"
+      },
+      {
+        "id": "e5 a set is graded for duplicate names overlapping descriptions and size",
+        "kind": "edge",
+        "says": "A set is graded for duplicate names, overlapping descriptions at the threshold, and size at the budget"
+      },
+      {
+        "id": "e6 pages carry an opaque cursor and a clamped limit and a note",
+        "kind": "edge",
+        "says": "Pages carry an opaque cursor, a clamped limit and a note, and refuse a bad limit or cursor"
+      },
+      {
+        "id": "e7 a page stops at the size cap and says so but always carries one item",
+        "kind": "edge",
+        "says": "A page stops at the size cap, says so, and always carries one item"
+      },
+      {
+        "id": "e8 a tools own hints are trusted only from a trusted server and the defaults apply otherwise",
+        "kind": "edge",
+        "says": "A tool's own hints count only from a trusted server"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/52-designing-tool-interfaces/prose/unit-02/practice-2/target/report.xml"
+    },
+    "origin": "course/52-designing-tool-interfaces/02-results-annotations-large-tool-sets-and-the-practice.md",
+    "concepts": [
+      "the practice of Results, annotations and large tool sets, and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/52-designing-tool-interfaces/prose/unit-02/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "designing-tool-interfaces-u2"
+}

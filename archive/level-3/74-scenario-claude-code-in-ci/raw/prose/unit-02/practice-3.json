@@ -1,0 +1,333 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "74-scenario-claude-code-in-ci"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: the design of a pull request pipeline that uses Claude (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: the design of a pull request pipeline that uses Claude"
+    },
+    {
+      "type": "para",
+      "text": "A team wants Claude in its pipeline for three jobs: a review that blocks the merge of a pull request, an overnight report on technical debt, and the generation of tests for changed files. The first draft has the usual mistakes. The review is a batch that a developer waits for, one pass reads fourteen files at once, the run is not headless, the review is allowed to run commands, the criteria say \"be conservative\", and the test prompt does not mention the tests that exist. In this practice you correct the files. There is no program to write and no model is called: the tests read your files. The pipeline's shape (job, audience, api, passes, session, context, tools, command) is this course's own description of a pipeline, not a product file; the flags, the schema and the batch behaviour are the documented ones (checked 2026-10-04). It is in Python, TypeScript, Java and Kotlin; pick your language folder, open `starter/` and edit the files there; each language folder holds its own copy of the files."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is the draft of the CI setup with six gaps cut out of it. Part of the criteria and of the test prompt is written, and the schema has its properties; the pipeline file holds three jobs whose settings are wrong. Each gap is marked by a `TODO n of 6` comment in the markdown files (JSON takes none) that says what is missing, with one example and the cases it unlocks. Delete the comment when the file is done. A file holds no program, so there is no logger to write here: the tests read the files and report the failing case with its message. Write them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`ci/pipeline.json`, the `pre-merge-review` job, unlocks `m1`, `e1`, `e2` and `e4`: real time, two passes, a fresh session with the earlier findings, read tools only.",
+        "`ci/pipeline.json`, the `debt-report` and `test-generation` jobs, unlock `m1` and `e3`: the API for the audience, and a headless, bounded command.",
+        "`ci/review.schema.json` unlocks `e3`: severity as a closed list, and the required fields.",
+        "`ci/review-criteria.md` unlocks `e5` and `e7`: the severity section with an example for each level, and no personal path.",
+        "`ci/testgen-prompt.md` unlocks `e6`: the existing tests and what a useful test is.",
+        "The review command in `ci/pipeline.json` unlocks `e3` and `e4`: `-p`, the JSON output, the schema, the turn limit and the read tools."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole setup."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "The project folder holds a `ci/` folder with four files."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`ci/pipeline.json`: a list of `jobs`. Each job has `name`, `kind` (`review`, `report` or `testgen`), `audience` (`waiting` when a person waits for the result, `scheduled` when nobody does), `api` (`realtime` or `batch`), `passes`, `session` (`fresh` or `shared`), `context` (what the prompt is given), `tools` and `command`. The jobs are `pre-merge-review`, `debt-report` and `test-generation`.",
+        "`ci/review.schema.json`: the JSON schema of the review's answer: a list of findings.",
+        "`ci/review-criteria.md`: the criteria the review follows.",
+        "`ci/testgen-prompt.md`: the prompt that generates tests."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Rules the files must follow:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "A job a person waits for runs in real time; a job nobody waits for runs as a batch, whose command is a script that submits it.",
+        "The review has two passes, in this order: `per-file`, then `integration`. It runs in a `fresh` session and its context includes `prior_findings`.",
+        "Every command that starts `claude` has `-p` (or `--print`), `--output-format json` and `--max-turns` with a number. The review command also has `--json-schema` with a file whose `severity` is a closed list and whose findings require `file`, `line`, `severity`, `issue` and `suggestion`.",
+        "The review has only `Read`, `Grep` and `Glob`, in its `tools` and in the `--allowedTools` of its command.",
+        "The criteria have a `## Report` list and a `## Skip` list of at least two items each, and a `## Severity` list with a line for `high`, `medium` and `low`, each with `Example:`. They hold none of these vague phrases: \"be conservative\", \"be careful\", \"only report important\", \"high confidence\", \"use good judgement\".",
+        "The test prompt holds `{{changed_files}}` and `{{existing_tests}}`, an `## A useful test` list of three items or more and a `## Do not write` list of two items or more.",
+        "No file holds a home path, an address other than `example.com`, or a key."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Who waits decides the API.** The Message Batches API costs half and may take up to 24 hours with no guarantee, which suits a report for the next morning and not a check a developer is waiting on. *You should see* the merge check in real time and the report as a batch.",
+        "**One pass over many files is unreliable.** Depth varies from file to file and the review contradicts itself. *You should see* a pass for each file for local issues and a separate pass for what crosses files.",
+        "**A reviewer is not the author.** A review in the session that wrote the code is biased toward it. *You should see* a fresh session, given the earlier findings, so that a re-run reports what is new.",
+        "**A run without a person must end by itself.** *You should see* `-p`, a turn limit, JSON out and read-only tools.",
+        "**Criteria are cases, not attitudes.** \"Be conservative\" does not say what to leave out. *You should see* the kinds of issue to report and to skip named, and an example for each severity.",
+        "**A test generator needs to know what exists.** *You should see* the existing tests in the prompt and a short definition of a useful test."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A job a person waits for is real time, a job nobody waits for is a batch"
+        ],
+        [
+          "`e1`",
+          "The review has a pass per file, then an integration pass"
+        ],
+        [
+          "`e2`",
+          "The review runs in a fresh session and is given the earlier findings"
+        ],
+        [
+          "`e3`",
+          "Every `claude` command is headless, JSON and bounded; the schema has a closed severity and required fields"
+        ],
+        [
+          "`e4`",
+          "The review has read tools only, in its list and in its command"
+        ],
+        [
+          "`e5`",
+          "The criteria list what to report and skip, give an example for each severity and use no vague phrase"
+        ],
+        [
+          "`e6`",
+          "The test prompt passes the changed files and the existing tests and defines a useful test"
+        ],
+        [
+          "`e7`",
+          "No personal path, address or key in any file"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "{\n  \"jobs\": [\n    {\n      \"name\": \"pre-merge-review\", \"kind\": \"review\", \"audience\": \"waiting\", \"api\": \"realtime\",\n      \"passes\": [\"per-file\", \"integration\"], \"session\": \"fresh\", \"context\": [\"prior_findings\"],\n      \"tools\": [\"Read\", \"Grep\", \"Glob\"],\n      \"command\": \"claude -p \\\"Review the changed files against ci/review-criteria.md\\\" --output-format json --json-schema ci/review.schema.json --max-turns 8 --allowedTools \\\"Read,Grep,Glob\\\"\"\n    },\n    {\n      \"name\": \"debt-report\", \"kind\": \"report\", \"audience\": \"scheduled\", \"api\": \"batch\",\n      \"passes\": [], \"session\": \"fresh\", \"context\": [],\n      \"tools\": [],\n      \"command\": \"python ci/submit_batch.py debt-report\"\n    },\n    {\n      \"name\": \"test-generation\", \"kind\": \"testgen\", \"audience\": \"waiting\", \"api\": \"realtime\",\n      \"passes\": [], \"session\": \"fresh\", \"context\": [\"existing_tests\"],\n      \"tools\": [\"Read\", \"Glob\", \"Edit\"],\n      \"command\": \"claude -p \\\"Write tests as described in ci/testgen-prompt.md\\\" --output-format json --max-turns 6 --allowedTools \\\"Read,Glob,Edit\\\"\"\n    }\n  ]\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/ci/review-criteria.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "# Review criteria\n\nReview only the lines that this pull request changes, and the code those lines call.\n\n## Report\n\n- A bug: a value that can be missing is used without a check, a loop that never ends, a condition that can never be true.\n- A security problem: input that reaches a query or a command without being escaped, a secret in the source.\n- A performance problem that grows with the input: a query inside a loop.\n\n## Skip\n\n- Formatting and naming that the linter already checks.\n- A pattern that the project uses in other files, even when you would write it differently.\n- Code that this pull request does not change.\n\n## Severity\n\n- high: the change can lose or expose data, or stop a request from finishing. Example: a query built by joining the user's text into the SQL string.\n- medium: the change gives a wrong result in a case that can happen. Example: the last page of a list is dropped when the count divides evenly.\n- low: the change works but is harder to maintain than it needs to be. Example: the same lookup is repeated three times in one function.\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/ci/review.schema.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"findings\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"file\": {\"type\": \"string\"},\n          \"line\": {\"type\": \"integer\"},\n          \"severity\": {\"type\": \"string\", \"enum\": [\"high\", \"medium\", \"low\"]},\n          \"category\": {\"type\": \"string\", \"enum\": [\"bug\", \"security\", \"performance\", \"style\"]},\n          \"issue\": {\"type\": \"string\"},\n          \"suggestion\": {\"type\": \"string\"}\n        },\n        \"required\": [\"file\", \"line\", \"severity\", \"category\", \"issue\", \"suggestion\"]\n      }\n    }\n  },\n  \"required\": [\"findings\"]\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/ci/testgen-prompt.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "# Generate tests\n\nWrite tests for these changed files:\n\n{{changed_files}}\n\nThe project already has these tests. Do not repeat any of them:\n\n{{existing_tests}}\n\n## A useful test\n\n- Checks a behaviour that a caller can see, not how the code is written inside.\n- Covers one case: a normal value, an empty value, a value at a limit, or an error.\n- Fails when the behaviour it checks breaks.\n\n## Do not write\n\n- A test of a getter or a constant.\n- A second test of a case that an existing test already covers.\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "{\n  \"jobs\": [\n    {\n      \"name\": \"pre-merge-review\", \"kind\": \"review\", \"audience\": \"waiting\", \"api\": \"batch\",\n      \"passes\": [\"all-files\"], \"session\": \"shared\", \"context\": [],\n      \"tools\": [\"Read\", \"Grep\", \"Bash\"],\n      \"command\": \"python ci/submit_batch.py pr-review\"\n    },\n    {\n      \"name\": \"debt-report\", \"kind\": \"report\", \"audience\": \"scheduled\", \"api\": \"realtime\",\n      \"passes\": [], \"session\": \"fresh\", \"context\": [],\n      \"tools\": [\"Read\", \"Grep\", \"Glob\"],\n      \"command\": \"claude \\\"List the technical debt in src\\\"\"\n    },\n    {\n      \"name\": \"test-generation\", \"kind\": \"testgen\", \"audience\": \"waiting\", \"api\": \"realtime\",\n      \"passes\": [], \"session\": \"fresh\", \"context\": [],\n      \"tools\": [\"Read\", \"Glob\", \"Edit\"],\n      \"command\": \"claude \\\"Write tests for the changed files\\\"\"\n    }\n  ]\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/ci/review-criteria.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "# Review criteria\n\n<!-- TODO 4 of 6 (unlocks e5 and e7): finish the criteria and remove the personal path. Add a `## Severity` section with one line for each of high, medium and low,\neach with a description and an `Example:`. Example of a line: a dash, `high:`, what makes it high, `Example:`, a concrete case. Delete this comment. -->\n\nReview only the lines that this pull request changes, and the code those lines call. Draft kept in /home/dev/notes.\n\n## Report\n\n- A bug: a value that can be missing is used without a check, a loop that never ends, a condition that can never be true.\n- A security problem: input that reaches a query or a command without being escaped, a secret in the source.\n- A performance problem that grows with the input: a query inside a loop.\n\n## Skip\n\n- Formatting and naming that the linter already checks.\n- A pattern that the project uses in other files, even when you would write it differently.\n- Code that this pull request does not change.\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/ci/review.schema.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"findings\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"file\": {\"type\": \"string\"},\n          \"line\": {\"type\": \"integer\"},\n          \"severity\": {\"type\": \"string\"},\n          \"category\": {\"type\": \"string\"},\n          \"issue\": {\"type\": \"string\"},\n          \"suggestion\": {\"type\": \"string\"}\n        }\n      }\n    }\n  }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/ci/testgen-prompt.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "# Generate tests\n\n<!-- TODO 5 of 6 (unlocks e6): finish the prompt. Pass the existing tests with the placeholder `{{existing_tests}}` and add a `## A useful test` section of at least three points.\nExample of a point: a dash and a sentence about what a good test checks. Delete this comment. -->\n\nWrite tests for these changed files:\n\n{{changed_files}}\n\n## Do not write\n\n- A test of a getter or a constant.\n- A second test of a case that an existing test already covers.\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 8,
+    "code": 4,
+    "tables": 1,
+    "lists": 4,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "ea7790b7ed2216df6fe085ed4585ba951e89b4fa519339189f29ef268000c293",
+  "starting_code": "{\n  \"jobs\": [\n    {\n      \"name\": \"pre-merge-review\", \"kind\": \"review\", \"audience\": \"waiting\", \"api\": \"batch\",\n      \"passes\": [\"all-files\"], \"session\": \"shared\", \"context\": [],\n      \"tools\": [\"Read\", \"Grep\", \"Bash\"],\n      \"command\": \"python ci/submit_batch.py pr-review\"\n    },\n    {\n      \"name\": \"debt-report\", \"kind\": \"report\", \"audience\": \"scheduled\", \"api\": \"realtime\",\n      \"passes\": [], \"session\": \"fresh\", \"context\": [],\n      \"tools\": [\"Read\", \"Grep\", \"Glob\"],\n      \"command\": \"claude \\\"List the technical debt in src\\\"\"\n    },\n    {\n      \"name\": \"test-generation\", \"kind\": \"testgen\", \"audience\": \"waiting\", \"api\": \"realtime\",\n      \"passes\": [], \"session\": \"fresh\", \"context\": [],\n      \"tools\": [\"Read\", \"Glob\", \"Edit\"],\n      \"command\": \"claude \\\"Write tests for the changed files\\\"\"\n    }\n  ]\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-3/project/ci/pipeline.json",
+    "test_path": "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-3/src/test/java/CiSetupTest.java",
+    "run_command": [
+      "python3",
+      "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-3/check_files.py",
+      "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-3/project/ci/pipeline.json",
+      "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-3/project/ci/review-criteria.md",
+      "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-3/project/ci/review.schema.json",
+      "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-3/project/ci/testgen-prompt.md"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_whoWaitsDecidesBetweenRealTimeAndBatch()",
+        "kind": "main",
+        "says": "A job a person waits for is real time, a job nobody waits for is a batch"
+      },
+      {
+        "id": "e1_aReviewHasAPassForEachFileAndThenAnIntegrationPass()",
+        "kind": "edge",
+        "says": "The review has a pass per file, then an integration pass"
+      },
+      {
+        "id": "e2_aReviewRunsInAFreshSessionAndIsGivenTheEarlierFindings()",
+        "kind": "edge",
+        "says": "The review runs in a fresh session and is given the earlier findings"
+      },
+      {
+        "id": "e3_everyClaudeCommandIsHeadlessJsonAndBounded()",
+        "kind": "edge",
+        "says": "Every claude command is headless, JSON and bounded; the schema has a closed severity and required fields"
+      },
+      {
+        "id": "e4_theReviewCanOnlyRead()",
+        "kind": "edge",
+        "says": "The review has read tools only, in its list and in its command"
+      },
+      {
+        "id": "e5_theCriteriaNameWhatToReportWhatToSkipAndAnExampleForEachSeverity()",
+        "kind": "edge",
+        "says": "The criteria list what to report and skip, give an example for each severity and use no vague phrase"
+      },
+      {
+        "id": "e6_theTestPromptPassesTheExistingTestsAndSaysWhatAUsefulTestIs()",
+        "kind": "edge",
+        "says": "The test prompt passes the changed files and the existing tests and defines a useful test"
+      },
+      {
+        "id": "e7_noFileHoldsAPersonalPathAnAddressOrAKey()",
+        "kind": "edge",
+        "says": "No personal path, address or key in any file"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-3/target/test-results/test"
+    },
+    "origin": "course/74-scenario-claude-code-in-ci/02-review-passes-criteria-test-generation-and-the-practice.md",
+    "concepts": [
+      "the practice of Review passes, criteria, test generation and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-3/project/ci/review-criteria.md",
+      "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-3/project/ci/review.schema.json",
+      "practice/level-3/74-scenario-claude-code-in-ci/prose/unit-02/practice-3/project/ci/testgen-prompt.md"
+    ]
+  },
+  "lang": "java",
+  "edition": "scenario-claude-code-in-ci-u2"
+}

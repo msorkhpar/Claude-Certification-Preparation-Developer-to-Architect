@@ -1,0 +1,288 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "25-structured-output-and-defensive-parsing"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: an extractor with validation and a re-prompt (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an extractor with validation and a re-prompt"
+    },
+    {
+      "type": "para",
+      "text": "A model can be asked for JSON that follows a schema, and the reply can still be wrong: cut off, wrapped in prose, a number where a string belongs, or a quotation the document never contained. Write the code around the model that catches this and asks again, a bounded number of times. The rules come from the Claude documentation on structured outputs, tool use and stop reasons, read on 2026-10-03; the lesson pages explain them. Nothing here touches the network: the model is a function that you call, and the tests give it scripted replies in the shape of a Messages API response."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given types"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "schema",
+          "a JSON Schema as a map, using only `type` (`string`, `integer`, `number`, `boolean`, `array`, `object`, `null`), `enum`, `minimum`, `maximum`, `required`, `properties`, `additionalProperties: false` and `items`"
+        ],
+        [
+          "`ask(messages)`",
+          "the model: takes the list of `{\"role\", \"content\"}` messages and returns a reply `{\"content\": [blocks], \"stop_reason\": ...}`; the text blocks hold the model's words"
+        ],
+        [
+          "problem",
+          "`{\"path\", \"message\"}`; the path is `$` for the whole value, `$.total` for a field, `$.items[1].qty` for an array element"
+        ],
+        [
+          "`ParseError`",
+          "raised when no JSON object can be read from a reply"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working extractor with eight small gaps cut out of it. Everything that is plumbing is written and correct: the fence handling and the JSON parse in `parse_json`, the type table, the order of the checks in `validate` and its walk over properties and items, the first prompt, the loop of `extract` with its re-prompt messages and its result shape. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails every case on an assertion. The TypeScript, Java and Kotlin names are the camel-case forms (`objectSpan`, `isInteger`, `rangeErrors`, ...). Write them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_object_span` unlocks `m1`, `e1` and `e3`: the index of the first `{` and of the last `}`.",
+        "`_is_integer` unlocks `e6`: a whole number or a float with no fraction, never a boolean.",
+        "`_range_errors` unlocks `e2`: the `minimum` and `maximum` problems of a number.",
+        "`_required_errors` unlocks `e2`: one problem per missing `required` key.",
+        "`_extra_errors` unlocks `e2`: one problem per key the schema does not list.",
+        "`_feedback` unlocks `e2`: the text that sends every problem back to the model.",
+        "`_grounding_errors` unlocks `e5`: the quotes that the document does not contain.",
+        "`_early_status` unlocks `e4`: `refused` or `truncated`, so the reply is not retried."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs the first gap; the rest of the cases need the gaps named above. About twenty lines in all. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. `parse_json` already logs what it receives."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`parse_json(text)` returns the JSON value in a reply. If the text holds a code fence, use the body of the first fence; then take the span from the first `{` to the last `}` and parse it. Raise `ParseError` when there is no such span or it is not valid JSON.",
+        "`validate(schema, value)` returns the list of problems, in this order for one value: a wrong type stops the checks for that value (one problem, no more); then `enum`, then `minimum` and `maximum`; for an object, one problem per missing `required` key (path `$.key`, in the schema's order), then the checks of every property in the schema's order, then one problem per key that the schema does not list when `additionalProperties` is false; for an array, the checks of each element. An integer is a number with no fraction (`2.0` is an integer, `2.5` is not); a boolean is never a number or an integer. A conforming value gives an empty list.",
+        [
+          "`extract(ask, document, schema, max_attempts=3, evidence_fields=())` builds the first message (role `user`, containing the document), calls `ask`, and reads the reply:",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`stop_reason` of `refusal`: stop, status `refused`, no further call. `max_tokens`: stop, status `truncated`, no further call (asking again with the error list cannot fix a cut-off reply).",
+              "Otherwise parse the text and validate it. For every name in `evidence_fields`, a string field of that name must occur in the document; if it does not, add the problem `$.name`. A reply that parses and has no problems gives status `ok`.",
+              "On a problem and with attempts left, call `ask` again with the earlier messages, then the model's reply as an `assistant` message with exactly its text, then a `user` message that lists every problem with its path and message. A parse failure is the single problem at path `$`.",
+              "After `max_attempts` calls in all, give status `failed` with the problems of the last attempt.",
+              "The result is `{\"status\", \"value\", \"attempts\", \"errors\"}`; `value` is the parsed object for `ok` and nothing otherwise."
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A valid reply is returned after one call"
+        ],
+        [
+          "`e1`",
+          "JSON is found inside fences and prose, and text with no JSON is retried"
+        ],
+        [
+          "`e2`",
+          "Every schema violation is listed and sent back to the model"
+        ],
+        [
+          "`e3`",
+          "The number of attempts is bounded"
+        ],
+        [
+          "`e4`",
+          "A refusal or a cut-off reply is not retried"
+        ],
+        [
+          "`e5`",
+          "A quotation that is not in the document is rejected"
+        ],
+        [
+          "`e6`",
+          "Types are exact: booleans are not numbers and integers have no fraction"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Extract structured data from a document with validation and a bounded re-prompt. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"extractor\");\nexport type Problem = { path: string; message: string };\nexport type Reply = { content: Array<{ type: string; text?: string }>; stop_reason?: string };\nexport type Message = { role: \"user\" | \"assistant\"; content: string };\nexport type Ask = (messages: Message[]) => Reply;\nexport type Result = { status: \"ok\" | \"failed\" | \"refused\" | \"truncated\"; value: any; attempts: number; errors: Problem[] };\n\n/** No JSON object could be read from the model's text. */\nexport class ParseError extends Error {}\n\n/** The index of the first { and of the last } in the text; -1 for a brace that is not there. */\nfunction objectSpan(body: string): [number, number] {\n  return [body.indexOf(\"{\"), body.lastIndexOf(\"}\")];\n}\n\n/** The JSON value in a model reply: the body of a code fence, else the span from the first { to the last }. */\nexport function parseJson(text: string): any {\n  log.debug(\"parseJson input\", text);\n  let body = text;\n  const fence = text.indexOf(\"```\");\n  if (fence !== -1) {\n    const start = text.indexOf(\"\\n\", fence);\n    const end = text.indexOf(\"```\", start !== -1 ? start : fence + 3);\n    if (start !== -1 && end !== -1) body = text.slice(start + 1, end);\n  }\n  const [first, last] = objectSpan(body);\n  if (first === -1 || last < first) throw new ParseError(\"no JSON object found in the reply\");\n  try {\n    return JSON.parse(body.slice(first, last + 1));\n  } catch (err) {\n    throw new ParseError(`invalid JSON: ${(err as Error).message}`);\n  }\n}\n\n/** Is this value an integer for the schema? A number with no fraction; never a boolean. */\nfunction isInteger(v: any): boolean {\n  return typeof v === \"number\" && Number.isInteger(v);\n}\n\nconst TYPES: Record<string, (v: any) => boolean> = {\n  string: (v) => typeof v === \"string\",\n  integer: isInteger,\n  number: (v) => typeof v === \"number\" && Number.isFinite(v),\n  boolean: (v) => typeof v === \"boolean\",\n  array: (v) => Array.isArray(v),\n  object: (v) => typeof v === \"object\" && v !== null && !Array.isArray(v),\n  null: (v) => v === null,\n};\n\n/** The problems of a number outside minimum and maximum. */\nfunction rangeErrors(schema: any, value: number, path: string): Problem[] {\n  const errors: Problem[] = [];\n  if (schema.minimum !== undefined && value < schema.minimum) errors.push({ path, message: `must be at least ${schema.minimum}` });\n  if (schema.maximum !== undefined && value > schema.maximum) errors.push({ path, message: `must be at most ${schema.maximum}` });\n  return errors;\n}\n\n/** The problems of missing required keys. */\nfunction requiredErrors(schema: any, value: any, path: string): Problem[] {\n  return (schema.required ?? []).filter((key: string) => !(key in value)).map((key: string) => ({ path: `${path}.${key}`, message: \"is required\" }));\n}\n\n/** The problems of keys the schema does not list, when additionalProperties is false. */\nfunction extraErrors(schema: any, value: any, path: string): Problem[] {\n  if (schema.additionalProperties !== false) return [];\n  const properties = schema.properties ?? {};\n  return Object.keys(value).filter((key) => !(key in properties)).map((key) => ({ path: `${path}.${key}`, message: \"is not allowed\" }));\n}\n\n/** A list of problems, one per way value breaks schema; empty when it conforms. */\nexport function validate(schema: any, value: any, path = \"$\"): Problem[] {\n  const errors: Problem[] = [];\n  if (schema.type !== undefined && !TYPES[schema.type](value)) return [{ path, message: `must be of type ${schema.type}` }];\n  if (schema.enum && !schema.enum.includes(value)) errors.push({ path, message: `must be one of ${JSON.stringify(schema.enum)}` });\n  if (typeof value === \"number\") errors.push(...rangeErrors(schema, value, path));\n  if (TYPES.object(value)) {\n    errors.push(...requiredErrors(schema, value, path));\n    const properties = schema.properties ?? {};\n    for (const [key, sub] of Object.entries(properties)) if (key in value) errors.push(...validate(sub, value[key], `${path}.${key}`));\n    errors.push(...extraErrors(schema, value, path));\n  }\n  if (Array.isArray(value) && schema.items) value.forEach((item, i) => errors.push(...validate(schema.items, item, `${path}[${i}]`)));\n  return errors;\n}\n\nconst textOf = (reply: Reply) => reply.content.filter((b) => b.type === \"text\").map((b) => b.text).join(\"\");\n\nfunction prompt(document: string, schema: unknown): string {\n  return \"Extract the data from the document as one JSON object that follows this JSON Schema. Reply with the JSON only.\\n\" +\n    `<schema>${JSON.stringify(schema)}</schema>\\n<document>\\n${document}\\n</document>`;\n}\n\n/** The message that sends the problems back to the model. */\nfunction feedback(errors: Problem[]): string {\n  return `Your reply was rejected:\\n${errors.map((e) => `- ${e.path}: ${e.message}`).join(\"\\n\")}\\nReturn the corrected JSON only.`;\n}\n\n/** The quotes the document does not contain. */\nfunction groundingErrors(value: any, document: string, evidenceFields: string[]): Problem[] {\n  const errors: Problem[] = [];\n  for (const name of evidenceFields) {\n    const quoted = value !== null && typeof value === \"object\" ? value[name] : undefined;\n    if (typeof quoted === \"string\" && !document.includes(quoted)) errors.push({ path: `$.${name}`, message: \"is not found in the document\" });\n  }\n  return errors;\n}\n\n/** \"refused\" or \"truncated\" for a reply that must not be retried, else null. */\nfunction earlyStatus(reply: Reply): \"refused\" | \"truncated\" | null {\n  if (reply.stop_reason === \"refusal\") return \"refused\";\n  if (reply.stop_reason === \"max_tokens\") return \"truncated\";\n  return null;\n}\n\n/** Ask, parse, validate and, on a problem, re-prompt with the errors, at most maxAttempts calls. */\nexport function extract(ask: Ask, document: string, schema: any, maxAttempts = 3, evidenceFields: string[] = []): Result {\n  let messages: Message[] = [{ role: \"user\", content: prompt(document, schema) }];\n  let errors: Problem[] = [];\n  for (let attempt = 1; attempt <= maxAttempts; attempt++) {\n    const reply = ask(messages);\n    const early = earlyStatus(reply);\n    if (early) return { status: early, value: null, attempts: attempt, errors: [] };\n    const text = textOf(reply);\n    let value: any = null;\n    try {\n      value = parseJson(text);\n      errors = validate(schema, value);\n      errors.push(...groundingErrors(value, document, evidenceFields));\n    } catch (err) {\n      if (!(err instanceof ParseError)) throw err;\n      value = null;\n      errors = [{ path: \"$\", message: err.message }];\n    }\n    if (errors.length === 0) return { status: \"ok\", value, attempts: attempt, errors: [] };\n    if (attempt < maxAttempts) messages = [...messages, { role: \"assistant\", content: text }, { role: \"user\", content: feedback(errors) }];\n  }\n  return { status: \"failed\", value: null, attempts: maxAttempts, errors };\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { extract } from \"./extractor.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\nconst DOC = \"Invoice from Acme Tools. Total due: 120.50 EUR. Thank you for your business.\";\nconst SCHEMA = {\n  type: \"object\",\n  required: [\"vendor\", \"total\", \"currency\", \"evidence\"],\n  properties: {\n    vendor: { type: \"string\" },\n    total: { type: \"number\", minimum: 0 },\n    currency: { type: \"string\", enum: [\"USD\", \"EUR\", \"GBP\"] },\n    evidence: { type: \"string\" },\n  },\n  additionalProperties: false,\n};\nconst GOOD = { vendor: \"Acme Tools\", total: 120.5, currency: \"EUR\", evidence: \"Total due: 120.50 EUR\" };\n\n// A hand-written stand-in for the model, in the shape of a Messages API reply: it always answers with valid JSON.\nconst ask = (_messages: any[]) => ({ content: [{ type: \"text\", text: JSON.stringify(GOOD) }], stop_reason: \"end_turn\" });\n\nconst result: any = extract(ask, DOC, SCHEMA, 3, [\"evidence\"]) ?? {};\n\nconsole.log(\"status:\", result.status);\nconsole.log(\"attempts:\", result.attempts);\nconsole.log(\"value:\", JSON.stringify(result.value));\nconsole.log(\"errors:\", JSON.stringify(result.errors));\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Extract structured data from a document with validation and a bounded re-prompt. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"extractor\");\nexport type Problem = { path: string; message: string };\nexport type Reply = { content: Array<{ type: string; text?: string }>; stop_reason?: string };\nexport type Message = { role: \"user\" | \"assistant\"; content: string };\nexport type Ask = (messages: Message[]) => Reply;\nexport type Result = { status: \"ok\" | \"failed\" | \"refused\" | \"truncated\"; value: any; attempts: number; errors: Problem[] };\n\n/** No JSON object could be read from the model's text. */\nexport class ParseError extends Error {}\n\n/** The index of the first { and of the last } in the text; -1 for a brace that is not there. */\nfunction objectSpan(body: string): [number, number] {\n  // TODO 1 of 8 (finish this to pass m1, e1 and e3): where the JSON object sits in the text.\n  // Receives the text. Returns [first, last]: the index of the first `{` and of the last `}`, or -1 for a brace that is not there.\n  // Example: objectSpan('Sure! {\"a\": 1} Done.') -> [6, 13]\n  return [-1, -1];\n}\n\n/** The JSON value in a model reply: the body of a code fence, else the span from the first { to the last }. */\nexport function parseJson(text: string): any {\n  log.debug(\"parseJson input\", text);\n  let body = text;\n  const fence = text.indexOf(\"```\");\n  if (fence !== -1) {\n    const start = text.indexOf(\"\\n\", fence);\n    const end = text.indexOf(\"```\", start !== -1 ? start : fence + 3);\n    if (start !== -1 && end !== -1) body = text.slice(start + 1, end);\n  }\n  const [first, last] = objectSpan(body);\n  if (first === -1 || last < first) throw new ParseError(\"no JSON object found in the reply\");\n  try {\n    return JSON.parse(body.slice(first, last + 1));\n  } catch (err) {\n    throw new ParseError(`invalid JSON: ${(err as Error).message}`);\n  }\n}\n\n/** Is this value an integer for the schema? A number with no fraction; never a boolean. */\nfunction isInteger(v: any): boolean {\n  // TODO 2 of 8 (finish this to pass e6): is this value an integer for the schema?\n  // Receives any value. Returns true for a number with no fraction (2 and 2.0), false for 2.5, for a boolean and for a string.\n  // Example: isInteger(2.5) -> false, isInteger(true) -> false\n  return false;\n}\n\nconst TYPES: Record<string, (v: any) => boolean> = {\n  string: (v) => typeof v === \"string\",\n  integer: isInteger,\n  number: (v) => typeof v === \"number\" && Number.isFinite(v),\n  boolean: (v) => typeof v === \"boolean\",\n  array: (v) => Array.isArray(v),\n  object: (v) => typeof v === \"object\" && v !== null && !Array.isArray(v),\n  null: (v) => v === null,\n};\n\n/** The problems of a number outside minimum and maximum. */\nfunction rangeErrors(schema: any, value: number, path: string): Problem[] {\n  // TODO 3 of 8 (finish this to pass e2): the problems of a number outside minimum and maximum.\n  // Receives the schema, a number and its path. Returns { path, message } problems: \"must be at least <minimum>\" first, then\n  // \"must be at most <maximum>\", each only when the schema has that key and the value breaks it.\n  // Example: rangeErrors({ minimum: 0 }, -1, \"$.total\") -> [{ path: \"$.total\", message: \"must be at least 0\" }]\n  return [];\n}\n\n/** The problems of missing required keys. */\nfunction requiredErrors(schema: any, value: any, path: string): Problem[] {\n  // TODO 4 of 8 (finish this to pass e2): the problems of missing required keys.\n  // Receives the schema, an object and its path. Returns one { path: \"<path>.<key>\", message: \"is required\" } per key of the schema's\n  // `required` list that the object lacks, in the schema's order.\n  // Example: requiredErrors({ required: [\"a\"] }, {}, \"$\") -> [{ path: \"$.a\", message: \"is required\" }]\n  return [];\n}\n\n/** The problems of keys the schema does not list, when additionalProperties is false. */\nfunction extraErrors(schema: any, value: any, path: string): Problem[] {\n  // TODO 5 of 8 (finish this to pass e2): the problems of keys the schema does not list.\n  // Receives the schema, an object and its path. When `additionalProperties` is false, returns one\n  // { path: \"<path>.<key>\", message: \"is not allowed\" } per key that is not in `properties`; otherwise an empty list.\n  // Example: extraErrors({ additionalProperties: false, properties: {} }, { x: 1 }, \"$\") -> [{ path: \"$.x\", message: \"is not allowed\" }]\n  return [];\n}\n\n/** A list of problems, one per way value breaks schema; empty when it conforms. */\nexport function validate(schema: any, value: any, path = \"$\"): Problem[] {\n  const errors: Problem[] = [];\n  if (schema.type !== undefined && !TYPES[schema.type](value)) return [{ path, message: `must be of type ${schema.type}` }];\n  if (schema.enum && !schema.enum.includes(value)) errors.push({ path, message: `must be one of ${JSON.stringify(schema.enum)}` });\n  if (typeof value === \"number\") errors.push(...rangeErrors(schema, value, path));\n  if (TYPES.object(value)) {\n    errors.push(...requiredErrors(schema, value, path));\n    const properties = schema.properties ?? {};\n    for (const [key, sub] of Object.entries(properties)) if (key in value) errors.push(...validate(sub, value[key], `${path}.${key}`));\n    errors.push(...extraErrors(schema, value, path));\n  }\n  if (Array.isArray(value) && schema.items) value.forEach((item, i) => errors.push(...validate(schema.items, item, `${path}[${i}]`)));\n  return errors;\n}\n\nconst textOf = (reply: Reply) => reply.content.filter((b) => b.type === \"text\").map((b) => b.text).join(\"\");\n\nfunction prompt(document: string, schema: unknown): string {\n  return \"Extract the data from the document as one JSON object that follows this JSON Schema. Reply with the JSON only.\\n\" +\n    `<schema>${JSON.stringify(schema)}</schema>\\n<document>\\n${document}\\n</document>`;\n}\n\n/** The message that sends the problems back to the model. */\nfunction feedback(errors: Problem[]): string {\n  // TODO 6 of 8 (finish this to pass e2): the message that sends the problems back to the model.\n  // Receives the list of problems. Returns \"Your reply was rejected:\", then one \"- <path>: <message>\" line per problem, then\n  // \"Return the corrected JSON only.\", each on its own line.\n  // Example: [{ path: \"$.total\", message: \"must be of type number\" }] -> \"Your reply was rejected:\\n- $.total: must be of type number\\nReturn the corrected JSON only.\"\n  return \"\";\n}\n\n/** The quotes the document does not contain. */\nfunction groundingErrors(value: any, document: string, evidenceFields: string[]): Problem[] {\n  // TODO 7 of 8 (finish this to pass e5): the quotes the document does not contain.\n  // Receives the parsed value, the document text and the names of the evidence fields. For each name whose value in the object is a\n  // string that does not occur in the document, returns { path: \"$.<name>\", message: \"is not found in the document\" }.\n  // Example: groundingErrors({ quote: \"x\" }, \"abc\", [\"quote\"]) -> [{ path: \"$.quote\", message: \"is not found in the document\" }]\n  return [];\n}\n\n/** \"refused\" or \"truncated\" for a reply that must not be retried, else null. */\nfunction earlyStatus(reply: Reply): \"refused\" | \"truncated\" | null {\n  // TODO 8 of 8 (finish this to pass e4): a reply that must not be retried.\n  // Receives a reply. Returns \"refused\" when its stop_reason is \"refusal\", \"truncated\" when it is \"max_tokens\", else null.\n  // Example: earlyStatus({ content: [], stop_reason: \"max_tokens\" }) -> \"truncated\"\n  // The starter says \"truncated\" for every reply, so it stops after one call; write the real rule.\n  return \"truncated\";\n}\n\n/** Ask, parse, validate and, on a problem, re-prompt with the errors, at most maxAttempts calls. */\nexport function extract(ask: Ask, document: string, schema: any, maxAttempts = 3, evidenceFields: string[] = []): Result {\n  let messages: Message[] = [{ role: \"user\", content: prompt(document, schema) }];\n  let errors: Problem[] = [];\n  for (let attempt = 1; attempt <= maxAttempts; attempt++) {\n    const reply = ask(messages);\n    const early = earlyStatus(reply);\n    if (early) return { status: early, value: null, attempts: attempt, errors: [] };\n    const text = textOf(reply);\n    let value: any = null;\n    try {\n      value = parseJson(text);\n      errors = validate(schema, value);\n      errors.push(...groundingErrors(value, document, evidenceFields));\n    } catch (err) {\n      if (!(err instanceof ParseError)) throw err;\n      value = null;\n      errors = [{ path: \"$\", message: err.message }];\n    }\n    if (errors.length === 0) return { status: \"ok\", value, attempts: attempt, errors: [] };\n    if (attempt < maxAttempts) messages = [...messages, { role: \"assistant\", content: text }, { role: \"user\", content: feedback(errors) }];\n  }\n  return { status: \"failed\", value: null, attempts: maxAttempts, errors };\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { extract } from \"./extractor.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\nconst DOC = \"Invoice from Acme Tools. Total due: 120.50 EUR. Thank you for your business.\";\nconst SCHEMA = {\n  type: \"object\",\n  required: [\"vendor\", \"total\", \"currency\", \"evidence\"],\n  properties: {\n    vendor: { type: \"string\" },\n    total: { type: \"number\", minimum: 0 },\n    currency: { type: \"string\", enum: [\"USD\", \"EUR\", \"GBP\"] },\n    evidence: { type: \"string\" },\n  },\n  additionalProperties: false,\n};\nconst GOOD = { vendor: \"Acme Tools\", total: 120.5, currency: \"EUR\", evidence: \"Total due: 120.50 EUR\" };\n\n// A hand-written stand-in for the model, in the shape of a Messages API reply: it always answers with valid JSON.\nconst ask = (_messages: any[]) => ({ content: [{ type: \"text\", text: JSON.stringify(GOOD) }], stop_reason: \"end_turn\" });\n\nconst result: any = extract(ask, DOC, SCHEMA, 3, [\"evidence\"]) ?? {};\n\nconsole.log(\"status:\", result.status);\nconsole.log(\"attempts:\", result.attempts);\nconsole.log(\"value:\", JSON.stringify(result.value));\nconsole.log(\"errors:\", JSON.stringify(result.errors));\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 4,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "08efbae793404d18e159b5337f44fd7b960ebebb4de79ef668e8e70d08b4a39f",
+  "starting_code": "// Extract structured data from a document with validation and a bounded re-prompt. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"extractor\");\nexport type Problem = { path: string; message: string };\nexport type Reply = { content: Array<{ type: string; text?: string }>; stop_reason?: string };\nexport type Message = { role: \"user\" | \"assistant\"; content: string };\nexport type Ask = (messages: Message[]) => Reply;\nexport type Result = { status: \"ok\" | \"failed\" | \"refused\" | \"truncated\"; value: any; attempts: number; errors: Problem[] };\n\n/** No JSON object could be read from the model's text. */\nexport class ParseError extends Error {}\n\n/** The index of the first { and of the last } in the text; -1 for a brace that is not there. */\nfunction objectSpan(body: string): [number, number] {\n  // TODO 1 of 8 (finish this to pass m1, e1 and e3): where the JSON object sits in the text.\n  // Receives the text. Returns [first, last]: the index of the first `{` and of the last `}`, or -1 for a brace that is not there.\n  // Example: objectSpan('Sure! {\"a\": 1} Done.') -> [6, 13]\n  return [-1, -1];\n}\n\n/** The JSON value in a model reply: the body of a code fence, else the span from the first { to the last }. */\nexport function parseJson(text: string): any {\n  log.debug(\"parseJson input\", text);\n  let body = text;\n  const fence = text.indexOf(\"```\");\n  if (fence !== -1) {\n    const start = text.indexOf(\"\\n\", fence);\n    const end = text.indexOf(\"```\", start !== -1 ? start : fence + 3);\n    if (start !== -1 && end !== -1) body = text.slice(start + 1, end);\n  }\n  const [first, last] = objectSpan(body);\n  if (first === -1 || last < first) throw new ParseError(\"no JSON object found in the reply\");\n  try {\n    return JSON.parse(body.slice(first, last + 1));\n  } catch (err) {\n    throw new ParseError(`invalid JSON: ${(err as Error).message}`);\n  }\n}\n\n/** Is this value an integer for the schema? A number with no fraction; never a boolean. */\nfunction isInteger(v: any): boolean {\n  // TODO 2 of 8 (finish this to pass e6): is this value an integer for the schema?\n  // Receives any value. Returns true for a number with no fraction (2 and 2.0), false for 2.5, for a boolean and for a string.\n  // Example: isInteger(2.5) -> false, isInteger(true) -> false\n  return false;\n}\n\nconst TYPES: Record<string, (v: any) => boolean> = {\n  string: (v) => typeof v === \"string\",\n  integer: isInteger,\n  number: (v) => typeof v === \"number\" && Number.isFinite(v),\n  boolean: (v) => typeof v === \"boolean\",\n  array: (v) => Array.isArray(v),\n  object: (v) => typeof v === \"object\" && v !== null && !Array.isArray(v),\n  null: (v) => v === null,\n};\n\n/** The problems of a number outside minimum and maximum. */\nfunction rangeErrors(schema: any, value: number, path: string): Problem[] {\n  // TODO 3 of 8 (finish this to pass e2): the problems of a number outside minimum and maximum.\n  // Receives the schema, a number and its path. Returns { path, message } problems: \"must be at least <minimum>\" first, then\n  // \"must be at most <maximum>\", each only when the schema has that key and the value breaks it.\n  // Example: rangeErrors({ minimum: 0 }, -1, \"$.total\") -> [{ path: \"$.total\", message: \"must be at least 0\" }]\n  return [];\n}\n\n/** The problems of missing required keys. */\nfunction requiredErrors(schema: any, value: any, path: string): Problem[] {\n  // TODO 4 of 8 (finish this to pass e2): the problems of missing required keys.\n  // Receives the schema, an object and its path. Returns one { path: \"<path>.<key>\", message: \"is required\" } per key of the schema's\n  // `required` list that the object lacks, in the schema's order.\n  // Example: requiredErrors({ required: [\"a\"] }, {}, \"$\") -> [{ path: \"$.a\", message: \"is required\" }]\n  return [];\n}\n\n/** The problems of keys the schema does not list, when additionalProperties is false. */\nfunction extraErrors(schema: any, value: any, path: string): Problem[] {\n  // TODO 5 of 8 (finish this to pass e2): the problems of keys the schema does not list.\n  // Receives the schema, an object and its path. When `additionalProperties` is false, returns one\n  // { path: \"<path>.<key>\", message: \"is not allowed\" } per key that is not in `properties`; otherwise an empty list.\n  // Example: extraErrors({ additionalProperties: false, properties: {} }, { x: 1 }, \"$\") -> [{ path: \"$.x\", message: \"is not allowed\" }]\n  return [];\n}\n\n/** A list of problems, one per way value breaks schema; empty when it conforms. */\nexport function validate(schema: any, value: any, path = \"$\"): Problem[] {\n  const errors: Problem[] = [];\n  if (schema.type !== undefined && !TYPES[schema.type](value)) return [{ path, message: `must be of type ${schema.type}` }];\n  if (schema.enum && !schema.enum.includes(value)) errors.push({ path, message: `must be one of ${JSON.stringify(schema.enum)}` });\n  if (typeof value === \"number\") errors.push(...rangeErrors(schema, value, path));\n  if (TYPES.object(value)) {\n    errors.push(...requiredErrors(schema, value, path));\n    const properties = schema.properties ?? {};\n    for (const [key, sub] of Object.entries(properties)) if (key in value) errors.push(...validate(sub, value[key], `${path}.${key}`));\n    errors.push(...extraErrors(schema, value, path));\n  }\n  if (Array.isArray(value) && schema.items) value.forEach((item, i) => errors.push(...validate(schema.items, item, `${path}[${i}]`)));\n  return errors;\n}\n\nconst textOf = (reply: Reply) => reply.content.filter((b) => b.type === \"text\").map((b) => b.text).join(\"\");\n\nfunction prompt(document: string, schema: unknown): string {\n  return \"Extract the data from the document as one JSON object that follows this JSON Schema. Reply with the JSON only.\\n\" +\n    `<schema>${JSON.stringify(schema)}</schema>\\n<document>\\n${document}\\n</document>`;\n}\n\n/** The message that sends the problems back to the model. */\nfunction feedback(errors: Problem[]): string {\n  // TODO 6 of 8 (finish this to pass e2): the message that sends the problems back to the model.\n  // Receives the list of problems. Returns \"Your reply was rejected:\", then one \"- <path>: <message>\" line per problem, then\n  // \"Return the corrected JSON only.\", each on its own line.\n  // Example: [{ path: \"$.total\", message: \"must be of type number\" }] -> \"Your reply was rejected:\\n- $.total: must be of type number\\nReturn the corrected JSON only.\"\n  return \"\";\n}\n\n/** The quotes the document does not contain. */\nfunction groundingErrors(value: any, document: string, evidenceFields: string[]): Problem[] {\n  // TODO 7 of 8 (finish this to pass e5): the quotes the document does not contain.\n  // Receives the parsed value, the document text and the names of the evidence fields. For each name whose value in the object is a\n  // string that does not occur in the document, returns { path: \"$.<name>\", message: \"is not found in the document\" }.\n  // Example: groundingErrors({ quote: \"x\" }, \"abc\", [\"quote\"]) -> [{ path: \"$.quote\", message: \"is not found in the document\" }]\n  return [];\n}\n\n/** \"refused\" or \"truncated\" for a reply that must not be retried, else null. */\nfunction earlyStatus(reply: Reply): \"refused\" | \"truncated\" | null {\n  // TODO 8 of 8 (finish this to pass e4): a reply that must not be retried.\n  // Receives a reply. Returns \"refused\" when its stop_reason is \"refusal\", \"truncated\" when it is \"max_tokens\", else null.\n  // Example: earlyStatus({ content: [], stop_reason: \"max_tokens\" }) -> \"truncated\"\n  // The starter says \"truncated\" for every reply, so it stops after one call; write the real rule.\n  return \"truncated\";\n}\n\n/** Ask, parse, validate and, on a problem, re-prompt with the errors, at most maxAttempts calls. */\nexport function extract(ask: Ask, document: string, schema: any, maxAttempts = 3, evidenceFields: string[] = []): Result {\n  let messages: Message[] = [{ role: \"user\", content: prompt(document, schema) }];\n  let errors: Problem[] = [];\n  for (let attempt = 1; attempt <= maxAttempts; attempt++) {\n    const reply = ask(messages);\n    const early = earlyStatus(reply);\n    if (early) return { status: early, value: null, attempts: attempt, errors: [] };\n    const text = textOf(reply);\n    let value: any = null;\n    try {\n      value = parseJson(text);\n      errors = validate(schema, value);\n      errors.push(...groundingErrors(value, document, evidenceFields));\n    } catch (err) {\n      if (!(err instanceof ParseError)) throw err;\n      value = null;\n      errors = [{ path: \"$\", message: err.message }];\n    }\n    if (errors.length === 0) return { status: \"ok\", value, attempts: attempt, errors: [] };\n    if (attempt < maxAttempts) messages = [...messages, { role: \"assistant\", content: text }, { role: \"user\", content: feedback(errors) }];\n  }\n  return { status: \"failed\", value: null, attempts: maxAttempts, errors };\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-2/extractor.ts",
+    "test_path": "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-2/extractor.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-2/extractor.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 a valid reply is returned after one call",
+        "kind": "main",
+        "says": "A valid reply is returned after one call"
+      },
+      {
+        "id": "e1 json is found in fences and prose and bad text is retried",
+        "kind": "edge",
+        "says": "JSON is found inside fences and prose, and text with no JSON is retried"
+      },
+      {
+        "id": "e2 every schema violation is listed and sent back to the model",
+        "kind": "edge",
+        "says": "Every schema violation is listed and sent back to the model"
+      },
+      {
+        "id": "e3 the number of attempts is bounded",
+        "kind": "edge",
+        "says": "The number of attempts is bounded"
+      },
+      {
+        "id": "e4 a refusal or a cut off reply is not retried",
+        "kind": "edge",
+        "says": "A refusal or a cut-off reply is not retried"
+      },
+      {
+        "id": "e5 a quote that is not in the document is rejected",
+        "kind": "edge",
+        "says": "A quotation that is not in the document is rejected"
+      },
+      {
+        "id": "e6 types are exact booleans are not numbers and integers have no fraction",
+        "kind": "edge",
+        "says": "Types are exact: booleans are not numbers and integers have no fraction"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-2/target/report.xml"
+    },
+    "origin": "course/25-structured-output-and-defensive-parsing/02-defensive-parsing-validation-and-the-re-prompt.md",
+    "concepts": [
+      "the practice of Defensive parsing, validation and the re-prompt is solved"
+    ],
+    "files": [
+      "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "structured-output-and-defensive-parsing-u2"
+}

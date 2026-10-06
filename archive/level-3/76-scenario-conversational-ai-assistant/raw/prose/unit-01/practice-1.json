@@ -1,0 +1,155 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "76-scenario-conversational-ai-assistant"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: The assistant: persona, memory and the window",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A customer's message to the example assistant asks to speak to a human and, in the same sentence, says they might hurt themselves. Where does the route lead?",
+        "options": [
+          {
+            "id": "a",
+            "text": "To a request hand-off, since asking for a person is stated first in the sentence",
+            "correct": false,
+            "says": "Ruled out because the order puts safety above a request: \"a signal of risk goes to a person, a request for a person is honoured, a stalled conversation is handed over after two misses\"."
+          },
+          {
+            "id": "b",
+            "text": "To a safety hand-off, since a signal of risk is checked first",
+            "correct": true,
+            "says": "Risk is checked first."
+          },
+          {
+            "id": "c",
+            "text": "To the model, since it weighs the two parts of the message together before it replies",
+            "correct": false,
+            "says": "Ruled out because the decision is made before the model sees the message: \"Before the model sees a message, code checks it in a fixed order\"."
+          },
+          {
+            "id": "d",
+            "text": "To a stalled hand-off, since two questions have gone unanswered in the conversation",
+            "correct": false,
+            "says": "Ruled out because the stall comes last: \"a message that asks for a human and also signals risk is a safety hand-off\"."
+          }
+        ],
+        "origin": {
+          "path": "course/76-scenario-conversational-ai-assistant/01-the-assistant-persona-memory-and-the-window.md",
+          "section": "Routing in code"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "The example recalls two facts for a customer on 2026-10-04: an address saved on 2026-09-20 and a plan saved on 2025-12-01, with a limit of thirty days. What does the assistant do with them?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Treats both as current and goes on to use them",
+            "correct": false,
+            "says": "Ruled out because an old fact is not trusted: \"a fact that has not been touched for months is more likely to be wrong than one from last week\"."
+          },
+          {
+            "id": "b",
+            "text": "Uses the postal one and has the subscription one confirmed before relying on it",
+            "correct": true,
+            "says": "The address is current and the plan is marked to be verified."
+          },
+          {
+            "id": "c",
+            "text": "Drops both facts from the conversation and starts afresh",
+            "correct": false,
+            "says": "Ruled out because the old fact is checked and not thrown away: \"so that the assistant asks the customer before it relies on an address from last year\"."
+          },
+          {
+            "id": "d",
+            "text": "Verifies both facts with the person before saying anything else to them in the conversation",
+            "correct": false,
+            "says": "Ruled out because only the old fact needs confirming: \"the example marks each fact `current` when it is no older than a limit, and `verify` when it is older\"."
+          }
+        ],
+        "origin": {
+          "path": "course/76-scenario-conversational-ai-assistant/01-the-assistant-persona-memory-and-the-window.md",
+          "section": "Memory that crosses sessions"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A team stores memory files for all customers under one directory and serves any path that begins with `/memories`. A request arrives for `/memories/../../secrets.env`. What is the documentation's guidance?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Allow it on the strength of the matching prefix of the memory area",
+            "correct": false,
+            "says": "Ruled out because the prefix is not enough: \"A malicious path such as `/memories/../../secrets.env` can reach files outside the `/memories` directory\"."
+          },
+          {
+            "id": "b",
+            "text": "Let the model decide whether the file is sensitive before anything is returned to it",
+            "correct": false,
+            "says": "Ruled out because a decision by the model is a request and not a guarantee: \"A refusal that usually happens is a request, and a handler that strips is a guarantee.\""
+          },
+          {
+            "id": "c",
+            "text": "Check each one in every command and refuse whatever resolves outside the root",
+            "correct": true,
+            "says": "Every path is validated."
+          },
+          {
+            "id": "d",
+            "text": "Rely on the platform to confine every file operation to the memory area",
+            "correct": false,
+            "says": "Ruled out because the platform does not execute the operations: \"The memory tool operates client-side: Claude requests file operations, and your application executes them.\""
+          }
+        ],
+        "origin": {
+          "path": "course/76-scenario-conversational-ai-assistant/01-the-assistant-persona-memory-and-the-window.md",
+          "section": "Memory that crosses sessions"
+        }
+      }
+    ],
+    "concepts": [
+      "Memory that crosses sessions, as the page teaches it",
+      "Routing in code, as the page teaches it"
+    ]
+  }
+}

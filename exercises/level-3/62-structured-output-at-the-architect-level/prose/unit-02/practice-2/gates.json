@@ -1,0 +1,135 @@
+{
+  "gates_api": 1,
+  "inputs": [
+    {
+      "role": "statement",
+      "path": "statement.md",
+      "digest": "sha256:61e00035a2424ad0c21147e947e53e8e9bbfd209b1f2789f2a6f1b8069f90401"
+    },
+    {
+      "role": "starter",
+      "path": "starter/extraction.ts",
+      "digest": "sha256:150943357c3d48999211d9bd31438b0f229ab0d437b52aee4b7d6b9c658c9ca3"
+    },
+    {
+      "role": "reference",
+      "path": "reference/extraction.ts",
+      "digest": "sha256:ce554e267a4be3b9fabde522fd98310000b44e3d86c687063f2636da8be88b28"
+    },
+    {
+      "role": "starter:try-it.ts",
+      "path": "starter/try-it.ts",
+      "digest": "sha256:a663279081ad51e8cf77a8136fdd8604a728a8137f1050d4aa3ce127227ed01c"
+    },
+    {
+      "role": "reference:try-it.ts",
+      "path": "reference/try-it.ts",
+      "digest": "sha256:a663279081ad51e8cf77a8136fdd8604a728a8137f1050d4aa3ce127227ed01c"
+    },
+    {
+      "role": "tests",
+      "path": "tests/extraction.test.ts",
+      "digest": "sha256:571f48057ed3eb2ed6121207346675be9a441cc4a5668d0b1db11e2bd366483e"
+    },
+    {
+      "role": "plant:e1 a value the document does not give is null and needs no quote while an invented value fails as ungrounded",
+      "path": "plants/edge-1/extraction.ts.plant.json",
+      "digest": "sha256:5cdc58557336a0229c837f61e29fa05b4153b54eb39fc109a2d664abc75352e0"
+    },
+    {
+      "role": "plant:e2 a retry carries the original document the failed record and only the errors a second look can fix",
+      "path": "plants/edge-2/extraction.ts.plant.json",
+      "digest": "sha256:75dcf8846d91e9b4185cfd54f89047eff0f7f40ad639c08b64d9ba2a9b490394"
+    },
+    {
+      "role": "plant:e3 a required value that the model reports as absent is not retried and goes to review",
+      "path": "plants/edge-3/extraction.ts.plant.json",
+      "digest": "sha256:fe6e7517821beabbbfa6e8d0056d4a8ccd65e1754ffb0ceeb71602a86c15f280"
+    },
+    {
+      "role": "plant:e4 retries stop after the limit and the document is marked failed",
+      "path": "plants/edge-4/extraction.ts.plant.json",
+      "digest": "sha256:53239ee762bce81b3f30cb1063a29d193056c5d4363a18e5abf8ebe911fa4698"
+    },
+    {
+      "role": "plant:e5 a total that differs from the line items is a semantic error and a flagged conflict goes to review without a retry",
+      "path": "plants/edge-5/extraction.ts.plant.json",
+      "digest": "sha256:39c372f81564acf72e8bbe3eb9c7b415af047191a1e180cb31674c23106e0d20"
+    },
+    {
+      "role": "plant:e6 currency takes unclear and other with a detail and rejects anything else as a syntax error",
+      "path": "plants/edge-6/extraction.ts.plant.json",
+      "digest": "sha256:fe09a0a60313d084f537334253819f8eabb41d1522ade66c02a1ab54157b7d9c"
+    },
+    {
+      "role": "plant:e7 chunk results merge by keeping the first value and recording a conflict when two chunks disagree",
+      "path": "plants/edge-7/extraction.ts.plant.json",
+      "digest": "sha256:a31499fa6703f63643a769a2eb18f93dba514fd7d166f28a914a2d609694d64c"
+    },
+    {
+      "role": "plant:e8 accuracy counts every document and not only the validated ones",
+      "path": "plants/edge-8/extraction.ts.plant.json",
+      "digest": "sha256:c9a12fd0cb28d39b812dd4e253e2047a8bb3e3fccfeea9749392375e19cf8bc4"
+    },
+    {
+      "role": "plant:e9 the request forces a tool where the model allows it and falls back to auto with a reply check where it does not",
+      "path": "plants/edge-9/extraction.ts.plant.json",
+      "digest": "sha256:7e15e3b3ff0d3d1dbc9706e20dea3c20816efa47ab72bc7871c2c19699ed170c"
+    },
+    {
+      "role": "build:junit-file.mjs",
+      "path": "build/junit-file.mjs",
+      "digest": "sha256:eebbfd3bebdf18b0d715903d01abac0b7199da78c76c588b50c0c40352614cef"
+    },
+    {
+      "role": "build:logger.ts",
+      "path": "build/logger.ts",
+      "digest": "sha256:ee4ada918729a2eb77f3d514a0acf59bad03b63ca373a3a7b92f86d95f23197d"
+    }
+  ],
+  "origins": [
+    {
+      "role": "origin",
+      "path": "course/62-structured-output-at-the-architect-level/02-retries-conflicts-chunks-and-the-practice.md",
+      "section": null,
+      "digest": "sha256:ac1820d6fdb3681efcbae54c9b614a556ae24c28744d0249273a4ea34acb4920"
+    }
+  ],
+  "gates": [
+    {
+      "id": "G1",
+      "family": "code",
+      "held": true,
+      "says": "all 10 cases passed on the reference, on two runs alike",
+      "recorded": {}
+    },
+    {
+      "id": "G2",
+      "family": "code",
+      "held": true,
+      "says": "none of the 10 cases passed on the starter",
+      "recorded": {}
+    },
+    {
+      "id": "G3",
+      "family": "code",
+      "held": true,
+      "says": "each of the 9 edge cases was caught by its own plant",
+      "recorded": {}
+    },
+    {
+      "id": "G4",
+      "family": "code",
+      "held": true,
+      "says": "every test the report named mapped to one of the 10 cases, and every case was named",
+      "recorded": {}
+    },
+    {
+      "id": "G5",
+      "family": "code",
+      "held": true,
+      "says": "the cited passage of 'course/62-structured-output-at-the-architect-level/02-retries-conflicts-chunks-and-the-practice.md' still matches the ledger",
+      "recorded": {}
+    }
+  ]
+}

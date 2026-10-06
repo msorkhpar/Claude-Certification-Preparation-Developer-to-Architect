@@ -1,0 +1,299 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "81-reliability-of-multi-agent-systems"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Safe retries and circuit breakers",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Safe retries and circuit breakers"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Architect Professional · **Module 81:** Reliability of multi-agent systems · **Page 1 of 2** **Exams:** P1, P5"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** say when a retry is safe and when it pays twice, design an idempotency key that is recorded together with the effect it guards, keep the same key on every retry of one task, and place a circuit breaker around an agent that keeps failing so that the run stops spending on it."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-04 against Anthropic's engineering article \"How we built our multi-agent research system\", Anthropic's \"Building effective agents\", and the Claude Certified Architect, Professional exam guide v1.0 (July 2026), domains 1 and 5. The example ran in the course's container in Python, TypeScript, Java and Kotlin with the same output. Nothing is called over a network: the failures are scripted and the clock is a number, so the output shows the safeguards and not a real system's failure rates."
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "**Exam guide and current product.** *What the guide states, and so what the exam keys:* domain 5 asks for reliability of context and tools, and domain 1 for a design that survives failure, so the exam asks what to do when a step times out, a response is lost or an agent keeps failing. *What Anthropic's article says:* its research system combines \"the adaptability of AI agents built on Claude with deterministic safeguards like retry logic and regular checkpoints\", and it reports that agents are stateful and that errors compound, so that minor failures can be catastrophic when nothing handles them. *How to read both:* the exam keys the deterministic answer, a safeguard in code outside the model, and rejects the answer that asks the model to be careful. Retry, key and breaker are patterns of ordinary distributed systems, applied here to agents; they are the course's teaching of the idea and not a feature of a Claude product."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "An agent calls a refund tool. The tool pays, and the response is lost on the way back. The agent sees a timeout, and the retry logic does what it was built to do: it tries again. The customer is refunded twice. Nothing misbehaved: the model reasoned correctly, the network failed as networks do, and the retry was exactly what the design asked for. A multi-agent system makes this worse, since more calls are made, in parallel, by components that cannot see one another's attempts. Reliability here is not about a better model. It is about what happens on the second attempt."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "A retry is safe only when the repeat is recognised"
+    },
+    {
+      "type": "para",
+      "text": "Retrying a call that reads is harmless. Retrying a call that changes something (pays, sends, writes, books) repeats the change unless the tool can tell that this attempt is a repeat. The mechanism is an **idempotency key**: a value that identifies the intended action, sent with the call. The tool keeps the keys it has seen, and a second call with a known key returns the first result instead of acting again."
+    },
+    {
+      "type": "para",
+      "text": "Three details decide whether the key works."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Record the key together with the effect.** The key and the payment are saved in one step, in one transaction. If they were saved apart, a crash between the two leaves an effect with no key, or a key with no effect, and the next attempt either pays twice or never pays.",
+        "**Use the same key on every retry of one task.** The key names the intention, not the attempt. A new key for each attempt turns the retry into a new refund. The key is made once, before the first call, from what identifies the task (the order and the action), and it is stored with the task.",
+        "**The danger is the lost response.** A tool that fails before acting is safe to retry. The case that needs the key is the one in which the action happened and the answer did not arrive, which is why the example loses the response after the money has moved."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The key belongs to the tool's design as much as the agent's. When a tool that changes things offers no key, the architect wraps it with one, or does not let an agent retry it."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Retries have limits, and not every failure is a retry"
+    },
+    {
+      "type": "para",
+      "text": "A retry helps with failures that pass: a timeout, a rate limit, a response that was lost. It does not help with one that does not: a refused request, a missing permission, an invalid input. The first kind is **transient**, the second **fatal**. A runner retries the first kind up to a fixed number of calls and then fails the task with a clear reason, and it never retries the second. An unlimited retry is a way to spend money while nothing changes."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "A circuit breaker stops the spending"
+    },
+    {
+      "type": "para",
+      "text": "Suppose an agent's backend is down. Every task that needs it retries, waits and fails, and a run of fifty tasks makes a hundred and fifty wasted calls. A **circuit breaker** is a small state machine around the agent that watches consecutive failures."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "State",
+        "What it does",
+        "How it changes"
+      ],
+      "rows": [
+        [
+          "**Closed**",
+          "Calls go through",
+          "After a set number of failures in a row, it opens"
+        ],
+        [
+          "**Open**",
+          "Calls are refused at once, without reaching the agent",
+          "After a cooldown, it moves to half-open"
+        ],
+        [
+          "**Half-open**",
+          "One probe call goes through",
+          "A success closes it; a failure opens it again"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "A success resets the count, so scattered failures do not open it. The count is of consecutive failures for one agent, not of all failures in the run: an agent that is healthy must not be cut off by a failing neighbour. When the breaker is open, the task fails fast with the reason `circuit open`, and the rest of the plan goes on (page 2)."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "example",
+      "id": "m81-reliable-call",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/81-reliable-call/python/reliable_call.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/81-reliable-call/typescript/reliableCall.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/81-reliable-call/java/ReliableCall.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/81-reliable-call/kotlin/ReliableCall.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"A retried refund that must not pay twice, and a circuit breaker around a failing agent.\n\nAnthropic's multi-agent research write-up (read on 2026-10-04) says it combines \"the adaptability of AI agents built on Claude with\ndeterministic safeguards like retry logic and regular checkpoints\". This file shows two such safeguards on scripted failures. A retry is\nsafe only when the tool it repeats is idempotent: the refund tool records its idempotency key together with its effect, so a second\nattempt with the same key returns the first result. A breaker stops calling an agent that keeps failing and lets one probe through after\na cooldown. Nothing is called over a network: the failures are scripted and the clock is a number.\n\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\n\nclass Transient(Exception):\n    \"\"\"A failure worth retrying: a timeout, a rate limit, a lost response.\"\"\"\n\n\nclass Ledger:\n    \"\"\"The refunds actually paid, and the idempotency keys already used.\"\"\"\n\n    def __init__(self):\n        self.paid = []\n        self.keys = {}\n\n\ndef refund(ledger, key, order, amount, lose_response):\n    \"\"\"Pays once per key. The response may be lost after the money has moved, which is the dangerous case.\"\"\"\n    log.debug(\"refund input: %r\", key)\n    if key is not None and key in ledger.keys:\n        return ledger.keys[key]\n    ledger.paid.append((order, amount))\n    receipt = f\"refund-{len(ledger.paid)}\"\n    if key is not None:\n        ledger.keys[key] = receipt\n    if lose_response:\n        raise Transient(\"response lost\")\n    return receipt\n\n\ndef retry(attempt, tries):\n    \"\"\"Calls attempt(n) up to `tries` times while it raises Transient; returns (result, calls made).\"\"\"\n    for n in range(1, tries + 1):\n        try:\n            return attempt(n), n\n        except Transient:\n            if n == tries:\n                raise\n\n\nclass Breaker:\n    \"\"\"Closed until `threshold` failures in a row, then open for `cooldown` seconds, then one probe (half open).\"\"\"\n\n    def __init__(self, threshold, cooldown):\n        self.threshold, self.cooldown = threshold, cooldown\n        self.failures, self.opened_at = 0, None\n\n    def state(self, now):\n        if self.opened_at is None:\n            return \"closed\"\n        return \"half-open\" if now - self.opened_at >= self.cooldown else \"open\"\n\n    def allow(self, now):\n        return self.state(now) != \"open\"\n\n    def record(self, ok, now):\n        if ok:\n            self.failures, self.opened_at = 0, None\n        else:\n            self.failures += 1\n            if self.failures >= self.threshold or self.state(now) == \"half-open\":\n                self.opened_at = now\n\n\ndef main():\n    naive = Ledger()\n    retry(lambda n: refund(naive, None, \"order-7\", 40, lose_response=(n == 1)), 2)\n    print(f\"retry without a key: {len(naive.paid)} refunds paid for one order\")\n    keyed = Ledger()\n    receipt, calls = retry(lambda n: refund(keyed, \"order-7:refund\", \"order-7\", 40, lose_response=(n == 1)), 2)\n    print(f\"retry with a key: {len(keyed.paid)} refund paid for one order, {calls} calls, receipt {receipt}\")\n    breaker = Breaker(threshold=3, cooldown=30)\n    reached = 0\n    for now, healthy in [(0, False), (1, False), (2, False), (3, True), (40, True), (41, True)]:\n        if not breaker.allow(now):\n            print(f\"t={now}: breaker {breaker.state(now)}, call refused without reaching the agent\")\n            continue\n        reached += 1\n        breaker.record(healthy, now)\n        print(f\"t={now}: call {'succeeded' if healthy else 'failed'}, breaker {breaker.state(now)}\")\n    print(f\"the agent was reached {reached} times in 6 attempts\")\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "retry without a key: 2 refunds paid for one order\nretry with a key: 1 refund paid for one order, 2 calls, receipt refund-1\nt=0: call failed, breaker closed\nt=1: call failed, breaker closed\nt=2: call failed, breaker open\nt=3: breaker open, call refused without reaching the agent\nt=40: call succeeded, breaker closed\nt=41: call succeeded, breaker closed\nthe agent was reached 5 times in 6 attempts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// A retried refund that must not pay twice, and a circuit breaker around a failing agent.\n//\n// Anthropic's multi-agent research write-up (read on 2026-10-04) says it combines \"the adaptability of AI agents built on Claude with\n// deterministic safeguards like retry logic and regular checkpoints\". This file shows two such safeguards on scripted failures. A retry is\n// safe only when the tool it repeats is idempotent: the refund tool records its idempotency key together with its effect, so a second\n// attempt with the same key returns the first result. A breaker stops calling an agent that keeps failing and lets one probe through after\n// a cooldown. Nothing is called over a network: the failures are scripted and the clock is a number.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"reliable_call\");\n\nexport class Transient extends Error {} // a failure worth retrying: a timeout, a rate limit, a lost response\n\n/** The refunds actually paid, and the idempotency keys already used. */\nexport class Ledger {\n  paid: Array<[string, number]> = [];\n  keys = new Map<string, string>();\n}\n\n/** Pays once per key. The response may be lost after the money has moved, which is the dangerous case. */\nexport function refund(ledger: Ledger, key: string | null, order: string, amount: number, loseResponse: boolean): string {\n  log.debug(\"refund input\", key);\n  if (key !== null && ledger.keys.has(key)) return ledger.keys.get(key)!;\n  ledger.paid.push([order, amount]);\n  const receipt = `refund-${ledger.paid.length}`;\n  if (key !== null) ledger.keys.set(key, receipt);\n  if (loseResponse) throw new Transient(\"response lost\");\n  return receipt;\n}\n\n/** Calls attempt(n) up to `tries` times while it throws Transient; returns [result, calls made]. */\nexport function retry<T>(attempt: (n: number) => T, tries: number): [T, number] {\n  for (let n = 1; ; n++) {\n    try {\n      return [attempt(n), n];\n    } catch (error) {\n      if (!(error instanceof Transient) || n >= tries) throw error;\n    }\n  }\n}\n\n/** Closed until `threshold` failures in a row, then open for `cooldown` seconds, then one probe (half open). */\nexport class Breaker {\n  failures = 0;\n  openedAt: number | null = null;\n  threshold: number;\n  cooldown: number;\n\n  constructor(threshold: number, cooldown: number) {\n    this.threshold = threshold;\n    this.cooldown = cooldown;\n  }\n\n  state(now: number): string {\n    if (this.openedAt === null) return \"closed\";\n    return now - this.openedAt >= this.cooldown ? \"half-open\" : \"open\";\n  }\n\n  allow(now: number): boolean {\n    return this.state(now) !== \"open\";\n  }\n\n  record(ok: boolean, now: number): void {\n    if (ok) {\n      this.failures = 0;\n      this.openedAt = null;\n    } else {\n      this.failures += 1;\n      if (this.failures >= this.threshold || this.state(now) === \"half-open\") this.openedAt = now;\n    }\n  }\n}\n\nfunction main() {\n  const naive = new Ledger();\n  retry((n) => refund(naive, null, \"order-7\", 40, n === 1), 2);\n  console.log(`retry without a key: ${naive.paid.length} refunds paid for one order`);\n  const keyed = new Ledger();\n  const [receipt, calls] = retry((n) => refund(keyed, \"order-7:refund\", \"order-7\", 40, n === 1), 2);\n  console.log(`retry with a key: ${keyed.paid.length} refund paid for one order, ${calls} calls, receipt ${receipt}`);\n  const breaker = new Breaker(3, 30);\n  let reached = 0;\n  for (const [now, healthy] of [[0, false], [1, false], [2, false], [3, true], [40, true], [41, true]] as Array<[number, boolean]>) {\n    if (!breaker.allow(now)) {\n      console.log(`t=${now}: breaker ${breaker.state(now)}, call refused without reaching the agent`);\n      continue;\n    }\n    reached += 1;\n    breaker.record(healthy, now);\n    console.log(`t=${now}: call ${healthy ? \"succeeded\" : \"failed\"}, breaker ${breaker.state(now)}`);\n  }\n  console.log(`the agent was reached ${reached} times in 6 attempts`);\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "retry without a key: 2 refunds paid for one order\nretry with a key: 1 refund paid for one order, 2 calls, receipt refund-1\nt=0: call failed, breaker closed\nt=1: call failed, breaker closed\nt=2: call failed, breaker open\nt=3: breaker open, call refused without reaching the agent\nt=40: call succeeded, breaker closed\nt=41: call succeeded, breaker closed\nthe agent was reached 5 times in 6 attempts"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.HashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.function.IntFunction;\n\n/**\n * A retried refund that must not pay twice, and a circuit breaker around a failing agent.\n *\n * <p>Anthropic's multi-agent research write-up (read on 2026-10-04) says it combines \"the adaptability of AI agents built on Claude with\n * deterministic safeguards like retry logic and regular checkpoints\". This file shows two such safeguards on scripted failures. A retry is\n * safe only when the tool it repeats is idempotent: the refund tool records its idempotency key together with its effect, so a second\n * attempt with the same key returns the first result. A breaker stops calling an agent that keeps failing and lets one probe through after\n * a cooldown. Nothing is called over a network: the failures are scripted and the clock is a number.\n */\npublic final class ReliableCall {\n    private static final System.Logger LOG = System.getLogger(ReliableCall.class.getName());\n    /** A failure worth retrying: a timeout, a rate limit, a lost response. */\n    static final class Transient extends RuntimeException {\n        Transient(String message) {\n            super(message);\n        }\n    }\n\n    /** The refunds actually paid, and the idempotency keys already used. */\n    static final class Ledger {\n        final List<String> paid = new ArrayList<>();\n        final Map<String, String> keys = new HashMap<>();\n    }\n\n    record Attempt<T>(T result, int calls) {}\n\n    /** Pays once per key. The response may be lost after the money has moved, which is the dangerous case. */\n    static String refund(Ledger ledger, String key, String order, int amount, boolean loseResponse) {\n        LOG.log(System.Logger.Level.DEBUG, \"refund input: {0}\", key);\n        if (key != null && ledger.keys.containsKey(key)) return ledger.keys.get(key);\n        ledger.paid.add(order + \":\" + amount);\n        String receipt = \"refund-\" + ledger.paid.size();\n        if (key != null) ledger.keys.put(key, receipt);\n        if (loseResponse) throw new Transient(\"response lost\");\n        return receipt;\n    }\n\n    /** Calls attempt(n) up to {@code tries} times while it throws Transient; returns the result and the calls made. */\n    static <T> Attempt<T> retry(IntFunction<T> attempt, int tries) {\n        for (int n = 1; ; n++) {\n            try {\n                return new Attempt<>(attempt.apply(n), n);\n            } catch (Transient e) {\n                if (n >= tries) throw e;\n            }\n        }\n    }\n\n    /** Closed until {@code threshold} failures in a row, then open for {@code cooldown} seconds, then one probe (half open). */\n    static final class Breaker {\n        private final int threshold;\n        private final int cooldown;\n        private int failures = 0;\n        private Integer openedAt = null;\n\n        Breaker(int threshold, int cooldown) {\n            this.threshold = threshold;\n            this.cooldown = cooldown;\n        }\n\n        String state(int now) {\n            if (openedAt == null) return \"closed\";\n            return now - openedAt >= cooldown ? \"half-open\" : \"open\";\n        }\n\n        boolean allow(int now) {\n            return !state(now).equals(\"open\");\n        }\n\n        void record(boolean ok, int now) {\n            if (ok) {\n                failures = 0;\n                openedAt = null;\n            } else {\n                failures += 1;\n                if (failures >= threshold || state(now).equals(\"half-open\")) openedAt = now;\n            }\n        }\n    }\n\n    public static void main(String[] args) {\n        Ledger naive = new Ledger();\n        retry(n -> refund(naive, null, \"order-7\", 40, n == 1), 2);\n        System.out.println(\"retry without a key: \" + naive.paid.size() + \" refunds paid for one order\");\n        Ledger keyed = new Ledger();\n        Attempt<String> done = retry(n -> refund(keyed, \"order-7:refund\", \"order-7\", 40, n == 1), 2);\n        System.out.println(\"retry with a key: \" + keyed.paid.size() + \" refund paid for one order, \" + done.calls() + \" calls, receipt \" + done.result());\n        Breaker breaker = new Breaker(3, 30);\n        int reached = 0;\n        int[] times = {0, 1, 2, 3, 40, 41};\n        boolean[] healthy = {false, false, false, true, true, true};\n        for (int i = 0; i < times.length; i++) {\n            int now = times[i];\n            if (!breaker.allow(now)) {\n                System.out.println(\"t=\" + now + \": breaker \" + breaker.state(now) + \", call refused without reaching the agent\");\n                continue;\n            }\n            reached++;\n            breaker.record(healthy[i], now);\n            System.out.println(\"t=\" + now + \": call \" + (healthy[i] ? \"succeeded\" : \"failed\") + \", breaker \" + breaker.state(now));\n        }\n        System.out.println(\"the agent was reached \" + reached + \" times in 6 attempts\");\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "retry without a key: 2 refunds paid for one order\nretry with a key: 1 refund paid for one order, 2 calls, receipt refund-1\nt=0: call failed, breaker closed\nt=1: call failed, breaker closed\nt=2: call failed, breaker open\nt=3: breaker open, call refused without reaching the agent\nt=40: call succeeded, breaker closed\nt=41: call succeeded, breaker closed\nthe agent was reached 5 times in 6 attempts"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "private val log = System.getLogger(\"reliable_call\")\n\n/**\n * A retried refund that must not pay twice, and a circuit breaker around a failing agent.\n *\n * Anthropic's multi-agent research write-up (read on 2026-10-04) says it combines \"the adaptability of AI agents built on Claude with\n * deterministic safeguards like retry logic and regular checkpoints\". This file shows two such safeguards on scripted failures. A retry is\n * safe only when the tool it repeats is idempotent: the refund tool records its idempotency key together with its effect, so a second\n * attempt with the same key returns the first result. A breaker stops calling an agent that keeps failing and lets one probe through after\n * a cooldown. Nothing is called over a network: the failures are scripted and the clock is a number.\n */\n/** A failure worth retrying: a timeout, a rate limit, a lost response. */\nclass Transient(message: String) : RuntimeException(message)\n\n/** The refunds actually paid, and the idempotency keys already used. */\nclass Ledger {\n    val paid = mutableListOf<String>()\n    val keys = mutableMapOf<String, String>()\n}\n\n/** Pays once per key. The response may be lost after the money has moved, which is the dangerous case. */\nfun refund(ledger: Ledger, key: String?, order: String, amount: Int, loseResponse: Boolean): String {\n    log.log(System.Logger.Level.DEBUG, \"refund input: {0}\", key)\n    if (key != null && key in ledger.keys) return ledger.keys.getValue(key)\n    ledger.paid += \"$order:$amount\"\n    val receipt = \"refund-${ledger.paid.size}\"\n    if (key != null) ledger.keys[key] = receipt\n    if (loseResponse) throw Transient(\"response lost\")\n    return receipt\n}\n\n/** Calls attempt(n) up to `tries` times while it throws Transient; returns the result and the calls made. */\nfun <T> retry(tries: Int, attempt: (Int) -> T): Pair<T, Int> {\n    var n = 1\n    while (true) {\n        try {\n            return attempt(n) to n\n        } catch (e: Transient) {\n            if (n >= tries) throw e\n        }\n        n++\n    }\n}\n\n/** Closed until `threshold` failures in a row, then open for `cooldown` seconds, then one probe (half open). */\nclass Breaker(private val threshold: Int, private val cooldown: Int) {\n    private var failures = 0\n    private var openedAt: Int? = null\n\n    fun state(now: Int): String {\n        val opened = openedAt ?: return \"closed\"\n        return if (now - opened >= cooldown) \"half-open\" else \"open\"\n    }\n\n    fun allow(now: Int) = state(now) != \"open\"\n\n    fun record(ok: Boolean, now: Int) {\n        if (ok) {\n            failures = 0\n            openedAt = null\n        } else {\n            failures += 1\n            if (failures >= threshold || state(now) == \"half-open\") openedAt = now\n        }\n    }\n}\n\nfun main() {\n    val naive = Ledger()\n    retry(2) { n -> refund(naive, null, \"order-7\", 40, n == 1) }\n    println(\"retry without a key: ${naive.paid.size} refunds paid for one order\")\n    val keyed = Ledger()\n    val (receipt, calls) = retry(2) { n -> refund(keyed, \"order-7:refund\", \"order-7\", 40, n == 1) }\n    println(\"retry with a key: ${keyed.paid.size} refund paid for one order, $calls calls, receipt $receipt\")\n    val breaker = Breaker(3, 30)\n    var reached = 0\n    for ((now, healthy) in listOf(0 to false, 1 to false, 2 to false, 3 to true, 40 to true, 41 to true)) {\n        if (!breaker.allow(now)) {\n            println(\"t=$now: breaker ${breaker.state(now)}, call refused without reaching the agent\")\n            continue\n        }\n        reached++\n        breaker.record(healthy, now)\n        println(\"t=$now: call ${if (healthy) \"succeeded\" else \"failed\"}, breaker ${breaker.state(now)}\")\n    }\n    println(\"the agent was reached $reached times in 6 attempts\")\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "retry without a key: 2 refunds paid for one order\nretry with a key: 1 refund paid for one order, 2 calls, receipt refund-1\nt=0: call failed, breaker closed\nt=1: call failed, breaker closed\nt=2: call failed, breaker open\nt=3: breaker open, call refused without reaching the agent\nt=40: call succeeded, breaker closed\nt=41: call succeeded, breaker closed\nthe agent was reached 5 times in 6 attempts"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The first two lines are the point. Without a key, a lost response and a retry pay twice. With the key recorded with the refund, the retry returns the first receipt, two calls were made, and one refund was paid. The breaker lines show three failures in a row opening it at `t=2`, a call at `t=3` refused without reaching the agent, and a probe at `t=40` after the cooldown that closes it. The agent was reached five times in six attempts: the breaker saved one call here, and in a run with a long outage it saves many more."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "para",
+      "text": "These are the wrong answers the exam's options for this domain offer, each with the reason it is rejected."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**\"Generate a fresh key for each attempt so the tool cannot confuse them.\"** It is tempting because a fresh value looks unique and safe. The exam rejects it: a new key per attempt means the tool cannot recognise the repeat, so the retry pays again. The key names the intention and stays the same across attempts.",
+        "**\"Tell the agent in its prompt never to refund the same order twice.\"** It is tempting because the instruction is easy to write. The exam rejects it: the agent cannot see an attempt whose response was lost, and a control that must hold is enforced in code outside the model.",
+        "**\"Retry indefinitely until the call succeeds, because every failure is temporary.\"** It is tempting because transient failures are common. The exam rejects it: fatal failures never clear, an outage can last longer than any budget, and a breaker with a retry limit is what stops the spending."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "Scenario: Tern Payments' transfer tool writes its idempotency key to a keys table and then makes the transfer as a second, separate step. A crash falls between the two steps, and after the restart a retry returns the stored receipt although no money moved. What design prevents this?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Delete stored keys that are older than a minute, so that a retry can proceed afresh",
+              "**b**: Make the agent confirm the account balance in its prompt before every retry",
+              "**c**: Write the transfer first and the key second, as two steps in that order",
+              "**d**: Persist both together as one indivisible operation"
+            ]
+          }
+        ],
+        [
+          "Scenario: Quillon Labs runs fifty tasks that depend on one search agent whose backend is down. Each task retries three times before failing. What limits the waste best?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: A breaker that trips after repeated errors in a row and refuses calls for a pause",
+              "**b**: A larger retry count for each task, so the backend has more chances to come back",
+              "**c**: A faster model for the search agent, so that every failed call ends sooner",
+              "**d**: A rule that restarts the whole run from the first task whenever any task has failed"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**d**. The key and the effect are recorded in one step, so neither can exist without the other. *a* is ruled out because the page says to \"Record the key together with the effect\", and deleting keys breaks the recognition of repeats. *b* is ruled out because \"a control that must hold is enforced in code outside the model\". *c* is ruled out because it only reverses the gap: \"a crash between the two leaves an effect with no key, or a key with no effect\".",
+            "**a**. A breaker refuses calls at once while it is open and probes once after the cooldown. *b* is ruled out because \"an unlimited retry is a way to spend money while nothing changes\" and a larger count is the same mistake. *c* is ruled out because the waste is the count of calls, \"a hundred and fifty wasted calls\", which speed leaves in place. *d* is ruled out because a restart makes the same calls again, where the breaker means \"the task fails fast with the reason `circuit open`\"."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 12,
+    "code": 0,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 1,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "135a440f1cc6b40ce59d65d86fc9bf0ee87f57d7f035ea6ddd3167fe82035957"
+}

@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "audit.ts",
+      "old": "const wrong = count((s) => hasWrongTool(s.steps));",
+      "new": "const wrong = sessions.reduce((a, s) => a + s.steps.filter((st) => hasWrongTool([st])).length, 0);"
+    }
+  ]
+}

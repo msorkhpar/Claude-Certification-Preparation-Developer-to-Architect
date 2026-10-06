@@ -1,0 +1,78 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "14-the-messages-api"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 2,
+  "title": "Practice: a conversation client, graded on the state it keeps (TypeScript)",
+  "lang": "typescript",
+  "main_file": "conversation.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "conversation.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-2/14-the-messages-api/prose/unit-03/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-2/14-the-messages-api/prose/unit-03/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-2/14-the-messages-api/prose/unit-03/practice-2/conversation.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 every request carries the whole history in order",
+      "kind": "main",
+      "says": "Every request carries the whole history in order, with assistant content as received"
+    },
+    {
+      "id": "e1 usage adds up over the turns",
+      "kind": "edge",
+      "says": "Usage adds up over the turns"
+    },
+    {
+      "id": "e2 a failed call leaves no dangling user turn",
+      "kind": "edge",
+      "says": "A failed call leaves no dangling user turn"
+    },
+    {
+      "id": "e3 stop reason is reported and max tokens marks the reply truncated",
+      "kind": "edge",
+      "says": "The stop reason is reported and max_tokens marks the reply truncated"
+    },
+    {
+      "id": "e4 system is a top level field and stop sequences are passed on",
+      "kind": "edge",
+      "says": "system is top-level (and left out when absent); stop sequences are passed on"
+    },
+    {
+      "id": "e5 each request is a snapshot and history is a copy",
+      "kind": "edge",
+      "says": "Each request is a snapshot, and history() is a copy"
+    },
+    {
+      "id": "e6 a blank turn is refused before anything is sent",
+      "kind": "edge",
+      "says": "A blank turn is refused before anything is sent"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/14-the-messages-api/03-the-conversation-state-the-client-keeps.md"
+}

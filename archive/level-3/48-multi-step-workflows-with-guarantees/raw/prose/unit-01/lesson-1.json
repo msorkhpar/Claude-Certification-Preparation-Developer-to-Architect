@@ -1,0 +1,366 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "48-multi-step-workflows-with-guarantees"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Prompt or code: where a guarantee lives",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Prompt or code: where a guarantee lives"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Architect · **Module 48:** Multi-step workflows with guarantees · **Page 1 of 2** **Exams:** A1.4; S1"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** say why an instruction in a prompt is not a guarantee and where one lives instead, write the gate that enforces a prerequisite between two tools in the code that runs them, choose what the gate sends back to the model when it refuses, and explain why a forced `tool_choice` does not stand in for the gate."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-03 against the Claude Code documentation pages \"Automate actions with hooks\" and \"Subagents in the SDK\", the Claude API pages \"Handle tool calls\" and \"Define tools\", and Anthropic's engineering article on building effective agents. The example runs offline in Python (`anthropic` 1.11.0) and TypeScript (`@anthropic-ai/sdk` 0.131.0) against scripted replies in the shape of the Messages API, so it shows no live output. The scenario is the exam's S1, a customer support resolution agent. This page builds on module 26 (the tool loop), module 41 (least privilege and hooks) and module 45 (what the loop owns)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "Scenario S1 of the Architect exam is a support agent that can look up customers and orders and issue refunds. Its questions share one shape: the agent sometimes does something in the wrong order, and the team asks how to stop it. The wrong answers all add words to the prompt. The right answer moves the rule out of the prompt and into the code that runs the tools, and the reason is arithmetic. As an illustration (these are not measured figures), a model that follows an instruction 99.5 percent of the time still skips it on one conversation in two hundred, and a company that handles ten thousand conversations a month has fifty refunds that moved without a check."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "An instruction is a request"
+    },
+    {
+      "type": "para",
+      "text": "The Claude Code documentation draws the line in one sentence. Hooks give \"deterministic control: certain actions always happen rather than relying on the LLM to choose to run them.\" The other side of the line is a prompt, a `CLAUDE.md` file, a skill: text that the model reads and weighs with everything else in its context. It usually complies. \"Usually\" is the property, not a flaw to be tuned away, because the model is a probabilistic component whose output depends on the whole conversation."
+    },
+    {
+      "type": "para",
+      "text": "Two kinds of requirement therefore need two kinds of mechanism."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "The requirement",
+        "A prompt is enough when",
+        "Code is needed when"
+      ],
+      "rows": [
+        [
+          "Style, tone, how to phrase a refusal",
+          "A slip costs little and a person can see it",
+          "Never: judgement and wording are what the model is for"
+        ],
+        [
+          "Which tool suits a request",
+          "A wrong pick is cheap and the loop can recover",
+          "The wrong pick must be impossible, for example by not offering the tool"
+        ],
+        [
+          "An order between steps, such as identity before money",
+          "Never, when the later step cannot be undone",
+          "The consequence is financial, legal or about security, and \"usually\" is not an acceptable rate"
+        ],
+        [
+          "A limit, such as refunds above an amount",
+          "Never, for the same reason",
+          "A person must decide above the limit"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The building-effective-agents article places the actions in the same bucket for customer support: \"Actions such as issuing refunds or updating tickets can be handled programmatically\". Programmatic means the code decides whether the action runs. The model proposes it."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The gate"
+    },
+    {
+      "type": "para",
+      "text": "A gate is a function in the code that runs the tools. For every tool call the model asks for, it checks the prerequisites, and only then does it call the backend. The practice of this module is exactly that: a desk with four tools and a rule for each step."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Verify identity first.** Until a verification has succeeded in this session, only `verify_identity` and `escalate` run. Every other call is refused.",
+        "**The order must be the customer's.** A looked-up order that belongs to someone else is refused and not shown, even though the backend returned it, because the gate compares it with the verified customer.",
+        "**A refund is checked against the order.** The order must have been looked up, the amount must be a positive whole number, and it must not exceed what is left on the order.",
+        "**A refund over the limit does not run.** It is refused with a code that says a person must decide, and the case is handed over (page 2)."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Three properties make a gate a guarantee and not a second prompt."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "**It runs on every call.** There is no path from the model's output to the backend that does not go through it. The loop of module 45 has one place where tools run; the gate sits there.",
+        "**It keeps its own state.** The gate remembers that verification succeeded, in a variable, and does not ask the model whether it did. A sentence in the model's text such as \"the customer has been verified\" is not evidence, and a failed verification clears the state, so that an earlier success cannot be reused.",
+        "**A refused call never reaches the backend.** The backend log is the proof: after a refused refund there is no `process_refund` in it."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What the model gets back"
+    },
+    {
+      "type": "para",
+      "text": "A refused call still needs an answer. The API requires one: \"Tool result blocks must immediately follow their corresponding tool use blocks in the message history.\" The loop sends a `tool_result` with `is_error` set, as for any failing tool, and the content decides what happens next. The documentation's advice for errors applies word for word: \"include what went wrong and what Claude should try next\". The practice's text is `BLOCKED identity_required: Verify the customer's identity before this action.`, a code that code and logs can match, and a sentence that tells the model its next step."
+    },
+    {
+      "type": "para",
+      "text": "The gate does not repair the call. It would be tempting to run the missing verification itself, but the customer's identity code is something the model must obtain from the customer, so the gate refuses and says what is missing. That keeps the conversation honest and keeps the gate small. In the example below, the model's recovery after the refusal takes three more calls and no extra code: it asks for the verification, looks up the order and tries the refund again."
+    },
+    {
+      "type": "para",
+      "text": "The refusal must also not leak what it protects. A lookup of someone else's order says only that the order does not belong to the verified customer. It does not say whose it is."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Where the gate sits in each tool"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Where the model runs",
+        "The gate is"
+      ],
+      "rows": [
+        [
+          "Your own loop on the Messages API",
+          "The function that executes a `tool_use` block, before it calls the backend"
+        ],
+        [
+          "The Agent SDK or Claude Code",
+          "A `PreToolUse` hook (module 49), which runs before every other step of the permission decision and whose denial holds even in `bypassPermissions`"
+        ],
+        [
+          "A tool implemented as an MCP server",
+          "The server itself, which should refuse a call whose prerequisites it can check, because it cannot trust every client to have a gate"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "In this course's judgement, putting the check in the tool is the most robust of the three, because the rule travels with the tool. The cost is that the tool needs the state (who is verified), which a stateless server has to receive as an argument that it can check, such as a session token that only a successful verification could have produced."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "`tool_choice` is not the gate"
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "**Exam guide and current product.** *What the guide states, and so what the exam keys:* for the order of steps (task 1.4) it keys programmatic enforcement, hooks and prerequisite gates such as blocking the refund until the customer lookup has returned a verified id, over prompt instructions, which have a non-zero failure rate. Separately, in its tool-design and structured-output tasks (2.3 and 4.3) it describes forcing a named tool with `tool_choice` on the first request and doing the later steps in follow-up turns, and using `any` to guarantee that a tool is called. *What works on current models (the \"Define tools\" page, checked 2026-10-03):* `any` and `tool` \"return a 400 error\" on Claude Opus 5.5, Claude Sonnet 5.5, Claude Fable 5.1 and Claude Mythos 5.1, and they are also not supported with manual extended thinking; the page names `auto` with strict tool use, or structured outputs, as what to use instead, and says that prompting still influences which tool `auto` picks. It shows forced use working on other models (it names Claude Opus 5 as supporting it, with adaptive thinking on). Where forcing works, it applies to the request that sets it, and \"changes to the `tool_choice` parameter will invalidate cached message blocks\", while tool definitions and system prompts remain cached. So the working design on current models is the gate in the loop, and a first call that must be a particular tool is made by code (the dispatcher refuses everything else until it has happened). On the exam, answer an ordering question with enforcement in code, and answer a question that asks how to make the first request call a named tool with the forced choice the guide describes. Where a schema in this course has a field whose data may be absent, it is optional and nullable so that the model is not pushed to invent a value (module 62); the input schemas of this module's tools have only required fields, since each value is always known at the call."
+        }
+      ]
+    },
+    {
+      "type": "para",
+      "text": "A common half-answer is to force the first tool with `tool_choice`, so that `verify_identity` always comes first. It fails twice. Where it is available, a forced choice works on the request that sets it: \"the API prefills the assistant message to force a tool to be used\". It says nothing about the checks that follow, so the model can still call the refund on turn three after a failed verification. And on the models of this course it is not available: forced tool use returns a 400 error on Claude Opus 5.5, Claude Sonnet 5.5, Claude Fable 5.1 and Claude Mythos 5.1 (module 26). The documentation's alternative for a guaranteed call is `auto` with strict tool use for a valid input, which guarantees the shape of the call and not its place in a sequence. An order between steps is a property of the program that runs them."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "para",
+      "text": "The example runs the same scripted model through two loops. The model is scripted to skip identity verification: its first call is `process_refund`. The system prompt asks for verification first in both runs. In the first run the loop trusts the prompt and runs whatever is asked. In the second, the dispatcher is the gate above."
+    },
+    {
+      "type": "example",
+      "id": "m48-identity-gate",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/48-identity-gate/python/identity_gate.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/48-identity-gate/typescript/identityGate.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/48-identity-gate/java/IdentityGate.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/48-identity-gate/kotlin/IdentityGate.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"The same scripted model, which skips identity verification, run against a loop that trusts the prompt and a loop that enforces the prerequisite in code.\n\nThe replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures. The system prompt asks for\nverification first in both runs: what differs is whether the code that runs the tools checks it.\n\"\"\"\nfrom harness import scripted_client\nfrom harness.scripted import message, text, tool_use\nimport logging\n\nlog = logging.getLogger(__name__)\n\nMODEL = \"claude-sonnet-5-5\"\nSYSTEM = \"You are a support agent. Verify the customer's identity before any refund.\"\nTOOLS = [{\"name\": n, \"description\": d, \"input_schema\": {\"type\": \"object\", \"properties\": p, \"required\": list(p)}} for n, d, p in [\n    (\"verify_identity\", \"Check the customer's identity code. Use it before any order or refund action.\", {\"code\": {\"type\": \"string\"}}),\n    (\"lookup_order\", \"Look up one order of the verified customer.\", {\"order_id\": {\"type\": \"string\"}}),\n    (\"process_refund\", \"Refund an amount in cents on a looked-up order.\", {\"order_id\": {\"type\": \"string\"}, \"amount_cents\": {\"type\": \"integer\"}})]]\n\n\nclass Backend:\n    def __init__(self):\n        self.log, self.verified = [], False\n\n    def call(self, name, args):\n        self.log.append(name)\n        if name == \"verify_identity\":\n            self.verified = args[\"code\"] == \"1234\"\n            return \"verified=yes\" if self.verified else \"verified=no\"\n        return {\"lookup_order\": \"order_id=O1; total_cents=5000\", \"process_refund\": \"refund_id=R1\"}[name]\n\n\ndef gate(backend, name, args):\n    \"\"\"The prerequisite, in code: nothing but verification runs before the customer is verified.\"\"\"\n    if name != \"verify_identity\" and not backend.verified:\n        return \"BLOCKED identity_required: Verify the customer's identity before this action.\", True\n    return backend.call(name, args), False\n\n\ndef run(client, backend, gated):\n    messages = [{\"role\": \"user\", \"content\": \"Please refund 20.00 on order O1. My code is 1234.\"}]\n    results = []\n    while True:\n        reply = client.messages.create(model=MODEL, max_tokens=500, system=SYSTEM, tools=TOOLS, messages=messages)\n        messages.append({\"role\": \"assistant\", \"content\": reply.content})\n        if reply.stop_reason != \"tool_use\":\n            return results\n        out = []\n        for block in reply.content:\n            if block.type == \"tool_use\":\n                content, is_error = gate(backend, block.name, block.input) if gated else (backend.call(block.name, block.input), False)\n                results.append((block.name, content, is_error))\n                out.append({\"type\": \"tool_result\", \"tool_use_id\": block.id, \"content\": content, **({\"is_error\": True} if is_error else {})})\n        messages.append({\"role\": \"user\", \"content\": out})\n\n\ndef replies(gated):\n    first = message([text(\"Refunding now.\"), tool_use(\"toolu_01\", \"process_refund\", order_id=\"O1\", amount_cents=2000)], stop_reason=\"tool_use\", model=MODEL)\n    if not gated:\n        return [first, message([text(\"Refund issued.\")], model=MODEL)]\n    return [first,\n            message([tool_use(\"toolu_02\", \"verify_identity\", code=\"1234\")], stop_reason=\"tool_use\", model=MODEL),\n            message([tool_use(\"toolu_03\", \"lookup_order\", order_id=\"O1\")], stop_reason=\"tool_use\", model=MODEL),\n            message([tool_use(\"toolu_04\", \"process_refund\", order_id=\"O1\", amount_cents=2000)], stop_reason=\"tool_use\", model=MODEL),\n            message([text(\"Refund issued after verification.\")], model=MODEL)]\n\n\ndef main():\n    print(\"system prompt in both runs:\", SYSTEM)\n    for label, gated in ((\"prompt only\", False), (\"code gate  \", True)):\n        client, transport = scripted_client(*replies(gated))\n        backend = Backend()\n        results = run(client, backend, gated)\n        before = backend.log.index(\"process_refund\") < backend.log.index(\"verify_identity\") if \"verify_identity\" in backend.log else \"process_refund\" in backend.log\n        print(f\"{label}: backend calls = {backend.log}; refund before verification: {before}\")\n        if gated:\n            print(f\"{label}: first result sent back to the model: {results[0][1]} (is_error={results[0][2]})\")\n        assert all(r[\"system\"] == SYSTEM for r in transport.requests)\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "system prompt in both runs: You are a support agent. Verify the customer's identity before any refund.\nprompt only: backend calls = ['process_refund']; refund before verification: True\ncode gate  : backend calls = ['verify_identity', 'lookup_order', 'process_refund']; refund before verification: False\ncode gate  : first result sent back to the model: BLOCKED identity_required: Verify the customer's identity before this action. (is_error=True)"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// The same scripted model, which skips identity verification, run against a loop that trusts the prompt and a loop that enforces the prerequisite in code.\n//\n// The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures. The system prompt asks for\n// verification first in both runs: what differs is whether the code that runs the tools checks it.\nimport Anthropic from \"@anthropic-ai/sdk\";\nimport { message, scriptedFetch, text } from \"../../../harness/ts/scriptedFetch.ts\";\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"identity_gate\");\n\nexport const MODEL = \"claude-sonnet-5-5\";\nexport const SYSTEM = \"You are a support agent. Verify the customer's identity before any refund.\";\nconst def = (name: string, description: string, properties: Record<string, unknown>): Anthropic.Tool =>\n  ({ name, description, input_schema: { type: \"object\", properties, required: Object.keys(properties) } });\nconst TOOLS: Anthropic.Tool[] = [\n  def(\"verify_identity\", \"Check the customer's identity code. Use it before any order or refund action.\", { code: { type: \"string\" } }),\n  def(\"lookup_order\", \"Look up one order of the verified customer.\", { order_id: { type: \"string\" } }),\n  def(\"process_refund\", \"Refund an amount in cents on a looked-up order.\", { order_id: { type: \"string\" }, amount_cents: { type: \"integer\" } }),\n];\n\nexport class Backend {\n  log: string[] = [];\n  verified = false;\n\n  call(name: string, args: any): string {\n    this.log.push(name);\n    if (name === \"verify_identity\") {\n      this.verified = args.code === \"1234\";\n      return this.verified ? \"verified=yes\" : \"verified=no\";\n    }\n    return ({ lookup_order: \"order_id=O1; total_cents=5000\", process_refund: \"refund_id=R1\" } as Record<string, string>)[name];\n  }\n}\n\n/** The prerequisite, in code: nothing but verification runs before the customer is verified. */\nexport function gate(backend: Backend, name: string, args: any): [string, boolean] {\n  if (name !== \"verify_identity\" && !backend.verified) return [\"BLOCKED identity_required: Verify the customer's identity before this action.\", true];\n  return [backend.call(name, args), false];\n}\n\nexport async function run(client: Anthropic, backend: Backend, gated: boolean) {\n  const messages: Anthropic.MessageParam[] = [{ role: \"user\", content: \"Please refund 20.00 on order O1. My code is 1234.\" }];\n  const results: Array<[string, string, boolean]> = [];\n  for (;;) {\n    const reply = await client.messages.create({ model: MODEL, max_tokens: 500, system: SYSTEM, tools: TOOLS, messages });\n    messages.push({ role: \"assistant\", content: reply.content });\n    if (reply.stop_reason !== \"tool_use\") return results;\n    const out: Anthropic.ToolResultBlockParam[] = [];\n    for (const block of reply.content) {\n      if (block.type === \"tool_use\") {\n        const [content, isError] = gated ? gate(backend, block.name, block.input) : [backend.call(block.name, block.input), false] as [string, boolean];\n        results.push([block.name, content, isError]);\n        out.push({ type: \"tool_result\", tool_use_id: block.id, content, ...(isError ? { is_error: true } : {}) });\n      }\n    }\n    messages.push({ role: \"user\", content: out });\n  }\n}\n\nconst usage = { input_tokens: 1, output_tokens: 1 };\nconst call = (id: string, name: string, input: Record<string, unknown>) => ({ type: \"tool_use\", id, name, input });\nexport function replies(gated: boolean) {\n  const first = { body: message([text(\"Refunding now.\"), call(\"toolu_01\", \"process_refund\", { order_id: \"O1\", amount_cents: 2000 })], \"tool_use\", usage, MODEL) };\n  if (!gated) return [first, { body: message([text(\"Refund issued.\")], \"end_turn\", usage, MODEL) }];\n  return [first,\n    { body: message([call(\"toolu_02\", \"verify_identity\", { code: \"1234\" })], \"tool_use\", usage, MODEL) },\n    { body: message([call(\"toolu_03\", \"lookup_order\", { order_id: \"O1\" })], \"tool_use\", usage, MODEL) },\n    { body: message([call(\"toolu_04\", \"process_refund\", { order_id: \"O1\", amount_cents: 2000 })], \"tool_use\", usage, MODEL) },\n    { body: message([text(\"Refund issued after verification.\")], \"end_turn\", usage, MODEL) }];\n}\n\nexport function clientFor(script: Array<Record<string, unknown>>) {\n  const fake = scriptedFetch(script as any);\n  return { fake, client: new Anthropic({ apiKey: \"placeholder\", maxRetries: 0, fetch: fake.fetch }) };\n}\n\nconst py = (b: boolean) => (b ? \"True\" : \"False\");\nconst pyList = (items: string[]) => `[${items.map((s) => `'${s}'`).join(\", \")}]`;\n\nasync function main() {\n  console.log(\"system prompt in both runs:\", SYSTEM);\n  for (const [label, gated] of [[\"prompt only\", false], [\"code gate  \", true]] as const) {\n    const { fake, client } = clientFor(replies(gated));\n    const backend = new Backend();\n    const results = await run(client, backend, gated);\n    const at = backend.log.indexOf(\"verify_identity\");\n    const before = at >= 0 ? backend.log.indexOf(\"process_refund\") < at : backend.log.includes(\"process_refund\");\n    console.log(`${label}: backend calls = ${pyList(backend.log)}; refund before verification: ${py(before)}`);\n    if (gated) console.log(`${label}: first result sent back to the model: ${results[0][1]} (is_error=${py(results[0][2])})`);\n    assert(fake.seen.every((r) => r.body.system === SYSTEM));\n  }\n}\n\nfunction assert(condition: boolean) {\n  if (!condition) throw new Error(\"the system prompt differed between requests\");\n}\n\nif (import.meta.main) await main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "system prompt in both runs: You are a support agent. Verify the customer's identity before any refund.\nprompt only: backend calls = ['process_refund']; refund before verification: True\ncode gate  : backend calls = ['verify_identity', 'lookup_order', 'process_refund']; refund before verification: False\ncode gate  : first result sent back to the model: BLOCKED identity_required: Verify the customer's identity before this action. (is_error=True)"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import static harness.Scripted.map;\nimport static harness.Scripted.message;\nimport static harness.Scripted.text;\nimport static harness.Scripted.toolUse;\nimport static harness.Show.py;\n\nimport com.anthropic.client.AnthropicClient;\nimport com.anthropic.core.JsonValue;\nimport com.anthropic.core.ObjectMappers;\nimport com.anthropic.models.messages.ContentBlock;\nimport com.anthropic.models.messages.ContentBlockParam;\nimport com.anthropic.models.messages.Message;\nimport com.anthropic.models.messages.MessageCreateParams;\nimport com.anthropic.models.messages.MessageParam;\nimport com.anthropic.models.messages.Model;\nimport com.anthropic.models.messages.Tool;\nimport com.anthropic.models.messages.ToolResultBlockParam;\nimport harness.Scripted;\nimport java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/**\n * The same scripted model, which skips identity verification, run against a loop that trusts the prompt and a loop that enforces the prerequisite in code.\n *\n * <p>The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures. The system prompt asks for\n * verification first in both runs: what differs is whether the code that runs the tools checks it.\n */\npublic final class IdentityGate {\n    private static final System.Logger LOG = System.getLogger(IdentityGate.class.getName());\n    static final String MODEL = \"claude-sonnet-5-5\";\n    static final String SYSTEM = \"You are a support agent. Verify the customer's identity before any refund.\";\n\n    static Tool tool(String name, String description, Map<String, Object> properties) {\n        return Tool.builder().name(name).description(description)\n            .inputSchema(Tool.InputSchema.builder().properties(JsonValue.from(properties)).required(new ArrayList<>(properties.keySet())).build()).build();\n    }\n\n    static final List<Tool> TOOLS = List.of(\n        tool(\"verify_identity\", \"Check the customer's identity code. Use it before any order or refund action.\", map(\"code\", map(\"type\", \"string\"))),\n        tool(\"lookup_order\", \"Look up one order of the verified customer.\", map(\"order_id\", map(\"type\", \"string\"))),\n        tool(\"process_refund\", \"Refund an amount in cents on a looked-up order.\", map(\"order_id\", map(\"type\", \"string\"), \"amount_cents\", map(\"type\", \"integer\"))));\n\n    static final class Backend {\n        final List<String> log = new ArrayList<>();\n        boolean verified = false;\n\n        String call(String name, Map<String, Object> args) {\n            log.add(name);\n            return switch (name) {\n                case \"verify_identity\" -> {\n                    verified = \"1234\".equals(args.get(\"code\"));\n                    yield verified ? \"verified=yes\" : \"verified=no\";\n                }\n                case \"lookup_order\" -> \"order_id=O1; total_cents=5000\";\n                case \"process_refund\" -> \"refund_id=R1\";\n                default -> throw new IllegalArgumentException(name);\n            };\n        }\n    }\n\n    /** What one tool call returned and whether it is an error. */\n    record Result(String name, String content, boolean isError) {}\n\n    /** The prerequisite, in code: nothing but verification runs before the customer is verified. */\n    static Result gate(Backend backend, String name, Map<String, Object> args) {\n        if (!name.equals(\"verify_identity\") && !backend.verified) {\n            return new Result(name, \"BLOCKED identity_required: Verify the customer's identity before this action.\", true);\n        }\n        return new Result(name, backend.call(name, args), false);\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static List<Result> run(AnthropicClient client, Backend backend, boolean gated) {\n        List<MessageParam> messages = new ArrayList<>();\n        messages.add(MessageParam.builder().role(MessageParam.Role.USER).content(\"Please refund 20.00 on order O1. My code is 1234.\").build());\n        List<Result> results = new ArrayList<>();\n        while (true) {\n            MessageCreateParams.Builder request = MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(500).system(SYSTEM).messages(messages);\n            TOOLS.forEach(request::addTool);\n            Message reply = client.messages().create(request.build());\n            messages.add(reply.toParam());\n            if (!reply.stopReason().get().asString().equals(\"tool_use\")) return results;\n            List<ContentBlockParam> out = new ArrayList<>();\n            for (ContentBlock block : reply.content()) {\n                if (!block.isToolUse()) continue;\n                var use = block.asToolUse();\n                Map<String, Object> args = ObjectMappers.jsonMapper().convertValue(use._input(), Map.class);\n                Result r = gated ? gate(backend, use.name(), args) : new Result(use.name(), backend.call(use.name(), args), false);\n                results.add(r);\n                ToolResultBlockParam.Builder b = ToolResultBlockParam.builder().toolUseId(use.id()).content(r.content());\n                if (r.isError()) b.isError(true);\n                out.add(ContentBlockParam.ofToolResult(b.build()));\n            }\n            messages.add(MessageParam.builder().role(MessageParam.Role.USER).contentOfBlockParams(out).build());\n        }\n    }\n\n    static Object[] replies(boolean gated) {\n        Map<String, Object> first = message(List.of(text(\"Refunding now.\"), toolUse(\"toolu_01\", \"process_refund\", map(\"order_id\", \"O1\", \"amount_cents\", 2000))), \"tool_use\");\n        if (!gated) return new Object[] {first, message(List.of(text(\"Refund issued.\")))};\n        return new Object[] {first,\n            message(List.of(toolUse(\"toolu_02\", \"verify_identity\", map(\"code\", \"1234\"))), \"tool_use\"),\n            message(List.of(toolUse(\"toolu_03\", \"lookup_order\", map(\"order_id\", \"O1\"))), \"tool_use\"),\n            message(List.of(toolUse(\"toolu_04\", \"process_refund\", map(\"order_id\", \"O1\", \"amount_cents\", 2000))), \"tool_use\"),\n            message(List.of(text(\"Refund issued after verification.\")))};\n    }\n\n    public static void main(String[] args) {\n        System.out.println(\"system prompt in both runs: \" + SYSTEM);\n        for (Object[] mode : new Object[][] {{\"prompt only\", false}, {\"code gate  \", true}}) {\n            String label = (String) mode[0];\n            boolean gated = (Boolean) mode[1];\n            Scripted.Rig rig = Scripted.client(replies(gated));\n            Backend backend = new Backend();\n            List<Result> results = run(rig.client(), backend, gated);\n            boolean before = backend.log.contains(\"verify_identity\")\n                ? backend.log.indexOf(\"process_refund\") < backend.log.indexOf(\"verify_identity\") : backend.log.contains(\"process_refund\");\n            System.out.println(label + \": backend calls = \" + py(backend.log) + \"; refund before verification: \" + py(before));\n            if (gated) System.out.println(label + \": first result sent back to the model: \" + results.get(0).content() + \" (is_error=\" + py(results.get(0).isError()) + \")\");\n            for (var r : rig.http().requests) if (!r.get(\"system\").asText().equals(SYSTEM)) throw new AssertionError(\"system prompt changed\");\n        }\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "system prompt in both runs: You are a support agent. Verify the customer's identity before any refund.\nprompt only: backend calls = ['process_refund']; refund before verification: True\ncode gate  : backend calls = ['verify_identity', 'lookup_order', 'process_refund']; refund before verification: False\ncode gate  : first result sent back to the model: BLOCKED identity_required: Verify the customer's identity before this action. (is_error=True)"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import com.anthropic.client.AnthropicClient\nimport com.anthropic.core.JsonValue\nimport com.anthropic.core.jsonMapper\nimport com.anthropic.models.messages.ContentBlockParam\nimport com.anthropic.models.messages.MessageCreateParams\nimport com.anthropic.models.messages.MessageParam\nimport com.anthropic.models.messages.Model\nimport com.anthropic.models.messages.Tool\nimport com.anthropic.models.messages.ToolResultBlockParam\nimport harness.Scripted\nimport harness.Scripted.map\nimport harness.Scripted.message\nimport harness.Scripted.text\nimport harness.Scripted.toolUse\nimport harness.Show.py\n\nprivate val log = System.getLogger(\"identity_gate\")\n\n/**\n * The same scripted model, which skips identity verification, run against a loop that trusts the prompt and a loop that enforces the prerequisite in code.\n *\n * The replies are illustrative, hand-written bodies in the shape of the Messages API (claude-sonnet-5-5), not captures. The system prompt asks for\n * verification first in both runs: what differs is whether the code that runs the tools checks it.\n */\nconst val MODEL = \"claude-sonnet-5-5\"\nconst val SYSTEM = \"You are a support agent. Verify the customer's identity before any refund.\"\n\nfun tool(name: String, description: String, properties: Map<String, Any>): Tool = Tool.builder().name(name).description(description)\n    .inputSchema(Tool.InputSchema.builder().properties(JsonValue.from(properties)).required(properties.keys.toList()).build()).build()\n\nval TOOLS = listOf(\n    tool(\"verify_identity\", \"Check the customer's identity code. Use it before any order or refund action.\", map(\"code\", map(\"type\", \"string\"))),\n    tool(\"lookup_order\", \"Look up one order of the verified customer.\", map(\"order_id\", map(\"type\", \"string\"))),\n    tool(\"process_refund\", \"Refund an amount in cents on a looked-up order.\", map(\"order_id\", map(\"type\", \"string\"), \"amount_cents\", map(\"type\", \"integer\"))),\n)\n\nclass Backend {\n    val log = mutableListOf<String>()\n    var verified = false\n\n    fun call(name: String, args: Map<*, *>): String {\n        log += name\n        return when (name) {\n            \"verify_identity\" -> {\n                verified = args[\"code\"] == \"1234\"\n                if (verified) \"verified=yes\" else \"verified=no\"\n            }\n            \"lookup_order\" -> \"order_id=O1; total_cents=5000\"\n            \"process_refund\" -> \"refund_id=R1\"\n            else -> throw IllegalArgumentException(name)\n        }\n    }\n}\n\n/** What one tool call returned and whether it is an error. */\ndata class Result(val name: String, val content: String, val isError: Boolean)\n\n/** The prerequisite, in code: nothing but verification runs before the customer is verified. */\nfun gate(backend: Backend, name: String, args: Map<*, *>): Result {\n    if (name != \"verify_identity\" && !backend.verified) return Result(name, \"BLOCKED identity_required: Verify the customer's identity before this action.\", true)\n    return Result(name, backend.call(name, args), false)\n}\n\nfun run(client: AnthropicClient, backend: Backend, gated: Boolean): List<Result> {\n    val messages = mutableListOf(MessageParam.builder().role(MessageParam.Role.USER).content(\"Please refund 20.00 on order O1. My code is 1234.\").build())\n    val results = mutableListOf<Result>()\n    while (true) {\n        val request = MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(500).system(SYSTEM).messages(messages.toList()).apply { TOOLS.forEach { addTool(it) } }\n        val reply = client.messages().create(request.build())\n        messages += reply.toParam()\n        if (reply.stopReason().get().asString() != \"tool_use\") return results\n        val out = reply.content().filter { it.isToolUse() }.map { block ->\n            val use = block.asToolUse()\n            val args = jsonMapper().convertValue(use._input(), Map::class.java)\n            val r = if (gated) gate(backend, use.name(), args) else Result(use.name(), backend.call(use.name(), args), false)\n            results += r\n            val b = ToolResultBlockParam.builder().toolUseId(use.id()).content(r.content)\n            if (r.isError) b.isError(true)\n            ContentBlockParam.ofToolResult(b.build())\n        }\n        messages += MessageParam.builder().role(MessageParam.Role.USER).contentOfBlockParams(out).build()\n    }\n}\n\nfun replies(gated: Boolean): Array<Any> {\n    val first = message(listOf(text(\"Refunding now.\"), toolUse(\"toolu_01\", \"process_refund\", map(\"order_id\", \"O1\", \"amount_cents\", 2000))), \"tool_use\")\n    if (!gated) return arrayOf(first, message(listOf(text(\"Refund issued.\"))))\n    return arrayOf(\n        first,\n        message(listOf(toolUse(\"toolu_02\", \"verify_identity\", map(\"code\", \"1234\"))), \"tool_use\"),\n        message(listOf(toolUse(\"toolu_03\", \"lookup_order\", map(\"order_id\", \"O1\"))), \"tool_use\"),\n        message(listOf(toolUse(\"toolu_04\", \"process_refund\", map(\"order_id\", \"O1\", \"amount_cents\", 2000))), \"tool_use\"),\n        message(listOf(text(\"Refund issued after verification.\"))),\n    )\n}\n\nfun main() {\n    println(\"system prompt in both runs: $SYSTEM\")\n    for ((label, gated) in listOf(\"prompt only\" to false, \"code gate  \" to true)) {\n        val rig = Scripted.client(*replies(gated))\n        val backend = Backend()\n        val results = run(rig.client(), backend, gated)\n        val before = if (\"verify_identity\" in backend.log) backend.log.indexOf(\"process_refund\") < backend.log.indexOf(\"verify_identity\") else \"process_refund\" in backend.log\n        println(\"$label: backend calls = ${py(backend.log)}; refund before verification: ${py(before)}\")\n        if (gated) println(\"$label: first result sent back to the model: ${results[0].content} (is_error=${py(results[0].isError)})\")\n        check(rig.http().requests.all { it[\"system\"].asText() == SYSTEM })\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "system prompt in both runs: You are a support agent. Verify the customer's identity before any refund.\nprompt only: backend calls = ['process_refund']; refund before verification: True\ncode gate  : backend calls = ['verify_identity', 'lookup_order', 'process_refund']; refund before verification: False\ncode gate  : first result sent back to the model: BLOCKED identity_required: Verify the customer's identity before this action. (is_error=True)"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The first loop ran the refund as its only backend call: the money moved before anyone was verified, and the prompt, which both runs carried, did nothing. In the second run the refund never reached the backend. The first result the model got back was the refusal, flagged as an error and naming the missing step, and the model's next three calls were the verification, the lookup and the refund, in the right order. All four languages print the same lines."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "para",
+      "text": "These are the wrong answers that the exam's options for this task statement offer, each with the reason it is rejected."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**\"Add ALWAYS verify identity first to the system prompt.\"** It is tempting because it is the cheapest change. The exam rejects it: the sentence lowers the rate of the skip and does not make it zero, and the step cannot be undone. The rule belongs in the code that runs the tools.",
+        "**\"Trust the model's report that the customer was verified.\"** It is tempting because the model says so in plain words. The exam rejects it: \"I have verified the customer\" is text. The gate keeps the fact itself, set only by a successful verification call, and clears it on a failure.",
+        "**\"Refuse the call with a bare error.\"** It is tempting because the call is stopped either way. The exam rejects it: a bare error or an empty result sends the model guessing. Return a flagged result with the missing step in it.",
+        "**\"Force the verification tool with tool_choice, and the order is guaranteed.\"** It is tempting because it sounds like enforcement. The exam keys programmatic gating for ordering (task 1.4), and a forced choice applies only to the request that sets it, so later calls are free. On current models it is also refused with a 400 error."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A gate in a support agent's dispatcher refuses a refund because no identity has been verified. What should the dispatcher send back to the model?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: A flagged failure result that names the missing step",
+              "**b**: Nothing, leaving the call unanswered",
+              "**c**: A generic error that says only that the call failed",
+              "**d**: The refund's result after running the verification itself"
+            ]
+          }
+        ],
+        [
+          "On a model that supports forced tool use, a team forces the verification tool through tool_choice on the first request, believing the order of steps is now guaranteed. Which gap remains?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Later tools can stay blocked until verification returns a result",
+              "**b**: Text written before the call changes the order in which the tools run",
+              "**c**: Later turns are unconstrained, so a refund can still follow a failed check",
+              "**d**: The forced choice discards the cached tool definitions and system prompt"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**a**. Every call needs an answer, and an error that names the missing step lets the model do it and try again. *b* is ruled out because the API requires a result: \"Tool result blocks must immediately follow their corresponding tool use blocks in the message history.\" *c* is ruled out because the documentation's advice is to \"include what went wrong and what Claude should try next\". *d* is ruled out because the model must obtain the code from the customer: \"the gate refuses and says what is missing\".",
+            "**c**. A forced choice applies to the request that sets it, and nothing carries it to later calls. *b* is ruled out because the model writes no text before a forced call: \"the API prefills the assistant message to force a tool to be used\". *a* is ruled out because keeping later tools blocked until verification returns is what a gate does, not what a forced choice does: \"An order between steps is a property of the program that runs them.\" *d* is ruled out because the page says that a changed `tool_choice` invalidates \"cached message blocks\", \"while tool definitions and system prompts remain cached\"."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 11,
+    "paras": 17,
+    "code": 0,
+    "tables": 2,
+    "lists": 4,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 1,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "677ef6e88ff61e89886c88c2da00732fe4164b9a8e28e9e255031fed65b37b01"
+}

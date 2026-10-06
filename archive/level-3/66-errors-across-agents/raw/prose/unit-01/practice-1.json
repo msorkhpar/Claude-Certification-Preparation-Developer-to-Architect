@@ -1,0 +1,121 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "66-errors-across-agents"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Where a failure is handled, and what travels up",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "Scenario S3, multi-agent research system. A web-search subagent's service call times out now and then. Each time, the subagent reports a failure to the coordinator, which delegates the whole task again. Runs are slow, and the coordinator's context fills with repeated failure reports. What should change?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Let the coordinator make every retry itself, since only it sees the whole picture of the run",
+            "correct": false,
+            "says": "Ruled out because passing failures up has the cost that \"the coordinator's context fills with failure reports\" and the decision is made \"without the subagent's detail\"."
+          },
+          {
+            "id": "b",
+            "text": "Let the worker retry the transient fault itself, passing up only what it cannot resolve",
+            "correct": true,
+            "says": "The subagent holds the query and the work done, so it retries what is transient and reports only what survives."
+          },
+          {
+            "id": "c",
+            "text": "Raise the subagent's timeout far enough that a failure can no longer occur",
+            "correct": false,
+            "says": "Ruled out because a timeout is the example of a \"transient failure\", which is retried \"a bounded number of times\" and not designed away."
+          },
+          {
+            "id": "d",
+            "text": "Stop retrying anywhere, so that the user decides about each failure",
+            "correct": false,
+            "says": "Ruled out because it would hand the user each transient failure, when \"a transient failure, a timeout or a brief outage, is the subagent's to retry\"."
+          }
+        ],
+        "origin": {
+          "path": "course/66-errors-across-agents/01-where-a-failure-is-handled-and-what-travels-up.md",
+          "section": "Handle a failure at the lowest layer that can fix it"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "Scenario S3, multi-agent research system. A document-analysis subagent opens forty files, fails to open two, and ends with the sentence \"Analysis finished.\" The coordinator's report then claims complete coverage. Which change fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Have the coordinator read the subagent's tool calls afterwards to find the files that failed",
+            "correct": false,
+            "says": "Ruled out because \"intermediate tool calls and results stay inside the subagent; only its final message returns to the parent\"."
+          },
+          {
+            "id": "b",
+            "text": "Raise the coordinator's turn limit so that it can inspect more of the run",
+            "correct": false,
+            "says": "Ruled out because the coordinator has nothing more to inspect: \"Everything the subagent did in between\" stays inside it."
+          },
+          {
+            "id": "c",
+            "text": "Instruct the worker to close with a structured account of what it read and missed",
+            "correct": true,
+            "says": "Only the final message reaches the parent, so the structure has to be requested there."
+          },
+          {
+            "id": "d",
+            "text": "Run the subagent twice and compare its two final sentences against each other",
+            "correct": false,
+            "says": "Ruled out because two runs of the same instruction return the same kind of sentence, and \"the structure has to be asked for in the subagent's instructions\"."
+          }
+        ],
+        "origin": {
+          "path": "course/66-errors-across-agents/01-where-a-failure-is-handled-and-what-travels-up.md",
+          "section": "Where a failure is handled, and what travels up"
+        }
+      }
+    ],
+    "concepts": [
+      "Handle a failure at the lowest layer that can fix it, as the page teaches it",
+      "Where a failure is handled, and what travels up, as the page teaches it"
+    ]
+  }
+}

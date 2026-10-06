@@ -1,0 +1,321 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "33-mcp-advanced"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: an MCP server's side of a multi round-trip request (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an MCP server's side of a multi round-trip request"
+    },
+    {
+      "type": "para",
+      "text": "In the MCP revision of 2026-07-28 a server no longer calls the client in the middle of a request. When a tool needs a person's answer or a model completion, it ends the call with an `input_required` result that lists what it needs, and the client retries the same call with the answers. The server keeps nothing between the two calls, so whatever it needs to remember travels in an opaque `requestState` that the client echoes back. That state crosses a client the server does not trust, so it must be signed, bound to the user and the call, and given an expiry. Write the tool handler that does this. The message shapes, the rules for `requestState`, the error codes and the capability checks come from the MCP specification of revision 2026-07-28 (the multi round-trip requests, tools, elicitation and sampling pages), read on 2026-10-03; the lesson pages explain them. Nothing here uses a network or an MCP SDK: the handler is a function from the parameters of a request to the result, which is what the SDKs call underneath."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "request",
+          "the parameters of a `tools/call`: `{\"name\", \"arguments\", \"_meta\", optionally \"inputResponses\" and \"requestState\"}`; `_meta` holds the protocol version under `io.modelcontextprotocol/protocolVersion` and the capabilities the client declares under `io.modelcontextprotocol/clientCapabilities`"
+        ],
+        [
+          "`TOOLS`, `VERSION`, `TTL_SECONDS`",
+          "the two tool definitions (`deploy` and `status`), the one protocol version served, and the lifetime of a state: 300 seconds"
+        ],
+        [
+          "`mint_state(secret, payload)`",
+          "a `requestState` for the payload, signed with the secret"
+        ],
+        [
+          "`read_state(secret, token)`",
+          "the payload of a `requestState`, or nothing when it is not one this secret signed (changed, cut short, signed by another secret, or not a state at all)"
+        ],
+        [
+          "`args_digest(arguments)`",
+          "a fingerprint of the arguments, the same in any key order"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working handler with eight gaps cut out of it. Everything that is plumbing is written and correct: the state signing (`mint_state`, `read_state`, `args_digest`), the error and result builders, the two request messages, the version check, and the order in which `call_tool` runs its steps. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. Debug a gap by logging its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the Java, Kotlin and TypeScript names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_validate` unlocks `e6`: the protocol error for an unknown tool, a missing service or a bad env.",
+        "`_can_elicit` unlocks `e2`: which declared capabilities mean the client can be asked.",
+        "`_confirm_usable` unlocks `m1` and `e3`: which answers count as an answer to the question.",
+        "`_confirmed` unlocks `e3`: only an accept with `confirm` exactly true goes on.",
+        "`_notes_text` unlocks `m1`: the sentence the client wrote for the release notes.",
+        "`_state_error` unlocks `e4` and `e5`: the three checks on a returned state, in order.",
+        "`_new_state` unlocks `e7`: the payload that carries the whole context.",
+        "`_tool_listing` unlocks `e1`: the cacheable tool list."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole handler; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`list_tools(request)`: a request whose version is not `VERSION` is a protocol error (below). Otherwise `{\"resultType\": \"complete\", \"tools\": TOOLS sorted by name, \"ttlMs\": 300000, \"cacheScope\": \"public\"}`.",
+        [
+          "`call_tool(request, secret, principal, now)` where `principal` is the authenticated user and `now` is the time in seconds. It returns a result, or a protocol error `{\"error\": {\"code\", \"message\", optionally \"data\"}}`. Check in this order:",
+          {
+            "type": "list",
+            "ordered": true,
+            "items": [
+              "Version not `VERSION`: code `-32022`, message `Unsupported protocol version`, `data` `{\"supported\": [VERSION]}`.",
+              "A tool name other than `deploy` and `status`: `-32602`, `Unknown tool: NAME`.",
+              "`arguments.service` missing, not a string or only spaces: `-32602`, `Invalid params: service is required`. For `deploy`, an `env` that is not `staging` or `production`: `-32602`, `Invalid params: env must be staging or production`.",
+              "`status` completes with the text `SERVICE: running`. `deploy` to `staging` completes with `Deployed SERVICE to staging`. Both need no input from the client."
+            ]
+          },
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "A complete result is `{\"resultType\": \"complete\", \"content\": [{\"type\": \"text\", \"text\": ...}], \"isError\": false}`.",
+              "`deploy` to `production` needs a person's confirmation by elicitation. The client can be asked only when it declared an `elicitation` capability that is empty (which means form mode) or holds `form`; a capability with only `url`, or none, cannot be asked. Then the result is complete with `isError` true and the text `Deploying to production needs confirmation, and this client cannot be asked.` and nothing is requested.",
+              [
+                "Otherwise there are up to two steps, kept in the signed state, not in the server:",
+                {
+                  "type": "list",
+                  "ordered": false,
+                  "items": [
+                    "Step `confirm`: with no usable answer, return `{\"resultType\": \"input_required\", \"inputRequests\": {\"confirm\": ...}, \"requestState\": ...}`. The request is `{\"method\": \"elicitation/create\", \"params\": {\"mode\": \"form\", \"message\": \"Deploy SERVICE to production?\", \"requestedSchema\": {\"type\": \"object\", \"properties\": {\"confirm\": {\"type\": \"boolean\", \"title\": \"Confirm the deployment\"}}, \"required\": [\"confirm\"]}}}`. An answer is usable when `inputResponses.confirm` is an object whose `action` is `accept`, `decline` or `cancel`; anything else, or a missing answer, is asked again with a fresh state. Only `accept` with `content.confirm` exactly true goes on; every other usable answer completes with `Deployment cancelled` (and `isError` false). After a confirmation, a client that declared a `sampling` capability gets step `notes`; one that did not completes with `Deployed SERVICE to production`.",
+                    "Step `notes`: ask with `{\"notes\": {\"method\": \"sampling/createMessage\", \"params\": {\"messages\": [{\"role\": \"user\", \"content\": {\"type\": \"text\", \"text\": \"Write one sentence of release notes for SERVICE.\"}}], \"maxTokens\": 100}}}`. The answer is usable when `inputResponses.notes.content.text` is a string; the result is then `Deployed SERVICE to production. Release notes: TEXT`. An unusable or missing answer is asked again."
+                  ]
+                }
+              ],
+              "The state payload is `{\"v\": 1, \"tool\", \"digest\": args_digest(arguments), \"sub\": principal, \"exp\": now + TTL_SECONDS, \"step\"}`; `step` is the step that the next call must answer (`confirm` or `notes`).",
+              "A call with no `requestState` starts at step `confirm` and ignores any `inputResponses`: an answer alone never skips the question. A call with a `requestState` is checked in this order, with code `-32602`: a state that `read_state` does not accept: `Invalid requestState`; `now` later than `exp`: `Expired requestState`; a `sub`, `tool` or `digest` that differs from this call: `requestState does not match this request`. A valid state sets the step. Unknown keys in `inputResponses` are ignored."
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A production deploy takes three round trips and keeps no state"
+        ],
+        [
+          "`e1`",
+          "A staging deploy and a status call finish at once, and the tool list is cacheable"
+        ],
+        [
+          "`e2`",
+          "The server only asks what the client declared it can answer"
+        ],
+        [
+          "`e3`",
+          "A no or a missing answer is handled without an error"
+        ],
+        [
+          "`e4`",
+          "A state the server did not sign is refused"
+        ],
+        [
+          "`e5`",
+          "A state works only for the same user, the same call and before it expires"
+        ],
+        [
+          "`e6`",
+          "A request the server cannot serve is a protocol error with a code"
+        ],
+        [
+          "`e7`",
+          "The state carries the whole context, and an answer alone never skips a step"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"An MCP server's side of multi round-trip requests, with no state kept between calls. See ../../statement.md.\"\"\"\nimport base64\nimport hashlib\nimport hmac\nimport json\nimport logging\n\nlog = logging.getLogger(__name__)\n\nVERSION = \"2026-07-28\"\nMETA_VERSION = \"io.modelcontextprotocol/protocolVersion\"\nMETA_CAPS = \"io.modelcontextprotocol/clientCapabilities\"\nTTL_SECONDS = 300\n\nTOOLS = [\n    {\"name\": \"deploy\", \"description\": \"Deploy a service to an environment. Production needs a person's confirmation.\",\n     \"inputSchema\": {\"type\": \"object\", \"properties\": {\"service\": {\"type\": \"string\"}, \"env\": {\"type\": \"string\", \"enum\": [\"staging\", \"production\"]}}, \"required\": [\"service\", \"env\"]}},\n    {\"name\": \"status\", \"description\": \"Report whether a service is running.\",\n     \"inputSchema\": {\"type\": \"object\", \"properties\": {\"service\": {\"type\": \"string\"}}, \"required\": [\"service\"]}},\n]\n\n\ndef _b64(data):\n    return base64.urlsafe_b64encode(data).decode().rstrip(\"=\")\n\n\ndef _unb64(text):\n    return base64.urlsafe_b64decode(text + \"=\" * (-len(text) % 4))\n\n\ndef mint_state(secret, payload):\n    \"\"\"Given: a requestState for `payload`: its JSON, then a HMAC-SHA256 signature of it, both in base64url, joined by a dot.\"\"\"\n    body = _b64(json.dumps(payload, sort_keys=True, separators=(\",\", \":\")).encode())\n    return body + \".\" + _b64(hmac.new(secret.encode(), body.encode(), hashlib.sha256).digest())\n\n\ndef read_state(secret, token):\n    \"\"\"Given: the payload of a requestState, or None when it is not one this secret signed (tampered, truncated, foreign, garbage).\"\"\"\n    try:\n        body, sig = token.split(\".\")\n        if not hmac.compare_digest(_b64(hmac.new(secret.encode(), body.encode(), hashlib.sha256).digest()), sig):\n            return None\n        payload = json.loads(_unb64(body))\n    except Exception:  # noqa: BLE001\n        return None\n    return payload if isinstance(payload, dict) else None\n\n\ndef args_digest(arguments):\n    \"\"\"Given: a fingerprint of the call's arguments, the same for the same arguments in any key order.\"\"\"\n    return hashlib.sha256(json.dumps(arguments, sort_keys=True, separators=(\",\", \":\")).encode()).hexdigest()\n\n\ndef _error(code, message, data=None):\n    return {\"error\": {\"code\": code, \"message\": message, **({\"data\": data} if data else {})}}\n\n\ndef _meta_error(request):\n    version = (request.get(\"_meta\") or {}).get(META_VERSION)\n    if version != VERSION:\n        return _error(-32022, \"Unsupported protocol version\", {\"supported\": [VERSION]})\n    return None\n\n\ndef _tool_listing():\n    return {\"resultType\": \"complete\", \"tools\": sorted(TOOLS, key=lambda t: t[\"name\"]), \"ttlMs\": 300000, \"cacheScope\": \"public\"}\n\n\ndef list_tools(request):\n    return _meta_error(request) or _tool_listing()\n\n\ndef _complete(text, is_error=False):\n    return {\"resultType\": \"complete\", \"content\": [{\"type\": \"text\", \"text\": text}], \"isError\": is_error}\n\n\ndef _confirm_request(service):\n    return {\"confirm\": {\"method\": \"elicitation/create\", \"params\": {\"mode\": \"form\", \"message\": f\"Deploy {service} to production?\", \"requestedSchema\": {\n        \"type\": \"object\", \"properties\": {\"confirm\": {\"type\": \"boolean\", \"title\": \"Confirm the deployment\"}}, \"required\": [\"confirm\"]}}}}\n\n\ndef _notes_request(service):\n    return {\"notes\": {\"method\": \"sampling/createMessage\", \"params\": {\"messages\": [{\"role\": \"user\", \"content\": {\"type\": \"text\", \"text\": f\"Write one sentence of release notes for {service}.\"}}], \"maxTokens\": 100}}}\n\n\ndef _new_state(name, arguments, principal, now, step):\n    return {\"v\": 1, \"tool\": name, \"digest\": args_digest(arguments), \"sub\": principal, \"exp\": now + TTL_SECONDS, \"step\": step}\n\n\ndef _validate(name, arguments):\n    if name not in (\"deploy\", \"status\"):\n        return _error(-32602, f\"Unknown tool: {name}\")\n    service = arguments.get(\"service\")\n    if not isinstance(service, str) or not service.strip():\n        return _error(-32602, \"Invalid params: service is required\")\n    if name == \"deploy\" and arguments.get(\"env\") not in (\"staging\", \"production\"):\n        return _error(-32602, \"Invalid params: env must be staging or production\")\n    return None\n\n\ndef _can_elicit(caps):\n    elicitation = caps.get(\"elicitation\")\n    return elicitation is not None and (elicitation == {} or \"form\" in elicitation)\n\n\ndef _state_error(secret, token, principal, name, arguments, now):\n    state = read_state(secret, token)\n    if state is None:\n        return _error(-32602, \"Invalid requestState\")\n    if now > state.get(\"exp\", 0):\n        return _error(-32602, \"Expired requestState\")\n    if state.get(\"sub\") != principal or state.get(\"tool\") != name or state.get(\"digest\") != args_digest(arguments):\n        return _error(-32602, \"requestState does not match this request\")\n    return None\n\n\ndef _confirm_usable(answer):\n    return isinstance(answer, dict) and answer.get(\"action\") in (\"accept\", \"decline\", \"cancel\")\n\n\ndef _confirmed(answer):\n    return answer[\"action\"] == \"accept\" and (answer.get(\"content\") or {}).get(\"confirm\") is True\n\n\ndef _notes_text(answers):\n    notes = answers.get(\"notes\")\n    content = notes.get(\"content\") if isinstance(notes, dict) else None\n    return content[\"text\"] if isinstance(content, dict) and isinstance(content.get(\"text\"), str) else None\n\n\ndef _ask(requests, step, secret, name, arguments, principal, now):\n    state = _new_state(name, arguments, principal, now, step)\n    return {\"resultType\": \"input_required\", \"inputRequests\": requests, \"requestState\": mint_state(secret, state)}\n\n\ndef call_tool(request, secret, principal, now):\n    log.debug(\"call_tool input: %r\", request)\n    bad = _meta_error(request)\n    if bad:\n        return bad\n    name, arguments = request.get(\"name\"), request.get(\"arguments\") or {}\n    invalid = _validate(name, arguments)\n    if invalid:\n        return invalid\n    service = arguments[\"service\"]\n    if name == \"status\":\n        return _complete(f\"{service}: running\")\n    if arguments[\"env\"] == \"staging\":\n        return _complete(f\"Deployed {service} to staging\")\n    caps = (request.get(\"_meta\") or {}).get(META_CAPS) or {}\n    if not _can_elicit(caps):\n        return _complete(\"Deploying to production needs confirmation, and this client cannot be asked.\", True)\n    step = \"confirm\"\n    token = request.get(\"requestState\")\n    if token is not None:\n        invalid = _state_error(secret, token, principal, name, arguments, now)\n        if invalid:\n            return invalid\n        step = (read_state(secret, token) or {}).get(\"step\")\n    answers = request.get(\"inputResponses\") if token is not None else None\n    answers = answers if isinstance(answers, dict) else {}\n    if step == \"confirm\":\n        answer = answers.get(\"confirm\")\n        if not _confirm_usable(answer):\n            return _ask(_confirm_request(service), \"confirm\", secret, name, arguments, principal, now)\n        if not _confirmed(answer):\n            return _complete(\"Deployment cancelled\")\n        if \"sampling\" not in caps:\n            return _complete(f\"Deployed {service} to production\")\n        return _ask(_notes_request(service), \"notes\", secret, name, arguments, principal, now)\n    text = _notes_text(answers)\n    if text is None:\n        return _ask(_notes_request(service), \"notes\", secret, name, arguments, principal, now)\n    return _complete(f\"Deployed {service} to production. Release notes: {text}\")\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom mrtr import call_tool\n\nSECRET, NOW = \"s3cret\", 1000\nMETA = {\"io.modelcontextprotocol/protocolVersion\": \"2026-07-28\",\n        \"io.modelcontextprotocol/clientCapabilities\": {\"elicitation\": {}, \"sampling\": {}}}\n\n\ndef request(**extra):\n    return {\"name\": \"deploy\", \"arguments\": {\"service\": \"api\", \"env\": \"production\"}, \"_meta\": META, **extra}\n\n\n# Round trip 1: the server needs a person's confirmation, so it ends the call with input_required and a signed state.\nfirst = call_tool(request(), SECRET, \"alice\", NOW) or {}\nprint(\"first call:\", first.get(\"resultType\"), \"| asks for:\", list((first.get(\"inputRequests\") or {})))\nprint(\"state is a string:\", isinstance(first.get(\"requestState\"), str))\n\n# Round trip 2: the client retries the same call with the answer and echoes the state back.\nanswer = {\"confirm\": {\"action\": \"accept\", \"content\": {\"confirm\": True}}}\nsecond = call_tool(request(inputResponses=answer, requestState=first.get(\"requestState\")), SECRET, \"alice\", NOW + 10) or {}\nprint(\"second call:\", second.get(\"resultType\"), \"| asks for:\", list((second.get(\"inputRequests\") or {})))\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"An MCP server's side of multi round-trip requests, with no state kept between calls. See ../../statement.md.\"\"\"\nimport base64\nimport hashlib\nimport hmac\nimport json\nimport logging\n\nlog = logging.getLogger(__name__)\n\nVERSION = \"2026-07-28\"\nMETA_VERSION = \"io.modelcontextprotocol/protocolVersion\"\nMETA_CAPS = \"io.modelcontextprotocol/clientCapabilities\"\nTTL_SECONDS = 300\n\nTOOLS = [\n    {\"name\": \"deploy\", \"description\": \"Deploy a service to an environment. Production needs a person's confirmation.\",\n     \"inputSchema\": {\"type\": \"object\", \"properties\": {\"service\": {\"type\": \"string\"}, \"env\": {\"type\": \"string\", \"enum\": [\"staging\", \"production\"]}}, \"required\": [\"service\", \"env\"]}},\n    {\"name\": \"status\", \"description\": \"Report whether a service is running.\",\n     \"inputSchema\": {\"type\": \"object\", \"properties\": {\"service\": {\"type\": \"string\"}}, \"required\": [\"service\"]}},\n]\n\n\ndef _b64(data):\n    return base64.urlsafe_b64encode(data).decode().rstrip(\"=\")\n\n\ndef _unb64(text):\n    return base64.urlsafe_b64decode(text + \"=\" * (-len(text) % 4))\n\n\ndef mint_state(secret, payload):\n    \"\"\"Given: a requestState for `payload`: its JSON, then a HMAC-SHA256 signature of it, both in base64url, joined by a dot.\"\"\"\n    body = _b64(json.dumps(payload, sort_keys=True, separators=(\",\", \":\")).encode())\n    return body + \".\" + _b64(hmac.new(secret.encode(), body.encode(), hashlib.sha256).digest())\n\n\ndef read_state(secret, token):\n    \"\"\"Given: the payload of a requestState, or None when it is not one this secret signed (tampered, truncated, foreign, garbage).\"\"\"\n    try:\n        body, sig = token.split(\".\")\n        if not hmac.compare_digest(_b64(hmac.new(secret.encode(), body.encode(), hashlib.sha256).digest()), sig):\n            return None\n        payload = json.loads(_unb64(body))\n    except Exception:  # noqa: BLE001\n        return None\n    return payload if isinstance(payload, dict) else None\n\n\ndef args_digest(arguments):\n    \"\"\"Given: a fingerprint of the call's arguments, the same for the same arguments in any key order.\"\"\"\n    return hashlib.sha256(json.dumps(arguments, sort_keys=True, separators=(\",\", \":\")).encode()).hexdigest()\n\n\ndef _error(code, message, data=None):\n    return {\"error\": {\"code\": code, \"message\": message, **({\"data\": data} if data else {})}}\n\n\ndef _meta_error(request):\n    version = (request.get(\"_meta\") or {}).get(META_VERSION)\n    if version != VERSION:\n        return _error(-32022, \"Unsupported protocol version\", {\"supported\": [VERSION]})\n    return None\n\n\ndef _tool_listing():\n    \"\"\"TODO 1 of 8 (unlocks e1): the result of tools/list.\n\n    Receives nothing and returns the dict from the statement: resultType \"complete\", the TOOLS sorted by name, ttlMs 300000, cacheScope \"public\".\n    Example: _tool_listing()[\"tools\"][0][\"name\"] -> \"deploy\"\n    \"\"\"\n    return {}\n\n\ndef list_tools(request):\n    return _meta_error(request) or _tool_listing()\n\n\ndef _complete(text, is_error=False):\n    return {\"resultType\": \"complete\", \"content\": [{\"type\": \"text\", \"text\": text}], \"isError\": is_error}\n\n\ndef _confirm_request(service):\n    return {\"confirm\": {\"method\": \"elicitation/create\", \"params\": {\"mode\": \"form\", \"message\": f\"Deploy {service} to production?\", \"requestedSchema\": {\n        \"type\": \"object\", \"properties\": {\"confirm\": {\"type\": \"boolean\", \"title\": \"Confirm the deployment\"}}, \"required\": [\"confirm\"]}}}}\n\n\ndef _notes_request(service):\n    return {\"notes\": {\"method\": \"sampling/createMessage\", \"params\": {\"messages\": [{\"role\": \"user\", \"content\": {\"type\": \"text\", \"text\": f\"Write one sentence of release notes for {service}.\"}}], \"maxTokens\": 100}}}\n\n\ndef _new_state(name, arguments, principal, now, step):\n    \"\"\"TODO 2 of 8 (unlocks e7): the payload of a requestState.\n\n    Receives the tool name, the arguments, the user, the time in seconds and the step. Returns the dict from the statement: v, tool, digest, sub, exp, step.\n    Example: _new_state(\"deploy\", {\"service\": \"api\"}, \"alice\", 1000, \"confirm\")[\"exp\"] -> 1300\n    \"\"\"\n    return {}\n\n\ndef _validate(name, arguments):\n    \"\"\"TODO 3 of 8 (unlocks e6): the protocol error for a call that cannot be served, in the order of the statement.\n\n    Receives the tool name and the arguments. Returns `_error(-32602, ...)` for an unknown tool, a missing or blank service, or (for deploy) an env\n    that is not staging or production; None when the call is valid.\n    Example: _validate(\"deploy\", {\"service\": \"api\", \"env\": \"dev\"}) -> _error(-32602, \"Invalid params: env must be staging or production\")\n    \"\"\"\n    return None\n\n\ndef _can_elicit(caps):\n    \"\"\"TODO 4 of 8 (unlocks e2): can the client be asked for a confirmation?\n\n    Receives the client capabilities dict. Returns True when `elicitation` is present and is empty or holds `form`; False for none or only `url`.\n    Example: _can_elicit({\"elicitation\": {}}) -> True, _can_elicit({\"elicitation\": {\"url\": {}}}) -> False\n    \"\"\"\n    return False\n\n\ndef _state_error(secret, token, principal, name, arguments, now):\n    \"\"\"TODO 5 of 8 (unlocks e4 and e5): the error for a requestState that cannot be used.\n\n    Receives the secret, the token, the user, the tool name, the arguments and the time. Returns `_error(-32602, ...)` with `Invalid requestState`\n    (`read_state` gives None), `Expired requestState` (now after exp) or `requestState does not match this request` (sub, tool or digest differ), checked in\n    that order; None when the state is good.\n    Example: a state minted for \"alice\" and read for \"bob\" -> _error(-32602, \"requestState does not match this request\")\n    \"\"\"\n    return None\n\n\ndef _confirm_usable(answer):\n    \"\"\"TODO 6 of 8 (unlocks m1 and e3): is this an answer to the confirmation question?\n\n    Receives `inputResponses.confirm` (anything, or None). Returns True when it is a dict whose `action` is accept, decline or cancel.\n    Example: _confirm_usable({\"action\": \"decline\"}) -> True, _confirm_usable(\"yes\") -> False\n    \"\"\"\n    return False\n\n\ndef _confirmed(answer):\n    \"\"\"TODO 7 of 8 (unlocks e3): did the person accept?\n\n    Receives a usable answer. Returns True only for action `accept` with `content.confirm` exactly True.\n    Example: _confirmed({\"action\": \"accept\", \"content\": {\"confirm\": False}}) -> False\n    \"\"\"\n    return False\n\n\ndef _notes_text(answers):\n    \"\"\"TODO 8 of 8 (unlocks m1): the release notes the client wrote.\n\n    Receives the `inputResponses` dict. Returns `answers[\"notes\"][\"content\"][\"text\"]` when that is a string; None for anything else.\n    Example: _notes_text({\"notes\": {\"content\": {\"type\": \"text\", \"text\": \"Faster.\"}}}) -> \"Faster.\"\n    \"\"\"\n    return None\n\n\ndef _ask(requests, step, secret, name, arguments, principal, now):\n    state = _new_state(name, arguments, principal, now, step)\n    return {\"resultType\": \"input_required\", \"inputRequests\": requests, \"requestState\": mint_state(secret, state)}\n\n\ndef call_tool(request, secret, principal, now):\n    log.debug(\"call_tool input: %r\", request)\n    bad = _meta_error(request)\n    if bad:\n        return bad\n    name, arguments = request.get(\"name\"), request.get(\"arguments\") or {}\n    invalid = _validate(name, arguments)\n    if invalid:\n        return invalid\n    service = arguments[\"service\"]\n    if name == \"status\":\n        return _complete(f\"{service}: running\")\n    if arguments[\"env\"] == \"staging\":\n        return _complete(f\"Deployed {service} to staging\")\n    caps = (request.get(\"_meta\") or {}).get(META_CAPS) or {}\n    if not _can_elicit(caps):\n        return _complete(\"Deploying to production needs confirmation, and this client cannot be asked.\", True)\n    step = \"confirm\"\n    token = request.get(\"requestState\")\n    if token is not None:\n        invalid = _state_error(secret, token, principal, name, arguments, now)\n        if invalid:\n            return invalid\n        step = (read_state(secret, token) or {}).get(\"step\")\n    answers = request.get(\"inputResponses\") if token is not None else None\n    answers = answers if isinstance(answers, dict) else {}\n    if step == \"confirm\":\n        answer = answers.get(\"confirm\")\n        if not _confirm_usable(answer):\n            return _ask(_confirm_request(service), \"confirm\", secret, name, arguments, principal, now)\n        if not _confirmed(answer):\n            return _complete(\"Deployment cancelled\")\n        if \"sampling\" not in caps:\n            return _complete(f\"Deployed {service} to production\")\n        return _ask(_notes_request(service), \"notes\", secret, name, arguments, principal, now)\n    text = _notes_text(answers)\n    if text is None:\n        return _ask(_notes_request(service), \"notes\", secret, name, arguments, principal, now)\n    return _complete(f\"Deployed {service} to production. Release notes: {text}\")\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom mrtr import call_tool\n\nSECRET, NOW = \"s3cret\", 1000\nMETA = {\"io.modelcontextprotocol/protocolVersion\": \"2026-07-28\",\n        \"io.modelcontextprotocol/clientCapabilities\": {\"elicitation\": {}, \"sampling\": {}}}\n\n\ndef request(**extra):\n    return {\"name\": \"deploy\", \"arguments\": {\"service\": \"api\", \"env\": \"production\"}, \"_meta\": META, **extra}\n\n\n# Round trip 1: the server needs a person's confirmation, so it ends the call with input_required and a signed state.\nfirst = call_tool(request(), SECRET, \"alice\", NOW) or {}\nprint(\"first call:\", first.get(\"resultType\"), \"| asks for:\", list((first.get(\"inputRequests\") or {})))\nprint(\"state is a string:\", isinstance(first.get(\"requestState\"), str))\n\n# Round trip 2: the client retries the same call with the answer and echoes the state back.\nanswer = {\"confirm\": {\"action\": \"accept\", \"content\": {\"confirm\": True}}}\nsecond = call_tool(request(inputResponses=answer, requestState=first.get(\"requestState\")), SECRET, \"alice\", NOW + 10) or {}\nprint(\"second call:\", second.get(\"resultType\"), \"| asks for:\", list((second.get(\"inputRequests\") or {})))\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 4,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "edb7b17ab76a79cf28ffb93b4920780096f5c21daee71ec88cc8838121d6b22a",
+  "starting_code": "\"\"\"An MCP server's side of multi round-trip requests, with no state kept between calls. See ../../statement.md.\"\"\"\nimport base64\nimport hashlib\nimport hmac\nimport json\nimport logging\n\nlog = logging.getLogger(__name__)\n\nVERSION = \"2026-07-28\"\nMETA_VERSION = \"io.modelcontextprotocol/protocolVersion\"\nMETA_CAPS = \"io.modelcontextprotocol/clientCapabilities\"\nTTL_SECONDS = 300\n\nTOOLS = [\n    {\"name\": \"deploy\", \"description\": \"Deploy a service to an environment. Production needs a person's confirmation.\",\n     \"inputSchema\": {\"type\": \"object\", \"properties\": {\"service\": {\"type\": \"string\"}, \"env\": {\"type\": \"string\", \"enum\": [\"staging\", \"production\"]}}, \"required\": [\"service\", \"env\"]}},\n    {\"name\": \"status\", \"description\": \"Report whether a service is running.\",\n     \"inputSchema\": {\"type\": \"object\", \"properties\": {\"service\": {\"type\": \"string\"}}, \"required\": [\"service\"]}},\n]\n\n\ndef _b64(data):\n    return base64.urlsafe_b64encode(data).decode().rstrip(\"=\")\n\n\ndef _unb64(text):\n    return base64.urlsafe_b64decode(text + \"=\" * (-len(text) % 4))\n\n\ndef mint_state(secret, payload):\n    \"\"\"Given: a requestState for `payload`: its JSON, then a HMAC-SHA256 signature of it, both in base64url, joined by a dot.\"\"\"\n    body = _b64(json.dumps(payload, sort_keys=True, separators=(\",\", \":\")).encode())\n    return body + \".\" + _b64(hmac.new(secret.encode(), body.encode(), hashlib.sha256).digest())\n\n\ndef read_state(secret, token):\n    \"\"\"Given: the payload of a requestState, or None when it is not one this secret signed (tampered, truncated, foreign, garbage).\"\"\"\n    try:\n        body, sig = token.split(\".\")\n        if not hmac.compare_digest(_b64(hmac.new(secret.encode(), body.encode(), hashlib.sha256).digest()), sig):\n            return None\n        payload = json.loads(_unb64(body))\n    except Exception:  # noqa: BLE001\n        return None\n    return payload if isinstance(payload, dict) else None\n\n\ndef args_digest(arguments):\n    \"\"\"Given: a fingerprint of the call's arguments, the same for the same arguments in any key order.\"\"\"\n    return hashlib.sha256(json.dumps(arguments, sort_keys=True, separators=(\",\", \":\")).encode()).hexdigest()\n\n\ndef _error(code, message, data=None):\n    return {\"error\": {\"code\": code, \"message\": message, **({\"data\": data} if data else {})}}\n\n\ndef _meta_error(request):\n    version = (request.get(\"_meta\") or {}).get(META_VERSION)\n    if version != VERSION:\n        return _error(-32022, \"Unsupported protocol version\", {\"supported\": [VERSION]})\n    return None\n\n\ndef _tool_listing():\n    \"\"\"TODO 1 of 8 (unlocks e1): the result of tools/list.\n\n    Receives nothing and returns the dict from the statement: resultType \"complete\", the TOOLS sorted by name, ttlMs 300000, cacheScope \"public\".\n    Example: _tool_listing()[\"tools\"][0][\"name\"] -> \"deploy\"\n    \"\"\"\n    return {}\n\n\ndef list_tools(request):\n    return _meta_error(request) or _tool_listing()\n\n\ndef _complete(text, is_error=False):\n    return {\"resultType\": \"complete\", \"content\": [{\"type\": \"text\", \"text\": text}], \"isError\": is_error}\n\n\ndef _confirm_request(service):\n    return {\"confirm\": {\"method\": \"elicitation/create\", \"params\": {\"mode\": \"form\", \"message\": f\"Deploy {service} to production?\", \"requestedSchema\": {\n        \"type\": \"object\", \"properties\": {\"confirm\": {\"type\": \"boolean\", \"title\": \"Confirm the deployment\"}}, \"required\": [\"confirm\"]}}}}\n\n\ndef _notes_request(service):\n    return {\"notes\": {\"method\": \"sampling/createMessage\", \"params\": {\"messages\": [{\"role\": \"user\", \"content\": {\"type\": \"text\", \"text\": f\"Write one sentence of release notes for {service}.\"}}], \"maxTokens\": 100}}}\n\n\ndef _new_state(name, arguments, principal, now, step):\n    \"\"\"TODO 2 of 8 (unlocks e7): the payload of a requestState.\n\n    Receives the tool name, the arguments, the user, the time in seconds and the step. Returns the dict from the statement: v, tool, digest, sub, exp, step.\n    Example: _new_state(\"deploy\", {\"service\": \"api\"}, \"alice\", 1000, \"confirm\")[\"exp\"] -> 1300\n    \"\"\"\n    return {}\n\n\ndef _validate(name, arguments):\n    \"\"\"TODO 3 of 8 (unlocks e6): the protocol error for a call that cannot be served, in the order of the statement.\n\n    Receives the tool name and the arguments. Returns `_error(-32602, ...)` for an unknown tool, a missing or blank service, or (for deploy) an env\n    that is not staging or production; None when the call is valid.\n    Example: _validate(\"deploy\", {\"service\": \"api\", \"env\": \"dev\"}) -> _error(-32602, \"Invalid params: env must be staging or production\")\n    \"\"\"\n    return None\n\n\ndef _can_elicit(caps):\n    \"\"\"TODO 4 of 8 (unlocks e2): can the client be asked for a confirmation?\n\n    Receives the client capabilities dict. Returns True when `elicitation` is present and is empty or holds `form`; False for none or only `url`.\n    Example: _can_elicit({\"elicitation\": {}}) -> True, _can_elicit({\"elicitation\": {\"url\": {}}}) -> False\n    \"\"\"\n    return False\n\n\ndef _state_error(secret, token, principal, name, arguments, now):\n    \"\"\"TODO 5 of 8 (unlocks e4 and e5): the error for a requestState that cannot be used.\n\n    Receives the secret, the token, the user, the tool name, the arguments and the time. Returns `_error(-32602, ...)` with `Invalid requestState`\n    (`read_state` gives None), `Expired requestState` (now after exp) or `requestState does not match this request` (sub, tool or digest differ), checked in\n    that order; None when the state is good.\n    Example: a state minted for \"alice\" and read for \"bob\" -> _error(-32602, \"requestState does not match this request\")\n    \"\"\"\n    return None\n\n\ndef _confirm_usable(answer):\n    \"\"\"TODO 6 of 8 (unlocks m1 and e3): is this an answer to the confirmation question?\n\n    Receives `inputResponses.confirm` (anything, or None). Returns True when it is a dict whose `action` is accept, decline or cancel.\n    Example: _confirm_usable({\"action\": \"decline\"}) -> True, _confirm_usable(\"yes\") -> False\n    \"\"\"\n    return False\n\n\ndef _confirmed(answer):\n    \"\"\"TODO 7 of 8 (unlocks e3): did the person accept?\n\n    Receives a usable answer. Returns True only for action `accept` with `content.confirm` exactly True.\n    Example: _confirmed({\"action\": \"accept\", \"content\": {\"confirm\": False}}) -> False\n    \"\"\"\n    return False\n\n\ndef _notes_text(answers):\n    \"\"\"TODO 8 of 8 (unlocks m1): the release notes the client wrote.\n\n    Receives the `inputResponses` dict. Returns `answers[\"notes\"][\"content\"][\"text\"]` when that is a string; None for anything else.\n    Example: _notes_text({\"notes\": {\"content\": {\"type\": \"text\", \"text\": \"Faster.\"}}}) -> \"Faster.\"\n    \"\"\"\n    return None\n\n\ndef _ask(requests, step, secret, name, arguments, principal, now):\n    state = _new_state(name, arguments, principal, now, step)\n    return {\"resultType\": \"input_required\", \"inputRequests\": requests, \"requestState\": mint_state(secret, state)}\n\n\ndef call_tool(request, secret, principal, now):\n    log.debug(\"call_tool input: %r\", request)\n    bad = _meta_error(request)\n    if bad:\n        return bad\n    name, arguments = request.get(\"name\"), request.get(\"arguments\") or {}\n    invalid = _validate(name, arguments)\n    if invalid:\n        return invalid\n    service = arguments[\"service\"]\n    if name == \"status\":\n        return _complete(f\"{service}: running\")\n    if arguments[\"env\"] == \"staging\":\n        return _complete(f\"Deployed {service} to staging\")\n    caps = (request.get(\"_meta\") or {}).get(META_CAPS) or {}\n    if not _can_elicit(caps):\n        return _complete(\"Deploying to production needs confirmation, and this client cannot be asked.\", True)\n    step = \"confirm\"\n    token = request.get(\"requestState\")\n    if token is not None:\n        invalid = _state_error(secret, token, principal, name, arguments, now)\n        if invalid:\n            return invalid\n        step = (read_state(secret, token) or {}).get(\"step\")\n    answers = request.get(\"inputResponses\") if token is not None else None\n    answers = answers if isinstance(answers, dict) else {}\n    if step == \"confirm\":\n        answer = answers.get(\"confirm\")\n        if not _confirm_usable(answer):\n            return _ask(_confirm_request(service), \"confirm\", secret, name, arguments, principal, now)\n        if not _confirmed(answer):\n            return _complete(\"Deployment cancelled\")\n        if \"sampling\" not in caps:\n            return _complete(f\"Deployed {service} to production\")\n        return _ask(_notes_request(service), \"notes\", secret, name, arguments, principal, now)\n    text = _notes_text(answers)\n    if text is None:\n        return _ask(_notes_request(service), \"notes\", secret, name, arguments, principal, now)\n    return _complete(f\"Deployed {service} to production. Release notes: {text}\")\n",
+  "exercise": {
+    "main_path": "practice/level-2/33-mcp-advanced/prose/unit-02/practice-1/mrtr.py",
+    "test_path": "practice/level-2/33-mcp-advanced/prose/unit-02/practice-1/test_mrtr.py",
+    "run_command": [
+      "python3",
+      "practice/level-2/33-mcp-advanced/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-2/33-mcp-advanced/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-2/33-mcp-advanced/prose/unit-02/practice-1/test_mrtr.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_a_production_deploy_takes_three_round_trips_and_keeps_no_state",
+        "kind": "main",
+        "says": "A production deploy takes three round trips and keeps no state"
+      },
+      {
+        "id": "test_e1_a_staging_deploy_and_a_status_call_finish_at_once_and_the_tool_list_is_cacheable",
+        "kind": "edge",
+        "says": "A staging deploy and a status call finish at once, and the tool list is cacheable"
+      },
+      {
+        "id": "test_e2_the_server_only_asks_what_the_client_declared_it_can_answer",
+        "kind": "edge",
+        "says": "The server only asks what the client declared it can answer"
+      },
+      {
+        "id": "test_e3_a_no_or_a_missing_answer_is_handled_without_an_error",
+        "kind": "edge",
+        "says": "A no or a missing answer is handled without an error"
+      },
+      {
+        "id": "test_e4_a_state_the_server_did_not_sign_is_refused",
+        "kind": "edge",
+        "says": "A state the server did not sign is refused"
+      },
+      {
+        "id": "test_e5_a_state_works_only_for_the_same_user_the_same_call_and_before_it_expires",
+        "kind": "edge",
+        "says": "A state works only for the same user, the same call and before it expires"
+      },
+      {
+        "id": "test_e6_a_request_the_server_cannot_serve_is_a_protocol_error_with_a_code",
+        "kind": "edge",
+        "says": "A request the server cannot serve is a protocol error with a code"
+      },
+      {
+        "id": "test_e7_the_state_carries_the_whole_context_and_an_answer_alone_never_skips_a_step",
+        "kind": "edge",
+        "says": "The state carries the whole context, and an answer alone never skips a step"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/33-mcp-advanced/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/33-mcp-advanced/02-streamable-http-state-and-authorization.md",
+    "concepts": [
+      "the practice of MCP advanced: Streamable HTTP, state and authorization is solved"
+    ],
+    "files": [
+      "practice/level-2/33-mcp-advanced/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "mcp-advanced-u2"
+}

@@ -1,0 +1,86 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "25-structured-output-and-defensive-parsing"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 4,
+  "title": "Practice: an extractor with validation and a re-prompt (Kotlin)",
+  "lang": "kotlin",
+  "main_file": "src/main/kotlin/Extractor.kt",
+  "files": [
+    "src/main/kotlin/TryIt.kt"
+  ],
+  "test_file": "src/test/kotlin/ExtractorTest.kt",
+  "build": [
+    "src/main/kotlin/Json.kt",
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-4",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-4",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_aValidReplyIsReturnedAfterOneCall()",
+      "kind": "main",
+      "says": "A valid reply is returned after one call"
+    },
+    {
+      "id": "e1_jsonIsFoundInFencesAndProseAndBadTextIsRetried()",
+      "kind": "edge",
+      "says": "JSON is found inside fences and prose, and text with no JSON is retried"
+    },
+    {
+      "id": "e2_everySchemaViolationIsListedAndSentBackToTheModel()",
+      "kind": "edge",
+      "says": "Every schema violation is listed and sent back to the model"
+    },
+    {
+      "id": "e3_theNumberOfAttemptsIsBounded()",
+      "kind": "edge",
+      "says": "The number of attempts is bounded"
+    },
+    {
+      "id": "e4_aRefusalOrACutOffReplyIsNotRetried()",
+      "kind": "edge",
+      "says": "A refusal or a cut-off reply is not retried"
+    },
+    {
+      "id": "e5_aQuoteThatIsNotInTheDocumentIsRejected()",
+      "kind": "edge",
+      "says": "A quotation that is not in the document is rejected"
+    },
+    {
+      "id": "e6_typesAreExactBooleansAreNotNumbersAndIntegersHaveNoFraction()",
+      "kind": "edge",
+      "says": "Types are exact: booleans are not numbers and integers have no fraction"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/25-structured-output-and-defensive-parsing/02-defensive-parsing-validation-and-the-re-prompt.md"
+}

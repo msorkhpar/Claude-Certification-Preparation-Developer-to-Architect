@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "51-session-state"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: Continue, resume and fork: what a session keeps",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A review agent finished mapping a payments module on Monday. On Tuesday the team wants to compare a rewrite with a refactor from that same baseline, and the Monday thread must stay usable. What should the SDK call carry?",
+        "options": [
+          {
+            "id": "a",
+            "text": "`resume` with the saved id and `fork_session` enabled",
+            "correct": true,
+            "says": "Fork is an option set together with a resume id, so it branches a copy and leaves the original usable."
+          },
+          {
+            "id": "b",
+            "text": "`continue_conversation` alone, which branches the latest run",
+            "correct": false,
+            "says": "Ruled out because \"**Continue** finds the most recent session in the current directory\", so it adds to that session and branches nothing."
+          },
+          {
+            "id": "c",
+            "text": "`resume` with the saved id, once for each approach",
+            "correct": false,
+            "says": "Ruled out because \"Continue and resume both pick up an existing session and add to it\", which puts both approaches into one history."
+          },
+          {
+            "id": "d",
+            "text": "A new run whose first prompt only names the Monday thread",
+            "correct": false,
+            "says": "Ruled out because a name carries none of the analysis, and the guide says to \"Capture the results you need (analysis output, decisions, file diffs) as application state and pass them into a fresh session's prompt.\""
+          }
+        ],
+        "origin": {
+          "path": "course/51-session-state/01-continue-resume-and-fork-what-a-session-keeps.md",
+          "section": "Continue, resume and fork"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A multi-user app keeps one conversation per customer. After a restart it must return each customer to the right earlier conversation, not just the latest one. What does the code store for each customer?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A `continue` flag, with one working directory for each customer",
+            "correct": false,
+            "says": "Ruled out because \"**Continue** finds the most recent session in the current directory\", so a customer would get the latest conversation only and never an earlier one."
+          },
+          {
+            "id": "b",
+            "text": "A display name for each customer, passed to `resume` in the SDK",
+            "correct": false,
+            "says": "Ruled out because \"Resume takes a specific session ID\", not a display name; the guide's `--resume <session-name>` is a command-line form, and the SDK guide passes an id."
+          },
+          {
+            "id": "c",
+            "text": "The session id from the last result message",
+            "correct": true,
+            "says": "Resume needs a specific id, and the result carries it on every result."
+          },
+          {
+            "id": "d",
+            "text": "A fork of the first session, created for each customer",
+            "correct": false,
+            "says": "Ruled out because \"Fork is different: it creates a new session that starts with a copy of the original's history\", which is a second conversation and not a return to the first."
+          }
+        ],
+        "origin": {
+          "path": "course/51-session-state/01-continue-resume-and-fork-what-a-session-keeps.md",
+          "section": "Continue, resume and fork"
+        }
+      }
+    ]
+  }
+}

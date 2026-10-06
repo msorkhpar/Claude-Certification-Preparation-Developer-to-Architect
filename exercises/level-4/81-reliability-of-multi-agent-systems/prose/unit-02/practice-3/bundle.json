@@ -1,0 +1,90 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-4",
+    "81-reliability-of-multi-agent-systems"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 3,
+  "title": "Practice: a multi-agent run graded on injected failures (Java)",
+  "lang": "java",
+  "main_file": "src/main/java/ReliableAgents.java",
+  "files": [
+    "src/main/java/TryIt.java"
+  ],
+  "test_file": "src/test/java/ReliableAgentsTest.java",
+  "build": [
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-4/81-reliability-of-multi-agent-systems/prose/unit-02/practice-3",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-4/81-reliability-of-multi-agent-systems/prose/unit-02/practice-3",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_tasksRunInOrderAndReceiveTheResultsOfTheTasksTheyNeed()",
+      "kind": "main",
+      "says": "Tasks run in order and receive the results of the tasks they need"
+    },
+    {
+      "id": "e1_everyRetryOfATaskCarriesTheSameIdempotencyKey()",
+      "kind": "edge",
+      "says": "Every retry of a task carries the same idempotency key"
+    },
+    {
+      "id": "e2_retriesStopAtTheLimitAndAFatalFailureIsNotRetried()",
+      "kind": "edge",
+      "says": "Retries stop at the limit and a fatal failure is not retried"
+    },
+    {
+      "id": "e3_aFailureStaysInsideItsBranchAndDependentsAreSkipped()",
+      "kind": "edge",
+      "says": "A failure stays inside its branch and dependents are skipped"
+    },
+    {
+      "id": "e4_aBreakerStopsCallsToAnAgentThatKeepsFailingAndASuccessResetsIt()",
+      "kind": "edge",
+      "says": "A breaker stops calls to an agent that keeps failing, and a success resets it"
+    },
+    {
+      "id": "e5_aFallbackDegradesOneTaskWithItsOwnKeyAndIsNotCheckpointed()",
+      "kind": "edge",
+      "says": "A fallback degrades one task with its own key and is not checkpointed"
+    },
+    {
+      "id": "e6_aSecondRunResumesFromTheCheckpointAndRetriesOnlyWhatFailed()",
+      "kind": "edge",
+      "says": "A second run resumes from the checkpoint and retries only what failed"
+    },
+    {
+      "id": "e7_anUnexpectedCrashIsNotSwallowedAndKeepsTheWorkAlreadyCheckpointed()",
+      "kind": "edge",
+      "says": "An unexpected crash is not swallowed and keeps the work already checkpointed"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/81-reliability-of-multi-agent-systems/02-isolation-fallbacks-and-resuming-a-run.md"
+}

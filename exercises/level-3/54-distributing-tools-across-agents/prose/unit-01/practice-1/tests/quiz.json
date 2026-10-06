@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "54-distributing-tools-across-agents"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: Scoped tool sets: which agent gets which tool",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A synthesis subagent often needs to confirm a date or a name while it writes. Each time it returns control to the coordinator, which calls the search subagent and then the synthesis subagent again, and latency has grown by about 40 percent. Most checks are simple lookups and a few need real investigation. What is the best design?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Give it a small verifier tool for the quick cases and route the hard ones through the hub",
+            "correct": true,
+            "says": "A narrow tool serves the frequent case and the coordinator keeps the rare one."
+          },
+          {
+            "id": "b",
+            "text": "Let the synthesis subagent collect every check and return them in one batch at the end",
+            "correct": false,
+            "says": "Ruled out because \"Waiting to hand back all the checks at the end blocks later steps that depend on earlier verified facts\"."
+          },
+          {
+            "id": "c",
+            "text": "Give the synthesis subagent each of the search tools so that it can answer any check itself",
+            "correct": false,
+            "says": "Ruled out because \"Giving the synthesis agent every search tool over-provisions it and brings back the misuse\"."
+          },
+          {
+            "id": "d",
+            "text": "Have the search subagent save extra context around each source in case a check comes up",
+            "correct": false,
+            "says": "Ruled out because \"Speculative caching cannot reliably predict what the synthesis agent will need to check\"."
+          }
+        ],
+        "origin": {
+          "path": "course/54-distributing-tools-across-agents/01-scoped-tool-sets-per-agent.md",
+          "section": "One narrow tool for the frequent need"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "An analysis subagent holds a general `fetch_url` tool, and it sometimes fetches pages that have nothing to do with the documents it was given. Which change fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Add a sentence to its prompt saying that only links to the supplied files may be fetched",
+            "correct": false,
+            "says": "Ruled out because \"an instruction not to use a tool is a request, and a tool the agent holds is a tool it can use\"."
+          },
+          {
+            "id": "b",
+            "text": "Swap it for a loader that takes only the job's links and refuses the rest with a reason",
+            "correct": true,
+            "says": "A constraint inside the tool holds whatever the model decides."
+          },
+          {
+            "id": "c",
+            "text": "Take the tool away and have the coordinator paste each file's text into the brief by hand",
+            "correct": false,
+            "says": "Ruled out because \"Taking a tool away is not the fix when the role really needs the capability\"."
+          },
+          {
+            "id": "d",
+            "text": "Give it a second tool that reports the host of each link before the fetch is made",
+            "correct": false,
+            "says": "Ruled out because \"adding a tool to describe the first adds to the list and restricts nothing\"."
+          }
+        ],
+        "origin": {
+          "path": "course/54-distributing-tools-across-agents/01-scoped-tool-sets-per-agent.md",
+          "section": "More tools, worse choices"
+        }
+      }
+    ]
+  }
+}

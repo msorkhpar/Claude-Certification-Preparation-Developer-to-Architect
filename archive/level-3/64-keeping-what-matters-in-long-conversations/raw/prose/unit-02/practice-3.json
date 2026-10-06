@@ -1,0 +1,279 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "64-keeping-what-matters-in-long-conversations"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: a context that keeps the facts, trims the noise, never mixes customers and never splits a tool call (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a context that keeps the facts, trims the noise, never mixes customers and never splits a tool call"
+    },
+    {
+      "type": "para",
+      "text": "A support agent works with a customer over many turns. Its summaries turn \"$129.50 by 30 September\" into \"a refund soon\", every order lookup drops forty internal fields into the conversation, a late message with an old address overwrites the new one, a facts block loaded for one customer shows up in another customer's session, and the window that trims old messages sometimes keeps a tool result without the call that produced it. In this practice you write the context's building blocks: the trimming of a tool record, the update of case facts, the assembly of the context, the check of a summary against the facts, and the sliding window. The model is not called. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`trim_record`, `update_facts`, `build_context`, `missing_from_summary`, `window`); TypeScript has the camel-case names (`trimRecord`, ...); Java has the same camel-case names as static methods of `ContextBuilder` with the records the starter defines (`Fact`, `FactEntry`, `Message`); Kotlin has top-level functions and the same data classes. A token is estimated as the length of the text divided by four, rounded up (`estimate_tokens`, given)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working context builder with six gaps cut out of it. Everything that is plumbing is written and correct: the token estimate, the copy of the facts before a change, the new-fact case, the summary and recent-messages sections, the join of the sections and the cost loop of the window. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript, Java and Kotlin names are the camel-case forms where a name is given):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "The trimmed record (unlocks `m1`, `e1`): only the named fields are kept, with their exact values and in the order they are named; a named field the record does not have is skipped.",
+        "The newer fact (unlocks `e2`, `e3`): a fact that is as new as the stored one or newer replaces it and the replaced value is kept in `superseded` as `value@date`; an older fact that arrives late is only added to the history and does not replace the current value.",
+        "The customer's facts (unlocks `e4`): only the case facts of the customer the context is built for are used; those of another customer never enter it.",
+        "The case facts section (unlocks `e5`): when the customer has facts, a `## Case facts` section with one line `name: value (as of date)` each comes first, before the summary and the recent messages.",
+        "The values the summary lost (unlocks `e6`): the names of the facts whose exact value does not appear in the summary are returned, so a summary that lost a value is reported.",
+        "The tool call with its result (unlocks `e7`): a tool call and the result that follows it with the same id form one unit that the window keeps or drops whole; every other message is a unit of its own."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gap 1. About sixteen lines in all. The steps below describe the whole builder, so you can see how your gaps are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`trim_record(record, keep)` returns a new record with only the fields named in `keep`, in the order of `keep`, with their values unchanged. A name the record does not have is skipped.",
+        "`update_facts(facts, name, value, as_of)` returns a new facts map (the input is not changed). A fact is `{value, as_of, superseded}` where `as_of` is an ISO date and `superseded` is a list of `\"<value>@<date>\"` strings. A new name is added with an empty history. When `as_of` is the same as or later than the stored one, the new value replaces the stored one and the old one is appended to the history. When it is earlier, the stored value stays and the late value goes into the history.",
+        "`build_context(customer, facts, summary, recent)` takes fact entries `{customer, name, value, as_of}`, the summary text and the recent messages (`role`, `text`). It returns the text: `## Case facts` with one line `<name>: <value> (as of <date>)` for each fact of this customer only, in the given order (the section is left out when the customer has none), a blank line, `## Summary so far` with the summary, a blank line, and `## Recent messages` with one line `<role>: <text>` for each message.",
+        "`missing_from_summary(summary, facts)` returns the names of the fact entries whose value does not appear verbatim in the summary, in order.",
+        "`window(messages, budget)` takes messages `{role, kind, id, text}` where `kind` is `text`, `tool_use` or `tool_result`. It returns the newest messages, in their original order, whose estimated tokens add up to the budget at most. A tool call (a `tool_use` immediately followed by the `tool_result` with the same `id`) is kept whole or dropped whole. The window is one unbroken run from the newest message back: it stops at the first unit that does not fit."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Trim before the context fills.** A lookup with forty fields costs tokens on every later turn although five fields matter. *You should see* only the named fields, exactly as returned.",
+        "**Newer information wins, history stays.** A customer's address changes mid-conversation, and a delayed older message must not undo it. *You should see* the new value current, the old one in the history, and a late older value recorded without replacing anything.",
+        "**Scope isolation.** A facts block is loaded for one customer's session. *You should see* another customer's facts absent from the text.",
+        "**Position and headings.** The facts come first, under a heading, so that they are not lost in the middle of a long input. *You should see* the three sections in that order.",
+        "**Summaries lose numbers.** An exact amount or date that a summary rounds off is a defect that no reader notices. *You should see* the names of the facts the summary no longer holds.",
+        "**A window that respects tool calls.** A tool result without its call is not a valid conversation. *You should see* a call and its result kept together or dropped together."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Trimming keeps only the named fields with their exact values in the named order"
+        ],
+        [
+          "`e1`",
+          "A field that the record does not have is skipped"
+        ],
+        [
+          "`e2`",
+          "A newer fact replaces the old one and the old value is kept as history"
+        ],
+        [
+          "`e3`",
+          "An older fact that arrives late does not replace the current one"
+        ],
+        [
+          "`e4`",
+          "The case facts of another customer never enter the context"
+        ],
+        [
+          "`e5`",
+          "The context puts case facts first, then the summary, then the recent messages"
+        ],
+        [
+          "`e6`",
+          "A summary that loses an exact value is reported"
+        ],
+        [
+          "`e7`",
+          "The window drops the oldest messages and keeps a tool call with its result"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/** What a long conversation keeps: trimmed tool output, case facts that newer information replaces, a context that never mixes customers, and a window that keeps tool calls whole. See ../../statement.md. */\nfinal class ContextBuilder {\n    private static final System.Logger LOG = System.getLogger(ContextBuilder.class.getName());\n    private ContextBuilder() {}\n\n    record Fact(String value, String asOf, List<String> superseded) {}\n\n    record FactEntry(String customer, String name, String value, String asOf) {}\n\n    record Message(String role, String kind, String id, String text) {}\n\n    static int estimateTokens(String text) {\n        return (text.length() + 3) / 4;\n    }\n\n    static Map<String, String> trimRecord(Map<String, String> record, List<String> keep) {\n        Map<String, String> out = new LinkedHashMap<>();\n        for (String k : keep) if (record.containsKey(k)) out.put(k, record.get(k));\n        return out;\n    }\n\n    static Map<String, Fact> updateFacts(Map<String, Fact> facts, String name, String value, String asOf) {\n        Map<String, Fact> next = new LinkedHashMap<>();\n        for (Map.Entry<String, Fact> e : facts.entrySet()) next.put(e.getKey(), new Fact(e.getValue().value(), e.getValue().asOf(), new ArrayList<>(e.getValue().superseded())));\n        Fact current = next.get(name);\n        if (current == null) {\n            next.put(name, new Fact(value, asOf, new ArrayList<>()));\n        } else if (asOf.compareTo(current.asOf()) >= 0) {\n            List<String> history = new ArrayList<>(current.superseded());\n            history.add(current.value() + \"@\" + current.asOf());\n            next.put(name, new Fact(value, asOf, history));\n        } else {\n            List<String> history = new ArrayList<>(current.superseded());\n            history.add(value + \"@\" + asOf);\n            next.put(name, new Fact(current.value(), current.asOf(), history));\n        }\n        return next;\n    }\n\n    static String buildContext(String customer, List<FactEntry> facts, String summary, List<Message> recent) {\n        LOG.log(System.Logger.Level.DEBUG, \"buildContext input: {0}\", customer);\n        List<String> parts = new ArrayList<>();\n        List<String> mine = new ArrayList<>();\n        for (FactEntry f : facts) if (f.customer().equals(customer)) mine.add(f.name() + \": \" + f.value() + \" (as of \" + f.asOf() + \")\");\n        if (!mine.isEmpty()) parts.add(\"## Case facts\\n\" + String.join(\"\\n\", mine));\n        parts.add(\"## Summary so far\\n\" + summary);\n        List<String> lines = new ArrayList<>();\n        for (Message m : recent) lines.add(m.role() + \": \" + m.text());\n        parts.add(\"## Recent messages\\n\" + String.join(\"\\n\", lines));\n        return String.join(\"\\n\\n\", parts);\n    }\n\n    static List<String> missingFromSummary(String summary, List<FactEntry> facts) {\n        List<String> missing = new ArrayList<>();\n        for (FactEntry f : facts) if (!summary.contains(f.value())) missing.add(f.name());\n        return missing;\n    }\n\n    static List<Message> window(List<Message> messages, int budget) {\n        List<List<Message>> units = new ArrayList<>();\n        int i = 0;\n        while (i < messages.size()) {\n            Message m = messages.get(i);\n            if (m.kind().equals(\"tool_use\") && i + 1 < messages.size() && messages.get(i + 1).kind().equals(\"tool_result\") && messages.get(i + 1).id().equals(m.id())) {\n                units.add(List.of(m, messages.get(i + 1)));\n                i += 2;\n            } else {\n                units.add(List.of(m));\n                i += 1;\n            }\n        }\n        List<List<Message>> kept = new ArrayList<>();\n        int used = 0;\n        for (int u = units.size() - 1; u >= 0; u--) {\n            int cost = 0;\n            for (Message x : units.get(u)) cost += estimateTokens(x.text());\n            if (used + cost > budget) break;\n            kept.add(0, units.get(u));\n            used += cost;\n        }\n        List<Message> out = new ArrayList<>();\n        for (List<Message> unit : kept) out.addAll(unit);\n        return out;\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.*;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // A tool result is large; keep only the fields the next turn needs, with their exact values.\n        Map<String, String> order = new LinkedHashMap<>();\n        order.put(\"order_id\", \"A-1042\");\n        order.put(\"items\", \"2 x kettle\");\n        order.put(\"warehouse_bin\", \"R7-22\");\n        order.put(\"refund_amount\", \"$129.50\");\n        System.out.println(\"trimmed record: \" + ContextBuilder.trimRecord(order, List.of(\"refund_amount\", \"order_id\")));\n\n        // A newer value replaces the current one; the old one is kept as superseded.\n        Map<String, ContextBuilder.Fact> facts = ContextBuilder.updateFacts(new LinkedHashMap<>(), \"address\", \"12 Oak St\", \"2026-08-01\");\n        facts = ContextBuilder.updateFacts(facts, \"address\", \"9 Elm Rd\", \"2026-09-10\");\n        System.out.println(\"facts: \" + facts);\n\n        // The context of the next request: case facts, then the summary, then the recent messages.\n        List<ContextBuilder.FactEntry> caseFacts = List.of(new ContextBuilder.FactEntry(\"c1\", \"refund\", \"$129.50\", \"2026-09-02\"));\n        List<ContextBuilder.Message> recent = List.of(new ContextBuilder.Message(\"user\", \"text\", \"m1\", \"Where is my refund?\"));\n        System.out.println(ContextBuilder.buildContext(\"c1\", caseFacts, \"The customer asked about a refund.\", recent));\n\n        // A tool call and its result stay together when the window drops old messages.\n        List<ContextBuilder.Message> messages = List.of(new ContextBuilder.Message(\"user\", \"text\", \"m1\", \"x\".repeat(40)),\n            new ContextBuilder.Message(\"assistant\", \"tool_use\", \"t1\", \"lookup\"), new ContextBuilder.Message(\"user\", \"tool_result\", \"t1\", \"found\"));\n        System.out.println(\"window ids: \" + ContextBuilder.window(messages, 6).stream().map(ContextBuilder.Message::id).toList());\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/** What a long conversation keeps: trimmed tool output, case facts that newer information replaces, a context that never mixes customers, and a window that keeps tool calls whole. See ../../statement.md. */\nfinal class ContextBuilder {\n    private static final System.Logger LOG = System.getLogger(ContextBuilder.class.getName());\n    private ContextBuilder() {}\n\n    record Fact(String value, String asOf, List<String> superseded) {}\n\n    record FactEntry(String customer, String name, String value, String asOf) {}\n\n    record Message(String role, String kind, String id, String text) {}\n\n    static int estimateTokens(String text) {\n        return (text.length() + 3) / 4;\n    }\n\n    static Map<String, String> trimRecord(Map<String, String> record, List<String> keep) {\n        // TODO 1 of 6 (finish this to pass m1, e1): the trim. Receives a tool's record and the list of fields to keep.\n        //   Return a new record with only those fields, in the order of the list, with their exact values, skipping a\n        //   field that the record does not have. Example: record {id, status, notes}, keep [status, id] -> {status, id}.\n        return new LinkedHashMap<>(record);\n    }\n\n    static Map<String, Fact> updateFacts(Map<String, Fact> facts, String name, String value, String asOf) {\n        Map<String, Fact> next = new LinkedHashMap<>();\n        for (Map.Entry<String, Fact> e : facts.entrySet()) next.put(e.getKey(), new Fact(e.getValue().value(), e.getValue().asOf(), new ArrayList<>(e.getValue().superseded())));\n        Fact current = next.get(name);\n        if (current == null) {\n            next.put(name, new Fact(value, asOf, new ArrayList<>()));\n        } else {\n            // TODO 2 of 6 (finish this to pass e2, e3): the update of a known fact. When the new date is the same as or\n            //   later than the stored one, replace the value and the date and append \"oldvalue@olddate\" to the history; when\n            //   it is earlier, keep the current value and append \"newvalue@newdate\" to the history. Example: stored\n            //   5@2026-01-02, new 7@2026-01-05 -> value 7, history [5@2026-01-02].\n            next.put(name, new Fact(value, asOf, new ArrayList<>(current.superseded())));\n        }\n        return next;\n    }\n\n    static String buildContext(String customer, List<FactEntry> facts, String summary, List<Message> recent) {\n        LOG.log(System.Logger.Level.DEBUG, \"buildContext input: {0}\", customer);\n        List<String> parts = new ArrayList<>();\n        List<String> mine = new ArrayList<>();\n        // TODO 3 of 6 (finish this to pass e4): the facts of one customer. Receives the customer and all the fact\n        //   entries. Keep only the entries whose customer is that customer. Example: facts of C1 and C2, customer C1 ->\n        //   the C1 entries only.\n        for (FactEntry f : facts) mine.add(f.name() + \": \" + f.value() + \" (as of \" + f.asOf() + \")\");\n        // TODO 4 of 6 (finish this to pass e5): the case facts section. When there are facts for the customer, add first\n        //   a section titled \"## Case facts\" with one line per fact, \"name: value (as of date)\". Example: one fact -> \"##\n        //   Case facts\\norder: A-7 (as of 2026-01-02)\", before the summary.\n        parts.add(\"## Summary so far\\n\" + summary);\n        List<String> lines = new ArrayList<>();\n        for (Message m : recent) lines.add(m.role() + \": \" + m.text());\n        parts.add(\"## Recent messages\\n\" + String.join(\"\\n\", lines));\n        return String.join(\"\\n\\n\", parts);\n    }\n\n    static List<String> missingFromSummary(String summary, List<FactEntry> facts) {\n        // TODO 5 of 6 (finish this to pass e6): the check of a summary. Receives the summary and the fact entries.\n        //   Return the names of the facts whose exact value does not appear in the summary text. Example: fact order =\n        //   A-7, summary \"customer wants a refund\" -> [order].\n        return new ArrayList<>();\n    }\n\n    static List<Message> window(List<Message> messages, int budget) {\n        List<List<Message>> units = new ArrayList<>();\n        int i = 0;\n        while (i < messages.size()) {\n            Message m = messages.get(i);\n            // TODO 6 of 6 (finish this to pass e7): the units of the window. Walk the messages in order: a tool_use\n            //   message followed by the tool_result with the same id forms one unit of two, which is never split; any\n            //   other message is a unit of one. Example: [user, tool_use t1, tool_result t1] -> two units.\n            units.add(List.of(m));\n            i += 1;\n        }\n        List<List<Message>> kept = new ArrayList<>();\n        int used = 0;\n        for (int u = units.size() - 1; u >= 0; u--) {\n            int cost = 0;\n            for (Message x : units.get(u)) cost += estimateTokens(x.text());\n            if (used + cost > budget) break;\n            kept.add(0, units.get(u));\n            used += cost;\n        }\n        List<Message> out = new ArrayList<>();\n        for (List<Message> unit : kept) out.addAll(unit);\n        return out;\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.*;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // A tool result is large; keep only the fields the next turn needs, with their exact values.\n        Map<String, String> order = new LinkedHashMap<>();\n        order.put(\"order_id\", \"A-1042\");\n        order.put(\"items\", \"2 x kettle\");\n        order.put(\"warehouse_bin\", \"R7-22\");\n        order.put(\"refund_amount\", \"$129.50\");\n        System.out.println(\"trimmed record: \" + ContextBuilder.trimRecord(order, List.of(\"refund_amount\", \"order_id\")));\n\n        // A newer value replaces the current one; the old one is kept as superseded.\n        Map<String, ContextBuilder.Fact> facts = ContextBuilder.updateFacts(new LinkedHashMap<>(), \"address\", \"12 Oak St\", \"2026-08-01\");\n        facts = ContextBuilder.updateFacts(facts, \"address\", \"9 Elm Rd\", \"2026-09-10\");\n        System.out.println(\"facts: \" + facts);\n\n        // The context of the next request: case facts, then the summary, then the recent messages.\n        List<ContextBuilder.FactEntry> caseFacts = List.of(new ContextBuilder.FactEntry(\"c1\", \"refund\", \"$129.50\", \"2026-09-02\"));\n        List<ContextBuilder.Message> recent = List.of(new ContextBuilder.Message(\"user\", \"text\", \"m1\", \"Where is my refund?\"));\n        System.out.println(ContextBuilder.buildContext(\"c1\", caseFacts, \"The customer asked about a refund.\", recent));\n\n        // A tool call and its result stay together when the window drops old messages.\n        List<ContextBuilder.Message> messages = List.of(new ContextBuilder.Message(\"user\", \"text\", \"m1\", \"x\".repeat(40)),\n            new ContextBuilder.Message(\"assistant\", \"tool_use\", \"t1\", \"lookup\"), new ContextBuilder.Message(\"user\", \"tool_result\", \"t1\", \"found\"));\n        System.out.println(\"window ids: \" + ContextBuilder.window(messages, 6).stream().map(ContextBuilder.Message::id).toList());\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "ac8f768752a89177b64174ac40bfb14a64e974d876282118ebea1c95d9d8d0ec",
+  "starting_code": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/** What a long conversation keeps: trimmed tool output, case facts that newer information replaces, a context that never mixes customers, and a window that keeps tool calls whole. See ../../statement.md. */\nfinal class ContextBuilder {\n    private static final System.Logger LOG = System.getLogger(ContextBuilder.class.getName());\n    private ContextBuilder() {}\n\n    record Fact(String value, String asOf, List<String> superseded) {}\n\n    record FactEntry(String customer, String name, String value, String asOf) {}\n\n    record Message(String role, String kind, String id, String text) {}\n\n    static int estimateTokens(String text) {\n        return (text.length() + 3) / 4;\n    }\n\n    static Map<String, String> trimRecord(Map<String, String> record, List<String> keep) {\n        // TODO 1 of 6 (finish this to pass m1, e1): the trim. Receives a tool's record and the list of fields to keep.\n        //   Return a new record with only those fields, in the order of the list, with their exact values, skipping a\n        //   field that the record does not have. Example: record {id, status, notes}, keep [status, id] -> {status, id}.\n        return new LinkedHashMap<>(record);\n    }\n\n    static Map<String, Fact> updateFacts(Map<String, Fact> facts, String name, String value, String asOf) {\n        Map<String, Fact> next = new LinkedHashMap<>();\n        for (Map.Entry<String, Fact> e : facts.entrySet()) next.put(e.getKey(), new Fact(e.getValue().value(), e.getValue().asOf(), new ArrayList<>(e.getValue().superseded())));\n        Fact current = next.get(name);\n        if (current == null) {\n            next.put(name, new Fact(value, asOf, new ArrayList<>()));\n        } else {\n            // TODO 2 of 6 (finish this to pass e2, e3): the update of a known fact. When the new date is the same as or\n            //   later than the stored one, replace the value and the date and append \"oldvalue@olddate\" to the history; when\n            //   it is earlier, keep the current value and append \"newvalue@newdate\" to the history. Example: stored\n            //   5@2026-01-02, new 7@2026-01-05 -> value 7, history [5@2026-01-02].\n            next.put(name, new Fact(value, asOf, new ArrayList<>(current.superseded())));\n        }\n        return next;\n    }\n\n    static String buildContext(String customer, List<FactEntry> facts, String summary, List<Message> recent) {\n        LOG.log(System.Logger.Level.DEBUG, \"buildContext input: {0}\", customer);\n        List<String> parts = new ArrayList<>();\n        List<String> mine = new ArrayList<>();\n        // TODO 3 of 6 (finish this to pass e4): the facts of one customer. Receives the customer and all the fact\n        //   entries. Keep only the entries whose customer is that customer. Example: facts of C1 and C2, customer C1 ->\n        //   the C1 entries only.\n        for (FactEntry f : facts) mine.add(f.name() + \": \" + f.value() + \" (as of \" + f.asOf() + \")\");\n        // TODO 4 of 6 (finish this to pass e5): the case facts section. When there are facts for the customer, add first\n        //   a section titled \"## Case facts\" with one line per fact, \"name: value (as of date)\". Example: one fact -> \"##\n        //   Case facts\\norder: A-7 (as of 2026-01-02)\", before the summary.\n        parts.add(\"## Summary so far\\n\" + summary);\n        List<String> lines = new ArrayList<>();\n        for (Message m : recent) lines.add(m.role() + \": \" + m.text());\n        parts.add(\"## Recent messages\\n\" + String.join(\"\\n\", lines));\n        return String.join(\"\\n\\n\", parts);\n    }\n\n    static List<String> missingFromSummary(String summary, List<FactEntry> facts) {\n        // TODO 5 of 6 (finish this to pass e6): the check of a summary. Receives the summary and the fact entries.\n        //   Return the names of the facts whose exact value does not appear in the summary text. Example: fact order =\n        //   A-7, summary \"customer wants a refund\" -> [order].\n        return new ArrayList<>();\n    }\n\n    static List<Message> window(List<Message> messages, int budget) {\n        List<List<Message>> units = new ArrayList<>();\n        int i = 0;\n        while (i < messages.size()) {\n            Message m = messages.get(i);\n            // TODO 6 of 6 (finish this to pass e7): the units of the window. Walk the messages in order: a tool_use\n            //   message followed by the tool_result with the same id forms one unit of two, which is never split; any\n            //   other message is a unit of one. Example: [user, tool_use t1, tool_result t1] -> two units.\n            units.add(List.of(m));\n            i += 1;\n        }\n        List<List<Message>> kept = new ArrayList<>();\n        int used = 0;\n        for (int u = units.size() - 1; u >= 0; u--) {\n            int cost = 0;\n            for (Message x : units.get(u)) cost += estimateTokens(x.text());\n            if (used + cost > budget) break;\n            kept.add(0, units.get(u));\n            used += cost;\n        }\n        List<Message> out = new ArrayList<>();\n        for (List<Message> unit : kept) out.addAll(unit);\n        return out;\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/64-keeping-what-matters-in-long-conversations/prose/unit-02/practice-3/src/main/java/ContextBuilder.java",
+    "test_path": "practice/level-3/64-keeping-what-matters-in-long-conversations/prose/unit-02/practice-3/src/test/java/ContextBuilderTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/64-keeping-what-matters-in-long-conversations/prose/unit-02/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/64-keeping-what-matters-in-long-conversations/prose/unit-02/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_trimmingKeepsOnlyTheNamedFieldsWithTheirExactValuesInTheNamedOrder()",
+        "kind": "main",
+        "says": "Trimming keeps only the named fields with their exact values in the named order"
+      },
+      {
+        "id": "e1_aFieldThatTheRecordDoesNotHaveIsSkipped()",
+        "kind": "edge",
+        "says": "A field that the record does not have is skipped"
+      },
+      {
+        "id": "e2_aNewerFactReplacesTheOldOneAndTheOldValueIsKeptAsHistory()",
+        "kind": "edge",
+        "says": "A newer fact replaces the old one and the old value is kept as history"
+      },
+      {
+        "id": "e3_anOlderFactThatArrivesLateDoesNotReplaceTheCurrentOne()",
+        "kind": "edge",
+        "says": "An older fact that arrives late does not replace the current one"
+      },
+      {
+        "id": "e4_theCaseFactsOfAnotherCustomerNeverEnterTheContext()",
+        "kind": "edge",
+        "says": "The case facts of another customer never enter the context"
+      },
+      {
+        "id": "e5_theContextPutsCaseFactsFirstThenTheSummaryThenTheRecentMessages()",
+        "kind": "edge",
+        "says": "The context puts case facts first, then the summary, then the recent messages"
+      },
+      {
+        "id": "e6_aSummaryThatLosesAnExactValueIsReported()",
+        "kind": "edge",
+        "says": "A summary that loses an exact value is reported"
+      },
+      {
+        "id": "e7_theWindowDropsTheOldestMessagesAndKeepsAToolCallWithItsResult()",
+        "kind": "edge",
+        "says": "The window drops the oldest messages and keeps a tool call with its result"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/64-keeping-what-matters-in-long-conversations/prose/unit-02/practice-3/target/test-results/test"
+    },
+    "origin": "course/64-keeping-what-matters-in-long-conversations/02-long-sessions-stale-facts-isolation-and-the-practice.md",
+    "concepts": [
+      "the practice of Long sessions: windows, stale facts, late updates, isolation and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/64-keeping-what-matters-in-long-conversations/prose/unit-02/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "keeping-what-matters-in-long-conversations-u2"
+}

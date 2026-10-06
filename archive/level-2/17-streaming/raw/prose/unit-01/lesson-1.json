@@ -1,0 +1,358 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "17-streaming"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Streaming events and assembling a message",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Streaming events and assembling a message"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Developer · **Module 17:** Streaming · **Page 1 of 2** **Exams:** DV1"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** read the server-sent events of a streamed reply, fold them into the message a non-streaming call would return, and say which fields are cumulative, which are cut into fragments and which events to ignore."
+    },
+    {
+      "type": "para",
+      "text": "Checked against the Claude API documentation (Streaming messages, the Python and TypeScript SDK pages, API versioning) on 2026-10-02, and by running the example and the practice offline in the course container with `anthropic` 1.11.0 and `@anthropic-ai/sdk` 0.131.0. The model id is `claude-sonnet-5-5`; the stream is a hand-written sequence labelled illustrative."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "A user waiting for a long answer looks at a blank screen for ten seconds, or reads the first words after one. Streaming is how the second experience is built, and it changes the shape of the code: the result is no longer a value returned by one call, it is a sequence you assemble. The exam asks what is in that sequence and where the usual mistakes are made: adding what should be replaced, parsing what is not yet complete, and trusting a stream that ended early."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Streaming is the same request with stream set to true"
+    },
+    {
+      "type": "para",
+      "text": "A stream is the same POST request to the same URL with `stream` set to `true`. The response is `text/event-stream`: **server-sent events**, each with an `event:` name and a `data:` line holding a JSON object whose `type` repeats the name. The SDKs hide the framing. Python offers `client.messages.stream(...)`, a context manager with `text_stream` and `get_final_message()`, and `client.messages.create(..., stream=True)` for the raw events. TypeScript offers `client.messages.stream(...)` with `.on('text', ...)` and `.finalMessage()`, and `create({ stream: true })` for the raw events. Java and Kotlin use the streaming method of the Java client, which returns the events."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The shape of a stream"
+    },
+    {
+      "type": "para",
+      "text": "A stream is a sequence of named events, and the message arrives in pieces: a start, blocks, and an end."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Event",
+        "Carries"
+      ],
+      "rows": [
+        [
+          "`message_start`",
+          "A `message` with `id`, `role`, `model`, an empty `content` and the input token count in `usage`"
+        ],
+        [
+          "`content_block_start`",
+          "The `index` of a block and its opening form: an empty `text`, a `tool_use` with its `id` and `name`, or a `thinking` block"
+        ],
+        [
+          "`content_block_delta`",
+          "A piece of that block: `text_delta`, `input_json_delta`, `thinking_delta` or `signature_delta`"
+        ],
+        [
+          "`content_block_stop`",
+          "The block at `index` is complete"
+        ],
+        [
+          "`message_delta`",
+          "The `stop_reason` and `stop_sequence`, and `usage` with the output token count"
+        ],
+        [
+          "`message_stop`",
+          "The stream finished normally"
+        ],
+        [
+          "`ping`",
+          "A keep-alive with no content"
+        ],
+        [
+          "`error`",
+          "An error, such as `overloaded_error`, in the stream"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Four rules turn that table into code:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Blocks are assembled by index.** `content` lists the blocks in index order, not in the order they stopped. Blocks are never sorted by type or by size.",
+        "**Text and thinking are concatenated.** A `text_delta` appends to the text of its block, and a `thinking_delta` to its thinking. A `signature_delta` sets the signature, which must be sent back unchanged with the thinking block.",
+        "**Tool input is text until the block ends.** The fragments of a `tool_use` input arrive as `partial_json` strings that are not valid JSON until the block ends. Join them, and parse once, after the block stops.",
+        "**Usage is split in two.** Input tokens come from `message_start`; the output count comes from the last `message_delta`. The output count in `message_delta` is cumulative: replace the stored one, do not add to it."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Under the versioning policy the API may add new event types, so ignore event types you do not know. `ping` is the first example of such an event: the raw iteration of the Python and TypeScript SDKs drops it before your loop sees it."
+    },
+    {
+      "type": "para",
+      "text": "A stream that ends without `message_stop` is an incomplete message, not a short one. The stop reason arrives in `message_delta`, near the end, so a cut stream has none."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example: one stream, read three ways"
+    },
+    {
+      "type": "para",
+      "text": "The program feeds a hand-written stream through the real SDK from a scripted transport. The stream has one text block (in two pieces), then one `tool_use` block whose input arrives in four fragments. It reads the stream with the SDK's helper, with the raw events, and a second time with an `error` event in the middle."
+    },
+    {
+      "type": "example",
+      "id": "m17-streaming",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/17-streaming-events/python/streaming.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/17-streaming-events/typescript/streaming.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/17-streaming-events/java/Streaming.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/17-streaming-events/kotlin/Streaming.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"A streamed reply read three ways, from a scripted server-sent-event body.\n\nThe stream is an illustrative, hand-written sequence of events in the API's framing\n(claude-sonnet-5-5): one text block, then one tool_use block whose input arrives in fragments.\n\"\"\"\nimport logging\nimport anthropic\nimport httpx2\n\nfrom harness import ScriptedTransport, sse_response\n\nlog = logging.getLogger(__name__)\n\nMODEL = \"claude-sonnet-5-5\"\nPARAMS = dict(model=MODEL, max_tokens=128, messages=[{\"role\": \"user\", \"content\": \"Weather in Paris?\"}],\n              tools=[{\"name\": \"get_weather\", \"description\": \"Weather for a city.\",\n                      \"input_schema\": {\"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}}, \"required\": [\"city\"]}}])\n\n\ndef delta(index, kind, key, value):\n    return {\"type\": \"content_block_delta\", \"index\": index, \"delta\": {\"type\": kind, key: value}}\n\n\nEVENTS = [\n    {\"type\": \"message_start\", \"message\": {\"id\": \"msg_illustrative\", \"type\": \"message\", \"role\": \"assistant\",\n     \"model\": MODEL, \"content\": [], \"stop_reason\": None, \"stop_sequence\": None,\n     \"usage\": {\"input_tokens\": 52, \"output_tokens\": 1}}},\n    {\"type\": \"content_block_start\", \"index\": 0, \"content_block\": {\"type\": \"text\", \"text\": \"\"}},\n    {\"type\": \"ping\"},\n    delta(0, \"text_delta\", \"text\", \"Let me \"),\n    delta(0, \"text_delta\", \"text\", \"check.\"),\n    {\"type\": \"content_block_stop\", \"index\": 0},\n    {\"type\": \"content_block_start\", \"index\": 1,\n     \"content_block\": {\"type\": \"tool_use\", \"id\": \"toolu_illustrative_1\", \"name\": \"get_weather\", \"input\": {}}},\n    delta(1, \"input_json_delta\", \"partial_json\", \"\"),\n    delta(1, \"input_json_delta\", \"partial_json\", '{\"ci'),\n    delta(1, \"input_json_delta\", \"partial_json\", 'ty\": \"Par'),\n    delta(1, \"input_json_delta\", \"partial_json\", 'is\"}'),\n    {\"type\": \"content_block_stop\", \"index\": 1},\n    {\"type\": \"message_delta\", \"delta\": {\"stop_reason\": \"tool_use\", \"stop_sequence\": None}, \"usage\": {\"output_tokens\": 38}},\n    {\"type\": \"message_stop\"},\n]\nFAILING = EVENTS[:5] + [{\"type\": \"error\", \"error\": {\"type\": \"overloaded_error\", \"message\": \"Overloaded\"}}]\n\n\ndef run_length(names):\n    \"\"\"['a', 'b', 'b'] -> 'a, b x2'\"\"\"\n    out = []\n    for name in names:\n        if out and out[-1][0] == name:\n            out[-1][1] += 1\n        else:\n            out.append([name, 1])\n    return \", \".join(n if c == 1 else f\"{n} x{c}\" for n, c in out)\n\n\ndef client_for(events):\n    transport = ScriptedTransport(sse_response(events))\n    return anthropic.Anthropic(api_key=\"placeholder\", max_retries=0, http_client=httpx2.Client(transport=transport)), transport\n\n\ndef main():\n    client, transport = client_for(EVENTS)\n    print(\"request sets stream:\", end=\" \")\n    with client.messages.stream(**PARAMS) as stream:\n        print(transport.requests[0][\"stream\"])\n        print(\"text pieces:\", list(stream.text_stream))\n        final = stream.get_final_message()\n    print(\"final stop_reason:\", final.stop_reason, \"| usage:\", final.usage.input_tokens, \"in,\", final.usage.output_tokens, \"out\")\n    print(\"blocks:\", [b.type for b in final.content], \"| tool input:\", final.content[1].input)\n\n    client, _ = client_for(EVENTS)\n    print(\"raw events:\", run_length(e.type for e in client.messages.create(**PARAMS, stream=True)))\n\n    client, _ = client_for(FAILING)\n    try:\n        with client.messages.stream(**PARAMS) as stream:\n            for _ in stream.text_stream:\n                pass\n    except anthropic.APIStatusError as err:\n        print(\"mid-stream error:\", type(err).__name__, err.body[\"error\"][\"type\"] if isinstance(err.body, dict) and \"error\" in err.body else err.body)\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "request sets stream: True\ntext pieces: ['Let me ', 'check.']\nfinal stop_reason: tool_use | usage: 52 in, 38 out\nblocks: ['text', 'tool_use'] | tool input: {'city': 'Paris'}\nraw events: message_start, content_block_start, content_block_delta x2, content_block_stop, content_block_start, content_block_delta x4, content_block_stop, message_delta, message_stop\nmid-stream error: APIStatusError overloaded_error"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// A streamed reply read three ways, from a scripted server-sent-event body.\n// The stream is an illustrative, hand-written sequence of events in the API's framing\n// (claude-sonnet-5-5): one text block, then one tool_use block whose input arrives in fragments.\nimport Anthropic from \"@anthropic-ai/sdk\";\nimport { scriptedFetch } from \"../../../harness/ts/scriptedFetch.ts\";\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"streaming\");\n\nconst MODEL = \"claude-sonnet-5-5\";\nexport const PARAMS = {\n  model: MODEL,\n  max_tokens: 128,\n  messages: [{ role: \"user\" as const, content: \"Weather in Paris?\" }],\n  tools: [{ name: \"get_weather\", description: \"Weather for a city.\", input_schema: { type: \"object\" as const, properties: { city: { type: \"string\" } }, required: [\"city\"] } }],\n};\n\nconst delta = (index: number, kind: string, key: string, value: string) => ({ type: \"content_block_delta\", index, delta: { type: kind, [key]: value } });\n\nexport const EVENTS = [\n  { type: \"message_start\", message: { id: \"msg_illustrative\", type: \"message\", role: \"assistant\", model: MODEL, content: [], stop_reason: null, stop_sequence: null, usage: { input_tokens: 52, output_tokens: 1 } } },\n  { type: \"content_block_start\", index: 0, content_block: { type: \"text\", text: \"\" } },\n  { type: \"ping\" },\n  delta(0, \"text_delta\", \"text\", \"Let me \"),\n  delta(0, \"text_delta\", \"text\", \"check.\"),\n  { type: \"content_block_stop\", index: 0 },\n  { type: \"content_block_start\", index: 1, content_block: { type: \"tool_use\", id: \"toolu_illustrative_1\", name: \"get_weather\", input: {} } },\n  delta(1, \"input_json_delta\", \"partial_json\", \"\"),\n  delta(1, \"input_json_delta\", \"partial_json\", '{\"ci'),\n  delta(1, \"input_json_delta\", \"partial_json\", 'ty\": \"Par'),\n  delta(1, \"input_json_delta\", \"partial_json\", 'is\"}'),\n  { type: \"content_block_stop\", index: 1 },\n  { type: \"message_delta\", delta: { stop_reason: \"tool_use\", stop_sequence: null }, usage: { output_tokens: 38 } },\n  { type: \"message_stop\" },\n];\nexport const FAILING = [...EVENTS.slice(0, 5), { type: \"error\", error: { type: \"overloaded_error\", message: \"Overloaded\" } }];\n\nexport function clientFor(events: Array<{ type: string }>) {\n  const fake = scriptedFetch([{ sse: events }]);\n  return { fake, client: new Anthropic({ apiKey: \"placeholder\", maxRetries: 0, fetch: fake.fetch }) };\n}\n\nfunction runLength(names: string[]): string {\n  const out: Array<[string, number]> = [];\n  for (const name of names) {\n    if (out.length && out[out.length - 1][0] === name) out[out.length - 1][1]++;\n    else out.push([name, 1]);\n  }\n  return out.map(([n, c]) => (c === 1 ? n : `${n} x${c}`)).join(\", \");\n}\n\nasync function main() {\n  let { fake, client } = clientFor(EVENTS);\n  const pieces: string[] = [];\n  const stream = client.messages.stream(PARAMS).on(\"text\", (t) => pieces.push(t));\n  const final = await stream.finalMessage();\n  console.log(\"request sets stream:\", fake.seen[0].body.stream);\n  console.log(\"text pieces:\", JSON.stringify(pieces));\n  console.log(\"final stop_reason:\", final.stop_reason, \"| usage:\", final.usage.input_tokens, \"in,\", final.usage.output_tokens, \"out\");\n  console.log(\"blocks:\", final.content.map((b) => b.type), \"| tool input:\", JSON.stringify((final.content[1] as any).input));\n\n  ({ client } = clientFor(EVENTS));\n  const types: string[] = [];\n  for await (const event of await client.messages.create({ ...PARAMS, stream: true })) types.push(event.type);\n  console.log(\"raw events:\", runLength(types));\n\n  ({ client } = clientFor(FAILING));\n  try {\n    await client.messages.stream(PARAMS).finalMessage();\n  } catch (err) {\n    if (err instanceof Anthropic.APIError) console.log(\"mid-stream error:\", err.constructor.name, (err.error as any)?.error?.type ?? err.message);\n    else throw err;\n  }\n}\n\nif (import.meta.main) await main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "request sets stream: true\ntext pieces: [\"Let me \",\"check.\"]\nfinal stop_reason: tool_use | usage: 52 in, 38 out\nblocks: [ 'text', 'tool_use' ] | tool input: {\"city\":\"Paris\"}\nraw events: message_start, content_block_start, content_block_delta x2, content_block_stop, content_block_start, content_block_delta x4, content_block_stop, message_delta, message_stop\nmid-stream error: APIError overloaded_error"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import static harness.Scripted.map;\n\nimport com.anthropic.client.AnthropicClient;\nimport com.anthropic.core.ObjectMappers;\nimport com.anthropic.core.http.StreamResponse;\nimport com.anthropic.errors.SseException;\nimport com.anthropic.helpers.MessageAccumulator;\nimport com.anthropic.models.messages.ContentBlock;\nimport com.anthropic.models.messages.Message;\nimport com.anthropic.models.messages.MessageCreateParams;\nimport com.anthropic.models.messages.Model;\nimport com.anthropic.models.messages.RawMessageStreamEvent;\nimport com.anthropic.models.messages.Tool;\nimport com.anthropic.core.JsonValue;\nimport harness.Reply;\nimport harness.Scripted;\nimport harness.ScriptedHttp;\nimport java.util.ArrayList;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.stream.Collectors;\n\n/**\n * A streamed reply read three ways, from a scripted server-sent-event body.\n *\n * <p>The stream is an illustrative, hand-written sequence of events in the API's framing\n * (claude-sonnet-5-5): one text block, then one tool_use block whose input arrives in fragments.\n * The Java SDK reads the events itself and drops `ping` events, so a raw event list has no `ping` in it.\n */\npublic final class Streaming {\n    private static final System.Logger LOG = System.getLogger(Streaming.class.getName());\n    static final String MODEL = \"claude-sonnet-5-5\";\n\n    static MessageCreateParams params() {\n        Tool weather = Tool.builder().name(\"get_weather\").description(\"Weather for a city.\")\n            .inputSchema(Tool.InputSchema.builder().properties(JsonValue.from(map(\"city\", map(\"type\", \"string\")))).required(List.of(\"city\")).build()).build();\n        return MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(128).addUserMessage(\"Weather in Paris?\").addTool(weather).build();\n    }\n\n    static Map<String, Object> delta(int index, String kind, String key, String value) {\n        return map(\"type\", \"content_block_delta\", \"index\", index, \"delta\", map(\"type\", kind, key, value));\n    }\n\n    static final List<Map<String, Object>> EVENTS = List.of(\n        map(\"type\", \"message_start\", \"message\", map(\"id\", \"msg_illustrative\", \"type\", \"message\", \"role\", \"assistant\", \"model\", MODEL, \"content\", List.of(),\n            \"stop_reason\", null, \"stop_sequence\", null, \"usage\", map(\"input_tokens\", 52, \"output_tokens\", 1))),\n        map(\"type\", \"content_block_start\", \"index\", 0, \"content_block\", map(\"type\", \"text\", \"text\", \"\")),\n        map(\"type\", \"ping\"),\n        delta(0, \"text_delta\", \"text\", \"Let me \"),\n        delta(0, \"text_delta\", \"text\", \"check.\"),\n        map(\"type\", \"content_block_stop\", \"index\", 0),\n        map(\"type\", \"content_block_start\", \"index\", 1, \"content_block\", map(\"type\", \"tool_use\", \"id\", \"toolu_illustrative_1\", \"name\", \"get_weather\", \"input\", map())),\n        delta(1, \"input_json_delta\", \"partial_json\", \"\"),\n        delta(1, \"input_json_delta\", \"partial_json\", \"{\\\"ci\"),\n        delta(1, \"input_json_delta\", \"partial_json\", \"ty\\\": \\\"Par\"),\n        delta(1, \"input_json_delta\", \"partial_json\", \"is\\\"}\"),\n        map(\"type\", \"content_block_stop\", \"index\", 1),\n        map(\"type\", \"message_delta\", \"delta\", map(\"stop_reason\", \"tool_use\", \"stop_sequence\", null), \"usage\", map(\"output_tokens\", 38)),\n        map(\"type\", \"message_stop\"));\n\n    static final List<Map<String, Object>> FAILING = failing();\n\n    private static List<Map<String, Object>> failing() {\n        List<Map<String, Object>> events = new ArrayList<>(EVENTS.subList(0, 5));\n        events.add(map(\"type\", \"error\", \"error\", map(\"type\", \"overloaded_error\", \"message\", \"Overloaded\")));\n        return events;\n    }\n\n    /** The pieces of a streamed reply: the text deltas, and the message the SDK's accumulator assembled from all the events. */\n    record Streamed(List<String> textPieces, Message message) {}\n\n    /** The name of a raw stream event, as it is on the wire. */\n    static String typeName(RawMessageStreamEvent e) {\n        if (e.isMessageStart()) return \"message_start\";\n        if (e.isMessageDelta()) return \"message_delta\";\n        if (e.isMessageStop()) return \"message_stop\";\n        if (e.isContentBlockStart()) return \"content_block_start\";\n        if (e.isContentBlockDelta()) return \"content_block_delta\";\n        return \"content_block_stop\";\n    }\n\n    static Streamed readText(AnthropicClient client) {\n        MessageAccumulator accumulator = MessageAccumulator.create();\n        List<String> pieces = new ArrayList<>();\n        try (StreamResponse<RawMessageStreamEvent> stream = client.messages().createStreaming(params())) {\n            stream.stream().forEach(event -> {\n                accumulator.accumulate(event);\n                event.contentBlockDelta().flatMap(d -> d.delta().text()).ifPresent(t -> pieces.add(t.text()));\n            });\n        }\n        return new Streamed(pieces, accumulator.message());\n    }\n\n    static List<String> rawEventNames(AnthropicClient client) {\n        try (StreamResponse<RawMessageStreamEvent> stream = client.messages().createStreaming(params())) {\n            return stream.stream().map(Streaming::typeName).toList();\n        }\n    }\n\n    /** ['a', 'b', 'b'] becomes \"a, b x2\". */\n    static String runLength(List<String> names) {\n        List<String> parts = new ArrayList<>();\n        for (int i = 0; i < names.size(); ) {\n            int j = i;\n            while (j < names.size() && names.get(j).equals(names.get(i))) j++;\n            parts.add(j - i == 1 ? names.get(i) : names.get(i) + \" x\" + (j - i));\n            i = j;\n        }\n        return String.join(\", \", parts);\n    }\n\n    static Scripted.Rig clientFor(List<Map<String, Object>> events) {\n        return Scripted.client(Reply.sse(events));\n    }\n\n    /** The tool input the stream assembled, as a map. */\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> toolInput(ContentBlock block) {\n        return ObjectMappers.jsonMapper().convertValue(block.asToolUse()._input(), Map.class);\n    }\n\n    private static String py(Object v) {\n        if (v instanceof String s) return \"'\" + s + \"'\";\n        if (v instanceof Map<?, ?> m) return m.entrySet().stream().map(e -> py(e.getKey()) + \": \" + py(e.getValue())).collect(Collectors.joining(\", \", \"{\", \"}\"));\n        if (v instanceof List<?> l) return l.stream().map(Streaming::py).collect(Collectors.joining(\", \", \"[\", \"]\"));\n        return String.valueOf(v);\n    }\n\n    public static void main(String[] args) {\n        Scripted.Rig rig = clientFor(EVENTS);\n        Streamed streamed = readText(rig.client());\n        System.out.println(\"request sets stream: \" + (rig.http().requests.get(0).get(\"stream\").asBoolean() ? \"True\" : \"False\"));\n        System.out.println(\"text pieces: \" + py(streamed.textPieces()));\n        Message finalMessage = streamed.message();\n        System.out.println(\"final stop_reason: \" + finalMessage.stopReason().get().asString() + \" | usage: \" + finalMessage.usage().inputTokens() + \" in, \" + finalMessage.usage().outputTokens() + \" out\");\n        System.out.println(\"blocks: \" + py(finalMessage.content().stream().map(b -> b.isText() ? \"text\" : \"tool_use\").toList()) + \" | tool input: \" + py(toolInput(finalMessage.content().get(1))));\n\n        System.out.println(\"raw events: \" + runLength(rawEventNames(clientFor(EVENTS).client())));\n\n        try {\n            readText(clientFor(FAILING).client());\n        } catch (SseException err) {\n            System.out.println(\"mid-stream error: \" + err.getClass().getSimpleName() + \" \" + err.errorType().map(t -> t.asString()).orElse(\"?\"));\n        }\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "request sets stream: True\ntext pieces: ['Let me ', 'check.']\nfinal stop_reason: tool_use | usage: 52 in, 38 out\nblocks: ['text', 'tool_use'] | tool input: {'city': 'Paris'}\nraw events: message_start, content_block_start, content_block_delta x2, content_block_stop, content_block_start, content_block_delta x4, content_block_stop, message_delta, message_stop\nmid-stream error: SseException overloaded_error"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import com.anthropic.core.JsonValue\nimport com.anthropic.core.jsonMapper\nimport com.anthropic.errors.SseException\nimport com.anthropic.helpers.MessageAccumulator\nimport com.anthropic.client.AnthropicClient\nimport com.anthropic.models.messages.ContentBlock\nimport com.anthropic.models.messages.Message\nimport com.anthropic.models.messages.MessageCreateParams\nimport com.anthropic.models.messages.Model\nimport com.anthropic.models.messages.RawMessageStreamEvent\nimport com.anthropic.models.messages.Tool\nimport harness.Reply\nimport harness.Scripted\nimport harness.Scripted.map\n\nprivate val log = System.getLogger(\"streaming\")\n\n/**\n * A streamed reply read three ways, from a scripted server-sent-event body.\n *\n * The stream is an illustrative, hand-written sequence of events in the API's framing\n * (claude-sonnet-5-5): one text block, then one tool_use block whose input arrives in fragments.\n * The Java SDK (used from Kotlin) reads the events itself and drops `ping` events, so a raw event list has no `ping` in it.\n */\nconst val MODEL = \"claude-sonnet-5-5\"\n\nfun params(): MessageCreateParams {\n    val weather = Tool.builder().name(\"get_weather\").description(\"Weather for a city.\")\n        .inputSchema(Tool.InputSchema.builder().properties(JsonValue.from(map(\"city\", map(\"type\", \"string\")))).required(listOf(\"city\")).build()).build()\n    return MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(128).addUserMessage(\"Weather in Paris?\").addTool(weather).build()\n}\n\nfun delta(index: Int, kind: String, key: String, value: String) = map(\"type\", \"content_block_delta\", \"index\", index, \"delta\", map(\"type\", kind, key, value))\n\nval EVENTS = listOf(\n    map(\n        \"type\", \"message_start\",\n        \"message\", map(\"id\", \"msg_illustrative\", \"type\", \"message\", \"role\", \"assistant\", \"model\", MODEL, \"content\", listOf<Any>(), \"stop_reason\", null, \"stop_sequence\", null, \"usage\", map(\"input_tokens\", 52, \"output_tokens\", 1)),\n    ),\n    map(\"type\", \"content_block_start\", \"index\", 0, \"content_block\", map(\"type\", \"text\", \"text\", \"\")),\n    map(\"type\", \"ping\"),\n    delta(0, \"text_delta\", \"text\", \"Let me \"),\n    delta(0, \"text_delta\", \"text\", \"check.\"),\n    map(\"type\", \"content_block_stop\", \"index\", 0),\n    map(\"type\", \"content_block_start\", \"index\", 1, \"content_block\", map(\"type\", \"tool_use\", \"id\", \"toolu_illustrative_1\", \"name\", \"get_weather\", \"input\", map())),\n    delta(1, \"input_json_delta\", \"partial_json\", \"\"),\n    delta(1, \"input_json_delta\", \"partial_json\", \"{\\\"ci\"),\n    delta(1, \"input_json_delta\", \"partial_json\", \"ty\\\": \\\"Par\"),\n    delta(1, \"input_json_delta\", \"partial_json\", \"is\\\"}\"),\n    map(\"type\", \"content_block_stop\", \"index\", 1),\n    map(\"type\", \"message_delta\", \"delta\", map(\"stop_reason\", \"tool_use\", \"stop_sequence\", null), \"usage\", map(\"output_tokens\", 38)),\n    map(\"type\", \"message_stop\"),\n)\nval FAILING = EVENTS.take(5) + map(\"type\", \"error\", \"error\", map(\"type\", \"overloaded_error\", \"message\", \"Overloaded\"))\n\n/** The pieces of a streamed reply: the text deltas, and the message the SDK's accumulator assembled from all the events. */\ndata class Streamed(val textPieces: List<String>, val message: Message)\n\n/** The name of a raw stream event, as it is on the wire. */\nfun typeName(e: RawMessageStreamEvent) = when {\n    e.isMessageStart() -> \"message_start\"\n    e.isMessageDelta() -> \"message_delta\"\n    e.isMessageStop() -> \"message_stop\"\n    e.isContentBlockStart() -> \"content_block_start\"\n    e.isContentBlockDelta() -> \"content_block_delta\"\n    else -> \"content_block_stop\"\n}\n\nfun readText(client: AnthropicClient): Streamed {\n    val accumulator = MessageAccumulator.create()\n    val pieces = mutableListOf<String>()\n    client.messages().createStreaming(params()).use { stream ->\n        stream.stream().forEach { event ->\n            accumulator.accumulate(event)\n            event.contentBlockDelta().flatMap { it.delta().text() }.ifPresent { pieces += it.text() }\n        }\n    }\n    return Streamed(pieces, accumulator.message())\n}\n\nfun rawEventNames(client: AnthropicClient): List<String> = client.messages().createStreaming(params()).use { stream -> stream.stream().map(::typeName).toList() }\n\n/** ['a', 'b', 'b'] becomes \"a, b x2\". */\nfun runLength(names: List<String>): String {\n    val parts = mutableListOf<String>()\n    var i = 0\n    while (i < names.size) {\n        var j = i\n        while (j < names.size && names[j] == names[i]) j++\n        parts += if (j - i == 1) names[i] else \"${names[i]} x${j - i}\"\n        i = j\n    }\n    return parts.joinToString(\", \")\n}\n\nfun clientFor(events: List<Map<String, Any?>>) = Scripted.client(Reply.sse(events))\n\n/** The tool input the stream assembled, as a map. */\nfun toolInput(block: ContentBlock): Map<*, *> = jsonMapper().convertValue(block.asToolUse()._input(), Map::class.java)\n\nprivate fun py(v: Any?): String = when (v) {\n    is String -> \"'$v'\"\n    is Map<*, *> -> v.entries.joinToString(\", \", \"{\", \"}\") { \"${py(it.key)}: ${py(it.value)}\" }\n    is List<*> -> v.joinToString(\", \", \"[\", \"]\") { py(it) }\n    else -> v.toString()\n}\n\nfun main() {\n    val rig = clientFor(EVENTS)\n    val streamed = readText(rig.client())\n    println(\"request sets stream: ${if (rig.http().requests[0][\"stream\"].asBoolean()) \"True\" else \"False\"}\")\n    println(\"text pieces: ${py(streamed.textPieces)}\")\n    val message = streamed.message\n    println(\"final stop_reason: ${message.stopReason().get().asString()} | usage: ${message.usage().inputTokens()} in, ${message.usage().outputTokens()} out\")\n    println(\"blocks: ${py(message.content().map { if (it.isText()) \"text\" else \"tool_use\" })} | tool input: ${py(toolInput(message.content()[1]))}\")\n\n    println(\"raw events: ${runLength(rawEventNames(clientFor(EVENTS).client()))}\")\n\n    try {\n        readText(clientFor(FAILING).client())\n    } catch (err: SseException) {\n        println(\"mid-stream error: ${err.javaClass.simpleName} ${err.errorType().map { it.asString() }.orElse(\"?\")}\")\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "request sets stream: True\ntext pieces: ['Let me ', 'check.']\nfinal stop_reason: tool_use | usage: 52 in, 38 out\nblocks: ['text', 'tool_use'] | tool input: {'city': 'Paris'}\nraw events: message_start, content_block_start, content_block_delta x2, content_block_stop, content_block_start, content_block_delta x4, content_block_stop, message_delta, message_stop\nmid-stream error: SseException overloaded_error"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Read the output for four facts:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**The request carries `stream: true`.** It is the same call with one more field.",
+        "**The helper assembled the message.** The text came in two pieces, and the final message holds the two blocks, the tool input `{'city': 'Paris'}` parsed from four fragments, and usage of 52 in and 38 out: the input count from the start and the output count from the end.",
+        "**The raw events omit `ping`.** The stream held one, and the run-length summary does not show it, because the SDK drops it.",
+        "**An error in the middle is an exception.** The SDK raises when it meets the `error` event, with the type from the event, although the status of the response was a success."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The Java and Kotlin tabs read the same scripted event stream with the SDK's `MessageAccumulator`, which assembles the message from the events as they arrive. The SDK drops `ping` events before the program sees them, and an `error` event ends the stream with an `SseException` (the Python SDK raises `APIStatusError`), so the mid-stream error line reads `SseException overloaded_error`. The practice below runs in all four languages."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The practice: assemble a streamed message"
+    },
+    {
+      "type": "para",
+      "text": "You write `assemble(events)`, which folds the parsed `data:` objects into the message a non-streaming call would have returned. The statement, with the exact contract, is in `exercises/17-streaming/unit-01/practice-1/statement.md`; each language folder has a `starter`, the `tests` and a `run.sh` or build file. The starter fails every test."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Text deltas are joined and the message is complete"
+        ],
+        [
+          "`e1`",
+          "Tool input is the fragments joined, then parsed; empty input is `{}`"
+        ],
+        [
+          "`e2`",
+          "`ping` and unknown event types are ignored"
+        ],
+        [
+          "`e3`",
+          "An error event raises with its type and message"
+        ],
+        [
+          "`e4`",
+          "A stream that ends before `message_stop` is an error, not a short message"
+        ],
+        [
+          "`e5`",
+          "Usage: input tokens from the start, the cumulative output tokens from the end"
+        ],
+        [
+          "`e6`",
+          "Blocks keep their index order; thinking fields are assembled"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Adding the output count.** Each `message_delta` restates the total so far. A client that sums them reports a multiple of the real cost.",
+        "**Parsing each fragment.** A fragment of tool input is a piece of text, not an object. Parse after the block stops.",
+        "**Accepting a stream that just stopped.** Without `message_stop` there is no stop reason and the content may end in the middle of a word. Raise, so that the caller can decide."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A handler adds up the output token count of every `message_delta` it receives and reports three times the real cost. What does the page say it should do instead?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Overwrite the earlier figure, since each event restates the running tally",
+              "**b**: Take the input count from the final event and the output count from the first",
+              "**c**: Sum them all and then subtract the figure that the opening event gave",
+              "**d**: Drop the field and measure the pieces of text that arrived in the stream"
+            ]
+          }
+        ],
+        [
+          "A stream breaks in the middle of the fragments of a tool call's input. What should the code do?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Join the fragments received so far and parse them as the input",
+              "**b**: Run the tool with whatever the first fragment held",
+              "**c**: Throw the piece away and report the whole message as failed",
+              "**d**: Keep the block and mark the message as a short one"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**a**. The page says \"The output count in message_delta is cumulative: replace the stored one, do not add to it\". *b* is ruled out because \"the output count comes from the last message_delta\" and the input count from `message_start`. *c* is ruled out because the page says \"do not add to it\". *d* is ruled out because usage is read from the events: \"Input tokens come from message_start\".",
+            "**c**. The page says \"Raise, so that the caller can decide\" when a stream just stopped, because it \"is an incomplete message, not a short one\". *a* is ruled out because the fragments \"are not valid JSON until the block ends\". *b* is ruled out because \"A fragment of tool input is a piece of text, not an object\". *d* is ruled out because the page says \"an incomplete message, not a short one\"."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 13,
+    "code": 0,
+    "tables": 2,
+    "lists": 4,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "f56f6ba9d03bb29d42b97cafb7cfd947f6482a7ab1b278570832046c5748dd6b"
+}

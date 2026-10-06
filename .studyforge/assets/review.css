@@ -1,0 +1,49 @@
+/* A spaced-review bank: the due summary, the verdict lines and the controls, over the quiz's look.
+
+   ⭐ Written beside `page.css`, never inside it, and ONLY for a corpus that has a review bank. The
+   section is a quiz section (`data-practice-quiz`), so the questions and options wear
+   `practice-quiz.css`; this adds what only a schedule has. ⛔ No colour and no measure of its own:
+   every value is a palette token. ⚠️ Phone first: the controls wrap. */
+
+/* ⭐ The bank's list is the quiz's list under the bank's own part name, so it numbers the same way:
+   one counter in each stem's legend and no marker of the browser's beside the options. */
+section[data-review] ol[data-review-part="questions"] {
+  margin: 0 0 .75rem;
+  padding: 0;
+  list-style: none;
+  counter-reset: question;
+}
+
+section[data-review] li[data-practice-question] {
+  margin: 0 0 1rem;
+  counter-increment: question;
+}
+
+section[data-review] p[data-review-part="summary"] {
+  margin: 0 0 .75rem;
+  color: var(--fg-soft);
+  font-size: .9rem;
+}
+
+section[data-review] li[data-practice-question][hidden],
+section[data-review] [data-review-part="says"][hidden],
+section[data-review] [data-review-part="offline"][hidden],
+section[data-review] [data-review-part="controls"][hidden],
+section[data-review] [data-review-act][hidden] {
+  display: none;
+}
+
+section[data-review] li[data-practice-question][data-review-verdict="correct"] {
+  border-left: 3px solid var(--done);
+}
+
+section[data-review] li[data-practice-question][data-review-verdict="wrong"] {
+  border-left: 3px solid var(--accent);
+}
+
+section[data-review] p[data-review-part="controls"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin: .75rem 0 0;
+}

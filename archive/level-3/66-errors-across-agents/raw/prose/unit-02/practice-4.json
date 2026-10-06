@@ -1,0 +1,282 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "66-errors-across-agents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: subagents that recover locally, fail with context and leave the coordinator able to decide (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: subagents that recover locally, fail with context and leave the coordinator able to decide"
+    },
+    {
+      "type": "para",
+      "text": "A research system sends one subagent to each source. When a source times out, the subagent returns \"search unavailable\" and the coordinator learns nothing; when a source has nothing to say, the subagent returns an error, so the coordinator retries a search that worked; when one source is closed to the system, the whole run stops; and the final report claims to cover every topic although two of them were never read. In this practice you write the three decisions that fix this: what a subagent does about a failure (retry what is transient, report the rest with its context), what the coordinator does with each result, and what the report says about coverage. The tool is not called: the tests give you scripted replies. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`search_with_recovery`, `coordinator_plan`, `coverage_note`); TypeScript has the camel-case names; Java has the same camel-case names as static methods of `ErrorFlow` with the records the starter defines (`Reply`, `Outcome`, `Step`); Kotlin has top-level functions and data classes with default values (its `search_with_recovery` takes the call function as the last argument)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working error flow with six gaps cut out of it. Everything that is plumbing is written and correct: the loop of attempts, the tables of alternatives and transient failures, the success outcome, the first rows of the coordinator's plan and the first groups of the coverage note. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript, Java and Kotlin names are the camel-case forms where a name is given):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "The local retry (unlocks `m1`): a transient failure (`timeout`, `unavailable`) is retried locally while the attempts are below the limit, and the success that follows is reported with its number of attempts.",
+        "The valid empty result (unlocks `e1`): an `ok` reply with no items is the status `empty`, a success with no findings, never an error; with items it is `success`.",
+        "The failure context (unlocks `e2`, `e3`): a failure carries what was attempted, the number of attempts, the partial results of the last attempt and the alternatives for its type, so the coordinator can act on it; a permission or invalid query error is not retried.",
+        "The coordinator's actions (unlocks `e4`): a failed topic with partial results is used as it is (`use_partial`), one without them but with alternatives is retried another way (`try_alternative`), and one with neither is flagged as a gap (`flag_gap`); the run never stops.",
+        "The partial and gap groups (unlocks `e5`): a failed topic with partial results is listed under `Partial` with its failure type, and one without them under `Gaps` with the failure type and the query that was attempted, so the note names the cause.",
+        "The topic with no result (unlocks `e6`): a topic that has no result at all is a gap that was not searched: `topic (not searched)` under `Gaps`."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gap 1. About eight lines in all. The steps below describe the whole flow, so you can see how your gaps are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "A search tool is a function `call(query, attempt)` (the attempt number starts at 1) that returns either `{status: \"ok\", items: [...]}` or `{status: \"error\", type, partial: [...]}`, where `type` is one of `timeout`, `unavailable`, `permission` and `invalid_query` (or anything else) and `partial` holds the items found before the error."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`search_with_recovery(query, call, max_attempts=2)` returns an outcome:",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "an `ok` reply with items gives `{status: \"success\", items, attempts}`; an `ok` reply with no items is a valid empty result, `{status: \"empty\", items: [], attempts}`, and is never an error;",
+              "an error of type `timeout` or `unavailable` is transient: the subagent calls again, up to `max_attempts` calls in all;",
+              "any other error, or a transient one on the last attempt, ends in `{status: \"failed\", failure_type, attempted, attempts, partial_results, alternatives}`: `attempted` is the query, `partial_results` is the `partial` of the last reply, and `alternatives` comes from the `ALTERNATIVES` table in the starter (an empty list for a type the table does not know)."
+            ]
+          }
+        ],
+        "`coordinator_plan(results)` takes a map from topic to outcome and returns `(topic, action)` pairs in the map's order: `use` for a success, `no_findings` for an empty result, and for a failure `use_partial` when it has partial results, otherwise `try_alternative` when it has alternatives, otherwise `flag_gap`. It never stops the run for a failure.",
+        "`coverage_note(results, topics)` returns lines for the groups that are not empty, in this order: `Well-supported: ...` (successes), `Partial: ...` (failures with partial results, each as `<topic> (<failure_type>)`), `No findings: ...` (empty results) and `Gaps: ...` (other failures, each as `<topic> (<failure_type>: <attempted>)`, and a topic with no result at all as `<topic> (not searched)`). Topics are listed in the order of `topics`, and the lines are joined by a newline; with nothing to say the result is an empty string."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Recover locally.** A timeout is the subagent's to retry, so that the coordinator hears only what the subagent could not fix. *You should see* a success after one retry, reported with two attempts.",
+        "**An empty result is an answer.** A search that finds nothing has succeeded. *You should see* `empty` and no retry.",
+        "**Errors carry context.** \"Failed\" is not enough for a coordinator to choose a recovery. *You should see* the failure type, the query, the attempts, the partial results and the alternatives.",
+        "**Do not retry what cannot change.** A closed door stays closed. *You should see* one attempt for a permission error.",
+        "**Never stop the run, never hide the gap.** The coordinator uses what it has and the report says what is missing and why. *You should see* a plan for every topic and a note with a gap named."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A transient failure is retried locally and the success is reported with its attempts"
+        ],
+        [
+          "`e1`",
+          "A valid empty result is a success with no findings and never an error"
+        ],
+        [
+          "`e2`",
+          "A permission or invalid query error is not retried and carries what was attempted and its alternatives"
+        ],
+        [
+          "`e3`",
+          "A failure that survives the retries carries the partial results of the last attempt"
+        ],
+        [
+          "`e4`",
+          "The coordinator uses partial results, tries an alternative or flags a gap, and never stops the run"
+        ],
+        [
+          "`e5`",
+          "The coverage note separates supported topics from gaps and names the cause"
+        ],
+        [
+          "`e6`",
+          "A topic with no result is a gap that was not searched"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "/** How a subagent's failure reaches the coordinator and the report: local recovery, structured error context, valid empty results, and coverage notes. See ../../statement.md. */\n\nprivate val log = System.getLogger(\"error_flow\")\n\nval ALTERNATIVES = mapOf(\n    \"timeout\" to listOf(\"retry later\", \"try a narrower query\"),\n    \"unavailable\" to listOf(\"use a cached source\", \"try another provider\"),\n    \"permission\" to listOf(\"request access\", \"use a public source\"),\n    \"invalid_query\" to listOf(\"rewrite the query\"),\n)\nval TRANSIENT = listOf(\"timeout\", \"unavailable\")\n\n/** What a search tool returns: status ok with items, or status error with a type and the partial items found before it failed. */\ndata class Reply(val status: String, val type: String? = null, val items: List<String> = emptyList(), val partial: List<String> = emptyList())\n\ndata class Outcome(val status: String, val items: List<String> = emptyList(), val attempts: Int, val failureType: String? = null, val attempted: String? = null, val partialResults: List<String> = emptyList(), val alternatives: List<String> = emptyList())\n\ndata class Step(val topic: String, val action: String)\n\nfun searchWithRecovery(query: String, maxAttempts: Int = 2, call: (String, Int) -> Reply): Outcome {\n    log.log(System.Logger.Level.DEBUG, \"searchWithRecovery input: {0}\", query)\n    var attempts = 0\n    while (true) {\n        attempts += 1\n        val reply = call(query, attempts)\n        if (reply.status == \"ok\") return Outcome(if (reply.items.isEmpty()) \"empty\" else \"success\", reply.items, attempts)\n        val kind = reply.type!!\n        if (kind in TRANSIENT && attempts < maxAttempts) continue\n        return Outcome(\"failed\", emptyList(), attempts, kind, query, reply.partial, ALTERNATIVES[kind] ?: emptyList())\n    }\n}\n\nfun coordinatorPlan(results: Map<String, Outcome>): List<Step> = results.map { (topic, o) ->\n    Step(topic, when {\n        o.status == \"success\" -> \"use\"\n        o.status == \"empty\" -> \"no_findings\"\n        o.partialResults.isNotEmpty() -> \"use_partial\"\n        o.alternatives.isNotEmpty() -> \"try_alternative\"\n        else -> \"flag_gap\"\n    })\n}\n\nfun coverageNote(results: Map<String, Outcome>, topics: List<String>): String {\n    val groups = linkedMapOf(\"Well-supported\" to mutableListOf<String>(), \"Partial\" to mutableListOf(), \"No findings\" to mutableListOf(), \"Gaps\" to mutableListOf())\n    for (topic in topics) {\n        val o = results[topic]\n        when {\n            o == null -> groups.getValue(\"Gaps\") += \"$topic (not searched)\"\n            o.status == \"success\" -> groups.getValue(\"Well-supported\") += topic\n            o.status == \"empty\" -> groups.getValue(\"No findings\") += topic\n            o.partialResults.isNotEmpty() -> groups.getValue(\"Partial\") += \"$topic (${o.failureType})\"\n            else -> groups.getValue(\"Gaps\") += \"$topic (${o.failureType}: ${o.attempted})\"\n        }\n    }\n    return groups.filter { it.value.isNotEmpty() }.map { \"${it.key}: ${it.value.joinToString(\", \")}\" }.joinToString(\"\\n\")\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // A stand-in for a search subagent, like the tests use: it times out once, then answers.\n    val news = searchWithRecovery(\"news\") { _, attempt ->\n        if (attempt == 1) Reply(\"error\", \"timeout\") else Reply(\"ok\", items = listOf(\"a\", \"b\"))\n    }\n    println(\"transient failure: $news\")\n\n    // A search the agent may not run: the failure is not transient.\n    val filings = searchWithRecovery(\"filings\") { _, _ -> Reply(\"error\", \"permission\") }\n    println(\"permission failure: $filings\")\n\n    // What the coordinator does with each outcome, and what the final report admits.\n    val results = linkedMapOf(\"news\" to news, \"filings\" to filings)\n    println(\"plan: ${coordinatorPlan(results)}\")\n    println(coverageNote(results, listOf(\"news\", \"filings\", \"patents\")))\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "/** How a subagent's failure reaches the coordinator and the report: local recovery, structured error context, valid empty results, and coverage notes. See ../../statement.md. */\n\nprivate val log = System.getLogger(\"error_flow\")\n\nval ALTERNATIVES = mapOf(\n    \"timeout\" to listOf(\"retry later\", \"try a narrower query\"),\n    \"unavailable\" to listOf(\"use a cached source\", \"try another provider\"),\n    \"permission\" to listOf(\"request access\", \"use a public source\"),\n    \"invalid_query\" to listOf(\"rewrite the query\"),\n)\nval TRANSIENT = listOf(\"timeout\", \"unavailable\")\n\n/** What a search tool returns: status ok with items, or status error with a type and the partial items found before it failed. */\ndata class Reply(val status: String, val type: String? = null, val items: List<String> = emptyList(), val partial: List<String> = emptyList())\n\ndata class Outcome(val status: String, val items: List<String> = emptyList(), val attempts: Int, val failureType: String? = null, val attempted: String? = null, val partialResults: List<String> = emptyList(), val alternatives: List<String> = emptyList())\n\ndata class Step(val topic: String, val action: String)\n\nfun searchWithRecovery(query: String, maxAttempts: Int = 2, call: (String, Int) -> Reply): Outcome {\n    log.log(System.Logger.Level.DEBUG, \"searchWithRecovery input: {0}\", query)\n    var attempts = 0\n    while (true) {\n        attempts += 1\n        val reply = call(query, attempts)\n        // TODO 2 of 6 (finish this to pass e1): the status of an ok reply. Return success when the reply holds items and\n        //   empty when it holds none (a search that found nothing is a valid answer, not a failure). Example: ok with []\n        //   -> empty.\n        if (reply.status == \"ok\") return Outcome(\"success\", reply.items, attempts)\n        val kind = reply.type!!\n        // TODO 1 of 6 (finish this to pass m1): the local retry. When the failure type is one of TRANSIENT and the\n        //   attempts so far are below max_attempts, try again; otherwise give up. Example: timeout then ok, limit 2 ->\n        //   success with attempts 2.\n        // TODO 3 of 6 (finish this to pass e2, e3): the failed outcome. Return status failed with the failure type, the\n        //   query that was attempted, the attempts, the partial results the reply carried (none when absent) and the\n        //   alternatives listed for that failure type (none when unknown). Example: permission error -> alternatives\n        //   [request access, use a public source].\n        return Outcome(\"failed\", emptyList(), attempts, kind, query, emptyList(), emptyList())\n    }\n}\n\nfun coordinatorPlan(results: Map<String, Outcome>): List<Step> = results.map { (topic, o) ->\n    Step(topic, when {\n        o.status == \"success\" -> \"use\"\n        o.status == \"empty\" -> \"no_findings\"\n        // TODO 4 of 6 (finish this to pass e4): the rows for a failed topic. When the outcome has partial results, the\n        //   action is use_partial; otherwise try_alternative when it has alternatives; otherwise flag_gap. Example:\n        //   failed, no partial, alternatives [rewrite the query] -> try_alternative.\n        else -> \"flag_gap\"\n    })\n}\n\nfun coverageNote(results: Map<String, Outcome>, topics: List<String>): String {\n    val groups = linkedMapOf(\"Well-supported\" to mutableListOf<String>(), \"Partial\" to mutableListOf(), \"No findings\" to mutableListOf(), \"Gaps\" to mutableListOf())\n    for (topic in topics) {\n        val o = results[topic]\n        when {\n            // TODO 6 of 6 (finish this to pass e6): the topic with no result. When a requested topic has no outcome at\n            //   all, list it under Gaps as \"topic (not searched)\". Example: topics [a, b], results only for a -> Gaps: b\n            //   (not searched).\n            o == null -> continue\n            o.status == \"success\" -> groups.getValue(\"Well-supported\") += topic\n            o.status == \"empty\" -> groups.getValue(\"No findings\") += topic\n            // TODO 5 of 6 (finish this to pass e5): the groups of a failed topic in the coverage note. With partial\n            //   results, list the topic under Partial as \"topic (failure type)\"; without, under Gaps as \"topic (failure\n            //   type: query attempted)\". Example: partial, timeout -> Partial: topic (timeout).\n            else -> groups.getValue(\"Gaps\") += topic\n        }\n    }\n    return groups.filter { it.value.isNotEmpty() }.map { \"${it.key}: ${it.value.joinToString(\", \")}\" }.joinToString(\"\\n\")\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // A stand-in for a search subagent, like the tests use: it times out once, then answers.\n    val news = searchWithRecovery(\"news\") { _, attempt ->\n        if (attempt == 1) Reply(\"error\", \"timeout\") else Reply(\"ok\", items = listOf(\"a\", \"b\"))\n    }\n    println(\"transient failure: $news\")\n\n    // A search the agent may not run: the failure is not transient.\n    val filings = searchWithRecovery(\"filings\") { _, _ -> Reply(\"error\", \"permission\") }\n    println(\"permission failure: $filings\")\n\n    // What the coordinator does with each outcome, and what the final report admits.\n    val results = linkedMapOf(\"news\" to news, \"filings\" to filings)\n    println(\"plan: ${coordinatorPlan(results)}\")\n    println(coverageNote(results, listOf(\"news\", \"filings\", \"patents\")))\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 6,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "2a53401f134453e638b059c35020fe33378dbb2725ae9826a53fe4e4ed9b6773",
+  "starting_code": "/** How a subagent's failure reaches the coordinator and the report: local recovery, structured error context, valid empty results, and coverage notes. See ../../statement.md. */\n\nprivate val log = System.getLogger(\"error_flow\")\n\nval ALTERNATIVES = mapOf(\n    \"timeout\" to listOf(\"retry later\", \"try a narrower query\"),\n    \"unavailable\" to listOf(\"use a cached source\", \"try another provider\"),\n    \"permission\" to listOf(\"request access\", \"use a public source\"),\n    \"invalid_query\" to listOf(\"rewrite the query\"),\n)\nval TRANSIENT = listOf(\"timeout\", \"unavailable\")\n\n/** What a search tool returns: status ok with items, or status error with a type and the partial items found before it failed. */\ndata class Reply(val status: String, val type: String? = null, val items: List<String> = emptyList(), val partial: List<String> = emptyList())\n\ndata class Outcome(val status: String, val items: List<String> = emptyList(), val attempts: Int, val failureType: String? = null, val attempted: String? = null, val partialResults: List<String> = emptyList(), val alternatives: List<String> = emptyList())\n\ndata class Step(val topic: String, val action: String)\n\nfun searchWithRecovery(query: String, maxAttempts: Int = 2, call: (String, Int) -> Reply): Outcome {\n    log.log(System.Logger.Level.DEBUG, \"searchWithRecovery input: {0}\", query)\n    var attempts = 0\n    while (true) {\n        attempts += 1\n        val reply = call(query, attempts)\n        // TODO 2 of 6 (finish this to pass e1): the status of an ok reply. Return success when the reply holds items and\n        //   empty when it holds none (a search that found nothing is a valid answer, not a failure). Example: ok with []\n        //   -> empty.\n        if (reply.status == \"ok\") return Outcome(\"success\", reply.items, attempts)\n        val kind = reply.type!!\n        // TODO 1 of 6 (finish this to pass m1): the local retry. When the failure type is one of TRANSIENT and the\n        //   attempts so far are below max_attempts, try again; otherwise give up. Example: timeout then ok, limit 2 ->\n        //   success with attempts 2.\n        // TODO 3 of 6 (finish this to pass e2, e3): the failed outcome. Return status failed with the failure type, the\n        //   query that was attempted, the attempts, the partial results the reply carried (none when absent) and the\n        //   alternatives listed for that failure type (none when unknown). Example: permission error -> alternatives\n        //   [request access, use a public source].\n        return Outcome(\"failed\", emptyList(), attempts, kind, query, emptyList(), emptyList())\n    }\n}\n\nfun coordinatorPlan(results: Map<String, Outcome>): List<Step> = results.map { (topic, o) ->\n    Step(topic, when {\n        o.status == \"success\" -> \"use\"\n        o.status == \"empty\" -> \"no_findings\"\n        // TODO 4 of 6 (finish this to pass e4): the rows for a failed topic. When the outcome has partial results, the\n        //   action is use_partial; otherwise try_alternative when it has alternatives; otherwise flag_gap. Example:\n        //   failed, no partial, alternatives [rewrite the query] -> try_alternative.\n        else -> \"flag_gap\"\n    })\n}\n\nfun coverageNote(results: Map<String, Outcome>, topics: List<String>): String {\n    val groups = linkedMapOf(\"Well-supported\" to mutableListOf<String>(), \"Partial\" to mutableListOf(), \"No findings\" to mutableListOf(), \"Gaps\" to mutableListOf())\n    for (topic in topics) {\n        val o = results[topic]\n        when {\n            // TODO 6 of 6 (finish this to pass e6): the topic with no result. When a requested topic has no outcome at\n            //   all, list it under Gaps as \"topic (not searched)\". Example: topics [a, b], results only for a -> Gaps: b\n            //   (not searched).\n            o == null -> continue\n            o.status == \"success\" -> groups.getValue(\"Well-supported\") += topic\n            o.status == \"empty\" -> groups.getValue(\"No findings\") += topic\n            // TODO 5 of 6 (finish this to pass e5): the groups of a failed topic in the coverage note. With partial\n            //   results, list the topic under Partial as \"topic (failure type)\"; without, under Gaps as \"topic (failure\n            //   type: query attempted)\". Example: partial, timeout -> Partial: topic (timeout).\n            else -> groups.getValue(\"Gaps\") += topic\n        }\n    }\n    return groups.filter { it.value.isNotEmpty() }.map { \"${it.key}: ${it.value.joinToString(\", \")}\" }.joinToString(\"\\n\")\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/66-errors-across-agents/prose/unit-02/practice-4/src/main/kotlin/ErrorFlow.kt",
+    "test_path": "practice/level-3/66-errors-across-agents/prose/unit-02/practice-4/src/test/kotlin/ErrorFlowTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/66-errors-across-agents/prose/unit-02/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/66-errors-across-agents/prose/unit-02/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_aTransientFailureIsRetriedLocallyAndTheSuccessIsReportedWithItsAttempts()",
+        "kind": "main",
+        "says": "A transient failure is retried locally and the success is reported with its attempts"
+      },
+      {
+        "id": "e1_aValidEmptyResultIsASuccessWithNoFindingsAndNeverAnError()",
+        "kind": "edge",
+        "says": "A valid empty result is a success with no findings and never an error"
+      },
+      {
+        "id": "e2_aPermissionOrInvalidQueryErrorIsNotRetriedAndCarriesWhatWasAttemptedAndItsAlternatives()",
+        "kind": "edge",
+        "says": "A permission or invalid query error is not retried and carries what was attempted and its alternatives"
+      },
+      {
+        "id": "e3_aFailureThatSurvivesTheRetriesCarriesThePartialResultsOfTheLastAttempt()",
+        "kind": "edge",
+        "says": "A failure that survives the retries carries the partial results of the last attempt"
+      },
+      {
+        "id": "e4_theCoordinatorUsesPartialResultsTriesAnAlternativeOrFlagsAGapAndNeverStopsTheRun()",
+        "kind": "edge",
+        "says": "The coordinator uses partial results, tries an alternative or flags a gap, and never stops the run"
+      },
+      {
+        "id": "e5_theCoverageNoteSeparatesSupportedTopicsFromGapsAndNamesTheCause()",
+        "kind": "edge",
+        "says": "The coverage note separates supported topics from gaps and names the cause"
+      },
+      {
+        "id": "e6_aTopicWithNoResultIsAGapThatWasNotSearched()",
+        "kind": "edge",
+        "says": "A topic with no result is a gap that was not searched"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/66-errors-across-agents/prose/unit-02/practice-4/target/test-results/test"
+    },
+    "origin": "course/66-errors-across-agents/02-plans-partial-results-coverage-notes-and-the-practice.md",
+    "concepts": [
+      "the practice of Plans, partial results, coverage notes and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/66-errors-across-agents/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "errors-across-agents-u2"
+}

@@ -1,0 +1,85 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "66-errors-across-agents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 4,
+  "title": "Practice: subagents that recover locally, fail with context and leave the coordinator able to decide (Kotlin)",
+  "lang": "kotlin",
+  "main_file": "src/main/kotlin/ErrorFlow.kt",
+  "files": [
+    "src/main/kotlin/TryIt.kt"
+  ],
+  "test_file": "src/test/kotlin/ErrorFlowTest.kt",
+  "build": [
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/66-errors-across-agents/prose/unit-02/practice-4",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/66-errors-across-agents/prose/unit-02/practice-4",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_aTransientFailureIsRetriedLocallyAndTheSuccessIsReportedWithItsAttempts()",
+      "kind": "main",
+      "says": "A transient failure is retried locally and the success is reported with its attempts"
+    },
+    {
+      "id": "e1_aValidEmptyResultIsASuccessWithNoFindingsAndNeverAnError()",
+      "kind": "edge",
+      "says": "A valid empty result is a success with no findings and never an error"
+    },
+    {
+      "id": "e2_aPermissionOrInvalidQueryErrorIsNotRetriedAndCarriesWhatWasAttemptedAndItsAlternatives()",
+      "kind": "edge",
+      "says": "A permission or invalid query error is not retried and carries what was attempted and its alternatives"
+    },
+    {
+      "id": "e3_aFailureThatSurvivesTheRetriesCarriesThePartialResultsOfTheLastAttempt()",
+      "kind": "edge",
+      "says": "A failure that survives the retries carries the partial results of the last attempt"
+    },
+    {
+      "id": "e4_theCoordinatorUsesPartialResultsTriesAnAlternativeOrFlagsAGapAndNeverStopsTheRun()",
+      "kind": "edge",
+      "says": "The coordinator uses partial results, tries an alternative or flags a gap, and never stops the run"
+    },
+    {
+      "id": "e5_theCoverageNoteSeparatesSupportedTopicsFromGapsAndNamesTheCause()",
+      "kind": "edge",
+      "says": "The coverage note separates supported topics from gaps and names the cause"
+    },
+    {
+      "id": "e6_aTopicWithNoResultIsAGapThatWasNotSearched()",
+      "kind": "edge",
+      "says": "A topic with no result is a gap that was not searched"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/66-errors-across-agents/02-plans-partial-results-coverage-notes-and-the-practice.md"
+}

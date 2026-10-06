@@ -1,0 +1,292 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "93-professional-capstone"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "A claims assistant end to end, across the seven domains",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "A claims assistant end to end, across the seven domains"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Architect Professional · **Module 93:** Professional capstone · **Page 1 of 2** **Exams:** P1, P2, P3, P4, P5, P6, P7"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** take one design and walk it through the seven domains of the Professional exam, name the decision each domain forces and the module that taught it, follow a request through the chain of an assistant (identifiers swapped for tokens, retrieval by the reader's rights, a stale-evidence check, a source check, a route, a trace without content), and use a release gate that protects the costly segment."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-04 against the Claude Certified Architect, Professional exam guide (version 1.0, all seven domains), the Claude documentation pages named in modules 79 to 92, and by running the example offline in the course container. Nothing here called a model, and the documents, requests, answers and cases are invented. This page draws on every module of Level 4. The review of a design by rule, and the practice, are the second page."
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "**Exam guide and current product.** *What the guide states:* the Professional exam draws its items from seven domains: solution design and architecture (17 percent), models, prompting and context (13), integration (19), evaluation, testing and optimisation (16), governance, safety and risk (14), stakeholder communication and lifecycle (14) and developer productivity and operational enablement (7). *What the current product's documentation says (pages read 2026-10-04):* the pages behind each module are named on that module's pages; nothing on the platform ties them into one design, and no page prescribes the chain of the example, whose thresholds (a confidence of 95) are the course's design values. A capstone question names a scenario and asks which domain's rule decides it, so the skill is to find the rule and apply it, not to remember a page."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "The exam's scenario items do not announce their domain. A stale answer after a document refresh is an integration question, an evaluation question and a governance question at once, and the choice among the answers is made by noticing which fact in the stem carries the weight. This page shows one design in which every domain contributes a decision, so that the pattern of the questions becomes familiar: read the scenario, find the failing layer, apply the rule of the domain that owns it, and check that the other domains have not been broken by the fix."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The scenario"
+    },
+    {
+      "type": "para",
+      "text": "Larch Mutual, an insurer, wants an assistant that answers policy questions for its claims staff and drafts replies to customers. About 3,000 questions a day. A wrong refund costs about 250 and a person's check costs 5. The documents are policy wordings and partner contracts, and they are revised often. The claims staff may read policy documents; only the partnership team may read contracts. A sponsor will decide on a pilot."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "One design, seven decisions"
+    },
+    {
+      "type": "para",
+      "text": "Each domain forces a decision, and each decision was taught in a module."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "**P1, solution design.** The decision statement says what the assistant helps decide and what it does not. Four stages (input, processing, output, feedback) are all present, and the feedback stage is the one most often missing. The pattern is the lowest rung that meets the need: an augmented call with a small fixed workflow, not an agent, because the path is known (modules 79 and 80). A team of agents would cost about 15 times a chat, and the value does not pay it.",
+        "**P2, models, prompts and context.** The static instructions and the policy wording come first, the question last, so that the prefix can be cached; the model is chosen by measured quality, latency and price and not by name (module 82).",
+        "**P3, integration.** Retrieval filters by the reader's rights before it ranks, so a document the reader may not see never reaches the model. The index is replaced when a document changes, and an answer drawn from a superseded version is refused. The assistant holds the reader's rights and not its own (modules 85 and 86).",
+        "**P4, evaluation.** A suite by segment with the refund segment protected, a gate that refuses a change that loses an answer there, a staged roll-out and a way back (modules 88 and 89).",
+        "**P5, governance.** Identifiers are swapped for tokens before the call, the audit trace holds ids and sizes and no content, a person stands before a refund, the retention has a floor and a ceiling and users are told that AI helped (modules 83 and 90).",
+        "**P6, stakeholders.** A summary of at most 80 words for the sponsor with one decision; service levels with owners; a pilot whose assumptions each have a stop trigger (module 91).",
+        "**P7, enablement.** The team that builds it works under managed settings with a model list and an effort cap, and its adoption is measured against a baseline (module 92)."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The chain, request by request"
+    },
+    {
+      "type": "para",
+      "text": "The example is the middle of that design on one page: the part a request travels through. Its order is itself a design decision, and each step answers one failure."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Tokenise.** An email address in the question becomes `<EMAIL_1>` before anything is sent, and the same address always gets the same token, so a question that mentions it twice still reads as one person. The map from token to address stays with the caller.",
+        "**Retrieve by the reader's rights.** Documents the reader may not read are removed first, then the rest are ranked by the words they share with the question; a tie goes to the smaller id, and a question that shares nothing with any readable document gets no evidence.",
+        "**Check the version.** Each document has a current version. A chunk from an older one means the index was not replaced: the request is held with the reason `stale evidence (policy-2-old v2, current v3)`. This is the failure of the exam's retrieval sample, and the check is cheap.",
+        "**Check the source.** The answer's quote must be in the chunk; an answer whose quote is missing is held as `unsupported`.",
+        "**Route.** A high-consequence action goes to a person; otherwise a confidence of at least 95 goes out and a lower one goes to review (page 1 of module 90).",
+        "**Trace and keep.** The trace holds the request id, the chunk and its version, the outcome and the number of characters, and no text. Tail-based keeping stores every trace that was held or reached a person and leaves the rest to sampling (module 87)."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The example runs five requests. The first is answered. The second meets a stale index and is held. The third asks for a refund and goes to a person. The fourth asks about a partner commission, a document the reader may not read, and gets no evidence. The fifth carries an email address, which the output shows as a token, and is answered from the policy about reporting a claim. Three traces are kept: the held ones and the one that went to a person."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The gate on the last line"
+    },
+    {
+      "type": "para",
+      "text": "The example ends with the release gate of module 89 in small. A change is judged on twelve cases in three segments. It gains answers in the status and complaint segments and loses one in the refund segment, which is protected, so the gate says no-go and names the segment, although the gains outnumber the loss. After the refund case is fixed, the same change is a go with no loss and three gains. The point of the capstone is that this gate and the first request in the chain belong to the same design: a change to the retrieval step that pleases the status segment is refused if it costs a refund answer."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "example",
+      "id": "m93-claims-assistant",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/93-claims-assistant/python/claims_assistant.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/93-claims-assistant/typescript/claimsAssistant.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/93-claims-assistant/java/ClaimsAssistant.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/93-claims-assistant/kotlin/ClaimsAssistant.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"A claims assistant on one page of code: identifiers swapped for tokens before anything is sent, retrieval that filters by the reader's rights first and refuses stale evidence, a source check, a route to a person, a trace that holds no content, and a release gate that protects the costly segment.\n\nThe documents, requests, answers and cases are invented, and the model is a scripted answer, so nothing here calls a model. The thresholds (a confidence of 95) are design values.\n\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\nimport re\nfrom collections import namedtuple\n\nChunk = namedtuple(\"Chunk\", \"id doc version text\")\nRequest = namedtuple(\"Request\", \"id text allowed consequence quote confidence\")\nCase = namedtuple(\"Case\", \"id segment old_ok new_ok\")\n\nCURRENT = {\"policy\": 3, \"contracts\": 1}\nINDEX = [Chunk(\"policy-1\", \"policy\", 3, \"Claims must be reported within 30 days of the loss.\"),\n         Chunk(\"policy-2\", \"policy\", 3, \"Water damage is covered up to 5,000 per claim.\"),\n         Chunk(\"contract-9\", \"contracts\", 1, \"Partner commission is 12 percent of premiums.\")]\nSTALE_INDEX = [INDEX[0], Chunk(\"policy-2-old\", \"policy\", 2, \"Water damage is covered up to 3,000 per claim.\"), INDEX[2]]\n\n\ndef tokenise(text):\n    \"\"\"Identifiers become tokens before the text leaves the caller; the map from token to value stays here.\"\"\"\n    vault = {}\n    def swap(match):\n        value = match.group(0)\n        for token, known in vault.items():\n            if known == value:\n                return token\n        token = f\"<EMAIL_{len(vault) + 1}>\"\n        vault[token] = value\n        return token\n    return re.sub(r\"[\\w.+-]+@[\\w-]+\\.[\\w.]+\", swap, text), vault\n\n\ndef words(text):\n    return {w for w in re.findall(r\"[a-z]+\", text.lower()) if len(w) > 3}\n\n\ndef retrieve(question, allowed, index):\n    \"\"\"The reader's rights are applied before ranking; the best match wins, a tie goes to the smaller id, and no overlap is no evidence.\"\"\"\n    scored = sorted(((-len(words(question) & words(c.text)), c.id, c) for c in index if c.doc in allowed), key=lambda t: t[:2])\n    return scored[0][2] if scored and scored[0][0] < 0 else None\n\n\ndef handle(request, index):\n    \"\"\"One request through the chain; the outcome says why a request was held.\"\"\"\n    log.debug(\"handle input: %r\", request)\n    sent, _ = tokenise(request.text)\n    chunk = retrieve(sent, request.allowed, index)\n    if chunk is None:\n        outcome = \"hold: no evidence\"\n    elif chunk.version != CURRENT[chunk.doc]:\n        outcome = f\"hold: stale evidence ({chunk.id} v{chunk.version}, current v{CURRENT[chunk.doc]})\"\n    elif request.quote not in chunk.text:\n        outcome = \"hold: unsupported\"\n    elif request.consequence == \"high\":\n        outcome = \"human\"\n    else:\n        outcome = \"auto\" if request.confidence >= 95 else \"review\"\n    trace = {\"request\": request.id, \"chunk\": f\"{chunk.id}@v{chunk.version}\" if chunk else \"none\", \"outcome\": outcome, \"chars\": len(sent)}\n    return sent, trace\n\n\ndef keep(trace):\n    \"\"\"Tail-based: a trace that was held or reached a person is kept, the rest are sampled elsewhere.\"\"\"\n    return trace[\"outcome\"].startswith(\"hold\") or trace[\"outcome\"] == \"human\"\n\n\ndef release(cases, protected):\n    \"\"\"A change ships only when no protected segment loses an answer and the losses do not outnumber the gains.\"\"\"\n    lost = [c for c in cases if c.old_ok and not c.new_ok]\n    gained = [c for c in cases if c.new_ok and not c.old_ok]\n    hit = sorted({c.segment for c in lost if c.segment in protected})\n    if hit:\n        return \"no-go: protected segment lost answers: \" + \", \".join(hit)\n    if len(lost) > len(gained):\n        return f\"no-go: net loss: lost {len(lost)}, gained {len(gained)}\"\n    return f\"go: lost {len(lost)}, gained {len(gained)}\"\n\n\ndef main():\n    water = \"Water damage is covered up to 5,000 per claim.\"\n    late = \"Claims must be reported within 30 days of the loss.\"\n    requests = [\n        (Request(\"r1\", \"How much does the policy cover for water damage?\", {\"policy\"}, \"low\", water, 97), INDEX),\n        (Request(\"r2\", \"How much does the policy cover for water damage?\", {\"policy\"}, \"low\", water, 97), STALE_INDEX),\n        (Request(\"r3\", \"Can I get a refund of 400 for water damage?\", {\"policy\"}, \"high\", water, 99), INDEX),\n        (Request(\"r4\", \"What is the partner commission?\", {\"policy\"}, \"low\", water, 99), INDEX),\n        (Request(\"r5\", \"I reported my claim from jo@example.com, how many days do I have?\", {\"policy\"}, \"low\", late, 96), INDEX),\n    ]\n    traces = []\n    for request, index in requests:\n        sent, trace = handle(request, index)\n        traces.append(trace)\n        print(f\"{request.id}: sent={sent!r}; evidence={trace['chunk']}; outcome={trace['outcome']}\")\n    print(\"traces kept:\", \", \".join(t[\"request\"] for t in traces if keep(t)))\n    cases = [Case(f\"s{i}\", \"status\", i > 2, True) for i in range(1, 7)] + [Case(f\"f{i}\", \"refund\", True, i != 4) for i in range(1, 5)] + [Case(\"c1\", \"complaint\", False, True), Case(\"c2\", \"complaint\", True, True)]\n    print(\"release with refunds protected:\", release(cases, {\"refund\"}))\n    fixed = [Case(c.id, c.segment, c.old_ok, True) if c.id == \"f4\" else c for c in cases]\n    print(\"release after the refund fix:\", release(fixed, {\"refund\"}))\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "r1: sent='How much does the policy cover for water damage?'; evidence=policy-2@v3; outcome=auto\nr2: sent='How much does the policy cover for water damage?'; evidence=policy-2-old@v2; outcome=hold: stale evidence (policy-2-old v2, current v3)\nr3: sent='Can I get a refund of 400 for water damage?'; evidence=policy-2@v3; outcome=human\nr4: sent='What is the partner commission?'; evidence=none; outcome=hold: no evidence\nr5: sent='I reported my claim from <EMAIL_1>, how many days do I have?'; evidence=policy-1@v3; outcome=auto\ntraces kept: r2, r3, r4\nrelease with refunds protected: no-go: protected segment lost answers: refund\nrelease after the refund fix: go: lost 0, gained 3"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "import { logger } from \"./logger.ts\";\nconst log = logger(\"claims_assistant\");\n/**\n * A claims assistant on one page of code: identifiers swapped for tokens before anything is sent, retrieval that filters by the reader's rights first and refuses stale evidence, a source check, a route to a person, a trace that holds no content, and a release gate that protects the costly segment.\n *\n * The documents, requests, answers and cases are invented, and the model is a scripted answer, so nothing here calls a model. The thresholds (a confidence of 95) are design values.\n */\nexport type Chunk = { id: string; doc: string; version: number; text: string };\nexport type Request = { id: string; text: string; allowed: Set<string>; consequence: string; quote: string; confidence: number };\nexport type Case = { id: string; segment: string; oldOk: boolean; newOk: boolean };\nexport type Trace = { request: string; chunk: string; outcome: string; chars: number };\n\nexport const CURRENT: Record<string, number> = { policy: 3, contracts: 1 };\nexport const INDEX: Chunk[] = [\n  { id: \"policy-1\", doc: \"policy\", version: 3, text: \"Claims must be reported within 30 days of the loss.\" },\n  { id: \"policy-2\", doc: \"policy\", version: 3, text: \"Water damage is covered up to 5,000 per claim.\" },\n  { id: \"contract-9\", doc: \"contracts\", version: 1, text: \"Partner commission is 12 percent of premiums.\" },\n];\nexport const STALE_INDEX: Chunk[] = [INDEX[0], { id: \"policy-2-old\", doc: \"policy\", version: 2, text: \"Water damage is covered up to 3,000 per claim.\" }, INDEX[2]];\n\n/** Identifiers become tokens before the text leaves the caller; the map from token to value stays here. */\nexport function tokenise(text: string): [string, Record<string, string>] {\n  const vault: Record<string, string> = {};\n  const sent = text.replace(/[\\w.+-]+@[\\w-]+\\.[\\w.]+/g, (value) => {\n    for (const [token, known] of Object.entries(vault)) if (known === value) return token;\n    const token = `<EMAIL_${Object.keys(vault).length + 1}>`;\n    vault[token] = value;\n    return token;\n  });\n  return [sent, vault];\n}\n\nfunction words(text: string): Set<string> {\n  return new Set((text.toLowerCase().match(/[a-z]+/g) ?? []).filter((w) => w.length > 3));\n}\n\n/** The reader's rights are applied before ranking; the best match wins, a tie goes to the smaller id, and no overlap is no evidence. */\nexport function retrieve(question: string, allowed: Set<string>, index: Chunk[]): Chunk | null {\n  const mine = words(question);\n  const scored = index.filter((c) => allowed.has(c.doc)).map((c) => ({ overlap: [...words(c.text)].filter((w) => mine.has(w)).length, chunk: c }));\n  scored.sort((a, b) => b.overlap - a.overlap || (a.chunk.id < b.chunk.id ? -1 : a.chunk.id > b.chunk.id ? 1 : 0));\n  return scored.length && scored[0].overlap > 0 ? scored[0].chunk : null;\n}\n\n/** One request through the chain; the outcome says why a request was held. */\nexport function handle(request: Request, index: Chunk[]): [string, Trace] {\n  log.debug(\"handle input\", request);\n  const [sent] = tokenise(request.text);\n  const chunk = retrieve(sent, request.allowed, index);\n  let outcome: string;\n  if (chunk === null) outcome = \"hold: no evidence\";\n  else if (chunk.version !== CURRENT[chunk.doc]) outcome = `hold: stale evidence (${chunk.id} v${chunk.version}, current v${CURRENT[chunk.doc]})`;\n  else if (!chunk.text.includes(request.quote)) outcome = \"hold: unsupported\";\n  else if (request.consequence === \"high\") outcome = \"human\";\n  else outcome = request.confidence >= 95 ? \"auto\" : \"review\";\n  return [sent, { request: request.id, chunk: chunk ? `${chunk.id}@v${chunk.version}` : \"none\", outcome, chars: sent.length }];\n}\n\n/** Tail-based: a trace that was held or reached a person is kept, the rest are sampled elsewhere. */\nexport function keep(trace: Trace): boolean {\n  return trace.outcome.startsWith(\"hold\") || trace.outcome === \"human\";\n}\n\n/** A change ships only when no protected segment loses an answer and the losses do not outnumber the gains. */\nexport function release(cases: Case[], protectedSegments: Set<string>): string {\n  const lost = cases.filter((c) => c.oldOk && !c.newOk);\n  const gained = cases.filter((c) => c.newOk && !c.oldOk);\n  const hit = [...new Set(lost.filter((c) => protectedSegments.has(c.segment)).map((c) => c.segment))].sort();\n  if (hit.length) return \"no-go: protected segment lost answers: \" + hit.join(\", \");\n  if (lost.length > gained.length) return `no-go: net loss: lost ${lost.length}, gained ${gained.length}`;\n  return `go: lost ${lost.length}, gained ${gained.length}`;\n}\n\nfunction main(): void {\n  const water = \"Water damage is covered up to 5,000 per claim.\";\n  const late = \"Claims must be reported within 30 days of the loss.\";\n  const policy = new Set([\"policy\"]);\n  const requests: [Request, Chunk[]][] = [\n    [{ id: \"r1\", text: \"How much does the policy cover for water damage?\", allowed: policy, consequence: \"low\", quote: water, confidence: 97 }, INDEX],\n    [{ id: \"r2\", text: \"How much does the policy cover for water damage?\", allowed: policy, consequence: \"low\", quote: water, confidence: 97 }, STALE_INDEX],\n    [{ id: \"r3\", text: \"Can I get a refund of 400 for water damage?\", allowed: policy, consequence: \"high\", quote: water, confidence: 99 }, INDEX],\n    [{ id: \"r4\", text: \"What is the partner commission?\", allowed: policy, consequence: \"low\", quote: water, confidence: 99 }, INDEX],\n    [{ id: \"r5\", text: \"I reported my claim from jo@example.com, how many days do I have?\", allowed: policy, consequence: \"low\", quote: late, confidence: 96 }, INDEX],\n  ];\n  const traces: Trace[] = [];\n  for (const [request, index] of requests) {\n    const [sent, trace] = handle(request, index);\n    traces.push(trace);\n    console.log(`${request.id}: sent=${pyRepr(sent)}; evidence=${trace.chunk}; outcome=${trace.outcome}`);\n  }\n  console.log(\"traces kept:\", traces.filter(keep).map((t) => t.request).join(\", \"));\n  const cases: Case[] = [];\n  for (let i = 1; i <= 6; i++) cases.push({ id: `s${i}`, segment: \"status\", oldOk: i > 2, newOk: true });\n  for (let i = 1; i <= 4; i++) cases.push({ id: `f${i}`, segment: \"refund\", oldOk: true, newOk: i !== 4 });\n  cases.push({ id: \"c1\", segment: \"complaint\", oldOk: false, newOk: true }, { id: \"c2\", segment: \"complaint\", oldOk: true, newOk: true });\n  console.log(\"release with refunds protected:\", release(cases, new Set([\"refund\"])));\n  const fixed = cases.map((c) => (c.id === \"f4\" ? { ...c, newOk: true } : c));\n  console.log(\"release after the refund fix:\", release(fixed, new Set([\"refund\"])));\n}\n\n/** The text between single quotes, as the Python edition prints a string. */\nfunction pyRepr(text: string): string {\n  return `'${text}'`;\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "r1: sent='How much does the policy cover for water damage?'; evidence=policy-2@v3; outcome=auto\nr2: sent='How much does the policy cover for water damage?'; evidence=policy-2-old@v2; outcome=hold: stale evidence (policy-2-old v2, current v3)\nr3: sent='Can I get a refund of 400 for water damage?'; evidence=policy-2@v3; outcome=human\nr4: sent='What is the partner commission?'; evidence=none; outcome=hold: no evidence\nr5: sent='I reported my claim from <EMAIL_1>, how many days do I have?'; evidence=policy-1@v3; outcome=auto\ntraces kept: r2, r3, r4\nrelease with refunds protected: no-go: protected segment lost answers: refund\nrelease after the refund fix: go: lost 0, gained 3"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.Comparator;\nimport java.util.LinkedHashMap;\nimport java.util.LinkedHashSet;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\nimport java.util.TreeSet;\nimport java.util.regex.Matcher;\nimport java.util.regex.Pattern;\nimport java.util.stream.Collectors;\n\n/**\n * A claims assistant on one page of code: identifiers swapped for tokens before anything is sent, retrieval that filters by the reader's rights first and refuses stale evidence, a source check, a route to a person, a trace that holds no content, and a release gate that protects the costly segment.\n *\n * The documents, requests, answers and cases are invented, and the model is a scripted answer, so nothing here calls a model. The thresholds (a confidence of 95) are design values.\n */\npublic class ClaimsAssistant {\n    private static final System.Logger LOG = System.getLogger(ClaimsAssistant.class.getName());\n    record Chunk(String id, String doc, int version, String text) {}\n\n    record Request(String id, String text, Set<String> allowed, String consequence, String quote, int confidence) {}\n\n    record Case(String id, String segment, boolean oldOk, boolean newOk) {}\n\n    record Trace(String request, String chunk, String outcome, int chars) {}\n\n    record Handled(String sent, Trace trace) {}\n\n    record Tokenised(String sent, Map<String, String> vault) {}\n\n    static final Map<String, Integer> CURRENT = Map.of(\"policy\", 3, \"contracts\", 1);\n    static final List<Chunk> INDEX = List.of(\n        new Chunk(\"policy-1\", \"policy\", 3, \"Claims must be reported within 30 days of the loss.\"),\n        new Chunk(\"policy-2\", \"policy\", 3, \"Water damage is covered up to 5,000 per claim.\"),\n        new Chunk(\"contract-9\", \"contracts\", 1, \"Partner commission is 12 percent of premiums.\"));\n    static final List<Chunk> STALE_INDEX = List.of(INDEX.get(0), new Chunk(\"policy-2-old\", \"policy\", 2, \"Water damage is covered up to 3,000 per claim.\"), INDEX.get(2));\n\n    /** Identifiers become tokens before the text leaves the caller; the map from token to value stays here. */\n    static Tokenised tokenise(String text) {\n        Map<String, String> vault = new LinkedHashMap<>();\n        Matcher m = Pattern.compile(\"[\\\\w.+-]+@[\\\\w-]+\\\\.[\\\\w.]+\").matcher(text);\n        StringBuilder out = new StringBuilder();\n        while (m.find()) {\n            String value = m.group();\n            String token = null;\n            for (Map.Entry<String, String> e : vault.entrySet()) if (e.getValue().equals(value)) token = e.getKey();\n            if (token == null) {\n                token = \"<EMAIL_\" + (vault.size() + 1) + \">\";\n                vault.put(token, value);\n            }\n            m.appendReplacement(out, Matcher.quoteReplacement(token));\n        }\n        m.appendTail(out);\n        return new Tokenised(out.toString(), vault);\n    }\n\n    static Set<String> words(String text) {\n        Set<String> out = new LinkedHashSet<>();\n        Matcher m = Pattern.compile(\"[a-z]+\").matcher(text.toLowerCase());\n        while (m.find()) if (m.group().length() > 3) out.add(m.group());\n        return out;\n    }\n\n    /** The reader's rights are applied before ranking; the best match wins, a tie goes to the smaller id, and no overlap is no evidence. */\n    static Chunk retrieve(String question, Set<String> allowed, List<Chunk> index) {\n        Set<String> mine = words(question);\n        Chunk best = null;\n        int bestOverlap = 0;\n        List<Chunk> candidates = new ArrayList<>(index.stream().filter(c -> allowed.contains(c.doc())).toList());\n        candidates.sort(Comparator.comparing(Chunk::id));\n        for (Chunk c : candidates) {\n            Set<String> shared = new LinkedHashSet<>(words(c.text()));\n            shared.retainAll(mine);\n            if (shared.size() > bestOverlap) {\n                bestOverlap = shared.size();\n                best = c;\n            }\n        }\n        return best;\n    }\n\n    /** One request through the chain; the outcome says why a request was held. */\n    static Handled handle(Request request, List<Chunk> index) {\n        LOG.log(System.Logger.Level.DEBUG, \"handle input: {0}\", request);\n        String sent = tokenise(request.text()).sent();\n        Chunk chunk = retrieve(sent, request.allowed(), index);\n        String outcome;\n        if (chunk == null) outcome = \"hold: no evidence\";\n        else if (chunk.version() != CURRENT.get(chunk.doc())) outcome = \"hold: stale evidence (\" + chunk.id() + \" v\" + chunk.version() + \", current v\" + CURRENT.get(chunk.doc()) + \")\";\n        else if (!chunk.text().contains(request.quote())) outcome = \"hold: unsupported\";\n        else if (request.consequence().equals(\"high\")) outcome = \"human\";\n        else outcome = request.confidence() >= 95 ? \"auto\" : \"review\";\n        return new Handled(sent, new Trace(request.id(), chunk == null ? \"none\" : chunk.id() + \"@v\" + chunk.version(), outcome, sent.length()));\n    }\n\n    /** Tail-based: a trace that was held or reached a person is kept, the rest are sampled elsewhere. */\n    static boolean keep(Trace trace) {\n        return trace.outcome().startsWith(\"hold\") || trace.outcome().equals(\"human\");\n    }\n\n    /** A change ships only when no protected segment loses an answer and the losses do not outnumber the gains. */\n    static String release(List<Case> cases, Set<String> protectedSegments) {\n        int lost = 0;\n        int gained = 0;\n        TreeSet<String> hit = new TreeSet<>();\n        for (Case c : cases) {\n            if (c.oldOk() && !c.newOk()) {\n                lost++;\n                if (protectedSegments.contains(c.segment())) hit.add(c.segment());\n            }\n            if (c.newOk() && !c.oldOk()) gained++;\n        }\n        if (!hit.isEmpty()) return \"no-go: protected segment lost answers: \" + String.join(\", \", hit);\n        if (lost > gained) return \"no-go: net loss: lost \" + lost + \", gained \" + gained;\n        return \"go: lost \" + lost + \", gained \" + gained;\n    }\n\n    public static void main(String[] args) {\n        String water = \"Water damage is covered up to 5,000 per claim.\";\n        String late = \"Claims must be reported within 30 days of the loss.\";\n        Set<String> policy = Set.of(\"policy\");\n        List<Request> requests = List.of(\n            new Request(\"r1\", \"How much does the policy cover for water damage?\", policy, \"low\", water, 97),\n            new Request(\"r2\", \"How much does the policy cover for water damage?\", policy, \"low\", water, 97),\n            new Request(\"r3\", \"Can I get a refund of 400 for water damage?\", policy, \"high\", water, 99),\n            new Request(\"r4\", \"What is the partner commission?\", policy, \"low\", water, 99),\n            new Request(\"r5\", \"I reported my claim from jo@example.com, how many days do I have?\", policy, \"low\", late, 96));\n        List<Trace> traces = new ArrayList<>();\n        for (Request request : requests) {\n            Handled h = handle(request, request.id().equals(\"r2\") ? STALE_INDEX : INDEX);\n            traces.add(h.trace());\n            System.out.println(request.id() + \": sent='\" + h.sent() + \"'; evidence=\" + h.trace().chunk() + \"; outcome=\" + h.trace().outcome());\n        }\n        System.out.println(\"traces kept: \" + traces.stream().filter(ClaimsAssistant::keep).map(Trace::request).collect(Collectors.joining(\", \")));\n        List<Case> cases = new ArrayList<>();\n        for (int i = 1; i <= 6; i++) cases.add(new Case(\"s\" + i, \"status\", i > 2, true));\n        for (int i = 1; i <= 4; i++) cases.add(new Case(\"f\" + i, \"refund\", true, i != 4));\n        cases.add(new Case(\"c1\", \"complaint\", false, true));\n        cases.add(new Case(\"c2\", \"complaint\", true, true));\n        System.out.println(\"release with refunds protected: \" + release(cases, Set.of(\"refund\")));\n        List<Case> fixed = new ArrayList<>();\n        for (Case c : cases) fixed.add(c.id().equals(\"f4\") ? new Case(c.id(), c.segment(), c.oldOk(), true) : c);\n        System.out.println(\"release after the refund fix: \" + release(fixed, Set.of(\"refund\")));\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "r1: sent='How much does the policy cover for water damage?'; evidence=policy-2@v3; outcome=auto\nr2: sent='How much does the policy cover for water damage?'; evidence=policy-2-old@v2; outcome=hold: stale evidence (policy-2-old v2, current v3)\nr3: sent='Can I get a refund of 400 for water damage?'; evidence=policy-2@v3; outcome=human\nr4: sent='What is the partner commission?'; evidence=none; outcome=hold: no evidence\nr5: sent='I reported my claim from <EMAIL_1>, how many days do I have?'; evidence=policy-1@v3; outcome=auto\ntraces kept: r2, r3, r4\nrelease with refunds protected: no-go: protected segment lost answers: refund\nrelease after the refund fix: go: lost 0, gained 3"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "/**\n * A claims assistant on one page of code: identifiers swapped for tokens before anything is sent, retrieval that filters by the reader's rights first and refuses stale evidence, a source check, a route to a person, a trace that holds no content, and a release gate that protects the costly segment.\n *\n * The documents, requests, answers and cases are invented, and the model is a scripted answer, so nothing here calls a model. The thresholds (a confidence of 95) are design values.\n */\n\nprivate val log = System.getLogger(\"claims_assistant\")\n\ndata class Chunk(val id: String, val doc: String, val version: Int, val text: String)\n\ndata class Request(val id: String, val text: String, val allowed: Set<String>, val consequence: String, val quote: String, val confidence: Int)\n\ndata class Case(val id: String, val segment: String, val oldOk: Boolean, val newOk: Boolean)\n\ndata class Trace(val request: String, val chunk: String, val outcome: String, val chars: Int)\n\ndata class Handled(val sent: String, val trace: Trace)\n\ndata class Tokenised(val sent: String, val vault: Map<String, String>)\n\nval CURRENT = mapOf(\"policy\" to 3, \"contracts\" to 1)\nval INDEX = listOf(\n    Chunk(\"policy-1\", \"policy\", 3, \"Claims must be reported within 30 days of the loss.\"),\n    Chunk(\"policy-2\", \"policy\", 3, \"Water damage is covered up to 5,000 per claim.\"),\n    Chunk(\"contract-9\", \"contracts\", 1, \"Partner commission is 12 percent of premiums.\"),\n)\nval STALE_INDEX = listOf(INDEX[0], Chunk(\"policy-2-old\", \"policy\", 2, \"Water damage is covered up to 3,000 per claim.\"), INDEX[2])\n\n/** Identifiers become tokens before the text leaves the caller; the map from token to value stays here. */\nfun tokenise(text: String): Tokenised {\n    val vault = linkedMapOf<String, String>()\n    val sent = Regex(\"[\\\\w.+-]+@[\\\\w-]+\\\\.[\\\\w.]+\").replace(text) { m ->\n        vault.entries.firstOrNull { it.value == m.value }?.key ?: \"<EMAIL_${vault.size + 1}>\".also { vault[it] = m.value }\n    }\n    return Tokenised(sent, vault)\n}\n\nfun words(text: String): Set<String> = Regex(\"[a-z]+\").findAll(text.lowercase()).map { it.value }.filter { it.length > 3 }.toSet()\n\n/** The reader's rights are applied before ranking; the best match wins, a tie goes to the smaller id, and no overlap is no evidence. */\nfun retrieve(question: String, allowed: Set<String>, index: List<Chunk>): Chunk? {\n    val mine = words(question)\n    val scored = index.filter { it.doc in allowed }.map { c -> words(c.text).count { it in mine } to c }.sortedWith(compareBy({ -it.first }, { it.second.id }))\n    return if (scored.isNotEmpty() && scored[0].first > 0) scored[0].second else null\n}\n\n/** One request through the chain; the outcome says why a request was held. */\nfun handle(request: Request, index: List<Chunk>): Handled {\n    log.log(System.Logger.Level.DEBUG, \"handle input: {0}\", request)\n    val sent = tokenise(request.text).sent\n    val chunk = retrieve(sent, request.allowed, index)\n    val outcome = when {\n        chunk == null -> \"hold: no evidence\"\n        chunk.version != CURRENT.getValue(chunk.doc) -> \"hold: stale evidence (${chunk.id} v${chunk.version}, current v${CURRENT.getValue(chunk.doc)})\"\n        request.quote !in chunk.text -> \"hold: unsupported\"\n        request.consequence == \"high\" -> \"human\"\n        else -> if (request.confidence >= 95) \"auto\" else \"review\"\n    }\n    return Handled(sent, Trace(request.id, if (chunk == null) \"none\" else \"${chunk.id}@v${chunk.version}\", outcome, sent.length))\n}\n\n/** Tail-based: a trace that was held or reached a person is kept, the rest are sampled elsewhere. */\nfun keep(trace: Trace): Boolean = trace.outcome.startsWith(\"hold\") || trace.outcome == \"human\"\n\n/** A change ships only when no protected segment loses an answer and the losses do not outnumber the gains. */\nfun release(cases: List<Case>, protectedSegments: Set<String>): String {\n    val lost = cases.filter { it.oldOk && !it.newOk }\n    val gained = cases.filter { it.newOk && !it.oldOk }\n    val hit = lost.filter { it.segment in protectedSegments }.map { it.segment }.toSortedSet().toList()\n    if (hit.isNotEmpty()) return \"no-go: protected segment lost answers: \" + hit.joinToString(\", \")\n    if (lost.size > gained.size) return \"no-go: net loss: lost ${lost.size}, gained ${gained.size}\"\n    return \"go: lost ${lost.size}, gained ${gained.size}\"\n}\n\nfun main() {\n    val water = \"Water damage is covered up to 5,000 per claim.\"\n    val late = \"Claims must be reported within 30 days of the loss.\"\n    val policy = setOf(\"policy\")\n    val requests = listOf(\n        Request(\"r1\", \"How much does the policy cover for water damage?\", policy, \"low\", water, 97) to INDEX,\n        Request(\"r2\", \"How much does the policy cover for water damage?\", policy, \"low\", water, 97) to STALE_INDEX,\n        Request(\"r3\", \"Can I get a refund of 400 for water damage?\", policy, \"high\", water, 99) to INDEX,\n        Request(\"r4\", \"What is the partner commission?\", policy, \"low\", water, 99) to INDEX,\n        Request(\"r5\", \"I reported my claim from jo@example.com, how many days do I have?\", policy, \"low\", late, 96) to INDEX,\n    )\n    val traces = mutableListOf<Trace>()\n    for ((request, index) in requests) {\n        val h = handle(request, index)\n        traces.add(h.trace)\n        println(\"${request.id}: sent='${h.sent}'; evidence=${h.trace.chunk}; outcome=${h.trace.outcome}\")\n    }\n    println(\"traces kept: \" + traces.filter { keep(it) }.joinToString(\", \") { it.request })\n    val cases = (1..6).map { Case(\"s$it\", \"status\", it > 2, true) } + (1..4).map { Case(\"f$it\", \"refund\", true, it != 4) } + listOf(Case(\"c1\", \"complaint\", false, true), Case(\"c2\", \"complaint\", true, true))\n    println(\"release with refunds protected: \" + release(cases, setOf(\"refund\")))\n    val fixed = cases.map { if (it.id == \"f4\") it.copy(newOk = true) else it }\n    println(\"release after the refund fix: \" + release(fixed, setOf(\"refund\")))\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "r1: sent='How much does the policy cover for water damage?'; evidence=policy-2@v3; outcome=auto\nr2: sent='How much does the policy cover for water damage?'; evidence=policy-2-old@v2; outcome=hold: stale evidence (policy-2-old v2, current v3)\nr3: sent='Can I get a refund of 400 for water damage?'; evidence=policy-2@v3; outcome=human\nr4: sent='What is the partner commission?'; evidence=none; outcome=hold: no evidence\nr5: sent='I reported my claim from <EMAIL_1>, how many days do I have?'; evidence=policy-1@v3; outcome=auto\ntraces kept: r2, r3, r4\nrelease with refunds protected: no-go: protected segment lost answers: refund\nrelease after the refund fix: go: lost 0, gained 3"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The practice: a launch review"
+    },
+    {
+      "type": "para",
+      "text": "The practice is in [`exercises/93-professional-capstone`](../../exercises/93-professional-capstone/unit-01/practice-1/statement.md) and is the second page's subject: you write the review that turns a design into findings, a verdict and a scorecard by domain."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**\"Fix the wrong answer in the prompt; the model got it wrong.\"** It is tempting because the answer is wrong and the prompt is the nearest lever. The exam rejects it because a confident wrong answer after a document refresh points to the retrieval step, where a stale chunk is the usual cause; check the version of the evidence before the model.",
+        "**\"Rank first and filter by rights afterwards; the ranking is the hard part.\"** It is tempting because ranking over all documents finds the best match. The exam rejects it because a document that the reader may not see can reach the model before the filter removes it; filter by rights first, then rank.",
+        "**\"The change gains more answers than it loses, so release it.\"** It is tempting because the net count is positive. The exam rejects it because a loss in a protected segment is a veto whatever the gains elsewhere; the segment that costs most when wrong is protected by the gate."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "Scenario: Larch Mutual's assistant answers a coverage question with a limit of 3,000, and the current policy says 5,000. Latency and the model version have not changed since the documents were refreshed. Where does the investigation start?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The retrieval step, to see whether a stale chunk was returned",
+              "**b**: The model, to see whether its weights were updated by the vendor",
+              "**c**: The sampling temperature, to see whether it was lowered by a release",
+              "**d**: The context window, to see whether the prompt was cut short"
+            ]
+          }
+        ],
+        [
+          "Scenario: A change to the retrieval step gains three answers in a minor segment and loses one in the segment where an error costs 250. The totals favour the change. What does the gate return?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Release it, because the gains outnumber the losses",
+              "**b**: Release it, with a note asking the owner to review the lost case",
+              "**c**: Refuse it, naming the area where the damage fell",
+              "**d**: Refuse it, because every loss blocks every change"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**a**. A confident wrong answer after a refresh points to stale evidence. *b* is ruled out because the stem leaves the model version unchanged, and the page says \"check the version of the evidence before the model\". *c* is ruled out because \"Fix the wrong answer in the prompt; the model got it wrong\" is the tempting lever the exam rejects, and a temperature change would not return the exact old figure. *d* is ruled out because the stale index holds the chunk \"Water damage is covered up to 3,000 per claim.\", the very figure the assistant gave, which a cut-short prompt would not produce.",
+            "**c**. A loss in a protected segment is a veto whatever the gains. *a* is ruled out because \"a loss in a protected segment is a veto whatever the gains elsewhere\". *b* is ruled out because the gate returns a decision and not a note, and the page says it \"says no-go and names the segment\". *d* is ruled out because the gate's rule is that \"the losses do not outnumber the gains\" for a loss outside a protected segment, so not every loss blocks a change."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 11,
+    "paras": 10,
+    "code": 0,
+    "tables": 0,
+    "lists": 4,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 1,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "0eb4edfd97b5cf1230743f9972746019d55ad6ccd090f73bc944a23e8beb7bb9"
+}

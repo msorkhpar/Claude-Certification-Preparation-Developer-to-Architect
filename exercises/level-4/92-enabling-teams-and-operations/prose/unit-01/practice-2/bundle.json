@@ -1,0 +1,88 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-4",
+    "92-enabling-teams-and-operations"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 2,
+  "title": "Practice: rolling Claude Code out to an organisation (TypeScript)",
+  "lang": "typescript",
+  "main_file": "project/managed/managed-settings.json",
+  "files": [
+    "project/.claude/settings.json",
+    "project/docs/rollout.md"
+  ],
+  "test_file": "tests/rollout.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-4/92-enabling-teams-and-operations/prose/unit-01/practice-2/check_files.py",
+    "practice/level-4/92-enabling-teams-and-operations/prose/unit-01/practice-2/project/.claude/settings.json",
+    "practice/level-4/92-enabling-teams-and-operations/prose/unit-01/practice-2/project/docs/rollout.md",
+    "practice/level-4/92-enabling-teams-and-operations/prose/unit-01/practice-2/project/managed/managed-settings.json"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-4/92-enabling-teams-and-operations/prose/unit-01/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-4/92-enabling-teams-and-operations/prose/unit-01/practice-2/tests/rollout.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 the managed file locks permissions and protects the environment file",
+      "kind": "main",
+      "says": "The managed file locks permission rules, turns off bypass mode and denies Read(./.env)"
+    },
+    {
+      "id": "e1 keys only an organisation can set live in the managed file and never in the project file",
+      "kind": "edge",
+      "says": "The managed-only keys are absent from the project file and allowManagedHooksOnly is true in the managed file"
+    },
+    {
+      "id": "e2 plugins come only from the companys marketplace and cannot be sideloaded",
+      "kind": "edge",
+      "says": "strictKnownMarketplaces lists only sources the company owns and disableSideloadFlags is true"
+    },
+    {
+      "id": "e3 only the managed mcp allowlist applies and a server is never allowed and denied",
+      "kind": "edge",
+      "says": "The managed MCP allowlist is exclusive, well formed and disjoint from the denylist"
+    },
+    {
+      "id": "e4 the model choice is locked by a list and the effort cap is at most high",
+      "kind": "edge",
+      "says": "availableModels is set, the default model is in it and the effort cap is at most high (exactly high is allowed)"
+    },
+    {
+      "id": "e5 the group spend limits add up to the organisation limit and no more",
+      "kind": "edge",
+      "says": "The group limits add up to the organisation limit or less (exactly equal is allowed) and a member's limit is within the smallest group's"
+    },
+    {
+      "id": "e6 adoption is measured by outcomes against a baseline of at least 4 weeks",
+      "kind": "edge",
+      "says": "The baseline is at least 4 weeks (exactly 4 is allowed) and the outcome targets are outcomes"
+    },
+    {
+      "id": "e7 the precedence table is in the documented order and no file holds personal data",
+      "kind": "edge",
+      "says": "The precedence table has the documented order, the group note is present and no file holds personal data"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/92-enabling-teams-and-operations/01-one-setting-in-five-places-precedence-locks-and-managed-only-keys.md"
+}

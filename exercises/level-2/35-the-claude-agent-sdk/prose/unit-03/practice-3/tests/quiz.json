@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "35-the-claude-agent-sdk"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 3,
+  "title": "Check yourself: Driving the Agent SDK offline, and the practice",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A team wants to test its permission policy without a model. Which part of the run can it replace, according to the page?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The executable that the SDK starts, through its path option",
+            "correct": true,
+            "says": "The page says both SDKs let you choose the executable that they start, `cli_path` in Python and `pathToClaudeCodeExecutable` in TypeScript, so the SDK code runs for real."
+          },
+          {
+            "id": "b",
+            "text": "The control messages, since the policy never sees them",
+            "correct": false,
+            "says": "Ruled out because \"the binary sends control requests back when it needs your process\", and the SDK answers them, so they belong to the code under test."
+          },
+          {
+            "id": "c",
+            "text": "The prompt text, because the policy ignores what is asked",
+            "correct": false,
+            "says": "Ruled out because \"A script, a JSON file named in an environment variable, lists the steps of a run\", so what is replaced is the binary behind the script and not the prompt."
+          },
+          {
+            "id": "d",
+            "text": "The SDK library, since its code holds the policy",
+            "correct": false,
+            "says": "Ruled out because \"the SDK code in your program runs for real\", which is the point of the method."
+          }
+        ],
+        "origin": {
+          "path": "course/35-the-claude-agent-sdk/03-driving-the-sdk-offline-and-the-practice.md",
+          "section": "How the SDK reaches the binary"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "In the example, the git push never reaches the permission callback. Why?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The hook runs first and denies it, so no later step is consulted",
+            "correct": true,
+            "says": "The page says \"The push never reaches the callback. The hook runs first and denies it\", which follows the order of page 2."
+          },
+          {
+            "id": "b",
+            "text": "The stand-in hides every Bash call that mentions a remote",
+            "correct": false,
+            "says": "Ruled out because the stand-in applies \"a simplified copy of the documented behaviour\", and its hook step is the SDK's registered hook, not a filter on remotes."
+          },
+          {
+            "id": "c",
+            "text": "The turn limit stops the run before the push can be asked",
+            "correct": false,
+            "says": "Ruled out because the options allow six turns and \"the run ends in success after five\"."
+          },
+          {
+            "id": "d",
+            "text": "The callback allows only the list command, so the push is skipped",
+            "correct": false,
+            "says": "Ruled out because the callback is asked about three calls (the two custom tools and the list command), \"but not the push, which the hook had already decided\"."
+          }
+        ],
+        "origin": {
+          "path": "course/35-the-claude-agent-sdk/03-driving-the-sdk-offline-and-the-practice.md",
+          "section": "The example: three kinds of callback in one run"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "The example's output lists six MCP messages for two custom tool calls. What does the page say that number is?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It is the number of messages that the real binary sends for two tools",
+            "correct": false,
+            "says": "Ruled out because the count is \"not a number to expect from the real binary\"."
+          },
+          {
+            "id": "b",
+            "text": "It is a protocol limit of three messages for each tool",
+            "correct": false,
+            "says": "Ruled out because the three messages are \"an initialize, a notification and a tool call for each custom tool\", the stand-in's own sequence and not a limit of the protocol."
+          },
+          {
+            "id": "c",
+            "text": "It is the sequence that the stand-in itself produces",
+            "correct": true,
+            "says": "The page says \"The MCP count is the stand-in's own sequence of an initialize, a notification and a tool call for each custom tool\"."
+          },
+          {
+            "id": "d",
+            "text": "It is a count measured on the real binary and recorded here",
+            "correct": false,
+            "says": "Ruled out because the page says \"It is not the real binary, and nothing here shows how the real binary words its messages or schedules its calls.\""
+          }
+        ],
+        "origin": {
+          "path": "course/35-the-claude-agent-sdk/03-driving-the-sdk-offline-and-the-practice.md",
+          "section": "The example: three kinds of callback in one run"
+        }
+      }
+    ]
+  }
+}

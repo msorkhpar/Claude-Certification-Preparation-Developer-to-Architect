@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/java/Pipeline.java",
+      "old": "return Math.round(hits * 100.0 / relevant.size()) / 100.0;",
+      "new": "int answered = 0;\n        for (String q : relevant.keySet()) if (results.containsKey(q)) answered++;\n        return Math.round(hits * 100.0 / Math.max(1, answered)) / 100.0;"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/java/Triage.java",
+      "old": "        for (Span s : spans) if (s.status().equals(\"error\")) return \"error\";\n        if (spans.get(0).ms() > slowMs) return \"slow\";\n",
+      "new": "        if (spans.get(0).ms() > slowMs) return \"slow\";\n        for (Span s : spans) if (s.status().equals(\"error\")) return \"error\";\n"
+    }
+  ]
+}

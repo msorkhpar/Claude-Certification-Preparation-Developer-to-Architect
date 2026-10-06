@@ -1,0 +1,85 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "48-multi-step-workflows-with-guarantees"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 3,
+  "title": "Practice: a refund desk that cannot skip identity (Java)",
+  "lang": "java",
+  "main_file": "src/main/java/RefundDesk.java",
+  "files": [
+    "src/main/java/TryIt.java"
+  ],
+  "test_file": "src/test/java/RefundDeskTest.java",
+  "build": [
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/48-multi-step-workflows-with-guarantees/prose/unit-02/practice-3",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/48-multi-step-workflows-with-guarantees/prose/unit-02/practice-3",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_aVerifiedCustomerCanLookUpAnOrderAndBeRefundedWithinTheLimit()",
+      "kind": "main",
+      "says": "A verified customer looks up an order and is refunded within the limit; the desk records it"
+    },
+    {
+      "id": "e1_aRefundBeforeIdentityIsVerifiedIsBlockedInCodeAndNeverReachesTheBackend()",
+      "kind": "edge",
+      "says": "A refund before identity is verified is refused in code and never reaches the backend"
+    },
+    {
+      "id": "e2_anOrderThatBelongsToSomeoneElseIsNeitherShownNorRefundable()",
+      "kind": "edge",
+      "says": "Another customer's order is not shown, not remembered and not refundable; lookup also needs identity"
+    },
+    {
+      "id": "e3_aRefundIsCheckedAgainstTheOrderItsAmountAndWhatIsLeft()",
+      "kind": "edge",
+      "says": "A refund is checked against the looked-up order, the amount and what is left"
+    },
+    {
+      "id": "e4_aRefundOverTheLimitIsNotExecutedAndBecomesAStructuredHandOff()",
+      "kind": "edge",
+      "says": "A refund over the limit is not executed, and the hand-off says what a person needs to decide"
+    },
+    {
+      "id": "e5_aFailedCheckDoesNotUnlockAnythingAndThreeInARowLockTheDesk()",
+      "kind": "edge",
+      "says": "A failed check unlocks nothing; three in a row lock the desk, and only escalation still works"
+    },
+    {
+      "id": "e6_unknownToolsAndBackendErrorsAreReportedAndTheHandOffListsEveryBlock()",
+      "kind": "edge",
+      "says": "Unknown tools and backend errors are reported, and the hand-off lists every refusal"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/48-multi-step-workflows-with-guarantees/02-prerequisite-chains-limits-hand-offs-and-the-practice.md"
+}

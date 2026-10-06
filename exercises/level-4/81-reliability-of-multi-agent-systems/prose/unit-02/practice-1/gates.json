@@ -1,0 +1,120 @@
+{
+  "gates_api": 1,
+  "inputs": [
+    {
+      "role": "statement",
+      "path": "statement.md",
+      "digest": "sha256:ea75c6d07e864b75cce7360aec99c1c1b70e72140b82700d5cba911b82ba1414"
+    },
+    {
+      "role": "starter",
+      "path": "starter/reliable_agents.py",
+      "digest": "sha256:a484810b95b9a667aa6ddfb7067d8bc42bbad50e861e318ed6e0d59959bc566c"
+    },
+    {
+      "role": "reference",
+      "path": "reference/reliable_agents.py",
+      "digest": "sha256:36708b6eedfa39870ab08a4f1aa2310a307e42e7f63cf897839d31c7a4d6bfa1"
+    },
+    {
+      "role": "starter:try_it.py",
+      "path": "starter/try_it.py",
+      "digest": "sha256:86a4cb461fe117bd0829fe6d82f2983083e84a0654183b18456f802765a3f9b9"
+    },
+    {
+      "role": "reference:try_it.py",
+      "path": "reference/try_it.py",
+      "digest": "sha256:86a4cb461fe117bd0829fe6d82f2983083e84a0654183b18456f802765a3f9b9"
+    },
+    {
+      "role": "tests",
+      "path": "tests/test_reliable_agents.py",
+      "digest": "sha256:cb197e6981a91477cb7d43f2fe151f4ee5e3ab2d3b30a7f1824efea318063484"
+    },
+    {
+      "role": "plant:test_e1_every_retry_of_a_task_carries_the_same_idempotency_key",
+      "path": "plants/edge-1/reliable_agents.py.plant.json",
+      "digest": "sha256:bae4988c6d198add912068edf0d4c3ecb9ec5d40d095f8b79f0adedfd223a41d"
+    },
+    {
+      "role": "plant:test_e2_retries_stop_at_the_limit_and_a_fatal_failure_is_not_retried",
+      "path": "plants/edge-2/reliable_agents.py.plant.json",
+      "digest": "sha256:6ee3b95bfc62f5d301f63d266ddf69276b8b1e16b7c1cf236b269dabc6c13757"
+    },
+    {
+      "role": "plant:test_e3_a_failure_stays_inside_its_branch_and_dependents_are_skipped",
+      "path": "plants/edge-3/reliable_agents.py.plant.json",
+      "digest": "sha256:eab8f37c843aa69f86ff86bf5e7c3c21d1b1bc36cc36b5236d0cb4c45b61af29"
+    },
+    {
+      "role": "plant:test_e4_a_breaker_stops_calls_to_an_agent_that_keeps_failing_and_a_success_resets_it",
+      "path": "plants/edge-4/reliable_agents.py.plant.json",
+      "digest": "sha256:9f43795a2cee5cfb53967f6accef1beb83d481fc7d8e148f7cb2966cda8a2e5b"
+    },
+    {
+      "role": "plant:test_e5_a_fallback_degrades_one_task_with_its_own_key_and_is_not_checkpointed",
+      "path": "plants/edge-5/reliable_agents.py.plant.json",
+      "digest": "sha256:99d755547fc9365834052b242a0cc027fbfb6a1ae79bb7c699cd50524d747f22"
+    },
+    {
+      "role": "plant:test_e6_a_second_run_resumes_from_the_checkpoint_and_retries_only_what_failed",
+      "path": "plants/edge-6/reliable_agents.py.plant.json",
+      "digest": "sha256:266936b1a349beda778b99347f074e5c13e2953ed074f9814c65f537873ca050"
+    },
+    {
+      "role": "plant:test_e7_an_unexpected_crash_is_not_swallowed_and_keeps_the_work_already_checkpointed",
+      "path": "plants/edge-7/reliable_agents.py.plant.json",
+      "digest": "sha256:ddb907ecddc45b3058d500bc3000e01aa7818d8edc6b11e10439c2cf81aca41c"
+    },
+    {
+      "role": "build:pytest.ini",
+      "path": "build/pytest.ini",
+      "digest": "sha256:78b695b449e8bb92c850493180f73fc8d1122b2b99925d12dddab5c285e8d026"
+    }
+  ],
+  "origins": [
+    {
+      "role": "origin",
+      "path": "course/81-reliability-of-multi-agent-systems/02-isolation-fallbacks-and-resuming-a-run.md",
+      "section": null,
+      "digest": "sha256:5f0256bdab8316194c17fe238acbbddfda760d8396a6083840ce7761a9127934"
+    }
+  ],
+  "gates": [
+    {
+      "id": "G1",
+      "family": "code",
+      "held": true,
+      "says": "all 8 cases passed on the reference, on two runs alike",
+      "recorded": {}
+    },
+    {
+      "id": "G2",
+      "family": "code",
+      "held": true,
+      "says": "none of the 8 cases passed on the starter",
+      "recorded": {}
+    },
+    {
+      "id": "G3",
+      "family": "code",
+      "held": true,
+      "says": "each of the 7 edge cases was caught by its own plant",
+      "recorded": {}
+    },
+    {
+      "id": "G4",
+      "family": "code",
+      "held": true,
+      "says": "every test the report named mapped to one of the 8 cases, and every case was named",
+      "recorded": {}
+    },
+    {
+      "id": "G5",
+      "family": "code",
+      "held": true,
+      "says": "the cited passage of 'course/81-reliability-of-multi-agent-systems/02-isolation-fallbacks-and-resuming-a-run.md' still matches the ledger",
+      "recorded": {}
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "practice": "33-mcp-advanced/unit-01/practice-1",
+  "name": "mrtr",
+  "tests": {
+    "java": "MrtrTest",
+    "kotlin": "MrtrTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_production_deploy_takes_three_round_trips_and_keeps_no_state",
+      "typescript": "m1 a production deploy takes three round trips and keeps no state",
+      "java": "m1_aProductionDeployTakesThreeRoundTripsAndKeepsNoState",
+      "kotlin": "m1_aProductionDeployTakesThreeRoundTripsAndKeepsNoState"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_staging_deploy_and_a_status_call_finish_at_once_and_the_tool_list_is_cacheable",
+      "typescript": "e1 a staging deploy and a status call finish at once and the tool list is cacheable",
+      "java": "e1_aStagingDeployAndAStatusCallFinishAtOnceAndTheToolListIsCacheable",
+      "kotlin": "e1_aStagingDeployAndAStatusCallFinishAtOnceAndTheToolListIsCacheable"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_the_server_only_asks_what_the_client_declared_it_can_answer",
+      "typescript": "e2 the server only asks what the client declared it can answer",
+      "java": "e2_theServerOnlyAsksWhatTheClientDeclaredItCanAnswer",
+      "kotlin": "e2_theServerOnlyAsksWhatTheClientDeclaredItCanAnswer"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_no_or_a_missing_answer_is_handled_without_an_error",
+      "typescript": "e3 a no or a missing answer is handled without an error",
+      "java": "e3_aNoOrAMissingAnswerIsHandledWithoutAnError",
+      "kotlin": "e3_aNoOrAMissingAnswerIsHandledWithoutAnError"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_a_state_the_server_did_not_sign_is_refused",
+      "typescript": "e4 a state the server did not sign is refused",
+      "java": "e4_aStateTheServerDidNotSignIsRefused",
+      "kotlin": "e4_aStateTheServerDidNotSignIsRefused"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_state_works_only_for_the_same_user_the_same_call_and_before_it_expires",
+      "typescript": "e5 a state works only for the same user the same call and before it expires",
+      "java": "e5_aStateWorksOnlyForTheSameUserTheSameCallAndBeforeItExpires",
+      "kotlin": "e5_aStateWorksOnlyForTheSameUserTheSameCallAndBeforeItExpires"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_a_request_the_server_cannot_serve_is_a_protocol_error_with_a_code",
+      "typescript": "e6 a request the server cannot serve is a protocol error with a code",
+      "java": "e6_aRequestTheServerCannotServeIsAProtocolErrorWithACode",
+      "kotlin": "e6_aRequestTheServerCannotServeIsAProtocolErrorWithACode"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_the_state_carries_the_whole_context_and_an_answer_alone_never_skips_a_step",
+      "typescript": "e7 the state carries the whole context and an answer alone never skips a step",
+      "java": "e7_theStateCarriesTheWholeContextAndAnAnswerAloneNeverSkipsAStep",
+      "kotlin": "e7_theStateCarriesTheWholeContextAndAnAnswerAloneNeverSkipsAStep"
+    }
+  },
+  "plants": {
+    "wrong-no-expiry": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "accepts a requestState after its expiry time"
+    },
+    "wrong-any-principal": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "accepts a requestState that was issued to another user"
+    },
+    "wrong-no-digest": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "accepts a requestState on a call whose arguments differ from the ones it was issued for"
+    },
+    "wrong-bad-state-restarts": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "silently starts the flow over when the requestState is not one it signed"
+    },
+    "wrong-elicit-without-capability": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "sends an elicitation request to a client that did not declare the capability"
+    },
+    "wrong-decline-continues": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "carries on with the deployment after the user declined"
+    },
+    "wrong-error-on-missing-input": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "answers a retry that lacks the requested input with a protocol error instead of asking again"
+    },
+    "wrong-list-uncacheable": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "lists the tools with a cache lifetime of zero"
+    },
+    "wrong-version-ignored": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "serves a request whose protocol version is not the one it supports"
+    },
+    "wrong-answer-alone-skips": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "takes an answer that arrives with no requestState as if the question had been asked"
+    }
+  }
+}

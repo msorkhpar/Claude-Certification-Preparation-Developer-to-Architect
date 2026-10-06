@@ -1,0 +1,83 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "43-debugging-claude-applications"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: diagnose a failure from a trace (TypeScript)",
+  "lang": "typescript",
+  "main_file": "diagnose.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "diagnose.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-2/43-debugging-claude-applications/prose/unit-02/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-2/43-debugging-claude-applications/prose/unit-02/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-2/43-debugging-claude-applications/prose/unit-02/practice-2/diagnose.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 each documented http error maps to a type an origin and a recovery",
+      "kind": "main",
+      "says": "Each documented HTTP error maps to its type, origin and recovery"
+    },
+    {
+      "id": "e1 a 429 is a rate limit or a spend cap and other statuses fall back by class",
+      "kind": "edge",
+      "says": "The two kinds of 429, the 400 spend limit, and the fallback by class for statuses the table does not list"
+    },
+    {
+      "id": "e2 a successful response can still fail by its stop reason",
+      "kind": "edge",
+      "says": "A 200 response with a failing stop reason, and the stop reasons that are fine"
+    },
+    {
+      "id": "e3 an empty end turn is the integration when text followed the tool result and the model otherwise",
+      "kind": "edge",
+      "says": "An empty end_turn: our message structure or the model, by the last user message's blocks"
+    },
+    {
+      "id": "e4 a parse failure is the integration when a json object is in the text and the model when not",
+      "kind": "edge",
+      "says": "A parse failure: our parser or the model, by whether a JSON object is in the text"
+    },
+    {
+      "id": "e5 tool failures split into a model that called a missing tool and our tool that raised",
+      "kind": "edge",
+      "says": "A tool name the model invented against our own tool raising; a tool-reported error is not a failure"
+    },
+    {
+      "id": "e6 the first failure names the cause and a later good response marks it recovered",
+      "kind": "edge",
+      "says": "The first failure wins, with its index; a later good response means it recovered; a clean or empty trace is ok"
+    },
+    {
+      "id": "e7 a dropped connection has no status and belongs to the service side",
+      "kind": "edge",
+      "says": "A dropped connection has no status and belongs to the service side, and may recover"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/43-debugging-claude-applications/02-reading-a-trace-and-the-practice.md"
+}

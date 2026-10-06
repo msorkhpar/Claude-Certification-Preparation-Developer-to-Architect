@@ -1,0 +1,268 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-1",
+    "04-capabilities-and-limits"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "What Claude does well, and where it slips",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "What Claude does well, and where it slips"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Foundations · **Module 4:** Capabilities and limits · **Page 1 of 2** **Exams:** DV2, DV4 (and the judgment behind AS2, AS6)"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** say which kinds of task suit Claude and which need a second mechanism, for reasoning, coding, long documents, images, numbers and counting, and recent events, and name the fix for each weakness."
+    },
+    {
+      "type": "para",
+      "text": "Checked against the Anthropic documentation on 2026-10-02 (models overview, vision, context windows, token counting, reduce hallucinations). Claims about weaknesses are limited to what those pages state or what follows directly from them; each is marked."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "\"Can Claude do this?\" is the wrong question for an engineer; the useful one is \"what must be around Claude for this to be reliable?\" Exam scenarios hide the answer in a weakness: a count that is off, a scanned table misread, a fact after the cut-off, a very long input. Knowing the weakness points at the fix."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The broad picture"
+    },
+    {
+      "type": "para",
+      "text": "The models overview says current Claude models \"excel in\" top-tier results across reasoning, coding, multilingual tasks, long-context handling, honesty and image processing, and that all current models \"support text and image input, text output, multilingual capabilities, vision, and tool use\". Those are strengths to build on. The rest of this page is where the pages themselves say to be careful."
+    },
+    {
+      "type": "para",
+      "text": "Source: Models overview, Claude API documentation."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Reasoning"
+    },
+    {
+      "type": "para",
+      "text": "Claude works through multi-step problems well, and the way you ask matters. Module 6 teaches prompting for reasoning; page 2 of this module covers thinking at a glance. The limit to know: the reasoning is generated text, produced token by token. A confident chain of steps can contain a wrong step that makes everything after it wrong, so reasoning that decides something important needs a check that does not come from the same reasoning (a test, a calculation in code, a second reader)."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Coding"
+    },
+    {
+      "type": "para",
+      "text": "Code generation, explanation and review are core uses; the models overview describes Opus 5.5 as the model for long-running agentic coding and Sonnet 5.5 as the best balance of speed and intelligence. The limits are those of any unreviewed contribution: code can look right and not run, call a function that does not exist (a hallucination of the kind module 1 described), or pass the example it was shown and fail the next one. What fixes it is the machinery engineers already own: run it, test it, review it. Claude Code (module 38) is built around exactly that loop."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Long documents"
+    },
+    {
+      "type": "para",
+      "text": "The window can hold up to 1M tokens on three of the four current models. Two cautions from the context windows page: \"more context isn't automatically better\", because accuracy and recall degrade as the window fills (context rot), and cost grows with every token you send. Practical rules, developed in modules 6, 29 and 64: put long documents first and the question last (the vision page makes the same point for text, \"placing long documents before your query improves results\"), ask for supporting quotes, and send only what the question needs."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Vision"
+    },
+    {
+      "type": "para",
+      "text": "Claude reads images and PDFs. The vision documentation lists limits in plain terms, and they are exam material:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "**People.** Claude cannot be used to name people in images, and refuses to.",
+        "**Accuracy.** It \"might hallucinate or make mistakes when interpreting low-quality, rotated, or very small images under 200 pixels\".",
+        "**Spatial reasoning.** Coordinates and localisation outputs are approximate.",
+        "**Counting.** It \"can give approximate counts of objects in an image but might not always be precisely accurate, especially with large numbers of small objects\".",
+        "**Synthetic images.** It \"cannot determine whether an image is AI-generated\".",
+        "**Medical images.** It is \"not designed to interpret complex diagnostic scans such as CTs or MRIs\".",
+        "**Generation.** Claude \"is an image understanding model only\"; it cannot create or edit images."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Source: Vision, Claude API documentation. The page's own closing advice: \"Always carefully review and verify Claude's image interpretations, especially for high-stakes use cases.\" It adds: \"Do not use Claude for tasks requiring perfect precision or sensitive image analysis without human oversight.\""
+    },
+    {
+      "type": "para",
+      "text": "Images also cost tokens: each 28 by 28 pixel patch is one visual token, so an image costs about `ceil(width/28) x ceil(height/28)` tokens up to a per-model cap. A 1000 by 1000 image is 1,296 tokens on the page's table. Module 30 teaches this in code."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Maths and counting"
+    },
+    {
+      "type": "para",
+      "text": "This weakness is a consequence of two facts you already have, rather than a quotation. The model produces text token by token (page 1 of module 1), and it sees sub-word pieces, not characters (module 2). So exact arithmetic on long numbers, exact counts of letters, words or items, and exact string manipulation are approximate unless the model does the work in a tool. The documentation's vision page says the same of counting objects in pictures. The fix is not a better prompt; it is code. Give the model a calculator or a code-execution tool, or have it write the program and run it yourself."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Recency and private knowledge"
+    },
+    {
+      "type": "para",
+      "text": "The model's knowledge stops at its cut-off (June 2026 for the three large models, February 2025 reliable for Haiku 4.5, as module 1 page 2 tabulates) and it has no clock and no access to your systems. Anything recent, private or fast-changing has to come in through the prompt, a retrieval step (module 28) or a tool (module 26). Asked without them, it answers from what it has, which is how a stale or invented answer is produced with a confident voice."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The honest summary"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Task",
+        "Claude alone",
+        "What to add"
+      ],
+      "rows": [
+        [
+          "Draft, summarise, translate, explain",
+          "Strong",
+          "Review for accuracy and fit"
+        ],
+        [
+          "Write and refactor code",
+          "Strong",
+          "Tests, running it, review"
+        ],
+        [
+          "Reason through a problem",
+          "Strong",
+          "An independent check on the decisive step"
+        ],
+        [
+          "Analyse a long document",
+          "Strong, with care",
+          "Quotes, trimming, document first"
+        ],
+        [
+          "Read an image or PDF",
+          "Strong, with limits",
+          "Verify, mind the listed weaknesses"
+        ],
+        [
+          "Exact arithmetic, counts, string edits",
+          "Unreliable",
+          "A calculator or code tool"
+        ],
+        [
+          "Recent or private facts",
+          "Absent",
+          "Context, retrieval or a tool"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Fixing an exact-count error by prompting harder.** \"Count carefully\" does not change that the model sees pieces. Move the counting into code.",
+        "**Trusting an image reading because it is detailed.** Detail is not accuracy; the vision page lists the conditions under which it is wrong.",
+        "**Filling the window because it is there.** A bigger window is capacity, not a reason to send everything; context rot makes curation part of the design."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A finance team pastes forty invoice amounts into a prompt and asks Claude for the sum. The reply reads fluently and is off by a few cents. What is the most dependable correction?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Let it call a code tool and pass on the tool's result",
+              "**b**: Add a closing line asking Claude to flag how sure it is of the total",
+              "**c**: Reformat the amounts into one column so the sum is easier to follow",
+              "**d**: Ask for the sum again with an instruction to double-check each step"
+            ]
+          }
+        ],
+        [
+          "An inspection app sends shelf photographs and asks Claude how many bottles are visible. Totals are sometimes wrong on crowded shelves, and the total feeds a purchasing decision. Which design response fits what the documentation says?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Shrink each photo heavily so the scene looks simpler to the model",
+              "**b**: Take the coordinates it returns for each bottle as exact positions to count",
+              "**c**: Label the figures approximate and verify the important ones against real stock",
+              "**d**: Switch to a larger model and treat its counts as final in the weekly purchasing report"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**a**. Exact arithmetic is a task for a tool, because the model works on tokens (the maths and counting section), and the first trap says to move such work into code. *d* is ruled out because a re-check request \"does not change that the model sees pieces\", and the section says the fix is not a better prompt. *b* is ruled out because reasoning \"needs a check that does not come from the same reasoning\", and the model's own report of certainty is not one. *c* is ruled out because exact arithmetic on long numbers is \"approximate unless the model does the work in a tool\", however the amounts are laid out.",
+            "**c**. The vision page says counts can be approximate, and its closing advice is to verify interpretations in high-stakes cases, so the figures are labelled as estimates and the ones that matter are checked. *a* is ruled out because Claude \"might hallucinate or make mistakes when interpreting low-quality, rotated, or very small images under 200 pixels\", so heavy shrinking makes it worse. *b* is ruled out because the vision list says \"Coordinates and localisation outputs are approximate\", so they cannot give an exact count either. *d* is ruled out because the page says \"Do not use Claude for tasks requiring perfect precision or sensitive image analysis without human oversight\", for any tier."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 13,
+    "paras": 14,
+    "code": 0,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "b6d1dafc67a7c54dded7cecaa83e7e291ca7ff0ec5541feaffc644b76a28cf89"
+}

@@ -1,0 +1,121 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "81-reliability-of-multi-agent-systems"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Safe retries and circuit breakers",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "Scenario: Tern Payments' transfer tool writes its idempotency key to a keys table and then makes the transfer as a second, separate step. A crash falls between the two steps, and after the restart a retry returns the stored receipt although no money moved. What design prevents this?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Delete stored keys that are older than a minute, so that a retry can proceed afresh",
+            "correct": false,
+            "says": "Ruled out because the page says to \"Record the key together with the effect\", and deleting keys breaks the recognition of repeats."
+          },
+          {
+            "id": "b",
+            "text": "Make the agent confirm the account balance in its prompt before every retry",
+            "correct": false,
+            "says": "Ruled out because \"a control that must hold is enforced in code outside the model\"."
+          },
+          {
+            "id": "c",
+            "text": "Write the transfer first and the key second, as two steps in that order",
+            "correct": false,
+            "says": "Ruled out because it only reverses the gap: \"a crash between the two leaves an effect with no key, or a key with no effect\"."
+          },
+          {
+            "id": "d",
+            "text": "Persist both together as one indivisible operation",
+            "correct": true,
+            "says": "The key and the effect are recorded in one step, so neither can exist without the other."
+          }
+        ],
+        "origin": {
+          "path": "course/81-reliability-of-multi-agent-systems/01-safe-retries-and-circuit-breakers.md",
+          "section": "A retry is safe only when the repeat is recognised"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "Scenario: Quillon Labs runs fifty tasks that depend on one search agent whose backend is down. Each task retries three times before failing. What limits the waste best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A breaker that trips after repeated errors in a row and refuses calls for a pause",
+            "correct": true,
+            "says": "A breaker refuses calls at once while it is open and probes once after the cooldown."
+          },
+          {
+            "id": "b",
+            "text": "A larger retry count for each task, so the backend has more chances to come back",
+            "correct": false,
+            "says": "Ruled out because \"an unlimited retry is a way to spend money while nothing changes\" and a larger count is the same mistake."
+          },
+          {
+            "id": "c",
+            "text": "A faster model for the search agent, so that every failed call ends sooner",
+            "correct": false,
+            "says": "Ruled out because the waste is the count of calls, \"a hundred and fifty wasted calls\", which speed leaves in place."
+          },
+          {
+            "id": "d",
+            "text": "A rule that restarts the whole run from the first task whenever any task has failed",
+            "correct": false,
+            "says": "Ruled out because a restart makes the same calls again, where the breaker means \"the task fails fast with the reason `circuit open`\"."
+          }
+        ],
+        "origin": {
+          "path": "course/81-reliability-of-multi-agent-systems/01-safe-retries-and-circuit-breakers.md",
+          "section": "Retries have limits, and not every failure is a retry"
+        }
+      }
+    ],
+    "concepts": [
+      "A retry is safe only when the repeat is recognised, as the page teaches it",
+      "Retries have limits, and not every failure is a retry, as the page teaches it"
+    ]
+  }
+}

@@ -1,0 +1,315 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "13-one-rest-api-under-every-sdk"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: a raw Messages API client, graded on the HTTP contract (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a raw Messages API client, graded on the HTTP contract"
+    },
+    {
+      "type": "para",
+      "text": "Write a small client that speaks the Messages API by hand: no SDK, one injected transport. The tests check the request that would go on the wire and the way a reply, good or bad, becomes a value or an error."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given types (in the starter, do not change them)"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`Request`",
+          "`method`, `url`, `headers` (a map), `body` (JSON **text**)"
+        ],
+        [
+          "`Response`",
+          "`status`, `headers` (a map, **lower-case names**), `body` (text)"
+        ],
+        [
+          "transport",
+          "a function from `Request` to `Response`; the tests pass a scripted one, a real client would do the network call"
+        ],
+        [
+          "`ApiError`",
+          "a non-2xx reply: `status`, `error_type`, `detail`, `request_id` (nothing when there is none). TypeScript, Java and Kotlin spell the fields `status`, `errorType`, `detail` and `requestId`"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Java and Kotlin also get a small `Json` helper (`parse` and `stringify`) in the starter; Python and TypeScript use their standard JSON."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working client with eight gaps cut out of it. The plumbing is written and correct: the given types, `build_request` and `send_messages` themselves, the check for a good status, the JSON parsing of an error body and the way the parts become an `ApiError`. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To see what a gap receives, debug it by logging its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (Python names; the TypeScript, Java and Kotlin names are the camel-case forms, with `headersFor` for `_headers` and `bodyFor` for `_body`):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_validate` unlocks `e2`: bad input is refused.",
+        "`_headers` unlocks `m1`: the three headers.",
+        "`_body` unlocks `m1` and `e1`: the body, with `system` only when it is present.",
+        "`_error_parts` unlocks `e4` and `e5`: the error type and message, or `unknown` and the trimmed text.",
+        "`_pick_request_id` unlocks `e4`: the header's id before the body's.",
+        "`_redact` unlocks `e6`: the key replaced by `[redacted]`.",
+        "`_parse_message` unlocks `e3`: the parsed message of a good reply.",
+        "`text_of` unlocks `e3`: the text blocks joined."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gaps 2 and 3. A few lines each, about twenty in all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The three functions"
+    },
+    {
+      "type": "para",
+      "text": "**`build_request(api_key, model, messages, max_tokens, system=None)`** (TypeScript `buildRequest`, Java `RawClient.buildRequest`, Kotlin `buildRequest`) returns a `Request`:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "method `POST`, URL `https://api.anthropic.com/v1/messages`;",
+        "exactly three headers: `x-api-key` (the key), `anthropic-version` (`2023-06-01`) and `content-type` (`application/json`);",
+        "a JSON body with `model`, `max_tokens` and `messages`, plus `system` **only when it is present and not blank**."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "It refuses bad input with `ValueError` (TypeScript `Error`, Java and Kotlin `IllegalArgumentException`): a blank key, no messages, or `max_tokens` below 1."
+    },
+    {
+      "type": "para",
+      "text": "**`send_messages(transport, api_key, model, messages, max_tokens, system=None)`** builds the request, calls the transport and:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "on a status from 200 to 299, returns the parsed JSON message;",
+        [
+          "on any other status, raises `ApiError`:",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "for a JSON body shaped like `{\"type\": \"error\", \"error\": {\"type\": ..., \"message\": ...}}`, the error's `type` and `message`;",
+              "for anything else (a proxy's HTML page, an empty body), `error_type` `unknown` and the first 200 characters of the text, trimmed, as the detail;",
+              "the **request id** comes from the `request-id` response header; when the header is absent, from the body's `request_id` field; otherwise nothing;",
+              "the API key never appears in the error: replace every occurrence of it in the detail with `[redacted]`."
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "**`text_of(message)`** returns the `text` of the message's text blocks joined, ignoring every other block type."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "The request has the right method, URL, exactly three headers and a JSON body"
+        ],
+        [
+          "`e1`",
+          "A blank or absent `system` is left out of the body"
+        ],
+        [
+          "`e2`",
+          "Bad input is refused before the transport is called"
+        ],
+        [
+          "`e3`",
+          "A good reply is parsed, and `text_of` joins text blocks only"
+        ],
+        [
+          "`e4`",
+          "An error reply becomes an `ApiError`; the header's request id wins over the body's"
+        ],
+        [
+          "`e5`",
+          "A reply that is not JSON still gives an `ApiError` (`unknown`)"
+        ],
+        [
+          "`e6`",
+          "The API key never appears in an error"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// A raw Messages API client over an injected transport. See ../../statement.md for the contract.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"rawClient\");\nexport const URL = \"https://api.anthropic.com/v1/messages\";\n\nexport type Request = { method: string; url: string; headers: Record<string, string>; body: string };\nexport type Response = { status: number; headers: Record<string, string>; body: string }; // header names in lower case\nexport type Transport = (request: Request) => Response;\n\n/** A non-2xx reply: status, error type, message and the request id (null when there is none). */\nexport class ApiError extends Error {\n  status: number;\n  errorType: string;\n  detail: string;\n  requestId: string | null;\n  constructor(status: number, errorType: string, message: string, requestId: string | null = null) {\n    super(`${status} ${errorType}: ${message}`);\n    this.status = status;\n    this.errorType = errorType;\n    this.detail = message;\n    this.requestId = requestId;\n  }\n}\n\nfunction present(value: unknown): value is string {\n  return typeof value === \"string\" && value.trim() !== \"\";\n}\n\nfunction validate(apiKey: string, messages: object[], maxTokens: number): void {\n  if (!present(apiKey)) throw new Error(\"apiKey is required\");\n  if (!messages || messages.length === 0) throw new Error(\"messages must not be empty\");\n  if (!Number.isInteger(maxTokens) || maxTokens < 1) throw new Error(\"maxTokens must be at least 1\");\n}\n\nfunction headersFor(apiKey: string): Record<string, string> {\n  return { \"x-api-key\": apiKey, \"anthropic-version\": \"2023-06-01\", \"content-type\": \"application/json\" };\n}\n\nfunction bodyFor(model: string, messages: object[], maxTokens: number, system?: string | null): Record<string, unknown> {\n  const body: Record<string, unknown> = { model, max_tokens: maxTokens, messages };\n  if (present(system)) body.system = system;\n  return body;\n}\n\nexport function buildRequest(apiKey: string, model: string, messages: object[], maxTokens: number, system?: string | null): Request {\n  log.debug(\"buildRequest input\", model, messages, maxTokens, system);\n  validate(apiKey, messages, maxTokens);\n  return { method: \"POST\", url: URL, headers: headersFor(apiKey), body: JSON.stringify(bodyFor(model, messages, maxTokens, system)) };\n}\n\nfunction errorParts(parsed: any, text: string): [string, string] {\n  if (parsed && typeof parsed === \"object\" && parsed.error && typeof parsed.error === \"object\") {\n    return [parsed.error.type ?? \"unknown\", String(parsed.error.message ?? \"\")];\n  }\n  return [\"unknown\", text.trim().slice(0, 200)];\n}\n\nfunction pickRequestId(headerId: string | null, bodyId: string | null): string | null {\n  return headerId ?? bodyId ?? null;\n}\n\nfunction redact(message: string, apiKey: string): string {\n  return message.split(apiKey).join(\"[redacted]\");\n}\n\nfunction errorFrom(response: Response, apiKey: string): ApiError {\n  let parsed: any = null;\n  try {\n    parsed = JSON.parse(response.body);\n  } catch {\n    // not JSON: keep the raw text\n  }\n  const [kind, message] = errorParts(parsed, response.body);\n  const bodyId = parsed && typeof parsed === \"object\" ? (parsed.request_id ?? null) : null;\n  return new ApiError(response.status, kind, redact(message, apiKey), pickRequestId(response.headers[\"request-id\"] ?? null, bodyId));\n}\n\nfunction parseMessage(text: string): any {\n  return JSON.parse(text);\n}\n\nexport function sendMessages(transport: Transport, apiKey: string, model: string, messages: object[], maxTokens: number, system?: string | null): any {\n  const request = buildRequest(apiKey, model, messages, maxTokens, system);\n  const response = transport(request);\n  if (response.status >= 200 && response.status < 300) return parseMessage(response.body);\n  throw errorFrom(response, apiKey);\n}\n\nexport function textOf(message: { content?: Array<{ type: string; text?: string }> }): string {\n  return (message.content ?? []).filter((b) => b.type === \"text\").map((b) => b.text ?? \"\").join(\"\");\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { ApiError, sendMessages, textOf } from \"./rawClient.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// A stand-in transport, like the one the tests use: it records the request and answers with a fixed reply.\nconst sent: any[] = [];\nconst transport = (request: any) => {\n  sent.push(request);\n  const body = { content: [{ type: \"text\", text: \"Paris.\" }], stop_reason: \"end_turn\", usage: { input_tokens: 9, output_tokens: 3 } };\n  return { status: 200, headers: {}, body: JSON.stringify(body) };\n};\n\nconst messages = [{ role: \"user\", content: \"Capital of France?\" }];\nconst message = sendMessages(transport, \"sk-test-0123456789abcdef\", \"claude-sonnet-5-5\", messages, 64, \"Be brief.\");\n\nconsole.log(\"requests sent:\", sent.length);\nconsole.log(\"method and url:\", sent[0]?.method, sent[0]?.url);\nconsole.log(\"header names:\", sent[0] ? Object.keys(sent[0].headers).sort() : null);\nconsole.log(\"reply text:\", message ? textOf(message) : null);\n\n// An error reply becomes an ApiError.\ntry {\n  sendMessages(() => ({ status: 429, headers: { \"request-id\": \"req_1\" }, body: JSON.stringify(\n    { type: \"error\", error: { type: \"rate_limit_error\", message: \"Rate limited\" } }) }),\n    \"sk-test-0123456789abcdef\", \"claude-sonnet-5-5\", messages, 64);\n} catch (err) {\n  if (err instanceof ApiError) console.log(\"api error:\", err.status, err.errorType, err.requestId);\n  else throw err;\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// A raw Messages API client over an injected transport. See ../../statement.md for the contract.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"rawClient\");\nexport const URL = \"https://api.anthropic.com/v1/messages\";\n\nexport type Request = { method: string; url: string; headers: Record<string, string>; body: string };\nexport type Response = { status: number; headers: Record<string, string>; body: string }; // header names in lower case\nexport type Transport = (request: Request) => Response;\n\n/** A non-2xx reply: status, error type, message and the request id (null when there is none). */\nexport class ApiError extends Error {\n  status: number;\n  errorType: string;\n  detail: string;\n  requestId: string | null;\n  constructor(status: number, errorType: string, message: string, requestId: string | null = null) {\n    super(`${status} ${errorType}: ${message}`);\n    this.status = status;\n    this.errorType = errorType;\n    this.detail = message;\n    this.requestId = requestId;\n  }\n}\n\nfunction present(value: unknown): value is string {\n  return typeof value === \"string\" && value.trim() !== \"\";\n}\n\nfunction validate(apiKey: string, messages: object[], maxTokens: number): void {\n  // TODO 1 of 8 (finish this to pass e2): refuse bad input before anything is sent.\n  // Receives the key, the messages and maxTokens. Throws an Error when the key is blank (use present), the messages are empty or\n  // maxTokens is not a whole number of at least 1; otherwise returns nothing.\n  // Example: validate(\"  \", [], 8) -> Error, validate(\"sk-x\", [{ role: \"user\", content: \"hi\" }], 8) -> undefined\n}\n\nfunction headersFor(apiKey: string): Record<string, string> {\n  // TODO 2 of 8 (finish this to pass m1): the three request headers.\n  // Receives the API key. Returns an object with exactly `x-api-key` (the key), `anthropic-version` (2023-06-01) and `content-type`\n  // (application/json). Example: headersFor(\"k\")[\"anthropic-version\"] -> \"2023-06-01\"\n  return {};\n}\n\nfunction bodyFor(model: string, messages: object[], maxTokens: number, system?: string | null): Record<string, unknown> {\n  // TODO 3 of 8 (finish this to pass m1 and e1): the request body as an object.\n  // Receives the model, the messages, maxTokens and the system text (may be null or undefined). Returns an object with `model`,\n  // `max_tokens` and `messages`, plus `system` only when it is present and not blank (use present).\n  // Example: bodyFor(\"m\", [], 8, \"  \") -> { model: \"m\", max_tokens: 8, messages: [] }\n  return {};\n}\n\nexport function buildRequest(apiKey: string, model: string, messages: object[], maxTokens: number, system?: string | null): Request {\n  log.debug(\"buildRequest input\", model, messages, maxTokens, system);\n  validate(apiKey, messages, maxTokens);\n  return { method: \"POST\", url: URL, headers: headersFor(apiKey), body: JSON.stringify(bodyFor(model, messages, maxTokens, system)) };\n}\n\nfunction errorParts(parsed: any, text: string): [string, string] {\n  // TODO 4 of 8 (finish this to pass e4 and e5): the error type and message of an error reply.\n  // Receives the parsed JSON body (null when it is not JSON) and the raw body text. For a body shaped like\n  // { error: { type, message } } returns that type and message as text; for anything else returns \"unknown\" and the first 200\n  // characters of the text, trimmed.\n  // Example: errorParts({ error: { type: \"x\", message: \"m\" } }, \"\") -> [\"x\", \"m\"], errorParts(null, \" <html> \") -> [\"unknown\", \"<html>\"]\n  return [\"\", \"\"];\n}\n\nfunction pickRequestId(headerId: string | null, bodyId: string | null): string | null {\n  // TODO 5 of 8 (finish this to pass e4): which request id the error carries.\n  // Receives the id from the `request-id` header and the id from the body, either may be null. Returns the header's when there is one,\n  // else the body's, else null. Example: pickRequestId(\"h\", \"b\") -> \"h\", pickRequestId(null, \"b\") -> \"b\"\n  return null;\n}\n\nfunction redact(message: string, apiKey: string): string {\n  // TODO 6 of 8 (finish this to pass e6): keep the key out of the error.\n  // Receives the message and the API key. Returns the message with every occurrence of the key replaced by [redacted].\n  // Example: redact(\"bad key sk-1\", \"sk-1\") -> \"bad key [redacted]\"\n  return message;\n}\n\nfunction errorFrom(response: Response, apiKey: string): ApiError {\n  let parsed: any = null;\n  try {\n    parsed = JSON.parse(response.body);\n  } catch {\n    // not JSON: keep the raw text\n  }\n  const [kind, message] = errorParts(parsed, response.body);\n  const bodyId = parsed && typeof parsed === \"object\" ? (parsed.request_id ?? null) : null;\n  return new ApiError(response.status, kind, redact(message, apiKey), pickRequestId(response.headers[\"request-id\"] ?? null, bodyId));\n}\n\nfunction parseMessage(text: string): any {\n  // TODO 7 of 8 (finish this to pass e3): the message of a good reply.\n  // Receives the response body text. Returns the parsed JSON object. Example: parseMessage('{\"stop_reason\":\"end_turn\"}') -> { stop_reason: \"end_turn\" }\n  return {};\n}\n\nexport function sendMessages(transport: Transport, apiKey: string, model: string, messages: object[], maxTokens: number, system?: string | null): any {\n  const request = buildRequest(apiKey, model, messages, maxTokens, system);\n  const response = transport(request);\n  if (response.status >= 200 && response.status < 300) return parseMessage(response.body);\n  throw errorFrom(response, apiKey);\n}\n\nexport function textOf(message: { content?: Array<{ type: string; text?: string }> }): string {\n  // TODO 8 of 8 (finish this to pass e3): the text of a message.\n  // Receives a message with a `content` array of blocks. Returns the `text` of the blocks whose `type` is \"text\", joined with nothing\n  // between them; every other block type is ignored.\n  // Example: textOf({ content: [{ type: \"text\", text: \"a\" }, { type: \"tool_use\" }, { type: \"text\", text: \"b\" }] }) -> \"ab\"\n  return \"\";\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { ApiError, sendMessages, textOf } from \"./rawClient.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// A stand-in transport, like the one the tests use: it records the request and answers with a fixed reply.\nconst sent: any[] = [];\nconst transport = (request: any) => {\n  sent.push(request);\n  const body = { content: [{ type: \"text\", text: \"Paris.\" }], stop_reason: \"end_turn\", usage: { input_tokens: 9, output_tokens: 3 } };\n  return { status: 200, headers: {}, body: JSON.stringify(body) };\n};\n\nconst messages = [{ role: \"user\", content: \"Capital of France?\" }];\nconst message = sendMessages(transport, \"sk-test-0123456789abcdef\", \"claude-sonnet-5-5\", messages, 64, \"Be brief.\");\n\nconsole.log(\"requests sent:\", sent.length);\nconsole.log(\"method and url:\", sent[0]?.method, sent[0]?.url);\nconsole.log(\"header names:\", sent[0] ? Object.keys(sent[0].headers).sort() : null);\nconsole.log(\"reply text:\", message ? textOf(message) : null);\n\n// An error reply becomes an ApiError.\ntry {\n  sendMessages(() => ({ status: 429, headers: { \"request-id\": \"req_1\" }, body: JSON.stringify(\n    { type: \"error\", error: { type: \"rate_limit_error\", message: \"Rate limited\" } }) }),\n    \"sk-test-0123456789abcdef\", \"claude-sonnet-5-5\", messages, 64);\n} catch (err) {\n  if (err instanceof ApiError) console.log(\"api error:\", err.status, err.errorType, err.requestId);\n  else throw err;\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 9,
+    "code": 2,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "9f27a196151dfce5cb2fd884cfb8e5549d6812ace51e327405acd707604ad1ba",
+  "starting_code": "// A raw Messages API client over an injected transport. See ../../statement.md for the contract.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"rawClient\");\nexport const URL = \"https://api.anthropic.com/v1/messages\";\n\nexport type Request = { method: string; url: string; headers: Record<string, string>; body: string };\nexport type Response = { status: number; headers: Record<string, string>; body: string }; // header names in lower case\nexport type Transport = (request: Request) => Response;\n\n/** A non-2xx reply: status, error type, message and the request id (null when there is none). */\nexport class ApiError extends Error {\n  status: number;\n  errorType: string;\n  detail: string;\n  requestId: string | null;\n  constructor(status: number, errorType: string, message: string, requestId: string | null = null) {\n    super(`${status} ${errorType}: ${message}`);\n    this.status = status;\n    this.errorType = errorType;\n    this.detail = message;\n    this.requestId = requestId;\n  }\n}\n\nfunction present(value: unknown): value is string {\n  return typeof value === \"string\" && value.trim() !== \"\";\n}\n\nfunction validate(apiKey: string, messages: object[], maxTokens: number): void {\n  // TODO 1 of 8 (finish this to pass e2): refuse bad input before anything is sent.\n  // Receives the key, the messages and maxTokens. Throws an Error when the key is blank (use present), the messages are empty or\n  // maxTokens is not a whole number of at least 1; otherwise returns nothing.\n  // Example: validate(\"  \", [], 8) -> Error, validate(\"sk-x\", [{ role: \"user\", content: \"hi\" }], 8) -> undefined\n}\n\nfunction headersFor(apiKey: string): Record<string, string> {\n  // TODO 2 of 8 (finish this to pass m1): the three request headers.\n  // Receives the API key. Returns an object with exactly `x-api-key` (the key), `anthropic-version` (2023-06-01) and `content-type`\n  // (application/json). Example: headersFor(\"k\")[\"anthropic-version\"] -> \"2023-06-01\"\n  return {};\n}\n\nfunction bodyFor(model: string, messages: object[], maxTokens: number, system?: string | null): Record<string, unknown> {\n  // TODO 3 of 8 (finish this to pass m1 and e1): the request body as an object.\n  // Receives the model, the messages, maxTokens and the system text (may be null or undefined). Returns an object with `model`,\n  // `max_tokens` and `messages`, plus `system` only when it is present and not blank (use present).\n  // Example: bodyFor(\"m\", [], 8, \"  \") -> { model: \"m\", max_tokens: 8, messages: [] }\n  return {};\n}\n\nexport function buildRequest(apiKey: string, model: string, messages: object[], maxTokens: number, system?: string | null): Request {\n  log.debug(\"buildRequest input\", model, messages, maxTokens, system);\n  validate(apiKey, messages, maxTokens);\n  return { method: \"POST\", url: URL, headers: headersFor(apiKey), body: JSON.stringify(bodyFor(model, messages, maxTokens, system)) };\n}\n\nfunction errorParts(parsed: any, text: string): [string, string] {\n  // TODO 4 of 8 (finish this to pass e4 and e5): the error type and message of an error reply.\n  // Receives the parsed JSON body (null when it is not JSON) and the raw body text. For a body shaped like\n  // { error: { type, message } } returns that type and message as text; for anything else returns \"unknown\" and the first 200\n  // characters of the text, trimmed.\n  // Example: errorParts({ error: { type: \"x\", message: \"m\" } }, \"\") -> [\"x\", \"m\"], errorParts(null, \" <html> \") -> [\"unknown\", \"<html>\"]\n  return [\"\", \"\"];\n}\n\nfunction pickRequestId(headerId: string | null, bodyId: string | null): string | null {\n  // TODO 5 of 8 (finish this to pass e4): which request id the error carries.\n  // Receives the id from the `request-id` header and the id from the body, either may be null. Returns the header's when there is one,\n  // else the body's, else null. Example: pickRequestId(\"h\", \"b\") -> \"h\", pickRequestId(null, \"b\") -> \"b\"\n  return null;\n}\n\nfunction redact(message: string, apiKey: string): string {\n  // TODO 6 of 8 (finish this to pass e6): keep the key out of the error.\n  // Receives the message and the API key. Returns the message with every occurrence of the key replaced by [redacted].\n  // Example: redact(\"bad key sk-1\", \"sk-1\") -> \"bad key [redacted]\"\n  return message;\n}\n\nfunction errorFrom(response: Response, apiKey: string): ApiError {\n  let parsed: any = null;\n  try {\n    parsed = JSON.parse(response.body);\n  } catch {\n    // not JSON: keep the raw text\n  }\n  const [kind, message] = errorParts(parsed, response.body);\n  const bodyId = parsed && typeof parsed === \"object\" ? (parsed.request_id ?? null) : null;\n  return new ApiError(response.status, kind, redact(message, apiKey), pickRequestId(response.headers[\"request-id\"] ?? null, bodyId));\n}\n\nfunction parseMessage(text: string): any {\n  // TODO 7 of 8 (finish this to pass e3): the message of a good reply.\n  // Receives the response body text. Returns the parsed JSON object. Example: parseMessage('{\"stop_reason\":\"end_turn\"}') -> { stop_reason: \"end_turn\" }\n  return {};\n}\n\nexport function sendMessages(transport: Transport, apiKey: string, model: string, messages: object[], maxTokens: number, system?: string | null): any {\n  const request = buildRequest(apiKey, model, messages, maxTokens, system);\n  const response = transport(request);\n  if (response.status >= 200 && response.status < 300) return parseMessage(response.body);\n  throw errorFrom(response, apiKey);\n}\n\nexport function textOf(message: { content?: Array<{ type: string; text?: string }> }): string {\n  // TODO 8 of 8 (finish this to pass e3): the text of a message.\n  // Receives a message with a `content` array of blocks. Returns the `text` of the blocks whose `type` is \"text\", joined with nothing\n  // between them; every other block type is ignored.\n  // Example: textOf({ content: [{ type: \"text\", text: \"a\" }, { type: \"tool_use\" }, { type: \"text\", text: \"b\" }] }) -> \"ab\"\n  return \"\";\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/13-one-rest-api-under-every-sdk/prose/unit-02/practice-2/rawClient.ts",
+    "test_path": "practice/level-2/13-one-rest-api-under-every-sdk/prose/unit-02/practice-2/rawClient.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-2/13-one-rest-api-under-every-sdk/prose/unit-02/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-2/13-one-rest-api-under-every-sdk/prose/unit-02/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-2/13-one-rest-api-under-every-sdk/prose/unit-02/practice-2/rawClient.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 request has method url three headers and json body",
+        "kind": "main",
+        "says": "The request has the right method, URL, exactly three headers and a JSON body"
+      },
+      {
+        "id": "e1 blank or absent system is left out of the body",
+        "kind": "edge",
+        "says": "A blank or absent system is left out of the body"
+      },
+      {
+        "id": "e2 bad input is refused before anything is sent",
+        "kind": "edge",
+        "says": "Bad input is refused before the transport is called"
+      },
+      {
+        "id": "e3 success returns the message and text joins text blocks only",
+        "kind": "edge",
+        "says": "A good reply is parsed, and text_of joins text blocks only"
+      },
+      {
+        "id": "e4 an error reply becomes an api error with the header request id",
+        "kind": "edge",
+        "says": "An error reply becomes an ApiError; the header's request id wins over the body's"
+      },
+      {
+        "id": "e5 a reply that is not json still gives an api error",
+        "kind": "edge",
+        "says": "A reply that is not JSON still gives an ApiError (unknown)"
+      },
+      {
+        "id": "e6 the api key never appears in an error",
+        "kind": "edge",
+        "says": "The API key never appears in an error"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/13-one-rest-api-under-every-sdk/prose/unit-02/practice-2/target/report.xml"
+    },
+    "origin": "course/13-one-rest-api-under-every-sdk/02-what-the-sdk-does-for-you.md",
+    "concepts": [
+      "the practice of What the SDK does for you, and a raw client is solved"
+    ],
+    "files": [
+      "practice/level-2/13-one-rest-api-under-every-sdk/prose/unit-02/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "one-rest-api-under-every-sdk-u2"
+}

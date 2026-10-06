@@ -1,0 +1,415 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "39-extending-claude-code"
+  ],
+  "variant": "prose",
+  "unit": 4,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: the marketplace of a platform team (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: the marketplace of a platform team"
+    },
+    {
+      "type": "para",
+      "text": "A platform team ships one plugin from its own repository and lists two more that live elsewhere. Each of these goes wrong quietly: an entry named differently from its manifest cannot be installed by the manifest's name, a version set in two places is read from one without a warning, a hooks file without its wrapper fails to load, a dependency from another marketplace is refused unless the root marketplace allows it, and a plugin from an external source is not installed by the repository's settings alone. In this practice you write the files of the page \"Building a plugin and publishing it through your own marketplace\". Nothing is installed and Claude Code is not started: the tests read your files and check them against the documented rules. It is in Python, TypeScript, Java and Kotlin; The folder is the root of the marketplace repository."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "File",
+        "What it holds"
+      ],
+      "rows": [
+        [
+          "`.claude-plugin/marketplace.json`",
+          "the catalog: name, owner, entries, the dependency allowlist and the renames"
+        ],
+        [
+          "`.claude/settings.json`",
+          "the team's settings that register the marketplace and enable a plugin"
+        ],
+        [
+          "`plugins/standards-kit/.claude-plugin/plugin.json`",
+          "the manifest of the plugin that lives inside the marketplace"
+        ],
+        [
+          "`plugins/standards-kit/skills/changelog/SKILL.md`",
+          "a skill that drafts a changelog entry"
+        ],
+        [
+          "`plugins/standards-kit/hooks/hooks.json`",
+          "the hook registration"
+        ],
+        [
+          "`plugins/standards-kit/scripts/protect.sh`",
+          "the guard script the hook runs (given; it only has to stay in place)"
+        ],
+        [
+          "`plugins/standards-kit/.mcp.json`",
+          "the plugin's MCP server"
+        ],
+        [
+          "`plugins/standards-kit/servers/tickets.js`",
+          "the server's code (given; a stand-in)"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The starter holds the files unfinished. All JSON files are strict JSON: a comment or a trailing comma is an error."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is the marketplace with nine gaps cut out. The catalog's name, owner and descriptions, the `standards-kit` entry, the `db-tools` source, the manifest's name, author, licence and keywords, the shape of the hook file and the MCP file, and the guard script and server stand-in are written. JSON cannot carry a comment, so the gaps are listed here; each is an empty value (`{}`, `[]`, `\"\"` or an empty front matter field) in the file named. A gap is neutral, so the starter loads and fails the cases on an assertion. Write them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`.claude-plugin/marketplace.json`, the third entry: its `name`, `lint-helper`, unlocks `e1`, and its `source` unlocks `m1` and `e4`: a `github` source, `owner/name`, pinned by `ref` and `sha`.",
+        "The same file, the `dependencies` of `db-tools` unlocks `e5`: `audit-logger` from the marketplace `shared-tools`.",
+        "The same file, `allowCrossMarketplaceDependenciesOn` unlocks `e5`: the root marketplace names `shared-tools`.",
+        "The same file, `renames` unlocks `e7`: `std-kit` to `standards-kit` and `old-linter` to `null`.",
+        "`plugins/standards-kit/.claude-plugin/plugin.json` unlocks `e3` and `e5`: the semantic `version` and the dependency with its range.",
+        "`plugins/standards-kit/hooks/hooks.json` unlocks `e2`: the `matcher` and the `command` through `${CLAUDE_PLUGIN_ROOT}`.",
+        "`plugins/standards-kit/.mcp.json` unlocks `e2`: the `args` that reach the server code through `${CLAUDE_PLUGIN_ROOT}`.",
+        "`plugins/standards-kit/skills/changelog/SKILL.md` unlocks `e2` and `e8`: `description`, `allowed-tools` and the instructions.",
+        "`.claude/settings.json` unlocks `e6`: the `source` of the registered marketplace and the enabled plugin."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About fourteen lines in all. If a case fails, read the assertion message under it: it names the file and the rule. These files have no code to log from; the tests read them, and a failing case shows what it expected and what it found."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**The marketplace file.** A `name` of `example-org-tools`, a `description`, an `owner` with a `name` (an e-mail, if you give one, ends in `@example.com`) and a `plugins` array of three entries, `standards-kit`, `lint-helper` and `db-tools`. Entry names are unique and use letters, digits, dots, underscores and hyphens only. No plugin name, and not the marketplace name, may be reserved or pass as an Anthropic or official one.",
+        "**The three sources.** `standards-kit` is a relative path, `\"./plugins/standards-kit\"`: it starts with `./`, stays inside the marketplace and names a folder that exists. `lint-helper` is a `github` source with `repo` written `owner/name`. `db-tools` is a `git-subdir` source with a `url` and a `path` of `tools/db-tools`. The two external sources are pinned twice: `ref` is a release tag such as `v1.2.0` and `sha` is a full 40-character lowercase commit.",
+        "**The manifest.** `name` `standards-kit`, a three-part `version` such as `1.0.0` and a `description`. The version lives here and not in the marketplace entry. Only `plugin.json` goes inside `.claude-plugin/`. The manifest depends on `lint-helper` through the object form `{\"name\", \"version\"}` with the range `~1.2.0`.",
+        "**The components.** The skill `changelog` has front matter with `name` and a `description` that says when to use it (`Use when ...`), and a body with no `TODO`. `hooks.json` wraps the event map in a top-level `hooks` key and holds one `PreToolUse` group with the matcher `Edit|Write` and one `command` handler that reaches `scripts/protect.sh` through `${CLAUDE_PLUGIN_ROOT}`. `.mcp.json` declares a server whose arguments reach its code through `${CLAUDE_PLUGIN_ROOT}`. There is no `CLAUDE.md` at the plugin root: it is not loaded as context.",
+        "**The dependency across marketplaces.** The `db-tools` entry depends on `audit-logger` from the marketplace `shared-tools`, and the root marketplace names `shared-tools` in `allowCrossMarketplaceDependenciesOn`.",
+        "**The team settings.** `extraKnownMarketplaces` registers the marketplace under its own name from a `github` source (`owner/name`), and `enabledPlugins` turns on `standards-kit@example-org-tools`. Only plugins of that marketplace are enabled, and only ones whose entry is a relative path.",
+        "**The renames.** `renames` maps the former name `std-kit` to `standards-kit` and `old-linter` to `null` (retired). A former name is not also a current entry, and every chain of renames ends at a current plugin or at `null`.",
+        "**Nothing personal, nothing unfinished.** No file holds a home folder path, an e-mail address that is not `@example.com`, a key that starts like an API key, or a `TODO` marker."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**The catalog is complete.** *You should see* an owner, a description and an entry for each plugin, each with a source that resolves.",
+        "**Names are installable.** *You should see* the marketplace and each plugin name valid in a plugin id, and none that an install could mistake for an official one.",
+        "**Files are found wherever the plugin is cached.** *You should see* only the manifest in `.claude-plugin/`, the wrapper key in `hooks.json` and `${CLAUDE_PLUGIN_ROOT}` in every path the plugin runs.",
+        "**One version.** *You should see* the version in the manifest alone, in three parts.",
+        "**A tag says what, a commit says which.** *You should see* each source kind written in its own form and pinned to a tag and a full commit.",
+        "**Dependencies are bounded.** *You should see* a range on the local dependency and the other marketplace allowed by name.",
+        "**Settings install what they can.** *You should see* the marketplace registered under its own name and only a relative-path plugin enabled.",
+        "**Renames do not dangle.** *You should see* every former name end at a current plugin or at `null`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "The marketplace file names an owner and lists each plugin by a source that resolves"
+        ],
+        [
+          "`e1`",
+          "Names are valid in a plugin id and are not reserved or mistaken for official ones"
+        ],
+        [
+          "`e2`",
+          "The plugin keeps only its manifest in the manifest folder and finds its files through the plugin root"
+        ],
+        [
+          "`e3`",
+          "The version lives in the manifest alone and is semantic"
+        ],
+        [
+          "`e4`",
+          "Each source kind is written in its own form and pinned to a tag and a commit"
+        ],
+        [
+          "`e5`",
+          "A dependency carries a range, and one from another marketplace is allowed by name"
+        ],
+        [
+          "`e6`",
+          "The team settings register the marketplace and enable only what installs from it"
+        ],
+        [
+          "`e7`",
+          "Renames lead every former name to a current plugin or to `null`"
+        ],
+        [
+          "`e8`",
+          "No file is left unfinished or holds a personal path, an address or a key"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "{\n  \"name\": \"example-org-tools\",\n  \"description\": \"Plugins for the platform team\",\n  \"owner\": { \"name\": \"Example Org Platform Team\", \"email\": \"contact@example.com\" },\n  \"allowCrossMarketplaceDependenciesOn\": [\"shared-tools\"],\n  \"plugins\": [\n    {\n      \"name\": \"standards-kit\",\n      \"source\": \"./plugins/standards-kit\",\n      \"description\": \"Changelog skill, edit guard and ticket server for the platform team\"\n    },\n    {\n      \"name\": \"lint-helper\",\n      \"source\": {\n        \"source\": \"github\",\n        \"repo\": \"example-org/lint-helper\",\n        \"ref\": \"v1.2.0\",\n        \"sha\": \"a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0\"\n      },\n      \"description\": \"Runs the team's linters\"\n    },\n    {\n      \"name\": \"db-tools\",\n      \"source\": {\n        \"source\": \"git-subdir\",\n        \"url\": \"example-org/monorepo\",\n        \"path\": \"tools/db-tools\",\n        \"ref\": \"v2.0.0\",\n        \"sha\": \"0f1e2d3c4b5a69788796a5b4c3d2e1f00f1e2d3c\"\n      },\n      \"description\": \"Database helpers\",\n      \"dependencies\": [{ \"name\": \"audit-logger\", \"marketplace\": \"shared-tools\" }]\n    }\n  ],\n  \"renames\": {\n    \"std-kit\": \"standards-kit\",\n    \"old-linter\": null\n  }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.claude/settings.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"extraKnownMarketplaces\": {\n    \"example-org-tools\": {\n      \"source\": { \"source\": \"github\", \"repo\": \"example-org/team-marketplace\" }\n    }\n  },\n  \"enabledPlugins\": {\n    \"standards-kit@example-org-tools\": true\n  }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/plugins/standards-kit/.claude-plugin/plugin.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"name\": \"standards-kit\",\n  \"version\": \"1.0.0\",\n  \"description\": \"Changelog skill, edit guard and ticket server for the platform team\",\n  \"author\": { \"name\": \"Example Org Platform Team\" },\n  \"license\": \"MIT\",\n  \"keywords\": [\"standards\", \"changelog\"],\n  \"dependencies\": [{ \"name\": \"lint-helper\", \"version\": \"~1.2.0\" }]\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/plugins/standards-kit/.mcp.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"mcpServers\": {\n    \"tickets\": {\n      \"command\": \"node\",\n      \"args\": [\"${CLAUDE_PLUGIN_ROOT}/servers/tickets.js\"]\n    }\n  }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/plugins/standards-kit/hooks/hooks.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"hooks\": {\n    \"PreToolUse\": [\n      {\n        \"matcher\": \"Edit|Write\",\n        \"hooks\": [\n          {\n            \"type\": \"command\",\n            \"command\": \"\\\"${CLAUDE_PLUGIN_ROOT}\\\"/scripts/protect.sh\"\n          }\n        ]\n      }\n    ]\n  }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/plugins/standards-kit/skills/changelog/SKILL.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "---\nname: changelog\ndescription: Draft a changelog entry from the merged pull requests since the last tag. Use when asked for a changelog entry, release notes or a summary of what shipped.\nallowed-tools: Read Grep Bash(git log *)\n---\nCollect the merged pull requests with `git log --merges --oneline <last-tag>..HEAD`.\nGroup them under Added, Changed and Fixed, one line each, and link the pull request number.\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "{\n  \"name\": \"example-org-tools\",\n  \"description\": \"Plugins for the platform team\",\n  \"owner\": { \"name\": \"Example Org Platform Team\", \"email\": \"contact@example.com\" },\n  \"plugins\": [\n    {\n      \"name\": \"standards-kit\",\n      \"source\": \"./plugins/standards-kit\",\n      \"description\": \"Changelog skill, edit guard and ticket server for the platform team\"\n    },\n    {\n      \"name\": \"\",\n      \"source\": {},\n      \"description\": \"Runs the team's linters\"\n    },\n    {\n      \"name\": \"db-tools\",\n      \"source\": {\n        \"source\": \"git-subdir\",\n        \"url\": \"example-org/monorepo\",\n        \"path\": \"tools/db-tools\",\n        \"ref\": \"v2.0.0\",\n        \"sha\": \"0f1e2d3c4b5a69788796a5b4c3d2e1f00f1e2d3c\"\n      },\n      \"description\": \"Database helpers\"\n    }\n  ]\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.claude/settings.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"extraKnownMarketplaces\": {\n    \"example-org-tools\": {\n      \"source\": {}\n    }\n  },\n  \"enabledPlugins\": {}\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/plugins/standards-kit/.claude-plugin/plugin.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"name\": \"standards-kit\",\n  \"version\": \"\",\n  \"description\": \"Changelog skill, edit guard and ticket server for the platform team\",\n  \"author\": { \"name\": \"Example Org Platform Team\" },\n  \"license\": \"MIT\",\n  \"keywords\": [\"standards\", \"changelog\"],\n  \"dependencies\": []\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/plugins/standards-kit/.mcp.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"mcpServers\": {\n    \"tickets\": {\n      \"command\": \"node\",\n      \"args\": []\n    }\n  }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/plugins/standards-kit/hooks/hooks.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"hooks\": {\n    \"PreToolUse\": [\n      {\n        \"matcher\": \"\",\n        \"hooks\": [\n          {\n            \"type\": \"command\",\n            \"command\": \"\"\n          }\n        ]\n      }\n    ]\n  }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/plugins/standards-kit/skills/changelog/SKILL.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "---\nname: changelog\ndescription:\nallowed-tools:\n---\n<!-- TODO: write the instructions here: which command lists the merged pull requests, how to group them, what each line links to. -->\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 9,
+    "code": 6,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "cb257d902b433d1366a758da910d02129bdc590349c83a9ba1e612c10ff17b2f",
+  "starting_code": "{\n  \"name\": \"example-org-tools\",\n  \"description\": \"Plugins for the platform team\",\n  \"owner\": { \"name\": \"Example Org Platform Team\", \"email\": \"contact@example.com\" },\n  \"plugins\": [\n    {\n      \"name\": \"standards-kit\",\n      \"source\": \"./plugins/standards-kit\",\n      \"description\": \"Changelog skill, edit guard and ticket server for the platform team\"\n    },\n    {\n      \"name\": \"\",\n      \"source\": {},\n      \"description\": \"Runs the team's linters\"\n    },\n    {\n      \"name\": \"db-tools\",\n      \"source\": {\n        \"source\": \"git-subdir\",\n        \"url\": \"example-org/monorepo\",\n        \"path\": \"tools/db-tools\",\n        \"ref\": \"v2.0.0\",\n        \"sha\": \"0f1e2d3c4b5a69788796a5b4c3d2e1f00f1e2d3c\"\n      },\n      \"description\": \"Database helpers\"\n    }\n  ]\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/39-extending-claude-code/prose/unit-04/practice-4/project/.claude-plugin/marketplace.json",
+    "test_path": "practice/level-2/39-extending-claude-code/prose/unit-04/practice-4/src/test/kotlin/MarketplaceSetupTest.kt",
+    "run_command": [
+      "python3",
+      "practice/level-2/39-extending-claude-code/prose/unit-04/practice-4/check_files.py",
+      "practice/level-2/39-extending-claude-code/prose/unit-04/practice-4/project/.claude-plugin/marketplace.json",
+      "practice/level-2/39-extending-claude-code/prose/unit-04/practice-4/project/.claude/settings.json",
+      "practice/level-2/39-extending-claude-code/prose/unit-04/practice-4/project/plugins/standards-kit/.claude-plugin/plugin.json",
+      "practice/level-2/39-extending-claude-code/prose/unit-04/practice-4/project/plugins/standards-kit/.mcp.json",
+      "practice/level-2/39-extending-claude-code/prose/unit-04/practice-4/project/plugins/standards-kit/hooks/hooks.json",
+      "practice/level-2/39-extending-claude-code/prose/unit-04/practice-4/project/plugins/standards-kit/skills/changelog/SKILL.md"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/39-extending-claude-code/prose/unit-04/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_theMarketplaceFileNamesAnOwnerAndListsEachPluginByASourceThatResolves()",
+        "kind": "main",
+        "says": "The marketplace file names an owner and lists each plugin by a source that resolves"
+      },
+      {
+        "id": "e1_namesAreValidInAPluginIdAndAreNotReservedOrMistakenForOfficialOnes()",
+        "kind": "edge",
+        "says": "Names are valid in a plugin id and are not reserved or mistaken for official ones"
+      },
+      {
+        "id": "e2_thePluginKeepsOnlyItsManifestInTheManifestFolderAndFindsItsFilesThroughThePluginRoot()",
+        "kind": "edge",
+        "says": "The plugin keeps only its manifest in the manifest folder and finds its files through the plugin root"
+      },
+      {
+        "id": "e3_theVersionLivesInTheManifestAloneAndIsSemantic()",
+        "kind": "edge",
+        "says": "The version lives in the manifest alone and is semantic"
+      },
+      {
+        "id": "e4_eachSourceKindIsWrittenInItsOwnFormAndPinnedToATagAndACommit()",
+        "kind": "edge",
+        "says": "Each source kind is written in its own form and pinned to a tag and a commit"
+      },
+      {
+        "id": "e5_aDependencyCarriesARangeAndOneFromAnotherMarketplaceIsAllowedByName()",
+        "kind": "edge",
+        "says": "A dependency carries a range, and one from another marketplace is allowed by name"
+      },
+      {
+        "id": "e6_theTeamSettingsRegisterTheMarketplaceAndEnableOnlyWhatInstallsFromIt()",
+        "kind": "edge",
+        "says": "The team settings register the marketplace and enable only what installs from it"
+      },
+      {
+        "id": "e7_renamesLeadEveryFormerNameToACurrentPluginOrToNull()",
+        "kind": "edge",
+        "says": "Renames lead every former name to a current plugin or to null"
+      },
+      {
+        "id": "e8_noFileIsLeftUnfinishedOrHoldsAPersonalPathAnAddressOrAKey()",
+        "kind": "edge",
+        "says": "No file is left unfinished or holds a personal path, an address or a key"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/39-extending-claude-code/prose/unit-04/practice-4/target/test-results/test"
+    },
+    "origin": "course/39-extending-claude-code/04-building-a-plugin-and-publishing-it-through-your-own-marketplace.md",
+    "concepts": [
+      "the practice of Building a plugin and publishing it through your own marketplace is solved"
+    ],
+    "files": [
+      "practice/level-2/39-extending-claude-code/prose/unit-04/practice-4/project/.claude/settings.json",
+      "practice/level-2/39-extending-claude-code/prose/unit-04/practice-4/project/plugins/standards-kit/.claude-plugin/plugin.json",
+      "practice/level-2/39-extending-claude-code/prose/unit-04/practice-4/project/plugins/standards-kit/.mcp.json",
+      "practice/level-2/39-extending-claude-code/prose/unit-04/practice-4/project/plugins/standards-kit/hooks/hooks.json",
+      "practice/level-2/39-extending-claude-code/prose/unit-04/practice-4/project/plugins/standards-kit/skills/changelog/SKILL.md"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "extending-claude-code-u4"
+}

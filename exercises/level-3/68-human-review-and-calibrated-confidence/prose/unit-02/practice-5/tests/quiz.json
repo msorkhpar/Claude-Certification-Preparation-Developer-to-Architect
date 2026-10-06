@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "68-human-review-and-calibrated-confidence"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 5,
+  "title": "Check yourself: Routing review, checkpoints for irreversible actions, and the practice",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "Scenario S6, structured data extraction. Flagged extractions pile up faster than two reviewers can read them. Which handling fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Read them as they come in, because a first-in order treats every document and every reviewer fairly",
+            "correct": false,
+            "says": "Ruled out because \"reviewer attention is limited, so spend it on conflicts and the lowest confidence first\"."
+          },
+          {
+            "id": "b",
+            "text": "Take conflicts and the least certain items first, and keep the overflow as a backlog",
+            "correct": true,
+            "says": "Conflicts and the lowest confidence are read first and the overflow waits, visibly, in a backlog."
+          },
+          {
+            "id": "c",
+            "text": "Drop whatever has not been read by the end of the week, so the pile never grows",
+            "correct": false,
+            "says": "Ruled out because a backlog is \"a queue that is kept and shown, not dropped\"."
+          },
+          {
+            "id": "d",
+            "text": "Lift the cut-off until the pile matches what two people can read in a day",
+            "correct": false,
+            "says": "Ruled out because \"the threshold comes from labelled data. Keep it, queue the overflow and report the backlog\"."
+          }
+        ],
+        "origin": {
+          "path": "course/68-human-review-and-calibrated-confidence/02-routing-review-checkpoints-and-the-practice.md",
+          "section": "Traps"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "Scenario S1, customer support resolution agent. An agent that can close accounts reports 99 out of 100 for its confidence in closing one. Where should the guard on that step live?",
+        "options": [
+          {
+            "id": "a",
+            "text": "In a note appended to the closing message after the action has been taken",
+            "correct": false,
+            "says": "Ruled out because the account is already closed by then, and \"it does nothing about a deleted record, a sent payment or a closed account\"."
+          },
+          {
+            "id": "b",
+            "text": "In the system prompt, as an instruction to ask the customer first whenever the number is under 100",
+            "correct": false,
+            "says": "Ruled out because \"an instruction the model can be talked out of is a request\"."
+          },
+          {
+            "id": "c",
+            "text": "In a confidence floor above which the agent may act on its own",
+            "correct": false,
+            "says": "Ruled out because the checkpoint \"does not read the confidence at all\", and a floor reads it."
+          },
+          {
+            "id": "d",
+            "text": "In a code-level gate that holds the action until a human approves",
+            "correct": true,
+            "says": "The checkpoint reads no confidence, and the irreversible step always needs a person, as the page says: \"an action on the irreversible list always needs a person\"."
+          }
+        ],
+        "origin": {
+          "path": "course/68-human-review-and-calibrated-confidence/02-routing-review-checkpoints-and-the-practice.md",
+          "section": "A checkpoint for what cannot be undone"
+        }
+      }
+    ]
+  }
+}

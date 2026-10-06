@@ -1,0 +1,78 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "18-model-choice-cost-and-migration"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: a cost model and a model router, graded on a cost table (Python)",
+  "lang": "python",
+  "main_file": "router.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_router.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-2/18-model-choice-cost-and-migration/prose/unit-02/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-2/18-model-choice-cost-and-migration/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-2/18-model-choice-cost-and-migration/prose/unit-02/practice-1/test_router.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_cost_of_a_plain_request_and_the_cheapest_model_that_meets_the_tier",
+      "kind": "main",
+      "says": "A plain request is priced from input and output, and the router returns the cheapest model at or above the tier"
+    },
+    {
+      "id": "test_e1_cache_reads_and_writes_are_priced_by_their_own_multipliers",
+      "kind": "edge",
+      "says": "Cache writes cost 1.25 and 2 times input, reads use the model's own multiplier, and an unsplit write is the 5-minute kind"
+    },
+    {
+      "id": "test_e2_the_batch_discount_halves_every_part_of_the_cost",
+      "kind": "edge",
+      "says": "The batch discount halves every part of the cost, cache parts included"
+    },
+    {
+      "id": "test_e3_the_router_picks_by_cost_and_tier_not_by_the_order_of_the_catalog",
+      "kind": "edge",
+      "says": "The router picks by cost and tier, whatever the order of the catalog"
+    },
+    {
+      "id": "test_e4_a_model_whose_context_or_output_limit_is_too_small_is_skipped",
+      "kind": "edge",
+      "says": "A model with too small a context window or output limit is skipped"
+    },
+    {
+      "id": "test_e5_deprecated_models_are_skipped_and_an_empty_choice_raises",
+      "kind": "edge",
+      "says": "Deprecated models are skipped, and a choice with no model raises NoModelError"
+    },
+    {
+      "id": "test_e6_a_tie_goes_to_the_lower_tier",
+      "kind": "edge",
+      "says": "A cost tie goes to the lower tier"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/18-model-choice-cost-and-migration/02-usage-token-counting-and-a-cost-model.md"
+}

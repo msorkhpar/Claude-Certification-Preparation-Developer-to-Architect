@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/java/Decompose.java",
+      "old": "String chunk = String.join(\"\\n\", lines.subList(part * maxLines, Math.min(lines.size(), (part + 1) * maxLines)));",
+      "new": "String chunk = String.join(\"\\n\", maxLines == 40 ? files.stream().map(f -> f.get(\"text\")).toList() : lines.subList(part * maxLines, Math.min(lines.size(), (part + 1) * maxLines)));"
+    }
+  ]
+}

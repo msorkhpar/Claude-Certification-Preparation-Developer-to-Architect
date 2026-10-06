@@ -1,0 +1,83 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-4",
+    "87-observability-at-scale"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: trace triage (Python)",
+  "lang": "python",
+  "main_file": "triage.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_triage.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-4/87-observability-at-scale/prose/unit-02/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-4/87-observability-at-scale/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-4/87-observability-at-scale/prose/unit-02/practice-1/test_triage.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_every_trace_gets_one_reason_and_a_healthy_trace_is_kept_by_its_id",
+      "kind": "main",
+      "says": "Every trace gets one reason and a healthy trace is kept by its id"
+    },
+    {
+      "id": "test_e1_an_error_outranks_a_slow_root_which_outranks_retries_which_outrank_a_flag",
+      "kind": "edge",
+      "says": "An error outranks a slow root, which outranks retries, which outrank a flag"
+    },
+    {
+      "id": "test_e2_the_root_cause_is_the_deepest_failing_span_and_its_path_starts_at_the_root",
+      "kind": "edge",
+      "says": "The root cause is the deepest failing span and its path starts at the root"
+    },
+    {
+      "id": "test_e3_a_stale_or_empty_retrieval_is_blamed_only_when_no_span_failed",
+      "kind": "edge",
+      "says": "A stale or empty retrieval is blamed only when no span failed"
+    },
+    {
+      "id": "test_e4_drift_reports_a_move_in_either_direction_over_the_tolerance_and_never_divides_by_zero",
+      "kind": "edge",
+      "says": "Drift reports a move in either direction over the tolerance and never divides by zero"
+    },
+    {
+      "id": "test_e5_an_alert_needs_consecutive_windows_over_the_threshold_and_a_dip_starts_the_count_again",
+      "kind": "edge",
+      "says": "An alert needs consecutive windows over the threshold and a dip starts the count again"
+    },
+    {
+      "id": "test_e6_a_log_record_drops_the_content_fields_unless_they_are_allowed_by_name",
+      "kind": "edge",
+      "says": "A log record drops the content fields unless they are allowed by name"
+    },
+    {
+      "id": "test_e7_a_requests_trail_joins_the_events_of_every_component_in_time_order",
+      "kind": "edge",
+      "says": "A request's trail joins the events of every component in time order"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/87-observability-at-scale/02-drift-alerts-and-the-practice.md"
+}

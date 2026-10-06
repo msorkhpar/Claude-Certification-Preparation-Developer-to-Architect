@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "52-designing-tool-interfaces"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: Descriptions, names and boundaries: what a model chooses a tool from",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "Logs show an agent often calls `get_customer` when users ask about orders, instead of `lookup_order`. Each tool has a one-line summary (“Retrieves customer information”, “Retrieves order details”) and accepts similar identifiers. What is the best first step?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Rewrite both texts with input shapes, sample requests and where each one stops",
+            "correct": true,
+            "says": "The cause is thin descriptions, and the first fix is to make each say what it takes and where it stops."
+          },
+          {
+            "id": "b",
+            "text": "Add five to eight worked examples of order requests to the system prompt",
+            "correct": false,
+            "says": "Ruled out because worked examples in the prompt \"leave the descriptions as thin as they were\" and cost tokens on every request."
+          },
+          {
+            "id": "c",
+            "text": "Put a layer before each turn that picks the tool by keywords and id patterns",
+            "correct": false,
+            "says": "Ruled out because \"a routing layer bypasses the model's own reading of the request\" and is a component to build."
+          },
+          {
+            "id": "d",
+            "text": "Merge both into a single `lookup_entity` tool that works out which backend to ask",
+            "correct": false,
+            "says": "Ruled out because merging \"is a legitimate design but a larger change than a first step needs\"."
+          }
+        ],
+        "origin": {
+          "path": "course/52-designing-tool-interfaces/01-descriptions-names-and-boundaries.md",
+          "section": "Overlap makes the model guess"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "Since the team added the sentence \"Always check the customer's account first.\" to an agent's prompt, it calls `get_customer` before every order question, although the `lookup_order` description is clear. Which change most directly removes the unwanted pull?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Add a third tool that wraps both lookups behind one name",
+            "correct": false,
+            "says": "Ruled out because a wrapper adds a third name to choose from, and \"More tools don't always lead to better outcomes.\""
+          },
+          {
+            "id": "b",
+            "text": "Add a routing layer in front of the model for order questions",
+            "correct": false,
+            "says": "Ruled out because a routing layer \"bypasses the model's own reading of the request\" and leaves the prompt as it was."
+          },
+          {
+            "id": "c",
+            "text": "Reword that rule to drop its tool-specific trigger",
+            "correct": true,
+            "says": "The keyword in the rule pulls the choice, so the rule is what to change."
+          },
+          {
+            "id": "d",
+            "text": "Lengthen the `lookup_order` description with more examples",
+            "correct": false,
+            "says": "Ruled out because the keyword pulls every order question toward `get_customer` \"however clear the description of `lookup_order` is\"; more text on the other side does not remove the pull."
+          }
+        ],
+        "origin": {
+          "path": "course/52-designing-tool-interfaces/01-descriptions-names-and-boundaries.md",
+          "section": "Split or consolidate: count contracts"
+        }
+      }
+    ]
+  }
+}

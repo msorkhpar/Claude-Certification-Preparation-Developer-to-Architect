@@ -1,0 +1,417 @@
+/* The reading-modes switch and the first-visit question, then one rule per mode.
+
+   ⛔ WRITTEN ONLY FOR A CORPUS THAT DECLARES MODES. It is its own file, linked
+   after `page.css`, so the shared stylesheet keeps its bytes for every other
+   corpus. The rules after the look are generated per corpus (`render/modes.py`):
+   they key on the `data-mode` attribute the markup carries with the default
+   mode as its value, so a page with scripts off reads the default mode.
+
+   ⭐ The switch has the theme control's look, on its own line below it, reached
+   by its role and label. The question is a card over the page, in palette
+   tokens only, so both schemes and both themes read it. ⛔ No ligature: the
+   words are UI text, and nothing here sets the mono face. */
+
+body > header div[role="group"][aria-label="Reading mode"] {
+  display: flex;
+  flex-wrap: wrap;
+  width: max-content;
+  max-width: 100%;
+  margin: 0;
+  gap: 1px;
+  padding: 2px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+}
+
+body > header div[role="group"][aria-label="Reading mode"][hidden],
+body > header div[role="dialog"][data-section="mode-question"][hidden] {
+  display: none;
+}
+
+body > header div[role="group"][aria-label="Reading mode"] button {
+  font-family: var(--font-ui);
+  font-size: .78rem;
+  line-height: 1.7;
+  padding: .05rem .55rem;
+  border: 0;
+  border-radius: var(--radius-tight);
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+body > header div[role="group"][aria-label="Reading mode"] button:hover {
+  color: var(--fg);
+  background: var(--surface-2);
+}
+
+body > header div[role="group"][aria-label="Reading mode"] button[aria-pressed="true"] {
+  color: var(--fg);
+  background: var(--accent-soft);
+  box-shadow: inset 0 -2px 0 var(--accent);
+  font-weight: 700;
+}
+
+body > header div[role="dialog"][data-section="mode-question"] {
+  position: fixed;
+  z-index: 20;
+  top: 20vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(32rem, calc(100vw - 2 * var(--gutter)));
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-control);
+  background: var(--panel);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  box-shadow: 0 .5rem 2rem rgba(0, 0, 0, .35);
+}
+
+body > header div[role="dialog"][data-section="mode-question"] h2 {
+  margin: 0 0 .4rem;
+  font-size: 1.1rem;
+}
+
+body > header div[role="dialog"][data-section="mode-question"] p {
+  margin: 0 0 .75rem;
+  font-size: .9rem;
+  color: var(--fg-soft);
+}
+
+body > header div[role="dialog"][data-section="mode-question"] ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+body > header div[role="dialog"][data-section="mode-question"] li { margin: 0 0 .5rem; }
+
+body > header div[role="dialog"][data-section="mode-question"] button {
+  display: block;
+  width: 100%;
+  padding: .55rem .75rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  text-align: left;
+  cursor: pointer;
+}
+
+body > header div[role="dialog"][data-section="mode-question"] button:hover {
+  background: var(--accent-soft);
+}
+
+body > header div[role="dialog"][data-section="mode-question"] button strong {
+  display: block;
+  font-size: .98rem;
+}
+
+body > header div[role="dialog"][data-section="mode-question"] button span {
+  display: block;
+  font-size: .85rem;
+  color: var(--fg-soft);
+}
+
+/* --- an entry that belongs to the other language only ---------------------- *
+   A row of the index, the rail or a module's list, and a page, that has nothing for the
+   chosen mode. The generated rules below grey the row and show its label; these are the
+   parts that do not depend on the mode. A closed entry is an anchor with no `href`, so it is
+   not a link, and it takes no pointer either. */
+
+[data-entry-label] {
+  display: none;
+  margin-left: .5rem;
+  padding: 0 .4rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-tight);
+  font-family: var(--font-ui);
+  font-size: .72rem;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.5;
+  white-space: nowrap;
+  color: var(--muted);
+}
+
+a[aria-disabled="true"] {
+  cursor: not-allowed;
+  pointer-events: none;
+  text-decoration: none;
+}
+
+body > header aside[data-section="mode-outside"] {
+  display: none;
+  margin: 0 0 .75rem;
+  padding: .6rem .8rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--fg-soft);
+  font-family: var(--font-ui);
+  font-size: .9rem;
+}
+
+body > header aside[data-section="mode-outside"] p { margin: 0 0 .5rem; }
+body > header aside[data-section="mode-outside"] p:last-child { margin: 0; }
+
+body > header aside[data-section="mode-outside"] button {
+  margin: 0 .4rem .3rem 0;
+  padding: .3rem .7rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface-2);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  font-size: .85rem;
+  cursor: pointer;
+}
+
+body > header aside[data-section="mode-outside"] button:hover { background: var(--accent-soft); }
+
+/* --- what each mode shows: generated per corpus, below --------------------- */
+
+html[data-mode="python"] section[data-lang]:not([data-lang="python"]),
+html[data-mode="python"] nav[aria-label="Outline"] li[data-lang]:not([data-lang="python"]) { display: none; }
+html[data-mode="python"] section[data-lang][data-linked]:not([data-lang="python"]) { display: block; }
+html[data-mode="python"][data-entry-lang]:not([data-entry-lang~="python"]) section[data-lang]:not([data-lang="python"]) { display: block; }
+html[data-mode="python"][data-entry-lang]:not([data-entry-lang~="python"]) nav[aria-label="Outline"] li[data-lang]:not([data-lang="python"]) { display: list-item; }
+html[data-mode="python"] li[data-entry-lang]:not([data-entry-lang~="python"]), html[data-mode="python"] li[data-entry-lang]:not([data-entry-lang~="python"]) a { color: var(--muted); }
+html[data-mode="python"] li[data-entry-lang]:not([data-entry-lang~="python"]) [data-entry-label] { display: inline-block; }
+html[data-mode="python"][data-entry-lang]:not([data-entry-lang~="python"]) aside[data-section="mode-outside"] { display: block; }
+html[data-mode="typescript"] section[data-lang]:not([data-lang="typescript"]),
+html[data-mode="typescript"] nav[aria-label="Outline"] li[data-lang]:not([data-lang="typescript"]) { display: none; }
+html[data-mode="typescript"] section[data-lang][data-linked]:not([data-lang="typescript"]) { display: block; }
+html[data-mode="typescript"][data-entry-lang]:not([data-entry-lang~="typescript"]) section[data-lang]:not([data-lang="typescript"]) { display: block; }
+html[data-mode="typescript"][data-entry-lang]:not([data-entry-lang~="typescript"]) nav[aria-label="Outline"] li[data-lang]:not([data-lang="typescript"]) { display: list-item; }
+html[data-mode="typescript"] li[data-entry-lang]:not([data-entry-lang~="typescript"]), html[data-mode="typescript"] li[data-entry-lang]:not([data-entry-lang~="typescript"]) a { color: var(--muted); }
+html[data-mode="typescript"] li[data-entry-lang]:not([data-entry-lang~="typescript"]) [data-entry-label] { display: inline-block; }
+html[data-mode="typescript"][data-entry-lang]:not([data-entry-lang~="typescript"]) aside[data-section="mode-outside"] { display: block; }
+html[data-mode="java"] section[data-lang]:not([data-lang="java"]),
+html[data-mode="java"] nav[aria-label="Outline"] li[data-lang]:not([data-lang="java"]) { display: none; }
+html[data-mode="java"] section[data-lang][data-linked]:not([data-lang="java"]) { display: block; }
+html[data-mode="java"][data-entry-lang]:not([data-entry-lang~="java"]) section[data-lang]:not([data-lang="java"]) { display: block; }
+html[data-mode="java"][data-entry-lang]:not([data-entry-lang~="java"]) nav[aria-label="Outline"] li[data-lang]:not([data-lang="java"]) { display: list-item; }
+html[data-mode="java"] li[data-entry-lang]:not([data-entry-lang~="java"]), html[data-mode="java"] li[data-entry-lang]:not([data-entry-lang~="java"]) a { color: var(--muted); }
+html[data-mode="java"] li[data-entry-lang]:not([data-entry-lang~="java"]) [data-entry-label] { display: inline-block; }
+html[data-mode="java"][data-entry-lang]:not([data-entry-lang~="java"]) aside[data-section="mode-outside"] { display: block; }
+html[data-mode="kotlin"] section[data-lang]:not([data-lang="kotlin"]),
+html[data-mode="kotlin"] nav[aria-label="Outline"] li[data-lang]:not([data-lang="kotlin"]) { display: none; }
+html[data-mode="kotlin"] section[data-lang][data-linked]:not([data-lang="kotlin"]) { display: block; }
+html[data-mode="kotlin"][data-entry-lang]:not([data-entry-lang~="kotlin"]) section[data-lang]:not([data-lang="kotlin"]) { display: block; }
+html[data-mode="kotlin"][data-entry-lang]:not([data-entry-lang~="kotlin"]) nav[aria-label="Outline"] li[data-lang]:not([data-lang="kotlin"]) { display: list-item; }
+html[data-mode="kotlin"] li[data-entry-lang]:not([data-entry-lang~="kotlin"]), html[data-mode="kotlin"] li[data-entry-lang]:not([data-entry-lang~="kotlin"]) a { color: var(--muted); }
+html[data-mode="kotlin"] li[data-entry-lang]:not([data-entry-lang~="kotlin"]) [data-entry-label] { display: inline-block; }
+html[data-mode="kotlin"][data-entry-lang]:not([data-entry-lang~="kotlin"]) aside[data-section="mode-outside"] { display: block; }
+/* A two-language example: one block, a tab per language.
+
+   ⛔ WRITTEN ONLY FOR A CORPUS THAT DECLARES MODES. It is composed into
+   `modes.css` (`render/example_tabs.py`), so the shared stylesheet keeps its bytes
+   for every other corpus. The rules after this look are generated per corpus: one
+   set per mode, keyed on `html[data-mode]`.
+
+   ⭐ Scripts off, every panel is present under its language label, in the default
+   mode's order; the tab bar ships `hidden`. With scripts on, `data-tabs-on` is set
+   on the block: the bar shows, the labels go, and one panel is open.
+
+   ⭐ Tokens only, so both schemes and both themes read it. ⛔ No ligature: the code
+   is drawn by `reading.css`, which turns them off, and nothing here sets the mono
+   face. */
+
+div[data-example] {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0 0 1.6rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+}
+
+/* The mode's rules set `order` on the tabs and panels (0, 1, ...): the flag and the bar
+   come before them whatever the mode lists. */
+div[data-example] > [data-example-flag] { order: -2; }
+div[data-example] > [data-example-tabs] { order: -1; }
+
+div[data-example] [data-example-label] {
+  margin: 0;
+  max-width: none;
+  padding: .3rem .75rem;
+  font-family: var(--font-ui);
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--fg-soft);
+  border-bottom: 1px solid var(--rule);
+}
+
+div[data-example] [role="tabpanel"] {
+  min-width: 0;
+  padding: .75rem .75rem 0;
+}
+
+div[data-example] [role="tabpanel"] figure.code { margin-top: 0; }
+
+div[data-example] [role="tabpanel"]:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+div[data-example][data-tabs-on] [data-example-label] { display: none; }
+
+div[data-example] [data-example-tabs] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  padding: 2px 2px 0;
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface-2);
+}
+
+div[data-example] [data-example-tabs][hidden] { display: none; }
+
+div[data-example] [role="tab"] {
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  padding: .25rem .9rem;
+  border: 0;
+  border-radius: var(--radius-tight) var(--radius-tight) 0 0;
+  background: none;
+  color: var(--muted);
+  font-family: var(--font-ui);
+  font-size: .85rem;
+  cursor: pointer;
+}
+
+div[data-example] [role="tab"]:hover { color: var(--fg); background: var(--surface); }
+
+div[data-example] [role="tab"][aria-selected="true"] {
+  color: var(--fg);
+  background: var(--surface);
+  box-shadow: inset 0 -2px 0 var(--accent);
+  font-weight: 700;
+}
+
+div[data-example] [role="tab"]:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+div[data-example] [role="tabpanel"][hidden] { display: none; }
+
+/* A block whose point is a message the compiler gave: flagged in words, and by a
+   border that is not the plain one (heavier for an error, dashed for a warning), so
+   the difference is not carried by colour alone. */
+div[data-example][data-output] { border-width: 3px; border-color: var(--sign); }
+div[data-example][data-output="warning"] { border-style: dashed; border-width: 2px; }
+
+div[data-example] [data-example-flag] {
+  margin: 0;
+  max-width: none;
+  padding: .3rem .75rem;
+  background: var(--sign);
+  color: var(--sign-ink);
+  font-family: var(--font-ui);
+  font-size: .82rem;
+  font-weight: 700;
+}
+
+/* --- what each mode shows: generated per corpus, below --------------------- */
+html[data-mode="python"] div[data-example] [data-lang]:not([data-lang="python"]):not([data-lang="typescript"]):not([data-lang="java"]):not([data-lang="kotlin"]) { display: none; }
+html[data-mode="python"] div[data-example] [data-lang="python"] { order: 0; }
+html[data-mode="python"] div[data-example] [data-lang="typescript"] { order: 1; }
+html[data-mode="python"] div[data-example] [data-lang="java"] { order: 2; }
+html[data-mode="python"] div[data-example] [data-lang="kotlin"] { order: 3; }
+html[data-mode="typescript"] div[data-example] [data-lang]:not([data-lang="typescript"]):not([data-lang="python"]):not([data-lang="java"]):not([data-lang="kotlin"]) { display: none; }
+html[data-mode="typescript"] div[data-example] [data-lang="typescript"] { order: 0; }
+html[data-mode="typescript"] div[data-example] [data-lang="python"] { order: 1; }
+html[data-mode="typescript"] div[data-example] [data-lang="java"] { order: 2; }
+html[data-mode="typescript"] div[data-example] [data-lang="kotlin"] { order: 3; }
+html[data-mode="java"] div[data-example] [data-lang]:not([data-lang="java"]):not([data-lang="python"]):not([data-lang="typescript"]):not([data-lang="kotlin"]) { display: none; }
+html[data-mode="java"] div[data-example] [data-lang="java"] { order: 0; }
+html[data-mode="java"] div[data-example] [data-lang="python"] { order: 1; }
+html[data-mode="java"] div[data-example] [data-lang="typescript"] { order: 2; }
+html[data-mode="java"] div[data-example] [data-lang="kotlin"] { order: 3; }
+html[data-mode="kotlin"] div[data-example] [data-lang]:not([data-lang="kotlin"]):not([data-lang="python"]):not([data-lang="typescript"]):not([data-lang="java"]) { display: none; }
+html[data-mode="kotlin"] div[data-example] [data-lang="kotlin"] { order: 0; }
+html[data-mode="kotlin"] div[data-example] [data-lang="python"] { order: 1; }
+html[data-mode="kotlin"] div[data-example] [data-lang="typescript"] { order: 2; }
+html[data-mode="kotlin"] div[data-example] [data-lang="java"] { order: 3; }
+/* A language a block or a practice lacks: shown greyed, with the languages that carry it.
+
+   ⛔ WRITTEN ONLY FOR A CORPUS THAT DECLARES `absent_language: grey`. It is composed into
+   `modes.css` after the tabs' own rules (`render/absent_language.py`), so a corpus that
+   leaves the key out keeps its bytes.
+
+   ⭐ The sentences ship in the markup, hidden here and shown by the mode's own rules (one set
+   per mode, generated below) only where the mode lists a language the block or the practice
+   lacks. Scripts off, in a crawl and in the preview that is the default mode's view, so the
+   reader still learns what carries the topic. Tokens only, so both schemes and both themes
+   read it; the grey is the muted ink, and the words carry the meaning as well. */
+
+div[data-example] [data-example-missing] {
+  display: none;
+  order: -1;
+  margin: 0;
+  max-width: none;
+  padding: .3rem .75rem;
+  font-family: var(--font-ui);
+  font-size: .82rem;
+  color: var(--muted);
+  border-bottom: 1px solid var(--rule);
+}
+
+div[data-example] [role="tab"][aria-disabled="true"] {
+  color: var(--muted);
+  font-style: italic;
+  cursor: default;
+}
+
+div[data-example] [role="tab"][aria-disabled="true"]:hover {
+  color: var(--muted);
+  background: none;
+}
+
+li[data-practice-card] [data-practice-carriers] {
+  display: none;
+  margin: .2rem 0 0;
+  max-width: none;
+  font-family: var(--font-ui);
+  font-size: .82rem;
+  color: var(--muted);
+}
+
+/* --- what each mode greys: generated per corpus, below --------------------- */
+html[data-mode="python"] div[data-example][data-missing~="python"] [data-example-missing] { display: block; }
+html[data-mode="python"] div[data-example][data-missing~="typescript"] [data-example-missing] { display: block; }
+html[data-mode="python"] div[data-example][data-missing~="java"] [data-example-missing] { display: block; }
+html[data-mode="python"] div[data-example][data-missing~="kotlin"] [data-example-missing] { display: block; }
+html[data-mode="python"] section[data-kind="practice"][data-lang~="python"], html[data-mode="python"] section[data-practice][data-lang~="python"], html[data-mode="python"] section[data-practice-quiz][data-lang~="python"] { display: revert; }
+html[data-mode="python"] li[data-practice-card][data-practice-lang]:not([data-practice-lang~="python"]), html[data-mode="python"] li[data-practice-card][data-practice-lang]:not([data-practice-lang~="python"]) a { color: var(--muted); }
+html[data-mode="python"] li[data-practice-card][data-practice-lang]:not([data-practice-lang~="python"]) [data-practice-carriers] { display: block; }
+html[data-mode="typescript"] div[data-example][data-missing~="typescript"] [data-example-missing] { display: block; }
+html[data-mode="typescript"] div[data-example][data-missing~="python"] [data-example-missing] { display: block; }
+html[data-mode="typescript"] div[data-example][data-missing~="java"] [data-example-missing] { display: block; }
+html[data-mode="typescript"] div[data-example][data-missing~="kotlin"] [data-example-missing] { display: block; }
+html[data-mode="typescript"] section[data-kind="practice"][data-lang~="typescript"], html[data-mode="typescript"] section[data-practice][data-lang~="typescript"], html[data-mode="typescript"] section[data-practice-quiz][data-lang~="typescript"] { display: revert; }
+html[data-mode="typescript"] li[data-practice-card][data-practice-lang]:not([data-practice-lang~="typescript"]), html[data-mode="typescript"] li[data-practice-card][data-practice-lang]:not([data-practice-lang~="typescript"]) a { color: var(--muted); }
+html[data-mode="typescript"] li[data-practice-card][data-practice-lang]:not([data-practice-lang~="typescript"]) [data-practice-carriers] { display: block; }
+html[data-mode="java"] div[data-example][data-missing~="java"] [data-example-missing] { display: block; }
+html[data-mode="java"] div[data-example][data-missing~="python"] [data-example-missing] { display: block; }
+html[data-mode="java"] div[data-example][data-missing~="typescript"] [data-example-missing] { display: block; }
+html[data-mode="java"] div[data-example][data-missing~="kotlin"] [data-example-missing] { display: block; }
+html[data-mode="java"] section[data-kind="practice"][data-lang~="java"], html[data-mode="java"] section[data-practice][data-lang~="java"], html[data-mode="java"] section[data-practice-quiz][data-lang~="java"] { display: revert; }
+html[data-mode="java"] li[data-practice-card][data-practice-lang]:not([data-practice-lang~="java"]), html[data-mode="java"] li[data-practice-card][data-practice-lang]:not([data-practice-lang~="java"]) a { color: var(--muted); }
+html[data-mode="java"] li[data-practice-card][data-practice-lang]:not([data-practice-lang~="java"]) [data-practice-carriers] { display: block; }
+html[data-mode="kotlin"] div[data-example][data-missing~="kotlin"] [data-example-missing] { display: block; }
+html[data-mode="kotlin"] div[data-example][data-missing~="python"] [data-example-missing] { display: block; }
+html[data-mode="kotlin"] div[data-example][data-missing~="typescript"] [data-example-missing] { display: block; }
+html[data-mode="kotlin"] div[data-example][data-missing~="java"] [data-example-missing] { display: block; }
+html[data-mode="kotlin"] section[data-kind="practice"][data-lang~="kotlin"], html[data-mode="kotlin"] section[data-practice][data-lang~="kotlin"], html[data-mode="kotlin"] section[data-practice-quiz][data-lang~="kotlin"] { display: revert; }
+html[data-mode="kotlin"] li[data-practice-card][data-practice-lang]:not([data-practice-lang~="kotlin"]), html[data-mode="kotlin"] li[data-practice-card][data-practice-lang]:not([data-practice-lang~="kotlin"]) a { color: var(--muted); }
+html[data-mode="kotlin"] li[data-practice-card][data-practice-lang]:not([data-practice-lang~="kotlin"]) [data-practice-carriers] { display: block; }

@@ -1,0 +1,122 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "64-keeping-what-matters-in-long-conversations"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 5,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Long sessions: windows, stale facts, late updates, isolation and the practice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "Scenario S1, customer support resolution agent. At turn twelve a customer says the delivery address has changed. A delayed copy of the customer's turn-two message, which holds the old address, is processed afterwards. What should the facts store hold?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The old address, because it was the last one processed",
+            "correct": false,
+            "says": "Ruled out because \"Order of arrival does not decide\"."
+          },
+          {
+            "id": "b",
+            "text": "The updated value as current, with the earlier one in the history",
+            "correct": true,
+            "says": "The date decides, so the late older value goes to the history and the current value is untouched."
+          },
+          {
+            "id": "c",
+            "text": "Both addresses as current values until the customer confirms one",
+            "correct": false,
+            "says": "Ruled out because \"a value with an earlier date is recorded in the history and does not replace anything\", so nothing is left unsettled."
+          },
+          {
+            "id": "d",
+            "text": "The new address, with the old one deleted so that no trace remains",
+            "correct": false,
+            "says": "Ruled out because \"The old value is kept in the history, since an audit or a dispute may ask what was known when\"."
+          }
+        ],
+        "origin": {
+          "path": "course/64-keeping-what-matters-in-long-conversations/02-long-sessions-stale-facts-isolation-and-the-practice.md",
+          "section": "Facts have an age"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "Scenario S1, customer support resolution agent. One agent process serves many customers. After a deploy, customers see another customer's order details. The engineers find that the facts store was keyed by an id that the model copied from the conversation. What should they change?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Add a prompt rule telling the model to leave other people's data out of its replies",
+            "correct": false,
+            "says": "Ruled out because \"A rule written in the prompt is not isolation\"."
+          },
+          {
+            "id": "b",
+            "text": "Empty the store hourly so that stale entries cannot be reached by anyone",
+            "correct": false,
+            "says": "Ruled out because the leak comes from the key, and the page's remedy is \"Everything that is cached, remembered or summarised is scoped the same way\", not a periodic clearing."
+          },
+          {
+            "id": "c",
+            "text": "Add the customer's name to each fact so that the model can tell them apart",
+            "correct": false,
+            "says": "Ruled out because facts of other customers are \"excluded where the text is assembled, not left for the model to ignore\"."
+          },
+          {
+            "id": "d",
+            "text": "Take the key from the authenticated session and filter where the context is built",
+            "correct": true,
+            "says": "The identity comes from the session the application holds, and the exclusion happens in code before the model sees anything."
+          }
+        ],
+        "origin": {
+          "path": "course/64-keeping-what-matters-in-long-conversations/02-long-sessions-stale-facts-isolation-and-the-practice.md",
+          "section": "One customer, one scope"
+        }
+      }
+    ],
+    "concepts": [
+      "Facts have an age, as the page teaches it",
+      "Long sessions: windows, stale facts, late updates, isolation and the practice, as the page teaches it",
+      "One customer, one scope, as the page teaches it"
+    ]
+  }
+}

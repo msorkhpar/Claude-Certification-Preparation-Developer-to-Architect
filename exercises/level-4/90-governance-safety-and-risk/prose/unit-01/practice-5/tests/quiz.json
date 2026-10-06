@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-4",
+    "90-governance-safety-and-risk"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 5,
+  "title": "Check yourself: Controls that fail closed, and a person before the irreversible",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "Scenario: Dana runs the refund flow of a claims assistant. The service that screens incoming requests stops answering, and the code must choose between two behaviours for a request that asks for a refund. Which one fits the design rules on this page?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Hold it and tell the caller that the check is unavailable",
+            "correct": true,
+            "says": "A refund is a high-consequence action and the screen is an input control, so the design holds."
+          },
+          {
+            "id": "b",
+            "text": "Let the request pass and flag it for a person to look at tomorrow",
+            "correct": false,
+            "says": "Ruled out because \"A screen that is down and lets a request through is the opening an attacker waits for\"."
+          },
+          {
+            "id": "c",
+            "text": "Run the request once more through the model's own safety training",
+            "correct": false,
+            "says": "Ruled out because the layers \"answer different attackers and different mistakes\", and the model's own training is not the missing screen."
+          },
+          {
+            "id": "d",
+            "text": "Let the request pass because the later approval step will catch it",
+            "correct": false,
+            "says": "Ruled out because \"an output control cannot stop a tool call that already happened\", and a later step does not repair a gap on an earlier layer."
+          }
+        ],
+        "origin": {
+          "path": "course/90-governance-safety-and-risk/01-controls-that-fail-closed-and-a-person-before-the-irreversible.md",
+          "section": "What a control does when it fails"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "Scenario: Ravi reviews a design in which a model must \"always ask a person before closing an account\", a rule written in the system prompt. What is the main weakness of that design?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The sentence is too short for the model to follow it reliably under load",
+            "correct": false,
+            "says": "Ruled out because the page grants that \"the model usually follows it\", so reliability of following is not the weakness."
+          },
+          {
+            "id": "b",
+            "text": "The rule should sit in the user turn so that the model reads it last",
+            "correct": false,
+            "says": "Ruled out because the sentence stays \"a request to the model and not a control\" wherever it sits."
+          },
+          {
+            "id": "c",
+            "text": "Nothing forces the step to happen, because an instruction only asks",
+            "correct": true,
+            "says": "A line in a prompt is a request and a control is a step the model cannot skip."
+          },
+          {
+            "id": "d",
+            "text": "The sentence repeats a rule the platform already applies to every account",
+            "correct": false,
+            "says": "Ruled out because \"Every control has a failure mode of its own, and the design must say it\", and no platform rule is assumed to hold it."
+          }
+        ],
+        "origin": {
+          "path": "course/90-governance-safety-and-risk/01-controls-that-fail-closed-and-a-person-before-the-irreversible.md",
+          "section": "Traps"
+        }
+      }
+    ]
+  }
+}

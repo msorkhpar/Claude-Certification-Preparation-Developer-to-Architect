@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "47-invoking-subagents"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: The Agent tool, agent definitions and the permission of a spawn",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A team gives its security-review subagent the one-word blurb \"Helper.\" The coordinator keeps reviewing code itself and never delegates. Which change makes delegation likely?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Rewrite the description to state when this specialist should be called",
+            "correct": true,
+            "says": "The model reads the description to decide whether to delegate, so it must say when the agent applies."
+          },
+          {
+            "id": "b",
+            "text": "Raise the agent's turn limit for each run it starts",
+            "correct": false,
+            "says": "Ruled out because a turn limit only bounds a run that has started: \"Turns before it stops; the output is then marked partial, and the agent can be resumed\"."
+          },
+          {
+            "id": "c",
+            "text": "Move the review instructions from the description into the agent's own prompt",
+            "correct": false,
+            "says": "Ruled out because the prompt is the agent's own role, while the description is \"Natural language description of when to use this agent\"."
+          },
+          {
+            "id": "d",
+            "text": "Set the nesting depth to three levels below the main agent",
+            "correct": false,
+            "says": "Ruled out because nesting concerns subagents that spawn their own: \"The practice removes `Agent` from every subagent's list and sets the nesting depth to one, so that only the coordinator decides how large the team is.\""
+          }
+        ],
+        "origin": {
+          "path": "course/47-invoking-subagents/01-the-agent-tool-definitions-and-permissions.md",
+          "section": "The definition"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A dashboard counts delegations by looking for calls to the Agent tool in the message stream. Replayed logs from earlier runs show subagent reports, yet the dashboard reports zero delegations. What fixes it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Read the tools list of the init message, where the tool is always named Agent",
+            "correct": false,
+            "says": "Ruled out because the two lists differ: the tool \"appears as Agent in tool_use blocks but as Task in the system:init tools list\"."
+          },
+          {
+            "id": "b",
+            "text": "Look for the subagent's name in the assistant's text blocks",
+            "correct": false,
+            "says": "Ruled out because a spawn is a tool call, not text: the model \"calls a tool named `Agent` with an input that names the one it wants\"."
+          },
+          {
+            "id": "c",
+            "text": "Also match the former name Task in each spawn's blocks",
+            "correct": true,
+            "says": "Older versions named the tool Task in the call blocks, so both names must be matched."
+          },
+          {
+            "id": "d",
+            "text": "Add Agent to the allowed tools",
+            "correct": false,
+            "says": "Ruled out because the entry does not change what is logged: a spawn needs no approval of its own, and listing it \"makes the intent explicit\"."
+          }
+        ],
+        "origin": {
+          "path": "course/47-invoking-subagents/01-the-agent-tool-definitions-and-permissions.md",
+          "section": "One tool starts a subagent"
+        }
+      }
+    ]
+  }
+}

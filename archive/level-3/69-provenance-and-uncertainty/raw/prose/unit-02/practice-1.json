@@ -1,0 +1,297 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "69-provenance-and-uncertainty"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: a ledger of claims that keeps its sources (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a ledger of claims that keeps its sources"
+    },
+    {
+      "type": "para",
+      "text": "A research system sends three subagents to read different sources, and a synthesis agent writes the report. In the draft, a market-size figure appears without a source, two reports that disagree were averaged into a number nobody published, and a figure from 2022 is shown as if it contradicted one from 2024. In this practice you write the ledger that prevents those three failures: a finding that must carry its source and its date, a merge that records agreement, change over time and real conflict without choosing a winner, a coverage note that says what is well supported and what is missing, and the rendering of each kind of content in a fitting form. The model is not called. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`check_finding`, `merge`, `coverage_note`, `render`); TypeScript has the camel-case names; Java has the same camel-case names as static methods of `Ledger` with the records the starter defines (`Finding`, `Src`, `Val`, `Entry`, `Gap`, `Coverage`); Kotlin has top-level functions and data classes. Dates are ISO text (`2024-05-01`) and compare as text."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working ledger of claims with eight gaps cut out of it. Everything that is plumbing is written and correct: the grouping of findings by claim and by value, the refusal of a finding that fails the check, the first rows of the coverage note, the table and prose headers and the refusal of an unknown content type. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript, Java and Kotlin names are the camel-case forms where a name is given):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "The required fields (unlocks `e1`): a finding is missing a field of REQUIRED (`claim`, `value`, `source`, `date`) when it is absent, empty or only blanks; the check returns the names of the missing fields in that order.",
+        "Every source once (unlocks `m1`): a claim's value keeps each pair of source and date once, even when two findings repeat it, in the order they came.",
+        "Agreed, changed or in conflict (unlocks `e2`, `e3`): one value is `agreed`; several values with two of them from the same date are a `conflict` that keeps both; several values from different dates are a `changed` claim, ordered by the earliest date of each value.",
+        "The well supported claims (unlocks `e4`): an agreed claim whose value has two or more different sources is well supported; one with a single source is listed apart as `single_source`; changed and contested claims have their own lists.",
+        "The gaps (unlocks `e5`): a planned claim that has no finding is a gap, with the reason given for it or `no source found`.",
+        "The financial table (unlocks `e6`): financial data is a table: the header `| Source | Date | Value |`, the separator `|---|---|---|` and one row per source with its value.",
+        "The technical list (unlocks `e8`): technical findings are a list: the claim and a colon, then one `- value (source, date)` line per source.",
+        "The disagreement in the news (unlocks `e7`): news is prose; when the sources disagree it ends with `The sources disagree.`, and when the figures come from different dates with `The figures are from different dates.`."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gap 2. About twenty-two lines in all. The steps below describe the whole ledger, so you can see how your gaps are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "A finding is `{claim, value, source, date}`. `check_finding(finding)` returns the names of the required fields that are missing or blank (only spaces counts as blank), in the order `claim`, `value`, `source`, `date`; an empty list means the finding is complete.",
+        "`merge(findings)` refuses (raises `ValueError` in Python, an `Error` in TypeScript, `IllegalArgumentException` in Java and Kotlin) when any finding is incomplete. Otherwise it returns one entry `{claim, status, values}` per claim, in the order the claims first appear. `values` lists the distinct values of the claim in the order they first appear, each as `{value, sources}`, where `sources` lists the distinct `{source, date}` pairs of that value in order. The `status` is `agreed` when the claim has one value; `conflict` when two findings of the claim have different values **and the same date**; otherwise `changed`. For a `changed` claim the values are listed from the one with the earliest date to the latest (by the earliest date among its sources). Values are never dropped, merged or averaged.",
+        "`coverage_note(planned, merged, unavailable)` returns `{well_supported, single_source, changed, contested, gaps}`. For the merged entries, in their order: `conflict` goes to `contested`, `changed` to `changed`, and an `agreed` claim goes to `well_supported` when its value has at least two distinct source names, otherwise to `single_source`. `gaps` lists, in the order of `planned`, each planned claim that has no entry as `{claim, reason}`, where the reason is `unavailable[claim]` or `no source found`.",
+        [
+          "`render(entry, kind)` returns text for a merged entry, one row for each source of each value in order. `kind` is `financial`, `news` or `technical`; any other is refused.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`financial`: a table. The lines `| Source | Date | Value |` and `|---|---|---|`, then `| <source> | <date> | <value> |` for each row.",
+              "`technical`: the line `<claim>:` followed by `- <value> (<source>, <date>)` for each row.",
+              "`news`: one line of prose, `<claim>: ` followed by `<value> (<source>, <date>)` for each row joined with `; `, then a full stop. A `conflict` adds ` The sources disagree.` and a `changed` entry adds ` The figures are from different dates.`"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Provenance is a required field.** A claim without a source cannot be checked, and a claim without a date cannot be interpreted. *You should see* the missing fields named, and the merge refusing the finding.",
+        "**Keep every source.** Agreement from two sources is stronger than one, and the reader may want either. *You should see* every distinct source of every value in the merged entry.",
+        "**Annotate a conflict; do not choose.** Two credible sources that disagree on the same date are a finding about the topic. *You should see* both values with their sources and the status `conflict`.",
+        "**A date can explain a difference.** A figure from 2022 and one from 2024 are not in conflict. *You should see* `changed`, with the older value first.",
+        "**Say what the report does not cover.** A gap with a reason is information. *You should see* the planned claims with no finding listed with their reason, and single-source claims set apart.",
+        "**Fit the form to the content.** Numbers compare in a table, events read as prose, technical findings list well. *You should see* three different shapes from the same entry."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Findings are merged per claim with every source kept once"
+        ],
+        [
+          "`e1`",
+          "A finding without a source or a date is refused"
+        ],
+        [
+          "`e2`",
+          "Two values from the same date are a conflict that keeps both"
+        ],
+        [
+          "`e3`",
+          "Two values from different dates are a change, not a conflict"
+        ],
+        [
+          "`e4`",
+          "The coverage note separates what is well supported from what is not"
+        ],
+        [
+          "`e5`",
+          "A planned claim with no finding is a gap with its reason"
+        ],
+        [
+          "`e6`",
+          "Financial data is rendered as a table"
+        ],
+        [
+          "`e7`",
+          "News is rendered as prose that says when sources disagree"
+        ],
+        [
+          "`e8`",
+          "Technical findings are a list, and an unknown content type is refused"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Claims that keep their sources: required provenance fields, a merge that records agreement, change over time and conflict, a coverage note with gaps, and rendering by content type. See ../../statement.md.\"\"\"\n\nimport logging\n\nlog = logging.getLogger(__name__)\n\nREQUIRED = (\"claim\", \"value\", \"source\", \"date\")\nKINDS = (\"financial\", \"news\", \"technical\")\n\n\ndef check_finding(finding):\n    return [f for f in REQUIRED if not str(finding.get(f, \"\")).strip()]\n\n\ndef merge(findings):\n    log.debug(\"merge input: %r\", findings)\n    for i, f in enumerate(findings):\n        missing = check_finding(f)\n        if missing:\n            raise ValueError(f\"finding {i} is missing {', '.join(missing)}\")\n    claims = []\n    for f in findings:\n        if f[\"claim\"] not in claims:\n            claims.append(f[\"claim\"])\n    out = []\n    for claim in claims:\n        group = [f for f in findings if f[\"claim\"] == claim]\n        values = []\n        for f in group:\n            entry = next((v for v in values if v[\"value\"] == f[\"value\"]), None)\n            if entry is None:\n                entry = {\"value\": f[\"value\"], \"sources\": []}\n                values.append(entry)\n            pair = {\"source\": f[\"source\"], \"date\": f[\"date\"]}\n            if pair not in entry[\"sources\"]:\n                entry[\"sources\"].append(pair)\n        if len(values) == 1:\n            status = \"agreed\"\n        elif any(a[\"value\"] != b[\"value\"] and a[\"date\"] == b[\"date\"] for a in group for b in group):\n            status = \"conflict\"\n        else:\n            status = \"changed\"\n            values.sort(key=lambda v: min(s[\"date\"] for s in v[\"sources\"]))\n        out.append({\"claim\": claim, \"status\": status, \"values\": values})\n    return out\n\n\ndef coverage_note(planned, merged, unavailable):\n    note = {\"well_supported\": [], \"single_source\": [], \"changed\": [], \"contested\": [], \"gaps\": []}\n    for e in merged:\n        if e[\"status\"] == \"conflict\":\n            note[\"contested\"].append(e[\"claim\"])\n        elif e[\"status\"] == \"changed\":\n            note[\"changed\"].append(e[\"claim\"])\n        elif len({s[\"source\"] for s in e[\"values\"][0][\"sources\"]}) >= 2:\n            note[\"well_supported\"].append(e[\"claim\"])\n        else:\n            note[\"single_source\"].append(e[\"claim\"])\n    have = {e[\"claim\"] for e in merged}\n    note[\"gaps\"] = [{\"claim\": c, \"reason\": unavailable.get(c, \"no source found\")} for c in planned if c not in have]\n    return note\n\n\ndef render(entry, kind):\n    if kind not in KINDS:\n        raise ValueError(f\"unknown content type {kind}\")\n    rows = [(v[\"value\"], s[\"source\"], s[\"date\"]) for v in entry[\"values\"] for s in v[\"sources\"]]\n    if kind == \"financial\":\n        return \"\\n\".join([\"| Source | Date | Value |\", \"|---|---|---|\"] + [f\"| {s} | {d} | {v} |\" for v, s, d in rows])\n    if kind == \"technical\":\n        return \"\\n\".join([f\"{entry['claim']}:\"] + [f\"- {v} ({s}, {d})\" for v, s, d in rows])\n    text = f\"{entry['claim']}: \" + \"; \".join(f\"{v} ({s}, {d})\" for v, s, d in rows) + \".\"\n    if entry[\"status\"] == \"conflict\":\n        text += \" The sources disagree.\"\n    elif entry[\"status\"] == \"changed\":\n        text += \" The figures are from different dates.\"\n    return text\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom ledger import check_finding, coverage_note, merge, render\n\n# Findings from two subagents: the same claim from two sources, and one that disagrees.\nfindings = [\n    {\"claim\": \"revenue 2023\", \"value\": \"4.1B\", \"source\": \"Annual report\", \"date\": \"2024-02-01\"},\n    {\"claim\": \"revenue 2023\", \"value\": \"4.1B\", \"source\": \"Press release\", \"date\": \"2024-02-03\"},\n    {\"claim\": \"headcount\", \"value\": \"910\", \"source\": \"Press release\", \"date\": \"2024-03-01\"},\n    {\"claim\": \"headcount\", \"value\": \"950\", \"source\": \"Blog\", \"date\": \"2024-03-01\"},\n]\nprint(\"missing fields:\", check_finding({\"claim\": \"headcount\", \"value\": \"910\"}))\n\nmerged = merge(findings)\nfor entry in merged:\n    print(\"entry:\", entry[\"claim\"], entry[\"status\"], entry[\"values\"])\n\n# What the report says about coverage, and how an entry is shown.\nprint(\"coverage:\", coverage_note([\"revenue 2023\", \"headcount\", \"patents\"], merged, {\"patents\": \"the registry timed out\"}))\nprint(\"rendered:\", render(merged[0], \"news\"))\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Claims that keep their sources: required provenance fields, a merge that records agreement, change over time and conflict, a coverage note with gaps, and rendering by content type. See ../../statement.md.\"\"\"\n\nimport logging\n\nlog = logging.getLogger(__name__)\n\nREQUIRED = (\"claim\", \"value\", \"source\", \"date\")\nKINDS = (\"financial\", \"news\", \"technical\")\n\n\ndef check_finding(finding):\n    # TODO 1 of 8 (finish this to pass e1): the provenance check. Receives one finding. Return the names, in REQUIRED\n    #   order, of the fields that are absent, empty or only white space. Example: source \"\" and date \" \" -> [source,\n    #   date].\n    return [f for f in REQUIRED if f not in finding]\n\n\ndef merge(findings):\n    log.debug(\"merge input: %r\", findings)\n    for i, f in enumerate(findings):\n        missing = check_finding(f)\n        if missing:\n            raise ValueError(f\"finding {i} is missing {', '.join(missing)}\")\n    claims = []\n    for f in findings:\n        if f[\"claim\"] not in claims:\n            claims.append(f[\"claim\"])\n    out = []\n    for claim in claims:\n        group = [f for f in findings if f[\"claim\"] == claim]\n        values = []\n        for f in group:\n            entry = next((v for v in values if v[\"value\"] == f[\"value\"]), None)\n            if entry is None:\n                entry = {\"value\": f[\"value\"], \"sources\": []}\n                values.append(entry)\n            pair = {\"source\": f[\"source\"], \"date\": f[\"date\"]}\n            # TODO 2 of 8 (finish this to pass m1): the sources of a value. When a finding repeats a source and date\n            #   pair that the value already holds, do not add it again; otherwise add the pair last. Example: Annual\n            #   report 2024-02-01 reported twice -> kept once.\n            entry[\"sources\"].append(pair)\n        # TODO 3 of 8 (finish this to pass e2, e3): the status of a claim. Receives the group of findings and its\n        #   distinct values. One value -> agreed. Several values where two different values share a date -> conflict (keep\n        #   all). Several values with no shared date -> changed, with the values ordered by their earliest date. Example:\n        #   12% and 9% both on 2024-05-01 -> conflict.\n        status = \"agreed\"\n        out.append({\"claim\": claim, \"status\": status, \"values\": values})\n    return out\n\n\ndef coverage_note(planned, merged, unavailable):\n    note = {\"well_supported\": [], \"single_source\": [], \"changed\": [], \"contested\": [], \"gaps\": []}\n    for e in merged:\n        if e[\"status\"] == \"conflict\":\n            note[\"contested\"].append(e[\"claim\"])\n        elif e[\"status\"] == \"changed\":\n            note[\"changed\"].append(e[\"claim\"])\n        # TODO 4 of 8 (finish this to pass e4): the split of the agreed claims. For an agreed claim, add it to\n        #   well_supported when its value comes from at least two different sources, otherwise to single_source. Example:\n        #   two sources -> well_supported; one -> single_source.\n        else:\n            note[\"single_source\"].append(e[\"claim\"])\n    have = {e[\"claim\"] for e in merged}\n    # TODO 5 of 8 (finish this to pass e5): the gaps. Receives the planned claims, the merged entries and the reasons\n    #   for unavailable claims. Return one {claim, reason} for each planned claim that has no merged entry, with the\n    #   reason from `unavailable` or \"no source found\". Example: planned [a, b], merged a -> gap b.\n    note[\"gaps\"] = []\n    return note\n\n\ndef render(entry, kind):\n    if kind not in KINDS:\n        raise ValueError(f\"unknown content type {kind}\")\n    rows = [(v[\"value\"], s[\"source\"], s[\"date\"]) for v in entry[\"values\"] for s in v[\"sources\"]]\n    # TODO 6 of 8 (finish this to pass e6): the financial rendering. Return a Markdown table: the header \"| Source |\n    #   Date | Value |\", the line \"|---|---|---|\" and one row \"| source | date | value |\" for each source of each value.\n    #   Example: one source -> three lines.\n    # TODO 7 of 8 (finish this to pass e8): the technical rendering. Return the claim followed by a colon, then one line\n    #   \"- value (source, date)\" for each source of each value. Example: one source -> two lines.\n    text = f\"{entry['claim']}: \" + \"; \".join(f\"{v} ({s}, {d})\" for v, s, d in rows) + \".\"\n    # TODO 8 of 8 (finish this to pass e7): the news ending. After the prose, add \" The sources disagree.\" for a\n    #   conflict and \" The figures are from different dates.\" for a changed claim. Example: conflict -> the prose ends\n    #   with that sentence.\n    return text\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom ledger import check_finding, coverage_note, merge, render\n\n# Findings from two subagents: the same claim from two sources, and one that disagrees.\nfindings = [\n    {\"claim\": \"revenue 2023\", \"value\": \"4.1B\", \"source\": \"Annual report\", \"date\": \"2024-02-01\"},\n    {\"claim\": \"revenue 2023\", \"value\": \"4.1B\", \"source\": \"Press release\", \"date\": \"2024-02-03\"},\n    {\"claim\": \"headcount\", \"value\": \"910\", \"source\": \"Press release\", \"date\": \"2024-03-01\"},\n    {\"claim\": \"headcount\", \"value\": \"950\", \"source\": \"Blog\", \"date\": \"2024-03-01\"},\n]\nprint(\"missing fields:\", check_finding({\"claim\": \"headcount\", \"value\": \"910\"}))\n\nmerged = merge(findings)\nfor entry in merged:\n    print(\"entry:\", entry[\"claim\"], entry[\"status\"], entry[\"values\"])\n\n# What the report says about coverage, and how an entry is shown.\nprint(\"coverage:\", coverage_note([\"revenue 2023\", \"headcount\", \"patents\"], merged, {\"patents\": \"the registry timed out\"}))\nprint(\"rendered:\", render(merged[0], \"news\"))\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "bee495b697947dc1d77a36105dfda925207204539fce81afe77fae95e74ab247",
+  "starting_code": "\"\"\"Claims that keep their sources: required provenance fields, a merge that records agreement, change over time and conflict, a coverage note with gaps, and rendering by content type. See ../../statement.md.\"\"\"\n\nimport logging\n\nlog = logging.getLogger(__name__)\n\nREQUIRED = (\"claim\", \"value\", \"source\", \"date\")\nKINDS = (\"financial\", \"news\", \"technical\")\n\n\ndef check_finding(finding):\n    # TODO 1 of 8 (finish this to pass e1): the provenance check. Receives one finding. Return the names, in REQUIRED\n    #   order, of the fields that are absent, empty or only white space. Example: source \"\" and date \" \" -> [source,\n    #   date].\n    return [f for f in REQUIRED if f not in finding]\n\n\ndef merge(findings):\n    log.debug(\"merge input: %r\", findings)\n    for i, f in enumerate(findings):\n        missing = check_finding(f)\n        if missing:\n            raise ValueError(f\"finding {i} is missing {', '.join(missing)}\")\n    claims = []\n    for f in findings:\n        if f[\"claim\"] not in claims:\n            claims.append(f[\"claim\"])\n    out = []\n    for claim in claims:\n        group = [f for f in findings if f[\"claim\"] == claim]\n        values = []\n        for f in group:\n            entry = next((v for v in values if v[\"value\"] == f[\"value\"]), None)\n            if entry is None:\n                entry = {\"value\": f[\"value\"], \"sources\": []}\n                values.append(entry)\n            pair = {\"source\": f[\"source\"], \"date\": f[\"date\"]}\n            # TODO 2 of 8 (finish this to pass m1): the sources of a value. When a finding repeats a source and date\n            #   pair that the value already holds, do not add it again; otherwise add the pair last. Example: Annual\n            #   report 2024-02-01 reported twice -> kept once.\n            entry[\"sources\"].append(pair)\n        # TODO 3 of 8 (finish this to pass e2, e3): the status of a claim. Receives the group of findings and its\n        #   distinct values. One value -> agreed. Several values where two different values share a date -> conflict (keep\n        #   all). Several values with no shared date -> changed, with the values ordered by their earliest date. Example:\n        #   12% and 9% both on 2024-05-01 -> conflict.\n        status = \"agreed\"\n        out.append({\"claim\": claim, \"status\": status, \"values\": values})\n    return out\n\n\ndef coverage_note(planned, merged, unavailable):\n    note = {\"well_supported\": [], \"single_source\": [], \"changed\": [], \"contested\": [], \"gaps\": []}\n    for e in merged:\n        if e[\"status\"] == \"conflict\":\n            note[\"contested\"].append(e[\"claim\"])\n        elif e[\"status\"] == \"changed\":\n            note[\"changed\"].append(e[\"claim\"])\n        # TODO 4 of 8 (finish this to pass e4): the split of the agreed claims. For an agreed claim, add it to\n        #   well_supported when its value comes from at least two different sources, otherwise to single_source. Example:\n        #   two sources -> well_supported; one -> single_source.\n        else:\n            note[\"single_source\"].append(e[\"claim\"])\n    have = {e[\"claim\"] for e in merged}\n    # TODO 5 of 8 (finish this to pass e5): the gaps. Receives the planned claims, the merged entries and the reasons\n    #   for unavailable claims. Return one {claim, reason} for each planned claim that has no merged entry, with the\n    #   reason from `unavailable` or \"no source found\". Example: planned [a, b], merged a -> gap b.\n    note[\"gaps\"] = []\n    return note\n\n\ndef render(entry, kind):\n    if kind not in KINDS:\n        raise ValueError(f\"unknown content type {kind}\")\n    rows = [(v[\"value\"], s[\"source\"], s[\"date\"]) for v in entry[\"values\"] for s in v[\"sources\"]]\n    # TODO 6 of 8 (finish this to pass e6): the financial rendering. Return a Markdown table: the header \"| Source |\n    #   Date | Value |\", the line \"|---|---|---|\" and one row \"| source | date | value |\" for each source of each value.\n    #   Example: one source -> three lines.\n    # TODO 7 of 8 (finish this to pass e8): the technical rendering. Return the claim followed by a colon, then one line\n    #   \"- value (source, date)\" for each source of each value. Example: one source -> two lines.\n    text = f\"{entry['claim']}: \" + \"; \".join(f\"{v} ({s}, {d})\" for v, s, d in rows) + \".\"\n    # TODO 8 of 8 (finish this to pass e7): the news ending. After the prose, add \" The sources disagree.\" for a\n    #   conflict and \" The figures are from different dates.\" for a changed claim. Example: conflict -> the prose ends\n    #   with that sentence.\n    return text\n",
+  "exercise": {
+    "main_path": "practice/level-3/69-provenance-and-uncertainty/prose/unit-02/practice-1/ledger.py",
+    "test_path": "practice/level-3/69-provenance-and-uncertainty/prose/unit-02/practice-1/test_ledger.py",
+    "run_command": [
+      "python3",
+      "practice/level-3/69-provenance-and-uncertainty/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-3/69-provenance-and-uncertainty/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-3/69-provenance-and-uncertainty/prose/unit-02/practice-1/test_ledger.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_findings_are_merged_per_claim_with_every_source_kept_once",
+        "kind": "main",
+        "says": "Findings are merged per claim with every source kept once"
+      },
+      {
+        "id": "test_e1_a_finding_without_a_source_or_a_date_is_refused",
+        "kind": "edge",
+        "says": "A finding without a source or a date is refused"
+      },
+      {
+        "id": "test_e2_two_values_from_the_same_date_are_a_conflict_that_keeps_both",
+        "kind": "edge",
+        "says": "Two values from the same date are a conflict that keeps both"
+      },
+      {
+        "id": "test_e3_two_values_from_different_dates_are_a_change_not_a_conflict",
+        "kind": "edge",
+        "says": "Two values from different dates are a change, not a conflict"
+      },
+      {
+        "id": "test_e4_the_coverage_note_separates_what_is_well_supported_from_what_is_not",
+        "kind": "edge",
+        "says": "The coverage note separates what is well supported from what is not"
+      },
+      {
+        "id": "test_e5_a_planned_claim_with_no_finding_is_a_gap_with_its_reason",
+        "kind": "edge",
+        "says": "A planned claim with no finding is a gap with its reason"
+      },
+      {
+        "id": "test_e6_financial_data_is_rendered_as_a_table",
+        "kind": "edge",
+        "says": "Financial data is rendered as a table"
+      },
+      {
+        "id": "test_e7_news_is_rendered_as_prose_that_says_when_sources_disagree",
+        "kind": "edge",
+        "says": "News is rendered as prose that says when sources disagree"
+      },
+      {
+        "id": "test_e8_technical_findings_are_a_list_and_an_unknown_content_type_is_refused",
+        "kind": "edge",
+        "says": "Technical findings are a list, and an unknown content type is refused"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/69-provenance-and-uncertainty/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/69-provenance-and-uncertainty/02-coverage-report-structure-rendering-and-the-practice.md",
+    "concepts": [
+      "the practice of Coverage, report structure, rendering by content type, and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/69-provenance-and-uncertainty/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "provenance-and-uncertainty-u2"
+}

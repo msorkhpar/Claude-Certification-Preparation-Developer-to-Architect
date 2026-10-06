@@ -1,0 +1,286 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "26-tool-use"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: a tool loop against a scripted model (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a tool loop against a scripted model"
+    },
+    {
+      "type": "para",
+      "text": "Claude never runs your tools. It answers a request with `stop_reason` of `tool_use` and one or more `tool_use` blocks; your code runs them, sends the results back in a single user message, and asks again until the model ends its turn. Write that loop, with the limits and the error handling that keep it from hanging or lying. The rules come from the Claude documentation on tool use, handling tool calls, parallel tool use, stop reasons and forced tool use, read on 2026-10-03; the lesson pages explain them. Nothing here touches the network: the model is a function that you call, and the tests give it scripted replies in the shape of a Messages API response."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given types"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`ask(request)`",
+          "the model: takes a request `{\"model\", \"max_tokens\", \"messages\", \"tools\", optionally \"tool_choice\"}` and returns a reply `{\"content\": [blocks], \"stop_reason\": ...}`"
+        ],
+        [
+          "tool",
+          "a name, a description, an `input_schema` and a handler that takes the input map and returns a string or any JSON value"
+        ],
+        [
+          "`ToolError`",
+          "a handler may throw it (or any other error) to say it failed"
+        ],
+        [
+          "`RequestError`",
+          "what your code throws, before any call, for a request the API would reject with a 400; `field` names the part"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working tool loop with seven small gaps cut out of it. Everything that is plumbing is written and correct: the types, the request that is built for every turn, the assistant message that is appended after every reply, the error results for an unknown tool and for a handler that throws, the `pause_turn` continue and the `max_turns` result. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails every case on an assertion. The TypeScript, Java and Kotlin names are the camel-case forms (`checkChoice`, `missingInputs`, `resultContent`, ...); `_turn_numbers` is `lastTurn` there. Write them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_check_choice` unlocks `e5`: the `RequestError` for a `tool_choice` the API would reject.",
+        "`_missing_inputs` unlocks `e2`: the required keys that a call leaves out.",
+        "`_result_content` unlocks `e6`: a string as it is, any other value as JSON text.",
+        "`_tool_results` unlocks `m1` and `e1`: one result per `tool_use` block, in order, none for a server tool block.",
+        "`_final_status` unlocks `e4`: `done`, `refused` or `truncated` from the stop reason.",
+        "`_turn_numbers` unlocks `e3`: the turns the loop may use, so that `max_turns` calls are made and no more.",
+        "`_sent_choice` unlocks `e5`: a forced choice on the first request only."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs the fourth gap. About fifteen lines in all. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. `run_agent` already logs the user text it receives."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "`run_agent(ask, tools, user_text, model=\"claude-sonnet-5-5\", max_turns=8, tool_choice=None)` returns `{\"status\", \"text\", \"turns\", \"messages\"}`: the final status, the text of the last reply, the number of model calls, and the conversation."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "The first message has role `user` and the text. Each request lists the tools without their handlers, and carries `model`, `max_tokens` (1024) and a snapshot of the messages so far.",
+        "After each reply, append it as an `assistant` message with its content blocks unchanged (text blocks and server tool blocks included).",
+        "Stop reason `tool_use`: run every `tool_use` block, in order, and append ONE `user` message that holds one `tool_result` block per call (`tool_use_id` of the call, `content`, and `is_error` only on an error result), nothing else. Blocks of type `server_tool_use` are Anthropic's to run and get no result. A handler's string is sent as it is and any other value as JSON text.",
+        "A call becomes a result with `is_error: true` and a message, and the loop goes on, when: the tool name is unknown (`Unknown tool: NAME`); a key listed in the schema's `required` is missing from the input (the handler is not called, and the message is `Missing required input: KEY`, with several missing keys joined by `, ` in the order of `required`); or the handler throws (the error's message).",
+        "`end_turn` or `stop_sequence`: status `done`. `refusal`: status `refused`. `max_tokens` or any other stop reason: status `truncated`. `pause_turn` (a server tool's turn that was paused): call again with the assistant message appended and no user message.",
+        "After `max_turns` model calls without an end, status `max_turns`.",
+        "`tool_choice` is a map such as `{\"type\": \"auto\", \"disable_parallel_tool_use\": true}`. Check it before the first call and throw `RequestError`: field `tool_choice.type` unless the type is `auto`, `any`, `tool` or `none`; `tool_choice.disable_parallel_tool_use` if that key is present and is not a boolean; `tool_choice` for type `any` or `tool` on `claude-opus-5-5`, `claude-sonnet-5-5`, `claude-fable-5-1` or `claude-mythos-5-1`, which reject forced tool use; and `tool_choice.name` for type `tool` when no tool has that name. Send the choice as given on the first request. A forced choice (`any` or `tool`) must not repeat, or the model could never give a final answer: from the second request on, send `{\"type\": \"auto\"}` instead. `auto` and `none` are sent unchanged every time. With no `tool_choice`, send none."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A tool call is run and its result sent back until the model ends its turn"
+        ],
+        [
+          "`e1`",
+          "Parallel calls get one user message with every result in order"
+        ],
+        [
+          "`e2`",
+          "A failing, unknown or malformed call becomes an error result and the loop goes on"
+        ],
+        [
+          "`e3`",
+          "The number of turns is bounded"
+        ],
+        [
+          "`e4`",
+          "Refusal and truncation end the loop, and a paused turn continues"
+        ],
+        [
+          "`e5`",
+          "`tool_choice` is validated for the model, and a forced choice applies to the first request only"
+        ],
+        [
+          "`e6`",
+          "Results that are not text are sent as JSON text"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "private val log = System.getLogger(\"toolloop\")\n\n/** A tool loop against a scripted model. See ../../statement.md. Messages and replies are JSON-like maps. */\n\nprivate val FORCED_UNSUPPORTED = setOf(\"claude-opus-5-5\", \"claude-sonnet-5-5\", \"claude-fable-5-1\", \"claude-mythos-5-1\")\nprivate val CHOICE_TYPES = setOf(\"auto\", \"any\", \"tool\", \"none\")\n\n/** Refuse a tool_choice the API would reject. */\nprivate fun checkChoice(tools: List<Tool>, model: String, choice: Map<String, Any?>) {\n    val kind = choice[\"type\"]\n    if (kind !in CHOICE_TYPES) throw RequestError(\"tool_choice.type\", \"must be auto, any, tool or none\")\n    if (choice.containsKey(\"disable_parallel_tool_use\") && choice[\"disable_parallel_tool_use\"] !is Boolean) throw RequestError(\"tool_choice.disable_parallel_tool_use\", \"must be a boolean\")\n    if ((kind == \"any\" || kind == \"tool\") && model in FORCED_UNSUPPORTED) throw RequestError(\"tool_choice\", \"$model does not support forced tool use\")\n    if (kind == \"tool\" && tools.none { it.name == choice[\"name\"] }) throw RequestError(\"tool_choice.name\", \"names no tool in the request\")\n}\n\n/** The keys listed in the tool's required list that the input lacks. */\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun missingInputs(tool: Tool, input: Map<String, Any?>): List<Any?> =\n    ((tool.inputSchema[\"required\"] as? List<Any?>) ?: emptyList()).filter { !input.containsKey(it) }\n\n/** The content of a tool result: a string as it is, any other value as JSON text. */\nprivate fun resultContent(out: Any?): String = if (out is String) out else Json.stringify(out)\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun runOne(tools: List<Tool>, block: Map<String, Any?>): Map<String, Any?> {\n    val result = linkedMapOf<String, Any?>(\"type\" to \"tool_result\", \"tool_use_id\" to block[\"id\"])\n    val tool = tools.firstOrNull { it.name == block[\"name\"] }\n    if (tool == null) {\n        result[\"content\"] = \"Unknown tool: ${block[\"name\"]}\"\n        result[\"is_error\"] = true\n        return result\n    }\n    val input = block[\"input\"] as Map<String, Any?>\n    val missing = missingInputs(tool, input)\n    if (missing.isNotEmpty()) {\n        result[\"content\"] = \"Missing required input: ${missing.joinToString(\", \")}\"\n        result[\"is_error\"] = true\n        return result\n    }\n    try {\n        val out = tool.handler(input)\n        result[\"content\"] = resultContent(out)\n    } catch (e: RuntimeException) { // a tool that fails must not end the loop\n        result[\"content\"] = e.message\n        result[\"is_error\"] = true\n    }\n    return result\n}\n\nprivate fun textOf(content: List<Map<String, Any?>>): String = content.filter { it[\"type\"] == \"text\" }.joinToString(\"\") { it[\"text\"] as String }\n\n/** One tool_result per tool_use block of the reply, in order. */\nprivate fun toolResults(tools: List<Tool>, content: List<Map<String, Any?>>): List<Map<String, Any?>> =\n    content.filter { it[\"type\"] == \"tool_use\" }.map { runOne(tools, it) }\n\n/** The status of a reply that ends the loop: done, refused or truncated. */\nprivate fun finalStatus(stop: Any?): String = when (stop) {\n    \"end_turn\", \"stop_sequence\" -> \"done\"\n    \"refusal\" -> \"refused\"\n    else -> \"truncated\" // max_tokens, model_context_window_exceeded: the answer is cut off\n}\n\n/** The last turn number the loop may use. */\nprivate fun lastTurn(maxTurns: Int): Int = maxTurns\n\n/** The tool_choice to send on this turn: a forced choice only on the first request. */\nprivate fun sentChoice(toolChoice: Map<String, Any?>, turn: Int): Map<String, Any?> {\n    val forced = toolChoice[\"type\"] == \"any\" || toolChoice[\"type\"] == \"tool\"\n    return if (forced && turn > 1) mapOf(\"type\" to \"auto\") else toolChoice\n}\n\nprivate fun outcome(status: String, text: String, turns: Int, messages: List<Map<String, Any?>>): Map<String, Any?> =\n    linkedMapOf(\"status\" to status, \"text\" to text, \"turns\" to turns, \"messages\" to messages)\n\n/** Call the model, run every tool it asks for, send the results back, until it ends its turn or a limit is hit. */\n@Suppress(\"UNCHECKED_CAST\")\nfun runAgent(ask: Ask, tools: List<Tool>, userText: String, model: String = \"claude-sonnet-5-5\", maxTurns: Int = 8, toolChoice: Map<String, Any?>? = null): Map<String, Any?> {\n    log.log(System.Logger.Level.DEBUG, \"runAgent input: {0}\", userText)\n    if (toolChoice != null) checkChoice(tools, model, toolChoice)\n    val definitions = tools.map { mapOf(\"name\" to it.name, \"description\" to it.description, \"input_schema\" to it.inputSchema) }\n    val messages = mutableListOf<Map<String, Any?>>(mapOf(\"role\" to \"user\", \"content\" to userText))\n    var text = \"\"\n    var calls = 0\n    for (turn in 1..lastTurn(maxTurns)) {\n        val request = linkedMapOf<String, Any?>(\"model\" to model, \"max_tokens\" to 1024, \"messages\" to messages.toList(), \"tools\" to definitions)\n        if (toolChoice != null) request[\"tool_choice\"] = sentChoice(toolChoice, turn)\n        val reply = ask(request)\n        calls = turn\n        val content = reply[\"content\"] as List<Map<String, Any?>>\n        messages += mapOf(\"role\" to \"assistant\", \"content\" to content)\n        text = textOf(content)\n        when (reply[\"stop_reason\"]) {\n            \"tool_use\" -> messages += mapOf(\"role\" to \"user\", \"content\" to toolResults(tools, content))\n            \"pause_turn\" -> continue\n            else -> return outcome(finalStatus(reply[\"stop_reason\"]), text, calls, messages)\n        }\n    }\n    return outcome(\"max_turns\", text, calls, messages)\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    val schema = mapOf(\"type\" to \"object\", \"properties\" to mapOf(\"city\" to mapOf(\"type\" to \"string\")), \"required\" to listOf(\"city\"))\n    val tools = listOf(Tool(\"get_weather\", \"Current weather for a city.\", schema) { input -> \"${input[\"city\"]}: 18 C\" })\n\n    // A stand-in for the model, like the one the tests use: it asks for one tool call, then ends its turn.\n    val replies = mutableListOf<Map<String, Any?>>(\n        mapOf(\"content\" to listOf(mapOf(\"type\" to \"text\", \"text\" to \"Let me check.\"),\n            mapOf(\"type\" to \"tool_use\", \"id\" to \"tu_1\", \"name\" to \"get_weather\", \"input\" to mapOf(\"city\" to \"Oslo\"))),\n            \"stop_reason\" to \"tool_use\"),\n        mapOf(\"content\" to listOf(mapOf(\"type\" to \"text\", \"text\" to \"It is 18 C in Oslo.\")), \"stop_reason\" to \"end_turn\"),\n    )\n\n    val result = runAgent({ _ -> replies.removeAt(0) }, tools, \"Weather in Oslo?\")\n\n    println(\"status: ${result[\"status\"]}\")\n    println(\"text: ${result[\"text\"]}\")\n    println(\"model calls: ${result[\"turns\"]}\")\n    println(\"messages: ${Json.stringify(result[\"messages\"])}\")\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "private val log = System.getLogger(\"toolloop\")\n\n/** A tool loop against a scripted model. See ../../statement.md. Messages and replies are JSON-like maps. */\n\nprivate val FORCED_UNSUPPORTED = setOf(\"claude-opus-5-5\", \"claude-sonnet-5-5\", \"claude-fable-5-1\", \"claude-mythos-5-1\")\nprivate val CHOICE_TYPES = setOf(\"auto\", \"any\", \"tool\", \"none\")\n\n/** Refuse a tool_choice the API would reject. */\nprivate fun checkChoice(tools: List<Tool>, model: String, choice: Map<String, Any?>) {\n    // TODO 1 of 7 (finish this to pass e5): refuse a tool_choice the API would reject.\n    // Receives the tools, the model id and the tool_choice map. Throws RequestError, in this order: field \"tool_choice.type\" unless the type is in\n    // CHOICE_TYPES; \"tool_choice.disable_parallel_tool_use\" when that key is present and not a Boolean; \"tool_choice\" for type \"any\" or \"tool\" on a\n    // model in FORCED_UNSUPPORTED; \"tool_choice.name\" for type \"tool\" when no tool has that name. Returns normally otherwise.\n    // Example: checkChoice(emptyList(), \"claude-opus-5-5\", mapOf(\"type\" to \"any\")) throws a RequestError with field \"tool_choice\"\n}\n\n/** The keys listed in the tool's required list that the input lacks. */\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun missingInputs(tool: Tool, input: Map<String, Any?>): List<Any?> {\n    // TODO 2 of 7 (finish this to pass e2): the required keys a call leaves out.\n    // Receives a tool and the input map of the call. Returns the keys in the tool's inputSchema \"required\" list that the input lacks, in the\n    // order of that list; an empty list when none is missing.\n    // Example: a tool whose inputSchema requires \"city\", with an empty input -> [city]\n    return emptyList()\n}\n\n/** The content of a tool result: a string as it is, any other value as JSON text. */\nprivate fun resultContent(out: Any?): String {\n    // TODO 3 of 7 (finish this to pass e6): the content of a tool_result.\n    // Receives what a handler returned. Returns a String as it is and any other value as JSON text (use Json.stringify).\n    // Example: resultContent(mapOf(\"city\" to \"Oslo\")) -> {\"city\":\"Oslo\"}\n    return out.toString()\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun runOne(tools: List<Tool>, block: Map<String, Any?>): Map<String, Any?> {\n    val result = linkedMapOf<String, Any?>(\"type\" to \"tool_result\", \"tool_use_id\" to block[\"id\"])\n    val tool = tools.firstOrNull { it.name == block[\"name\"] }\n    if (tool == null) {\n        result[\"content\"] = \"Unknown tool: ${block[\"name\"]}\"\n        result[\"is_error\"] = true\n        return result\n    }\n    val input = block[\"input\"] as Map<String, Any?>\n    val missing = missingInputs(tool, input)\n    if (missing.isNotEmpty()) {\n        result[\"content\"] = \"Missing required input: ${missing.joinToString(\", \")}\"\n        result[\"is_error\"] = true\n        return result\n    }\n    try {\n        val out = tool.handler(input)\n        result[\"content\"] = resultContent(out)\n    } catch (e: RuntimeException) { // a tool that fails must not end the loop\n        result[\"content\"] = e.message\n        result[\"is_error\"] = true\n    }\n    return result\n}\n\nprivate fun textOf(content: List<Map<String, Any?>>): String = content.filter { it[\"type\"] == \"text\" }.joinToString(\"\") { it[\"text\"] as String }\n\n/** One tool_result per tool_use block of the reply, in order. */\nprivate fun toolResults(tools: List<Tool>, content: List<Map<String, Any?>>): List<Map<String, Any?>> {\n    // TODO 4 of 7 (finish this to pass m1 and e1): run every tool call of a reply.\n    // Receives the tools and the content blocks of the reply. Returns one tool_result (from runOne) per block of type \"tool_use\", in the\n    // order of the blocks; blocks of any other type, such as \"server_tool_use\", get no result.\n    // Example: [a text block, a tool_use block] -> a list with one tool_result\n    return emptyList()\n}\n\n/** The status of a reply that ends the loop: done, refused or truncated. */\nprivate fun finalStatus(stop: Any?): String {\n    // TODO 5 of 7 (finish this to pass e4): the status of a reply that ends the loop.\n    // Receives the stop_reason. Returns \"done\" for \"end_turn\" and \"stop_sequence\", \"refused\" for \"refusal\" and \"truncated\" for any other.\n    // Example: finalStatus(\"max_tokens\") -> \"truncated\"\n    return \"done\"\n}\n\n/** The last turn number the loop may use. */\nprivate fun lastTurn(maxTurns: Int): Int {\n    // TODO 6 of 7 (finish this to pass e3): the last turn number the loop may use.\n    // Receives maxTurns. Returns the highest turn number, so that at most maxTurns calls are made.\n    // Example: lastTurn(3) -> 3\n    return 1\n}\n\n/** The tool_choice to send on this turn: a forced choice only on the first request. */\nprivate fun sentChoice(toolChoice: Map<String, Any?>, turn: Int): Map<String, Any?> {\n    // TODO 7 of 7 (finish this to pass e5): the tool_choice to send on a turn.\n    // Receives the tool_choice map and the turn number (1 for the first request). A forced choice (type \"any\" or \"tool\") is sent as given on\n    // turn 1 and as {type=auto} from turn 2 on; \"auto\" and \"none\" are sent unchanged every turn.\n    // Example: sentChoice(mapOf(\"type\" to \"any\"), 2) -> {type=auto}\n    return toolChoice\n}\n\nprivate fun outcome(status: String, text: String, turns: Int, messages: List<Map<String, Any?>>): Map<String, Any?> =\n    linkedMapOf(\"status\" to status, \"text\" to text, \"turns\" to turns, \"messages\" to messages)\n\n/** Call the model, run every tool it asks for, send the results back, until it ends its turn or a limit is hit. */\n@Suppress(\"UNCHECKED_CAST\")\nfun runAgent(ask: Ask, tools: List<Tool>, userText: String, model: String = \"claude-sonnet-5-5\", maxTurns: Int = 8, toolChoice: Map<String, Any?>? = null): Map<String, Any?> {\n    log.log(System.Logger.Level.DEBUG, \"runAgent input: {0}\", userText)\n    if (toolChoice != null) checkChoice(tools, model, toolChoice)\n    val definitions = tools.map { mapOf(\"name\" to it.name, \"description\" to it.description, \"input_schema\" to it.inputSchema) }\n    val messages = mutableListOf<Map<String, Any?>>(mapOf(\"role\" to \"user\", \"content\" to userText))\n    var text = \"\"\n    var calls = 0\n    for (turn in 1..lastTurn(maxTurns)) {\n        val request = linkedMapOf<String, Any?>(\"model\" to model, \"max_tokens\" to 1024, \"messages\" to messages.toList(), \"tools\" to definitions)\n        if (toolChoice != null) request[\"tool_choice\"] = sentChoice(toolChoice, turn)\n        val reply = ask(request)\n        calls = turn\n        val content = reply[\"content\"] as List<Map<String, Any?>>\n        messages += mapOf(\"role\" to \"assistant\", \"content\" to content)\n        text = textOf(content)\n        when (reply[\"stop_reason\"]) {\n            \"tool_use\" -> messages += mapOf(\"role\" to \"user\", \"content\" to toolResults(tools, content))\n            \"pause_turn\" -> continue\n            else -> return outcome(finalStatus(reply[\"stop_reason\"]), text, calls, messages)\n        }\n    }\n    return outcome(\"max_turns\", text, calls, messages)\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    val schema = mapOf(\"type\" to \"object\", \"properties\" to mapOf(\"city\" to mapOf(\"type\" to \"string\")), \"required\" to listOf(\"city\"))\n    val tools = listOf(Tool(\"get_weather\", \"Current weather for a city.\", schema) { input -> \"${input[\"city\"]}: 18 C\" })\n\n    // A stand-in for the model, like the one the tests use: it asks for one tool call, then ends its turn.\n    val replies = mutableListOf<Map<String, Any?>>(\n        mapOf(\"content\" to listOf(mapOf(\"type\" to \"text\", \"text\" to \"Let me check.\"),\n            mapOf(\"type\" to \"tool_use\", \"id\" to \"tu_1\", \"name\" to \"get_weather\", \"input\" to mapOf(\"city\" to \"Oslo\"))),\n            \"stop_reason\" to \"tool_use\"),\n        mapOf(\"content\" to listOf(mapOf(\"type\" to \"text\", \"text\" to \"It is 18 C in Oslo.\")), \"stop_reason\" to \"end_turn\"),\n    )\n\n    val result = runAgent({ _ -> replies.removeAt(0) }, tools, \"Weather in Oslo?\")\n\n    println(\"status: ${result[\"status\"]}\")\n    println(\"text: ${result[\"text\"]}\")\n    println(\"model calls: ${result[\"turns\"]}\")\n    println(\"messages: ${Json.stringify(result[\"messages\"])}\")\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "83553d731a6ef1b58564c1579fefa386a034de9bbed3fd36f0d923a4a14b0ad4",
+  "starting_code": "private val log = System.getLogger(\"toolloop\")\n\n/** A tool loop against a scripted model. See ../../statement.md. Messages and replies are JSON-like maps. */\n\nprivate val FORCED_UNSUPPORTED = setOf(\"claude-opus-5-5\", \"claude-sonnet-5-5\", \"claude-fable-5-1\", \"claude-mythos-5-1\")\nprivate val CHOICE_TYPES = setOf(\"auto\", \"any\", \"tool\", \"none\")\n\n/** Refuse a tool_choice the API would reject. */\nprivate fun checkChoice(tools: List<Tool>, model: String, choice: Map<String, Any?>) {\n    // TODO 1 of 7 (finish this to pass e5): refuse a tool_choice the API would reject.\n    // Receives the tools, the model id and the tool_choice map. Throws RequestError, in this order: field \"tool_choice.type\" unless the type is in\n    // CHOICE_TYPES; \"tool_choice.disable_parallel_tool_use\" when that key is present and not a Boolean; \"tool_choice\" for type \"any\" or \"tool\" on a\n    // model in FORCED_UNSUPPORTED; \"tool_choice.name\" for type \"tool\" when no tool has that name. Returns normally otherwise.\n    // Example: checkChoice(emptyList(), \"claude-opus-5-5\", mapOf(\"type\" to \"any\")) throws a RequestError with field \"tool_choice\"\n}\n\n/** The keys listed in the tool's required list that the input lacks. */\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun missingInputs(tool: Tool, input: Map<String, Any?>): List<Any?> {\n    // TODO 2 of 7 (finish this to pass e2): the required keys a call leaves out.\n    // Receives a tool and the input map of the call. Returns the keys in the tool's inputSchema \"required\" list that the input lacks, in the\n    // order of that list; an empty list when none is missing.\n    // Example: a tool whose inputSchema requires \"city\", with an empty input -> [city]\n    return emptyList()\n}\n\n/** The content of a tool result: a string as it is, any other value as JSON text. */\nprivate fun resultContent(out: Any?): String {\n    // TODO 3 of 7 (finish this to pass e6): the content of a tool_result.\n    // Receives what a handler returned. Returns a String as it is and any other value as JSON text (use Json.stringify).\n    // Example: resultContent(mapOf(\"city\" to \"Oslo\")) -> {\"city\":\"Oslo\"}\n    return out.toString()\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun runOne(tools: List<Tool>, block: Map<String, Any?>): Map<String, Any?> {\n    val result = linkedMapOf<String, Any?>(\"type\" to \"tool_result\", \"tool_use_id\" to block[\"id\"])\n    val tool = tools.firstOrNull { it.name == block[\"name\"] }\n    if (tool == null) {\n        result[\"content\"] = \"Unknown tool: ${block[\"name\"]}\"\n        result[\"is_error\"] = true\n        return result\n    }\n    val input = block[\"input\"] as Map<String, Any?>\n    val missing = missingInputs(tool, input)\n    if (missing.isNotEmpty()) {\n        result[\"content\"] = \"Missing required input: ${missing.joinToString(\", \")}\"\n        result[\"is_error\"] = true\n        return result\n    }\n    try {\n        val out = tool.handler(input)\n        result[\"content\"] = resultContent(out)\n    } catch (e: RuntimeException) { // a tool that fails must not end the loop\n        result[\"content\"] = e.message\n        result[\"is_error\"] = true\n    }\n    return result\n}\n\nprivate fun textOf(content: List<Map<String, Any?>>): String = content.filter { it[\"type\"] == \"text\" }.joinToString(\"\") { it[\"text\"] as String }\n\n/** One tool_result per tool_use block of the reply, in order. */\nprivate fun toolResults(tools: List<Tool>, content: List<Map<String, Any?>>): List<Map<String, Any?>> {\n    // TODO 4 of 7 (finish this to pass m1 and e1): run every tool call of a reply.\n    // Receives the tools and the content blocks of the reply. Returns one tool_result (from runOne) per block of type \"tool_use\", in the\n    // order of the blocks; blocks of any other type, such as \"server_tool_use\", get no result.\n    // Example: [a text block, a tool_use block] -> a list with one tool_result\n    return emptyList()\n}\n\n/** The status of a reply that ends the loop: done, refused or truncated. */\nprivate fun finalStatus(stop: Any?): String {\n    // TODO 5 of 7 (finish this to pass e4): the status of a reply that ends the loop.\n    // Receives the stop_reason. Returns \"done\" for \"end_turn\" and \"stop_sequence\", \"refused\" for \"refusal\" and \"truncated\" for any other.\n    // Example: finalStatus(\"max_tokens\") -> \"truncated\"\n    return \"done\"\n}\n\n/** The last turn number the loop may use. */\nprivate fun lastTurn(maxTurns: Int): Int {\n    // TODO 6 of 7 (finish this to pass e3): the last turn number the loop may use.\n    // Receives maxTurns. Returns the highest turn number, so that at most maxTurns calls are made.\n    // Example: lastTurn(3) -> 3\n    return 1\n}\n\n/** The tool_choice to send on this turn: a forced choice only on the first request. */\nprivate fun sentChoice(toolChoice: Map<String, Any?>, turn: Int): Map<String, Any?> {\n    // TODO 7 of 7 (finish this to pass e5): the tool_choice to send on a turn.\n    // Receives the tool_choice map and the turn number (1 for the first request). A forced choice (type \"any\" or \"tool\") is sent as given on\n    // turn 1 and as {type=auto} from turn 2 on; \"auto\" and \"none\" are sent unchanged every turn.\n    // Example: sentChoice(mapOf(\"type\" to \"any\"), 2) -> {type=auto}\n    return toolChoice\n}\n\nprivate fun outcome(status: String, text: String, turns: Int, messages: List<Map<String, Any?>>): Map<String, Any?> =\n    linkedMapOf(\"status\" to status, \"text\" to text, \"turns\" to turns, \"messages\" to messages)\n\n/** Call the model, run every tool it asks for, send the results back, until it ends its turn or a limit is hit. */\n@Suppress(\"UNCHECKED_CAST\")\nfun runAgent(ask: Ask, tools: List<Tool>, userText: String, model: String = \"claude-sonnet-5-5\", maxTurns: Int = 8, toolChoice: Map<String, Any?>? = null): Map<String, Any?> {\n    log.log(System.Logger.Level.DEBUG, \"runAgent input: {0}\", userText)\n    if (toolChoice != null) checkChoice(tools, model, toolChoice)\n    val definitions = tools.map { mapOf(\"name\" to it.name, \"description\" to it.description, \"input_schema\" to it.inputSchema) }\n    val messages = mutableListOf<Map<String, Any?>>(mapOf(\"role\" to \"user\", \"content\" to userText))\n    var text = \"\"\n    var calls = 0\n    for (turn in 1..lastTurn(maxTurns)) {\n        val request = linkedMapOf<String, Any?>(\"model\" to model, \"max_tokens\" to 1024, \"messages\" to messages.toList(), \"tools\" to definitions)\n        if (toolChoice != null) request[\"tool_choice\"] = sentChoice(toolChoice, turn)\n        val reply = ask(request)\n        calls = turn\n        val content = reply[\"content\"] as List<Map<String, Any?>>\n        messages += mapOf(\"role\" to \"assistant\", \"content\" to content)\n        text = textOf(content)\n        when (reply[\"stop_reason\"]) {\n            \"tool_use\" -> messages += mapOf(\"role\" to \"user\", \"content\" to toolResults(tools, content))\n            \"pause_turn\" -> continue\n            else -> return outcome(finalStatus(reply[\"stop_reason\"]), text, calls, messages)\n        }\n    }\n    return outcome(\"max_turns\", text, calls, messages)\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/26-tool-use/prose/unit-03/practice-4/src/main/kotlin/ToolLoop.kt",
+    "test_path": "practice/level-2/26-tool-use/prose/unit-03/practice-4/src/test/kotlin/ToolLoopTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/26-tool-use/prose/unit-03/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/26-tool-use/prose/unit-03/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_aToolCallIsRunAndItsResultSentBackUntilTheModelEndsItsTurn()",
+        "kind": "main",
+        "says": "A tool call is run and its result sent back until the model ends its turn"
+      },
+      {
+        "id": "e1_parallelCallsGetOneUserMessageWithEveryResultInOrder()",
+        "kind": "edge",
+        "says": "Parallel calls get one user message with every result in order"
+      },
+      {
+        "id": "e2_aFailingUnknownOrMalformedCallBecomesAnErrorResultAndTheLoopGoesOn()",
+        "kind": "edge",
+        "says": "A failing, unknown or malformed call becomes an error result and the loop goes on"
+      },
+      {
+        "id": "e3_theNumberOfTurnsIsBounded()",
+        "kind": "edge",
+        "says": "The number of turns is bounded"
+      },
+      {
+        "id": "e4_refusalAndTruncationEndTheLoopAndAPausedTurnContinues()",
+        "kind": "edge",
+        "says": "Refusal and truncation end the loop, and a paused turn continues"
+      },
+      {
+        "id": "e5_toolChoiceIsValidatedForTheModelAndAForcedChoiceAppliesToTheFirstRequestOnly()",
+        "kind": "edge",
+        "says": "tool_choice is validated for the model, and a forced choice applies to the first request only"
+      },
+      {
+        "id": "e6_resultsThatAreNotTextAreSentAsJsonText()",
+        "kind": "edge",
+        "says": "Results that are not text are sent as JSON text"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/26-tool-use/prose/unit-03/practice-4/target/test-results/test"
+    },
+    "origin": "course/26-tool-use/03-parallel-calls-the-tool-runner-and-the-practice.md",
+    "concepts": [
+      "the practice of Parallel calls, the tool runner and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/26-tool-use/prose/unit-03/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "tool-use-u3"
+}

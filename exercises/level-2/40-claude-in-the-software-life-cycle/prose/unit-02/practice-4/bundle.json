@@ -1,0 +1,93 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "40-claude-in-the-software-life-cycle"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 4,
+  "title": "Practice: Claude in a repository's workflow (Kotlin)",
+  "lang": "kotlin",
+  "main_file": "project/.github/workflows/claude.yml",
+  "files": [
+    "project/.github/workflows/review.yml",
+    "project/.gitignore",
+    "project/CLAUDE.md",
+    "project/REVIEW.md",
+    "project/prompts/CHANGELOG.md",
+    "project/prompts/triage.md"
+  ],
+  "test_file": "src/test/kotlin/PipelineSetupTest.kt",
+  "build": [
+    "libs/harness/build.gradle.kts",
+    "libs/harness/src/main/java/harness/Show.java",
+    "libs/40-workflow-lint/build.gradle.kts",
+    "libs/40-workflow-lint/src/main/kotlin/WorkflowLint.kt",
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-2/40-claude-in-the-software-life-cycle/prose/unit-02/practice-4/check_files.py",
+    "practice/level-2/40-claude-in-the-software-life-cycle/prose/unit-02/practice-4/project/.github/workflows/claude.yml",
+    "practice/level-2/40-claude-in-the-software-life-cycle/prose/unit-02/practice-4/project/.github/workflows/review.yml",
+    "practice/level-2/40-claude-in-the-software-life-cycle/prose/unit-02/practice-4/project/.gitignore",
+    "practice/level-2/40-claude-in-the-software-life-cycle/prose/unit-02/practice-4/project/CLAUDE.md",
+    "practice/level-2/40-claude-in-the-software-life-cycle/prose/unit-02/practice-4/project/REVIEW.md",
+    "practice/level-2/40-claude-in-the-software-life-cycle/prose/unit-02/practice-4/project/prompts/CHANGELOG.md",
+    "practice/level-2/40-claude-in-the-software-life-cycle/prose/unit-02/practice-4/project/prompts/triage.md"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/40-claude-in-the-software-life-cycle/prose/unit-02/practice-4",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_theMentionWorkflowAnswersOnlyClaudeCommentsAndHoldsNoKey()",
+      "kind": "main",
+      "says": "The mention workflow answers only @claude comments, checks the code out, uses the stable action version, holds no key and passes the course's linter"
+    },
+    {
+      "id": "e1_theReviewWorkflowReadsTheCodeAndPostsTheReview()",
+      "kind": "edge",
+      "says": "The review workflow reads the code, runs the review skill with --comment, names the inline comment tool and installs the plugin"
+    },
+    {
+      "id": "e2_eachPromptFileCarriesAVersionThatItsChangelogExplains()",
+      "kind": "edge",
+      "says": "Each prompt file carries a version that the changelog's newest entry matches"
+    },
+    {
+      "id": "e3_theReviewGuidanceAndTheGitWorkflowAreFilesTheReviewerAndClaudeRead()",
+      "kind": "edge",
+      "says": "The review guidance and the git workflow are files with the required sections"
+    },
+    {
+      "id": "e4_everyRunIsBoundedByTurnsTimeAndConcurrency()",
+      "kind": "edge",
+      "says": "Every run is bounded by turns, time and concurrency, and a new push replaces a running review"
+    },
+    {
+      "id": "e5_noFileHoldsAKeyAPersonalPathOrAnAddress()",
+      "kind": "edge",
+      "says": "No file holds a key, a personal path or an address"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/40-claude-in-the-software-life-cycle/02-ci-code-review-and-repository-events.md"
+}

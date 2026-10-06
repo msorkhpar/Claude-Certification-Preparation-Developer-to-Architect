@@ -1,0 +1,295 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "41-security-and-safety"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: an injection-resistant tool gate (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an injection-resistant tool gate"
+    },
+    {
+      "type": "para",
+      "text": "An agent that reads the web, mail or files is exposed to text that someone else wrote and that may carry instructions. The defence is not one clever prompt. It is layers around the model: untrusted text is kept apart from your instructions, every tool call is checked against least privilege before it runs, a session that has read untrusted text gets less freedom, secrets never reach logs, and every decision is recorded. In this practice you write the code layer: a small gate that sits between the model's tool calls and the tools. It is a design the course proposes from the documented advice (untrusted content only in tool results and JSON-encoded, least privilege, screening, a hook that decides before the permission prompt); it is not a feature of any product. Nothing here calls a model or the network: the tests call the gate the way a hook would."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "para",
+      "text": "The Java and Kotlin folders give you `Json` (parse text into maps, lists, strings, numbers, booleans and null, and write them back compactly, keys in insertion order). Python and TypeScript have JSON built in. Decisions and records are plain data: a map with string keys in every language."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working gate with six gaps cut out of it. Everything that is plumbing is written and correct: the injection patterns and the `screen` function, the path resolver, the dangerous-command, chaining, secret-argument and taint checks, the URL parsing, the audit, the card and key redaction around the Luhn check, and the hook answer. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. Write them in this order (the Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`wrap_untrusted` unlocks `m1` and `e1`: the JSON block for clean text and the withheld error for flagged text.",
+        "`_is_secret` unlocks `e2`: which file names count as secrets.",
+        "`_command_allowed` unlocks `e3`: the allow-list of first words, and the `git` sub-commands.",
+        "`_is_card` unlocks `e6`: the length and Luhn test that decides whether a run of digits is a card number.",
+        "`_email_decision` unlocks `e4` and `e5`: the domain list, the body check and the tainted-session refusal.",
+        "`alerts` unlocks `e7`: actors with three denials, in the order they reached three."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole gate; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "Names are written in Python style; TypeScript uses camelCase (`wrapUntrusted`, `markUntrusted`, `hookResponse`, `tainted` as a getter, `audit` as a getter); Java and Kotlin put the three functions on the class as static or companion members (`Gate.screen`, `Gate.wrapUntrusted`, `Gate.redact`, `Gate.hookResponse`) and use `isTainted()` / `isTainted`, `audit()` and `alerts()` as methods."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`screen(text)` returns the names of the injection signals found in the text, in this order: `override`, `role-tag`, `exfiltrate`, `reveal`. All four patterns ignore letter case and let `.` match a newline.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`override`: `\\b(ignore|disregard|forget)\\b.{0,40}\\b(previous|prior|above|earlier|system)\\b.{0,20}\\b(instructions?|prompts?|rules)\\b`",
+              "`role-tag`: `<\\s*/?\\s*(system|assistant|tool_result|instructions?)\\s*>`",
+              "`exfiltrate`: `\\b(send|email|forward|post|upload)\\b.{0,60}\\b(to|at)\\b.{0,40}[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)+`",
+              "`reveal`: `\\b(reveal|print|show|repeat)\\b.{0,40}\\b(system prompt|password|secret|api key)\\b`"
+            ]
+          }
+        ],
+        "`wrap_untrusted(tool_use_id, source, content)` returns a tool result block. For clean text it is `{\"type\": \"tool_result\", \"tool_use_id\": ..., \"content\": <one line of compact JSON>}` where the JSON is the object `{\"source\": source, \"trust\": \"untrusted\", \"content\": content}` with those keys in that order. When `screen` finds a signal it returns `{\"type\": \"tool_result\", \"tool_use_id\": ..., \"is_error\": true, \"content\": \"Content from <source> withheld: possible prompt injection (<signals joined by \", \">)\"}` and nothing of the text.",
+        "`redact(text)` replaces, in this order: `sk-ant-[A-Za-z0-9_-]{8,}` with `[SECRET]`; `AKIA` followed by 16 capital letters or digits, as a whole word, with `[SECRET]`; `Bearer ` followed by 16 or more of `[A-Za-z0-9._-]` with `Bearer [SECRET]`; an address, `[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)+`, with `[EMAIL]`; and a card number with `[CARD]`. A card number is 13 to 19 digits, written with at most one space or hyphen between digits, that passes the Luhn check; a long number that fails the check is left as it is.",
+        [
+          "`Gate(root, allowed_hosts, allowed_email_domains)` decides tool calls. `decide(actor, tool, args)` returns `{\"decision\": \"allow\" | \"ask\" | \"deny\", \"reason\": ...}` and appends a record to the audit. The tools are `read_file(path)`, `write_file(path, content)`, `bash(command)`, `fetch(url)` and `send_email(to, subject, body)`; any other name is `deny` with the reason `unknown tool`. An allow has the reason `ok`. A missing string argument counts as an empty string.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**Paths** (`read_file`, `write_file`): turn backslashes into `/`, join a relative path to `root`, drop `.` parts and apply `..` (never above the top). A path not equal to `root` and not under `root + \"/\"` is `deny`, `outside the project`. A secret file is `deny`, `secret file`: a name `.env`, or starting `.env.` unless it is `.env.example`, a folder called `secrets` anywhere in the path, or a name ending in `.pem` or `.key`. A write into a folder called `.git` or `.claude` is `deny`, `protected path`.",
+              "**`bash`**: first, a word that is `sudo` or `rm` (or ends in `/sudo` or `/rm`) is `deny`, `dangerous command`. Then a command containing any of `;` `&` `|` `>` `<` a backtick, `$(` or a newline is `deny`, `chaining or redirection`. Then the first word must be `ls`, `cat`, `pytest` or `git`, and `git` only with `status`, `diff` or `log` as its next word; anything else, and an empty command, is `deny`, `command not allowed`. An argument that does not start with `-` and names a secret file is `deny`, `secret file`.",
+              "**`fetch`**: read the URL as `scheme://authority path ?query #fragment` with the pattern `([A-Za-z][A-Za-z0-9+.-]*)://([^/?#]*)([^?#]*)(\\?[^#]*)?(#.*)?` over the whole text. A URL that does not match, or whose scheme is not `https`, is `deny`, `https only`. An authority with an `@` is `deny`, `credentials in the URL`. The host is the authority in lower case without a `:port`; it must equal an allowed host or end with a dot and an allowed host, else `deny`, `host not allowed`.",
+              "**`send_email`**: the recipient's domain (after the last `@`, lower case) must be in the allowed domains, else `deny`, `recipient not allowed`. If `redact(subject + \"\\n\" + body)` differs from the text, `deny`, `sensitive data in the body`.",
+              "**Taint**: `mark_untrusted(source)` marks the session. Afterwards `write_file`, and `bash` with `pytest`, return `ask` with `untrusted content in this session`; a `fetch` whose URL has a query or a fragment returns `ask` with `data could leave in the URL`; `send_email` returns `deny` with `a person must send it`. Reads, the other bash commands and a plain `fetch` stay `allow`. Every `deny` above still wins over an `ask`: check the other rules first. `tainted` tells whether the session is marked; a new `Gate` is clean.",
+              "**Audit**: `audit` is the list of records so far, each `{\"actor\", \"tool\", \"decision\", \"reason\", \"args\"}`, where `args` is the call's arguments with every string value passed through `redact` and other values left as they are.",
+              "`alerts()` lists the actors with three or more `deny` records, each as `{\"actor\", \"denials\"}` with the actor's current count, ordered by when each reached three. An `ask` is not a denial."
+            ]
+          }
+        ],
+        "`hook_response(decision)` gives the answer of a `PreToolUse` hook as `{\"exit_code\", \"stdout\", \"stderr\"}`. An `allow` is exit code 0 with nothing printed. A `deny` or an `ask` is exit code 0 with the compact JSON `{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": <decision>, \"permissionDecisionReason\": <reason>}}` on standard output and an empty standard error."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Untrusted text is delivered as one JSON string that names its source and says it is untrusted"
+        ],
+        [
+          "`e1`",
+          "The screen names the signals, ignores clean text, and a flagged result is withheld with an error that shows none of the text"
+        ],
+        [
+          "`e2`",
+          "Paths stay inside the project, secrets and protected folders are refused, a sibling folder with a similar name is outside"
+        ],
+        [
+          "`e3`",
+          "Bash is limited to read-only commands; dangerous, chained and redirected commands and secret arguments are refused"
+        ],
+        [
+          "`e4`",
+          "Fetch obeys the host list (a lookalike host fails) and refuses credentials; email obeys the domain list and the body check"
+        ],
+        [
+          "`e5`",
+          "After untrusted content entered the session, changes ask, an email is refused, reads still work, and a denial stays a denial"
+        ],
+        [
+          "`e6`",
+          "Redaction covers keys, addresses and Luhn-valid cards, leaves other numbers, and the audit never holds a raw secret"
+        ],
+        [
+          "`e7`",
+          "The hook answer has the documented shapes and repeated denials by one actor raise an alert, while questions do not"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"An injection-resistant tool gate. See ../../statement.md.\"\"\"\nimport logging\nimport json\nimport re\n\nlog = logging.getLogger(__name__)\n\nTOOLS = {\"read_file\", \"write_file\", \"bash\", \"fetch\", \"send_email\"}\nSIGNALS = {\n    \"override\": re.compile(r\"\\b(ignore|disregard|forget)\\b.{0,40}\\b(previous|prior|above|earlier|system)\\b.{0,20}\\b(instructions?|prompts?|rules)\\b\", re.I | re.S),\n    \"role-tag\": re.compile(r\"<\\s*/?\\s*(system|assistant|tool_result|instructions?)\\s*>\", re.I),\n    \"exfiltrate\": re.compile(r\"\\b(send|email|forward|post|upload)\\b.{0,60}\\b(to|at)\\b.{0,40}[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)+\", re.I | re.S),\n    \"reveal\": re.compile(r\"\\b(reveal|print|show|repeat)\\b.{0,40}\\b(system prompt|password|secret|api key)\\b\", re.I | re.S),\n}\nSHELL_TRICKS = (\";\", \"&\", \"|\", \">\", \"<\", \"`\", \"$(\", \"\\n\")\n\n\ndef screen(text):\n    \"\"\"The names of the injection signals found in the text, in the fixed order of SIGNALS.\"\"\"\n    return [name for name, pattern in SIGNALS.items() if pattern.search(text)]\n\n\ndef wrap_untrusted(tool_use_id, source, content):\n    \"\"\"A tool_result block that carries untrusted text as one JSON string, or an error result when the text is flagged.\"\"\"\n    log.debug(\"wrap_untrusted input: %r\", content)\n    signals = screen(content)\n    if signals:\n        return {\"type\": \"tool_result\", \"tool_use_id\": tool_use_id, \"is_error\": True,\n                \"content\": f\"Content from {source} withheld: possible prompt injection ({', '.join(signals)})\"}\n    payload = json.dumps({\"source\": source, \"trust\": \"untrusted\", \"content\": content}, separators=(\",\", \":\"))\n    return {\"type\": \"tool_result\", \"tool_use_id\": tool_use_id, \"content\": payload}\n\n\ndef _luhn(digits):\n    total = 0\n    for i, ch in enumerate(reversed(digits)):\n        d = int(ch)\n        if i % 2 == 1:\n            d = d * 2 - 9 if d * 2 > 9 else d * 2\n        total += d\n    return total % 10 == 0\n\n\ndef redact(text):\n    \"\"\"Secrets become [SECRET], addresses [EMAIL] and card numbers that pass the Luhn check [CARD].\"\"\"\n    text = re.sub(r\"sk-ant-[A-Za-z0-9_-]{8,}\", \"[SECRET]\", text)\n    text = re.sub(r\"\\bAKIA[0-9A-Z]{16}\\b\", \"[SECRET]\", text, flags=re.A)\n    text = re.sub(r\"Bearer [A-Za-z0-9._-]{16,}\", \"Bearer [SECRET]\", text)\n    text = re.sub(r\"[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)+\", \"[EMAIL]\", text)\n\n    def card(m):\n        digits = re.sub(r\"[ -]\", \"\", m.group(0))\n        return \"[CARD]\" if _is_card(digits) else m.group(0)\n\n    return re.sub(r\"\\b(?:[0-9][ -]?){12,18}[0-9]\\b\", card, text, flags=re.A)\n\n\ndef _resolve(root, path):\n    path = path.replace(\"\\\\\", \"/\")\n    stack = []\n    for part in ((path if path.startswith(\"/\") else root + \"/\" + path)).split(\"/\"):\n        if part in (\"\", \".\"):\n            continue\n        if part == \"..\":\n            if stack:\n                stack.pop()\n        else:\n            stack.append(part)\n    return \"/\" + \"/\".join(stack)\n\n\ndef _is_secret(path):\n    parts = path.replace(\"\\\\\", \"/\").split(\"/\")\n    base = parts[-1]\n    return (base == \".env\" or (base.startswith(\".env.\") and base != \".env.example\") or \"secrets\" in parts[:-1] or base.endswith((\".pem\", \".key\")))\n\n\ndef _command_allowed(words):\n    if not words or words[0] not in (\"ls\", \"cat\", \"pytest\", \"git\"):\n        return False\n    if words[0] == \"git\":\n        return len(words) > 1 and words[1] in (\"status\", \"diff\", \"log\")\n    return True\n\n\ndef _is_card(digits):\n    return 13 <= len(digits) <= 19 and _luhn(digits)\n\n\ndef _result(decision, reason=\"ok\"):\n    return {\"decision\": decision, \"reason\": reason}\n\n\nclass Gate:\n    def __init__(self, root, allowed_hosts, allowed_email_domains):\n        self.root = _resolve(\"/\", root)\n        self.allowed_hosts = [h.lower() for h in allowed_hosts]\n        self.allowed_email_domains = [d.lower() for d in allowed_email_domains]\n        self._tainted = False\n        self._audit = []\n\n    @property\n    def tainted(self):\n        return self._tainted\n\n    @property\n    def audit(self):\n        return list(self._audit)\n\n    def mark_untrusted(self, source):\n        self._tainted = True\n\n    def _inside(self, path):\n        return path == self.root or path.startswith(self.root + \"/\")\n\n    def decide(self, actor, tool, args):\n        result = self._decide(tool, args)\n        clean = {k: (redact(v) if isinstance(v, str) else v) for k, v in args.items()}\n        self._audit.append({\"actor\": actor, \"tool\": tool, \"decision\": result[\"decision\"], \"reason\": result[\"reason\"], \"args\": clean})\n        return result\n\n    def _decide(self, tool, args):\n        if tool not in TOOLS:\n            return _result(\"deny\", \"unknown tool\")\n        if tool in (\"read_file\", \"write_file\"):\n            path = _resolve(self.root, str(args.get(\"path\", \"\")))\n            if not self._inside(path):\n                return _result(\"deny\", \"outside the project\")\n            if _is_secret(path):\n                return _result(\"deny\", \"secret file\")\n            if tool == \"write_file\":\n                if {\".git\", \".claude\"} & set(path.split(\"/\")):\n                    return _result(\"deny\", \"protected path\")\n                if self._tainted:\n                    return _result(\"ask\", \"untrusted content in this session\")\n            return _result(\"allow\")\n        if tool == \"bash\":\n            return self._bash(str(args.get(\"command\", \"\")))\n        if tool == \"fetch\":\n            return self._fetch(str(args.get(\"url\", \"\")))\n        return self._email(args)\n\n    def _bash(self, command):\n        words = command.split()\n        if any(w.rsplit(\"/\", 1)[-1] in (\"sudo\", \"rm\") for w in words):\n            return _result(\"deny\", \"dangerous command\")\n        if any(t in command for t in SHELL_TRICKS):\n            return _result(\"deny\", \"chaining or redirection\")\n        if not _command_allowed(words):\n            return _result(\"deny\", \"command not allowed\")\n        if any(_is_secret(w) for w in words[1:] if not w.startswith(\"-\")):\n            return _result(\"deny\", \"secret file\")\n        if words[0] == \"pytest\" and self._tainted:\n            return _result(\"ask\", \"untrusted content in this session\")\n        return _result(\"allow\")\n\n    def _fetch(self, url):\n        m = re.fullmatch(r\"([A-Za-z][A-Za-z0-9+.-]*)://([^/?#]*)([^?#]*)(\\?[^#]*)?(#.*)?\", url)\n        if not m or m.group(1).lower() != \"https\":\n            return _result(\"deny\", \"https only\")\n        if \"@\" in m.group(2):\n            return _result(\"deny\", \"credentials in the URL\")\n        host = re.sub(r\":[0-9]+$\", \"\", m.group(2).lower())\n        if not any(host == h or host.endswith(\".\" + h) for h in self.allowed_hosts):\n            return _result(\"deny\", \"host not allowed\")\n        if self._tainted and (m.group(4) or m.group(5)):\n            return _result(\"ask\", \"data could leave in the URL\")\n        return _result(\"allow\")\n\n    def _email(self, args):\n        to = str(args.get(\"to\", \"\"))\n        domain = to.rsplit(\"@\", 1)[-1].lower() if \"@\" in to else \"\"\n        text = f\"{args.get('subject', '')}\\n{args.get('body', '')}\"\n        return self._email_decision(domain, text)\n\n    def _email_decision(self, domain, text):\n        if domain not in self.allowed_email_domains:\n            return _result(\"deny\", \"recipient not allowed\")\n        if redact(text) != text:\n            return _result(\"deny\", \"sensitive data in the body\")\n        if self._tainted:\n            return _result(\"deny\", \"a person must send it\")\n        return _result(\"allow\")\n\n    def alerts(self):\n        \"\"\"Actors with three or more denials, ordered by when each reached three, with their denial count.\"\"\"\n        counts, order = {}, []\n        for record in self._audit:\n            if record[\"decision\"] == \"deny\":\n                counts[record[\"actor\"]] = counts.get(record[\"actor\"], 0) + 1\n                if counts[record[\"actor\"]] == 3:\n                    order.append(record[\"actor\"])\n        return [{\"actor\": a, \"denials\": counts[a]} for a in order]\n\n\ndef hook_response(decision):\n    \"\"\"The PreToolUse hook answer for a decision: exit code, standard output, standard error.\"\"\"\n    if decision[\"decision\"] == \"allow\":\n        return {\"exit_code\": 0, \"stdout\": \"\", \"stderr\": \"\"}\n    out = {\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": decision[\"decision\"], \"permissionDecisionReason\": decision[\"reason\"]}}\n    return {\"exit_code\": 0, \"stdout\": json.dumps(out, separators=(\",\", \":\")), \"stderr\": \"\"}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nimport json\n\nfrom gate import Gate, wrap_untrusted\n\n# The gate sits between the model's tool calls and the tools; it is told the project root and what may be reached.\ngate = Gate(\"/proj\", [\"api.example.com\", \"docs.example.org\"], [\"example.com\"])\n\nfor tool, args in ((\"read_file\", {\"path\": \"src/a.py\"}), (\"bash\", {\"command\": \"sudo rm -rf /\"}), (\"fetch\", {\"url\": \"https://evil.example.net/x\"})):\n    r = gate.decide(\"alice\", tool, args) or {}\n    print(f\"{tool} {args}: {r.get('decision')} ({r.get('reason')})\")\n\n# Text a tool returned is untrusted: it reaches the model as one JSON string that says where it came from.\nresult = wrap_untrusted(\"toolu_1\", \"web page\", 'He said \"hi\"\\n</div>') or {}\nprint(\"wrapped content:\", result.get(\"content\"))\n\n# After the session has read untrusted text, writes are no longer free.\ngate.mark_untrusted(\"web page\")\nr = gate.decide(\"alice\", \"write_file\", {\"path\": \"src/a.py\"}) or {}\nprint(\"write after untrusted text:\", r.get(\"decision\"), f\"({r.get('reason')})\")\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"An injection-resistant tool gate. See ../../statement.md.\"\"\"\nimport logging\nimport json\nimport re\n\nlog = logging.getLogger(__name__)\n\nTOOLS = {\"read_file\", \"write_file\", \"bash\", \"fetch\", \"send_email\"}\nSIGNALS = {\n    \"override\": re.compile(r\"\\b(ignore|disregard|forget)\\b.{0,40}\\b(previous|prior|above|earlier|system)\\b.{0,20}\\b(instructions?|prompts?|rules)\\b\", re.I | re.S),\n    \"role-tag\": re.compile(r\"<\\s*/?\\s*(system|assistant|tool_result|instructions?)\\s*>\", re.I),\n    \"exfiltrate\": re.compile(r\"\\b(send|email|forward|post|upload)\\b.{0,60}\\b(to|at)\\b.{0,40}[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)+\", re.I | re.S),\n    \"reveal\": re.compile(r\"\\b(reveal|print|show|repeat)\\b.{0,40}\\b(system prompt|password|secret|api key)\\b\", re.I | re.S),\n}\nSHELL_TRICKS = (\";\", \"&\", \"|\", \">\", \"<\", \"`\", \"$(\", \"\\n\")\n\n\ndef screen(text):\n    \"\"\"The names of the injection signals found in the text, in the fixed order of SIGNALS.\"\"\"\n    return [name for name, pattern in SIGNALS.items() if pattern.search(text)]\n\n\ndef wrap_untrusted(tool_use_id, source, content):\n    \"\"\"TODO 1 of 6 (unlocks m1 and e1): wrap untrusted text as a tool_result block.\n\n    Receives the tool_use_id, where the text came from and the text. Returns a tool_result dict. Clean text becomes one line of\n    compact JSON (`separators=(\",\", \":\")`) with the keys source, trust (\"untrusted\") and content, in that order. When `screen`\n    finds a signal, return the error block from the statement instead and leave the text out of it.\n    Example: wrap_untrusted(\"t1\", \"web page\", \"hi\")\n      -> {\"type\": \"tool_result\", \"tool_use_id\": \"t1\", \"content\": '{\"source\":\"web page\",\"trust\":\"untrusted\",\"content\":\"hi\"}'}\n    \"\"\"\n    log.debug(\"wrap_untrusted input: %r\", content)\n    return {\"type\": \"tool_result\", \"tool_use_id\": tool_use_id, \"content\": content}\n\n\ndef _luhn(digits):\n    total = 0\n    for i, ch in enumerate(reversed(digits)):\n        d = int(ch)\n        if i % 2 == 1:\n            d = d * 2 - 9 if d * 2 > 9 else d * 2\n        total += d\n    return total % 10 == 0\n\n\ndef redact(text):\n    \"\"\"Secrets become [SECRET], addresses [EMAIL] and card numbers that pass the Luhn check [CARD].\"\"\"\n    text = re.sub(r\"sk-ant-[A-Za-z0-9_-]{8,}\", \"[SECRET]\", text)\n    text = re.sub(r\"\\bAKIA[0-9A-Z]{16}\\b\", \"[SECRET]\", text, flags=re.A)\n    text = re.sub(r\"Bearer [A-Za-z0-9._-]{16,}\", \"Bearer [SECRET]\", text)\n    text = re.sub(r\"[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)+\", \"[EMAIL]\", text)\n\n    def card(m):\n        digits = re.sub(r\"[ -]\", \"\", m.group(0))\n        return \"[CARD]\" if _is_card(digits) else m.group(0)\n\n    return re.sub(r\"\\b(?:[0-9][ -]?){12,18}[0-9]\\b\", card, text, flags=re.A)\n\n\ndef _resolve(root, path):\n    path = path.replace(\"\\\\\", \"/\")\n    stack = []\n    for part in ((path if path.startswith(\"/\") else root + \"/\" + path)).split(\"/\"):\n        if part in (\"\", \".\"):\n            continue\n        if part == \"..\":\n            if stack:\n                stack.pop()\n        else:\n            stack.append(part)\n    return \"/\" + \"/\".join(stack)\n\n\ndef _is_secret(path):\n    \"\"\"TODO 2 of 6 (unlocks e2): does this path name a secret file?\n\n    Receives a path and returns True for a file named `.env`, a file starting `.env.` unless it is `.env.example`, any file inside\n    a folder called `secrets`, and a name ending in `.pem` or `.key`; False otherwise. Backslashes count as `/`.\n    Example: _is_secret(\"app/.env.local\") -> True, _is_secret(\".env.example\") -> False\n    \"\"\"\n    return False\n\n\ndef _command_allowed(words):\n    \"\"\"TODO 3 of 6 (finish this to pass e3): is the first word of a bash command on the allow-list?\n\n    Receives the command split into words. Returns True for `ls`, `cat`, `pytest`, and `git` followed by `status`, `diff` or\n    `log`; False for anything else, including an empty list. (The checks for sudo, rm, chaining and secret arguments are written.)\n    Example: _command_allowed([\"git\", \"log\", \"--oneline\"]) -> True, _command_allowed([\"git\", \"push\"]) -> False\n    \"\"\"\n    return False\n\n\ndef _is_card(digits):\n    \"\"\"TODO 4 of 6 (finish this to pass e6): is this run of digits a card number?\n\n    Receives the digits with spaces and hyphens already removed. Returns True when there are 13 to 19 of them and `_luhn` accepts\n    them (a long number that fails the check is not a card). Example: _is_card(\"4111111111111111\") -> True, _is_card(\"4111111111111112\") -> False\n    \"\"\"\n    return False\n\n\ndef _result(decision, reason=\"ok\"):\n    return {\"decision\": decision, \"reason\": reason}\n\n\nclass Gate:\n    def __init__(self, root, allowed_hosts, allowed_email_domains):\n        self.root = _resolve(\"/\", root)\n        self.allowed_hosts = [h.lower() for h in allowed_hosts]\n        self.allowed_email_domains = [d.lower() for d in allowed_email_domains]\n        self._tainted = False\n        self._audit = []\n\n    @property\n    def tainted(self):\n        return self._tainted\n\n    @property\n    def audit(self):\n        return list(self._audit)\n\n    def mark_untrusted(self, source):\n        self._tainted = True\n\n    def _inside(self, path):\n        return path == self.root or path.startswith(self.root + \"/\")\n\n    def decide(self, actor, tool, args):\n        result = self._decide(tool, args)\n        clean = {k: (redact(v) if isinstance(v, str) else v) for k, v in args.items()}\n        self._audit.append({\"actor\": actor, \"tool\": tool, \"decision\": result[\"decision\"], \"reason\": result[\"reason\"], \"args\": clean})\n        return result\n\n    def _decide(self, tool, args):\n        if tool not in TOOLS:\n            return _result(\"deny\", \"unknown tool\")\n        if tool in (\"read_file\", \"write_file\"):\n            path = _resolve(self.root, str(args.get(\"path\", \"\")))\n            if not self._inside(path):\n                return _result(\"deny\", \"outside the project\")\n            if _is_secret(path):\n                return _result(\"deny\", \"secret file\")\n            if tool == \"write_file\":\n                if {\".git\", \".claude\"} & set(path.split(\"/\")):\n                    return _result(\"deny\", \"protected path\")\n                if self._tainted:\n                    return _result(\"ask\", \"untrusted content in this session\")\n            return _result(\"allow\")\n        if tool == \"bash\":\n            return self._bash(str(args.get(\"command\", \"\")))\n        if tool == \"fetch\":\n            return self._fetch(str(args.get(\"url\", \"\")))\n        return self._email(args)\n\n    def _bash(self, command):\n        words = command.split()\n        if any(w.rsplit(\"/\", 1)[-1] in (\"sudo\", \"rm\") for w in words):\n            return _result(\"deny\", \"dangerous command\")\n        if any(t in command for t in SHELL_TRICKS):\n            return _result(\"deny\", \"chaining or redirection\")\n        if not _command_allowed(words):\n            return _result(\"deny\", \"command not allowed\")\n        if any(_is_secret(w) for w in words[1:] if not w.startswith(\"-\")):\n            return _result(\"deny\", \"secret file\")\n        if words[0] == \"pytest\" and self._tainted:\n            return _result(\"ask\", \"untrusted content in this session\")\n        return _result(\"allow\")\n\n    def _fetch(self, url):\n        m = re.fullmatch(r\"([A-Za-z][A-Za-z0-9+.-]*)://([^/?#]*)([^?#]*)(\\?[^#]*)?(#.*)?\", url)\n        if not m or m.group(1).lower() != \"https\":\n            return _result(\"deny\", \"https only\")\n        if \"@\" in m.group(2):\n            return _result(\"deny\", \"credentials in the URL\")\n        host = re.sub(r\":[0-9]+$\", \"\", m.group(2).lower())\n        if not any(host == h or host.endswith(\".\" + h) for h in self.allowed_hosts):\n            return _result(\"deny\", \"host not allowed\")\n        if self._tainted and (m.group(4) or m.group(5)):\n            return _result(\"ask\", \"data could leave in the URL\")\n        return _result(\"allow\")\n\n    def _email(self, args):\n        to = str(args.get(\"to\", \"\"))\n        domain = to.rsplit(\"@\", 1)[-1].lower() if \"@\" in to else \"\"\n        text = f\"{args.get('subject', '')}\\n{args.get('body', '')}\"\n        return self._email_decision(domain, text)\n\n    def _email_decision(self, domain, text):\n        \"\"\"TODO 5 of 6 (finish this to pass e4 and e5): decide a send_email call.\n\n        Receives the recipient's lower-case domain and the subject and body joined by a newline. Returns `_result(decision, reason)`:\n        deny `recipient not allowed` when the domain is not in `self.allowed_email_domains`; deny `sensitive data in the body` when\n        `redact(text)` differs from the text; deny `a person must send it` when the session is tainted (`self._tainted`); else allow.\n        Example: a clean mail to \"example.com\" in a tainted session -> {\"decision\": \"deny\", \"reason\": \"a person must send it\"}\n        \"\"\"\n        return _result(\"allow\")\n\n    def alerts(self):\n        \"\"\"TODO 6 of 6 (finish this to pass e7): actors with three or more denials.\n\n        Reads `self._audit` (records with \"actor\" and \"decision\"). Returns a list of {\"actor\", \"denials\"}, one per actor with three or\n        more `deny` records (an `ask` is not a denial), with that actor's current count, ordered by when each reached three.\n        Example: alice denied 3 times, then bob 3 times, then alice once more -> [{\"actor\": \"alice\", \"denials\": 4}, {\"actor\": \"bob\", \"denials\": 3}]\n        \"\"\"\n        return []\n\n\ndef hook_response(decision):\n    \"\"\"The PreToolUse hook answer for a decision: exit code, standard output, standard error.\"\"\"\n    if decision[\"decision\"] == \"allow\":\n        return {\"exit_code\": 0, \"stdout\": \"\", \"stderr\": \"\"}\n    out = {\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": decision[\"decision\"], \"permissionDecisionReason\": decision[\"reason\"]}}\n    return {\"exit_code\": 0, \"stdout\": json.dumps(out, separators=(\",\", \":\")), \"stderr\": \"\"}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nimport json\n\nfrom gate import Gate, wrap_untrusted\n\n# The gate sits between the model's tool calls and the tools; it is told the project root and what may be reached.\ngate = Gate(\"/proj\", [\"api.example.com\", \"docs.example.org\"], [\"example.com\"])\n\nfor tool, args in ((\"read_file\", {\"path\": \"src/a.py\"}), (\"bash\", {\"command\": \"sudo rm -rf /\"}), (\"fetch\", {\"url\": \"https://evil.example.net/x\"})):\n    r = gate.decide(\"alice\", tool, args) or {}\n    print(f\"{tool} {args}: {r.get('decision')} ({r.get('reason')})\")\n\n# Text a tool returned is untrusted: it reaches the model as one JSON string that says where it came from.\nresult = wrap_untrusted(\"toolu_1\", \"web page\", 'He said \"hi\"\\n</div>') or {}\nprint(\"wrapped content:\", result.get(\"content\"))\n\n# After the session has read untrusted text, writes are no longer free.\ngate.mark_untrusted(\"web page\")\nr = gate.decide(\"alice\", \"write_file\", {\"path\": \"src/a.py\"}) or {}\nprint(\"write after untrusted text:\", r.get(\"decision\"), f\"({r.get('reason')})\")\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 6,
+    "code": 2,
+    "tables": 1,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "ba2cbddf3eadbe5bcde4c28e83e0564eb471c5fd0f2322a94263760796cb298b",
+  "starting_code": "\"\"\"An injection-resistant tool gate. See ../../statement.md.\"\"\"\nimport logging\nimport json\nimport re\n\nlog = logging.getLogger(__name__)\n\nTOOLS = {\"read_file\", \"write_file\", \"bash\", \"fetch\", \"send_email\"}\nSIGNALS = {\n    \"override\": re.compile(r\"\\b(ignore|disregard|forget)\\b.{0,40}\\b(previous|prior|above|earlier|system)\\b.{0,20}\\b(instructions?|prompts?|rules)\\b\", re.I | re.S),\n    \"role-tag\": re.compile(r\"<\\s*/?\\s*(system|assistant|tool_result|instructions?)\\s*>\", re.I),\n    \"exfiltrate\": re.compile(r\"\\b(send|email|forward|post|upload)\\b.{0,60}\\b(to|at)\\b.{0,40}[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)+\", re.I | re.S),\n    \"reveal\": re.compile(r\"\\b(reveal|print|show|repeat)\\b.{0,40}\\b(system prompt|password|secret|api key)\\b\", re.I | re.S),\n}\nSHELL_TRICKS = (\";\", \"&\", \"|\", \">\", \"<\", \"`\", \"$(\", \"\\n\")\n\n\ndef screen(text):\n    \"\"\"The names of the injection signals found in the text, in the fixed order of SIGNALS.\"\"\"\n    return [name for name, pattern in SIGNALS.items() if pattern.search(text)]\n\n\ndef wrap_untrusted(tool_use_id, source, content):\n    \"\"\"TODO 1 of 6 (unlocks m1 and e1): wrap untrusted text as a tool_result block.\n\n    Receives the tool_use_id, where the text came from and the text. Returns a tool_result dict. Clean text becomes one line of\n    compact JSON (`separators=(\",\", \":\")`) with the keys source, trust (\"untrusted\") and content, in that order. When `screen`\n    finds a signal, return the error block from the statement instead and leave the text out of it.\n    Example: wrap_untrusted(\"t1\", \"web page\", \"hi\")\n      -> {\"type\": \"tool_result\", \"tool_use_id\": \"t1\", \"content\": '{\"source\":\"web page\",\"trust\":\"untrusted\",\"content\":\"hi\"}'}\n    \"\"\"\n    log.debug(\"wrap_untrusted input: %r\", content)\n    return {\"type\": \"tool_result\", \"tool_use_id\": tool_use_id, \"content\": content}\n\n\ndef _luhn(digits):\n    total = 0\n    for i, ch in enumerate(reversed(digits)):\n        d = int(ch)\n        if i % 2 == 1:\n            d = d * 2 - 9 if d * 2 > 9 else d * 2\n        total += d\n    return total % 10 == 0\n\n\ndef redact(text):\n    \"\"\"Secrets become [SECRET], addresses [EMAIL] and card numbers that pass the Luhn check [CARD].\"\"\"\n    text = re.sub(r\"sk-ant-[A-Za-z0-9_-]{8,}\", \"[SECRET]\", text)\n    text = re.sub(r\"\\bAKIA[0-9A-Z]{16}\\b\", \"[SECRET]\", text, flags=re.A)\n    text = re.sub(r\"Bearer [A-Za-z0-9._-]{16,}\", \"Bearer [SECRET]\", text)\n    text = re.sub(r\"[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)+\", \"[EMAIL]\", text)\n\n    def card(m):\n        digits = re.sub(r\"[ -]\", \"\", m.group(0))\n        return \"[CARD]\" if _is_card(digits) else m.group(0)\n\n    return re.sub(r\"\\b(?:[0-9][ -]?){12,18}[0-9]\\b\", card, text, flags=re.A)\n\n\ndef _resolve(root, path):\n    path = path.replace(\"\\\\\", \"/\")\n    stack = []\n    for part in ((path if path.startswith(\"/\") else root + \"/\" + path)).split(\"/\"):\n        if part in (\"\", \".\"):\n            continue\n        if part == \"..\":\n            if stack:\n                stack.pop()\n        else:\n            stack.append(part)\n    return \"/\" + \"/\".join(stack)\n\n\ndef _is_secret(path):\n    \"\"\"TODO 2 of 6 (unlocks e2): does this path name a secret file?\n\n    Receives a path and returns True for a file named `.env`, a file starting `.env.` unless it is `.env.example`, any file inside\n    a folder called `secrets`, and a name ending in `.pem` or `.key`; False otherwise. Backslashes count as `/`.\n    Example: _is_secret(\"app/.env.local\") -> True, _is_secret(\".env.example\") -> False\n    \"\"\"\n    return False\n\n\ndef _command_allowed(words):\n    \"\"\"TODO 3 of 6 (finish this to pass e3): is the first word of a bash command on the allow-list?\n\n    Receives the command split into words. Returns True for `ls`, `cat`, `pytest`, and `git` followed by `status`, `diff` or\n    `log`; False for anything else, including an empty list. (The checks for sudo, rm, chaining and secret arguments are written.)\n    Example: _command_allowed([\"git\", \"log\", \"--oneline\"]) -> True, _command_allowed([\"git\", \"push\"]) -> False\n    \"\"\"\n    return False\n\n\ndef _is_card(digits):\n    \"\"\"TODO 4 of 6 (finish this to pass e6): is this run of digits a card number?\n\n    Receives the digits with spaces and hyphens already removed. Returns True when there are 13 to 19 of them and `_luhn` accepts\n    them (a long number that fails the check is not a card). Example: _is_card(\"4111111111111111\") -> True, _is_card(\"4111111111111112\") -> False\n    \"\"\"\n    return False\n\n\ndef _result(decision, reason=\"ok\"):\n    return {\"decision\": decision, \"reason\": reason}\n\n\nclass Gate:\n    def __init__(self, root, allowed_hosts, allowed_email_domains):\n        self.root = _resolve(\"/\", root)\n        self.allowed_hosts = [h.lower() for h in allowed_hosts]\n        self.allowed_email_domains = [d.lower() for d in allowed_email_domains]\n        self._tainted = False\n        self._audit = []\n\n    @property\n    def tainted(self):\n        return self._tainted\n\n    @property\n    def audit(self):\n        return list(self._audit)\n\n    def mark_untrusted(self, source):\n        self._tainted = True\n\n    def _inside(self, path):\n        return path == self.root or path.startswith(self.root + \"/\")\n\n    def decide(self, actor, tool, args):\n        result = self._decide(tool, args)\n        clean = {k: (redact(v) if isinstance(v, str) else v) for k, v in args.items()}\n        self._audit.append({\"actor\": actor, \"tool\": tool, \"decision\": result[\"decision\"], \"reason\": result[\"reason\"], \"args\": clean})\n        return result\n\n    def _decide(self, tool, args):\n        if tool not in TOOLS:\n            return _result(\"deny\", \"unknown tool\")\n        if tool in (\"read_file\", \"write_file\"):\n            path = _resolve(self.root, str(args.get(\"path\", \"\")))\n            if not self._inside(path):\n                return _result(\"deny\", \"outside the project\")\n            if _is_secret(path):\n                return _result(\"deny\", \"secret file\")\n            if tool == \"write_file\":\n                if {\".git\", \".claude\"} & set(path.split(\"/\")):\n                    return _result(\"deny\", \"protected path\")\n                if self._tainted:\n                    return _result(\"ask\", \"untrusted content in this session\")\n            return _result(\"allow\")\n        if tool == \"bash\":\n            return self._bash(str(args.get(\"command\", \"\")))\n        if tool == \"fetch\":\n            return self._fetch(str(args.get(\"url\", \"\")))\n        return self._email(args)\n\n    def _bash(self, command):\n        words = command.split()\n        if any(w.rsplit(\"/\", 1)[-1] in (\"sudo\", \"rm\") for w in words):\n            return _result(\"deny\", \"dangerous command\")\n        if any(t in command for t in SHELL_TRICKS):\n            return _result(\"deny\", \"chaining or redirection\")\n        if not _command_allowed(words):\n            return _result(\"deny\", \"command not allowed\")\n        if any(_is_secret(w) for w in words[1:] if not w.startswith(\"-\")):\n            return _result(\"deny\", \"secret file\")\n        if words[0] == \"pytest\" and self._tainted:\n            return _result(\"ask\", \"untrusted content in this session\")\n        return _result(\"allow\")\n\n    def _fetch(self, url):\n        m = re.fullmatch(r\"([A-Za-z][A-Za-z0-9+.-]*)://([^/?#]*)([^?#]*)(\\?[^#]*)?(#.*)?\", url)\n        if not m or m.group(1).lower() != \"https\":\n            return _result(\"deny\", \"https only\")\n        if \"@\" in m.group(2):\n            return _result(\"deny\", \"credentials in the URL\")\n        host = re.sub(r\":[0-9]+$\", \"\", m.group(2).lower())\n        if not any(host == h or host.endswith(\".\" + h) for h in self.allowed_hosts):\n            return _result(\"deny\", \"host not allowed\")\n        if self._tainted and (m.group(4) or m.group(5)):\n            return _result(\"ask\", \"data could leave in the URL\")\n        return _result(\"allow\")\n\n    def _email(self, args):\n        to = str(args.get(\"to\", \"\"))\n        domain = to.rsplit(\"@\", 1)[-1].lower() if \"@\" in to else \"\"\n        text = f\"{args.get('subject', '')}\\n{args.get('body', '')}\"\n        return self._email_decision(domain, text)\n\n    def _email_decision(self, domain, text):\n        \"\"\"TODO 5 of 6 (finish this to pass e4 and e5): decide a send_email call.\n\n        Receives the recipient's lower-case domain and the subject and body joined by a newline. Returns `_result(decision, reason)`:\n        deny `recipient not allowed` when the domain is not in `self.allowed_email_domains`; deny `sensitive data in the body` when\n        `redact(text)` differs from the text; deny `a person must send it` when the session is tainted (`self._tainted`); else allow.\n        Example: a clean mail to \"example.com\" in a tainted session -> {\"decision\": \"deny\", \"reason\": \"a person must send it\"}\n        \"\"\"\n        return _result(\"allow\")\n\n    def alerts(self):\n        \"\"\"TODO 6 of 6 (finish this to pass e7): actors with three or more denials.\n\n        Reads `self._audit` (records with \"actor\" and \"decision\"). Returns a list of {\"actor\", \"denials\"}, one per actor with three or\n        more `deny` records (an `ask` is not a denial), with that actor's current count, ordered by when each reached three.\n        Example: alice denied 3 times, then bob 3 times, then alice once more -> [{\"actor\": \"alice\", \"denials\": 4}, {\"actor\": \"bob\", \"denials\": 3}]\n        \"\"\"\n        return []\n\n\ndef hook_response(decision):\n    \"\"\"The PreToolUse hook answer for a decision: exit code, standard output, standard error.\"\"\"\n    if decision[\"decision\"] == \"allow\":\n        return {\"exit_code\": 0, \"stdout\": \"\", \"stderr\": \"\"}\n    out = {\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": decision[\"decision\"], \"permissionDecisionReason\": decision[\"reason\"]}}\n    return {\"exit_code\": 0, \"stdout\": json.dumps(out, separators=(\",\", \":\")), \"stderr\": \"\"}\n",
+  "exercise": {
+    "main_path": "practice/level-2/41-security-and-safety/prose/unit-03/practice-1/gate.py",
+    "test_path": "practice/level-2/41-security-and-safety/prose/unit-03/practice-1/test_gate.py",
+    "run_command": [
+      "python3",
+      "practice/level-2/41-security-and-safety/prose/unit-03/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-2/41-security-and-safety/prose/unit-03/practice-1/target/report.xml",
+      "practice/level-2/41-security-and-safety/prose/unit-03/practice-1/test_gate.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_untrusted_text_reaches_the_model_only_as_one_json_string_that_says_where_it_came_from",
+        "kind": "main",
+        "says": "Untrusted text is delivered as one JSON string that names its source and says it is untrusted"
+      },
+      {
+        "id": "test_e1_a_screen_names_injection_signals_and_a_flagged_result_is_withheld_with_an_error",
+        "kind": "edge",
+        "says": "The screen names the signals, ignores clean text, and a flagged result is withheld with an error that shows none of the text"
+      },
+      {
+        "id": "test_e2_reads_and_writes_stay_inside_the_project_and_away_from_secrets_and_protected_folders",
+        "kind": "edge",
+        "says": "Paths stay inside the project, secrets and protected folders are refused, a sibling folder with a similar name is outside"
+      },
+      {
+        "id": "test_e3_bash_is_limited_to_a_few_read_only_commands_and_dangerous_or_chained_ones_are_refused",
+        "kind": "edge",
+        "says": "Bash is limited to read-only commands; dangerous, chained and redirected commands and secret arguments are refused"
+      },
+      {
+        "id": "test_e4_fetch_and_email_obey_the_host_and_domain_lists_and_refuse_credentials_in_a_url",
+        "kind": "edge",
+        "says": "Fetch obeys the host list (a lookalike host fails) and refuses credentials; email obeys the domain list and the body check"
+      },
+      {
+        "id": "test_e5_once_untrusted_content_is_in_the_session_anything_that_changes_things_asks_or_is_refused",
+        "kind": "edge",
+        "says": "After untrusted content entered the session, changes ask, an email is refused, reads still work, and a denial stays a denial"
+      },
+      {
+        "id": "test_e6_secrets_card_numbers_and_addresses_are_redacted_in_text_and_in_the_audit",
+        "kind": "edge",
+        "says": "Redaction covers keys, addresses and Luhn-valid cards, leaves other numbers, and the audit never holds a raw secret"
+      },
+      {
+        "id": "test_e7_the_hook_answer_follows_the_documented_shapes_and_repeated_denials_raise_an_alert",
+        "kind": "edge",
+        "says": "The hook answer has the documented shapes and repeated denials by one actor raise an alert, while questions do not"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/41-security-and-safety/prose/unit-03/practice-1/target/report.xml"
+    },
+    "origin": "course/41-security-and-safety/03-guardrails-monitoring-and-the-practice.md",
+    "concepts": [
+      "the practice of Layered guardrails, monitoring and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/41-security-and-safety/prose/unit-03/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "security-and-safety-u3"
+}

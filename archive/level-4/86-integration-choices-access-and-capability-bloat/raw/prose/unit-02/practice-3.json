@@ -1,0 +1,284 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "86-integration-choices-access-and-capability-bloat"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: a capability review and a gateway (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a capability review and a gateway"
+    },
+    {
+      "type": "para",
+      "text": "A platform team gives every agent every tool, lets all of them load at once, connects capabilities by whatever was quickest, checks only the user's rights when a tool is called, and has no single place that sees the traffic. In this practice you write the pieces that replace that: the audit that says which tools a role must lose, the plan that loads a few tools up front and defers the rest, the choice of mechanism, the check that a call is covered by both the user's and the agent's rights, and a gateway that authenticates, checks the model, the tool and the rate, routes an allowed request and records every decision. The example of the module's first page builds a smaller gateway, which checks the credential, the model and the rate; the practice's gateway adds a check of the tool between the model and the rate. Nothing calls a model: the tests give you tools, scopes and requests. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`audit`, `plan_loading`, `choose_mechanism`, `authorize`, `gateway`); TypeScript has the camel-case names (`planLoading`, `chooseMechanism`); Java has the same camel-case names as static methods of the practice's class `Capability` (the example's class is `CapabilityAudit`); Kotlin has top-level functions. The starter shows the types of each language: Python and TypeScript use plain dictionaries and objects, Java and Kotlin use records and data classes (`Agent`, `Tool`, `AuditResult`, `Plan`, `Request`, `Policy`, `Outcome`)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working capability design with ten small gaps cut out of it. Everything that is plumbing is written and correct: the assembly of the audit, the plan of what loads up front, and the gateway that looks up the team and builds its answer. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value (an empty list, the input unchanged, `None`), so the starter runs and fails every case on an assertion. Debug a gap by logging its input with the `log` line at the top of the file (the starter already logs the input of one function; add your own `log.debug` lines the same way); a run shows the lines you logged under the failing case. Write the gaps in this order (the Java and Kotlin names are the camel-case forms, TypeScript has no leading underscore):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_remove` and 2. `_risky` unlock `m1`: the tools to take away and the risky ones among them.",
+        "`_dormant` unlocks `e1`: held, needed tools nobody used.",
+        "`_clamp` unlocks `e3`: the number of tools kept loaded, between three and five.",
+        "`_defers` unlocks `e2`: whether the definitions are deferred (ten tools, or over ten thousand tokens).",
+        "`_ranked` unlocks `e3`: the tools to load first, the most used first and by name among equals.",
+        "`choose_mechanism` unlocks `e4`: the mechanism by counterpart, path and number of clients.",
+        "`authorize` unlocks `e5`: whose rights a tool call uses.",
+        "`_verdict` unlocks `e6`: the decision and reason, checking credential, model, tool and rate in that order.",
+        "`_record` unlocks `e7`: the record of a decision, with no content."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole design."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`audit(agent, catalog)` compares what an agent holds with what its role needs. `agent` has `holds` (a list of tool names), `needs` (a list) and `used` (tool name to the number of calls). `catalog` maps each tool to its `access` class (`read`, `draft`, `money` or `destroy`). Return `remove` (the held tools that are not needed, in the order held), `risky` (those of them whose access is `money` or `destroy`), `missing` (the needed tools that are not held, in the order needed) and `dormant` (the held tools that are needed and have no calls). A dormant tool is reported and never removed.",
+        "`plan_loading(tools, usage, keep=4, search_tokens=350)` decides what loads up front. `tools` maps a tool to the tokens of its definition and `usage` maps it to its calls. A set of fewer than 10 tools whose definitions total at most 10,000 tokens loads whole: `search` is false, `load_now` lists every tool, `deferred` is empty and `tokens` is the total. Otherwise `search` is true, `keep` is first held between 3 and 5, `load_now` is that many tools ordered by calls (most first, ties by name), `deferred` is the others in the order given, and `tokens` is the loaded tools plus `search_tokens`.",
+        "`choose_mechanism(consumers, counterpart, path)` returns `agent-to-agent` when the counterpart is an `agent`, `direct call in code` when the path is `fixed`, `MCP server` when more than one client uses the capability, and `custom tool` otherwise, checked in that order.",
+        "`authorize(tool, user_scopes, agent_scopes, required)` looks the tool up in `required` (tool to the scope it needs). An unknown tool is `deny: unknown tool`; a scope the user lacks is `deny: user lacks <scope>`; a scope the agent lacks is `deny: agent lacks <scope>`; otherwise `allow`.",
+        "`gateway(request, policy)` decides one request. The request has a `credential` (possibly none), a `model`, a `tool` (possibly none) and `recent`, the requests the team sent this minute. The policy maps credentials to teams and holds, per team, the models and tools it may use and its limit, plus `routes` from a model name to the model it is sent to. Check in this order: the credential (`unauthenticated`), the model (`model not allowed`), the tool when there is one (`tool not allowed`) and the rate (`rate limited`, when `recent` has reached the limit). A request that passes is `allow` with the reason `routed to <model>` (the route, or the name itself when none is listed). Return the decision, the reason and an `audit` record with the `team` (or `unknown`), the `model`, the `tool` (or `none`) and the `decision`. Every request has a record, denied ones included, and the record holds no content."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Remove, do not watch.** *You should see* the refund and delete tools in the list to remove, named as risky.",
+        "**A tool the role needs is reviewed, not removed.** *You should see* an unused needed tool in `dormant` and not in `remove`.",
+        "**Definitions have a cost.** *You should see* a small set loaded whole and a large one deferred, by count or by size.",
+        "**A few tools stay loaded.** *You should see* the number of tools kept loaded stay between 3 and 5 and ties settled by name, not by the order they were listed.",
+        "**The mechanism follows the counterpart and the path.** *You should see* an agent peer reached agent to agent, a fixed path in code, and a shared capability in an MCP server.",
+        "**Two sets of rights.** *You should see* a call refused when the agent lacks a scope the user holds.",
+        "**One place decides, in a fixed order.** *You should see* an unknown caller denied before anything else is looked at.",
+        "**Every decision leaves a record.** *You should see* a denied request recorded with the team, the model, the tool and the decision."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "An agent loses the tools its role does not need and the risky ones among them are named"
+        ],
+        [
+          "`e1`",
+          "A tool that is held and needed but never used is reported as dormant and never removed"
+        ],
+        [
+          "`e2`",
+          "A small set loads whole and a large one defers when it has ten tools or over ten thousand tokens"
+        ],
+        [
+          "`e3`",
+          "The number of tools kept loaded stays between three and five and ties are broken by name"
+        ],
+        [
+          "`e4`",
+          "The mechanism follows the counterpart, then the path, then the number of clients"
+        ],
+        [
+          "`e5`",
+          "A call needs the user's scope and the agent's scope and an unknown tool is refused"
+        ],
+        [
+          "`e6`",
+          "The gateway checks the credential, then the model, then the tool, then the rate"
+        ],
+        [
+          "`e7`",
+          "The gateway keeps a record of every decision with the team or unknown and no content"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.Comparator;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\n\n/** Capability design: what a role keeps, which tool definitions load up front, which mechanism connects a capability, whose rights a tool call uses and what a gateway decides. See ../../statement.md. */\nfinal class Capability {\n    private static final System.Logger LOG = System.getLogger(Capability.class.getName());\n    private Capability() {}\n\n    /** A tool's access class and the size of its definition in tokens. */\n    record Tool(String access, int tokens) {}\n\n    /** What an agent holds, what its role needs and how often each tool was called. */\n    record Agent(List<String> holds, List<String> needs, Map<String, Integer> used) {}\n\n    /** The tools to remove, the risky ones among them, the needed tools the agent lacks and the held, needed tools nobody used. */\n    record AuditResult(List<String> remove, List<String> risky, List<String> missing, List<String> dormant) {}\n\n    /** Whether a search tool is used, the tools loaded now and deferred, and the tokens loaded up front. */\n    record Plan(boolean search, List<String> loadNow, List<String> deferred, int tokens) {}\n\n    /** A request to the gateway: who calls (null for nobody), which model, which tool (null for none) and how many requests the team sent this minute. */\n    record Request(String credential, String model, String tool, int recent) {}\n\n    /** The gateway's rules: credential to team, the models and tools each team may use, requests a minute and where each model name is routed. */\n    record Policy(Map<String, String> credentials, Map<String, Set<String>> models, Map<String, Set<String>> tools, Map<String, Integer> limits, Map<String, String> routes) {}\n\n    /** The gateway's decision, its reason and the record kept of it. */\n    record Outcome(String decision, String reason, Map<String, String> audit) {}\n\n    private static final Set<String> RISKY = Set.of(\"money\", \"destroy\");\n\n    private static List<String> remove(Agent agent) {\n        return agent.holds().stream().filter(t -> !agent.needs().contains(t)).toList();\n    }\n\n    private static List<String> risky(List<String> remove, Map<String, Tool> catalog) {\n        return remove.stream().filter(t -> RISKY.contains(catalog.get(t).access())).toList();\n    }\n\n    private static List<String> dormant(Agent agent) {\n        return agent.holds().stream().filter(t -> agent.needs().contains(t) && agent.used().getOrDefault(t, 0) == 0).toList();\n    }\n\n    static AuditResult audit(Agent agent, Map<String, Tool> catalog) {\n        LOG.log(System.Logger.Level.DEBUG, \"audit input: {0}\", agent);\n        List<String> remove = remove(agent);\n        return new AuditResult(remove, risky(remove, catalog), agent.needs().stream().filter(t -> !agent.holds().contains(t)).toList(), dormant(agent));\n    }\n\n    private static int clamp(int keep) {\n        return Math.max(3, Math.min(5, keep));\n    }\n\n    private static boolean defers(Map<String, Integer> tools) {\n        return tools.size() >= 10 || tools.values().stream().mapToInt(Integer::intValue).sum() > 10000;\n    }\n\n    private static List<String> ranked(Map<String, Integer> tools, Map<String, Integer> usage, int keep) {\n        List<String> sorted = new ArrayList<>(tools.keySet());\n        sorted.sort(Comparator.comparing((String t) -> -usage.getOrDefault(t, 0)).thenComparing(t -> t));\n        return new ArrayList<>(sorted.subList(0, Math.min(keep, sorted.size())));\n    }\n\n    static Plan planLoading(Map<String, Integer> tools, Map<String, Integer> usage) {\n        return planLoading(tools, usage, 4, 350);\n    }\n\n    static Plan planLoading(Map<String, Integer> tools, Map<String, Integer> usage, int keep, int searchTokens) {\n        LOG.log(System.Logger.Level.DEBUG, \"planLoading input: {0}\", tools);\n        List<String> names = new ArrayList<>(tools.keySet());\n        if (!defers(tools)) return new Plan(false, names, List.of(), tools.values().stream().mapToInt(Integer::intValue).sum());\n        List<String> first = ranked(tools, usage, clamp(keep));\n        return new Plan(true, first, names.stream().filter(t -> !first.contains(t)).toList(), first.stream().mapToInt(tools::get).sum() + searchTokens);\n    }\n\n    static String chooseMechanism(int consumers, String counterpart, String path) {\n        if (counterpart.equals(\"agent\")) return \"agent-to-agent\";\n        if (path.equals(\"fixed\")) return \"direct call in code\";\n        return consumers > 1 ? \"MCP server\" : \"custom tool\";\n    }\n\n    static String authorize(String tool, Set<String> userScopes, Set<String> agentScopes, Map<String, String> required) {\n        if (!required.containsKey(tool)) return \"deny: unknown tool\";\n        String scope = required.get(tool);\n        if (!userScopes.contains(scope)) return \"deny: user lacks \" + scope;\n        if (!agentScopes.contains(scope)) return \"deny: agent lacks \" + scope;\n        return \"allow\";\n    }\n\n    private static List<String> verdict(String team, Request request, Policy policy) {\n        if (team == null) return List.of(\"deny\", \"unauthenticated\");\n        if (!policy.models().get(team).contains(request.model())) return List.of(\"deny\", \"model not allowed\");\n        if (request.tool() != null && !policy.tools().get(team).contains(request.tool())) return List.of(\"deny\", \"tool not allowed\");\n        if (request.recent() >= policy.limits().get(team)) return List.of(\"deny\", \"rate limited\");\n        return List.of(\"allow\", \"routed to \" + policy.routes().getOrDefault(request.model(), request.model()));\n    }\n\n    private static Map<String, String> record(String team, Request request, String decision) {\n        return Map.of(\"team\", team == null ? \"unknown\" : team, \"model\", request.model(), \"tool\", request.tool() == null ? \"none\" : request.tool(), \"decision\", decision);\n    }\n\n    static Outcome gateway(Request request, Policy policy) {\n        LOG.log(System.Logger.Level.DEBUG, \"gateway input: {0}\", request);\n        String team = request.credential() == null ? null : policy.credentials().get(request.credential());\n        List<String> verdict = verdict(team, request, policy);\n        return new Outcome(verdict.get(0), verdict.get(1), record(team, request, verdict.get(0)));\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.*;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        Map<String, Capability.Tool> catalog = new LinkedHashMap<>();\n        catalog.put(\"read_ticket\", new Capability.Tool(\"read\", 160));\n        catalog.put(\"draft_reply\", new Capability.Tool(\"draft\", 220));\n        catalog.put(\"issue_refund\", new Capability.Tool(\"money\", 240));\n        catalog.put(\"export_report\", new Capability.Tool(\"read\", 300));\n\n        // An agent holds more tools than its role needs: the audit names what to remove and which of them are risky.\n        Capability.Agent agent = new Capability.Agent(new ArrayList<>(catalog.keySet()), List.of(\"read_ticket\", \"draft_reply\"), Map.of(\"read_ticket\", 12, \"draft_reply\", 9));\n        System.out.println(\"audit: \" + Capability.audit(agent, catalog));\n\n        // Loading a long tool list: the most used tools load now, the rest wait behind a search tool.\n        Map<String, Integer> tools = new LinkedHashMap<>();\n        for (int i = 1; i <= 12; i++) tools.put(String.format(\"t%02d\", i), 100);\n        System.out.println(\"loading plan: \" + Capability.planLoading(tools, Map.of(\"t01\", 9, \"t02\", 5), 3, 350));\n\n        // The gateway checks one request against the policy.\n        Capability.Policy policy = new Capability.Policy(Map.of(\"k1\", \"support\"), Map.of(\"support\", Set.of(\"standard\")),\n            Map.of(\"support\", Set.of(\"read_ticket\", \"draft_reply\")), Map.of(\"support\", 2), Map.of(\"standard\", \"claude-sonnet-5-5\"));\n        System.out.println(\"allowed: \" + Capability.gateway(new Capability.Request(\"k1\", \"standard\", \"read_ticket\", 0), policy));\n        System.out.println(\"over the limit: \" + Capability.gateway(new Capability.Request(\"k1\", \"standard\", \"read_ticket\", 2), policy));\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.ArrayList;\nimport java.util.Comparator;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\n\n/** Capability design: what a role keeps, which tool definitions load up front, which mechanism connects a capability, whose rights a tool call uses and what a gateway decides. See ../../statement.md. */\nfinal class Capability {\n    private static final System.Logger LOG = System.getLogger(Capability.class.getName());\n    private Capability() {}\n\n    /** A tool's access class and the size of its definition in tokens. */\n    record Tool(String access, int tokens) {}\n\n    /** What an agent holds, what its role needs and how often each tool was called. */\n    record Agent(List<String> holds, List<String> needs, Map<String, Integer> used) {}\n\n    /** The tools to remove, the risky ones among them, the needed tools the agent lacks and the held, needed tools nobody used. */\n    record AuditResult(List<String> remove, List<String> risky, List<String> missing, List<String> dormant) {}\n\n    /** Whether a search tool is used, the tools loaded now and deferred, and the tokens loaded up front. */\n    record Plan(boolean search, List<String> loadNow, List<String> deferred, int tokens) {}\n\n    /** A request to the gateway: who calls (null for nobody), which model, which tool (null for none) and how many requests the team sent this minute. */\n    record Request(String credential, String model, String tool, int recent) {}\n\n    /** The gateway's rules: credential to team, the models and tools each team may use, requests a minute and where each model name is routed. */\n    record Policy(Map<String, String> credentials, Map<String, Set<String>> models, Map<String, Set<String>> tools, Map<String, Integer> limits, Map<String, String> routes) {}\n\n    /** The gateway's decision, its reason and the record kept of it. */\n    record Outcome(String decision, String reason, Map<String, String> audit) {}\n\n    private static final Set<String> RISKY = Set.of(\"money\", \"destroy\");\n\n    private static List<String> remove(Agent agent) {\n        // TODO 1 of 10 (unlocks m1): the tools to take away.\n        // Receives the agent (`holds`, `needs`, `used`). Returns the held tools that the role does not need, in the order they are held.\n        // Example: holds [read, refund], needs [read] -> [refund]\n        return List.of();\n    }\n\n    private static List<String> risky(List<String> remove, Map<String, Tool> catalog) {\n        // TODO 2 of 10 (unlocks m1): the risky tools among those to remove.\n        // Receives the tools to remove and the catalog (tool to its access class and tokens). Returns those whose access class is in RISKY, in the same order.\n        // Example: remove [refund, export], refund has access \"money\" and export has \"read\" -> [refund]\n        return List.of();\n    }\n\n    private static List<String> dormant(Agent agent) {\n        // TODO 3 of 10 (unlocks e1): the tools that are kept but never used.\n        // Receives the agent. Returns the held tools that the role needs and that have no calls in `used` (a tool missing from `used` has none), in the order held. They are\n        // reported and never removed.\n        // Example: holds [a, b], needs [a, b], used {a: 5, b: 0} -> [b]\n        return List.of();\n    }\n\n    static AuditResult audit(Agent agent, Map<String, Tool> catalog) {\n        LOG.log(System.Logger.Level.DEBUG, \"audit input: {0}\", agent);\n        List<String> remove = remove(agent);\n        return new AuditResult(remove, risky(remove, catalog), agent.needs().stream().filter(t -> !agent.holds().contains(t)).toList(), dormant(agent));\n    }\n\n    private static int clamp(int keep) {\n        // TODO 4 of 10 (unlocks e3): how many tools to keep loaded.\n        // Receives the number asked for. Returns it limited to the range from 3 to 5.\n        // Example: clamp(1) -> 3, clamp(8) -> 5, clamp(4) -> 4\n        return keep;\n    }\n\n    private static boolean defers(Map<String, Integer> tools) {\n        // TODO 5 of 10 (unlocks e2): must the definitions be deferred?\n        // Receives the tools (name to the tokens of its definition). Returns true when there are 10 tools or more, or the definitions together are over 10000 tokens (10000 itself is fine).\n        // Example: 9 tools of 100 tokens -> false; 10 tools -> true; two tools of 5000 and 5001 -> true\n        return false;\n    }\n\n    private static List<String> ranked(Map<String, Integer> tools, Map<String, Integer> usage, int keep) {\n        // TODO 6 of 10 (unlocks e3): the tools to load first.\n        // Receives the tools, the usage counts (a tool missing from `usage` has 0) and how many to keep. Returns that many tool names, the most used first and by name among equals.\n        // Example: usage {b: 9, a: 9, c: 1}, keep 2 -> [a, b]\n        return new ArrayList<>(tools.keySet()).subList(0, Math.min(keep, tools.size()));\n    }\n\n    static Plan planLoading(Map<String, Integer> tools, Map<String, Integer> usage) {\n        return planLoading(tools, usage, 4, 350);\n    }\n\n    static Plan planLoading(Map<String, Integer> tools, Map<String, Integer> usage, int keep, int searchTokens) {\n        LOG.log(System.Logger.Level.DEBUG, \"planLoading input: {0}\", tools);\n        List<String> names = new ArrayList<>(tools.keySet());\n        if (!defers(tools)) return new Plan(false, names, List.of(), tools.values().stream().mapToInt(Integer::intValue).sum());\n        List<String> first = ranked(tools, usage, clamp(keep));\n        return new Plan(true, first, names.stream().filter(t -> !first.contains(t)).toList(), first.stream().mapToInt(tools::get).sum() + searchTokens);\n    }\n\n    static String chooseMechanism(int consumers, String counterpart, String path) {\n        // TODO 7 of 10 (unlocks e4): how a capability is connected.\n        // Receives the number of clients that will use it, the counterpart (\"agent\" or \"tool\") and the path (\"fixed\" or \"model-chosen\"). Decide in this order:\n        // a counterpart that is an agent gives \"agent-to-agent\"; a fixed path gives \"direct call in code\"; otherwise \"MCP server\" for more than one client and \"custom tool\" for one.\n        // Example: chooseMechanism(4, \"tool\", \"model-chosen\") -> \"MCP server\"\n        return null;\n    }\n\n    static String authorize(String tool, Set<String> userScopes, Set<String> agentScopes, Map<String, String> required) {\n        // TODO 8 of 10 (unlocks e5): whose rights a tool call uses.\n        // Receives the tool name, the scopes of the user, the scopes of the agent and `required` (tool to the scope it needs). Returns \"deny: unknown tool\" for a tool\n        // that is not in `required`; then \"deny: user lacks <scope>\"; then \"deny: agent lacks <scope>\"; otherwise \"allow\". Both the user and the agent must hold the scope.\n        // Example: scope \"refunds:write\" held by the agent only -> \"deny: user lacks refunds:write\"\n        return null;\n    }\n\n    private static List<String> verdict(String team, Request request, Policy policy) {\n        // TODO 9 of 10 (unlocks e6): the decision and its reason.\n        // Receives the team (null when the credential is unknown), the request (`model`, `tool` or null, `recent`) and the policy (`models`, `tools` and `limits` per team,\n        // `routes`). Checks in this order and stops at the first that fails, returning List.of(\"deny\", reason): \"unauthenticated\" when there is no team; \"model not allowed\";\n        // \"tool not allowed\" (only when a tool is named); \"rate limited\" when `recent` is at or over the team's limit. Otherwise List.of(\"allow\", \"routed to <name>\"), where the name is\n        // `policy.routes()` for the model, or the model itself when it has no route.\n        // Example: team \"support\", model \"standard\", no tool, recent 1, limit 2 -> [allow, routed to claude-sonnet-5-5]\n        return List.of(\"allow\", \"\");\n    }\n\n    private static Map<String, String> record(String team, Request request, String decision) {\n        // TODO 10 of 10 (unlocks e7): the record kept of a decision.\n        // Receives the team (null when unknown), the request and the decision. Returns a map with `team`, `model`, `tool` and `decision`: the team or \"unknown\", the model, the tool or\n        // \"none\", and the decision. Nothing else: no prompt and no credential.\n        // Example: team null, model \"deep\", tool null, \"deny\" -> {team: unknown, model: deep, tool: none, decision: deny}\n        return Map.of();\n    }\n\n    static Outcome gateway(Request request, Policy policy) {\n        LOG.log(System.Logger.Level.DEBUG, \"gateway input: {0}\", request);\n        String team = request.credential() == null ? null : policy.credentials().get(request.credential());\n        List<String> verdict = verdict(team, request, policy);\n        return new Outcome(verdict.get(0), verdict.get(1), record(team, request, verdict.get(0)));\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.*;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        Map<String, Capability.Tool> catalog = new LinkedHashMap<>();\n        catalog.put(\"read_ticket\", new Capability.Tool(\"read\", 160));\n        catalog.put(\"draft_reply\", new Capability.Tool(\"draft\", 220));\n        catalog.put(\"issue_refund\", new Capability.Tool(\"money\", 240));\n        catalog.put(\"export_report\", new Capability.Tool(\"read\", 300));\n\n        // An agent holds more tools than its role needs: the audit names what to remove and which of them are risky.\n        Capability.Agent agent = new Capability.Agent(new ArrayList<>(catalog.keySet()), List.of(\"read_ticket\", \"draft_reply\"), Map.of(\"read_ticket\", 12, \"draft_reply\", 9));\n        System.out.println(\"audit: \" + Capability.audit(agent, catalog));\n\n        // Loading a long tool list: the most used tools load now, the rest wait behind a search tool.\n        Map<String, Integer> tools = new LinkedHashMap<>();\n        for (int i = 1; i <= 12; i++) tools.put(String.format(\"t%02d\", i), 100);\n        System.out.println(\"loading plan: \" + Capability.planLoading(tools, Map.of(\"t01\", 9, \"t02\", 5), 3, 350));\n\n        // The gateway checks one request against the policy.\n        Capability.Policy policy = new Capability.Policy(Map.of(\"k1\", \"support\"), Map.of(\"support\", Set.of(\"standard\")),\n            Map.of(\"support\", Set.of(\"read_ticket\", \"draft_reply\")), Map.of(\"support\", 2), Map.of(\"standard\", \"claude-sonnet-5-5\"));\n        System.out.println(\"allowed: \" + Capability.gateway(new Capability.Request(\"k1\", \"standard\", \"read_ticket\", 0), policy));\n        System.out.println(\"over the limit: \" + Capability.gateway(new Capability.Request(\"k1\", \"standard\", \"read_ticket\", 2), policy));\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "85d897b388cecc56c3db4c25d4830cc76723e7a5630e379f20ade0569925e163",
+  "starting_code": "import java.util.ArrayList;\nimport java.util.Comparator;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\n\n/** Capability design: what a role keeps, which tool definitions load up front, which mechanism connects a capability, whose rights a tool call uses and what a gateway decides. See ../../statement.md. */\nfinal class Capability {\n    private static final System.Logger LOG = System.getLogger(Capability.class.getName());\n    private Capability() {}\n\n    /** A tool's access class and the size of its definition in tokens. */\n    record Tool(String access, int tokens) {}\n\n    /** What an agent holds, what its role needs and how often each tool was called. */\n    record Agent(List<String> holds, List<String> needs, Map<String, Integer> used) {}\n\n    /** The tools to remove, the risky ones among them, the needed tools the agent lacks and the held, needed tools nobody used. */\n    record AuditResult(List<String> remove, List<String> risky, List<String> missing, List<String> dormant) {}\n\n    /** Whether a search tool is used, the tools loaded now and deferred, and the tokens loaded up front. */\n    record Plan(boolean search, List<String> loadNow, List<String> deferred, int tokens) {}\n\n    /** A request to the gateway: who calls (null for nobody), which model, which tool (null for none) and how many requests the team sent this minute. */\n    record Request(String credential, String model, String tool, int recent) {}\n\n    /** The gateway's rules: credential to team, the models and tools each team may use, requests a minute and where each model name is routed. */\n    record Policy(Map<String, String> credentials, Map<String, Set<String>> models, Map<String, Set<String>> tools, Map<String, Integer> limits, Map<String, String> routes) {}\n\n    /** The gateway's decision, its reason and the record kept of it. */\n    record Outcome(String decision, String reason, Map<String, String> audit) {}\n\n    private static final Set<String> RISKY = Set.of(\"money\", \"destroy\");\n\n    private static List<String> remove(Agent agent) {\n        // TODO 1 of 10 (unlocks m1): the tools to take away.\n        // Receives the agent (`holds`, `needs`, `used`). Returns the held tools that the role does not need, in the order they are held.\n        // Example: holds [read, refund], needs [read] -> [refund]\n        return List.of();\n    }\n\n    private static List<String> risky(List<String> remove, Map<String, Tool> catalog) {\n        // TODO 2 of 10 (unlocks m1): the risky tools among those to remove.\n        // Receives the tools to remove and the catalog (tool to its access class and tokens). Returns those whose access class is in RISKY, in the same order.\n        // Example: remove [refund, export], refund has access \"money\" and export has \"read\" -> [refund]\n        return List.of();\n    }\n\n    private static List<String> dormant(Agent agent) {\n        // TODO 3 of 10 (unlocks e1): the tools that are kept but never used.\n        // Receives the agent. Returns the held tools that the role needs and that have no calls in `used` (a tool missing from `used` has none), in the order held. They are\n        // reported and never removed.\n        // Example: holds [a, b], needs [a, b], used {a: 5, b: 0} -> [b]\n        return List.of();\n    }\n\n    static AuditResult audit(Agent agent, Map<String, Tool> catalog) {\n        LOG.log(System.Logger.Level.DEBUG, \"audit input: {0}\", agent);\n        List<String> remove = remove(agent);\n        return new AuditResult(remove, risky(remove, catalog), agent.needs().stream().filter(t -> !agent.holds().contains(t)).toList(), dormant(agent));\n    }\n\n    private static int clamp(int keep) {\n        // TODO 4 of 10 (unlocks e3): how many tools to keep loaded.\n        // Receives the number asked for. Returns it limited to the range from 3 to 5.\n        // Example: clamp(1) -> 3, clamp(8) -> 5, clamp(4) -> 4\n        return keep;\n    }\n\n    private static boolean defers(Map<String, Integer> tools) {\n        // TODO 5 of 10 (unlocks e2): must the definitions be deferred?\n        // Receives the tools (name to the tokens of its definition). Returns true when there are 10 tools or more, or the definitions together are over 10000 tokens (10000 itself is fine).\n        // Example: 9 tools of 100 tokens -> false; 10 tools -> true; two tools of 5000 and 5001 -> true\n        return false;\n    }\n\n    private static List<String> ranked(Map<String, Integer> tools, Map<String, Integer> usage, int keep) {\n        // TODO 6 of 10 (unlocks e3): the tools to load first.\n        // Receives the tools, the usage counts (a tool missing from `usage` has 0) and how many to keep. Returns that many tool names, the most used first and by name among equals.\n        // Example: usage {b: 9, a: 9, c: 1}, keep 2 -> [a, b]\n        return new ArrayList<>(tools.keySet()).subList(0, Math.min(keep, tools.size()));\n    }\n\n    static Plan planLoading(Map<String, Integer> tools, Map<String, Integer> usage) {\n        return planLoading(tools, usage, 4, 350);\n    }\n\n    static Plan planLoading(Map<String, Integer> tools, Map<String, Integer> usage, int keep, int searchTokens) {\n        LOG.log(System.Logger.Level.DEBUG, \"planLoading input: {0}\", tools);\n        List<String> names = new ArrayList<>(tools.keySet());\n        if (!defers(tools)) return new Plan(false, names, List.of(), tools.values().stream().mapToInt(Integer::intValue).sum());\n        List<String> first = ranked(tools, usage, clamp(keep));\n        return new Plan(true, first, names.stream().filter(t -> !first.contains(t)).toList(), first.stream().mapToInt(tools::get).sum() + searchTokens);\n    }\n\n    static String chooseMechanism(int consumers, String counterpart, String path) {\n        // TODO 7 of 10 (unlocks e4): how a capability is connected.\n        // Receives the number of clients that will use it, the counterpart (\"agent\" or \"tool\") and the path (\"fixed\" or \"model-chosen\"). Decide in this order:\n        // a counterpart that is an agent gives \"agent-to-agent\"; a fixed path gives \"direct call in code\"; otherwise \"MCP server\" for more than one client and \"custom tool\" for one.\n        // Example: chooseMechanism(4, \"tool\", \"model-chosen\") -> \"MCP server\"\n        return null;\n    }\n\n    static String authorize(String tool, Set<String> userScopes, Set<String> agentScopes, Map<String, String> required) {\n        // TODO 8 of 10 (unlocks e5): whose rights a tool call uses.\n        // Receives the tool name, the scopes of the user, the scopes of the agent and `required` (tool to the scope it needs). Returns \"deny: unknown tool\" for a tool\n        // that is not in `required`; then \"deny: user lacks <scope>\"; then \"deny: agent lacks <scope>\"; otherwise \"allow\". Both the user and the agent must hold the scope.\n        // Example: scope \"refunds:write\" held by the agent only -> \"deny: user lacks refunds:write\"\n        return null;\n    }\n\n    private static List<String> verdict(String team, Request request, Policy policy) {\n        // TODO 9 of 10 (unlocks e6): the decision and its reason.\n        // Receives the team (null when the credential is unknown), the request (`model`, `tool` or null, `recent`) and the policy (`models`, `tools` and `limits` per team,\n        // `routes`). Checks in this order and stops at the first that fails, returning List.of(\"deny\", reason): \"unauthenticated\" when there is no team; \"model not allowed\";\n        // \"tool not allowed\" (only when a tool is named); \"rate limited\" when `recent` is at or over the team's limit. Otherwise List.of(\"allow\", \"routed to <name>\"), where the name is\n        // `policy.routes()` for the model, or the model itself when it has no route.\n        // Example: team \"support\", model \"standard\", no tool, recent 1, limit 2 -> [allow, routed to claude-sonnet-5-5]\n        return List.of(\"allow\", \"\");\n    }\n\n    private static Map<String, String> record(String team, Request request, String decision) {\n        // TODO 10 of 10 (unlocks e7): the record kept of a decision.\n        // Receives the team (null when unknown), the request and the decision. Returns a map with `team`, `model`, `tool` and `decision`: the team or \"unknown\", the model, the tool or\n        // \"none\", and the decision. Nothing else: no prompt and no credential.\n        // Example: team null, model \"deep\", tool null, \"deny\" -> {team: unknown, model: deep, tool: none, decision: deny}\n        return Map.of();\n    }\n\n    static Outcome gateway(Request request, Policy policy) {\n        LOG.log(System.Logger.Level.DEBUG, \"gateway input: {0}\", request);\n        String team = request.credential() == null ? null : policy.credentials().get(request.credential());\n        List<String> verdict = verdict(team, request, policy);\n        return new Outcome(verdict.get(0), verdict.get(1), record(team, request, verdict.get(0)));\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-4/86-integration-choices-access-and-capability-bloat/prose/unit-02/practice-3/src/main/java/Capability.java",
+    "test_path": "practice/level-4/86-integration-choices-access-and-capability-bloat/prose/unit-02/practice-3/src/test/java/CapabilityTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-4/86-integration-choices-access-and-capability-bloat/prose/unit-02/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-4/86-integration-choices-access-and-capability-bloat/prose/unit-02/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_anAgentLosesTheToolsItsRoleDoesNotNeedAndTheRiskyOnesAmongThemAreNamed()",
+        "kind": "main",
+        "says": "An agent loses the tools its role does not need and the risky ones among them are named"
+      },
+      {
+        "id": "e1_aToolThatIsHeldAndNeededButNeverUsedIsReportedAsDormantAndNeverRemoved()",
+        "kind": "edge",
+        "says": "A tool that is held and needed but never used is reported as dormant and never removed"
+      },
+      {
+        "id": "e2_aSmallSetLoadsWholeAndALargeOneDefersWhenItHasTenToolsOrOverTenThousandTokens()",
+        "kind": "edge",
+        "says": "A small set loads whole and a large one defers when it has ten tools or over ten thousand tokens"
+      },
+      {
+        "id": "e3_theNumberOfToolsKeptLoadedStaysBetweenThreeAndFiveAndTiesAreBrokenByName()",
+        "kind": "edge",
+        "says": "The number of tools kept loaded stays between three and five and ties are broken by name"
+      },
+      {
+        "id": "e4_theMechanismFollowsTheCounterpartThenThePathThenTheNumberOfClients()",
+        "kind": "edge",
+        "says": "The mechanism follows the counterpart, then the path, then the number of clients"
+      },
+      {
+        "id": "e5_aCallNeedsTheUsersScopeAndTheAgentsScopeAndAnUnknownToolIsRefused()",
+        "kind": "edge",
+        "says": "A call needs the user's scope and the agent's scope and an unknown tool is refused"
+      },
+      {
+        "id": "e6_theGatewayChecksTheCredentialThenTheModelThenTheToolThenTheRate()",
+        "kind": "edge",
+        "says": "The gateway checks the credential, then the model, then the tool, then the rate"
+      },
+      {
+        "id": "e7_theGatewayKeepsARecordOfEveryDecisionWithTheTeamOrUnknownAndNoContent()",
+        "kind": "edge",
+        "says": "The gateway keeps a record of every decision with the team or unknown and no content"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-4/86-integration-choices-access-and-capability-bloat/prose/unit-02/practice-3/target/test-results/test"
+    },
+    "origin": "course/86-integration-choices-access-and-capability-bloat/02-capability-bloat-progressive-discovery-and-the-practice.md",
+    "concepts": [
+      "the practice of Capability bloat, progressive discovery and the practice is solved"
+    ],
+    "files": [
+      "practice/level-4/86-integration-choices-access-and-capability-bloat/prose/unit-02/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "integration-choices-access-and-capability-bloat-u2"
+}

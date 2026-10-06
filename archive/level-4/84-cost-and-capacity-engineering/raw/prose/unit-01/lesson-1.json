@@ -1,0 +1,361 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "84-cost-and-capacity-engineering"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Sizing a workload: limits, tiers and the bill",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Sizing a workload: limits, tiers and the bill"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Architect Professional · **Module 84:** Cost and capacity engineering · **Page 1 of 2** **Exams:** P2, P4"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** turn a workload into the three rate limits it needs (requests, input tokens and output tokens per minute) with headroom, say which tokens count toward the input limit and why caching changes the answer, choose the smallest tier that covers the need, price the month in whole cents from the token mix, and tell a rate-limit error from an overload error and from a spend-cap error."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-04 against the Claude API documentation pages \"Rate limits\" and \"Pricing\", the Prompt caching page, and the Claude Certified Architect, Professional exam guide v1.0 (July 2026), domain 2. The example ran in the course's container in Python, TypeScript, Java and Kotlin with the same output and calls no model. Its limits and prices are the documented figures for Claude Sonnet 5.5 on the checking date, kept in whole cents so that every language prints the same numbers. Limits, tiers and prices change and differ per model: re-read the pages before you plan, and treat every figure on this page as a worked input and not as a promise."
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "**Exam guide and current product.** *What the guide states, and so what the exam keys:* domain 2 includes cost and capacity as design inputs, so the exam asks which limit a workload will hit first and which lever reduces cost without losing quality. *What the current documentation says (checked 2026-10-04):* limits are measured in requests per minute (RPM), input tokens per minute (ITPM) and output tokens per minute (OTPM) per model class, and \"for most Claude models, only uncached input tokens count toward your ITPM rate limits\", which means input tokens and cache writes count and cache reads do not. A reached limit returns a 429 error; an overloaded service returns a 529. The SDKs retry twice by default. *How to read both:* the exam keys the design that sizes by the limit that binds, caches the stable prefix to relieve it, and handles each error by its meaning. The multipliers and the tier thresholds are the documentation's, not the exam's."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "A team launches a support assistant, and on the first Monday it receives 429 errors for an hour. The model did not fail and the code did not change. The team sized the service on requests per minute, and the limit they hit was input tokens per minute, because each request carries a long policy. A short calculation done before launch would have found it: requests per minute times the tokens that count, with headroom, compared with the tier. The same calculation shows the fix: cache the policy, and most of those tokens stop counting. Capacity and cost are the same arithmetic seen from two sides."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Three limits, and the one that binds"
+    },
+    {
+      "type": "para",
+      "text": "Every workload has a rate, in requests per minute, and a token mix per request. From them, three numbers follow, each multiplied by a headroom for peaks and growth (the example uses 30 percent) and rounded up."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Limit",
+        "What it is",
+        "How to compute it"
+      ],
+      "rows": [
+        [
+          "**RPM**",
+          "Requests per minute",
+          "The peak rate, plus headroom"
+        ],
+        [
+          "**ITPM**",
+          "Input tokens per minute that count",
+          "Rate times (uncached input plus cache-write tokens), plus headroom"
+        ],
+        [
+          "**OTPM**",
+          "Output tokens per minute",
+          "Rate times output tokens, plus headroom"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Compare each number with the tier's limits; the workload fits a tier only if all three fit, and the limit that fails first is the **binding** one. The example's tiers for Claude Sonnet 5.5 are Start (1,000 RPM, 2 million ITPM, 400,000 OTPM), Build (5,000, 5 million, 1 million) and Scale (10,000, 10 million, 2 million), and a workload above Scale needs a custom arrangement."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Caching moves the binding limit"
+    },
+    {
+      "type": "para",
+      "text": "Cache reads do not count toward ITPM. A prompt of 7,700 input tokens counts in full when it is sent plain. The same prompt with 6,000 tokens read from the cache, 200 written and 1,500 uncached counts 1,700, not 7,700. At 800 requests per minute, the example gives:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "",
+        "Need",
+        "Tier"
+      ],
+      "rows": [
+        [
+          "With caching",
+          "1,040 RPM, 1,768,000 ITPM, 416,000 OTPM",
+          "Build (Start is out on RPM, 1,000, and on OTPM, 400,000)"
+        ],
+        [
+          "Without caching",
+          "1,040 RPM, 8,008,000 ITPM, 416,000 OTPM",
+          "Scale (ITPM exceeds Build's 5 million)"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "So caching moved the workload down a tier. With it, input tokens (1,768,000 against Start's 2 million) are no longer the problem, and request rate and output decide the tier; without it, input tokens bind and Build is out. An architect who did not count cache reads out would buy Scale for a workload that fits Build. The prefix has to be cacheable for this to hold (module 82), which makes the prompt's order a capacity decision as well as a cost one."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The bill is the same mix at different prices"
+    },
+    {
+      "type": "para",
+      "text": "Price the month from the same token mix, by category. The documented Sonnet 5.5 prices on the checking date are input 2, output 10, five-minute cache write 2.50 and cache read 0.20 dollars per million tokens, and the Batch API is billed at half price. The example keeps money in whole cents. For 2 million requests a month:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Design",
+        "Monthly bill"
+      ],
+      "rows": [
+        [
+          "With caching",
+          "$17,400.00"
+        ],
+        [
+          "Without caching",
+          "$38,800.00"
+        ],
+        [
+          "With caching, 30 percent of requests through the Batch API",
+          "$14,790.00"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Two levers show here. **Caching** more than halves the bill, because the long stable prefix is read at a tenth of the input price. **Batching** takes a further 15 percent off by moving the share of work that can wait. Both are available only if the design allows them: a prefix that changes defeats the first, and a caller who needs the answer in seconds cannot use the second. The check on a design's savings is arithmetic on the mix, not a claim, and the usage fields the API returns for cache reads, cache writes and output are the figures to price from."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Reading the errors"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Status",
+        "What it means",
+        "What the design does"
+      ],
+      "rows": [
+        [
+          "**429, rate limit**",
+          "A limit was reached; the response says how long to wait",
+          "Wait for the time given and retry, with backoff; cut the token rate by caching, queueing or spreading the load"
+        ],
+        [
+          "**429, spend cap**",
+          "The usage tier's monthly spend cap was reached; there is no wait time to honour (a limit you set yourself is refused with a 400 instead)",
+          "Do not retry: raise the limit or stop, and alert a person"
+        ],
+        [
+          "**529, overloaded**",
+          "The service is overloaded, not your limit",
+          "Retry with backoff; consider a fallback or a queue"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The SDKs retry twice by default, which absorbs a brief limit and does nothing against a sustained one. A retry loop that ignores the wait time or retries a spend-cap error spends effort on a request that will fail. The reliability patterns of module 81 (the same key on every retry, a breaker) apply here too."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "example",
+      "id": "m84-capacity-model",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/84-capacity-model/python/capacity_model.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/84-capacity-model/typescript/capacityModel.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/84-capacity-model/java/CapacityModel.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/84-capacity-model/kotlin/CapacityModel.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"A capacity and cost model for one workload: the limits it needs, the tier that gives them, and the monthly bill.\n\nThe Claude documentation on rate limits (read on 2026-10-04) says that \"for most Claude models, only uncached input tokens count toward\nyour ITPM rate limits\": `input_tokens` and `cache_creation_input_tokens` count, `cache_read_input_tokens` do not. The limits of the Start,\nBuild and Scale tiers below are the documented figures for Claude Sonnet 5.5, and the prices are the documented Sonnet 5.5 prices on the\nClaude API (input 2, output 10, 5-minute cache write 2.50, cache read 0.20 dollars per million tokens, batch at half price). Prices and\nlimits change; re-read them before you plan. Money is kept in whole cents so that every language prints the same figures.\n\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\nTIERS = [(\"Start\", 1000, 2_000_000, 400_000), (\"Build\", 5000, 5_000_000, 1_000_000), (\"Scale\", 10_000, 10_000_000, 2_000_000)]  # name, RPM, ITPM, OTPM\nCENTS_PER_MTOK = {\"input\": 200, \"cache_write\": 250, \"cache_read\": 20, \"output\": 1000}\n\nCACHED = {\"rpm\": 800, \"input\": 1500, \"cache_write\": 200, \"cache_read\": 6000, \"output\": 400}  # tokens per request, requests per minute\nUNCACHED = {\"rpm\": 800, \"input\": 7700, \"cache_write\": 0, \"cache_read\": 0, \"output\": 400}  # the same prompts with no caching\nREQUESTS_PER_MONTH = 2_000_000\n\n\ndef required_capacity(workload, headroom_percent):\n    \"\"\"RPM, ITPM and OTPM to ask for. Cache reads do not count toward ITPM; every figure is rounded up after the headroom.\"\"\"\n    def up(x):\n        return -(-x * (100 + headroom_percent) // 100)\n    return {\"rpm\": up(workload[\"rpm\"]), \"itpm\": up(workload[\"rpm\"] * (workload[\"input\"] + workload[\"cache_write\"])), \"otpm\": up(workload[\"rpm\"] * workload[\"output\"])}\n\n\ndef smallest_tier(need, tiers):\n    for name, rpm, itpm, otpm in tiers:\n        if need[\"rpm\"] <= rpm and need[\"itpm\"] <= itpm and need[\"otpm\"] <= otpm:\n            return name\n    return \"Custom\"\n\n\ndef monthly_cents(workload, requests, batch_percent):\n    \"\"\"Cents per month. The share of requests sent through the Batch API is billed at half price in every category.\"\"\"\n    log.debug(\"monthly_cents input: %r\", workload)\n    per_request = sum(workload[k] * CENTS_PER_MTOK[k] for k in CENTS_PER_MTOK)  # cents times tokens, per million\n    return requests * per_request * (200 - batch_percent) // (200 * 1_000_000)\n\n\ndef dollars(cents):\n    return f\"${cents // 100:,}.{cents % 100:02d}\"\n\n\ndef main():\n    for label, workload in ((\"with caching\", CACHED), (\"without caching\", UNCACHED)):\n        need = required_capacity(workload, 30)\n        print(f\"{label}: need {need['rpm']} rpm, {need['itpm']} itpm, {need['otpm']} otpm -> tier {smallest_tier(need, TIERS)}\")\n    print(\"monthly bill with caching:\", dollars(monthly_cents(CACHED, REQUESTS_PER_MONTH, 0)))\n    print(\"monthly bill without caching:\", dollars(monthly_cents(UNCACHED, REQUESTS_PER_MONTH, 0)))\n    print(\"monthly bill with caching and 30 percent batch:\", dollars(monthly_cents(CACHED, REQUESTS_PER_MONTH, 30)))\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "with caching: need 1040 rpm, 1768000 itpm, 416000 otpm -> tier Build\nwithout caching: need 1040 rpm, 8008000 itpm, 416000 otpm -> tier Scale\nmonthly bill with caching: $17,400.00\nmonthly bill without caching: $38,800.00\nmonthly bill with caching and 30 percent batch: $14,790.00"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// A capacity and cost model for one workload: the limits it needs, the tier that gives them, and the monthly bill.\n//\n// The Claude documentation on rate limits (read on 2026-10-04) says that \"for most Claude models, only uncached input tokens count toward\n// your ITPM rate limits\": `input_tokens` and `cache_creation_input_tokens` count, `cache_read_input_tokens` do not. The limits of the Start,\n// Build and Scale tiers below are the documented figures for Claude Sonnet 5.5, and the prices are the documented Sonnet 5.5 prices on the\n// Claude API (input 2, output 10, 5-minute cache write 2.50, cache read 0.20 dollars per million tokens, batch at half price). Prices and\n// limits change; re-read them before you plan. Money is kept in whole cents so that every language prints the same figures.\n\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"capacity_model\");\n\nexport type Workload = { rpm: number; input: number; cache_write: number; cache_read: number; output: number }; // tokens per request, requests per minute\nexport type Need = { rpm: number; itpm: number; otpm: number };\n\nexport const TIERS: Array<[string, number, number, number]> = [[\"Start\", 1000, 2_000_000, 400_000], [\"Build\", 5000, 5_000_000, 1_000_000], [\"Scale\", 10_000, 10_000_000, 2_000_000]]; // name, RPM, ITPM, OTPM\nexport const CENTS_PER_MTOK = { input: 200, cache_write: 250, cache_read: 20, output: 1000 };\n\nexport const CACHED: Workload = { rpm: 800, input: 1500, cache_write: 200, cache_read: 6000, output: 400 };\nexport const UNCACHED: Workload = { rpm: 800, input: 7700, cache_write: 0, cache_read: 0, output: 400 }; // the same prompts with no caching\nexport const REQUESTS_PER_MONTH = 2_000_000;\n\n/** RPM, ITPM and OTPM to ask for. Cache reads do not count toward ITPM; every figure is rounded up after the headroom. */\nexport function requiredCapacity(w: Workload, headroomPercent: number): Need {\n  const up = (x: number) => Math.ceil((x * (100 + headroomPercent)) / 100);\n  return { rpm: up(w.rpm), itpm: up(w.rpm * (w.input + w.cache_write)), otpm: up(w.rpm * w.output) };\n}\n\nexport function smallestTier(need: Need, tiers: Array<[string, number, number, number]>): string {\n  for (const [name, rpm, itpm, otpm] of tiers) if (need.rpm <= rpm && need.itpm <= itpm && need.otpm <= otpm) return name;\n  return \"Custom\";\n}\n\n/** Cents per month. The share of requests sent through the Batch API is billed at half price in every category. */\nexport function monthlyCents(w: Workload, requests: number, batchPercent: number): number {\n  log.debug(\"monthlyCents input\", w);\n  const perRequest = w.input * CENTS_PER_MTOK.input + w.cache_write * CENTS_PER_MTOK.cache_write + w.cache_read * CENTS_PER_MTOK.cache_read + w.output * CENTS_PER_MTOK.output;\n  return Math.floor((requests * perRequest * (200 - batchPercent)) / (200 * 1_000_000));\n}\n\nexport function dollars(cents: number): string {\n  return `$${Math.floor(cents / 100).toLocaleString(\"en-US\")}.${String(cents % 100).padStart(2, \"0\")}`;\n}\n\nfunction main() {\n  for (const [label, workload] of [[\"with caching\", CACHED], [\"without caching\", UNCACHED]] as Array<[string, Workload]>) {\n    const need = requiredCapacity(workload, 30);\n    console.log(`${label}: need ${need.rpm} rpm, ${need.itpm} itpm, ${need.otpm} otpm -> tier ${smallestTier(need, TIERS)}`);\n  }\n  console.log(\"monthly bill with caching:\", dollars(monthlyCents(CACHED, REQUESTS_PER_MONTH, 0)));\n  console.log(\"monthly bill without caching:\", dollars(monthlyCents(UNCACHED, REQUESTS_PER_MONTH, 0)));\n  console.log(\"monthly bill with caching and 30 percent batch:\", dollars(monthlyCents(CACHED, REQUESTS_PER_MONTH, 30)));\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "with caching: need 1040 rpm, 1768000 itpm, 416000 otpm -> tier Build\nwithout caching: need 1040 rpm, 8008000 itpm, 416000 otpm -> tier Scale\nmonthly bill with caching: $17,400.00\nmonthly bill without caching: $38,800.00\nmonthly bill with caching and 30 percent batch: $14,790.00"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.List;\nimport java.util.Locale;\n\n/**\n * A capacity and cost model for one workload: the limits it needs, the tier that gives them, and the monthly bill.\n *\n * <p>The Claude documentation on rate limits (read on 2026-10-04) says that \"for most Claude models, only uncached input tokens count toward\n * your ITPM rate limits\": {@code input_tokens} and {@code cache_creation_input_tokens} count, {@code cache_read_input_tokens} do not. The limits of the\n * Start, Build and Scale tiers below are the documented figures for Claude Sonnet 5.5, and the prices are the documented Sonnet 5.5 prices on the\n * Claude API (input 2, output 10, 5-minute cache write 2.50, cache read 0.20 dollars per million tokens, batch at half price). Prices and\n * limits change; re-read them before you plan. Money is kept in whole cents so that every language prints the same figures.\n */\npublic final class CapacityModel {\n    private static final System.Logger LOG = System.getLogger(CapacityModel.class.getName());\n    /** Tokens per request and requests per minute. */\n    record Workload(long rpm, long input, long cacheWrite, long cacheRead, long output) {}\n\n    record Need(long rpm, long itpm, long otpm) {}\n\n    record Tier(String name, long rpm, long itpm, long otpm) {}\n\n    static final List<Tier> TIERS = List.of(new Tier(\"Start\", 1000, 2_000_000, 400_000), new Tier(\"Build\", 5000, 5_000_000, 1_000_000), new Tier(\"Scale\", 10_000, 10_000_000, 2_000_000));\n\n    static final Workload CACHED = new Workload(800, 1500, 200, 6000, 400);\n    static final Workload UNCACHED = new Workload(800, 7700, 0, 0, 400); // the same prompts with no caching\n    static final long REQUESTS_PER_MONTH = 2_000_000;\n\n    private static long up(long x, long headroomPercent) {\n        return (x * (100 + headroomPercent) + 99) / 100;\n    }\n\n    /** RPM, ITPM and OTPM to ask for. Cache reads do not count toward ITPM; every figure is rounded up after the headroom. */\n    static Need requiredCapacity(Workload w, long headroomPercent) {\n        return new Need(up(w.rpm(), headroomPercent), up(w.rpm() * (w.input() + w.cacheWrite()), headroomPercent), up(w.rpm() * w.output(), headroomPercent));\n    }\n\n    static String smallestTier(Need need, List<Tier> tiers) {\n        for (Tier t : tiers) if (need.rpm() <= t.rpm() && need.itpm() <= t.itpm() && need.otpm() <= t.otpm()) return t.name();\n        return \"Custom\";\n    }\n\n    /** Cents per month. The share of requests sent through the Batch API is billed at half price in every category. */\n    static long monthlyCents(Workload w, long requests, long batchPercent) {\n        LOG.log(System.Logger.Level.DEBUG, \"monthlyCents input: {0}\", w);\n        long perRequest = w.input() * 200 + w.cacheWrite() * 250 + w.cacheRead() * 20 + w.output() * 1000; // cents times tokens, per million\n        return requests * perRequest * (200 - batchPercent) / (200 * 1_000_000L);\n    }\n\n    static String dollars(long cents) {\n        return String.format(Locale.ROOT, \"$%,d.%02d\", cents / 100, cents % 100);\n    }\n\n    public static void main(String[] args) {\n        for (Object[] row : new Object[][] {{\"with caching\", CACHED}, {\"without caching\", UNCACHED}}) {\n            Need need = requiredCapacity((Workload) row[1], 30);\n            System.out.println(row[0] + \": need \" + need.rpm() + \" rpm, \" + need.itpm() + \" itpm, \" + need.otpm() + \" otpm -> tier \" + smallestTier(need, TIERS));\n        }\n        System.out.println(\"monthly bill with caching: \" + dollars(monthlyCents(CACHED, REQUESTS_PER_MONTH, 0)));\n        System.out.println(\"monthly bill without caching: \" + dollars(monthlyCents(UNCACHED, REQUESTS_PER_MONTH, 0)));\n        System.out.println(\"monthly bill with caching and 30 percent batch: \" + dollars(monthlyCents(CACHED, REQUESTS_PER_MONTH, 30)));\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "with caching: need 1040 rpm, 1768000 itpm, 416000 otpm -> tier Build\nwithout caching: need 1040 rpm, 8008000 itpm, 416000 otpm -> tier Scale\nmonthly bill with caching: $17,400.00\nmonthly bill without caching: $38,800.00\nmonthly bill with caching and 30 percent batch: $14,790.00"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "private val log = System.getLogger(\"capacity_model\")\n\n/**\n * A capacity and cost model for one workload: the limits it needs, the tier that gives them, and the monthly bill.\n *\n * The Claude documentation on rate limits (read on 2026-10-04) says that \"for most Claude models, only uncached input tokens count toward\n * your ITPM rate limits\": `input_tokens` and `cache_creation_input_tokens` count, `cache_read_input_tokens` do not. The limits of the Start,\n * Build and Scale tiers below are the documented figures for Claude Sonnet 5.5, and the prices are the documented Sonnet 5.5 prices on the\n * Claude API (input 2, output 10, 5-minute cache write 2.50, cache read 0.20 dollars per million tokens, batch at half price). Prices and\n * limits change; re-read them before you plan. Money is kept in whole cents so that every language prints the same figures.\n */\n/** Tokens per request and requests per minute. */\ndata class Workload(val rpm: Long, val input: Long, val cacheWrite: Long, val cacheRead: Long, val output: Long)\n\ndata class Need(val rpm: Long, val itpm: Long, val otpm: Long)\n\ndata class Tier(val name: String, val rpm: Long, val itpm: Long, val otpm: Long)\n\nval TIERS = listOf(Tier(\"Start\", 1000, 2_000_000, 400_000), Tier(\"Build\", 5000, 5_000_000, 1_000_000), Tier(\"Scale\", 10_000, 10_000_000, 2_000_000))\n\nval CACHED = Workload(800, 1500, 200, 6000, 400)\nval UNCACHED = Workload(800, 7700, 0, 0, 400) // the same prompts with no caching\nconst val REQUESTS_PER_MONTH = 2_000_000L\n\nprivate fun up(x: Long, headroomPercent: Long) = (x * (100 + headroomPercent) + 99) / 100\n\n/** RPM, ITPM and OTPM to ask for. Cache reads do not count toward ITPM; every figure is rounded up after the headroom. */\nfun requiredCapacity(w: Workload, headroomPercent: Long) =\n    Need(up(w.rpm, headroomPercent), up(w.rpm * (w.input + w.cacheWrite), headroomPercent), up(w.rpm * w.output, headroomPercent))\n\nfun smallestTier(need: Need, tiers: List<Tier>): String =\n    tiers.firstOrNull { need.rpm <= it.rpm && need.itpm <= it.itpm && need.otpm <= it.otpm }?.name ?: \"Custom\"\n\n/** Cents per month. The share of requests sent through the Batch API is billed at half price in every category. */\nfun monthlyCents(w: Workload, requests: Long, batchPercent: Long): Long {\n    log.log(System.Logger.Level.DEBUG, \"monthlyCents input: {0}\", w)\n    val perRequest = w.input * 200 + w.cacheWrite * 250 + w.cacheRead * 20 + w.output * 1000 // cents times tokens, per million\n    return requests * perRequest * (200 - batchPercent) / (200 * 1_000_000L)\n}\n\nfun dollars(cents: Long): String = \"$\" + \"%,d\".format(java.util.Locale.ROOT, cents / 100) + \".\" + \"%02d\".format(cents % 100)\n\nfun main() {\n    for ((label, workload) in listOf(\"with caching\" to CACHED, \"without caching\" to UNCACHED)) {\n        val need = requiredCapacity(workload, 30)\n        println(\"$label: need ${need.rpm} rpm, ${need.itpm} itpm, ${need.otpm} otpm -> tier ${smallestTier(need, TIERS)}\")\n    }\n    println(\"monthly bill with caching: \" + dollars(monthlyCents(CACHED, REQUESTS_PER_MONTH, 0)))\n    println(\"monthly bill without caching: \" + dollars(monthlyCents(UNCACHED, REQUESTS_PER_MONTH, 0)))\n    println(\"monthly bill with caching and 30 percent batch: \" + dollars(monthlyCents(CACHED, REQUESTS_PER_MONTH, 30)))\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "with caching: need 1040 rpm, 1768000 itpm, 416000 otpm -> tier Build\nwithout caching: need 1040 rpm, 8008000 itpm, 416000 otpm -> tier Scale\nmonthly bill with caching: $17,400.00\nmonthly bill without caching: $38,800.00\nmonthly bill with caching and 30 percent batch: $14,790.00"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "para",
+      "text": "These are the wrong answers the exam's options for this domain offer, each with the reason it is rejected."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**\"Size the service on requests per minute; tokens are the model's business.\"** It is tempting because the request rate is the number everyone knows. The exam rejects it: the limit that binds is often tokens, and a long prompt multiplies the token rate, so the design computes all three limits and compares each with the tier.",
+        "**\"Count every input token, including cache reads, toward the input limit.\"** It is tempting because every token is processed. The exam rejects it: for most models only uncached input and cache writes count, so caching a stable prefix relieves the limit as well as the bill.",
+        "**\"On a 429, retry immediately and as often as needed.\"** It is tempting because a retry usually works. The exam rejects it: a rate-limit error says how long to wait, and a spend-cap error has no wait time to honour and must not be retried."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "Scenario: Wicker Foods' service peaks at 600 requests a minute, each with 4,000 uncached input tokens and 300 output tokens, with 30 percent headroom. Using the tiers on the page, which is the smallest that fits?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Start, since 780 requests a minute is below its request ceiling",
+              "**b**: Scale, since the headroom pushes the totals past the limits of the tier below",
+              "**c**: A custom arrangement, since four thousand tokens a request is more than any tier allows",
+              "**d**: Build, since only the intake volume exceeds Start's allowance while the rest fit"
+            ]
+          }
+        ],
+        [
+          "Scenario: Fjord Media's support assistant costs $38,800.00 a month without caching and $17,400.00 with it, on 2 million requests. About what share of the uncached bill does caching remove?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: About 15 percent",
+              "**b**: About 30 percent",
+              "**c**: About 55 percent",
+              "**d**: About 85 percent"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**d**. The three figures are 780 RPM, 3,120,000 ITPM and 234,000 OTPM, and the input figure is over Start's 2 million and under Build's 5 million. *a* is ruled out because \"the workload fits a tier only if all three fit\". *b* is ruled out because the headroom is already in the figures: \"each multiplied by a headroom for peaks and growth\". *c* is ruled out because \"a workload above Scale needs a custom arrangement\", and this one is far below it.",
+            "**c**. The difference is $21,400.00, which is about 55 percent of $38,800.00. *a* is ruled out because 15 percent is the batching figure: \"takes a further 15 percent off by moving the share of work that can wait\". *b* is ruled out because 30 percent is the share sent through the Batch API: \"30 percent of requests through the Batch API\". *d* is ruled out because caching removes a little over half, \"because the long stable prefix is read at a tenth of the input price\" and the output and the first writes are still billed."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 10,
+    "paras": 12,
+    "code": 0,
+    "tables": 4,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 1,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "534c4cdfaf7d676b99b651df7702318d2692189d7422a68eabe86ab115eb76d6"
+}

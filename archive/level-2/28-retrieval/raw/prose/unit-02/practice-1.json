@@ -1,0 +1,289 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "28-retrieval"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: a retrieval pipeline graded on recall (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a retrieval pipeline graded on recall"
+    },
+    {
+      "type": "para",
+      "text": "A retrieval pipeline cuts documents into chunks, finds the chunks that match a question by two different indexes, merges the two rankings, and optionally lets a second model re-order the best few. You do not judge it by how it reads: you measure it, by recall, over questions whose answers you know. The ideas come from the Claude documentation on embeddings and search results, read on 2026-10-03, and from the Anthropic write-up on contextual retrieval; the lesson pages explain them."
+    },
+    {
+      "type": "para",
+      "text": "**The embedding here is a toy.** Anthropic offers no embedding model, and nothing in this practice touches a network or a vendor. `embed(text)` is given: it counts letter trigrams of the tokenised text into 64 buckets with a fixed hash (FNV-1a over the UTF-8 bytes of the trigram, modulo 64) and scales the vector to length 1. It sees spelling, not meaning, so \"delete\" and \"deleting\" are close and \"delete\" and \"remove\" are not. It stands in for a real embedding model so that the tests are deterministic; the reranker is likewise a function the tests pass in. The fusion, BM25 and recall code you write is the real thing."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`tokenize(text)`",
+          "lower-case words and numbers: the runs of `[a-z0-9]`"
+        ],
+        [
+          "`embed(text)`",
+          "the toy embedding above: 64 numbers of length 1"
+        ],
+        [
+          "chunk",
+          "`{id: \"<doc>#<n>\", doc, text}`"
+        ],
+        [
+          "`scorer(query, text)`",
+          "a reranker: a number, higher is more relevant"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working pipeline with seven gaps cut out of it. Everything that is plumbing is written and correct: `tokenize`, the toy `embed`, the argument check of `chunk`, `build_chunks`, the BM25 bookkeeping (token counts, document frequencies, the average length, the loop over chunks and terms), `bm25_rank`, `embedding_rank`, the ordering helper that sorts scores best first with ties by id, `retrieve` with its modes and its pool, and `evaluate`. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value (an empty list, an empty dict, 0), so the starter runs and fails the cases on an assertion. The names below are Python's; TypeScript, Java and Kotlin have the camel-case forms (`windows`, `termScore`, `dot`, `fuse`, `rerank`, `recallAtK`, `indexedText`). Write them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_windows` unlocks `e1`: the windows over a list of words, ending at the last word.",
+        "`_term_score` unlocks `e2`: the BM25 score of one term in one chunk, with its idf and its length normalisation.",
+        "`_dot` unlocks `m1`: the dot product that `embedding_rank` ranks by.",
+        "`fuse` unlocks `e3`: reciprocal rank fusion, ties by id.",
+        "`rerank` unlocks `e4`: the ids ordered by the scorer, equal scores in input order, cut to `top_n`.",
+        "`recall_at_k` unlocks `e5`: documents found among the first `k` chunks, each counted once.",
+        "`_indexed_text` unlocks `e6`: the context sentence put in front of the chunk's text for indexing."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs all of them. About twenty lines in all. To see what a gap receives, log its input with the `log` line at the top of the file; `retrieve` already logs its own input, and a run shows the lines under the failing case."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`chunk(text, size, overlap)`: split the text on whitespace into words and return windows of `size` words that start `size - overlap` words apart; the windows stop at the first one that reaches the last word, so the last window ends at the last word and no window is repeated. No words gives an empty list. A `size` below 1, or an `overlap` below 0 or not below `size`, is an error (`ValueError` in Python, `RangeError` in TypeScript, `IllegalArgumentException` in Java and Kotlin).",
+        "`build_chunks(corpus, size, overlap)`: every document `{id, text}` becomes its chunks, with ids `<doc>#0`, `<doc>#1` and so on.",
+        "`bm25_rank(chunks, query, index_text=None)`: chunk ids by BM25 with `k1 = 1.5`, `b = 0.75` and `idf = ln(1 + (N - df + 0.5) / (df + 0.5))`; a distinct query term scores `idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * len / avg_len))` and a chunk's score is the sum, adding the terms in the order they first appear in the query. `N` is the number of chunks, `len` a chunk's token count. Best first, ties by id, score 0 left out. When `index_text` maps a chunk id to a string, that string is indexed instead of the chunk's text.",
+        "`embedding_rank(chunks, query, index_text=None)`: chunk ids by the dot product of the `embed` vectors (they have length 1, so it is the cosine), best first, ties by id, a similarity of 0 or less left out; `index_text` as above.",
+        "`fuse(rankings, k=60)`: reciprocal rank fusion. An id's score is the sum, over the lists that hold it, of `1 / (k + rank)`, where rank starts at 1 and a repeat of an id in one list is ignored. Best first, ties by id.",
+        "`rerank(query, ids, texts, scorer, top_n=None)`: the given ids, ordered by `scorer(query, texts[id])` from high to low; ids with equal scores keep their input order; cut to `top_n` when it is given. Only the given ids take part.",
+        "`recall_at_k(ids, doc_of, relevant, k)`: the share of the relevant documents that appear among the documents of the first `k` chunk ids. A document counts once however many of its chunks are there. No relevant documents is an error.",
+        "`retrieve(chunks, query, mode=\"hybrid\", k=3, pool=10, contexts=None, scorer=None)`: the ids of the best `k` chunks. Mode `bm25` and `embedding` use one ranking, `hybrid` fuses both. `contexts` maps chunk ids to a sentence that is indexed in front of the chunk's text (the sentence, a space, the text) for both indexes; the chunk itself is not changed. With a `scorer`, take the first `pool` ids of the ranking and rerank them to `k`.",
+        "`evaluate(chunks, queries, mode, k, ...)`: the mean `recall_at_k` over `[{query, relevant}]`, with the remaining arguments passed on to `retrieve`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Hybrid search finds what each single index misses, measured on a small knowledge base"
+        ],
+        [
+          "`e1`",
+          "Chunks overlap and end at the last word"
+        ],
+        [
+          "`e2`",
+          "A rare word outweighs common ones, and short chunks win"
+        ],
+        [
+          "`e3`",
+          "Fusion rewards agreement between lists and breaks ties by id"
+        ],
+        [
+          "`e4`",
+          "Reranking orders only the pool by the scorer"
+        ],
+        [
+          "`e5`",
+          "Recall counts documents, not chunks"
+        ],
+        [
+          "`e6`",
+          "A context sentence makes a bare chunk findable"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The tests read the knowledge base from `tests/fixture.json`."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"A retrieval pipeline: chunking, lexical and embedding search, fusion, reranking and recall. See ../../statement.md.\"\"\"\nimport logging\nimport math\nimport re\n\nlog = logging.getLogger(__name__)\n\n\ndef tokenize(text):\n    \"\"\"Lower-case words and numbers: the runs of [a-z0-9] in the text.\"\"\"\n    return re.findall(r\"[a-z0-9]+\", text.lower())\n\n\n# ---- given: a deterministic toy embedding (not a real model) -------------------------------------------------------\nDIMS = 64\n\n\ndef _fnv1a(text):\n    h = 2166136261\n    for byte in text.encode(\"utf-8\"):\n        h = ((h ^ byte) * 16777619) & 0xFFFFFFFF\n    return h\n\n\ndef embed(text):\n    \"\"\"64 numbers: letter-trigram counts of the tokenised text hashed into buckets, scaled to length 1.\n    It sees spelling, not meaning: 'delete' and 'deleting' are close, 'delete' and 'remove' are not.\"\"\"\n    padded = \" \" + \" \".join(tokenize(text)) + \" \"\n    vector = [0.0] * DIMS\n    for i in range(len(padded) - 2):\n        vector[_fnv1a(padded[i:i + 3]) % DIMS] += 1.0\n    length = math.sqrt(sum(x * x for x in vector))\n    return [x / length for x in vector] if length else vector\n# ---------------------------------------------------------------------------------------------------------------------\n\n\ndef chunk(text, size, overlap):\n    \"\"\"Windows of `size` words that start `size - overlap` words apart; the last window ends at the last word.\"\"\"\n    if size < 1 or overlap < 0 or overlap >= size:\n        raise ValueError(\"size must be at least 1 and overlap must be in 0 .. size - 1\")\n    return _windows(text.split(), size, overlap)\n\n\ndef _windows(words, size, overlap):\n    chunks, start = [], 0\n    while start < len(words):\n        chunks.append(\" \".join(words[start:start + size]))\n        if start + size >= len(words):\n            break\n        start += size - overlap\n    return chunks\n\n\ndef build_chunks(corpus, size, overlap):\n    \"\"\"[{\"id\": \"<doc>#<n>\", \"doc\", \"text\"}] for every document of [{\"id\", \"text\"}], in order.\"\"\"\n    return [{\"id\": f\"{doc['id']}#{n}\", \"doc\": doc[\"id\"], \"text\": piece}\n            for doc in corpus for n, piece in enumerate(chunk(doc[\"text\"], size, overlap))]\n\n\ndef _texts(chunks, index_text):\n    return {c[\"id\"]: (index_text or {}).get(c[\"id\"], c[\"text\"]) for c in chunks}\n\n\ndef _ordered(scores):\n    return [cid for cid, score in sorted(scores.items(), key=lambda kv: (-kv[1], kv[0])) if score > 0]\n\n\ndef _term_score(tf, df, n, length, average, k1, b):\n    idf = math.log(1 + (n - df + 0.5) / (df + 0.5))\n    return idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * length / average))\n\n\ndef bm25_rank(chunks, query, index_text=None, k1=1.5, b=0.75):\n    \"\"\"Chunk ids by BM25 score, best first, ties by id, chunks that share no word with the query left out.\"\"\"\n    docs = {cid: tokenize(text) for cid, text in _texts(chunks, index_text).items()}\n    n = len(docs)\n    average = sum(len(d) for d in docs.values()) / n if n else 0.0\n    df = {}\n    for tokens in docs.values():\n        for term in set(tokens):\n            df[term] = df.get(term, 0) + 1\n    terms = list(dict.fromkeys(tokenize(query)))\n    scores = {}\n    for cid, tokens in docs.items():\n        score = 0.0\n        for term in terms:\n            tf = tokens.count(term)\n            if tf == 0:\n                continue\n            score += _term_score(tf, df[term], n, len(tokens), average, k1, b)\n        scores[cid] = score\n    return _ordered(scores)\n\n\ndef _dot(a, b):\n    total = 0.0\n    for x, y in zip(a, b):\n        total += x * y\n    return total\n\n\ndef embedding_rank(chunks, query, index_text=None):\n    \"\"\"Chunk ids by cosine similarity of embed() vectors, best first, ties by id, zero similarity left out.\"\"\"\n    q = embed(query)\n    scores = {}\n    for cid, text in _texts(chunks, index_text).items():\n        scores[cid] = _dot(q, embed(text))\n    return _ordered(scores)\n\n\ndef fuse(rankings, k=60):\n    \"\"\"Reciprocal rank fusion: each id scores the sum of 1 / (k + rank) over the lists that hold it (rank from 1, a repeat\n    in one list ignored); best first, ties by id.\"\"\"\n    scores = {}\n    for ranking in rankings:\n        for rank, cid in enumerate(dict.fromkeys(ranking), start=1):\n            scores[cid] = scores.get(cid, 0.0) + 1.0 / (k + rank)\n    return _ordered(scores)\n\n\ndef rerank(query, ids, texts, scorer, top_n=None):\n    \"\"\"The given ids reordered by scorer(query, text) high to low (equal scores keep their input order), cut to top_n.\"\"\"\n    ordered = sorted(ids, key=lambda cid: -scorer(query, texts[cid]))  # sorted is stable\n    return ordered if top_n is None else ordered[:top_n]\n\n\ndef recall_at_k(ids, doc_of, relevant, k):\n    \"\"\"The share of the relevant documents that appear among the documents of the first k chunk ids.\"\"\"\n    if not relevant:\n        raise ValueError(\"relevant must not be empty\")\n    found = {doc_of[cid] for cid in ids[:k]}\n    return len(found & set(relevant)) / len(set(relevant))\n\n\ndef _indexed_text(chunks, contexts):\n    return {c[\"id\"]: f\"{contexts[c['id']]} {c['text']}\" for c in chunks if contexts and c[\"id\"] in contexts}\n\n\ndef retrieve(chunks, query, mode=\"hybrid\", k=3, pool=10, contexts=None, scorer=None):\n    \"\"\"The ids of the best k chunks. mode is bm25, embedding or hybrid (fusion of both). `contexts` maps chunk ids to a\n    sentence that is indexed in front of the chunk's text; `scorer` reranks the first `pool` ids of the ranking.\"\"\"\n    log.debug(\"retrieve input: mode=%s k=%s query=%r\", mode, k, query)\n    index_text = _indexed_text(chunks, contexts)\n    lexical = bm25_rank(chunks, query, index_text)\n    semantic = embedding_rank(chunks, query, index_text)\n    ranked = lexical if mode == \"bm25\" else semantic if mode == \"embedding\" else fuse([lexical, semantic])\n    if scorer is None:\n        return ranked[:k]\n    return rerank(query, ranked[:pool], {c[\"id\"]: c[\"text\"] for c in chunks}, scorer, k)\n\n\ndef evaluate(chunks, queries, mode=\"hybrid\", k=3, **options):\n    \"\"\"The mean recall@k over [{\"query\", \"relevant\": [doc ids]}].\"\"\"\n    doc_of = {c[\"id\"]: c[\"doc\"] for c in chunks}\n    scores = [recall_at_k(retrieve(chunks, q[\"query\"], mode, k, **options), doc_of, q[\"relevant\"], k) for q in queries]\n    return sum(scores) / len(scores)\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom retrieval import build_chunks, evaluate, retrieve\n\n# A tiny corpus like the test fixture: two documents, cut into windows of 14 words that overlap by 4.\ncorpus = [\n    {\"id\": \"refunds\", \"text\": \"Refund policy: customers may request a refund within 30 days of purchase. Refunds are issued to the \"\n                              \"original payment method within five business days. Digital goods are not refundable after download.\"},\n    {\"id\": \"shipping\", \"text\": \"Shipping: orders over 50 euros ship free of charge. Standard delivery takes three to five business \"\n                               \"days, express delivery takes one day.\"},\n]\nchunks = build_chunks(corpus, 14, 4) or []\nprint(\"chunks:\", [c[\"id\"] for c in chunks])\n\nquery = \"free shipping threshold\"\nfor mode in (\"bm25\", \"embedding\", \"hybrid\"):\n    print(f\"{mode} top 3:\", retrieve(chunks, query, mode, 3))\n\n# Recall@3 over one question whose answer we know.\nprint(\"hybrid recall@3:\", evaluate(chunks, [{\"query\": query, \"relevant\": [\"shipping\"]}], \"hybrid\", 3) if chunks else None)\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"A retrieval pipeline: chunking, lexical and embedding search, fusion, reranking and recall. See ../../statement.md.\"\"\"\nimport logging\nimport math\nimport re\n\nlog = logging.getLogger(__name__)\n\n\ndef tokenize(text):\n    \"\"\"Lower-case words and numbers: the runs of [a-z0-9] in the text.\"\"\"\n    return re.findall(r\"[a-z0-9]+\", text.lower())\n\n\n# ---- given: a deterministic toy embedding (not a real model) -------------------------------------------------------\nDIMS = 64\n\n\ndef _fnv1a(text):\n    h = 2166136261\n    for byte in text.encode(\"utf-8\"):\n        h = ((h ^ byte) * 16777619) & 0xFFFFFFFF\n    return h\n\n\ndef embed(text):\n    \"\"\"64 numbers: letter-trigram counts of the tokenised text hashed into buckets, scaled to length 1.\n    It sees spelling, not meaning: 'delete' and 'deleting' are close, 'delete' and 'remove' are not.\"\"\"\n    padded = \" \" + \" \".join(tokenize(text)) + \" \"\n    vector = [0.0] * DIMS\n    for i in range(len(padded) - 2):\n        vector[_fnv1a(padded[i:i + 3]) % DIMS] += 1.0\n    length = math.sqrt(sum(x * x for x in vector))\n    return [x / length for x in vector] if length else vector\n# ---------------------------------------------------------------------------------------------------------------------\n\n\ndef chunk(text, size, overlap):\n    \"\"\"Windows of `size` words that start `size - overlap` words apart; the last window ends at the last word.\"\"\"\n    if size < 1 or overlap < 0 or overlap >= size:\n        raise ValueError(\"size must be at least 1 and overlap must be in 0 .. size - 1\")\n    return _windows(text.split(), size, overlap)\n\n\ndef _windows(words, size, overlap):\n    \"\"\"TODO 1 of 7 (finish this to pass e1): the windows over a list of words.\n\n    Receives the words, size and overlap (already checked). Returns the windows as strings of the words joined by one space: each holds\n    `size` words, the next starts `size - overlap` words later, and the loop stops at the first window that reaches the last word (so the\n    last window ends at the last word and none is repeated). No words gives [].\n    Example: _windows(\"a b c d e\".split(), 3, 1) -> [\"a b c\", \"c d e\"]\n    \"\"\"\n    return []\n\n\ndef build_chunks(corpus, size, overlap):\n    \"\"\"[{\"id\": \"<doc>#<n>\", \"doc\", \"text\"}] for every document of [{\"id\", \"text\"}], in order.\"\"\"\n    return [{\"id\": f\"{doc['id']}#{n}\", \"doc\": doc[\"id\"], \"text\": piece}\n            for doc in corpus for n, piece in enumerate(chunk(doc[\"text\"], size, overlap))]\n\n\ndef _texts(chunks, index_text):\n    return {c[\"id\"]: (index_text or {}).get(c[\"id\"], c[\"text\"]) for c in chunks}\n\n\ndef _ordered(scores):\n    return [cid for cid, score in sorted(scores.items(), key=lambda kv: (-kv[1], kv[0])) if score > 0]\n\n\ndef _term_score(tf, df, n, length, average, k1, b):\n    \"\"\"TODO 2 of 7 (finish this to pass e2): the BM25 score one query term gives one chunk.\n\n    Receives the term's count in the chunk (tf, at least 1), the number of chunks that hold the term (df), the number of chunks (n), the chunk's\n    length in tokens, the average length, k1 and b. Returns idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * length / average)) with\n    idf = ln(1 + (n - df + 0.5) / (df + 0.5)). A rare term has a large idf; a short chunk gets a larger score than a long one.\n    Example: _term_score(1, 1, 4, 5, 5.0, 1.5, 0.75) is about 1.2 times ln(1 + 3.5 / 1.5)\n    \"\"\"\n    return 0.0\n\n\ndef bm25_rank(chunks, query, index_text=None, k1=1.5, b=0.75):\n    \"\"\"Chunk ids by BM25 score, best first, ties by id, chunks that share no word with the query left out.\"\"\"\n    docs = {cid: tokenize(text) for cid, text in _texts(chunks, index_text).items()}\n    n = len(docs)\n    average = sum(len(d) for d in docs.values()) / n if n else 0.0\n    df = {}\n    for tokens in docs.values():\n        for term in set(tokens):\n            df[term] = df.get(term, 0) + 1\n    terms = list(dict.fromkeys(tokenize(query)))\n    scores = {}\n    for cid, tokens in docs.items():\n        score = 0.0\n        for term in terms:\n            tf = tokens.count(term)\n            if tf == 0:\n                continue\n            score += _term_score(tf, df[term], n, len(tokens), average, k1, b)\n        scores[cid] = score\n    return _ordered(scores)\n\n\ndef _dot(a, b):\n    \"\"\"TODO 3 of 7 (finish this to pass m1): the dot product of two vectors of the same length.\n\n    Receives two lists of numbers. Returns the sum of the products of the numbers in the same place (the vectors of embed() have length 1,\n    so this is their cosine). Example: _dot([1.0, 2.0], [3.0, 4.0]) -> 11.0\n    \"\"\"\n    return 0.0\n\n\ndef embedding_rank(chunks, query, index_text=None):\n    \"\"\"Chunk ids by cosine similarity of embed() vectors, best first, ties by id, zero similarity left out.\"\"\"\n    q = embed(query)\n    scores = {}\n    for cid, text in _texts(chunks, index_text).items():\n        scores[cid] = _dot(q, embed(text))\n    return _ordered(scores)\n\n\ndef fuse(rankings, k=60):\n    \"\"\"Reciprocal rank fusion: each id scores the sum of 1 / (k + rank) over the lists that hold it (rank from 1, a repeat\n    in one list ignored); best first, ties by id.\"\"\"\n    # TODO 4 of 7 (finish this to pass e3): reciprocal rank fusion of the lists in `rankings`.\n    # Returns the ids best first: an id scores the sum of 1 / (k + rank) over the lists that hold it (rank starts at 1, a repeat in one list is\n    # ignored); _ordered(scores) sorts a dict of scores best first, ties by id, and leaves out scores of 0 or less.\n    # Example: fuse([[\"a\", \"b\"], [\"b\", \"c\"]]) -> [\"b\", \"a\", \"c\"]\n    return []\n\n\ndef rerank(query, ids, texts, scorer, top_n=None):\n    \"\"\"The given ids reordered by scorer(query, text) high to low (equal scores keep their input order), cut to top_n.\"\"\"\n    # TODO 5 of 7 (finish this to pass e4): the ids ordered by scorer(query, texts[id]) high to low.\n    # Equal scores keep their input order (a stable sort); cut to top_n when it is not None. Only the given ids take part.\n    # Example: rerank(\"q\", [\"a\", \"b\"], {\"a\": \"x\", \"b\": \"xx\"}, lambda q, t: len(t)) -> [\"b\", \"a\"]\n    return list(ids)\n\n\ndef recall_at_k(ids, doc_of, relevant, k):\n    \"\"\"The share of the relevant documents that appear among the documents of the first k chunk ids.\"\"\"\n    if not relevant:\n        raise ValueError(\"relevant must not be empty\")\n    # TODO 6 of 7 (finish this to pass e5): the share of the relevant documents found among the documents of the first k chunk ids.\n    # A document counts once however many of its chunks are there; `relevant` is not empty here. Returns a number from 0 to 1.\n    # Example: recall_at_k([\"a#0\", \"a#1\", \"b#0\"], {\"a#0\": \"a\", \"a#1\": \"a\", \"b#0\": \"b\"}, [\"a\", \"c\"], 3) -> 0.5\n    return 0.0\n\n\ndef _indexed_text(chunks, contexts):\n    \"\"\"TODO 7 of 7 (finish this to pass e6): the text each chunk is indexed under when it has a context sentence.\n\n    Receives the chunks and `contexts` (None or a dict from chunk id to a sentence). Returns a dict from chunk id to the sentence, a space\n    and the chunk's text, for the chunks that have a sentence only; the chunks themselves are not changed.\n    Example: _indexed_text([{\"id\": \"a#0\", \"text\": \"x\"}], {\"a#0\": \"About a.\"}) -> {\"a#0\": \"About a. x\"}\n    \"\"\"\n    return {}\n\n\ndef retrieve(chunks, query, mode=\"hybrid\", k=3, pool=10, contexts=None, scorer=None):\n    \"\"\"The ids of the best k chunks. mode is bm25, embedding or hybrid (fusion of both). `contexts` maps chunk ids to a\n    sentence that is indexed in front of the chunk's text; `scorer` reranks the first `pool` ids of the ranking.\"\"\"\n    log.debug(\"retrieve input: mode=%s k=%s query=%r\", mode, k, query)\n    index_text = _indexed_text(chunks, contexts)\n    lexical = bm25_rank(chunks, query, index_text)\n    semantic = embedding_rank(chunks, query, index_text)\n    ranked = lexical if mode == \"bm25\" else semantic if mode == \"embedding\" else fuse([lexical, semantic])\n    if scorer is None:\n        return ranked[:k]\n    return rerank(query, ranked[:pool], {c[\"id\"]: c[\"text\"] for c in chunks}, scorer, k)\n\n\ndef evaluate(chunks, queries, mode=\"hybrid\", k=3, **options):\n    \"\"\"The mean recall@k over [{\"query\", \"relevant\": [doc ids]}].\"\"\"\n    doc_of = {c[\"id\"]: c[\"doc\"] for c in chunks}\n    scores = [recall_at_k(retrieve(chunks, q[\"query\"], mode, k, **options), doc_of, q[\"relevant\"], k) for q in queries]\n    return sum(scores) / len(scores)\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom retrieval import build_chunks, evaluate, retrieve\n\n# A tiny corpus like the test fixture: two documents, cut into windows of 14 words that overlap by 4.\ncorpus = [\n    {\"id\": \"refunds\", \"text\": \"Refund policy: customers may request a refund within 30 days of purchase. Refunds are issued to the \"\n                              \"original payment method within five business days. Digital goods are not refundable after download.\"},\n    {\"id\": \"shipping\", \"text\": \"Shipping: orders over 50 euros ship free of charge. Standard delivery takes three to five business \"\n                               \"days, express delivery takes one day.\"},\n]\nchunks = build_chunks(corpus, 14, 4) or []\nprint(\"chunks:\", [c[\"id\"] for c in chunks])\n\nquery = \"free shipping threshold\"\nfor mode in (\"bm25\", \"embedding\", \"hybrid\"):\n    print(f\"{mode} top 3:\", retrieve(chunks, query, mode, 3))\n\n# Recall@3 over one question whose answer we know.\nprint(\"hybrid recall@3:\", evaluate(chunks, [{\"query\": query, \"relevant\": [\"shipping\"]}], \"hybrid\", 3) if chunks else None)\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 6,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "5dbb0cc7b1f5d331618065195fee1370b4d8bc9e41adf806775693e1630cc87a",
+  "starting_code": "\"\"\"A retrieval pipeline: chunking, lexical and embedding search, fusion, reranking and recall. See ../../statement.md.\"\"\"\nimport logging\nimport math\nimport re\n\nlog = logging.getLogger(__name__)\n\n\ndef tokenize(text):\n    \"\"\"Lower-case words and numbers: the runs of [a-z0-9] in the text.\"\"\"\n    return re.findall(r\"[a-z0-9]+\", text.lower())\n\n\n# ---- given: a deterministic toy embedding (not a real model) -------------------------------------------------------\nDIMS = 64\n\n\ndef _fnv1a(text):\n    h = 2166136261\n    for byte in text.encode(\"utf-8\"):\n        h = ((h ^ byte) * 16777619) & 0xFFFFFFFF\n    return h\n\n\ndef embed(text):\n    \"\"\"64 numbers: letter-trigram counts of the tokenised text hashed into buckets, scaled to length 1.\n    It sees spelling, not meaning: 'delete' and 'deleting' are close, 'delete' and 'remove' are not.\"\"\"\n    padded = \" \" + \" \".join(tokenize(text)) + \" \"\n    vector = [0.0] * DIMS\n    for i in range(len(padded) - 2):\n        vector[_fnv1a(padded[i:i + 3]) % DIMS] += 1.0\n    length = math.sqrt(sum(x * x for x in vector))\n    return [x / length for x in vector] if length else vector\n# ---------------------------------------------------------------------------------------------------------------------\n\n\ndef chunk(text, size, overlap):\n    \"\"\"Windows of `size` words that start `size - overlap` words apart; the last window ends at the last word.\"\"\"\n    if size < 1 or overlap < 0 or overlap >= size:\n        raise ValueError(\"size must be at least 1 and overlap must be in 0 .. size - 1\")\n    return _windows(text.split(), size, overlap)\n\n\ndef _windows(words, size, overlap):\n    \"\"\"TODO 1 of 7 (finish this to pass e1): the windows over a list of words.\n\n    Receives the words, size and overlap (already checked). Returns the windows as strings of the words joined by one space: each holds\n    `size` words, the next starts `size - overlap` words later, and the loop stops at the first window that reaches the last word (so the\n    last window ends at the last word and none is repeated). No words gives [].\n    Example: _windows(\"a b c d e\".split(), 3, 1) -> [\"a b c\", \"c d e\"]\n    \"\"\"\n    return []\n\n\ndef build_chunks(corpus, size, overlap):\n    \"\"\"[{\"id\": \"<doc>#<n>\", \"doc\", \"text\"}] for every document of [{\"id\", \"text\"}], in order.\"\"\"\n    return [{\"id\": f\"{doc['id']}#{n}\", \"doc\": doc[\"id\"], \"text\": piece}\n            for doc in corpus for n, piece in enumerate(chunk(doc[\"text\"], size, overlap))]\n\n\ndef _texts(chunks, index_text):\n    return {c[\"id\"]: (index_text or {}).get(c[\"id\"], c[\"text\"]) for c in chunks}\n\n\ndef _ordered(scores):\n    return [cid for cid, score in sorted(scores.items(), key=lambda kv: (-kv[1], kv[0])) if score > 0]\n\n\ndef _term_score(tf, df, n, length, average, k1, b):\n    \"\"\"TODO 2 of 7 (finish this to pass e2): the BM25 score one query term gives one chunk.\n\n    Receives the term's count in the chunk (tf, at least 1), the number of chunks that hold the term (df), the number of chunks (n), the chunk's\n    length in tokens, the average length, k1 and b. Returns idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * length / average)) with\n    idf = ln(1 + (n - df + 0.5) / (df + 0.5)). A rare term has a large idf; a short chunk gets a larger score than a long one.\n    Example: _term_score(1, 1, 4, 5, 5.0, 1.5, 0.75) is about 1.2 times ln(1 + 3.5 / 1.5)\n    \"\"\"\n    return 0.0\n\n\ndef bm25_rank(chunks, query, index_text=None, k1=1.5, b=0.75):\n    \"\"\"Chunk ids by BM25 score, best first, ties by id, chunks that share no word with the query left out.\"\"\"\n    docs = {cid: tokenize(text) for cid, text in _texts(chunks, index_text).items()}\n    n = len(docs)\n    average = sum(len(d) for d in docs.values()) / n if n else 0.0\n    df = {}\n    for tokens in docs.values():\n        for term in set(tokens):\n            df[term] = df.get(term, 0) + 1\n    terms = list(dict.fromkeys(tokenize(query)))\n    scores = {}\n    for cid, tokens in docs.items():\n        score = 0.0\n        for term in terms:\n            tf = tokens.count(term)\n            if tf == 0:\n                continue\n            score += _term_score(tf, df[term], n, len(tokens), average, k1, b)\n        scores[cid] = score\n    return _ordered(scores)\n\n\ndef _dot(a, b):\n    \"\"\"TODO 3 of 7 (finish this to pass m1): the dot product of two vectors of the same length.\n\n    Receives two lists of numbers. Returns the sum of the products of the numbers in the same place (the vectors of embed() have length 1,\n    so this is their cosine). Example: _dot([1.0, 2.0], [3.0, 4.0]) -> 11.0\n    \"\"\"\n    return 0.0\n\n\ndef embedding_rank(chunks, query, index_text=None):\n    \"\"\"Chunk ids by cosine similarity of embed() vectors, best first, ties by id, zero similarity left out.\"\"\"\n    q = embed(query)\n    scores = {}\n    for cid, text in _texts(chunks, index_text).items():\n        scores[cid] = _dot(q, embed(text))\n    return _ordered(scores)\n\n\ndef fuse(rankings, k=60):\n    \"\"\"Reciprocal rank fusion: each id scores the sum of 1 / (k + rank) over the lists that hold it (rank from 1, a repeat\n    in one list ignored); best first, ties by id.\"\"\"\n    # TODO 4 of 7 (finish this to pass e3): reciprocal rank fusion of the lists in `rankings`.\n    # Returns the ids best first: an id scores the sum of 1 / (k + rank) over the lists that hold it (rank starts at 1, a repeat in one list is\n    # ignored); _ordered(scores) sorts a dict of scores best first, ties by id, and leaves out scores of 0 or less.\n    # Example: fuse([[\"a\", \"b\"], [\"b\", \"c\"]]) -> [\"b\", \"a\", \"c\"]\n    return []\n\n\ndef rerank(query, ids, texts, scorer, top_n=None):\n    \"\"\"The given ids reordered by scorer(query, text) high to low (equal scores keep their input order), cut to top_n.\"\"\"\n    # TODO 5 of 7 (finish this to pass e4): the ids ordered by scorer(query, texts[id]) high to low.\n    # Equal scores keep their input order (a stable sort); cut to top_n when it is not None. Only the given ids take part.\n    # Example: rerank(\"q\", [\"a\", \"b\"], {\"a\": \"x\", \"b\": \"xx\"}, lambda q, t: len(t)) -> [\"b\", \"a\"]\n    return list(ids)\n\n\ndef recall_at_k(ids, doc_of, relevant, k):\n    \"\"\"The share of the relevant documents that appear among the documents of the first k chunk ids.\"\"\"\n    if not relevant:\n        raise ValueError(\"relevant must not be empty\")\n    # TODO 6 of 7 (finish this to pass e5): the share of the relevant documents found among the documents of the first k chunk ids.\n    # A document counts once however many of its chunks are there; `relevant` is not empty here. Returns a number from 0 to 1.\n    # Example: recall_at_k([\"a#0\", \"a#1\", \"b#0\"], {\"a#0\": \"a\", \"a#1\": \"a\", \"b#0\": \"b\"}, [\"a\", \"c\"], 3) -> 0.5\n    return 0.0\n\n\ndef _indexed_text(chunks, contexts):\n    \"\"\"TODO 7 of 7 (finish this to pass e6): the text each chunk is indexed under when it has a context sentence.\n\n    Receives the chunks and `contexts` (None or a dict from chunk id to a sentence). Returns a dict from chunk id to the sentence, a space\n    and the chunk's text, for the chunks that have a sentence only; the chunks themselves are not changed.\n    Example: _indexed_text([{\"id\": \"a#0\", \"text\": \"x\"}], {\"a#0\": \"About a.\"}) -> {\"a#0\": \"About a. x\"}\n    \"\"\"\n    return {}\n\n\ndef retrieve(chunks, query, mode=\"hybrid\", k=3, pool=10, contexts=None, scorer=None):\n    \"\"\"The ids of the best k chunks. mode is bm25, embedding or hybrid (fusion of both). `contexts` maps chunk ids to a\n    sentence that is indexed in front of the chunk's text; `scorer` reranks the first `pool` ids of the ranking.\"\"\"\n    log.debug(\"retrieve input: mode=%s k=%s query=%r\", mode, k, query)\n    index_text = _indexed_text(chunks, contexts)\n    lexical = bm25_rank(chunks, query, index_text)\n    semantic = embedding_rank(chunks, query, index_text)\n    ranked = lexical if mode == \"bm25\" else semantic if mode == \"embedding\" else fuse([lexical, semantic])\n    if scorer is None:\n        return ranked[:k]\n    return rerank(query, ranked[:pool], {c[\"id\"]: c[\"text\"] for c in chunks}, scorer, k)\n\n\ndef evaluate(chunks, queries, mode=\"hybrid\", k=3, **options):\n    \"\"\"The mean recall@k over [{\"query\", \"relevant\": [doc ids]}].\"\"\"\n    doc_of = {c[\"id\"]: c[\"doc\"] for c in chunks}\n    scores = [recall_at_k(retrieve(chunks, q[\"query\"], mode, k, **options), doc_of, q[\"relevant\"], k) for q in queries]\n    return sum(scores) / len(scores)\n",
+  "exercise": {
+    "main_path": "practice/level-2/28-retrieval/prose/unit-02/practice-1/retrieval.py",
+    "test_path": "practice/level-2/28-retrieval/prose/unit-02/practice-1/test_retrieval.py",
+    "run_command": [
+      "python3",
+      "practice/level-2/28-retrieval/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-2/28-retrieval/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-2/28-retrieval/prose/unit-02/practice-1/test_retrieval.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_hybrid_search_finds_what_each_single_index_misses",
+        "kind": "main",
+        "says": "Hybrid search finds what each single index misses, measured on a small knowledge base"
+      },
+      {
+        "id": "test_e1_chunks_overlap_and_end_at_the_last_word",
+        "kind": "edge",
+        "says": "Chunks overlap and end at the last word"
+      },
+      {
+        "id": "test_e2_a_rare_word_outweighs_common_ones_and_short_chunks_win",
+        "kind": "edge",
+        "says": "A rare word outweighs common ones, and short chunks win"
+      },
+      {
+        "id": "test_e3_fusion_rewards_agreement_and_breaks_ties_by_id",
+        "kind": "edge",
+        "says": "Fusion rewards agreement between lists and breaks ties by id"
+      },
+      {
+        "id": "test_e4_reranking_orders_the_pool_by_the_scorer",
+        "kind": "edge",
+        "says": "Reranking orders only the pool by the scorer"
+      },
+      {
+        "id": "test_e5_recall_counts_documents_not_chunks",
+        "kind": "edge",
+        "says": "Recall counts documents, not chunks"
+      },
+      {
+        "id": "test_e6_a_context_sentence_makes_a_bare_chunk_findable",
+        "kind": "edge",
+        "says": "A context sentence makes a bare chunk findable"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/28-retrieval/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/28-retrieval/02-fusion-reranking-context-and-recall.md",
+    "concepts": [
+      "the practice of Fusion, reranking, context and recall is solved"
+    ],
+    "files": [
+      "practice/level-2/28-retrieval/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "retrieval-u2"
+}

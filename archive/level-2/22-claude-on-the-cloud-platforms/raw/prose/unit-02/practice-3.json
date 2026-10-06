@@ -1,0 +1,267 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "22-claude-on-the-cloud-platforms"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: one request, three front doors (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: one request, three front doors"
+    },
+    {
+      "type": "para",
+      "text": "The same Messages request can go to the direct API, to Claude in Amazon Bedrock or to Claude on Google Vertex AI. The body is nearly the same; the URL, the model id, where the version goes and the features available are not. Write the function that builds the request for each platform and the function that tells a team which features it would lose. The shapes come from the Claude documentation pages for Amazon Bedrock and Google Cloud, read on 2026-10-02; the lesson pages explain them. Nothing here signs a request or touches the network: authentication (AWS SigV4, a Google access token or an API key) is added by an SDK or a proxy and is not part of what you build."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given data"
+    },
+    {
+      "type": "para",
+      "text": "`build_request(platform, model, body, config)` takes `platform` (`anthropic`, `bedrock` or `vertex`), `model` (the id on the direct API, for example `claude-opus-5-5` or `claude-haiku-4-5-20251001`), `body` (a Messages request body) and `config` (a map with `region` for Bedrock, `project` and `endpoint` for Vertex). It returns a map with `method`, `url`, `headers` (without any credential) and `body`, and raises `PlatformError` (`field` names the offending part: `platform`, `model`, `config`, `endpoint` or `feature`). The four course models and `claude-sonnet-4-6` are the only models to handle."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working request builder with seven gaps cut out of it. Everything that is plumbing is written and correct: the constants and feature tables, `PlatformError`, the direct API request, the shape of the Bedrock and Vertex requests, the deep copy of the body, the check that the Vertex model and project are given, and the check that a platform and its features are known. Each gap is a small function with its signature, a comment that says what it receives and returns, one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. Python names them with a leading underscore; TypeScript, Java and Kotlin use camel case without it (`checkBedrock`, `vertexHost`). Write them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_family` unlocks `e1`: a dated and an undated Haiku id are one family.",
+        "`_check_bedrock` unlocks `e4` and `e6`: a model Bedrock does not serve and a missing region are refused.",
+        "`_bedrock_model_id` unlocks `m1` and `e1`: `anthropic.` and the family.",
+        "`_vertex_model_id` unlocks `e1`: the dated Haiku id in a Vertex URL.",
+        "`_vertex_host` unlocks `m1` and `e3`: the host of a global, multi-region or regional endpoint, and which models a region serves.",
+        "`_vertex_body` unlocks `e2`: no model, a version field, and the caller's body left alone.",
+        "`_lacking` unlocks `e5`: the features a platform lacks."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About a dozen lines in all. To see what a gap receives, log its input with the `log` line at the top of the file: `build_request` already logs its input at debug level, and a run shows the logged lines under the failing case."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "`build_request`"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Direct API:** `POST https://api.anthropic.com/v1/messages`, headers `anthropic-version: 2023-06-01` and `content-type: application/json`, the model in the body.",
+        "**Bedrock:** `POST https://bedrock-mantle.<region>.api.aws/anthropic/v1/messages`, the same two headers, and the model in the body as the Bedrock id: `anthropic.` followed by the model name without a date (`anthropic.claude-opus-5-5`, `anthropic.claude-haiku-4-5` for both `claude-haiku-4-5-20251001` and `claude-haiku-4-5`). Bedrock's Messages endpoint serves the Fable 5.1, Opus 5.5, Sonnet 5.5 and Haiku 4.5 models here; `claude-sonnet-4-6` is `model`. A missing or empty `region` is `config`.",
+        "**Vertex:** the model is **not** in the body but in the URL, and the version is **not** a header but a body field `anthropic_version` with the value `vertex-2023-10-16`; the only header is `content-type`. The URL is `https://<host>/v1/projects/<project>/locations/<endpoint>/publishers/anthropic/models/<model id>:rawPredict`. The endpoint (default `global`) picks the host: `global` is `aiplatform.googleapis.com`; the multi-region endpoints `us` and `eu` are `aiplatform.us.rep.googleapis.com` and `aiplatform.eu.rep.googleapis.com`; any other value is a specific region and the host is `<region>-aiplatform.googleapis.com`, which serves `claude-sonnet-4-6` only (any other model with a specific region is `endpoint`). The Vertex model id is the model name, with `claude-haiku-4-5@20251001` for Haiku 4.5. A missing or empty `project` is `config`. The five models above are served; any other is `model`.",
+        "An unknown platform is `platform`. Never change the `body` you were given."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "`unsupported_features(platform, features)` (TypeScript `unsupportedFeatures`, Java `Platforms.unsupportedFeatures`, Kotlin `unsupportedFeatures`)"
+    },
+    {
+      "type": "para",
+      "text": "Return the features of the list that the platform lacks, in the order given; an unknown platform or feature is a `PlatformError`. The direct API lacks none. Bedrock lacks `batches` (the Message Batches API), `fast_mode`, `files_api`, `web_search`, `web_fetch`, `code_execution`, `mcp_connector`, `structured_outputs`, `skills` and `managed_agents`. Vertex lacks `batches`, `fast_mode`, `files_api`, `web_fetch`, `code_execution`, `mcp_connector`, `skills` and `managed_agents`. The other names (`prompt_caching`, `thinking`, `tool_use`, `citations`) are available everywhere."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "The same message takes three shapes: URL, headers and model place for each platform"
+        ],
+        [
+          "`e1`",
+          "Model ids change with the platform"
+        ],
+        [
+          "`e2`",
+          "Vertex moves the model into the URL and the version into the body, and the caller's body is never changed"
+        ],
+        [
+          "`e3`",
+          "Vertex global, multi-region and regional endpoints, and which models a regional endpoint serves"
+        ],
+        [
+          "`e4`",
+          "A platform serves only its own models"
+        ],
+        [
+          "`e5`",
+          "Each platform lacks its own features"
+        ],
+        [
+          "`e6`",
+          "A request needs the place it is sent to (region or project)"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\n\n/** One request, three front doors: the direct API, Amazon Bedrock and Google Vertex AI. See ../../statement.md. */\nfinal class Platforms {\n    private static final System.Logger LOG = System.getLogger(Platforms.class.getName());\n    private Platforms() {}\n\n    private static final String ANTHROPIC_VERSION = \"2023-06-01\";\n    private static final String VERTEX_VERSION = \"vertex-2023-10-16\";\n    private static final String HAIKU = \"claude-haiku-4-5\";\n    private static final String HAIKU_VERTEX = \"claude-haiku-4-5@20251001\";\n    private static final Set<String> BEDROCK_MODELS = Set.of(\"claude-fable-5-1\", \"claude-opus-5-5\", \"claude-sonnet-5-5\", HAIKU);\n    private static final Set<String> VERTEX_MODELS = Set.of(\"claude-fable-5-1\", \"claude-opus-5-5\", \"claude-sonnet-5-5\", HAIKU, \"claude-sonnet-4-6\");\n    private static final Set<String> REGIONAL_VERTEX_MODELS = Set.of(\"claude-sonnet-4-6\"); // specific regions serve Sonnet 4.6 and earlier only\n    private static final Map<String, Set<String>> MISSING = Map.of(\n            \"anthropic\", Set.of(),\n            \"bedrock\", Set.of(\"batches\", \"fast_mode\", \"files_api\", \"web_search\", \"web_fetch\", \"code_execution\", \"mcp_connector\", \"structured_outputs\", \"skills\", \"managed_agents\"),\n            \"vertex\", Set.of(\"batches\", \"fast_mode\", \"files_api\", \"web_fetch\", \"code_execution\", \"mcp_connector\", \"skills\", \"managed_agents\"));\n    private static final Set<String> FEATURES = Set.of(\"batches\", \"fast_mode\", \"files_api\", \"web_search\", \"web_fetch\", \"code_execution\", \"mcp_connector\",\n            \"structured_outputs\", \"skills\", \"managed_agents\", \"prompt_caching\", \"thinking\", \"tool_use\", \"citations\");\n\n    private static String family(String model) {\n        return model.startsWith(HAIKU) ? HAIKU : model;\n    }\n\n    private static void checkBedrock(String model, String family, Map<String, Object> config) {\n        if (!BEDROCK_MODELS.contains(family)) throw new PlatformError(\"model\", model + \" is not served by Claude in Amazon Bedrock\");\n        if (blank(config.get(\"region\"))) throw new PlatformError(\"config\", \"a Bedrock request needs a region\");\n    }\n\n    private static String bedrockModelId(String family) {\n        return \"anthropic.\" + family;\n    }\n\n    private static String vertexModelId(String family) {\n        return family.equals(HAIKU) ? HAIKU_VERTEX : family;\n    }\n\n    private static String vertexHost(String endpoint, String family, String model) {\n        if (endpoint.equals(\"global\")) return \"aiplatform.googleapis.com\";\n        if (endpoint.equals(\"us\") || endpoint.equals(\"eu\")) return \"aiplatform.\" + endpoint + \".rep.googleapis.com\";\n        if (!REGIONAL_VERTEX_MODELS.contains(family)) {\n            throw new PlatformError(\"endpoint\", model + \" is served on the global and multi-region endpoints, not on a specific region\");\n        }\n        return endpoint + \"-aiplatform.googleapis.com\";\n    }\n\n    private static Map<String, Object> vertexBody(Map<String, Object> body) {\n        Map<String, Object> sent = copyBody(body);\n        sent.remove(\"model\");\n        sent.put(\"anthropic_version\", VERTEX_VERSION);\n        return sent;\n    }\n\n    private static List<String> lacking(String platform, List<String> features) {\n        List<String> out = new ArrayList<>();\n        for (String name : features) if (MISSING.get(platform).contains(name)) out.add(name);\n        return out;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static Object copy(Object value) {\n        if (value instanceof Map<?, ?> m) {\n            Map<String, Object> out = new LinkedHashMap<>();\n            for (Map.Entry<String, Object> e : ((Map<String, Object>) m).entrySet()) out.put(e.getKey(), copy(e.getValue()));\n            return out;\n        }\n        if (value instanceof List<?> l) {\n            List<Object> out = new ArrayList<>();\n            for (Object x : l) out.add(copy(x));\n            return out;\n        }\n        return value;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static Map<String, Object> copyBody(Map<String, Object> body) {\n        return (Map<String, Object>) copy(body);\n    }\n\n    private static Map<String, Object> request(String url, Map<String, Object> headers, Map<String, Object> body) {\n        Map<String, Object> r = new LinkedHashMap<>();\n        r.put(\"method\", \"POST\");\n        r.put(\"url\", url);\n        r.put(\"headers\", headers);\n        r.put(\"body\", body);\n        return r;\n    }\n\n    private static Map<String, Object> versionHeaders() {\n        Map<String, Object> h = new LinkedHashMap<>();\n        h.put(\"anthropic-version\", ANTHROPIC_VERSION);\n        h.put(\"content-type\", \"application/json\");\n        return h;\n    }\n\n    private static boolean blank(Object s) {\n        return s == null || ((String) s).isEmpty();\n    }\n\n    static Map<String, Object> buildRequest(String platform, String model, Map<String, Object> body, Map<String, Object> config) {\n        LOG.log(System.Logger.Level.DEBUG, \"buildRequest input: {0} {1} {2} {3}\", platform, model, body, config);\n        String family = family(model);\n        switch (platform) {\n            case \"anthropic\": {\n                Map<String, Object> sent = copyBody(body);\n                sent.put(\"model\", model);\n                return request(\"https://api.anthropic.com/v1/messages\", versionHeaders(), sent);\n            }\n            case \"bedrock\": {\n                checkBedrock(model, family, config);\n                Map<String, Object> sent = copyBody(body);\n                sent.put(\"model\", bedrockModelId(family));\n                return request(\"https://bedrock-mantle.\" + config.get(\"region\") + \".api.aws/anthropic/v1/messages\", versionHeaders(), sent);\n            }\n            case \"vertex\": {\n                if (!VERTEX_MODELS.contains(family)) throw new PlatformError(\"model\", model + \" is not served on Google Vertex AI\");\n                if (blank(config.get(\"project\"))) throw new PlatformError(\"config\", \"a Vertex request needs a project\");\n                String endpoint = config.get(\"endpoint\") == null ? \"global\" : (String) config.get(\"endpoint\");\n                String path = \"/v1/projects/\" + config.get(\"project\") + \"/locations/\" + endpoint + \"/publishers/anthropic/models/\" + vertexModelId(family) + \":rawPredict\";\n                String host = vertexHost(endpoint, family, model);\n                Map<String, Object> headers = new LinkedHashMap<>();\n                headers.put(\"content-type\", \"application/json\");\n                return request(\"https://\" + host + path, headers, vertexBody(body));\n            }\n            default:\n                throw new PlatformError(\"platform\", \"unknown platform \" + platform);\n        }\n    }\n\n    static List<String> unsupportedFeatures(String platform, List<String> features) {\n        Set<String> missing = MISSING.get(platform);\n        if (missing == null) throw new PlatformError(\"platform\", \"unknown platform \" + platform);\n        for (String name : features) if (!FEATURES.contains(name)) throw new PlatformError(\"feature\", \"unknown feature \" + name);\n        return lacking(platform, features);\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        Map<String, Object> body = Map.of(\"model\", \"ignored-by-the-builder\", \"max_tokens\", 256,\n            \"messages\", List.of(Map.of(\"role\", \"user\", \"content\", \"Hello, Claude\")));\n        String opus = \"claude-opus-5-5\";\n\n        // The same message for three front doors: the URL, the model id and the version header change.\n        try {\n            Map<String, Map<String, Object>> doors = new java.util.LinkedHashMap<>();\n            doors.put(\"anthropic\", Map.of());\n            doors.put(\"bedrock\", Map.of(\"region\", \"us-east-1\"));\n            doors.put(\"vertex\", Map.of(\"project\", \"my-project\"));\n            for (var door : doors.entrySet()) {\n                Map<String, Object> request = Platforms.buildRequest(door.getKey(), opus, new java.util.HashMap<>(body), door.getValue());\n                Object reqBody = request == null ? null : request.get(\"body\");\n                Object headers = request == null ? null : request.get(\"headers\");\n                System.out.println(door.getKey() + \" -> \" + (request == null ? null : request.get(\"url\"))\n                    + \" | model in body: \" + (reqBody instanceof Map<?, ?> b ? b.get(\"model\") : null)\n                    + \" | headers: \" + (headers instanceof Map<?, ?> h ? new java.util.TreeSet<>(h.keySet()) : null));\n            }\n        } catch (PlatformError err) {\n            System.out.println(\"platform error: \" + err.getMessage());\n        }\n\n        // What a team would lose by moving to Bedrock.\n        System.out.println(\"missing on bedrock: \" + Platforms.unsupportedFeatures(\"bedrock\", List.of(\"batches\", \"fast_mode\", \"files_api\")));\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\n\n/** One request, three front doors: the direct API, Amazon Bedrock and Google Vertex AI. See ../../statement.md. */\nfinal class Platforms {\n    private static final System.Logger LOG = System.getLogger(Platforms.class.getName());\n    private Platforms() {}\n\n    private static final String ANTHROPIC_VERSION = \"2023-06-01\";\n    private static final String VERTEX_VERSION = \"vertex-2023-10-16\";\n    private static final String HAIKU = \"claude-haiku-4-5\";\n    private static final String HAIKU_VERTEX = \"claude-haiku-4-5@20251001\";\n    private static final Set<String> BEDROCK_MODELS = Set.of(\"claude-fable-5-1\", \"claude-opus-5-5\", \"claude-sonnet-5-5\", HAIKU);\n    private static final Set<String> VERTEX_MODELS = Set.of(\"claude-fable-5-1\", \"claude-opus-5-5\", \"claude-sonnet-5-5\", HAIKU, \"claude-sonnet-4-6\");\n    private static final Set<String> REGIONAL_VERTEX_MODELS = Set.of(\"claude-sonnet-4-6\"); // specific regions serve Sonnet 4.6 and earlier only\n    private static final Map<String, Set<String>> MISSING = Map.of(\n            \"anthropic\", Set.of(),\n            \"bedrock\", Set.of(\"batches\", \"fast_mode\", \"files_api\", \"web_search\", \"web_fetch\", \"code_execution\", \"mcp_connector\", \"structured_outputs\", \"skills\", \"managed_agents\"),\n            \"vertex\", Set.of(\"batches\", \"fast_mode\", \"files_api\", \"web_fetch\", \"code_execution\", \"mcp_connector\", \"skills\", \"managed_agents\"));\n    private static final Set<String> FEATURES = Set.of(\"batches\", \"fast_mode\", \"files_api\", \"web_search\", \"web_fetch\", \"code_execution\", \"mcp_connector\",\n            \"structured_outputs\", \"skills\", \"managed_agents\", \"prompt_caching\", \"thinking\", \"tool_use\", \"citations\");\n\n    private static String family(String model) {\n        // TODO 1 of 7 (finish this to pass e1): the model name without its date.\n        // Receives a model id. Returns HAIKU when the id starts with HAIKU (so a dated id such as claude-haiku-4-5-20251001 and the plain\n        // name are one family), the id itself otherwise. Example: \"claude-haiku-4-5-20251001\" -> \"claude-haiku-4-5\"\n        return model;\n    }\n\n    private static void checkBedrock(String model, String family, Map<String, Object> config) {\n        // TODO 2 of 7 (finish this to pass e4 and e6): refuse what Bedrock cannot take.\n        // Receives the model id, its family and the config map. Throws PlatformError(\"model\", reason) when the family is not in\n        // BEDROCK_MODELS, and PlatformError(\"config\", reason) when config has no region or an empty one (blank() tells).\n        // Example: claude-sonnet-4-6 with a region throws with field \"model\"\n    }\n\n    private static String bedrockModelId(String family) {\n        // TODO 3 of 7 (finish this to pass m1 and e1): the model id in a Bedrock body.\n        // Receives the family. Returns \"anthropic.\" followed by it. Example: \"claude-opus-5-5\" -> \"anthropic.claude-opus-5-5\"\n        return family;\n    }\n\n    private static String vertexModelId(String family) {\n        // TODO 4 of 7 (finish this to pass e1): the model id in a Vertex URL.\n        // Receives the family. Returns HAIKU_VERTEX for HAIKU and the family itself for the others.\n        // Example: \"claude-haiku-4-5\" -> \"claude-haiku-4-5@20251001\"\n        return family;\n    }\n\n    private static String vertexHost(String endpoint, String family, String model) {\n        // TODO 5 of 7 (finish this to pass m1 and e3): the host of a Vertex endpoint.\n        // Receives the endpoint, the model's family and the model id. Returns aiplatform.googleapis.com for \"global\",\n        // aiplatform.<endpoint>.rep.googleapis.com for \"us\" and \"eu\", and <endpoint>-aiplatform.googleapis.com for a specific region,\n        // which throws PlatformError(\"endpoint\", reason) unless the family is in REGIONAL_VERTEX_MODELS.\n        // Example: (\"eu\", \"claude-opus-5-5\", \"claude-opus-5-5\") -> \"aiplatform.eu.rep.googleapis.com\"\n        return \"\";\n    }\n\n    private static Map<String, Object> vertexBody(Map<String, Object> body) {\n        // TODO 6 of 7 (finish this to pass e2): the body Vertex takes.\n        // Receives the caller's body. Returns a deep copy (copyBody) without the \"model\" key (the model is in the URL) and with\n        // \"anthropic_version\" set to VERTEX_VERSION; the caller's own body is never changed.\n        // Example: {model: x, max_tokens: 5} -> {max_tokens: 5, anthropic_version: ...}\n        return copyBody(body);\n    }\n\n    private static List<String> lacking(String platform, List<String> features) {\n        // TODO 7 of 7 (finish this to pass e5): the features this platform lacks.\n        // Receives a known platform and a list of known feature names. Returns the names that are in MISSING.get(platform), in the order given.\n        // Example: (\"vertex\", [\"batches\", \"thinking\"]) -> [\"batches\"]\n        return new ArrayList<>();\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static Object copy(Object value) {\n        if (value instanceof Map<?, ?> m) {\n            Map<String, Object> out = new LinkedHashMap<>();\n            for (Map.Entry<String, Object> e : ((Map<String, Object>) m).entrySet()) out.put(e.getKey(), copy(e.getValue()));\n            return out;\n        }\n        if (value instanceof List<?> l) {\n            List<Object> out = new ArrayList<>();\n            for (Object x : l) out.add(copy(x));\n            return out;\n        }\n        return value;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static Map<String, Object> copyBody(Map<String, Object> body) {\n        return (Map<String, Object>) copy(body);\n    }\n\n    private static Map<String, Object> request(String url, Map<String, Object> headers, Map<String, Object> body) {\n        Map<String, Object> r = new LinkedHashMap<>();\n        r.put(\"method\", \"POST\");\n        r.put(\"url\", url);\n        r.put(\"headers\", headers);\n        r.put(\"body\", body);\n        return r;\n    }\n\n    private static Map<String, Object> versionHeaders() {\n        Map<String, Object> h = new LinkedHashMap<>();\n        h.put(\"anthropic-version\", ANTHROPIC_VERSION);\n        h.put(\"content-type\", \"application/json\");\n        return h;\n    }\n\n    private static boolean blank(Object s) {\n        return s == null || ((String) s).isEmpty();\n    }\n\n    static Map<String, Object> buildRequest(String platform, String model, Map<String, Object> body, Map<String, Object> config) {\n        LOG.log(System.Logger.Level.DEBUG, \"buildRequest input: {0} {1} {2} {3}\", platform, model, body, config);\n        String family = family(model);\n        switch (platform) {\n            case \"anthropic\": {\n                Map<String, Object> sent = copyBody(body);\n                sent.put(\"model\", model);\n                return request(\"https://api.anthropic.com/v1/messages\", versionHeaders(), sent);\n            }\n            case \"bedrock\": {\n                checkBedrock(model, family, config);\n                Map<String, Object> sent = copyBody(body);\n                sent.put(\"model\", bedrockModelId(family));\n                return request(\"https://bedrock-mantle.\" + config.get(\"region\") + \".api.aws/anthropic/v1/messages\", versionHeaders(), sent);\n            }\n            case \"vertex\": {\n                if (!VERTEX_MODELS.contains(family)) throw new PlatformError(\"model\", model + \" is not served on Google Vertex AI\");\n                if (blank(config.get(\"project\"))) throw new PlatformError(\"config\", \"a Vertex request needs a project\");\n                String endpoint = config.get(\"endpoint\") == null ? \"global\" : (String) config.get(\"endpoint\");\n                String path = \"/v1/projects/\" + config.get(\"project\") + \"/locations/\" + endpoint + \"/publishers/anthropic/models/\" + vertexModelId(family) + \":rawPredict\";\n                String host = vertexHost(endpoint, family, model);\n                Map<String, Object> headers = new LinkedHashMap<>();\n                headers.put(\"content-type\", \"application/json\");\n                return request(\"https://\" + host + path, headers, vertexBody(body));\n            }\n            default:\n                throw new PlatformError(\"platform\", \"unknown platform \" + platform);\n        }\n    }\n\n    static List<String> unsupportedFeatures(String platform, List<String> features) {\n        Set<String> missing = MISSING.get(platform);\n        if (missing == null) throw new PlatformError(\"platform\", \"unknown platform \" + platform);\n        for (String name : features) if (!FEATURES.contains(name)) throw new PlatformError(\"feature\", \"unknown feature \" + name);\n        return lacking(platform, features);\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        Map<String, Object> body = Map.of(\"model\", \"ignored-by-the-builder\", \"max_tokens\", 256,\n            \"messages\", List.of(Map.of(\"role\", \"user\", \"content\", \"Hello, Claude\")));\n        String opus = \"claude-opus-5-5\";\n\n        // The same message for three front doors: the URL, the model id and the version header change.\n        try {\n            Map<String, Map<String, Object>> doors = new java.util.LinkedHashMap<>();\n            doors.put(\"anthropic\", Map.of());\n            doors.put(\"bedrock\", Map.of(\"region\", \"us-east-1\"));\n            doors.put(\"vertex\", Map.of(\"project\", \"my-project\"));\n            for (var door : doors.entrySet()) {\n                Map<String, Object> request = Platforms.buildRequest(door.getKey(), opus, new java.util.HashMap<>(body), door.getValue());\n                Object reqBody = request == null ? null : request.get(\"body\");\n                Object headers = request == null ? null : request.get(\"headers\");\n                System.out.println(door.getKey() + \" -> \" + (request == null ? null : request.get(\"url\"))\n                    + \" | model in body: \" + (reqBody instanceof Map<?, ?> b ? b.get(\"model\") : null)\n                    + \" | headers: \" + (headers instanceof Map<?, ?> h ? new java.util.TreeSet<>(h.keySet()) : null));\n            }\n        } catch (PlatformError err) {\n            System.out.println(\"platform error: \" + err.getMessage());\n        }\n\n        // What a team would lose by moving to Bedrock.\n        System.out.println(\"missing on bedrock: \" + Platforms.unsupportedFeatures(\"bedrock\", List.of(\"batches\", \"fast_mode\", \"files_api\")));\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 6,
+    "code": 2,
+    "tables": 1,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "9b1b355d0f411ccfde66b7bb1151a42a34562fb8663403260033fb8cd3eb0de8",
+  "starting_code": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\n\n/** One request, three front doors: the direct API, Amazon Bedrock and Google Vertex AI. See ../../statement.md. */\nfinal class Platforms {\n    private static final System.Logger LOG = System.getLogger(Platforms.class.getName());\n    private Platforms() {}\n\n    private static final String ANTHROPIC_VERSION = \"2023-06-01\";\n    private static final String VERTEX_VERSION = \"vertex-2023-10-16\";\n    private static final String HAIKU = \"claude-haiku-4-5\";\n    private static final String HAIKU_VERTEX = \"claude-haiku-4-5@20251001\";\n    private static final Set<String> BEDROCK_MODELS = Set.of(\"claude-fable-5-1\", \"claude-opus-5-5\", \"claude-sonnet-5-5\", HAIKU);\n    private static final Set<String> VERTEX_MODELS = Set.of(\"claude-fable-5-1\", \"claude-opus-5-5\", \"claude-sonnet-5-5\", HAIKU, \"claude-sonnet-4-6\");\n    private static final Set<String> REGIONAL_VERTEX_MODELS = Set.of(\"claude-sonnet-4-6\"); // specific regions serve Sonnet 4.6 and earlier only\n    private static final Map<String, Set<String>> MISSING = Map.of(\n            \"anthropic\", Set.of(),\n            \"bedrock\", Set.of(\"batches\", \"fast_mode\", \"files_api\", \"web_search\", \"web_fetch\", \"code_execution\", \"mcp_connector\", \"structured_outputs\", \"skills\", \"managed_agents\"),\n            \"vertex\", Set.of(\"batches\", \"fast_mode\", \"files_api\", \"web_fetch\", \"code_execution\", \"mcp_connector\", \"skills\", \"managed_agents\"));\n    private static final Set<String> FEATURES = Set.of(\"batches\", \"fast_mode\", \"files_api\", \"web_search\", \"web_fetch\", \"code_execution\", \"mcp_connector\",\n            \"structured_outputs\", \"skills\", \"managed_agents\", \"prompt_caching\", \"thinking\", \"tool_use\", \"citations\");\n\n    private static String family(String model) {\n        // TODO 1 of 7 (finish this to pass e1): the model name without its date.\n        // Receives a model id. Returns HAIKU when the id starts with HAIKU (so a dated id such as claude-haiku-4-5-20251001 and the plain\n        // name are one family), the id itself otherwise. Example: \"claude-haiku-4-5-20251001\" -> \"claude-haiku-4-5\"\n        return model;\n    }\n\n    private static void checkBedrock(String model, String family, Map<String, Object> config) {\n        // TODO 2 of 7 (finish this to pass e4 and e6): refuse what Bedrock cannot take.\n        // Receives the model id, its family and the config map. Throws PlatformError(\"model\", reason) when the family is not in\n        // BEDROCK_MODELS, and PlatformError(\"config\", reason) when config has no region or an empty one (blank() tells).\n        // Example: claude-sonnet-4-6 with a region throws with field \"model\"\n    }\n\n    private static String bedrockModelId(String family) {\n        // TODO 3 of 7 (finish this to pass m1 and e1): the model id in a Bedrock body.\n        // Receives the family. Returns \"anthropic.\" followed by it. Example: \"claude-opus-5-5\" -> \"anthropic.claude-opus-5-5\"\n        return family;\n    }\n\n    private static String vertexModelId(String family) {\n        // TODO 4 of 7 (finish this to pass e1): the model id in a Vertex URL.\n        // Receives the family. Returns HAIKU_VERTEX for HAIKU and the family itself for the others.\n        // Example: \"claude-haiku-4-5\" -> \"claude-haiku-4-5@20251001\"\n        return family;\n    }\n\n    private static String vertexHost(String endpoint, String family, String model) {\n        // TODO 5 of 7 (finish this to pass m1 and e3): the host of a Vertex endpoint.\n        // Receives the endpoint, the model's family and the model id. Returns aiplatform.googleapis.com for \"global\",\n        // aiplatform.<endpoint>.rep.googleapis.com for \"us\" and \"eu\", and <endpoint>-aiplatform.googleapis.com for a specific region,\n        // which throws PlatformError(\"endpoint\", reason) unless the family is in REGIONAL_VERTEX_MODELS.\n        // Example: (\"eu\", \"claude-opus-5-5\", \"claude-opus-5-5\") -> \"aiplatform.eu.rep.googleapis.com\"\n        return \"\";\n    }\n\n    private static Map<String, Object> vertexBody(Map<String, Object> body) {\n        // TODO 6 of 7 (finish this to pass e2): the body Vertex takes.\n        // Receives the caller's body. Returns a deep copy (copyBody) without the \"model\" key (the model is in the URL) and with\n        // \"anthropic_version\" set to VERTEX_VERSION; the caller's own body is never changed.\n        // Example: {model: x, max_tokens: 5} -> {max_tokens: 5, anthropic_version: ...}\n        return copyBody(body);\n    }\n\n    private static List<String> lacking(String platform, List<String> features) {\n        // TODO 7 of 7 (finish this to pass e5): the features this platform lacks.\n        // Receives a known platform and a list of known feature names. Returns the names that are in MISSING.get(platform), in the order given.\n        // Example: (\"vertex\", [\"batches\", \"thinking\"]) -> [\"batches\"]\n        return new ArrayList<>();\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static Object copy(Object value) {\n        if (value instanceof Map<?, ?> m) {\n            Map<String, Object> out = new LinkedHashMap<>();\n            for (Map.Entry<String, Object> e : ((Map<String, Object>) m).entrySet()) out.put(e.getKey(), copy(e.getValue()));\n            return out;\n        }\n        if (value instanceof List<?> l) {\n            List<Object> out = new ArrayList<>();\n            for (Object x : l) out.add(copy(x));\n            return out;\n        }\n        return value;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static Map<String, Object> copyBody(Map<String, Object> body) {\n        return (Map<String, Object>) copy(body);\n    }\n\n    private static Map<String, Object> request(String url, Map<String, Object> headers, Map<String, Object> body) {\n        Map<String, Object> r = new LinkedHashMap<>();\n        r.put(\"method\", \"POST\");\n        r.put(\"url\", url);\n        r.put(\"headers\", headers);\n        r.put(\"body\", body);\n        return r;\n    }\n\n    private static Map<String, Object> versionHeaders() {\n        Map<String, Object> h = new LinkedHashMap<>();\n        h.put(\"anthropic-version\", ANTHROPIC_VERSION);\n        h.put(\"content-type\", \"application/json\");\n        return h;\n    }\n\n    private static boolean blank(Object s) {\n        return s == null || ((String) s).isEmpty();\n    }\n\n    static Map<String, Object> buildRequest(String platform, String model, Map<String, Object> body, Map<String, Object> config) {\n        LOG.log(System.Logger.Level.DEBUG, \"buildRequest input: {0} {1} {2} {3}\", platform, model, body, config);\n        String family = family(model);\n        switch (platform) {\n            case \"anthropic\": {\n                Map<String, Object> sent = copyBody(body);\n                sent.put(\"model\", model);\n                return request(\"https://api.anthropic.com/v1/messages\", versionHeaders(), sent);\n            }\n            case \"bedrock\": {\n                checkBedrock(model, family, config);\n                Map<String, Object> sent = copyBody(body);\n                sent.put(\"model\", bedrockModelId(family));\n                return request(\"https://bedrock-mantle.\" + config.get(\"region\") + \".api.aws/anthropic/v1/messages\", versionHeaders(), sent);\n            }\n            case \"vertex\": {\n                if (!VERTEX_MODELS.contains(family)) throw new PlatformError(\"model\", model + \" is not served on Google Vertex AI\");\n                if (blank(config.get(\"project\"))) throw new PlatformError(\"config\", \"a Vertex request needs a project\");\n                String endpoint = config.get(\"endpoint\") == null ? \"global\" : (String) config.get(\"endpoint\");\n                String path = \"/v1/projects/\" + config.get(\"project\") + \"/locations/\" + endpoint + \"/publishers/anthropic/models/\" + vertexModelId(family) + \":rawPredict\";\n                String host = vertexHost(endpoint, family, model);\n                Map<String, Object> headers = new LinkedHashMap<>();\n                headers.put(\"content-type\", \"application/json\");\n                return request(\"https://\" + host + path, headers, vertexBody(body));\n            }\n            default:\n                throw new PlatformError(\"platform\", \"unknown platform \" + platform);\n        }\n    }\n\n    static List<String> unsupportedFeatures(String platform, List<String> features) {\n        Set<String> missing = MISSING.get(platform);\n        if (missing == null) throw new PlatformError(\"platform\", \"unknown platform \" + platform);\n        for (String name : features) if (!FEATURES.contains(name)) throw new PlatformError(\"feature\", \"unknown feature \" + name);\n        return lacking(platform, features);\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/22-claude-on-the-cloud-platforms/prose/unit-02/practice-3/src/main/java/Platforms.java",
+    "test_path": "practice/level-2/22-claude-on-the-cloud-platforms/prose/unit-02/practice-3/src/test/java/PlatformsTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/22-claude-on-the-cloud-platforms/prose/unit-02/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/22-claude-on-the-cloud-platforms/prose/unit-02/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_theSameMessageTakesThreeShapes()",
+        "kind": "main",
+        "says": "The same message takes three shapes: URL, headers and model place for each platform"
+      },
+      {
+        "id": "e1_modelIdsChangeWithThePlatform()",
+        "kind": "edge",
+        "says": "Model ids change with the platform"
+      },
+      {
+        "id": "e2_vertexMovesTheModelIntoTheUrlAndTheVersionIntoTheBody()",
+        "kind": "edge",
+        "says": "Vertex moves the model into the URL and the version into the body, and the caller's body is never changed"
+      },
+      {
+        "id": "e3_vertexEndpointsGlobalMultiRegionAndRegional()",
+        "kind": "edge",
+        "says": "Vertex global, multi-region and regional endpoints, and which models a regional endpoint serves"
+      },
+      {
+        "id": "e4_aPlatformServesOnlyItsOwnModels()",
+        "kind": "edge",
+        "says": "A platform serves only its own models"
+      },
+      {
+        "id": "e5_eachPlatformLacksItsOwnFeatures()",
+        "kind": "edge",
+        "says": "Each platform lacks its own features"
+      },
+      {
+        "id": "e6_aRequestNeedsThePlaceItIsSentTo()",
+        "kind": "edge",
+        "says": "A request needs the place it is sent to (region or project)"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/22-claude-on-the-cloud-platforms/prose/unit-02/practice-3/target/test-results/test"
+    },
+    "origin": "course/22-claude-on-the-cloud-platforms/02-what-each-platform-lacks-where-it-runs-and-what-it-costs.md",
+    "concepts": [
+      "the practice of What each platform lacks, where it runs and what it costs is solved"
+    ],
+    "files": [
+      "practice/level-2/22-claude-on-the-cloud-platforms/prose/unit-02/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "claude-on-the-cloud-platforms-u2"
+}

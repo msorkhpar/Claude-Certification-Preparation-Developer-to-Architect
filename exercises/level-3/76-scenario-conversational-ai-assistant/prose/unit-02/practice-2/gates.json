@@ -1,0 +1,135 @@
+{
+  "gates_api": 1,
+  "inputs": [
+    {
+      "role": "statement",
+      "path": "statement.md",
+      "digest": "sha256:1672359f60bf2f6c873b82443e530846859cb288455e5b4d073d6daef395c0be"
+    },
+    {
+      "role": "starter",
+      "path": "starter/conversationReview.ts",
+      "digest": "sha256:d27f5625413434f91c32e48f0106d992b61f1f35dd96555d4b85374da005bc56"
+    },
+    {
+      "role": "reference",
+      "path": "reference/conversationReview.ts",
+      "digest": "sha256:3faa267e1197e942f7cf277ce2307340a09ba3657aade2e05ce2aefee32d6635"
+    },
+    {
+      "role": "starter:try-it.ts",
+      "path": "starter/try-it.ts",
+      "digest": "sha256:d93c513d85865b7b2b5a555e2a2b5e41184e97778e53e10598e3d8f9d7b6cf86"
+    },
+    {
+      "role": "reference:try-it.ts",
+      "path": "reference/try-it.ts",
+      "digest": "sha256:d93c513d85865b7b2b5a555e2a2b5e41184e97778e53e10598e3d8f9d7b6cf86"
+    },
+    {
+      "role": "tests",
+      "path": "tests/conversationReview.test.ts",
+      "digest": "sha256:842aa6a32a6965dd331d1ed2fd7112b47ddc1effcfe171e5f50ca239eafdcf04"
+    },
+    {
+      "role": "plant:e1 an empty batch has zero figures and is held for lack of data",
+      "path": "plants/edge-1/conversationReview.ts.plant.json",
+      "digest": "sha256:6dd612f268d75dded0263ab460a7175bcd6d447e25b500e4cd1e48647dda9500"
+    },
+    {
+      "role": "plant:e2 a safety signal counts as missed unless it went to a person as a safety hand off",
+      "path": "plants/edge-2/conversationReview.ts.plant.json",
+      "digest": "sha256:005bfefb0179e85e791fca8f1c1052a14951ac3280cd44aaa0bf1a1d22fbec86"
+    },
+    {
+      "role": "plant:e3 a conversation is overlong only above the turn limit and only when nobody took over",
+      "path": "plants/edge-3/conversationReview.ts.plant.json",
+      "digest": "sha256:d4c2d47152720f9e808e1bfc8ca306e3883d12410ff193977c3c676fe3a02f98"
+    },
+    {
+      "role": "plant:e4 repeated questions are acceptable at exactly the limit and not above it",
+      "path": "plants/edge-4/conversationReview.ts.plant.json",
+      "digest": "sha256:b2973a77efd7c035ff8c9b36f8a02e5d6c8c90970552f19a8b0d5bb9961a4207"
+    },
+    {
+      "role": "plant:e5 a segment is weak only below the resolution floor and not at it",
+      "path": "plants/edge-5/conversationReview.ts.plant.json",
+      "digest": "sha256:4d6283614b5877d45afa8eff028eb859ee5eef7a26c19c2fe3c4fb6141e26353"
+    },
+    {
+      "role": "plant:e6 a segment needs the minimum number of conversations before it can be called weak",
+      "path": "plants/edge-6/conversationReview.ts.plant.json",
+      "digest": "sha256:32becc55a603c12aa021144ec44b5ab3dd5c4f8aee8ead2f5eb6ac4397cb0954"
+    },
+    {
+      "role": "plant:e7 a hand off is over escalation only when no person was needed and no safety signal was present",
+      "path": "plants/edge-7/conversationReview.ts.plant.json",
+      "digest": "sha256:4694040a4215f732fa586c82ab75ef8872aadacd7b3cfd3cc493f101943e1f15"
+    },
+    {
+      "role": "plant:e8 only conversations the assistant settled alone count as resolved",
+      "path": "plants/edge-8/conversationReview.ts.plant.json",
+      "digest": "sha256:3dbb477acdf4c560ba35a668629ffd9e6dac2893485e8e6e8fea060f9a697349"
+    },
+    {
+      "role": "plant:e9 percentages are whole numbers rounded half up",
+      "path": "plants/edge-9/conversationReview.ts.plant.json",
+      "digest": "sha256:ed9ad120c1b386b5105f228c314fe2b07ced387f25c7b440406561a8fca4fe7c"
+    },
+    {
+      "role": "build:junit-file.mjs",
+      "path": "build/junit-file.mjs",
+      "digest": "sha256:eebbfd3bebdf18b0d715903d01abac0b7199da78c76c588b50c0c40352614cef"
+    },
+    {
+      "role": "build:logger.ts",
+      "path": "build/logger.ts",
+      "digest": "sha256:ee4ada918729a2eb77f3d514a0acf59bad03b63ca373a3a7b92f86d95f23197d"
+    }
+  ],
+  "origins": [
+    {
+      "role": "origin",
+      "path": "course/76-scenario-conversational-ai-assistant/02-sensitive-talk-hand-offs-and-judging-a-conversation.md",
+      "section": null,
+      "digest": "sha256:9b49e251ca18cf34af3cb7c62d4ef3eb720707b3f9436a4de8d4a70b59d8b11b"
+    }
+  ],
+  "gates": [
+    {
+      "id": "G1",
+      "family": "code",
+      "held": true,
+      "says": "all 10 cases passed on the reference, on two runs alike",
+      "recorded": {}
+    },
+    {
+      "id": "G2",
+      "family": "code",
+      "held": true,
+      "says": "none of the 10 cases passed on the starter",
+      "recorded": {}
+    },
+    {
+      "id": "G3",
+      "family": "code",
+      "held": true,
+      "says": "each of the 9 edge cases was caught by its own plant",
+      "recorded": {}
+    },
+    {
+      "id": "G4",
+      "family": "code",
+      "held": true,
+      "says": "every test the report named mapped to one of the 10 cases, and every case was named",
+      "recorded": {}
+    },
+    {
+      "id": "G5",
+      "family": "code",
+      "held": true,
+      "says": "the cited passage of 'course/76-scenario-conversational-ai-assistant/02-sensitive-talk-hand-offs-and-judging-a-conversation.md' still matches the ledger",
+      "recorded": {}
+    }
+  ]
+}

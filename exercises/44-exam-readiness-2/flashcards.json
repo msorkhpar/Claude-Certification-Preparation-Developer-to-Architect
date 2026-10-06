@@ -1,0 +1,2210 @@
+{
+  "level": 2,
+  "format": 1,
+  "title": "Level 2 flashcards",
+  "cards": [
+    {
+      "id": "fc-001",
+      "module": 12,
+      "page": "course/12-from-business-need-to-a-testable-spec/01-requirements-for-a-claude-feature.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "Which stop_reason values does the API documentation list?",
+      "back": "end_turn, max_tokens, stop_sequence, tool_use, pause_turn, refusal and model_context_window_exceeded. A stop_reason marks a normal completion; HTTP errors mark failures, so a spec must handle both."
+    },
+    {
+      "id": "fc-002",
+      "module": 12,
+      "page": "course/12-from-business-need-to-a-testable-spec/01-requirements-for-a-claude-feature.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "Why must a spec for a Claude feature list a reply cut at max_tokens and a refusal as separate failure rows?",
+      "back": "Both arrive as normal successful responses, not HTTP errors, so each needs its own branch in code and its own test. A spec without failure behaviour produces code without it."
+    },
+    {
+      "id": "fc-003",
+      "module": 12,
+      "page": "course/12-from-business-need-to-a-testable-spec/02-budgets-and-matching-an-architecture.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "What are the two values of the per-request inference_geo setting, and what does US-only cost?",
+      "back": "\"global\" (the default) and \"us\". US-only inference is priced at 1.1 times the standard rate. It is supported on Claude 4.6 and later; Claude Haiku 4.5 or earlier returns a 400 error."
+    },
+    {
+      "id": "fc-004",
+      "module": 12,
+      "page": "course/12-from-business-need-to-a-testable-spec/02-budgets-and-matching-an-architecture.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "How does the API limit request rates, and which input tokens count toward ITPM for most models?",
+      "back": "With a token bucket that is continuously replenished, so a burst can hit a limit even when the average is low. For most models only uncached input tokens count toward ITPM, which makes caching a throughput lever."
+    },
+    {
+      "id": "fc-005",
+      "module": 12,
+      "page": "course/12-from-business-need-to-a-testable-spec/03-the-life-cycle-and-a-spec-you-can-test.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "What are the four phases of the application life cycle in the exam's wording?",
+      "back": "Develop, implement, operate, maintain. One list of testable statements runs through all four: requirements become tests, budgets become alerts, and both become the regression suite."
+    },
+    {
+      "id": "fc-006",
+      "module": 12,
+      "page": "course/12-from-business-need-to-a-testable-spec/03-the-life-cycle-and-a-spec-you-can-test.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "Which settings does a 400 reject on Fable 5.1, Opus 5.5 and Sonnet 5.5, and what about prefill?",
+      "back": "The sampling parameters temperature, top_p and top_k are rejected for any non-default value on those three models. A request that prefills the assistant turn returns a 400 on Claude 4.6 and later."
+    },
+    {
+      "id": "fc-007",
+      "module": 12,
+      "page": "course/12-from-business-need-to-a-testable-spec/03-the-life-cycle-and-a-spec-you-can-test.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "What should a client do about new fields or enum values the API adds to a response?",
+      "back": "Be tolerant of additions and strict about what you send. The versioning policy allows new output values and new enum-like variants, so a client that rejects unknown fields or event types breaks, and a retry cannot help."
+    },
+    {
+      "id": "fc-008",
+      "module": 13,
+      "page": "course/13-one-rest-api-under-every-sdk/01-the-http-contract.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "Which method, path and headers does a plain Messages API request need?",
+      "back": "POST /v1/messages with an Authorization bearer token (the legacy x-api-key header is still supported), anthropic-version: 2023-06-01, content-type: application/json, and a JSON body with at least model, max_tokens and messages."
+    },
+    {
+      "id": "fc-009",
+      "module": 13,
+      "page": "course/13-one-rest-api-under-every-sdk/01-the-http-contract.md",
+      "domains": [
+        "DV1",
+        "DV2"
+      ],
+      "front": "What happens to a Messages or token-counting request larger than 32 MB?",
+      "back": "It is refused with a 413 request_too_large. On the direct API the edge, Cloudflare, returns this error before the request reaches the API servers."
+    },
+    {
+      "id": "fc-010",
+      "module": 13,
+      "page": "course/13-one-rest-api-under-every-sdk/02-what-the-sdk-does-for-you.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "What does an SDK retry by default, and how long is its default timeout?",
+      "back": "Certain errors are retried 2 times by default with a short exponential backoff, and the default timeout is 10 minutes. The SDK does not choose your retry budget, bound concurrency or keep the conversation."
+    },
+    {
+      "id": "fc-011",
+      "module": 13,
+      "page": "course/13-one-rest-api-under-every-sdk/03-streaming-transport-and-connections.md",
+      "domains": [
+        "DV1",
+        "DV2"
+      ],
+      "front": "How does a streamed Messages reply travel, and what content type does it use?",
+      "back": "With \"stream\": true the server answers one normal HTTP response whose body is server-sent events (content type text/event-stream), named events with an event: line and a data: line, and the connection stays open until the message is complete."
+    },
+    {
+      "id": "fc-012",
+      "module": 13,
+      "page": "course/13-one-rest-api-under-every-sdk/03-streaming-transport-and-connections.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "Why does the Messages API use server-sent events rather than a websocket?",
+      "back": "A model call is one request and one long answer, so no client-to-server traffic is needed after the first message. SSE is plain HTTP, so proxies, auth headers and retries work as usual. A client cancels by closing the connection."
+    },
+    {
+      "id": "fc-013",
+      "module": 13,
+      "page": "course/13-one-rest-api-under-every-sdk/03-streaming-transport-and-connections.md",
+      "domains": [
+        "DV1",
+        "DV2"
+      ],
+      "front": "How do you protect a long generation from networks that drop idle connections?",
+      "back": "Stream it so bytes keep flowing, or use the Message Batches API and poll for results. Avoid a large max_tokens without streaming or batches. The SDKs also set TCP keep-alive."
+    },
+    {
+      "id": "fc-014",
+      "module": 14,
+      "page": "course/14-the-messages-api/01-turns-roles-and-content-blocks.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "Where does the system prompt go in a Messages API request?",
+      "back": "In the top-level system field, next to messages, not as the first message. A role system message is allowed only after a user turn on Fable 5.1, Opus 5.5 and Sonnet 5.5, takes precedence on conflict and does not invalidate a cached prefix."
+    },
+    {
+      "id": "fc-015",
+      "module": 14,
+      "page": "course/14-the-messages-api/01-turns-roles-and-content-blocks.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "What happens if a request to a Claude 4.6 or later model ends with an assistant message (a prefill)?",
+      "back": "It returns a 400 invalid_request_error saying the conversation must end with a user message. Use structured outputs where supported, or system-prompt instructions, instead."
+    },
+    {
+      "id": "fc-016",
+      "module": 14,
+      "page": "course/14-the-messages-api/01-turns-roles-and-content-blocks.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "What must you do with thinking and redacted_thinking blocks of the latest assistant turn when you send it back?",
+      "back": "Pass them back exactly as received. Editing, reordering or dropping them returns a 400. With tool use, every such block from the turn must be returned unchanged."
+    },
+    {
+      "id": "fc-017",
+      "module": 14,
+      "page": "course/14-the-messages-api/02-limits-stop-reasons-and-usage.md",
+      "domains": [
+        "DV1",
+        "DV2"
+      ],
+      "front": "What are the maximum max_tokens values for Fable 5.1, Opus 5.5, Sonnet 5.5 and Haiku 4.5, and does a higher max_tokens cost rate limit?",
+      "back": "128K for Claude Fable 5.1, Opus 5.5 and Sonnet 5.5, and 64K for Claude Haiku 4.5. max_tokens does not factor into OTPM rate-limit calculations, so a higher value has no rate-limit downside."
+    },
+    {
+      "id": "fc-018",
+      "module": 14,
+      "page": "course/14-the-messages-api/02-limits-stop-reasons-and-usage.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "What does stop_reason pause_turn mean, and what does the client do?",
+      "back": "A server-side tool loop reached its iteration limit (10 by default). Send the reply back as an assistant turn and call again so the model can finish."
+    },
+    {
+      "id": "fc-019",
+      "module": 14,
+      "page": "course/14-the-messages-api/02-limits-stop-reasons-and-usage.md",
+      "domains": [
+        "DV1",
+        "DV2"
+      ],
+      "front": "How do you compute the total input tokens of a request that uses prompt caching?",
+      "back": "cache_read_input_tokens + cache_creation_input_tokens + input_tokens. The input_tokens field counts only tokens after the last cache breakpoint: a 200,000-token cached document plus a 50-token question reads 50."
+    },
+    {
+      "id": "fc-020",
+      "module": 14,
+      "page": "course/14-the-messages-api/03-the-conversation-state-the-client-keeps.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "When should a conversation client commit a user turn to its history?",
+      "back": "Only when the whole exchange succeeded. Append the turn, call, and on any failure remove it before the error leaves, or the next request holds two user turns in a row."
+    },
+    {
+      "id": "fc-021",
+      "module": 15,
+      "page": "course/15-errors-retries-and-timeouts/01-error-classes-by-type-and-origin.md",
+      "domains": [
+        "DV1",
+        "DV8"
+      ],
+      "front": "Which error types go with 401, 402, 403, 413, 504 and 529?",
+      "back": "401 authentication_error, 402 billing_error, 403 permission_error, 413 request_too_large, 504 timeout_error, 529 overloaded_error. A 400 is invalid_request_error and a 500 is api_error."
+    },
+    {
+      "id": "fc-022",
+      "module": 15,
+      "page": "course/15-errors-retries-and-timeouts/01-error-classes-by-type-and-origin.md",
+      "domains": [
+        "DV8"
+      ],
+      "front": "How do you recognise a 429 caused by a spend cap rather than a rate limit?",
+      "back": "It has the same rate_limit_error type but no retry-after header, and error.details.error_code is enforced_spend_limit_reached. Usage pauses until 00:00 UTC on the first day of the next month, so retries fail."
+    },
+    {
+      "id": "fc-023",
+      "module": 15,
+      "page": "course/15-errors-retries-and-timeouts/02-retry-back-off-and-idempotency.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "Which failures does the SDK retry by default, and how often?",
+      "back": "Connection errors, 408, 409, 429 and 5xx, two times, with a short exponential backoff. The cut is by status, so a spend-cap 429 is retried too and fails each time. 400, 401, 403, 404 and 413 are not retried."
+    },
+    {
+      "id": "fc-024",
+      "module": 15,
+      "page": "course/15-errors-retries-and-timeouts/02-retry-back-off-and-idempotency.md",
+      "domains": [
+        "DV1",
+        "DV8"
+      ],
+      "front": "How should back-off delays be computed, and what is retry-after?",
+      "back": "Double the delay each attempt, take the smaller of that and a cap, and apply jitter last. retry-after is the seconds to wait before retrying and is a floor: wait the larger of it and your back-off."
+    },
+    {
+      "id": "fc-025",
+      "module": 15,
+      "page": "course/15-errors-retries-and-timeouts/02-retry-back-off-and-idempotency.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "What is the rule for retries and side effects?",
+      "back": "Retry the call, never the side effect. Give tools that charge or send an idempotency key of your own design, since the Messages API docs checked describe none. In batches, custom_id matches results to requests."
+    },
+    {
+      "id": "fc-026",
+      "module": 15,
+      "page": "course/15-errors-retries-and-timeouts/03-timeouts-logging-and-debugging.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "What are the three clocks a timeout can limit, and what is the SDK default?",
+      "back": "Connect (opening the connection), read (wait between bytes, restarting at each streamed event) and total (wall clock). The SDK default is ten minutes, and timed-out requests are retried twice by default."
+    },
+    {
+      "id": "fc-027",
+      "module": 15,
+      "page": "course/15-errors-retries-and-timeouts/03-timeouts-logging-and-debugging.md",
+      "domains": [
+        "DV8"
+      ],
+      "front": "Which fields belong in a log line for an API call, and what stays out?",
+      "back": "Request id, status, error type, attempt number, model id, stop_reason, usage and latency. Keep out the API key and auth headers, prompts and replies unless the spec allows them, and unchecked error messages."
+    },
+    {
+      "id": "fc-028",
+      "module": 16,
+      "page": "course/16-async-concurrency-and-backpressure/01-async-calls-and-bounded-concurrency.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "How do Python's asyncio.gather and TypeScript's Promise.all differ from return_exceptions=True and Promise.allSettled?",
+      "back": "gather and Promise.all give up on the first failure and hide the other results. return_exceptions=True and allSettled wait for every call and return each outcome in input order, a failure sitting in its own slot."
+    },
+    {
+      "id": "fc-029",
+      "module": 16,
+      "page": "course/16-async-concurrency-and-backpressure/01-async-calls-and-bounded-concurrency.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "What does Little's law say about sizing the in-flight bound for API calls?",
+      "back": "Requests in flight equal the request rate times the time each takes. At 1,000 requests a minute with 6-second calls you need about 100 in flight; a bound of 20 caps you near 200 a minute."
+    },
+    {
+      "id": "fc-030",
+      "module": 16,
+      "page": "course/16-async-concurrency-and-backpressure/01-async-calls-and-bounded-concurrency.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "What happens when an async web handler calls the synchronous client?",
+      "back": "The call waits without yielding, so it stops the event loop and every other task waits too. Use AsyncAnthropic inside async def. The Java SDK advises one shared client per application."
+    },
+    {
+      "id": "fc-031",
+      "module": 16,
+      "page": "course/16-async-concurrency-and-backpressure/02-rate-limits-and-backpressure.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "Which rate-limit headers tell a client how much allowance remains, and what is retry-after?",
+      "back": "anthropic-ratelimit-requests-remaining, the input-tokens-remaining and output-tokens-remaining family (rounded to the nearest thousand) and the matching reset headers in RFC 3339 format. retry-after, on a 429, is the seconds to wait."
+    },
+    {
+      "id": "fc-032",
+      "module": 16,
+      "page": "course/16-async-concurrency-and-backpressure/02-rate-limits-and-backpressure.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "Which tokens count toward ITPM for most models, and does max_tokens count toward OTPM?",
+      "back": "input_tokens and cache_creation_input_tokens count toward ITPM, cache_read_input_tokens does not. max_tokens does not factor into OTPM calculations, which count what was generated."
+    },
+    {
+      "id": "fc-033",
+      "module": 16,
+      "page": "course/16-async-concurrency-and-backpressure/02-rate-limits-and-backpressure.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "In what order should client-side rate-limit controls be applied?",
+      "back": "First bound the calls in flight, then pace them with a client-side token bucket, and retry with back-off on a 429 last, honouring retry-after. For work nobody waits for, use the Message Batches API instead."
+    },
+    {
+      "id": "fc-034",
+      "module": 16,
+      "page": "course/16-async-concurrency-and-backpressure/02-rate-limits-and-backpressure.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "What is backpressure, and how does a bounded worker pool provide it?",
+      "back": "A slow stage holds back the fast one instead of letting work pile up. Each worker takes the next item only when it is free, so at most limit items are in flight and at most limit have been pulled from the source."
+    },
+    {
+      "id": "fc-035",
+      "module": 17,
+      "page": "course/17-streaming/01-events-and-assembling-a-message.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "Which events make up a streamed message, and where do the stop reason and usage arrive?",
+      "back": "message_start, then content_block_start, content_block_delta and content_block_stop per block, then message_delta and message_stop, with ping and error possible. The stop_reason is in message_delta; input tokens come from message_start."
+    },
+    {
+      "id": "fc-036",
+      "module": 17,
+      "page": "course/17-streaming/01-events-and-assembling-a-message.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "How is the output token count in message_delta treated?",
+      "back": "It is cumulative, so replace the stored value; do not add. A client that sums them reports a multiple of the real cost."
+    },
+    {
+      "id": "fc-037",
+      "module": 17,
+      "page": "course/17-streaming/01-events-and-assembling-a-message.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "How do you assemble a tool_use input from a stream?",
+      "back": "Join the input_json_delta partial_json fragments as text and parse once, after the block stops. The fragments are not valid JSON until then. Blocks are assembled by index."
+    },
+    {
+      "id": "fc-038",
+      "module": 17,
+      "page": "course/17-streaming/01-events-and-assembling-a-message.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "How should a client treat ping and unknown event types, and a stream that ends without message_stop?",
+      "back": "Ignore ping and any unknown event types, since the versioning policy lets the API add them. A stream that ends without message_stop is an incomplete message and has no stop reason, so raise an error."
+    },
+    {
+      "id": "fc-039",
+      "module": 17,
+      "page": "course/17-streaming/02-tool-use-errors-and-when-to-stream.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "Why can an error arrive in a stream after a 200 status, and how is it retried?",
+      "back": "The status line is sent before generation, so a later failure comes as an error event. A failed stream cannot be resumed: discard the partial output and retry the whole request with back-off."
+    },
+    {
+      "id": "fc-040",
+      "module": 17,
+      "page": "course/17-streaming/02-tool-use-errors-and-when-to-stream.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "In which three situations does streaming pay off?",
+      "back": "A person waits for a long answer, the answer is very long (SDKs refuse non-streaming calls expected to exceed about ten minutes), or a proxy drops idle connections. Streaming does not change token cost or limits."
+    },
+    {
+      "id": "fc-041",
+      "module": 17,
+      "page": "course/17-streaming/02-tool-use-errors-and-when-to-stream.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "How can you get streaming's length benefit without handling events yourself?",
+      "back": "Use the final-message helper: Python's stream.get_final_message() or TypeScript's finalMessage(). It streams underneath and returns one message."
+    },
+    {
+      "id": "fc-042",
+      "module": 18,
+      "page": "course/18-model-choice-cost-and-migration/01-matching-a-tier-to-a-workload.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "What are the context window and price per million tokens (input / output) of Haiku 4.5 and Sonnet 5.5, as read on 2026-10-02?",
+      "back": "Haiku 4.5: 200K context, 64K max output, $1 / $5. Sonnet 5.5: 1M context, 128K max output, $2 / $10. Output costs five times input on every row, and prices move, so re-read them."
+    },
+    {
+      "id": "fc-043",
+      "module": 18,
+      "page": "course/18-model-choice-cost-and-migration/01-matching-a-tier-to-a-workload.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "How do the documentation's advice to start with Opus 5.5 and its advice to choose Haiku or Sonnet fit together?",
+      "back": "Begin with a capable model so a failure means the task is hard, measure on your own cases, then move down a tier at a time until quality drops and keep the last tier that held. A tier above Opus is earned by failing an evaluation."
+    },
+    {
+      "id": "fc-044",
+      "module": 18,
+      "page": "course/18-model-choice-cost-and-migration/01-matching-a-tier-to-a-workload.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "Why is price per token a poor proxy for price per task across models?",
+      "back": "Claude 4.7 and later use a newer tokenizer that produces about 30 percent more tokens for the same text. A model 20 percent cheaper per token but 30 percent more tokens costs 1.04 times as much per task."
+    },
+    {
+      "id": "fc-045",
+      "module": 18,
+      "page": "course/18-model-choice-cost-and-migration/02-usage-token-counting-and-a-cost-model.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "At what multiples of the input price are cache writes and cache reads billed?",
+      "back": "Writes cost 1.25 times input for 5 minutes and 2 times for 1 hour. Reads cost 0.1 times input, 0.05 on Opus 5.5 and 0.025 on Fable 5.1. The batch discount of 50 percent stacks on top."
+    },
+    {
+      "id": "fc-046",
+      "module": 18,
+      "page": "course/18-model-choice-cost-and-migration/03-pinning-ids-and-migrating-safely.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "Is a dateless id such as claude-sonnet-5-5 a moving alias?",
+      "back": "No. Every Claude model ID is a pinned snapshot, including the dateless IDs used from the 4.6 generation on. Before 4.6 a dateless alias is a pointer resolving to the dated ID."
+    },
+    {
+      "id": "fc-047",
+      "module": 18,
+      "page": "course/18-model-choice-cost-and-migration/03-pinning-ids-and-migrating-safely.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "What are the four lifecycle states of a model, and how much retirement notice is given?",
+      "back": "Active, Legacy, Deprecated and Retired. Anthropic gives at least 60 days' notice before retirement of publicly released models. Bedrock and Google Cloud set their own retirement schedules."
+    },
+    {
+      "id": "fc-048",
+      "module": 18,
+      "page": "course/18-model-choice-cost-and-migration/03-pinning-ids-and-migrating-safely.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "What does a request to Opus 5.5 or Sonnet 5.5 get a 400 for?",
+      "back": "A disabled thinking type or a manual budget_tokens, forced tool_choice of any or a named tool (use auto or none), non-default temperature, top_p or top_k, and a prefilled assistant turn. Haiku 4.5 predates these rules."
+    },
+    {
+      "id": "fc-049",
+      "module": 19,
+      "page": "course/19-thinking-effort-and-speed/01-thinking-and-effort.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "Which thinking settings does Opus 5.5 accept, and what does Haiku 4.5 accept?",
+      "back": "Opus 5.5 thinks adaptively with no field or adaptive; an enabled budget or disabled returns a 400. Haiku 4.5 has thinking off by default, accepts enabled with budget_tokens and disabled, and returns a 400 for adaptive."
+    },
+    {
+      "id": "fc-050",
+      "module": 19,
+      "page": "course/19-thinking-effort-and-speed/01-thinking-and-effort.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "How are thinking tokens billed, and where do you read them?",
+      "back": "As output tokens, for the full thinking process rather than the visible content. Read usage.output_tokens_details.thinking_tokens; it never exceeds output_tokens, the billed total. Thinking counts against max_tokens."
+    },
+    {
+      "id": "fc-051",
+      "module": 19,
+      "page": "course/19-thinking-effort-and-speed/01-thinking-and-effort.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "Where does effort go, what are the levels and the defaults?",
+      "back": "In output_config.effort, not inside thinking. Levels: low, medium, high, xhigh, max; Haiku 4.5 does not support effort. The default is high, except Opus 5.5 where it is medium. Effort is a soft signal; max_tokens is the hard ceiling."
+    },
+    {
+      "id": "fc-052",
+      "module": 19,
+      "page": "course/19-thinking-effort-and-speed/02-fast-mode-tools-and-caching.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "What does fast mode do, what does it cost on Opus 5.5, and where is it unavailable?",
+      "back": "It gives up to 2.5 times the output tokens per second at twice the price ($8 / $40 on Opus 5.5), via speed: \"fast\" and the fast-mode-2026-02-01 beta header. It does not speed the first token, is first-party API only, and is not available with the Batch API."
+    },
+    {
+      "id": "fc-053",
+      "module": 19,
+      "page": "course/19-thinking-effort-and-speed/02-fast-mode-tools-and-caching.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "What happens if you change the thinking mode in the middle of a tool-use loop?",
+      "back": "A tool-use loop is one assistant turn with a single thinking mode. The API does not error; it silently disables thinking for that request. Toggle between turns, not within them."
+    },
+    {
+      "id": "fc-054",
+      "module": 19,
+      "page": "course/19-thinking-effort-and-speed/02-fast-mode-tools-and-caching.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "Which changes invalidate the cached messages according to the prompt caching table?",
+      "back": "Changing the speed setting, tool choice, thinking parameters or effort setting invalidates the messages portion. Per-message effort in a role system message leaves the prefix intact, and setting a parameter to its default equals omitting it."
+    },
+    {
+      "id": "fc-055",
+      "module": 20,
+      "page": "course/20-prompt-caching/01-the-prefix-the-breakpoint-and-the-usage-fields.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "In what order is a prompt cache prefix built, and how many explicit breakpoints can you place?",
+      "back": "tools, then system, then messages, up to and including the block marked with cache_control. Up to four breakpoints; an automatic breakpoint uses one of the four slots. Cache hits need 100 percent identical segments."
+    },
+    {
+      "id": "fc-056",
+      "module": 20,
+      "page": "course/20-prompt-caching/01-the-prefix-the-breakpoint-and-the-usage-fields.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "What are the minimum cacheable prompt lengths for the course models, and what happens below them?",
+      "back": "512 tokens for Fable 5.1, Opus 5.5 and Sonnet 5.5, and 4,096 tokens for Haiku 4.5. Below the minimum the request is processed without caching and no error is returned; usage shows zero cache writes and zero cache reads."
+    },
+    {
+      "id": "fc-057",
+      "module": 20,
+      "page": "course/20-prompt-caching/01-the-prefix-the-breakpoint-and-the-usage-fields.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "Writes appear on every request and reads never do. What is the likely cause?",
+      "back": "The prefix keeps changing, for example a timestamp placed before the breakpoint. Move the breakpoint to the last stable block and put varying content after it."
+    },
+    {
+      "id": "fc-058",
+      "module": 20,
+      "page": "course/20-prompt-caching/02-prices-lifetimes-lookback-and-invalidation.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "What is the cache lifetime by default, what does a hit do to it, and how is the one-hour lifetime requested?",
+      "back": "5 minutes by default, refreshed at no extra cost each time the entry is used. One hour is requested with {\"type\": \"ephemeral\", \"ttl\": \"1h\"}. Longer-TTL entries must appear before shorter ones."
+    },
+    {
+      "id": "fc-059",
+      "module": 20,
+      "page": "course/20-prompt-caching/02-prices-lifetimes-lookback-and-invalidation.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "How many requests does each lifetime need to break even?",
+      "back": "With the 5-minute write (1.25 times base), a second request already pays: 1.35 against 2. With the 1-hour write (2 times), a third request pays: 2.2 against 3."
+    },
+    {
+      "id": "fc-060",
+      "module": 20,
+      "page": "course/20-prompt-caching/02-prices-lifetimes-lookback-and-invalidation.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "How far back does the cache lookback go, and what is the remedy for a long growing conversation?",
+      "back": "It checks at most 20 positions, the breakpoint included. If more than 20 blocks are added between requests, add a second breakpoint near the old position."
+    },
+    {
+      "id": "fc-061",
+      "module": 20,
+      "page": "course/20-prompt-caching/02-prices-lifetimes-lookback-and-invalidation.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "How do you make parallel requests share a cache, and how do you pre-warm one?",
+      "back": "An entry exists only after the first response begins, so send one, wait for it to start, then fan out. To pre-warm, send the same prefix with max_tokens of 0; this is rejected in a batch."
+    },
+    {
+      "id": "fc-062",
+      "module": 21,
+      "page": "course/21-message-batches/01-submitting-a-batch-limits-and-price.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "What are the limits of one Message Batch?",
+      "back": "100,000 requests or 256 MB, whichever is reached first. A batch above 256 MB returns a 413 request_too_large. A batch expires if not finished in 24 hours, and results are available for 29 days after creation."
+    },
+    {
+      "id": "fc-063",
+      "module": 21,
+      "page": "course/21-message-batches/01-submitting-a-batch-limits-and-price.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "What rules does custom_id follow, and which parameters does a batch refuse?",
+      "back": "custom_id is 1 to 64 characters of letters, digits, hyphens and underscores, unique in the batch. stream: true, speed and max_tokens: 0 are refused with a validation error."
+    },
+    {
+      "id": "fc-064",
+      "module": 21,
+      "page": "course/21-message-batches/01-submitting-a-batch-limits-and-price.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "What is the batch discount and how does it combine with caching?",
+      "back": "All usage is charged at 50 percent of standard prices, input and output. It stacks with prompt caching, but cache hits are best-effort, typically 30 to 98 percent. Batches may slightly exceed a workspace's spend limit."
+    },
+    {
+      "id": "fc-065",
+      "module": 21,
+      "page": "course/21-message-batches/02-polling-results-and-retries.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "What are the four batch result types, and which are billed?",
+      "back": "succeeded (billed), errored, canceled and expired (not billed). Results are a .jsonl file at results_url, in any order, so match by custom_id and never by position."
+    },
+    {
+      "id": "fc-066",
+      "module": 21,
+      "page": "course/21-message-batches/02-polling-results-and-retries.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "Which failed batch results should be retried unchanged, and which fixed first?",
+      "back": "An errored result with invalid_request_error is fixed first, since it fails again. Other errored results, expired results and canceled results (if still wanted) are resubmitted unchanged."
+    },
+    {
+      "id": "fc-067",
+      "module": 21,
+      "page": "course/21-message-batches/02-polling-results-and-retries.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "How does a batch report progress and cancellation?",
+      "back": "processing_status moves from in_progress to ended; request_counts shows processing, succeeded, errored, canceled and expired. After a cancel the status is canceling, then ended with partial results; requests already run are billed."
+    },
+    {
+      "id": "fc-068",
+      "module": 21,
+      "page": "course/21-message-batches/02-polling-results-and-retries.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "What does a pause_turn result in a batch mean?",
+      "back": "The server-tool loop did not finish. Continue it by submitting the paused content again, in a batch or a synchronous request."
+    },
+    {
+      "id": "fc-069",
+      "module": 22,
+      "page": "course/22-claude-on-the-cloud-platforms/01-one-messages-api-three-front-doors.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "On Google Cloud (Vertex), where do the model and the version go in a Messages request?",
+      "back": "The model is not in the body; it is in the endpoint URL before :rawPredict. The version is the body field anthropic_version set to vertex-2023-10-16, not a header."
+    },
+    {
+      "id": "fc-070",
+      "module": 22,
+      "page": "course/22-claude-on-the-cloud-platforms/01-one-messages-api-three-front-doors.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "What changes for a Messages request on Amazon Bedrock compared with the direct API?",
+      "back": "The endpoint is bedrock-mantle.{region}.api.aws/anthropic/v1/messages, the model id carries an anthropic. prefix (anthropic.claude-opus-5-5), and the call is signed with AWS credentials (SigV4). The anthropic-version header stays."
+    },
+    {
+      "id": "fc-071",
+      "module": 22,
+      "page": "course/22-claude-on-the-cloud-platforms/01-one-messages-api-three-front-doors.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "Which Bedrock credential path is recommended and which is least preferred?",
+      "back": "A Bedrock service role with AWS-managed keys is recommended; an IAM assumed role (12-hour session) is next; a bearer token (12-hour maximum) sent in x-api-key is least preferred."
+    },
+    {
+      "id": "fc-072",
+      "module": 22,
+      "page": "course/22-claude-on-the-cloud-platforms/02-what-each-platform-lacks-where-it-runs-and-what-it-costs.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "Which features does Bedrock lack that the direct API has?",
+      "back": "Structured outputs, URL sources and the Files API, server-side tools (code execution, web search, web fetch, advisor), Agent Skills, MCP connector, programmatic tool calling, the Message Batches and other API endpoints, and Managed Agents."
+    },
+    {
+      "id": "fc-073",
+      "module": 22,
+      "page": "course/22-claude-on-the-cloud-platforms/02-what-each-platform-lacks-where-it-runs-and-what-it-costs.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "Which two features does Google Cloud offer that Bedrock does not, and what do both lack?",
+      "back": "Structured outputs and the web search tool. Both lack the Message Batches API, the Files API, URL sources, code execution, web fetch, the MCP connector and Agent Skills. Fast mode is first-party API only."
+    },
+    {
+      "id": "fc-074",
+      "module": 22,
+      "page": "course/22-claude-on-the-cloud-platforms/02-what-each-platform-lacks-where-it-runs-and-what-it-costs.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "What are the three Google Cloud endpoint types and their price rules?",
+      "back": "Global (dynamic routing, no premium, pay-as-you-go only), multi-region (us and eu, within a geography) and regional (guaranteed regions, needed for provisioned throughput). Regional and multi-region carry a 10 percent premium."
+    },
+    {
+      "id": "fc-075",
+      "module": 23,
+      "page": "course/23-setting-up-claude-on-the-cloud-platforms/01-least-privilege-for-bedrock-and-vertex.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "What should a least-privilege Bedrock policy for one model contain?",
+      "back": "Version 2012-10-17, an Allow statement with an invoke action (bedrock:InvokeModel, bedrock:InvokeModelWithResponseStream or bedrock-mantle:CreateInference) and the one model ARN. No wildcard action, no resource of *, no NotAction or NotResource."
+    },
+    {
+      "id": "fc-076",
+      "module": 23,
+      "page": "course/23-setting-up-claude-on-the-cloud-platforms/01-least-privilege-for-bedrock-and-vertex.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "Which four findings does a review of an allow-list policy look for?",
+      "back": "A wildcard action such as bedrock:*, a resource of *, an Effect other than Allow, and NotAction or NotResource. A wildcard in a deny guardrail is legitimate."
+    },
+    {
+      "id": "fc-077",
+      "module": 23,
+      "page": "course/23-setting-up-claude-on-the-cloud-platforms/01-least-privilege-for-bedrock-and-vertex.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "What Google Cloud role gives a service account the ability to call a Claude endpoint and no more?",
+      "back": "A custom role with the aiplatform.endpoints.predict permission. Predefined roles such as roles/aiplatform.user carry more, and aiplatform.endpoints.deploy might allow exporting other models."
+    },
+    {
+      "id": "fc-078",
+      "module": 23,
+      "page": "course/23-setting-up-claude-on-the-cloud-platforms/02-residency-quotas-logging-and-the-configuration-practice.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "Which Google Cloud endpoint satisfies an EU residency rule for Sonnet 5.5?",
+      "back": "The eu multi-region endpoint, at the 10 percent premium. A specific europe- region serves claude-sonnet-4-6 only. Vertex model ids have no anthropic. prefix."
+    },
+    {
+      "id": "fc-079",
+      "module": 23,
+      "page": "course/23-setting-up-claude-on-the-cloud-platforms/02-residency-quotas-logging-and-the-configuration-practice.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "What do both cloud platforms recommend for logging?",
+      "back": "Retaining activity logs on at least a 30-day rolling basis: CloudWatch and CloudTrail on Bedrock, request-response logging on Google Cloud. Google says turning it on gives neither Google nor Anthropic access to your content."
+    },
+    {
+      "id": "fc-080",
+      "module": 23,
+      "page": "course/23-setting-up-claude-on-the-cloud-platforms/02-residency-quotas-logging-and-the-configuration-practice.md",
+      "domains": [
+        "DV2"
+      ],
+      "front": "Above what quota does a Bedrock request need Anthropic's approval?",
+      "back": "More than 5,000,000 input tokens per minute or 500,000 output tokens per minute. The default quota is 2 million input TPM."
+    },
+    {
+      "id": "fc-081",
+      "module": 24,
+      "page": "course/24-prompt-engineering-for-applications/01-templates-placement-and-instructions.md",
+      "domains": [
+        "DV4"
+      ],
+      "front": "What are the three rules for filling a prompt template safely?",
+      "back": "Fill every placeholder in one pass from left to right and never rescan the result, treat a missing variable as an error, and wrap each variable in a descriptive tag. Tags mark data but do not make it safe."
+    },
+    {
+      "id": "fc-082",
+      "module": 24,
+      "page": "course/24-prompt-engineering-for-applications/01-templates-placement-and-instructions.md",
+      "domains": [
+        "DV4"
+      ],
+      "front": "Where should untrusted content such as retrieved text or a tool result go?",
+      "back": "Inside tool_result blocks, rather than system prompts or plain user text blocks. Data in the system prompt gets the authority of an instruction. Variable text belongs in the user turn, inside tags."
+    },
+    {
+      "id": "fc-083",
+      "module": 24,
+      "page": "course/24-prompt-engineering-for-applications/02-examples-reasoning-long-documents-and-chains.md",
+      "domains": [
+        "DV4"
+      ],
+      "front": "What does the documentation recommend for few-shot examples?",
+      "back": "Examples should be relevant, diverse (cover edge cases) and wrapped in <example> tags, with several in <examples>. Include 3 to 5 examples for best results."
+    },
+    {
+      "id": "fc-084",
+      "module": 24,
+      "page": "course/24-prompt-engineering-for-applications/02-examples-reasoning-long-documents-and-chains.md",
+      "domains": [
+        "DV4"
+      ],
+      "front": "How should you steer reasoning on Opus 5.5, where thinking is always on?",
+      "back": "Prefer general instructions such as think thoroughly over step-by-step plans, lower the effort level first to get less thinking, and remove old think-carefully instructions. Do not ask for reasoning as structured output."
+    },
+    {
+      "id": "fc-085",
+      "module": 24,
+      "page": "course/24-prompt-engineering-for-applications/02-examples-reasoning-long-documents-and-chains.md",
+      "domains": [
+        "DV4"
+      ],
+      "front": "What replaces a prefilled assistant turn on current models?",
+      "back": "Structured outputs or a tool with an enum field to force a format, a system instruction such as respond directly without preamble, and clear user-turn instructions. A prefill returns a 400 on Claude 4.6 and later."
+    },
+    {
+      "id": "fc-086",
+      "module": 24,
+      "page": "course/24-prompt-engineering-for-applications/02-examples-reasoning-long-documents-and-chains.md",
+      "domains": [
+        "DV4"
+      ],
+      "front": "What are the four rules for prompts with long documents?",
+      "back": "Put long documents near the top above the query, put the query at the end (up to 30 percent better in tests), wrap each document in document tags with source subtags, and ask Claude to quote relevant parts first."
+    },
+    {
+      "id": "fc-087",
+      "module": 24,
+      "page": "course/24-prompt-engineering-for-applications/02-examples-reasoning-long-documents-and-chains.md",
+      "domains": [
+        "DV4"
+      ],
+      "front": "When is explicit prompt chaining still useful?",
+      "back": "When you need to inspect or check intermediate outputs, enforce a pipeline structure, use a different system prompt or model per step, or pass a smaller second prompt. Version templates with an id and log it."
+    },
+    {
+      "id": "fc-088",
+      "module": 25,
+      "page": "course/25-structured-output-and-defensive-parsing/01-getting-json-schemas-structured-outputs-and-strict-tools.md",
+      "domains": [
+        "DV1",
+        "DV4"
+      ],
+      "front": "What is the difference between structured outputs and strict tool use?",
+      "back": "Structured outputs (output_config.format with type json_schema) control the response format, what Claude says. Strict tool use (strict: true on a tool) validates how Claude calls your functions."
+    },
+    {
+      "id": "fc-089",
+      "module": 25,
+      "page": "course/25-structured-output-and-defensive-parsing/01-getting-json-schemas-structured-outputs-and-strict-tools.md",
+      "domains": [
+        "DV1",
+        "DV4"
+      ],
+      "front": "What happens to tool_choice of any or tool on Opus 5.5, Sonnet 5.5, Fable 5.1 and Mythos 5.1?",
+      "back": "It returns a 400 error. Use auto with strict tool use for schema-valid inputs, or structured outputs for a fixed JSON shape. The values auto and none keep working."
+    },
+    {
+      "id": "fc-090",
+      "module": 25,
+      "page": "course/25-structured-output-and-defensive-parsing/01-getting-json-schemas-structured-outputs-and-strict-tools.md",
+      "domains": [
+        "DV4"
+      ],
+      "front": "Which JSON Schema features does structured outputs not support, and what must every object set?",
+      "back": "No recursive schemas, numerical constraints (minimum, maximum, multipleOf), string constraints (minLength, maxLength) or minItems above 1; an unsupported feature gives a 400. Every object must set additionalProperties to false."
+    },
+    {
+      "id": "fc-091",
+      "module": 25,
+      "page": "course/25-structured-output-and-defensive-parsing/01-getting-json-schemas-structured-outputs-and-strict-tools.md",
+      "domains": [
+        "DV1",
+        "DV4"
+      ],
+      "front": "In which two cases does the reply body not follow the structured-output schema?",
+      "back": "When stop_reason is refusal (200 status, billed tokens) and when it is max_tokens (output may be incomplete). Check stop_reason before parsing. Enum capitalisation is also not guaranteed."
+    },
+    {
+      "id": "fc-092",
+      "module": 25,
+      "page": "course/25-structured-output-and-defensive-parsing/02-defensive-parsing-validation-and-the-re-prompt.md",
+      "domains": [
+        "DV1",
+        "DV4"
+      ],
+      "front": "Which stop reasons must a re-prompt loop never retry?",
+      "back": "max_tokens (raise the limit or continue) and refusal (a decision; read stop_details and use a fallback model). Retrying a refusal costs billed tokens for the same decision."
+    },
+    {
+      "id": "fc-093",
+      "module": 25,
+      "page": "course/25-structured-output-and-defensive-parsing/02-defensive-parsing-validation-and-the-re-prompt.md",
+      "domains": [
+        "DV1",
+        "DV4"
+      ],
+      "front": "What should a re-prompt after a failed validation contain?",
+      "back": "The first message, the model's reply as an assistant message with exactly its text, and a user message listing every problem with its path. Bound the attempts and report failed with the last problems."
+    },
+    {
+      "id": "fc-094",
+      "module": 25,
+      "page": "course/25-structured-output-and-defensive-parsing/02-defensive-parsing-validation-and-the-re-prompt.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "What can a program check that a schema cannot?",
+      "back": "Constraints such as minimum and enum values the API cannot enforce, and that a quoted evidence string really occurs in the source document. An invented quotation is the commonest way a structured reply is well formed and false."
+    },
+    {
+      "id": "fc-095",
+      "module": 26,
+      "page": "course/26-tool-use/01-tools-schemas-descriptions-and-tool-choice.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "Who runs user-defined tools, Anthropic-schema client tools and server tools?",
+      "back": "User-defined and Anthropic-schema client tools (memory, bash, text_editor, computer, browser) are run by your application. Server tools (web_search, web_fetch, code_execution, tool_search) run on Anthropic's infrastructure; you never construct their tool_result."
+    },
+    {
+      "id": "fc-096",
+      "module": 26,
+      "page": "course/26-tool-use/01-tools-schemas-descriptions-and-tool-choice.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "What are the four values of tool_choice and their defaults?",
+      "back": "auto (Claude decides; default when tools are given), any (must use one tool), tool (a named tool) and none (no tools; default when no tools are given). any and tool prefill the assistant, so no explanation precedes the tool_use."
+    },
+    {
+      "id": "fc-097",
+      "module": 26,
+      "page": "course/26-tool-use/01-tools-schemas-descriptions-and-tool-choice.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "What does strict: true on a tool guarantee, and what does it not?",
+      "back": "The tool input strictly follows the input_schema and the tool name is valid. It does not check whether the call is sensible, such as a city your database lacks."
+    },
+    {
+      "id": "fc-098",
+      "module": 26,
+      "page": "course/26-tool-use/02-the-loop-results-errors-and-stop-reasons.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "Which formatting rules for tool results cause a 400 error?",
+      "back": "Results must immediately follow their tool_use blocks, and in the user message the tool_result blocks must come first, with any text after them. Text added right after results can also lead to an empty end_turn reply."
+    },
+    {
+      "id": "fc-099",
+      "module": 26,
+      "page": "course/26-tool-use/02-the-loop-results-errors-and-stop-reasons.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "How should a failing tool call be reported to the model?",
+      "back": "Send a tool_result with is_error true and an instructive message saying what went wrong and what to try. Claude retries 2 to 3 times with corrections. Never turn a failure into an empty success."
+    },
+    {
+      "id": "fc-100",
+      "module": 26,
+      "page": "course/26-tool-use/02-the-loop-results-errors-and-stop-reasons.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "How is a tool loop bounded and which stop reasons end it?",
+      "back": "Count model calls with a limit of your own (the SDK runner uses max_iterations). The loop continues on tool_use; end_turn and stop_sequence are done, max_tokens is truncated, refusal is refused, and pause_turn means send the content back."
+    },
+    {
+      "id": "fc-101",
+      "module": 26,
+      "page": "course/26-tool-use/03-parallel-calls-the-tool-runner-and-the-practice.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "How must results of parallel tool calls be returned, and how are parallel calls turned off?",
+      "back": "One tool_result per tool_use, all together in the next user message, matched by tool_use_id. Separate messages teach Claude to avoid parallel calls. Set disable_parallel_tool_use: true inside the tool_choice object, not at the top level."
+    },
+    {
+      "id": "fc-102",
+      "module": 27,
+      "page": "course/27-choosing-an-extension/01-the-extension-surface-and-what-each-costs.md",
+      "domains": [
+        "DV5",
+        "DV7"
+      ],
+      "front": "What does each extension feature cost in context?",
+      "back": "CLAUDE.md and output styles load in full every request; skills load descriptions at start and content when used; MCP loads tool names at start and full schemas on demand; subagents have an isolated context; hooks cost zero unless they return context."
+    },
+    {
+      "id": "fc-103",
+      "module": 27,
+      "page": "course/27-choosing-an-extension/01-the-extension-surface-and-what-each-costs.md",
+      "domains": [
+        "DV5",
+        "DV7"
+      ],
+      "front": "What size limit is advised for CLAUDE.md and where should reference material go?",
+      "back": "Keep CLAUDE.md under 200 lines and move reference material to skills, which load on demand. A skill with side effects should use disable-model-invocation: true."
+    },
+    {
+      "id": "fc-104",
+      "module": 27,
+      "page": "course/27-choosing-an-extension/01-the-extension-surface-and-what-each-costs.md",
+      "domains": [
+        "DV7"
+      ],
+      "front": "How do definitions at several levels combine for CLAUDE.md, skills, MCP servers and hooks?",
+      "back": "CLAUDE.md files are additive; skills and subagents override by name; MCP servers override by name (local over project over user); hooks merge, all firing for their matching events."
+    },
+    {
+      "id": "fc-105",
+      "module": 27,
+      "page": "course/27-choosing-an-extension/02-choosing-between-similar-features-and-combining-them.md",
+      "domains": [
+        "DV5",
+        "DV7"
+      ],
+      "front": "When should you choose a subagent over a skill?",
+      "back": "When you need context isolation or the window is filling: a subagent has its own window and returns only a summary, while a skill adds to the main window. They combine via the skills: field and context: fork."
+    },
+    {
+      "id": "fc-106",
+      "module": 27,
+      "page": "course/27-choosing-an-extension/02-choosing-between-similar-features-and-combining-them.md",
+      "domains": [
+        "DV5",
+        "DV7"
+      ],
+      "front": "How do a hook and a skill differ in guarantee, and where do guardrails belong?",
+      "back": "A hook always fires on its event; a skill is interpreted by Claude and the outcome can vary. Guardrails belong in hooks, such as a PreToolUse hook that blocks an edit; an instruction is a request, not enforcement."
+    },
+    {
+      "id": "fc-107",
+      "module": 27,
+      "page": "course/27-choosing-an-extension/02-choosing-between-similar-features-and-combining-them.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "What does MCP provide compared with a skill?",
+      "back": "MCP provides tools and data access to an external system; a skill provides knowledge, workflows and reference material. They work together, for example MCP to the database and a skill documenting its schema."
+    },
+    {
+      "id": "fc-108",
+      "module": 27,
+      "page": "course/27-choosing-an-extension/02-choosing-between-similar-features-and-combining-them.md",
+      "domains": [
+        "DV5",
+        "DV7"
+      ],
+      "front": "How does a subagent differ from a dynamic workflow?",
+      "back": "With subagents Claude decides turn by turn what runs next; in a workflow the script decides. Use a workflow when a job outgrows a handful of subagents or findings should be cross-checked."
+    },
+    {
+      "id": "fc-109",
+      "module": 28,
+      "page": "course/28-retrieval/01-chunks-bm25-and-embeddings.md",
+      "domains": [
+        "DV4"
+      ],
+      "front": "What are the stages of a retrieval pipeline?",
+      "back": "Chunk, index, retrieve, merge, rerank (optional) and generate. Stages 1 to 5 can be tested without a model."
+    },
+    {
+      "id": "fc-110",
+      "module": 28,
+      "page": "course/28-retrieval/01-chunks-bm25-and-embeddings.md",
+      "domains": [
+        "DV4"
+      ],
+      "front": "What does BM25 find well, and what does it miss, compared with an embedding index?",
+      "back": "BM25 scores exact query words, so it finds identifiers and error codes, but misses a chunk with the same meaning in other words. Embeddings find meaning (return an item vs send the parcel back) but are weaker on exact strings."
+    },
+    {
+      "id": "fc-111",
+      "module": 28,
+      "page": "course/28-retrieval/01-chunks-bm25-and-embeddings.md",
+      "domains": [
+        "DV4"
+      ],
+      "front": "Does Anthropic offer an embedding model, and what should you set when embedding for retrieval?",
+      "back": "No; the documentation points to providers such as Voyage AI and says to assess several vendors. Use input_type to say whether text is a query or a document, and do not omit it."
+    },
+    {
+      "id": "fc-112",
+      "module": 28,
+      "page": "course/28-retrieval/02-fusion-reranking-context-and-recall.md",
+      "domains": [
+        "DV4"
+      ],
+      "front": "How does reciprocal rank fusion merge a keyword ranking and an embedding ranking?",
+      "back": "It uses only ranks, because the scores are on different scales: an id scores the sum over the lists of 1 / (k + rank), with k = 60 in the practice. An id near the top of both lists scores high."
+    },
+    {
+      "id": "fc-113",
+      "module": 28,
+      "page": "course/28-retrieval/02-fusion-reranking-context-and-recall.md",
+      "domains": [
+        "DV4"
+      ],
+      "front": "What is contextual retrieval and what failure-rate reduction does Anthropic report?",
+      "back": "Prepending chunk-specific explanatory context to each chunk before embedding and building the keyword index. Top-20 failure rate: 5.7 percent baseline, 49 percent lower with contextual embeddings and BM25, 67 percent lower with reranking added."
+    },
+    {
+      "id": "fc-114",
+      "module": 28,
+      "page": "course/28-retrieval/02-fusion-reranking-context-and-recall.md",
+      "domains": [
+        "DV4"
+      ],
+      "front": "When is retrieval unnecessary, and how should it be measured when used?",
+      "back": "Under about 200,000 tokens, put the whole knowledge base in a cached prompt. Otherwise measure recall at k on questions with known source documents, changing one stage at a time. A reranker only orders its pool."
+    },
+    {
+      "id": "fc-115",
+      "module": 28,
+      "page": "course/28-retrieval/02-fusion-reranking-context-and-recall.md",
+      "domains": [
+        "DV4"
+      ],
+      "front": "What are the rules for the search_result block?",
+      "back": "It needs a source, a title and a content array of text blocks, and is used in RAG so Claude can cite documents. Citations are off by default, enabled with enabled: true, and must be enabled on all search results in a request or none."
+    },
+    {
+      "id": "fc-116",
+      "module": 29,
+      "page": "course/29-context-engineering/01-the-window-context-rot-and-trimming-in-code.md",
+      "domains": [
+        "DV4"
+      ],
+      "front": "What happens when the input alone exceeds the context window, and what is stop_reason model_context_window_exceeded?",
+      "back": "The API returns a 400 invalid_request_error (prompt is too long). On Claude 4.5 and newer, input plus max_tokens over the window is accepted, and generation hitting the limit stops with model_context_window_exceeded; treat that reply as truncated."
+    },
+    {
+      "id": "fc-117",
+      "module": 29,
+      "page": "course/29-context-engineering/01-the-window-context-rot-and-trimming-in-code.md",
+      "domains": [
+        "DV4"
+      ],
+      "front": "In what order should a program trim a long conversation, and what must never be split?",
+      "back": "Clear old tool results, then drop whole old turns, then summarise last. Never separate a tool_use from its tool_result: drop or clear by whole turns, or the request returns a 400."
+    },
+    {
+      "id": "fc-118",
+      "module": 29,
+      "page": "course/29-context-engineering/02-context-editing-compaction-and-memory.md",
+      "domains": [
+        "DV4"
+      ],
+      "front": "Which beta header and strategy name enable context editing, and what are its defaults?",
+      "back": "Header context-management-2025-06-27 and strategy clear_tool_uses_20250919 in context_management. Defaults: trigger 100,000 input tokens, keep 3 tool uses, clear_tool_inputs false; clear_at_least protects the cache."
+    },
+    {
+      "id": "fc-119",
+      "module": 29,
+      "page": "course/29-context-engineering/02-context-editing-compaction-and-memory.md",
+      "domains": [
+        "DV4"
+      ],
+      "front": "How do on-demand compaction and threshold compaction differ?",
+      "back": "On demand: you send compaction: {type: summarize} and the API returns a compaction block with stop_reason compaction. At a threshold: a compact_20260112 edit in context_management triggers at input_tokens (default 150,000, minimum 50,000). Beta headers differ."
+    },
+    {
+      "id": "fc-120",
+      "module": 29,
+      "page": "course/29-context-engineering/02-context-editing-compaction-and-memory.md",
+      "domains": [
+        "DV4"
+      ],
+      "front": "What is the memory tool, and whose job is security?",
+      "back": "A client-side tool (memory_20250818) with view, create, str_replace, insert, delete and rename inside /memories. Your code executes every operation, so you must validate every path against directory traversal."
+    },
+    {
+      "id": "fc-121",
+      "module": 29,
+      "page": "course/29-context-engineering/03-citations-the-files-api-and-the-practice.md",
+      "domains": [
+        "DV4"
+      ],
+      "front": "Which combination with citations returns a 400, and what is the all-or-none rule?",
+      "back": "Citations with structured outputs (output_config.format) return a 400. Citations must be enabled on all or none of the documents in a request, and only text is citable."
+    },
+    {
+      "id": "fc-122",
+      "module": 29,
+      "page": "course/29-context-engineering/03-citations-the-files-api-and-the-practice.md",
+      "domains": [
+        "DV4"
+      ],
+      "front": "What are the Files API limits, and why must you never accept a file_id from an end user?",
+      "back": "500 MB per file and 1 TB per organization. Uploaded files are accessible to the entire workspace, so a user-supplied id could read another user's file. Use a workspace per tenant, and keep the user-to-file mapping yourself."
+    },
+    {
+      "id": "fc-123",
+      "module": 30,
+      "page": "course/30-vision-and-documents/01-images-limits-and-cost.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "What are the image limits per request and per image?",
+      "back": "100 images per request for models with a 200k context window, 600 for others; 8000 by 8000 pixels per image; 10 MB per base64 image on the API (5 MB on Bedrock and Google Cloud); 32 MB request size. Formats: JPEG, PNG, GIF, WebP."
+    },
+    {
+      "id": "fc-124",
+      "module": 30,
+      "page": "course/30-vision-and-documents/01-images-limits-and-cost.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "What changes when a single request holds more than 20 images?",
+      "back": "A stricter per-image dimension limit applies to every image, including resent earlier images and screenshots in tool results. Resize so neither side exceeds 2000 px, or keep to 20 or fewer image and document blocks."
+    },
+    {
+      "id": "fc-125",
+      "module": 30,
+      "page": "course/30-vision-and-documents/01-images-limits-and-cost.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "How many visual tokens does an image cost, and what are the two resolution tiers?",
+      "back": "One token per 28 by 28 pixel patch: ceil(width/28) x ceil(height/28). Claude 4.7 and later: 2576 px long edge, 4784 tokens; other models: 1568 px, 1568 tokens. A 1920 by 1080 screenshot costs 1560 tokens standard and 2691 high-resolution."
+    },
+    {
+      "id": "fc-126",
+      "module": 30,
+      "page": "course/30-vision-and-documents/01-images-limits-and-cost.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "When mapping coordinates Claude returns back to your image, which size do you divide by?",
+      "back": "The resized size, not the padded size. Padding is added to the bottom and right and holds no content. Ask for pixel coordinates, since Claude does not work well with normalized coordinates."
+    },
+    {
+      "id": "fc-127",
+      "module": 30,
+      "page": "course/30-vision-and-documents/02-pdfs-documents-and-the-practice.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "What are the PDF limits and how does Claude receive a PDF?",
+      "back": "32 MB request size, 600 pages per request (100 when the context window is under 1M tokens), no password or encryption. Each page is converted to an image and its extracted text is provided alongside. There is no extra PDF fee."
+    },
+    {
+      "id": "fc-128",
+      "module": 30,
+      "page": "course/30-vision-and-documents/02-pdfs-documents-and-the-practice.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "Which file types can go into a document block, and what are Files API limits?",
+      "back": "PDFs and plain text (.txt, .csv, .md as text/plain); binary formats such as .xlsx and .docx are not supported. Files API: 500 MB per file, 1 TB per organization, expiry one hour to 90 days, no download of uploaded files."
+    },
+    {
+      "id": "fc-129",
+      "module": 30,
+      "page": "course/30-vision-and-documents/02-pdfs-documents-and-the-practice.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "On which platforms are only base64 sources available for images and PDFs?",
+      "back": "Amazon Bedrock and Google Cloud. On the Claude API an image can also come from a URL or a Files API file_id."
+    },
+    {
+      "id": "fc-130",
+      "module": 31,
+      "page": "course/31-computer-use/01-the-toolset-the-loop-and-scaling.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "Which tool entry declares computer use for Claude 5.5 and later, and what does it reject?",
+      "back": "{\"type\": \"computer_toolset_20260801\"}, which gives 17 member tools with no beta header. It takes no display size: name, display_width_px, display_height_px, display_number or enable_zoom give an invalid_request_error. Older models use computer_20251124."
+    },
+    {
+      "id": "fc-131",
+      "module": 31,
+      "page": "course/31-computer-use/01-the-toolset-the-loop-and-scaling.md",
+      "domains": [
+        "DV5",
+        "DV6"
+      ],
+      "front": "How must a batch of computer actions in one reply be answered?",
+      "back": "Run the blocks in order and stop at the first failure. Return a normal result for successes, is_error true with a description for the failure, and is_error true with 'Not executed: an earlier computer action in this turn failed.' for the rest. An unanswered block is an invalid_request_error."
+    },
+    {
+      "id": "fc-132",
+      "module": 31,
+      "page": "course/31-computer-use/01-the-toolset-the-loop-and-scaling.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "How do you handle screenshot size and coordinates in a computer use loop?",
+      "back": "The API does not downscale: resize each screenshot yourself and keep the scale factor. Claude's coordinates are in the pixel space of the image it saw, even after zoom, so scale them back up before acting on the real display."
+    },
+    {
+      "id": "fc-133",
+      "module": 31,
+      "page": "course/31-computer-use/02-safety-sandboxing-and-the-practice.md",
+      "domains": [
+        "DV6"
+      ],
+      "front": "What four precautions does the documentation list for computer use?",
+      "back": "A dedicated virtual machine or container with minimal privileges, no access to sensitive data such as logins, an allowlist of internet domains, and a human confirmation for decisions with real-world consequences or affirmative consent. Classifiers are a second layer only."
+    },
+    {
+      "id": "fc-134",
+      "module": 31,
+      "page": "course/31-computer-use/02-safety-sandboxing-and-the-practice.md",
+      "domains": [
+        "DV5",
+        "DV6"
+      ],
+      "front": "Where should a human confirmation sit in a computer use loop?",
+      "back": "Before each action block runs, because a batch can finish a multistep action inside one turn. Once per task or once per reply is not enough."
+    },
+    {
+      "id": "fc-135",
+      "module": 31,
+      "page": "course/31-computer-use/02-safety-sandboxing-and-the-practice.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "What happens to context in long computer use loops, and what are the choices?",
+      "back": "Screenshots accumulate (roughly 1,000 to 1,800 input tokens each) and past 20 images a stricter per-side limit applies. Resize to 2000 px or less, or prune; client pruning breaks the cache and thinking blocks on the 5.5 models, so prefer server-side clearing."
+    },
+    {
+      "id": "fc-136",
+      "module": 31,
+      "page": "course/31-computer-use/02-safety-sandboxing-and-the-practice.md",
+      "domains": [
+        "DV6"
+      ],
+      "front": "Why can computer use be attacked through the screen, and what do classifiers do?",
+      "back": "Claude may follow commands found in webpages or images even when they conflict with your instructions. Anthropic trained resistance and classifiers scan tool outputs such as screenshots, but the precautions above remain important even with them."
+    },
+    {
+      "id": "fc-137",
+      "module": 31,
+      "page": "course/31-computer-use/02-safety-sandboxing-and-the-practice.md",
+      "domains": [
+        "DV5",
+        "DV6"
+      ],
+      "front": "Where are screenshots, actions and files of a computer use session stored?",
+      "back": "In your environment, not by Anthropic: computer use is a client-side tool. Anthropic processes the images and action requests in real time, and the tool is eligible for zero data retention."
+    },
+    {
+      "id": "fc-138",
+      "module": 32,
+      "page": "course/32-mcp-fundamentals/01-hosts-clients-servers-and-primitives.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "Who controls each MCP primitive: tools, resources and prompts?",
+      "back": "Tools are model-controlled, resources are application-controlled (passive read-only data with a URI and MIME type), and prompts are user-controlled templates. The host creates one client per server."
+    },
+    {
+      "id": "fc-139",
+      "module": 32,
+      "page": "course/32-mcp-fundamentals/01-hosts-clients-servers-and-primitives.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "Which two MCP transports exist, and what is deprecated in revision 2026-07-28?",
+      "back": "stdio (subprocess, one JSON-RPC message per line) and Streamable HTTP (POST with optional SSE). Sampling, roots and logging over the protocol are deprecated. Modern versions have no initialize handshake; servers implement server/discover."
+    },
+    {
+      "id": "fc-140",
+      "module": 32,
+      "page": "course/32-mcp-fundamentals/02-writing-a-server.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "Which failure belongs in a tool error (isError: true) and which in a protocol error?",
+      "back": "Input validation, API and business-logic failures are tool execution errors with isError: true, so the model can self-correct. Unknown tool, malformed request or a missing resource is a JSON-RPC protocol error. In the Python SDK, raise ToolError for expected failures."
+    },
+    {
+      "id": "fc-141",
+      "module": 32,
+      "page": "course/32-mcp-fundamentals/02-writing-a-server.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "What is the stdout rule for a stdio MCP server?",
+      "back": "The server must not write anything to stdout that is not a valid MCP message; one stray print corrupts the JSON-RPC stream. Log to stderr. The rule does not apply to a Streamable HTTP server."
+    },
+    {
+      "id": "fc-142",
+      "module": 32,
+      "page": "course/32-mcp-fundamentals/02-writing-a-server.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "How far can a client trust a tool annotation such as read-only?",
+      "back": "Clients must consider annotations untrusted unless they come from trusted servers. They are hints, not enforcement, and there should still be a human in the loop with the ability to deny tool invocations."
+    },
+    {
+      "id": "fc-143",
+      "module": 32,
+      "page": "course/32-mcp-fundamentals/03-clients-testing-and-debugging.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "What are the Inspector's three clients, and what does it need?",
+      "back": "Web (the default graphical client), CLI (scriptable, for CI) and TUI (terminal UI), in the package @modelcontextprotocol/inspector. It requires Node 22.19.0 or newer and runs through npx. It is the first stop for debugging."
+    },
+    {
+      "id": "fc-144",
+      "module": 32,
+      "page": "course/32-mcp-fundamentals/03-clients-testing-and-debugging.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "Why does an MCP server work from your shell but fail in a host?",
+      "back": "The host may launch it from an undefined working directory with a limited set of environment variables. Use absolute paths and set an env key in the host configuration. Test with a real client, not only handler calls."
+    },
+    {
+      "id": "fc-145",
+      "module": 33,
+      "page": "course/33-mcp-advanced/01-round-trips-elicitation-and-notifications.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "How does a server ask the client for input under revision 2026-07-28?",
+      "back": "With the multi round-trip pattern: it answers tools/call, resources/read or prompts/get with an input-required result (inputRequests and/or requestState), and the client retries the original request with inputResponses. Server-initiated requests are no longer supported."
+    },
+    {
+      "id": "fc-146",
+      "module": 33,
+      "page": "course/33-mcp-advanced/01-round-trips-elicitation-and-notifications.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "What must a client do with requestState, and what must a server do?",
+      "back": "The client must echo the exact value on the retry and must not inspect, parse or modify it. The server must treat it as attacker-controlled: protect its integrity (HMAC), bind it to the principal, an expiry and the originating request."
+    },
+    {
+      "id": "fc-147",
+      "module": 33,
+      "page": "course/33-mcp-advanced/01-round-trips-elicitation-and-notifications.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "When must a server use URL mode rather than form mode elicitation?",
+      "back": "For sensitive information such as passwords, API keys, access tokens or payment credentials, which must stay out of band. Form mode uses a flat-object schema. A person's answer is accept, decline or cancel; a decline is a normal outcome."
+    },
+    {
+      "id": "fc-148",
+      "module": 33,
+      "page": "course/33-mcp-advanced/02-streamable-http-state-and-authorization.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "What does the Streamable HTTP transport of 2026-07-28 look like?",
+      "back": "A single MCP endpoint accepting POST; each request gets a JSON object or a request-scoped SSE stream. The GET stream and protocol-level sessions were removed. Headers MCP-Protocol-Version, Mcp-Method and Mcp-Name mirror body fields."
+    },
+    {
+      "id": "fc-149",
+      "module": 33,
+      "page": "course/33-mcp-advanced/02-streamable-http-state-and-authorization.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "Which three security rules apply to a Streamable HTTP server for local use?",
+      "back": "Validate the Origin header on all connections (403 if invalid) to stop DNS rebinding, bind to localhost 127.0.0.1 rather than all interfaces, and implement authentication for all connections."
+    },
+    {
+      "id": "fc-150",
+      "module": 33,
+      "page": "course/33-mcp-advanced/02-streamable-http-state-and-authorization.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "How does a server keep state without sessions, and how is the handle protected?",
+      "back": "It mints an explicit handle such as a cart id, passed as a tool argument. Possession of a handle is not authentication: use secure random handles, optional expiry, and bind them server-side to the authenticated user."
+    },
+    {
+      "id": "fc-151",
+      "module": 33,
+      "page": "course/33-mcp-advanced/02-streamable-http-state-and-authorization.md",
+      "domains": [
+        "DV5"
+      ],
+      "front": "What does MCP authorization require, and what is token passthrough?",
+      "back": "OAuth 2.1 with Protected Resource Metadata, the resource parameter, PKCE S256, and the token in the Authorization header, never in the query string. Servers must validate the audience; accepting or forwarding another token (passthrough) is forbidden."
+    },
+    {
+      "id": "fc-152",
+      "module": 34,
+      "page": "course/34-workflows-and-agents/01-workflow-or-agent-and-the-first-patterns.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "What separates a workflow from an agent?",
+      "back": "Who decides the next step: in a workflow, predefined code paths orchestrate models and tools; in an agent, the model dynamically directs its own process in a loop. Start with the simplest solution and add complexity only when needed."
+    },
+    {
+      "id": "fc-153",
+      "module": 34,
+      "page": "course/34-workflows-and-agents/01-workflow-or-agent-and-the-first-patterns.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "What are routing and the two forms of parallelization?",
+      "back": "Routing classifies an input and directs it to a specialised follow-up task (normalise the label, have a default route). Parallelization is sectioning (independent subtasks run in parallel, such as a guardrail) and voting (same task several times, with a threshold)."
+    },
+    {
+      "id": "fc-154",
+      "module": 34,
+      "page": "course/34-workflows-and-agents/01-workflow-or-agent-and-the-first-patterns.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "What is prompt chaining and when does it fit?",
+      "back": "Each LLM call processes the previous output, optionally with a gate check between steps. It fits tasks that decompose cleanly into fixed subtasks, trading latency for accuracy."
+    },
+    {
+      "id": "fc-155",
+      "module": 34,
+      "page": "course/34-workflows-and-agents/02-orchestrators-evaluators-agents-and-the-practice.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "How does orchestrator-workers differ from parallelization, and what must it handle?",
+      "back": "The subtasks are determined by the orchestrator from the input, not predefined. Parse the plan defensively and cap it, let one failing worker not stop others, and combine nothing if every worker failed."
+    },
+    {
+      "id": "fc-156",
+      "module": 34,
+      "page": "course/34-workflows-and-agents/02-orchestrators-evaluators-agents-and-the-practice.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "What exits does an evaluator-optimizer loop need?",
+      "back": "A score threshold that accepts the draft and a maximum number of rounds. Return the best-scoring draft, not the last; an unreadable judge reply scores zero and the loop goes on."
+    },
+    {
+      "id": "fc-157",
+      "module": 34,
+      "page": "course/34-workflows-and-agents/02-orchestrators-evaluators-agents-and-the-practice.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "What does the article say about the cost of agents and how to control them?",
+      "back": "Agents mean higher costs and compounding errors, so test extensively in sandboxes with guardrails. Gain ground truth from the environment at each step and include stopping conditions such as a maximum number of iterations."
+    },
+    {
+      "id": "fc-158",
+      "module": 35,
+      "page": "course/35-the-claude-agent-sdk/01-the-sdk-and-its-loop.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "What is the Claude Agent SDK, which languages does it support, and what do other languages do?",
+      "back": "A library that runs the Claude Code binary as a child process, for Python and TypeScript; there is no Java or Kotlin edition. Other languages run the CLI as a subprocess with -p and --output-format json."
+    },
+    {
+      "id": "fc-159",
+      "module": 35,
+      "page": "course/35-the-claude-agent-sdk/01-the-sdk-and-its-loop.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "How do you bound an Agent SDK run, and how do you read how it ended?",
+      "back": "max_turns (tool-use round trips) and max_budget_usd, both unlimited by default. Check the result subtype: success, error_max_turns, error_max_budget_usd, error_during_execution or error_max_structured_output_retries. The result text exists only on success."
+    },
+    {
+      "id": "fc-160",
+      "module": 35,
+      "page": "course/35-the-claude-agent-sdk/01-the-sdk-and-its-loop.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "What happens when a single-shot query() reaches an error result?",
+      "back": "It yields the final result message and then raises an error that includes the failure text, and the binary exits nonzero. The raise is intentional; catch it and keep the result you already have."
+    },
+    {
+      "id": "fc-161",
+      "module": 35,
+      "page": "course/35-the-claude-agent-sdk/02-tools-permissions-hooks-and-custom-tools.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "What is the order in which the SDK evaluates a tool call?",
+      "back": "Hooks, deny rules, ask rules, the permission mode, allow rules and finally the canUseTool callback. Auto-approved tools never reach canUseTool, so gate every call with a PreToolUse hook."
+    },
+    {
+      "id": "fc-162",
+      "module": 35,
+      "page": "course/35-the-claude-agent-sdk/02-tools-permissions-hooks-and-custom-tools.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "What does allowed_tools do, and how does it differ from disallowed_tools?",
+      "back": "allowed_tools only pre-approves the listed tools and does not restrict Claude to them. A bare name in disallowed_tools removes the tool from context; a scoped rule such as Bash(rm *) denies matching calls even in bypassPermissions."
+    },
+    {
+      "id": "fc-163",
+      "module": 35,
+      "page": "course/35-the-claude-agent-sdk/02-tools-permissions-hooks-and-custom-tools.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "How are custom tools defined, named and how are their errors reported?",
+      "back": "With the in-process MCP server (@tool and create_sdk_mcp_server in Python); the full name is mcp__{server_name}__{tool_name}. A handler error does not stop the loop; return is_error with a message written for Claude. Annotations are metadata, not enforcement."
+    },
+    {
+      "id": "fc-164",
+      "module": 35,
+      "page": "course/35-the-claude-agent-sdk/03-driving-the-sdk-offline-and-the-practice.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "How can an Agent SDK policy be tested offline?",
+      "back": "Replace the binary with a scripted stand-in through cli_path (Python) or pathToClaudeCodeExecutable (TypeScript), so the real SDK code builds flags, answers control requests (can_use_tool, hook_callback, mcp_message) and parses the stream. The stand-in is not the real binary."
+    },
+    {
+      "id": "fc-165",
+      "module": 36,
+      "page": "course/36-managed-and-self-hosted-agents/01-what-managed-agents-is.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "What are the four concepts of Claude Managed Agents, and what header does every endpoint need?",
+      "back": "Agent (model, system prompt, tools, MCP servers, skills), environment, session and events. Every endpoint needs the beta header managed-agents-2026-04-01, which the SDKs set. Event history is persisted server-side."
+    },
+    {
+      "id": "fc-166",
+      "module": 36,
+      "page": "course/36-managed-and-self-hosted-agents/01-what-managed-agents-is.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "What does a session override of tools do to the agent's configuration?",
+      "back": "Overrides replace and never merge, so a tools override must list every tool the session should have. They apply to that one session; the agent and its version are untouched. A model override also drops the agent's effort."
+    },
+    {
+      "id": "fc-167",
+      "module": 36,
+      "page": "course/36-managed-and-self-hosted-agents/01-what-managed-agents-is.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "Why is Managed Agents the wrong choice for a zero-data-retention requirement?",
+      "back": "It is stateful by design, storing conversation history, sandbox state and outputs server-side, and is not currently eligible for Zero Data Retention or HIPAA BAA coverage. It is also in beta, so behaviour may change between releases."
+    },
+    {
+      "id": "fc-168",
+      "module": 36,
+      "page": "course/36-managed-and-self-hosted-agents/02-environments-policies-budgets-and-self-hosting.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "What happens if you omit networking when creating a cloud environment?",
+      "back": "The create request gets unrestricted networking. Set it explicitly. With limited networking, packages also need networking.allow_package_managers: true, or the request returns a 400; allowed_hosts takes bare hostnames or wildcards."
+    },
+    {
+      "id": "fc-169",
+      "module": 36,
+      "page": "course/36-managed-and-self-hosted-agents/02-environments-policies-budgets-and-self-hosting.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "What are the three permission policies and their defaults?",
+      "back": "always_allow, always_ask (the session pauses for approval) and auto (the server runs, denies or pauses). The agent toolset defaults to always_allow and MCP toolsets to always_ask. auto is not a human checkpoint; custom tools are controlled by your application."
+    },
+    {
+      "id": "fc-170",
+      "module": 36,
+      "page": "course/36-managed-and-self-hosted-agents/02-environments-policies-budgets-and-self-hosting.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "How do session budgets work in Managed Agents?",
+      "back": "A hard spend ceiling set at creation, written as whole US cents in a string (\"125\" is $1.25). It is checked between requests, so the in-flight request finishes. At the cap the session goes idle with budget_reached and a user.message is rejected with 400; raising the cap resumes it."
+    },
+    {
+      "id": "fc-171",
+      "module": 36,
+      "page": "course/36-managed-and-self-hosted-agents/02-environments-policies-budgets-and-self-hosting.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "What does a self-hosted sandbox move, and what stays with Anthropic?",
+      "back": "Tool execution moves to your infrastructure via an environment worker needing outbound HTTPS. Orchestration stays on Anthropic's side, and tool inputs and outputs still flow to its control plane. You own the image, egress, and the environment key."
+    },
+    {
+      "id": "fc-172",
+      "module": 37,
+      "page": "course/37-agent-frameworks-compared/01-three-families-of-agent-frameworks.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "Who decides the next step in graph-based, model-driven and typed frameworks?",
+      "back": "Graph-based: you, in advance, through nodes and edges, with state and checkpoints. Model-driven: the model at each turn, with a loop and stop conditions. Typed: the model inside a schema, with validated output."
+    },
+    {
+      "id": "fc-173",
+      "module": 37,
+      "page": "course/37-agent-frameworks-compared/01-three-families-of-agent-frameworks.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "What is a checkpoint and why does a graph framework need one?",
+      "back": "A copy of the graph state saved after each node. After a crash or while a person decides, the run resumes from the last checkpoint without repeating earlier nodes or model calls already paid for."
+    },
+    {
+      "id": "fc-174",
+      "module": 37,
+      "page": "course/37-agent-frameworks-compared/01-three-families-of-agent-frameworks.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "What does a typed agent do with a reply that fails validation, and what does validation not prove?",
+      "back": "The failure goes back to the model as a retry message and the run continues. Validation proves the shape only; a refund of 4999 cents passes the schema whether or not it is right."
+    },
+    {
+      "id": "fc-175",
+      "module": 37,
+      "page": "course/37-agent-frameworks-compared/02-framework-or-sdk.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "What does the engineering advice say about starting with frameworks?",
+      "back": "Find the simplest solution and increase complexity only when needed; start by using LLM APIs directly. Frameworks add abstraction layers that can obscure the prompts and responses, making debugging harder."
+    },
+    {
+      "id": "fc-176",
+      "module": 37,
+      "page": "course/37-agent-frameworks-compared/02-framework-or-sdk.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "Which options exist for an Anthropic agent stack, and in what order should you ask?",
+      "back": "Messages API with your own loop, the client SDK tool runner, the Agent SDK, a framework and Managed Agents. Start at the top and stop at the first that meets the requirement; name the missing feature before moving down."
+    },
+    {
+      "id": "fc-177",
+      "module": 37,
+      "page": "course/37-agent-frameworks-compared/02-framework-or-sdk.md",
+      "domains": [
+        "DV3"
+      ],
+      "front": "How do you limit the cost of coupling to a framework?",
+      "back": "Keep tools and the model call behind your own functions so a change of framework is a change in one place. Choose a framework for a feature you can name, such as persistence when the product must resume."
+    },
+    {
+      "id": "fc-178",
+      "module": 38,
+      "page": "course/38-claude-code-for-developers/01-install-the-loop-and-permission-modes.md",
+      "domains": [
+        "DV7"
+      ],
+      "front": "What are the six permission modes in Claude Code?",
+      "back": "default (reads only), acceptEdits, plan (no edits until a plan is approved), auto (a classifier reviews actions), dontAsk (denies anything that would prompt) and bypassPermissions (everything, isolated containers and VMs only)."
+    },
+    {
+      "id": "fc-179",
+      "module": 38,
+      "page": "course/38-claude-code-for-developers/01-install-the-loop-and-permission-modes.md",
+      "domains": [
+        "DV7"
+      ],
+      "front": "Which mode does a session start in, and what cannot a project settings file set?",
+      "back": "Order: the --permission-mode flag, then permissions.defaultMode in settings, then the built-in default. Setting auto or bypassPermissions in .claude/settings.json or settings.local.json has no effect. Deny rules block in every mode, including bypassPermissions."
+    },
+    {
+      "id": "fc-180",
+      "module": 38,
+      "page": "course/38-claude-code-for-developers/01-install-the-loop-and-permission-modes.md",
+      "domains": [
+        "DV7"
+      ],
+      "front": "What do checkpoints and /rewind cover?",
+      "back": "File changes Claude edited: press Esc twice or use /rewind to roll code and conversation back. Actions affecting remote systems (databases, APIs, deployments, a pushed commit) cannot be checkpointed."
+    },
+    {
+      "id": "fc-181",
+      "module": 38,
+      "page": "course/38-claude-code-for-developers/02-memory-settings-and-permission-rules.md",
+      "domains": [
+        "DV7"
+      ],
+      "front": "What is the CLAUDE.md size guideline, and does it enforce anything?",
+      "back": "Target under 200 lines per file, since longer files consume context and reduce adherence. Memory is context, not enforced configuration; to block an action use a PreToolUse hook. Imports (@path) go up to four hops deep and do not reduce context cost."
+    },
+    {
+      "id": "fc-182",
+      "module": 38,
+      "page": "course/38-claude-code-for-developers/02-memory-settings-and-permission-rules.md",
+      "domains": [
+        "DV7"
+      ],
+      "front": "In what order are settings layers applied, and how are lists such as allow and deny treated?",
+      "back": "Highest first: managed, command line, project local, shared project, user. A higher key overrides the same key lower down, but lists combine across layers, so a deny rule anywhere reaches every session."
+    },
+    {
+      "id": "fc-183",
+      "module": 38,
+      "page": "course/38-claude-code-for-developers/02-memory-settings-and-permission-rules.md",
+      "domains": [
+        "DV7"
+      ],
+      "front": "In what order are permission rules evaluated, and what does a bare Bash allow rule do?",
+      "back": "Deny, then ask, then allow; the first match wins and specificity does not matter, so an allow cannot carve an exception out of a deny. A bare Bash allow rule approves every command that no deny or ask rule catches."
+    },
+    {
+      "id": "fc-184",
+      "module": 38,
+      "page": "course/38-claude-code-for-developers/03-commands-headless-runs-and-the-practice.md",
+      "domains": [
+        "DV7"
+      ],
+      "front": "Which flags make a headless claude -p run safe and bounded?",
+      "back": "--bare (skip auto-discovery; key from ANTHROPIC_API_KEY), --output-format json, --max-turns and --max-budget-usd, --permission-mode dontAsk and --allowedTools with patterns such as Bash(git diff *). Never use --dangerously-skip-permissions outside a container or VM."
+    },
+    {
+      "id": "fc-185",
+      "module": 39,
+      "page": "course/39-extending-claude-code/01-skills-and-how-they-compare.md",
+      "domains": [
+        "DV1",
+        "DV7"
+      ],
+      "front": "Where do skills live, and which wins when two share a name?",
+      "back": "Enterprise (managed settings), personal (~/.claude/skills), project (.claude/skills), nested (subdirectory) and plugin locations. By name: enterprise over personal, and personal over project."
+    },
+    {
+      "id": "fc-186",
+      "module": 39,
+      "page": "course/39-extending-claude-code/01-skills-and-how-they-compare.md",
+      "domains": [
+        "DV1",
+        "DV7"
+      ],
+      "front": "What does a skill's description do, and what are its limits?",
+      "back": "Claude uses it to decide when to apply the skill, so put the key use case first. The combined description and when_to_use text is truncated at 1,536 characters in the listing. Frontmatter is read only when the opening --- is the first line."
+    },
+    {
+      "id": "fc-187",
+      "module": 39,
+      "page": "course/39-extending-claude-code/02-subagents-and-hooks.md",
+      "domains": [
+        "DV7"
+      ],
+      "front": "What happens to a subagent that has no tools line, and which fields are required?",
+      "back": "It inherits every tool, edits and shell included. Only name and description are required; a file without a name or description is skipped silently. Use tools to bound a read-only reviewer."
+    },
+    {
+      "id": "fc-188",
+      "module": 39,
+      "page": "course/39-extending-claude-code/02-subagents-and-hooks.md",
+      "domains": [
+        "DV7"
+      ],
+      "front": "What are the three subagent memory scopes and their locations?",
+      "back": "user (~/.claude/agent-memory/<name>/), project (.claude/agent-memory/<name>/, shareable via version control) and local (.claude/agent-memory-local/<name>/, not checked in). Turning auto memory off disables the field."
+    },
+    {
+      "id": "fc-189",
+      "module": 39,
+      "page": "course/39-extending-claude-code/02-subagents-and-hooks.md",
+      "domains": [
+        "DV1",
+        "DV7"
+      ],
+      "front": "What do a hook's exit codes do for PreToolUse?",
+      "back": "Exit 0 means no objection (or a JSON answer); exit 2 blocks the action and stderr goes to Claude; any other code is a non-blocking error. Exit 0 with JSON permissionDecision deny also blocks. The most restrictive answer wins: deny, defer, ask, allow."
+    },
+    {
+      "id": "fc-190",
+      "module": 39,
+      "page": "course/39-extending-claude-code/03-plugins-sharing-and-the-practice.md",
+      "domains": [
+        "DV7"
+      ],
+      "front": "What is the plugin layout, and which agent fields does a plugin ignore?",
+      "back": "The manifest .claude-plugin/plugin.json (only name required) with skills/, agents/, hooks/hooks.json and .mcp.json at the plugin root. Plugin agents ignore permissionMode, hooks and mcpServers. Use ${CLAUDE_PLUGIN_ROOT} for script paths."
+    },
+    {
+      "id": "fc-191",
+      "module": 39,
+      "page": "course/39-extending-claude-code/03-plugins-sharing-and-the-practice.md",
+      "domains": [
+        "DV7"
+      ],
+      "front": "Why pin a plugin dependency with a version range, and how is a team given a plugin?",
+      "back": "Without a range a dependency moves to every new release and a rename can break your plugin; ~2.1.0 keeps 2.1.x patches. Share via extraKnownMarketplaces and enabledPlugins (plugin@marketplace) in .claude/settings.json, applied only in trusted folders."
+    },
+    {
+      "id": "fc-192",
+      "module": 40,
+      "page": "course/40-claude-in-the-software-life-cycle/01-git-committed-configuration-and-versioned-prompts.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "Which Claude Code configuration files are committed and which are gitignored?",
+      "back": "Committed: CLAUDE.md, .claude/settings.json, .claude/skills/ and agents/, .mcp.json. Gitignored: .claude/settings.local.json and CLAUDE.local.md. A secret is never committed, and a committed config file is reviewed like code."
+    },
+    {
+      "id": "fc-193",
+      "module": 40,
+      "page": "course/40-claude-in-the-software-life-cycle/01-git-committed-configuration-and-versioned-prompts.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "How should a prompt used by a workflow be versioned?",
+      "back": "One file per prompt in the repository, a semantic version in its frontmatter, a changelog entry for every change whose latest heading equals the version, and a review with a sample of inputs compared before and after."
+    },
+    {
+      "id": "fc-194",
+      "module": 40,
+      "page": "course/40-claude-in-the-software-life-cycle/01-git-committed-configuration-and-versioned-prompts.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "What is a git worktree used for with Claude Code?",
+      "back": "Each worktree is a separate checkout on its own branch, so two Claude sessions can edit two features without colliding. The repository needs at least one commit first."
+    },
+    {
+      "id": "fc-195",
+      "module": 40,
+      "page": "course/40-claude-in-the-software-life-cycle/02-ci-code-review-and-repository-events.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "Which three ways to automate Claude with repository events exist?",
+      "back": "The GitHub Action (anthropics/claude-code-action@v1, workflows you write), Code Review (automatic PR review, tuned by REVIEW.md) and routines (saved configurations on a schedule, API call or GitHub event, run on Anthropic's cloud)."
+    },
+    {
+      "id": "fc-196",
+      "module": 40,
+      "page": "course/40-claude-in-the-software-life-cycle/02-ci-code-review-and-repository-events.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "What settings make a GitHub Actions workflow with Claude safe and bounded?",
+      "back": "An if guard for @claude mentions, least-privilege permissions per job (contents: read for review), checkout first, @v1 not @beta, a secret not a literal key, --max-turns in claude_args, a workflow timeout and a concurrency group."
+    },
+    {
+      "id": "fc-197",
+      "module": 40,
+      "page": "course/40-claude-in-the-software-life-cycle/02-ci-code-review-and-repository-events.md",
+      "domains": [
+        "DV1"
+      ],
+      "front": "Does Claude Code Review block a merge, and what does REVIEW.md do?",
+      "back": "No: its check run always completes with a neutral conclusion, so findings advise. REVIEW.md holds review-only instructions on what to flag, at what severity, and what to skip; CLAUDE.md applies to all tasks."
+    },
+    {
+      "id": "fc-198",
+      "module": 41,
+      "page": "course/41-security-and-safety/01-injection-jailbreaks-and-untrusted-input.md",
+      "domains": [
+        "DV6"
+      ],
+      "front": "Who is the adversary in a jailbreak or direct injection, and who in an indirect injection?",
+      "back": "The user of your application is the adversary in a jailbreak or direct injection. In indirect injection a third party whose content Claude reads (web pages, emails, documents, tool results) is, and the user is trusted."
+    },
+    {
+      "id": "fc-199",
+      "module": 41,
+      "page": "course/41-security-and-safety/01-injection-jailbreaks-and-untrusted-input.md",
+      "domains": [
+        "DV6"
+      ],
+      "front": "How should untrusted third-party content be delivered to Claude?",
+      "back": "Only in tool_result blocks, JSON-encoded, with its source named, and with the policy in the system prompt that tool content is untrusted data. Never in system prompts or plain user text, and put your own instructions in a following user turn."
+    },
+    {
+      "id": "fc-200",
+      "module": 41,
+      "page": "course/41-security-and-safety/01-injection-jailbreaks-and-untrusted-input.md",
+      "domains": [
+        "DV6"
+      ],
+      "front": "Why is a pattern screen the weakest layer?",
+      "back": "It catches known phrasings and misses paraphrases. A model-based screen generalises better but can still be fooled. Treat every screen as one layer beside structure and privilege."
+    },
+    {
+      "id": "fc-201",
+      "module": 41,
+      "page": "course/41-security-and-safety/02-least-privilege-hooks-sandboxes-and-secrets.md",
+      "domains": [
+        "DV6"
+      ],
+      "front": "What are the three dimensions of least privilege for an agent?",
+      "back": "Tools (which can be called), data (which files, records and secrets a call reaches) and actions (what a call can change or send). Ask of each grant what a hostile instruction gets if it uses it."
+    },
+    {
+      "id": "fc-202",
+      "module": 41,
+      "page": "course/41-security-and-safety/02-least-privilege-hooks-sandboxes-and-secrets.md",
+      "domains": [
+        "DV6"
+      ],
+      "front": "What does the Claude Code sandbox cover and not cover?",
+      "back": "It covers shell commands only, enforced by the operating system with a proxy checking allowed domains. File tools, MCP servers and hooks run outside it and follow permission rules. It is not available on native Windows (use WSL2)."
+    },
+    {
+      "id": "fc-203",
+      "module": 41,
+      "page": "course/41-security-and-safety/02-least-privilege-hooks-sandboxes-and-secrets.md",
+      "domains": [
+        "DV6"
+      ],
+      "front": "How should a guard hook handle commands it cannot parse, and a safe case?",
+      "back": "Fail closed: block a command or event it cannot parse. Answer the safe case with no opinion, not allow, so it never overrides a stricter rule. A prefix rule Bash(git push *) misses git -C . push."
+    },
+    {
+      "id": "fc-204",
+      "module": 41,
+      "page": "course/41-security-and-safety/03-guardrails-monitoring-and-the-practice.md",
+      "domains": [
+        "DV6"
+      ],
+      "front": "Which layers belong around the model for one request?",
+      "back": "Input screen, structure for untrusted content, privilege, a small-model screen of tool output, an action gate or hook that fails closed, output redaction and an audit record with alerts. Red-team your own agent."
+    },
+    {
+      "id": "fc-205",
+      "module": 42,
+      "page": "course/42-evaluation/01-success-criteria-and-test-sets.md",
+      "domains": [
+        "DV8"
+      ],
+      "front": "What are the four traits of a good success criterion?",
+      "back": "Specific, measurable, achievable and relevant. A good one names a metric, a threshold, a data set and a baseline, such as an F1 score of at least 0.85 on a held-out set of 10,000 posts."
+    },
+    {
+      "id": "fc-206",
+      "module": 42,
+      "page": "course/42-evaluation/01-success-criteria-and-test-sets.md",
+      "domains": [
+        "DV8"
+      ],
+      "front": "What are the three principles for building evals?",
+      "back": "Be task-specific (mirror the real distribution and include edge cases), automate grading when possible, and prioritise volume over quality: more automatically graded questions beat fewer hand-graded ones."
+    },
+    {
+      "id": "fc-207",
+      "module": 42,
+      "page": "course/42-evaluation/01-success-criteria-and-test-sets.md",
+      "domains": [
+        "DV8"
+      ],
+      "front": "Why keep a held-out slice of the test set?",
+      "back": "A prompt refined against all the cases will do well on them, so the score says nothing about new input. Keep cases the prompt was never shaped by and run them at the end."
+    },
+    {
+      "id": "fc-208",
+      "module": 42,
+      "page": "course/42-evaluation/02-code-graded-and-model-graded-evals.md",
+      "domains": [
+        "DV8"
+      ],
+      "front": "Which grader types exist, and which should you use first?",
+      "back": "Exact match, string or pattern match, structure check, similarity score, model grader and human grader. Use the cheapest grader that can decide the case, from exact match toward the model grader."
+    },
+    {
+      "id": "fc-209",
+      "module": 42,
+      "page": "course/42-evaluation/02-code-graded-and-model-graded-evals.md",
+      "domains": [
+        "DV8"
+      ],
+      "front": "What makes a model-graded check trustworthy?",
+      "back": "An anchored scale, the graded output delimited in tags, a bare score as the only reply, and a different model than the one that generated the output. A reply that is not a bare score counts as ungradable and fails."
+    },
+    {
+      "id": "fc-210",
+      "module": 42,
+      "page": "course/42-evaluation/03-refining-against-a-set-and-regression-runs.md",
+      "domains": [
+        "DV8"
+      ],
+      "front": "What are the five steps of the refinement loop?",
+      "back": "Baseline run, one change, run the whole set, compare per case, keep or revert. Keep a change only if every success dimension holds; an average never excuses a regression, and a removed case fails the comparison."
+    },
+    {
+      "id": "fc-211",
+      "module": 42,
+      "page": "course/42-evaluation/03-refining-against-a-set-and-regression-runs.md",
+      "domains": [
+        "DV8"
+      ],
+      "front": "When should a regression run happen?",
+      "back": "On a prompt edit, a new model id, a changed setting, a changed tool or schema, and on a nightly schedule. A run on the new model id turns migration 400s into failed cases before production."
+    },
+    {
+      "id": "fc-212",
+      "module": 43,
+      "page": "course/43-debugging-claude-applications/01-failure-types-origins-and-recoveries.md",
+      "domains": [
+        "DV8"
+      ],
+      "front": "What are the four origins of a failure, and who acts on each?",
+      "back": "Integration (you, in code), model (the prompt, validation or fallback), service (usually retry with back-off) and account (a person, outside the code)."
+    },
+    {
+      "id": "fc-213",
+      "module": 43,
+      "page": "course/43-debugging-claude-applications/01-failure-types-origins-and-recoveries.md",
+      "domains": [
+        "DV8"
+      ],
+      "front": "Which migration changes produce a 400, and what is their recovery?",
+      "back": "A prefill on Claude 4.6 and later, edited thinking blocks, thinking type enabled on 4.7 and later, forced tool_choice on Opus 5.5, Sonnet 5.5, Fable 5.1 and Mythos 5.1, and non-default sampling parameters. Change the request; a retry never helps."
+    },
+    {
+      "id": "fc-214",
+      "module": 43,
+      "page": "course/43-debugging-claude-applications/01-failure-types-origins-and-recoveries.md",
+      "domains": [
+        "DV8"
+      ],
+      "front": "How do you handle a refusal?",
+      "back": "It is a response, not an error: stop_reason refusal arrives with status 200, so track it as its own signal. Re-sending to the same model usually refuses again; use a fallback model or reset the context. stop_details may have null fields."
+    },
+    {
+      "id": "fc-215",
+      "module": 43,
+      "page": "course/43-debugging-claude-applications/01-failure-types-origins-and-recoveries.md",
+      "domains": [
+        "DV8"
+      ],
+      "front": "What causes an empty end_turn reply, and what are the fixes?",
+      "back": "Exactly 2 to 3 tokens with no content. Either the integration added text blocks right after a tool result (send the result alone) or the model judged its turn complete (add a continuation user message). Do not retry unmodified."
+    },
+    {
+      "id": "fc-216",
+      "module": 43,
+      "page": "course/43-debugging-claude-applications/01-failure-types-origins-and-recoveries.md",
+      "domains": [
+        "DV8"
+      ],
+      "front": "What is the rule for choosing a recovery?",
+      "back": "Retry only what can change by itself. Fix your own request, send account faults to a person, back off on capacity (429, 529), stream or batch on a 504, use a fallback for a refusal, and raise max_tokens for a cut-off."
+    },
+    {
+      "id": "fc-217",
+      "module": 43,
+      "page": "course/43-debugging-claude-applications/02-reading-a-trace-and-the-practice.md",
+      "domains": [
+        "DV8"
+      ],
+      "front": "What is the reading routine for a trace?",
+      "back": "Find the first failure, check for a status, check whether a 200 really succeeded via stop_reason, check content, parse and tool steps, then name the origin and recovery and note whether a later response recovered."
+    },
+    {
+      "id": "fc-218",
+      "module": 43,
+      "page": "course/43-debugging-claude-applications/02-reading-a-trace-and-the-practice.md",
+      "domains": [
+        "DV8"
+      ],
+      "front": "How do you tell an integration fault from a model fault?",
+      "back": "Ask a question with a checkable answer, such as whether a text block followed a tool_result, or whether a JSON object exists in the text. Replay the same request, or replace the model with a scripted reply of the right shape."
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "14-the-messages-api"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 5,
+  "title": "Check yourself: The conversation state the client keeps, and a conversation client",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A chat client appends each user turn to its history before calling the API. After a night of occasional 529 errors, some conversations answer oddly, and their stored history shows two user turns in a row. What is the best fix?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Retry every failed call forever so that no turn is ever left without its answer by morning",
+            "correct": false,
+            "says": "Ruled out because a retry is a separate decision, and the page says the retry \"will send a different conversation from the one the user saw\" if the history is damaged."
+          },
+          {
+            "id": "b",
+            "text": "Take that entry out again whenever the call raises, so that only whole exchanges are kept",
+            "correct": true,
+            "says": "The rule is to \"commit a turn only when the whole exchange succeeded\", which means removing the user turn on any failure."
+          },
+          {
+            "id": "c",
+            "text": "Merge any two consecutive user turns into one when the history is saved",
+            "correct": false,
+            "says": "Ruled out because a merge hides the damage while \"the next request contains two user turns in a row\" in the very same way, and a question that never got an answer stays in the history."
+          },
+          {
+            "id": "d",
+            "text": "Store only the assistant turns, which are the ones that the model produced",
+            "correct": false,
+            "says": "Ruled out because \"the whole list goes in every request\", and a list without user turns is not a conversation."
+          }
+        ],
+        "origin": {
+          "path": "course/14-the-messages-api/03-the-conversation-state-the-client-keeps.md",
+          "section": "Failure leaves no mark"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A product team notices that a support conversation of 40 turns costs far more than four conversations of 10 turns, although the total number of questions is the same. What explains it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The system prompt is repeated once for every question, so it dominates the bill",
+            "correct": false,
+            "says": "Ruled out because the system prompt is the same size on every turn, and the page says \"every turn resends everything before it\", so the history is what grows."
+          },
+          {
+            "id": "b",
+            "text": "Long conversations are charged at a higher price for each output token that is produced",
+            "correct": false,
+            "says": "Ruled out because nothing on the page prices long conversations differently, and the growth comes from input: \"every turn resends everything before it\"."
+          },
+          {
+            "id": "c",
+            "text": "The model writes longer replies as a conversation grows, and the replies dominate the bill in the end",
+            "correct": false,
+            "says": "Ruled out because \"turn n sends about 200 n input tokens\", which is growth in input and not in replies."
+          },
+          {
+            "id": "d",
+            "text": "Each call repeats the earlier exchanges, so the input bill grows with the square of the length",
+            "correct": true,
+            "says": "The page says \"the input cost of a conversation grows with the square of its length\", because each turn resends everything before it."
+          }
+        ],
+        "origin": {
+          "path": "course/14-the-messages-api/03-the-conversation-state-the-client-keeps.md",
+          "section": "The cost of a long conversation"
+        }
+      }
+    ]
+  }
+}

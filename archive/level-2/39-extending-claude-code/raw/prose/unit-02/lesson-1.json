@@ -1,0 +1,349 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "39-extending-claude-code"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Subagents, their memory, and hooks",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Subagents, their memory, and hooks"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Developer · **Module 39:** Extending Claude Code · **Page 2 of 5** **Exams:** DV1, DV7; A3.2"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** define a subagent with a bounded toolset, choose a memory scope for it, say which of its fields a plugin ignores, write a hook that blocks a destructive command or an edit to a protected file, and read a hook's exit codes and JSON answer correctly."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-03 against the Claude Code documentation (subagents, the hooks guide and the features overview), which mention behaviour up to Claude Code v2.1.286. The example is a hook written as a process and a linter for skill and subagent files, in Python, TypeScript, Java and Kotlin. It is the course's own model of the documented rules. It was run offline and it sends nothing anywhere."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "Subagents keep a noisy side task out of the main conversation, and hooks turn a rule into code that always runs. Both are on the exam, and both have details that decide whether a configuration is safe: which tools a subagent inherits when you list none, which fields a plugin silently ignores, and which hook answer actually blocks a call."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Subagents"
+    },
+    {
+      "type": "para",
+      "text": "\"Each subagent runs in its own context window with a custom system prompt, specific tool access, and independent permissions.\" Claude delegates a task to a subagent when it matches the subagent's description, and the subagent \"does that work in its own context and returns only the summary.\" So a subagent is for work that \"would flood your main conversation with search results, logs, or file contents you won't reference again\". A file in `.claude/agents/` defines one: YAML frontmatter, then the system prompt as Markdown. \"Only `name` and `description` are required.\""
+    },
+    {
+      "type": "para",
+      "text": "The fields to know:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Field",
+        "What it does"
+      ],
+      "rows": [
+        [
+          "`description`",
+          "Claude reads it to decide when to delegate, so write when to use the agent"
+        ],
+        [
+          "`tools`",
+          "The tools the subagent may use. Omit it and the subagent inherits every tool"
+        ],
+        [
+          "`model`",
+          "`sonnet`, `haiku`, `opus` or `inherit`. The default is the main conversation's model"
+        ],
+        [
+          "`maxTurns`",
+          "Stops the subagent after that many agentic turns"
+        ],
+        [
+          "`memory`",
+          "`user`, `project` or `local`: a persistent directory that survives across conversations"
+        ],
+        [
+          "`permissionMode`, `hooks`, `mcpServers`",
+          "Work for your own agents, and are ignored for plugin agents"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Bound a subagent by listing its tools. A reviewer needs `Read`, `Grep` and `Glob`, and a reviewer with no `tools` line can edit files and run commands. A file with no `name` is skipped without a message, and so is one with a `name` but no `description`, so a subagent that never appears is usually a frontmatter problem."
+    },
+    {
+      "type": "para",
+      "text": "Where the file lives sets who has it, and the same name resolves by priority: managed settings first, then the command line, then project, then user, and a plugin's `agents/` directory last, at priority 5, the lowest."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Subagent memory"
+    },
+    {
+      "type": "para",
+      "text": "The `memory` field \"gives the subagent a persistent directory that survives across conversations\", where it builds knowledge \"such as codebase patterns, debugging insights, and architectural decisions.\" The scope chooses where that directory lives and who shares it."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Scope",
+        "Location",
+        "Use it when"
+      ],
+      "rows": [
+        [
+          "`user`",
+          "`~/.claude/agent-memory/<name>/`",
+          "The agent should remember across all projects"
+        ],
+        [
+          "`project`",
+          "`.claude/agent-memory/<name>/`",
+          "The knowledge is project-specific and \"shareable via version control\""
+        ],
+        [
+          "`local`",
+          "`.claude/agent-memory-local/<name>/`",
+          "The knowledge is project-specific and should not be checked in"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Subagent memory is part of auto memory, so turning auto memory off makes the field have no effect."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Hooks"
+    },
+    {
+      "type": "para",
+      "text": "Hooks are \"user-defined shell commands\" that run at points in Claude Code's life cycle, \"which gives you deterministic control: certain actions always happen rather than relying on the LLM to choose to run them.\" That is the sentence that separates a hook from a memory line or a skill. The events that matter most are `PreToolUse` (before a tool runs, and it \"Can block it\"), `PostToolUse` (after a call succeeds), `UserPromptSubmit`, `SessionStart` and `Stop`. A hook is registered under an event with a `matcher` that filters when it fires, such as `Edit|Write` for the file-editing tools, and one or more handlers of type `command`."
+    },
+    {
+      "type": "para",
+      "text": "A command hook is a process. \"When an event fires, Claude Code passes event-specific data as JSON to your script's stdin\", and the script answers with its exit code and its output."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "**Exit 0**: no objection. Output is ignored for a `PreToolUse` hook unless it is the JSON answer below.",
+        "**Exit 2**: \"Claude Code blocks the action. Write a reason to stderr.\" For `PreToolUse` the reason goes to Claude as feedback, so it can adjust.",
+        "**Any other exit code**: with empty or plain-text output, \"the action proceeds as a non-blocking error\". Treat it as a bug in the hook, because it does not stop the call."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Exit 0 with a JSON object on standard output is the structured answer. For `PreToolUse`, put `hookSpecificOutput` with `hookEventName: \"PreToolUse\"`, `permissionDecision` as `allow`, `deny` or `ask`, and `permissionDecisionReason`. Both forms can block. The JSON form lets you say `ask` and carries a reason that is shown to the person."
+    },
+    {
+      "type": "para",
+      "text": "Several hooks can match one call, and they run in parallel. \"For `PreToolUse` permission decisions, the most restrictive answer applies, in the order `deny`, `defer`, `ask`, `allow`.\" A logging hook that exits 0 does not weaken a guard hook that denies. `defer` is a decision for programs that run `claude -p` and read its JSON output: it pauses the run at a tool call so the caller can collect an answer and resume, and Claude Code honors it only in that non-interactive mode and only when the turn makes a single tool call."
+    },
+    {
+      "type": "para",
+      "text": "Two practical points. A hook that guards a rule must read the whole command and not a prefix. A deny rule `Bash(git push *)` misses `git -C . push`, a push behind an environment assignment, a push inside `sh -c`, and one after `&&`, and a hook can normalise those spellings. And keep the matcher narrow: the documentation warns that an empty or `.*` matcher on a permission hook \"would auto-approve every tool permission prompt\"."
+    },
+    {
+      "type": "example",
+      "id": "m39-hook-gate",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/39-hook-gate/python/hook_gate.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/39-hook-gate/typescript/hookGate.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/39-hook-gate/java/HookGate.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/39-hook-gate/kotlin/HookGate.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"A PreToolUse hook that blocks destructive commands, and a linter for skill and subagent files.\n\nClaude Code starts a hook as a process, writes one JSON event to its standard input and reads the answer from its exit code, its\nstandard output and its standard error. Exit code 2 blocks the call and the standard error is the reason; exit code 0 with a JSON\n`permissionDecision` answers in a structured way; exit code 0 with nothing printed gives no opinion. This file is such a hook (run it\nwith --hook) and a demonstration (run it plain). The event and output shapes are those of the Claude Code hooks reference, read on\n2026-10-03. The command check normalises what a prefix rule such as `Bash(git push *)` would miss: another form of the same command.\n\"\"\"\nimport logging\nimport json\nimport re\nimport shlex\nimport sys\n\nfrom miniyaml import split_frontmatter\n\nlog = logging.getLogger(__name__)\n\nPROTECTED = (\".env\", \"package-lock.json\", \".git/\")\n\n\ndef _git_subcommand(args):\n    i = 0\n    while i < len(args):\n        if args[i] in (\"-C\", \"-c\", \"--git-dir\", \"--work-tree\"):\n            i += 2\n        elif args[i].startswith(\"-\"):\n            i += 1\n        else:\n            return args[i]\n    return None\n\n\ndef dangerous(command):\n    \"\"\"The reason a command is refused, or None. Looks through compound commands, `sh -c`, env assignments, paths and git options.\"\"\"\n    for part in re.split(r\"&&|\\|\\||;|\\||&|\\n\", command):\n        try:\n            words = shlex.split(part)\n        except ValueError:\n            return \"a command that cannot be parsed is not run unreviewed\"\n        while words and re.fullmatch(r\"\\w+=\\S*\", words[0]):\n            words = words[1:]\n        if not words:\n            continue\n        program, args = words[0].rsplit(\"/\", 1)[-1], words[1:]\n        if program in (\"sh\", \"bash\", \"zsh\") and \"-c\" in args and args.index(\"-c\") + 1 < len(args):\n            inner = dangerous(args[args.index(\"-c\") + 1])\n            if inner:\n                return inner\n        if program == \"git\" and _git_subcommand(args) == \"push\":\n            return \"nothing is pushed from an agent\"\n        short = \"\".join(a[1:] for a in args if a.startswith(\"-\") and not a.startswith(\"--\"))\n        recursive, force = \"r\" in short or \"R\" in short or \"--recursive\" in args, \"f\" in short or \"--force\" in args\n        if program == \"rm\" and recursive and force:\n            return \"a recursive forced delete is not run from an agent\"\n    return None\n\n\ndef pre_tool_use(event):\n    \"\"\"(exit code, standard output, standard error) for one PreToolUse event.\"\"\"\n    tool, tool_input = event[\"tool_name\"], event.get(\"tool_input\", {})\n    if tool == \"Bash\":\n        reason = dangerous(tool_input.get(\"command\", \"\"))\n        if reason:\n            out = {\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"deny\", \"permissionDecisionReason\": reason}}\n            return 0, json.dumps(out), \"\"\n    if tool in (\"Edit\", \"Write\", \"MultiEdit\"):\n        path = tool_input.get(\"file_path\", \"\").replace(\"\\\\\", \"/\")\n        for pattern in PROTECTED:\n            if pattern in path:\n                return 2, \"\", f\"Blocked: {path} matches protected pattern '{pattern}'\"\n    return 0, \"\", \"\"\n\n\n# --- linting the files that configure Claude Code -----------------------------------------------------------------------------\n\nSIDE_EFFECTS = re.compile(r\"\\b(deploy|publish|delete|commit|push|merge)\\b\", re.I)\n\n\ndef lint_skill(text):\n    fm, _ = split_frontmatter(text)\n    findings = []\n    desc = str(fm.get(\"description\") or \"\")\n    if not desc:\n        findings.append(\"description is missing: Claude uses it to decide when to load the skill\")\n    if len(desc) + len(str(fm.get(\"when_to_use\") or \"\")) > 1536:\n        findings.append(\"description and when_to_use together exceed 1,536 characters and are cut\")\n    if SIDE_EFFECTS.search(f\"{fm.get('name', '')} {desc}\") and fm.get(\"disable-model-invocation\") is not True:\n        findings.append(\"a skill with side effects should set disable-model-invocation: true\")\n    allowed = fm.get(\"allowed-tools\")\n    if allowed and \"Bash\" in str(allowed).replace(\",\", \" \").split():\n        findings.append(\"allowed-tools names bare Bash: pre-approve a pattern such as Bash(git add *) instead\")\n    return findings\n\n\ndef lint_agent(text):\n    fm, _ = split_frontmatter(text)\n    findings = [f\"{k} is required\" for k in (\"name\", \"description\") if not fm.get(k)]\n    if \"tools\" not in fm:\n        findings.append(\"tools is omitted: the subagent inherits every tool\")\n    if fm.get(\"memory\") is not None and fm[\"memory\"] not in (\"user\", \"project\", \"local\"):\n        findings.append(\"memory must be user, project or local\")\n    if fm.get(\"permissionMode\") == \"bypassPermissions\":\n        findings.append(\"permissionMode bypassPermissions skips every prompt in this subagent\")\n    return findings\n\n\nSKILL = \"---\\nname: deploy\\ndescription: Deploy the service to production\\nallowed-tools: Bash\\n---\\nRun the release script.\\n\"\nAGENT = \"---\\nname: reviewer\\ndescription: Reviews a diff for bugs\\nmemory: team\\n---\\nYou review code.\\n\"\n\n\ndef demo():\n    events = [(\"Bash\", {\"command\": \"git push origin main\"}), (\"Bash\", {\"command\": \"git -C . push origin main\"}), (\"Bash\", {\"command\": \"bash -c 'rm -rf build'\"}),\n              (\"Bash\", {\"command\": \"ls && git status\"}), (\"Bash\", {\"command\": \"rm build/old.txt\"}), (\"Edit\", {\"file_path\": \"/work/app/.env\"}), (\"Edit\", {\"file_path\": \"/work/app/main.py\"})]\n    for tool, tool_input in events:\n        code, out, err = pre_tool_use({\"hook_event_name\": \"PreToolUse\", \"tool_name\": tool, \"tool_input\": tool_input})\n        shown = f\"deny (exit 0, JSON): {json.loads(out)['hookSpecificOutput']['permissionDecisionReason']}\" if out else f\"block (exit 2): {err}\" if code == 2 else \"no decision (exit 0)\"\n        print(f\"{tool} {next(iter(tool_input.values()))!r} -> {shown}\")\n    print(\"skill findings:\", lint_skill(SKILL))\n    print(\"agent findings:\", lint_agent(AGENT))\n\n\nif __name__ == \"__main__\":\n    if \"--hook\" in sys.argv:\n        code, out, err = pre_tool_use(json.load(sys.stdin))\n        sys.stdout.write(out)\n        sys.stderr.write(err)\n        sys.exit(code)\n    demo()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "Bash 'git push origin main' -> deny (exit 0, JSON): nothing is pushed from an agent\nBash 'git -C . push origin main' -> deny (exit 0, JSON): nothing is pushed from an agent\nBash \"bash -c 'rm -rf build'\" -> deny (exit 0, JSON): a recursive forced delete is not run from an agent\nBash 'ls && git status' -> no decision (exit 0)\nBash 'rm build/old.txt' -> no decision (exit 0)\nEdit '/work/app/.env' -> block (exit 2): Blocked: /work/app/.env matches protected pattern '.env'\nEdit '/work/app/main.py' -> no decision (exit 0)\nskill findings: ['a skill with side effects should set disable-model-invocation: true', 'allowed-tools names bare Bash: pre-approve a pattern such as Bash(git add *) instead']\nagent findings: ['tools is omitted: the subagent inherits every tool', 'memory must be user, project or local']"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// A PreToolUse hook that blocks destructive commands, and a linter for skill and subagent files.\n//\n// Claude Code starts a hook as a process, writes one JSON event to its standard input and reads the answer from its exit code, its\n// standard output and its standard error. Exit code 2 blocks the call and the standard error is the reason; exit code 0 with a JSON\n// `permissionDecision` answers in a structured way; exit code 0 with nothing printed gives no opinion. This file is such a hook (run it\n// with --hook) and a demonstration (run it plain). The event and output shapes are those of the Claude Code hooks reference, read on\n// 2026-10-03. The command check normalises what a prefix rule such as `Bash(git push *)` would miss: another form of the same command.\nimport { readFileSync } from \"node:fs\";\nimport { splitFrontmatter } from \"./miniyaml.ts\";\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"hook_gate\");\n\nconst PROTECTED = [\".env\", \"package-lock.json\", \".git/\"];\n\n/** The words of a shell command, with quotes and backslashes read the way a POSIX shell reads them. */\nfunction shellSplit(text: string): string[] {\n  const words: string[] = [];\n  let cur = \"\";\n  let inWord = false;\n  for (let i = 0; i < text.length; i++) {\n    const c = text[i];\n    if (c === \"'\") {\n      const end = text.indexOf(\"'\", i + 1);\n      if (end < 0) throw new Error(\"No closing quotation\");\n      cur += text.slice(i + 1, end);\n      i = end;\n      inWord = true;\n    } else if (c === '\"') {\n      i++;\n      while (i < text.length && text[i] !== '\"') {\n        if (text[i] === \"\\\\\" && i + 1 < text.length && '\"\\\\$`'.includes(text[i + 1])) i++;\n        cur += text[i++];\n      }\n      if (i >= text.length) throw new Error(\"No closing quotation\");\n      inWord = true;\n    } else if (c === \"\\\\\" && i + 1 < text.length) {\n      cur += text[++i];\n      inWord = true;\n    } else if (/\\s/.test(c)) {\n      if (inWord) words.push(cur);\n      cur = \"\";\n      inWord = false;\n    } else {\n      cur += c;\n      inWord = true;\n    }\n  }\n  if (inWord) words.push(cur);\n  return words;\n}\n\nfunction gitSubcommand(args: string[]): string | null {\n  let i = 0;\n  while (i < args.length) {\n    if ([\"-C\", \"-c\", \"--git-dir\", \"--work-tree\"].includes(args[i])) i += 2;\n    else if (args[i].startsWith(\"-\")) i += 1;\n    else return args[i];\n  }\n  return null;\n}\n\n/** The reason a command is refused, or null. Looks through compound commands, `sh -c`, env assignments, paths and git options. */\nexport function dangerous(command: string): string | null {\n  for (const part of command.split(/&&|\\|\\||;|\\||&|\\n/)) {\n    let words: string[];\n    try {\n      words = shellSplit(part);\n    } catch {\n      return \"a command that cannot be parsed is not run unreviewed\";\n    }\n    while (words.length && /^\\w+=\\S*$/.test(words[0])) words = words.slice(1);\n    if (!words.length) continue;\n    const program = words[0].split(\"/\").at(-1) as string;\n    const args = words.slice(1);\n    if ([\"sh\", \"bash\", \"zsh\"].includes(program) && args.includes(\"-c\") && args.indexOf(\"-c\") + 1 < args.length) {\n      const inner = dangerous(args[args.indexOf(\"-c\") + 1]);\n      if (inner) return inner;\n    }\n    if (program === \"git\" && gitSubcommand(args) === \"push\") return \"nothing is pushed from an agent\";\n    const short = args.filter((a) => a.startsWith(\"-\") && !a.startsWith(\"--\")).map((a) => a.slice(1)).join(\"\");\n    const recursive = short.includes(\"r\") || short.includes(\"R\") || args.includes(\"--recursive\");\n    const force = short.includes(\"f\") || args.includes(\"--force\");\n    if (program === \"rm\" && recursive && force) return \"a recursive forced delete is not run from an agent\";\n  }\n  return null;\n}\n\n/** [exit code, standard output, standard error] for one PreToolUse event. */\nexport function preToolUse(event: any): [number, string, string] {\n  const tool = event.tool_name;\n  const toolInput = event.tool_input ?? {};\n  if (tool === \"Bash\") {\n    const reason = dangerous(toolInput.command ?? \"\");\n    if (reason) {\n      const out = { hookSpecificOutput: { hookEventName: \"PreToolUse\", permissionDecision: \"deny\", permissionDecisionReason: reason } };\n      return [0, JSON.stringify(out), \"\"];\n    }\n  }\n  if ([\"Edit\", \"Write\", \"MultiEdit\"].includes(tool)) {\n    const path = String(toolInput.file_path ?? \"\").replaceAll(\"\\\\\", \"/\");\n    for (const pattern of PROTECTED) if (path.includes(pattern)) return [2, \"\", `Blocked: ${path} matches protected pattern '${pattern}'`];\n  }\n  return [0, \"\", \"\"];\n}\n\n// --- linting the files that configure Claude Code -------------------------------------------------------------------------------\n\nconst SIDE_EFFECTS = /\\b(deploy|publish|delete|commit|push|merge)\\b/i;\n\nexport function lintSkill(text: string): string[] {\n  const [fm] = splitFrontmatter(text);\n  const findings: string[] = [];\n  const desc = String(fm.description ?? \"\");\n  if (!desc) findings.push(\"description is missing: Claude uses it to decide when to load the skill\");\n  if (desc.length + String(fm.when_to_use ?? \"\").length > 1536) findings.push(\"description and when_to_use together exceed 1,536 characters and are cut\");\n  if (SIDE_EFFECTS.test(`${fm.name ?? \"\"} ${desc}`) && fm[\"disable-model-invocation\"] !== true) findings.push(\"a skill with side effects should set disable-model-invocation: true\");\n  const allowed = fm[\"allowed-tools\"];\n  if (allowed && String(allowed).replaceAll(\",\", \" \").split(/\\s+/).includes(\"Bash\")) findings.push(\"allowed-tools names bare Bash: pre-approve a pattern such as Bash(git add *) instead\");\n  return findings;\n}\n\nexport function lintAgent(text: string): string[] {\n  const [fm] = splitFrontmatter(text);\n  const findings = [\"name\", \"description\"].filter((k) => !fm[k]).map((k) => `${k} is required`);\n  if (!(\"tools\" in fm)) findings.push(\"tools is omitted: the subagent inherits every tool\");\n  if (fm.memory != null && ![\"user\", \"project\", \"local\"].includes(String(fm.memory))) findings.push(\"memory must be user, project or local\");\n  if (fm.permissionMode === \"bypassPermissions\") findings.push(\"permissionMode bypassPermissions skips every prompt in this subagent\");\n  return findings;\n}\n\nconst SKILL = \"---\\nname: deploy\\ndescription: Deploy the service to production\\nallowed-tools: Bash\\n---\\nRun the release script.\\n\";\nconst AGENT = \"---\\nname: reviewer\\ndescription: Reviews a diff for bugs\\nmemory: team\\n---\\nYou review code.\\n\";\n\n/** A string written the way Python writes it, so both languages show the same output. */\nfunction pyRepr(s: string): string {\n  return s.includes(\"'\") && !s.includes('\"') ? `\"${s}\"` : `'${s}'`;\n}\n\nfunction pyList(items: string[]): string {\n  return `[${items.map(pyRepr).join(\", \")}]`;\n}\n\nfunction demo() {\n  const events: Array<[string, Record<string, string>]> = [[\"Bash\", { command: \"git push origin main\" }], [\"Bash\", { command: \"git -C . push origin main\" }], [\"Bash\", { command: \"bash -c 'rm -rf build'\" }],\n    [\"Bash\", { command: \"ls && git status\" }], [\"Bash\", { command: \"rm build/old.txt\" }], [\"Edit\", { file_path: \"/work/app/.env\" }], [\"Edit\", { file_path: \"/work/app/main.py\" }]];\n  for (const [tool, toolInput] of events) {\n    const [code, out, err] = preToolUse({ hook_event_name: \"PreToolUse\", tool_name: tool, tool_input: toolInput });\n    const shown = out ? `deny (exit 0, JSON): ${JSON.parse(out).hookSpecificOutput.permissionDecisionReason}` : code === 2 ? `block (exit 2): ${err}` : \"no decision (exit 0)\";\n    console.log(`${tool} ${pyRepr(Object.values(toolInput)[0])} -> ${shown}`);\n  }\n  console.log(\"skill findings:\", pyList(lintSkill(SKILL)));\n  console.log(\"agent findings:\", pyList(lintAgent(AGENT)));\n}\n\nif (import.meta.main) {\n  if (process.argv.includes(\"--hook\")) {\n    const [code, out, err] = preToolUse(JSON.parse(readFileSync(0, \"utf8\")));\n    process.stdout.write(out);\n    process.stderr.write(err);\n    process.exitCode = code;\n  } else demo();\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "Bash 'git push origin main' -> deny (exit 0, JSON): nothing is pushed from an agent\nBash 'git -C . push origin main' -> deny (exit 0, JSON): nothing is pushed from an agent\nBash \"bash -c 'rm -rf build'\" -> deny (exit 0, JSON): a recursive forced delete is not run from an agent\nBash 'ls && git status' -> no decision (exit 0)\nBash 'rm build/old.txt' -> no decision (exit 0)\nEdit '/work/app/.env' -> block (exit 2): Blocked: /work/app/.env matches protected pattern '.env'\nEdit '/work/app/main.py' -> no decision (exit 0)\nskill findings: ['a skill with side effects should set disable-model-invocation: true', 'allowed-tools names bare Bash: pre-approve a pattern such as Bash(git add *) instead']\nagent findings: ['tools is omitted: the subagent inherits every tool', 'memory must be user, project or local']"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import com.fasterxml.jackson.databind.ObjectMapper;\nimport com.fasterxml.jackson.dataformat.yaml.YAMLFactory;\nimport java.io.IOException;\nimport java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.regex.Matcher;\nimport java.util.regex.Pattern;\nimport java.util.stream.Collectors;\n\n/**\n * A PreToolUse hook that blocks destructive commands, and a linter for skill and subagent files.\n *\n * <p>Claude Code starts a hook as a process, writes one JSON event to its standard input and reads the answer from its exit code, its\n * standard output and its standard error. Exit code 2 blocks the call and the standard error is the reason; exit code 0 with a JSON\n * `permissionDecision` answers in a structured way; exit code 0 with nothing printed gives no opinion. This file is such a hook (run it\n * with --hook) and a demonstration (run it plain). The event and output shapes are those of the Claude Code hooks reference, read on\n * 2026-10-03. The command check normalises what a prefix rule such as `Bash(git push *)` would miss: another form of the same command.\n * The front matter of the skill and subagent files is YAML, read with Jackson.\n */\npublic final class HookGate {\n    private static final System.Logger LOG = System.getLogger(HookGate.class.getName());\n    static final List<String> PROTECTED = List.of(\".env\", \"package-lock.json\", \".git/\");\n    private static final ObjectMapper JSON = new ObjectMapper();\n    private static final ObjectMapper YAML = new ObjectMapper(new YAMLFactory());\n\n    /** What the hook process answers: the exit code, standard output and standard error. */\n    record Answer(int code, String out, String err) {}\n\n    /** The words of a command line as a POSIX shell would split them (quotes and backslashes); a bad quote is an error. */\n    static List<String> shlexSplit(String s) {\n        List<String> words = new ArrayList<>();\n        StringBuilder word = null;\n        int i = 0;\n        while (i < s.length()) {\n            char c = s.charAt(i++);\n            if (Character.isWhitespace(c)) {\n                if (word != null) { words.add(word.toString()); word = null; }\n                continue;\n            }\n            if (word == null) word = new StringBuilder();\n            if (c == '\\\\') {\n                if (i >= s.length()) throw new IllegalArgumentException(\"No escaped character\");\n                word.append(s.charAt(i++));\n            } else if (c == '\\'') {\n                int end = s.indexOf('\\'', i);\n                if (end < 0) throw new IllegalArgumentException(\"No closing quotation\");\n                word.append(s, i, end);\n                i = end + 1;\n            } else if (c == '\"') {\n                while (true) {\n                    if (i >= s.length()) throw new IllegalArgumentException(\"No closing quotation\");\n                    char d = s.charAt(i++);\n                    if (d == '\"') break;\n                    if (d == '\\\\' && i < s.length() && \"\\\"\\\\$`\\n\".indexOf(s.charAt(i)) >= 0) d = s.charAt(i++);\n                    word.append(d);\n                }\n            } else {\n                word.append(c);\n            }\n        }\n        if (word != null) words.add(word.toString());\n        return words;\n    }\n\n    private static String gitSubcommand(List<String> args) {\n        int i = 0;\n        while (i < args.size()) {\n            String a = args.get(i);\n            if (List.of(\"-C\", \"-c\", \"--git-dir\", \"--work-tree\").contains(a)) i += 2;\n            else if (a.startsWith(\"-\")) i += 1;\n            else return a;\n        }\n        return null;\n    }\n\n    /** The reason a command is refused, or null. Looks through compound commands, `sh -c`, env assignments, paths and git options. */\n    static String dangerous(String command) {\n        for (String part : command.split(\"&&|\\\\|\\\\||;|\\\\||&|\\n\")) {\n            List<String> words;\n            try {\n                words = shlexSplit(part);\n            } catch (IllegalArgumentException e) {\n                return \"a command that cannot be parsed is not run unreviewed\";\n            }\n            int skip = 0;\n            while (skip < words.size() && words.get(skip).matches(\"\\\\w+=\\\\S*\")) skip++;\n            words = words.subList(skip, words.size());\n            if (words.isEmpty()) continue;\n            String program = words.get(0).substring(words.get(0).lastIndexOf('/') + 1);\n            List<String> args = words.subList(1, words.size());\n            int dashC = args.indexOf(\"-c\");\n            if (List.of(\"sh\", \"bash\", \"zsh\").contains(program) && dashC >= 0 && dashC + 1 < args.size()) {\n                String inner = dangerous(args.get(dashC + 1));\n                if (inner != null) return inner;\n            }\n            if (program.equals(\"git\") && \"push\".equals(gitSubcommand(args))) return \"nothing is pushed from an agent\";\n            String shortFlags = args.stream().filter(a -> a.startsWith(\"-\") && !a.startsWith(\"--\")).map(a -> a.substring(1)).collect(Collectors.joining());\n            boolean recursive = shortFlags.contains(\"r\") || shortFlags.contains(\"R\") || args.contains(\"--recursive\");\n            boolean force = shortFlags.contains(\"f\") || args.contains(\"--force\");\n            if (program.equals(\"rm\") && recursive && force) return \"a recursive forced delete is not run from an agent\";\n        }\n        return null;\n    }\n\n    /** The answer for one PreToolUse event. */\n    @SuppressWarnings(\"unchecked\")\n    static Answer preToolUse(Map<String, Object> event) throws IOException {\n        String tool = (String) event.get(\"tool_name\");\n        Map<String, Object> toolInput = (Map<String, Object>) event.getOrDefault(\"tool_input\", Map.of());\n        if (tool.equals(\"Bash\")) {\n            String reason = dangerous((String) toolInput.getOrDefault(\"command\", \"\"));\n            if (reason != null) {\n                Map<String, Object> specific = new LinkedHashMap<>();\n                specific.put(\"hookEventName\", \"PreToolUse\");\n                specific.put(\"permissionDecision\", \"deny\");\n                specific.put(\"permissionDecisionReason\", reason);\n                return new Answer(0, JSON.writeValueAsString(Map.of(\"hookSpecificOutput\", specific)), \"\");\n            }\n        }\n        if (List.of(\"Edit\", \"Write\", \"MultiEdit\").contains(tool)) {\n            String path = ((String) toolInput.getOrDefault(\"file_path\", \"\")).replace(\"\\\\\", \"/\");\n            for (String pattern : PROTECTED) {\n                if (path.contains(pattern)) return new Answer(2, \"\", \"Blocked: \" + path + \" matches protected pattern '\" + pattern + \"'\");\n            }\n        }\n        return new Answer(0, \"\", \"\");\n    }\n\n    // --- linting the files that configure Claude Code -------------------------------------------------------------------\n\n    private static final Pattern SIDE_EFFECTS = Pattern.compile(\"\\\\b(deploy|publish|delete|commit|push|merge)\\\\b\", Pattern.CASE_INSENSITIVE);\n    private static final Pattern FRONTMATTER = Pattern.compile(\"^---\\\\n(.*?)\\\\n---\\\\n?(.*)$\", Pattern.DOTALL);\n\n    /** The front matter of a Markdown file that starts with a --- block; an empty map when it has none. */\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> frontmatter(String text) throws IOException {\n        Matcher m = FRONTMATTER.matcher(text);\n        if (!m.matches()) return Map.of();\n        Map<String, Object> fm = YAML.readValue(m.group(1), LinkedHashMap.class);\n        return fm == null ? Map.of() : fm;\n    }\n\n    private static String text(Object o) {\n        return o == null ? \"\" : String.valueOf(o);\n    }\n\n    static List<String> lintSkill(String text) throws IOException {\n        Map<String, Object> fm = frontmatter(text);\n        List<String> findings = new ArrayList<>();\n        String desc = text(fm.get(\"description\"));\n        if (desc.isEmpty()) findings.add(\"description is missing: Claude uses it to decide when to load the skill\");\n        if (desc.length() + text(fm.get(\"when_to_use\")).length() > 1536) findings.add(\"description and when_to_use together exceed 1,536 characters and are cut\");\n        if (SIDE_EFFECTS.matcher(text(fm.getOrDefault(\"name\", \"\")) + \" \" + desc).find() && !Boolean.TRUE.equals(fm.get(\"disable-model-invocation\"))) {\n            findings.add(\"a skill with side effects should set disable-model-invocation: true\");\n        }\n        Object allowed = fm.get(\"allowed-tools\");\n        if (allowed != null && !text(allowed).isEmpty() && List.of(text(allowed).replace(\",\", \" \").trim().split(\"\\\\s+\")).contains(\"Bash\")) {\n            findings.add(\"allowed-tools names bare Bash: pre-approve a pattern such as Bash(git add *) instead\");\n        }\n        return findings;\n    }\n\n    static List<String> lintAgent(String text) throws IOException {\n        Map<String, Object> fm = frontmatter(text);\n        List<String> findings = new ArrayList<>();\n        for (String k : List.of(\"name\", \"description\")) if (text(fm.get(k)).isEmpty()) findings.add(k + \" is required\");\n        if (!fm.containsKey(\"tools\")) findings.add(\"tools is omitted: the subagent inherits every tool\");\n        if (fm.get(\"memory\") != null && !List.of(\"user\", \"project\", \"local\").contains(fm.get(\"memory\"))) findings.add(\"memory must be user, project or local\");\n        if (\"bypassPermissions\".equals(fm.get(\"permissionMode\"))) findings.add(\"permissionMode bypassPermissions skips every prompt in this subagent\");\n        return findings;\n    }\n\n    static final String SKILL = \"---\\nname: deploy\\ndescription: Deploy the service to production\\nallowed-tools: Bash\\n---\\nRun the release script.\\n\";\n    static final String AGENT = \"---\\nname: reviewer\\ndescription: Reviews a diff for bugs\\nmemory: team\\n---\\nYou review code.\\n\";\n\n    /** Python's repr of strings and lists of strings, so every language of the course prints the same text. */\n    static String py(Object v) {\n        if (v instanceof List<?> l) return l.stream().map(HookGate::py).collect(Collectors.joining(\", \", \"[\", \"]\"));\n        String s = String.valueOf(v);\n        String q = s.contains(\"'\") && !s.contains(\"\\\"\") ? \"\\\"\" : \"'\";\n        return q + s.replace(\"\\\\\", \"\\\\\\\\\").replace(\"\\n\", \"\\\\n\").replace(q, \"\\\\\" + q) + q;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static void demo() throws IOException {\n        List<Object[]> events = List.of(\n            new Object[] {\"Bash\", \"command\", \"git push origin main\"}, new Object[] {\"Bash\", \"command\", \"git -C . push origin main\"},\n            new Object[] {\"Bash\", \"command\", \"bash -c 'rm -rf build'\"}, new Object[] {\"Bash\", \"command\", \"ls && git status\"},\n            new Object[] {\"Bash\", \"command\", \"rm build/old.txt\"}, new Object[] {\"Edit\", \"file_path\", \"/work/app/.env\"},\n            new Object[] {\"Edit\", \"file_path\", \"/work/app/main.py\"});\n        for (Object[] e : events) {\n            Map<String, Object> event = Map.of(\"hook_event_name\", \"PreToolUse\", \"tool_name\", e[0], \"tool_input\", Map.of((String) e[1], e[2]));\n            Answer a = preToolUse(event);\n            String shown;\n            if (!a.out().isEmpty()) {\n                Map<String, Object> specific = (Map<String, Object>) JSON.readValue(a.out(), Map.class).get(\"hookSpecificOutput\");\n                shown = \"deny (exit 0, JSON): \" + specific.get(\"permissionDecisionReason\");\n            } else {\n                shown = a.code() == 2 ? \"block (exit 2): \" + a.err() : \"no decision (exit 0)\";\n            }\n            System.out.println(e[0] + \" \" + py(e[2]) + \" -> \" + shown);\n        }\n        System.out.println(\"skill findings: \" + py(lintSkill(SKILL)));\n        System.out.println(\"agent findings: \" + py(lintAgent(AGENT)));\n    }\n\n    public static void main(String[] args) throws Exception {\n        if (List.of(args).contains(\"--hook\")) {\n            Answer a = preToolUse(JSON.readValue(System.in, LinkedHashMap.class));\n            System.out.print(a.out());\n            System.err.print(a.err());\n            System.out.flush();\n            System.err.flush();\n            System.exit(a.code());\n        }\n        demo();\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "Bash 'git push origin main' -> deny (exit 0, JSON): nothing is pushed from an agent\nBash 'git -C . push origin main' -> deny (exit 0, JSON): nothing is pushed from an agent\nBash \"bash -c 'rm -rf build'\" -> deny (exit 0, JSON): a recursive forced delete is not run from an agent\nBash 'ls && git status' -> no decision (exit 0)\nBash 'rm build/old.txt' -> no decision (exit 0)\nEdit '/work/app/.env' -> block (exit 2): Blocked: /work/app/.env matches protected pattern '.env'\nEdit '/work/app/main.py' -> no decision (exit 0)\nskill findings: ['a skill with side effects should set disable-model-invocation: true', 'allowed-tools names bare Bash: pre-approve a pattern such as Bash(git add *) instead']\nagent findings: ['tools is omitted: the subagent inherits every tool', 'memory must be user, project or local']"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import com.fasterxml.jackson.databind.ObjectMapper\nimport com.fasterxml.jackson.dataformat.yaml.YAMLFactory\nimport kotlin.system.exitProcess\n\nprivate val log = System.getLogger(\"hook_gate\")\n\n/**\n * A PreToolUse hook that blocks destructive commands, and a linter for skill and subagent files.\n *\n * Claude Code starts a hook as a process, writes one JSON event to its standard input and reads the answer from its exit code, its\n * standard output and its standard error. Exit code 2 blocks the call and the standard error is the reason; exit code 0 with a JSON\n * `permissionDecision` answers in a structured way; exit code 0 with nothing printed gives no opinion. This file is such a hook (run it\n * with --hook) and a demonstration (run it plain). The event and output shapes are those of the Claude Code hooks reference, read on\n * 2026-10-03. The command check normalises what a prefix rule such as `Bash(git push *)` would miss: another form of the same command.\n * The front matter of the skill and subagent files is YAML, read with Jackson.\n */\nval PROTECTED = listOf(\".env\", \"package-lock.json\", \".git/\")\nprivate val JSON = ObjectMapper()\nprivate val YAML = ObjectMapper(YAMLFactory())\n\n/** What the hook process answers: the exit code, standard output and standard error. */\ndata class Answer(val code: Int, val out: String, val err: String)\n\n/** The words of a command line as a POSIX shell would split them (quotes and backslashes); a bad quote is an error. */\nfun shlexSplit(s: String): List<String> {\n    val words = mutableListOf<String>()\n    var word: StringBuilder? = null\n    var i = 0\n    while (i < s.length) {\n        val c = s[i++]\n        if (c.isWhitespace()) {\n            word?.let { words += it.toString() }\n            word = null\n            continue\n        }\n        val w = word ?: StringBuilder().also { word = it }\n        when (c) {\n            '\\\\' -> {\n                require(i < s.length) { \"No escaped character\" }\n                w.append(s[i++])\n            }\n            '\\'' -> {\n                val end = s.indexOf('\\'', i)\n                require(end >= 0) { \"No closing quotation\" }\n                w.append(s, i, end)\n                i = end + 1\n            }\n            '\"' -> while (true) {\n                require(i < s.length) { \"No closing quotation\" }\n                var d = s[i++]\n                if (d == '\"') break\n                if (d == '\\\\' && i < s.length && s[i] in \"\\\"\\\\$`\\n\") d = s[i++]\n                w.append(d)\n            }\n            else -> w.append(c)\n        }\n    }\n    word?.let { words += it.toString() }\n    return words\n}\n\nprivate fun gitSubcommand(args: List<String>): String? {\n    var i = 0\n    while (i < args.size) {\n        val a = args[i]\n        if (a in listOf(\"-C\", \"-c\", \"--git-dir\", \"--work-tree\")) i += 2 else if (a.startsWith(\"-\")) i += 1 else return a\n    }\n    return null\n}\n\n/** The reason a command is refused, or null. Looks through compound commands, `sh -c`, env assignments, paths and git options. */\nfun dangerous(command: String): String? {\n    for (part in command.split(Regex(\"&&|\\\\|\\\\||;|\\\\||&|\\n\"))) {\n        val split = try {\n            shlexSplit(part)\n        } catch (e: IllegalArgumentException) {\n            return \"a command that cannot be parsed is not run unreviewed\"\n        }\n        val words = split.dropWhile { Regex(\"\"\"\\w+=\\S*\"\"\").matches(it) }\n        if (words.isEmpty()) continue\n        val program = words[0].substringAfterLast('/')\n        val args = words.drop(1)\n        val dashC = args.indexOf(\"-c\")\n        if (program in listOf(\"sh\", \"bash\", \"zsh\") && dashC >= 0 && dashC + 1 < args.size) {\n            dangerous(args[dashC + 1])?.let { return it }\n        }\n        if (program == \"git\" && gitSubcommand(args) == \"push\") return \"nothing is pushed from an agent\"\n        val short = args.filter { it.startsWith(\"-\") && !it.startsWith(\"--\") }.joinToString(\"\") { it.drop(1) }\n        val recursive = \"r\" in short || \"R\" in short || \"--recursive\" in args\n        val force = \"f\" in short || \"--force\" in args\n        if (program == \"rm\" && recursive && force) return \"a recursive forced delete is not run from an agent\"\n    }\n    return null\n}\n\n/** The answer for one PreToolUse event. */\nfun preToolUse(event: Map<String, Any?>): Answer {\n    val tool = event[\"tool_name\"] as String\n    @Suppress(\"UNCHECKED_CAST\") val toolInput = (event[\"tool_input\"] ?: emptyMap<String, Any?>()) as Map<String, Any?>\n    if (tool == \"Bash\") {\n        dangerous(toolInput[\"command\"] as String? ?: \"\")?.let { reason ->\n            val specific = linkedMapOf(\"hookEventName\" to \"PreToolUse\", \"permissionDecision\" to \"deny\", \"permissionDecisionReason\" to reason)\n            return Answer(0, JSON.writeValueAsString(mapOf(\"hookSpecificOutput\" to specific)), \"\")\n        }\n    }\n    if (tool in listOf(\"Edit\", \"Write\", \"MultiEdit\")) {\n        val path = (toolInput[\"file_path\"] as String? ?: \"\").replace(\"\\\\\", \"/\")\n        for (pattern in PROTECTED) if (pattern in path) return Answer(2, \"\", \"Blocked: $path matches protected pattern '$pattern'\")\n    }\n    return Answer(0, \"\", \"\")\n}\n\n// --- linting the files that configure Claude Code -----------------------------------------------------------------------------\n\nprivate val SIDE_EFFECTS = Regex(\"\"\"\\b(deploy|publish|delete|commit|push|merge)\\b\"\"\", RegexOption.IGNORE_CASE)\n\n/** The front matter of a Markdown file that starts with a --- block; an empty map when it has none. */\n@Suppress(\"UNCHECKED_CAST\")\nfun frontmatter(text: String): Map<String, Any?> {\n    val m = Regex(\"^---\\\\n(.*?)\\\\n---\\\\n?(.*)$\", RegexOption.DOT_MATCHES_ALL).matchEntire(text) ?: return emptyMap()\n    return YAML.readValue(m.groupValues[1], LinkedHashMap::class.java) as Map<String, Any?>? ?: emptyMap()\n}\n\nprivate fun text(o: Any?) = o?.toString() ?: \"\"\n\nfun lintSkill(text: String): List<String> {\n    val fm = frontmatter(text)\n    val findings = mutableListOf<String>()\n    val desc = text(fm[\"description\"])\n    if (desc.isEmpty()) findings += \"description is missing: Claude uses it to decide when to load the skill\"\n    if (desc.length + text(fm[\"when_to_use\"]).length > 1536) findings += \"description and when_to_use together exceed 1,536 characters and are cut\"\n    if (SIDE_EFFECTS.containsMatchIn(\"${text(fm[\"name\"])} $desc\") && fm[\"disable-model-invocation\"] != true) {\n        findings += \"a skill with side effects should set disable-model-invocation: true\"\n    }\n    val allowed = text(fm[\"allowed-tools\"])\n    if (allowed.isNotEmpty() && \"Bash\" in allowed.replace(\",\", \" \").trim().split(Regex(\"\\\\s+\"))) {\n        findings += \"allowed-tools names bare Bash: pre-approve a pattern such as Bash(git add *) instead\"\n    }\n    return findings\n}\n\nfun lintAgent(text: String): List<String> {\n    val fm = frontmatter(text)\n    val findings = listOf(\"name\", \"description\").filter { text(fm[it]).isEmpty() }.map { \"$it is required\" }.toMutableList()\n    if (\"tools\" !in fm) findings += \"tools is omitted: the subagent inherits every tool\"\n    if (fm[\"memory\"] != null && fm[\"memory\"] !in listOf(\"user\", \"project\", \"local\")) findings += \"memory must be user, project or local\"\n    if (fm[\"permissionMode\"] == \"bypassPermissions\") findings += \"permissionMode bypassPermissions skips every prompt in this subagent\"\n    return findings\n}\n\nconst val SKILL = \"---\\nname: deploy\\ndescription: Deploy the service to production\\nallowed-tools: Bash\\n---\\nRun the release script.\\n\"\nconst val AGENT = \"---\\nname: reviewer\\ndescription: Reviews a diff for bugs\\nmemory: team\\n---\\nYou review code.\\n\"\n\n/** Python's repr of strings and lists of strings, so every language of the course prints the same text. */\nfun py(v: Any?): String {\n    if (v is List<*>) return v.joinToString(\", \", \"[\", \"]\") { py(it) }\n    val s = v.toString()\n    val q = if (\"'\" in s && \"\\\"\" !in s) \"\\\"\" else \"'\"\n    return q + s.replace(\"\\\\\", \"\\\\\\\\\").replace(\"\\n\", \"\\\\n\").replace(q, \"\\\\\" + q) + q\n}\n\nfun demo() {\n    val events = listOf(\n        \"Bash\" to (\"command\" to \"git push origin main\"), \"Bash\" to (\"command\" to \"git -C . push origin main\"), \"Bash\" to (\"command\" to \"bash -c 'rm -rf build'\"),\n        \"Bash\" to (\"command\" to \"ls && git status\"), \"Bash\" to (\"command\" to \"rm build/old.txt\"), \"Edit\" to (\"file_path\" to \"/work/app/.env\"),\n        \"Edit\" to (\"file_path\" to \"/work/app/main.py\"),\n    )\n    for ((tool, input) in events) {\n        val (code, out, err) = preToolUse(mapOf(\"hook_event_name\" to \"PreToolUse\", \"tool_name\" to tool, \"tool_input\" to mapOf(input)))\n        val shown = when {\n            out.isNotEmpty() -> \"deny (exit 0, JSON): \" + (JSON.readTree(out)[\"hookSpecificOutput\"][\"permissionDecisionReason\"].asText())\n            code == 2 -> \"block (exit 2): $err\"\n            else -> \"no decision (exit 0)\"\n        }\n        println(\"$tool ${py(input.second)} -> $shown\")\n    }\n    println(\"skill findings: ${py(lintSkill(SKILL))}\")\n    println(\"agent findings: ${py(lintAgent(AGENT))}\")\n}\n\nfun main(args: Array<String>) {\n    if (\"--hook\" in args) {\n        @Suppress(\"UNCHECKED_CAST\")\n        val (code, out, err) = preToolUse(JSON.readValue(System.`in`, LinkedHashMap::class.java) as Map<String, Any?>)\n        print(out)\n        System.err.print(err)\n        System.out.flush()\n        System.err.flush()\n        exitProcess(code)\n    }\n    demo()\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "Bash 'git push origin main' -> deny (exit 0, JSON): nothing is pushed from an agent\nBash 'git -C . push origin main' -> deny (exit 0, JSON): nothing is pushed from an agent\nBash \"bash -c 'rm -rf build'\" -> deny (exit 0, JSON): a recursive forced delete is not run from an agent\nBash 'ls && git status' -> no decision (exit 0)\nBash 'rm build/old.txt' -> no decision (exit 0)\nEdit '/work/app/.env' -> block (exit 2): Blocked: /work/app/.env matches protected pattern '.env'\nEdit '/work/app/main.py' -> no decision (exit 0)\nskill findings: ['a skill with side effects should set disable-model-invocation: true', 'allowed-tools names bare Bash: pre-approve a pattern such as Bash(git add *) instead']\nagent findings: ['tools is omitted: the subagent inherits every tool', 'memory must be user, project or local']"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The program is a hook and a linter. Plain, it runs seven events through the gate. A `git push`, `git -C . push` and `bash -c 'rm -rf build'` are denied through the JSON answer with exit 0 and a reason. A compound `ls && git status` and a plain `rm build/old.txt` get no opinion. An edit of `.env` blocks with exit 2 and a reason on standard error, and an edit of `main.py` gets no opinion. With `--hook` the same code reads one event from standard input and exits with the code, which is how Claude Code would start it. The linter then reads two files. The skill `deploy` has side effects and a bare `Bash` grant, so it gets two findings. The agent has no `tools` line and a `memory` value that is not `user`, `project` or `local`, so it gets two findings as well. All four languages print the same lines."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Omitting `tools` on a subagent that should only read.** It inherits every tool, edits and shell included.",
+        "**Believing a hook's exit 1 blocks the call.** Only exit 2, or exit 0 with a JSON `deny`, blocks. Any other code is a non-blocking error.",
+        "**Guarding a command with a prefix.** `Bash(git push *)` is not matched by `git -C . push`. Parse the command.",
+        "**Putting `permissionMode` or `hooks` in a plugin's agent.** The plugin loader ignores them, so the agent runs without the limit you wrote. Ship hooks in the plugin's `hooks/hooks.json`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A reviewer subagent's file has no `tools` line. What can it do?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Read only, because a review of code needs nothing more than reading it",
+              "**b**: Nothing at all, because an empty list gives the subagent no tools to use",
+              "**c**: Use every tool of the session, including editing and running commands",
+              "**d**: Use only the tools that the main conversation allows without asking first"
+            ]
+          }
+        ],
+        [
+          "A hook script is meant to stop `git push`. Which behaviour stops the call?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Exiting with code 2 with the reason written to standard error",
+              "**b**: Printing a warning to standard output and exiting with code 1",
+              "**c**: Exiting with code 0 after logging the command to a file",
+              "**d**: Exiting with code 3 after writing a reason to standard error"
+            ]
+          }
+        ],
+        [
+          "A subagent builds notes on a repository, and teammates should receive them through version control. Which `memory` value fits?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: `user`, whose directory sits in each person's home folder",
+              "**b**: `local`, whose directory is kept out of commits",
+              "**c**: `team`, whose directory is shared by every teammate",
+              "**d**: `project`, whose directory is committed alongside the sources"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**c**. The page says \"Omit it and the subagent inherits every tool\", and \"a reviewer with no `tools` line can edit files and run commands\". *a* is ruled out because a reviewer is bounded only when you list `Read`, `Grep` and `Glob`, as the page says: \"Bound a subagent by listing its tools.\" *b* is ruled out because the table says \"Omit it and the subagent inherits every tool\", which is the opposite of none. *d* is ruled out because a subagent has \"specific tool access, and independent permissions\", and an omitted list does not narrow it to the main conversation's pre-approvals.",
+            "**a**. The page says \"Exit 2: Claude Code blocks the action. Write a reason to stderr.\" *b* is ruled out because with an exit code of 1 and plain-text output \"the action proceeds as a non-blocking error\", and a warning does not stop the call. *c* is ruled out because \"Exit 0: no objection\", and a logging hook \"does not weaken a guard hook\" and does not block either. *d* is ruled out because exit code 3 is an \"other exit code\", and the page says to \"Treat it as a bug in the hook, because it does not stop the call.\"",
+            "**d**. The table says the `project` scope, at `.claude/agent-memory/<name>/`, is for knowledge that is \"shareable via version control\". *a* is ruled out because the `user` scope is for a case where \"The agent should remember across all projects\", and its directory is under `~/.claude/`, outside the repository. *b* is ruled out because the `local` scope is for knowledge that is \"project-specific and should not be checked in\". *c* is ruled out because the field takes one of three values, and the page's own example is flagged: \"memory must be user, project or local\"."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 16,
+    "code": 0,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "c556a563f600fff903e6a5d8ac3d291a5754038c85054c33719cc18f0dbe6b64"
+}

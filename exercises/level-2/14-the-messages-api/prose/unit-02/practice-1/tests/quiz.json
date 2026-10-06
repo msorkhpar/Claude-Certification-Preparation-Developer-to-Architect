@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "14-the-messages-api"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Check yourself: max_tokens, stop sequences, stop_reason and usage",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A nightly job asks for a JSON report and sometimes crashes in the JSON parser, with no error status from the API. Which first check does the page recommend?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Lower the sampling temperature so that the report is less variable from one night to the next",
+            "correct": false,
+            "says": "Ruled out because on current models \"a non-default value of any of them is rejected with a 400 error\", and variability is not what truncates a reply."
+          },
+          {
+            "id": "b",
+            "text": "Read `stop_reason` and treat `max_tokens` as a cut reply before using the text",
+            "correct": true,
+            "says": "The page says \"stop_reason indicates normal completion; HTTP errors indicate failures\", so a cut reply arrives as a normal 200 and only `stop_reason` shows it."
+          },
+          {
+            "id": "c",
+            "text": "Add a stop sequence at the end of every field that the report holds",
+            "correct": false,
+            "says": "Ruled out because a stop sequence is \"a cheap way to end a reply at a delimiter you chose\", which does not stop the reply being cut at the ceiling."
+          },
+          {
+            "id": "d",
+            "text": "Catch the HTTP status of the call and retry every status above 399",
+            "correct": false,
+            "says": "Ruled out because a `max_tokens` cut carries a 200 status: \"a `max_tokens` or a `refusal` arrives with status 200\"."
+          }
+        ],
+        "origin": {
+          "path": "course/14-the-messages-api/02-limits-stop-reasons-and-usage.md",
+          "section": "stop_reason: why the reply ended"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A team upgrades from an older model to Claude Sonnet 5.5 and every call returns a 400 until they delete a line that sets the sampling temperature to 0.2. What should they do about `top_p`, which they also set?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Replace it with `top_k`, which the model still accepts",
+            "correct": false,
+            "says": "Ruled out because \"temperature, top_p and top_k used to be the knobs of randomness\", and the page rejects all three, so `top_k` is no way out."
+          },
+          {
+            "id": "b",
+            "text": "Keep it and raise it to 1.0, which is the safest setting",
+            "correct": false,
+            "says": "Ruled out because \"the upgrade is a deletion, not a change of value\", and the page does not name 1.0 or any value as safe."
+          },
+          {
+            "id": "c",
+            "text": "Keep it, because only the temperature setting is rejected on that model and the others pass",
+            "correct": false,
+            "says": "Ruled out because \"a non-default value of any of them is rejected with a 400 error\", and the three are named together."
+          },
+          {
+            "id": "d",
+            "text": "Omit it as well, since any non-default value is rejected for that release",
+            "correct": true,
+            "says": "The page says a non-default value of any of the three settings \"is rejected with a 400 error\" on the current models."
+          }
+        ],
+        "origin": {
+          "path": "course/14-the-messages-api/02-limits-stop-reasons-and-usage.md",
+          "section": "Sampling settings you must not send"
+        }
+      }
+    ]
+  }
+}

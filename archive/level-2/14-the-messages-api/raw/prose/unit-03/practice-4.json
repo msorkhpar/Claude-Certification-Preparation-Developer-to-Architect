@@ -1,0 +1,286 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "14-the-messages-api"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: a conversation client, graded on the state it keeps (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a conversation client, graded on the state it keeps"
+    },
+    {
+      "type": "para",
+      "text": "The Messages API is stateless: every request must carry the whole conversation. Write the client that keeps it."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working conversation client with eight gaps cut out of it. The plumbing is written and correct: the constructor, `say` itself (it calls the gaps in order), `totals` and `reset`. Each gap is a small method with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To see what a gap receives, debug it by logging its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (Python names; the TypeScript, Java and Kotlin names are the camel-case forms, `makeReply` for `_reply`):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_check_text` unlocks `e6`: a blank turn is refused.",
+        "`_request_body` unlocks `m1` and `e5`: the body with a deep copy of the whole history.",
+        "`_optional_fields` unlocks `e4`: the top-level `system` and the stop sequences.",
+        "`_send_or_roll_back` unlocks `e2`: no dangling user turn when the call fails.",
+        "`_assistant_turn` unlocks `m1`: the assistant turn with the content as received.",
+        "`_add_usage` unlocks `e1`: the running totals.",
+        "`_reply` unlocks `m1` and `e3`: the text, the stop reason and `truncated`.",
+        "`history` unlocks `e5`: the turns as a copy."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gaps 2, 5 and 7. A few lines each, about fifteen in all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given types"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`send`",
+          "an injected function: it takes the request body (a map) and returns a Messages API response (a map with `content`, `stop_reason` and `usage`); the tests pass a scripted one"
+        ],
+        [
+          "`Reply`",
+          "`text` (the text blocks joined), `stop_reason` and `truncated`; TypeScript, Java and Kotlin spell them `text`, `stopReason` and `truncated`"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "`Conversation(send, model, max_tokens, system=None, stop_sequences=None)`"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "**`say(text)`** adds a user turn, sends the request and returns a `Reply`.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "The request body has `model`, `max_tokens` and `messages`, where `messages` is the **whole history** so far, oldest first, ending with the new user turn. `system` is a **top-level field**, never a message with a system role, and it is left out when absent or blank. `stop_sequences` is passed on when given and non-empty.",
+              "The body handed to `send` is a **snapshot**: later turns must not change a request already sent.",
+              "The assistant turn is stored as `{\"role\": \"assistant\", \"content\": <the response's content, as received>}`.",
+              "`usage` is added to the running totals. `truncated` is true when `stop_reason` is `max_tokens`.",
+              "If `send` fails, the exception propagates and the history is left as it was before the call (no dangling user turn, so roles keep alternating on the next call).",
+              "Blank text (empty or only whitespace) is refused before anything is sent: `ValueError` (TypeScript `Error`, Java and Kotlin `IllegalArgumentException`)."
+            ]
+          }
+        ],
+        "**`history()`** returns a copy of the turns; changing the copy changes nothing.",
+        "**`totals()`** returns `input_tokens` and `output_tokens` summed over every successful turn.",
+        "**`reset()`** clears history and totals."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Every request carries the whole history in order, with assistant content as received"
+        ],
+        [
+          "`e1`",
+          "Usage adds up over the turns"
+        ],
+        [
+          "`e2`",
+          "A failed call leaves no dangling user turn"
+        ],
+        [
+          "`e3`",
+          "The stop reason is reported and `max_tokens` marks the reply truncated"
+        ],
+        [
+          "`e4`",
+          "`system` is top-level (and left out when absent); stop sequences are passed on"
+        ],
+        [
+          "`e5`",
+          "Each request is a snapshot, and `history()` is a copy"
+        ],
+        [
+          "`e6`",
+          "A blank turn is refused before anything is sent"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "/** A conversation client that keeps the state the API does not. See ../../statement.md for the contract. */\nprivate val log = System.getLogger(\"conversation\")\n\nclass Conversation(\n    private val send: Send,\n    private val model: String,\n    private val maxTokens: Int,\n    private val system: String? = null,\n    private val stopSequences: List<String>? = null,\n) {\n    private var history = mutableListOf<MutableMap<String, Any?>>()\n    private var inputTokens = 0L\n    private var outputTokens = 0L\n\n    @Suppress(\"UNCHECKED_CAST\")\n    private fun copy(turns: List<Map<String, Any?>>): MutableList<MutableMap<String, Any?>> =\n        (Json.parse(Json.stringify(turns)) as List<Map<String, Any?>>).map { it.toMutableMap() }.toMutableList()\n\n    private fun checkText(text: String) {\n        require(text.isNotBlank()) { \"a turn needs text\" }\n    }\n\n    private fun requestBody(): MutableMap<String, Any?> =\n        linkedMapOf(\"model\" to model, \"max_tokens\" to maxTokens.toLong(), \"messages\" to copy(history))\n\n    private fun optionalFields(body: MutableMap<String, Any?>) {\n        if (!system.isNullOrBlank()) body[\"system\"] = system\n        if (!stopSequences.isNullOrEmpty()) body[\"stop_sequences\"] = stopSequences.toList()\n    }\n\n    private fun sendOrRollBack(body: Map<String, Any?>): Map<String, Any?> =\n        try {\n            send.send(body)\n        } catch (e: RuntimeException) {\n            history.removeAt(history.size - 1)\n            throw e\n        }\n\n    private fun assistantTurn(response: Map<String, Any?>): MutableMap<String, Any?> =\n        mutableMapOf(\"role\" to \"assistant\", \"content\" to response[\"content\"])\n\n    private fun addUsage(usageValue: Any?) {\n        (usageValue as? Map<*, *>)?.let { usage ->\n            (usage[\"input_tokens\"] as? Number)?.let { inputTokens += it.toLong() }\n            (usage[\"output_tokens\"] as? Number)?.let { outputTokens += it.toLong() }\n        }\n    }\n\n    private fun makeReply(response: Map<String, Any?>): Reply {\n        val replyText = (response[\"content\"] as List<*>).filterIsInstance<Map<*, *>>().filter { it[\"type\"] == \"text\" }.joinToString(\"\") { it[\"text\"].toString() }\n        val stop = response[\"stop_reason\"] as String?\n        return Reply(replyText, stop, stop == \"max_tokens\")\n    }\n\n    fun say(text: String): Reply {\n        log.log(System.Logger.Level.DEBUG, \"say input: {0}\", text)\n        checkText(text)\n        history.add(mutableMapOf(\"role\" to \"user\", \"content\" to text))\n        val body = requestBody()\n        optionalFields(body)\n        val response = sendOrRollBack(body)\n        history.add(assistantTurn(response))\n        addUsage(response[\"usage\"])\n        return makeReply(response)\n    }\n\n    fun history(): MutableList<MutableMap<String, Any?>> = copy(history)\n\n    fun totals(): Map<String, Long> = linkedMapOf(\"input_tokens\" to inputTokens, \"output_tokens\" to outputTokens)\n\n    fun reset() {\n        history = mutableListOf()\n        inputTokens = 0\n        outputTokens = 0\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // A stand-in for the API, like the one the tests use: it answers every request the same way.\n    val fakeSend = Send {\n        mapOf(\n            \"content\" to listOf(mapOf(\"type\" to \"text\", \"text\" to \"Paris.\")),\n            \"stop_reason\" to \"end_turn\",\n            \"usage\" to mapOf(\"input_tokens\" to 10L, \"output_tokens\" to 5L),\n        )\n    }\n\n    val chat = Conversation(fakeSend, \"claude-sonnet-5-5\", 64, system = \"Be brief.\")\n    val reply = chat.say(\"Capital of France?\")\n    chat.say(\"Since when?\")\n\n    println(\"reply text: ${reply.text}\")\n    println(\"stop reason: ${reply.stopReason} | truncated: ${reply.truncated}\")\n    println(\"history size: ${chat.history().size}\")\n    println(\"totals: ${chat.totals()}\")\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "/** A conversation client that keeps the state the API does not. See ../../statement.md for the contract. */\nprivate val log = System.getLogger(\"conversation\")\n\nclass Conversation(\n    private val send: Send,\n    private val model: String,\n    private val maxTokens: Int,\n    private val system: String? = null,\n    private val stopSequences: List<String>? = null,\n) {\n    private var history = mutableListOf<MutableMap<String, Any?>>()\n    private var inputTokens = 0L\n    private var outputTokens = 0L\n\n    @Suppress(\"UNCHECKED_CAST\")\n    private fun copy(turns: List<Map<String, Any?>>): MutableList<MutableMap<String, Any?>> =\n        (Json.parse(Json.stringify(turns)) as List<Map<String, Any?>>).map { it.toMutableMap() }.toMutableList()\n\n    private fun checkText(text: String) {\n        // TODO 1 of 8 (finish this to pass e6): refuse a blank turn before anything is sent.\n        // Receives the text of the turn. Throws IllegalArgumentException (use require) when it is empty or only whitespace; otherwise\n        // returns nothing. Example: checkText(\"   \") -> IllegalArgumentException, checkText(\"hi\") -> nothing\n    }\n\n    private fun requestBody(): MutableMap<String, Any?> {\n        // TODO 2 of 8 (finish this to pass m1 and e5): the request body, a snapshot.\n        // Receives nothing (it reads the fields). Returns a map with \"model\", \"max_tokens\" (as a Long) and \"messages\" = copy(history), a\n        // deep copy of the whole history so far (the new user turn is already in it), so a later turn cannot change a request already sent.\n        // Example: after say(\"a\"), the first body has messages [{role=user, content=a}]\n        return linkedMapOf(\"model\" to model, \"max_tokens\" to maxTokens.toLong(), \"messages\" to emptyList<Any?>())\n    }\n\n    private fun optionalFields(body: MutableMap<String, Any?>) {\n        // TODO 3 of 8 (finish this to pass e4): the top-level fields that are only sometimes there.\n        // Receives the body and adds to it: \"system\" (a top-level field, never a message) when system is not blank, and\n        // \"stop_sequences\" (a copy of the list) when stopSequences is given and not empty. Returns nothing.\n        // Example: with system \"Be brief.\" the body gains system=Be brief.; with system \"  \" it gains nothing\n    }\n\n    private fun sendOrRollBack(body: Map<String, Any?>): Map<String, Any?> {\n        // TODO 4 of 8 (finish this to pass e2): send the body, and leave no dangling user turn when the call fails.\n        // Receives the body. Returns send.send(body). When send throws a RuntimeException, removes the user turn that say added to\n        // history and throws the same exception again, so roles keep alternating on the next call.\n        return send.send(body)\n    }\n\n    private fun assistantTurn(response: Map<String, Any?>): MutableMap<String, Any?> {\n        // TODO 5 of 8 (finish this to pass m1): the turn to store for the reply.\n        // Receives the response. Returns a map with \"role\" = \"assistant\" and \"content\" = the response's content list, as received.\n        // Example: content [{type=text, text=Paris.}] -> {role=assistant, content=[that same list]}\n        return mutableMapOf(\"role\" to \"assistant\", \"content\" to emptyList<Any?>())\n    }\n\n    private fun addUsage(usageValue: Any?) {\n        // TODO 6 of 8 (finish this to pass e1): keep the running totals.\n        // Receives the response's usage (a Map, or null; a key may be missing). Adds its input_tokens and output_tokens to the\n        // inputTokens and outputTokens fields. Returns nothing.\n        // Example: inputTokens 12 plus usage {input_tokens=30, output_tokens=9} -> inputTokens 42\n    }\n\n    private fun makeReply(response: Map<String, Any?>): Reply {\n        // TODO 7 of 8 (finish this to pass m1 and e3): what say returns.\n        // Receives the response. Returns a Reply: the text of the content blocks whose type is \"text\" joined with nothing between\n        // them, the response's stop_reason, and truncated, true only when the stop reason is \"max_tokens\".\n        // Example: stop_reason \"max_tokens\" -> truncated true; \"end_turn\" -> truncated false\n        return Reply(\"\", \"\", false)\n    }\n\n    fun say(text: String): Reply {\n        log.log(System.Logger.Level.DEBUG, \"say input: {0}\", text)\n        checkText(text)\n        history.add(mutableMapOf(\"role\" to \"user\", \"content\" to text))\n        val body = requestBody()\n        optionalFields(body)\n        val response = sendOrRollBack(body)\n        history.add(assistantTurn(response))\n        addUsage(response[\"usage\"])\n        return makeReply(response)\n    }\n\n    fun history(): MutableList<MutableMap<String, Any?>> {\n        // TODO 8 of 8 (finish this to pass e5): the turns so far, as a copy.\n        // Returns copy(history), so changing what the caller gets changes nothing here.\n        // Example: chat.history().add(x) leaves chat.history().size unchanged\n        return mutableListOf()\n    }\n\n    fun totals(): Map<String, Long> = linkedMapOf(\"input_tokens\" to inputTokens, \"output_tokens\" to outputTokens)\n\n    fun reset() {\n        history = mutableListOf()\n        inputTokens = 0\n        outputTokens = 0\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // A stand-in for the API, like the one the tests use: it answers every request the same way.\n    val fakeSend = Send {\n        mapOf(\n            \"content\" to listOf(mapOf(\"type\" to \"text\", \"text\" to \"Paris.\")),\n            \"stop_reason\" to \"end_turn\",\n            \"usage\" to mapOf(\"input_tokens\" to 10L, \"output_tokens\" to 5L),\n        )\n    }\n\n    val chat = Conversation(fakeSend, \"claude-sonnet-5-5\", 64, system = \"Be brief.\")\n    val reply = chat.say(\"Capital of France?\")\n    chat.say(\"Since when?\")\n\n    println(\"reply text: ${reply.text}\")\n    println(\"stop reason: ${reply.stopReason} | truncated: ${reply.truncated}\")\n    println(\"history size: ${chat.history().size}\")\n    println(\"totals: ${chat.totals()}\")\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 4,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "512104e5fc2bdddd59642736b4780f7a0284d799044c4cadf96f74038e321043",
+  "starting_code": "/** A conversation client that keeps the state the API does not. See ../../statement.md for the contract. */\nprivate val log = System.getLogger(\"conversation\")\n\nclass Conversation(\n    private val send: Send,\n    private val model: String,\n    private val maxTokens: Int,\n    private val system: String? = null,\n    private val stopSequences: List<String>? = null,\n) {\n    private var history = mutableListOf<MutableMap<String, Any?>>()\n    private var inputTokens = 0L\n    private var outputTokens = 0L\n\n    @Suppress(\"UNCHECKED_CAST\")\n    private fun copy(turns: List<Map<String, Any?>>): MutableList<MutableMap<String, Any?>> =\n        (Json.parse(Json.stringify(turns)) as List<Map<String, Any?>>).map { it.toMutableMap() }.toMutableList()\n\n    private fun checkText(text: String) {\n        // TODO 1 of 8 (finish this to pass e6): refuse a blank turn before anything is sent.\n        // Receives the text of the turn. Throws IllegalArgumentException (use require) when it is empty or only whitespace; otherwise\n        // returns nothing. Example: checkText(\"   \") -> IllegalArgumentException, checkText(\"hi\") -> nothing\n    }\n\n    private fun requestBody(): MutableMap<String, Any?> {\n        // TODO 2 of 8 (finish this to pass m1 and e5): the request body, a snapshot.\n        // Receives nothing (it reads the fields). Returns a map with \"model\", \"max_tokens\" (as a Long) and \"messages\" = copy(history), a\n        // deep copy of the whole history so far (the new user turn is already in it), so a later turn cannot change a request already sent.\n        // Example: after say(\"a\"), the first body has messages [{role=user, content=a}]\n        return linkedMapOf(\"model\" to model, \"max_tokens\" to maxTokens.toLong(), \"messages\" to emptyList<Any?>())\n    }\n\n    private fun optionalFields(body: MutableMap<String, Any?>) {\n        // TODO 3 of 8 (finish this to pass e4): the top-level fields that are only sometimes there.\n        // Receives the body and adds to it: \"system\" (a top-level field, never a message) when system is not blank, and\n        // \"stop_sequences\" (a copy of the list) when stopSequences is given and not empty. Returns nothing.\n        // Example: with system \"Be brief.\" the body gains system=Be brief.; with system \"  \" it gains nothing\n    }\n\n    private fun sendOrRollBack(body: Map<String, Any?>): Map<String, Any?> {\n        // TODO 4 of 8 (finish this to pass e2): send the body, and leave no dangling user turn when the call fails.\n        // Receives the body. Returns send.send(body). When send throws a RuntimeException, removes the user turn that say added to\n        // history and throws the same exception again, so roles keep alternating on the next call.\n        return send.send(body)\n    }\n\n    private fun assistantTurn(response: Map<String, Any?>): MutableMap<String, Any?> {\n        // TODO 5 of 8 (finish this to pass m1): the turn to store for the reply.\n        // Receives the response. Returns a map with \"role\" = \"assistant\" and \"content\" = the response's content list, as received.\n        // Example: content [{type=text, text=Paris.}] -> {role=assistant, content=[that same list]}\n        return mutableMapOf(\"role\" to \"assistant\", \"content\" to emptyList<Any?>())\n    }\n\n    private fun addUsage(usageValue: Any?) {\n        // TODO 6 of 8 (finish this to pass e1): keep the running totals.\n        // Receives the response's usage (a Map, or null; a key may be missing). Adds its input_tokens and output_tokens to the\n        // inputTokens and outputTokens fields. Returns nothing.\n        // Example: inputTokens 12 plus usage {input_tokens=30, output_tokens=9} -> inputTokens 42\n    }\n\n    private fun makeReply(response: Map<String, Any?>): Reply {\n        // TODO 7 of 8 (finish this to pass m1 and e3): what say returns.\n        // Receives the response. Returns a Reply: the text of the content blocks whose type is \"text\" joined with nothing between\n        // them, the response's stop_reason, and truncated, true only when the stop reason is \"max_tokens\".\n        // Example: stop_reason \"max_tokens\" -> truncated true; \"end_turn\" -> truncated false\n        return Reply(\"\", \"\", false)\n    }\n\n    fun say(text: String): Reply {\n        log.log(System.Logger.Level.DEBUG, \"say input: {0}\", text)\n        checkText(text)\n        history.add(mutableMapOf(\"role\" to \"user\", \"content\" to text))\n        val body = requestBody()\n        optionalFields(body)\n        val response = sendOrRollBack(body)\n        history.add(assistantTurn(response))\n        addUsage(response[\"usage\"])\n        return makeReply(response)\n    }\n\n    fun history(): MutableList<MutableMap<String, Any?>> {\n        // TODO 8 of 8 (finish this to pass e5): the turns so far, as a copy.\n        // Returns copy(history), so changing what the caller gets changes nothing here.\n        // Example: chat.history().add(x) leaves chat.history().size unchanged\n        return mutableListOf()\n    }\n\n    fun totals(): Map<String, Long> = linkedMapOf(\"input_tokens\" to inputTokens, \"output_tokens\" to outputTokens)\n\n    fun reset() {\n        history = mutableListOf()\n        inputTokens = 0\n        outputTokens = 0\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/14-the-messages-api/prose/unit-03/practice-4/src/main/kotlin/Conversation.kt",
+    "test_path": "practice/level-2/14-the-messages-api/prose/unit-03/practice-4/src/test/kotlin/ConversationTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/14-the-messages-api/prose/unit-03/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/14-the-messages-api/prose/unit-03/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_everyRequestCarriesTheWholeHistoryInOrder()",
+        "kind": "main",
+        "says": "Every request carries the whole history in order, with assistant content as received"
+      },
+      {
+        "id": "e1_usageAddsUpOverTheTurns()",
+        "kind": "edge",
+        "says": "Usage adds up over the turns"
+      },
+      {
+        "id": "e2_aFailedCallLeavesNoDanglingUserTurn()",
+        "kind": "edge",
+        "says": "A failed call leaves no dangling user turn"
+      },
+      {
+        "id": "e3_stopReasonIsReportedAndMaxTokensMarksTheReplyTruncated()",
+        "kind": "edge",
+        "says": "The stop reason is reported and max_tokens marks the reply truncated"
+      },
+      {
+        "id": "e4_systemIsATopLevelFieldAndStopSequencesArePassedOn()",
+        "kind": "edge",
+        "says": "system is top-level (and left out when absent); stop sequences are passed on"
+      },
+      {
+        "id": "e5_eachRequestIsASnapshotAndHistoryIsACopy()",
+        "kind": "edge",
+        "says": "Each request is a snapshot, and history() is a copy"
+      },
+      {
+        "id": "e6_aBlankTurnIsRefusedBeforeAnythingIsSent()",
+        "kind": "edge",
+        "says": "A blank turn is refused before anything is sent"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/14-the-messages-api/prose/unit-03/practice-4/target/test-results/test"
+    },
+    "origin": "course/14-the-messages-api/03-the-conversation-state-the-client-keeps.md",
+    "concepts": [
+      "the practice of The conversation state the client keeps, and a conversation client is solved"
+    ],
+    "files": [
+      "practice/level-2/14-the-messages-api/prose/unit-03/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "the-messages-api-u3"
+}

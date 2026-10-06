@@ -1,0 +1,368 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "86-integration-choices-access-and-capability-bloat"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Capability bloat, progressive discovery and the practice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Capability bloat, progressive discovery and the practice"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Architect Professional · **Module 86:** Integration choices, access and capability bloat · **Page 2 of 2** **Exams:** P3"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** count the three costs of a bloated tool set, apply least privilege by removing tools and not by watching them, decide when tool definitions should load up front and when they should be found through a search, justify the choice as an accuracy against latency trade, and write the module's practice."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-04 against the Claude documentation page \"Tool search tool\", Anthropic's articles \"Advanced tool use\" and \"Writing effective tools for agents\", the Claude Certified Architect - Professional exam guide (version 1.0, domain 3 and its sample item 1), and by running the example and the practice offline in the course container. Nothing here called a model, and the sizes of tool definitions in the example are its own invented figures. This page deepens module 52 (tool interfaces), module 54 (distributing tools across agents) and module 27 (choosing an extension). The choice of mechanism, the gateway and the question of whose rights a call uses are the first page."
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "**Exam guide and current product.** *What the guide states, and so what the exam keys:* domain 3 asks the candidate to \"Evaluate tool/agent configuration for capability bloat\", to \"Evaluate progressive discovery vs. monolithic context strategy\" and to \"Evaluate accuracy-latency trade-offs and justify configuration decisions\". Its sample item 1 keys least privilege as removing the tools a role does not need \"entirely\" and calls logging and confirmation prompts compensating. *What the current product does (documentation read 2026-10-04):* progressive discovery is a product feature, the tool search tool, with two variants, `tool_search_tool_regex_20251119` and `tool_search_tool_bm25_20251119`, available on the current Claude models. A tool is marked `defer_loading: true` and is found through a search. Every tool's full definition is still sent with each request, and only what enters the context window changes. On the exam, answer in the guide's terms of progressive discovery. In a design, name the feature and its threshold."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "An internal platform exposes 45 tools from eight systems to agents used by 300 employees. Selection quality is dropping: the agent calls `get_customer` when the user asks about an order, and fills a parameter from the wrong tool's schema. The prompt is long before the conversation starts, and every request pays for it. A review finds that the support agent also holds a refund tool and an account-deletion tool that no support task has used in a year. Capability bloat has three costs at once: context, selection accuracy and risk. The exam asks which fix attacks which cost, and which fixes only look like they do."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Three costs of too many capabilities"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "**Context.** Every definition is read on every request. Anthropic's article counts a five-server setup of GitHub, Slack, Sentry, Grafana and Splunk at 58 tools consuming \"approximately 55K tokens before the conversation even starts\". In the example, four servers with 24 tools cost 12,120 tokens of definitions.",
+        "**Selection accuracy.** The documentation says \"Claude's ability to pick the right tool degrades once you exceed 30–50 available tools\", and the article names the most common failures as \"wrong tool selection and incorrect parameters, especially when tools have similar names\". The tool-writing article adds that \"Too many tools or overlapping tools can also distract agents from pursuing efficient strategies\". Merging tools into one with a mode argument is not a cure: it hides the behaviours from the model's own choice and leaves the number of capabilities the same.",
+        "**Risk.** Each tool is authority. A tool the role never uses is an attack surface and a mistake waiting to happen, and it costs context as well."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Least privilege: remove, do not watch"
+    },
+    {
+      "type": "para",
+      "text": "The exam's sample item gives an agent that can read tickets, draft replies, issue refunds and delete accounts, where staff only read and draft. The keyed answer removes the refund and delete tools from the configuration entirely. Logging and confirmation prompts are compensating controls: they act after the privilege exists, or they ask a person to carry the risk of a capability the role never needed. A larger model does not change what the agent is allowed to do."
+    },
+    {
+      "type": "para",
+      "text": "The example's `audit` is the review as code. It compares what an agent holds with what its role needs and returns three lists. The tools to remove are the ones held and not needed, and the risky ones among them (money, destruction) are named so that they are removed first. The needed tools the agent lacks are listed too, since a review that only removes will break the role. The practice's `audit` adds a fourth list, the dormant tools: held, needed and never used in the observed period. They are not removed, because the role needs them; they are reviewed, since either the role description or the usage sample is wrong. In the example, removing two tools cuts the support agent from 830 tokens of definitions to 380."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Progressive discovery: load few, find the rest"
+    },
+    {
+      "type": "para",
+      "text": "The tool search tool lets Claude \"work with hundreds or thousands of tools by discovering and loading them on demand\". The mechanics are short. You include a search tool in the `tools` list, and you mark the tools that should not load up front with `defer_loading: true`. Claude's context holds the search tool and the non-deferred tools. When it needs another tool it searches, the API returns the matches as references, expands them into full definitions, and Claude calls the tool. Four facts matter for a design."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "**When to use it.** The documentation lists \"10 or more tools\", \"tool definitions consume more than 10k tokens\", falling selection accuracy and a growing library. Standard tool calling is \"a better fit when you have fewer than 10 tools, every tool is used in every request, or your tool definitions are small\".",
+        "**Keep the common path free of search.** \"Keep your 3–5 most frequently used tools non-deferred so Claude can call them without searching first.\" The example loads the four most used tools and defers the other twenty.",
+        "**Everything is still sent.** \"You still send every tool's full definition in the `tools` array on every request\", including the deferred ones, because the API needs them to run the search. Deferring changes what enters the context window, and it does not shrink the request.",
+        "**Caching survives.** The deferred tools are kept out of the prefix, so \"The prefix is untouched, so prompt caching is preserved\". A deferred tool cannot itself carry a cache breakpoint."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "For tools that come from MCP servers, deferral can be set once for the whole server on its toolset entry. The example's four servers go from 12,120 tokens to 2,320 up front, which includes a search tool of 350 tokens that the example assumes: 81 percent fewer in this example's arithmetic. Anthropic's page says tool search \"typically reduces this by over 85 percent\" for a load of three to five tools out of a larger set; the two figures are different measurements of different sets, and your own is the one to use."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "An accuracy against latency trade"
+    },
+    {
+      "type": "para",
+      "text": "Neither extreme is free. Loading everything costs context on every request and, past the 30 to 50 tools of the documentation, accuracy. Deferring adds a step: when the tool that is needed is not loaded, the model calls the search first, and that is a round trip. The design decision is to put the tools of the common path in the loaded set, so that most requests never search, and to defer the long tail, where a search costs less than the definitions cost on every request. Where the tool set is small, loading everything is the better design: it has no extra step and nothing to tune. The decision is justified with a measurement, not an opinion: the same evaluation set run against both configurations, with selection accuracy and latency compared (module 88). Names help either way: prefixes such as `github_` and `slack_` let one search match a whole group."
+    },
+    {
+      "type": "para",
+      "text": "The same shape appears in the knowledge question of module 85. A small body of knowledge goes into a cached prompt, which is the monolithic context, and a large one is retrieved. In both places the monolithic choice is right for a small, stable, shared set, and discovery is right for a large or growing one."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "para",
+      "text": "The example is the one from the first page. Its first half is this page: the audit of a support agent, then two tool sets, a small one that loads whole and a large one that defers, with the tokens before and after. It ran offline in every language."
+    },
+    {
+      "type": "example",
+      "id": "m86-capability-audit",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/86-capability-audit/python/capability_audit.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/86-capability-audit/typescript/capabilityAudit.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/86-capability-audit/java/CapabilityAudit.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/86-capability-audit/kotlin/CapabilityAudit.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Integration design decisions in code: which tools a role keeps, which tool definitions load up front, which mechanism connects a capability, whose rights a tool call uses and what a gateway decides.\n\nThe numbers are invented for the example, and the sizes of tool definitions are the example's own. The rules are those of the Claude Certified Architect - Professional exam guide (domain 3), the Claude documentation page\n\"Tool search tool\", the Model Context Protocol security best practices and the Claude Code gateway pages, read on 2026-10-04. Nothing here calls a model.\n\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\nCATALOG = {\"read_ticket\": (\"read\", 160), \"draft_reply\": (\"draft\", 220), \"issue_refund\": (\"money\", 240), \"delete_account\": (\"destroy\", 210)}\nRISKY = {\"money\", \"destroy\"}\nSERVER_TOOLS = {\"github\": [\"create_issue\", \"search_code\", \"get_pr\", \"list_prs\", \"merge_pr\", \"comment\", \"list_repos\", \"get_file\"], \"slack\": [\"post_message\", \"search\", \"list_channels\", \"get_thread\", \"react\", \"upload\"],\n                \"sentry\": [\"list_issues\", \"get_event\", \"resolve\", \"assign\", \"search\"], \"grafana\": [\"query\", \"list_dashboards\", \"get_panel\", \"create_alert\", \"list_alerts\"]}\nSERVER_SIZE = {\"github\": 520, \"slack\": 410, \"sentry\": 480, \"grafana\": 620}\nTOOLS = {f\"{server}_{name}\": SERVER_SIZE[server] for server, names in SERVER_TOOLS.items() for name in names}\nUSAGE = {\"github_create_issue\": 90, \"github_search_code\": 70, \"slack_post_message\": 60, \"github_get_pr\": 50, \"sentry_list_issues\": 20, \"grafana_query\": 10}\nPOLICY = {\"credentials\": {\"key-a\": \"support\", \"key-b\": \"research\"}, \"models\": {\"support\": {\"standard\"}, \"research\": {\"standard\", \"deep\"}}, \"limits\": {\"support\": 30, \"research\": 10},\n          \"routes\": {\"standard\": \"claude-sonnet-5-5\", \"deep\": \"claude-opus-5-5\"}}\n\n\ndef audit(holds, needs, catalog):\n    \"\"\"Least privilege: a tool the role does not need is removed from its configuration, not logged or put behind a confirmation.\"\"\"\n    log.debug(\"audit input: %r\", holds)\n    remove = [t for t in holds if t not in needs]\n    return {\"remove\": remove, \"risky\": [t for t in remove if catalog[t][0] in RISKY], \"missing\": [t for t in needs if t not in holds]}\n\n\ndef plan_loading(tools, usage, keep=4, search_tokens=350):\n    \"\"\"With 10 or more tools, or definitions over 10,000 tokens, the 3 to 5 most used tools stay loaded and the rest are found through a search tool.\"\"\"\n    keep = max(3, min(5, keep))\n    if len(tools) < 10 and sum(tools.values()) <= 10000:\n        return {\"search\": False, \"load_now\": list(tools), \"deferred\": [], \"tokens\": sum(tools.values())}\n    ranked = sorted(tools, key=lambda t: (-usage.get(t, 0), t))[:keep]\n    return {\"search\": True, \"load_now\": ranked, \"deferred\": [t for t in tools if t not in ranked], \"tokens\": sum(tools[t] for t in ranked) + search_tokens}\n\n\ndef choose_mechanism(consumers, counterpart, path):\n    \"\"\"Another agent is reached agent-to-agent; a step with a known path is a call in code; a capability several clients share is an MCP server; otherwise it is a tool of the one application.\"\"\"\n    if counterpart == \"agent\":\n        return \"agent-to-agent\"\n    if path == \"fixed\":\n        return \"direct call in code\"\n    return \"MCP server\" if consumers > 1 else \"custom tool\"\n\n\ndef authorize(tool, user_scopes, agent_scopes, required):\n    \"\"\"A call is allowed only when the user holds the scope the tool needs and the agent does too; the agent's own rights are a ceiling, not a licence.\"\"\"\n    if tool not in required:\n        return \"deny: unknown tool\"\n    scope = required[tool]\n    if scope not in user_scopes:\n        return f\"deny: user lacks {scope}\"\n    if scope not in agent_scopes:\n        return f\"deny: agent lacks {scope}\"\n    return \"allow\"\n\n\ndef gateway(credential, model, recent, policy):\n    \"\"\"One place decides who is calling, which models that team may use and how many requests a minute it may send, and keeps a record of every decision.\"\"\"\n    team = policy[\"credentials\"].get(credential)\n    if team is None:\n        decision, reason = \"deny\", \"unauthenticated\"\n    elif model not in policy[\"models\"][team]:\n        decision, reason = \"deny\", \"model not allowed\"\n    elif recent >= policy[\"limits\"][team]:\n        decision, reason = \"deny\", \"rate limited\"\n    else:\n        decision, reason = \"allow\", f\"routed to {policy['routes'].get(model, model)}\"\n    return {\"decision\": decision, \"reason\": reason, \"audit\": {\"team\": team or \"unknown\", \"model\": model, \"decision\": decision}}\n\n\ndef percent(part, whole):\n    return (200 * part + whole) // (2 * whole)\n\n\ndef main():\n    holds, needs = list(CATALOG), [\"read_ticket\", \"draft_reply\"]\n    result = audit(holds, needs, CATALOG)\n    cost = lambda names: sum(CATALOG[t][1] for t in names)\n    print(f\"support agent holds {len(holds)} tools ({cost(holds)} tokens) and needs {len(needs)}\")\n    print(f\"  remove: {', '.join(result['remove'])}; risky among them: {', '.join(result['risky'])}\")\n    print(f\"  after removal: {len(holds) - len(result['remove'])} tools, {cost(needs)} tokens\")\n    for name, tools in ((\"three tools\", {k: v[1] for k, v in list(CATALOG.items())[:3]}), (\"four servers\", TOOLS)):\n        plan = plan_loading(tools, USAGE)\n        saved = f\", {percent(sum(tools.values()) - plan['tokens'], sum(tools.values()))}% fewer\" if plan[\"search\"] else \"\"\n        print(f\"{name}: {len(tools)} tools, {sum(tools.values())} tokens of definitions -> search tool {'yes' if plan['search'] else 'no'}, {len(plan['load_now'])} loaded now, {len(plan['deferred'])} deferred, {plan['tokens']} tokens up front{saved}\")\n    print(\"  loaded now: \" + \", \".join(plan[\"load_now\"]))\n    for consumers, counterpart, path in [(1, \"tool\", \"model-chosen\"), (4, \"tool\", \"model-chosen\"), (1, \"tool\", \"fixed\"), (1, \"agent\", \"model-chosen\")]:\n        print(f\"  {consumers} application(s), counterpart {counterpart:<5}, path {path:<12} -> {choose_mechanism(consumers, counterpart, path)}\")\n    required = {\"read_ticket\": \"tickets:read\", \"issue_refund\": \"refunds:write\"}\n    user, agent = {\"tickets:read\"}, {\"tickets:read\", \"refunds:write\"}\n    print(f\"refund asked by a user who may only read: agent's rights alone -> {'allow' if required['issue_refund'] in agent else 'deny'}; user's and agent's rights -> {authorize('issue_refund', user, agent, required)}\")\n    log = []\n    for credential, model, recent in [(None, \"standard\", 0), (\"key-a\", \"deep\", 0), (\"key-a\", \"standard\", 30), (\"key-b\", \"deep\", 3)]:\n        outcome = gateway(credential, model, recent, POLICY)\n        log.append(outcome[\"audit\"])\n        print(f\"  gateway: credential {credential or 'none':<5} model {model:<8} recent {recent:>2} -> {outcome['decision']}: {outcome['reason']}\")\n    print(f\"  records kept: {len(log)}, denials among them: {sum(1 for r in log if r['decision'] == 'deny')}\")\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "support agent holds 4 tools (830 tokens) and needs 2\n  remove: issue_refund, delete_account; risky among them: issue_refund, delete_account\n  after removal: 2 tools, 380 tokens\nthree tools: 3 tools, 620 tokens of definitions -> search tool no, 3 loaded now, 0 deferred, 620 tokens up front\nfour servers: 24 tools, 12120 tokens of definitions -> search tool yes, 4 loaded now, 20 deferred, 2320 tokens up front, 81% fewer\n  loaded now: github_create_issue, github_search_code, slack_post_message, github_get_pr\n  1 application(s), counterpart tool , path model-chosen -> custom tool\n  4 application(s), counterpart tool , path model-chosen -> MCP server\n  1 application(s), counterpart tool , path fixed        -> direct call in code\n  1 application(s), counterpart agent, path model-chosen -> agent-to-agent\nrefund asked by a user who may only read: agent's rights alone -> allow; user's and agent's rights -> deny: user lacks refunds:write\n  gateway: credential none  model standard recent  0 -> deny: unauthenticated\n  gateway: credential key-a model deep     recent  0 -> deny: model not allowed\n  gateway: credential key-a model standard recent 30 -> deny: rate limited\n  gateway: credential key-b model deep     recent  3 -> allow: routed to claude-opus-5-5\n  records kept: 4, denials among them: 3"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "import { logger } from \"./logger.ts\";\nconst log = logger(\"capability_audit\");\n\n/**\n * Integration design decisions in code: which tools a role keeps, which tool definitions load up front, which mechanism connects a capability, whose rights a tool call uses and what a gateway decides.\n *\n * The numbers are invented for the example, and the sizes of tool definitions are the example's own. The rules are those of the Claude Certified Architect - Professional exam guide (domain 3), the Claude documentation page\n * \"Tool search tool\", the Model Context Protocol security best practices and the Claude Code gateway pages, read on 2026-10-04. Nothing here calls a model.\n */\nexport const CATALOG: Record<string, [string, number]> = { read_ticket: [\"read\", 160], draft_reply: [\"draft\", 220], issue_refund: [\"money\", 240], delete_account: [\"destroy\", 210] };\nconst RISKY = new Set([\"money\", \"destroy\"]);\nconst SERVER_TOOLS: Record<string, string[]> = {\n  github: [\"create_issue\", \"search_code\", \"get_pr\", \"list_prs\", \"merge_pr\", \"comment\", \"list_repos\", \"get_file\"],\n  slack: [\"post_message\", \"search\", \"list_channels\", \"get_thread\", \"react\", \"upload\"],\n  sentry: [\"list_issues\", \"get_event\", \"resolve\", \"assign\", \"search\"],\n  grafana: [\"query\", \"list_dashboards\", \"get_panel\", \"create_alert\", \"list_alerts\"],\n};\nconst SERVER_SIZE: Record<string, number> = { github: 520, slack: 410, sentry: 480, grafana: 620 };\nexport const TOOLS: Record<string, number> = Object.fromEntries(Object.entries(SERVER_TOOLS).flatMap(([server, names]) => names.map((name) => [`${server}_${name}`, SERVER_SIZE[server]])));\nexport const USAGE: Record<string, number> = { github_create_issue: 90, github_search_code: 70, slack_post_message: 60, github_get_pr: 50, sentry_list_issues: 20, grafana_query: 10 };\nexport type Policy = { credentials: Record<string, string>; models: Record<string, string[]>; limits: Record<string, number>; routes: Record<string, string> };\nexport const POLICY: Policy = {\n  credentials: { \"key-a\": \"support\", \"key-b\": \"research\" },\n  models: { support: [\"standard\"], research: [\"standard\", \"deep\"] },\n  limits: { support: 30, research: 10 },\n  routes: { standard: \"claude-sonnet-5-5\", deep: \"claude-opus-5-5\" },\n};\n\n/** Least privilege: a tool the role does not need is removed from its configuration, not logged or put behind a confirmation. */\nexport function audit(holds: string[], needs: string[], catalog: Record<string, [string, number]>) {\n  log.debug(\"audit input\", holds);\n  const remove = holds.filter((t) => !needs.includes(t));\n  return { remove, risky: remove.filter((t) => RISKY.has(catalog[t][0])), missing: needs.filter((t) => !holds.includes(t)) };\n}\n\n/** With 10 or more tools, or definitions over 10,000 tokens, the 3 to 5 most used tools stay loaded and the rest are found through a search tool. */\nexport function planLoading(tools: Record<string, number>, usage: Record<string, number>, keep = 4, searchTokens = 350) {\n  keep = Math.max(3, Math.min(5, keep));\n  const names = Object.keys(tools);\n  const total = names.reduce((a, t) => a + tools[t], 0);\n  if (names.length < 10 && total <= 10000) return { search: false, load_now: names, deferred: [] as string[], tokens: total };\n  const ranked = [...names].sort((a, b) => (usage[b] ?? 0) - (usage[a] ?? 0) || (a < b ? -1 : 1)).slice(0, keep);\n  return { search: true, load_now: ranked, deferred: names.filter((t) => !ranked.includes(t)), tokens: ranked.reduce((a, t) => a + tools[t], 0) + searchTokens };\n}\n\n/** Another agent is reached agent-to-agent; a step with a known path is a call in code; a capability several clients share is an MCP server; otherwise it is a tool of the one application. */\nexport function chooseMechanism(consumers: number, counterpart: string, path: string): string {\n  if (counterpart === \"agent\") return \"agent-to-agent\";\n  if (path === \"fixed\") return \"direct call in code\";\n  return consumers > 1 ? \"MCP server\" : \"custom tool\";\n}\n\n/** A call is allowed only when the user holds the scope the tool needs and the agent does too; the agent's own rights are a ceiling, not a licence. */\nexport function authorize(tool: string, userScopes: string[], agentScopes: string[], required: Record<string, string>): string {\n  if (!(tool in required)) return \"deny: unknown tool\";\n  const scope = required[tool];\n  if (!userScopes.includes(scope)) return `deny: user lacks ${scope}`;\n  if (!agentScopes.includes(scope)) return `deny: agent lacks ${scope}`;\n  return \"allow\";\n}\n\n/** One place decides who is calling, which models that team may use and how many requests a minute it may send, and keeps a record of every decision. */\nexport function gateway(credential: string | null, model: string, recent: number, policy: Policy) {\n  const team = credential === null ? undefined : policy.credentials[credential];\n  let decision = \"deny\";\n  let reason: string;\n  if (team === undefined) reason = \"unauthenticated\";\n  else if (!policy.models[team].includes(model)) reason = \"model not allowed\";\n  else if (recent >= policy.limits[team]) reason = \"rate limited\";\n  else {\n    decision = \"allow\";\n    reason = `routed to ${policy.routes[model] ?? model}`;\n  }\n  return { decision, reason, audit: { team: team ?? \"unknown\", model, decision } };\n}\n\nconst percent = (part: number, whole: number) => Math.floor((200 * part + whole) / (2 * whole));\n\nfunction main() {\n  const holds = Object.keys(CATALOG);\n  const needs = [\"read_ticket\", \"draft_reply\"];\n  const result = audit(holds, needs, CATALOG);\n  const cost = (names: string[]) => names.reduce((a, t) => a + CATALOG[t][1], 0);\n  console.log(`support agent holds ${holds.length} tools (${cost(holds)} tokens) and needs ${needs.length}`);\n  console.log(`  remove: ${result.remove.join(\", \")}; risky among them: ${result.risky.join(\", \")}`);\n  console.log(`  after removal: ${holds.length - result.remove.length} tools, ${cost(needs)} tokens`);\n  const three = Object.fromEntries(Object.entries(CATALOG).slice(0, 3).map(([k, v]) => [k, v[1]]));\n  let plan = planLoading(three, USAGE);\n  for (const [name, tools] of [[\"three tools\", three], [\"four servers\", TOOLS]] as Array<[string, Record<string, number>]>) {\n    plan = planLoading(tools, USAGE);\n    const total = Object.values(tools).reduce((a, b) => a + b, 0);\n    const saved = plan.search ? `, ${percent(total - plan.tokens, total)}% fewer` : \"\";\n    console.log(`${name}: ${Object.keys(tools).length} tools, ${total} tokens of definitions -> search tool ${plan.search ? \"yes\" : \"no\"}, ${plan.load_now.length} loaded now, ${plan.deferred.length} deferred, ${plan.tokens} tokens up front${saved}`);\n  }\n  console.log(\"  loaded now: \" + plan.load_now.join(\", \"));\n  const rows: Array<[number, string, string]> = [[1, \"tool\", \"model-chosen\"], [4, \"tool\", \"model-chosen\"], [1, \"tool\", \"fixed\"], [1, \"agent\", \"model-chosen\"]];\n  for (const [consumers, counterpart, path] of rows) console.log(`  ${consumers} application(s), counterpart ${counterpart.padEnd(5)}, path ${path.padEnd(12)} -> ${chooseMechanism(consumers, counterpart, path)}`);\n  const required = { read_ticket: \"tickets:read\", issue_refund: \"refunds:write\" };\n  const user = [\"tickets:read\"];\n  const agent = [\"tickets:read\", \"refunds:write\"];\n  console.log(`refund asked by a user who may only read: agent's rights alone -> ${agent.includes(required.issue_refund) ? \"allow\" : \"deny\"}; user's and agent's rights -> ${authorize(\"issue_refund\", user, agent, required)}`);\n  const log: Array<{ team: string; model: string; decision: string }> = [];\n  const requests: Array<[string | null, string, number]> = [[null, \"standard\", 0], [\"key-a\", \"deep\", 0], [\"key-a\", \"standard\", 30], [\"key-b\", \"deep\", 3]];\n  for (const [credential, model, recent] of requests) {\n    const outcome = gateway(credential, model, recent, POLICY);\n    log.push(outcome.audit);\n    console.log(`  gateway: credential ${(credential ?? \"none\").padEnd(5)} model ${model.padEnd(8)} recent ${String(recent).padStart(2)} -> ${outcome.decision}: ${outcome.reason}`);\n  }\n  console.log(`  records kept: ${log.length}, denials among them: ${log.filter((r) => r.decision === \"deny\").length}`);\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "support agent holds 4 tools (830 tokens) and needs 2\n  remove: issue_refund, delete_account; risky among them: issue_refund, delete_account\n  after removal: 2 tools, 380 tokens\nthree tools: 3 tools, 620 tokens of definitions -> search tool no, 3 loaded now, 0 deferred, 620 tokens up front\nfour servers: 24 tools, 12120 tokens of definitions -> search tool yes, 4 loaded now, 20 deferred, 2320 tokens up front, 81% fewer\n  loaded now: github_create_issue, github_search_code, slack_post_message, github_get_pr\n  1 application(s), counterpart tool , path model-chosen -> custom tool\n  4 application(s), counterpart tool , path model-chosen -> MCP server\n  1 application(s), counterpart tool , path fixed        -> direct call in code\n  1 application(s), counterpart agent, path model-chosen -> agent-to-agent\nrefund asked by a user who may only read: agent's rights alone -> allow; user's and agent's rights -> deny: user lacks refunds:write\n  gateway: credential none  model standard recent  0 -> deny: unauthenticated\n  gateway: credential key-a model deep     recent  0 -> deny: model not allowed\n  gateway: credential key-a model standard recent 30 -> deny: rate limited\n  gateway: credential key-b model deep     recent  3 -> allow: routed to claude-opus-5-5\n  records kept: 4, denials among them: 3"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\n\n/**\n * Integration design decisions in code: which tools a role keeps, which tool definitions load up front, which mechanism connects a capability, whose rights a tool call uses and what a gateway decides.\n *\n * <p>The numbers are invented for the example, and the sizes of tool definitions are the example's own. The rules are those of the Claude Certified Architect - Professional exam guide (domain 3), the Claude documentation page\n * \"Tool search tool\", the Model Context Protocol security best practices and the Claude Code gateway pages, read on 2026-10-04. Nothing here calls a model.\n */\npublic final class CapabilityAudit {\n    private static final System.Logger LOG = System.getLogger(CapabilityAudit.class.getName());\n    private CapabilityAudit() {}\n\n    /** A tool's access class and the size of its definition in tokens. */\n    record Tool(String access, int tokens) {}\n\n    /** The outcome of an audit: what to remove, which of that is risky and what the role lacks. */\n    record Audit(List<String> remove, List<String> risky, List<String> missing) {}\n\n    /** How tool definitions load: with a search tool or not, which tools now and which later, and the tokens up front. */\n    record Plan(boolean search, List<String> loadNow, List<String> deferred, int tokens) {}\n\n    /** The gateway's rules: which credential belongs to which team, the models and requests a minute each team may use, and where a model name is routed. */\n    record Policy(Map<String, String> credentials, Map<String, Set<String>> models, Map<String, Integer> limits, Map<String, String> routes) {}\n\n    /** The gateway's decision, its reason and the record kept of it. */\n    record Outcome(String decision, String reason, Map<String, String> audit) {}\n\n    static final Map<String, Tool> CATALOG = new LinkedHashMap<>();\n    static final Map<String, Integer> TOOLS = new LinkedHashMap<>();\n    static final Map<String, Integer> USAGE = Map.of(\"github_create_issue\", 90, \"github_search_code\", 70, \"slack_post_message\", 60, \"github_get_pr\", 50, \"sentry_list_issues\", 20, \"grafana_query\", 10);\n    static final Policy POLICY = new Policy(Map.of(\"key-a\", \"support\", \"key-b\", \"research\"), Map.of(\"support\", Set.of(\"standard\"), \"research\", Set.of(\"standard\", \"deep\")), Map.of(\"support\", 30, \"research\", 10),\n        Map.of(\"standard\", \"claude-sonnet-5-5\", \"deep\", \"claude-opus-5-5\"));\n    private static final Set<String> RISKY = Set.of(\"money\", \"destroy\");\n\n    static {\n        CATALOG.put(\"read_ticket\", new Tool(\"read\", 160));\n        CATALOG.put(\"draft_reply\", new Tool(\"draft\", 220));\n        CATALOG.put(\"issue_refund\", new Tool(\"money\", 240));\n        CATALOG.put(\"delete_account\", new Tool(\"destroy\", 210));\n        Map<String, List<String>> servers = new LinkedHashMap<>();\n        servers.put(\"github\", List.of(\"create_issue\", \"search_code\", \"get_pr\", \"list_prs\", \"merge_pr\", \"comment\", \"list_repos\", \"get_file\"));\n        servers.put(\"slack\", List.of(\"post_message\", \"search\", \"list_channels\", \"get_thread\", \"react\", \"upload\"));\n        servers.put(\"sentry\", List.of(\"list_issues\", \"get_event\", \"resolve\", \"assign\", \"search\"));\n        servers.put(\"grafana\", List.of(\"query\", \"list_dashboards\", \"get_panel\", \"create_alert\", \"list_alerts\"));\n        Map<String, Integer> size = Map.of(\"github\", 520, \"slack\", 410, \"sentry\", 480, \"grafana\", 620);\n        servers.forEach((server, names) -> names.forEach(name -> TOOLS.put(server + \"_\" + name, size.get(server))));\n    }\n\n    /** Least privilege: a tool the role does not need is removed from its configuration, not logged or put behind a confirmation. */\n    static Audit audit(List<String> holds, List<String> needs, Map<String, Tool> catalog) {\n        LOG.log(System.Logger.Level.DEBUG, \"audit input: {0}\", holds);\n        List<String> remove = holds.stream().filter(t -> !needs.contains(t)).toList();\n        return new Audit(remove, remove.stream().filter(t -> RISKY.contains(catalog.get(t).access())).toList(), needs.stream().filter(t -> !holds.contains(t)).toList());\n    }\n\n    static Plan planLoading(Map<String, Integer> tools, Map<String, Integer> usage) {\n        return planLoading(tools, usage, 4, 350);\n    }\n\n    /** With 10 or more tools, or definitions over 10,000 tokens, the 3 to 5 most used tools stay loaded and the rest are found through a search tool. */\n    static Plan planLoading(Map<String, Integer> tools, Map<String, Integer> usage, int keep, int searchTokens) {\n        keep = Math.max(3, Math.min(5, keep));\n        List<String> names = new ArrayList<>(tools.keySet());\n        int total = tools.values().stream().mapToInt(Integer::intValue).sum();\n        if (names.size() < 10 && total <= 10000) return new Plan(false, names, List.of(), total);\n        List<String> sorted = new ArrayList<>(names);\n        sorted.sort((a, b) -> usage.getOrDefault(a, 0).equals(usage.getOrDefault(b, 0)) ? a.compareTo(b) : Integer.compare(usage.getOrDefault(b, 0), usage.getOrDefault(a, 0)));\n        List<String> ranked = new ArrayList<>(sorted.subList(0, Math.min(keep, sorted.size())));\n        return new Plan(true, List.copyOf(ranked), names.stream().filter(t -> !ranked.contains(t)).toList(), ranked.stream().mapToInt(tools::get).sum() + searchTokens);\n    }\n\n    /** Another agent is reached agent-to-agent; a step with a known path is a call in code; a capability several clients share is an MCP server; otherwise it is a tool of the one application. */\n    static String chooseMechanism(int consumers, String counterpart, String path) {\n        if (counterpart.equals(\"agent\")) return \"agent-to-agent\";\n        if (path.equals(\"fixed\")) return \"direct call in code\";\n        return consumers > 1 ? \"MCP server\" : \"custom tool\";\n    }\n\n    /** A call is allowed only when the user holds the scope the tool needs and the agent does too; the agent's own rights are a ceiling, not a licence. */\n    static String authorize(String tool, Set<String> userScopes, Set<String> agentScopes, Map<String, String> required) {\n        if (!required.containsKey(tool)) return \"deny: unknown tool\";\n        String scope = required.get(tool);\n        if (!userScopes.contains(scope)) return \"deny: user lacks \" + scope;\n        if (!agentScopes.contains(scope)) return \"deny: agent lacks \" + scope;\n        return \"allow\";\n    }\n\n    /** One place decides who is calling, which models that team may use and how many requests a minute it may send, and keeps a record of every decision. */\n    static Outcome gateway(String credential, String model, int recent, Policy policy) {\n        String team = credential == null ? null : policy.credentials().get(credential);\n        String decision = \"deny\";\n        String reason;\n        if (team == null) reason = \"unauthenticated\";\n        else if (!policy.models().get(team).contains(model)) reason = \"model not allowed\";\n        else if (recent >= policy.limits().get(team)) reason = \"rate limited\";\n        else {\n            decision = \"allow\";\n            reason = \"routed to \" + policy.routes().getOrDefault(model, model);\n        }\n        return new Outcome(decision, reason, Map.of(\"team\", team == null ? \"unknown\" : team, \"model\", model, \"decision\", decision));\n    }\n\n    private static int percent(int part, int whole) {\n        return (200 * part + whole) / (2 * whole);\n    }\n\n    public static void main(String[] args) {\n        List<String> holds = new ArrayList<>(CATALOG.keySet());\n        List<String> needs = List.of(\"read_ticket\", \"draft_reply\");\n        Audit result = audit(holds, needs, CATALOG);\n        int heldTokens = holds.stream().mapToInt(t -> CATALOG.get(t).tokens()).sum();\n        int neededTokens = needs.stream().mapToInt(t -> CATALOG.get(t).tokens()).sum();\n        System.out.println(\"support agent holds \" + holds.size() + \" tools (\" + heldTokens + \" tokens) and needs \" + needs.size());\n        System.out.println(\"  remove: \" + String.join(\", \", result.remove()) + \"; risky among them: \" + String.join(\", \", result.risky()));\n        System.out.println(\"  after removal: \" + (holds.size() - result.remove().size()) + \" tools, \" + neededTokens + \" tokens\");\n        Map<String, Integer> three = new LinkedHashMap<>();\n        CATALOG.entrySet().stream().limit(3).forEach(e -> three.put(e.getKey(), e.getValue().tokens()));\n        Plan plan = null;\n        Map<String, Map<String, Integer>> sets = new LinkedHashMap<>();\n        sets.put(\"three tools\", three);\n        sets.put(\"four servers\", TOOLS);\n        for (Map.Entry<String, Map<String, Integer>> e : sets.entrySet()) {\n            plan = planLoading(e.getValue(), USAGE);\n            int total = e.getValue().values().stream().mapToInt(Integer::intValue).sum();\n            String saved = plan.search() ? \", \" + percent(total - plan.tokens(), total) + \"% fewer\" : \"\";\n            System.out.println(e.getKey() + \": \" + e.getValue().size() + \" tools, \" + total + \" tokens of definitions -> search tool \" + (plan.search() ? \"yes\" : \"no\") + \", \" + plan.loadNow().size() + \" loaded now, \"\n                + plan.deferred().size() + \" deferred, \" + plan.tokens() + \" tokens up front\" + saved);\n        }\n        System.out.println(\"  loaded now: \" + String.join(\", \", plan.loadNow()));\n        Object[][] rows = {{1, \"tool\", \"model-chosen\"}, {4, \"tool\", \"model-chosen\"}, {1, \"tool\", \"fixed\"}, {1, \"agent\", \"model-chosen\"}};\n        for (Object[] r : rows) {\n            System.out.println(String.format(\"  %d application(s), counterpart %-5s, path %-12s -> %s\", (int) r[0], r[1], r[2], chooseMechanism((int) r[0], (String) r[1], (String) r[2])));\n        }\n        Map<String, String> required = Map.of(\"read_ticket\", \"tickets:read\", \"issue_refund\", \"refunds:write\");\n        Set<String> user = Set.of(\"tickets:read\");\n        Set<String> agent = Set.of(\"tickets:read\", \"refunds:write\");\n        System.out.println(\"refund asked by a user who may only read: agent's rights alone -> \" + (agent.contains(required.get(\"issue_refund\")) ? \"allow\" : \"deny\") + \"; user's and agent's rights -> \"\n            + authorize(\"issue_refund\", user, agent, required));\n        List<Map<String, String>> log = new ArrayList<>();\n        Object[][] requests = {{null, \"standard\", 0}, {\"key-a\", \"deep\", 0}, {\"key-a\", \"standard\", 30}, {\"key-b\", \"deep\", 3}};\n        for (Object[] r : requests) {\n            Outcome outcome = gateway((String) r[0], (String) r[1], (int) r[2], POLICY);\n            log.add(outcome.audit());\n            System.out.println(String.format(\"  gateway: credential %-5s model %-8s recent %2d -> %s: %s\", r[0] == null ? \"none\" : r[0], r[1], (int) r[2], outcome.decision(), outcome.reason()));\n        }\n        System.out.println(\"  records kept: \" + log.size() + \", denials among them: \" + log.stream().filter(r -> r.get(\"decision\").equals(\"deny\")).count());\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "support agent holds 4 tools (830 tokens) and needs 2\n  remove: issue_refund, delete_account; risky among them: issue_refund, delete_account\n  after removal: 2 tools, 380 tokens\nthree tools: 3 tools, 620 tokens of definitions -> search tool no, 3 loaded now, 0 deferred, 620 tokens up front\nfour servers: 24 tools, 12120 tokens of definitions -> search tool yes, 4 loaded now, 20 deferred, 2320 tokens up front, 81% fewer\n  loaded now: github_create_issue, github_search_code, slack_post_message, github_get_pr\n  1 application(s), counterpart tool , path model-chosen -> custom tool\n  4 application(s), counterpart tool , path model-chosen -> MCP server\n  1 application(s), counterpart tool , path fixed        -> direct call in code\n  1 application(s), counterpart agent, path model-chosen -> agent-to-agent\nrefund asked by a user who may only read: agent's rights alone -> allow; user's and agent's rights -> deny: user lacks refunds:write\n  gateway: credential none  model standard recent  0 -> deny: unauthenticated\n  gateway: credential key-a model deep     recent  0 -> deny: model not allowed\n  gateway: credential key-a model standard recent 30 -> deny: rate limited\n  gateway: credential key-b model deep     recent  3 -> allow: routed to claude-opus-5-5\n  records kept: 4, denials among them: 3"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "private val log = System.getLogger(\"capability_audit\")\n\n/**\n * Integration design decisions in code: which tools a role keeps, which tool definitions load up front, which mechanism connects a capability, whose rights a tool call uses and what a gateway decides.\n *\n * The numbers are invented for the example, and the sizes of tool definitions are the example's own. The rules are those of the Claude Certified Architect - Professional exam guide (domain 3), the Claude documentation page\n * \"Tool search tool\", the Model Context Protocol security best practices and the Claude Code gateway pages, read on 2026-10-04. Nothing here calls a model.\n */\n\n/** A tool's access class and the size of its definition in tokens. */\ndata class Tool(val access: String, val tokens: Int)\n\n/** The outcome of an audit: what to remove, which of that is risky and what the role lacks. */\ndata class Audit(val remove: List<String>, val risky: List<String>, val missing: List<String>)\n\n/** How tool definitions load: with a search tool or not, which tools now and which later, and the tokens up front. */\ndata class Plan(val search: Boolean, val loadNow: List<String>, val deferred: List<String>, val tokens: Int)\n\n/** The gateway's rules: which credential belongs to which team, the models and requests a minute each team may use, and where a model name is routed. */\ndata class Policy(val credentials: Map<String, String>, val models: Map<String, Set<String>>, val limits: Map<String, Int>, val routes: Map<String, String>)\n\n/** The gateway's decision, its reason and the record kept of it. */\ndata class Outcome(val decision: String, val reason: String, val audit: Map<String, String>)\n\nval CATALOG = linkedMapOf(\"read_ticket\" to Tool(\"read\", 160), \"draft_reply\" to Tool(\"draft\", 220), \"issue_refund\" to Tool(\"money\", 240), \"delete_account\" to Tool(\"destroy\", 210))\nprivate val RISKY = setOf(\"money\", \"destroy\")\nprivate val SERVER_TOOLS = linkedMapOf(\n    \"github\" to listOf(\"create_issue\", \"search_code\", \"get_pr\", \"list_prs\", \"merge_pr\", \"comment\", \"list_repos\", \"get_file\"),\n    \"slack\" to listOf(\"post_message\", \"search\", \"list_channels\", \"get_thread\", \"react\", \"upload\"),\n    \"sentry\" to listOf(\"list_issues\", \"get_event\", \"resolve\", \"assign\", \"search\"),\n    \"grafana\" to listOf(\"query\", \"list_dashboards\", \"get_panel\", \"create_alert\", \"list_alerts\"),\n)\nprivate val SERVER_SIZE = mapOf(\"github\" to 520, \"slack\" to 410, \"sentry\" to 480, \"grafana\" to 620)\nval TOOLS: Map<String, Int> = SERVER_TOOLS.flatMap { (server, names) -> names.map { \"${server}_$it\" to SERVER_SIZE.getValue(server) } }.toMap(LinkedHashMap())\nval USAGE = mapOf(\"github_create_issue\" to 90, \"github_search_code\" to 70, \"slack_post_message\" to 60, \"github_get_pr\" to 50, \"sentry_list_issues\" to 20, \"grafana_query\" to 10)\nval POLICY = Policy(\n    mapOf(\"key-a\" to \"support\", \"key-b\" to \"research\"), mapOf(\"support\" to setOf(\"standard\"), \"research\" to setOf(\"standard\", \"deep\")), mapOf(\"support\" to 30, \"research\" to 10),\n    mapOf(\"standard\" to \"claude-sonnet-5-5\", \"deep\" to \"claude-opus-5-5\"),\n)\n\n/** Least privilege: a tool the role does not need is removed from its configuration, not logged or put behind a confirmation. */\nfun audit(holds: List<String>, needs: List<String>, catalog: Map<String, Tool>): Audit {\n    log.log(System.Logger.Level.DEBUG, \"audit input: {0}\", holds)\n    val remove = holds.filter { it !in needs }\n    return Audit(remove, remove.filter { catalog.getValue(it).access in RISKY }, needs.filter { it !in holds })\n}\n\n/** With 10 or more tools, or definitions over 10,000 tokens, the 3 to 5 most used tools stay loaded and the rest are found through a search tool. */\nfun planLoading(tools: Map<String, Int>, usage: Map<String, Int>, keep: Int = 4, searchTokens: Int = 350): Plan {\n    val kept = keep.coerceIn(3, 5)\n    val names = tools.keys.toList()\n    val total = tools.values.sum()\n    if (names.size < 10 && total <= 10000) return Plan(false, names, emptyList(), total)\n    val ranked = names.sortedWith(compareBy({ -(usage[it] ?: 0) }, { it })).take(kept)\n    return Plan(true, ranked, names.filter { it !in ranked }, ranked.sumOf { tools.getValue(it) } + searchTokens)\n}\n\n/** Another agent is reached agent-to-agent; a step with a known path is a call in code; a capability several clients share is an MCP server; otherwise it is a tool of the one application. */\nfun chooseMechanism(consumers: Int, counterpart: String, path: String): String = when {\n    counterpart == \"agent\" -> \"agent-to-agent\"\n    path == \"fixed\" -> \"direct call in code\"\n    consumers > 1 -> \"MCP server\"\n    else -> \"custom tool\"\n}\n\n/** A call is allowed only when the user holds the scope the tool needs and the agent does too; the agent's own rights are a ceiling, not a licence. */\nfun authorize(tool: String, userScopes: Set<String>, agentScopes: Set<String>, required: Map<String, String>): String {\n    val scope = required[tool] ?: return \"deny: unknown tool\"\n    if (scope !in userScopes) return \"deny: user lacks $scope\"\n    if (scope !in agentScopes) return \"deny: agent lacks $scope\"\n    return \"allow\"\n}\n\n/** One place decides who is calling, which models that team may use and how many requests a minute it may send, and keeps a record of every decision. */\nfun gateway(credential: String?, model: String, recent: Int, policy: Policy): Outcome {\n    val team = credential?.let { policy.credentials[it] }\n    val (decision, reason) = when {\n        team == null -> \"deny\" to \"unauthenticated\"\n        model !in policy.models.getValue(team) -> \"deny\" to \"model not allowed\"\n        recent >= policy.limits.getValue(team) -> \"deny\" to \"rate limited\"\n        else -> \"allow\" to \"routed to ${policy.routes[model] ?: model}\"\n    }\n    return Outcome(decision, reason, mapOf(\"team\" to (team ?: \"unknown\"), \"model\" to model, \"decision\" to decision))\n}\n\nprivate fun percent(part: Int, whole: Int) = (200 * part + whole) / (2 * whole)\n\nfun main() {\n    val holds = CATALOG.keys.toList()\n    val needs = listOf(\"read_ticket\", \"draft_reply\")\n    val result = audit(holds, needs, CATALOG)\n    println(\"support agent holds ${holds.size} tools (${holds.sumOf { CATALOG.getValue(it).tokens }} tokens) and needs ${needs.size}\")\n    println(\"  remove: ${result.remove.joinToString(\", \")}; risky among them: ${result.risky.joinToString(\", \")}\")\n    println(\"  after removal: ${holds.size - result.remove.size} tools, ${needs.sumOf { CATALOG.getValue(it).tokens }} tokens\")\n    val three = CATALOG.entries.take(3).associate { it.key to it.value.tokens }\n    var plan = planLoading(three, USAGE)\n    for ((name, tools) in listOf(\"three tools\" to three, \"four servers\" to TOOLS)) {\n        plan = planLoading(tools, USAGE)\n        val total = tools.values.sum()\n        val saved = if (plan.search) \", ${percent(total - plan.tokens, total)}% fewer\" else \"\"\n        println(\"$name: ${tools.size} tools, $total tokens of definitions -> search tool ${if (plan.search) \"yes\" else \"no\"}, ${plan.loadNow.size} loaded now, ${plan.deferred.size} deferred, ${plan.tokens} tokens up front$saved\")\n    }\n    println(\"  loaded now: \" + plan.loadNow.joinToString(\", \"))\n    for ((consumers, counterpart, path) in listOf(Triple(1, \"tool\", \"model-chosen\"), Triple(4, \"tool\", \"model-chosen\"), Triple(1, \"tool\", \"fixed\"), Triple(1, \"agent\", \"model-chosen\"))) {\n        println(\"  %d application(s), counterpart %-5s, path %-12s -> %s\".format(consumers, counterpart, path, chooseMechanism(consumers, counterpart, path)))\n    }\n    val required = mapOf(\"read_ticket\" to \"tickets:read\", \"issue_refund\" to \"refunds:write\")\n    val user = setOf(\"tickets:read\")\n    val agent = setOf(\"tickets:read\", \"refunds:write\")\n    println(\"refund asked by a user who may only read: agent's rights alone -> ${if (required.getValue(\"issue_refund\") in agent) \"allow\" else \"deny\"}; user's and agent's rights -> ${authorize(\"issue_refund\", user, agent, required)}\")\n    val log = mutableListOf<Map<String, String>>()\n    for ((credential, model, recent) in listOf(Triple(null, \"standard\", 0), Triple(\"key-a\", \"deep\", 0), Triple(\"key-a\", \"standard\", 30), Triple(\"key-b\", \"deep\", 3))) {\n        val outcome = gateway(credential, model, recent, POLICY)\n        log += outcome.audit\n        println(\"  gateway: credential %-5s model %-8s recent %2d -> %s: %s\".format(credential ?: \"none\", model, recent, outcome.decision, outcome.reason))\n    }\n    println(\"  records kept: ${log.size}, denials among them: ${log.count { it[\"decision\"] == \"deny\" }}\")\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "support agent holds 4 tools (830 tokens) and needs 2\n  remove: issue_refund, delete_account; risky among them: issue_refund, delete_account\n  after removal: 2 tools, 380 tokens\nthree tools: 3 tools, 620 tokens of definitions -> search tool no, 3 loaded now, 0 deferred, 620 tokens up front\nfour servers: 24 tools, 12120 tokens of definitions -> search tool yes, 4 loaded now, 20 deferred, 2320 tokens up front, 81% fewer\n  loaded now: github_create_issue, github_search_code, slack_post_message, github_get_pr\n  1 application(s), counterpart tool , path model-chosen -> custom tool\n  4 application(s), counterpart tool , path model-chosen -> MCP server\n  1 application(s), counterpart tool , path fixed        -> direct call in code\n  1 application(s), counterpart agent, path model-chosen -> agent-to-agent\nrefund asked by a user who may only read: agent's rights alone -> allow; user's and agent's rights -> deny: user lacks refunds:write\n  gateway: credential none  model standard recent  0 -> deny: unauthenticated\n  gateway: credential key-a model deep     recent  0 -> deny: model not allowed\n  gateway: credential key-a model standard recent 30 -> deny: rate limited\n  gateway: credential key-b model deep     recent  3 -> allow: routed to claude-opus-5-5\n  records kept: 4, denials among them: 3"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The practice: capability design as code"
+    },
+    {
+      "type": "para",
+      "text": "The practice is in [`exercises/86-integration-choices-access-and-capability-bloat`](../../exercises/86-integration-choices-access-and-capability-bloat/unit-01/practice-1/statement.md). You write the audit of an agent's tools, the plan for loading definitions with its thresholds and its floor and ceiling on the loaded set, the choice of mechanism, the authorisation of a call by the user's and the agent's rights, and a gateway that decides in order and keeps a record of every decision. It is graded in Python, TypeScript, Java and Kotlin; the statement lists eight cases, each saying what you should see when it works."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**\"Log every refund and delete so that misuse can be audited.\"** It is tempting because logging is cheap and nothing is taken away. The exam rejects it: the role never needed the capability, and \"compensating controls\" act after the privilege exists. The tool is removed from the configuration.",
+        "**\"Shorten every tool description to save tokens.\"** It is tempting because it is a quick change that touches every tool. It fails on two counts: it trades selection quality for tokens, since the descriptions are what the model chooses by, and it leaves the tool count where it was. Fewer loaded definitions, found on demand, attack both.",
+        "**\"Leave the deferred tools out of the request to save more.\"** It is tempting because they are not in the context anyway. It fails: \"You still send every tool's full definition in the `tools` array on every request\", since the search runs on the full set."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A support agent can read tickets, draft replies, pay customers back and permanently close user profiles. Staff only ever read tickets and draft replies. Applying least privilege, which change reduces risk most?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Record every repayment and closure so that misuse can be audited later",
+              "**b**: Remove the repayment and closure capabilities from its configuration",
+              "**c**: Keep every capability but ask for a confirmation before each repayment and closure",
+              "**d**: Replace the agent with a larger model that follows instructions more reliably"
+            ]
+          }
+        ],
+        [
+          "An internal agent is offered 45 capabilities from eight systems. It increasingly picks the wrong one, and the descriptions of all of them fill much of the window before the first message. Which first step fits?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Shorten every description so that the definitions take fewer tokens",
+              "**b**: Merge the capabilities into a few multi-purpose ones that take a mode argument",
+              "**c**: Move to a larger model so that more definitions fit in the window",
+              "**d**: Defer most definitions behind a search tool and keep the few most used loaded"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**b**. The role never needs those capabilities, so removing them from the configuration removes the risk. *a* is ruled out because \"Logging and confirmation prompts are compensating controls\", acting after the privilege exists. *c* is ruled out for the same reason, since a confirmation means \"they ask a person to carry the risk of a capability the role never needed\". *d* is ruled out because \"A larger model does not change what the agent is allowed to do\".",
+            "**d**. With 10 or more tools and large definitions, the search tool loads on demand and the most used tools stay loaded. *a* is ruled out because \"it trades selection quality for tokens\" and leaves the tool count where it was. *b* is ruled out because merging \"hides the behaviours from the model's own choice and leaves the number of capabilities the same\". *c* is ruled out because a larger window does not cure it: \"Claude's ability to pick the right tool degrades once you exceed 30–50 available tools\"."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Module quiz"
+    },
+    {
+      "type": "para",
+      "text": "This quiz covers both pages of the module."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A team has 60 tools and turns on the tool search tool. A developer proposes to omit the least-used tools from the request, to save tokens. What does the documentation say?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Send the least-used ones inside the system prompt as plain text",
+              "**b**: Send only the loaded tools, and keep the rest in the application",
+              "**c**: Send every definition and mark the infrequent ones as deferred",
+              "**d**: Send every definition with a cache breakpoint on each deferred one"
+            ]
+          }
+        ],
+        [
+          "A gateway receives a request whose credential has been revoked and which also names a model that the team may not use. What does it answer, and what does it record?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: A refusal for the model, recorded under the team that owned the revoked credential",
+              "**b**: A refusal as unauthenticated, logged under unknown with the verdict but no prompt text",
+              "**c**: An approval with a warning in the log, since a revoked credential is the provider's concern",
+              "**d**: A refusal that keeps the full prompt in the record, so that an attack can be studied later"
+            ]
+          }
+        ],
+        [
+          "A partner company's autonomous research system, built on another framework, must hand sub-tasks to your own autonomous system and collect the results. Which mechanism does the integration use?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: An MCP server that exposes your system as one tool of the partner's system",
+              "**b**: A direct call from the partner's code into the functions of your system",
+              "**c**: A subagent that your own framework starts on the partner's behalf",
+              "**d**: An agent-to-agent protocol between the two independent parties"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**c**. The search runs on the full set, so every definition is sent and the infrequent ones are marked as deferred. *b* is ruled out because \"You still send every tool's full definition in the `tools` array on every request\". *a* is ruled out because deferral changes \"what enters the context window\", and text in the prompt would load them all every time. *d* is ruled out because deferred tools are kept out of the prefix, and \"A deferred tool cannot itself carry a cache breakpoint\".",
+            "**b**. Who is calling comes first, and the record keeps \"the team (or \"unknown\"), the model and the verdict, and no prompt text\". *a* is ruled out because \"A request with no credential is refused as unauthenticated even when it also asks for a model it may not have\". *c* is ruled out because \"every decision, the refusals included, leaves a record\". *d* is ruled out because \"a log of content is its own data-protection problem\".",
+            "**d**. The counterpart is an independent agent with its own owner, which is the agent-to-agent case. *a* is ruled out because \"MCP is for agent-to-tool communication\", and the partner's agent is a peer and not a tool. *b* is ruled out because a direct call suits \"The path is known: the same steps in the same order\", and a delegation between two agents is not that. *c* is ruled out because A2A is \"Not a sub-agent or tool-call protocol\", and a subagent is how an agent delegates inside its own framework, not across two."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Question 1 of the quiz above is adapted from sample item 1 of the Claude Certified Architect - Professional exam guide (Anthropic, version 1.0), which the guide offers as an illustration of item style. Question 2 of the module quiz and the first of the quiz above are adapted in part from the practice questions of CLAUDE-CERTIFICATIONS by Amey Thakur (MIT License)."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 12,
+    "paras": 14,
+    "code": 0,
+    "tables": 0,
+    "lists": 5,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 1,
+    "html": 0,
+    "disclosures": 2,
+    "examples": 1
+  },
+  "content_sha256": "c0f65a4f9c2e79f911852a2213b5e30d488610c2f00d2ed695b65dcec0194f94"
+}

@@ -1,0 +1,93 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "38-claude-code-for-developers"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 1,
+  "title": "Practice: set up a repository for Claude Code (Python)",
+  "lang": "python",
+  "main_file": "project/CLAUDE.md",
+  "files": [
+    "project/.claude/settings.json",
+    "project/.claude/settings.local.json",
+    "project/.claude/skills/fix-issue/SKILL.md",
+    "project/.gitignore",
+    "project/scripts/ci-review.sh"
+  ],
+  "test_file": "tests/test_project_setup.py",
+  "build": [
+    "project/docs/architecture.md",
+    "tests/examples/39-hook-gate/python/hook_gate.py",
+    "tests/examples/39-hook-gate/python/miniyaml.py",
+    "tests/examples/38-settings-layers/python/settings_layers.py",
+    "pytest.ini",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-1/check_files.py",
+    "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-1/project/.claude/settings.json",
+    "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-1/project/.claude/settings.local.json",
+    "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-1/project/.claude/skills/fix-issue/SKILL.md",
+    "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-1/project/.gitignore",
+    "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-1/project/CLAUDE.md",
+    "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-1/project/scripts/ci-review.sh"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-1/target/report.xml",
+    "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-1/tests/test_project_setup.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_the_memory_file_is_short_concrete_and_pulls_in_the_architecture_notes",
+      "kind": "main",
+      "says": "The memory file is short, names the commands, and its import resolves to the architecture notes"
+    },
+    {
+      "id": "test_e1_the_permission_rules_allow_the_daily_commands_ask_before_commits_and_deny_secrets_and_pushes",
+      "kind": "edge",
+      "says": "Sixteen sample calls get the right answer from the merged rules: allow, ask or deny"
+    },
+    {
+      "id": "test_e2_the_shared_file_sets_a_mode_it_may_set_and_uses_only_rules_that_are_consulted",
+      "kind": "edge",
+      "says": "The shared file sets a mode it is allowed to set and uses only rules that Claude Code consults"
+    },
+    {
+      "id": "test_e3_personal_settings_stay_local_and_the_local_file_wins",
+      "kind": "edge",
+      "says": "The personal file wins for its owner, is ignored by git and stays small"
+    },
+    {
+      "id": "test_e4_the_custom_command_is_a_skill_that_only_a_person_can_start",
+      "kind": "edge",
+      "says": "The custom command is a skill with an argument hint that Claude cannot start by itself"
+    },
+    {
+      "id": "test_e5_the_headless_script_is_bounded_and_does_not_skip_permissions",
+      "kind": "edge",
+      "says": "The headless script is capped, does not skip permissions and pre-approves no whole tool that changes things"
+    },
+    {
+      "id": "test_e6_no_file_holds_a_personal_path_an_address_or_a_key",
+      "kind": "edge",
+      "says": "No file holds a personal path, an address or a key"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/38-claude-code-for-developers/03-commands-headless-runs-and-the-practice.md"
+}

@@ -1,0 +1,2367 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "94-exam-readiness-4"
+  ],
+  "variant": "prose",
+  "unit": 4,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Professional mock exam 2",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "x1",
+        "stem": "Scenario: Fell Utilities must let an agent call a vendor's booking tool that changes records and offers no idempotency key. The agent's runner retries on timeouts. What does the architect do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Give it an identifier of its own, or keep repeats away from it",
+            "correct": true,
+            "says": "The key belongs to the tool's design as much as the agent's, so when a tool that changes things offers none, the architect wraps it with one or does not let an agent retry it (module 81, page 1). The danger is the lost response after the action happened. The page puts it as \"When a tool that changes things offers no key, the architect wraps it with one, or does not let an agent retry it\"."
+          },
+          {
+            "id": "b",
+            "text": "Tell the agent in its prompt to avoid booking the same slot twice",
+            "correct": false,
+            "says": "Ruled out because \"the agent cannot see an attempt whose response was lost\", and a control that must hold is enforced in code."
+          },
+          {
+            "id": "c",
+            "text": "Retry the call until some reply finally arrives",
+            "correct": false,
+            "says": "Ruled out because \"An unlimited retry is a way to spend money while nothing changes.\""
+          },
+          {
+            "id": "d",
+            "text": "Allow the retries to run exactly as they are today",
+            "correct": false,
+            "says": "Ruled out because \"repeats the change unless the tool can tell that this attempt is a repeat\""
+          }
+        ],
+        "origin": {
+          "path": "course/81-reliability-of-multi-agent-systems/01-safe-retries-and-circuit-breakers.md",
+          "section": "A retry is safe only when the repeat is recognised"
+        },
+        "domain": "P1"
+      },
+      {
+        "id": "x2",
+        "stem": "Scenario: Marden Health's pilot ran with ten volunteers who sent clean cases, and the sponsor wants the roll-out to two thousand users to begin next week. Which test does the roll-out plan need for the pilot's assumption about what the volunteers sent?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Buy licences for all two thousand users and read the first week's tickets",
+            "correct": false,
+            "says": "Ruled out because the page rejects it: \"Scale the pilot as it is and buy more licences\"."
+          },
+          {
+            "id": "b",
+            "text": "Raise the model tier before the roll-out, to handle odd inputs better",
+            "correct": false,
+            "says": "Ruled out because the page says \"None of the rows is about the model getting worse\"."
+          },
+          {
+            "id": "c",
+            "text": "Sample real production traffic and evaluate it by slice",
+            "correct": true,
+            "says": "Ten volunteers sent clean cases, but production brings a long tail of odd, long, multilingual or hostile inputs, so the test is to sample real inputs and evaluate by slice (module 79, page 2). A plan that lists the assumptions, the evidence and \"the trigger that stops the roll-out\" is a plan."
+          },
+          {
+            "id": "d",
+            "text": "Count escalations per hundred tasks and staff the help desk for that rate",
+            "correct": false,
+            "says": "Ruled out because that tests a different assumption: \"People covered the edge cases\"."
+          }
+        ],
+        "origin": {
+          "path": "course/79-from-business-problem-to-solution/02-the-automation-boundary-needed-accuracy-and-the-pilot.md",
+          "section": "From a pilot to the full population"
+        },
+        "domain": "P1"
+      },
+      {
+        "id": "x3",
+        "stem": "Scenario: A design at Tamsin Rail passes each customer message straight to a model with no check on its length, its content or its source, and it has a good processing stage, an output check and a feedback loop. What does the four-stage review record?",
+        "options": [
+          {
+            "id": "a",
+            "text": "No finding for the design, which has three strong stages",
+            "correct": false,
+            "says": "Ruled out because the stem lists the other stages as present, and the rubric raises a high finding when \"A stage is empty or absent\", whichever other stages are strong."
+          },
+          {
+            "id": "b",
+            "text": "A medium finding for the missing input side, which asks for revision",
+            "correct": false,
+            "says": "Ruled out because a missing stage is a high rule and \"any `high` gives `reject`, otherwise any `medium` gives `revise`\", so it cannot stop at a medium finding."
+          },
+          {
+            "id": "c",
+            "text": "A low finding for the missing input side, which can be fixed after launch",
+            "correct": false,
+            "says": "Ruled out because a low finding \"is recorded and does not hold the design back\", and a missing input stage is not a matter to improve later."
+          },
+          {
+            "id": "d",
+            "text": "A high finding for the missing input side, which rejects it",
+            "correct": true,
+            "says": "The input stage holds where requests come from, how they are validated and bounded and what is stripped, and a design that sends raw text straight to the model lacks it, which is a high finding (module 80, page 1). The rubric rejects on any high finding. The page puts it as \"Where requests come from, how they are validated and bounded, what is stripped before the model sees it\"."
+          }
+        ],
+        "origin": {
+          "path": "course/80-end-to-end-and-multi-agent-architecture/01-the-four-stages-and-the-price-of-a-team.md",
+          "section": "Four stages that every end-to-end design has"
+        },
+        "domain": "P1"
+      },
+      {
+        "id": "x4",
+        "stem": "Scenario: A refund screen at Ashby Mutual shows the handler a model's ruling and a green button. Handlers approve over 99 percent of what appears. What does the design lack?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A disclosure line on the screen, so that the handler knows AI helped",
+            "correct": false,
+            "says": "Ruled out because the page says \"people who receive output directly are told that AI helped produce it\", and the handler is not one of them."
+          },
+          {
+            "id": "b",
+            "text": "The source material next to the answer, so that the review means something",
+            "correct": true,
+            "says": "A person can only hold the line when the design makes the review real, which means they see the evidence and not only the model's verdict (module 79, page 2). The page warns that the interface must not turn review into \"a click-through\". The page puts it as \"they see the evidence, not only the model's verdict\"."
+          },
+          {
+            "id": "c",
+            "text": "A lower accuracy target for the model, so that handlers have more to correct",
+            "correct": false,
+            "says": "Ruled out because the page ties the target to \"an item is worth reviewing when its expected error cost exceeds the review cost\", and not to keeping handlers busy."
+          },
+          {
+            "id": "d",
+            "text": "A second model that repeats the verdict, so that two opinions agree",
+            "correct": false,
+            "says": "Ruled out because the usage policy asks that \"a qualified professional in that field must review the content or decision prior to dissemination or finalization\", and a second model is not a person."
+          }
+        ],
+        "origin": {
+          "path": "course/79-from-business-problem-to-solution/02-the-automation-boundary-needed-accuracy-and-the-pilot.md",
+          "section": "The automation boundary and who is accountable"
+        },
+        "domain": "P1"
+      },
+      {
+        "id": "x5",
+        "stem": "Scenario: A review at Harlow Retail examines an agent that chooses its own tools for open-ended supplier research, where the path depends on what is found. Everything else in the design is sound. Which finding does the rubric raise for the pattern?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A low finding for team below price, since a lone agent costs about four chats",
+            "correct": false,
+            "says": "Ruled out because that rule concerns \"a team's value is below 15 chats' worth\", and this design has no team."
+          },
+          {
+            "id": "b",
+            "text": "A medium finding for autonomy without need, since any agent is more than a plan requires",
+            "correct": false,
+            "says": "Ruled out because the page says \"an agent is only flagged when the path is known\", and a rule that fires without its second fact is \"a false alarm\"."
+          },
+          {
+            "id": "c",
+            "text": "None, since the rule fires only where the route is already known",
+            "correct": true,
+            "says": "Autonomy without need is conditional on a second fact, a known path, and here the path depends on what is found (module 93, page 2). The page says \"A rule that fires without its second fact is a false alarm\"."
+          },
+          {
+            "id": "d",
+            "text": "A high finding for a missing stage, since an agent has no fixed processing step",
+            "correct": false,
+            "says": "Ruled out because the page raises that when \"A stage is empty or absent\", and an agent's processing is present."
+          }
+        ],
+        "origin": {
+          "path": "course/93-professional-capstone/02-the-written-design-review-findings-verdict-and-scorecard.md",
+          "section": "The 22 rules"
+        },
+        "domain": "P1"
+      },
+      {
+        "id": "x6",
+        "stem": "Scenario: An automated workflow at Torrance Mutual approves payments under a daily spending limit. The team measured 99.8 percent accuracy in testing and proposes to enforce the limit in the system prompt. Where should the limit live?",
+        "options": [
+          {
+            "id": "a",
+            "text": "In the model's tool description, to have the model read it at every call",
+            "correct": false,
+            "says": "Ruled out because the page says to \"Enforce in code any control that must always hold, such as a spending limit or a mandatory approval\", and a tool description is only text the model reads."
+          },
+          {
+            "id": "b",
+            "text": "In the prompt, with a check in the next test run",
+            "correct": false,
+            "says": "Ruled out because the page says \"Probabilistic behaviour cannot give a guarantee, however high the measured accuracy\"."
+          },
+          {
+            "id": "c",
+            "text": "In a reviewer's checklist, to have a person catch every breach by hand",
+            "correct": false,
+            "says": "Ruled out because people are kept for \"decisions that carry accountability, cannot be undone or fall under a rule that demands a human\", whereas a control that must always hold is enforced in code."
+          },
+          {
+            "id": "d",
+            "text": "In code outside the model",
+            "correct": true,
+            "says": "A control that must always hold is enforced in code, because the model's behaviour is probabilistic (module 79, page 2). The page adds that \"a regulatory control never rests on the model alone\", whatever the test score was."
+          }
+        ],
+        "origin": {
+          "path": "course/79-from-business-problem-to-solution/02-the-automation-boundary-needed-accuracy-and-the-pilot.md",
+          "section": "The automation boundary and who is accountable"
+        },
+        "domain": "P1"
+      },
+      {
+        "id": "x7",
+        "stem": "Scenario: A sponsor at Pellam Retail funds a chat design for its agreed targets, the 95th percentile latency and availability. Which value claim is that, and what does it influence in the design?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The service-level pillar, which affects tier, caching, concurrency and accept-and-poll",
+            "correct": true,
+            "says": "The pillar of agreed targets such as latency, availability and accuracy by case type is performance service levels, and it shapes model tier, caching, concurrency and accept-and-poll (module 79, page 1). The other three each claim a different kind of value with a different measure. The page puts it as \"Shapes model tier, caching, concurrency and accept-and-poll\"."
+          },
+          {
+            "id": "b",
+            "text": "Cost, which counts tokens, review time and rework and not the model price alone",
+            "correct": false,
+            "says": "Ruled out because the page defines cost as \"Work costs less in total\", measured against the human baseline."
+          },
+          {
+            "id": "c",
+            "text": "Productivity, which favours an augmented assistant with a person in the loop",
+            "correct": false,
+            "says": "Ruled out because the page defines it as \"People get more done\", measured in hours saved per person per week."
+          },
+          {
+            "id": "d",
+            "text": "Efficiency, which favours a workflow on the routine path with people kept for exceptions",
+            "correct": false,
+            "says": "Ruled out because the page lists efficiency as \"The same work, with less effort per unit\", measured by handling time per claim."
+          }
+        ],
+        "origin": {
+          "path": "course/79-from-business-problem-to-solution/01-from-a-business-problem-to-the-simplest-pattern.md",
+          "section": "The five value pillars"
+        },
+        "domain": "P1"
+      },
+      {
+        "id": "x8",
+        "stem": "Scenario: At Northwind Insurance about 15 percent of claims are disputed, and nobody can list the steps in advance, though a handler will decide each one anyway. Which two statements does the worked example support? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "A single call receives the claim text and returns an approval",
+            "correct": false,
+            "says": "Ruled out because \"Automate decisions that are reversible, cheap to get wrong and easy to audit afterwards\"."
+          },
+          {
+            "id": "b",
+            "text": "An assistant gathers the file for the person who rules",
+            "correct": true,
+            "says": "For disputes the design is an assistant that gathers the file for the person, and the example concludes \"No decision calls for a team of agents\" (module 79, page 1). The page says \"The model prepares the file; a qualified person decides.\""
+          },
+          {
+            "id": "c",
+            "text": "A coordinated crew investigates each dispute in parallel and rules on it",
+            "correct": false,
+            "says": "Ruled out because a team of agents fits only where \"The parts are independent, the volume of reading exceeds one context and the value pays for the cost\", and here a person decides each dispute anyway."
+          },
+          {
+            "id": "d",
+            "text": "A workflow of fixed calls rules on each dispute in a set order",
+            "correct": false,
+            "says": "Ruled out because \"Only then does autonomy earn its price\", and a fixed order suits only a path known in advance."
+          },
+          {
+            "id": "e",
+            "text": "None of the decisions here calls for a team of agents",
+            "correct": true,
+            "says": "For disputes the design is an assistant that gathers the file for the person, and the example concludes \"No decision calls for a team of agents\" (module 79, page 1). The page says \"The model prepares the file; a qualified person decides.\""
+          }
+        ],
+        "origin": {
+          "path": "course/79-from-business-problem-to-solution/01-from-a-business-problem-to-the-simplest-pattern.md",
+          "section": "A worked example, from request to rung"
+        },
+        "domain": "P1",
+        "select": 2
+      },
+      {
+        "id": "x9",
+        "stem": "Scenario: A sponsor at Ivel Bank claims its new triage assistant lowers cost. The team plans to show the saving as the model's price per token, which is below the price of the old tool. What should the design measure?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The share of customers reached in a new way by the assistant each month",
+            "correct": false,
+            "says": "Ruled out because that is the transformation pillar, \"Share of customers served in a new way\"."
+          },
+          {
+            "id": "b",
+            "text": "Spend per finished task including review and rework, against a human baseline",
+            "correct": true,
+            "says": "The cost pillar claims that work costs less in total, and its measure is the cost per completed task against the human baseline, counting tokens, review time and rework and not model price alone (module 79, page 1). The page puts it as \"Counts tokens, review time and rework, not model price alone\"."
+          },
+          {
+            "id": "c",
+            "text": "The 95th percentile latency across all the requests the assistant serves",
+            "correct": false,
+            "says": "Ruled out because a latency figure belongs to another pillar, whose measure is \"95th percentile latency, availability, accuracy by case type\", and it says nothing of cost per task."
+          },
+          {
+            "id": "d",
+            "text": "The count of hours saved for each person each week, summed across the whole team",
+            "correct": false,
+            "says": "Ruled out because that is the productivity pillar, \"Hours saved per person per week\", which claims a different kind of value."
+          }
+        ],
+        "origin": {
+          "path": "course/79-from-business-problem-to-solution/01-from-a-business-problem-to-the-simplest-pattern.md",
+          "section": "The five value pillars"
+        },
+        "domain": "P1"
+      },
+      {
+        "id": "x10",
+        "stem": "Scenario: A research run at Pike Biotech crashes after a payment tool acts but before the run writes its result to the store. The next run starts from the store. Which two statements does the page support? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "A fresh identifier is minted for the new run, with a new key",
+            "correct": false,
+            "says": "Ruled out because \"The key names the intention, not the attempt.\""
+          },
+          {
+            "id": "b",
+            "text": "The unsaved task is retried under its recorded identifier",
+            "correct": true,
+            "says": "A task whose effect happened but whose result was not stored is retried with the same key, and the tool returns the recorded result and does not act again (module 81, page 2). The page says \"The checkpoint and the idempotency key cover the two halves of the same gap.\""
+          },
+          {
+            "id": "c",
+            "text": "Results are written at the end of the run, so a crash is never half done",
+            "correct": false,
+            "says": "Ruled out because \"Write on success, immediately.\""
+          },
+          {
+            "id": "d",
+            "text": "The vendor's endpoint returns the first receipt and does not pay again",
+            "correct": true,
+            "says": "A task whose effect happened but whose result was not stored is retried with the same key, and the tool returns the recorded result and does not act again (module 81, page 2). The page says \"The checkpoint and the idempotency key cover the two halves of the same gap.\""
+          },
+          {
+            "id": "e",
+            "text": "The task is skipped and counted as done",
+            "correct": false,
+            "says": "Ruled out because \"A run that starts with a store takes every task found there as done\", and this task's result never reached the store, so it is run again under its key."
+          }
+        ],
+        "origin": {
+          "path": "course/81-reliability-of-multi-agent-systems/02-isolation-fallbacks-and-resuming-a-run.md",
+          "section": "Checkpoint and resume"
+        },
+        "domain": "P1",
+        "select": 2
+      },
+      {
+        "id": "x11",
+        "stem": "Scenario: A lead agent at Rowan Research dispatches three subagents with the one-line task \"look into the market\", and the subagents return overlapping findings with a gap in the middle. What should the lead write instead?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A brief naming the objective, format, tools and boundaries",
+            "correct": true,
+            "says": "A subagent sees only what it is given, so the lead writes the task like a brief, with the objective, the output format, the tools and sources, and the boundaries (module 80, page 2). That keeps \"two subagents do not research the same thing or leave a gap between them\"."
+          },
+          {
+            "id": "b",
+            "text": "A longer one-line task with more adjectives about thoroughness",
+            "correct": false,
+            "says": "Ruled out because \"the lead must put everything the task needs into the task description\", and adjectives about thoroughness add none of it."
+          },
+          {
+            "id": "c",
+            "text": "The full conversation so far, leaving no subagent without context",
+            "correct": false,
+            "says": "Ruled out because \"Give every subagent the whole conversation so nothing is lost\" is the page's trap, since the subagent's small context is why it exists."
+          },
+          {
+            "id": "d",
+            "text": "The same one-line task with the market named more precisely",
+            "correct": false,
+            "says": "Ruled out because \"A subagent starts with only what it is given.\""
+          }
+        ],
+        "origin": {
+          "path": "course/80-end-to-end-and-multi-agent-architecture/02-contracts-between-parts-and-the-review.md",
+          "section": "What a subagent gets, and what it returns"
+        },
+        "domain": "P1"
+      },
+      {
+        "id": "x12",
+        "stem": "Scenario: Mossgate Bank's assembler has only static modules left and they still exceed the token budget for the request. Which two statements describe the right behaviour? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "The end of the policy is trimmed until the request fits",
+            "correct": false,
+            "says": "Ruled out because \"When the request is too long, truncate the end of the system prompt\" is rejected, because \"static modules hold the rules and are never cut\"."
+          },
+          {
+            "id": "b",
+            "text": "The request is sent anyway and the model discards the surplus",
+            "correct": false,
+            "says": "Ruled out because \"a request that exceeds a budget must lose something\" and the page says to \"Decide beforehand what: each dynamic module has a priority\", so the cut is made before sending and not left to the model."
+          },
+          {
+            "id": "c",
+            "text": "Building stops rather than a truncated policy being sent",
+            "correct": true,
+            "says": "The static modules are never dropped, and when only they remain and still exceed the budget the assembler refuses the request and does not send a truncated policy (module 82, page 1). The page calls a silent truncation \"worse than a refusal\"."
+          },
+          {
+            "id": "d",
+            "text": "The lowest-priority static block is dropped like the dynamic ones",
+            "correct": false,
+            "says": "Ruled out because \"The static modules are never dropped, since they hold the rules\"."
+          },
+          {
+            "id": "e",
+            "text": "Rule-bearing blocks are never dropped, whatever the ceiling",
+            "correct": true,
+            "says": "The static modules are never dropped, and when only they remain and still exceed the budget the assembler refuses the request and does not send a truncated policy (module 82, page 1). The page calls a silent truncation \"worse than a refusal\"."
+          }
+        ],
+        "origin": {
+          "path": "course/82-models-prompts-and-context-as-design-choices/01-assembling-a-prompt-in-cache-friendly-order.md",
+          "section": "A budget drops the least useful context first"
+        },
+        "domain": "P2",
+        "select": 2
+      },
+      {
+        "id": "x13",
+        "stem": "Scenario: A voice product at Hallow Studio peaks at 500 calls a minute, each carrying 800 fresh input tokens and producing 1,500 tokens of reply. The plan allows 30 percent spare capacity and checks Start (1,000 requests, 2 million input, 400,000 output tokens a minute) and Build (5,000, 5 million, 1 million). Which plan does it pick?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Scale, because tokens read from a cache count toward the input limit",
+            "correct": false,
+            "says": "Ruled out because \"cache reads do not count toward ITPM\", and nothing here is read from a cache."
+          },
+          {
+            "id": "b",
+            "text": "Start, because the request rate of 650 and input volume of 520,000 are both inside it",
+            "correct": false,
+            "says": "Ruled out because the output side is the third limit: \"the workload fits a tier only if all three fit\"."
+          },
+          {
+            "id": "c",
+            "text": "The larger of those two, since generated text at 975,000 outruns the smaller one's cap",
+            "correct": true,
+            "says": "The needed figures are 650 requests, 520,000 input tokens and 975,000 output tokens a minute, and the output side exceeds Start's 400,000 while fitting Build's 1 million (module 84, page 1). The page says \"the limit that fails first is the binding one\"."
+          },
+          {
+            "id": "d",
+            "text": "Start, because only the request rate of a service decides the tier",
+            "correct": false,
+            "says": "Ruled out because the page rejects it: \"Size the service on requests per minute; tokens are the model's business.\""
+          }
+        ],
+        "origin": {
+          "path": "course/84-cost-and-capacity-engineering/01-sizing-a-workload-limits-tiers-and-the-bill.md",
+          "section": "Three limits, and the one that binds"
+        },
+        "domain": "P2"
+      },
+      {
+        "id": "x14",
+        "stem": "Scenario: Admission at Elwood Foods checks a team whose monthly allowance is 100 and whose spend so far is 90, and the next call is estimated to take exactly 10. Which decision does admission return?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Warn, since the total reaches the ceiling without passing it",
+            "correct": true,
+            "says": "The edges are exact: a request that brings the spend exactly to the budget does not block, and at or beyond 80 percent it warns (module 84, page 2). The page's order is \"warned, then degraded, then stopped\"."
+          },
+          {
+            "id": "b",
+            "text": "Degrade to a cheaper model silently, since the team is nearly out",
+            "correct": false,
+            "says": "Ruled out because degrading is a routing step with its own rule, and admission returns \"allow, warn or block\"."
+          },
+          {
+            "id": "c",
+            "text": "Allow without comment, since the budget is not exceeded",
+            "correct": false,
+            "says": "Ruled out because \"Reaching 80 percent warns\", and the team is already beyond that mark."
+          },
+          {
+            "id": "d",
+            "text": "Block, since the estimate takes the team to its whole budget",
+            "correct": false,
+            "says": "Ruled out because \"one that brings it exactly to the budget does not\" block."
+          }
+        ],
+        "origin": {
+          "path": "course/84-cost-and-capacity-engineering/02-the-gateway-budgets-and-callers-that-cannot-wait.md",
+          "section": "Four decisions in code"
+        },
+        "domain": "P2"
+      },
+      {
+        "id": "x15",
+        "stem": "Scenario: Harbor Lines marks its brief standing instructions for caching, the calls succeed, and the bill shows no savings from it and no error. What explains it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The prefix is under the model's minimum, so the tag it carries has no effect and nothing is stored",
+            "correct": true,
+            "says": "Below the model's minimum the marking \"has no effect and does not report an error\", so the cache stays inactive and shows up only in the bill (module 82, page 1)."
+          },
+          {
+            "id": "b",
+            "text": "The cache was written and expired between calls, so a longer lifetime is needed",
+            "correct": false,
+            "says": "Ruled out because \"A cache that was never active shows up only in the bill\", so nothing was written that could expire."
+          },
+          {
+            "id": "c",
+            "text": "Short prefixes need a batch request, so the calls should be resubmitted that way",
+            "correct": false,
+            "says": "Ruled out because the check is \"to read the usage figures the API returns for cache writes and cache reads\", and not to change the call type."
+          },
+          {
+            "id": "d",
+            "text": "An error was raised and missed in the logs, so the logging level must be raised",
+            "correct": false,
+            "says": "Ruled out because \"A cache that was never active shows up only in the bill\", so the logs hold no error to find."
+          }
+        ],
+        "origin": {
+          "path": "course/82-models-prompts-and-context-as-design-choices/01-assembling-a-prompt-in-cache-friendly-order.md",
+          "section": "The minimum: a short prefix is not cached"
+        },
+        "domain": "P2"
+      },
+      {
+        "id": "x16",
+        "stem": "Scenario: Perrin Cloud's assembler holds two dynamic modules of equal priority, a long customer history and a long list of offers, and the request is over budget by a little. Which module does it drop first?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Neither module is dropped at all",
+            "correct": false,
+            "says": "Ruled out because \"a request that exceeds a budget must lose something\", and a tie in priority is settled by position and not by dropping nothing."
+          },
+          {
+            "id": "b",
+            "text": "The one that sits later in the final sequence",
+            "correct": true,
+            "says": "Equal priorities are broken by position, and the later module goes first (module 82, page 1). The page's rule is that \"the assembler drops the lowest first, and among equal priorities the later one\"."
+          },
+          {
+            "id": "c",
+            "text": "The one that the caller names first in the request",
+            "correct": false,
+            "says": "Ruled out because \"The order is the same every time\", and \"callers cannot\" decide it."
+          },
+          {
+            "id": "d",
+            "text": "The one that holds more tokens in its current form",
+            "correct": false,
+            "says": "Ruled out because the page orders the cut by rank and not by size: \"each dynamic module has a priority\"."
+          }
+        ],
+        "origin": {
+          "path": "course/82-models-prompts-and-context-as-design-choices/01-assembling-a-prompt-in-cache-friendly-order.md",
+          "section": "A budget drops the least useful context first"
+        },
+        "domain": "P2"
+      },
+      {
+        "id": "x17",
+        "stem": "Scenario: Orlan Support picks the model for a classification workload by reading its name in the lineup, and a new release replaces the old one without a new check. Which practice does the page require for the capability the task needs?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Evaluate the candidates, and repeat it on each swap",
+            "correct": true,
+            "says": "The tier a task needs is found by evaluating the task, not by reading a model's name, and it can change when a model is replaced (module 82, page 2). The page adds that price \"can only rank models that are already right\"."
+          },
+          {
+            "id": "b",
+            "text": "Copy the tier from the previous model into the new one",
+            "correct": false,
+            "says": "Ruled out because the page says the needed tier \"can change when a model is replaced\"."
+          },
+          {
+            "id": "c",
+            "text": "Read the capability from the model's price and its position in the lineup",
+            "correct": false,
+            "says": "Ruled out because the page says price does \"Nothing alone; it ranks the models that remain\", so it cannot show what a model can do."
+          },
+          {
+            "id": "d",
+            "text": "Take the highest rung of the lineup for every workload",
+            "correct": false,
+            "says": "Ruled out because \"Use the largest model for every workload\" is rejected, because the requirement is a rung, a speed limit and a price."
+          }
+        ],
+        "origin": {
+          "path": "course/82-models-prompts-and-context-as-design-choices/02-choosing-a-model-and-shaping-the-context.md",
+          "section": "A model is chosen for a workload"
+        },
+        "domain": "P2"
+      },
+      {
+        "id": "x18",
+        "stem": "Scenario: Ferrow Retail's finance lead asks for showback that takes each team's total volume and applies a single blended rate. What does the gateway design do instead?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Round each row first, then add the rounded rows together",
+            "correct": false,
+            "says": "Ruled out because \"rounding each row first gains or loses cents\"."
+          },
+          {
+            "id": "b",
+            "text": "Price the input tokens only and leave the output unbilled across teams",
+            "correct": false,
+            "says": "Ruled out because leaving one kind out misstates the bill: \"a bill that ignores either is wrong\"."
+          },
+          {
+            "id": "c",
+            "text": "Use the average of every model's price across the teams",
+            "correct": false,
+            "says": "Ruled out because an average hides what the page states: \"cache reads are cheap, output is dear\"."
+          },
+          {
+            "id": "d",
+            "text": "Charge each usage kind at its model's price, cache reads cheap",
+            "correct": true,
+            "says": "Showback is computed from usage rows by token kind at the price of the row's model, and the total is divided by a million and rounded once at the end (module 84, page 2). A bill that ignores the kinds is wrong. The page puts it as \"Every token kind has its own price\"."
+          }
+        ],
+        "origin": {
+          "path": "course/84-cost-and-capacity-engineering/02-the-gateway-budgets-and-callers-that-cannot-wait.md",
+          "section": "Four decisions in code"
+        },
+        "domain": "P2"
+      },
+      {
+        "id": "x19",
+        "stem": "Scenario: A prompt module at Lanyard Health is marked static and holds the text \"Dear {customer}\" in its first line, and the team defends it as convenient. What does the assembler do, and why?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It moves the module behind the dynamic ones, since the order is chosen by callers",
+            "correct": false,
+            "says": "Ruled out because \"The order is the same every time\", and \"callers cannot\" decide it."
+          },
+          {
+            "id": "b",
+            "text": "It refuses to build the request, since a changing prefix value breaks the cache",
+            "correct": true,
+            "says": "A static module that holds a variable is refused when the request is assembled, because a value that changes in the prefix breaks the cache (module 82, page 1). The page's rule is that \"Variables belong in dynamic modules only.\""
+          },
+          {
+            "id": "c",
+            "text": "It fills the value in and caches the result, since the cache matches on meaning",
+            "correct": false,
+            "says": "Ruled out because the page says \"Two requests share a cache entry only when everything up to the breakpoint is identical, character for character.\""
+          },
+          {
+            "id": "d",
+            "text": "It drops the module as the lowest priority, since a budget would cut it first",
+            "correct": false,
+            "says": "Ruled out because \"The static modules are never dropped, since they hold the rules\""
+          }
+        ],
+        "origin": {
+          "path": "course/82-models-prompts-and-context-as-design-choices/01-assembling-a-prompt-in-cache-friendly-order.md",
+          "section": "A request is modules, not a string"
+        },
+        "domain": "P2"
+      },
+      {
+        "id": "x20",
+        "stem": "Scenario: A team at Selby Finance enables the variable that emits raw request and response bodies, intending only to see tool inputs. What does the page say about that setting?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It redacts prompts by default and so changes nothing",
+            "correct": false,
+            "says": "Ruled out because the defaults say \"Spans redact user prompt text, tool input details, and tool content by default\", and this setting overrides that."
+          },
+          {
+            "id": "b",
+            "text": "It reveals tool inputs alone, and nothing else in the payload at all",
+            "correct": false,
+            "says": "Ruled out because the page says it \"implies consent to everything\" the other three would reveal."
+          },
+          {
+            "id": "c",
+            "text": "It exposes all other content too, including the whole conversation",
+            "correct": true,
+            "says": "The variable that emits raw bodies reaches further than the three narrower variables, because the bodies carry the whole conversation (module 87, page 1). The page puts it as \"include the entire conversation history\"."
+          },
+          {
+            "id": "d",
+            "text": "It stays off in a project file unless the repository sets it",
+            "correct": false,
+            "says": "Ruled out because \"a repository can't use them to turn telemetry on, choose where it goes, or capture content\"."
+          }
+        ],
+        "origin": {
+          "path": "course/87-observability-at-scale/01-what-to-keep-where-it-failed-and-what-must-not-be-logged.md",
+          "section": "What must not be logged"
+        },
+        "domain": "P3"
+      },
+      {
+        "id": "x21",
+        "stem": "Scenario: A compliance assistant at Brannock Bank must find a policy clause, then the exception it points to, then the free-text procedure that exception names, where each lookup depends on the last result. A one-shot ranked retrieval fails on it. Which two statements does the page support? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "A keyword index with a larger k is the fit",
+            "correct": false,
+            "says": "Ruled out because a larger k is still one list from one index, and \"One index's misses are never seen\"."
+          },
+          {
+            "id": "b",
+            "text": "A cached prompt that holds the whole rulebook is the fit",
+            "correct": false,
+            "says": "Ruled out because the page reserves that for a corpus \"under about 200,000 tokens\"."
+          },
+          {
+            "id": "c",
+            "text": "An agent that searches issues one query after another",
+            "correct": true,
+            "says": "When the next query depends on the last result, the mechanism is an agent that searches one query after another, because \"A single top-k list that cannot follow a chain\" is the failure the page names (module 85, page 1)."
+          },
+          {
+            "id": "d",
+            "text": "A structured query run by a tool is the fit",
+            "correct": false,
+            "says": "Ruled out because that mechanism fits when \"The answer lives in a table or a database\"."
+          },
+          {
+            "id": "e",
+            "text": "A single top-k list cannot follow a chain",
+            "correct": true,
+            "says": "When the next query depends on the last result, the mechanism is an agent that searches one query after another, because \"A single top-k list that cannot follow a chain\" is the failure the page names (module 85, page 1)."
+          }
+        ],
+        "origin": {
+          "path": "course/85-retrieval-pipelines-at-design-level/01-where-to-cut-what-to-carry-and-which-index.md",
+          "section": "Match the mechanism to the data and the question"
+        },
+        "domain": "P3",
+        "select": 2
+      },
+      {
+        "id": "x22",
+        "stem": "Scenario: Valmont Care plans one gateway for forty teams and its security lead asks what the design must budget for besides licences. Which cost does the page name?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Nothing beyond a configuration file and a short setup guide for teams",
+            "correct": false,
+            "says": "Ruled out because the gateway is \"a proxy your organisation runs between the clients and the provider\", which is a service to operate and not a file and a guide."
+          },
+          {
+            "id": "b",
+            "text": "Running it as infrastructure that follows what its clients send",
+            "correct": true,
+            "says": "The page states the cost plainly: the gateway becomes infrastructure the organisation operates, and it has to forward what its clients send as they change (module 86, page 1). The page puts it as \"The tradeoff is that the gateway becomes infrastructure your organization operates\"."
+          },
+          {
+            "id": "c",
+            "text": "A second provider key for every team that uses the gateway",
+            "correct": false,
+            "says": "Ruled out because the page says \"the provider key stays server-side; developers hold gateway credentials instead\"."
+          },
+          {
+            "id": "d",
+            "text": "The loss of the logs from retired teams and old projects",
+            "correct": false,
+            "says": "Ruled out because \"every decision, the refusals included, leaves a record\", so the logs are a gain and not a cost."
+          }
+        ],
+        "origin": {
+          "path": "course/86-integration-choices-access-and-capability-bloat/01-which-mechanism-a-gateway-and-whose-rights.md",
+          "section": "A gateway: one place for credentials, limits and records"
+        },
+        "domain": "P3"
+      },
+      {
+        "id": "x23",
+        "stem": "Scenario: Pelham Health's guidance changes weekly, differs by reader group and must name its source in every answer. A proposal is to train the facts into the model. What does the page conclude?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Retrieval from a store the team keeps current",
+            "correct": true,
+            "says": "Facts that change weekly, belong to different readers and must be cited are retrieval's case: a weight cannot be edited for one document, name its source or be taken from one reader (module 85, page 2). The page puts it as \"a weight cannot be edited for one document, cannot name its source and cannot be taken away from one reader\"."
+          },
+          {
+            "id": "b",
+            "text": "Train the facts into the model once a month",
+            "correct": false,
+            "says": "Ruled out because \"Facts change, a source must be shown or a reader's access must be respected\" are the cases where the weights are weak."
+          },
+          {
+            "id": "c",
+            "text": "Train them in, using the Claude API's fine-tuning service",
+            "correct": false,
+            "says": "Ruled out because the glossary says \"The Claude API does not currently offer fine-tuning\"."
+          },
+          {
+            "id": "d",
+            "text": "Cache the facts in the prompt of each call",
+            "correct": false,
+            "says": "Ruled out because that suits \"a small, stable body of rules shared by every request\", which weekly guidance is not."
+          }
+        ],
+        "origin": {
+          "path": "course/85-retrieval-pipelines-at-design-level/02-freshness-measurement-and-the-practice.md",
+          "section": "Knowledge that changes: the prompt, retrieval or the weights"
+        },
+        "domain": "P3"
+      },
+      {
+        "id": "x24",
+        "stem": "Scenario: To cut the monitoring bill, a team at Rowley Travel proposes to keep a random tenth of the data points on every time series. What does the page conclude?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It is wrong only for alerts, since dashboards can tolerate gaps",
+            "correct": false,
+            "says": "Ruled out because the page rejects \"a random sample of metric points\" for every use of a rate."
+          },
+          {
+            "id": "b",
+            "text": "It is sound, since a random sample estimates any rate well",
+            "correct": false,
+            "says": "Ruled out because the page puts the cost in labels: \"Metrics are cheap to keep and costly when a label has many values\", so thinning the points is not what makes them dear."
+          },
+          {
+            "id": "c",
+            "text": "It is sound, since traces are sampled the same way in the example here",
+            "correct": false,
+            "says": "Ruled out because the example keeps traces by rule: \"Tail-based sampling decides when the trace is complete\"."
+          },
+          {
+            "id": "d",
+            "text": "It is wrong, since a metric is a count and a missing count is wrong",
+            "correct": true,
+            "says": "Metrics are counts, so dropping a random share of points gives a wrong rate, and the lever for cost is fewer labels with many values (module 87, page 2). The page puts it as \"metrics are counts, and a missing count is a wrong count\"."
+          }
+        ],
+        "origin": {
+          "path": "course/87-observability-at-scale/02-drift-alerts-and-the-practice.md",
+          "section": "The cost of telemetry"
+        },
+        "domain": "P3"
+      },
+      {
+        "id": "x25",
+        "stem": "Scenario: A nightly job at Farrow Clinics adds the chunks of new and changed documents to its index and reports success. A leaflet that held a patient's details was withdrawn last month, yet its text still appears in answers. Which two changes does the page call for? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "Lower the number of results returned, to push the old leaflet out of the top",
+            "correct": false,
+            "says": "Ruled out because the old chunk \"competes with the new one for a place in the top results\"."
+          },
+          {
+            "id": "b",
+            "text": "Drop a revised source's earlier copy before loading its replacement",
+            "correct": true,
+            "says": "A re-index has four outcomes: it keeps unchanged documents, replaces changed ones, adds new ones and removes withdrawn ones (module 85, page 2). For a withdrawn document \"the removal is a correctness and, for personal data, a compliance matter, not a tidiness one\"."
+          },
+          {
+            "id": "c",
+            "text": "Delete the records of retired sources",
+            "correct": true,
+            "says": "A re-index has four outcomes: it keeps unchanged documents, replaces changed ones, adds new ones and removes withdrawn ones (module 85, page 2). For a withdrawn document \"the removal is a correctness and, for personal data, a compliance matter, not a tidiness one\"."
+          },
+          {
+            "id": "d",
+            "text": "Run the same job twice a night",
+            "correct": false,
+            "says": "Ruled out because \"A re-index that runs less often than the documents change leaves old text in the index between runs\"."
+          },
+          {
+            "id": "e",
+            "text": "Re-embed every chunk with the same model before each run",
+            "correct": false,
+            "says": "Ruled out because \"Nothing in a document refresh touches the model, its sampling settings or the size of its window\", so re-embedding with the same model leaves the withdrawn text where it was."
+          }
+        ],
+        "origin": {
+          "path": "course/85-retrieval-pipelines-at-design-level/02-freshness-measurement-and-the-practice.md",
+          "section": "What a re-index must do"
+        },
+        "domain": "P3",
+        "select": 2
+      },
+      {
+        "id": "x26",
+        "stem": "Scenario: A small internal agent at Yarrow Print has six tools, every one of which is used in nearly every request, and each definition is short. An engineer proposes the tool search tool to modernise it. What does the page say?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Defer all six, since the cache keeps the prefix untouched",
+            "correct": false,
+            "says": "Ruled out because deferring pays on \"a large or growing\" set, and here it adds a round trip when the needed tool is absent."
+          },
+          {
+            "id": "b",
+            "text": "Keep them all loaded, since discovery adds a step and nothing to tune away",
+            "correct": true,
+            "says": "Where the tool set is small, loading everything is the better design, with no extra step and nothing to tune (module 86, page 2). The documentation lists \"10 or more tools\" and \"tool definitions consume more than 10k tokens\" as the signs for search."
+          },
+          {
+            "id": "c",
+            "text": "Split the six into two agents, since fewer tools per agent is always safer",
+            "correct": false,
+            "says": "Ruled out because the documentation puts the drop at \"Claude's ability to pick the right tool degrades once you exceed 30–50 available tools\", and six is far below that."
+          },
+          {
+            "id": "d",
+            "text": "Defer five of the six, since discovery is the better design for any agent",
+            "correct": false,
+            "says": "Ruled out because the documentation says standard calling is \"a better fit when you have fewer than 10 tools, every tool is used in every request, or your tool definitions are small\"."
+          }
+        ],
+        "origin": {
+          "path": "course/86-integration-choices-access-and-capability-bloat/01-which-mechanism-a-gateway-and-whose-rights.md",
+          "section": "The example"
+        },
+        "domain": "P3"
+      },
+      {
+        "id": "x27",
+        "stem": "Scenario: A drift check at Oakley Pay stores a baseline of zero for the share of requests refused. This week the share is 3 percent, and the check divides by the baseline. What should the rule do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Skip the metric entirely until a nonzero baseline has been stored again",
+            "correct": false,
+            "says": "Ruled out because \"A metric whose baseline is zero needs a rule of its own\", and silence is not one."
+          },
+          {
+            "id": "b",
+            "text": "Raise the baseline to the current value and then divide",
+            "correct": false,
+            "says": "Ruled out because \"to treat a move you did not plan as a finding\", and resets are made at a change you decided on."
+          },
+          {
+            "id": "c",
+            "text": "Treat any rise from nothing as a 100-point move, with no division",
+            "correct": true,
+            "says": "A move from zero is treated as a move of 100 percent, and the check never divides by it, so the metric is flagged beyond tolerance (module 87, page 2). The page puts it as \"the example treats any move from zero as a move of 100 percent, and never divides by it\"."
+          },
+          {
+            "id": "d",
+            "text": "Report the move as 3 percent of the whole traffic",
+            "correct": false,
+            "says": "Ruled out because the check computes \"the relative change in whole percent\", and a change from zero has no relative size."
+          }
+        ],
+        "origin": {
+          "path": "course/87-observability-at-scale/02-drift-alerts-and-the-practice.md",
+          "section": "Drift: a change that throws nothing"
+        },
+        "domain": "P3"
+      },
+      {
+        "id": "x28",
+        "stem": "Scenario: In a trace at Dunmore Media, one lookup was repeated four times in a row before it succeeded, and the request returned a correct answer with a normal latency. Under a tail-based rule, why might that trace still be kept?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Because a correct answer with normal latency is the rarest kind to find",
+            "correct": false,
+            "says": "Ruled out because the rule keeps \"the rest, kept by a share of their ids\", and this trace has a reason of its own."
+          },
+          {
+            "id": "b",
+            "text": "Because retries of a tool are always logged as errors in the span",
+            "correct": false,
+            "says": "Ruled out because the page lists the reasons apart: \"error: any span failed\" is one, and a retried call belongs to the retries reason, for a loop that eventually succeeded."
+          },
+          {
+            "id": "c",
+            "text": "Because every successful trace is stored when it follows a failure",
+            "correct": false,
+            "says": "Ruled out because \"The example keeps a trace for the first of these reasons, in this order\", so a success earns a place only as part of the sample."
+          },
+          {
+            "id": "d",
+            "text": "Because three or more calls of a single tool mark a loop that is worth keeping",
+            "correct": true,
+            "says": "The retries rule keeps a trace in which one tool was called three times or more, a sign of a loop that eventually succeeded (module 87, page 1). It ranks below error and slow and above feedback and the sample. The page puts it as \"one tool was called three times or more, a sign of a loop that eventually succeeded\"."
+          }
+        ],
+        "origin": {
+          "path": "course/87-observability-at-scale/01-what-to-keep-where-it-failed-and-what-must-not-be-logged.md",
+          "section": "What to keep when you cannot keep everything"
+        },
+        "domain": "P3"
+      },
+      {
+        "id": "x29",
+        "stem": "Scenario: Ordway Telecom indexes eight years of call transcripts in fixed windows of 200 words, and answers quote half a line from one participant and half from the other. Where should the cut be made?",
+        "options": [
+          {
+            "id": "a",
+            "text": "At a larger window of 800 words, to bring every exchange in whole",
+            "correct": false,
+            "says": "Ruled out because the page asks for the cut to follow the data: \"A heading, a clause number, a function, a table row and a support ticket are the joints of their kinds of data\"."
+          },
+          {
+            "id": "b",
+            "text": "At the same size, with a stronger embedding model to rank the pieces",
+            "correct": false,
+            "says": "Ruled out because \"changing the index changes how the pieces are scored, not where they were cut\"."
+          },
+          {
+            "id": "c",
+            "text": "At a smaller window of 50 words, to put fewer sentences in a chunk",
+            "correct": false,
+            "says": "Ruled out because \"A smaller window cuts in more places and separates more sentences from their neighbours.\""
+          },
+          {
+            "id": "d",
+            "text": "At each change of speaker, with long turns split at sentence ends",
+            "correct": true,
+            "says": "The cut follows the joints of the data, and for a transcript the joint is the speaker turn, with a unit longer than the limit split at sentence ends (module 85, page 1). The page says \"Size then follows from the unit\"."
+          }
+        ],
+        "origin": {
+          "path": "course/85-retrieval-pipelines-at-design-level/01-where-to-cut-what-to-carry-and-which-index.md",
+          "section": "Cut where the data has joints"
+        },
+        "domain": "P3"
+      },
+      {
+        "id": "x30",
+        "stem": "Scenario: A review at Lowden Care compares a support agent's tools with its role and plans to delete everything the role does not use, and nothing else. The role also needs a tool the agent was never given. What does the page say about the review?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It is complete",
+            "correct": false,
+            "says": "Ruled out because \"a review that only removes will break the role\", and a review that stops at removal is not complete."
+          },
+          {
+            "id": "b",
+            "text": "It must add logging for every tool left",
+            "correct": false,
+            "says": "Ruled out because \"Logging and confirmation prompts are compensating controls\", and they do not replace the audit of what is held and needed."
+          },
+          {
+            "id": "c",
+            "text": "It must also report the shortfall",
+            "correct": true,
+            "says": "The audit compares what an agent holds with what its role needs and returns four lists: tools to remove, needed tools it lacks, risky ones named first, and dormant ones to review (module 86, page 2). A review that only removes will break the role. The page puts it as \"The needed tools the agent lacks are listed too\"."
+          },
+          {
+            "id": "d",
+            "text": "It must remove the missing tool from the role description, to make the two agree",
+            "correct": false,
+            "says": "Ruled out because the audit \"compares what an agent holds with what its role needs\", so the role is the reference and the shortfall is reported and not edited away."
+          }
+        ],
+        "origin": {
+          "path": "course/86-integration-choices-access-and-capability-bloat/02-capability-bloat-progressive-discovery-and-the-practice.md",
+          "section": "Least privilege: remove, do not watch"
+        },
+        "domain": "P3"
+      },
+      {
+        "id": "x31",
+        "stem": "Scenario: Hendry Stores' agent is offered 120 tools through a search tool, and every request starts with a search because all tools are deferred. Latency is poor. Which configuration does the guidance advise?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Replace the search tool with shorter tool descriptions for all 120",
+            "correct": false,
+            "says": "Ruled out because \"Shorten every tool description to save tokens\" fails because it \"trades selection quality for tokens\"."
+          },
+          {
+            "id": "b",
+            "text": "Load the three to five most used definitions and defer the rest",
+            "correct": true,
+            "says": "The common path stays loaded so that most requests never search, and the long tail is deferred, where a search costs less than the definitions would on every request (module 86, page 2). The page names a floor of three to five loaded tools. The page puts it as \"most frequently used tools non-deferred so Claude can call them without searching first\"."
+          },
+          {
+            "id": "c",
+            "text": "Defer nothing, loading every definition up front",
+            "correct": false,
+            "says": "Ruled out because \"Past the 30 to 50 tools\" accuracy falls, so loading all 120 trades one cost for another."
+          },
+          {
+            "id": "d",
+            "text": "Defer the most used ones too, along with the rest",
+            "correct": false,
+            "says": "Ruled out because \"when the tool that is needed is not loaded, the model calls the search first, and that is a round trip\", and deferring the common tools makes that happen on most requests."
+          }
+        ],
+        "origin": {
+          "path": "course/86-integration-choices-access-and-capability-bloat/02-capability-bloat-progressive-discovery-and-the-practice.md",
+          "section": "Progressive discovery: load few, find the rest"
+        },
+        "domain": "P3"
+      },
+      {
+        "id": "x32",
+        "stem": "Scenario: Ashgrove Bank proposes to test a new model on half of live traffic for a month to find out whether refund answers regress. Which two statements does the page support? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "Release to half of users, which gives the clearest data",
+            "correct": false,
+            "says": "Ruled out because \"A change that ships to half of the traffic exposes half of the users to the regression before anyone has measured it, so that is not a gate.\""
+          },
+          {
+            "id": "b",
+            "text": "An A/B test on all users comes first and alone predicts reaction",
+            "correct": false,
+            "says": "Ruled out because only a shadow run \"keeps the answers away from users\", whereas an A/B test \"sends live traffic to two versions at random\", so on all users it cannot come first."
+          },
+          {
+            "id": "c",
+            "text": "Exposure to real users follows once the shadow run says the change is safe to show",
+            "correct": true,
+            "says": "A shadow run sends copies of live requests to the new version and keeps the answers away from users, and \"It comes first; an A/B test comes after it, once the shadow run says the change is safe to show\" (module 88, page 2)."
+          },
+          {
+            "id": "d",
+            "text": "A shadow run exposes no user to a degradation",
+            "correct": true,
+            "says": "A shadow run sends copies of live requests to the new version and keeps the answers away from users, and \"It comes first; an A/B test comes after it, once the shadow run says the change is safe to show\" (module 88, page 2)."
+          },
+          {
+            "id": "e",
+            "text": "Compare average segment accuracies, which summarise the change",
+            "correct": false,
+            "says": "Ruled out because \"An average of segment accuracies weights a rare segment like a common one and hides its price.\""
+          }
+        ],
+        "origin": {
+          "path": "course/88-evaluation-and-optimisation/02-changing-safely-diagnosing-and-the-practice.md",
+          "section": "Shadow runs: seeing a change before users do"
+        },
+        "domain": "P4",
+        "select": 2
+      },
+      {
+        "id": "x33",
+        "stem": "Scenario: A change at Ravel Freight is refused by the gate on a refund case that must pass, and the old model's retirement is 40 days away. The lead proposes to ship anyway. What does the page say?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Ship it as proposed and note the failure in the release",
+            "correct": false,
+            "says": "Ruled out because for a must-pass case \"If any fails, the change is refused\", and a note in the release does not change that."
+          },
+          {
+            "id": "b",
+            "text": "Re-weight the failing case until the average rises",
+            "correct": false,
+            "says": "Ruled out because \"Re-weighting a failed case turns a rule into a preference\"."
+          },
+          {
+            "id": "c",
+            "text": "Make it a work list, one owner for each reason",
+            "correct": true,
+            "says": "A refused gate with a retirement date in 40 days becomes a work list with an owner for each reason (module 89, page 2). The page adds that the gate \"says what must be fixed or accepted first\"."
+          },
+          {
+            "id": "d",
+            "text": "Watch the failure in production and fix it later",
+            "correct": false,
+            "says": "Ruled out because \"watching a known failure in production makes customers the test\"."
+          }
+        ],
+        "origin": {
+          "path": "course/89-migration-and-model-upgrades-at-scale/02-the-gate-the-roll-out-and-the-way-back.md",
+          "section": "A regression suite that gates"
+        },
+        "domain": "P4"
+      },
+      {
+        "id": "x34",
+        "stem": "Scenario: Dovedale Insurance's assistant answers a coverage question with a claim the policy extract does not make, though the right passage was in the prompt and the reply has the right shape. Where does the diagnosis place the fault, and what does it try?",
+        "options": [
+          {
+            "id": "a",
+            "text": "In retrieval, by rebuilding the index with a different chunk size and overlap",
+            "correct": false,
+            "says": "Ruled out because the order begins \"Was the evidence found?\", and here the passage was supplied."
+          },
+          {
+            "id": "b",
+            "text": "In the model, by moving to a larger one from the same family",
+            "correct": false,
+            "says": "Ruled out because \"A larger model does not know a document it was never shown\", and the model comes last because it is the most expensive fix."
+          },
+          {
+            "id": "c",
+            "text": "In format, by adding an output schema with stricter field types",
+            "correct": false,
+            "says": "Ruled out because \"Format and instruction failures are cheap to see and cheap to fix in the prompt\", but the stem says the shape was right."
+          },
+          {
+            "id": "d",
+            "text": "In grounding, by permitting an admission of ignorance and quoting first",
+            "correct": true,
+            "says": "The evidence was there and the answer claims more than it says, so the fault is grounding (module 88, page 2). The documentation's remedies are permission to say it does not know, quotes extracted first and a citation for every claim. The page puts it as \"permission to say it does not know, quotes extracted first, a citation for every claim\"."
+          }
+        ],
+        "origin": {
+          "path": "course/88-evaluation-and-optimisation/02-changing-safely-diagnosing-and-the-practice.md",
+          "section": "Diagnosing a wrong answer in the order that is cheapest to check"
+        },
+        "domain": "P4"
+      },
+      {
+        "id": "x35",
+        "stem": "Scenario: A team at Merrin Air trims its instructions and switches to a smaller model to cut delay before any evaluation of the full-strength system exists. Which order does the documentation advise?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Reduce latency first, then judge the quality of the answers afterwards on a sample",
+            "correct": false,
+            "says": "Ruled out because \"Optimisation is a search for the cheapest and fastest system that still meets the floor, so the floor comes first.\" A check of quality afterwards on a sample comes too late."
+          },
+          {
+            "id": "b",
+            "text": "Reduce latency only after the prompt performs well without constraints",
+            "correct": true,
+            "says": "The floor comes first: a prompt that works well without model or prompt constraints shows what top performance looks like, and latency reduction follows (module 88, page 2). The documentation warns that reducing it prematurely can hide that. The page puts it as \"Trying to reduce latency prematurely might prevent you from discovering what top performance looks like\"."
+          },
+          {
+            "id": "c",
+            "text": "Reduce latency, measured only on the mean across all requests",
+            "correct": false,
+            "says": "Ruled out because \"A mean hides the tail\", and \"the slowest five in a hundred requests are the ones users complain about\"."
+          },
+          {
+            "id": "d",
+            "text": "Reduce latency and measure quality together in a single combined step",
+            "correct": false,
+            "says": "Ruled out because the order is \"first engineer a prompt that works well\", and two changes at once blur which one moved a score."
+          }
+        ],
+        "origin": {
+          "path": "course/88-evaluation-and-optimisation/02-changing-safely-diagnosing-and-the-practice.md",
+          "section": "Optimising tokens, latency and cost without breaking quality"
+        },
+        "domain": "P4"
+      },
+      {
+        "id": "x36",
+        "stem": "Scenario: Eskdale Telecom's gate measures the 95th percentile of the new model's timings on forty cases against its limit. One run shows a single slow case, and a second run shows three. What should the check do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Pass at one, refuse at three, since a lone outlier is tolerated",
+            "correct": true,
+            "says": "The check is the nearest-rank 95th percentile, and a single slow case among forty does not block the change while three do (module 89, page 2). The example uses the percentile and not the worst case. The page puts it as \"A single slow case among forty does not block the change, and three do\"."
+          },
+          {
+            "id": "b",
+            "text": "Pass both, since the mean is within the limit",
+            "correct": false,
+            "says": "Ruled out because \"A mean hides the tail\", and the slowest five in a hundred are what the check is for."
+          },
+          {
+            "id": "c",
+            "text": "Refuse neither, since latency cannot gate a change",
+            "correct": false,
+            "says": "Ruled out because the page lists \"Latency. The tail, by the nearest-rank 95th percentile of the new timings\" as a check of the gate."
+          },
+          {
+            "id": "d",
+            "text": "Refuse both, since any slow case breaks the limit for the worst user",
+            "correct": false,
+            "says": "Ruled out because \"The example's check is the percentile and not the worst case\", so one slow case does not break it."
+          }
+        ],
+        "origin": {
+          "path": "course/89-migration-and-model-upgrades-at-scale/02-the-gate-the-roll-out-and-the-way-back.md",
+          "section": "A regression suite that gates"
+        },
+        "domain": "P4"
+      },
+      {
+        "id": "x37",
+        "stem": "Scenario: A review at Quill Telecom runs the launch rubric on a design where a human review costs 60 and a wrong decision costs 50. What accuracy does the needed-accuracy rule return?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Minus 20, since the check exceeds the error by that percent",
+            "correct": false,
+            "says": "Ruled out because the rule rounds the percent \"up, and never below 0\"."
+          },
+          {
+            "id": "b",
+            "text": "Zero, since the check never pays and the result is clamped",
+            "correct": true,
+            "says": "The accuracy is 100 minus the review cost as a percent of the error cost, rounded up and never below 0, so a check that costs as much as an error or more needs no accuracy (module 93, page 2). The result stays 0 and does not go negative. The page puts it as \"A check that costs as much as an error, or more, needs no accuracy\"."
+          },
+          {
+            "id": "c",
+            "text": "Eighty, since the error is 80 percent of the check",
+            "correct": false,
+            "says": "Ruled out because the rule takes \"the review cost as a percent of the error cost\", and 80 is the error as a share of the check."
+          },
+          {
+            "id": "d",
+            "text": "A hundred, since a check this dear needs a perfect model",
+            "correct": false,
+            "says": "Ruled out because the page says \"the check never pays\", so no accuracy is needed."
+          }
+        ],
+        "origin": {
+          "path": "course/93-professional-capstone/02-the-written-design-review-findings-verdict-and-scorecard.md",
+          "section": "The accuracy a design needs"
+        },
+        "domain": "P4"
+      },
+      {
+        "id": "x38",
+        "stem": "Scenario: Tolley Foods can grade its label-type answers by code, and its engineers plan to hand-grade thirty polished cases instead of running six hundred machine-graded ones, because hand grading has higher quality. What does the documentation advise for those outputs?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Hand-grade thirty, since quality is the property that makes a set trustworthy",
+            "correct": false,
+            "says": "Ruled out because the documentation says \"More questions with slightly lower signal automated grading is better than fewer questions with high-quality human hand-graded evals.\""
+          },
+          {
+            "id": "b",
+            "text": "Wait for a few thousand cases before grading any, since small sets mislead",
+            "correct": false,
+            "says": "Ruled out because \"We often hear that AI developer teams delay creating evals because they believe that only large evals with hundreds of test cases are useful.\""
+          },
+          {
+            "id": "c",
+            "text": "Run the broad automated set, since breadth beats refinement here",
+            "correct": true,
+            "says": "For outputs that a machine can grade, the page prefers volume to polish, quoting the documentation that more questions with slightly lower signal and automated grading are better than fewer hand-graded ones (module 88, page 1). Code grading is \"Fastest and most reliable, extremely scalable\"."
+          },
+          {
+            "id": "d",
+            "text": "Hand-grade all six hundred, since people are the only valid judges",
+            "correct": false,
+            "says": "Ruled out because human grading is \"Most flexible and high quality, but slow and expensive. Avoid if possible.\""
+          }
+        ],
+        "origin": {
+          "path": "course/88-evaluation-and-optimisation/01-metrics-evaluation-sets-and-where-a-headline-hides-the-failure.md",
+          "section": "Mixed methods: one grader per kind of output"
+        },
+        "domain": "P4"
+      },
+      {
+        "id": "x39",
+        "stem": "Scenario: Corran Health's release gate for its claims assistant measures accuracy, latency and cost, and an audit finds that prompt-injection attempts reach the tool layer. Which addition does the guide's list of dimensions require?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A user rating collected after each answer, averaged by month and by team name",
+            "correct": false,
+            "says": "Ruled out because \"A criterion must be one you can fail\", and a monthly average of ratings sets no number that can fail a release on hostile inputs."
+          },
+          {
+            "id": "b",
+            "text": "A higher accuracy floor on ordinary cases, checked on the same sample",
+            "correct": false,
+            "says": "Ruled out because the guide lists five dimensions, and \"Safety\" and \"Security\" are separate from \"Accuracy: the share of cases answered correctly, by case type\"."
+          },
+          {
+            "id": "c",
+            "text": "A mean latency per request, reported with the median for comparison",
+            "correct": false,
+            "says": "Ruled out because \"Latency: a percentile and not a mean\", and speed says nothing of what got through."
+          },
+          {
+            "id": "d",
+            "text": "The share of hostile inputs that succeeded, on cases built to provoke them",
+            "correct": true,
+            "says": "A release gate needs a number for each dimension that can fail it, and for security that number is the share of injection or leak attempts that got through, on attack cases (module 88, page 1). The page lists five dimensions: accuracy, latency, cost, safety and security. The page puts it as \"the share of injection or leak attempts that got through, on attack cases\"."
+          }
+        ],
+        "origin": {
+          "path": "course/88-evaluation-and-optimisation/01-metrics-evaluation-sets-and-where-a-headline-hides-the-failure.md",
+          "section": "Metrics along several dimensions"
+        },
+        "domain": "P4"
+      },
+      {
+        "id": "x40",
+        "stem": "Scenario: Tavern Group moves an assistant to a model whose replies include adaptive thinking, and many replies are now cut off mid-sentence though max_tokens is unchanged. Which two statements explain it and the fix? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "Thinking is off by default, so a safety filter stops the reply",
+            "correct": false,
+            "says": "Ruled out because \"a request with no `thinking` field runs with adaptive thinking\"."
+          },
+          {
+            "id": "b",
+            "text": "The reply format changed, so the parser must read the first block as text",
+            "correct": false,
+            "says": "Ruled out because the page says \"Read content blocks by `type`\", which is a different failure from a cut-off reply."
+          },
+          {
+            "id": "c",
+            "text": "Reasoning shares the same ceiling as the visible text",
+            "correct": true,
+            "says": "On this model max_tokens covers thinking plus text, and \"thinking tokens are billed as output tokens\", so a limit sized for the old model cuts replies short (module 89, page 1). The checklist says to \"Recount tokens and re-baseline cost\"."
+          },
+          {
+            "id": "d",
+            "text": "Raise the ceiling, recount the usage and re-baseline cost",
+            "correct": true,
+            "says": "On this model max_tokens covers thinking plus text, and \"thinking tokens are billed as output tokens\", so a limit sized for the old model cuts replies short (module 89, page 1). The checklist says to \"Recount tokens and re-baseline cost\"."
+          },
+          {
+            "id": "e",
+            "text": "The prices changed, so the limit must be lowered to keep the old bill",
+            "correct": false,
+            "says": "Ruled out because \"a budget that cannot change is a decision to stay on a model whose date is fixed\", and a lower cap would cut more replies short."
+          }
+        ],
+        "origin": {
+          "path": "course/89-migration-and-model-upgrades-at-scale/01-the-calendar-the-audit-and-the-settings-a-new-model-changes.md",
+          "section": "Changes that throw nothing"
+        },
+        "domain": "P4",
+        "select": 2
+      },
+      {
+        "id": "x41",
+        "stem": "Scenario: At Linford Retail an A/B test with 500 cases in each arm shows 410 right for the current prompt and 425 right for the new one, and the planned minimum was 200. The sponsor wants the new prompt shipped. What does the two-proportion test at 95 percent conclude?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The new prompt is better, since 425 is more than 410 on a sample over the minimum",
+            "correct": false,
+            "says": "Ruled out because \"The larger number is not the better version.\""
+          },
+          {
+            "id": "b",
+            "text": "Too few cases, since a test of this kind needs thousands per arm",
+            "correct": false,
+            "says": "Ruled out because \"The example's minimum is 200; below it the verdict is `too few cases`\", and 500 is above it."
+          },
+          {
+            "id": "c",
+            "text": "The old prompt is better, since a clear test can only favour the version in use",
+            "correct": false,
+            "says": "Ruled out because \"A clear difference can go either way\", and a test that can only report wins \"is not a test\"."
+          },
+          {
+            "id": "d",
+            "text": "No clear difference, since a gap of that size on that sample is within chance",
+            "correct": true,
+            "says": "The page gives the contrast: 410 right of 500 against 438 is a clear gain, and 410 against 425 is not (module 88, page 2). The sample is above the minimum, so the verdict is that the gap is within chance. The page puts it as \"410 right of 500 against 438 is a clear gain, and 410 against 425 is not\"."
+          }
+        ],
+        "origin": {
+          "path": "course/88-evaluation-and-optimisation/02-changing-safely-diagnosing-and-the-practice.md",
+          "section": "A/B tests: telling a gain from chance"
+        },
+        "domain": "P4"
+      },
+      {
+        "id": "x42",
+        "stem": "Scenario: A fairness review at Stanton Mutual wants a parity report across customer groups, but the system holds no field that labels a customer's group. What does the page say about the report?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The cohorts must be defined where they can be measured, or the gap hides",
+            "correct": true,
+            "says": "The report computes one metric per group and shows the gap, and the groups must be defined where they can be measured, since a segment you cannot label cannot be reported (module 90, page 2). The page puts it as \"The groups must be defined where they can be measured\"."
+          },
+          {
+            "id": "b",
+            "text": "An overall average can stand in, covering every group",
+            "correct": false,
+            "says": "Ruled out because \"a headline average hides a failing group exactly as it hides a failing segment\"."
+          },
+          {
+            "id": "c",
+            "text": "Skipping it is the right course for the report now",
+            "correct": false,
+            "says": "Ruled out because \"Bias, in the guide's wording, is a property of outcomes.\""
+          },
+          {
+            "id": "d",
+            "text": "The gap fixes itself once the labels exist, with no owner needed",
+            "correct": false,
+            "says": "Ruled out because \"The report does not fix anything on its own\", which is why the register gives it an owner."
+          }
+        ],
+        "origin": {
+          "path": "course/90-governance-safety-and-risk/02-compliance-fairness-transparency-and-the-register.md",
+          "section": "Fairness is a gap you measure"
+        },
+        "domain": "P5"
+      },
+      {
+        "id": "x43",
+        "stem": "Scenario: Beacon Clinics plans to process protected health information on Claude Platform on AWS, and its design note says that zero data retention covers the HIPAA obligation. Which two statements does the page support? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "One arrangement covers both, and zero retention implies the agreement",
+            "correct": false,
+            "says": "Ruled out because the two are obtained differently: zero retention is requested from Anthropic, while HIPAA readiness needs \"The business associate agreement signed and the setting enabled\"."
+          },
+          {
+            "id": "b",
+            "text": "Neither matters, and de-identified input removes the duty",
+            "correct": false,
+            "says": "Ruled out because \"Neither arrangement removes the need to de-identify\"."
+          },
+          {
+            "id": "c",
+            "text": "Both are offered there, and the platform shares the Claude API's policy",
+            "correct": false,
+            "says": "Ruled out because HIPAA readiness applies to \"The Claude API only, not Claude Platform on AWS or Microsoft Foundry\"."
+          },
+          {
+            "id": "d",
+            "text": "The agreement-based one is offered on the first-party API alone",
+            "correct": true,
+            "says": "Zero data retention means Anthropic does not store prompts or responses at rest, while HIPAA readiness is a signed agreement and a setting that applies to the Claude API only (module 83, page 1). The page says \"Zero data retention and HIPAA readiness are different things\"."
+          },
+          {
+            "id": "e",
+            "text": "Storing nothing and holding a contract are two different arrangements",
+            "correct": true,
+            "says": "Zero data retention means Anthropic does not store prompts or responses at rest, while HIPAA readiness is a signed agreement and a setting that applies to the Claude API only (module 83, page 1). The page says \"Zero data retention and HIPAA readiness are different things\"."
+          }
+        ],
+        "origin": {
+          "path": "course/83-deployment-architecture-and-data-handling/01-where-the-data-goes-platform-region-and-retention.md",
+          "section": "Zero data retention and HIPAA readiness are different things"
+        },
+        "domain": "P5",
+        "select": 2
+      },
+      {
+        "id": "x44",
+        "stem": "Scenario: A support assistant at Fenwick Mutual must tell readers where an answer came from, and the team wants a design that shows the basis without storing the answer in the audit trail. Which elements does the page give?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The full prompt and reply stored in the trace for later audit",
+            "correct": false,
+            "says": "Ruled out because the log holds \"request id, action, consequence, outcome and the size of the text, and never the text itself\"."
+          },
+          {
+            "id": "b",
+            "text": "A line saying that the model is confident in its answer",
+            "correct": false,
+            "says": "Ruled out because \"confidence is not evidence\", and a model can be certain and wrong."
+          },
+          {
+            "id": "c",
+            "text": "The source quote, the document version and a contact person",
+            "correct": true,
+            "says": "Transparency has two duties: tell people AI helped, and show the basis, which means the quote the grounding check used, the document version and the way to reach a person (module 90, page 2). The page puts it as \"A trace that holds ids and sizes can show which document supported an answer without holding the answer\"."
+          },
+          {
+            "id": "d",
+            "text": "Nothing beyond a disclosure that AI helped write the answer",
+            "correct": false,
+            "says": "Ruled out because \"Two duties travel together\", and the second is to let a reader see the basis of an answer."
+          }
+        ],
+        "origin": {
+          "path": "course/90-governance-safety-and-risk/02-compliance-fairness-transparency-and-the-register.md",
+          "section": "Transparency: tell people, and show the basis"
+        },
+        "domain": "P5"
+      },
+      {
+        "id": "x45",
+        "stem": "Scenario: Ingram Bank's design puts three strong controls on the input layer, a harmlessness screen, injection patterns and an untrusted-content rule, and none elsewhere. A confident wrong answer and a rogue tool call both occur in testing. What does the review conclude?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Other tiers are bare, so add output, action and monitor safeguards",
+            "correct": true,
+            "says": "The layers answer different attackers and mistakes, so a design with all its controls on one layer has a gap on the others (module 90, page 1). The review adds an output control, an action control and a monitor. The page puts it as \"An input control cannot catch a confident wrong answer\"."
+          },
+          {
+            "id": "b",
+            "text": "A longer system prompt is needed to carry all of the rules",
+            "correct": false,
+            "says": "Ruled out because \"the model is told in the system prompt\" is \"a weak instance of one layer\"."
+          },
+          {
+            "id": "c",
+            "text": "A fourth input control is needed for tool arguments",
+            "correct": false,
+            "says": "Ruled out because \"an output control cannot stop a tool call that already happened\", and the reverse holds for input."
+          },
+          {
+            "id": "d",
+            "text": "It is sound as it stands and needs no further layers added later",
+            "correct": false,
+            "says": "Ruled out because \"A design with all its controls on one layer has a gap on the others\", and the two failures in testing fall on the other layers."
+          }
+        ],
+        "origin": {
+          "path": "course/90-governance-safety-and-risk/01-controls-that-fail-closed-and-a-person-before-the-irreversible.md",
+          "section": "Four layers, and what each guards"
+        },
+        "domain": "P5"
+      },
+      {
+        "id": "x46",
+        "stem": "Scenario: Calloway Mutual's policy caps log retention at 365 days. On the night, the purge job meets a record stored for exactly 365 days, and nobody has placed a hold on it. What does the job do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Keeps it forever, since an entry at the edge is under a hold",
+            "correct": false,
+            "says": "Ruled out because a hold is a separate matter: \"an entry under a legal hold is never removed, whatever its age\"."
+          },
+          {
+            "id": "b",
+            "text": "Removes it after a warning, since the limit is a soft one",
+            "correct": false,
+            "says": "Ruled out because the page treats a ceiling as a limit, and \"a retention equal to a limit as acceptable\"."
+          },
+          {
+            "id": "c",
+            "text": "Keeps it, since removal needs an age beyond the limit",
+            "correct": true,
+            "says": "Purging follows the same precision as the check: an entry is removed only when it is more than the ceiling old, so one exactly at the ceiling stays (module 83, page 2). A retention equal to a limit is acceptable. The page puts it as \"an entry is removed only when it is more than the ceiling old\"."
+          },
+          {
+            "id": "d",
+            "text": "Removes it, since the limit has been reached",
+            "correct": false,
+            "says": "Ruled out because the window allows \"the days actually kept, which lie between them, the ceiling itself allowed\", so a record at exactly 365 days is within it."
+          }
+        ],
+        "origin": {
+          "path": "course/83-deployment-architecture-and-data-handling/02-the-identifier-boundary-the-audit-log-and-the-practice.md",
+          "section": "Retention has a floor and a ceiling"
+        },
+        "domain": "P5"
+      },
+      {
+        "id": "x47",
+        "stem": "Scenario: A design review at Norwood Energy hears the claim that the assistant is GDPR compliant, resting on the model vendor's reputation. What should the architect ask to see?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A signed statement from the vendor about the model's handling of data",
+            "correct": false,
+            "says": "Ruled out because \"A model does not make a system compliant\"."
+          },
+          {
+            "id": "b",
+            "text": "A line in the system prompt that names the regulation in full",
+            "correct": false,
+            "says": "Ruled out because a regime is \"a list of requirements, not a feature\", and a prompt line is a request to the model."
+          },
+          {
+            "id": "c",
+            "text": "A passing score on the accuracy suite for the assistant itself",
+            "correct": false,
+            "says": "Ruled out because the page reads a regime as \"requirements on the design\", and not as a test result."
+          },
+          {
+            "id": "d",
+            "text": "The requirement, the part of the system meeting it, and the evidence",
+            "correct": true,
+            "says": "A claim about a regime needs a source: which requirement, which part of the system meets it and what evidence shows that (module 90, page 2). The page points to a trust centre for the compliance material. The page puts it as \"A claim about a regime needs a source\"."
+          }
+        ],
+        "origin": {
+          "path": "course/90-governance-safety-and-risk/02-compliance-fairness-transparency-and-the-register.md",
+          "section": "A regime is a list of requirements, not a feature"
+        },
+        "domain": "P5"
+      },
+      {
+        "id": "x48",
+        "stem": "Scenario: Hartwell Group's control that checks reply format at the output layer, an ordinary-tier control, is down for an hour while traffic flows. Which two statements follow the page's rule? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "Every reply is held until the check returns",
+            "correct": false,
+            "says": "Ruled out because for an ordinary output control \"the answers themselves are still checked by other controls\", so a flag is enough and a hold is not needed."
+          },
+          {
+            "id": "b",
+            "text": "The outage counts as a pass and leaves no trace",
+            "correct": false,
+            "says": "Ruled out because the flag exists to \"record that the check did not run\"."
+          },
+          {
+            "id": "c",
+            "text": "The input screen is switched off as well",
+            "correct": false,
+            "says": "Ruled out because \"Every control has a failure mode of its own, and the design must say it\", so one control's outage does not switch another off."
+          },
+          {
+            "id": "d",
+            "text": "The record keeps the gap visible",
+            "correct": true,
+            "says": "\"A control that guards a low-consequence reply may proceed with a flag\", and the example marks such a reply `auto (unscreened)` so that the gap shows in the record (module 90, page 1)."
+          },
+          {
+            "id": "e",
+            "text": "Replies go on carrying a mark that the guard did not run",
+            "correct": true,
+            "says": "\"A control that guards a low-consequence reply may proceed with a flag\", and the example marks such a reply `auto (unscreened)` so that the gap shows in the record (module 90, page 1)."
+          }
+        ],
+        "origin": {
+          "path": "course/90-governance-safety-and-risk/01-controls-that-fail-closed-and-a-person-before-the-irreversible.md",
+          "section": "What a control does when it fails"
+        },
+        "domain": "P5",
+        "select": 2
+      },
+      {
+        "id": "x49",
+        "stem": "Scenario: A user of Pellew Insurance's assistant triggers refusals eleven times in a day, each ending with a refusal stop reason. What does the design do with that count?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Tell the person it breaches policy, then throttle or end access",
+            "correct": true,
+            "says": "Counting refusals per user feeds the response to repeat offenders: tell the user the action violates the usage policy and throttle or end the access (module 90, page 1). A refusal is an outcome the application handles. The page puts it as \"Counting refusals per user also feeds the response to repeat offenders that the jailbreak page describes\"."
+          },
+          {
+            "id": "b",
+            "text": "Raise the sampling temperature to make the replies differ next time",
+            "correct": false,
+            "says": "Ruled out because the page treats a refusal as an outcome with a branch: \"the context is reset (the turn that caused it removed or rephrased)\"."
+          },
+          {
+            "id": "c",
+            "text": "Show the category of each refusal to the user in a message",
+            "correct": false,
+            "says": "Ruled out because \"the `stop_details` fields can be null, so the user-facing message comes from the application\"."
+          },
+          {
+            "id": "d",
+            "text": "Ignore the count and leave the reply path unchanged",
+            "correct": false,
+            "says": "Ruled out because \"The design treats it as an outcome with its own branch\", and a count that is ignored has none."
+          }
+        ],
+        "origin": {
+          "path": "course/90-governance-safety-and-risk/01-controls-that-fail-closed-and-a-person-before-the-irreversible.md",
+          "section": "Refusals are a result to handle"
+        },
+        "domain": "P5"
+      },
+      {
+        "id": "x50",
+        "stem": "Scenario: The tokenising layer at Wyndham Care replaces each e-mail address with a placeholder, and a reviewer asks where the map from placeholder to address lives and whether one person keeps one placeholder. What does the design say?",
+        "options": [
+          {
+            "id": "a",
+            "text": "In the provider's logs, to let the model restore each value in its reply",
+            "correct": false,
+            "says": "Ruled out because \"The vault is local\" and \"The provider sees tokens and never the values.\""
+          },
+          {
+            "id": "b",
+            "text": "In a vault held only by the caller, and equal values get one stand-in each",
+            "correct": true,
+            "says": "The map stays in a vault inside the caller, the provider sees only tokens, and the same value gets the same token so the model can still reason about one person writing twice (module 83, page 2). Restoration happens after the reply. The page puts it as \"The same value gets the same token\"."
+          },
+          {
+            "id": "c",
+            "text": "In the system prompt, to let the model reason about who wrote twice",
+            "correct": false,
+            "says": "Ruled out because the map is data that \"never leaves the caller\", and a prompt would send it across."
+          },
+          {
+            "id": "d",
+            "text": "In a fresh placeholder for each mention, leaving no pattern to be learnt",
+            "correct": false,
+            "says": "Ruled out because \"The same value gets the same token\", so the model can still reason about \"the same person wrote twice\"."
+          }
+        ],
+        "origin": {
+          "path": "course/83-deployment-architecture-and-data-handling/02-the-identifier-boundary-the-audit-log-and-the-practice.md",
+          "section": "Keep the identifier out of the request"
+        },
+        "domain": "P5"
+      },
+      {
+        "id": "x51",
+        "stem": "Scenario: A sponsor at Addison Travel says the new assistant must be quick. The agents who use it sit at a screen, and a nightly job also calls it. What should discovery write down for the agents?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A target of fast, since the sponsor chose the word",
+            "correct": false,
+            "says": "Ruled out because \"Fast\", \"accurate\" and \"safe\" are not answers, \"because nobody can fail them\"."
+          },
+          {
+            "id": "b",
+            "text": "The mean time, since it is the one figure that everybody knows well",
+            "correct": false,
+            "says": "Ruled out because a latency is \"a ceiling (95th percentile of at most 2000 ms)\", and a mean hides the tail."
+          },
+          {
+            "id": "c",
+            "text": "A minutes-long allowance, since the nightly job sets the pace",
+            "correct": false,
+            "says": "Ruled out because \"a batch job would allow minutes\", but the agents at a screen cannot wait that long."
+          },
+          {
+            "id": "d",
+            "text": "A 95th-percentile ceiling like 2 seconds, since a person waits",
+            "correct": true,
+            "says": "The question is who waits and for how long, and for a person on screen the answer is a number such as 2 seconds at the 95th percentile, while a batch job would allow minutes (module 91, page 1). The page puts it as \"so the answer must come within 2 seconds at the 95th percentile\"."
+          }
+        ],
+        "origin": {
+          "path": "course/91-stakeholders-and-the-project-lifecycle/01-discovery-the-decision-statement-and-one-decision-for-two-audiences.md",
+          "section": "Discovery ends in numbers and an owner"
+        },
+        "domain": "P6"
+      },
+      {
+        "id": "x52",
+        "stem": "Scenario: A handover note at Oldham Health gives an owner and a runbook for a new assistant, and one monitor, the error rate, compared with a baseline. What does the hand-off section still lack?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A named vendor contact who can be reached after hours",
+            "correct": false,
+            "says": "Ruled out because the page lists \"the owner of the service (a role), the owner of the runbook that explains each alert, the monitors\" and the rollback."
+          },
+          {
+            "id": "b",
+            "text": "A statement that the design cannot change after launch, to keep it stable",
+            "correct": false,
+            "says": "Ruled out because \"Iteration is not a failure of the design; it is the part of the design that was planned for.\""
+          },
+          {
+            "id": "c",
+            "text": "A second signal, read against the old figures both ways, and a rollback",
+            "correct": true,
+            "says": "The hand-off names the owner, the runbook, at least two monitors, such as refusals or tokens per answer, each compared with a baseline in both directions, and the rollback to the previous model that stays tested (module 91, page 2). The page puts it as \"at least two signals, such as refusals, tokens per answer\"."
+          },
+          {
+            "id": "d",
+            "text": "A third document, the architecture diagram of the whole service",
+            "correct": false,
+            "says": "Ruled out because \"a diagram without the runbook leaves the first incident to the person who happens to remember\"."
+          }
+        ],
+        "origin": {
+          "path": "course/91-stakeholders-and-the-project-lifecycle/02-service-levels-feedback-and-the-lifecycle-from-pilot-to-scale.md",
+          "section": "The lifecycle after the launch"
+        },
+        "domain": "P6"
+      },
+      {
+        "id": "x53",
+        "stem": "Scenario: A sponsor at Penrose Care insists on a single accuracy figure for the board, though the system answers three kinds of request with very different error costs. Which figure does the page advise giving?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The overall average across all three kinds of request",
+            "correct": false,
+            "says": "Ruled out because \"Full automation at 6 percent wrong barely beats the human baseline once errors are priced\", and an average hides the costly slice."
+          },
+          {
+            "id": "b",
+            "text": "The best segment's figure, quoted with the sample that produced it",
+            "correct": false,
+            "says": "Ruled out because \"Promise what you measure and measure what you promise\", and a flattering slice is a promise the design cannot keep."
+          },
+          {
+            "id": "c",
+            "text": "No figure at all until the system has been in use a year",
+            "correct": false,
+            "says": "Ruled out because \"If the sponsor insists on a single figure, give the number that matches the decision they face and say what it does not cover\"."
+          },
+          {
+            "id": "d",
+            "text": "The number for the decision they face, with what it leaves out",
+            "correct": true,
+            "says": "If the sponsor insists on one figure, the architect gives the number that matches the decision they face and says what it does not cover (module 79, page 2). The page adds that the accuracy to ask for is \"99 percent on the confident slice, with the rest reviewed\"."
+          }
+        ],
+        "origin": {
+          "path": "course/79-from-business-problem-to-solution/02-the-automation-boundary-needed-accuracy-and-the-pilot.md",
+          "section": "Needed accuracy comes from two costs"
+        },
+        "domain": "P6"
+      },
+      {
+        "id": "x54",
+        "stem": "Scenario: An architect at Dalby Foods shows the sponsor only the option they recommend, and the sponsor asks why nobody considered the simple thing. Which two statements does the page support? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "Four or more alternatives belong in the record, the weak ones among them",
+            "correct": true,
+            "says": "A record compares at least four options, including obviously wrong ones, because the reader's first question is why not the simple thing (module 91, page 1). Each has \"a monthly cost, whether it meets the service levels, a status and a reason\"."
+          },
+          {
+            "id": "b",
+            "text": "Every alternative gets a cost, a service-level verdict, a status and a reason",
+            "correct": true,
+            "says": "A record compares at least four options, including obviously wrong ones, because the reader's first question is why not the simple thing (module 91, page 1). Each has \"a monthly cost, whether it meets the service levels, a status and a reason\"."
+          },
+          {
+            "id": "c",
+            "text": "A longer and more detailed argument for the recommended option is the cure",
+            "correct": false,
+            "says": "Ruled out because \"A design record that shows one option is an announcement.\""
+          },
+          {
+            "id": "d",
+            "text": "Two alternatives suffice, the recommended one and its nearest rival",
+            "correct": false,
+            "says": "Ruled out because the page asks for \"at least four, including the ones that are obviously wrong\"."
+          },
+          {
+            "id": "e",
+            "text": "Every option the vendor has ever listed belongs in the record, ranked by novelty",
+            "correct": false,
+            "says": "Ruled out because \"among those that meet them the cheapest wins\", and the newest is not a criterion."
+          }
+        ],
+        "origin": {
+          "path": "course/91-stakeholders-and-the-project-lifecycle/01-discovery-the-decision-statement-and-one-decision-for-two-audiences.md",
+          "section": "Options, and the rule for the recommendation"
+        },
+        "domain": "P6",
+        "select": 2
+      },
+      {
+        "id": "x55",
+        "stem": "Scenario: Two months after launch, the review at Brandt Telecom finds that a new customer segment has appeared and a threshold no longer fits. A manager reads this as proof that the original design failed. How does the page frame it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "As a reason to freeze the design until the next sponsor review",
+            "correct": false,
+            "says": "Ruled out because \"The guide lists five phases: discovery, design, handoff, monitoring and iteration\", and a freeze would stop the design before the last phase."
+          },
+          {
+            "id": "b",
+            "text": "As planned iteration",
+            "correct": true,
+            "says": "The record is reviewed at each stage of the roll-out, and each review may change the design: a new segment appears, a threshold moves, a model is replaced (module 91, page 2). Iteration is the part of the design that was planned for. The page puts it as \"a new segment appears, a threshold moves, a model is replaced\"."
+          },
+          {
+            "id": "c",
+            "text": "As a reason to restart discovery",
+            "correct": false,
+            "says": "Ruled out because the record \"is reviewed at each stage of the roll-out, and each review is allowed to change the design\"."
+          },
+          {
+            "id": "d",
+            "text": "As a failure",
+            "correct": false,
+            "says": "Ruled out because \"Iteration is not a failure of the design; it is the part of the design that was planned for.\""
+          }
+        ],
+        "origin": {
+          "path": "course/91-stakeholders-and-the-project-lifecycle/02-service-levels-feedback-and-the-lifecycle-from-pilot-to-scale.md",
+          "section": "The lifecycle after the launch"
+        },
+        "domain": "P6"
+      },
+      {
+        "id": "x56",
+        "stem": "Scenario: After three months of work, an architect at Hollis Rail cannot show the sponsor any saving, though the assistant clearly handles disputes. The discovery notes record the volume and the error cost. Which discovery question was left out?",
+        "options": [
+          {
+            "id": "a",
+            "text": "What exists today, with its price and quality, as the baseline",
+            "correct": true,
+            "says": "Discovery asks what exists today, such as the cost and quality of the current way, because without a baseline no saving can be shown (module 91, page 1). The page's example is 315,000 a month with people alone. The page puts it as \"Without a baseline no saving can be shown\"."
+          },
+          {
+            "id": "b",
+            "text": "Who is accountable, so that someone can be telephoned",
+            "correct": false,
+            "says": "Ruled out because the page lists that separately: \"A role that can be telephoned\"."
+          },
+          {
+            "id": "c",
+            "text": "What counts as done, with a measure, a threshold and an owner",
+            "correct": false,
+            "says": "Ruled out because that question concerns the target, \"A measure, a threshold, an owner\", and the saving needs the figure for the current way."
+          },
+          {
+            "id": "d",
+            "text": "What is out of bounds, such as data that may not leave a region",
+            "correct": false,
+            "says": "Ruled out because that question asks for \"Data that may not leave a region, actions that need a person\", which sets limits and gives no figure to measure a saving against."
+          }
+        ],
+        "origin": {
+          "path": "course/91-stakeholders-and-the-project-lifecycle/01-discovery-the-decision-statement-and-one-decision-for-two-audiences.md",
+          "section": "Discovery ends in numbers and an owner"
+        },
+        "domain": "P6"
+      },
+      {
+        "id": "x57",
+        "stem": "Scenario: A design record at Westmere Health lists two options as recommended, both cheaper than the baseline and both within the service levels, so that the sponsor can pick the one that suits. What does the review say?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Keep both, since a choice gives the sponsor a sense of control",
+            "correct": false,
+            "says": "Ruled out because the page says \"Exactly one is recommended.\""
+          },
+          {
+            "id": "b",
+            "text": "Name a single winner, since two endorsements push the choice back to the reader",
+            "correct": true,
+            "says": "The record recommends exactly one option, the cheapest that meets the service levels, and two recommended options push the choice back to the reader (module 91, page 1). The other options stay in the record with a reason in a sentence. The page puts it as \"Two recommended options push the choice back to the reader\"."
+          },
+          {
+            "id": "c",
+            "text": "Recommend the more capable of the two, since capability is the safer reason",
+            "correct": false,
+            "says": "Ruled out because \"the newest\" and \"the most capable\" are not criteria, as the page says: \"among those that meet them the cheapest wins\"."
+          },
+          {
+            "id": "d",
+            "text": "Remove the options that were not recommended, since a record is an announcement",
+            "correct": false,
+            "says": "Ruled out because \"A design record that shows one option is an announcement.\""
+          }
+        ],
+        "origin": {
+          "path": "course/91-stakeholders-and-the-project-lifecycle/01-discovery-the-decision-statement-and-one-decision-for-two-audiences.md",
+          "section": "Options, and the rule for the recommendation"
+        },
+        "domain": "P6"
+      },
+      {
+        "id": "x58",
+        "stem": "Scenario: A service record at Merton Care names an accountable party as \"the project team\", and the incident review cannot find anyone to call at night. What does the page say should have been written?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The vendor that supplies the underlying model to the assistant",
+            "correct": false,
+            "says": "Ruled out because \"deploying an automated decision means owning its outcomes\", so the deploying organisation owns it."
+          },
+          {
+            "id": "b",
+            "text": "The executive sponsor who approved the work and funds it",
+            "correct": false,
+            "says": "Ruled out because \"the owner is a role that can be called when it moves\", and a sponsor is not that."
+          },
+          {
+            "id": "c",
+            "text": "A role reachable by phone, such as the billing operations manager",
+            "correct": true,
+            "says": "Accountability is a role that can be telephoned, written in the record, and where the model prepares and a person decides the record says so (module 91, page 1). The page calls an ownerless target \"nobody's\". The page puts it as \"A role that can be telephoned\"."
+          },
+          {
+            "id": "d",
+            "text": "A committee that reviews every incident at its regular weekly meeting",
+            "correct": false,
+            "says": "Ruled out because \"A target without a measure cannot be reported, and one without an owner is nobody's.\""
+          }
+        ],
+        "origin": {
+          "path": "course/78-exam-readiness-3/05-architect-scenario-question-pool.md",
+          "section": "Mock exam"
+        },
+        "domain": "P6"
+      },
+      {
+        "id": "x59",
+        "stem": "Scenario: A launch review at Garston Retail runs the rubric on a design that promises \"fast replies\" with no figure, though an owner and the needed accuracy are stated. What does the rubric record?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A medium finding for no latency number, so the verdict is revise",
+            "correct": true,
+            "says": "The rule `sla-without-numbers` is a medium P6 finding raised when a latency or an availability has no number, and any medium finding with no high one gives revise (module 93, page 2). The page puts it as \"a latency or an availability with no number\"."
+          },
+          {
+            "id": "b",
+            "text": "No finding at all, so the verdict is approve as proposed",
+            "correct": false,
+            "says": "Ruled out because the rule raises on \"a latency or an availability with no number\", and a service level needs \"a target, a measure and an owner\"."
+          },
+          {
+            "id": "c",
+            "text": "A low finding for unstated accuracy, so the verdict is approve",
+            "correct": false,
+            "says": "Ruled out because the table gives `accuracy-unstated` as \"the needed accuracy is not stated\", and the stem states it."
+          },
+          {
+            "id": "d",
+            "text": "A high finding for no accountable owner, so the verdict is reject",
+            "correct": false,
+            "says": "Ruled out because `no-accountable-owner` is raised when there is \"no owner for the service\", which the stem excludes."
+          }
+        ],
+        "origin": {
+          "path": "course/93-professional-capstone/02-the-written-design-review-findings-verdict-and-scorecard.md",
+          "section": "The 22 rules"
+        },
+        "domain": "P6"
+      },
+      {
+        "id": "x60",
+        "stem": "Scenario: Dunmow Group sets an organisation spend limit of 20,000, group limits of 6,000, 8,000 and 6,000, and gives one member a ceiling of 9,000 in the 6,000 group. Which two statements does the page support? (Select two.)",
+        "options": [
+          {
+            "id": "a",
+            "text": "The groups together exceed the organisation, which breaks the sum",
+            "correct": false,
+            "says": "Ruled out because \"a total of exactly 20000 passes and 20001 does not\"."
+          },
+          {
+            "id": "b",
+            "text": "That individual figure is unreachable",
+            "correct": true,
+            "says": "A member's limit is no higher than the smallest group's, since \"a member limit above a group's own makes the member limit a number that can never be reached\", and the group limits add up exactly to the organisation's total (module 92, page 2)."
+          },
+          {
+            "id": "c",
+            "text": "The organisation limit is a safety net that makes the other figures optional",
+            "correct": false,
+            "says": "Ruled out because \"make the groups add up exactly\", because the organisation limit decides first otherwise."
+          },
+          {
+            "id": "d",
+            "text": "The three shares sum to the grand total exactly",
+            "correct": true,
+            "says": "A member's limit is no higher than the smallest group's, since \"a member limit above a group's own makes the member limit a number that can never be reached\", and the group limits add up exactly to the organisation's total (module 92, page 2)."
+          },
+          {
+            "id": "e",
+            "text": "Nothing is wrong, and a member may exceed a group's limit with consent",
+            "correct": false,
+            "says": "Ruled out because \"a member's limit is no higher than the smallest group's\", so a figure above the group's cannot stand."
+          }
+        ],
+        "origin": {
+          "path": "course/92-enabling-teams-and-operations/02-rolling-out-plugins-servers-spend-and-adoption.md",
+          "section": "Spend limits that add up"
+        },
+        "domain": "P7",
+        "select": 2
+      },
+      {
+        "id": "x61",
+        "stem": "Scenario: Rowan Labs has no device management and sets its policy in the admin console, and its security lead wants a stricter policy for the contractors' group alone. What does the page say?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Ask any administrator to edit the setting for the contractors' group",
+            "correct": false,
+            "says": "Ruled out because it \"is edited by an Owner or Primary Owner, not by any administrator\"."
+          },
+          {
+            "id": "b",
+            "text": "Set it in the shared project file that every contractor checks out",
+            "correct": false,
+            "says": "Ruled out because \"a policy belongs in managed settings, and the shared file holds what the team agrees for itself\"."
+          },
+          {
+            "id": "c",
+            "text": "It cannot target a subset yet, so a separate profile goes to them",
+            "correct": true,
+            "says": "Server-managed settings apply to everyone in the organisation, and a different policy for one group means a different file or profile deployed to that group (module 92, page 1). They are fetched at startup and refreshed hourly. The page puts it as \"per-group policy is not yet supported there\"."
+          },
+          {
+            "id": "d",
+            "text": "Set the stricter values in the console for the group of contractors",
+            "correct": false,
+            "says": "Ruled out because server-managed settings are applied to everyone: \"It applies to everyone in the organisation\"."
+          }
+        ],
+        "origin": {
+          "path": "course/92-enabling-teams-and-operations/01-one-setting-in-five-places-precedence-locks-and-managed-only-keys.md",
+          "section": "Server-managed settings and their limits"
+        },
+        "domain": "P7"
+      },
+      {
+        "id": "x62",
+        "stem": "Scenario: Kinsale Software wants developers to install plugins only from its own marketplace repository, and an engineer sets the managed allowlist of marketplace sources to an empty list to be safe. What happens?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Every origin is blocked, the firm's and the official one alike",
+            "correct": true,
+            "says": "An empty list blocks every source, the official marketplace included, so allow nothing and allow ours are different lists (module 92, page 2). The company's own repository must be listed to be allowed. The page puts it as \"An empty list blocks every source, the official one included\"."
+          },
+          {
+            "id": "b",
+            "text": "Every source is allowed, the firm's own and any public one",
+            "correct": false,
+            "says": "Ruled out because the allowlist is \"an allowlist of the sources plugins may come from\", and an empty one lists none."
+          },
+          {
+            "id": "c",
+            "text": "Only the official source is allowed, and the firm's own is refused",
+            "correct": false,
+            "says": "Ruled out because \"Allow all plugins from the official marketplace and block the rest\" is rejected, because an empty list blocks the official one too."
+          },
+          {
+            "id": "d",
+            "text": "Only the company's source is allowed, and the official one is refused",
+            "correct": false,
+            "says": "Ruled out because \"The practice's policy lists one: the company's own marketplace repository\", and an empty list names none, so the firm's source is refused too."
+          }
+        ],
+        "origin": {
+          "path": "course/92-enabling-teams-and-operations/02-rolling-out-plugins-servers-spend-and-adoption.md",
+          "section": "Where plugins and servers may come from"
+        },
+        "domain": "P7"
+      },
+      {
+        "id": "x63",
+        "stem": "Scenario: A platform team at Larkin Pay enables Claude Code for an organisation with zero data retention and promises leadership a dashboard of merged pull requests with assistance. What should it check first?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The baseline of four weeks, since the metrics begin once the baseline period ends",
+            "correct": false,
+            "says": "Ruled out because the baseline is collected before the launch: \"the plan takes four weeks of data before the rollout\"."
+          },
+          {
+            "id": "b",
+            "text": "Whether those contribution metrics are available, since they need the GitHub app",
+            "correct": true,
+            "says": "Contribution metrics need the GitHub app and are not available for organisations with zero data retention enabled, so the team checks that before promising them (module 92, page 2). The page puts it as \"are not available for organisations with zero data retention enabled\"."
+          },
+          {
+            "id": "c",
+            "text": "The count of lines accepted, since that is the outcome that matters",
+            "correct": false,
+            "says": "Ruled out because \"Lines and suggestions accepted are reported and not targeted.\""
+          },
+          {
+            "id": "d",
+            "text": "The seat allowance, since it limits how many merges are recorded",
+            "correct": false,
+            "says": "Ruled out because \"a member's use draws from a seat allowance\", which concerns spend and not metrics."
+          }
+        ],
+        "origin": {
+          "path": "course/92-enabling-teams-and-operations/02-rolling-out-plugins-servers-spend-and-adoption.md",
+          "section": "Adoption is a result"
+        },
+        "domain": "P7"
+      }
+    ],
+    "mock": {
+      "pass_mark": 70,
+      "domains": [
+        {
+          "id": "P1",
+          "title": "Solution design and architecture"
+        },
+        {
+          "id": "P2",
+          "title": "Claude models, prompting and context"
+        },
+        {
+          "id": "P3",
+          "title": "Integration"
+        },
+        {
+          "id": "P4",
+          "title": "Evaluation, testing and optimisation"
+        },
+        {
+          "id": "P5",
+          "title": "Governance, safety and risk"
+        },
+        {
+          "id": "P6",
+          "title": "Stakeholder communication and lifecycle"
+        },
+        {
+          "id": "P7",
+          "title": "Developer productivity and operational enablement"
+        }
+      ]
+    },
+    "concepts": [
+      "the level's ideas, met as scenarios"
+    ]
+  }
+}

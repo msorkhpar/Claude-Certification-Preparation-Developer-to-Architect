@@ -1,0 +1,156 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "38-claude-code-for-developers"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 5,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Commands, headless runs, auto mode and the practice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A CI job runs `claude -p` to review each diff and must give the same result on every runner. Which flag is the key part?",
+        "options": [
+          {
+            "id": "a",
+            "text": "`--output-format json`, because it gives a script structured text to parse",
+            "correct": false,
+            "says": "Ruled out because \"Use `json` when a script parses the result\", which shapes the output and does not remove local configuration."
+          },
+          {
+            "id": "b",
+            "text": "`--bare`, because it skips the local setup that discovery finds",
+            "correct": true,
+            "says": "The page says `--bare` is \"useful for CI and scripts where you need the same result on every machine.\""
+          },
+          {
+            "id": "c",
+            "text": "`--max-turns`, because it limits how many agentic turns a single run takes",
+            "correct": false,
+            "says": "Ruled out because \"`--max-turns` limits the number of agentic turns\", which bounds a run and does not make two runners agree."
+          },
+          {
+            "id": "d",
+            "text": "`--max-budget-usd`, because it caps the amount that a single run may spend",
+            "correct": false,
+            "says": "Ruled out because \"`--max-budget-usd` caps the spend\", which is a bound on cost and not on configuration."
+          }
+        ],
+        "origin": {
+          "path": "course/38-claude-code-for-developers/03-commands-headless-runs-and-the-practice.md",
+          "section": "Headless runs"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A command's workflow deploys code and posts to an external service. How is Claude kept from launching it on its own judgement?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Add an `argument-hint` line to its frontmatter",
+            "correct": false,
+            "says": "Ruled out because `argument-hint` is \"a hint such as `[issue-number]` shown in autocomplete\" and controls nobody."
+          },
+          {
+            "id": "b",
+            "text": "Save it as a command file and not as a skill folder",
+            "correct": false,
+            "says": "Ruled out because a command file and a skill \"both create `/deploy` and work the same way\", so the file kind changes nothing."
+          },
+          {
+            "id": "c",
+            "text": "Set `disable-model-invocation: true` in its frontmatter",
+            "correct": true,
+            "says": "The page says setting `disable-model-invocation: true` tells it to \"prevent Claude from automatically loading this skill\", so only a person can start it."
+          },
+          {
+            "id": "d",
+            "text": "Start the session with `--permission-mode dontAsk`",
+            "correct": false,
+            "says": "Ruled out because `dontAsk` \"runs reads and pre-approved tools and denies anything that would prompt\", which decides tool approval and not who may load a command."
+          }
+        ],
+        "origin": {
+          "path": "course/38-claude-code-for-developers/03-commands-headless-runs-and-the-practice.md",
+          "section": "Custom commands are skills"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A script lists `--allowedTools \"Bash\"` so that a headless review can run `git diff`. What is wrong with it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It pre-approves every shell command, because a bare name matches all",
+            "correct": true,
+            "says": "The trap says \"`--allowedTools \"Bash\"` approves every command. List `Bash(git diff *)` and its like.\""
+          },
+          {
+            "id": "b",
+            "text": "It is rejected at start, because a tool name must carry a pattern",
+            "correct": false,
+            "says": "Ruled out because the page says \"List patterns and not whole tools that change things\", a recommendation and not a parsing rule, and its own example lists a bare `Read`."
+          },
+          {
+            "id": "c",
+            "text": "It is skipped by a bare run, because `--bare` ignores a tool list",
+            "correct": false,
+            "says": "Ruled out because `--bare` skips \"auto-discovery of hooks, skills, custom commands, subagents, installed plugins, MCP servers, auto memory, and CLAUDE.md\", and a flag passed on the command line is not discovered."
+          },
+          {
+            "id": "d",
+            "text": "It approves nothing, because only `dontAsk` can pre-approve a tool",
+            "correct": false,
+            "says": "Ruled out because the flag itself \"pre-approves specific tools, in quotes and separated by commas\", while `dontAsk` merely \"runs reads and pre-approved tools\"."
+          }
+        ],
+        "origin": {
+          "path": "course/38-claude-code-for-developers/03-commands-headless-runs-and-the-practice.md",
+          "section": "Headless runs"
+        }
+      }
+    ],
+    "concepts": [
+      "Commands, headless runs, auto mode and the practice, as the page teaches it",
+      "Custom commands are skills, as the page teaches it",
+      "Headless runs, as the page teaches it"
+    ]
+  }
+}

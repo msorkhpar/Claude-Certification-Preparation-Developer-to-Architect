@@ -1,0 +1,78 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "26-tool-use"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 2,
+  "title": "Practice: a tool loop against a scripted model (TypeScript)",
+  "lang": "typescript",
+  "main_file": "toolloop.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "toolloop.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-2/26-tool-use/prose/unit-03/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-2/26-tool-use/prose/unit-03/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-2/26-tool-use/prose/unit-03/practice-2/toolloop.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 a tool call is run and its result sent back until the model ends its turn",
+      "kind": "main",
+      "says": "A tool call is run and its result sent back until the model ends its turn"
+    },
+    {
+      "id": "e1 parallel calls get one user message with every result in order",
+      "kind": "edge",
+      "says": "Parallel calls get one user message with every result in order"
+    },
+    {
+      "id": "e2 a failing unknown or malformed call becomes an error result and the loop goes on",
+      "kind": "edge",
+      "says": "A failing, unknown or malformed call becomes an error result and the loop goes on"
+    },
+    {
+      "id": "e3 the number of turns is bounded",
+      "kind": "edge",
+      "says": "The number of turns is bounded"
+    },
+    {
+      "id": "e4 refusal and truncation end the loop and a paused turn continues",
+      "kind": "edge",
+      "says": "Refusal and truncation end the loop, and a paused turn continues"
+    },
+    {
+      "id": "e5 tool choice is validated for the model and a forced choice applies to the first request only",
+      "kind": "edge",
+      "says": "tool_choice is validated for the model, and a forced choice applies to the first request only"
+    },
+    {
+      "id": "e6 results that are not text are sent as json text",
+      "kind": "edge",
+      "says": "Results that are not text are sent as JSON text"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/26-tool-use/03-parallel-calls-the-tool-runner-and-the-practice.md"
+}

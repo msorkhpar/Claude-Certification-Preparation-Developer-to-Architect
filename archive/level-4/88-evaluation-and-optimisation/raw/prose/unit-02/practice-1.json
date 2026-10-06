@@ -1,0 +1,280 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "88-evaluation-and-optimisation"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: an evaluation kit (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an evaluation kit"
+    },
+    {
+      "type": "para",
+      "text": "A team reports one accuracy figure for its assistant and ships whatever raises it. Two versions with the same figure are called equal although one of them fails the refunds that cost twenty times as much as a status question; a live test with a hundred cases is called a win; a version that lost three right answers in the refund segment ships because it gained three elsewhere; a wrong answer is blamed on the model before anyone checks whether the right document was retrieved; and the cheapest model is chosen without asking whether it is fast enough. In this practice you write the pieces that replace that: a report by segment with the cost of the errors, the latency percentile, the A/B verdict at 95 percent, the gate for a shadow run, the order of a diagnosis and the choice of a model under limits. The model is not called: the tests give you graded cases, counts and timings. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`segment_table`, `percentile`, `ab_verdict`, `shadow_gate`, `diagnose`, `choose_model`); TypeScript has the camel-case names (`segmentTable`, `abVerdict`, `shadowGate`, `chooseModel`); Java has the same camel-case names as static methods of `EvalKit`; Kotlin has top-level functions. Python and TypeScript use tuples and arrays: a graded case is `(segment, correct)`, a line of the report is `(segment, cases, right, percent, cost)`, a case run on both versions is `(segment, old_ok, new_ok)` and a model option is `(name, accuracy, p95, cost)`. Java and Kotlin use the records and data classes shown in the starter (`Result`, `Line`, `Paired`, `Gate`, `Option`). The function `pct` (whole percent, half up, integers only) is already written."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working kit with seven small gaps cut out of it. The grouping of the cases by segment, the counting of lost, gained and protected cases and the plumbing of every function are written, and so is `pct`. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks; a gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the lines under the failing case. Write them in this order (the Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_error_cost` unlocks `m1` and `e1`: the wrong answers times the segment's cost, 1 when it has none.",
+        "`_order` unlocks `m1` and `e1`: the costliest segment first, ties by name.",
+        "`percentile` unlocks `e2`: the nearest-rank value of unsorted input.",
+        "`ab_verdict` unlocks `e3` and `e4`: the minimum size, the degenerate pools and the 95 percent test.",
+        "`_decision` unlocks `e5`: ship or hold from the protected losses, the losses and the gains.",
+        "`diagnose` unlocks `e6`: the order of the questions.",
+        "`choose_model` unlocks `e7`: the cheapest option inside both limits."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole kit."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`segment_table(results, costs)` groups the graded cases by segment and returns one line per segment: its cases, its right answers, `pct` of them, and the cost of its errors, which is the number of wrong answers times the segment's entry in `costs` (1 when the segment has no entry). The lines are ordered by cost, the highest first, and by segment name when costs are equal. No results give no lines.",
+        "`percentile(values, p)` is the nearest-rank percentile: sort the values and take the one at rank `ceil(p * n / 100)`, counting from 1. The values may arrive in any order. No values give 0.",
+        "`ab_verdict(x1, n1, x2, n2, min_n=200)` compares the old version (`x1` right of `n1`) with the new one (`x2` of `n2`). If either arm has fewer than `min_n` cases the verdict is `too few cases`. If the pooled number right is 0 or is all of them, it is `no clear difference`. Otherwise it is a two-proportion test at 95 percent, with D = `x2*n1 - x1*n2`, N = `n1 + n2` and X = `x1 + x2`: the difference is clear when `D*D*N*10000` is at least `38416*n1*n2*X*(N-X)` (the square of 1.96, scaled so that only integers are used). A clear difference is `new is better` when D is positive and `old is better` otherwise; anything else is `no clear difference`.",
+        "`shadow_gate(pairs, protected)` takes the cases run on both versions. A case is lost when the old version was right and the new one was not, and gained in the opposite case. Return the decision, the number lost, the number gained and the sorted, distinct protected segments that lost a case. The decision is `hold` when any protected segment lost a case or more cases were lost than gained, and `ship` otherwise.",
+        "`diagnose(found, supported, format_ok, passes_on_stronger)` says where to look first for a wrong answer: `retrieval or data` when the evidence was not found, then `ungrounded answer` when the answer claims what the evidence does not support, then `format instructions` when the reply has the wrong shape, then `prompt or task` when the case fails on a stronger model too, and `model mismatch` otherwise.",
+        "`choose_model(options, min_accuracy, max_p95)` returns the name of the cheapest option whose accuracy is at least `min_accuracy` and whose p95 latency is at most `max_p95`; equal costs are broken by name. When no option qualifies the result is `none`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Report by segment.** *You should see* refunds at the top with the largest error cost, while the overall figure would have looked fine.",
+        "**A default for the unknown.** *You should see* a segment with no price still cost something per error, and an empty set give an empty report.",
+        "**Tails, not means.** *You should see* the 95th percentile of four timings be the slowest one, whatever order they arrived in.",
+        "**Enough cases first.** *You should see* a test with 199 cases in one arm decide nothing.",
+        "**A difference that is not chance.** *You should see* a gap of 28 right answers in 500 cases each called clear and a gap of 21 not called, and both directions named.",
+        "**A gate with two keys.** *You should see* a version held for a protected regression even when its gains match its losses, and held for a net loss in segments that are not protected.",
+        "**A diagnosis order.** *You should see* a case with no evidence sent to retrieval before anybody tunes a prompt.",
+        "**Two limits, then the price.** *You should see* the cheapest model that is both accurate and fast enough, and `none` when nothing is."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A segment table reports accuracy and error cost with the costliest segment first"
+        ],
+        [
+          "`e1`",
+          "A segment with no cost entry costs one per error and no results give an empty table"
+        ],
+        [
+          "`e2`",
+          "A percentile uses the nearest rank and does not need sorted input"
+        ],
+        [
+          "`e3`",
+          "A test with fewer cases than the minimum in either arm decides nothing"
+        ],
+        [
+          "`e4`",
+          "A difference is called only when it clears the 95 percent bar and the better side is named"
+        ],
+        [
+          "`e5`",
+          "A shadow run is held for a regression in a protected segment or for more losses than gains"
+        ],
+        [
+          "`e6`",
+          "Diagnosis checks the evidence, then the grounding, then the format, then the stronger model"
+        ],
+        [
+          "`e7`",
+          "Model choice takes the cheapest option that meets the accuracy floor and the latency limit"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Evaluation kit: a report by segment, a latency percentile, an A/B verdict, a shadow-run gate, a diagnosis order and a model choice under limits. See ../../statement.md.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef pct(part, whole):\n    return (200 * part + whole) // (2 * whole) if whole else 0\n\n\ndef _error_cost(wrong, segment, costs):\n    return wrong * costs.get(segment, 1)\n\n\ndef _order(table):\n    return sorted(table, key=lambda t: (-t[4], t[0]))\n\n\ndef segment_table(results, costs):\n    log.debug(\"segment_table input: %r\", results)\n    seen = {}\n    for segment, correct in results:\n        total, right = seen.get(segment, (0, 0))\n        seen[segment] = (total + 1, right + (1 if correct else 0))\n    return _order([(s, n, r, pct(r, n), _error_cost(n - r, s, costs)) for s, (n, r) in seen.items()])\n\n\ndef percentile(values, p):\n    ordered = sorted(values)\n    return ordered[(p * len(ordered) + 99) // 100 - 1] if ordered else 0\n\n\ndef ab_verdict(x1, n1, x2, n2, min_n=200):\n    if n1 < min_n or n2 < min_n:\n        return \"too few cases\"\n    big_n, x = n1 + n2, x1 + x2\n    if x == 0 or x == big_n:\n        return \"no clear difference\"\n    d = x2 * n1 - x1 * n2\n    if d * d * big_n * 10000 < 38416 * n1 * n2 * x * (big_n - x):\n        return \"no clear difference\"\n    return \"new is better\" if d > 0 else \"old is better\"\n\n\ndef _decision(blocked, lost, gained):\n    return \"ship\" if not blocked and lost <= gained else \"hold\"\n\n\ndef shadow_gate(pairs, protected):\n    lost = [s for s, old_ok, new_ok in pairs if old_ok and not new_ok]\n    gained = [s for s, old_ok, new_ok in pairs if new_ok and not old_ok]\n    blocked = sorted({s for s in lost if s in protected})\n    return {\"decision\": _decision(blocked, len(lost), len(gained)), \"lost\": len(lost), \"gained\": len(gained), \"blocked\": blocked}\n\n\ndef diagnose(found, supported, format_ok, passes_on_stronger):\n    if not found:\n        return \"retrieval or data\"\n    if not supported:\n        return \"ungrounded answer\"\n    if not format_ok:\n        return \"format instructions\"\n    if not passes_on_stronger:\n        return \"prompt or task\"\n    return \"model mismatch\"\n\n\ndef choose_model(options, min_accuracy, max_p95):\n    fit = [o for o in options if o[1] >= min_accuracy and o[2] <= max_p95]\n    return min(fit, key=lambda o: (o[3], o[0]))[0] if fit else \"none\"\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom evalkit import ab_verdict, choose_model, segment_table, shadow_gate\n\n# Results of an evaluation as (segment, correct) rows; a wrong refund costs more than a wrong order status.\nCOSTS = {\"order status\": 1, \"refund\": 20, \"policy\": 5}\nresults = [(\"order status\", True)] * 30 + [(\"refund\", True)] * 5 + [(\"refund\", False)] * 3 + [(\"policy\", True)] * 9 + [(\"policy\", False)]\nprint(\"segments:\", segment_table(results, COSTS))\n\n# The same cases under the old and the new prompt: a gain in one segment must not hide a loss in a protected one.\npairs = [(\"refund\", True, False), (\"policy\", False, True), (\"policy\", False, True), (\"order status\", True, True)]\nprint(\"shadow gate:\", shadow_gate(pairs, {\"refund\"}))\nprint(\"A/B verdict:\", ab_verdict(100, 200, 160, 200))\n\n# The cheapest model that is accurate and fast enough: (name, accuracy, p95 latency, cost).\nprint(\"model:\", choose_model([(\"small\", 88, 900, 1), (\"medium\", 94, 1500, 3), (\"large\", 97, 4000, 9)], 90, 2000))\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Evaluation kit: a report by segment, a latency percentile, an A/B verdict, a shadow-run gate, a diagnosis order and a model choice under limits. See ../../statement.md.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef pct(part, whole):\n    \"\"\"Whole percent, half up, integers only (written for you).\"\"\"\n    return (200 * part + whole) // (2 * whole) if whole else 0\n\n\ndef _error_cost(wrong, segment, costs):\n    \"\"\"TODO 1 of 7 (unlocks m1 and e1): the cost of the wrong answers of one segment.\n\n    Receives the number of wrong answers, the segment name and the costs by segment. Returns wrong times the segment's cost, 1 when the\n    segment has no entry. Example: _error_cost(3, \"refund\", {\"refund\": 20}) -> 60, _error_cost(2, \"odd\", {\"refund\": 20}) -> 2\n    \"\"\"\n    return 0\n\n\ndef _order(table):\n    \"\"\"TODO 2 of 7 (unlocks m1 and e1): order the report lines.\n\n    Receives the lines (segment, cases, right, percent, cost). Returns them with the highest cost first and equal costs by segment name.\n    Example: _order([(\"a\", 1, 1, 100, 0), (\"b\", 2, 1, 50, 5)]) -> [(\"b\", 2, 1, 50, 5), (\"a\", 1, 1, 100, 0)]\n    \"\"\"\n    return table\n\n\ndef segment_table(results, costs):\n    log.debug(\"segment_table input: %r\", results)\n    seen = {}\n    for segment, correct in results:\n        total, right = seen.get(segment, (0, 0))\n        seen[segment] = (total + 1, right + (1 if correct else 0))\n    return _order([(s, n, r, pct(r, n), _error_cost(n - r, s, costs)) for s, (n, r) in seen.items()])\n\n\ndef percentile(values, p):\n    \"\"\"TODO 3 of 7 (unlocks e2): the nearest-rank percentile.\n\n    Receives the values in any order and p from 1 to 100. Returns the value at rank ceil(p * n / 100) of the sorted values, counting from 1,\n    and 0 for no values. Example: percentile([4800, 800, 1000, 900], 95) -> 4800\n    \"\"\"\n    return -1\n\n\ndef ab_verdict(x1, n1, x2, n2, min_n=200):\n    \"\"\"TODO 4 of 7 (unlocks e3 and e4): the A/B verdict at 95 percent.\n\n    Receives the right answers and cases of the old version (x1 of n1) and the new one (x2 of n2). Returns `too few cases` when an arm has\n    fewer than min_n cases, `no clear difference` when the pooled right answers are 0 or all, otherwise the integer test from the statement:\n    `new is better`, `old is better` or `no clear difference`. Example: ab_verdict(410, 500, 438, 500) -> \"new is better\"\n    \"\"\"\n    return \"\"\n\n\ndef _decision(blocked, lost, gained):\n    \"\"\"TODO 5 of 7 (unlocks e5): ship or hold.\n\n    Receives the protected segments that lost, the number lost and the number gained. Returns `hold` when a protected segment lost or more\n    were lost than gained, `ship` otherwise. Example: _decision([], 2, 2) -> \"ship\", _decision([\"refund\"], 1, 5) -> \"hold\"\n    \"\"\"\n    return \"\"\n\n\ndef shadow_gate(pairs, protected):\n    lost = [s for s, old_ok, new_ok in pairs if old_ok and not new_ok]\n    gained = [s for s, old_ok, new_ok in pairs if new_ok and not old_ok]\n    blocked = sorted({s for s in lost if s in protected})\n    return {\"decision\": _decision(blocked, len(lost), len(gained)), \"lost\": len(lost), \"gained\": len(gained), \"blocked\": blocked}\n\n\ndef diagnose(found, supported, format_ok, passes_on_stronger):\n    \"\"\"TODO 6 of 7 (unlocks e6): where to look first for a wrong answer.\n\n    Receives four booleans. Returns `retrieval or data` when the evidence was not found, then `ungrounded answer` when it is not supported,\n    then `format instructions` when the format is wrong, then `prompt or task` when it fails on a stronger model, else `model mismatch`.\n    Example: diagnose(True, True, False, True) -> \"format instructions\"\n    \"\"\"\n    return \"\"\n\n\ndef choose_model(options, min_accuracy, max_p95):\n    \"\"\"TODO 7 of 7 (unlocks e7): the cheapest model that meets both limits.\n\n    Receives options (name, accuracy, p95, cost). Returns the name of the cheapest one with accuracy >= min_accuracy and p95 <= max_p95,\n    equal costs by name, or `none`. Example: choose_model([(\"a\", 90, 100, 2)], 95, 100) -> \"none\"\n    \"\"\"\n    return \"\"\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom evalkit import ab_verdict, choose_model, segment_table, shadow_gate\n\n# Results of an evaluation as (segment, correct) rows; a wrong refund costs more than a wrong order status.\nCOSTS = {\"order status\": 1, \"refund\": 20, \"policy\": 5}\nresults = [(\"order status\", True)] * 30 + [(\"refund\", True)] * 5 + [(\"refund\", False)] * 3 + [(\"policy\", True)] * 9 + [(\"policy\", False)]\nprint(\"segments:\", segment_table(results, COSTS))\n\n# The same cases under the old and the new prompt: a gain in one segment must not hide a loss in a protected one.\npairs = [(\"refund\", True, False), (\"policy\", False, True), (\"policy\", False, True), (\"order status\", True, True)]\nprint(\"shadow gate:\", shadow_gate(pairs, {\"refund\"}))\nprint(\"A/B verdict:\", ab_verdict(100, 200, 160, 200))\n\n# The cheapest model that is accurate and fast enough: (name, accuracy, p95 latency, cost).\nprint(\"model:\", choose_model([(\"small\", 88, 900, 1), (\"medium\", 94, 1500, 3), (\"large\", 97, 4000, 9)], 90, 2000))\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "2b19fabe96afc49aa26354e0afde31288fb5f512b8b8a39757fed90081319690",
+  "starting_code": "\"\"\"Evaluation kit: a report by segment, a latency percentile, an A/B verdict, a shadow-run gate, a diagnosis order and a model choice under limits. See ../../statement.md.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef pct(part, whole):\n    \"\"\"Whole percent, half up, integers only (written for you).\"\"\"\n    return (200 * part + whole) // (2 * whole) if whole else 0\n\n\ndef _error_cost(wrong, segment, costs):\n    \"\"\"TODO 1 of 7 (unlocks m1 and e1): the cost of the wrong answers of one segment.\n\n    Receives the number of wrong answers, the segment name and the costs by segment. Returns wrong times the segment's cost, 1 when the\n    segment has no entry. Example: _error_cost(3, \"refund\", {\"refund\": 20}) -> 60, _error_cost(2, \"odd\", {\"refund\": 20}) -> 2\n    \"\"\"\n    return 0\n\n\ndef _order(table):\n    \"\"\"TODO 2 of 7 (unlocks m1 and e1): order the report lines.\n\n    Receives the lines (segment, cases, right, percent, cost). Returns them with the highest cost first and equal costs by segment name.\n    Example: _order([(\"a\", 1, 1, 100, 0), (\"b\", 2, 1, 50, 5)]) -> [(\"b\", 2, 1, 50, 5), (\"a\", 1, 1, 100, 0)]\n    \"\"\"\n    return table\n\n\ndef segment_table(results, costs):\n    log.debug(\"segment_table input: %r\", results)\n    seen = {}\n    for segment, correct in results:\n        total, right = seen.get(segment, (0, 0))\n        seen[segment] = (total + 1, right + (1 if correct else 0))\n    return _order([(s, n, r, pct(r, n), _error_cost(n - r, s, costs)) for s, (n, r) in seen.items()])\n\n\ndef percentile(values, p):\n    \"\"\"TODO 3 of 7 (unlocks e2): the nearest-rank percentile.\n\n    Receives the values in any order and p from 1 to 100. Returns the value at rank ceil(p * n / 100) of the sorted values, counting from 1,\n    and 0 for no values. Example: percentile([4800, 800, 1000, 900], 95) -> 4800\n    \"\"\"\n    return -1\n\n\ndef ab_verdict(x1, n1, x2, n2, min_n=200):\n    \"\"\"TODO 4 of 7 (unlocks e3 and e4): the A/B verdict at 95 percent.\n\n    Receives the right answers and cases of the old version (x1 of n1) and the new one (x2 of n2). Returns `too few cases` when an arm has\n    fewer than min_n cases, `no clear difference` when the pooled right answers are 0 or all, otherwise the integer test from the statement:\n    `new is better`, `old is better` or `no clear difference`. Example: ab_verdict(410, 500, 438, 500) -> \"new is better\"\n    \"\"\"\n    return \"\"\n\n\ndef _decision(blocked, lost, gained):\n    \"\"\"TODO 5 of 7 (unlocks e5): ship or hold.\n\n    Receives the protected segments that lost, the number lost and the number gained. Returns `hold` when a protected segment lost or more\n    were lost than gained, `ship` otherwise. Example: _decision([], 2, 2) -> \"ship\", _decision([\"refund\"], 1, 5) -> \"hold\"\n    \"\"\"\n    return \"\"\n\n\ndef shadow_gate(pairs, protected):\n    lost = [s for s, old_ok, new_ok in pairs if old_ok and not new_ok]\n    gained = [s for s, old_ok, new_ok in pairs if new_ok and not old_ok]\n    blocked = sorted({s for s in lost if s in protected})\n    return {\"decision\": _decision(blocked, len(lost), len(gained)), \"lost\": len(lost), \"gained\": len(gained), \"blocked\": blocked}\n\n\ndef diagnose(found, supported, format_ok, passes_on_stronger):\n    \"\"\"TODO 6 of 7 (unlocks e6): where to look first for a wrong answer.\n\n    Receives four booleans. Returns `retrieval or data` when the evidence was not found, then `ungrounded answer` when it is not supported,\n    then `format instructions` when the format is wrong, then `prompt or task` when it fails on a stronger model, else `model mismatch`.\n    Example: diagnose(True, True, False, True) -> \"format instructions\"\n    \"\"\"\n    return \"\"\n\n\ndef choose_model(options, min_accuracy, max_p95):\n    \"\"\"TODO 7 of 7 (unlocks e7): the cheapest model that meets both limits.\n\n    Receives options (name, accuracy, p95, cost). Returns the name of the cheapest one with accuracy >= min_accuracy and p95 <= max_p95,\n    equal costs by name, or `none`. Example: choose_model([(\"a\", 90, 100, 2)], 95, 100) -> \"none\"\n    \"\"\"\n    return \"\"\n",
+  "exercise": {
+    "main_path": "practice/level-4/88-evaluation-and-optimisation/prose/unit-02/practice-1/evalkit.py",
+    "test_path": "practice/level-4/88-evaluation-and-optimisation/prose/unit-02/practice-1/test_evalkit.py",
+    "run_command": [
+      "python3",
+      "practice/level-4/88-evaluation-and-optimisation/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-4/88-evaluation-and-optimisation/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-4/88-evaluation-and-optimisation/prose/unit-02/practice-1/test_evalkit.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_a_segment_table_reports_accuracy_and_error_cost_with_the_costliest_segment_first",
+        "kind": "main",
+        "says": "A segment table reports accuracy and error cost with the costliest segment first"
+      },
+      {
+        "id": "test_e1_a_segment_with_no_cost_entry_costs_one_per_error_and_no_results_give_an_empty_table",
+        "kind": "edge",
+        "says": "A segment with no cost entry costs one per error and no results give an empty table"
+      },
+      {
+        "id": "test_e2_a_percentile_uses_the_nearest_rank_and_does_not_need_sorted_input",
+        "kind": "edge",
+        "says": "A percentile uses the nearest rank and does not need sorted input"
+      },
+      {
+        "id": "test_e3_a_test_with_fewer_cases_than_the_minimum_in_either_arm_decides_nothing",
+        "kind": "edge",
+        "says": "A test with fewer cases than the minimum in either arm decides nothing"
+      },
+      {
+        "id": "test_e4_a_difference_is_called_only_when_it_clears_the_95_percent_bar_and_the_better_side_is_named",
+        "kind": "edge",
+        "says": "A difference is called only when it clears the 95 percent bar and the better side is named"
+      },
+      {
+        "id": "test_e5_a_shadow_run_is_held_for_a_regression_in_a_protected_segment_or_for_more_losses_than_gains",
+        "kind": "edge",
+        "says": "A shadow run is held for a regression in a protected segment or for more losses than gains"
+      },
+      {
+        "id": "test_e6_diagnosis_checks_the_evidence_then_the_grounding_then_the_format_then_the_stronger_model",
+        "kind": "edge",
+        "says": "Diagnosis checks the evidence, then the grounding, then the format, then the stronger model"
+      },
+      {
+        "id": "test_e7_model_choice_takes_the_cheapest_option_that_meets_the_accuracy_floor_and_the_latency_limit",
+        "kind": "edge",
+        "says": "Model choice takes the cheapest option that meets the accuracy floor and the latency limit"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-4/88-evaluation-and-optimisation/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/88-evaluation-and-optimisation/02-changing-safely-diagnosing-and-the-practice.md",
+    "concepts": [
+      "the practice of Changing safely, diagnosing a wrong answer and the practice is solved"
+    ],
+    "files": [
+      "practice/level-4/88-evaluation-and-optimisation/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "evaluation-and-optimisation-u2"
+}

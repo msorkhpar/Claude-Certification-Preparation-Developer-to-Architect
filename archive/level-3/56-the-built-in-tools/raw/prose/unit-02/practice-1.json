@@ -1,0 +1,336 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "56-the-built-in-tools"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: set up a read-mostly explorer for an unfamiliar codebase (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: set up a read-mostly explorer for an unfamiliar codebase"
+    },
+    {
+      "type": "para",
+      "text": "A developer-productivity agent has to explore a service nobody on the team knows: find where things start, follow imports, trace a function through wrapper modules and write down what it learns. It may read and search anything except the secrets, it may write notes, and it must not change the source or run commands that change anything. All of that is plain files. In this practice you write them for a small service, the inventory service, and the tests read the project the way Claude Code would. The tests are the same in all four languages and read only the files: they are configuration and notes, not code in a language, and the Java and Kotlin tests read the JSON with Jackson and the agent's YAML front matter with its YAML module. The checks run on the course's own models of the documented rules (`examples/38-settings-layers` for permission rules and `examples/56-builtin-tools` for the tools, in your language). Nothing here starts Claude Code or touches the network."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working set of configuration files with six gaps cut out of it. Everything that is plumbing is written and correct: the structure of the permissions file and of the options file, the agent's name and instructions, and the plan's opening paragraph, its first, second and last steps and its headings. Each gap is a spot in one file that holds a neutral value (an empty list, an empty text, a literal where a reference belongs) or a comment that says what goes there, and the list below names the file, the rule and the case it unlocks. The starter is read by the same tests, so it fails the cases on an assertion until you fill the gaps. These tests read files, not code, so there is no function to log from: read the failure message under the case, which names the file and the rule. Write the gaps in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "The allow rules, in `.claude/settings.json` (unlocks `m1`, `e2`): the read-only git commands `git log` and `git diff` with any arguments and `git status`, and edits under `notes/` written as `Edit(notes/**)`; the starter allows the whole `Bash` tool and writes a path rule for `Write`, which are never right.",
+        "The deny rules, in `.claude/settings.json` (unlocks `m1`, `e1`): reading `.env` and everything under `secrets/` written as `Read(...)` rules, and edits under `src/`.",
+        "The agent, in `.claude/agents/explorer.md` (unlocks `e3`): a `description` that starts a sentence with `Use when`, a `tools` line with `Read, Grep, Glob` and nothing else, a `model` and a `maxTurns` of at most 15.",
+        "The SDK options, in `agent-options.json` (unlocks `e4`): `tools` and `allowedTools` hold `Read`, `Grep` and `Glob`; `disallowedTools` holds `Bash`, `Edit` and `Write` by bare name.",
+        "The exploration steps, in `docs/exploration-plan.md` (unlocks `e5`): step 3 reads the entry point files with `Read` and follows imports one hop at a time; step 4 lists the names each wrapper module exports and searches for each with `Grep` before tracing usage.",
+        "The edit remedies, in `docs/exploration-plan.md` (unlocks `e6`, `e7`): three numbered remedies in this order: more surrounding lines, `replace_all`, then `Read` the whole file and `Write` it back; and no personal path in the file."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gaps 1 and 2. About five lines in all, in the files of your language folder (the four folders hold the same files). The steps below describe the whole set, so you can see how your gaps are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`.claude/settings.json`, the shared permissions:",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "allow the read-only git commands `git log` and `git diff` (with any arguments) and `git status`, and allow edits under `notes/`;",
+              "deny reading `.env` and everything under `secrets/`, and deny edits under `src/`;",
+              "nothing else. Use only the rule forms that are consulted: a path rule for `Write` is never matched (write it as `Edit(...)`), the search tools take their path rules as `Read(...)`, and a bare `Bash` allow rule approves every command."
+            ]
+          }
+        ],
+        "`.claude/agents/explorer.md`: a subagent named `explorer` with a `description` that starts a sentence with `Use when`, `tools` listing `Read`, `Grep` and `Glob` and nothing else, a `model`, a `maxTurns` of at most 15, and a body with its instructions.",
+        "`agent-options.json`: the options an SDK application passes to the same agent: `tools` with the three tools, `allowedTools` pre-approving them, and `disallowedTools` listing `Bash`, `Edit` and `Write` by bare name. On macOS, Linux and WSL, `Grep` and `Glob` are not in the default tool set; naming them is what makes them available.",
+        [
+          "`docs/exploration-plan.md`: how the agent explores, in two parts.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "A short paragraph that says not to read every file first, then a numbered list: find entry points with `Grep`, find files by name with `Glob` (give a pattern in backticks), read the entry files with `Read` and follow imports one hop at a time, list the names each wrapper module exports and search for each exported name with `Grep` before tracing usage, and write findings to `notes/findings.md`.",
+              "Under the heading `## When an edit does not apply`, three numbered remedies in this order: repeat the text with more surrounding lines until it is unique; use `replace_all` when every occurrence should change; and as a last resort `Read` the whole file and `Write` it back with the change."
+            ]
+          }
+        ],
+        "No file holds a personal path, an email address or a key. (The starter has a personal path; find it.)"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Permission rules for an explorer.** The exam asks how permissions bound the built-in tools. *You should see* reading and searching allowed, edits under `src/` denied, notes allowed, anything else asking, and no whole tool approved.",
+        "**A read rule covers more than Read.** A `Read(...)` deny also stops `Grep` and `Glob` from searching that path and stops `Edit` and `Write` from changing it. *You should see* eight calls on secrets and the environment file all denied, in every tool.",
+        "**Only the forms that are consulted.** A rule that is never matched protects nothing. *You should see* no `Write(...)` or `Grep(...)` path rule and no bare allow.",
+        "**The agent's tool list.** Least privilege for a subagent is a list. *You should see* three tools, a sentence that says when to use the agent, and a turn limit.",
+        "**The options of an SDK application.** `allowedTools` pre-approves and does not restrict; `tools` and a bare name in `disallowedTools` decide what exists. *You should see* the tool set resolve to exactly Read, Grep and Glob on Linux.",
+        "**Incremental exploration.** The exam asks for a search for entry points, then reads that follow imports, and a search for each exported name when tracing through wrappers, in place of reading everything upfront. *You should see* the plan's order checked step by step.",
+        "**When Edit cannot apply.** Edit needs one exact match. *You should see* the remedies in the order of how little they risk: a longer anchor, `replace_all`, and the whole-file rewrite last."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Thirteen sample calls get the right answer from your rules: read and search freely, notes yes, source no"
+        ],
+        [
+          "`e1`",
+          "A read rule protects secrets from reading, searching and writing"
+        ],
+        [
+          "`e2`",
+          "Only rule forms that are consulted, and no whole tool that changes things allowed"
+        ],
+        [
+          "`e3`",
+          "The explorer agent reads and searches, says when to use it and is bounded"
+        ],
+        [
+          "`e4`",
+          "The SDK options make the search tools available and remove the tools that change things"
+        ],
+        [
+          "`e5`",
+          "The plan starts with a search, then reads, and never reads everything first"
+        ],
+        [
+          "`e6`",
+          "The edit remedies come in order: longer anchor, replace_all, whole-file rewrite"
+        ],
+        [
+          "`e7`",
+          "No file holds a personal path, an address or a key"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "{\n  \"permissions\": {\n    \"allow\": [\"Bash(git log *)\", \"Bash(git diff *)\", \"Bash(git status)\", \"Edit(notes/**)\"],\n    \"deny\": [\"Read(./.env)\", \"Read(secrets/**)\", \"Edit(src/**)\"]\n  }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.claude/agents/explorer.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "---\nname: explorer\ndescription: Use when a question is about how unfamiliar code is organised or where a name is used. Reads and searches the repository and reports what it found with file paths; it never edits files or runs commands.\ntools: Read, Grep, Glob\nmodel: sonnet\nmaxTurns: 12\n---\nYou explore the inventory service and answer questions about it. Start from a search, follow what you find, and report each claim with the file and line it\ncomes from. Say plainly when something could not be found.\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/agent-options.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"tools\": [\"Read\", \"Grep\", \"Glob\"],\n  \"allowedTools\": [\"Read\", \"Grep\", \"Glob\"],\n  \"disallowedTools\": [\"Bash\", \"Edit\", \"Write\"]\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/docs/exploration-plan.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "# Exploring an unfamiliar service\n\nDo not read every file first. Build the picture in small steps, and let each result choose the next one.\n\n1. Find the entry points with Grep: search for `def main`, route decorators and the names of command handlers.\n2. Find files by their names with Glob, for example `**/*_test.py` or `src/**/handlers/*.py`.\n3. Read the entry point files in full with Read, then follow their imports one hop at a time.\n4. Before tracing a function through wrapper modules, list the names each wrapper exports, then search the repository for each exported name with Grep.\n5. Write what you learn to `notes/findings.md`, with the file and line for every claim.\n\n## When an edit does not apply\n\n1. If Edit says the text appears more than once, repeat it with more surrounding lines until it is unique.\n2. If every occurrence should change, use replace_all.\n3. If no unique anchor exists, Read the whole file and Write it back with the change.\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "{\n  \"permissions\": {\n    \"allow\": [\"Bash\", \"Write(notes/**)\"],\n    \"deny\": []\n  }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.claude/agents/explorer.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "---\nname: explorer\ndescription: Explores code.\n---\nYou explore the inventory service and answer questions about it. Start from a search, follow what you find, and report each claim with the file and line it\ncomes from. Say plainly when something could not be found.\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/agent-options.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"tools\": [],\n  \"allowedTools\": [],\n  \"disallowedTools\": []\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/docs/exploration-plan.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "# Exploring an unfamiliar service\n\nDo not read every file first. Build the picture in small steps, and let each result choose the next one.\n\n1. Find the entry points with Grep: search for `def main`, route decorators and the names of command handlers.\n2. Find files by their names with Glob, for example `**/*_test.py` or `src/**/handlers/*.py`.\n<!-- TODO 5 of 6 (finish this to pass e5): steps 3 and 4. Step 3 reads the entry point files in full with Read and follows their imports one hop at a time. Step 4 lists the names each wrapper module exports and searches the repository for each exported name with Grep before tracing a function through the wrappers. -->\n5. Write what you learn to `notes/findings.md`, with the file and line for every claim.\n\n## When an edit does not apply\n\n<!-- TODO 6 of 6 (finish this to pass e6): three numbered remedies, in this order: repeat the text with more surrounding lines until it is unique; use replace_all when every occurrence should change; and as a last resort Read the whole file and Write it back with the change. Remove the personal path below for e7. -->\nThe author's clone was at /home/dev/inventory.\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 6,
+    "code": 4,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "309b751638513f318714d49f6425688960afeaacdd673428850b934cbc730c73",
+  "starting_code": "{\n  \"permissions\": {\n    \"allow\": [\"Bash\", \"Write(notes/**)\"],\n    \"deny\": []\n  }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-1/project/.claude/settings.json",
+    "test_path": "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-1/tests/test_explorer_setup.py",
+    "run_command": [
+      "python3",
+      "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-1/check_files.py",
+      "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-1/project/.claude/agents/explorer.md",
+      "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-1/project/.claude/settings.json",
+      "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-1/project/agent-options.json",
+      "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-1/project/docs/exploration-plan.md"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-3/56-the-built-in-tools/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-1/tests/test_explorer_setup.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_the_permission_rules_let_an_explorer_read_search_and_take_notes_but_not_change_the_source",
+        "kind": "main",
+        "says": "Thirteen sample calls get the right answer from your rules: read and search freely, notes yes, source no"
+      },
+      {
+        "id": "test_e1_a_read_rule_protects_secrets_from_reading_searching_and_writing",
+        "kind": "edge",
+        "says": "A read rule protects secrets from reading, searching and writing"
+      },
+      {
+        "id": "test_e2_only_rule_forms_that_are_consulted_are_used_and_no_whole_tool_that_changes_things_is_allowed",
+        "kind": "edge",
+        "says": "Only rule forms that are consulted, and no whole tool that changes things allowed"
+      },
+      {
+        "id": "test_e3_the_explorer_agent_reads_and_searches_and_says_when_to_use_it",
+        "kind": "edge",
+        "says": "The explorer agent reads and searches, says when to use it and is bounded"
+      },
+      {
+        "id": "test_e4_the_sdk_options_make_the_search_tools_available_and_remove_the_tools_that_change_things",
+        "kind": "edge",
+        "says": "The SDK options make the search tools available and remove the tools that change things"
+      },
+      {
+        "id": "test_e5_the_exploration_plan_starts_with_a_search_then_reads_and_never_reads_everything_first",
+        "kind": "edge",
+        "says": "The plan starts with a search, then reads, and never reads everything first"
+      },
+      {
+        "id": "test_e6_the_edit_fallback_widens_the_anchor_then_replaces_all_then_rewrites_the_file",
+        "kind": "edge",
+        "says": "The edit remedies come in order: longer anchor, replace_all, whole-file rewrite"
+      },
+      {
+        "id": "test_e7_no_file_holds_a_personal_path_an_address_or_a_key",
+        "kind": "edge",
+        "says": "No file holds a personal path, an address or a key"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/56-the-built-in-tools/02-permissions-exploring-a-codebase-and-the-practice.md",
+    "concepts": [
+      "the practice of Permissions that bound the tools, exploring a codebase and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-1/project/.claude/agents/explorer.md",
+      "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-1/project/agent-options.json",
+      "practice/level-3/56-the-built-in-tools/prose/unit-02/practice-1/project/docs/exploration-plan.md"
+    ]
+  },
+  "lang": "python",
+  "edition": "the-built-in-tools-u2"
+}

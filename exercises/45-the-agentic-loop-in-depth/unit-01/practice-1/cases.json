@@ -1,0 +1,103 @@
+{
+  "practice": "45-the-agentic-loop-in-depth/unit-01/practice-1",
+  "name": "agent",
+  "tests": {
+    "java": "AgentLoopTest",
+    "kotlin": "AgentLoopTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_a_run_alternates_model_and_tools_until_the_model_ends_its_turn",
+      "typescript": "m1 a run alternates model and tools until the model ends its turn",
+      "java": "m1_aRunAlternatesModelAndToolsUntilTheModelEndsItsTurn",
+      "kotlin": "m1_aRunAlternatesModelAndToolsUntilTheModelEndsItsTurn"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_the_stop_reason_decides_and_the_words_of_the_text_do_not",
+      "typescript": "e1 the stop reason decides and the words of the text do not",
+      "java": "e1_theStopReasonDecidesAndTheWordsOfTheTextDoNot",
+      "kotlin": "e1_theStopReasonDecidesAndTheWordsOfTheTextDoNot"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_every_call_of_a_turn_is_answered_in_one_user_message_in_order",
+      "typescript": "e2 every call of a turn is answered in one user message in order",
+      "java": "e2_everyCallOfATurnIsAnsweredInOneUserMessageInOrder",
+      "kotlin": "e2_everyCallOfATurnIsAnsweredInOneUserMessageInOrder"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_a_failing_or_unknown_tool_becomes_an_error_result_and_the_run_goes_on",
+      "typescript": "e3 a failing or unknown tool becomes an error result and the run goes on",
+      "java": "e3_aFailingOrUnknownToolBecomesAnErrorResultAndTheRunGoesOn",
+      "kotlin": "e3_aFailingOrUnknownToolBecomesAnErrorResultAndTheRunGoesOn"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_the_turn_limit_is_a_backstop_that_ends_only_a_run_the_model_has_not_ended",
+      "typescript": "e4 the turn limit is a backstop that ends only a run the model has not ended",
+      "java": "e4_theTurnLimitIsABackstopThatEndsOnlyARunTheModelHasNotEnded",
+      "kotlin": "e4_theTurnLimitIsABackstopThatEndsOnlyARunTheModelHasNotEnded"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_cut_off_or_refused_reply_ends_the_run_with_its_own_status",
+      "typescript": "e5 a cut off or refused reply ends the run with its own status",
+      "java": "e5_aCutOffOrRefusedReplyEndsTheRunWithItsOwnStatus",
+      "kotlin": "e5_aCutOffOrRefusedReplyEndsTheRunWithItsOwnStatus"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_a_tool_use_reply_without_a_tool_call_is_malformed_and_sends_nothing_more",
+      "typescript": "e6 a tool use reply without a tool call is malformed and sends nothing more",
+      "java": "e6_aToolUseReplyWithoutAToolCallIsMalformedAndSendsNothingMore",
+      "kotlin": "e6_aToolUseReplyWithoutAToolCallIsMalformedAndSendsNothingMore"
+    }
+  },
+  "plants": {
+    "wrong-text-marker": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "ends the run when the text says done, even if the reply also calls a tool"
+    },
+    "wrong-cap-reports-done": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "reports a run that hit the turn limit as done"
+    },
+    "wrong-cap-off-by-one": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "allows one model call more than the turn limit"
+    },
+    "wrong-assistant-trimmed": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "keeps only the tool calls of an assistant turn and drops its text"
+    },
+    "wrong-error-without-flag": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "sends a failing tool's message back as an ordinary result"
+    },
+    "wrong-truncated-is-done": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "treats a reply cut off by max_tokens as a finished one"
+    },
+    "wrong-malformed-continues": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "reports a tool use reply without a tool call as an unexpected stop reason"
+    }
+  }
+}

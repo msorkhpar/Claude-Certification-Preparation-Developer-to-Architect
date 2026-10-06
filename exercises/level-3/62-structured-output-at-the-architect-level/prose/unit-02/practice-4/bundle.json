@@ -1,0 +1,100 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "62-structured-output-at-the-architect-level"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 4,
+  "title": "Practice: an extraction pipeline that admits absence, checks what a schema cannot, retries with feedback and is measured on every document (Kotlin)",
+  "lang": "kotlin",
+  "main_file": "src/main/kotlin/Extraction.kt",
+  "files": [
+    "src/main/kotlin/TryIt.kt"
+  ],
+  "test_file": "src/test/kotlin/ExtractionTest.kt",
+  "build": [
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-4",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-4",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_aDocumentWithEveryValuePresentAndQuotedComesBackValidOnTheFirstAttempt()",
+      "kind": "main",
+      "says": "A document with every value present and quoted comes back valid on the first attempt"
+    },
+    {
+      "id": "e1_aValueTheDocumentDoesNotGiveIsNullAndNeedsNoQuoteWhileAnInventedValueFailsAsUngrounded()",
+      "kind": "edge",
+      "says": "A value the document does not give is null and needs no quote, while an invented value fails as ungrounded"
+    },
+    {
+      "id": "e2_aRetryCarriesTheOriginalDocumentTheFailedRecordAndOnlyTheErrorsASecondLookCanFix()",
+      "kind": "edge",
+      "says": "A retry carries the document, the failed record and only the errors a second look can fix"
+    },
+    {
+      "id": "e3_aRequiredValueThatTheModelReportsAsAbsentIsNotRetriedAndGoesToReview()",
+      "kind": "edge",
+      "says": "A required value reported as absent is not retried and goes to review"
+    },
+    {
+      "id": "e4_retriesStopAfterTheLimitAndTheDocumentIsMarkedFailed()",
+      "kind": "edge",
+      "says": "Retries stop after the limit and the document is marked failed"
+    },
+    {
+      "id": "e5_aTotalThatDiffersFromTheLineItemsIsASemanticErrorAndAFlaggedConflictGoesToReviewWithoutARetry()",
+      "kind": "edge",
+      "says": "A total that differs from the line items is a semantic error; a flagged conflict goes to review without a retry"
+    },
+    {
+      "id": "e6_currencyTakesUnclearAndOtherWithADetailAndRejectsAnythingElseAsASyntaxError()",
+      "kind": "edge",
+      "says": "Currency takes unclear and other with a detail, and anything else is a syntax error"
+    },
+    {
+      "id": "e7_chunkResultsMergeByKeepingTheFirstValueAndRecordingAConflictWhenTwoChunksDisagree()",
+      "kind": "edge",
+      "says": "Chunk results merge by keeping the first value and recording a conflict when two chunks disagree"
+    },
+    {
+      "id": "e8_accuracyCountsEveryDocumentAndNotOnlyTheValidatedOnes()",
+      "kind": "edge",
+      "says": "Accuracy counts every document and not only the validated ones"
+    },
+    {
+      "id": "e9_theRequestForcesAToolWhereTheModelAllowsItAndFallsBackToAutoWithAReplyCheckWhereItDoesNot()",
+      "kind": "edge",
+      "says": "The request forces a tool where the model allows it and falls back to auto with a reply check where it does not"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/62-structured-output-at-the-architect-level/02-retries-conflicts-chunks-and-the-practice.md"
+}

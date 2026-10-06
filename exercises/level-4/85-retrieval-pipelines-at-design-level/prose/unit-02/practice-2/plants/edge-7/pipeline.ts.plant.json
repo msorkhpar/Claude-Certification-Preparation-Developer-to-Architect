@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "pipeline.ts",
+      "old": "  return Math.round((hits / entries.length) * 100) / 100;",
+      "new": "  const answered = entries.filter(([q]) => q in results).length;\n  return Math.round((hits / Math.max(1, answered)) * 100) / 100;"
+    }
+  ]
+}

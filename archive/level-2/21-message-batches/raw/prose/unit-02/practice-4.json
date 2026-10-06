@@ -1,0 +1,314 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "21-message-batches"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: submit a batch and handle its results (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: submit a batch and handle its results"
+    },
+    {
+      "type": "para",
+      "text": "A Message Batch takes many Messages requests at half price and returns one result per request, in any order, up to 24 hours later. Write the three functions around it: build the request list, cut a big job into batches, and read the results. The rules come from the Claude documentation on batch processing, read on 2026-10-02; the lesson pages explain them. Nothing here touches the network: results are the lines of the `.jsonl` file the API serves at `results_url`."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given types"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "item",
+          "`{\"id\": <your key>, \"params\": <a Messages request body>}`"
+        ],
+        [
+          "request",
+          "`{\"custom_id\": ..., \"params\": ...}`, one element of a batch's `requests`"
+        ],
+        [
+          "result line",
+          "one line of JSON: `{\"custom_id\": ..., \"result\": {...}}` where `result.type` is `succeeded` (with `message`, whose `content` blocks and `usage` are those of a normal reply), `errored` (with `error.error.type`, such as `invalid_request_error` or `overloaded_error`), `canceled` or `expired`"
+        ],
+        [
+          "`BatchError`",
+          "the error to raise: `field` names the offending part (`custom_id`, `params.max_tokens`, `params.stream`, `params.speed` or `size`)"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working batch tool with six gaps cut out of it. Everything that is plumbing is written and correct: the constants, `BatchError`, the loops of the three functions, the size measure, the parsing of the result lines, the matching by custom id, the outcome of every kind of result, and the assembling of the answer. Each gap is a small function with its signature, a comment that says what it receives and returns, one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. Python names them with a leading underscore; TypeScript, Java and Kotlin use camel case without it (`checkCustomId`, `mustStartNew`). Write them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_check_custom_id` unlocks `e1`: the pattern, and an id used twice.",
+        "`_check_params` unlocks `e2`: `max_tokens`, `stream` and `speed`.",
+        "`_must_start_new` unlocks `e3`: when the next request opens a new batch, by count or by size.",
+        "`_keep_result` unlocks `m1` and `e5`: a result is filed by its custom id, a stranger is reported, the first result wins.",
+        "`_needs_fix` unlocks `e4`: which error type is fixed and which is retried.",
+        "`_add_usage` unlocks `e6`: the four usage sums."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About fifteen lines in all. To see what a gap receives, log its input with the `log` line at the top of the file: `build_requests` already logs its input at debug level, and a run shows the logged lines under the failing case."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "`build_requests(items)` (TypeScript `buildRequests`, Java `Batches.buildRequests`, Kotlin `buildRequests`)"
+    },
+    {
+      "type": "para",
+      "text": "Return the requests, one per item, `custom_id` being the item's id, in the same order. Raise `BatchError` when:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "an id is not 1 to 64 characters of letters, digits, hyphens and underscores (`custom_id`), or is used twice (`custom_id`);",
+        "`max_tokens` is missing or below 1 (`params.max_tokens`);",
+        "`stream` is true (`params.stream`) or `speed` is present (`params.speed`)."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "`split_batches(requests, max_requests=100000, max_bytes=268435456)` (TypeScript `splitBatches`, Java `Batches.splitBatches`, Kotlin `splitBatches`)"
+    },
+    {
+      "type": "para",
+      "text": "Cut the requests, in order, into consecutive batches so that no batch holds more than `max_requests` requests or more than `max_bytes` bytes. A request's size is the length in UTF-8 bytes of its compact JSON (no spaces after `,` or `:`). A single request larger than `max_bytes` raises `BatchError` with `size`. An empty list gives an empty list."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "`collect(requests, result_lines)` (TypeScript `collect`, Java `Batches.collect`, Kotlin `collect`)"
+    },
+    {
+      "type": "para",
+      "text": "Return a map with:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`outcomes`: one per request **in request order**, matched by `custom_id` and never by position: `{custom_id, status}` plus `text` (the text blocks joined) and `usage` for `succeeded`, `error_type` for `errored`; a request with no result line has `status` `missing`;",
+        "`retry`: ids worth sending again unchanged, in request order: `expired`, `canceled`, `missing`, and `errored` for any type other than `invalid_request_error`;",
+        "`fix`: ids of `errored` results of type `invalid_request_error`, which fail again until the request is corrected;",
+        "`unknown`: custom ids in the file that no request carries, in file order (they are otherwise ignored);",
+        "`usage`: the sums of `input_tokens`, `output_tokens`, `cache_creation_input_tokens` and `cache_read_input_tokens` over the `succeeded` results only (the other kinds are not billed)."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Blank lines are skipped, and when one custom id appears twice the first result wins."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Results are matched to requests by custom id, not by position"
+        ],
+        [
+          "`e1`",
+          "A custom id is 1 to 64 safe characters and unique"
+        ],
+        [
+          "`e2`",
+          "Parameters a batch cannot take are refused"
+        ],
+        [
+          "`e3`",
+          "A big job is cut in order by request count and by size"
+        ],
+        [
+          "`e4`",
+          "Invalid requests are fixed, the other failures are retried"
+        ],
+        [
+          "`e5`",
+          "A request with no result is missing and retried, and a stranger id is reported"
+        ],
+        [
+          "`e6`",
+          "Only succeeded requests count toward usage"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.lang.System.Logger.Level\n\nprivate val log = System.getLogger(\"batches\")\n\n/** Build, split and read Message Batches. See ../../statement.md for the contract. Requests and results are JSON-like maps. */\n\n/** The batch would be refused. [field] names the offending part. */\nclass BatchError(val field: String, reason: String) : RuntimeException(\"$field: $reason\")\n\nprivate val CUSTOM_ID = Regex(\"^[a-zA-Z0-9_-]{1,64}$\")\nprivate const val MAX_REQUESTS = 100_000\nprivate const val MAX_BYTES = 256L * 1024 * 1024\nprivate val USAGE_KEYS = listOf(\"input_tokens\", \"output_tokens\", \"cache_creation_input_tokens\", \"cache_read_input_tokens\")\n\nprivate fun checkCustomId(id: Any?, seen: MutableSet<String>) {\n    if (id !is String || !CUSTOM_ID.matches(id)) throw BatchError(\"custom_id\", \"$id is not 1 to 64 letters, digits, hyphens or underscores\")\n    if (!seen.add(id)) throw BatchError(\"custom_id\", \"$id is used twice\")\n}\n\nprivate fun checkParams(params: Map<String, Any?>) {\n    val maxTokens = (params[\"max_tokens\"] as Number?)?.toLong() ?: 0L\n    if (maxTokens < 1) throw BatchError(\"params.max_tokens\", \"must be at least 1 inside a batch\")\n    if (params[\"stream\"] == true) throw BatchError(\"params.stream\", \"batch results are a file, not a stream\")\n    if (params.containsKey(\"speed\")) throw BatchError(\"params.speed\", \"fast mode is not available in a batch\")\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun buildRequests(items: List<Map<String, Any?>>): List<Map<String, Any?>> {\n    log.log(Level.DEBUG, \"buildRequests input: {0}\", items)\n    val seen = mutableSetOf<String>()\n    val requests = mutableListOf<Map<String, Any?>>()\n    for (item in items) {\n        val id = item[\"id\"]\n        val params = item[\"params\"] as Map<String, Any?>\n        checkCustomId(id, seen)\n        checkParams(params)\n        requests.add(linkedMapOf(\"custom_id\" to id, \"params\" to params))\n    }\n    return requests\n}\n\nprivate fun size(request: Map<String, Any?>): Long = Json.stringify(request).toByteArray(Charsets.UTF_8).size.toLong()\n\nprivate fun mustStartNew(count: Int, used: Long, bytes: Long, maxRequests: Int, maxBytes: Long): Boolean =\n    count > 0 && (count >= maxRequests || used + bytes > maxBytes)\n\nfun splitBatches(requests: List<Map<String, Any?>>, maxRequests: Int = MAX_REQUESTS, maxBytes: Long = MAX_BYTES): List<List<Map<String, Any?>>> {\n    val batches = mutableListOf<List<Map<String, Any?>>>()\n    var current = mutableListOf<Map<String, Any?>>()\n    var used = 0L\n    for (request in requests) {\n        val bytes = size(request)\n        if (bytes > maxBytes) throw BatchError(\"size\", \"${request[\"custom_id\"]} alone is larger than a batch may be\")\n        if (mustStartNew(current.size, used, bytes, maxRequests, maxBytes)) {\n            batches.add(current)\n            current = mutableListOf()\n            used = 0\n        }\n        current.add(request)\n        used += bytes\n    }\n    if (current.isNotEmpty()) batches.add(current)\n    return batches\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun keepResult(wanted: List<String>, byId: MutableMap<String, Map<String, Any?>>, unknown: MutableList<String>, record: Map<String, Any?>) {\n    val cid = record[\"custom_id\"] as String\n    if (cid !in wanted) unknown.add(cid) else byId.putIfAbsent(cid, record[\"result\"] as Map<String, Any?>)\n}\n\nprivate fun needsFix(errorType: String): Boolean = errorType == \"invalid_request_error\"\n\nprivate fun addUsage(usage: MutableMap<String, Any?>, used: Map<String, Any?>) {\n    for (key in USAGE_KEYS) usage[key] = (usage[key] as Long) + ((used[key] as Number?)?.toLong() ?: 0L)\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun collect(requests: List<Map<String, Any?>>, resultLines: List<String>): Map<String, Any?> {\n    val wanted = requests.map { it[\"custom_id\"] as String }\n    val byId = linkedMapOf<String, Map<String, Any?>>()\n    val unknown = mutableListOf<String>()\n    for (line in resultLines) {\n        if (line.isBlank()) continue\n        keepResult(wanted, byId, unknown, Json.parse(line) as Map<String, Any?>)\n    }\n    val outcomes = mutableListOf<Map<String, Any?>>()\n    val retry = mutableListOf<String>()\n    val fix = mutableListOf<String>()\n    val usage = linkedMapOf<String, Any?>().also { u -> USAGE_KEYS.forEach { u[it] = 0L } }\n    for (cid in wanted) {\n        val result = byId[cid]\n        when {\n            result == null -> {\n                outcomes.add(linkedMapOf(\"custom_id\" to cid, \"status\" to \"missing\"))\n                retry.add(cid)\n            }\n            result[\"type\"] == \"succeeded\" -> {\n                val message = result[\"message\"] as Map<String, Any?>\n                val text = (message[\"content\"] as List<Map<String, Any?>>).filter { it[\"type\"] == \"text\" }.joinToString(\"\") { (it[\"text\"] ?: \"\").toString() }\n                val used = message[\"usage\"] as Map<String, Any?>\n                outcomes.add(linkedMapOf(\"custom_id\" to cid, \"status\" to \"succeeded\", \"text\" to text, \"usage\" to used))\n                addUsage(usage, used)\n            }\n            result[\"type\"] == \"errored\" -> {\n                val kind = ((result[\"error\"] as Map<String, Any?>)[\"error\"] as Map<String, Any?>)[\"type\"] as String\n                outcomes.add(linkedMapOf(\"custom_id\" to cid, \"status\" to \"errored\", \"error_type\" to kind))\n                (if (needsFix(kind)) fix else retry).add(cid)\n            }\n            else -> { // canceled or expired: the request never reached the model\n                outcomes.add(linkedMapOf(\"custom_id\" to cid, \"status\" to result[\"type\"]))\n                retry.add(cid)\n            }\n        }\n    }\n    return linkedMapOf(\"outcomes\" to outcomes, \"retry\" to retry, \"fix\" to fix, \"unknown\" to unknown, \"usage\" to usage)\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    val model = \"claude-haiku-4-5-20251001\"\n    val items = listOf(\"t-1\", \"t-2\", \"t-3\").map { id ->\n        mapOf(\"id\" to id, \"params\" to mapOf(\"model\" to model, \"max_tokens\" to 200,\n            \"messages\" to listOf(mapOf(\"role\" to \"user\", \"content\" to \"Classify ticket $id\"))))\n    }\n\n    // One line of the .jsonl results file, like the ones the tests build.\n    fun resultLine(customId: String, text: String) =\n        \"\"\"{\"custom_id\":\"$customId\",\"result\":{\"type\":\"succeeded\",\"message\":{\"id\":\"msg_illustrative\",\"type\":\"message\",\"role\":\"assistant\",\"model\":\"$model\",\"stop_reason\":\"end_turn\",\"content\":[{\"type\":\"text\",\"text\":\"$text\"}],\"usage\":{\"input_tokens\":50,\"output_tokens\":7}}}}\"\"\"\n\n    try {\n        val requests = buildRequests(items)\n        println(\"custom ids: ${requests.map { it[\"custom_id\"] }}\")\n        // The results come back in any order: they are matched by custom_id, not by position.\n        val done = collect(requests, listOf(resultLine(\"t-3\", \"billing\"), resultLine(\"t-1\", \"refund\"), resultLine(\"t-2\", \"shipping\")))\n        val outcomes = (done[\"outcomes\"] as? List<*> ?: emptyList<Any?>()).map { o ->\n            o as Map<*, *>\n            \"${o[\"custom_id\"]}/${o[\"status\"]}/${o[\"text\"]}\"\n        }\n        println(\"outcomes: $outcomes\")\n        println(\"to retry / fix / unknown: ${done[\"retry\"]} ${done[\"fix\"]} ${done[\"unknown\"]}\")\n    } catch (err: BatchError) {\n        println(\"batch error: ${err.message}\")\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.lang.System.Logger.Level\n\nprivate val log = System.getLogger(\"batches\")\n\n/** Build, split and read Message Batches. See ../../statement.md for the contract. Requests and results are JSON-like maps. */\n\n/** The batch would be refused. [field] names the offending part. */\nclass BatchError(val field: String, reason: String) : RuntimeException(\"$field: $reason\")\n\nprivate val CUSTOM_ID = Regex(\"^[a-zA-Z0-9_-]{1,64}$\")\nprivate const val MAX_REQUESTS = 100_000\nprivate const val MAX_BYTES = 256L * 1024 * 1024\nprivate val USAGE_KEYS = listOf(\"input_tokens\", \"output_tokens\", \"cache_creation_input_tokens\", \"cache_read_input_tokens\")\n\nprivate fun checkCustomId(id: Any?, seen: MutableSet<String>) {\n    // TODO 1 of 6 (finish this to pass e1): refuse a bad or repeated custom id, and remember a good one.\n    // Receives the id and the set `seen` of ids already used. Throws BatchError(\"custom_id\", reason) when the id is not a String matching\n    // CUSTOM_ID (1 to 64 letters, digits, hyphens or underscores) or is already in `seen`; otherwise adds it to `seen`.\n    // Example: \"has space\" throws; passing \"a\" twice with the same set throws the second time\n}\n\nprivate fun checkParams(params: Map<String, Any?>) {\n    // TODO 2 of 6 (finish this to pass e2): refuse the parameters a batch cannot take.\n    // Receives a request body. Throws BatchError(\"params.max_tokens\", reason) when max_tokens is missing or below 1,\n    // BatchError(\"params.stream\", reason) when stream is true, and BatchError(\"params.speed\", reason) when speed is present at all.\n    // Example: a body with max_tokens 0 throws with field \"params.max_tokens\"\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun buildRequests(items: List<Map<String, Any?>>): List<Map<String, Any?>> {\n    log.log(Level.DEBUG, \"buildRequests input: {0}\", items)\n    val seen = mutableSetOf<String>()\n    val requests = mutableListOf<Map<String, Any?>>()\n    for (item in items) {\n        val id = item[\"id\"]\n        val params = item[\"params\"] as Map<String, Any?>\n        checkCustomId(id, seen)\n        checkParams(params)\n        requests.add(linkedMapOf(\"custom_id\" to id, \"params\" to params))\n    }\n    return requests\n}\n\nprivate fun size(request: Map<String, Any?>): Long = Json.stringify(request).toByteArray(Charsets.UTF_8).size.toLong()\n\nprivate fun mustStartNew(count: Int, used: Long, bytes: Long, maxRequests: Int, maxBytes: Long): Boolean {\n    // TODO 3 of 6 (finish this to pass e3): must this request go into a new batch?\n    // Receives the number of requests in the current batch, their total bytes `used`, the size of the next request and both limits.\n    // Returns true when the current batch is not empty and adding the request would pass either limit (count already at maxRequests, or\n    // used + bytes above maxBytes). Example: (3, 10, 5, 3, 1000) -> true, (0, 0, 5, 3, 1000) -> false\n    return false\n}\n\nfun splitBatches(requests: List<Map<String, Any?>>, maxRequests: Int = MAX_REQUESTS, maxBytes: Long = MAX_BYTES): List<List<Map<String, Any?>>> {\n    val batches = mutableListOf<List<Map<String, Any?>>>()\n    var current = mutableListOf<Map<String, Any?>>()\n    var used = 0L\n    for (request in requests) {\n        val bytes = size(request)\n        if (bytes > maxBytes) throw BatchError(\"size\", \"${request[\"custom_id\"]} alone is larger than a batch may be\")\n        if (mustStartNew(current.size, used, bytes, maxRequests, maxBytes)) {\n            batches.add(current)\n            current = mutableListOf()\n            used = 0\n        }\n        current.add(request)\n        used += bytes\n    }\n    if (current.isNotEmpty()) batches.add(current)\n    return batches\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun keepResult(wanted: List<String>, byId: MutableMap<String, Map<String, Any?>>, unknown: MutableList<String>, record: Map<String, Any?>) {\n    // TODO 4 of 6 (finish this to pass m1 and e5): file one parsed result line by its custom id.\n    // Receives the list `wanted` of request ids, the map `byId`, the list `unknown` and the parsed `record` (custom_id and result).\n    // Adds the id to `unknown` when no request carries it; otherwise stores the record's result (cast it to Map<String, Any?>) in\n    // `byId` unless the id is already there (the first result wins). Example: a record for \"zzz\" when wanted is [\"a\"] -> unknown\n}\n\nprivate fun needsFix(errorType: String): Boolean {\n    // TODO 5 of 6 (finish this to pass e4): does an errored result need a corrected request?\n    // Receives the error type of an errored result. Returns true for \"invalid_request_error\" (it fails again until fixed), false for any\n    // other type, which is worth sending again unchanged. Example: \"overloaded_error\" -> false\n    return false\n}\n\nprivate fun addUsage(usage: MutableMap<String, Any?>, used: Map<String, Any?>) {\n    // TODO 6 of 6 (finish this to pass e6): add one succeeded reply's usage to the totals.\n    // Receives the map `usage` of totals (every key of USAGE_KEYS holds a Long, starting at 0L) and the reply's usage map, which may\n    // lack a key. Adds each key of USAGE_KEYS from `used` to `usage`, a missing key counting as 0. Store Long values.\n    // Example: adding {input_tokens: 5} raises usage input_tokens by 5 and leaves the other three alone\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun collect(requests: List<Map<String, Any?>>, resultLines: List<String>): Map<String, Any?> {\n    val wanted = requests.map { it[\"custom_id\"] as String }\n    val byId = linkedMapOf<String, Map<String, Any?>>()\n    val unknown = mutableListOf<String>()\n    for (line in resultLines) {\n        if (line.isBlank()) continue\n        keepResult(wanted, byId, unknown, Json.parse(line) as Map<String, Any?>)\n    }\n    val outcomes = mutableListOf<Map<String, Any?>>()\n    val retry = mutableListOf<String>()\n    val fix = mutableListOf<String>()\n    val usage = linkedMapOf<String, Any?>().also { u -> USAGE_KEYS.forEach { u[it] = 0L } }\n    for (cid in wanted) {\n        val result = byId[cid]\n        when {\n            result == null -> {\n                outcomes.add(linkedMapOf(\"custom_id\" to cid, \"status\" to \"missing\"))\n                retry.add(cid)\n            }\n            result[\"type\"] == \"succeeded\" -> {\n                val message = result[\"message\"] as Map<String, Any?>\n                val text = (message[\"content\"] as List<Map<String, Any?>>).filter { it[\"type\"] == \"text\" }.joinToString(\"\") { (it[\"text\"] ?: \"\").toString() }\n                val used = message[\"usage\"] as Map<String, Any?>\n                outcomes.add(linkedMapOf(\"custom_id\" to cid, \"status\" to \"succeeded\", \"text\" to text, \"usage\" to used))\n                addUsage(usage, used)\n            }\n            result[\"type\"] == \"errored\" -> {\n                val kind = ((result[\"error\"] as Map<String, Any?>)[\"error\"] as Map<String, Any?>)[\"type\"] as String\n                outcomes.add(linkedMapOf(\"custom_id\" to cid, \"status\" to \"errored\", \"error_type\" to kind))\n                (if (needsFix(kind)) fix else retry).add(cid)\n            }\n            else -> { // canceled or expired: the request never reached the model\n                outcomes.add(linkedMapOf(\"custom_id\" to cid, \"status\" to result[\"type\"]))\n                retry.add(cid)\n            }\n        }\n    }\n    return linkedMapOf(\"outcomes\" to outcomes, \"retry\" to retry, \"fix\" to fix, \"unknown\" to unknown, \"usage\" to usage)\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    val model = \"claude-haiku-4-5-20251001\"\n    val items = listOf(\"t-1\", \"t-2\", \"t-3\").map { id ->\n        mapOf(\"id\" to id, \"params\" to mapOf(\"model\" to model, \"max_tokens\" to 200,\n            \"messages\" to listOf(mapOf(\"role\" to \"user\", \"content\" to \"Classify ticket $id\"))))\n    }\n\n    // One line of the .jsonl results file, like the ones the tests build.\n    fun resultLine(customId: String, text: String) =\n        \"\"\"{\"custom_id\":\"$customId\",\"result\":{\"type\":\"succeeded\",\"message\":{\"id\":\"msg_illustrative\",\"type\":\"message\",\"role\":\"assistant\",\"model\":\"$model\",\"stop_reason\":\"end_turn\",\"content\":[{\"type\":\"text\",\"text\":\"$text\"}],\"usage\":{\"input_tokens\":50,\"output_tokens\":7}}}}\"\"\"\n\n    try {\n        val requests = buildRequests(items)\n        println(\"custom ids: ${requests.map { it[\"custom_id\"] }}\")\n        // The results come back in any order: they are matched by custom_id, not by position.\n        val done = collect(requests, listOf(resultLine(\"t-3\", \"billing\"), resultLine(\"t-1\", \"refund\"), resultLine(\"t-2\", \"shipping\")))\n        val outcomes = (done[\"outcomes\"] as? List<*> ?: emptyList<Any?>()).map { o ->\n            o as Map<*, *>\n            \"${o[\"custom_id\"]}/${o[\"status\"]}/${o[\"text\"]}\"\n        }\n        println(\"outcomes: $outcomes\")\n        println(\"to retry / fix / unknown: ${done[\"retry\"]} ${done[\"fix\"]} ${done[\"unknown\"]}\")\n    } catch (err: BatchError) {\n        println(\"batch error: ${err.message}\")\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 10,
+    "paras": 8,
+    "code": 2,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "239755dcb236dc5cfb22aa0b065e3ed32841baa843419ebc280f4fbfaea4bde3",
+  "starting_code": "import java.lang.System.Logger.Level\n\nprivate val log = System.getLogger(\"batches\")\n\n/** Build, split and read Message Batches. See ../../statement.md for the contract. Requests and results are JSON-like maps. */\n\n/** The batch would be refused. [field] names the offending part. */\nclass BatchError(val field: String, reason: String) : RuntimeException(\"$field: $reason\")\n\nprivate val CUSTOM_ID = Regex(\"^[a-zA-Z0-9_-]{1,64}$\")\nprivate const val MAX_REQUESTS = 100_000\nprivate const val MAX_BYTES = 256L * 1024 * 1024\nprivate val USAGE_KEYS = listOf(\"input_tokens\", \"output_tokens\", \"cache_creation_input_tokens\", \"cache_read_input_tokens\")\n\nprivate fun checkCustomId(id: Any?, seen: MutableSet<String>) {\n    // TODO 1 of 6 (finish this to pass e1): refuse a bad or repeated custom id, and remember a good one.\n    // Receives the id and the set `seen` of ids already used. Throws BatchError(\"custom_id\", reason) when the id is not a String matching\n    // CUSTOM_ID (1 to 64 letters, digits, hyphens or underscores) or is already in `seen`; otherwise adds it to `seen`.\n    // Example: \"has space\" throws; passing \"a\" twice with the same set throws the second time\n}\n\nprivate fun checkParams(params: Map<String, Any?>) {\n    // TODO 2 of 6 (finish this to pass e2): refuse the parameters a batch cannot take.\n    // Receives a request body. Throws BatchError(\"params.max_tokens\", reason) when max_tokens is missing or below 1,\n    // BatchError(\"params.stream\", reason) when stream is true, and BatchError(\"params.speed\", reason) when speed is present at all.\n    // Example: a body with max_tokens 0 throws with field \"params.max_tokens\"\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun buildRequests(items: List<Map<String, Any?>>): List<Map<String, Any?>> {\n    log.log(Level.DEBUG, \"buildRequests input: {0}\", items)\n    val seen = mutableSetOf<String>()\n    val requests = mutableListOf<Map<String, Any?>>()\n    for (item in items) {\n        val id = item[\"id\"]\n        val params = item[\"params\"] as Map<String, Any?>\n        checkCustomId(id, seen)\n        checkParams(params)\n        requests.add(linkedMapOf(\"custom_id\" to id, \"params\" to params))\n    }\n    return requests\n}\n\nprivate fun size(request: Map<String, Any?>): Long = Json.stringify(request).toByteArray(Charsets.UTF_8).size.toLong()\n\nprivate fun mustStartNew(count: Int, used: Long, bytes: Long, maxRequests: Int, maxBytes: Long): Boolean {\n    // TODO 3 of 6 (finish this to pass e3): must this request go into a new batch?\n    // Receives the number of requests in the current batch, their total bytes `used`, the size of the next request and both limits.\n    // Returns true when the current batch is not empty and adding the request would pass either limit (count already at maxRequests, or\n    // used + bytes above maxBytes). Example: (3, 10, 5, 3, 1000) -> true, (0, 0, 5, 3, 1000) -> false\n    return false\n}\n\nfun splitBatches(requests: List<Map<String, Any?>>, maxRequests: Int = MAX_REQUESTS, maxBytes: Long = MAX_BYTES): List<List<Map<String, Any?>>> {\n    val batches = mutableListOf<List<Map<String, Any?>>>()\n    var current = mutableListOf<Map<String, Any?>>()\n    var used = 0L\n    for (request in requests) {\n        val bytes = size(request)\n        if (bytes > maxBytes) throw BatchError(\"size\", \"${request[\"custom_id\"]} alone is larger than a batch may be\")\n        if (mustStartNew(current.size, used, bytes, maxRequests, maxBytes)) {\n            batches.add(current)\n            current = mutableListOf()\n            used = 0\n        }\n        current.add(request)\n        used += bytes\n    }\n    if (current.isNotEmpty()) batches.add(current)\n    return batches\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun keepResult(wanted: List<String>, byId: MutableMap<String, Map<String, Any?>>, unknown: MutableList<String>, record: Map<String, Any?>) {\n    // TODO 4 of 6 (finish this to pass m1 and e5): file one parsed result line by its custom id.\n    // Receives the list `wanted` of request ids, the map `byId`, the list `unknown` and the parsed `record` (custom_id and result).\n    // Adds the id to `unknown` when no request carries it; otherwise stores the record's result (cast it to Map<String, Any?>) in\n    // `byId` unless the id is already there (the first result wins). Example: a record for \"zzz\" when wanted is [\"a\"] -> unknown\n}\n\nprivate fun needsFix(errorType: String): Boolean {\n    // TODO 5 of 6 (finish this to pass e4): does an errored result need a corrected request?\n    // Receives the error type of an errored result. Returns true for \"invalid_request_error\" (it fails again until fixed), false for any\n    // other type, which is worth sending again unchanged. Example: \"overloaded_error\" -> false\n    return false\n}\n\nprivate fun addUsage(usage: MutableMap<String, Any?>, used: Map<String, Any?>) {\n    // TODO 6 of 6 (finish this to pass e6): add one succeeded reply's usage to the totals.\n    // Receives the map `usage` of totals (every key of USAGE_KEYS holds a Long, starting at 0L) and the reply's usage map, which may\n    // lack a key. Adds each key of USAGE_KEYS from `used` to `usage`, a missing key counting as 0. Store Long values.\n    // Example: adding {input_tokens: 5} raises usage input_tokens by 5 and leaves the other three alone\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun collect(requests: List<Map<String, Any?>>, resultLines: List<String>): Map<String, Any?> {\n    val wanted = requests.map { it[\"custom_id\"] as String }\n    val byId = linkedMapOf<String, Map<String, Any?>>()\n    val unknown = mutableListOf<String>()\n    for (line in resultLines) {\n        if (line.isBlank()) continue\n        keepResult(wanted, byId, unknown, Json.parse(line) as Map<String, Any?>)\n    }\n    val outcomes = mutableListOf<Map<String, Any?>>()\n    val retry = mutableListOf<String>()\n    val fix = mutableListOf<String>()\n    val usage = linkedMapOf<String, Any?>().also { u -> USAGE_KEYS.forEach { u[it] = 0L } }\n    for (cid in wanted) {\n        val result = byId[cid]\n        when {\n            result == null -> {\n                outcomes.add(linkedMapOf(\"custom_id\" to cid, \"status\" to \"missing\"))\n                retry.add(cid)\n            }\n            result[\"type\"] == \"succeeded\" -> {\n                val message = result[\"message\"] as Map<String, Any?>\n                val text = (message[\"content\"] as List<Map<String, Any?>>).filter { it[\"type\"] == \"text\" }.joinToString(\"\") { (it[\"text\"] ?: \"\").toString() }\n                val used = message[\"usage\"] as Map<String, Any?>\n                outcomes.add(linkedMapOf(\"custom_id\" to cid, \"status\" to \"succeeded\", \"text\" to text, \"usage\" to used))\n                addUsage(usage, used)\n            }\n            result[\"type\"] == \"errored\" -> {\n                val kind = ((result[\"error\"] as Map<String, Any?>)[\"error\"] as Map<String, Any?>)[\"type\"] as String\n                outcomes.add(linkedMapOf(\"custom_id\" to cid, \"status\" to \"errored\", \"error_type\" to kind))\n                (if (needsFix(kind)) fix else retry).add(cid)\n            }\n            else -> { // canceled or expired: the request never reached the model\n                outcomes.add(linkedMapOf(\"custom_id\" to cid, \"status\" to result[\"type\"]))\n                retry.add(cid)\n            }\n        }\n    }\n    return linkedMapOf(\"outcomes\" to outcomes, \"retry\" to retry, \"fix\" to fix, \"unknown\" to unknown, \"usage\" to usage)\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/21-message-batches/prose/unit-02/practice-4/src/main/kotlin/Batches.kt",
+    "test_path": "practice/level-2/21-message-batches/prose/unit-02/practice-4/src/test/kotlin/BatchesTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/21-message-batches/prose/unit-02/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/21-message-batches/prose/unit-02/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_resultsAreMatchedToRequestsByCustomIdNotByPosition()",
+        "kind": "main",
+        "says": "Results are matched to requests by custom id, not by position"
+      },
+      {
+        "id": "e1_aCustomIdIs1To64SafeCharactersAndUnique()",
+        "kind": "edge",
+        "says": "A custom id is 1 to 64 safe characters and unique"
+      },
+      {
+        "id": "e2_parametersABatchCannotTakeAreRefused()",
+        "kind": "edge",
+        "says": "Parameters a batch cannot take are refused"
+      },
+      {
+        "id": "e3_aBigJobIsCutInOrderByRequestCountAndBySize()",
+        "kind": "edge",
+        "says": "A big job is cut in order by request count and by size"
+      },
+      {
+        "id": "e4_invalidRequestsAreFixedAndTheRestAreRetried()",
+        "kind": "edge",
+        "says": "Invalid requests are fixed, the other failures are retried"
+      },
+      {
+        "id": "e5_aRequestWithNoResultIsMissingAndAStrangerIsReported()",
+        "kind": "edge",
+        "says": "A request with no result is missing and retried, and a stranger id is reported"
+      },
+      {
+        "id": "e6_onlyRequestsThatSucceededCountTowardUsage()",
+        "kind": "edge",
+        "says": "Only succeeded requests count toward usage"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/21-message-batches/prose/unit-02/practice-4/target/test-results/test"
+    },
+    "origin": "course/21-message-batches/02-polling-results-and-retries.md",
+    "concepts": [
+      "the practice of Polling, results and retries is solved"
+    ],
+    "files": [
+      "practice/level-2/21-message-batches/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "message-batches-u2"
+}

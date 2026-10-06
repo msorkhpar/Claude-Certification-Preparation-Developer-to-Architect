@@ -1,0 +1,121 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-1",
+    "02-how-models-are-made"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Pretraining and tokenizers",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "An assistant is asked to tally the letter r in a long part number and gives a wrong, confident figure. The team wants a fix that holds for every part number. Which approach is best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Hand the counting to a small script and use its output",
+            "correct": true,
+            "says": "The model works on pieces, not letters, so a character-level tally is an approximation and a small program answers it exactly (the tokenizer section and the first trap)."
+          },
+          {
+            "id": "b",
+            "text": "Add a system line demanding an exact character count every time",
+            "correct": false,
+            "says": "Ruled out because \"a model answers it by approximation\", so a demand for exactness does not change how the part number is cut into pieces."
+          },
+          {
+            "id": "c",
+            "text": "Move to a model with a larger context window available",
+            "correct": false,
+            "says": "Ruled out because \"The window is how much text fits per request\", a capacity that does not change how a part number is cut into pieces."
+          },
+          {
+            "id": "d",
+            "text": "Run the same question five times and take the most common figure",
+            "correct": false,
+            "says": "Ruled out because \"Questions about individual characters (how many letters, which letter is third, reverse this string) are harder for it than they look\", so repeating the question repeats the weakness."
+          }
+        ],
+        "origin": {
+          "path": "course/02-how-models-are-made/01-pretraining-and-tokenizers.md",
+          "section": "Traps"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A team corrects the assistant by hand after it repeats a mistake across many chats, and expects it to do better next week. They call the API directly. Which expectation is accurate?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The weights absorb the fix and apply it to every later session by default",
+            "correct": false,
+            "says": "Ruled out because \"A conversation with Claude does not teach it anything that carries to the next conversation\"."
+          },
+          {
+            "id": "b",
+            "text": "A tuned copy of the model is created under the account for later calls",
+            "correct": false,
+            "says": "Ruled out because \"The Claude API does not currently offer fine-tuning\", so no tuned copy is made by calling it."
+          },
+          {
+            "id": "c",
+            "text": "Only a request that carries the amended guidance in its own input gains from it",
+            "correct": true,
+            "says": "Weights are fixed at inference and what looks like learning is the context window (the weights section), so only a call that carries the fix in its input can use it."
+          },
+          {
+            "id": "d",
+            "text": "A window large enough keeps the correction available to every future request",
+            "correct": false,
+            "says": "Ruled out because \"The window is how much text fits per request\", and a request holds only what is sent with it."
+          }
+        ],
+        "origin": {
+          "path": "course/02-how-models-are-made/01-pretraining-and-tokenizers.md",
+          "section": "The weights do not change while you chat"
+        }
+      }
+    ],
+    "concepts": [
+      "The weights do not change while you chat, as the page teaches it",
+      "Traps, as the page teaches it"
+    ]
+  }
+}

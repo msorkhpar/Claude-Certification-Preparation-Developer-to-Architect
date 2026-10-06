@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-4",
+    "90-governance-safety-and-risk"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Check yourself: Compliance, fairness, transparency and the register",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "Scenario: Mira is asked to honour a deletion request from a customer whose requests appear in the audit entries of a claims assistant. Those entries hold tokens, and one table maps each token to a person. What does the design do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Delete the entries of that customer from the log",
+            "correct": false,
+            "says": "Ruled out because \"Deleting every audit entry would destroy the proof\"."
+          },
+          {
+            "id": "b",
+            "text": "Remove the vault rows that tie them to anything in the log",
+            "correct": true,
+            "says": "Removing the vault rows leaves the entries and unlinks them from the person."
+          },
+          {
+            "id": "c",
+            "text": "Replace the tokens in that customer's entries with new tokens",
+            "correct": false,
+            "says": "Ruled out because \"keeping both leaves the person identifiable\", and new tokens in the entries leave the vault map in place."
+          },
+          {
+            "id": "d",
+            "text": "Encrypt that customer's entries with a key that is then kept",
+            "correct": false,
+            "says": "Ruled out because the design removes \"the map: the vault entries for that person go\", and encryption keeps a key that can link them again."
+          }
+        ],
+        "origin": {
+          "path": "course/90-governance-safety-and-risk/02-compliance-fairness-transparency-and-the-register.md",
+          "section": "Erasure by removing the map"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "Scenario: Tomas must set how long a support assistant keeps its audit records. Tomas's design has a shortest period, a longest period and a number of days between them. A court order then opens a case that covers a set of those records. What happens to those records?",
+        "options": [
+          {
+            "id": "a",
+            "text": "They are deleted at once because the court may inspect any copy",
+            "correct": false,
+            "says": "Ruled out because the hold keeps records, as \"the records in scope are kept past it\"."
+          },
+          {
+            "id": "b",
+            "text": "They follow the same schedule and the case uses what is left",
+            "correct": false,
+            "says": "Ruled out because \"A legal hold is the one thing that outranks the ceiling\", so the ordinary schedule does not apply."
+          },
+          {
+            "id": "c",
+            "text": "They are moved to a table with no limit on their retention",
+            "correct": false,
+            "says": "Ruled out because \"they are released when the hold ends\", and an unlimited table keeps them after the case."
+          },
+          {
+            "id": "d",
+            "text": "They are held past the ceiling until the matter is settled",
+            "correct": true,
+            "says": "A legal hold is the one thing that outranks the ceiling, and the records are released when it ends."
+          }
+        ],
+        "origin": {
+          "path": "course/90-governance-safety-and-risk/02-compliance-fairness-transparency-and-the-register.md",
+          "section": "Retention: a floor, a ceiling and a legal hold"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "gates_api": 1,
+  "inputs": [
+    {
+      "role": "statement",
+      "path": "statement.md",
+      "digest": "sha256:c0678a7ef06cc5d70bfa813d6a7b4442798952cfef1d55e0c18bddd01537ce30"
+    },
+    {
+      "role": "starter",
+      "path": "starter/retry.py",
+      "digest": "sha256:7e433434a378a61bfa7ea30bb53ba7d5192bf02ee5999143a6e011daa9f90905"
+    },
+    {
+      "role": "reference",
+      "path": "reference/retry.py",
+      "digest": "sha256:6de0420fe2e056ef17a4a0c256284f0703bef6ff80b344db98ff37fa9dfddf0b"
+    },
+    {
+      "role": "starter:try_it.py",
+      "path": "starter/try_it.py",
+      "digest": "sha256:772ecea75ecd086eed80c5126d3838cf015ca9c7263e7a96a05be3e79ebbfdff"
+    },
+    {
+      "role": "reference:try_it.py",
+      "path": "reference/try_it.py",
+      "digest": "sha256:772ecea75ecd086eed80c5126d3838cf015ca9c7263e7a96a05be3e79ebbfdff"
+    },
+    {
+      "role": "tests",
+      "path": "tests/test_retry.py",
+      "digest": "sha256:abaea8123f67dd5253a792513fa542e8235a2e184f545d07ff6ee391763b7a5f"
+    },
+    {
+      "role": "plant:test_e1_client_errors_are_not_retried",
+      "path": "plants/edge-1/retry.py.plant.json",
+      "digest": "sha256:c2f3e98384c5eab9cd461cdb2ace8fedc7ed109b14c2291157df4becca4aaefe"
+    },
+    {
+      "role": "plant:test_e2_retry_after_is_a_floor_for_the_wait",
+      "path": "plants/edge-2/retry.py.plant.json",
+      "digest": "sha256:757d54069d26ebb6a816f5c4c41278027c35b1fd62a73c43e0ed1668530883cd"
+    },
+    {
+      "role": "plant:test_e3_delay_doubles_up_to_the_cap_and_the_jitter_is_applied_last",
+      "path": "plants/edge-3/retry.py.plant.json",
+      "digest": "sha256:8e477258d30277e38b73826665628e83c158f101b929c08c4a7b7cd75b63f5db"
+    },
+    {
+      "role": "plant:test_e4_a_spend_cap_429_is_not_retried",
+      "path": "plants/edge-4/retry.py.plant.json",
+      "digest": "sha256:829add30df621600fbc56169f9f09feef530ddeec787f61b4b3363a2c676414f"
+    },
+    {
+      "role": "plant:test_e5_connection_errors_are_retried_like_server_errors",
+      "path": "plants/edge-5/retry.py.plant.json",
+      "digest": "sha256:c93e739c3bc89a8ad874f675475d0255f297d6f932727e5ef3ccef753c77d634"
+    },
+    {
+      "role": "plant:test_e6_giving_up_reports_the_last_reply_and_does_not_wait_after_the_last_attempt",
+      "path": "plants/edge-6/retry.py.plant.json",
+      "digest": "sha256:d02dd77a2ddfd6f8ab185472e5ae00ab92ba90d7eea5a58f0f2452633a61aa08"
+    },
+    {
+      "role": "build:pytest.ini",
+      "path": "build/pytest.ini",
+      "digest": "sha256:78b695b449e8bb92c850493180f73fc8d1122b2b99925d12dddab5c285e8d026"
+    }
+  ],
+  "origins": [
+    {
+      "role": "origin",
+      "path": "course/15-errors-retries-and-timeouts/02-retry-back-off-and-idempotency.md",
+      "section": null,
+      "digest": "sha256:3e0c11c57d619e22e35e3c164d4790c2acda7921223617f02b7d1e2d75838f15"
+    }
+  ],
+  "gates": [
+    {
+      "id": "G1",
+      "family": "code",
+      "held": true,
+      "says": "all 7 cases passed on the reference, on two runs alike",
+      "recorded": {}
+    },
+    {
+      "id": "G2",
+      "family": "code",
+      "held": true,
+      "says": "none of the 7 cases passed on the starter",
+      "recorded": {}
+    },
+    {
+      "id": "G3",
+      "family": "code",
+      "held": true,
+      "says": "each of the 6 edge cases was caught by its own plant",
+      "recorded": {}
+    },
+    {
+      "id": "G4",
+      "family": "code",
+      "held": true,
+      "says": "every test the report named mapped to one of the 7 cases, and every case was named",
+      "recorded": {}
+    },
+    {
+      "id": "G5",
+      "family": "code",
+      "held": true,
+      "says": "the cited passage of 'course/15-errors-retries-and-timeouts/02-retry-back-off-and-idempotency.md' still matches the ledger",
+      "recorded": {}
+    }
+  ]
+}

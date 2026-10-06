@@ -1,0 +1,158 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "24-prompt-engineering-for-applications"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Examples, reasoning, long documents and chains",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A prompt for Claude Sonnet 5.5 ends the `messages` list with an assistant turn that opens a JSON brace, to force the format. What happens?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The reply continues the brace, as it would on Claude Sonnet 4.5 or older models",
+            "correct": false,
+            "says": "Ruled out because only \"Claude Sonnet 4.5, Claude Haiku 4.5, and older models accept one\"."
+          },
+          {
+            "id": "b",
+            "text": "The call is rejected with a 400 error, since the model does not accept that pattern",
+            "correct": true,
+            "says": "The page says that Claude Sonnet 5.5 \"rejects a prefilled last assistant turn with a 400 error\"."
+          },
+          {
+            "id": "c",
+            "text": "The brace is dropped and the call succeeds with the normal reply",
+            "correct": false,
+            "says": "Ruled out because the page says that \"Requests with prefilled assistant messages to these models return a 400 error\", so no call succeeds."
+          },
+          {
+            "id": "d",
+            "text": "The reply is cut off at the first closing brace that the model writes",
+            "correct": false,
+            "says": "Ruled out because a request that \"rejects a prefilled last assistant turn\" never reaches generation, so no reply is cut off."
+          }
+        ],
+        "origin": {
+          "path": "course/24-prompt-engineering-for-applications/02-examples-reasoning-long-documents-and-chains.md",
+          "section": "Prefilling is gone"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "An analyst sends Claude a 60,000 token agreement plus one request about it. Which layout follows the page?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The instruction at the very start, then each tagged section after it",
+            "correct": false,
+            "says": "Ruled out because \"Queries at the end can improve response quality by up to 30 percent in tests\"."
+          },
+          {
+            "id": "b",
+            "text": "The instruction and the long text woven together paragraph by paragraph",
+            "correct": false,
+            "says": "Ruled out because the rule is to \"Place your long documents and inputs near the top of your prompt\", not to interleave them."
+          },
+          {
+            "id": "c",
+            "text": "The instruction in the system prompt and the long text placed last",
+            "correct": false,
+            "says": "Ruled out because the rule puts the long inputs \"near the top of your prompt\", not last."
+          },
+          {
+            "id": "d",
+            "text": "Tagged long text at the top, with the instruction at the very end",
+            "correct": true,
+            "says": "The page says to \"Place your long documents and inputs near the top of your prompt, above your query, instructions, and examples\", and to wrap each in tags."
+          }
+        ],
+        "origin": {
+          "path": "course/24-prompt-engineering-for-applications/02-examples-reasoning-long-documents-and-chains.md",
+          "section": "Long documents: top, tags, quotes, question last"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A team wants Claude Opus 5.5 to reason less on simple tickets. What does the page advise?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Add \"do not think\" to the system prompt and trust the model to comply",
+            "correct": false,
+            "says": "Ruled out because \"Asking it in the system prompt to think less doesn't reliably reduce its thinking.\""
+          },
+          {
+            "id": "b",
+            "text": "Reduce the effort setting first, and only then rewrite the prompt",
+            "correct": true,
+            "says": "The page says \"To get less thinking, lower the effort level first\"."
+          },
+          {
+            "id": "c",
+            "text": "Turn thinking off altogether with a parameter on the request",
+            "correct": false,
+            "says": "Ruled out because \"thinking is always on and adaptive thinking is the only mode\" on Claude Opus 5.5."
+          },
+          {
+            "id": "d",
+            "text": "Ask for reasoning in an output field, then cut it",
+            "correct": false,
+            "says": "Ruled out because \"A property that asks for the model's thinking or step-by-step reasoning may lead to a `reasoning_extraction` refusal.\""
+          }
+        ],
+        "origin": {
+          "path": "course/24-prompt-engineering-for-applications/02-examples-reasoning-long-documents-and-chains.md",
+          "section": "Reasoning on a model that always thinks"
+        }
+      }
+    ],
+    "concepts": [
+      "Examples, reasoning, long documents and chains, as the page teaches it",
+      "Long documents: top, tags, quotes, question last, as the page teaches it",
+      "Prefilling is gone, as the page teaches it",
+      "Prompt chaining, as the page teaches it",
+      "Reasoning on a model that always thinks, as the page teaches it"
+    ]
+  }
+}

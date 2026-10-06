@@ -1,0 +1,15 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/java/Bounded.java",
+      "old": "mapBounded(Iterator<T> items,",
+      "new": "mapBounded(Iterator<T> source,"
+    },
+    {
+      "file": "src/main/java/Bounded.java",
+      "old": "        List<Outcome<R>> results = new ArrayList<>(); // one slot",
+      "new": "        List<T> all = new ArrayList<>();\n        source.forEachRemaining(all::add);\n        Iterator<T> items = all.iterator();\n        List<Outcome<R>> results = new ArrayList<>(); // one slot"
+    }
+  ]
+}

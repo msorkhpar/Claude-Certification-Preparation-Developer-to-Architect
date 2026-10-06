@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "30-vision-and-documents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 5,
+  "title": "Check yourself: PDFs and documents: limits, cost and the practice",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A team sends a 400-page annual report full of tables to a model whose window holds a million tokens, and the call fails although 400 is under the page limit. According to the documentation, what is the likely cause?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Tables are rasterized at a resolution that the API charges for separately",
+            "correct": false,
+            "says": "Ruled out because \"Standard API pricing applies with no additional PDF fees.\""
+          },
+          {
+            "id": "b",
+            "text": "Small type and heavy graphics use up the available capacity first",
+            "correct": true,
+            "says": "The page says that dense PDFs with small-font pages or heavy graphics \"can fill the context window before reaching the page limit\"."
+          },
+          {
+            "id": "c",
+            "text": "PDFs above 100 pages are refused unless a beta header is present",
+            "correct": false,
+            "says": "Ruled out because the limit is \"600, and 100 when the request's context window is under 1M tokens\", so with a window of a million tokens the 100-page limit does not apply and no header is involved."
+          },
+          {
+            "id": "d",
+            "text": "Extracted text is capped at 1,000 tokens per document on every platform",
+            "correct": false,
+            "says": "Ruled out because the 1,000-token figure belongs to a mode that \"uses roughly 1,000 tokens for a 3-page PDF\" on Bedrock Converse and is not a cap on documents."
+          }
+        ],
+        "origin": {
+          "path": "course/30-vision-and-documents/02-pdfs-documents-and-the-practice.md",
+          "section": "Limits"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A multi-tenant application stores every customer's uploaded contract with the Files API and keeps one file id per customer in its database. Which design choice protects the customers from one another?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Encrypt each stored id with a key owned by that customer",
+            "correct": false,
+            "says": "Ruled out because \"A `file_id` is a capability: whoever can name it in a request in that workspace can read the file\", whatever the stored id looks like."
+          },
+          {
+            "id": "b",
+            "text": "Pass an end-user identifier so the API scopes each file to it",
+            "correct": false,
+            "says": "Ruled out because files are \"accessible to the whole workspace, not scoped to an end user, a conversation or a session\", and no request field changes that."
+          },
+          {
+            "id": "c",
+            "text": "Give every file the shortest expiry that the API allows",
+            "correct": false,
+            "says": "Ruled out because an expiry is something you set \"at upload and not changed afterwards\", and until it passes the file stays \"accessible to the whole workspace\"."
+          },
+          {
+            "id": "d",
+            "text": "Give each client its own workspace in the organization",
+            "correct": true,
+            "says": "The page says that \"a multi-tenant application creates a workspace for each tenant\" because files are visible to the whole workspace."
+          }
+        ],
+        "origin": {
+          "path": "course/30-vision-and-documents/02-pdfs-documents-and-the-practice.md",
+          "section": "Files API: what to remember"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A user attaches an Excel workbook and asks for a summary of it. How should the application prepare the file for a document block?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Attach the binary file unchanged",
+            "correct": false,
+            "says": "Ruled out because \"Binary formats such as `.xlsx` and `.docx` are not supported in document blocks\"."
+          },
+          {
+            "id": "b",
+            "text": "Convert it to text or PDF first",
+            "correct": true,
+            "says": "The page says that binary formats such as `.xlsx` and `.docx` \"are not supported in document blocks; convert them to text or PDF first.\""
+          },
+          {
+            "id": "c",
+            "text": "Upload it as text/plain through the Files API",
+            "correct": false,
+            "says": "Ruled out because the `text/plain` route is for files you \"upload `.txt`, `.csv` or `.md` to the Files API with the MIME type `text/plain`\", and a workbook is none of them."
+          },
+          {
+            "id": "d",
+            "text": "Send it as a PDF and never as plain text",
+            "correct": false,
+            "says": "Ruled out because \"A plain text file can go into a document block too\", so PDF is not the only accepted result."
+          }
+        ],
+        "origin": {
+          "path": "course/30-vision-and-documents/02-pdfs-documents-and-the-practice.md",
+          "section": "How a PDF reaches the model"
+        }
+      }
+    ]
+  }
+}

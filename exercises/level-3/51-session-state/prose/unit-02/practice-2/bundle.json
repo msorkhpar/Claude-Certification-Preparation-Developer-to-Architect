@@ -1,0 +1,87 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "51-session-state"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: plan a session, say what changed, and set the options (TypeScript)",
+  "lang": "typescript",
+  "main_file": "sessions.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "sessions.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "package.json",
+    "package-lock.json",
+    "run-tests.mjs",
+    "harness/fake_claude.py",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-3/51-session-state/prose/unit-02/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "practice/level-3/51-session-state/prose/unit-02/practice-2/run-tests.mjs"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 the plan resumes an unchanged session and tells a changed one what differs and starts fresh when most of it changed",
+      "kind": "main",
+      "says": "An untouched session resumes, a changed one resumes with a notice, a mostly changed one starts fresh"
+    },
+    {
+      "id": "e1 changed deleted and added files are listed in order and any difference asks for a notice",
+      "kind": "edge",
+      "says": "Changed, deleted and added files are listed in order, and any difference asks for a notice"
+    },
+    {
+      "id": "e2 more than half of the files changed or gone starts fresh and exactly half does not",
+      "kind": "edge",
+      "says": "More than half changed or gone starts fresh, exactly half does not, and new files do not count toward it"
+    },
+    {
+      "id": "e3 a session idle for more than a week starts fresh and exactly a week is resumed",
+      "kind": "edge",
+      "says": "More than a week idle starts fresh, exactly a week does not"
+    },
+    {
+      "id": "e4 no saved session starts fresh and a fork is only planned from a session that is resumed",
+      "kind": "edge",
+      "says": "No record starts fresh, and a fork is planned only from a resumed session"
+    },
+    {
+      "id": "e5 the change notice names only what differs and the prompt puts the notice or the summary before the task",
+      "kind": "edge",
+      "says": "The notice names only what differs, and the prompt puts the notice or the summary before the task"
+    },
+    {
+      "id": "e6 the summary has a fixed layout with blank and repeated items dropped and files listed by path",
+      "kind": "edge",
+      "says": "The summary has the fixed layout, with blanks and repeats dropped and files sorted by path"
+    },
+    {
+      "id": "e7 options resume by id and fork together and continue is refused unless one session exists and a name must be unique",
+      "kind": "edge",
+      "says": "Resume and fork go together, continue needs exactly one session, a name must be unique"
+    },
+    {
+      "id": "e8 a run through the sdk passes resume and fork to the binary and returns the session id even after an error",
+      "kind": "edge",
+      "says": "A run through the SDK sends --resume and --fork-session and returns the session id, also after an error"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/51-session-state/02-stale-results-the-notice-the-summary-and-the-practice.md"
+}

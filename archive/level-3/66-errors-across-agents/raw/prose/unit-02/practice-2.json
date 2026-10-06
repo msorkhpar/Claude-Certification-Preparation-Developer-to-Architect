@@ -1,0 +1,278 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "66-errors-across-agents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: subagents that recover locally, fail with context and leave the coordinator able to decide (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: subagents that recover locally, fail with context and leave the coordinator able to decide"
+    },
+    {
+      "type": "para",
+      "text": "A research system sends one subagent to each source. When a source times out, the subagent returns \"search unavailable\" and the coordinator learns nothing; when a source has nothing to say, the subagent returns an error, so the coordinator retries a search that worked; when one source is closed to the system, the whole run stops; and the final report claims to cover every topic although two of them were never read. In this practice you write the three decisions that fix this: what a subagent does about a failure (retry what is transient, report the rest with its context), what the coordinator does with each result, and what the report says about coverage. The tool is not called: the tests give you scripted replies. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`search_with_recovery`, `coordinator_plan`, `coverage_note`); TypeScript has the camel-case names; Java has the same camel-case names as static methods of `ErrorFlow` with the records the starter defines (`Reply`, `Outcome`, `Step`); Kotlin has top-level functions and data classes with default values (its `search_with_recovery` takes the call function as the last argument)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working error flow with six gaps cut out of it. Everything that is plumbing is written and correct: the loop of attempts, the tables of alternatives and transient failures, the success outcome, the first rows of the coordinator's plan and the first groups of the coverage note. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript, Java and Kotlin names are the camel-case forms where a name is given):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "The local retry (unlocks `m1`): a transient failure (`timeout`, `unavailable`) is retried locally while the attempts are below the limit, and the success that follows is reported with its number of attempts.",
+        "The valid empty result (unlocks `e1`): an `ok` reply with no items is the status `empty`, a success with no findings, never an error; with items it is `success`.",
+        "The failure context (unlocks `e2`, `e3`): a failure carries what was attempted, the number of attempts, the partial results of the last attempt and the alternatives for its type, so the coordinator can act on it; a permission or invalid query error is not retried.",
+        "The coordinator's actions (unlocks `e4`): a failed topic with partial results is used as it is (`use_partial`), one without them but with alternatives is retried another way (`try_alternative`), and one with neither is flagged as a gap (`flag_gap`); the run never stops.",
+        "The partial and gap groups (unlocks `e5`): a failed topic with partial results is listed under `Partial` with its failure type, and one without them under `Gaps` with the failure type and the query that was attempted, so the note names the cause.",
+        "The topic with no result (unlocks `e6`): a topic that has no result at all is a gap that was not searched: `topic (not searched)` under `Gaps`."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gap 1. About eight lines in all. The steps below describe the whole flow, so you can see how your gaps are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "A search tool is a function `call(query, attempt)` (the attempt number starts at 1) that returns either `{status: \"ok\", items: [...]}` or `{status: \"error\", type, partial: [...]}`, where `type` is one of `timeout`, `unavailable`, `permission` and `invalid_query` (or anything else) and `partial` holds the items found before the error."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`search_with_recovery(query, call, max_attempts=2)` returns an outcome:",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "an `ok` reply with items gives `{status: \"success\", items, attempts}`; an `ok` reply with no items is a valid empty result, `{status: \"empty\", items: [], attempts}`, and is never an error;",
+              "an error of type `timeout` or `unavailable` is transient: the subagent calls again, up to `max_attempts` calls in all;",
+              "any other error, or a transient one on the last attempt, ends in `{status: \"failed\", failure_type, attempted, attempts, partial_results, alternatives}`: `attempted` is the query, `partial_results` is the `partial` of the last reply, and `alternatives` comes from the `ALTERNATIVES` table in the starter (an empty list for a type the table does not know)."
+            ]
+          }
+        ],
+        "`coordinator_plan(results)` takes a map from topic to outcome and returns `(topic, action)` pairs in the map's order: `use` for a success, `no_findings` for an empty result, and for a failure `use_partial` when it has partial results, otherwise `try_alternative` when it has alternatives, otherwise `flag_gap`. It never stops the run for a failure.",
+        "`coverage_note(results, topics)` returns lines for the groups that are not empty, in this order: `Well-supported: ...` (successes), `Partial: ...` (failures with partial results, each as `<topic> (<failure_type>)`), `No findings: ...` (empty results) and `Gaps: ...` (other failures, each as `<topic> (<failure_type>: <attempted>)`, and a topic with no result at all as `<topic> (not searched)`). Topics are listed in the order of `topics`, and the lines are joined by a newline; with nothing to say the result is an empty string."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Recover locally.** A timeout is the subagent's to retry, so that the coordinator hears only what the subagent could not fix. *You should see* a success after one retry, reported with two attempts.",
+        "**An empty result is an answer.** A search that finds nothing has succeeded. *You should see* `empty` and no retry.",
+        "**Errors carry context.** \"Failed\" is not enough for a coordinator to choose a recovery. *You should see* the failure type, the query, the attempts, the partial results and the alternatives.",
+        "**Do not retry what cannot change.** A closed door stays closed. *You should see* one attempt for a permission error.",
+        "**Never stop the run, never hide the gap.** The coordinator uses what it has and the report says what is missing and why. *You should see* a plan for every topic and a note with a gap named."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A transient failure is retried locally and the success is reported with its attempts"
+        ],
+        [
+          "`e1`",
+          "A valid empty result is a success with no findings and never an error"
+        ],
+        [
+          "`e2`",
+          "A permission or invalid query error is not retried and carries what was attempted and its alternatives"
+        ],
+        [
+          "`e3`",
+          "A failure that survives the retries carries the partial results of the last attempt"
+        ],
+        [
+          "`e4`",
+          "The coordinator uses partial results, tries an alternative or flags a gap, and never stops the run"
+        ],
+        [
+          "`e5`",
+          "The coverage note separates supported topics from gaps and names the cause"
+        ],
+        [
+          "`e6`",
+          "A topic with no result is a gap that was not searched"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "import { logger } from \"./logger.ts\";\nconst log = logger(\"error_flow\");\n/** How a subagent's failure reaches the coordinator and the report: local recovery, structured error context, valid empty results, and coverage notes. See ../../statement.md. */\n\nexport const ALTERNATIVES: Record<string, string[]> = {\n  timeout: [\"retry later\", \"try a narrower query\"],\n  unavailable: [\"use a cached source\", \"try another provider\"],\n  permission: [\"request access\", \"use a public source\"],\n  invalid_query: [\"rewrite the query\"],\n};\nexport const TRANSIENT = [\"timeout\", \"unavailable\"];\n\nexport function searchWithRecovery(query: string, call: (query: string, attempt: number) => any, maxAttempts = 2): any {\n  log.debug(\"searchWithRecovery input\", query);\n  let attempts = 0;\n  for (;;) {\n    attempts += 1;\n    const reply = call(query, attempts);\n    if (reply.status === \"ok\") {\n      const items = reply.items;\n      return { status: items.length > 0 ? \"success\" : \"empty\", items, attempts };\n    }\n    const kind = reply.type;\n    if (TRANSIENT.includes(kind) && attempts < maxAttempts) continue;\n    return { status: \"failed\", failure_type: kind, attempted: query, attempts, partial_results: reply.partial ?? [], alternatives: ALTERNATIVES[kind] ?? [] };\n  }\n}\n\nexport function coordinatorPlan(results: Record<string, any>): Array<[string, string]> {\n  const plan: Array<[string, string]> = [];\n  for (const [topic, outcome] of Object.entries(results)) {\n    let action: string;\n    if (outcome.status === \"success\") action = \"use\";\n    else if (outcome.status === \"empty\") action = \"no_findings\";\n    else if (outcome.partial_results.length > 0) action = \"use_partial\";\n    else if (outcome.alternatives.length > 0) action = \"try_alternative\";\n    else action = \"flag_gap\";\n    plan.push([topic, action]);\n  }\n  return plan;\n}\n\nexport function coverageNote(results: Record<string, any>, topics: string[]): string {\n  const groups: Record<string, string[]> = { \"Well-supported\": [], Partial: [], \"No findings\": [], Gaps: [] };\n  for (const topic of topics) {\n    const outcome = results[topic];\n    if (outcome === undefined) groups[\"Gaps\"].push(`${topic} (not searched)`);\n    else if (outcome.status === \"success\") groups[\"Well-supported\"].push(topic);\n    else if (outcome.status === \"empty\") groups[\"No findings\"].push(topic);\n    else if (outcome.partial_results.length > 0) groups[\"Partial\"].push(`${topic} (${outcome.failure_type})`);\n    else groups[\"Gaps\"].push(`${topic} (${outcome.failure_type}: ${outcome.attempted})`);\n  }\n  return Object.entries(groups).filter(([, items]) => items.length > 0).map(([name, items]) => `${name}: ${items.join(\", \")}`).join(\"\\n\");\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { coordinatorPlan, coverageNote, searchWithRecovery } from \"./errorFlow.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// A stand-in for a search subagent, like the tests use: it times out once, then answers.\nconst flaky = (_query: string, attempt: number) =>\n  attempt === 1 ? { status: \"error\", type: \"timeout\", partial: [] } : { status: \"ok\", items: [\"a\", \"b\"] };\n\n// A search the agent may not run: the failure is not transient.\nconst forbidden = (_query: string, _attempt: number) => ({ status: \"error\", type: \"permission\", partial: [] });\n\nconst news = searchWithRecovery(\"news\", flaky);\nconsole.log(\"transient failure:\", JSON.stringify(news));\nconst filings = searchWithRecovery(\"filings\", forbidden);\nconsole.log(\"permission failure:\", JSON.stringify(filings));\n\n// What the coordinator does with each outcome, and what the final report admits.\nconst results = { news, filings };\nconsole.log(\"plan:\", JSON.stringify(coordinatorPlan(results)));\nconsole.log(coverageNote(results, [\"news\", \"filings\", \"patents\"]));\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "import { logger } from \"./logger.ts\";\nconst log = logger(\"error_flow\");\n/** How a subagent's failure reaches the coordinator and the report: local recovery, structured error context, valid empty results, and coverage notes. See ../../statement.md. */\n\nexport const ALTERNATIVES: Record<string, string[]> = {\n  timeout: [\"retry later\", \"try a narrower query\"],\n  unavailable: [\"use a cached source\", \"try another provider\"],\n  permission: [\"request access\", \"use a public source\"],\n  invalid_query: [\"rewrite the query\"],\n};\nexport const TRANSIENT = [\"timeout\", \"unavailable\"];\n\nexport function searchWithRecovery(query: string, call: (query: string, attempt: number) => any, maxAttempts = 2): any {\n  log.debug(\"searchWithRecovery input\", query);\n  let attempts = 0;\n  for (;;) {\n    attempts += 1;\n    const reply = call(query, attempts);\n    if (reply.status === \"ok\") {\n      const items = reply.items;\n      // TODO 2 of 6 (finish this to pass e1): the status of an ok reply. Return success when the reply holds items and\n      //   empty when it holds none (a search that found nothing is a valid answer, not a failure). Example: ok with [] ->\n      //   empty.\n      return { status: \"success\", items, attempts };\n    }\n    const kind = reply.type;\n    // TODO 1 of 6 (finish this to pass m1): the local retry. When the failure type is one of TRANSIENT and the attempts\n    //   so far are below max_attempts, try again; otherwise give up. Example: timeout then ok, limit 2 -> success with\n    //   attempts 2.\n    // TODO 3 of 6 (finish this to pass e2, e3): the failed outcome. Return status failed with the failure type, the\n    //   query that was attempted, the attempts, the partial results the reply carried (none when absent) and the\n    //   alternatives listed for that failure type (none when unknown). Example: permission error -> alternatives [request\n    //   access, use a public source].\n    return { status: \"failed\", failure_type: kind, attempted: query, attempts, partial_results: [], alternatives: [] };\n  }\n}\n\nexport function coordinatorPlan(results: Record<string, any>): Array<[string, string]> {\n  const plan: Array<[string, string]> = [];\n  for (const [topic, outcome] of Object.entries(results)) {\n    let action: string;\n    if (outcome.status === \"success\") action = \"use\";\n    else if (outcome.status === \"empty\") action = \"no_findings\";\n    // TODO 4 of 6 (finish this to pass e4): the rows for a failed topic. When the outcome has partial results, the\n    //   action is use_partial; otherwise try_alternative when it has alternatives; otherwise flag_gap. Example: failed, no\n    //   partial, alternatives [rewrite the query] -> try_alternative.\n    else action = \"flag_gap\";\n    plan.push([topic, action]);\n  }\n  return plan;\n}\n\nexport function coverageNote(results: Record<string, any>, topics: string[]): string {\n  const groups: Record<string, string[]> = { \"Well-supported\": [], Partial: [], \"No findings\": [], Gaps: [] };\n  for (const topic of topics) {\n    const outcome = results[topic];\n    // TODO 6 of 6 (finish this to pass e6): the topic with no result. When a requested topic has no outcome at all, list\n    //   it under Gaps as \"topic (not searched)\". Example: topics [a, b], results only for a -> Gaps: b (not searched).\n    if (outcome === undefined) continue;\n    else if (outcome.status === \"success\") groups[\"Well-supported\"].push(topic);\n    else if (outcome.status === \"empty\") groups[\"No findings\"].push(topic);\n    // TODO 5 of 6 (finish this to pass e5): the groups of a failed topic in the coverage note. With partial results,\n    //   list the topic under Partial as \"topic (failure type)\"; without, under Gaps as \"topic (failure type: query\n    //   attempted)\". Example: partial, timeout -> Partial: topic (timeout).\n    else groups[\"Gaps\"].push(topic);\n  }\n  return Object.entries(groups).filter(([, items]) => items.length > 0).map(([name, items]) => `${name}: ${items.join(\", \")}`).join(\"\\n\");\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { coordinatorPlan, coverageNote, searchWithRecovery } from \"./errorFlow.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// A stand-in for a search subagent, like the tests use: it times out once, then answers.\nconst flaky = (_query: string, attempt: number) =>\n  attempt === 1 ? { status: \"error\", type: \"timeout\", partial: [] } : { status: \"ok\", items: [\"a\", \"b\"] };\n\n// A search the agent may not run: the failure is not transient.\nconst forbidden = (_query: string, _attempt: number) => ({ status: \"error\", type: \"permission\", partial: [] });\n\nconst news = searchWithRecovery(\"news\", flaky);\nconsole.log(\"transient failure:\", JSON.stringify(news));\nconst filings = searchWithRecovery(\"filings\", forbidden);\nconsole.log(\"permission failure:\", JSON.stringify(filings));\n\n// What the coordinator does with each outcome, and what the final report admits.\nconst results = { news, filings };\nconsole.log(\"plan:\", JSON.stringify(coordinatorPlan(results)));\nconsole.log(coverageNote(results, [\"news\", \"filings\", \"patents\"]));\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 6,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "089d417216e8626d49a4c62832d5ec46c4a4c730c2e2ed20b523b3fccbb9e6f3",
+  "starting_code": "import { logger } from \"./logger.ts\";\nconst log = logger(\"error_flow\");\n/** How a subagent's failure reaches the coordinator and the report: local recovery, structured error context, valid empty results, and coverage notes. See ../../statement.md. */\n\nexport const ALTERNATIVES: Record<string, string[]> = {\n  timeout: [\"retry later\", \"try a narrower query\"],\n  unavailable: [\"use a cached source\", \"try another provider\"],\n  permission: [\"request access\", \"use a public source\"],\n  invalid_query: [\"rewrite the query\"],\n};\nexport const TRANSIENT = [\"timeout\", \"unavailable\"];\n\nexport function searchWithRecovery(query: string, call: (query: string, attempt: number) => any, maxAttempts = 2): any {\n  log.debug(\"searchWithRecovery input\", query);\n  let attempts = 0;\n  for (;;) {\n    attempts += 1;\n    const reply = call(query, attempts);\n    if (reply.status === \"ok\") {\n      const items = reply.items;\n      // TODO 2 of 6 (finish this to pass e1): the status of an ok reply. Return success when the reply holds items and\n      //   empty when it holds none (a search that found nothing is a valid answer, not a failure). Example: ok with [] ->\n      //   empty.\n      return { status: \"success\", items, attempts };\n    }\n    const kind = reply.type;\n    // TODO 1 of 6 (finish this to pass m1): the local retry. When the failure type is one of TRANSIENT and the attempts\n    //   so far are below max_attempts, try again; otherwise give up. Example: timeout then ok, limit 2 -> success with\n    //   attempts 2.\n    // TODO 3 of 6 (finish this to pass e2, e3): the failed outcome. Return status failed with the failure type, the\n    //   query that was attempted, the attempts, the partial results the reply carried (none when absent) and the\n    //   alternatives listed for that failure type (none when unknown). Example: permission error -> alternatives [request\n    //   access, use a public source].\n    return { status: \"failed\", failure_type: kind, attempted: query, attempts, partial_results: [], alternatives: [] };\n  }\n}\n\nexport function coordinatorPlan(results: Record<string, any>): Array<[string, string]> {\n  const plan: Array<[string, string]> = [];\n  for (const [topic, outcome] of Object.entries(results)) {\n    let action: string;\n    if (outcome.status === \"success\") action = \"use\";\n    else if (outcome.status === \"empty\") action = \"no_findings\";\n    // TODO 4 of 6 (finish this to pass e4): the rows for a failed topic. When the outcome has partial results, the\n    //   action is use_partial; otherwise try_alternative when it has alternatives; otherwise flag_gap. Example: failed, no\n    //   partial, alternatives [rewrite the query] -> try_alternative.\n    else action = \"flag_gap\";\n    plan.push([topic, action]);\n  }\n  return plan;\n}\n\nexport function coverageNote(results: Record<string, any>, topics: string[]): string {\n  const groups: Record<string, string[]> = { \"Well-supported\": [], Partial: [], \"No findings\": [], Gaps: [] };\n  for (const topic of topics) {\n    const outcome = results[topic];\n    // TODO 6 of 6 (finish this to pass e6): the topic with no result. When a requested topic has no outcome at all, list\n    //   it under Gaps as \"topic (not searched)\". Example: topics [a, b], results only for a -> Gaps: b (not searched).\n    if (outcome === undefined) continue;\n    else if (outcome.status === \"success\") groups[\"Well-supported\"].push(topic);\n    else if (outcome.status === \"empty\") groups[\"No findings\"].push(topic);\n    // TODO 5 of 6 (finish this to pass e5): the groups of a failed topic in the coverage note. With partial results,\n    //   list the topic under Partial as \"topic (failure type)\"; without, under Gaps as \"topic (failure type: query\n    //   attempted)\". Example: partial, timeout -> Partial: topic (timeout).\n    else groups[\"Gaps\"].push(topic);\n  }\n  return Object.entries(groups).filter(([, items]) => items.length > 0).map(([name, items]) => `${name}: ${items.join(\", \")}`).join(\"\\n\");\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/66-errors-across-agents/prose/unit-02/practice-2/errorFlow.ts",
+    "test_path": "practice/level-3/66-errors-across-agents/prose/unit-02/practice-2/errorFlow.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-3/66-errors-across-agents/prose/unit-02/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-3/66-errors-across-agents/prose/unit-02/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-3/66-errors-across-agents/prose/unit-02/practice-2/errorFlow.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 a transient failure is retried locally and the success is reported with its attempts",
+        "kind": "main",
+        "says": "A transient failure is retried locally and the success is reported with its attempts"
+      },
+      {
+        "id": "e1 a valid empty result is a success with no findings and never an error",
+        "kind": "edge",
+        "says": "A valid empty result is a success with no findings and never an error"
+      },
+      {
+        "id": "e2 a permission or invalid query error is not retried and carries what was attempted and its alternatives",
+        "kind": "edge",
+        "says": "A permission or invalid query error is not retried and carries what was attempted and its alternatives"
+      },
+      {
+        "id": "e3 a failure that survives the retries carries the partial results of the last attempt",
+        "kind": "edge",
+        "says": "A failure that survives the retries carries the partial results of the last attempt"
+      },
+      {
+        "id": "e4 the coordinator uses partial results tries an alternative or flags a gap and never stops the run",
+        "kind": "edge",
+        "says": "The coordinator uses partial results, tries an alternative or flags a gap, and never stops the run"
+      },
+      {
+        "id": "e5 the coverage note separates supported topics from gaps and names the cause",
+        "kind": "edge",
+        "says": "The coverage note separates supported topics from gaps and names the cause"
+      },
+      {
+        "id": "e6 a topic with no result is a gap that was not searched",
+        "kind": "edge",
+        "says": "A topic with no result is a gap that was not searched"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/66-errors-across-agents/prose/unit-02/practice-2/target/report.xml"
+    },
+    "origin": "course/66-errors-across-agents/02-plans-partial-results-coverage-notes-and-the-practice.md",
+    "concepts": [
+      "the practice of Plans, partial results, coverage notes and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/66-errors-across-agents/prose/unit-02/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "errors-across-agents-u2"
+}

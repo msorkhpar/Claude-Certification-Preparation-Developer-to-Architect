@@ -1,0 +1,304 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "45-the-agentic-loop-in-depth"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: an agent loop that is driven by the stop reason (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an agent loop that is driven by the stop reason"
+    },
+    {
+      "type": "para",
+      "text": "The loop of module 26 ran until the model stopped asking for tools. This practice builds the loop an architect would ship: one that ends only when the model's own stop reason says so, treats the turn limit as a backstop and not as the way a run normally ends, and keeps the conversation in a state the API accepts. Nothing here touches the network: the model is a function that the tests script."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`model`",
+          "a function from the list of messages so far to one reply: `{\"stop_reason\": ..., \"content\": [blocks]}`; a block is `{\"type\": \"text\", \"text\": ...}` or `{\"type\": \"tool_use\", \"id\": ..., \"name\": ..., \"input\": {...}}`"
+        ],
+        [
+          "`tools`",
+          "a map from a tool name to a handler: a function from the input map to a string; it may throw"
+        ],
+        [
+          "`task`",
+          "the first user message, a string"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working loop with six small gaps cut out. The loop itself, the tool runner and the outcome are written and correct; each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_text` unlocks `m1` and `e5`: the text blocks of a reply joined together.",
+        "`_calls` unlocks `e2` and `e6`: the `tool_use` blocks of a reply, in order.",
+        "`_tool_result` unlocks `m1`, `e2` and `e3`: one result block, with `is_error` only when flagged.",
+        "`_status_for` unlocks `m1`, `e5` and `e6`: the status for each stop reason that ends the run, including `malformed` for `tool_use` with no call.",
+        "`_at_limit` unlocks `e4`: whether the turn limit has been reached before the next model call.",
+        "`_snapshot` unlocks `m1`: the copy of the messages the model is handed."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About ten lines in all. The sections below describe the whole loop."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "`run_agent(model, tools, task, max_turns=8)` (`runAgent` in TypeScript, Java and Kotlin) returns `{\"status\", \"text\", \"turns\", \"messages\"}`."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Start with the one user message `{\"role\": \"user\", \"content\": task}`. One **turn** is one call of `model`. Hand the model a copy of the messages so far (a list with the same items), so that later changes do not rewrite what it was given.",
+        "Keep every reply exactly as it came: add `{\"role\": \"assistant\", \"content\": <the reply's content list>}`. `text` is always the text blocks of the latest reply joined together (empty when it has none).",
+        [
+          "Decide what happens next from `stop_reason` and from nothing else. Words in the text, such as \"done\" or \"I will call a tool\", never decide anything.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`tool_use`: run every `tool_use` block of the reply, in order, and answer all of them in **one** user message whose content is the list of results and nothing else: `{\"type\": \"tool_result\", \"tool_use_id\": <the call's id>, \"content\": <the handler's string>}`. A handler that throws, or a name that is not in `tools`, still gets a result, with `\"is_error\": true` added: the content is the exception's message, or `Unknown tool: NAME`. The run goes on. A result without an error has no `is_error` key.",
+              "`end_turn` or `stop_sequence`: status `done`.",
+              "`max_tokens`: status `truncated`. `refusal`: status `refused`.",
+              "any other value: status `unexpected`. The loop does not guess what a stop reason it has never seen means.",
+              "`tool_use` with no `tool_use` block in the reply: status `malformed`. There is nothing to answer, and an empty user message would be refused by the API, so nothing more is sent."
+            ]
+          }
+        ],
+        "`max_turns` is a backstop. Check it **before** each model call: when `turns` already equals `max_turns` and the model has not ended its turn, return status `max_turns` with the messages as they stand (they end with the last tool results, so the run can be resumed). A reply that ends the turn on the last allowed call is still `done`. `turns` is the number of model calls made."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each step is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Keep the conversation as the model's memory** (steps 1 and 2). The exam expects the results of the tools to be appended to the history so that the model can reason about its next action, and the replies to be kept as they came. *You should see* the second model call receive the first reply and its tool results, and a change that you make to your own list leave an earlier call's input as it was.",
+        "**Decide on the stop reason alone** (step 3, first part). The exam names reading the text for a completion signal as an anti-pattern, because a reply can say \"done\" and call a tool in the same breath. *You should see* a reply that says \"done\" with a tool call continue, and a reply that says \"I will call a tool\" with the end of its turn stop.",
+        "**Answer every call, once, in one message** (step 3, `tool_use`). The API needs a result for every call of a turn, and a failure is information for the model, not a reason to stop. *You should see* all the results of a turn together, in order, with the failing or unknown tool flagged and the run going on.",
+        "**Give the turn limit its proper job** (step 4). The exam rejects an arbitrary cap as the main stopper and accepts it as a backstop. *You should see* an endless run end with its own status and the messages intact, and a run that finishes on the last allowed call still report `done`.",
+        "**Give every other value a status** (step 3, the rest). A cut-off, a refusal and a value you have never seen are different events. *You should see* `truncated`, `refused` and `unexpected` come out as themselves, and nothing more sent after a malformed reply."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A run alternates model and tools until the model ends its turn, and the model sees the growing conversation"
+        ],
+        [
+          "`e1`",
+          "The stop reason decides: a reply that says \"done\" but calls a tool continues, and one that announces a tool but ends its turn ends"
+        ],
+        [
+          "`e2`",
+          "Every call of a turn is answered in one user message, in order, with the assistant turn kept as it came"
+        ],
+        [
+          "`e3`",
+          "A failing or unknown tool becomes an error result and the run goes on"
+        ],
+        [
+          "`e4`",
+          "The turn limit is a backstop: it ends an endless run with its own status and does not cut off a run that ends on the last turn"
+        ],
+        [
+          "`e5`",
+          "A cut-off, refused, stop-sequence or never-seen stop reason ends the run with the right status"
+        ],
+        [
+          "`e6`",
+          "A `tool_use` reply with no tool call is malformed and nothing more is sent"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"The agent loop, driven by the stop reason. See ../../statement.md.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef _text(content):\n    return \"\".join(block.get(\"text\", \"\") for block in content if block.get(\"type\") == \"text\")\n\n\ndef _calls(content):\n    return [block for block in content if block.get(\"type\") == \"tool_use\"]\n\n\ndef _tool_result(block, content, is_error=False):\n    result = {\"type\": \"tool_result\", \"tool_use_id\": block[\"id\"], \"content\": content}\n    if is_error:\n        result[\"is_error\"] = True\n    return result\n\n\ndef _status_for(reason, calls):\n    if reason == \"tool_use\" and not calls:\n        return \"malformed\"\n    if reason in (\"end_turn\", \"stop_sequence\"):\n        return \"done\"\n    if reason == \"max_tokens\":\n        return \"truncated\"\n    if reason == \"refusal\":\n        return \"refused\"\n    return \"unexpected\"\n\n\ndef _at_limit(turns, max_turns):\n    return turns >= max_turns\n\n\ndef _snapshot(messages):\n    return list(messages)\n\n\ndef _run_tool(block, tools):\n    handler = tools.get(block.get(\"name\"))\n    if handler is None:\n        return _tool_result(block, f\"Unknown tool: {block.get('name')}\", True)\n    try:\n        return _tool_result(block, handler(block.get(\"input\", {})))\n    except Exception as error:  # a failing tool is a result for the model, not a crash of the loop\n        return _tool_result(block, str(error), True)\n\n\ndef run_agent(model, tools, task, max_turns=8):\n    log.debug(\"run_agent input: %r\", task)\n    messages = [{\"role\": \"user\", \"content\": task}]\n    turns, last_text = 0, \"\"\n    while True:\n        if _at_limit(turns, max_turns):  # the count is a backstop: it only ends a run the model has not ended itself\n            return {\"status\": \"max_turns\", \"text\": last_text, \"turns\": turns, \"messages\": messages}\n        turns += 1\n        reply = model(_snapshot(messages))\n        content = reply[\"content\"]\n        last_text = _text(content)\n        messages.append({\"role\": \"assistant\", \"content\": content})\n        reason = reply[\"stop_reason\"]\n        calls = _calls(content)\n        if reason == \"tool_use\" and calls:\n            messages.append({\"role\": \"user\", \"content\": [_run_tool(block, tools) for block in calls]})\n        else:\n            return {\"status\": _status_for(reason, calls), \"text\": last_text, \"turns\": turns, \"messages\": messages}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom agent import run_agent\n\n\ndef lookup(arguments):\n    return f\"record {arguments['n']}\"\n\n\n# A scripted model, like the one the tests use: it asks for one tool call, then ends its turn.\nreplies = [\n    {\"stop_reason\": \"tool_use\", \"content\": [{\"type\": \"text\", \"text\": \"Looking.\"},\n                                            {\"type\": \"tool_use\", \"id\": \"t1\", \"name\": \"lookup\", \"input\": {\"n\": 1}}]},\n    {\"stop_reason\": \"end_turn\", \"content\": [{\"type\": \"text\", \"text\": \"Record 1 found.\"}]},\n]\n\n\ndef model(messages):\n    print(\"model called with\", len(messages), \"messages\")\n    return replies.pop(0) if replies else {\"stop_reason\": \"end_turn\", \"content\": [{\"type\": \"text\", \"text\": \"script ran out\"}]}\n\n\nresult = run_agent(model, {\"lookup\": lookup}, \"find record 1\") or {}\n\nprint(\"status:\", result.get(\"status\"), \"| turns:\", result.get(\"turns\"))\nprint(\"final text:\", result.get(\"text\"))\nprint(\"roles:\", [m[\"role\"] for m in result.get(\"messages\", [])])\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"The agent loop, driven by the stop reason. See ../../statement.md.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef _text(content):\n    \"\"\"TODO 1 of 6 (unlocks m1 and e5): the text of a reply.\n\n    Receives a reply's content list of blocks. Returns the `text` of every block whose type is \"text\", joined with nothing between.\n    Example: _text([{\"type\": \"text\", \"text\": \"Hi \"}, {\"type\": \"tool_use\", \"id\": \"t\"}, {\"type\": \"text\", \"text\": \"there\"}]) -> \"Hi there\"\n    \"\"\"\n    return \"\"\n\n\ndef _calls(content):\n    \"\"\"TODO 2 of 6 (unlocks e2 and e6): the tool calls of a reply.\n\n    Receives a reply's content list. Returns its `tool_use` blocks, in order; an empty list when there are none.\n    Example: _calls([{\"type\": \"text\", \"text\": \"x\"}, {\"type\": \"tool_use\", \"id\": \"a\"}]) -> [{\"type\": \"tool_use\", \"id\": \"a\"}]\n    \"\"\"\n    return []\n\n\ndef _tool_result(block, content, is_error=False):\n    \"\"\"TODO 3 of 6 (unlocks m1, e2 and e3): one tool_result block.\n\n    Receives the tool_use block, the result text and a flag. Returns {\"type\": \"tool_result\", \"tool_use_id\": <the block's id>,\n    \"content\": <the text>}, with \"is_error\": True added only when the flag is set (a good result has no is_error key).\n    Example: _tool_result({\"id\": \"t1\"}, \"boom\", True) -> {\"type\": \"tool_result\", \"tool_use_id\": \"t1\", \"content\": \"boom\", \"is_error\": True}\n    \"\"\"\n    return {}\n\n\ndef _status_for(reason, calls):\n    \"\"\"TODO 4 of 6 (unlocks m1, e5 and e6): the status a stop reason ends the run with (the loop only gets here when it cannot go on).\n\n    Receives the stop reason and the tool calls of the reply. Returns \"malformed\" for tool_use with no calls, \"done\" for end_turn and\n    stop_sequence, \"truncated\" for max_tokens, \"refused\" for refusal and \"unexpected\" for anything else.\n    Example: _status_for(\"max_tokens\", []) -> \"truncated\", _status_for(\"tool_use\", []) -> \"malformed\", _status_for(\"brand_new\", []) -> \"unexpected\"\n    \"\"\"\n    return \"\"\n\n\ndef _at_limit(turns, max_turns):\n    \"\"\"TODO 5 of 6 (unlocks e4): has the turn limit been reached before the next model call?\n\n    Receives the model calls made so far and the limit. Returns True when no call is left. Example: _at_limit(3, 3) -> True, _at_limit(2, 3) -> False\n    \"\"\"\n    return False\n\n\ndef _snapshot(messages):\n    \"\"\"TODO 6 of 6 (unlocks m1): the copy of the messages that the model is handed.\n\n    Receives the list of messages so far. Returns a new list with the same items, so later changes do not rewrite what the model saw.\n    Example: _snapshot([a, b]) -> a new list [a, b]\n    \"\"\"\n    return messages\n\n\ndef _run_tool(block, tools):\n    handler = tools.get(block.get(\"name\"))\n    if handler is None:\n        return _tool_result(block, f\"Unknown tool: {block.get('name')}\", True)\n    try:\n        return _tool_result(block, handler(block.get(\"input\", {})))\n    except Exception as error:  # a failing tool is a result for the model, not a crash of the loop\n        return _tool_result(block, str(error), True)\n\n\ndef run_agent(model, tools, task, max_turns=8):\n    log.debug(\"run_agent input: %r\", task)\n    messages = [{\"role\": \"user\", \"content\": task}]\n    turns, last_text = 0, \"\"\n    while True:\n        if _at_limit(turns, max_turns):  # the count is a backstop: it only ends a run the model has not ended itself\n            return {\"status\": \"max_turns\", \"text\": last_text, \"turns\": turns, \"messages\": messages}\n        turns += 1\n        reply = model(_snapshot(messages))\n        content = reply[\"content\"]\n        last_text = _text(content)\n        messages.append({\"role\": \"assistant\", \"content\": content})\n        reason = reply[\"stop_reason\"]\n        calls = _calls(content)\n        if reason == \"tool_use\" and calls:\n            messages.append({\"role\": \"user\", \"content\": [_run_tool(block, tools) for block in calls]})\n        else:\n            return {\"status\": _status_for(reason, calls), \"text\": last_text, \"turns\": turns, \"messages\": messages}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom agent import run_agent\n\n\ndef lookup(arguments):\n    return f\"record {arguments['n']}\"\n\n\n# A scripted model, like the one the tests use: it asks for one tool call, then ends its turn.\nreplies = [\n    {\"stop_reason\": \"tool_use\", \"content\": [{\"type\": \"text\", \"text\": \"Looking.\"},\n                                            {\"type\": \"tool_use\", \"id\": \"t1\", \"name\": \"lookup\", \"input\": {\"n\": 1}}]},\n    {\"stop_reason\": \"end_turn\", \"content\": [{\"type\": \"text\", \"text\": \"Record 1 found.\"}]},\n]\n\n\ndef model(messages):\n    print(\"model called with\", len(messages), \"messages\")\n    return replies.pop(0) if replies else {\"stop_reason\": \"end_turn\", \"content\": [{\"type\": \"text\", \"text\": \"script ran out\"}]}\n\n\nresult = run_agent(model, {\"lookup\": lookup}, \"find record 1\") or {}\n\nprint(\"status:\", result.get(\"status\"), \"| turns:\", result.get(\"turns\"))\nprint(\"final text:\", result.get(\"text\"))\nprint(\"roles:\", [m[\"role\"] for m in result.get(\"messages\", [])])\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 5,
+    "code": 2,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "ab7ceee419657361cc97982075753f4768a8e41d1409d0e8e2fcebdc337c851e",
+  "starting_code": "\"\"\"The agent loop, driven by the stop reason. See ../../statement.md.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef _text(content):\n    \"\"\"TODO 1 of 6 (unlocks m1 and e5): the text of a reply.\n\n    Receives a reply's content list of blocks. Returns the `text` of every block whose type is \"text\", joined with nothing between.\n    Example: _text([{\"type\": \"text\", \"text\": \"Hi \"}, {\"type\": \"tool_use\", \"id\": \"t\"}, {\"type\": \"text\", \"text\": \"there\"}]) -> \"Hi there\"\n    \"\"\"\n    return \"\"\n\n\ndef _calls(content):\n    \"\"\"TODO 2 of 6 (unlocks e2 and e6): the tool calls of a reply.\n\n    Receives a reply's content list. Returns its `tool_use` blocks, in order; an empty list when there are none.\n    Example: _calls([{\"type\": \"text\", \"text\": \"x\"}, {\"type\": \"tool_use\", \"id\": \"a\"}]) -> [{\"type\": \"tool_use\", \"id\": \"a\"}]\n    \"\"\"\n    return []\n\n\ndef _tool_result(block, content, is_error=False):\n    \"\"\"TODO 3 of 6 (unlocks m1, e2 and e3): one tool_result block.\n\n    Receives the tool_use block, the result text and a flag. Returns {\"type\": \"tool_result\", \"tool_use_id\": <the block's id>,\n    \"content\": <the text>}, with \"is_error\": True added only when the flag is set (a good result has no is_error key).\n    Example: _tool_result({\"id\": \"t1\"}, \"boom\", True) -> {\"type\": \"tool_result\", \"tool_use_id\": \"t1\", \"content\": \"boom\", \"is_error\": True}\n    \"\"\"\n    return {}\n\n\ndef _status_for(reason, calls):\n    \"\"\"TODO 4 of 6 (unlocks m1, e5 and e6): the status a stop reason ends the run with (the loop only gets here when it cannot go on).\n\n    Receives the stop reason and the tool calls of the reply. Returns \"malformed\" for tool_use with no calls, \"done\" for end_turn and\n    stop_sequence, \"truncated\" for max_tokens, \"refused\" for refusal and \"unexpected\" for anything else.\n    Example: _status_for(\"max_tokens\", []) -> \"truncated\", _status_for(\"tool_use\", []) -> \"malformed\", _status_for(\"brand_new\", []) -> \"unexpected\"\n    \"\"\"\n    return \"\"\n\n\ndef _at_limit(turns, max_turns):\n    \"\"\"TODO 5 of 6 (unlocks e4): has the turn limit been reached before the next model call?\n\n    Receives the model calls made so far and the limit. Returns True when no call is left. Example: _at_limit(3, 3) -> True, _at_limit(2, 3) -> False\n    \"\"\"\n    return False\n\n\ndef _snapshot(messages):\n    \"\"\"TODO 6 of 6 (unlocks m1): the copy of the messages that the model is handed.\n\n    Receives the list of messages so far. Returns a new list with the same items, so later changes do not rewrite what the model saw.\n    Example: _snapshot([a, b]) -> a new list [a, b]\n    \"\"\"\n    return messages\n\n\ndef _run_tool(block, tools):\n    handler = tools.get(block.get(\"name\"))\n    if handler is None:\n        return _tool_result(block, f\"Unknown tool: {block.get('name')}\", True)\n    try:\n        return _tool_result(block, handler(block.get(\"input\", {})))\n    except Exception as error:  # a failing tool is a result for the model, not a crash of the loop\n        return _tool_result(block, str(error), True)\n\n\ndef run_agent(model, tools, task, max_turns=8):\n    log.debug(\"run_agent input: %r\", task)\n    messages = [{\"role\": \"user\", \"content\": task}]\n    turns, last_text = 0, \"\"\n    while True:\n        if _at_limit(turns, max_turns):  # the count is a backstop: it only ends a run the model has not ended itself\n            return {\"status\": \"max_turns\", \"text\": last_text, \"turns\": turns, \"messages\": messages}\n        turns += 1\n        reply = model(_snapshot(messages))\n        content = reply[\"content\"]\n        last_text = _text(content)\n        messages.append({\"role\": \"assistant\", \"content\": content})\n        reason = reply[\"stop_reason\"]\n        calls = _calls(content)\n        if reason == \"tool_use\" and calls:\n            messages.append({\"role\": \"user\", \"content\": [_run_tool(block, tools) for block in calls]})\n        else:\n            return {\"status\": _status_for(reason, calls), \"text\": last_text, \"turns\": turns, \"messages\": messages}\n",
+  "exercise": {
+    "main_path": "practice/level-3/45-the-agentic-loop-in-depth/prose/unit-02/practice-1/agent.py",
+    "test_path": "practice/level-3/45-the-agentic-loop-in-depth/prose/unit-02/practice-1/test_agent.py",
+    "run_command": [
+      "python3",
+      "practice/level-3/45-the-agentic-loop-in-depth/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-3/45-the-agentic-loop-in-depth/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-3/45-the-agentic-loop-in-depth/prose/unit-02/practice-1/test_agent.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_a_run_alternates_model_and_tools_until_the_model_ends_its_turn",
+        "kind": "main",
+        "says": "A run alternates model and tools until the model ends its turn, and the model sees the growing conversation"
+      },
+      {
+        "id": "test_e1_the_stop_reason_decides_and_the_words_of_the_text_do_not",
+        "kind": "edge",
+        "says": "The stop reason decides: a reply that says \"done\" but calls a tool continues, and one that announces a tool but ends its turn ends"
+      },
+      {
+        "id": "test_e2_every_call_of_a_turn_is_answered_in_one_user_message_in_order",
+        "kind": "edge",
+        "says": "Every call of a turn is answered in one user message, in order, with the assistant turn kept as it came"
+      },
+      {
+        "id": "test_e3_a_failing_or_unknown_tool_becomes_an_error_result_and_the_run_goes_on",
+        "kind": "edge",
+        "says": "A failing or unknown tool becomes an error result and the run goes on"
+      },
+      {
+        "id": "test_e4_the_turn_limit_is_a_backstop_that_ends_only_a_run_the_model_has_not_ended",
+        "kind": "edge",
+        "says": "The turn limit is a backstop: it ends an endless run with its own status and does not cut off a run that ends on the last turn"
+      },
+      {
+        "id": "test_e5_a_cut_off_or_refused_reply_ends_the_run_with_its_own_status",
+        "kind": "edge",
+        "says": "A cut-off, refused, stop-sequence or never-seen stop reason ends the run with the right status"
+      },
+      {
+        "id": "test_e6_a_tool_use_reply_without_a_tool_call_is_malformed_and_sends_nothing_more",
+        "kind": "edge",
+        "says": "A tool_use reply with no tool call is malformed and nothing more is sent"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/45-the-agentic-loop-in-depth/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/45-the-agentic-loop-in-depth/02-results-parallel-calls-context-and-the-practice.md",
+    "concepts": [
+      "the practice of Results, parallel calls, growing context and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/45-the-agentic-loop-in-depth/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "the-agentic-loop-in-depth-u2"
+}

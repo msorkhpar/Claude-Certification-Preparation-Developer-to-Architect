@@ -1,0 +1,2135 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-1",
+    "11-exam-readiness-1"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Level 1 spaced-review question bank",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "rb-001",
+        "stem": "A chat tool built on the Messages API forgets a customer's name after the server process restarts, though she introduced herself earlier. What is the likeliest cause?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The weights inside the model were reset by the restart itself",
+            "correct": false,
+            "says": "The Messages API is stateless: code must resend the history on every request."
+          },
+          {
+            "id": "b",
+            "text": "The window shrinks each time a server process is restarted",
+            "correct": false,
+            "says": "The Messages API is stateless: code must resend the history on every request."
+          },
+          {
+            "id": "c",
+            "text": "The history was not sent again along with the new call",
+            "correct": true,
+            "says": "The Messages API is stateless: code must resend the history on every request."
+          },
+          {
+            "id": "d",
+            "text": "The name was longer than the output limit of the call",
+            "correct": false,
+            "says": "The Messages API is stateless: code must resend the history on every request."
+          }
+        ],
+        "origin": "course/01-how-a-language-model-works/01-how-a-language-model-works.md"
+      },
+      {
+        "id": "rb-002",
+        "stem": "A team budgets an English document at one token per word and is surprised by the bill. What is the better rule of thumb?",
+        "options": [
+          {
+            "id": "a",
+            "text": "About three and a half characters each, then count with the endpoint",
+            "correct": true,
+            "says": "A Claude token is about 3.5 English characters, it varies with language and tokenizer, and counts are estimates to recheck per model."
+          },
+          {
+            "id": "b",
+            "text": "One piece for every sentence on average, in any language",
+            "correct": false,
+            "says": "A Claude token is about 3.5 English characters, it varies with language and tokenizer, and counts are estimates to recheck per model."
+          },
+          {
+            "id": "c",
+            "text": "Exactly four characters for each piece in every language",
+            "correct": false,
+            "says": "A Claude token is about 3.5 English characters, it varies with language and tokenizer, and counts are estimates to recheck per model."
+          },
+          {
+            "id": "d",
+            "text": "The same figure as any earlier model gives for identical text",
+            "correct": false,
+            "says": "A Claude token is about 3.5 English characters, it varies with language and tokenizer, and counts are estimates to recheck per model."
+          }
+        ],
+        "origin": "course/01-how-a-language-model-works/01-how-a-language-model-works.md"
+      },
+      {
+        "id": "rb-003",
+        "stem": "Input of 180,000 tokens goes to a model with a 200K window, with max_tokens set to 40,000. What does the course say happens on Claude 4.5 models and newer?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The API returns a 400 error telling you that the prompt is too long",
+            "correct": false,
+            "says": "Only input alone larger than the window is refused; input plus max_tokens beyond it is accepted and generation can stop at the limit. (checked 2026-10-02)"
+          },
+          {
+            "id": "b",
+            "text": "The API quietly trims the input until the total fits",
+            "correct": false,
+            "says": "Only input alone larger than the window is refused; input plus max_tokens beyond it is accepted and generation can stop at the limit. (checked 2026-10-02)"
+          },
+          {
+            "id": "c",
+            "text": "The output cap is raised automatically to match the space",
+            "correct": false,
+            "says": "Only input alone larger than the window is refused; input plus max_tokens beyond it is accepted and generation can stop at the limit. (checked 2026-10-02)"
+          },
+          {
+            "id": "d",
+            "text": "The call is accepted, and generation ends at the cap",
+            "correct": true,
+            "says": "Only input alone larger than the window is refused; input plus max_tokens beyond it is accepted and generation can stop at the limit. (checked 2026-10-02)"
+          }
+        ],
+        "origin": "course/01-how-a-language-model-works/01-how-a-language-model-works.md"
+      },
+      {
+        "id": "rb-004",
+        "stem": "A team wants repeatable labels from Claude Sonnet 5.5. Which approach follows the course?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Set the temperature to 0.2 on every request that is sent",
+            "correct": false,
+            "says": "The current models reject non-default sampling values, a prompt sentence does not remove sampling, and extra runs only detect variation. (checked 2026-10-02)"
+          },
+          {
+            "id": "b",
+            "text": "Constrain the output to a fixed list and validate in code",
+            "correct": true,
+            "says": "The current models reject non-default sampling values, a prompt sentence does not remove sampling, and extra runs only detect variation. (checked 2026-10-02)"
+          },
+          {
+            "id": "c",
+            "text": "Add a line saying be consistent at the top of the prompt",
+            "correct": false,
+            "says": "The current models reject non-default sampling values, a prompt sentence does not remove sampling, and extra runs only detect variation. (checked 2026-10-02)"
+          },
+          {
+            "id": "d",
+            "text": "Run each ticket five times and keep the most common label",
+            "correct": false,
+            "says": "The current models reject non-default sampling values, a prompt sentence does not remove sampling, and extra runs only detect variation. (checked 2026-10-02)"
+          }
+        ],
+        "origin": "course/01-how-a-language-model-works/02-sampling-knowledge-and-hallucination.md"
+      },
+      {
+        "id": "rb-005",
+        "stem": "A model asked about last month's release notes answers confidently from an older version. Which fix sits at the right layer?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Ask it to try harder to remember the newest version",
+            "correct": false,
+            "says": "Knowledge stops at the cutoff and the model has no live access; recent or private facts must come through the context or a tool."
+          },
+          {
+            "id": "b",
+            "text": "Raise max_tokens so that it has longer to think the answer through",
+            "correct": false,
+            "says": "Knowledge stops at the cutoff and the model has no live access; recent or private facts must come through the context or a tool."
+          },
+          {
+            "id": "c",
+            "text": "Switch to a model with a larger window and ask again",
+            "correct": false,
+            "says": "Knowledge stops at the cutoff and the model has no live access; recent or private facts must come through the context or a tool."
+          },
+          {
+            "id": "d",
+            "text": "Supply the text in the context, or give it a tool to fetch it",
+            "correct": true,
+            "says": "Knowledge stops at the cutoff and the model has no live access; recent or private facts must come through the context or a tool."
+          }
+        ],
+        "origin": "course/01-how-a-language-model-works/02-sampling-knowledge-and-hallucination.md"
+      },
+      {
+        "id": "rb-006",
+        "stem": "Which statement about a model's knowledge is correct?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It updates itself each time any user corrects one of its answers",
+            "correct": false,
+            "says": "The weights are fixed after training and the model has no clock, no access to your files and no knowledge after the cutoff."
+          },
+          {
+            "id": "b",
+            "text": "It stops at the cutoff, so recent or private facts must be supplied",
+            "correct": true,
+            "says": "The weights are fixed after training and the model has no clock, no access to your files and no knowledge after the cutoff."
+          },
+          {
+            "id": "c",
+            "text": "It includes anything stored in the files on the user's own computer",
+            "correct": false,
+            "says": "The weights are fixed after training and the model has no clock, no access to your files and no knowledge after the cutoff."
+          },
+          {
+            "id": "d",
+            "text": "It always knows today's date from the clock of the server",
+            "correct": false,
+            "says": "The weights are fixed after training and the model has no clock, no access to your files and no knowledge after the cutoff."
+          }
+        ],
+        "origin": "course/01-how-a-language-model-works/02-sampling-knowledge-and-hallucination.md"
+      },
+      {
+        "id": "rb-007",
+        "stem": "An engineer asks why Claude cannot reliably count the letters in a long identifier. Which explanation is best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Its vocabulary is too small to hold any identifier",
+            "correct": false,
+            "says": "The tokenizer cuts text into sub-word pieces, so exact character work is approximate and belongs in code."
+          },
+          {
+            "id": "b",
+            "text": "Its context window is shorter than the identifier is",
+            "correct": false,
+            "says": "The tokenizer cuts text into sub-word pieces, so exact character work is approximate and belongs in code."
+          },
+          {
+            "id": "c",
+            "text": "It reads pieces of text rather than single characters",
+            "correct": true,
+            "says": "The tokenizer cuts text into sub-word pieces, so exact character work is approximate and belongs in code."
+          },
+          {
+            "id": "d",
+            "text": "Its training stopped before identifiers like that existed",
+            "correct": false,
+            "says": "The tokenizer cuts text into sub-word pieces, so exact character work is approximate and belongs in code."
+          }
+        ],
+        "origin": "course/02-how-models-are-made/01-pretraining-and-tokenizers.md"
+      },
+      {
+        "id": "rb-008",
+        "stem": "A stakeholder expects the assistant to improve each week as colleagues correct it in chat. Why will that not happen by itself?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Using the model never changes the trained weights themselves",
+            "correct": true,
+            "says": "Training changes weights and inference does not; memory features only put saved notes back into the context."
+          },
+          {
+            "id": "b",
+            "text": "Corrections are deleted automatically after thirty days",
+            "correct": false,
+            "says": "Training changes weights and inference does not; memory features only put saved notes back into the context."
+          },
+          {
+            "id": "c",
+            "text": "Correction messages are too short for the model to register",
+            "correct": false,
+            "says": "Training changes weights and inference does not; memory features only put saved notes back into the context."
+          },
+          {
+            "id": "d",
+            "text": "The app switches to a different model every single week",
+            "correct": false,
+            "says": "Training changes weights and inference does not; memory features only put saved notes back into the context."
+          }
+        ],
+        "origin": "course/02-how-models-are-made/01-pretraining-and-tokenizers.md"
+      },
+      {
+        "id": "rb-009",
+        "stem": "Which stages turn a text-continuing pretrained model into a helpful assistant?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Fine-tuning plus preference learning applied afterwards",
+            "correct": true,
+            "says": "Fine-tuning, RLHF and Constitutional AI shape behaviour; window size and sampling do not."
+          },
+          {
+            "id": "b",
+            "text": "A larger tokenizer vocabulary added once training is done",
+            "correct": false,
+            "says": "Fine-tuning, RLHF and Constitutional AI shape behaviour; window size and sampling do not."
+          },
+          {
+            "id": "c",
+            "text": "A longer context window added once training is done",
+            "correct": false,
+            "says": "Fine-tuning, RLHF and Constitutional AI shape behaviour; window size and sampling do not."
+          },
+          {
+            "id": "d",
+            "text": "A lower temperature applied at inference time by default",
+            "correct": false,
+            "says": "Fine-tuning, RLHF and Constitutional AI shape behaviour; window size and sampling do not."
+          }
+        ],
+        "origin": "course/02-how-models-are-made/02-fine-tuning-feedback-and-what-training-gives.md"
+      },
+      {
+        "id": "rb-010",
+        "stem": "Constitutional AI replaces much of the human preference labelling with what?",
+        "options": [
+          {
+            "id": "a",
+            "text": "More paid raters who compare every pair of replies by hand, one at a time",
+            "correct": false,
+            "says": "The model critiques and revises its answers against principles, then reinforcement learning uses AI feedback."
+          },
+          {
+            "id": "b",
+            "text": "A written list of principles used to critique and compare answers",
+            "correct": true,
+            "says": "The model critiques and revises its answers against principles, then reinforcement learning uses AI feedback."
+          },
+          {
+            "id": "c",
+            "text": "A fixed list of banned words applied after generation ends",
+            "correct": false,
+            "says": "The model critiques and revises its answers against principles, then reinforcement learning uses AI feedback."
+          },
+          {
+            "id": "d",
+            "text": "A search engine that fetches approved answers to reuse",
+            "correct": false,
+            "says": "The model critiques and revises its answers against principles, then reinforcement learning uses AI feedback."
+          }
+        ],
+        "origin": "course/02-how-models-are-made/02-fine-tuning-feedback-and-what-training-gives.md"
+      },
+      {
+        "id": "rb-011",
+        "stem": "A manager says the model is trained to be honest, so its numbers need no check. What is the best reply?",
+        "options": [
+          {
+            "id": "a",
+            "text": "That is true, because honesty training guarantees every single figure it gives",
+            "correct": false,
+            "says": "HHH is a research framework that informs training, not a guarantee about any single answer."
+          },
+          {
+            "id": "b",
+            "text": "That is true for numbers but not for names or other facts",
+            "correct": false,
+            "says": "HHH is a research framework that informs training, not a guarantee about any single answer."
+          },
+          {
+            "id": "c",
+            "text": "That is false only for the models older than the Opus tier",
+            "correct": false,
+            "says": "HHH is a research framework that informs training, not a guarantee about any single answer."
+          },
+          {
+            "id": "d",
+            "text": "That is a goal, not a guarantee, so claims that matter get verified",
+            "correct": true,
+            "says": "HHH is a research framework that informs training, not a guarantee about any single answer."
+          }
+        ],
+        "origin": "course/02-how-models-are-made/02-fine-tuning-feedback-and-what-training-gives.md"
+      },
+      {
+        "id": "rb-012",
+        "stem": "A company wants Claude to answer from a product manual that changes monthly. Which route does the module support?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Fine-tune the model again on each new edition that appears",
+            "correct": false,
+            "says": "The Claude API does not currently offer fine-tuning, and knowledge you have belongs in the window."
+          },
+          {
+            "id": "b",
+            "text": "Wait for the next model release to pick up the changes",
+            "correct": false,
+            "says": "The Claude API does not currently offer fine-tuning, and knowledge you have belongs in the window."
+          },
+          {
+            "id": "c",
+            "text": "Put the current edition into the context at request time",
+            "correct": true,
+            "says": "The Claude API does not currently offer fine-tuning, and knowledge you have belongs in the window."
+          },
+          {
+            "id": "d",
+            "text": "Teach the model the changes through many repeated chats",
+            "correct": false,
+            "says": "The Claude API does not currently offer fine-tuning, and knowledge you have belongs in the window."
+          }
+        ],
+        "origin": "course/02-how-models-are-made/02-fine-tuning-feedback-and-what-training-gives.md"
+      },
+      {
+        "id": "rb-013",
+        "stem": "A team must choose a tier for varied hard reasoning and is unsure. What approach does the documentation back?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Pick the highest-priced tier as the safe default choice for every task",
+            "correct": false,
+            "says": "The decision rule is to benchmark on your own use case; a good evaluation set is the most important step."
+          },
+          {
+            "id": "b",
+            "text": "Run its own prompts and data across candidates, then compare",
+            "correct": true,
+            "says": "The decision rule is to benchmark on your own use case; a good evaluation set is the most important step."
+          },
+          {
+            "id": "c",
+            "text": "Choose the model whose name is the shortest to type",
+            "correct": false,
+            "says": "The decision rule is to benchmark on your own use case; a good evaluation set is the most important step."
+          },
+          {
+            "id": "d",
+            "text": "Use the cheapest tier and accept whatever it produces",
+            "correct": false,
+            "says": "The decision rule is to benchmark on your own use case; a good evaluation set is the most important step."
+          }
+        ],
+        "origin": "course/03-claudes-family-and-its-surfaces/01-the-model-family-and-choosing-a-tier.md"
+      },
+      {
+        "id": "rb-014",
+        "stem": "Which surface suits a developer who wants an agent to edit files and run commands in a repository?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A Project in the app with the files pasted into it",
+            "correct": false,
+            "says": "Claude Code is an agentic coding tool that reads a codebase, edits files and runs commands."
+          },
+          {
+            "id": "b",
+            "text": "Claude in Chrome on the repository's web page",
+            "correct": false,
+            "says": "Claude Code is an agentic coding tool that reads a codebase, edits files and runs commands."
+          },
+          {
+            "id": "c",
+            "text": "The Claude for Excel add-in, opened on a spreadsheet of the files",
+            "correct": false,
+            "says": "Claude Code is an agentic coding tool that reads a codebase, edits files and runs commands."
+          },
+          {
+            "id": "d",
+            "text": "Claude's own coding tool for working inside a codebase",
+            "correct": true,
+            "says": "Claude Code is an agentic coding tool that reads a codebase, edits files and runs commands."
+          }
+        ],
+        "origin": "course/03-claudes-family-and-its-surfaces/02-the-surfaces-one-model-behind-many.md"
+      },
+      {
+        "id": "rb-015",
+        "stem": "Which kind of job suits the fast, low-cost tier?",
+        "options": [
+          {
+            "id": "a",
+            "text": "High-volume routine work, once checked against past cases",
+            "correct": true,
+            "says": "Efficiency first starts on the fast, low-cost tier and moves up only for a gap you can name, measured on your own data."
+          },
+          {
+            "id": "b",
+            "text": "Rare, ambiguous decisions where each miss is costly to fix",
+            "correct": false,
+            "says": "Efficiency first starts on the fast, low-cost tier and moves up only for a gap you can name, measured on your own data."
+          },
+          {
+            "id": "c",
+            "text": "Open-ended research that must be right on the first attempt",
+            "correct": false,
+            "says": "Efficiency first starts on the fast, low-cost tier and moves up only for a gap you can name, measured on your own data."
+          },
+          {
+            "id": "d",
+            "text": "Any task at all, provided that the prompt is long and detailed",
+            "correct": false,
+            "says": "Efficiency first starts on the fast, low-cost tier and moves up only for a gap you can name, measured on your own data."
+          }
+        ],
+        "origin": "course/03-claudes-family-and-its-surfaces/01-the-model-family-and-choosing-a-tier.md"
+      },
+      {
+        "id": "rb-016",
+        "stem": "Which setting trades intelligence for latency and cost within a single model?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The size of the context window for the request",
+            "correct": false,
+            "says": "The documentation describes effort that way and says tuning it is often a better lever than switching models."
+          },
+          {
+            "id": "b",
+            "text": "The prefill text at the start of the reply",
+            "correct": false,
+            "says": "The documentation describes effort that way and says tuning it is often a better lever than switching models."
+          },
+          {
+            "id": "c",
+            "text": "The effort level for the request",
+            "correct": true,
+            "says": "The documentation describes effort that way and says tuning it is often a better lever than switching models."
+          },
+          {
+            "id": "d",
+            "text": "The batch discount applied to the request",
+            "correct": false,
+            "says": "The documentation describes effort that way and says tuning it is often a better lever than switching models."
+          }
+        ],
+        "origin": "course/03-claudes-family-and-its-surfaces/01-the-model-family-and-choosing-a-tier.md"
+      },
+      {
+        "id": "rb-017",
+        "stem": "Which design puts most tokens on the cheaper model while keeping a stronger one for hard calls?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Running every single request on the top tier for safety",
+            "correct": false,
+            "says": "Executor-advisor and orchestrator-worker patterns are the documented answer to mostly easy and occasionally hard work."
+          },
+          {
+            "id": "b",
+            "text": "Doubling the effort setting on every request it handles",
+            "correct": false,
+            "says": "Executor-advisor and orchestrator-worker patterns are the documented answer to mostly easy and occasionally hard work."
+          },
+          {
+            "id": "c",
+            "text": "An orchestrator that hands bulk work to lower-cost workers",
+            "correct": true,
+            "says": "Executor-advisor and orchestrator-worker patterns are the documented answer to mostly easy and occasionally hard work."
+          },
+          {
+            "id": "d",
+            "text": "Sending each request to two tiers and averaging the replies",
+            "correct": false,
+            "says": "Executor-advisor and orchestrator-worker patterns are the documented answer to mostly easy and occasionally hard work."
+          }
+        ],
+        "origin": "course/03-claudes-family-and-its-surfaces/01-the-model-family-and-choosing-a-tier.md"
+      },
+      {
+        "id": "rb-018",
+        "stem": "A prompt behaves differently when sent to the API and when typed into a Project in the app. What is the likeliest reason?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Each surface wraps its own instructions, tools and defaults around it",
+            "correct": true,
+            "says": "The same model sits behind many surfaces, but what is sent around your text differs."
+          },
+          {
+            "id": "b",
+            "text": "The two surfaces rely on entirely unrelated model families",
+            "correct": false,
+            "says": "The same model sits behind many surfaces, but what is sent around your text differs."
+          },
+          {
+            "id": "c",
+            "text": "The app rewrites every message into another language first",
+            "correct": false,
+            "says": "The same model sits behind many surfaces, but what is sent around your text differs."
+          },
+          {
+            "id": "d",
+            "text": "The API removes the final sentence of every prompt it gets",
+            "correct": false,
+            "says": "The same model sits behind many surfaces, but what is sent around your text differs."
+          }
+        ],
+        "origin": "course/03-claudes-family-and-its-surfaces/02-the-surfaces-one-model-behind-many.md"
+      },
+      {
+        "id": "rb-019",
+        "stem": "A photographed table is rotated and very small, and Claude misreads one number. Which documented limit applies?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Claude cannot read tables in any picture that anyone gives it at all",
+            "correct": false,
+            "says": "The vision page lists low-quality, rotated and very small images, and asks you to verify readings."
+          },
+          {
+            "id": "b",
+            "text": "Claude refuses every image that has numbers in it",
+            "correct": false,
+            "says": "The vision page lists low-quality, rotated and very small images, and asks you to verify readings."
+          },
+          {
+            "id": "c",
+            "text": "Images are limited to a single one per request",
+            "correct": false,
+            "says": "The vision page lists low-quality, rotated and very small images, and asks you to verify readings."
+          },
+          {
+            "id": "d",
+            "text": "Poor-quality or awkwardly turned pictures give less reliable readings",
+            "correct": true,
+            "says": "The vision page lists low-quality, rotated and very small images, and asks you to verify readings."
+          }
+        ],
+        "origin": "course/04-capabilities-and-limits/01-what-claude-does-well-and-where-it-slips.md"
+      },
+      {
+        "id": "rb-020",
+        "stem": "A product owner wants a model to decide a customer's loan eligibility alone. What does the course advise?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Let the model decide, then tell the customer afterwards",
+            "correct": false,
+            "says": "Decisions with legal, medical, financial or safety consequences stay with a qualified person."
+          },
+          {
+            "id": "b",
+            "text": "Keep a qualified person in charge, with the tool as an aid",
+            "correct": true,
+            "says": "Decisions with legal, medical, financial or safety consequences stay with a qualified person."
+          },
+          {
+            "id": "c",
+            "text": "Use the largest tier so that no review is needed",
+            "correct": false,
+            "says": "Decisions with legal, medical, financial or safety consequences stay with a qualified person."
+          },
+          {
+            "id": "d",
+            "text": "Use deep thinking so that a separate check is unnecessary",
+            "correct": false,
+            "says": "Decisions with legal, medical, financial or safety consequences stay with a qualified person."
+          }
+        ],
+        "origin": "course/04-capabilities-and-limits/02-thinking-computer-use-and-when-not-to-use-a-model.md"
+      },
+      {
+        "id": "rb-021",
+        "stem": "When is turning thinking up most worthwhile?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Short lookups and one-word labels where speed matters most to the user",
+            "correct": false,
+            "says": "Thinking helps on complex tasks and is billed as output, so it is wasted on simple ones."
+          },
+          {
+            "id": "b",
+            "text": "Rewriting a sentence in a friendlier tone for a reader",
+            "correct": false,
+            "says": "Thinking helps on complex tasks and is billed as output, so it is wasted on simple ones."
+          },
+          {
+            "id": "c",
+            "text": "Fetching today's date from the model's own memory",
+            "correct": false,
+            "says": "Thinking helps on complex tasks and is billed as output, so it is wasted on simple ones."
+          },
+          {
+            "id": "d",
+            "text": "Multi-step maths, hard debugging or analysis with many facts",
+            "correct": true,
+            "says": "Thinking helps on complex tasks and is billed as output, so it is wasted on simple ones."
+          }
+        ],
+        "origin": "course/04-capabilities-and-limits/02-thinking-computer-use-and-when-not-to-use-a-model.md"
+      },
+      {
+        "id": "rb-022",
+        "stem": "An agent will operate a web page through screenshots. Which precaution matters most?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Give it the user's saved passwords so nothing blocks it",
+            "correct": false,
+            "says": "A screen is untrusted input that can carry injected instructions."
+          },
+          {
+            "id": "b",
+            "text": "Run it in isolation with no secrets, and confirm consequential steps",
+            "correct": true,
+            "says": "A screen is untrusted input that can carry injected instructions."
+          },
+          {
+            "id": "c",
+            "text": "Turn screenshots off entirely so that costs stay down",
+            "correct": false,
+            "says": "A screen is untrusted input that can carry injected instructions."
+          },
+          {
+            "id": "d",
+            "text": "Trust any instruction that appears on whichever page it happens to visit",
+            "correct": false,
+            "says": "A screen is untrusted input that can carry injected instructions."
+          }
+        ],
+        "origin": "course/04-capabilities-and-limits/02-thinking-computer-use-and-when-not-to-use-a-model.md"
+      },
+      {
+        "id": "rb-023",
+        "stem": "A report needs the total of 4,000 line amounts. Which design is best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Claude adds the figures in a single pass through them",
+            "correct": false,
+            "says": "Exact arithmetic belongs in code; the model approximates."
+          },
+          {
+            "id": "b",
+            "text": "Claude adds them twice and the team averages the two",
+            "correct": false,
+            "says": "Exact arithmetic belongs in code; the model approximates."
+          },
+          {
+            "id": "c",
+            "text": "A script does the addition and Claude explains the result",
+            "correct": true,
+            "says": "Exact arithmetic belongs in code; the model approximates."
+          },
+          {
+            "id": "d",
+            "text": "Claude estimates the sum from a sample of the lines",
+            "correct": false,
+            "says": "Exact arithmetic belongs in code; the model approximates."
+          }
+        ],
+        "origin": "course/04-capabilities-and-limits/01-what-claude-does-well-and-where-it-slips.md"
+      },
+      {
+        "id": "rb-024",
+        "stem": "Which job needs no extra machinery around Claude?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Summarising an uploaded article for a colleague",
+            "correct": true,
+            "says": "Language-shaped drafting and summarising suit a model, while exact, recent or private facts need code, tools or retrieval."
+          },
+          {
+            "id": "b",
+            "text": "Totalling a column of invoice figures to the cent",
+            "correct": false,
+            "says": "Language-shaped drafting and summarising suit a model, while exact, recent or private facts need code, tools or retrieval."
+          },
+          {
+            "id": "c",
+            "text": "Reporting yesterday's exchange rate between two currencies",
+            "correct": false,
+            "says": "Language-shaped drafting and summarising suit a model, while exact, recent or private facts need code, tools or retrieval."
+          },
+          {
+            "id": "d",
+            "text": "Looking up a value in the company's own database",
+            "correct": false,
+            "says": "Language-shaped drafting and summarising suit a model, while exact, recent or private facts need code, tools or retrieval."
+          }
+        ],
+        "origin": "course/04-capabilities-and-limits/02-thinking-computer-use-and-when-not-to-use-a-model.md"
+      },
+      {
+        "id": "rb-025",
+        "stem": "Which step of a monthly sales commentary should stay with a person?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Deciding which of the variances matter to the board",
+            "correct": true,
+            "says": "Judgment that carries accountability stays with a person, while drafting and formatting suit Claude."
+          },
+          {
+            "id": "b",
+            "text": "Drafting the narrative text that explains the variances",
+            "correct": false,
+            "says": "Judgment that carries accountability stays with a person, while drafting and formatting suit Claude."
+          },
+          {
+            "id": "c",
+            "text": "Formatting the finished text into the board template",
+            "correct": false,
+            "says": "Judgment that carries accountability stays with a person, while drafting and formatting suit Claude."
+          },
+          {
+            "id": "d",
+            "text": "Summarising last quarter's meeting notes for the file",
+            "correct": false,
+            "says": "Judgment that carries accountability stays with a person, while drafting and formatting suit Claude."
+          }
+        ],
+        "origin": "course/05-working-with-an-ai-responsibly/01-delegating-and-describing-a-task.md"
+      },
+      {
+        "id": "rb-026",
+        "stem": "Which part of a description tells Claude how to behave, such as flagging anything it is unsure about?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The product element",
+            "correct": false,
+            "says": "The three parts are product (what you want), process (how to go about it) and performance (how Claude should behave)."
+          },
+          {
+            "id": "b",
+            "text": "The performance element",
+            "correct": true,
+            "says": "The three parts are product (what you want), process (how to go about it) and performance (how Claude should behave)."
+          },
+          {
+            "id": "c",
+            "text": "The process element",
+            "correct": false,
+            "says": "The three parts are product (what you want), process (how to go about it) and performance (how Claude should behave)."
+          },
+          {
+            "id": "d",
+            "text": "The provenance element",
+            "correct": false,
+            "says": "The three parts are product (what you want), process (how to go about it) and performance (how Claude should behave)."
+          }
+        ],
+        "origin": "course/05-working-with-an-ai-responsibly/01-delegating-and-describing-a-task.md"
+      },
+      {
+        "id": "rb-027",
+        "stem": "Which question checks an output for completeness?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Does the tone of the reply sound confident enough?",
+            "correct": false,
+            "says": "Completeness is about silent omissions, which a summary can have even when every sentence is accurate."
+          },
+          {
+            "id": "b",
+            "text": "Is the name of the saved file tidy and consistent?",
+            "correct": false,
+            "says": "Completeness is about silent omissions, which a summary can have even when every sentence is accurate."
+          },
+          {
+            "id": "c",
+            "text": "Is the answer long enough to look properly thorough to a reader?",
+            "correct": false,
+            "says": "Completeness is about silent omissions, which a summary can have even when every sentence is accurate."
+          },
+          {
+            "id": "d",
+            "text": "What would a careful reader expect to see that is missing?",
+            "correct": true,
+            "says": "Completeness is about silent omissions, which a summary can have even when every sentence is accurate."
+          }
+        ],
+        "origin": "course/05-working-with-an-ai-responsibly/02-judging-the-output-and-owning-the-result.md"
+      },
+      {
+        "id": "rb-028",
+        "stem": "A colleague asks how reliable Claude's confident tone is as a signal. What is the course's answer?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It usually means that a fact has already been verified",
+            "correct": false,
+            "says": "Confidence of tone is not a signal; check the claims that would hurt if wrong against the source of record."
+          },
+          {
+            "id": "b",
+            "text": "Only hedged wording ever needs a second look from a careful reader",
+            "correct": false,
+            "says": "Confidence of tone is not a signal; check the claims that would hurt if wrong against the source of record."
+          },
+          {
+            "id": "c",
+            "text": "It proves nothing, so check what matters against the source",
+            "correct": true,
+            "says": "Confidence of tone is not a signal; check the claims that would hurt if wrong against the source of record."
+          },
+          {
+            "id": "d",
+            "text": "It matters only when the text is a legal document",
+            "correct": false,
+            "says": "Confidence of tone is not a signal; check the claims that would hurt if wrong against the source of record."
+          }
+        ],
+        "origin": "course/05-working-with-an-ai-responsibly/02-judging-the-output-and-owning-the-result.md"
+      },
+      {
+        "id": "rb-029",
+        "stem": "Who answers for a mistake in AI-assisted work that you forwarded to others?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The vendor that built the model that drafted it",
+            "correct": false,
+            "says": "You own what you send; accountability for errors stays with the person."
+          },
+          {
+            "id": "b",
+            "text": "You do, whoever drafted the text in the first place",
+            "correct": true,
+            "says": "You own what you send; accountability for errors stays with the person."
+          },
+          {
+            "id": "c",
+            "text": "The colleague who first suggested using the tool",
+            "correct": false,
+            "says": "You own what you send; accountability for errors stays with the person."
+          },
+          {
+            "id": "d",
+            "text": "Nobody, since an automated draft carries no author",
+            "correct": false,
+            "says": "You own what you send; accountability for errors stays with the person."
+          }
+        ],
+        "origin": "course/05-working-with-an-ai-responsibly/02-judging-the-output-and-owning-the-result.md"
+      },
+      {
+        "id": "rb-030",
+        "stem": "Which routine fits a team that lets an agent do several steps itself?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Unlimited access, because speed matters more than any kind of control",
+            "correct": false,
+            "says": "Treat an agent like a new colleague with limited access."
+          },
+          {
+            "id": "b",
+            "text": "Review only after a complaint has arrived from someone",
+            "correct": false,
+            "says": "Treat an agent like a new colleague with limited access."
+          },
+          {
+            "id": "c",
+            "text": "No record of the steps, in order to save storage",
+            "correct": false,
+            "says": "Treat an agent like a new colleague with limited access."
+          },
+          {
+            "id": "d",
+            "text": "A defined scope, review before consequences, and a record kept",
+            "correct": true,
+            "says": "Treat an agent like a new colleague with limited access."
+          }
+        ],
+        "origin": "course/05-working-with-an-ai-responsibly/01-delegating-and-describing-a-task.md"
+      },
+      {
+        "id": "rb-031",
+        "stem": "A prompt asks for a reply that is concise, thorough, clear and professional, and results vary. Which fix is best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Swap the adjectives for measurable limits, like a word cap",
+            "correct": true,
+            "says": "Stacked adjectives conflict and cannot be checked; give constraints you could verify afterwards."
+          },
+          {
+            "id": "b",
+            "text": "Add a few more adjectives so that the intent is clearer",
+            "correct": false,
+            "says": "Stacked adjectives conflict and cannot be checked; give constraints you could verify afterwards."
+          },
+          {
+            "id": "c",
+            "text": "Switch to a larger tier and keep the same wording",
+            "correct": false,
+            "says": "Stacked adjectives conflict and cannot be checked; give constraints you could verify afterwards."
+          },
+          {
+            "id": "d",
+            "text": "Add a role line that uses a famous and senior job title",
+            "correct": false,
+            "says": "Stacked adjectives conflict and cannot be checked; give constraints you could verify afterwards."
+          }
+        ],
+        "origin": "course/06-prompting-fundamentals/01-clear-direct-instructions-context-and-roles.md"
+      },
+      {
+        "id": "rb-032",
+        "stem": "Where should a pasted document go in a long prompt?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Between two copies of the question, one on each side",
+            "correct": false,
+            "says": "The documentation places long inputs above the query and reports better results with queries at the end."
+          },
+          {
+            "id": "b",
+            "text": "At the very end, after all of the instructions",
+            "correct": false,
+            "says": "The documentation places long inputs above the query and reports better results with queries at the end."
+          },
+          {
+            "id": "c",
+            "text": "Near the top, with the question placed after it",
+            "correct": true,
+            "says": "The documentation places long inputs above the query and reports better results with queries at the end."
+          },
+          {
+            "id": "d",
+            "text": "Anywhere at all, since order never makes a difference",
+            "correct": false,
+            "says": "The documentation places long inputs above the query and reports better results with queries at the end."
+          }
+        ],
+        "origin": "course/06-prompting-fundamentals/01-clear-direct-instructions-context-and-roles.md"
+      },
+      {
+        "id": "rb-033",
+        "stem": "How many examples does the prompting guidance suggest including?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A single one, in order to avoid overfitting",
+            "correct": false,
+            "says": "The page says to include 3 to 5 examples that mirror the use case and cover edge cases."
+          },
+          {
+            "id": "b",
+            "text": "Twenty or more, in every case without exception",
+            "correct": false,
+            "says": "The page says to include 3 to 5 examples that mirror the use case and cover edge cases."
+          },
+          {
+            "id": "c",
+            "text": "Three to five relevant ones that vary enough",
+            "correct": true,
+            "says": "The page says to include 3 to 5 examples that mirror the use case and cover edge cases."
+          },
+          {
+            "id": "d",
+            "text": "None at all, since examples harm the output",
+            "correct": false,
+            "says": "The page says to include 3 to 5 examples that mirror the use case and cover edge cases."
+          }
+        ],
+        "origin": "course/06-prompting-fundamentals/02-structure-examples-reasoning-and-output-format.md"
+      },
+      {
+        "id": "rb-034",
+        "stem": "Which route replaces prefilling the reply on current models?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Structured outputs or an enum tool, plus direct instructions",
+            "correct": true,
+            "says": "From the 4.6 models on, prefilled responses are no longer supported."
+          },
+          {
+            "id": "b",
+            "text": "A longer system prompt that repeats the format twice",
+            "correct": false,
+            "says": "From the 4.6 models on, prefilled responses are no longer supported."
+          },
+          {
+            "id": "c",
+            "text": "A higher temperature setting chosen for each request",
+            "correct": false,
+            "says": "From the 4.6 models on, prefilled responses are no longer supported."
+          },
+          {
+            "id": "d",
+            "text": "A second prefill placed in the user turn instead",
+            "correct": false,
+            "says": "From the 4.6 models on, prefilled responses are no longer supported."
+          }
+        ],
+        "origin": "course/06-prompting-fundamentals/02-structure-examples-reasoning-and-output-format.md"
+      },
+      {
+        "id": "rb-035",
+        "stem": "What should a template builder do with untrusted text placed between tags?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Trim it down to its first line, whatever the rest of it contains",
+            "correct": false,
+            "says": "Position is not a boundary; tags, a data statement and escaping do the marking."
+          },
+          {
+            "id": "b",
+            "text": "Convert all of it to lower case before inserting it",
+            "correct": false,
+            "says": "Position is not a boundary; tags, a data statement and escaping do the marking."
+          },
+          {
+            "id": "c",
+            "text": "Place it above the instructions instead of below",
+            "correct": false,
+            "says": "Position is not a boundary; tags, a data statement and escaping do the marking."
+          },
+          {
+            "id": "d",
+            "text": "Escape the angle brackets so it cannot close its own tag",
+            "correct": true,
+            "says": "Position is not a boundary; tags, a data statement and escaping do the marking."
+          }
+        ],
+        "origin": "course/06-prompting-fundamentals/02-structure-examples-reasoning-and-output-format.md"
+      },
+      {
+        "id": "rb-036",
+        "stem": "In what order does the course say to improve a weak output?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Rewrite everything at once, then test a single case to see what happens",
+            "correct": false,
+            "says": "The controlled fix is diagnosis, one change and a re-run of the whole evaluation set."
+          },
+          {
+            "id": "b",
+            "text": "Diagnose the cause, change one thing, re-run the same inputs",
+            "correct": true,
+            "says": "The controlled fix is diagnosis, one change and a re-run of the whole evaluation set."
+          },
+          {
+            "id": "c",
+            "text": "Change the model first, then rework the prompt text",
+            "correct": false,
+            "says": "The controlled fix is diagnosis, one change and a re-run of the whole evaluation set."
+          },
+          {
+            "id": "d",
+            "text": "Add examples until it seems to work, then stop",
+            "correct": false,
+            "says": "The controlled fix is diagnosis, one change and a re-run of the whole evaluation set."
+          }
+        ],
+        "origin": "course/06-prompting-fundamentals/04-diagnosing-a-weak-output.md"
+      },
+      {
+        "id": "rb-037",
+        "stem": "Which item belongs in a Project's instructions rather than its knowledge?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The current price list for all of the products",
+            "correct": false,
+            "says": "Instructions say how to work; knowledge says what is true here."
+          },
+          {
+            "id": "b",
+            "text": "A scanned contract from one of the suppliers",
+            "correct": false,
+            "says": "Instructions say how to work; knowledge says what is true here."
+          },
+          {
+            "id": "c",
+            "text": "Last quarter's report on the sales figures",
+            "correct": false,
+            "says": "Instructions say how to work; knowledge says what is true here."
+          },
+          {
+            "id": "d",
+            "text": "The tone and format every reply should follow",
+            "correct": true,
+            "says": "Instructions say how to work; knowledge says what is true here."
+          }
+        ],
+        "origin": "course/07-claude-in-the-apps/01-projects-instructions-and-keeping-knowledge-current.md"
+      },
+      {
+        "id": "rb-038",
+        "stem": "A team lead wants colleagues to read but not change a Project. Which permission level fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Can edit access",
+            "correct": false,
+            "says": "Can view is read-only access to contents, knowledge and instructions."
+          },
+          {
+            "id": "b",
+            "text": "Can view access",
+            "correct": true,
+            "says": "Can view is read-only access to contents, knowledge and instructions."
+          },
+          {
+            "id": "c",
+            "text": "Creator access",
+            "correct": false,
+            "says": "Can view is read-only access to contents, knowledge and instructions."
+          },
+          {
+            "id": "d",
+            "text": "Public access",
+            "correct": false,
+            "says": "Can view is read-only access to contents, knowledge and instructions."
+          }
+        ],
+        "origin": "course/07-claude-in-the-apps/01-projects-instructions-and-keeping-knowledge-current.md"
+      },
+      {
+        "id": "rb-039",
+        "stem": "What does RAG mode do for a large Project?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Deletes the older chats once the limit is reached",
+            "correct": false,
+            "says": "On paid plans it retrieves the relevant parts and expands the Project's capacity."
+          },
+          {
+            "id": "b",
+            "text": "Shares the Project with the whole organisation at once",
+            "correct": false,
+            "says": "On paid plans it retrieves the relevant parts and expands the Project's capacity."
+          },
+          {
+            "id": "c",
+            "text": "Retrieves the relevant parts so that more material fits",
+            "correct": true,
+            "says": "On paid plans it retrieves the relevant parts and expands the Project's capacity."
+          },
+          {
+            "id": "d",
+            "text": "Switches the model to a smaller and cheaper tier",
+            "correct": false,
+            "says": "On paid plans it retrieves the relevant parts and expands the Project's capacity."
+          }
+        ],
+        "origin": "course/07-claude-in-the-apps/01-projects-instructions-and-keeping-knowledge-current.md"
+      },
+      {
+        "id": "rb-040",
+        "stem": "Which statement about an artifact's storage is right?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It may be shared, so check before entering sensitive data",
+            "correct": true,
+            "says": "Storage is text only, up to 20 MB, personal or shared; shared storage is visible to every user."
+          },
+          {
+            "id": "b",
+            "text": "It is always private to the person who created it",
+            "correct": false,
+            "says": "Storage is text only, up to 20 MB, personal or shared; shared storage is visible to every user."
+          },
+          {
+            "id": "c",
+            "text": "It can hold images and files as well as text",
+            "correct": false,
+            "says": "Storage is text only, up to 20 MB, personal or shared; shared storage is visible to every user."
+          },
+          {
+            "id": "d",
+            "text": "It has no size limit of any kind attached to it",
+            "correct": false,
+            "says": "Storage is text only, up to 20 MB, personal or shared; shared storage is visible to every user."
+          }
+        ],
+        "origin": "course/07-claude-in-the-apps/02-artifacts-skills-research-and-plugins.md"
+      },
+      {
+        "id": "rb-041",
+        "stem": "Which pair of requirements must hold before Research can run?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A paid plan, and live web lookup enabled",
+            "correct": true,
+            "says": "Research is for paid plans and needs web search switched on. (checked 2026-10-02)"
+          },
+          {
+            "id": "b",
+            "text": "A shared Project, and a connector that is enabled",
+            "correct": false,
+            "says": "Research is for paid plans and needs web search switched on. (checked 2026-10-02)"
+          },
+          {
+            "id": "c",
+            "text": "An artifact, and a skill that is enabled",
+            "correct": false,
+            "says": "Research is for paid plans and needs web search switched on. (checked 2026-10-02)"
+          },
+          {
+            "id": "d",
+            "text": "The desktop app, and a folder connected to it",
+            "correct": false,
+            "says": "Research is for paid plans and needs web search switched on. (checked 2026-10-02)"
+          }
+        ],
+        "origin": "course/07-claude-in-the-apps/02-artifacts-skills-research-and-plugins.md"
+      },
+      {
+        "id": "rb-042",
+        "stem": "Which statement about skills is correct?",
+        "options": [
+          {
+            "id": "a",
+            "text": "All of them are loaded into every single chat",
+            "correct": false,
+            "says": "Progressive disclosure keeps unused skills out of the context window."
+          },
+          {
+            "id": "b",
+            "text": "Only the relevant ones are loaded into context when needed",
+            "correct": true,
+            "says": "Progressive disclosure keeps unused skills out of the context window."
+          },
+          {
+            "id": "c",
+            "text": "They can run only inside Claude Code and nowhere else",
+            "correct": false,
+            "says": "Progressive disclosure keeps unused skills out of the context window."
+          },
+          {
+            "id": "d",
+            "text": "They need no review at all before being shared",
+            "correct": false,
+            "says": "Progressive disclosure keeps unused skills out of the context window."
+          }
+        ],
+        "origin": "course/07-claude-in-the-apps/02-artifacts-skills-research-and-plugins.md"
+      },
+      {
+        "id": "rb-043",
+        "stem": "Which per-tool action restrictions can an owner set for a connector?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Read-only, read-write or admin, depending on the role",
+            "correct": false,
+            "says": "Per-tool action restrictions let an owner set each tool to always allowed, needs approval or blocked, alongside the source system's permissions."
+          },
+          {
+            "id": "b",
+            "text": "Private, shared with the team or published to everyone",
+            "correct": false,
+            "says": "Per-tool action restrictions let an owner set each tool to always allowed, needs approval or blocked, alongside the source system's permissions."
+          },
+          {
+            "id": "c",
+            "text": "Free of charge, metered per call or capped each month",
+            "correct": false,
+            "says": "Per-tool action restrictions let an owner set each tool to always allowed, needs approval or blocked, alongside the source system's permissions."
+          },
+          {
+            "id": "d",
+            "text": "Always allowed, needs approval, or blocked",
+            "correct": true,
+            "says": "Per-tool action restrictions let an owner set each tool to always allowed, needs approval or blocked, alongside the source system's permissions."
+          }
+        ],
+        "origin": "course/07-claude-in-the-apps/03-connectors-integrations-and-working-safely.md"
+      },
+      {
+        "id": "rb-044",
+        "stem": "Which workload suits Cowork over chat?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A one-line definition of a term for a colleague who asked",
+            "correct": false,
+            "says": "Cowork suits a clear deliverable that touches files or tools; chat suits light, turn-by-turn work."
+          },
+          {
+            "id": "b",
+            "text": "A quick brainstorm of names for a new product line",
+            "correct": false,
+            "says": "Cowork suits a clear deliverable that touches files or tools; chat suits light, turn-by-turn work."
+          },
+          {
+            "id": "c",
+            "text": "A deliverable built from a folder of files and several tools",
+            "correct": true,
+            "says": "Cowork suits a clear deliverable that touches files or tools; chat suits light, turn-by-turn work."
+          },
+          {
+            "id": "d",
+            "text": "A translation of a single sentence into French and German",
+            "correct": false,
+            "says": "Cowork suits a clear deliverable that touches files or tools; chat suits light, turn-by-turn work."
+          }
+        ],
+        "origin": "course/08-claudes-apps-in-depth/01-cowork-delegating-multi-step-work.md"
+      },
+      {
+        "id": "rb-045",
+        "stem": "In Claude in Chrome, which mode means nothing checks the actions?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Manually approve",
+            "correct": false,
+            "says": "Skip all approvals means Claude does not pause and nothing checks its actions. (checked 2026-10-02)"
+          },
+          {
+            "id": "b",
+            "text": "Skip all approvals",
+            "correct": true,
+            "says": "Skip all approvals means Claude does not pause and nothing checks its actions. (checked 2026-10-02)"
+          },
+          {
+            "id": "c",
+            "text": "Automatically approve",
+            "correct": false,
+            "says": "Skip all approvals means Claude does not pause and nothing checks its actions. (checked 2026-10-02)"
+          },
+          {
+            "id": "d",
+            "text": "Site allowlist mode",
+            "correct": false,
+            "says": "Skip all approvals means Claude does not pause and nothing checks its actions. (checked 2026-10-02)"
+          }
+        ],
+        "origin": "course/08-claudes-apps-in-depth/02-chrome-microsoft-365-and-claude-tag.md"
+      },
+      {
+        "id": "rb-046",
+        "stem": "Which statement about the Microsoft 365 add-ins' data is right?",
+        "options": [
+          {
+            "id": "a",
+            "text": "They inherit every custom retention setting that is set",
+            "correct": false,
+            "says": "The add-ins do not inherit custom retention and are outside the audit logs, though the Compliance API can include them. (checked 2026-10-02)"
+          },
+          {
+            "id": "b",
+            "text": "Their chats are kept on Anthropic's servers indefinitely",
+            "correct": false,
+            "says": "The add-ins do not inherit custom retention and are outside the audit logs, though the Compliance API can include them. (checked 2026-10-02)"
+          },
+          {
+            "id": "c",
+            "text": "They keep no data of any kind for any length of time",
+            "correct": false,
+            "says": "The add-ins do not inherit custom retention and are outside the audit logs, though the Compliance API can include them. (checked 2026-10-02)"
+          },
+          {
+            "id": "d",
+            "text": "Their activity is missing from the Enterprise audit logs",
+            "correct": true,
+            "says": "The add-ins do not inherit custom retention and are outside the audit logs, though the Compliance API can include them. (checked 2026-10-02)"
+          }
+        ],
+        "origin": "course/08-claudes-apps-in-depth/02-chrome-microsoft-365-and-claude-tag.md"
+      },
+      {
+        "id": "rb-047",
+        "stem": "Who sees Claude Tag's work when it is tagged in a channel?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Every member there, using the access set for that space",
+            "correct": true,
+            "says": "Channel work is visible to all members and uses the access an admin set for it; a DM is personal. (checked 2026-10-02)"
+          },
+          {
+            "id": "b",
+            "text": "Only the person who tagged it, as a private reply",
+            "correct": false,
+            "says": "Channel work is visible to all members and uses the access an admin set for it; a DM is personal. (checked 2026-10-02)"
+          },
+          {
+            "id": "c",
+            "text": "Only the Slack admins who installed the application",
+            "correct": false,
+            "says": "Channel work is visible to all members and uses the access an admin set for it; a DM is personal. (checked 2026-10-02)"
+          },
+          {
+            "id": "d",
+            "text": "Only the history of the requester's private account",
+            "correct": false,
+            "says": "Channel work is visible to all members and uses the access an admin set for it; a DM is personal. (checked 2026-10-02)"
+          }
+        ],
+        "origin": "course/08-claudes-apps-in-depth/02-chrome-microsoft-365-and-claude-tag.md"
+      },
+      {
+        "id": "rb-048",
+        "stem": "Which action stays off limits for Claude in Chrome in every mode?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Reading the text of a page that is open",
+            "correct": false,
+            "says": "Purchases, account creation and permanent deletions are prohibited whatever the permission mode. (checked 2026-10-02)"
+          },
+          {
+            "id": "b",
+            "text": "Filling in a harmless form on a trusted site",
+            "correct": false,
+            "says": "Purchases, account creation and permanent deletions are prohibited whatever the permission mode. (checked 2026-10-02)"
+          },
+          {
+            "id": "c",
+            "text": "Completing a purchase on a shopping site",
+            "correct": true,
+            "says": "Purchases, account creation and permanent deletions are prohibited whatever the permission mode. (checked 2026-10-02)"
+          },
+          {
+            "id": "d",
+            "text": "Taking a screenshot of the tab that is active",
+            "correct": false,
+            "says": "Purchases, account creation and permanent deletions are prohibited whatever the permission mode. (checked 2026-10-02)"
+          }
+        ],
+        "origin": "course/08-claudes-apps-in-depth/02-chrome-microsoft-365-and-claude-tag.md"
+      },
+      {
+        "id": "rb-049",
+        "stem": "What does Cowork's isolated cloud environment protect?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Everything that Claude is able to read for you",
+            "correct": false,
+            "says": "The isolation does not limit what Claude reads or does through connected tools."
+          },
+          {
+            "id": "b",
+            "text": "The mailbox that has been connected to the task",
+            "correct": false,
+            "says": "The isolation does not limit what Claude reads or does through connected tools."
+          },
+          {
+            "id": "c",
+            "text": "Your home and company network, but not what tools expose",
+            "correct": true,
+            "says": "The isolation does not limit what Claude reads or does through connected tools."
+          },
+          {
+            "id": "d",
+            "text": "The files that sit inside any connected folder",
+            "correct": false,
+            "says": "The isolation does not limit what Claude reads or does through connected tools."
+          }
+        ],
+        "origin": "course/08-claudes-apps-in-depth/01-cowork-delegating-multi-step-work.md"
+      },
+      {
+        "id": "rb-050",
+        "stem": "Which Claude Tag setup step needs the Owner role?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Pairing the Slack workspace with the organisation",
+            "correct": true,
+            "says": "Setup needs the Owner role in a Team or Enterprise organisation and a Slack workspace admin. (checked 2026-10-02)"
+          },
+          {
+            "id": "b",
+            "text": "Mentioning Claude in a channel it has already joined",
+            "correct": false,
+            "says": "Setup needs the Owner role in a Team or Enterprise organisation and a Slack workspace admin. (checked 2026-10-02)"
+          },
+          {
+            "id": "c",
+            "text": "Sending Claude a direct message about a task",
+            "correct": false,
+            "says": "Setup needs the Owner role in a Team or Enterprise organisation and a Slack workspace admin. (checked 2026-10-02)"
+          },
+          {
+            "id": "d",
+            "text": "Reading a thread that Claude has already answered",
+            "correct": false,
+            "says": "Setup needs the Owner role in a Team or Enterprise organisation and a Slack workspace admin. (checked 2026-10-02)"
+          }
+        ],
+        "origin": "course/08-claudes-apps-in-depth/02-chrome-microsoft-365-and-claude-tag.md"
+      },
+      {
+        "id": "rb-051",
+        "stem": "Which four competencies make up the AI fluency framework?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Design, Draft, Deliver and Document, in that sequence",
+            "correct": false,
+            "says": "The 4D framework names those four; module 5 teaches them as delegate, describe, discern and take responsibility."
+          },
+          {
+            "id": "b",
+            "text": "Define, Decide, Direct and Deploy, in that sequence",
+            "correct": false,
+            "says": "The 4D framework names those four; module 5 teaches them as delegate, describe, discern and take responsibility."
+          },
+          {
+            "id": "c",
+            "text": "Detect, Diagnose, Debug and Deploy, in that sequence",
+            "correct": false,
+            "says": "The 4D framework names those four; module 5 teaches them as delegate, describe, discern and take responsibility."
+          },
+          {
+            "id": "d",
+            "text": "Delegation, Description, Discernment and Diligence",
+            "correct": true,
+            "says": "The 4D framework names those four; module 5 teaches them as delegate, describe, discern and take responsibility."
+          }
+        ],
+        "origin": "course/09-claude-for-every-role/01-builders-students-and-educators.md"
+      },
+      {
+        "id": "rb-052",
+        "stem": "Which check matters most for a builder using Claude-generated code?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Counting how many lines the code contains",
+            "correct": false,
+            "says": "Builders owe discernment of code and user experience: run it, test it, review it."
+          },
+          {
+            "id": "b",
+            "text": "Running and testing it before it ships",
+            "correct": true,
+            "says": "Builders owe discernment of code and user experience: run it, test it, review it."
+          },
+          {
+            "id": "c",
+            "text": "Asking Claude whether it believes it is correct",
+            "correct": false,
+            "says": "Builders owe discernment of code and user experience: run it, test it, review it."
+          },
+          {
+            "id": "d",
+            "text": "Reading only the comments the code contains",
+            "correct": false,
+            "says": "Builders owe discernment of code and user experience: run it, test it, review it."
+          }
+        ],
+        "origin": "course/09-claude-for-every-role/01-builders-students-and-educators.md"
+      },
+      {
+        "id": "rb-053",
+        "stem": "What is the right use of Claude for learning in a course?",
+        "options": [
+          {
+            "id": "a",
+            "text": "As a ghostwriter whose finished essay is handed in unchanged",
+            "correct": false,
+            "says": "A student should not delegate the thinking the course exists to build."
+          },
+          {
+            "id": "b",
+            "text": "As a way to get around the rules that the course sets",
+            "correct": false,
+            "says": "A student should not delegate the thinking the course exists to build."
+          },
+          {
+            "id": "c",
+            "text": "As a complete replacement for all of the course reading",
+            "correct": false,
+            "says": "A student should not delegate the thinking the course exists to build."
+          },
+          {
+            "id": "d",
+            "text": "As a partner that asks and explains while the student thinks",
+            "correct": true,
+            "says": "A student should not delegate the thinking the course exists to build."
+          }
+        ],
+        "origin": "course/09-claude-for-every-role/01-builders-students-and-educators.md"
+      },
+      {
+        "id": "rb-054",
+        "stem": "Which hidden risk does the page name for non-profits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Writing the reports in plain language",
+            "correct": false,
+            "says": "Impact claims and statistics must be checked against the source before they reach a funder."
+          },
+          {
+            "id": "b",
+            "text": "Overstating results to a funder",
+            "correct": true,
+            "says": "Impact claims and statistics must be checked against the source before they reach a funder."
+          },
+          {
+            "id": "c",
+            "text": "Working alongside volunteers on projects",
+            "correct": false,
+            "says": "Impact claims and statistics must be checked against the source before they reach a funder."
+          },
+          {
+            "id": "d",
+            "text": "Keeping the records in a spreadsheet",
+            "correct": false,
+            "says": "Impact claims and statistics must be checked against the source before they reach a funder."
+          }
+        ],
+        "origin": "course/09-claude-for-every-role/02-nonprofits-small-businesses-and-creative-work.md"
+      },
+      {
+        "id": "rb-055",
+        "stem": "For a maker, what should stay with the person?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Resizing and formatting the finished files",
+            "correct": false,
+            "says": "Delegate production tasks, but keep the part that makes the work theirs."
+          },
+          {
+            "id": "b",
+            "text": "Transcribing the recorded interviews by hand",
+            "correct": false,
+            "says": "Delegate production tasks, but keep the part that makes the work theirs."
+          },
+          {
+            "id": "c",
+            "text": "The idea, the voice and the final choices",
+            "correct": true,
+            "says": "Delegate production tasks, but keep the part that makes the work theirs."
+          },
+          {
+            "id": "d",
+            "text": "Making variants for each different platform",
+            "correct": false,
+            "says": "Delegate production tasks, but keep the part that makes the work theirs."
+          }
+        ],
+        "origin": "course/09-claude-for-every-role/02-nonprofits-small-businesses-and-creative-work.md"
+      },
+      {
+        "id": "rb-056",
+        "stem": "Which field is listed among the Usage Policy's high-risk uses?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Employment and housing decisions",
+            "correct": true,
+            "says": "Legal, health, insurance, finance, employment and housing, academic testing and media are high-risk uses. (checked 2026-10-02)"
+          },
+          {
+            "id": "b",
+            "text": "Weather forecasts for a local newspaper",
+            "correct": false,
+            "says": "Legal, health, insurance, finance, employment and housing, academic testing and media are high-risk uses. (checked 2026-10-02)"
+          },
+          {
+            "id": "c",
+            "text": "Recipe suggestions for a cooking site",
+            "correct": false,
+            "says": "Legal, health, insurance, finance, employment and housing, academic testing and media are high-risk uses. (checked 2026-10-02)"
+          },
+          {
+            "id": "d",
+            "text": "Travel itineraries for a holiday company",
+            "correct": false,
+            "says": "Legal, health, insurance, finance, employment and housing, academic testing and media are high-risk uses. (checked 2026-10-02)"
+          }
+        ],
+        "origin": "course/10-safety-privacy-and-policy/01-the-usage-policy-and-sensitive-data.md"
+      },
+      {
+        "id": "rb-057",
+        "stem": "Which data class is normally allowed in any tool without a special check?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Public material",
+            "correct": true,
+            "says": "Public data is free to use; internal needs an approved tool, and the other classes need stronger controls."
+          },
+          {
+            "id": "b",
+            "text": "Internal material",
+            "correct": false,
+            "says": "Public data is free to use; internal needs an approved tool, and the other classes need stronger controls."
+          },
+          {
+            "id": "c",
+            "text": "Confidential material",
+            "correct": false,
+            "says": "Public data is free to use; internal needs an approved tool, and the other classes need stronger controls."
+          },
+          {
+            "id": "d",
+            "text": "Regulated material",
+            "correct": false,
+            "says": "Public data is free to use; internal needs an approved tool, and the other classes need stronger controls."
+          }
+        ],
+        "origin": "course/10-safety-privacy-and-policy/01-the-usage-policy-and-sensitive-data.md"
+      },
+      {
+        "id": "rb-058",
+        "stem": "A team asks whether replacing names with codes makes records anonymous. What is the right answer?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Yes, since any code at all makes records anonymous",
+            "correct": false,
+            "says": "Pseudonymised data is still personal data under many rules."
+          },
+          {
+            "id": "b",
+            "text": "No, because a separate key can reverse the substitution",
+            "correct": true,
+            "says": "Pseudonymised data is still personal data under many rules."
+          },
+          {
+            "id": "c",
+            "text": "Yes, as long as the codes are chosen at random",
+            "correct": false,
+            "says": "Pseudonymised data is still personal data under many rules."
+          },
+          {
+            "id": "d",
+            "text": "No, because codes are usually longer than names",
+            "correct": false,
+            "says": "Pseudonymised data is still personal data under many rules."
+          }
+        ],
+        "origin": "course/10-safety-privacy-and-policy/01-the-usage-policy-and-sensitive-data.md"
+      },
+      {
+        "id": "rb-059",
+        "stem": "A free-plan user wants her chats kept out of model improvement. Which option exists?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Clear the browser cache after finishing each session",
+            "correct": false,
+            "says": "Incognito chats are excluded from improvement even when the setting is on; a request in a chat is not a control. (checked 2026-10-02)"
+          },
+          {
+            "id": "b",
+            "text": "Write a note in each chat asking it not to train",
+            "correct": false,
+            "says": "Incognito chats are excluded from improvement even when the setting is on; a request in a chat is not a control. (checked 2026-10-02)"
+          },
+          {
+            "id": "c",
+            "text": "Use a much shorter prompt at the start of the chat",
+            "correct": false,
+            "says": "Incognito chats are excluded from improvement even when the setting is on; a request in a chat is not a control. (checked 2026-10-02)"
+          },
+          {
+            "id": "d",
+            "text": "Use incognito sessions, which are excluded from training use",
+            "correct": true,
+            "says": "Incognito chats are excluded from improvement even when the setting is on; a request in a chat is not a control. (checked 2026-10-02)"
+          }
+        ],
+        "origin": "course/10-safety-privacy-and-policy/01-the-usage-policy-and-sensitive-data.md"
+      },
+      {
+        "id": "rb-060",
+        "stem": "Which habit limits prompt injection through email content?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Ask the assistant to disregard any hidden text it finds",
+            "correct": false,
+            "says": "Keep a person on consequential steps and limit what Claude can do."
+          },
+          {
+            "id": "b",
+            "text": "Turn on every available connector for completeness",
+            "correct": false,
+            "says": "Keep a person on consequential steps and limit what Claude can do."
+          },
+          {
+            "id": "c",
+            "text": "Keep a person confirming actions that send or delete",
+            "correct": true,
+            "says": "Keep a person on consequential steps and limit what Claude can do."
+          },
+          {
+            "id": "d",
+            "text": "Use Skip all approvals to avoid interrupting the task",
+            "correct": false,
+            "says": "Keep a person on consequential steps and limit what Claude can do."
+          }
+        ],
+        "origin": "course/10-safety-privacy-and-policy/02-prompt-injection-controls-and-escalation.md"
+      },
+      {
+        "id": "rb-061",
+        "stem": "Who should receive a report of a suspected leak first?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The whole team, at the next regular meeting",
+            "correct": false,
+            "says": "A leak or a suspicious file is reported quickly, because waiting lets it spread."
+          },
+          {
+            "id": "b",
+            "text": "The security or IT contact, straight away",
+            "correct": true,
+            "says": "A leak or a suspicious file is reported quickly, because waiting lets it spread."
+          },
+          {
+            "id": "c",
+            "text": "The vendor, through its public discussion forum",
+            "correct": false,
+            "says": "A leak or a suspicious file is reported quickly, because waiting lets it spread."
+          },
+          {
+            "id": "d",
+            "text": "A colleague who works outside the company",
+            "correct": false,
+            "says": "A leak or a suspicious file is reported quickly, because waiting lets it spread."
+          }
+        ],
+        "origin": "course/10-safety-privacy-and-policy/02-prompt-injection-controls-and-escalation.md"
+      },
+      {
+        "id": "rb-062",
+        "stem": "Which exam is aimed at professionals who use the assistant as a productivity tool?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Claude Certified Developer, Foundations",
+            "correct": false,
+            "says": "The Associate exam is for business users of Claude and needs no software-development experience."
+          },
+          {
+            "id": "b",
+            "text": "Claude Certified Architect, Foundations",
+            "correct": false,
+            "says": "The Associate exam is for business users of Claude and needs no software-development experience."
+          },
+          {
+            "id": "c",
+            "text": "Claude Certified Architect, Professional",
+            "correct": false,
+            "says": "The Associate exam is for business users of Claude and needs no software-development experience."
+          },
+          {
+            "id": "d",
+            "text": "Claude Certified Associate, Foundations",
+            "correct": true,
+            "says": "The Associate exam is for business users of Claude and needs no software-development experience."
+          }
+        ],
+        "origin": "course/11-exam-readiness-1/01-the-four-exams-and-how-they-work.md"
+      },
+      {
+        "id": "rb-063",
+        "stem": "What decides pass or fail on the Claude exams?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The total scaled score, with 720 needed",
+            "correct": true,
+            "says": "Domain percentages guide revision but do not decide the result. (checked 2026-10-02)"
+          },
+          {
+            "id": "b",
+            "text": "The percentage reached in each separate domain",
+            "correct": false,
+            "says": "Domain percentages guide revision but do not decide the result. (checked 2026-10-02)"
+          },
+          {
+            "id": "c",
+            "text": "The number of attempts the candidate has made",
+            "correct": false,
+            "says": "Domain percentages guide revision but do not decide the result. (checked 2026-10-02)"
+          },
+          {
+            "id": "d",
+            "text": "The minutes that are left when the last item is done",
+            "correct": false,
+            "says": "Domain percentages guide revision but do not decide the result. (checked 2026-10-02)"
+          }
+        ],
+        "origin": "course/11-exam-readiness-1/01-the-four-exams-and-how-they-work.md"
+      },
+      {
+        "id": "rb-064",
+        "stem": "A candidate's registered name differs from her photo ID. When must it be corrected?",
+        "options": [
+          {
+            "id": "a",
+            "text": "At check-in, by explaining the difference to the proctor",
+            "correct": false,
+            "says": "The name must match exactly, and a correction is made before scheduling."
+          },
+          {
+            "id": "b",
+            "text": "After the exam, by lodging an appeal about the result",
+            "correct": false,
+            "says": "The name must match exactly, and a correction is made before scheduling."
+          },
+          {
+            "id": "c",
+            "text": "Before scheduling, through the support contact",
+            "correct": true,
+            "says": "The name must match exactly, and a correction is made before scheduling."
+          },
+          {
+            "id": "d",
+            "text": "It never matters, since the proctor sees the booking",
+            "correct": false,
+            "says": "The name must match exactly, and a correction is made before scheduling."
+          }
+        ],
+        "origin": "course/11-exam-readiness-1/02-booking-proctoring-and-the-rules-of-the-day.md"
+      },
+      {
+        "id": "rb-065",
+        "stem": "Which behaviour counts as misconduct during an exam?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Using scratch paper that the provider supplies",
+            "correct": false,
+            "says": "The Exam Policy lists using AI products during the exam among prohibited activities."
+          },
+          {
+            "id": "b",
+            "text": "Asking the proctor about a technical fault",
+            "correct": false,
+            "says": "The Exam Policy lists using AI products during the exam among prohibited activities."
+          },
+          {
+            "id": "c",
+            "text": "Using an AI assistant for help",
+            "correct": true,
+            "says": "The Exam Policy lists using AI products during the exam among prohibited activities."
+          },
+          {
+            "id": "d",
+            "text": "Taking a break that was approved in advance",
+            "correct": false,
+            "says": "The Exam Policy lists using AI products during the exam among prohibited activities."
+          }
+        ],
+        "origin": "course/11-exam-readiness-1/02-booking-proctoring-and-the-rules-of-the-day.md"
+      },
+      {
+        "id": "rb-066",
+        "stem": "How long must a candidate wait to retake after the second failed attempt?",
+        "options": [
+          {
+            "id": "a",
+            "text": "30 days",
+            "correct": true,
+            "says": "The waits are 14, 30 and 90 days after the first, second and third failed attempts. (checked 2026-10-02)"
+          },
+          {
+            "id": "b",
+            "text": "14 days",
+            "correct": false,
+            "says": "The waits are 14, 30 and 90 days after the first, second and third failed attempts. (checked 2026-10-02)"
+          },
+          {
+            "id": "c",
+            "text": "90 days",
+            "correct": false,
+            "says": "The waits are 14, 30 and 90 days after the first, second and third failed attempts. (checked 2026-10-02)"
+          },
+          {
+            "id": "d",
+            "text": "12 months",
+            "correct": false,
+            "says": "The waits are 14, 30 and 90 days after the first, second and third failed attempts. (checked 2026-10-02)"
+          }
+        ],
+        "origin": "course/11-exam-readiness-1/02-booking-proctoring-and-the-rules-of-the-day.md"
+      },
+      {
+        "id": "rb-067",
+        "stem": "In a scenario question, what should you read first?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The longest option, since it is often the best",
+            "correct": false,
+            "says": "The working method starts with reading the ask first."
+          },
+          {
+            "id": "b",
+            "text": "The last option, since it is placed there for a reason",
+            "correct": false,
+            "says": "The working method starts with reading the ask first."
+          },
+          {
+            "id": "c",
+            "text": "The first sentence only, and then the options",
+            "correct": false,
+            "says": "The working method starts with reading the ask first."
+          },
+          {
+            "id": "d",
+            "text": "The ask, then the situation with it in mind",
+            "correct": true,
+            "says": "The working method starts with reading the ask first."
+          }
+        ],
+        "origin": "course/11-exam-readiness-1/03-reading-a-scenario-question-and-revising.md"
+      }
+    ],
+    "review": {
+      "intervals_days": [
+        1,
+        3,
+        7,
+        14,
+        30
+      ]
+    }
+  }
+}

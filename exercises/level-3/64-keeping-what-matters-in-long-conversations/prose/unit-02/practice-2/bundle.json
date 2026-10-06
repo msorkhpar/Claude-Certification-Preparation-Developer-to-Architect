@@ -1,0 +1,83 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "64-keeping-what-matters-in-long-conversations"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: a context that keeps the facts, trims the noise, never mixes customers and never splits a tool call (TypeScript)",
+  "lang": "typescript",
+  "main_file": "contextBuilder.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "contextBuilder.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-3/64-keeping-what-matters-in-long-conversations/prose/unit-02/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-3/64-keeping-what-matters-in-long-conversations/prose/unit-02/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-3/64-keeping-what-matters-in-long-conversations/prose/unit-02/practice-2/contextBuilder.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 trimming keeps only the named fields with their exact values in the named order",
+      "kind": "main",
+      "says": "Trimming keeps only the named fields with their exact values in the named order"
+    },
+    {
+      "id": "e1 a field that the record does not have is skipped",
+      "kind": "edge",
+      "says": "A field that the record does not have is skipped"
+    },
+    {
+      "id": "e2 a newer fact replaces the old one and the old value is kept as history",
+      "kind": "edge",
+      "says": "A newer fact replaces the old one and the old value is kept as history"
+    },
+    {
+      "id": "e3 an older fact that arrives late does not replace the current one",
+      "kind": "edge",
+      "says": "An older fact that arrives late does not replace the current one"
+    },
+    {
+      "id": "e4 the case facts of another customer never enter the context",
+      "kind": "edge",
+      "says": "The case facts of another customer never enter the context"
+    },
+    {
+      "id": "e5 the context puts case facts first then the summary then the recent messages",
+      "kind": "edge",
+      "says": "The context puts case facts first, then the summary, then the recent messages"
+    },
+    {
+      "id": "e6 a summary that loses an exact value is reported",
+      "kind": "edge",
+      "says": "A summary that loses an exact value is reported"
+    },
+    {
+      "id": "e7 the window drops the oldest messages and keeps a tool call with its result",
+      "kind": "edge",
+      "says": "The window drops the oldest messages and keeps a tool call with its result"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/64-keeping-what-matters-in-long-conversations/02-long-sessions-stale-facts-isolation-and-the-practice.md"
+}

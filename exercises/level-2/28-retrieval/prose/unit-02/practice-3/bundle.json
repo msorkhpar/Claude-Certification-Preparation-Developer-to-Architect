@@ -1,0 +1,88 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "28-retrieval"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 3,
+  "title": "Practice: a retrieval pipeline graded on recall (Java)",
+  "lang": "java",
+  "main_file": "src/main/java/Retrieval.java",
+  "files": [
+    "src/main/java/TryIt.java"
+  ],
+  "test_file": "src/test/java/RetrievalTest.java",
+  "build": [
+    "src/main/java/Json.java",
+    "src/main/java/Types.java",
+    "tests/fixture.json",
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/28-retrieval/prose/unit-02/practice-3",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/28-retrieval/prose/unit-02/practice-3",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_hybridSearchFindsWhatEachSingleIndexMisses()",
+      "kind": "main",
+      "says": "Hybrid search finds what each single index misses, measured on a small knowledge base"
+    },
+    {
+      "id": "e1_chunksOverlapAndEndAtTheLastWord()",
+      "kind": "edge",
+      "says": "Chunks overlap and end at the last word"
+    },
+    {
+      "id": "e2_aRareWordOutweighsCommonOnesAndShortChunksWin()",
+      "kind": "edge",
+      "says": "A rare word outweighs common ones, and short chunks win"
+    },
+    {
+      "id": "e3_fusionRewardsAgreementAndBreaksTiesById()",
+      "kind": "edge",
+      "says": "Fusion rewards agreement between lists and breaks ties by id"
+    },
+    {
+      "id": "e4_rerankingOrdersThePoolByTheScorer()",
+      "kind": "edge",
+      "says": "Reranking orders only the pool by the scorer"
+    },
+    {
+      "id": "e5_recallCountsDocumentsNotChunks()",
+      "kind": "edge",
+      "says": "Recall counts documents, not chunks"
+    },
+    {
+      "id": "e6_aContextSentenceMakesABareChunkFindable()",
+      "kind": "edge",
+      "says": "A context sentence makes a bare chunk findable"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/28-retrieval/02-fusion-reranking-context-and-recall.md"
+}

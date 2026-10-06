@@ -1,0 +1,318 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-1",
+    "06-prompting-fundamentals"
+  ],
+  "variant": "prose",
+  "unit": 4,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: a prompt template builder, graded on structure (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a prompt template builder, graded on structure"
+    },
+    {
+      "type": "para",
+      "text": "Write `build_prompt` (Python), `buildPrompt` (TypeScript), `PromptBuilder.build` (Java) or `buildPrompt` (Kotlin): it turns a prompt **spec** into one prompt string. The tests check the structure of the string, exactly, so the format below is the contract."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working prompt builder with eight gaps cut out of it. The plumbing is written and correct: the spec handling, the order of the sections, the placeholder pass, the block helper and the numbering loops. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To see what a gap receives, debug it by logging its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (Python names, with a leading underscore; the TypeScript, Java and Kotlin names are the camel-case forms, `renderDocument` for `_render_document`, and so on):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_join` unlocks every case: the sections separated by one blank line.",
+        "`_present` unlocks `e1`: an absent, empty or whitespace-only text is not there.",
+        "`_lookup` unlocks `e2`: a placeholder's value, or an error that names the variable.",
+        "`_escape` unlocks `e4`: `&`, `<` and `>` made harmless.",
+        "`_render_document` unlocks `e4`, `e5` and `e6`: one document, escaped and never filled.",
+        "`_render_example` unlocks `m1` and `e6`: one example with its input and output blocks.",
+        "`_constraint_lines` unlocks `m1`: one `- ` line per constraint.",
+        "`_check_task` unlocks `e3`: a blank task is refused."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gaps 1, 2, 3, 5, 6 and 7. A few lines each, about ten in all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The spec"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Field",
+        "Type",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`task`",
+          "text",
+          "The ask. **Required.**"
+        ],
+        [
+          "`role`",
+          "text, optional",
+          "Who Claude is for this task"
+        ],
+        [
+          "`context`",
+          "text, optional",
+          "Why and for whom"
+        ],
+        [
+          "`documents`",
+          "list of `name` and `text`, optional",
+          "Source material (untrusted data)"
+        ],
+        [
+          "`examples`",
+          "list of `input` and `output`, optional",
+          "Worked examples"
+        ],
+        [
+          "`constraints`",
+          "list of text, optional",
+          "Rules the answer must obey"
+        ],
+        [
+          "`output_format`",
+          "text, optional",
+          "The shape of the answer"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Plus a `variables` map from names to text. (TypeScript, Java and Kotlin name the field `outputFormat`.)"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The output"
+    },
+    {
+      "type": "para",
+      "text": "Sections appear in this order, separated by one blank line, with no trailing newline. A section is **omitted entirely** when its field is absent, `null`, empty or only whitespace; `task` is never omitted."
+    },
+    {
+      "type": "code",
+      "lang": "text",
+      "text": "<role>\n{role}\n</role>\n\n<documents>\n<document index=\"1\" name=\"{name}\">\n{text}\n</document>\n<document index=\"2\" name=\"{name}\">\n{text}\n</document>\n</documents>\n\n<context>\n{context}\n</context>\n\n<examples>\n<example index=\"1\">\n<input>\n{input}\n</input>\n<output>\n{output}\n</output>\n</example>\n</examples>\n\n<constraints>\n- {first constraint}\n- {second constraint}\n</constraints>\n\n<output_format>\n{output_format}\n</output_format>\n\n<task>\n{task}\n</task>"
+    },
+    {
+      "type": "para",
+      "text": "Documents and examples keep the order they were given, numbered from 1."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Rules"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Variables.** `{{name}}` in `role`, `context`, `constraints`, `output_format`, `task`, and the `input` and `output` of examples is replaced by the variable's value, in one pass: a value that itself contains `{{other}}` is inserted as it is. A placeholder with no value is an error that names the variable (Python `ValueError`, TypeScript `Error`, Java and Kotlin `IllegalArgumentException`; the message contains the variable's name).",
+        "**Documents are data.** In a document's `text` and `name`, replace `&` with `&amp;`, `<` with `&lt;` and `>` with `&gt;`, and in the `name` also `\"` with `&quot;`, so a document can never close its own tag. Placeholders inside documents are **not** replaced.",
+        "**A blank task is refused** with the same error type: missing, empty or only whitespace."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A full spec renders every section in the order above"
+        ],
+        [
+          "`e1`",
+          "Absent, empty and whitespace-only optional sections are omitted, not rendered empty"
+        ],
+        [
+          "`e2`",
+          "Variables are filled in one pass; a missing variable is named in the error"
+        ],
+        [
+          "`e3`",
+          "A missing, empty or whitespace-only task is refused"
+        ],
+        [
+          "`e4`",
+          "Document text and names are escaped, so a document cannot close its own tag"
+        ],
+        [
+          "`e5`",
+          "Placeholders inside document text stay literal"
+        ],
+        [
+          "`e6`",
+          "Documents and examples keep their order and their numbering"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Build a structured prompt from a spec. See ../../statement.md for the exact format.\"\"\"\nimport logging\nimport re\n\nlog = logging.getLogger(__name__)\n\n_VAR = re.compile(r\"\\{\\{(\\w+)\\}\\}\")\n\n\ndef _fill(text, variables):\n    \"\"\"Replace every {{name}} in one pass; a value is inserted as it is, even when it holds another {{placeholder}}.\"\"\"\n    return _VAR.sub(lambda match: _lookup(match.group(1), variables), text)\n\n\ndef _block(tag, body):\n    return f\"<{tag}>\\n{body}\\n</{tag}>\"\n\n\ndef _join(parts):\n    return \"\\n\\n\".join(parts)\n\n\ndef _present(value):\n    return value is not None and value.strip() != \"\"\n\n\ndef _lookup(name, variables):\n    if name not in variables:\n        raise ValueError(f\"missing variable: {name}\")\n    return str(variables[name])\n\n\ndef _escape(text):\n    return text.replace(\"&\", \"&amp;\").replace(\"<\", \"&lt;\").replace(\">\", \"&gt;\")\n\n\ndef _render_document(index, doc):\n    name = _escape(doc[\"name\"]).replace('\"', \"&quot;\")\n    return f'<document index=\"{index}\" name=\"{name}\">\\n{_escape(doc[\"text\"])}\\n</document>'\n\n\ndef _render_example(index, example, variables):\n    return (\n        f'<example index=\"{index}\">\\n'\n        f'{_block(\"input\", _fill(example[\"input\"], variables))}\\n'\n        f'{_block(\"output\", _fill(example[\"output\"], variables))}\\n'\n        \"</example>\"\n    )\n\n\ndef _constraint_lines(constraints, variables):\n    return \"\\n\".join(\"- \" + _fill(c, variables) for c in constraints)\n\n\ndef _check_task(task):\n    if not _present(task):\n        raise ValueError(\"task is required\")\n\n\ndef build_prompt(spec, variables=None):\n    log.debug(\"build_prompt input: %r %r\", spec, variables)\n    variables = variables or {}\n    task = spec.get(\"task\")\n    _check_task(task)\n    parts = []\n    if _present(spec.get(\"role\")):\n        parts.append(_block(\"role\", _fill(spec[\"role\"], variables)))\n    documents = spec.get(\"documents\") or []\n    if documents:\n        rendered = [_render_document(i, doc) for i, doc in enumerate(documents, start=1)]\n        parts.append(_block(\"documents\", \"\\n\".join(rendered)))\n    if _present(spec.get(\"context\")):\n        parts.append(_block(\"context\", _fill(spec[\"context\"], variables)))\n    examples = spec.get(\"examples\") or []\n    if examples:\n        rendered = [_render_example(i, ex, variables) for i, ex in enumerate(examples, start=1)]\n        parts.append(_block(\"examples\", \"\\n\".join(rendered)))\n    constraints = spec.get(\"constraints\") or []\n    if constraints:\n        parts.append(_block(\"constraints\", _constraint_lines(constraints, variables)))\n    if _present(spec.get(\"output_format\")):\n        parts.append(_block(\"output_format\", _fill(spec[\"output_format\"], variables)))\n    parts.append(_block(\"task\", _fill(task or \"\", variables)))\n    return _join(parts)\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom prompt_builder import build_prompt\n\n# A small spec like the first main test case: a role, one document, one constraint and a task with a placeholder.\nspec = {\n    \"role\": \"You are a careful support analyst for {{company}}.\",\n    \"documents\": [{\"name\": \"policy.txt\", \"text\": \"Refunds within 30 days.\"}],\n    \"constraints\": [\"Answer in one word.\"],\n    \"task\": \"Classify the message about {{topic}}.\",\n}\nprompt = build_prompt(spec, {\"company\": \"Acme\", \"topic\": \"delivery\"})\n\nprint(\"prompt length:\", len(prompt))\nprint(\"starts with:\", repr(prompt[:20]))\nprint(\"has task block:\", \"<task>\\nClassify the message about delivery.\\n</task>\" in prompt)\nprint(prompt)\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Build a structured prompt from a spec. See ../../statement.md for the exact format.\"\"\"\nimport logging\nimport re\n\nlog = logging.getLogger(__name__)\n\n_VAR = re.compile(r\"\\{\\{(\\w+)\\}\\}\")\n\n\ndef _fill(text, variables):\n    \"\"\"Replace every {{name}} in one pass; a value is inserted as it is, even when it holds another {{placeholder}}.\"\"\"\n    return _VAR.sub(lambda match: _lookup(match.group(1), variables), text)\n\n\ndef _block(tag, body):\n    return f\"<{tag}>\\n{body}\\n</{tag}>\"\n\n\ndef _join(parts):\n    \"\"\"TODO 1 of 8 (finish this to pass every case): the finished prompt from its rendered sections.\n\n    Receives the list of rendered sections, in order. Returns them separated by one blank line, with no trailing newline.\n    Example: _join([\"<a>\", \"<b>\"]) -> \"<a>\\\\n\\\\n<b>\"\n    \"\"\"\n    return \"\"\n\n\ndef _present(value):\n    \"\"\"TODO 2 of 8 (finish this to pass e1): is an optional text really there?\n\n    Receives a text or None. Returns True unless it is None, empty or only whitespace.\n    Example: _present(\"  \") -> False, _present(\"x\") -> True\n    \"\"\"\n    return False\n\n\ndef _lookup(name, variables):\n    \"\"\"TODO 3 of 8 (finish this to pass e2): the value of one placeholder.\n\n    Receives the placeholder name and the variables map. Returns the value as text; when the name has no value raises\n    ValueError whose message contains the name.\n    Example: _lookup(\"who\", {\"who\": \"Ann\"}) -> \"Ann\", _lookup(\"place\", {}) -> ValueError(\"missing variable: place\")\n    \"\"\"\n    return \"\"\n\n\ndef _escape(text):\n    \"\"\"TODO 4 of 8 (finish this to pass e4): make document text harmless.\n\n    Receives a text. Returns it with & as &amp;, < as &lt; and > as &gt; (the ampersand first).\n    Example: _escape(\"a </document> & b\") -> \"a &lt;/document&gt; &amp; b\"\n    \"\"\"\n    return text\n\n\ndef _render_document(index, doc):\n    \"\"\"TODO 5 of 8 (finish this to pass e4, e5 and e6): one rendered document.\n\n    Receives its number (from 1) and a dict with `name` and `text`. Returns `<document index=\"N\" name=\"NAME\">`, a newline, the text,\n    a newline and `</document>`. Name and text are escaped (the name also turns \" into &quot;); placeholders in them are NOT filled.\n    Example: _render_document(1, {\"name\": \"a\", \"text\": \"x\"}) -> '<document index=\"1\" name=\"a\">\\\\nx\\\\n</document>'\n    \"\"\"\n    return \"\"\n\n\ndef _render_example(index, example, variables):\n    \"\"\"TODO 6 of 8 (finish this to pass m1 and e6): one rendered example.\n\n    Receives its number (from 1), a dict with `input` and `output`, and the variables. Returns `<example index=\"N\">`, the input block,\n    the output block (placeholders filled in both) and `</example>`, each on its own line.\n    Example: _render_example(1, {\"input\": \"i\", \"output\": \"o\"}, {}) -> '<example index=\"1\">\\\\n<input>\\\\ni\\\\n</input>\\\\n<output>\\\\no\\\\n</output>\\\\n</example>'\n    \"\"\"\n    return \"\"\n\n\ndef _constraint_lines(constraints, variables):\n    \"\"\"TODO 7 of 8 (finish this to pass m1): the body of the constraints section.\n\n    Receives the list of constraint texts and the variables. Returns one line per constraint, `- ` then the text with placeholders\n    filled, joined by newlines.\n    Example: _constraint_lines([\"Be brief.\"], {}) -> \"- Be brief.\"\n    \"\"\"\n    return \"\"\n\n\ndef _check_task(task):\n    \"\"\"TODO 8 of 8 (finish this to pass e3): refuse a blank task.\n\n    Receives the task, which may be None. Raises ValueError(\"task is required\") when it is None, empty or only whitespace; otherwise\n    returns nothing.\n    Example: _check_task(\"  \") -> ValueError, _check_task(\"Say hi.\") -> None\n    \"\"\"\n    return None\n\n\ndef build_prompt(spec, variables=None):\n    log.debug(\"build_prompt input: %r %r\", spec, variables)\n    variables = variables or {}\n    task = spec.get(\"task\")\n    _check_task(task)\n    parts = []\n    if _present(spec.get(\"role\")):\n        parts.append(_block(\"role\", _fill(spec[\"role\"], variables)))\n    documents = spec.get(\"documents\") or []\n    if documents:\n        rendered = [_render_document(i, doc) for i, doc in enumerate(documents, start=1)]\n        parts.append(_block(\"documents\", \"\\n\".join(rendered)))\n    if _present(spec.get(\"context\")):\n        parts.append(_block(\"context\", _fill(spec[\"context\"], variables)))\n    examples = spec.get(\"examples\") or []\n    if examples:\n        rendered = [_render_example(i, ex, variables) for i, ex in enumerate(examples, start=1)]\n        parts.append(_block(\"examples\", \"\\n\".join(rendered)))\n    constraints = spec.get(\"constraints\") or []\n    if constraints:\n        parts.append(_block(\"constraints\", _constraint_lines(constraints, variables)))\n    if _present(spec.get(\"output_format\")):\n        parts.append(_block(\"output_format\", _fill(spec[\"output_format\"], variables)))\n    parts.append(_block(\"task\", _fill(task or \"\", variables)))\n    return _join(parts)\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom prompt_builder import build_prompt\n\n# A small spec like the first main test case: a role, one document, one constraint and a task with a placeholder.\nspec = {\n    \"role\": \"You are a careful support analyst for {{company}}.\",\n    \"documents\": [{\"name\": \"policy.txt\", \"text\": \"Refunds within 30 days.\"}],\n    \"constraints\": [\"Answer in one word.\"],\n    \"task\": \"Classify the message about {{topic}}.\",\n}\nprompt = build_prompt(spec, {\"company\": \"Acme\", \"topic\": \"delivery\"})\n\nprint(\"prompt length:\", len(prompt))\nprint(\"starts with:\", repr(prompt[:20]))\nprint(\"has task block:\", \"<task>\\nClassify the message about delivery.\\n</task>\" in prompt)\nprint(prompt)\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 7,
+    "code": 3,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "682b19fd65de0451ad1bfe04d2ae05ce5e05269f02d4403c242a6aa8894b4c7a",
+  "starting_code": "\"\"\"Build a structured prompt from a spec. See ../../statement.md for the exact format.\"\"\"\nimport logging\nimport re\n\nlog = logging.getLogger(__name__)\n\n_VAR = re.compile(r\"\\{\\{(\\w+)\\}\\}\")\n\n\ndef _fill(text, variables):\n    \"\"\"Replace every {{name}} in one pass; a value is inserted as it is, even when it holds another {{placeholder}}.\"\"\"\n    return _VAR.sub(lambda match: _lookup(match.group(1), variables), text)\n\n\ndef _block(tag, body):\n    return f\"<{tag}>\\n{body}\\n</{tag}>\"\n\n\ndef _join(parts):\n    \"\"\"TODO 1 of 8 (finish this to pass every case): the finished prompt from its rendered sections.\n\n    Receives the list of rendered sections, in order. Returns them separated by one blank line, with no trailing newline.\n    Example: _join([\"<a>\", \"<b>\"]) -> \"<a>\\\\n\\\\n<b>\"\n    \"\"\"\n    return \"\"\n\n\ndef _present(value):\n    \"\"\"TODO 2 of 8 (finish this to pass e1): is an optional text really there?\n\n    Receives a text or None. Returns True unless it is None, empty or only whitespace.\n    Example: _present(\"  \") -> False, _present(\"x\") -> True\n    \"\"\"\n    return False\n\n\ndef _lookup(name, variables):\n    \"\"\"TODO 3 of 8 (finish this to pass e2): the value of one placeholder.\n\n    Receives the placeholder name and the variables map. Returns the value as text; when the name has no value raises\n    ValueError whose message contains the name.\n    Example: _lookup(\"who\", {\"who\": \"Ann\"}) -> \"Ann\", _lookup(\"place\", {}) -> ValueError(\"missing variable: place\")\n    \"\"\"\n    return \"\"\n\n\ndef _escape(text):\n    \"\"\"TODO 4 of 8 (finish this to pass e4): make document text harmless.\n\n    Receives a text. Returns it with & as &amp;, < as &lt; and > as &gt; (the ampersand first).\n    Example: _escape(\"a </document> & b\") -> \"a &lt;/document&gt; &amp; b\"\n    \"\"\"\n    return text\n\n\ndef _render_document(index, doc):\n    \"\"\"TODO 5 of 8 (finish this to pass e4, e5 and e6): one rendered document.\n\n    Receives its number (from 1) and a dict with `name` and `text`. Returns `<document index=\"N\" name=\"NAME\">`, a newline, the text,\n    a newline and `</document>`. Name and text are escaped (the name also turns \" into &quot;); placeholders in them are NOT filled.\n    Example: _render_document(1, {\"name\": \"a\", \"text\": \"x\"}) -> '<document index=\"1\" name=\"a\">\\\\nx\\\\n</document>'\n    \"\"\"\n    return \"\"\n\n\ndef _render_example(index, example, variables):\n    \"\"\"TODO 6 of 8 (finish this to pass m1 and e6): one rendered example.\n\n    Receives its number (from 1), a dict with `input` and `output`, and the variables. Returns `<example index=\"N\">`, the input block,\n    the output block (placeholders filled in both) and `</example>`, each on its own line.\n    Example: _render_example(1, {\"input\": \"i\", \"output\": \"o\"}, {}) -> '<example index=\"1\">\\\\n<input>\\\\ni\\\\n</input>\\\\n<output>\\\\no\\\\n</output>\\\\n</example>'\n    \"\"\"\n    return \"\"\n\n\ndef _constraint_lines(constraints, variables):\n    \"\"\"TODO 7 of 8 (finish this to pass m1): the body of the constraints section.\n\n    Receives the list of constraint texts and the variables. Returns one line per constraint, `- ` then the text with placeholders\n    filled, joined by newlines.\n    Example: _constraint_lines([\"Be brief.\"], {}) -> \"- Be brief.\"\n    \"\"\"\n    return \"\"\n\n\ndef _check_task(task):\n    \"\"\"TODO 8 of 8 (finish this to pass e3): refuse a blank task.\n\n    Receives the task, which may be None. Raises ValueError(\"task is required\") when it is None, empty or only whitespace; otherwise\n    returns nothing.\n    Example: _check_task(\"  \") -> ValueError, _check_task(\"Say hi.\") -> None\n    \"\"\"\n    return None\n\n\ndef build_prompt(spec, variables=None):\n    log.debug(\"build_prompt input: %r %r\", spec, variables)\n    variables = variables or {}\n    task = spec.get(\"task\")\n    _check_task(task)\n    parts = []\n    if _present(spec.get(\"role\")):\n        parts.append(_block(\"role\", _fill(spec[\"role\"], variables)))\n    documents = spec.get(\"documents\") or []\n    if documents:\n        rendered = [_render_document(i, doc) for i, doc in enumerate(documents, start=1)]\n        parts.append(_block(\"documents\", \"\\n\".join(rendered)))\n    if _present(spec.get(\"context\")):\n        parts.append(_block(\"context\", _fill(spec[\"context\"], variables)))\n    examples = spec.get(\"examples\") or []\n    if examples:\n        rendered = [_render_example(i, ex, variables) for i, ex in enumerate(examples, start=1)]\n        parts.append(_block(\"examples\", \"\\n\".join(rendered)))\n    constraints = spec.get(\"constraints\") or []\n    if constraints:\n        parts.append(_block(\"constraints\", _constraint_lines(constraints, variables)))\n    if _present(spec.get(\"output_format\")):\n        parts.append(_block(\"output_format\", _fill(spec[\"output_format\"], variables)))\n    parts.append(_block(\"task\", _fill(task or \"\", variables)))\n    return _join(parts)\n",
+  "exercise": {
+    "main_path": "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-1/prompt_builder.py",
+    "test_path": "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-1/test_prompt_builder.py",
+    "run_command": [
+      "python3",
+      "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-1/target/report.xml",
+      "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-1/test_prompt_builder.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_full_prompt_has_every_section_in_order",
+        "kind": "main",
+        "says": "A full spec renders every section in the order above"
+      },
+      {
+        "id": "test_e1_absent_optional_sections_are_omitted_not_empty",
+        "kind": "edge",
+        "says": "Absent, empty and whitespace-only optional sections are omitted, not rendered empty"
+      },
+      {
+        "id": "test_e2_variables_fill_once_and_a_missing_one_is_named",
+        "kind": "edge",
+        "says": "Variables are filled in one pass; a missing variable is named in the error"
+      },
+      {
+        "id": "test_e3_blank_task_is_refused",
+        "kind": "edge",
+        "says": "A missing, empty or whitespace-only task is refused"
+      },
+      {
+        "id": "test_e4_document_text_cannot_close_its_own_tag",
+        "kind": "edge",
+        "says": "Document text and names are escaped, so a document cannot close its own tag"
+      },
+      {
+        "id": "test_e5_placeholders_inside_documents_stay_literal",
+        "kind": "edge",
+        "says": "Placeholders inside document text stay literal"
+      },
+      {
+        "id": "test_e6_documents_and_examples_keep_their_order_and_index",
+        "kind": "edge",
+        "says": "Documents and examples keep their order and their numbering"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-1/target/report.xml"
+    },
+    "origin": "course/06-prompting-fundamentals/04-diagnosing-a-weak-output.md",
+    "concepts": [
+      "the practice of Diagnosing a weak output, and a template builder is solved"
+    ],
+    "files": [
+      "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "prompting-fundamentals-u4"
+}

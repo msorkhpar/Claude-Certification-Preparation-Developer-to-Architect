@@ -1,0 +1,87 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "13-one-rest-api-under-every-sdk"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 3,
+  "title": "Practice: a raw Messages API client, graded on the HTTP contract (Java)",
+  "lang": "java",
+  "main_file": "src/main/java/RawClient.java",
+  "files": [
+    "src/main/java/TryIt.java"
+  ],
+  "test_file": "src/test/java/RawClientTest.java",
+  "build": [
+    "src/main/java/Json.java",
+    "src/main/java/Types.java",
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/13-one-rest-api-under-every-sdk/prose/unit-02/practice-3",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/13-one-rest-api-under-every-sdk/prose/unit-02/practice-3",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_requestHasMethodUrlThreeHeadersAndJsonBody()",
+      "kind": "main",
+      "says": "The request has the right method, URL, exactly three headers and a JSON body"
+    },
+    {
+      "id": "e1_blankOrAbsentSystemIsLeftOutOfTheBody()",
+      "kind": "edge",
+      "says": "A blank or absent system is left out of the body"
+    },
+    {
+      "id": "e2_badInputIsRefusedBeforeAnythingIsSent()",
+      "kind": "edge",
+      "says": "Bad input is refused before the transport is called"
+    },
+    {
+      "id": "e3_successReturnsTheMessageAndTextJoinsTextBlocksOnly()",
+      "kind": "edge",
+      "says": "A good reply is parsed, and text_of joins text blocks only"
+    },
+    {
+      "id": "e4_anErrorReplyBecomesAnApiErrorWithTheHeaderRequestId()",
+      "kind": "edge",
+      "says": "An error reply becomes an ApiError; the header's request id wins over the body's"
+    },
+    {
+      "id": "e5_aReplyThatIsNotJsonStillGivesAnApiError()",
+      "kind": "edge",
+      "says": "A reply that is not JSON still gives an ApiError (unknown)"
+    },
+    {
+      "id": "e6_theApiKeyNeverAppearsInAnError()",
+      "kind": "edge",
+      "says": "The API key never appears in an error"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/13-one-rest-api-under-every-sdk/02-what-the-sdk-does-for-you.md"
+}

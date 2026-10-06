@@ -1,0 +1,310 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "31-computer-use"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "The computer use tool: the toolset, the loop and the scale",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "The computer use tool: the toolset, the loop and the scale"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Developer · **Module 31:** Computer use · **Page 1 of 2** **Exams:** DV5, DV6 (and X: this module goes beyond what the exam guides name)"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** declare the computer use toolset, explain who does what in its loop, answer a batch of actions correctly, and keep screenshots inside the image limits while mapping Claude's coordinates back onto the real screen."
+    },
+    {
+      "type": "para",
+      "text": "Checked against the Claude API documentation (Computer use tool, and Vision) on 2026-10-03, with the example run offline in the course container (`anthropic` 1.11.0, `@anthropic-ai/sdk` 0.131.0). There is no desktop and no model in the example: the screen is a few rectangles in memory and the replies are hand-written bodies in the shape of the Messages API for `claude-sonnet-5-5`, labelled illustrative. Nothing on this page was run against the live API."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "Most tools return data. The computer use tool returns a picture and takes a click. Claude looks at a screenshot, decides on a click, a keystroke or a scroll, and your code carries it out. That makes the loop around the model the product: it decides what a screenshot may contain, what happens when an action fails, and what a person must approve. The exam asks who runs what, how the request is shaped, and what goes wrong when the scale is not mapped back."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "One entry, seventeen members"
+    },
+    {
+      "type": "para",
+      "text": "The computer use tool is a client toolset. One entry, `{\"type\": \"computer_toolset_20260801\"}`, in the `tools` array \"gives Claude 17 member tools such as screenshot, left_click, type, and zoom, and your application runs every call in an environment you control.\" The request needs no beta header. On the Claude API and Google Cloud, Claude 5.5 and later models support computer use only through this toolset. Earlier models and other platforms still use the earlier `computer_20251124` tool, which needs a beta header."
+    },
+    {
+      "type": "para",
+      "text": "The members cover looking (`screenshot`, `zoom`), the pointer (`left_click`, `right_click`, `middle_click`, `double_click`, `triple_click`, `left_click_drag`, `mouse_move`, `left_mouse_down`, `left_mouse_up`, `cursor_position`, `scroll`), the keyboard (`type`, `key`, `hold_key`) and `wait`. All of them are on by default, `zoom` included. An environment that cannot produce zoom images withholds the member with the `configs` parameter of the entry, rather than leaving it on and returning errors."
+    },
+    {
+      "type": "para",
+      "text": "The entry takes no display size. The documentation lists the parameters of the earlier tool that it rejects, with the reason: \"coordinates are always in the pixel space of the screenshots you return\". A request that includes `name`, `display_width_px`, `display_height_px`, `display_number` or `enable_zoom` is an `invalid_request_error`."
+    },
+    {
+      "type": "para",
+      "text": "A call arrives as a `tool_use` block whose `name` is the member and which carries `\"toolset_name\": \"computer\"`. Dispatch on the pair. A custom tool in the same request can share a member's name, and `toolset_name` is what marks a block as a computer action."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Who does what"
+    },
+    {
+      "type": "para",
+      "text": "Claude never touches the machine. Your application receives the tool use requests, translates them into actions in your computing environment, captures the results and returns them. The reference implementation puts all of this in a Docker container: a virtual display, a light desktop, a few applications and the loop itself. The loop is the same as in module 26, with a screenshot as the main result:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Send the toolset, the user's task and the conversation so far.",
+        "When `stop_reason` is `tool_use`, run every `tool_use` block, in order, in your environment.",
+        "Send one new user message with one `tool_result` per call, matched by `tool_use_id` and echoing `\"toolset_name\": \"computer\"`. Return an image for `screenshot` and `zoom`. A short text such as `OK` is enough for the other actions, and `cursor_position` returns its coordinates as text.",
+        "Repeat until Claude answers without a tool call, or until a turn limit that you set stops the loop. The limit is a safeguard against \"potential infinite loops that could result in unexpected API costs\"."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Batch actions"
+    },
+    {
+      "type": "para",
+      "text": "Claude often plans a short sequence, such as click, type, then screenshot, and returns it as several blocks in one reply. This is a batch action. It has the shape of parallel tool use with one difference: you run the blocks in order, never at the same time. Later actions depend on earlier ones, because the `type` enters text into whatever the click focused."
+    },
+    {
+      "type": "para",
+      "text": "The rule is to run the blocks in order and stop at the first failure. The documentation says \"if one fails, don't run the rest\". Every block still needs a result, and the answer has three parts:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "A normal result for each action that succeeded.",
+        "`is_error: true` with a description for the one that failed.",
+        "`is_error: true` with exactly this text for every later action: `Not executed: an earlier computer action in this turn failed.`"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Claude then sees which actions ran, which failed and which were skipped, and replans. Leaving a block unanswered is an `invalid_request_error`, \"so an agent loop that reads only the first block fails on its next call\". If your application asks a person to confirm risky actions, make that check before each block runs, because a batch can finish a multistep action inside one turn."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Screenshots must fit, and coordinates are theirs"
+    },
+    {
+      "type": "para",
+      "text": "A screen is usually larger than the picture a model may be sent, and the toolset does nothing about it. The documentation says \"the toolset takes no display dimensions and the API doesn't downscale for you\", and an oversized image in a `tool_result` is rejected with a validation error. So you resize each screenshot before returning it, and you keep the scale factor."
+    },
+    {
+      "type": "para",
+      "text": "Claude's coordinates are in the pixel space of the image it saw. That holds after a `zoom` too: Claude \"still expresses coordinates in the full screenshot's space, never relative to the zoomed image\". The rule that follows is the documentation's own: \"If you scale screenshots down before returning them, scale Claude's coordinates back up before applying them to the real display.\" On a macOS Retina display the screenshot is already twice the logical size, so halve either the picture or the coordinates."
+    },
+    {
+      "type": "para",
+      "text": "The limit depends on the model. Claude Opus 4.7 and later, \"including every model that supports\" this toolset, accept up to 2576 pixels on the long edge and 4784 visual tokens, about 3.75 megapixels. Earlier models accept 1568 pixels and about 1.15 megapixels. The documentation's own example uses the smaller numbers, and so does the example below and the practice of the next page: it is safe on every model, and it costs detail on a high-resolution model. For that tier, size to the visual-token limit with the reference helper of the vision page (module 30)."
+    },
+    {
+      "type": "para",
+      "text": "A failed action is reported the same way as in any tool loop: a `tool_result` with `is_error: true`, the `toolset_name`, and a short message that says what went wrong, such as a coordinate outside the display."
+    },
+    {
+      "type": "example",
+      "id": "m31-screen-loop",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/31-screen-loop/python/screen_loop.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/31-screen-loop/typescript/screenLoop.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/31-screen-loop/java/ScreenLoop.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/31-screen-loop/kotlin/ScreenLoop.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"The loop around the computer use toolset, on a toy screen: scaling both ways, a batch, a halt after a failure and a confirmation.\n\nThere is no desktop and no model: the screen is a few rectangles in memory and the replies are hand-written bodies in the shape of the\nMessages API (claude-sonnet-5-5), illustrative and not captures. The tool entry, the batch rule and the halt text are those of the\n\"Computer use tool\" page of the Claude documentation, checked on 2026-10-03.\n\"\"\"\nimport logging\nimport base64\nimport json\nimport math\n\nfrom harness import scripted_client\nfrom harness.scripted import message, text\n\nlog = logging.getLogger(__name__)\n\nMODEL = \"claude-sonnet-5-5\"\nTOOLSET = {\"type\": \"computer_toolset_20260801\"}\nHALT = \"Not executed: an earlier computer action in this turn failed.\"\nSCREEN = {\"width\": 2560, \"height\": 1440, \"typed\": \"\", \"log\": [],\n          \"elements\": [{\"id\": \"search\", \"x\": 800, \"y\": 100, \"w\": 900, \"h\": 60, \"risk\": \"none\"}, {\"id\": \"buy\", \"x\": 2000, \"y\": 1200, \"w\": 300, \"h\": 80, \"risk\": \"payment\"}]}\n\n\ndef scale_for(width, height):\n    \"\"\"The documentation's example limits (1568 px on the long edge, about 1.15 megapixels): small enough for every model.\"\"\"\n    return min(1, 1568 / max(width, height), math.sqrt(1_150_000 / (width * height)))\n\n\ndef to_screen(x, y, scale, screen):\n    return (min(max(round(x / scale), 0), screen[\"width\"] - 1), min(max(round(y / scale), 0), screen[\"height\"] - 1))\n\n\ndef element_at(screen, x, y):\n    hit = [e for e in screen[\"elements\"] if e[\"x\"] <= x < e[\"x\"] + e[\"w\"] and e[\"y\"] <= y < e[\"y\"] + e[\"h\"]]\n    return hit[-1] if hit else None\n\n\ndef screenshot(screen, scale):\n    size = f'{int(screen[\"width\"] * scale)}x{int(screen[\"height\"] * scale)}'\n    return [{\"type\": \"image\", \"source\": {\"type\": \"base64\", \"media_type\": \"image/png\", \"data\": base64.b64encode(f\"{size}:{len(screen['log'])}\".encode()).decode()}}]\n\n\ndef perform(screen, name, args, scale, confirm):\n    \"\"\"Run one member of the toolset on the toy screen; return (content, is_error).\"\"\"\n    if name == \"screenshot\":\n        return screenshot(screen, scale), False\n    if name == \"left_click\":\n        x, y = to_screen(*args[\"coordinate\"], scale, screen)\n        target = element_at(screen, x, y)\n        if target and target[\"risk\"] != \"none\" and not (confirm and confirm({\"action\": name, \"element\": target[\"id\"], \"risk\": target[\"risk\"]})):\n            return f\"Declined: {target['id']} needs a person's confirmation ({target['risk']})\", True\n        screen[\"log\"].append([\"click\", target[\"id\"] if target else None])\n        return f\"Clicked {target['id'] if target else 'nothing'} at {x},{y} on the screen\", False\n    if name == \"type\":\n        screen[\"typed\"] += args[\"text\"]\n        screen[\"log\"].append([\"type\", args[\"text\"]])\n        return f\"Typed {len(args['text'])} characters\", False\n    if name == \"key\":\n        screen[\"log\"].append([\"key\", args[\"text\"]])\n        return f\"Pressed {args['text']}\", False\n    return f\"Unknown action: {name}\", True\n\n\ndef run_loop(client, screen, confirm=None, max_turns=6):\n    scale = scale_for(screen[\"width\"], screen[\"height\"])\n    messages = [{\"role\": \"user\", \"content\": \"Search for a kettle and buy the first one.\"}]\n    for turn in range(1, max_turns + 1):\n        reply = client.messages.create(model=MODEL, max_tokens=4096, tools=[TOOLSET], messages=messages)\n        messages.append({\"role\": \"assistant\", \"content\": [b.model_dump(exclude_none=True) for b in reply.content]})\n        if reply.stop_reason != \"tool_use\":\n            return {\"status\": \"done\", \"turns\": turn, \"answer\": reply.content[-1].text}\n        results, failed = [], False\n        for block in [b for b in reply.content if b.type == \"tool_use\"]:\n            if failed:\n                content, is_error = HALT, True\n            else:\n                content, is_error = perform(screen, block.name, block.input, scale, confirm)\n                failed = is_error\n            print(f\"turn {turn}: {block.name} {json.dumps(block.input, separators=(',', ':'))} -> {'ERROR ' if is_error else ''}{content if isinstance(content, str) else 'image'}\")\n            results.append({\"type\": \"tool_result\", \"tool_use_id\": block.id, \"toolset_name\": block.toolset_name, \"content\": content, **({\"is_error\": True} if is_error else {})})\n        messages.append({\"role\": \"user\", \"content\": results})\n    return {\"status\": \"max_turns\", \"turns\": max_turns, \"answer\": None}\n\n\ndef call(id, name, **input):\n    return {\"type\": \"tool_use\", \"id\": id, \"name\": name, \"toolset_name\": \"computer\", \"input\": input}\n\n\ndef main():\n    scale = scale_for(SCREEN[\"width\"], SCREEN[\"height\"])\n    point = lambda e: [round((e[\"x\"] + e[\"w\"] / 2) * scale), round((e[\"y\"] + e[\"h\"] / 2) * scale)]  # noqa: E731 - what the model would see\n    search, buy = SCREEN[\"elements\"]\n    client, transport = scripted_client(\n        message([call(\"toolu_1\", \"screenshot\"), call(\"toolu_2\", \"left_click\", coordinate=point(search)), call(\"toolu_3\", \"type\", text=\"kettle\"), call(\"toolu_4\", \"key\", text=\"Return\")], \"tool_use\", model=MODEL),\n        message([call(\"toolu_5\", \"left_click\", coordinate=point(buy)), call(\"toolu_6\", \"screenshot\")], \"tool_use\", model=MODEL),\n        message([text(\"I did not buy it: the payment button needs your confirmation.\")], model=MODEL))\n    print(f\"screen {SCREEN['width']}x{SCREEN['height']}, scale {scale:.4f}, the model sees {int(SCREEN['width'] * scale)}x{int(SCREEN['height'] * scale)}\")\n    result = run_loop(client, SCREEN, confirm=lambda action: False)\n    print(\"result:\", result[\"status\"], \"after\", result[\"turns\"], \"turns:\", result[\"answer\"])\n    print(\"screen log:\", json.dumps(SCREEN[\"log\"], separators=(\",\", \":\")), \"typed:\", SCREEN[\"typed\"])\n    first = transport.requests[0]\n    print(\"tools sent:\", json.dumps(first[\"tools\"], separators=(\",\", \":\")), \"beta header sent:\", \"anthropic-beta\" in transport.headers[0])\n    last = transport.requests[2][\"messages\"][-1][\"content\"]\n    print(\"second result message:\", [(r[\"tool_use_id\"], r[\"toolset_name\"], r.get(\"is_error\", False)) for r in last])\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "screen 2560x1440, scale 0.5585, the model sees 1429x804\nturn 1: screenshot {} -> image\nturn 1: left_click {\"coordinate\":[698,73]} -> Clicked search at 1250,131 on the screen\nturn 1: type {\"text\":\"kettle\"} -> Typed 6 characters\nturn 1: key {\"text\":\"Return\"} -> Pressed Return\nturn 2: left_click {\"coordinate\":[1201,693]} -> ERROR Declined: buy needs a person's confirmation (payment)\nturn 2: screenshot {} -> ERROR Not executed: an earlier computer action in this turn failed.\nresult: done after 3 turns: I did not buy it: the payment button needs your confirmation.\nscreen log: [[\"click\",\"search\"],[\"type\",\"kettle\"],[\"key\",\"Return\"]] typed: kettle\ntools sent: [{\"type\":\"computer_toolset_20260801\"}] beta header sent: False\nsecond result message: [('toolu_5', 'computer', True), ('toolu_6', 'computer', True)]"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// The loop around the computer use toolset, on a toy screen: scaling both ways, a batch, a halt after a failure and a confirmation.\n//\n// There is no desktop and no model: the screen is a few rectangles in memory and the replies are hand-written bodies in the shape of the\n// Messages API (claude-sonnet-5-5), illustrative and not captures. The tool entry, the batch rule and the halt text are those of the\n// \"Computer use tool\" page of the Claude documentation, checked on 2026-10-03.\nimport Anthropic from \"@anthropic-ai/sdk\";\nimport { message, scriptedFetch, text } from \"../../../harness/ts/scriptedFetch.ts\";\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"screen_loop\");\n\nexport const MODEL = \"claude-sonnet-5-5\";\nexport const TOOLSET = { type: \"computer_toolset_20260801\" };\nexport const HALT = \"Not executed: an earlier computer action in this turn failed.\";\n\ntype Element = { id: string; x: number; y: number; w: number; h: number; risk: string };\nexport type Screen = { width: number; height: number; typed: string; log: unknown[]; elements: Element[] };\nexport const newScreen = (): Screen => ({\n  width: 2560, height: 1440, typed: \"\", log: [],\n  elements: [{ id: \"search\", x: 800, y: 100, w: 900, h: 60, risk: \"none\" }, { id: \"buy\", x: 2000, y: 1200, w: 300, h: 80, risk: \"payment\" }],\n});\n\n/** The documentation's example limits (1568 px on the long edge, about 1.15 megapixels): small enough for every model. */\nexport const scaleFor = (width: number, height: number) => Math.min(1, 1568 / Math.max(width, height), Math.sqrt(1_150_000 / (width * height)));\n\nfunction roundHalfEven(x: number): number {\n  const floor = Math.floor(x);\n  if (x - floor !== 0.5) return Math.round(x);\n  return floor % 2 === 0 ? floor : floor + 1;\n}\n\nexport const toScreen = (x: number, y: number, scale: number, screen: Screen): [number, number] => [\n  Math.min(Math.max(roundHalfEven(x / scale), 0), screen.width - 1), Math.min(Math.max(roundHalfEven(y / scale), 0), screen.height - 1)];\n\nconst elementAt = (screen: Screen, x: number, y: number) => screen.elements.filter((e) => e.x <= x && x < e.x + e.w && e.y <= y && y < e.y + e.h).at(-1);\n\nfunction screenshot(screen: Screen, scale: number) {\n  const size = `${Math.floor(screen.width * scale)}x${Math.floor(screen.height * scale)}`;\n  return [{ type: \"image\", source: { type: \"base64\", media_type: \"image/png\", data: Buffer.from(`${size}:${screen.log.length}`).toString(\"base64\") } }];\n}\n\n/** Run one member of the toolset on the toy screen; return [content, isError]. */\nexport function perform(screen: Screen, name: string, args: any, scale: number, confirm?: (a: { action: string; element: string; risk: string }) => boolean): [any, boolean] {\n  if (name === \"screenshot\") return [screenshot(screen, scale), false];\n  if (name === \"left_click\") {\n    const [x, y] = toScreen(args.coordinate[0], args.coordinate[1], scale, screen);\n    const target = elementAt(screen, x, y);\n    if (target && target.risk !== \"none\" && !(confirm && confirm({ action: name, element: target.id, risk: target.risk }))) {\n      return [`Declined: ${target.id} needs a person's confirmation (${target.risk})`, true];\n    }\n    screen.log.push([\"click\", target ? target.id : null]);\n    return [`Clicked ${target ? target.id : \"nothing\"} at ${x},${y} on the screen`, false];\n  }\n  if (name === \"type\") {\n    screen.typed += args.text;\n    screen.log.push([\"type\", args.text]);\n    return [`Typed ${args.text.length} characters`, false];\n  }\n  if (name === \"key\") {\n    screen.log.push([\"key\", args.text]);\n    return [`Pressed ${args.text}`, false];\n  }\n  return [`Unknown action: ${name}`, true];\n}\n\nexport async function runLoop(client: Anthropic, screen: Screen, confirm?: (a: any) => boolean, maxTurns = 6) {\n  const scale = scaleFor(screen.width, screen.height);\n  const messages: any[] = [{ role: \"user\", content: \"Search for a kettle and buy the first one.\" }];\n  for (let turn = 1; turn <= maxTurns; turn++) {\n    const reply = await client.messages.create({ model: MODEL, max_tokens: 4096, tools: [TOOLSET] as any, messages });\n    messages.push({ role: \"assistant\", content: reply.content });\n    if (reply.stop_reason !== \"tool_use\") return { status: \"done\", turns: turn, answer: (reply.content.at(-1) as any).text as string | null };\n    const results: any[] = [];\n    let failed = false;\n    for (const block of reply.content.filter((b) => b.type === \"tool_use\") as any[]) {\n      let content: any, isError: boolean;\n      if (failed) [content, isError] = [HALT, true];\n      else {\n        [content, isError] = perform(screen, block.name, block.input, scale, confirm);\n        failed = isError;\n      }\n      console.log(`turn ${turn}: ${block.name} ${JSON.stringify(block.input)} -> ${isError ? \"ERROR \" : \"\"}${typeof content === \"string\" ? content : \"image\"}`);\n      results.push({ type: \"tool_result\", tool_use_id: block.id, toolset_name: block.toolset_name, content, ...(isError ? { is_error: true } : {}) });\n    }\n    messages.push({ role: \"user\", content: results });\n  }\n  return { status: \"max_turns\", turns: maxTurns, answer: null as string | null };\n}\n\nexport const call = (id: string, name: string, input: Record<string, unknown> = {}) => ({ type: \"tool_use\", id, name, toolset_name: \"computer\", input });\n\nasync function main() {\n  const screen = newScreen();\n  const scale = scaleFor(screen.width, screen.height);\n  const point = (e: Element) => [roundHalfEven((e.x + e.w / 2) * scale), roundHalfEven((e.y + e.h / 2) * scale)]; // what the model would see\n  const [search, buy] = screen.elements;\n  const fake = scriptedFetch([\n    { body: message([call(\"toolu_1\", \"screenshot\"), call(\"toolu_2\", \"left_click\", { coordinate: point(search) }), call(\"toolu_3\", \"type\", { text: \"kettle\" }), call(\"toolu_4\", \"key\", { text: \"Return\" })], \"tool_use\", undefined, MODEL) },\n    { body: message([call(\"toolu_5\", \"left_click\", { coordinate: point(buy) }), call(\"toolu_6\", \"screenshot\")], \"tool_use\", undefined, MODEL) },\n    { body: message([text(\"I did not buy it: the payment button needs your confirmation.\")], \"end_turn\", undefined, MODEL) },\n  ]);\n  const client = new Anthropic({ apiKey: \"placeholder\", maxRetries: 0, fetch: fake.fetch });\n  console.log(`screen ${screen.width}x${screen.height}, scale ${scale.toFixed(4)}, the model sees ${Math.floor(screen.width * scale)}x${Math.floor(screen.height * scale)}`);\n  const result = await runLoop(client, screen, () => false);\n  console.log(\"result:\", result.status, \"after\", result.turns, \"turns:\", result.answer);\n  console.log(\"screen log:\", JSON.stringify(screen.log), \"typed:\", screen.typed);\n  console.log(\"tools sent:\", JSON.stringify(fake.seen[0].body.tools), \"beta header sent:\", \"anthropic-beta\" in fake.seen[0].headers ? \"True\" : \"False\");\n  const last = fake.seen[2].body.messages.at(-1).content;\n  console.log(\"second result message:\", `[${last.map((r: any) => `('${r.tool_use_id}', '${r.toolset_name}', ${r.is_error ? \"True\" : \"False\"})`).join(\", \")}]`);\n}\n\nif (import.meta.main) await main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "screen 2560x1440, scale 0.5585, the model sees 1429x804\nturn 1: screenshot {} -> image\nturn 1: left_click {\"coordinate\":[698,73]} -> Clicked search at 1250,131 on the screen\nturn 1: type {\"text\":\"kettle\"} -> Typed 6 characters\nturn 1: key {\"text\":\"Return\"} -> Pressed Return\nturn 2: left_click {\"coordinate\":[1201,693]} -> ERROR Declined: buy needs a person's confirmation (payment)\nturn 2: screenshot {} -> ERROR Not executed: an earlier computer action in this turn failed.\nresult: done after 3 turns: I did not buy it: the payment button needs your confirmation.\nscreen log: [[\"click\",\"search\"],[\"type\",\"kettle\"],[\"key\",\"Return\"]] typed: kettle\ntools sent: [{\"type\":\"computer_toolset_20260801\"}] beta header sent: False\nsecond result message: [('toolu_5', 'computer', True), ('toolu_6', 'computer', True)]"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import static harness.Scripted.map;\nimport static harness.Scripted.message;\nimport static harness.Scripted.text;\n\nimport com.anthropic.client.AnthropicClient;\nimport com.anthropic.core.JsonValue;\nimport com.anthropic.core.ObjectMappers;\nimport com.anthropic.models.messages.Base64ImageSource;\nimport com.anthropic.models.messages.ComputerToolset20260801;\nimport com.anthropic.models.messages.ContentBlock;\nimport com.anthropic.models.messages.ContentBlockParam;\nimport com.anthropic.models.messages.ImageBlockParam;\nimport com.anthropic.models.messages.Message;\nimport com.anthropic.models.messages.MessageCreateParams;\nimport com.anthropic.models.messages.MessageParam;\nimport com.anthropic.models.messages.Model;\nimport com.anthropic.models.messages.ToolResultBlockParam;\nimport com.anthropic.models.messages.ToolUnion;\nimport com.anthropic.models.messages.ToolUseBlock;\nimport harness.Scripted;\nimport java.nio.charset.StandardCharsets;\nimport java.util.ArrayList;\nimport java.util.Base64;\nimport java.util.List;\nimport java.util.Locale;\nimport java.util.Map;\nimport java.util.function.Predicate;\n\n/**\n * The loop around the computer use toolset, on a toy screen: scaling both ways, a batch, a halt after a failure and a confirmation.\n *\n * <p>There is no desktop and no model: the screen is a few rectangles in memory and the replies are hand-written bodies in the shape of the\n * Messages API (claude-sonnet-5-5), illustrative and not captures. The tool entry, the batch rule and the halt text are those of the\n * \"Computer use tool\" page of the Claude documentation, checked on 2026-10-03.\n */\npublic final class ScreenLoop {\n    private static final System.Logger LOG = System.getLogger(ScreenLoop.class.getName());\n    static final String MODEL = \"claude-sonnet-5-5\";\n    static final String HALT = \"Not executed: an earlier computer action in this turn failed.\";\n\n    /** A rectangle on the toy screen; `risk` is \"none\" or what a click on it could cost. */\n    record Element(String id, int x, int y, int w, int h, String risk) {}\n\n    /** The toy screen: its size, what was typed, a log of the actions performed and the elements on it. */\n    static final class Screen {\n        final int width, height;\n        final StringBuilder typed = new StringBuilder();\n        final List<List<String>> log = new ArrayList<>();\n        final List<Element> elements = List.of(new Element(\"search\", 800, 100, 900, 60, \"none\"), new Element(\"buy\", 2000, 1200, 300, 80, \"payment\"));\n\n        Screen(int width, int height) {\n            this.width = width;\n            this.height = height;\n        }\n    }\n\n    static Screen newScreen() {\n        return new Screen(2560, 1440);\n    }\n\n    /** The documentation's example limits (1568 px on the long edge, about 1.15 megapixels): small enough for every model. */\n    static double scaleFor(int width, int height) {\n        return Math.min(1.0, Math.min(1568.0 / Math.max(width, height), Math.sqrt(1_150_000.0 / ((double) width * height))));\n    }\n\n    static int[] toScreen(double x, double y, double scale, Screen screen) {\n        return new int[] {(int) Math.min(Math.max(Math.rint(x / scale), 0), screen.width - 1), (int) Math.min(Math.max(Math.rint(y / scale), 0), screen.height - 1)};\n    }\n\n    static Element elementAt(Screen screen, int x, int y) {\n        Element hit = null;\n        for (Element e : screen.elements) if (e.x() <= x && x < e.x() + e.w() && e.y() <= y && y < e.y() + e.h()) hit = e;\n        return hit;\n    }\n\n    static ToolResultBlockParam.Content screenshot(Screen screen, double scale) {\n        String size = (int) (screen.width * scale) + \"x\" + (int) (screen.height * scale);\n        String data = Base64.getEncoder().encodeToString((size + \":\" + screen.log.size()).getBytes(StandardCharsets.UTF_8));\n        ImageBlockParam image = ImageBlockParam.builder().source(Base64ImageSource.builder().data(data).mediaType(Base64ImageSource.MediaType.IMAGE_PNG).build()).build();\n        return ToolResultBlockParam.Content.ofBlocks(List.of(ToolResultBlockParam.Content.Block.ofImage(image)));\n    }\n\n    /** What one action gave back: text or an image, and whether it failed. */\n    record Outcome(ToolResultBlockParam.Content content, boolean isError) {\n        static Outcome text(String s, boolean isError) {\n            return new Outcome(ToolResultBlockParam.Content.ofString(s), isError);\n        }\n    }\n\n    /** Run one member of the toolset on the toy screen. */\n    static Outcome perform(Screen screen, String name, Map<String, Object> args, double scale, Predicate<Map<String, String>> confirm) {\n        switch (name) {\n            case \"screenshot\":\n                return new Outcome(screenshot(screen, scale), false);\n            case \"left_click\": {\n                List<?> coordinate = (List<?>) args.get(\"coordinate\");\n                int[] at = toScreen(((Number) coordinate.get(0)).doubleValue(), ((Number) coordinate.get(1)).doubleValue(), scale, screen);\n                Element target = elementAt(screen, at[0], at[1]);\n                if (target != null && !target.risk().equals(\"none\") && !(confirm != null && confirm.test(Map.of(\"action\", name, \"element\", target.id(), \"risk\", target.risk())))) {\n                    return Outcome.text(\"Declined: \" + target.id() + \" needs a person's confirmation (\" + target.risk() + \")\", true);\n                }\n                screen.log.add(java.util.Arrays.asList(\"click\", target == null ? null : target.id()));\n                return Outcome.text(\"Clicked \" + (target == null ? \"nothing\" : target.id()) + \" at \" + at[0] + \",\" + at[1] + \" on the screen\", false);\n            }\n            case \"type\":\n                screen.typed.append(args.get(\"text\"));\n                screen.log.add(List.of(\"type\", (String) args.get(\"text\")));\n                return Outcome.text(\"Typed \" + ((String) args.get(\"text\")).length() + \" characters\", false);\n            case \"key\":\n                screen.log.add(List.of(\"key\", (String) args.get(\"text\")));\n                return Outcome.text(\"Pressed \" + args.get(\"text\"), false);\n            default:\n                return Outcome.text(\"Unknown action: \" + name, true);\n        }\n    }\n\n    /** How a loop ended. */\n    record Result(String status, int turns, String answer) {}\n\n    @SuppressWarnings(\"unchecked\")\n    static Result runLoop(AnthropicClient client, Screen screen, Predicate<Map<String, String>> confirm, int maxTurns) {\n        double scale = scaleFor(screen.width, screen.height);\n        List<MessageParam> messages = new ArrayList<>();\n        messages.add(MessageParam.builder().role(MessageParam.Role.USER).content(\"Search for a kettle and buy the first one.\").build());\n        ToolUnion toolset = ToolUnion.ofComputerToolset20260801(ComputerToolset20260801.builder().build());\n        for (int turn = 1; turn <= maxTurns; turn++) {\n            Message reply = client.messages().create(MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(4096).addTool(toolset).messages(messages).build());\n            messages.add(reply.toParam());\n            if (!reply.stopReason().get().asString().equals(\"tool_use\")) {\n                return new Result(\"done\", turn, reply.content().get(reply.content().size() - 1).asText().text());\n            }\n            List<ContentBlockParam> results = new ArrayList<>();\n            boolean failed = false;\n            for (ContentBlock b : reply.content()) {\n                if (!b.isToolUse()) continue;\n                ToolUseBlock block = b.asToolUse();\n                Map<String, Object> input = ObjectMappers.jsonMapper().convertValue(block._input(), Map.class);\n                Outcome outcome = failed ? Outcome.text(HALT, true) : perform(screen, block.name(), input, scale, confirm);\n                failed = outcome.isError();\n                String shown = outcome.content().string().orElse(\"image\");\n                System.out.println(\"turn \" + turn + \": \" + block.name() + \" \" + json(block._input()) + \" -> \" + (outcome.isError() ? \"ERROR \" : \"\") + shown);\n                ToolResultBlockParam.Builder result = ToolResultBlockParam.builder().toolUseId(block.id()).content(outcome.content())\n                    .toolsetName(block.toolsetName().orElseThrow());\n                if (outcome.isError()) result.isError(true);\n                results.add(ContentBlockParam.ofToolResult(result.build()));\n            }\n            messages.add(MessageParam.builder().role(MessageParam.Role.USER).contentOfBlockParams(results).build());\n        }\n        return new Result(\"max_turns\", maxTurns, null);\n    }\n\n    private static String json(Object value) {\n        try {\n            return ObjectMappers.jsonMapper().writeValueAsString(value);\n        } catch (Exception e) {\n            throw new IllegalStateException(e);\n        }\n    }\n\n    static Map<String, Object> call(String id, String name, Map<String, Object> input) {\n        return map(\"type\", \"tool_use\", \"id\", id, \"name\", name, \"toolset_name\", \"computer\", \"input\", input);\n    }\n\n    public static void main(String[] args) {\n        Screen screen = newScreen();\n        double scale = scaleFor(screen.width, screen.height);\n        Element search = screen.elements.get(0), buy = screen.elements.get(1);\n        List<Integer> searchAt = List.of((int) Math.rint((search.x() + search.w() / 2.0) * scale), (int) Math.rint((search.y() + search.h() / 2.0) * scale));\n        List<Integer> buyAt = List.of((int) Math.rint((buy.x() + buy.w() / 2.0) * scale), (int) Math.rint((buy.y() + buy.h() / 2.0) * scale));\n        Scripted.Rig rig = Scripted.client(\n            message(List.of(call(\"toolu_1\", \"screenshot\", map()), call(\"toolu_2\", \"left_click\", map(\"coordinate\", searchAt)), call(\"toolu_3\", \"type\", map(\"text\", \"kettle\")), call(\"toolu_4\", \"key\", map(\"text\", \"Return\"))), \"tool_use\"),\n            message(List.of(call(\"toolu_5\", \"left_click\", map(\"coordinate\", buyAt)), call(\"toolu_6\", \"screenshot\", map())), \"tool_use\"),\n            message(List.of(text(\"I did not buy it: the payment button needs your confirmation.\"))));\n        System.out.println(String.format(Locale.ROOT, \"screen %dx%d, scale %.4f, the model sees %dx%d\", screen.width, screen.height, scale, (int) (screen.width * scale), (int) (screen.height * scale)));\n        Result result = runLoop(rig.client(), screen, action -> false, 6);\n        System.out.println(\"result: \" + result.status() + \" after \" + result.turns() + \" turns: \" + result.answer());\n        System.out.println(\"screen log: \" + json(screen.log) + \" typed: \" + screen.typed);\n        System.out.println(\"tools sent: \" + rig.http().requests.get(0).get(\"tools\") + \" beta header sent: \" + (rig.http().headers.get(0).containsKey(\"anthropic-beta\") ? \"True\" : \"False\"));\n        List<String> second = new ArrayList<>();\n        rig.http().requests.get(2).get(\"messages\").get(rig.http().requests.get(2).get(\"messages\").size() - 1).get(\"content\").forEach(\n            r -> second.add(\"('\" + r.get(\"tool_use_id\").asText() + \"', '\" + r.get(\"toolset_name\").asText() + \"', \" + (r.path(\"is_error\").asBoolean(false) ? \"True\" : \"False\") + \")\"));\n        System.out.println(\"second result message: \" + second);\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "screen 2560x1440, scale 0.5585, the model sees 1429x804\nturn 1: screenshot {} -> image\nturn 1: left_click {\"coordinate\":[698,73]} -> Clicked search at 1250,131 on the screen\nturn 1: type {\"text\":\"kettle\"} -> Typed 6 characters\nturn 1: key {\"text\":\"Return\"} -> Pressed Return\nturn 2: left_click {\"coordinate\":[1201,693]} -> ERROR Declined: buy needs a person's confirmation (payment)\nturn 2: screenshot {} -> ERROR Not executed: an earlier computer action in this turn failed.\nresult: done after 3 turns: I did not buy it: the payment button needs your confirmation.\nscreen log: [[\"click\",\"search\"],[\"type\",\"kettle\"],[\"key\",\"Return\"]] typed: kettle\ntools sent: [{\"type\":\"computer_toolset_20260801\"}] beta header sent: False\nsecond result message: [('toolu_5', 'computer', True), ('toolu_6', 'computer', True)]"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import com.anthropic.client.AnthropicClient\nimport com.anthropic.core.jsonMapper\nimport com.anthropic.models.messages.Base64ImageSource\nimport com.anthropic.models.messages.ComputerToolset20260801\nimport com.anthropic.models.messages.ContentBlockParam\nimport com.anthropic.models.messages.ImageBlockParam\nimport com.anthropic.models.messages.MessageCreateParams\nimport com.anthropic.models.messages.MessageParam\nimport com.anthropic.models.messages.Model\nimport com.anthropic.models.messages.ToolResultBlockParam\nimport com.anthropic.models.messages.ToolUnion\nimport harness.Scripted\nimport harness.Scripted.map\nimport harness.Scripted.message\nimport harness.Scripted.text\nimport java.util.Base64\nimport kotlin.math.max\nimport kotlin.math.min\nimport kotlin.math.sqrt\n\nprivate val log = System.getLogger(\"screen_loop\")\n\n/**\n * The loop around the computer use toolset, on a toy screen: scaling both ways, a batch, a halt after a failure and a confirmation.\n *\n * There is no desktop and no model: the screen is a few rectangles in memory and the replies are hand-written bodies in the shape of the\n * Messages API (claude-sonnet-5-5), illustrative and not captures. The tool entry, the batch rule and the halt text are those of the\n * \"Computer use tool\" page of the Claude documentation, checked on 2026-10-03.\n */\nconst val MODEL = \"claude-sonnet-5-5\"\nconst val HALT = \"Not executed: an earlier computer action in this turn failed.\"\n\n/** A rectangle on the toy screen; `risk` is \"none\" or what a click on it could cost. */\ndata class Element(val id: String, val x: Int, val y: Int, val w: Int, val h: Int, val risk: String)\n\n/** The toy screen: its size, what was typed, a log of the actions performed and the elements on it. */\nclass Screen(val width: Int, val height: Int) {\n    val typed = StringBuilder()\n    val log = mutableListOf<List<String?>>()\n    val elements = listOf(Element(\"search\", 800, 100, 900, 60, \"none\"), Element(\"buy\", 2000, 1200, 300, 80, \"payment\"))\n}\n\nfun newScreen() = Screen(2560, 1440)\n\n/** The documentation's example limits (1568 px on the long edge, about 1.15 megapixels): small enough for every model. */\nfun scaleFor(width: Int, height: Int): Double = min(1.0, min(1568.0 / max(width, height), sqrt(1_150_000.0 / (width.toDouble() * height))))\n\nfun toScreen(x: Double, y: Double, scale: Double, screen: Screen) =\n    min(max(Math.rint(x / scale), 0.0), (screen.width - 1).toDouble()).toInt() to min(max(Math.rint(y / scale), 0.0), (screen.height - 1).toDouble()).toInt()\n\nfun elementAt(screen: Screen, x: Int, y: Int): Element? = screen.elements.lastOrNull { it.x <= x && x < it.x + it.w && it.y <= y && y < it.y + it.h }\n\nfun screenshot(screen: Screen, scale: Double): ToolResultBlockParam.Content {\n    val size = \"${(screen.width * scale).toInt()}x${(screen.height * scale).toInt()}\"\n    val data = Base64.getEncoder().encodeToString(\"$size:${screen.log.size}\".toByteArray())\n    val image = ImageBlockParam.builder().source(Base64ImageSource.builder().data(data).mediaType(Base64ImageSource.MediaType.IMAGE_PNG).build()).build()\n    return ToolResultBlockParam.Content.ofBlocks(listOf(ToolResultBlockParam.Content.Block.ofImage(image)))\n}\n\n/** What one action gave back: text or an image, and whether it failed. */\ndata class Outcome(val content: ToolResultBlockParam.Content, val isError: Boolean)\n\nprivate fun words(s: String, isError: Boolean) = Outcome(ToolResultBlockParam.Content.ofString(s), isError)\n\n/** Run one member of the toolset on the toy screen. */\nfun perform(screen: Screen, name: String, args: Map<*, *>, scale: Double, confirm: ((Map<String, String>) -> Boolean)?): Outcome = when (name) {\n    \"screenshot\" -> Outcome(screenshot(screen, scale), false)\n    \"left_click\" -> {\n        val (cx, cy) = (args[\"coordinate\"] as List<*>).map { (it as Number).toDouble() }\n        val (x, y) = toScreen(cx, cy, scale, screen)\n        val target = elementAt(screen, x, y)\n        if (target != null && target.risk != \"none\" && !(confirm != null && confirm(mapOf(\"action\" to name, \"element\" to target.id, \"risk\" to target.risk)))) {\n            words(\"Declined: ${target.id} needs a person's confirmation (${target.risk})\", true)\n        } else {\n            screen.log += listOf(\"click\", target?.id)\n            words(\"Clicked ${target?.id ?: \"nothing\"} at $x,$y on the screen\", false)\n        }\n    }\n    \"type\" -> {\n        screen.typed.append(args[\"text\"] as String)\n        screen.log += listOf(\"type\", args[\"text\"] as String)\n        words(\"Typed ${(args[\"text\"] as String).length} characters\", false)\n    }\n    \"key\" -> {\n        screen.log += listOf(\"key\", args[\"text\"] as String)\n        words(\"Pressed ${args[\"text\"]}\", false)\n    }\n    else -> words(\"Unknown action: $name\", true)\n}\n\n/** How a loop ended. */\ndata class Result(val status: String, val turns: Int, val answer: String?)\n\nprivate fun json(value: Any?): String = jsonMapper().writeValueAsString(value)\n\nfun runLoop(client: AnthropicClient, screen: Screen, confirm: ((Map<String, String>) -> Boolean)? = null, maxTurns: Int = 6): Result {\n    val scale = scaleFor(screen.width, screen.height)\n    val messages = mutableListOf(MessageParam.builder().role(MessageParam.Role.USER).content(\"Search for a kettle and buy the first one.\").build())\n    val toolset = ToolUnion.ofComputerToolset20260801(ComputerToolset20260801.builder().build())\n    for (turn in 1..maxTurns) {\n        val reply = client.messages().create(MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(4096).addTool(toolset).messages(messages.toList()).build())\n        messages += reply.toParam()\n        if (reply.stopReason().get().asString() != \"tool_use\") return Result(\"done\", turn, reply.content().last().asText().text())\n        val results = mutableListOf<ContentBlockParam>()\n        var failed = false\n        for (block in reply.content().filter { it.isToolUse() }.map { it.asToolUse() }) {\n            val outcome = if (failed) words(HALT, true) else perform(screen, block.name(), jsonMapper().convertValue(block._input(), Map::class.java), scale, confirm)\n            failed = outcome.isError\n            println(\"turn $turn: ${block.name()} ${json(block._input())} -> ${if (outcome.isError) \"ERROR \" else \"\"}${outcome.content.string().orElse(\"image\")}\")\n            val result = ToolResultBlockParam.builder().toolUseId(block.id()).content(outcome.content).toolsetName(block.toolsetName().get())\n            if (outcome.isError) result.isError(true)\n            results += ContentBlockParam.ofToolResult(result.build())\n        }\n        messages += MessageParam.builder().role(MessageParam.Role.USER).contentOfBlockParams(results).build()\n    }\n    return Result(\"max_turns\", maxTurns, null)\n}\n\nfun call(id: String, name: String, input: Map<String, Any?> = map()) = map(\"type\", \"tool_use\", \"id\", id, \"name\", name, \"toolset_name\", \"computer\", \"input\", input)\n\nfun main() {\n    val screen = newScreen()\n    val scale = scaleFor(screen.width, screen.height)\n    fun point(e: Element) = listOf(Math.rint((e.x + e.w / 2.0) * scale).toInt(), Math.rint((e.y + e.h / 2.0) * scale).toInt()) // what the model would see\n    val (search, buy) = screen.elements\n    val rig = Scripted.client(\n        message(listOf(call(\"toolu_1\", \"screenshot\"), call(\"toolu_2\", \"left_click\", map(\"coordinate\", point(search))), call(\"toolu_3\", \"type\", map(\"text\", \"kettle\")), call(\"toolu_4\", \"key\", map(\"text\", \"Return\"))), \"tool_use\"),\n        message(listOf(call(\"toolu_5\", \"left_click\", map(\"coordinate\", point(buy))), call(\"toolu_6\", \"screenshot\")), \"tool_use\"),\n        message(listOf(text(\"I did not buy it: the payment button needs your confirmation.\"))),\n    )\n    println(\"screen ${screen.width}x${screen.height}, scale ${\"%.4f\".format(scale)}, the model sees ${(screen.width * scale).toInt()}x${(screen.height * scale).toInt()}\")\n    val result = runLoop(rig.client(), screen, confirm = { false })\n    println(\"result: ${result.status} after ${result.turns} turns: ${result.answer}\")\n    println(\"screen log: ${json(screen.log)} typed: ${screen.typed}\")\n    println(\"tools sent: ${rig.http().requests[0][\"tools\"]} beta header sent: ${if (\"anthropic-beta\" in rig.http().headers[0]) \"True\" else \"False\"}\")\n    val last = rig.http().requests[2][\"messages\"].last()[\"content\"]\n    println(\"second result message: ${last.map { \"('${it[\"tool_use_id\"].asText()}', '${it[\"toolset_name\"].asText()}', ${if (it.path(\"is_error\").asBoolean(false)) \"True\" else \"False\"})\" }}\")\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "screen 2560x1440, scale 0.5585, the model sees 1429x804\nturn 1: screenshot {} -> image\nturn 1: left_click {\"coordinate\":[698,73]} -> Clicked search at 1250,131 on the screen\nturn 1: type {\"text\":\"kettle\"} -> Typed 6 characters\nturn 1: key {\"text\":\"Return\"} -> Pressed Return\nturn 2: left_click {\"coordinate\":[1201,693]} -> ERROR Declined: buy needs a person's confirmation (payment)\nturn 2: screenshot {} -> ERROR Not executed: an earlier computer action in this turn failed.\nresult: done after 3 turns: I did not buy it: the payment button needs your confirmation.\nscreen log: [[\"click\",\"search\"],[\"type\",\"kettle\"],[\"key\",\"Return\"]] typed: kettle\ntools sent: [{\"type\":\"computer_toolset_20260801\"}] beta header sent: False\nsecond result message: [('toolu_5', 'computer', True), ('toolu_6', 'computer', True)]"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The toy screen is 2560 by 1440. The area limit binds first (a scale of 0.5585, against 0.6125 from the edge alone), so the model sees 1429 by 804. Claude clicks at 698, 73 in that picture, and the loop divides by the scale and clicks at 1250, 131 on the real screen. The batch in turn 2 shows the halt rule: the click on the payment button is declined, and the screenshot after it is answered with the fixed text instead of being run. The last lines show that the tools array holds one entry and that no beta header was sent."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Reading only the first block of a reply.** A batch has several `tool_use` blocks, and every one needs a result. Run them in order, stop at the first failure and answer the rest with the halt text.",
+        "**Clicking where Claude said.** The coordinates are in the picture you returned. If you shrank it, divide by the scale, and clamp the result into the screen.",
+        "**Sending the full screen.** The API does not downscale a screenshot for you. An oversized one is rejected, and a coordinate from a resized one is only right after you map it back.",
+        "**Reusing the earlier tool by habit.** On the Claude API, Claude 5.5 and later models use the toolset with no beta header. The earlier `computer_20251124` entry belongs to older models and other platforms."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A team adds the computer use toolset to a request and expects Claude to press keys on the machine. Which part performs the keystroke?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Claude itself, through a remote link the toolset opens",
+              "**b**: An Anthropic server that replays the call on the desktop",
+              "**c**: The beta header on the request, which enables key presses",
+              "**d**: Your own program, in an environment it controls"
+            ]
+          }
+        ],
+        [
+          "A single reply from Claude contains a click, a text entry and a screenshot request, and the click fails. What should the application send back for the last two calls?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Error results with the fixed halt wording, and neither action run",
+              "**b**: The screenshot for the last call and an error for the text entry",
+              "**c**: Nothing for them, since the batch is abandoned after a failure",
+              "**d**: Normal results for both, because the earlier failure does not matter"
+            ]
+          }
+        ],
+        [
+          "The application shrinks every screenshot to half its size before returning it. Claude replies with a click at a spot in the shrunken image. What must the application do before clicking?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Click exactly where Claude said, since the toolset converts coordinates",
+              "**b**: Treat the numbers as relative to the last zoomed region",
+              "**c**: Scale the position back up by the factor it used, onto the real display",
+              "**d**: Give the toolset the true display size so that the API scales for you"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**d**. The page says the toolset \"gives Claude 17 member tools such as screenshot, left_click, type, and zoom, and your application runs every call in an environment you control.\" *a* is ruled out because the documentation describes the loop as one where the application translates the calls, and Claude \"never touches the machine\" in this design. *b* is ruled out because \"Your application receives the tool use requests, translates them into actions in your computing environment\", and no Anthropic server replays them. *c* is ruled out because \"The request needs no beta header.\"",
+            "**a**. The page says \"if one fails, don't run the rest\", and that every later action gets `is_error: true` with exactly the text `Not executed: an earlier computer action in this turn failed.` *d* is ruled out because \"Later actions depend on earlier ones, because the type enters text into whatever the click focused.\" *b* is ruled out because a screenshot after a failed click would run against a screen that no longer looks as expected, and \"if one fails, don't run the rest\". *c* is ruled out because leaving a block unanswered is an invalid request, \"so an agent loop that reads only the first block fails on its next call\".",
+            "**c**. The page quotes the documentation: \"If you scale screenshots down before returning them, scale Claude's coordinates back up before applying them to the real display.\" *a* is ruled out because \"coordinates are always in the pixel space of the screenshots you return\", which is the shrunken picture here. *b* is ruled out because after a zoom Claude \"still expresses coordinates in the full screenshot's space, never relative to the zoomed image\". *d* is ruled out because \"the toolset takes no display dimensions and the API doesn't downscale for you\"."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 17,
+    "code": 0,
+    "tables": 0,
+    "lists": 4,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "bc7004c942cf2de5ab6cb0bbfd4a2510a77d676300792b8bb4c600fb62871aff"
+}

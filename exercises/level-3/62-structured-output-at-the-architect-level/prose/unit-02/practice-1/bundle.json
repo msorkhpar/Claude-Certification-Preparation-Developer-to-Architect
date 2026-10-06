@@ -1,0 +1,93 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "62-structured-output-at-the-architect-level"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: an extraction pipeline that admits absence, checks what a schema cannot, retries with feedback and is measured on every document (Python)",
+  "lang": "python",
+  "main_file": "extraction.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_extraction.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-3/62-structured-output-at-the-architect-level/prose/unit-02/practice-1/test_extraction.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_a_document_with_every_value_present_and_quoted_comes_back_valid_on_the_first_attempt",
+      "kind": "main",
+      "says": "A document with every value present and quoted comes back valid on the first attempt"
+    },
+    {
+      "id": "test_e1_a_value_the_document_does_not_give_is_null_and_needs_no_quote_while_an_invented_value_fails_as_ungrounded",
+      "kind": "edge",
+      "says": "A value the document does not give is null and needs no quote, while an invented value fails as ungrounded"
+    },
+    {
+      "id": "test_e2_a_retry_carries_the_original_document_the_failed_record_and_only_the_errors_a_second_look_can_fix",
+      "kind": "edge",
+      "says": "A retry carries the document, the failed record and only the errors a second look can fix"
+    },
+    {
+      "id": "test_e3_a_required_value_that_the_model_reports_as_absent_is_not_retried_and_goes_to_review",
+      "kind": "edge",
+      "says": "A required value reported as absent is not retried and goes to review"
+    },
+    {
+      "id": "test_e4_retries_stop_after_the_limit_and_the_document_is_marked_failed",
+      "kind": "edge",
+      "says": "Retries stop after the limit and the document is marked failed"
+    },
+    {
+      "id": "test_e5_a_total_that_differs_from_the_line_items_is_a_semantic_error_and_a_flagged_conflict_goes_to_review_without_a_retry",
+      "kind": "edge",
+      "says": "A total that differs from the line items is a semantic error; a flagged conflict goes to review without a retry"
+    },
+    {
+      "id": "test_e6_currency_takes_unclear_and_other_with_a_detail_and_rejects_anything_else_as_a_syntax_error",
+      "kind": "edge",
+      "says": "Currency takes unclear and other with a detail, and anything else is a syntax error"
+    },
+    {
+      "id": "test_e7_chunk_results_merge_by_keeping_the_first_value_and_recording_a_conflict_when_two_chunks_disagree",
+      "kind": "edge",
+      "says": "Chunk results merge by keeping the first value and recording a conflict when two chunks disagree"
+    },
+    {
+      "id": "test_e8_accuracy_counts_every_document_and_not_only_the_validated_ones",
+      "kind": "edge",
+      "says": "Accuracy counts every document and not only the validated ones"
+    },
+    {
+      "id": "test_e9_the_request_forces_a_tool_where_the_model_allows_it_and_falls_back_to_auto_with_a_reply_check_where_it_does_not",
+      "kind": "edge",
+      "says": "The request forces a tool where the model allows it and falls back to auto with a reply check where it does not"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/62-structured-output-at-the-architect-level/02-retries-conflicts-chunks-and-the-practice.md"
+}

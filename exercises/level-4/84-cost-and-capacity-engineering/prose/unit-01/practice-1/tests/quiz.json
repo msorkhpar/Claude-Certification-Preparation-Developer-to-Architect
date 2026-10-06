@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-4",
+    "84-cost-and-capacity-engineering"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: Sizing a workload: limits, tiers and the bill",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "Scenario: Wicker Foods' service peaks at 600 requests a minute, each with 4,000 uncached input tokens and 300 output tokens, with 30 percent headroom. Using the tiers on the page, which is the smallest that fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Start, since 780 requests a minute is below its request ceiling",
+            "correct": false,
+            "says": "Ruled out because \"the workload fits a tier only if all three fit\"."
+          },
+          {
+            "id": "b",
+            "text": "Scale, since the headroom pushes the totals past the limits of the tier below",
+            "correct": false,
+            "says": "Ruled out because the headroom is already in the figures: \"each multiplied by a headroom for peaks and growth\"."
+          },
+          {
+            "id": "c",
+            "text": "A custom arrangement, since four thousand tokens a request is more than any tier allows",
+            "correct": false,
+            "says": "Ruled out because \"a workload above Scale needs a custom arrangement\", and this one is far below it."
+          },
+          {
+            "id": "d",
+            "text": "Build, since only the intake volume exceeds Start's allowance while the rest fit",
+            "correct": true,
+            "says": "The three figures are 780 RPM, 3,120,000 ITPM and 234,000 OTPM, and the input figure is over Start's 2 million and under Build's 5 million."
+          }
+        ],
+        "origin": {
+          "path": "course/84-cost-and-capacity-engineering/01-sizing-a-workload-limits-tiers-and-the-bill.md",
+          "section": "Three limits, and the one that binds"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "Scenario: Fjord Media's support assistant costs $38,800.00 a month without caching and $17,400.00 with it, on 2 million requests. About what share of the uncached bill does caching remove?",
+        "options": [
+          {
+            "id": "a",
+            "text": "About 15 percent",
+            "correct": false,
+            "says": "Ruled out because 15 percent is the batching figure: \"takes a further 15 percent off by moving the share of work that can wait\"."
+          },
+          {
+            "id": "b",
+            "text": "About 30 percent",
+            "correct": false,
+            "says": "Ruled out because 30 percent is the share sent through the Batch API: \"30 percent of requests through the Batch API\"."
+          },
+          {
+            "id": "c",
+            "text": "About 55 percent",
+            "correct": true,
+            "says": "The difference is $21,400.00, which is about 55 percent of $38,800.00."
+          },
+          {
+            "id": "d",
+            "text": "About 85 percent",
+            "correct": false,
+            "says": "Ruled out because caching removes a little over half, \"because the long stable prefix is read at a tenth of the input price\" and the output and the first writes are still billed."
+          }
+        ],
+        "origin": {
+          "path": "course/84-cost-and-capacity-engineering/01-sizing-a-workload-limits-tiers-and-the-bill.md",
+          "section": "The bill is the same mix at different prices"
+        }
+      }
+    ]
+  }
+}

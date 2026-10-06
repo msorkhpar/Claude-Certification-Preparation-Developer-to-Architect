@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/java/Audit.java",
+      "old": "int wrong = (int) sessions.stream().filter(s -> hasWrongTool(s.steps())).count();",
+      "new": "int wrong = (int) sessions.stream().flatMap(s -> s.steps().stream()).filter(st -> hasWrongTool(List.of(st))).count();"
+    }
+  ]
+}

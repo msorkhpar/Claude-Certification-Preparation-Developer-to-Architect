@@ -1,0 +1,299 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "42-evaluation"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: an eval harness (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an eval harness"
+    },
+    {
+      "type": "para",
+      "text": "An eval answers one question before you ship a change to a prompt, a model or a setting: did the application get better or worse, on the cases that matter? The harness is the code that asks it the same way every time. It runs each test case through your application, grades the output with a check that can be automated, adds the grades up by the dimension the success criteria name, and compares one run with the last so that a regression cannot hide behind a better average. In this practice you write that harness. Nothing here calls a model or the network: the application under test and the model-graded judge are plain functions that the tests pass in, so every run is exact."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "para",
+      "text": "The Java and Kotlin folders give you `Json` (parse text into maps, lists, strings, numbers, booleans and null, and write them back). Python and TypeScript have JSON built in. A case, a report and every result are plain data: a map with string keys in every language. Integers read from JSON are `Long` in Java and Kotlin; your code must accept any `Number` where a number is read."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working harness with nine small gaps cut out of it. The plumbing is written and correct: `judge_prompt`, the regex and JSON parsing steps of `grade`, the loop of `run_eval`, the report, and `meets` and `compare` around the helpers. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To see what a gap receives, log its input with the `log` line at the top of the file (`grade` already logs its output at debug level); a run shows the logged lines under the failing case. Write them in this order (the Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_norm` unlocks `e1`: the form in which an exact check compares two texts.",
+        "`_field_result` unlocks `e2`: the field check on a parsed JSON object, with the same typed value.",
+        "`_parse_score` unlocks `e3`: a judge reply that is exactly one digit from 1 to 5.",
+        "`_judged` unlocks `e3`: pass at the threshold, `below threshold` under it.",
+        "`_run_once` unlocks `e4`: a model that raises an error fails its own case and the run goes on.",
+        "`_outcome` unlocks `e7`: passed, flaky and reason from the runs of one case.",
+        "`_count_tags` unlocks `e5`: one case counted under each of its tags.",
+        "`_tag_failed` unlocks `e5`: whether a tag misses its minimum rate, including a tag no case carries.",
+        "`_changes` unlocks `e6`: regressions, fixed, added and removed cases of two runs."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole harness; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "Names are written in Python style; TypeScript uses camelCase (`runEval`). Java and Kotlin put the functions on `Harness` (`Harness.grade`, `Harness.runEval`, `Harness.meets`, `Harness.compare`) and take the model and the judge as functions from text to text (`Function<String, String>` in Java, `(String) -> String` in Kotlin; the judge may be null)."
+    },
+    {
+      "type": "para",
+      "text": "A **case** is `{\"id\", \"input\", \"tags\": [...] (optional), \"check\": {...}}`. The check is one of four kinds:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`{\"type\": \"exact\", \"expected\": text}`: the output equals the expected text after both are trimmed, every run of white space is one space, and both are lower-cased.",
+        "`{\"type\": \"regex\", \"pattern\": text}`: the pattern is found anywhere in the output (a search, not a whole-text match).",
+        "`{\"type\": \"json_field\", \"field\": name, \"equals\": value}`: the whole output, apart from surrounding white space, is one JSON object that has the field, and the field's value equals `equals` **with the same JSON type** (the string `\"3\"` is not the number `3`, and `1` is not `true`). The value is a string, an integer or a boolean.",
+        "`{\"type\": \"judge\", \"criterion\": text, \"threshold\": integer (optional, default 4)}`: a model-graded check."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`grade(case, output, judge)` returns `{\"passed\", \"reason\"}`. The reason is `ok` when the case passed; otherwise `mismatch` (exact, regex, or a field with another value), `not json` (the output is not a JSON object), `missing field`, `below threshold` or `ungradable`. A judge check also returns `\"score\"` (the integer, or null when there is none)."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "The judge is called with exactly this prompt, with the criterion and the output filled in, and its lines separated by `\\n`: `Rate this response on a scale of 1-5 for <criterion>:`, `<response><output></response>`, `1: Not at all <criterion>`, `5: Perfectly <criterion>`, `Output only the number.`",
+        "The judge's reply, once trimmed, must be one digit from 1 to 5. Anything else, a reply that raises an error, or no judge at all is `ungradable` and the case fails. A score at or above the threshold passes; a lower one is `below threshold`.",
+        "Exact, regex and json checks never call the judge."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`run_eval(cases, model, judge=None, repeats=1)` runs every case, in order, `repeats` times through `model(case[\"input\"])` and grades each output with `grade`. A run in which the model raises an error is a failed run with the reason `model error`; the other cases still run. A case **passes only if every one of its runs passes**; its reason is `ok`, or the reason of its first failed run. A case is **flaky** when some of its runs passed and some failed. The report is `{\"total\", \"passed\", \"pass_rate\", \"results\": [{\"id\", \"passed\", \"reason\", \"flaky\"}], \"by_tag\": {tag: {\"passed\", \"total\"}}, \"flaky\": [ids]}`: `pass_rate` is `passed / total` (0.0 with no cases), `by_tag` counts every case under each of its tags (tags in order of first appearance), and `flaky` lists the flaky case ids in order."
+    },
+    {
+      "type": "para",
+      "text": "`meets(report, criteria)` checks a report against success criteria and returns `{\"met\", \"failures\"}`. The criteria are `{\"min_pass_rate\": number, \"tags\": {tag: minimum rate}, \"max_flaky\": integer}`, and each key is optional. A criterion that is missing is not checked. Failures are listed in this order: `overall` when the pass rate is below `min_pass_rate`; `tag:<name>` for each tag, in the criteria's order, whose rate (`passed / total`) is below its minimum or that no case carries; `flaky` when more than `max_flaky` cases are flaky. A rate equal to its minimum passes. `met` is true when there are no failures."
+    },
+    {
+      "type": "para",
+      "text": "`compare(baseline, current)` compares two reports by case id and returns `{\"regressions\", \"fixed\", \"added\", \"removed\", \"pass_rate_delta\", \"ok\"}`: the ids that passed in the baseline and fail now, the ids that failed and pass now, the ids only in the current report, and the ids only in the baseline (each in report order, regressions, fixed and added in the current report's order and removed in the baseline's); the current pass rate minus the baseline's; and `ok`, which is true only when there are no regressions **and** no removed cases. A better average never excuses a regression, and a case that vanished from the set is not a pass."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A run grades each case with its own check (exact, regex), reports the pass rate and the order of the results, and an empty set has rate 0.0"
+        ],
+        [
+          "`e1`",
+          "An exact check ignores case and spacing only: a longer word, a different word and an empty output fail; a regex is a search, and an anchored one still fails on extra text"
+        ],
+        [
+          "`e2`",
+          "A json field check: a JSON object, the field present, the same typed value; a fenced block, prose around the JSON and an array are `not json`"
+        ],
+        [
+          "`e3`",
+          "A judge check: the exact prompt, a bare score at the threshold passes, a lower score fails, and a reply that is not a bare score, no judge or a judge that raises is `ungradable`"
+        ],
+        [
+          "`e4`",
+          "A model error fails its own case with `model error` and the run goes on"
+        ],
+        [
+          "`e5`",
+          "Tags report their own pass rates; `meets` judges the overall rate, each tag (a missing tag fails) and the flaky count, and a rate equal to its minimum passes"
+        ],
+        [
+          "`e6`",
+          "`compare` names regressions, fixes, added and removed cases; a better average with a regression is not ok; a removed case is not ok"
+        ],
+        [
+          "`e7`",
+          "Repeated runs: a case passes only if every run passes, a mixed case is flaky, a consistently failing case is not flaky, and the model is called once per run"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"An eval harness. See ../../statement.md.\"\"\"\nimport json\nimport logging\nimport re\n\nlog = logging.getLogger(__name__)\n\n\ndef _norm(text):\n    return \" \".join(text.split()).lower()\n\n\ndef _result(passed, reason, **extra):\n    return {\"passed\": passed, \"reason\": reason, **extra}\n\n\ndef judge_prompt(criterion, output):\n    return (f\"Rate this response on a scale of 1-5 for {criterion}:\\n<response>{output}</response>\\n\"\n            f\"1: Not at all {criterion}\\n5: Perfectly {criterion}\\nOutput only the number.\")\n\n\ndef _field_result(data, check):\n    if check[\"field\"] not in data:\n        return _result(False, \"missing field\")\n    actual, want = data[check[\"field\"]], check[\"equals\"]\n    return _result(True, \"ok\") if type(actual) is type(want) and actual == want else _result(False, \"mismatch\")\n\n\ndef _parse_score(reply):\n    text = reply.strip() if isinstance(reply, str) else \"\"\n    return int(text) if re.fullmatch(r\"[1-5]\", text) else None\n\n\ndef _judged(score, threshold):\n    if score >= threshold:\n        return _result(True, \"ok\", score=score)\n    return _result(False, \"below threshold\", score=score)\n\n\ndef grade(case, output, judge=None):\n    \"\"\"Grade one output against the case's check. Returns {\"passed\", \"reason\"} (and \"score\" for a judge check).\"\"\"\n    log.debug(\"grade input: %r\", output)\n    check = case[\"check\"]\n    kind = check[\"type\"]\n    if kind == \"exact\":\n        return _result(True, \"ok\") if _norm(output) == _norm(check[\"expected\"]) else _result(False, \"mismatch\")\n    if kind == \"regex\":\n        return _result(True, \"ok\") if re.search(check[\"pattern\"], output) else _result(False, \"mismatch\")\n    if kind == \"json_field\":\n        try:\n            data = json.loads(output)\n        except ValueError:\n            return _result(False, \"not json\")\n        if not isinstance(data, dict):\n            return _result(False, \"not json\")\n        return _field_result(data, check)\n    if kind == \"judge\":\n        if judge is None:\n            return _result(False, \"ungradable\", score=None)\n        try:\n            reply = judge(judge_prompt(check[\"criterion\"], output))\n        except Exception:\n            return _result(False, \"ungradable\", score=None)\n        score = _parse_score(reply)\n        if score is None:\n            return _result(False, \"ungradable\", score=None)\n        return _judged(score, check.get(\"threshold\", 4))\n    return _result(False, \"ungradable\")\n\n\ndef _run_once(model, judge, case):\n    try:\n        output = model(case[\"input\"])\n    except Exception:\n        return _result(False, \"model error\")\n    return grade(case, output, judge)\n\n\ndef _outcome(runs):\n    passed = all(r[\"passed\"] for r in runs)\n    mixed = any(r[\"passed\"] for r in runs) and not passed\n    reason = \"ok\" if passed else next(r[\"reason\"] for r in runs if not r[\"passed\"])\n    return passed, mixed, reason\n\n\ndef _count_tags(by_tag, tags, passed):\n    for tag in tags:\n        row = by_tag.setdefault(tag, {\"passed\": 0, \"total\": 0})\n        row[\"total\"] += 1\n        row[\"passed\"] += 1 if passed else 0\n\n\ndef run_eval(cases, model, judge=None, repeats=1):\n    \"\"\"Run every case `repeats` times through the model and grade it. A case passes only if every run passes.\"\"\"\n    results, by_tag, flaky = [], {}, []\n    for case in cases:\n        runs = [_run_once(model, judge, case) for _ in range(repeats)]\n        passed, mixed, reason = _outcome(runs)\n        results.append({\"id\": case[\"id\"], \"passed\": passed, \"reason\": reason, \"flaky\": mixed})\n        if mixed:\n            flaky.append(case[\"id\"])\n        _count_tags(by_tag, case.get(\"tags\", []), passed)\n    total, passed_count = len(results), sum(1 for r in results if r[\"passed\"])\n    return {\"total\": total, \"passed\": passed_count, \"pass_rate\": passed_count / total if total else 0.0,\n            \"results\": results, \"by_tag\": by_tag, \"flaky\": flaky}\n\n\ndef _tag_failed(row, minimum):\n    return row is None or row[\"total\"] == 0 or row[\"passed\"] / row[\"total\"] < minimum\n\n\ndef meets(report, criteria):\n    \"\"\"Compare a report with success criteria: min_pass_rate, tags {tag: minimum rate}, max_flaky.\"\"\"\n    failures = []\n    if \"min_pass_rate\" in criteria and report[\"pass_rate\"] < criteria[\"min_pass_rate\"]:\n        failures.append(\"overall\")\n    for tag, minimum in criteria.get(\"tags\", {}).items():\n        if _tag_failed(report[\"by_tag\"].get(tag), minimum):\n            failures.append(f\"tag:{tag}\")\n    if \"max_flaky\" in criteria and len(report[\"flaky\"]) > criteria[\"max_flaky\"]:\n        failures.append(\"flaky\")\n    return {\"met\": not failures, \"failures\": failures}\n\n\ndef _changes(before, now):\n    regressions = [i for i in now if i in before and before[i] and not now[i]]\n    fixed = [i for i in now if i in before and not before[i] and now[i]]\n    added = [i for i in now if i not in before]\n    removed = [i for i in before if i not in now]\n    return regressions, fixed, added, removed\n\n\ndef compare(baseline, current):\n    \"\"\"What changed between two reports: regressions, fixes, added and removed cases, the pass-rate change.\"\"\"\n    before = {r[\"id\"]: r[\"passed\"] for r in baseline[\"results\"]}\n    now = {r[\"id\"]: r[\"passed\"] for r in current[\"results\"]}\n    regressions, fixed, added, removed = _changes(before, now)\n    return {\"regressions\": regressions, \"fixed\": fixed, \"added\": added, \"removed\": removed,\n            \"pass_rate_delta\": current[\"pass_rate\"] - baseline[\"pass_rate\"], \"ok\": not regressions and not removed}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom harness import run_eval\n\n# Four test cases, each with its own automated check, like the first main test case.\ncases = [\n    {\"id\": \"c1\", \"input\": \"I love it\", \"tags\": [\"core\"], \"check\": {\"type\": \"exact\", \"expected\": \"positive\"}},\n    {\"id\": \"c2\", \"input\": \"awful\", \"tags\": [\"core\"], \"check\": {\"type\": \"exact\", \"expected\": \"negative\"}},\n    {\"id\": \"c3\", \"input\": \"order 7\", \"tags\": [\"extract\"], \"check\": {\"type\": \"regex\", \"pattern\": \"ORD-\\\\d{4}\"}},\n    {\"id\": \"c4\", \"input\": \"meh\", \"tags\": [\"core\", \"edge\"], \"check\": {\"type\": \"exact\", \"expected\": \"neutral\"}},\n]\nanswers = {\"I love it\": \"positive\", \"awful\": \"negative\", \"order 7\": \"The order is ORD-0007.\", \"meh\": \"positive\"}\n\n# The application under test is a plain function: here it just looks the answer up.\nreport = run_eval(cases, lambda text: answers[text]) or {}\n\nprint(\"passed:\", report.get(\"passed\"), \"of\", report.get(\"total\"), \"| pass rate:\", report.get(\"pass_rate\"))\nfor result in report.get(\"results\", []):\n    print(\" \", result[\"id\"], \"passed\" if result[\"passed\"] else \"failed\", \"-\", result[\"reason\"])\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"An eval harness. See ../../statement.md.\"\"\"\nimport json\nimport logging\nimport re\n\nlog = logging.getLogger(__name__)\n\n\ndef _norm(text):\n    \"\"\"TODO 1 of 9 (unlocks e1): the form two texts are compared in for an exact check.\n\n    Receives a text and returns it trimmed, every run of white space made one space, and lower-cased. Nothing else changes.\n    Example: _norm(\"  Paris \\n FRANCE \") -> \"paris france\"\n    \"\"\"\n    return text\n\n\ndef _result(passed, reason, **extra):\n    return {\"passed\": passed, \"reason\": reason, **extra}\n\n\ndef judge_prompt(criterion, output):\n    return (f\"Rate this response on a scale of 1-5 for {criterion}:\\n<response>{output}</response>\\n\"\n            f\"1: Not at all {criterion}\\n5: Perfectly {criterion}\\nOutput only the number.\")\n\n\ndef _field_result(data, check):\n    \"\"\"TODO 2 of 9 (unlocks e2): grade a parsed JSON object against a json_field check.\n\n    Receives the parsed object (a dict) and the check `{\"field\", \"equals\"}`. Returns `_result(passed, reason)`: `missing field` when the\n    field is absent; `ok` when the value equals `equals` with the same JSON type; else `mismatch`.\n    Example: {\"n\": \"3\"} against equals 3 -> {\"passed\": False, \"reason\": \"mismatch\"}\n    \"\"\"\n    return _result(False, \"mismatch\")\n\n\ndef _parse_score(reply):\n    \"\"\"TODO 3 of 9 (unlocks e3): read the judge's reply as a score.\n\n    Receives the reply (any value). Returns the integer when the trimmed reply is exactly one digit from 1 to 5, else None.\n    Example: _parse_score(\" 4\\n\") -> 4, _parse_score(\"I give it a 4\") -> None\n    \"\"\"\n    return None\n\n\ndef _judged(score, threshold):\n    \"\"\"TODO 4 of 9 (unlocks e3): the verdict for a judge score.\n\n    Receives the score and the threshold. Returns `_result(passed, reason, score=score)`: `ok` at or above the threshold, else\n    `below threshold`. Example: _judged(4, 4) -> {\"passed\": True, \"reason\": \"ok\", \"score\": 4}\n    \"\"\"\n    return _result(False, \"below threshold\", score=score)\n\n\ndef grade(case, output, judge=None):\n    \"\"\"Grade one output against the case's check. Returns {\"passed\", \"reason\"} (and \"score\" for a judge check).\"\"\"\n    log.debug(\"grade input: %r\", output)\n    check = case[\"check\"]\n    kind = check[\"type\"]\n    if kind == \"exact\":\n        return _result(True, \"ok\") if _norm(output) == _norm(check[\"expected\"]) else _result(False, \"mismatch\")\n    if kind == \"regex\":\n        return _result(True, \"ok\") if re.search(check[\"pattern\"], output) else _result(False, \"mismatch\")\n    if kind == \"json_field\":\n        try:\n            data = json.loads(output)\n        except ValueError:\n            return _result(False, \"not json\")\n        if not isinstance(data, dict):\n            return _result(False, \"not json\")\n        return _field_result(data, check)\n    if kind == \"judge\":\n        if judge is None:\n            return _result(False, \"ungradable\", score=None)\n        try:\n            reply = judge(judge_prompt(check[\"criterion\"], output))\n        except Exception:\n            return _result(False, \"ungradable\", score=None)\n        score = _parse_score(reply)\n        if score is None:\n            return _result(False, \"ungradable\", score=None)\n        return _judged(score, check.get(\"threshold\", 4))\n    return _result(False, \"ungradable\")\n\n\ndef _run_once(model, judge, case):\n    \"\"\"TODO 5 of 9 (unlocks e4): one run of one case.\n\n    Receives the model function, the judge and the case. Returns the verdict of `grade` for the model's output; when the model raises\n    an error the verdict is `_result(False, \"model error\")` and nothing is raised. Example: a model that raises -> {\"passed\": False, \"reason\": \"model error\"}\n    \"\"\"\n    return _result(False, \"model error\")\n\n\ndef _outcome(runs):\n    \"\"\"TODO 6 of 9 (unlocks e7): combine the runs of one case.\n\n    Receives the list of verdicts of its runs. Returns `(passed, flaky, reason)`: passed only if every run passed; flaky when some\n    passed and some failed; the reason is `ok`, or the reason of the first failed run.\n    Example: [ok, mismatch] -> (False, True, \"mismatch\")\n    \"\"\"\n    return False, False, \"mismatch\"\n\n\ndef _count_tags(by_tag, tags, passed):\n    \"\"\"TODO 7 of 9 (unlocks e5): count one case under each of its tags.\n\n    Receives the dict `by_tag` (changed in place), the case's tags and whether it passed. Every tag's `total` goes up by one, and its\n    `passed` by one when the case passed. Example: tags [\"a\"], passed -> by_tag[\"a\"] == {\"passed\": 1, \"total\": 1}\n    \"\"\"\n\n\ndef run_eval(cases, model, judge=None, repeats=1):\n    \"\"\"Run every case `repeats` times through the model and grade it. A case passes only if every run passes.\"\"\"\n    results, by_tag, flaky = [], {}, []\n    for case in cases:\n        runs = [_run_once(model, judge, case) for _ in range(repeats)]\n        passed, mixed, reason = _outcome(runs)\n        results.append({\"id\": case[\"id\"], \"passed\": passed, \"reason\": reason, \"flaky\": mixed})\n        if mixed:\n            flaky.append(case[\"id\"])\n        _count_tags(by_tag, case.get(\"tags\", []), passed)\n    total, passed_count = len(results), sum(1 for r in results if r[\"passed\"])\n    return {\"total\": total, \"passed\": passed_count, \"pass_rate\": passed_count / total if total else 0.0,\n            \"results\": results, \"by_tag\": by_tag, \"flaky\": flaky}\n\n\ndef _tag_failed(row, minimum):\n    \"\"\"TODO 8 of 9 (unlocks e5): does one tag fail its minimum rate?\n\n    Receives the tag's row `{\"passed\", \"total\"}` or None (no case carries the tag) and the minimum rate. Returns True for None, an\n    empty row, or a rate below the minimum; a rate equal to the minimum is fine. Example: ({\"passed\": 1, \"total\": 2}, 0.5) -> False\n    \"\"\"\n    return False\n\n\ndef meets(report, criteria):\n    \"\"\"Compare a report with success criteria: min_pass_rate, tags {tag: minimum rate}, max_flaky.\"\"\"\n    failures = []\n    if \"min_pass_rate\" in criteria and report[\"pass_rate\"] < criteria[\"min_pass_rate\"]:\n        failures.append(\"overall\")\n    for tag, minimum in criteria.get(\"tags\", {}).items():\n        if _tag_failed(report[\"by_tag\"].get(tag), minimum):\n            failures.append(f\"tag:{tag}\")\n    if \"max_flaky\" in criteria and len(report[\"flaky\"]) > criteria[\"max_flaky\"]:\n        failures.append(\"flaky\")\n    return {\"met\": not failures, \"failures\": failures}\n\n\ndef _changes(before, now):\n    \"\"\"TODO 9 of 9 (unlocks e6): what changed between two runs.\n\n    Receives two dicts `{case id: passed}`, the baseline and the current run. Returns `(regressions, fixed, added, removed)`, lists of\n    ids: passed before and fails now; failed before and passes now; only in the current run; only in the baseline. Regressions, fixed\n    and added follow the current order, removed the baseline's. Example: before {\"a\": True}, now {\"a\": False, \"b\": True} -> ([\"a\"], [], [\"b\"], [])\n    \"\"\"\n    return [], [], [], []\n\n\ndef compare(baseline, current):\n    \"\"\"What changed between two reports: regressions, fixes, added and removed cases, the pass-rate change.\"\"\"\n    before = {r[\"id\"]: r[\"passed\"] for r in baseline[\"results\"]}\n    now = {r[\"id\"]: r[\"passed\"] for r in current[\"results\"]}\n    regressions, fixed, added, removed = _changes(before, now)\n    return {\"regressions\": regressions, \"fixed\": fixed, \"added\": added, \"removed\": removed,\n            \"pass_rate_delta\": current[\"pass_rate\"] - baseline[\"pass_rate\"], \"ok\": not regressions and not removed}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom harness import run_eval\n\n# Four test cases, each with its own automated check, like the first main test case.\ncases = [\n    {\"id\": \"c1\", \"input\": \"I love it\", \"tags\": [\"core\"], \"check\": {\"type\": \"exact\", \"expected\": \"positive\"}},\n    {\"id\": \"c2\", \"input\": \"awful\", \"tags\": [\"core\"], \"check\": {\"type\": \"exact\", \"expected\": \"negative\"}},\n    {\"id\": \"c3\", \"input\": \"order 7\", \"tags\": [\"extract\"], \"check\": {\"type\": \"regex\", \"pattern\": \"ORD-\\\\d{4}\"}},\n    {\"id\": \"c4\", \"input\": \"meh\", \"tags\": [\"core\", \"edge\"], \"check\": {\"type\": \"exact\", \"expected\": \"neutral\"}},\n]\nanswers = {\"I love it\": \"positive\", \"awful\": \"negative\", \"order 7\": \"The order is ORD-0007.\", \"meh\": \"positive\"}\n\n# The application under test is a plain function: here it just looks the answer up.\nreport = run_eval(cases, lambda text: answers[text]) or {}\n\nprint(\"passed:\", report.get(\"passed\"), \"of\", report.get(\"total\"), \"| pass rate:\", report.get(\"pass_rate\"))\nfor result in report.get(\"results\", []):\n    print(\" \", result[\"id\"], \"passed\" if result[\"passed\"] else \"failed\", \"-\", result[\"reason\"])\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 11,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "008216443b0ce21233d90136ed432f388eb249218d8193b3b0a3a360209a2a4e",
+  "starting_code": "\"\"\"An eval harness. See ../../statement.md.\"\"\"\nimport json\nimport logging\nimport re\n\nlog = logging.getLogger(__name__)\n\n\ndef _norm(text):\n    \"\"\"TODO 1 of 9 (unlocks e1): the form two texts are compared in for an exact check.\n\n    Receives a text and returns it trimmed, every run of white space made one space, and lower-cased. Nothing else changes.\n    Example: _norm(\"  Paris \\n FRANCE \") -> \"paris france\"\n    \"\"\"\n    return text\n\n\ndef _result(passed, reason, **extra):\n    return {\"passed\": passed, \"reason\": reason, **extra}\n\n\ndef judge_prompt(criterion, output):\n    return (f\"Rate this response on a scale of 1-5 for {criterion}:\\n<response>{output}</response>\\n\"\n            f\"1: Not at all {criterion}\\n5: Perfectly {criterion}\\nOutput only the number.\")\n\n\ndef _field_result(data, check):\n    \"\"\"TODO 2 of 9 (unlocks e2): grade a parsed JSON object against a json_field check.\n\n    Receives the parsed object (a dict) and the check `{\"field\", \"equals\"}`. Returns `_result(passed, reason)`: `missing field` when the\n    field is absent; `ok` when the value equals `equals` with the same JSON type; else `mismatch`.\n    Example: {\"n\": \"3\"} against equals 3 -> {\"passed\": False, \"reason\": \"mismatch\"}\n    \"\"\"\n    return _result(False, \"mismatch\")\n\n\ndef _parse_score(reply):\n    \"\"\"TODO 3 of 9 (unlocks e3): read the judge's reply as a score.\n\n    Receives the reply (any value). Returns the integer when the trimmed reply is exactly one digit from 1 to 5, else None.\n    Example: _parse_score(\" 4\\n\") -> 4, _parse_score(\"I give it a 4\") -> None\n    \"\"\"\n    return None\n\n\ndef _judged(score, threshold):\n    \"\"\"TODO 4 of 9 (unlocks e3): the verdict for a judge score.\n\n    Receives the score and the threshold. Returns `_result(passed, reason, score=score)`: `ok` at or above the threshold, else\n    `below threshold`. Example: _judged(4, 4) -> {\"passed\": True, \"reason\": \"ok\", \"score\": 4}\n    \"\"\"\n    return _result(False, \"below threshold\", score=score)\n\n\ndef grade(case, output, judge=None):\n    \"\"\"Grade one output against the case's check. Returns {\"passed\", \"reason\"} (and \"score\" for a judge check).\"\"\"\n    log.debug(\"grade input: %r\", output)\n    check = case[\"check\"]\n    kind = check[\"type\"]\n    if kind == \"exact\":\n        return _result(True, \"ok\") if _norm(output) == _norm(check[\"expected\"]) else _result(False, \"mismatch\")\n    if kind == \"regex\":\n        return _result(True, \"ok\") if re.search(check[\"pattern\"], output) else _result(False, \"mismatch\")\n    if kind == \"json_field\":\n        try:\n            data = json.loads(output)\n        except ValueError:\n            return _result(False, \"not json\")\n        if not isinstance(data, dict):\n            return _result(False, \"not json\")\n        return _field_result(data, check)\n    if kind == \"judge\":\n        if judge is None:\n            return _result(False, \"ungradable\", score=None)\n        try:\n            reply = judge(judge_prompt(check[\"criterion\"], output))\n        except Exception:\n            return _result(False, \"ungradable\", score=None)\n        score = _parse_score(reply)\n        if score is None:\n            return _result(False, \"ungradable\", score=None)\n        return _judged(score, check.get(\"threshold\", 4))\n    return _result(False, \"ungradable\")\n\n\ndef _run_once(model, judge, case):\n    \"\"\"TODO 5 of 9 (unlocks e4): one run of one case.\n\n    Receives the model function, the judge and the case. Returns the verdict of `grade` for the model's output; when the model raises\n    an error the verdict is `_result(False, \"model error\")` and nothing is raised. Example: a model that raises -> {\"passed\": False, \"reason\": \"model error\"}\n    \"\"\"\n    return _result(False, \"model error\")\n\n\ndef _outcome(runs):\n    \"\"\"TODO 6 of 9 (unlocks e7): combine the runs of one case.\n\n    Receives the list of verdicts of its runs. Returns `(passed, flaky, reason)`: passed only if every run passed; flaky when some\n    passed and some failed; the reason is `ok`, or the reason of the first failed run.\n    Example: [ok, mismatch] -> (False, True, \"mismatch\")\n    \"\"\"\n    return False, False, \"mismatch\"\n\n\ndef _count_tags(by_tag, tags, passed):\n    \"\"\"TODO 7 of 9 (unlocks e5): count one case under each of its tags.\n\n    Receives the dict `by_tag` (changed in place), the case's tags and whether it passed. Every tag's `total` goes up by one, and its\n    `passed` by one when the case passed. Example: tags [\"a\"], passed -> by_tag[\"a\"] == {\"passed\": 1, \"total\": 1}\n    \"\"\"\n\n\ndef run_eval(cases, model, judge=None, repeats=1):\n    \"\"\"Run every case `repeats` times through the model and grade it. A case passes only if every run passes.\"\"\"\n    results, by_tag, flaky = [], {}, []\n    for case in cases:\n        runs = [_run_once(model, judge, case) for _ in range(repeats)]\n        passed, mixed, reason = _outcome(runs)\n        results.append({\"id\": case[\"id\"], \"passed\": passed, \"reason\": reason, \"flaky\": mixed})\n        if mixed:\n            flaky.append(case[\"id\"])\n        _count_tags(by_tag, case.get(\"tags\", []), passed)\n    total, passed_count = len(results), sum(1 for r in results if r[\"passed\"])\n    return {\"total\": total, \"passed\": passed_count, \"pass_rate\": passed_count / total if total else 0.0,\n            \"results\": results, \"by_tag\": by_tag, \"flaky\": flaky}\n\n\ndef _tag_failed(row, minimum):\n    \"\"\"TODO 8 of 9 (unlocks e5): does one tag fail its minimum rate?\n\n    Receives the tag's row `{\"passed\", \"total\"}` or None (no case carries the tag) and the minimum rate. Returns True for None, an\n    empty row, or a rate below the minimum; a rate equal to the minimum is fine. Example: ({\"passed\": 1, \"total\": 2}, 0.5) -> False\n    \"\"\"\n    return False\n\n\ndef meets(report, criteria):\n    \"\"\"Compare a report with success criteria: min_pass_rate, tags {tag: minimum rate}, max_flaky.\"\"\"\n    failures = []\n    if \"min_pass_rate\" in criteria and report[\"pass_rate\"] < criteria[\"min_pass_rate\"]:\n        failures.append(\"overall\")\n    for tag, minimum in criteria.get(\"tags\", {}).items():\n        if _tag_failed(report[\"by_tag\"].get(tag), minimum):\n            failures.append(f\"tag:{tag}\")\n    if \"max_flaky\" in criteria and len(report[\"flaky\"]) > criteria[\"max_flaky\"]:\n        failures.append(\"flaky\")\n    return {\"met\": not failures, \"failures\": failures}\n\n\ndef _changes(before, now):\n    \"\"\"TODO 9 of 9 (unlocks e6): what changed between two runs.\n\n    Receives two dicts `{case id: passed}`, the baseline and the current run. Returns `(regressions, fixed, added, removed)`, lists of\n    ids: passed before and fails now; failed before and passes now; only in the current run; only in the baseline. Regressions, fixed\n    and added follow the current order, removed the baseline's. Example: before {\"a\": True}, now {\"a\": False, \"b\": True} -> ([\"a\"], [], [\"b\"], [])\n    \"\"\"\n    return [], [], [], []\n\n\ndef compare(baseline, current):\n    \"\"\"What changed between two reports: regressions, fixes, added and removed cases, the pass-rate change.\"\"\"\n    before = {r[\"id\"]: r[\"passed\"] for r in baseline[\"results\"]}\n    now = {r[\"id\"]: r[\"passed\"] for r in current[\"results\"]}\n    regressions, fixed, added, removed = _changes(before, now)\n    return {\"regressions\": regressions, \"fixed\": fixed, \"added\": added, \"removed\": removed,\n            \"pass_rate_delta\": current[\"pass_rate\"] - baseline[\"pass_rate\"], \"ok\": not regressions and not removed}\n",
+  "exercise": {
+    "main_path": "practice/level-2/42-evaluation/prose/unit-03/practice-1/harness.py",
+    "test_path": "practice/level-2/42-evaluation/prose/unit-03/practice-1/test_harness.py",
+    "run_command": [
+      "python3",
+      "practice/level-2/42-evaluation/prose/unit-03/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-2/42-evaluation/prose/unit-03/practice-1/target/report.xml",
+      "practice/level-2/42-evaluation/prose/unit-03/practice-1/test_harness.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_a_run_grades_every_case_with_its_own_check_and_reports_the_pass_rate",
+        "kind": "main",
+        "says": "A run grades each case with its own check (exact, regex), reports the pass rate and the order of the results, and an empty set has rate 0.0"
+      },
+      {
+        "id": "test_e1_an_exact_check_ignores_case_and_spacing_but_nothing_else",
+        "kind": "edge",
+        "says": "An exact check ignores case and spacing only: a longer word, a different word and an empty output fail; a regex is a search, and an anchored one still fails on extra text"
+      },
+      {
+        "id": "test_e2_a_json_field_check_needs_a_json_object_with_the_field_and_the_same_typed_value",
+        "kind": "edge",
+        "says": "A json field check: a JSON object, the field present, the same typed value; a fenced block, prose around the JSON and an array are not json"
+      },
+      {
+        "id": "test_e3_a_judge_check_sends_the_rubric_prompt_and_accepts_only_a_bare_score_at_the_threshold",
+        "kind": "edge",
+        "says": "A judge check: the exact prompt, a bare score at the threshold passes, a lower score fails, and a reply that is not a bare score, no judge or a judge that raises is ungradable"
+      },
+      {
+        "id": "test_e4_a_model_that_fails_on_one_case_does_not_stop_the_run",
+        "kind": "edge",
+        "says": "A model error fails its own case with model error and the run goes on"
+      },
+      {
+        "id": "test_e5_tags_report_their_own_rates_and_success_criteria_judge_each_dimension",
+        "kind": "edge",
+        "says": "Tags report their own pass rates; meets judges the overall rate, each tag (a missing tag fails) and the flaky count, and a rate equal to its minimum passes"
+      },
+      {
+        "id": "test_e6_a_regression_run_names_what_broke_what_was_fixed_and_what_went_missing",
+        "kind": "edge",
+        "says": "compare names regressions, fixes, added and removed cases; a better average with a regression is not ok; a removed case is not ok"
+      },
+      {
+        "id": "test_e7_repeated_runs_expose_flaky_cases_and_a_case_passes_only_if_every_run_does",
+        "kind": "edge",
+        "says": "Repeated runs: a case passes only if every run passes, a mixed case is flaky, a consistently failing case is not flaky, and the model is called once per run"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/42-evaluation/prose/unit-03/practice-1/target/report.xml"
+    },
+    "origin": "course/42-evaluation/03-refining-against-a-set-and-regression-runs.md",
+    "concepts": [
+      "the practice of Refining against an eval set, regression runs and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/42-evaluation/prose/unit-03/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "evaluation-u3"
+}

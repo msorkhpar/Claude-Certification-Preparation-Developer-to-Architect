@@ -1,0 +1,121 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "60-claude-code-in-ci"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: A headless run, its JSON and the job status",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A CI step runs Claude Code unattended, and each issue it reports must be posted as an inline note. Which flags make the reply usable for that?",
+        "options": [
+          {
+            "id": "a",
+            "text": "`--output-format text` with a prompt asking for a bulleted list",
+            "correct": false,
+            "says": "Ruled out because text leaves the entries to be parsed from prose, and \"a decision made on prose is a guess\"."
+          },
+          {
+            "id": "b",
+            "text": "`--max-turns` with a high limit so that the list is complete",
+            "correct": false,
+            "says": "Ruled out because a limit bounds the loop and does not shape the answer: \"The run exits with an error at the limit\"."
+          },
+          {
+            "id": "c",
+            "text": "`--output-format json` with `--json-schema`",
+            "correct": true,
+            "says": "The schema makes the answer a validated object in `structured_output`."
+          },
+          {
+            "id": "d",
+            "text": "`--bare` alone, which formats replies for scripts",
+            "correct": false,
+            "says": "Ruled out because the flag controls what the run loads, with \"no hooks, skills, MCP servers, memory or CLAUDE.md\", and formats nothing."
+          }
+        ],
+        "origin": {
+          "path": "course/60-claude-code-in-ci/01-a-headless-run-its-json-and-the-job-status.md",
+          "section": "The gate"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A review run ends with the subtype `success`, yet the object holds no `structured_output`. What should the job do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Fail, because no valid answer exists",
+            "correct": true,
+            "says": "A run without a valid answer is a failure whatever its subtype says."
+          },
+          {
+            "id": "b",
+            "text": "Pass, since the run reports success",
+            "correct": false,
+            "says": "Ruled out because the documentation says \"Treat that case as a failure as well\"."
+          },
+          {
+            "id": "c",
+            "text": "Retry the same request until a value appears",
+            "correct": false,
+            "says": "Ruled out because \"Retrying inside the job repeats cost with no reason to expect a different result\"."
+          },
+          {
+            "id": "d",
+            "text": "Pass, with a note that nothing was reported",
+            "correct": false,
+            "says": "Ruled out because \"A job never passes by saying nothing\", and a silent pass cannot be told from a failed run."
+          }
+        ],
+        "origin": {
+          "path": "course/60-claude-code-in-ci/01-a-headless-run-its-json-and-the-job-status.md",
+          "section": "What the run prints"
+        }
+      }
+    ],
+    "concepts": [
+      "The gate, as the page teaches it",
+      "What the run prints, as the page teaches it"
+    ]
+  }
+}

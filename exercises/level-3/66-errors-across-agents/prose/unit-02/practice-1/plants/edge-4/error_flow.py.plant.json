@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "error_flow.py",
+      "old": "    plan = []\n    for topic, outcome in results.items():",
+      "new": "    plan = []\n    if any(o[\"status\"] == \"failed\" for o in results.values()):\n        return [(topic, \"abort\") for topic in results]\n    for topic, outcome in results.items():"
+    }
+  ]
+}

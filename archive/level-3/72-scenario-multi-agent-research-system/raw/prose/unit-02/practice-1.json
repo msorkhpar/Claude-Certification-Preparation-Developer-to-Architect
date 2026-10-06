@@ -1,0 +1,276 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "72-scenario-multi-agent-research-system"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: the coordinator's last step in a research run (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: the coordinator's last step in a research run"
+    },
+    {
+      "type": "para",
+      "text": "A coordinator hands subtasks to a search subagent, a document-analysis subagent and a synthesis subagent. The subagents have finished, some of them with a failure, and the coordinator has a list of results. Before the report is written, the coordinator must decide what it knows: which of the question's scopes were really covered, which claims several sources agree on, which claims the sources disagree about, what failed and what could be tried instead, and what the report cannot say. In this practice you write that step. The model is not called: the tests give you the results of the subagents. The shapes of a result and of the report are this course's own design for the capstone, not an Anthropic interface. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`synthesize`); TypeScript has the same name and the same fields. Java has the static method `Synthesis.synthesize` and the records `Finding`, `Failure`, `Result`, `Claim`, `Conflict` and `Report`; Kotlin has the top-level function `synthesize` and the data classes of the same names."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working synthesis step with seven gaps cut out of it. The plumbing is written and correct: collecting the findings of `ok` results and of the `partial` lists, grouping them by claim, telling a conflict (two or more values) from an agreed claim, and building the report from the pieces. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (Java and Kotlin use the camel-case names):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`covered_scopes` unlocks `e1` and `e5`, and the coverage in every case: the covered scopes and the gaps.",
+        "`sources_of` unlocks `e6`: the sources of a claim, in arrival order, without duplicates.",
+        "`observed_values` unlocks `e3`: the values and sources of a conflicting claim.",
+        "`all_partial` unlocks `e4`: whether every finding of a claim came from a partial list.",
+        "`unresolved_errors` unlocks `e2` and `e4`: the errors that a later result did not make up for.",
+        "`partial_scopes` unlocks `e4`: the gaps that a failed search still returned findings for.",
+        "`coverage_note` unlocks `e1`, `e2` and `e5`: the sentence about what is not covered."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About fifteen lines in all. The sections below describe the whole step."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "A finding is `{claim, value, source, date}`. A result of a subagent is `{scope, status, findings, error}`: `status` is `ok` (with `findings`) or `error` (with `error`, an object `{type, query, partial, alternatives}`, where `partial` is a list of findings that came back before the failure and `alternatives` lists queries to try instead)."
+    },
+    {
+      "type": "para",
+      "text": "`synthesize(required, results)` takes the scopes the question needs, in order, and returns a report with:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`covered`: the required scopes (in the order of `required`) that have an `ok` result with at least one finding; `gaps`: the other required scopes; `status`: `complete` when there are no gaps and `partial` otherwise.",
+        "`claims`: a list, sorted by the text of the claim, with `{claim, value, sources, partial}` for every claim on which all findings agree. `sources` is a list of `{source, date}` in the order the findings arrived, without duplicates. Findings come from `ok` results and from the `partial` lists of errors. `partial` is true only when every finding of the claim came from a `partial` list.",
+        "`conflicts`: a list, sorted by claim, with `{claim, values}` for every claim that has two or more different values; `values` lists `{value, source, date}` for each distinct value and source, in arrival order. A conflicting claim is not in `claims`: the report does not choose.",
+        "`errors`: for each result with status `error` whose scope is not covered, `{scope, type, query, alternatives}`. An error that a later `ok` result for the same scope made up for is not listed.",
+        "`partial`: the gaps for which an error returned partial findings.",
+        "`note`: `all scopes covered` when there are no gaps; otherwise `not covered: ` and the gaps in order, separated by `, `, each as `<scope> (<type> on '<query>')` when an unresolved error is recorded for it, `<scope> (not researched)` when no result at all names the scope (the plan never covered it), and `<scope> (no findings)` otherwise."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Coverage is checked against the question, not against the plan.** The exam's example is a report on the creative industries that covers only visual arts: every subagent succeeded and the coordinator's decomposition was too narrow. *You should see* a scope nobody researched reported as a gap and as `not researched`, which differs from a scope whose search failed.",
+        "**A failure travels with its context.** A bare \"search failed\" tells the coordinator nothing. *You should see* the type, the query and the alternatives kept, and a note that names them.",
+        "**A partial result is still information, and it is not coverage.** *You should see* partial findings in the claims, flagged, while their scope stays a gap.",
+        "**A conflict is information.** Two sources with two values are both shown, with their dates, and the report does not average or pick. *You should see* a conflict that names both sources and no claim for it.",
+        "**A status that cannot lie.** `complete` means that every scope was covered. *You should see* `partial` whenever a scope is missing, whatever the reason."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A full run with agreement: claims with every source, a complete status and the all-clear note"
+        ],
+        [
+          "`e1`",
+          "No results: every scope is a gap, `not researched`"
+        ],
+        [
+          "`e2`",
+          "A scope the plan never covered and a scope whose search failed read differently in the note"
+        ],
+        [
+          "`e3`",
+          "Two values for one claim are a conflict naming both sources and no claim"
+        ],
+        [
+          "`e4`",
+          "Partial results kept and flagged, not covering their scope, and an error that a retry made up for disappears"
+        ],
+        [
+          "`e5`",
+          "An `ok` result with no findings does not cover its scope"
+        ],
+        [
+          "`e6`",
+          "Claims sorted, sources in arrival order without duplicates, scopes in the order of `required`"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"The coordinator's last step in a research run: merge what the subagents returned into claims with their sources, conflicts, errors and a coverage note.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef _same(items, item):\n    return items if item in items else items + [item]\n\n\ndef _findings(results):\n    \"\"\"Every finding as (finding, came_from_a_partial_list), in arrival order.\"\"\"\n    seen = []\n    for r in results:\n        if r[\"status\"] == \"ok\":\n            seen += [(f, False) for f in r[\"findings\"]]\n        else:\n            seen += [(f, True) for f in r[\"error\"][\"partial\"]]\n    return seen\n\n\ndef covered_scopes(required, results):\n    ok_scopes = {r[\"scope\"] for r in results if r[\"status\"] == \"ok\" and r[\"findings\"]}\n    return [s for s in required if s in ok_scopes], [s for s in required if s not in ok_scopes]\n\n\ndef sources_of(group):\n    sources = []\n    for f, _ in group:\n        sources = _same(sources, {\"source\": f[\"source\"], \"date\": f[\"date\"]})\n    return sources\n\n\ndef observed_values(group):\n    observed = []\n    for f, _ in group:\n        observed = _same(observed, {\"value\": f[\"value\"], \"source\": f[\"source\"], \"date\": f[\"date\"]})\n    return observed\n\n\ndef all_partial(group):\n    return all(p for _, p in group)\n\n\ndef unresolved_errors(results, covered):\n    return [{\"scope\": r[\"scope\"], \"type\": r[\"error\"][\"type\"], \"query\": r[\"error\"][\"query\"], \"alternatives\": r[\"error\"][\"alternatives\"]}\n            for r in results if r[\"status\"] == \"error\" and r[\"scope\"] not in covered]\n\n\ndef partial_scopes(results, gaps):\n    return [s for s in gaps if any(r[\"status\"] == \"error\" and r[\"scope\"] == s and r[\"error\"][\"partial\"] for r in results)]\n\n\ndef coverage_note(gaps, errors, results):\n    parts = []\n    for g in gaps:\n        failed = next((e for e in errors if e[\"scope\"] == g), None)\n        if failed:\n            parts.append(f\"{g} ({failed['type']} on '{failed['query']}')\")\n        elif not any(r[\"scope\"] == g for r in results):\n            parts.append(f\"{g} (not researched)\")\n        else:\n            parts.append(f\"{g} (no findings)\")\n    return \"not covered: \" + \", \".join(parts) if parts else \"all scopes covered\"\n\n\ndef synthesize(required, results):\n    log.debug(\"synthesize input: %r\", results)\n    covered, gaps = covered_scopes(required, results)\n    by_claim = {}\n    for f, partial in _findings(results):\n        by_claim.setdefault(f[\"claim\"], []).append((f, partial))\n    claims, conflicts = [], []\n    for claim in sorted(by_claim):\n        group = by_claim[claim]\n        values = []\n        for f, _ in group:\n            values = _same(values, f[\"value\"])\n        if len(values) > 1:\n            conflicts.append({\"claim\": claim, \"values\": observed_values(group)})\n        else:\n            claims.append({\"claim\": claim, \"value\": values[0], \"sources\": sources_of(group), \"partial\": all_partial(group)})\n    errors = unresolved_errors(results, covered)\n    return {\"status\": \"partial\" if gaps else \"complete\", \"covered\": covered, \"gaps\": gaps, \"partial\": partial_scopes(results, gaps), \"claims\": claims,\n            \"conflicts\": conflicts, \"errors\": errors, \"note\": coverage_note(gaps, errors, results)}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom synthesis import synthesize\n\ndef finding(claim, value, source, date=\"2025-01-01\"):\n    return {\"claim\": claim, \"value\": value, \"source\": source, \"date\": date}\n\ndef ok(scope, *findings):\n    return {\"scope\": scope, \"status\": \"ok\", \"findings\": list(findings), \"error\": None}\n\n# Two subagents agree on claim X; a third scope timed out and is not covered.\nresults = [\n    ok(\"a\", finding(\"X\", \"1\", \"s1\"), finding(\"Y\", \"2\", \"s2\")),\n    ok(\"b\", finding(\"X\", \"1\", \"s3\")),\n    {\"scope\": \"c\", \"status\": \"error\", \"findings\": [],\n     \"error\": {\"type\": \"timeout\", \"query\": \"q-c\", \"partial\": [], \"alternatives\": [\"q-c-narrow\"]}},\n]\nreport = synthesize([\"a\", \"b\", \"c\"], results)\nprint(\"status:\", report[\"status\"])\nprint(\"covered:\", report[\"covered\"], \"| gaps:\", report[\"gaps\"])\nprint(\"claims:\", [(c[\"claim\"], c[\"value\"], len(c[\"sources\"])) for c in report[\"claims\"]])\nprint(\"note:\", report[\"note\"])\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"The coordinator's last step in a research run: merge what the subagents returned into claims with their sources, conflicts, errors and a coverage note.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef _same(items, item):\n    return items if item in items else items + [item]\n\n\ndef _findings(results):\n    \"\"\"Every finding as (finding, came_from_a_partial_list), in arrival order.\"\"\"\n    seen = []\n    for r in results:\n        if r[\"status\"] == \"ok\":\n            seen += [(f, False) for f in r[\"findings\"]]\n        else:\n            seen += [(f, True) for f in r[\"error\"][\"partial\"]]\n    return seen\n\n\ndef covered_scopes(required, results):\n    \"\"\"TODO 1 of 7 (unlocks e1, e5 and the coverage of every other case): split the required scopes into covered and gaps.\n\n    Receives the required scopes and the results. Returns (covered, gaps), both in the order of `required`: a scope is covered\n    when an `ok` result for it has at least one finding.\n    Example: required [\"a\", \"b\"], one ok result for \"a\" with a finding -> ([\"a\"], [\"b\"])\n    \"\"\"\n    return [], []\n\n\ndef sources_of(group):\n    \"\"\"TODO 2 of 7 (unlocks e6): the sources of one claim.\n\n    Receives the group of (finding, partial) pairs of one claim. Returns a list of {\"source\", \"date\"} in arrival order, no duplicates.\n    Example: findings from s9, s1, s9 -> [{\"source\": \"s9\", ...}, {\"source\": \"s1\", ...}]\n    \"\"\"\n    return []\n\n\ndef observed_values(group):\n    \"\"\"TODO 3 of 7 (unlocks e3): what the sources said about a conflicting claim.\n\n    Receives the group of (finding, partial) pairs of one claim. Returns a list of {\"value\", \"source\", \"date\"} in arrival order, no duplicates.\n    Example: s1 says \"12\", s2 says \"14\" twice -> [{\"value\": \"12\", \"source\": \"s1\", ...}, {\"value\": \"14\", \"source\": \"s2\", ...}]\n    \"\"\"\n    return []\n\n\ndef all_partial(group):\n    \"\"\"TODO 4 of 7 (unlocks e4): is every finding of the claim from a partial list?\n\n    Receives the group of (finding, partial) pairs of one claim. Returns True only when all of them are partial.\n    Example: [(f, True), (f, False)] -> False\n    \"\"\"\n    return False\n\n\ndef unresolved_errors(results, covered):\n    \"\"\"TODO 5 of 7 (unlocks e2 and e4): the errors that nothing made up for.\n\n    Receives the results and the covered scopes. Returns {\"scope\", \"type\", \"query\", \"alternatives\"} for each `error` result whose scope is not covered.\n    Example: an error for \"b\" while only \"a\" is covered -> [{\"scope\": \"b\", \"type\": \"timeout\", \"query\": \"qb\", \"alternatives\": [...]}]\n    \"\"\"\n    return []\n\n\ndef partial_scopes(results, gaps):\n    \"\"\"TODO 6 of 7 (unlocks e4): the gaps for which a failed search still returned findings.\n\n    Receives the results and the gaps. Returns the gaps that have an `error` result with a non-empty `partial` list.\n    Example: gap \"b\" with an error that carries one partial finding -> [\"b\"]\n    \"\"\"\n    return []\n\n\ndef coverage_note(gaps, errors, results):\n    \"\"\"TODO 7 of 7 (unlocks e1, e2 and e5): say what the report cannot cover.\n\n    Receives the gaps, the unresolved errors and the results. Returns \"all scopes covered\" for no gaps; otherwise \"not covered: \" and\n    each gap as \"<scope> (<type> on '<query>')\" for an unresolved error, \"<scope> (not researched)\" when no result names the scope,\n    or \"<scope> (no findings)\", joined by \", \".\n    Example: gaps [\"b\", \"c\"], an error for \"b\" (timeout on \"qb\"), no result for \"c\" -> \"not covered: b (timeout on 'qb'), c (not researched)\"\n    \"\"\"\n    return \"\"\n\n\ndef synthesize(required, results):\n    log.debug(\"synthesize input: %r\", results)\n    covered, gaps = covered_scopes(required, results)\n    by_claim = {}\n    for f, partial in _findings(results):\n        by_claim.setdefault(f[\"claim\"], []).append((f, partial))\n    claims, conflicts = [], []\n    for claim in sorted(by_claim):\n        group = by_claim[claim]\n        values = []\n        for f, _ in group:\n            values = _same(values, f[\"value\"])\n        if len(values) > 1:\n            conflicts.append({\"claim\": claim, \"values\": observed_values(group)})\n        else:\n            claims.append({\"claim\": claim, \"value\": values[0], \"sources\": sources_of(group), \"partial\": all_partial(group)})\n    errors = unresolved_errors(results, covered)\n    return {\"status\": \"partial\" if gaps else \"complete\", \"covered\": covered, \"gaps\": gaps, \"partial\": partial_scopes(results, gaps), \"claims\": claims,\n            \"conflicts\": conflicts, \"errors\": errors, \"note\": coverage_note(gaps, errors, results)}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom synthesis import synthesize\n\ndef finding(claim, value, source, date=\"2025-01-01\"):\n    return {\"claim\": claim, \"value\": value, \"source\": source, \"date\": date}\n\ndef ok(scope, *findings):\n    return {\"scope\": scope, \"status\": \"ok\", \"findings\": list(findings), \"error\": None}\n\n# Two subagents agree on claim X; a third scope timed out and is not covered.\nresults = [\n    ok(\"a\", finding(\"X\", \"1\", \"s1\"), finding(\"Y\", \"2\", \"s2\")),\n    ok(\"b\", finding(\"X\", \"1\", \"s3\")),\n    {\"scope\": \"c\", \"status\": \"error\", \"findings\": [],\n     \"error\": {\"type\": \"timeout\", \"query\": \"q-c\", \"partial\": [], \"alternatives\": [\"q-c-narrow\"]}},\n]\nreport = synthesize([\"a\", \"b\", \"c\"], results)\nprint(\"status:\", report[\"status\"])\nprint(\"covered:\", report[\"covered\"], \"| gaps:\", report[\"gaps\"])\nprint(\"claims:\", [(c[\"claim\"], c[\"value\"], len(c[\"sources\"])) for c in report[\"claims\"]])\nprint(\"note:\", report[\"note\"])\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 7,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "e1225b3f72774ec19257def8f78f7c8d19eed6560a0c6a15f1a32c06ad177fcc",
+  "starting_code": "\"\"\"The coordinator's last step in a research run: merge what the subagents returned into claims with their sources, conflicts, errors and a coverage note.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\ndef _same(items, item):\n    return items if item in items else items + [item]\n\n\ndef _findings(results):\n    \"\"\"Every finding as (finding, came_from_a_partial_list), in arrival order.\"\"\"\n    seen = []\n    for r in results:\n        if r[\"status\"] == \"ok\":\n            seen += [(f, False) for f in r[\"findings\"]]\n        else:\n            seen += [(f, True) for f in r[\"error\"][\"partial\"]]\n    return seen\n\n\ndef covered_scopes(required, results):\n    \"\"\"TODO 1 of 7 (unlocks e1, e5 and the coverage of every other case): split the required scopes into covered and gaps.\n\n    Receives the required scopes and the results. Returns (covered, gaps), both in the order of `required`: a scope is covered\n    when an `ok` result for it has at least one finding.\n    Example: required [\"a\", \"b\"], one ok result for \"a\" with a finding -> ([\"a\"], [\"b\"])\n    \"\"\"\n    return [], []\n\n\ndef sources_of(group):\n    \"\"\"TODO 2 of 7 (unlocks e6): the sources of one claim.\n\n    Receives the group of (finding, partial) pairs of one claim. Returns a list of {\"source\", \"date\"} in arrival order, no duplicates.\n    Example: findings from s9, s1, s9 -> [{\"source\": \"s9\", ...}, {\"source\": \"s1\", ...}]\n    \"\"\"\n    return []\n\n\ndef observed_values(group):\n    \"\"\"TODO 3 of 7 (unlocks e3): what the sources said about a conflicting claim.\n\n    Receives the group of (finding, partial) pairs of one claim. Returns a list of {\"value\", \"source\", \"date\"} in arrival order, no duplicates.\n    Example: s1 says \"12\", s2 says \"14\" twice -> [{\"value\": \"12\", \"source\": \"s1\", ...}, {\"value\": \"14\", \"source\": \"s2\", ...}]\n    \"\"\"\n    return []\n\n\ndef all_partial(group):\n    \"\"\"TODO 4 of 7 (unlocks e4): is every finding of the claim from a partial list?\n\n    Receives the group of (finding, partial) pairs of one claim. Returns True only when all of them are partial.\n    Example: [(f, True), (f, False)] -> False\n    \"\"\"\n    return False\n\n\ndef unresolved_errors(results, covered):\n    \"\"\"TODO 5 of 7 (unlocks e2 and e4): the errors that nothing made up for.\n\n    Receives the results and the covered scopes. Returns {\"scope\", \"type\", \"query\", \"alternatives\"} for each `error` result whose scope is not covered.\n    Example: an error for \"b\" while only \"a\" is covered -> [{\"scope\": \"b\", \"type\": \"timeout\", \"query\": \"qb\", \"alternatives\": [...]}]\n    \"\"\"\n    return []\n\n\ndef partial_scopes(results, gaps):\n    \"\"\"TODO 6 of 7 (unlocks e4): the gaps for which a failed search still returned findings.\n\n    Receives the results and the gaps. Returns the gaps that have an `error` result with a non-empty `partial` list.\n    Example: gap \"b\" with an error that carries one partial finding -> [\"b\"]\n    \"\"\"\n    return []\n\n\ndef coverage_note(gaps, errors, results):\n    \"\"\"TODO 7 of 7 (unlocks e1, e2 and e5): say what the report cannot cover.\n\n    Receives the gaps, the unresolved errors and the results. Returns \"all scopes covered\" for no gaps; otherwise \"not covered: \" and\n    each gap as \"<scope> (<type> on '<query>')\" for an unresolved error, \"<scope> (not researched)\" when no result names the scope,\n    or \"<scope> (no findings)\", joined by \", \".\n    Example: gaps [\"b\", \"c\"], an error for \"b\" (timeout on \"qb\"), no result for \"c\" -> \"not covered: b (timeout on 'qb'), c (not researched)\"\n    \"\"\"\n    return \"\"\n\n\ndef synthesize(required, results):\n    log.debug(\"synthesize input: %r\", results)\n    covered, gaps = covered_scopes(required, results)\n    by_claim = {}\n    for f, partial in _findings(results):\n        by_claim.setdefault(f[\"claim\"], []).append((f, partial))\n    claims, conflicts = [], []\n    for claim in sorted(by_claim):\n        group = by_claim[claim]\n        values = []\n        for f, _ in group:\n            values = _same(values, f[\"value\"])\n        if len(values) > 1:\n            conflicts.append({\"claim\": claim, \"values\": observed_values(group)})\n        else:\n            claims.append({\"claim\": claim, \"value\": values[0], \"sources\": sources_of(group), \"partial\": all_partial(group)})\n    errors = unresolved_errors(results, covered)\n    return {\"status\": \"partial\" if gaps else \"complete\", \"covered\": covered, \"gaps\": gaps, \"partial\": partial_scopes(results, gaps), \"claims\": claims,\n            \"conflicts\": conflicts, \"errors\": errors, \"note\": coverage_note(gaps, errors, results)}\n",
+  "exercise": {
+    "main_path": "practice/level-3/72-scenario-multi-agent-research-system/prose/unit-02/practice-1/synthesis.py",
+    "test_path": "practice/level-3/72-scenario-multi-agent-research-system/prose/unit-02/practice-1/test_synthesis.py",
+    "run_command": [
+      "python3",
+      "practice/level-3/72-scenario-multi-agent-research-system/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-3/72-scenario-multi-agent-research-system/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-3/72-scenario-multi-agent-research-system/prose/unit-02/practice-1/test_synthesis.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_a_full_run_with_agreement_returns_claims_with_every_source_and_a_complete_status",
+        "kind": "main",
+        "says": "A full run with agreement: claims with every source, a complete status and the all-clear note"
+      },
+      {
+        "id": "test_e1_no_results_leave_every_scope_a_gap_and_say_not_researched",
+        "kind": "edge",
+        "says": "No results: every scope is a gap, not researched"
+      },
+      {
+        "id": "test_e2_a_scope_the_plan_never_covered_and_a_scope_whose_search_failed_read_differently_in_the_note",
+        "kind": "edge",
+        "says": "A scope the plan never covered and a scope whose search failed read differently in the note"
+      },
+      {
+        "id": "test_e3_two_values_for_one_claim_are_a_conflict_that_names_both_sources_and_no_claim",
+        "kind": "edge",
+        "says": "Two values for one claim are a conflict naming both sources and no claim"
+      },
+      {
+        "id": "test_e4_partial_results_are_kept_and_flagged_but_do_not_cover_the_scope_and_a_retry_that_worked_clears_the_error",
+        "kind": "edge",
+        "says": "Partial results kept and flagged, not covering their scope, and an error that a retry made up for disappears"
+      },
+      {
+        "id": "test_e5_a_result_with_no_findings_does_not_cover_its_scope",
+        "kind": "edge",
+        "says": "An ok result with no findings does not cover its scope"
+      },
+      {
+        "id": "test_e6_claims_sources_and_scopes_come_out_in_a_fixed_order_without_duplicates",
+        "kind": "edge",
+        "says": "Claims sorted, sources in arrival order without duplicates, scopes in the order of required"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/72-scenario-multi-agent-research-system/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/72-scenario-multi-agent-research-system/02-failures-conflicts-the-coverage-note-and-the-practice.md",
+    "concepts": [
+      "the practice of Failures, conflicts, the coverage note and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/72-scenario-multi-agent-research-system/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "scenario-multi-agent-research-system-u2"
+}

@@ -1,0 +1,87 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "21-message-batches"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 3,
+  "title": "Practice: submit a batch and handle its results (Java)",
+  "lang": "java",
+  "main_file": "src/main/java/Batches.java",
+  "files": [
+    "src/main/java/TryIt.java"
+  ],
+  "test_file": "src/test/java/BatchesTest.java",
+  "build": [
+    "src/main/java/BatchError.java",
+    "src/main/java/Json.java",
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/21-message-batches/prose/unit-02/practice-3",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/21-message-batches/prose/unit-02/practice-3",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_resultsAreMatchedToRequestsByCustomIdNotByPosition()",
+      "kind": "main",
+      "says": "Results are matched to requests by custom id, not by position"
+    },
+    {
+      "id": "e1_aCustomIdIs1To64SafeCharactersAndUnique()",
+      "kind": "edge",
+      "says": "A custom id is 1 to 64 safe characters and unique"
+    },
+    {
+      "id": "e2_parametersABatchCannotTakeAreRefused()",
+      "kind": "edge",
+      "says": "Parameters a batch cannot take are refused"
+    },
+    {
+      "id": "e3_aBigJobIsCutInOrderByRequestCountAndBySize()",
+      "kind": "edge",
+      "says": "A big job is cut in order by request count and by size"
+    },
+    {
+      "id": "e4_invalidRequestsAreFixedAndTheRestAreRetried()",
+      "kind": "edge",
+      "says": "Invalid requests are fixed, the other failures are retried"
+    },
+    {
+      "id": "e5_aRequestWithNoResultIsMissingAndAStrangerIsReported()",
+      "kind": "edge",
+      "says": "A request with no result is missing and retried, and a stranger id is reported"
+    },
+    {
+      "id": "e6_onlyRequestsThatSucceededCountTowardUsage()",
+      "kind": "edge",
+      "says": "Only succeeded requests count toward usage"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/21-message-batches/02-polling-results-and-retries.md"
+}

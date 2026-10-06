@@ -1,0 +1,123 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "52-designing-tool-interfaces"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 5,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Results, annotations and large tool sets, and the practice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A `search_orders` tool returns every match, sometimes thousands of rows, and fills the context before the agent can act. What change helps most?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Send all the rows and ask the model to skip the extras",
+            "correct": false,
+            "says": "Ruled out because \"Bloated responses waste context and make it harder for Claude to extract what matters.\""
+          },
+          {
+            "id": "b",
+            "text": "Serve one page, a cursor and a note on narrowing",
+            "correct": true,
+            "says": "A page with a cursor bounds the result, and the note tells the agent how to go on."
+          },
+          {
+            "id": "c",
+            "text": "Cut the list at a fixed length and add no message",
+            "correct": false,
+            "says": "Ruled out because \"If you choose to truncate responses, be sure to steer agents with helpful instructions.\""
+          },
+          {
+            "id": "d",
+            "text": "Move to a larger context window and send the full list",
+            "correct": false,
+            "says": "Ruled out because the article expects \"the need for context-efficient tools to remain\"."
+          }
+        ],
+        "origin": {
+          "path": "course/52-designing-tool-interfaces/02-results-annotations-large-tool-sets-and-the-practice.md",
+          "section": "What a result should carry"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A `find_documents` tool answers with the sentence \"Found these documents: Maintenance Schedule, Lab Access Plan.\" The next tool, `read_document`, requires an exact handle for one document, and the agent keeps making them up. What change fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Return each hit with a stable identifier and the fields the following step needs",
+            "correct": true,
+            "says": "The tool should hand the next step a real identifier, in a result trimmed to what that step needs."
+          },
+          {
+            "id": "b",
+            "text": "Add a prompt rule that tells the model to derive each id from the title it was shown",
+            "correct": false,
+            "says": "Ruled out because the documentation asks the tool to \"Return semantic, stable identifiers (for example, slugs or UUIDs) rather than opaque internal references\", not the model to reconstruct them."
+          },
+          {
+            "id": "c",
+            "text": "Return every stored field of each hit, so that nothing is missing",
+            "correct": false,
+            "says": "Ruled out because a result should \"include only the fields Claude needs to reason about its next step\"."
+          },
+          {
+            "id": "d",
+            "text": "Lengthen the sentence, describing each document in more prose",
+            "correct": false,
+            "says": "Ruled out because more prose adds length and no handle: \"Bloated responses waste context and make it harder for Claude to extract what matters.\""
+          }
+        ],
+        "origin": {
+          "path": "course/52-designing-tool-interfaces/02-results-annotations-large-tool-sets-and-the-practice.md",
+          "section": "What a result should carry"
+        }
+      }
+    ],
+    "concepts": [
+      "Large tool sets and tool search, as the page teaches it",
+      "Results, annotations and large tool sets, and the practice, as the page teaches it",
+      "What a result should carry, as the page teaches it",
+      "When to redesign and not to reprompt, as the page teaches it"
+    ]
+  }
+}

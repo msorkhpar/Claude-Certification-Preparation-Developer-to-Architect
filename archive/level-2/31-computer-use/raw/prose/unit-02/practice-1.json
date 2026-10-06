@@ -1,0 +1,311 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "31-computer-use"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: the loop around the computer use tool (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: the loop around the computer use tool"
+    },
+    {
+      "type": "para",
+      "text": "The computer use tool turns Claude into someone who looks at a screenshot and decides on a click, a keystroke or a scroll. Claude runs nothing: your code takes each action, performs it, and answers with the new screenshot. Three things make that loop hard. The screen is usually larger than the picture the model may be sent, so every coordinate has to be scaled both ways. A model that reads a page can be pushed into clicking something it should not, so a risky click needs a person. And an action that fails must not let the rest of its batch run on a screen that no longer looks as expected. Write the executor and the loop, against a toy screen, and prune the screenshots that fill the context. The tool, the actions, the scaling rule and the safety advice come from the Claude documentation on the computer use tool and on vision, read on 2026-10-03; the lesson pages explain them. Nothing here touches a real desktop or the network: the screen is a map in memory and the model is a function that you call."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "screen",
+          "`{\"width\", \"height\", \"cursor\": [x, y], \"typed\", \"log\", \"elements\"}`; the log gets one entry per action that changes it (a click is `[name, element id or null]`, a typed text is `[\"type\", text]`, a key press is `[\"key\", text]`, a scroll is `[\"scroll\", direction]`); `elements` are `{\"id\", \"x\", \"y\", \"w\", \"h\", \"risk\"}` rectangles in real screen pixels, where `risk` is `\"none\"` or a reason such as `\"payment\"`; when elements overlap the later one wins"
+        ],
+        [
+          "`render(screen, width, height)`",
+          "the screenshot of the screen at that size, as the base64 text of a picture; it changes with every logged action"
+        ],
+        [
+          "`ask(request)`",
+          "the model: takes `{\"model\", \"max_tokens\", \"tools\", \"messages\"}` and returns `{\"content\": [blocks], \"stop_reason\"}`"
+        ],
+        [
+          "`confirm(action)`",
+          "a person's answer: takes `{\"action\", \"element\", \"risk\"}` and returns true or false; it may be missing"
+        ],
+        [
+          "`TOOLSET`",
+          "`computer_toolset_20260801`, the tool type of the current computer use toolset"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "A `tool_use` block of the toolset looks like `{\"type\": \"tool_use\", \"id\", \"name\": \"left_click\", \"toolset_name\": \"computer\", \"input\": {\"coordinate\": [x, y]}}`. Coordinates in `input` are pixels on the screenshot the model was sent."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working executor and loop with nine small gaps cut out of it. The plumbing is written and correct: the `render` stub, the element lookup, the click, `type`, `wait`, `mouse_move` and `cursor_position` handling, the batch that stops after a failed action, the copying of the conversation and the loop itself. Each gap is one small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To see what a gap receives, log its input with the `log` line at the top of the file (the starter's `perform` already logs its input); a run shows the logged lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`scale_for` unlocks `e1`, `e7` and `m1`: the factor that shrinks the screen.",
+        "`scaled_size` unlocks `e7` and `m1`: the size of the screenshot the model is sent.",
+        "`to_screen` unlocks `e1`, `e2` and `m1`: scale a point back, round half to even, clamp.",
+        "`_risk_error` unlocks `e2`: the confirmation a risky click needs.",
+        "`_valid_region` unlocks `e4`: which zoom regions are valid.",
+        "`_valid_key` unlocks `e4`: the text and the repeat of a key press.",
+        "`_valid_scroll` unlocks `e4`: the direction and the amount of a scroll.",
+        "`_to_replace` unlocks `e6`: which screenshots become a note (Java and Kotlin: `removeCount`, how many).",
+        "`_final_status` unlocks `e5`: the status each stop reason ends the loop with."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all (Python and TypeScript fewer). The section below describes the whole executor and loop; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`scale_for(width, height)`: `min(1, 1568 / longest side, sqrt(1,150,000 / (width * height)))`. `scaled_size(width, height)` is `(int(width * scale), int(height * scale))`. This is the documentation's example for models with the 1568 px and about 1.15 megapixel limits, so it is safe for every model. A model in the high-resolution tier accepts up to 2576 px on the long edge and 4784 visual tokens, and the lesson explains how that changes the scale.",
+        "`to_screen(x, y, scale, screen)`: divide by the scale, round half to even, and clamp into `0 .. width - 1` and `0 .. height - 1`.",
+        [
+          "`perform(screen, name, args, scale, confirm)` returns `(content, is_error)`. The content is a string, or for `screenshot` and `zoom` a list holding one block `{\"type\": \"image\", \"source\": {\"type\": \"base64\", \"media_type\": \"image/png\", \"data\": render(...)}}`. A coordinate is valid when it lies inside the scaled screenshot (`0 <= x < scaled width`, the same for y); an invalid one is an error `Coordinate <the value> is outside the screenshot`. All actions below change the screen only when they succeed.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`screenshot`: the picture at the scaled size. `zoom` with `region` `[x0, y0, x1, y1]` (scaled coordinates, `x0 < x1`, `y0 < y1`, the corner `x0, y0` valid, `x1` and `y1` within the scaled size and above 0): the picture at the size of the region on the real screen (`to_screen` of both corners, subtracted); otherwise the error `Invalid zoom region: <region>`.",
+              "`left_click`, `right_click`, `middle_click`, `double_click` and `triple_click`: with a `coordinate` use it; without one use the current cursor (real pixels). Find the element under the real point. When it has a `risk` other than `none`, ask `confirm` with `{\"action\": name, \"element\": id, \"risk\": risk}`; with no `confirm` or an answer of false the result is the error `Declined: <id> needs a person's confirmation (<risk>)` and nothing changes. A click moves the cursor, adds its log entry and returns `Clicked <id>` or `Clicked nothing`.",
+              "`type` with a string `text`: appends to `typed`, logs, returns `Typed <n> characters`; a missing text is an error.",
+              "`key` with a non-empty `text` and `repeat` (default 1, an integer from 1 to 100): logs, returns `Pressed <text>`; otherwise an error.",
+              "`wait` with a `duration` from 0 to 300 seconds: returns `Waited <duration>s`; otherwise an error. `scroll` with `scroll_direction` (`up`, `down`, `left`, `right`) and an integer `scroll_amount` of at least 1: logs, returns `Scrolled <direction> <amount>`; otherwise an error.",
+              "`mouse_move` with a valid `coordinate`: moves the cursor, returns `Moved`. `cursor_position`: returns `X=<x>,Y=<y>`, the cursor in scaled coordinates (multiply by the scale, round half to even).",
+              "Any other name: the error `Unknown action: <name>`."
+            ]
+          }
+        ],
+        "`prune_screenshots(messages, keep=3)`: a copy of the conversation in which every image inside a `tool_result` content list is replaced by the text block `{\"type\": \"text\", \"text\": \"[screenshot removed]\"}`, except the newest `keep` images. The input is not changed. With `keep` of 0 every screenshot goes; with `keep` above the number of screenshots none does.",
+        "`run_computer_loop(ask, screen, model=\"claude-sonnet-5-5\", max_turns=10, confirm=None)` returns `{\"status\", \"turns\", \"messages\"}`. The first message is the user text `Do the task on the screen.` Each request carries `model`, `max_tokens` 4096, `tools` `[{\"type\": \"computer_toolset_20260801\"}]` and a snapshot of the messages. After each reply, append it as an assistant message. Stop reason `tool_use`: run the `tool_use` blocks in order and append ONE user message with one `tool_result` per call (`tool_use_id`, the `toolset_name` of the call when it has one, `content`, and `is_error: true` only on an error). When an action fails, every later call of that reply is not run and gets the error result `Not executed: an earlier computer action in this turn failed.` `end_turn` or `stop_sequence`: status `done`. `refusal`: status `refused`. `pause_turn`: call again with the assistant message appended and no user message. Any other stop reason: status `truncated`. After `max_turns` model calls without an end: status `max_turns`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "The loop runs scaled actions and sends every result in one message"
+        ],
+        [
+          "`e1`",
+          "The screen is scaled to what the model may see, and clicks are scaled back"
+        ],
+        [
+          "`e2`",
+          "A click on a risky element needs a person's confirmation"
+        ],
+        [
+          "`e3`",
+          "A failed action stops the rest of its batch"
+        ],
+        [
+          "`e4`",
+          "Invalid actions come back as error results with a reason"
+        ],
+        [
+          "`e5`",
+          "The loop ends on a stop reason or at the turn limit"
+        ],
+        [
+          "`e6`",
+          "Old screenshots are replaced so the context does not fill up"
+        ],
+        [
+          "`e7`",
+          "Screenshots and zooms are sent at the size the model may see"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"The loop around the computer use tool, against a toy screen. See ../../statement.md.\"\"\"\nimport copy\nimport logging\nimport math\n\nlog = logging.getLogger(__name__)\n\nTOOLSET = \"computer_toolset_20260801\"\nCLICKS = (\"left_click\", \"right_click\", \"middle_click\", \"double_click\", \"triple_click\")\nNOT_EXECUTED = \"Not executed: an earlier computer action in this turn failed.\"\n\n\ndef render(screen, width, height):\n    \"\"\"Given: the screenshot of the toy screen at `width` x `height`, as the base64 text of a picture. It changes after every logged action.\"\"\"\n    return f\"png:{width}x{height}:{len(screen['log'])}\"\n\n\ndef scale_for(width, height):\n    \"\"\"The factor that shrinks a screen to what the model may be sent.\"\"\"\n    return min(1.0, 1568 / max(width, height), math.sqrt(1_150_000 / (width * height)))\n\n\ndef scaled_size(width, height):\n    \"\"\"The size of the screenshot the model is sent, as (width, height).\"\"\"\n    scale = scale_for(width, height)\n    return (int(width * scale), int(height * scale))\n\n\ndef to_screen(x, y, scale, screen):\n    \"\"\"A point on the (scaled) screenshot as a point on the real screen, clamped into the screen.\"\"\"\n    return (min(max(round(x / scale), 0), screen[\"width\"] - 1), min(max(round(y / scale), 0), screen[\"height\"] - 1))\n\n\ndef _element_at(screen, x, y):\n    hit = None\n    for element in screen[\"elements\"]:\n        if element[\"x\"] <= x < element[\"x\"] + element[\"w\"] and element[\"y\"] <= y < element[\"y\"] + element[\"h\"]:\n            hit = element\n    return hit\n\n\ndef _inside(shot, point):\n    return isinstance(point, (list, tuple)) and len(point) == 2 and 0 <= point[0] < shot[0] and 0 <= point[1] < shot[1]\n\n\ndef _risk_error(name, element, confirm):\n    \"\"\"The error text when a click on this element needs a person and does not get one, else None.\"\"\"\n    if not element or element.get(\"risk\", \"none\") == \"none\": return None\n    if confirm is None or not confirm({\"action\": name, \"element\": element[\"id\"], \"risk\": element[\"risk\"]}): return f\"Declined: {element['id']} needs a person's confirmation ({element['risk']})\"\n    return None\n\n\ndef _valid_region(shot, region):\n    \"\"\"Is this zoom region a list of four numbers inside the scaled screenshot, with x0 < x1 and y0 < y1?\"\"\"\n    return (isinstance(region, (list, tuple)) and len(region) == 4 and _inside(shot, region[:2]) and 0 < region[2] <= shot[0] and 0 < region[3] <= shot[1]\n            and region[0] < region[2] and region[1] < region[3])\n\n\ndef _valid_key(args):\n    \"\"\"Is this the input of a key press: a non-empty text and a repeat that is an integer from 1 to 100?\"\"\"\n    repeat = args.get(\"repeat\", 1)\n    return bool(args.get(\"text\")) and isinstance(repeat, int) and 1 <= repeat <= 100\n\n\ndef _valid_scroll(args):\n    \"\"\"Is this the input of a scroll: a direction of up, down, left or right and an integer amount of at least 1?\"\"\"\n    return args.get(\"scroll_direction\") in (\"up\", \"down\", \"left\", \"right\") and isinstance(args.get(\"scroll_amount\"), int) and args.get(\"scroll_amount\") >= 1\n\n\ndef _to_replace(images, keep):\n    \"\"\"The images to replace by a note: all but the newest `keep` (all of them when keep is 0).\"\"\"\n    return images[:-keep] if keep > 0 else images\n\n\ndef _final_status(stop):\n    \"\"\"The status the loop ends with for a stop reason, or None when the loop goes on (pause_turn).\"\"\"\n    if stop == \"pause_turn\": return None\n    if stop == \"refusal\": return \"refused\"\n    return \"done\" if stop in (\"end_turn\", \"stop_sequence\") else \"truncated\"\n\n\ndef perform(screen, name, args, scale, confirm=None):\n    \"\"\"Run one action. Returns (content, is_error): the text or image blocks for the result and whether it failed.\"\"\"\n    log.debug(\"perform input: %r %r\", name, args)\n    shot = scaled_size(screen[\"width\"], screen[\"height\"])\n    if name == \"screenshot\":\n        return ([{\"type\": \"image\", \"source\": {\"type\": \"base64\", \"media_type\": \"image/png\", \"data\": render(screen, *shot)}}], False)\n    if name == \"zoom\":\n        region = args.get(\"region\")\n        if not _valid_region(shot, region):\n            return (f\"Invalid zoom region: {region}\", True)\n        x0, y0 = to_screen(region[0], region[1], scale, screen)\n        x1, y1 = to_screen(region[2], region[3], scale, screen)\n        return ([{\"type\": \"image\", \"source\": {\"type\": \"base64\", \"media_type\": \"image/png\", \"data\": render(screen, x1 - x0, y1 - y0)}}], False)\n    if name in CLICKS:\n        point = args.get(\"coordinate\")\n        if point is None:\n            sx, sy = screen[\"cursor\"]\n        elif not _inside(shot, point):\n            return (f\"Coordinate {list(point) if isinstance(point, (list, tuple)) else point} is outside the screenshot\", True)\n        else:\n            sx, sy = to_screen(point[0], point[1], scale, screen)\n        element = _element_at(screen, sx, sy)\n        declined = _risk_error(name, element, confirm)\n        if declined:\n            return (declined, True)\n        screen[\"cursor\"] = [sx, sy]\n        screen[\"log\"].append((name, element[\"id\"] if element else None))\n        return (f\"Clicked {element['id'] if element else 'nothing'}\", False)\n    if name == \"type\":\n        text = args.get(\"text\")\n        if not isinstance(text, str):\n            return (\"type needs a text\", True)\n        screen[\"typed\"] += text\n        screen[\"log\"].append((\"type\", text))\n        return (f\"Typed {len(text)} characters\", False)\n    if name == \"key\":\n        if not _valid_key(args):\n            return (\"key needs a text and a repeat from 1 to 100\", True)\n        screen[\"log\"].append((\"key\", args[\"text\"]))\n        return (f\"Pressed {args['text']}\", False)\n    if name == \"wait\":\n        duration = args.get(\"duration\")\n        if not isinstance(duration, (int, float)) or not 0 <= duration <= 300:\n            return (\"wait needs a duration from 0 to 300 seconds\", True)\n        return (f\"Waited {duration}s\", False)\n    if name == \"scroll\":\n        direction, amount = args.get(\"scroll_direction\"), args.get(\"scroll_amount\")\n        if not _valid_scroll(args):\n            return (\"scroll needs a direction and a positive amount\", True)\n        screen[\"log\"].append((\"scroll\", direction))\n        return (f\"Scrolled {direction} {amount}\", False)\n    if name == \"mouse_move\":\n        point = args.get(\"coordinate\")\n        if not _inside(shot, point):\n            return (f\"Coordinate {point} is outside the screenshot\", True)\n        screen[\"cursor\"] = list(to_screen(point[0], point[1], scale, screen))\n        return (\"Moved\", False)\n    if name == \"cursor_position\":\n        return (f\"X={round(screen['cursor'][0] * scale)},Y={round(screen['cursor'][1] * scale)}\", False)\n    return (f\"Unknown action: {name}\", True)\n\n\ndef prune_screenshots(messages, keep=3):\n    \"\"\"A copy of the conversation in which every screenshot except the newest `keep` is replaced by a text note.\"\"\"\n    out = copy.deepcopy(messages)\n    images = [(m, b, i) for m in out if isinstance(m[\"content\"], list) for b in m[\"content\"] if b.get(\"type\") == \"tool_result\"\n              and isinstance(b.get(\"content\"), list) for i, c in enumerate(b[\"content\"]) if c.get(\"type\") == \"image\"]\n    for _, block, i in _to_replace(images, keep):\n        block[\"content\"][i] = {\"type\": \"text\", \"text\": \"[screenshot removed]\"}\n    return out\n\n\ndef run_computer_loop(ask, screen, model=\"claude-sonnet-5-5\", max_turns=10, confirm=None):\n    scale = scale_for(screen[\"width\"], screen[\"height\"])\n    messages = [{\"role\": \"user\", \"content\": \"Do the task on the screen.\"}]\n    for turn in range(1, max_turns + 1):\n        reply = ask({\"model\": model, \"max_tokens\": 4096, \"tools\": [{\"type\": TOOLSET}], \"messages\": copy.deepcopy(messages)})\n        messages.append({\"role\": \"assistant\", \"content\": reply[\"content\"]})\n        stop = reply.get(\"stop_reason\")\n        if stop == \"tool_use\":\n            results, failed = [], False\n            for block in reply[\"content\"]:\n                if block[\"type\"] != \"tool_use\":\n                    continue\n                result = {\"type\": \"tool_result\", \"tool_use_id\": block[\"id\"]}\n                if \"toolset_name\" in block:\n                    result[\"toolset_name\"] = block[\"toolset_name\"]\n                if failed:\n                    result.update(content=NOT_EXECUTED, is_error=True)\n                else:\n                    content, is_error = perform(screen, block[\"name\"], block[\"input\"], scale, confirm)\n                    result[\"content\"] = content\n                    if is_error:\n                        result[\"is_error\"] = True\n                        failed = True\n                results.append(result)\n            messages.append({\"role\": \"user\", \"content\": results})\n        elif _final_status(stop):\n            return {\"status\": _final_status(stop), \"turns\": turn, \"messages\": messages}\n    return {\"status\": \"max_turns\", \"turns\": max_turns, \"messages\": messages}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom computer import run_computer_loop\n\n# A toy screen in memory: a search box and a payment button.\nscreen = {\"width\": 1920, \"height\": 1080, \"cursor\": [0, 0], \"typed\": \"\", \"log\": [],\n          \"elements\": [{\"id\": \"search\", \"x\": 1000, \"y\": 200, \"w\": 400, \"h\": 40, \"risk\": \"none\"},\n                       {\"id\": \"pay\", \"x\": 800, \"y\": 600, \"w\": 200, \"h\": 60, \"risk\": \"payment\"}]}\n\n\ndef use(id, name, **input):\n    return {\"type\": \"tool_use\", \"id\": id, \"name\": name, \"toolset_name\": \"computer\", \"input\": input}\n\n\n# The model is a function that returns scripted replies in order, like the one the tests use.\nreplies = [\n    {\"content\": [use(\"t1\", \"screenshot\")], \"stop_reason\": \"tool_use\"},\n    {\"content\": [use(\"t2\", \"left_click\", coordinate=[894, 164]), use(\"t3\", \"type\", text=\"weather\"), use(\"t4\", \"screenshot\")], \"stop_reason\": \"tool_use\"},\n    {\"content\": [{\"type\": \"text\", \"text\": \"Typed it.\"}], \"stop_reason\": \"end_turn\"},\n]\nrequests = []\n\n\ndef ask(request):\n    requests.append(len(request[\"messages\"]))\n    # when the script runs out, the model just ends the conversation\n    return replies.pop(0) if replies else {\"content\": [{\"type\": \"text\", \"text\": \"script ran out\"}], \"stop_reason\": \"end_turn\"}\n\n\nresult = run_computer_loop(ask, screen) or {}\n\nprint(\"status and turns:\", result.get(\"status\"), result.get(\"turns\"))\nprint(\"messages in each request:\", requests)\nprint(\"actions performed on the screen:\", screen[\"log\"])\nprint(\"typed text:\", repr(screen[\"typed\"]))\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"The loop around the computer use tool, against a toy screen. See ../../statement.md.\"\"\"\nimport copy\nimport logging\nimport math\n\nlog = logging.getLogger(__name__)\n\nTOOLSET = \"computer_toolset_20260801\"\nCLICKS = (\"left_click\", \"right_click\", \"middle_click\", \"double_click\", \"triple_click\")\nNOT_EXECUTED = \"Not executed: an earlier computer action in this turn failed.\"\n\n\ndef render(screen, width, height):\n    \"\"\"Given: the screenshot of the toy screen at `width` x `height`, as the base64 text of a picture. It changes after every logged action.\"\"\"\n    return f\"png:{width}x{height}:{len(screen['log'])}\"\n\n\ndef scale_for(width, height):\n    \"\"\"TODO 1 of 9 (unlocks e1, e7 and m1): the factor that shrinks a screen to what the model may be sent.\n\n    Receives the real width and height. Returns a float: min(1, 1568 / longest side, sqrt(1,150,000 / (width * height))).\n    Example: scale_for(1280, 800) -> 1.0, scale_for(1920, 1080) -> 0.7447...\n    \"\"\"\n    return 1.0\n\n\ndef scaled_size(width, height):\n    \"\"\"TODO 2 of 9 (unlocks e7 and m1): the size of the screenshot the model is sent, as (width, height).\n\n    Receives the real width and height. Returns two ints: each side times `scale_for`, cut to a whole number.\n    Example: scaled_size(1920, 1080) -> (1429, 804)\n    \"\"\"\n    return (width, height)\n\n\ndef to_screen(x, y, scale, screen):\n    \"\"\"TODO 3 of 9 (unlocks e1, e2 and m1): a point on the (scaled) screenshot as a point on the real screen.\n\n    Receives x and y on the screenshot, the scale and the screen. Returns (x, y) on the screen: divide by the scale, round half to even\n    (Python's `round`), and clamp into 0 .. width - 1 and 0 .. height - 1.\n    Example: to_screen(894, 164, 0.7447, screen) -> (1200, 220); to_screen(-3, -3, 1.0, screen) -> (0, 0)\n    \"\"\"\n    return (0, 0)\n\n\ndef _element_at(screen, x, y):\n    hit = None\n    for element in screen[\"elements\"]:\n        if element[\"x\"] <= x < element[\"x\"] + element[\"w\"] and element[\"y\"] <= y < element[\"y\"] + element[\"h\"]:\n            hit = element\n    return hit\n\n\ndef _inside(shot, point):\n    return isinstance(point, (list, tuple)) and len(point) == 2 and 0 <= point[0] < shot[0] and 0 <= point[1] < shot[1]\n\n\ndef _risk_error(name, element, confirm):\n    \"\"\"TODO 4 of 9 (unlocks e2): the error text when a click on this element needs a person and does not get one, else None.\n\n    Receives the action name, the element under the click (a dict with \"id\" and \"risk\", or None) and `confirm` (a function or None).\n    A risk other than \"none\" is asked of `confirm` with {\"action\", \"element\", \"risk\"}; with no `confirm` or an answer of False return\n    \"Declined: <id> needs a person's confirmation (<risk>)\". Example: a \"payment\" element \"pay\", confirm None -> \"Declined: pay needs a person's confirmation (payment)\"\n    \"\"\"\n    return None\n\n\ndef _valid_region(shot, region):\n    \"\"\"TODO 5 of 9 (unlocks e4): is this zoom region valid?\n\n    Receives the scaled screenshot size (width, height) and the region. True for four numbers [x0, y0, x1, y1] where x0, y0 is inside\n    the screenshot (`_inside`), x1 and y1 are above 0 and within the size, x0 < x1 and y0 < y1. Example: (1429, 804), [0, 0, 300, 200] -> True\n    \"\"\"\n    return True\n\n\ndef _valid_key(args):\n    \"\"\"TODO 6 of 9 (unlocks e4): is this the input of a key press?\n\n    Receives the input dict. True when `text` is a non-empty string and `repeat` (default 1) is an integer from 1 to 100.\n    Example: {\"text\": \"ctrl+s\", \"repeat\": 2} -> True, {\"text\": \"Return\", \"repeat\": 101} -> False\n    \"\"\"\n    return True\n\n\ndef _valid_scroll(args):\n    \"\"\"TODO 7 of 9 (unlocks e4): is this the input of a scroll?\n\n    Receives the input dict. True when `scroll_direction` is up, down, left or right and `scroll_amount` is an integer of at least 1.\n    Example: {\"scroll_direction\": \"down\", \"scroll_amount\": 3} -> True, {\"scroll_direction\": \"up\", \"scroll_amount\": 0} -> False\n    \"\"\"\n    return True\n\n\ndef _to_replace(images, keep):\n    \"\"\"TODO 8 of 9 (unlocks e6): the images to replace by a note.\n\n    Receives the list of images, oldest first, and `keep`. Returns the part of the list to replace: all but the newest `keep`, and all\n    of them when keep is 0. Example: [\"a\", \"b\", \"c\"] with keep 1 -> [\"a\", \"b\"]; with keep 0 -> [\"a\", \"b\", \"c\"]; with keep 9 -> []\n    \"\"\"\n    return []\n\n\ndef _final_status(stop):\n    \"\"\"TODO 9 of 9 (unlocks e5): the status the loop ends with for a stop reason, or None when it goes on.\n\n    Receives the stop reason of a reply that is not `tool_use`. Returns \"refused\" for refusal, \"done\" for end_turn and stop_sequence,\n    None for pause_turn (call again), and \"truncated\" for anything else. Example: \"max_tokens\" -> \"truncated\"\n    \"\"\"\n    return None\n\n\ndef perform(screen, name, args, scale, confirm=None):\n    \"\"\"Run one action. Returns (content, is_error): the text or image blocks for the result and whether it failed.\"\"\"\n    log.debug(\"perform input: %r %r\", name, args)\n    shot = scaled_size(screen[\"width\"], screen[\"height\"])\n    if name == \"screenshot\":\n        return ([{\"type\": \"image\", \"source\": {\"type\": \"base64\", \"media_type\": \"image/png\", \"data\": render(screen, *shot)}}], False)\n    if name == \"zoom\":\n        region = args.get(\"region\")\n        if not _valid_region(shot, region):\n            return (f\"Invalid zoom region: {region}\", True)\n        x0, y0 = to_screen(region[0], region[1], scale, screen)\n        x1, y1 = to_screen(region[2], region[3], scale, screen)\n        return ([{\"type\": \"image\", \"source\": {\"type\": \"base64\", \"media_type\": \"image/png\", \"data\": render(screen, x1 - x0, y1 - y0)}}], False)\n    if name in CLICKS:\n        point = args.get(\"coordinate\")\n        if point is None:\n            sx, sy = screen[\"cursor\"]\n        elif not _inside(shot, point):\n            return (f\"Coordinate {list(point) if isinstance(point, (list, tuple)) else point} is outside the screenshot\", True)\n        else:\n            sx, sy = to_screen(point[0], point[1], scale, screen)\n        element = _element_at(screen, sx, sy)\n        declined = _risk_error(name, element, confirm)\n        if declined:\n            return (declined, True)\n        screen[\"cursor\"] = [sx, sy]\n        screen[\"log\"].append((name, element[\"id\"] if element else None))\n        return (f\"Clicked {element['id'] if element else 'nothing'}\", False)\n    if name == \"type\":\n        text = args.get(\"text\")\n        if not isinstance(text, str):\n            return (\"type needs a text\", True)\n        screen[\"typed\"] += text\n        screen[\"log\"].append((\"type\", text))\n        return (f\"Typed {len(text)} characters\", False)\n    if name == \"key\":\n        if not _valid_key(args):\n            return (\"key needs a text and a repeat from 1 to 100\", True)\n        screen[\"log\"].append((\"key\", args[\"text\"]))\n        return (f\"Pressed {args['text']}\", False)\n    if name == \"wait\":\n        duration = args.get(\"duration\")\n        if not isinstance(duration, (int, float)) or not 0 <= duration <= 300:\n            return (\"wait needs a duration from 0 to 300 seconds\", True)\n        return (f\"Waited {duration}s\", False)\n    if name == \"scroll\":\n        direction, amount = args.get(\"scroll_direction\"), args.get(\"scroll_amount\")\n        if not _valid_scroll(args):\n            return (\"scroll needs a direction and a positive amount\", True)\n        screen[\"log\"].append((\"scroll\", direction))\n        return (f\"Scrolled {direction} {amount}\", False)\n    if name == \"mouse_move\":\n        point = args.get(\"coordinate\")\n        if not _inside(shot, point):\n            return (f\"Coordinate {point} is outside the screenshot\", True)\n        screen[\"cursor\"] = list(to_screen(point[0], point[1], scale, screen))\n        return (\"Moved\", False)\n    if name == \"cursor_position\":\n        return (f\"X={round(screen['cursor'][0] * scale)},Y={round(screen['cursor'][1] * scale)}\", False)\n    return (f\"Unknown action: {name}\", True)\n\n\ndef prune_screenshots(messages, keep=3):\n    \"\"\"A copy of the conversation in which every screenshot except the newest `keep` is replaced by a text note.\"\"\"\n    out = copy.deepcopy(messages)\n    images = [(m, b, i) for m in out if isinstance(m[\"content\"], list) for b in m[\"content\"] if b.get(\"type\") == \"tool_result\"\n              and isinstance(b.get(\"content\"), list) for i, c in enumerate(b[\"content\"]) if c.get(\"type\") == \"image\"]\n    for _, block, i in _to_replace(images, keep):\n        block[\"content\"][i] = {\"type\": \"text\", \"text\": \"[screenshot removed]\"}\n    return out\n\n\ndef run_computer_loop(ask, screen, model=\"claude-sonnet-5-5\", max_turns=10, confirm=None):\n    scale = scale_for(screen[\"width\"], screen[\"height\"])\n    messages = [{\"role\": \"user\", \"content\": \"Do the task on the screen.\"}]\n    for turn in range(1, max_turns + 1):\n        reply = ask({\"model\": model, \"max_tokens\": 4096, \"tools\": [{\"type\": TOOLSET}], \"messages\": copy.deepcopy(messages)})\n        messages.append({\"role\": \"assistant\", \"content\": reply[\"content\"]})\n        stop = reply.get(\"stop_reason\")\n        if stop == \"tool_use\":\n            results, failed = [], False\n            for block in reply[\"content\"]:\n                if block[\"type\"] != \"tool_use\":\n                    continue\n                result = {\"type\": \"tool_result\", \"tool_use_id\": block[\"id\"]}\n                if \"toolset_name\" in block:\n                    result[\"toolset_name\"] = block[\"toolset_name\"]\n                if failed:\n                    result.update(content=NOT_EXECUTED, is_error=True)\n                else:\n                    content, is_error = perform(screen, block[\"name\"], block[\"input\"], scale, confirm)\n                    result[\"content\"] = content\n                    if is_error:\n                        result[\"is_error\"] = True\n                        failed = True\n                results.append(result)\n            messages.append({\"role\": \"user\", \"content\": results})\n        elif _final_status(stop):\n            return {\"status\": _final_status(stop), \"turns\": turn, \"messages\": messages}\n    return {\"status\": \"max_turns\", \"turns\": max_turns, \"messages\": messages}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom computer import run_computer_loop\n\n# A toy screen in memory: a search box and a payment button.\nscreen = {\"width\": 1920, \"height\": 1080, \"cursor\": [0, 0], \"typed\": \"\", \"log\": [],\n          \"elements\": [{\"id\": \"search\", \"x\": 1000, \"y\": 200, \"w\": 400, \"h\": 40, \"risk\": \"none\"},\n                       {\"id\": \"pay\", \"x\": 800, \"y\": 600, \"w\": 200, \"h\": 60, \"risk\": \"payment\"}]}\n\n\ndef use(id, name, **input):\n    return {\"type\": \"tool_use\", \"id\": id, \"name\": name, \"toolset_name\": \"computer\", \"input\": input}\n\n\n# The model is a function that returns scripted replies in order, like the one the tests use.\nreplies = [\n    {\"content\": [use(\"t1\", \"screenshot\")], \"stop_reason\": \"tool_use\"},\n    {\"content\": [use(\"t2\", \"left_click\", coordinate=[894, 164]), use(\"t3\", \"type\", text=\"weather\"), use(\"t4\", \"screenshot\")], \"stop_reason\": \"tool_use\"},\n    {\"content\": [{\"type\": \"text\", \"text\": \"Typed it.\"}], \"stop_reason\": \"end_turn\"},\n]\nrequests = []\n\n\ndef ask(request):\n    requests.append(len(request[\"messages\"]))\n    # when the script runs out, the model just ends the conversation\n    return replies.pop(0) if replies else {\"content\": [{\"type\": \"text\", \"text\": \"script ran out\"}], \"stop_reason\": \"end_turn\"}\n\n\nresult = run_computer_loop(ask, screen) or {}\n\nprint(\"status and turns:\", result.get(\"status\"), result.get(\"turns\"))\nprint(\"messages in each request:\", requests)\nprint(\"actions performed on the screen:\", screen[\"log\"])\nprint(\"typed text:\", repr(screen[\"typed\"]))\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "24f8d9adb130313cf8b9a427ddbb6d9c24bc0063e83fb623a31d0527b36c0c76",
+  "starting_code": "\"\"\"The loop around the computer use tool, against a toy screen. See ../../statement.md.\"\"\"\nimport copy\nimport logging\nimport math\n\nlog = logging.getLogger(__name__)\n\nTOOLSET = \"computer_toolset_20260801\"\nCLICKS = (\"left_click\", \"right_click\", \"middle_click\", \"double_click\", \"triple_click\")\nNOT_EXECUTED = \"Not executed: an earlier computer action in this turn failed.\"\n\n\ndef render(screen, width, height):\n    \"\"\"Given: the screenshot of the toy screen at `width` x `height`, as the base64 text of a picture. It changes after every logged action.\"\"\"\n    return f\"png:{width}x{height}:{len(screen['log'])}\"\n\n\ndef scale_for(width, height):\n    \"\"\"TODO 1 of 9 (unlocks e1, e7 and m1): the factor that shrinks a screen to what the model may be sent.\n\n    Receives the real width and height. Returns a float: min(1, 1568 / longest side, sqrt(1,150,000 / (width * height))).\n    Example: scale_for(1280, 800) -> 1.0, scale_for(1920, 1080) -> 0.7447...\n    \"\"\"\n    return 1.0\n\n\ndef scaled_size(width, height):\n    \"\"\"TODO 2 of 9 (unlocks e7 and m1): the size of the screenshot the model is sent, as (width, height).\n\n    Receives the real width and height. Returns two ints: each side times `scale_for`, cut to a whole number.\n    Example: scaled_size(1920, 1080) -> (1429, 804)\n    \"\"\"\n    return (width, height)\n\n\ndef to_screen(x, y, scale, screen):\n    \"\"\"TODO 3 of 9 (unlocks e1, e2 and m1): a point on the (scaled) screenshot as a point on the real screen.\n\n    Receives x and y on the screenshot, the scale and the screen. Returns (x, y) on the screen: divide by the scale, round half to even\n    (Python's `round`), and clamp into 0 .. width - 1 and 0 .. height - 1.\n    Example: to_screen(894, 164, 0.7447, screen) -> (1200, 220); to_screen(-3, -3, 1.0, screen) -> (0, 0)\n    \"\"\"\n    return (0, 0)\n\n\ndef _element_at(screen, x, y):\n    hit = None\n    for element in screen[\"elements\"]:\n        if element[\"x\"] <= x < element[\"x\"] + element[\"w\"] and element[\"y\"] <= y < element[\"y\"] + element[\"h\"]:\n            hit = element\n    return hit\n\n\ndef _inside(shot, point):\n    return isinstance(point, (list, tuple)) and len(point) == 2 and 0 <= point[0] < shot[0] and 0 <= point[1] < shot[1]\n\n\ndef _risk_error(name, element, confirm):\n    \"\"\"TODO 4 of 9 (unlocks e2): the error text when a click on this element needs a person and does not get one, else None.\n\n    Receives the action name, the element under the click (a dict with \"id\" and \"risk\", or None) and `confirm` (a function or None).\n    A risk other than \"none\" is asked of `confirm` with {\"action\", \"element\", \"risk\"}; with no `confirm` or an answer of False return\n    \"Declined: <id> needs a person's confirmation (<risk>)\". Example: a \"payment\" element \"pay\", confirm None -> \"Declined: pay needs a person's confirmation (payment)\"\n    \"\"\"\n    return None\n\n\ndef _valid_region(shot, region):\n    \"\"\"TODO 5 of 9 (unlocks e4): is this zoom region valid?\n\n    Receives the scaled screenshot size (width, height) and the region. True for four numbers [x0, y0, x1, y1] where x0, y0 is inside\n    the screenshot (`_inside`), x1 and y1 are above 0 and within the size, x0 < x1 and y0 < y1. Example: (1429, 804), [0, 0, 300, 200] -> True\n    \"\"\"\n    return True\n\n\ndef _valid_key(args):\n    \"\"\"TODO 6 of 9 (unlocks e4): is this the input of a key press?\n\n    Receives the input dict. True when `text` is a non-empty string and `repeat` (default 1) is an integer from 1 to 100.\n    Example: {\"text\": \"ctrl+s\", \"repeat\": 2} -> True, {\"text\": \"Return\", \"repeat\": 101} -> False\n    \"\"\"\n    return True\n\n\ndef _valid_scroll(args):\n    \"\"\"TODO 7 of 9 (unlocks e4): is this the input of a scroll?\n\n    Receives the input dict. True when `scroll_direction` is up, down, left or right and `scroll_amount` is an integer of at least 1.\n    Example: {\"scroll_direction\": \"down\", \"scroll_amount\": 3} -> True, {\"scroll_direction\": \"up\", \"scroll_amount\": 0} -> False\n    \"\"\"\n    return True\n\n\ndef _to_replace(images, keep):\n    \"\"\"TODO 8 of 9 (unlocks e6): the images to replace by a note.\n\n    Receives the list of images, oldest first, and `keep`. Returns the part of the list to replace: all but the newest `keep`, and all\n    of them when keep is 0. Example: [\"a\", \"b\", \"c\"] with keep 1 -> [\"a\", \"b\"]; with keep 0 -> [\"a\", \"b\", \"c\"]; with keep 9 -> []\n    \"\"\"\n    return []\n\n\ndef _final_status(stop):\n    \"\"\"TODO 9 of 9 (unlocks e5): the status the loop ends with for a stop reason, or None when it goes on.\n\n    Receives the stop reason of a reply that is not `tool_use`. Returns \"refused\" for refusal, \"done\" for end_turn and stop_sequence,\n    None for pause_turn (call again), and \"truncated\" for anything else. Example: \"max_tokens\" -> \"truncated\"\n    \"\"\"\n    return None\n\n\ndef perform(screen, name, args, scale, confirm=None):\n    \"\"\"Run one action. Returns (content, is_error): the text or image blocks for the result and whether it failed.\"\"\"\n    log.debug(\"perform input: %r %r\", name, args)\n    shot = scaled_size(screen[\"width\"], screen[\"height\"])\n    if name == \"screenshot\":\n        return ([{\"type\": \"image\", \"source\": {\"type\": \"base64\", \"media_type\": \"image/png\", \"data\": render(screen, *shot)}}], False)\n    if name == \"zoom\":\n        region = args.get(\"region\")\n        if not _valid_region(shot, region):\n            return (f\"Invalid zoom region: {region}\", True)\n        x0, y0 = to_screen(region[0], region[1], scale, screen)\n        x1, y1 = to_screen(region[2], region[3], scale, screen)\n        return ([{\"type\": \"image\", \"source\": {\"type\": \"base64\", \"media_type\": \"image/png\", \"data\": render(screen, x1 - x0, y1 - y0)}}], False)\n    if name in CLICKS:\n        point = args.get(\"coordinate\")\n        if point is None:\n            sx, sy = screen[\"cursor\"]\n        elif not _inside(shot, point):\n            return (f\"Coordinate {list(point) if isinstance(point, (list, tuple)) else point} is outside the screenshot\", True)\n        else:\n            sx, sy = to_screen(point[0], point[1], scale, screen)\n        element = _element_at(screen, sx, sy)\n        declined = _risk_error(name, element, confirm)\n        if declined:\n            return (declined, True)\n        screen[\"cursor\"] = [sx, sy]\n        screen[\"log\"].append((name, element[\"id\"] if element else None))\n        return (f\"Clicked {element['id'] if element else 'nothing'}\", False)\n    if name == \"type\":\n        text = args.get(\"text\")\n        if not isinstance(text, str):\n            return (\"type needs a text\", True)\n        screen[\"typed\"] += text\n        screen[\"log\"].append((\"type\", text))\n        return (f\"Typed {len(text)} characters\", False)\n    if name == \"key\":\n        if not _valid_key(args):\n            return (\"key needs a text and a repeat from 1 to 100\", True)\n        screen[\"log\"].append((\"key\", args[\"text\"]))\n        return (f\"Pressed {args['text']}\", False)\n    if name == \"wait\":\n        duration = args.get(\"duration\")\n        if not isinstance(duration, (int, float)) or not 0 <= duration <= 300:\n            return (\"wait needs a duration from 0 to 300 seconds\", True)\n        return (f\"Waited {duration}s\", False)\n    if name == \"scroll\":\n        direction, amount = args.get(\"scroll_direction\"), args.get(\"scroll_amount\")\n        if not _valid_scroll(args):\n            return (\"scroll needs a direction and a positive amount\", True)\n        screen[\"log\"].append((\"scroll\", direction))\n        return (f\"Scrolled {direction} {amount}\", False)\n    if name == \"mouse_move\":\n        point = args.get(\"coordinate\")\n        if not _inside(shot, point):\n            return (f\"Coordinate {point} is outside the screenshot\", True)\n        screen[\"cursor\"] = list(to_screen(point[0], point[1], scale, screen))\n        return (\"Moved\", False)\n    if name == \"cursor_position\":\n        return (f\"X={round(screen['cursor'][0] * scale)},Y={round(screen['cursor'][1] * scale)}\", False)\n    return (f\"Unknown action: {name}\", True)\n\n\ndef prune_screenshots(messages, keep=3):\n    \"\"\"A copy of the conversation in which every screenshot except the newest `keep` is replaced by a text note.\"\"\"\n    out = copy.deepcopy(messages)\n    images = [(m, b, i) for m in out if isinstance(m[\"content\"], list) for b in m[\"content\"] if b.get(\"type\") == \"tool_result\"\n              and isinstance(b.get(\"content\"), list) for i, c in enumerate(b[\"content\"]) if c.get(\"type\") == \"image\"]\n    for _, block, i in _to_replace(images, keep):\n        block[\"content\"][i] = {\"type\": \"text\", \"text\": \"[screenshot removed]\"}\n    return out\n\n\ndef run_computer_loop(ask, screen, model=\"claude-sonnet-5-5\", max_turns=10, confirm=None):\n    scale = scale_for(screen[\"width\"], screen[\"height\"])\n    messages = [{\"role\": \"user\", \"content\": \"Do the task on the screen.\"}]\n    for turn in range(1, max_turns + 1):\n        reply = ask({\"model\": model, \"max_tokens\": 4096, \"tools\": [{\"type\": TOOLSET}], \"messages\": copy.deepcopy(messages)})\n        messages.append({\"role\": \"assistant\", \"content\": reply[\"content\"]})\n        stop = reply.get(\"stop_reason\")\n        if stop == \"tool_use\":\n            results, failed = [], False\n            for block in reply[\"content\"]:\n                if block[\"type\"] != \"tool_use\":\n                    continue\n                result = {\"type\": \"tool_result\", \"tool_use_id\": block[\"id\"]}\n                if \"toolset_name\" in block:\n                    result[\"toolset_name\"] = block[\"toolset_name\"]\n                if failed:\n                    result.update(content=NOT_EXECUTED, is_error=True)\n                else:\n                    content, is_error = perform(screen, block[\"name\"], block[\"input\"], scale, confirm)\n                    result[\"content\"] = content\n                    if is_error:\n                        result[\"is_error\"] = True\n                        failed = True\n                results.append(result)\n            messages.append({\"role\": \"user\", \"content\": results})\n        elif _final_status(stop):\n            return {\"status\": _final_status(stop), \"turns\": turn, \"messages\": messages}\n    return {\"status\": \"max_turns\", \"turns\": max_turns, \"messages\": messages}\n",
+  "exercise": {
+    "main_path": "practice/level-2/31-computer-use/prose/unit-02/practice-1/computer.py",
+    "test_path": "practice/level-2/31-computer-use/prose/unit-02/practice-1/test_computer.py",
+    "run_command": [
+      "python3",
+      "practice/level-2/31-computer-use/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-2/31-computer-use/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-2/31-computer-use/prose/unit-02/practice-1/test_computer.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_the_loop_runs_scaled_actions_and_sends_every_result_in_one_message",
+        "kind": "main",
+        "says": "The loop runs scaled actions and sends every result in one message"
+      },
+      {
+        "id": "test_e1_the_screen_is_scaled_to_what_the_model_may_see_and_clicks_are_scaled_back",
+        "kind": "edge",
+        "says": "The screen is scaled to what the model may see, and clicks are scaled back"
+      },
+      {
+        "id": "test_e2_a_click_on_a_risky_element_needs_a_persons_confirmation",
+        "kind": "edge",
+        "says": "A click on a risky element needs a person's confirmation"
+      },
+      {
+        "id": "test_e3_a_failed_action_stops_the_rest_of_its_batch",
+        "kind": "edge",
+        "says": "A failed action stops the rest of its batch"
+      },
+      {
+        "id": "test_e4_invalid_actions_come_back_as_error_results_with_a_reason",
+        "kind": "edge",
+        "says": "Invalid actions come back as error results with a reason"
+      },
+      {
+        "id": "test_e5_the_loop_ends_on_a_stop_reason_or_at_the_turn_limit",
+        "kind": "edge",
+        "says": "The loop ends on a stop reason or at the turn limit"
+      },
+      {
+        "id": "test_e6_old_screenshots_are_replaced_so_the_context_does_not_fill_up",
+        "kind": "edge",
+        "says": "Old screenshots are replaced so the context does not fill up"
+      },
+      {
+        "id": "test_e7_screenshots_and_zooms_are_sent_at_the_size_the_model_may_see",
+        "kind": "edge",
+        "says": "Screenshots and zooms are sent at the size the model may see"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/31-computer-use/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/31-computer-use/02-safety-sandboxing-and-the-practice.md",
+    "concepts": [
+      "the practice of Computer use: safety, sandboxing, long loops and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/31-computer-use/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "computer-use-u2"
+}

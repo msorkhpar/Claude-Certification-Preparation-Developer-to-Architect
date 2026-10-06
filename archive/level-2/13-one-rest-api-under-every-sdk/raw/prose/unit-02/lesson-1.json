@@ -1,0 +1,363 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "13-one-rest-api-under-every-sdk"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "What the SDK does for you, and a raw client",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "What the SDK does for you, and a raw client"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Developer · **Module 13:** One REST API under every SDK · **Page 2 of 3** **Exams:** DV1, DV2"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** list what an official SDK adds to the raw HTTP call, show it by comparing the two requests, and write the raw client yourself against a scripted transport."
+    },
+    {
+      "type": "para",
+      "text": "Checked against the Claude API documentation (API overview, errors, and the Python, TypeScript and Java SDK pages) on 2026-10-02, and by running the example below and the practice offline in the course container with `anthropic` 1.11.0 (Python), `@anthropic-ai/sdk` 0.131.0 (TypeScript) and, for the practice, Java 25 and Kotlin 2.4. The model id is `claude-sonnet-5-5`; replies are hand-scripted and labelled illustrative."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "\"Just use the SDK\" is good advice until a call misbehaves. Then the questions are concrete: did the SDK retry, how long did it wait, which header carried the version, where is the request id? The exam asks what the SDK handles and what stays your job, and a team that cannot answer ends up with a proxy and a packet capture to find a missing header. Writing the raw client once, against a transport you control, makes the SDK's behaviour something you can reason about instead of something you hope for."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The same request, twice"
+    },
+    {
+      "type": "para",
+      "text": "The example makes one Messages call by hand and then through the SDK. Both go to the same scripted transport, so the program can record exactly what each one put on the wire, and nothing leaves the container. The first reply is a 200; the second is a 429 with a `retry-after` header and a request id."
+    },
+    {
+      "type": "example",
+      "id": "m13-raw-vs-sdk",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/13-raw-http-vs-sdk/python/raw_vs_sdk.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/13-raw-http-vs-sdk/typescript/rawVsSdk.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/13-raw-http-vs-sdk/java/RawVsSdk.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/13-raw-http-vs-sdk/kotlin/RawVsSdk.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"One Messages call written by hand with httpx2, then the same call through the SDK.\n\nBoth go through the same scripted transport, so nothing leaves the container. The reply is an\nillustrative, hand-written Messages response (claude-sonnet-5-5), not a capture.\n\"\"\"\nimport logging\nimport anthropic\nimport httpx2\n\nfrom harness import ScriptedTransport\nfrom harness.scripted import message, text\n\nlog = logging.getLogger(__name__)\n\nMODEL = \"claude-sonnet-5-5\"\nURL = \"https://api.anthropic.com/v1/messages\"\nPAYLOAD = {\"model\": MODEL, \"max_tokens\": 64, \"messages\": [{\"role\": \"user\", \"content\": \"Capital of France?\"}]}\nOK = message([text(\"Paris.\")])\nLIMITED = (429, {\"type\": \"error\", \"error\": {\"type\": \"rate_limit_error\", \"message\": \"Rate limited\"},\n                 \"request_id\": \"req_illustrative_0001\"}, {\"retry-after\": \"7\", \"request-id\": \"req_illustrative_0001\"})\n\n\ndef raw_call(transport):\n    \"\"\"The HTTP request the SDK would build, written out: three headers and a JSON body.\"\"\"\n    headers = {\"x-api-key\": \"placeholder\", \"anthropic-version\": \"2023-06-01\", \"content-type\": \"application/json\"}\n    with httpx2.Client(transport=transport) as http:\n        return http.post(URL, headers=headers, json=PAYLOAD)\n\n\ndef sdk_call(transport):\n    client = anthropic.Anthropic(api_key=\"placeholder\", max_retries=0,\n                                 http_client=httpx2.Client(transport=transport))\n    return client.messages.create(**PAYLOAD)\n\n\ndef main():\n    t_raw, t_sdk = ScriptedTransport(OK, LIMITED), ScriptedTransport(OK, LIMITED)\n\n    reply = raw_call(t_raw)\n    print(\"raw :\", reply.request.method, t_raw.urls[0], \"->\", reply.status_code, repr(reply.json()[\"content\"][0][\"text\"]))\n    message_ = sdk_call(t_sdk)\n    print(\"sdk :\", \"POST\", t_sdk.urls[0], \"->\", \"200\", repr(message_.content[0].text))\n    print(\"same URL:\", t_raw.urls[0] == t_sdk.urls[0], \"| same body:\", t_raw.requests[0] == t_sdk.requests[0])\n    for name in (\"anthropic-version\", \"content-type\"):\n        print(f\"{name}: raw {t_raw.headers[0][name]} | sdk {t_sdk.headers[0][name]}\")\n    print(\"headers only the SDK adds:\", \", \".join(sorted(set(t_sdk.headers[0]) - set(t_raw.headers[0]))))\n\n    limited = raw_call(t_raw)\n    print(\"raw 429 :\", limited.status_code, limited.json()[\"error\"][\"type\"], \"retry-after\", limited.headers[\"retry-after\"])\n    try:\n        sdk_call(t_sdk)\n    except anthropic.RateLimitError as err:\n        print(\"sdk 429 :\", type(err).__name__, err.status_code, \"request id\", err.request_id)\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "raw : POST https://api.anthropic.com/v1/messages -> 200 'Paris.'\nsdk : POST https://api.anthropic.com/v1/messages -> 200 'Paris.'\nsame URL: True | same body: True\nanthropic-version: raw 2023-06-01 | sdk 2023-06-01\ncontent-type: raw application/json | sdk application/json\nheaders only the SDK adds: x-stainless-arch, x-stainless-async, x-stainless-lang, x-stainless-os, x-stainless-package-version, x-stainless-read-timeout, x-stainless-retry-count, x-stainless-runtime, x-stainless-runtime-version, x-stainless-timeout\nraw 429 : 429 rate_limit_error retry-after 7\nsdk 429 : RateLimitError 429 request id req_illustrative_0001"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// One Messages call written by hand with fetch, then the same call through the SDK.\n// Both go through the same scripted fetch, so nothing leaves the container. The reply is an\n// illustrative, hand-written Messages response (claude-sonnet-5-5), not a capture.\nimport Anthropic from \"@anthropic-ai/sdk\";\nimport { message, scriptedFetch, text } from \"../../../harness/ts/scriptedFetch.ts\";\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"raw_vs_sdk\");\n\nconst MODEL = \"claude-sonnet-5-5\";\nconst URL = \"https://api.anthropic.com/v1/messages\";\nconst PAYLOAD = { model: MODEL, max_tokens: 64, messages: [{ role: \"user\" as const, content: \"Capital of France?\" }] };\nconst OK = { body: message([text(\"Paris.\")]) };\nconst LIMITED = {\n  status: 429,\n  body: { type: \"error\", error: { type: \"rate_limit_error\", message: \"Rate limited\" }, request_id: \"req_illustrative_0001\" },\n  headers: { \"retry-after\": \"7\", \"request-id\": \"req_illustrative_0001\" },\n};\n\n// The HTTP request the SDK would build, written out: three headers and a JSON body.\nexport function rawCall(fetchFn: typeof fetch) {\n  const headers = { \"x-api-key\": \"placeholder\", \"anthropic-version\": \"2023-06-01\", \"content-type\": \"application/json\" };\n  return fetchFn(URL, { method: \"POST\", headers, body: JSON.stringify(PAYLOAD) });\n}\n\nexport function sdkCall(fetchFn: typeof fetch) {\n  const client = new Anthropic({ apiKey: \"placeholder\", maxRetries: 0, fetch: fetchFn });\n  return client.messages.create(PAYLOAD);\n}\n\nasync function main() {\n  const raw = scriptedFetch([OK, LIMITED]);\n  const sdk = scriptedFetch([OK, LIMITED]);\n\n  const reply = await rawCall(raw.fetch);\n  console.log(\"raw :\", raw.seen[0].method, raw.seen[0].url, \"->\", reply.status, JSON.stringify(((await reply.json()) as any).content[0].text));\n  const msg = await sdkCall(sdk.fetch);\n  console.log(\"sdk :\", sdk.seen[0].method, sdk.seen[0].url, \"->\", \"200\", JSON.stringify((msg.content[0] as any).text));\n  console.log(\"same URL:\", raw.seen[0].url === sdk.seen[0].url, \"| same body:\", JSON.stringify(raw.seen[0].body) === JSON.stringify(sdk.seen[0].body));\n  for (const name of [\"anthropic-version\", \"content-type\"]) {\n    console.log(`${name}: raw ${raw.seen[0].headers[name]} | sdk ${sdk.seen[0].headers[name]}`);\n  }\n  const onlySdk = Object.keys(sdk.seen[0].headers).filter((h) => !(h in raw.seen[0].headers)).sort();\n  console.log(\"headers only the SDK adds:\", onlySdk.join(\", \"));\n\n  const limited = await rawCall(raw.fetch);\n  console.log(\"raw 429 :\", limited.status, ((await limited.json()) as any).error.type, \"retry-after\", limited.headers.get(\"retry-after\"));\n  try {\n    await sdkCall(sdk.fetch);\n  } catch (err) {\n    if (err instanceof Anthropic.RateLimitError) console.log(\"sdk 429 :\", err.constructor.name, err.status, \"request id\", err.requestID);\n    else throw err;\n  }\n}\n\nif (import.meta.main) await main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "raw : POST https://api.anthropic.com/v1/messages -> 200 \"Paris.\"\nsdk : POST https://api.anthropic.com/v1/messages -> 200 \"Paris.\"\nsame URL: true | same body: true\nanthropic-version: raw 2023-06-01 | sdk 2023-06-01\ncontent-type: raw application/json | sdk application/json\nheaders only the SDK adds: accept, user-agent, x-stainless-arch, x-stainless-lang, x-stainless-os, x-stainless-package-version, x-stainless-retry-count, x-stainless-runtime, x-stainless-runtime-version, x-stainless-timeout\nraw 429 : 429 rate_limit_error retry-after 7\nsdk 429 : RateLimitError 429 request id req_illustrative_0001"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import static harness.Scripted.map;\nimport static harness.Scripted.message;\nimport static harness.Scripted.text;\n\nimport com.anthropic.client.AnthropicClient;\nimport com.anthropic.errors.RateLimitException;\nimport com.anthropic.models.messages.Message;\nimport com.anthropic.models.messages.MessageCreateParams;\nimport com.anthropic.models.messages.Model;\nimport com.fasterxml.jackson.databind.JsonNode;\nimport harness.Reply;\nimport harness.Scripted;\nimport harness.ScriptedHttp;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.TreeSet;\n\n/**\n * One Messages call written by hand, then the same call through the SDK.\n *\n * <p>Both go through the same kind of scripted transport, so nothing leaves the container. The reply is an\n * illustrative, hand-written Messages response (claude-sonnet-5-5), not a capture.\n * (`harness` is the course's stand-in: a scripted transport plugged into the SDK's own HttpClient hook.)\n */\npublic final class RawVsSdk {\n    private static final System.Logger LOG = System.getLogger(RawVsSdk.class.getName());\n    static final String MODEL = \"claude-sonnet-5-5\";\n    static final String URL = \"https://api.anthropic.com/v1/messages\";\n    static final Map<String, Object> PAYLOAD = map(\"model\", MODEL, \"max_tokens\", 64, \"messages\", List.of(map(\"role\", \"user\", \"content\", \"Capital of France?\")));\n    static final Map<String, Object> OK = message(List.of(text(\"Paris.\")));\n    static final Reply LIMITED = Reply.json(429, map(\"type\", \"error\", \"error\", map(\"type\", \"rate_limit_error\", \"message\", \"Rate limited\"), \"request_id\", \"req_illustrative_0001\"),\n        \"retry-after\", \"7\", \"request-id\", \"req_illustrative_0001\");\n\n    /** The HTTP request the SDK would build, written out: three headers and a JSON body. */\n    static Reply rawCall(ScriptedHttp transport) {\n        Map<String, String> headers = Map.of(\"x-api-key\", \"placeholder\", \"anthropic-version\", \"2023-06-01\", \"content-type\", \"application/json\");\n        return transport.send(\"POST\", URL, headers, PAYLOAD);\n    }\n\n    static Message sdkCall(ScriptedHttp transport) {\n        AnthropicClient client = Scripted.clientOn(transport, 0);\n        return client.messages().create(MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(64).addUserMessage(\"Capital of France?\").build());\n    }\n\n    private static String repr(String s) {\n        return \"'\" + s + \"'\";\n    }\n\n    public static void main(String[] args) {\n        ScriptedHttp raw = Scripted.http(OK, LIMITED);\n        ScriptedHttp sdk = Scripted.http(OK, LIMITED);\n\n        Reply reply = rawCall(raw);\n        System.out.println(\"raw : \" + raw.methods.get(0) + \" \" + raw.urls.get(0) + \" -> \" + reply.status() + \" \" + repr(reply.json().at(\"/content/0/text\").asText()));\n        Message message = sdkCall(sdk);\n        System.out.println(\"sdk : POST \" + sdk.urls.get(0) + \" -> 200 \" + repr(message.content().get(0).asText().text()));\n        System.out.println(\"same URL: \" + py(raw.urls.get(0).equals(sdk.urls.get(0))) + \" | same body: \" + py(raw.requests.get(0).equals(sdk.requests.get(0))));\n        for (String name : List.of(\"anthropic-version\", \"content-type\")) {\n            System.out.println(name + \": raw \" + raw.headers.get(0).get(name) + \" | sdk \" + sdk.headers.get(0).get(name));\n        }\n        TreeSet<String> onlySdk = new TreeSet<>(sdk.headers.get(0).keySet());\n        onlySdk.removeAll(raw.headers.get(0).keySet());\n        System.out.println(\"headers only the SDK adds: \" + String.join(\", \", onlySdk));\n\n        Reply limited = rawCall(raw);\n        JsonNode body = limited.json();\n        System.out.println(\"raw 429 : \" + limited.status() + \" \" + body.at(\"/error/type\").asText() + \" retry-after \" + limited.headers().get(\"retry-after\"));\n        try {\n            sdkCall(sdk);\n        } catch (RateLimitException err) {\n            System.out.println(\"sdk 429 : \" + err.getClass().getSimpleName() + \" \" + err.statusCode() + \" request id \" + err.headers().values(\"request-id\").get(0));\n        }\n    }\n\n    private static String py(boolean value) {\n        return value ? \"True\" : \"False\";\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "raw : POST https://api.anthropic.com/v1/messages -> 200 'Paris.'\nsdk : POST https://api.anthropic.com/v1/messages -> 200 'Paris.'\nsame URL: True | same body: True\nanthropic-version: raw 2023-06-01 | sdk 2023-06-01\ncontent-type: raw application/json | sdk application/json\nheaders only the SDK adds: accept, user-agent, x-stainless-arch, x-stainless-kotlin-version, x-stainless-lang, x-stainless-os, x-stainless-os-version, x-stainless-package-version, x-stainless-retry-count, x-stainless-runtime, x-stainless-runtime-version\nraw 429 : 429 rate_limit_error retry-after 7\nsdk 429 : RateLimitException 429 request id req_illustrative_0001"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import com.anthropic.errors.RateLimitException\nimport com.anthropic.models.messages.Message\nimport com.anthropic.models.messages.MessageCreateParams\nimport com.anthropic.models.messages.Model\nimport harness.Reply\nimport harness.Scripted\nimport harness.Scripted.map\nimport harness.Scripted.message\nimport harness.Scripted.text\nimport harness.ScriptedHttp\n\nprivate val log = System.getLogger(\"raw_vs_sdk\")\n\n/**\n * One Messages call written by hand, then the same call through the SDK.\n *\n * Both go through the same kind of scripted transport, so nothing leaves the container. The reply is an\n * illustrative, hand-written Messages response (claude-sonnet-5-5), not a capture.\n * (`harness` is the course's stand-in: a scripted transport plugged into the SDK's own HttpClient hook.)\n */\nconst val MODEL = \"claude-sonnet-5-5\"\nconst val URL = \"https://api.anthropic.com/v1/messages\"\nval PAYLOAD = map(\"model\", MODEL, \"max_tokens\", 64, \"messages\", listOf(map(\"role\", \"user\", \"content\", \"Capital of France?\")))\nval OK = message(listOf(text(\"Paris.\")))\nval LIMITED = Reply.json(\n    429, map(\"type\", \"error\", \"error\", map(\"type\", \"rate_limit_error\", \"message\", \"Rate limited\"), \"request_id\", \"req_illustrative_0001\"),\n    \"retry-after\", \"7\", \"request-id\", \"req_illustrative_0001\",\n)\n\n/** The HTTP request the SDK would build, written out: three headers and a JSON body. */\nfun rawCall(transport: ScriptedHttp): Reply =\n    transport.send(\"POST\", URL, mapOf(\"x-api-key\" to \"placeholder\", \"anthropic-version\" to \"2023-06-01\", \"content-type\" to \"application/json\"), PAYLOAD)\n\nfun sdkCall(transport: ScriptedHttp): Message =\n    Scripted.clientOn(transport, 0).messages().create(MessageCreateParams.builder().model(Model.of(MODEL)).maxTokens(64).addUserMessage(\"Capital of France?\").build())\n\nprivate fun py(value: Boolean) = if (value) \"True\" else \"False\"\n\nfun main() {\n    val raw = Scripted.http(OK, LIMITED)\n    val sdk = Scripted.http(OK, LIMITED)\n\n    val reply = rawCall(raw)\n    println(\"raw : ${raw.methods[0]} ${raw.urls[0]} -> ${reply.status()} '${reply.json().at(\"/content/0/text\").asText()}'\")\n    val message = sdkCall(sdk)\n    println(\"sdk : POST ${sdk.urls[0]} -> 200 '${message.content()[0].asText().text()}'\")\n    println(\"same URL: ${py(raw.urls[0] == sdk.urls[0])} | same body: ${py(raw.requests[0] == sdk.requests[0])}\")\n    for (name in listOf(\"anthropic-version\", \"content-type\")) println(\"$name: raw ${raw.headers[0][name]} | sdk ${sdk.headers[0][name]}\")\n    println(\"headers only the SDK adds: \" + (sdk.headers[0].keys - raw.headers[0].keys).sorted().joinToString(\", \"))\n\n    val limited = rawCall(raw)\n    println(\"raw 429 : ${limited.status()} ${limited.json().at(\"/error/type\").asText()} retry-after ${limited.headers()[\"retry-after\"]}\")\n    try {\n        sdkCall(sdk)\n    } catch (err: RateLimitException) {\n        println(\"sdk 429 : ${err.javaClass.simpleName} ${err.statusCode()} request id ${err.headers().values(\"request-id\")[0]}\")\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "raw : POST https://api.anthropic.com/v1/messages -> 200 'Paris.'\nsdk : POST https://api.anthropic.com/v1/messages -> 200 'Paris.'\nsame URL: True | same body: True\nanthropic-version: raw 2023-06-01 | sdk 2023-06-01\ncontent-type: raw application/json | sdk application/json\nheaders only the SDK adds: accept, user-agent, x-stainless-arch, x-stainless-kotlin-version, x-stainless-lang, x-stainless-os, x-stainless-os-version, x-stainless-package-version, x-stainless-retry-count, x-stainless-runtime, x-stainless-runtime-version\nraw 429 : 429 rate_limit_error retry-after 7\nsdk 429 : RateLimitException 429 request id req_illustrative_0001"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Read the output as a list:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "**The contract is the same.** Same URL, same JSON body, same `anthropic-version`. The SDK adds nothing the API requires beyond what the raw call already had.",
+        "**The SDK adds identifying headers** (the `x-stainless-*` family in these runs): the platform, the runtime version, the package version, the retry count and the timeout. They help debugging and are not part of your contract. The exact list differs between languages because the HTTP stacks differ.",
+        "**A 429 is a status for raw code and a typed exception for the SDK.** The Python and TypeScript SDKs raised a `RateLimitError`, and both carry the status and the request id read from the `request-id` header. Java and Kotlin: the Java SDK page maps a 429 to `RateLimitException` and offers `withRawResponse()` for the headers and `requestId()`."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The Java and Kotlin tabs use the Java SDK (`com.anthropic:anthropic-java`, pinned 2.68.0; Kotlin uses the same artifact). It builds the same request from `MessageCreateParams` and sends it with `client.messages().create(params)`; in a program that talks to the real API the client comes from `AnthropicOkHttpClient.fromEnv()`, and here it runs on the scripted transport. Two lines of the output name things that belong to the SDK and so read differently in these tabs: the headers only the SDK adds (the Java SDK adds `accept` and `user-agent`, and reports its Kotlin version) and the class of the rate-limit error (`RateLimitException`, where the Python SDK has `RateLimitError`). The rest of the output is the same text. The practice below runs in all four languages."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What the SDK does for you"
+    },
+    {
+      "type": "para",
+      "text": "The overview lists the benefits; the SDK pages confirm each one. In the order you meet them:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "The SDK handles",
+        "Raw code must"
+      ],
+      "rows": [
+        [
+          "Authentication, version and content-type headers",
+          "Set the three headers on every request"
+        ],
+        [
+          "Building the JSON body from typed parameters",
+          "Serialise the body and keep field names exact"
+        ],
+        [
+          "Parsing the reply into typed objects (a `Message` with `content` blocks)",
+          "Parse JSON and navigate untyped maps"
+        ],
+        [
+          "Typed exceptions per status (`BadRequestError`, `RateLimitError`, `InternalServerError`...)",
+          "Branch on the status and read the body"
+        ],
+        [
+          "Retries: \"certain errors are automatically retried 2 times by default, with a short exponential backoff\"",
+          "Write the retry policy (module 15)"
+        ],
+        [
+          "A default timeout of 10 minutes, and a check on non-streaming requests that are expected to take longer",
+          "Pick and enforce timeouts"
+        ],
+        [
+          "The request id on every response object (`_request_id` in Python and TypeScript)",
+          "Read the `request-id` header"
+        ],
+        [
+          "Streaming helpers that assemble the final message (module 17)",
+          "Parse server-sent events"
+        ],
+        [
+          "Pagination iterators for list endpoints",
+          "Follow cursors"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What the SDK does not do"
+    },
+    {
+      "type": "para",
+      "text": "The same pages are as clear about the limits, and the exam likes these:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "**It does not choose your retry budget.** Two retries is a default for a generic caller, and it applies to every retryable failure, including ones that cannot succeed. A spend-cap 429 stays in force until the next month begins, so every retry of it fails (module 15 shows the SDK retrying one).",
+        "**It does not bound your concurrency.** Fifty parallel calls are fifty parallel calls (module 16).",
+        "**It does not keep your conversation.** The Messages API is stateless, so the history is yours (module 14).",
+        "**It does not keep secrets out of your logs.** At debug level the TypeScript SDK's documentation says \"all HTTP requests and responses are logged, including headers and bodies\", with some authentication headers redacted but \"sensitive data in request and response bodies may still be visible\".",
+        "**It does not validate your business rules.** A reply that parses is a valid message, not a correct answer."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Reaching the HTTP layer from an SDK"
+    },
+    {
+      "type": "para",
+      "text": "Sometimes the SDK is right and you still need the raw facts. Each SDK has an escape hatch, and each is named on its documentation page: `with_raw_response` in Python (headers, then `.parse()` for the object), `.withResponse()` or `.asResponse()` in TypeScript, `withRawResponse()` in Java. You can also replace the transport: Python takes an `http_client` that must be an `httpx2` client (the SDK depends on `httpx2` and rejects a client from the older `httpx` package with a `TypeError`), TypeScript takes a `fetch` function, and the Java SDK lets you implement its `HttpClient` interface. The course's stand-in for the API is exactly that hook: the examples and practices run the real SDK against a scripted transport."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The practice: a raw client"
+    },
+    {
+      "type": "para",
+      "text": "The practice is the first column of the table above, written by hand. You build the request, send it through an injected transport, and turn the reply into a message or an error, in Python, TypeScript, Java or Kotlin. The statement, with the exact contract, is in `exercises/13-one-rest-api-under-every-sdk/unit-01/practice-1/statement.md`; each language folder has a `starter`, the `tests` and a `run.sh` or build file. The starter fails every test."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "The request has the right method, URL, exactly three headers and a JSON body"
+        ],
+        [
+          "`e1`",
+          "A blank or absent `system` is left out of the body"
+        ],
+        [
+          "`e2`",
+          "Bad input is refused before the transport is called"
+        ],
+        [
+          "`e3`",
+          "A good reply is parsed, and the text of the message joins its text blocks only"
+        ],
+        [
+          "`e4`",
+          "An error reply becomes an error value; the header's request id wins over the body's"
+        ],
+        [
+          "`e5`",
+          "A reply that is not JSON still gives an error value"
+        ],
+        [
+          "`e6`",
+          "The API key never appears in an error"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Case `e6` is the operational habit of module 15 in miniature: an error message that is logged is an error message that is read by people who must not see a key, and a server that echoes a rejected key back in its message is exactly how a key reaches a log."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Assuming the SDK removed the need to understand HTTP.** It removed the typing, not the failure modes. Know the headers, the statuses and the request id.",
+        "**Treating the SDK's retries as a design.** Two retries with a short back-off is a default. Your timeout, your budget and your idempotency still need a decision.",
+        "**Logging requests at debug level in production.** Headers are partly redacted, bodies are not. Customer text does not belong in a log by default."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "Verbose diagnostics are on in a deployed service. Credentials look masked in the output, but customers' messages show up in it. What should the team do?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Keep it on, because the SDK masks sensitive data in request and response bodies",
+              "**b**: Switch that mode off for live traffic and record request ids instead",
+              "**c**: Redact the headers further so that the output holds no credentials at all",
+              "**d**: Log only the failing calls so that less customer text reaches the output"
+            ]
+          }
+        ],
+        [
+          "A service sets nothing on its SDK client and calls the API in a month where the organisation has already reached its monthly spend cap. What happens to each call?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: It is attempted once, because the SDK reads the cap and stops early",
+              "**b**: It is attempted once, because a 429 is never retried by the SDK",
+              "**c**: It is attempted three times, and the third attempt succeeds after a pause",
+              "**d**: It is attempted three times in all, and every attempt fails"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**b**. The page says that \"customer text does not belong in a log by default\", and request ids are the safe handle for a support ticket. *a* is ruled out because \"sensitive data in request and response bodies may still be visible\". *c* is ruled out because \"headers are partly redacted, bodies are not\", and the leak is in the bodies. *d* is ruled out because failing calls carry customer text too, and \"customer text does not belong in a log by default\".",
+            "**d**. Two retries after the first attempt make three, and a spend-cap 429 \"stays in force until the next month begins\". *b* is ruled out because \"certain errors are automatically retried 2 times by default\". *c* is ruled out because the cap \"stays in force until the next month begins\", so no pause helps. *a* is ruled out because \"two retries is a default for a generic caller\" and the SDK does not inspect the cap."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 10,
+    "paras": 12,
+    "code": 0,
+    "tables": 2,
+    "lists": 4,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "45123dd517df8e362e5f4a7e8548bf4d2e37854ca0260d660588b0f4ba16cfcc"
+}

@@ -1,0 +1,95 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "73-scenario-developer-productivity"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 3,
+  "title": "Practice: one shared setup for exploring a legacy system and generating boilerplate (Java)",
+  "lang": "java",
+  "main_file": "project/.mcp.json",
+  "files": [
+    "project/.claude/agents/explorer.md",
+    "project/.claude/agents/scaffolder.md",
+    "project/.claude/settings.json",
+    "project/docs/team-setup.md"
+  ],
+  "test_file": "src/test/java/McpSetupTest.java",
+  "build": [
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/73-scenario-developer-productivity/prose/unit-02/practice-3/check_files.py",
+    "practice/level-3/73-scenario-developer-productivity/prose/unit-02/practice-3/project/.claude/agents/explorer.md",
+    "practice/level-3/73-scenario-developer-productivity/prose/unit-02/practice-3/project/.claude/agents/scaffolder.md",
+    "practice/level-3/73-scenario-developer-productivity/prose/unit-02/practice-3/project/.claude/settings.json",
+    "practice/level-3/73-scenario-developer-productivity/prose/unit-02/practice-3/project/.mcp.json",
+    "practice/level-3/73-scenario-developer-productivity/prose/unit-02/practice-3/project/docs/team-setup.md"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/73-scenario-developer-productivity/prose/unit-02/practice-3",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_everyMcpToolReferenceBelongsToAConfiguredServer()",
+      "kind": "main",
+      "says": "Every MCP tool reference, in the subagents and in the permission rules, names a configured server"
+    },
+    {
+      "id": "e1_credentialsComeFromTheEnvironmentAndTheTokenHasNoDefault()",
+      "kind": "edge",
+      "says": "No literal credential; the token is a ${VAR} reference with no default"
+    },
+    {
+      "id": "e2_theExplorerIsReadOnlyAndSaysWhenToUseIt()",
+      "kind": "edge",
+      "says": "The explorer is read only, lists its tools and says when to use it"
+    },
+    {
+      "id": "e3_theScaffolderWritesOnlyInTheGeneratedFolder()",
+      "kind": "edge",
+      "says": "The scaffolder has no Bash and every edit or write rule is limited to the generated folder"
+    },
+    {
+      "id": "e4_theTicketsServerIsReadOnlyForAgents()",
+      "kind": "edge",
+      "says": "Create and delete ticket tools are denied and only read tools of the ticket server are allowed"
+    },
+    {
+      "id": "e5_theEnvironmentFileIsDeniedAndNoWholeToolIsApproved()",
+      "kind": "edge",
+      "says": "The environment file is denied and no allow rule approves a whole tool"
+    },
+    {
+      "id": "e6_theTeamNoteListsEveryVariableAndSaysWhichSessionToStart()",
+      "kind": "edge",
+      "says": "The note lists every variable and maps three situations to resume, fork or fresh"
+    },
+    {
+      "id": "e7_noFileHoldsAPersonalPathAnAddressOrAKey()",
+      "kind": "edge",
+      "says": "No personal path, address or key in any file"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/73-scenario-developer-productivity/02-sessions-variables-and-the-practice.md"
+}

@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/kotlin/CachePlan.kt",
+      "old": "    checkLifetimes(marked)\n    return plan\n",
+      "new": "    checkLifetimes(marked)\n    if (blocks.isNotEmpty()) (blocks[0] as MutableMap<String, Any?>)[\"seen\"] = true\n    return plan\n"
+    }
+  ]
+}

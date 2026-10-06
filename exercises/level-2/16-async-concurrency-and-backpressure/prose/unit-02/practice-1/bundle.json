@@ -1,0 +1,73 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "16-async-concurrency-and-backpressure"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: bounded concurrency with backpressure (Python)",
+  "lang": "python",
+  "main_file": "bounded.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_bounded.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-2/16-async-concurrency-and-backpressure/prose/unit-02/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-2/16-async-concurrency-and-backpressure/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-2/16-async-concurrency-and-backpressure/prose/unit-02/practice-1/test_bounded.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_results_come_back_for_every_item_and_never_more_than_limit_run_at_once",
+      "kind": "main",
+      "says": "Every item is processed, and never more than limit run at once"
+    },
+    {
+      "id": "test_e1_results_keep_the_input_order_even_when_later_items_finish_first",
+      "kind": "edge",
+      "says": "Results keep the input order even when later items finish first"
+    },
+    {
+      "id": "test_e2_a_failing_item_is_reported_and_the_others_still_finish",
+      "kind": "edge",
+      "says": "A failing item is reported and the others still finish"
+    },
+    {
+      "id": "test_e3_a_limit_above_the_item_count_and_an_empty_input_both_work",
+      "kind": "edge",
+      "says": "A limit above the item count and an empty input both work"
+    },
+    {
+      "id": "test_e4_a_limit_below_one_is_refused",
+      "kind": "edge",
+      "says": "A limit below one is refused"
+    },
+    {
+      "id": "test_e5_items_are_pulled_lazily_so_a_slow_consumer_holds_the_producer_back",
+      "kind": "edge",
+      "says": "Items are pulled lazily: while all workers are blocked, only limit items have been taken"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/16-async-concurrency-and-backpressure/02-rate-limits-and-backpressure.md"
+}

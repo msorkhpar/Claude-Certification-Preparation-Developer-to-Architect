@@ -1,0 +1,85 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "45-the-agentic-loop-in-depth"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 4,
+  "title": "Practice: an agent loop that is driven by the stop reason (Kotlin)",
+  "lang": "kotlin",
+  "main_file": "src/main/kotlin/AgentLoop.kt",
+  "files": [
+    "src/main/kotlin/TryIt.kt"
+  ],
+  "test_file": "src/test/kotlin/AgentLoopTest.kt",
+  "build": [
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/45-the-agentic-loop-in-depth/prose/unit-02/practice-4",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/45-the-agentic-loop-in-depth/prose/unit-02/practice-4",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_aRunAlternatesModelAndToolsUntilTheModelEndsItsTurn()",
+      "kind": "main",
+      "says": "A run alternates model and tools until the model ends its turn, and the model sees the growing conversation"
+    },
+    {
+      "id": "e1_theStopReasonDecidesAndTheWordsOfTheTextDoNot()",
+      "kind": "edge",
+      "says": "The stop reason decides: a reply that says \"done\" but calls a tool continues, and one that announces a tool but ends its turn ends"
+    },
+    {
+      "id": "e2_everyCallOfATurnIsAnsweredInOneUserMessageInOrder()",
+      "kind": "edge",
+      "says": "Every call of a turn is answered in one user message, in order, with the assistant turn kept as it came"
+    },
+    {
+      "id": "e3_aFailingOrUnknownToolBecomesAnErrorResultAndTheRunGoesOn()",
+      "kind": "edge",
+      "says": "A failing or unknown tool becomes an error result and the run goes on"
+    },
+    {
+      "id": "e4_theTurnLimitIsABackstopThatEndsOnlyARunTheModelHasNotEnded()",
+      "kind": "edge",
+      "says": "The turn limit is a backstop: it ends an endless run with its own status and does not cut off a run that ends on the last turn"
+    },
+    {
+      "id": "e5_aCutOffOrRefusedReplyEndsTheRunWithItsOwnStatus()",
+      "kind": "edge",
+      "says": "A cut-off, refused, stop-sequence or never-seen stop reason ends the run with the right status"
+    },
+    {
+      "id": "e6_aToolUseReplyWithoutAToolCallIsMalformedAndSendsNothingMore()",
+      "kind": "edge",
+      "says": "A tool_use reply with no tool call is malformed and nothing more is sent"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/45-the-agentic-loop-in-depth/02-results-parallel-calls-context-and-the-practice.md"
+}

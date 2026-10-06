@@ -1,0 +1,90 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-4",
+    "80-end-to-end-and-multi-agent-architecture"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 3,
+  "title": "Practice: an architecture review against a rubric (Java)",
+  "lang": "java",
+  "main_file": "src/main/java/ArchitectureReview.java",
+  "files": [
+    "src/main/java/TryIt.java"
+  ],
+  "test_file": "src/test/java/ArchitectureReviewTest.java",
+  "build": [
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-4/80-end-to-end-and-multi-agent-architecture/prose/unit-02/practice-3",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-4/80-end-to-end-and-multi-agent-architecture/prose/unit-02/practice-3",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_aSoundDesignPassesReviewWithNoFindings()",
+      "kind": "main",
+      "says": "A sound design passes review with no findings and is approved"
+    },
+    {
+      "id": "e1_aDesignWithoutAFeedbackLoopOrAStageIsRejected()",
+      "kind": "edge",
+      "says": "A missing feedback loop or a missing stage is a high finding"
+    },
+    {
+      "id": "e2_autonomyIsFlaggedOnlyWhenThePathIsKnown()",
+      "kind": "edge",
+      "says": "Autonomy is flagged only when the path is known"
+    },
+    {
+      "id": "e3_severalAgentsNeedIndependentPartsAndNoSharedContext()",
+      "kind": "edge",
+      "says": "A team needs independent parts and no shared context; one agent is exempt"
+    },
+    {
+      "id": "e4_anUnapprovedWriteIsAFindingOnlyWhenAnAuditIsNeeded()",
+      "kind": "edge",
+      "says": "An unapproved write is a finding only when an audit is needed"
+    },
+    {
+      "id": "e5_outputThatNobodyValidatesIsFlagged()",
+      "kind": "edge",
+      "says": "Output without a validation step is flagged; an absent output stage is not flagged twice"
+    },
+    {
+      "id": "e6_findingsAreOrderedBySeverityThenRuleAndTheVerdictFollowsTheWorst()",
+      "kind": "edge",
+      "says": "The findings are ordered by severity and then rule, and the verdict follows the worst"
+    },
+    {
+      "id": "e7_theCheapestDesignThatIsNotRejectedWinsAndTiesGoByName()",
+      "kind": "edge",
+      "says": "The cheapest design that is not rejected wins, ties go by name, and none passing gives no name"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/80-end-to-end-and-multi-agent-architecture/02-contracts-between-parts-and-the-review.md"
+}

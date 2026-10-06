@@ -1,0 +1,169 @@
+{
+  "practice": "57-memory-files-and-rules/unit-01/practice-1",
+  "name": "memory_setup",
+  "tests": {
+    "java": "MemorySetupTest",
+    "kotlin": "MemorySetupTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_the_conventions_of_each_area_load_for_exactly_the_files_that_area_governs",
+      "typescript": "m1 the conventions of each area load for exactly the files that area governs",
+      "java": "m1_theConventionsOfEachAreaLoadForExactlyTheFilesThatAreaGoverns",
+      "kotlin": "m1_theConventionsOfEachAreaLoadForExactlyTheFilesThatAreaGoverns"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_the_root_file_is_short_and_holds_only_what_every_task_needs",
+      "typescript": "e1 the root file is short and holds only what every task needs",
+      "java": "e1_theRootFileIsShortAndHoldsOnlyWhatEveryTaskNeeds",
+      "kotlin": "e1_theRootFileIsShortAndHoldsOnlyWhatEveryTaskNeeds"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_the_testing_rule_follows_the_file_type_and_not_the_folder",
+      "typescript": "e2 the testing rule follows the file type and not the folder",
+      "java": "e2_theTestingRuleFollowsTheFileTypeAndNotTheFolder",
+      "kotlin": "e2_theTestingRuleFollowsTheFileTypeAndNotTheFolder"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_the_import_names_a_file_that_exists_and_loads_at_launch",
+      "typescript": "e3 the import names a file that exists and loads at launch",
+      "java": "e3_theImportNamesAFileThatExistsAndLoadsAtLaunch",
+      "kotlin": "e3_theImportNamesAFileThatExistsAndLoadsAtLaunch"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_personal_lines_sit_in_personal_files_and_the_local_file_is_ignored",
+      "typescript": "e4 personal lines sit in personal files and the local file is ignored",
+      "java": "e4_personalLinesSitInPersonalFilesAndTheLocalFileIsIgnored",
+      "kotlin": "e4_personalLinesSitInPersonalFilesAndTheLocalFileIsIgnored"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_rule_that_must_always_hold_is_a_permission_rule_and_not_a_sentence",
+      "typescript": "e5 a rule that must always hold is a permission rule and not a sentence",
+      "java": "e5_aRuleThatMustAlwaysHoldIsAPermissionRuleAndNotASentence",
+      "kotlin": "e5_aRuleThatMustAlwaysHoldIsAPermissionRuleAndNotASentence"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_every_rule_scopes_itself_with_paths_that_are_valid_and_match_something",
+      "typescript": "e6 every rule scopes itself with paths that are valid and match something",
+      "java": "e6_everyRuleScopesItselfWithPathsThatAreValidAndMatchSomething",
+      "kotlin": "e6_everyRuleScopesItselfWithPathsThatAreValidAndMatchSomething"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_no_file_holds_a_personal_path_an_address_or_a_key",
+      "typescript": "e7 no file holds a personal path an address or a key",
+      "java": "e7_noFileHoldsAPersonalPathAnAddressOrAKey",
+      "kotlin": "e7_noFileHoldsAPersonalPathAnAddressOrAKey"
+    }
+  },
+  "plants": {
+    "wrong-api-unscoped": {
+      "caught_by": [
+        "e6",
+        "m1"
+      ],
+      "defect": "leaves the API rule without paths, so it loads in every session"
+    },
+    "wrong-api-bare-folder": {
+      "caught_by": [
+        "e6",
+        "m1"
+      ],
+      "defect": "scopes the API rule with a bare folder name, which is not a glob and matches no file"
+    },
+    "wrong-testing-folder": {
+      "caught_by": [
+        "e2",
+        "m1"
+      ],
+      "defect": "scopes the testing rule to one folder, so test files elsewhere miss it"
+    },
+    "wrong-testing-ts-only": {
+      "caught_by": [
+        "e2",
+        "m1"
+      ],
+      "defect": "scopes the testing rule to the ts files and leaves the tsx files out"
+    },
+    "wrong-terraform-everything": {
+      "caught_by": [
+        "m1"
+      ],
+      "defect": "scopes the Terraform rule to every file"
+    },
+    "wrong-root-keeps-testing": {
+      "caught_by": [
+        "e1",
+        "m1"
+      ],
+      "defect": "leaves one testing convention in the root file"
+    },
+    "wrong-root-long": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "pads the root file past fifty lines"
+    },
+    "wrong-import-typo": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "misspells the path of the import, so it imports nothing"
+    },
+    "wrong-import-in-code-span": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "writes the import inside a code span, where it is not expanded"
+    },
+    "wrong-personal-in-root": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "puts a personal preference into the shared root file"
+    },
+    "wrong-local-not-ignored": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "leaves the local instructions file out of the ignore file"
+    },
+    "wrong-no-migration-deny": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "leaves the migrations protected by a sentence only"
+    },
+    "wrong-write-rule": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "writes the migrations rule for the Write tool, whose path rules are never matched"
+    },
+    "wrong-home-path": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "writes a personal home path into the root file"
+    },
+    "wrong-testing-too-wide": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "adds a glob for the SQL files to the testing rule, which are not tests"
+    },
+    "wrong-terraform-dead-glob": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "adds a glob to the Terraform rule that matches no file of the project"
+    }
+  }
+}

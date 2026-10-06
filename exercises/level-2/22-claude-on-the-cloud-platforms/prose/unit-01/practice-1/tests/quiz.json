@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "22-claude-on-the-cloud-platforms"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: One Messages API, three front doors",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A team moves a working direct-API request to Google Cloud and keeps the body unchanged. It is refused. Which changes does the page require?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Add an `anthropic-version` header and remove nothing else from the body",
+            "correct": false,
+            "says": "Ruled out because the version is passed \"rather than as a header\"."
+          },
+          {
+            "id": "b",
+            "text": "Keep the model in the payload and send the version as a request header",
+            "correct": false,
+            "says": "Ruled out because \"`model` is not passed in the request body\", and the version is \"rather than as a header\"."
+          },
+          {
+            "id": "c",
+            "text": "Move both the model and the version into the query string of the address",
+            "correct": false,
+            "says": "Ruled out because the model \"is specified in the Google Cloud endpoint URL\", which is the address path, not a query string."
+          },
+          {
+            "id": "d",
+            "text": "Name the model in the address and carry the version in the payload",
+            "correct": true,
+            "says": "The page says \"`model` is not passed in the request body\" and that it \"is specified in the Google Cloud endpoint URL\", while `anthropic_version` goes \"in the request body\"."
+          }
+        ],
+        "origin": {
+          "path": "course/22-claude-on-the-cloud-platforms/01-one-messages-api-three-front-doors.md",
+          "section": "Google Cloud"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A developer calls Claude Opus 5.5 through Bedrock with the identifier `claude-opus-5-5` and gets an error. What fixes it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Add the provider prefix so the name starts with anthropic",
+            "correct": true,
+            "says": "The page says \"Model IDs in Claude in Amazon Bedrock carry an `anthropic.` provider prefix\"."
+          },
+          {
+            "id": "b",
+            "text": "Use the dated name that the direct API shows, with no prefix at all",
+            "correct": false,
+            "says": "Ruled out because the Bedrock ids \"carry an `anthropic.` provider prefix\" and are not the direct API names."
+          },
+          {
+            "id": "c",
+            "text": "Use the Vertex form of the name, with an at sign and a date after it",
+            "correct": false,
+            "says": "Ruled out because the at-sign form belongs to Google Cloud, where \"`model` is not passed in the request body\"."
+          },
+          {
+            "id": "d",
+            "text": "Send the name in a request header called x-model instead of the body",
+            "correct": false,
+            "says": "Ruled out because the model stays in the body on Bedrock, \"the same request body shape as Anthropic's first-party API\"."
+          }
+        ],
+        "origin": {
+          "path": "course/22-claude-on-the-cloud-platforms/01-one-messages-api-three-front-doors.md",
+          "section": "Bedrock"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A security team wants no long-lived keys on developer laptops when calling Claude through Bedrock. Which path does the page favour?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A single shared access key stored with the source code of the project",
+            "correct": false,
+            "says": "Ruled out because the service role is the path \"for the most secure, long-lived access\", with \"AWS-managed keys\" and no shared key in the source."
+          },
+          {
+            "id": "b",
+            "text": "Bearer tokens kept in each laptop's configuration file for daily use",
+            "correct": false,
+            "says": "Ruled out because bearer tokens are \"(12-hour maximum, least preferred)\"."
+          },
+          {
+            "id": "c",
+            "text": "A provisioned service role that the platform assumes for the caller",
+            "correct": true,
+            "says": "The page marks the service role as the recommended path: \"Use a Bedrock service role with AWS-managed keys for the most secure, long-lived access\"."
+          },
+          {
+            "id": "d",
+            "text": "An assumed role with a session that lasts for a full working week",
+            "correct": false,
+            "says": "Ruled out because an assumed role has \"a 12-hour maximum session\", not a week."
+          }
+        ],
+        "origin": {
+          "path": "course/22-claude-on-the-cloud-platforms/01-one-messages-api-three-front-doors.md",
+          "section": "Credentials on Bedrock"
+        }
+      }
+    ]
+  }
+}

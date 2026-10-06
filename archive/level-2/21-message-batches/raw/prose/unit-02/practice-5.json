@@ -1,0 +1,157 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "21-message-batches"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 5,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Polling, results and retries",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "The first line of a result file carries the id of the request sent third. What should the program do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Treat the file as corrupt, since entries must follow the order of submission",
+            "correct": false,
+            "says": "Ruled out because the file \"may not match the ordering of requests when the batch was created\"."
+          },
+          {
+            "id": "b",
+            "text": "Pair every entry with its source through the label you assigned, as the order is arbitrary",
+            "correct": true,
+            "says": "The page says \"always use the `custom_id` field\" to match, since the file order carries no meaning."
+          },
+          {
+            "id": "c",
+            "text": "Sort by finishing time, since that is the order that counts for the match",
+            "correct": false,
+            "says": "Ruled out because the page names the match key: \"always use the `custom_id` field\"."
+          },
+          {
+            "id": "d",
+            "text": "Match by position once the first entries are read, since the rest follow suit",
+            "correct": false,
+            "says": "Ruled out because \"Batch results can be returned in any order\"."
+          }
+        ],
+        "origin": {
+          "path": "course/21-message-batches/02-polling-results-and-retries.md",
+          "section": "The four result types"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A batch ends with 900 succeeded results, 50 errored, 30 canceled and 20 expired. Which results are billed?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The 900 and the 20 that timed out, as those had reached a queue",
+            "correct": false,
+            "says": "Ruled out because an expired request means \"the 24 hours passed before this request was sent\", so it never ran."
+          },
+          {
+            "id": "b",
+            "text": "The 900 and the 50 that failed on an error, as both ran a model",
+            "correct": false,
+            "says": "Ruled out because \"You will not be billed for these requests.\" is stated for the errored results too."
+          },
+          {
+            "id": "c",
+            "text": "All 1,000, as the discount is a flat half of the total",
+            "correct": false,
+            "says": "Ruled out because \"Only the `succeeded` results carry tokens that are billed.\""
+          },
+          {
+            "id": "d",
+            "text": "The 900 that worked, as the other three kinds carry no charge",
+            "correct": true,
+            "says": "The page says \"You will not be billed for these requests.\" of the three failure types."
+          }
+        ],
+        "origin": {
+          "path": "course/21-message-batches/02-polling-results-and-retries.md",
+          "section": "The four result types"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A result line for one request shows an error of type invalid_request_error. What is the sound next step?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Resubmit it unchanged, since a failure is usually a one-off",
+            "correct": false,
+            "says": "Ruled out because of \"fix it first; the same request fails again\"."
+          },
+          {
+            "id": "b",
+            "text": "Correct the body, then send it in a later batch",
+            "correct": true,
+            "says": "The page's table says for this error \"fix it first; the same request fails again\", and then a new batch can carry it."
+          },
+          {
+            "id": "c",
+            "text": "Wait for the same batch to retry it, since that is automatic",
+            "correct": false,
+            "says": "Ruled out because \"once a batch has been submitted, it cannot be modified\", so a batch does not retry on its own."
+          },
+          {
+            "id": "d",
+            "text": "Drop it, since an errored entry cannot join a new batch",
+            "correct": false,
+            "says": "Ruled out because the page says \"Collect the failures into a new, smaller batch.\""
+          }
+        ],
+        "origin": {
+          "path": "course/21-message-batches/02-polling-results-and-retries.md",
+          "section": "Which failures to retry"
+        }
+      }
+    ],
+    "concepts": [
+      "Keeping the results, as the page teaches it",
+      "Polling, results and retries, as the page teaches it",
+      "The four result types, as the page teaches it",
+      "Which failures to retry, as the page teaches it"
+    ]
+  }
+}

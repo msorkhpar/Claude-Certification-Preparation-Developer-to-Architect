@@ -1,0 +1,78 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "46-coordinator-and-subagents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: a coordinator that delegates to isolated subagents (TypeScript)",
+  "lang": "typescript",
+  "main_file": "coordinator.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "coordinator.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-3/46-coordinator-and-subagents/prose/unit-02/practice-2/coordinator.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 a hub sends one brief to each spoke and synthesizes what comes back",
+      "kind": "main",
+      "says": "A hub sends one brief to each spoke, in order, and synthesizes what comes back"
+    },
+    {
+      "id": "e1 a question the coordinator can answer itself is answered without any subagent",
+      "kind": "edge",
+      "says": "A question the planner answers itself starts no team"
+    },
+    {
+      "id": "e2 a subagent sees its own brief and nothing the others found",
+      "kind": "main",
+      "says": "A subagent receives exactly its own brief"
+    },
+    {
+      "id": "e3 the plan is cleaned of empty briefs and duplicate scopes and capped",
+      "kind": "edge",
+      "says": "Empty briefs and duplicate scopes are dropped, the team is capped, a plan with nothing usable fails without calls"
+    },
+    {
+      "id": "e4 a failing subagent does not stop the others and a run with no findings does not synthesize",
+      "kind": "edge",
+      "says": "One failing subagent does not stop the others; a run with no findings neither reviews nor synthesizes"
+    },
+    {
+      "id": "e5 a review sends only the gaps back out and stops when none are left",
+      "kind": "edge",
+      "says": "A review sends only the gaps out again, cleaned, and stops when none are left"
+    },
+    {
+      "id": "e6 the rounds are capped and the gaps that remain are reported",
+      "kind": "edge",
+      "says": "The rounds are capped, the gaps that remain are reported and the status is partial"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/46-coordinator-and-subagents/02-review-iteration-failures-and-the-practice.md"
+}

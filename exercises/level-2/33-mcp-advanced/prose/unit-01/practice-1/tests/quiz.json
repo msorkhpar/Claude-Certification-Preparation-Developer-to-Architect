@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "33-mcp-advanced"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: MCP advanced: multi round-trip requests, elicitation, sampling and notifications",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "Under the 2026-07-28 revision, a tool needs a person's answer halfway through a call. How does the server get it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It sends the client its own request on an open stream and waits for the reply",
+            "correct": false,
+            "says": "Ruled out because \"The previous pattern of server-initiated requests is no longer supported.\""
+          },
+          {
+            "id": "b",
+            "text": "It pauses the call and holds the connection open until the client answers",
+            "correct": false,
+            "says": "Ruled out because the pattern works \"without requiring a shared storage layer across server instances or requiring stateful load balancing\", which a held connection would need."
+          },
+          {
+            "id": "c",
+            "text": "It stores the question in a session, which the client resumes later",
+            "correct": false,
+            "says": "Ruled out because the pattern allows \"servers to request additional information without maintaining any server-side state\", so there is no session to resume."
+          },
+          {
+            "id": "d",
+            "text": "It returns an input-required result, and the client repeats the request with the replies",
+            "correct": true,
+            "says": "The page says the server answers with an input-required result, and the client \"then retries the original request including the additional requested information\"."
+          }
+        ],
+        "origin": {
+          "path": "course/33-mcp-advanced/01-round-trips-elicitation-and-notifications.md",
+          "section": "Multi round-trip requests"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A client receives an opaque string called requestState together with an input-required result. What must it do with that string?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Send back the exact same value on the retry, without reading it",
+            "correct": true,
+            "says": "The page says \"Clients MUST NOT inspect, parse, modify, or make any assumptions about its contents\", and that the client must echo the exact value on the retry."
+          },
+          {
+            "id": "b",
+            "text": "Discard it, since only the answers to the questions matter on the retry",
+            "correct": false,
+            "says": "Ruled out because \"the client MUST echo back the exact value of that field when retrying the original request\", and the retry needs it, since the server keeps nothing else."
+          },
+          {
+            "id": "c",
+            "text": "Keep it in a cookie so that other calls running in parallel can reuse it",
+            "correct": false,
+            "says": "Ruled out because both fields \"MUST NOT be used for any other request that the client may be sending in parallel\"."
+          },
+          {
+            "id": "d",
+            "text": "Decode it to learn what the server wants, then adjust it before the retry",
+            "correct": false,
+            "says": "Ruled out because \"Clients MUST NOT inspect, parse, modify, or make any assumptions about its contents.\""
+          }
+        ],
+        "origin": {
+          "path": "course/33-mcp-advanced/01-round-trips-elicitation-and-notifications.md",
+          "section": "Multi round-trip requests"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A server must collect a payment card number from a user during a tool call. Which mode of elicitation may it use?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The form one, since the client validates every field against a schema",
+            "correct": false,
+            "says": "Ruled out because \"Servers MUST NOT use form mode elicitation to request sensitive information\", whatever the schema checks."
+          },
+          {
+            "id": "b",
+            "text": "Either one, as long as the client shows the form to the person first",
+            "correct": false,
+            "says": "Ruled out because URL mode \"keeps the data out of band so it never passes through the client or the LLM context\", and a form always passes through the client."
+          },
+          {
+            "id": "c",
+            "text": "The out-of-band one, where the person visits a separate web page",
+            "correct": true,
+            "says": "The page says \"Servers MUST NOT use form mode elicitation to request sensitive information\", and that such interactions belong in URL mode."
+          },
+          {
+            "id": "d",
+            "text": "Neither one, since a server may never request data from a person",
+            "correct": false,
+            "says": "Ruled out because \"Elicitation lets a server ask a person for more information\", with URL mode for sensitive data."
+          }
+        ],
+        "origin": {
+          "path": "course/33-mcp-advanced/01-round-trips-elicitation-and-notifications.md",
+          "section": "Elicitation: forms and URLs"
+        }
+      }
+    ]
+  }
+}

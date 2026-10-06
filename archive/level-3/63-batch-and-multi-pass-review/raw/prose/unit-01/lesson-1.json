@@ -1,0 +1,341 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "63-batch-and-multi-pass-review"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "When a batch fits, how to meet an SLA with it, and what to resubmit",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "When a batch fits, how to meet an SLA with it, and what to resubmit"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Architect · **Module 63:** Batch and multi-pass review · **Page 1 of 2** **Exams:** A4.5; S5, S6"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** decide per workload between the synchronous API and a batch, compute how often to submit batches so that every item meets a delivery deadline, tell what a batch request may and may not contain, pair results with requests by `custom_id`, resubmit only the items that failed (changing what made them fail), and test a prompt on a sample before spending the batch discount on a large volume."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-04 against the Claude API documentation page \"Batch processing\" and the Claude Code documentation page on subagents, and against the exam guide's task statement 4.5. Nothing here called a model: the example is the arithmetic and the bookkeeping of a batch, written as plain code (`examples/63-batch-and-review`). This page deepens module 21 (Message Batches), which covers limits, price, polling and the result types, and does not repeat them; it adds the decisions an architect makes around them."
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "**Exam guide and current product.** *What the guide states, and so what the exam keys:* the Message Batches API gives 50 percent cost savings with \"up to 24-hour processing window, no guaranteed latency SLA\"; it fits non-blocking, latency-tolerant work (overnight reports, weekly audits, nightly test generation) and does not fit blocking work such as a pre-merge check; it \"does not support multi-turn tool calling within a single request (cannot execute tools mid-request and return results)\"; `custom_id` correlates requests with responses. *What the product does now (documentation read 2026-10-04):* a batch entry may carry tools, system messages, multi-turn message lists and thinking, \"each request in the batch is processed independently\", most batches finish in under an hour, results are available when every request has finished or after 24 hours, whichever comes first, and a batch that is not done in 24 hours expires. So a request can include tools and the model can answer with a tool call, but nobody is there to run the tool and continue, which is the guide's point: a batch cannot run an agent loop. On the exam the answers are the guide's: a blocking workflow uses the synchronous API, a tool loop needs the synchronous API, and the batch is for bulk work that can wait."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "A team has two Claude jobs. One reviews every pull request and a developer is waiting for its verdict; the other audits every service for outdated patterns once a week. Someone notices that the batch API is half the price and proposes it for both. The pull request check then takes anywhere from a few minutes to a day, with no promise, and blocks merging in the meantime. The architect's job is to put each workload on the interface whose latency it can bear, and to know the arithmetic that makes a promise like \"within 30 hours\" true. Scenarios S5 (Claude Code in CI) and S6 (structured data extraction) both test this."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Blocking or latency-tolerant"
+    },
+    {
+      "type": "para",
+      "text": "The deciding question is who or what waits for the answer."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Workload",
+        "Waits for the answer",
+        "Interface"
+      ],
+      "rows": [
+        [
+          "A check that gates a merge or a deploy",
+          "A developer and a pipeline",
+          "Synchronous"
+        ],
+        [
+          "An interactive assistant",
+          "A person",
+          "Synchronous"
+        ],
+        [
+          "A step inside an agent loop that calls tools",
+          "The loop itself",
+          "Synchronous"
+        ],
+        [
+          "An overnight report, a weekly audit, nightly test generation",
+          "Nobody, until the morning",
+          "Batch"
+        ],
+        [
+          "Back-filling labels or extractions for an archive",
+          "Nobody",
+          "Batch"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "A single product can use both: route per item and not per product. Standard documents go to the batch queue, and a document a customer is waiting for goes to the synchronous API. The half price is a reason to move work that can wait. It is not a reason to move work that cannot, and no discount makes a blocking check acceptable if it can take a day."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What a batch request may and may not contain"
+    },
+    {
+      "type": "para",
+      "text": "A batch entry is `{custom_id, params}`, where `params` are the parameters of a Messages request. Tools, system prompts, earlier turns and extended thinking are allowed. Three parameters are refused with a validation error: `stream: true` (the results come back as one file, not a stream), `speed` (fast mode tunes synchronous latency) and a `max_tokens` of 0. The `custom_id` is 1 to 64 characters of letters, digits, hyphens and underscores, and it is the only link between a request and its result, because the results \"can be returned in any order\". The example's `batch_entry` and `match_results` enforce both."
+    },
+    {
+      "type": "para",
+      "text": "The tool point deserves care, because the guide's sentence and the product differ in wording but not in consequence. A request that offers tools may come back with a tool call as its answer. In a synchronous loop your code would run the tool and send the result in the next request; in a batch there is no next request in the same job, since every entry is independent. A workflow that needs several rounds with tools therefore runs synchronously, or is cut so that each round is its own entry in successive batches, with the cost in latency that implies."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Meeting an SLA with a window"
+    },
+    {
+      "type": "para",
+      "text": "A batch finishes within 24 hours (usually much sooner), but an item that arrives just after one batch was submitted waits for the next submission. The worst case for an item is therefore:"
+    },
+    {
+      "type": "para",
+      "text": "worst-case wait = submission interval + processing window + handling time"
+    },
+    {
+      "type": "para",
+      "text": "With a 24-hour window and 2 hours to read and deliver the results, a promise of 30 hours leaves 30 − 24 − 2 = 4 hours for the interval: submit a batch at least every 4 hours. The exam asks this as a calculation: \"4-hour submission windows guarantee a 30-hour SLA with 24-hour batch processing\". The three numbers that are easy to forget are the interval itself (a nightly batch gives a worst wait of 24 + 24 + handling, which is 50 hours), the handling time, and the fact that the window is a ceiling and not a promise of an hour. A promise that the window cannot support is refused at design time: an SLA of 26 hours leaves no positive interval."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Failures: resubmit the failed items, and change what failed"
+    },
+    {
+      "type": "para",
+      "text": "A finished batch has a result per entry: succeeded, errored, canceled or expired. The sound reaction is by `custom_id`:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Succeeded entries are kept. Resubmitting the whole batch pays twice for work that is done.",
+        "An entry that expired, was canceled, or hit a server error is resubmitted unchanged in the next batch: nothing was wrong with it.",
+        "An entry rejected as an invalid request is repaired first, since sending it again fails again. A common cause is a document that exceeds the context window: the repair is to cut it into chunks, each its own entry with its own `custom_id` (the original id plus a suffix), and to merge the chunk results afterwards, as module 62 showed for extraction."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The practice has this as `resubmission_plan`: the actions are `resubmit`, `fix` and `chunk`, and an entry over the size limit is chunked whatever its failure."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Refine on a sample before the volume"
+    },
+    {
+      "type": "para",
+      "text": "A prompt that fails on one document in ten wastes a tenth of a large batch, and the failures are discovered a day later. Before submitting a large volume, run the prompt synchronously on a small, varied sample, read the failures, refine the prompt, and repeat until the first-pass success rate is high. The batch discount then applies to a prompt that has been proven. The guide's wording is that this \"maximizes first-pass success rates and reduces iterative resubmission costs\". The sample must include the awkward documents (the long ones, the ones with missing fields), since a sample of easy documents proves nothing."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "An independent instance is the product's building block"
+    },
+    {
+      "type": "para",
+      "text": "The second half of this module needs a way to run a review that does not share the generator's reasoning. In Claude Code a subagent starts with a fresh context window that does not include the conversation history, the skills already invoked or the files the main agent has read, and returns only a summary. That isolation is what makes a subagent an independent reviewer; the next page builds on it."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "example",
+      "id": "m63-batch-and-review",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/63-batch-and-review/python/batch_and_review.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/63-batch-and-review/typescript/batchAndReview.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/63-batch-and-review/java/BatchAndReview.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/63-batch-and-review/kotlin/BatchAndReview.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"What a batch asks of its caller, and what an independent review is given.\n\nRead on 2026-10-04 in the Claude API documentation (\"Batch processing\"): a batch is processed asynchronously, results are available when every request has finished or after 24 hours, whichever comes first,\na request is identified by its `custom_id` (1 to 64 letters, digits, hyphens and underscores), results can come back in any order, and `stream`, `speed` and a `max_tokens` of 0 are refused. The exam guide's wording for\ntask 4.5 (a batch has no latency guarantee and cannot run a tool mid-request) and 4.6 (an independent instance reviews better than the generator) is what the functions below make visible. Nothing here calls a model.\n\"\"\"\nimport re\nimport logging\n\nlog = logging.getLogger(__name__)\n\nCUSTOM_ID = re.compile(r\"^[a-zA-Z0-9_-]{1,64}$\")\n\n\ndef worst_case_wait(interval_hours, window_hours=24, handling_hours=2):\n    \"\"\"An item that arrives just after a submission waits one interval for the next batch, then the processing window, then the handling.\"\"\"\n    return interval_hours + window_hours + handling_hours\n\n\ndef batch_entry(custom_id, params):\n    \"\"\"One entry of a batch request, refused for the same reasons the API refuses it.\"\"\"\n    if not CUSTOM_ID.match(custom_id):\n        raise ValueError(f\"custom_id '{custom_id}' must be 1 to 64 letters, digits, hyphens or underscores\")\n    if params.get(\"stream\") is True:\n        raise ValueError(\"stream is not supported in a batch\")\n    if \"speed\" in params:\n        raise ValueError(\"speed is not supported in a batch\")\n    if params.get(\"max_tokens\") == 0:\n        raise ValueError(\"a max_tokens of 0 is not supported in a batch\")\n    return {\"custom_id\": custom_id, \"params\": params}\n\n\ndef match_results(requests, results):\n    \"\"\"Results come back in any order: pair them with the requests by custom_id, and report a result nobody asked for.\"\"\"\n    by_id = dict(results)\n    asked = set(requests)\n    return [(r, by_id.get(r, \"missing\")) for r in requests], [i for i, _ in results if i not in asked]\n\n\ndef review_request(code, reasoning, independent):\n    \"\"\"What the reviewing instance receives: an independent one gets the code alone, a self-review also gets the reasoning that produced it.\"\"\"\n    parts = [\"Review this code for defects.\", f\"<code>{code}</code>\"]\n    if not independent:\n        parts.append(f\"<your_earlier_reasoning>{reasoning}</your_earlier_reasoning>\")\n    return \"\\n\".join(parts)\n\n\ndef main():\n    for interval in (4, 6):\n        print(f\"worst-case wait with a {interval} hour interval: {worst_case_wait(interval)} hours (SLA 30 hours)\")\n    for custom_id in (\"invoice-0042\", \"invoice 0042\"):\n        try:\n            batch_entry(custom_id, {\"max_tokens\": 1024})\n            print(f\"custom_id {custom_id}: accepted\")\n        except ValueError as e:\n            print(f\"custom_id {custom_id}: refused, {e}\")\n    for params in ({\"stream\": True}, {\"speed\": \"fast\"}, {\"max_tokens\": 0}):\n        try:\n            batch_entry(\"a1\", params)\n        except ValueError as e:\n            print(f\"refused: {e}\")\n    matched, orphans = match_results([\"a1\", \"a2\", \"a3\"], [(\"a2\", \"expired\"), (\"z9\", \"succeeded\"), (\"a1\", \"succeeded\")])\n    print(\"matched: \" + \", \".join(f\"{i}={kind}\" for i, kind in matched) + \"; unrequested: \" + \", \".join(orphans))\n    code, reasoning = \"total = price * qty\", \"qty is always positive, so no check\"\n    for independent in (False, True):\n        request = review_request(code, reasoning, independent)\n        print(f\"independent={'yes' if independent else 'no'}: carries the reasoning: {'yes' if reasoning in request else 'no'}\")\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "worst-case wait with a 4 hour interval: 30 hours (SLA 30 hours)\nworst-case wait with a 6 hour interval: 32 hours (SLA 30 hours)\ncustom_id invoice-0042: accepted\ncustom_id invoice 0042: refused, custom_id 'invoice 0042' must be 1 to 64 letters, digits, hyphens or underscores\nrefused: stream is not supported in a batch\nrefused: speed is not supported in a batch\nrefused: a max_tokens of 0 is not supported in a batch\nmatched: a1=succeeded, a2=expired, a3=missing; unrequested: z9\nindependent=no: carries the reasoning: yes\nindependent=yes: carries the reasoning: no"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "import { logger } from \"./logger.ts\";\nconst log = logger(\"batch_and_review\");\n/**\n * What a batch asks of its caller, and what an independent review is given.\n *\n * Read on 2026-10-04 in the Claude API documentation (\"Batch processing\"): a batch is processed asynchronously, results are available when every request has finished or after 24 hours, whichever comes first,\n * a request is identified by its `custom_id` (1 to 64 letters, digits, hyphens and underscores), results can come back in any order, and `stream`, `speed` and a `max_tokens` of 0 are refused. The exam guide's wording for\n * task 4.5 (a batch has no latency guarantee and cannot run a tool mid-request) and 4.6 (an independent instance reviews better than the generator) is what the functions below make visible. Nothing here calls a model.\n */\nconst CUSTOM_ID = /^[a-zA-Z0-9_-]{1,64}$/;\n\n/** An item that arrives just after a submission waits one interval for the next batch, then the processing window, then the handling. */\nexport function worstCaseWait(intervalHours: number, windowHours = 24, handlingHours = 2): number {\n  return intervalHours + windowHours + handlingHours;\n}\n\n/** One entry of a batch request, refused for the same reasons the API refuses it. */\nexport function batchEntry(customId: string, params: Record<string, unknown>): { custom_id: string; params: Record<string, unknown> } {\n  if (!CUSTOM_ID.test(customId)) throw new Error(`custom_id '${customId}' must be 1 to 64 letters, digits, hyphens or underscores`);\n  if (params.stream === true) throw new Error(\"stream is not supported in a batch\");\n  if (\"speed\" in params) throw new Error(\"speed is not supported in a batch\");\n  if (params.max_tokens === 0) throw new Error(\"a max_tokens of 0 is not supported in a batch\");\n  return { custom_id: customId, params };\n}\n\n/** Results come back in any order: pair them with the requests by custom_id, and report a result nobody asked for. */\nexport function matchResults(requests: string[], results: Array<[string, string]>): [Array<[string, string]>, string[]] {\n  const byId = new Map(results);\n  const asked = new Set(requests);\n  return [requests.map((r): [string, string] => [r, byId.get(r) ?? \"missing\"]), results.map(([i]) => i).filter((i) => !asked.has(i))];\n}\n\n/** What the reviewing instance receives: an independent one gets the code alone, a self-review also gets the reasoning that produced it. */\nexport function reviewRequest(code: string, reasoning: string, independent: boolean): string {\n  const parts = [\"Review this code for defects.\", `<code>${code}</code>`];\n  if (!independent) parts.push(`<your_earlier_reasoning>${reasoning}</your_earlier_reasoning>`);\n  return parts.join(\"\\n\");\n}\n\nfunction main() {\n  for (const interval of [4, 6]) console.log(`worst-case wait with a ${interval} hour interval: ${worstCaseWait(interval)} hours (SLA 30 hours)`);\n  for (const customId of [\"invoice-0042\", \"invoice 0042\"]) {\n    try {\n      batchEntry(customId, { max_tokens: 1024 });\n      console.log(`custom_id ${customId}: accepted`);\n    } catch (e) {\n      console.log(`custom_id ${customId}: refused, ${(e as Error).message}`);\n    }\n  }\n  for (const params of [{ stream: true }, { speed: \"fast\" }, { max_tokens: 0 }]) {\n    try {\n      batchEntry(\"a1\", params);\n    } catch (e) {\n      console.log(`refused: ${(e as Error).message}`);\n    }\n  }\n  const [matched, orphans] = matchResults([\"a1\", \"a2\", \"a3\"], [[\"a2\", \"expired\"], [\"z9\", \"succeeded\"], [\"a1\", \"succeeded\"]]);\n  console.log(\"matched: \" + matched.map(([i, kind]) => `${i}=${kind}`).join(\", \") + \"; unrequested: \" + orphans.join(\", \"));\n  const code = \"total = price * qty\";\n  const reasoning = \"qty is always positive, so no check\";\n  for (const independent of [false, true]) {\n    const request = reviewRequest(code, reasoning, independent);\n    console.log(`independent=${independent ? \"yes\" : \"no\"}: carries the reasoning: ${request.includes(reasoning) ? \"yes\" : \"no\"}`);\n  }\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "worst-case wait with a 4 hour interval: 30 hours (SLA 30 hours)\nworst-case wait with a 6 hour interval: 32 hours (SLA 30 hours)\ncustom_id invoice-0042: accepted\ncustom_id invoice 0042: refused, custom_id 'invoice 0042' must be 1 to 64 letters, digits, hyphens or underscores\nrefused: stream is not supported in a batch\nrefused: speed is not supported in a batch\nrefused: a max_tokens of 0 is not supported in a batch\nmatched: a1=succeeded, a2=expired, a3=missing; unrequested: z9\nindependent=no: carries the reasoning: yes\nindependent=yes: carries the reasoning: no"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.HashMap;\nimport java.util.HashSet;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\nimport java.util.regex.Pattern;\n\n/**\n * What a batch asks of its caller, and what an independent review is given.\n *\n * <p>Read on 2026-10-04 in the Claude API documentation (\"Batch processing\"): a batch is processed asynchronously, results are available when every request has finished or after 24 hours, whichever comes first,\n * a request is identified by its `custom_id` (1 to 64 letters, digits, hyphens and underscores), results can come back in any order, and `stream`, `speed` and a `max_tokens` of 0 are refused. The exam guide's wording for\n * task 4.5 (a batch has no latency guarantee and cannot run a tool mid-request) and 4.6 (an independent instance reviews better than the generator) is what the methods below make visible. Nothing here calls a model.\n */\npublic final class BatchAndReview {\n    private static final System.Logger LOG = System.getLogger(BatchAndReview.class.getName());\n    private static final Pattern CUSTOM_ID = Pattern.compile(\"^[a-zA-Z0-9_-]{1,64}$\");\n\n    record Matched(String customId, String kind) {}\n\n    record Entry(String customId, Map<String, Object> params) {}\n\n    record Pairing(List<Matched> matched, List<String> unrequested) {}\n\n    /** An item that arrives just after a submission waits one interval for the next batch, then the processing window, then the handling. */\n    static int worstCaseWait(int intervalHours, int windowHours, int handlingHours) {\n        return intervalHours + windowHours + handlingHours;\n    }\n\n    /** One entry of a batch request, refused for the same reasons the API refuses it. */\n    static Entry batchEntry(String customId, Map<String, Object> params) {\n        if (!CUSTOM_ID.matcher(customId).matches()) throw new IllegalArgumentException(\"custom_id '\" + customId + \"' must be 1 to 64 letters, digits, hyphens or underscores\");\n        if (Boolean.TRUE.equals(params.get(\"stream\"))) throw new IllegalArgumentException(\"stream is not supported in a batch\");\n        if (params.containsKey(\"speed\")) throw new IllegalArgumentException(\"speed is not supported in a batch\");\n        if (Integer.valueOf(0).equals(params.get(\"max_tokens\"))) throw new IllegalArgumentException(\"a max_tokens of 0 is not supported in a batch\");\n        return new Entry(customId, params);\n    }\n\n    /** Results come back in any order: pair them with the requests by custom_id, and report a result nobody asked for. */\n    static Pairing matchResults(List<String> requests, List<Matched> results) {\n        Map<String, String> byId = new HashMap<>();\n        for (Matched r : results) byId.put(r.customId(), r.kind());\n        Set<String> asked = new HashSet<>(requests);\n        List<Matched> matched = new ArrayList<>();\n        for (String r : requests) matched.add(new Matched(r, byId.getOrDefault(r, \"missing\")));\n        List<String> unrequested = new ArrayList<>();\n        for (Matched r : results) if (!asked.contains(r.customId())) unrequested.add(r.customId());\n        return new Pairing(matched, unrequested);\n    }\n\n    /** What the reviewing instance receives: an independent one gets the code alone, a self-review also gets the reasoning that produced it. */\n    static String reviewRequest(String code, String reasoning, boolean independent) {\n        List<String> parts = new ArrayList<>(List.of(\"Review this code for defects.\", \"<code>\" + code + \"</code>\"));\n        if (!independent) parts.add(\"<your_earlier_reasoning>\" + reasoning + \"</your_earlier_reasoning>\");\n        return String.join(\"\\n\", parts);\n    }\n\n    public static void main(String[] args) {\n        for (int interval : new int[] {4, 6}) System.out.println(\"worst-case wait with a \" + interval + \" hour interval: \" + worstCaseWait(interval, 24, 2) + \" hours (SLA 30 hours)\");\n        for (String customId : new String[] {\"invoice-0042\", \"invoice 0042\"}) {\n            try {\n                batchEntry(customId, Map.of(\"max_tokens\", 1024));\n                System.out.println(\"custom_id \" + customId + \": accepted\");\n            } catch (IllegalArgumentException e) {\n                System.out.println(\"custom_id \" + customId + \": refused, \" + e.getMessage());\n            }\n        }\n        for (Map<String, Object> params : List.<Map<String, Object>>of(Map.of(\"stream\", true), Map.of(\"speed\", \"fast\"), Map.of(\"max_tokens\", 0))) {\n            try {\n                batchEntry(\"a1\", params);\n            } catch (IllegalArgumentException e) {\n                System.out.println(\"refused: \" + e.getMessage());\n            }\n        }\n        Pairing p = matchResults(List.of(\"a1\", \"a2\", \"a3\"), List.of(new Matched(\"a2\", \"expired\"), new Matched(\"z9\", \"succeeded\"), new Matched(\"a1\", \"succeeded\")));\n        List<String> pairs = new ArrayList<>();\n        for (Matched m : p.matched()) pairs.add(m.customId() + \"=\" + m.kind());\n        System.out.println(\"matched: \" + String.join(\", \", pairs) + \"; unrequested: \" + String.join(\", \", p.unrequested()));\n        String code = \"total = price * qty\";\n        String reasoning = \"qty is always positive, so no check\";\n        for (boolean independent : new boolean[] {false, true}) {\n            String request = reviewRequest(code, reasoning, independent);\n            System.out.println(\"independent=\" + (independent ? \"yes\" : \"no\") + \": carries the reasoning: \" + (request.contains(reasoning) ? \"yes\" : \"no\"));\n        }\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "worst-case wait with a 4 hour interval: 30 hours (SLA 30 hours)\nworst-case wait with a 6 hour interval: 32 hours (SLA 30 hours)\ncustom_id invoice-0042: accepted\ncustom_id invoice 0042: refused, custom_id 'invoice 0042' must be 1 to 64 letters, digits, hyphens or underscores\nrefused: stream is not supported in a batch\nrefused: speed is not supported in a batch\nrefused: a max_tokens of 0 is not supported in a batch\nmatched: a1=succeeded, a2=expired, a3=missing; unrequested: z9\nindependent=no: carries the reasoning: yes\nindependent=yes: carries the reasoning: no"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "private val log = System.getLogger(\"batch_and_review\")\n\n/**\n * What a batch asks of its caller, and what an independent review is given.\n *\n * Read on 2026-10-04 in the Claude API documentation (\"Batch processing\"): a batch is processed asynchronously, results are available when every request has finished or after 24 hours, whichever comes first,\n * a request is identified by its `custom_id` (1 to 64 letters, digits, hyphens and underscores), results can come back in any order, and `stream`, `speed` and a `max_tokens` of 0 are refused. The exam guide's wording for\n * task 4.5 (a batch has no latency guarantee and cannot run a tool mid-request) and 4.6 (an independent instance reviews better than the generator) is what the functions below make visible. Nothing here calls a model.\n */\nprivate val CUSTOM_ID = Regex(\"^[a-zA-Z0-9_-]{1,64}$\")\n\ndata class Matched(val customId: String, val kind: String)\n\ndata class Entry(val customId: String, val params: Map<String, Any>)\n\ndata class Pairing(val matched: List<Matched>, val unrequested: List<String>)\n\n/** An item that arrives just after a submission waits one interval for the next batch, then the processing window, then the handling. */\nfun worstCaseWait(intervalHours: Int, windowHours: Int = 24, handlingHours: Int = 2): Int = intervalHours + windowHours + handlingHours\n\n/** One entry of a batch request, refused for the same reasons the API refuses it. */\nfun batchEntry(customId: String, params: Map<String, Any>): Entry {\n    require(CUSTOM_ID.matches(customId)) { \"custom_id '$customId' must be 1 to 64 letters, digits, hyphens or underscores\" }\n    require(params[\"stream\"] != true) { \"stream is not supported in a batch\" }\n    require(\"speed\" !in params) { \"speed is not supported in a batch\" }\n    require(params[\"max_tokens\"] != 0) { \"a max_tokens of 0 is not supported in a batch\" }\n    return Entry(customId, params)\n}\n\n/** Results come back in any order: pair them with the requests by custom_id, and report a result nobody asked for. */\nfun matchResults(requests: List<String>, results: List<Matched>): Pairing {\n    val byId = results.associate { it.customId to it.kind }\n    val asked = requests.toSet()\n    return Pairing(requests.map { Matched(it, byId[it] ?: \"missing\") }, results.map { it.customId }.filter { it !in asked })\n}\n\n/** What the reviewing instance receives: an independent one gets the code alone, a self-review also gets the reasoning that produced it. */\nfun reviewRequest(code: String, reasoning: String, independent: Boolean): String {\n    val parts = mutableListOf(\"Review this code for defects.\", \"<code>$code</code>\")\n    if (!independent) parts += \"<your_earlier_reasoning>$reasoning</your_earlier_reasoning>\"\n    return parts.joinToString(\"\\n\")\n}\n\nfun main() {\n    for (interval in listOf(4, 6)) println(\"worst-case wait with a $interval hour interval: ${worstCaseWait(interval)} hours (SLA 30 hours)\")\n    for (customId in listOf(\"invoice-0042\", \"invoice 0042\")) {\n        try {\n            batchEntry(customId, mapOf(\"max_tokens\" to 1024))\n            println(\"custom_id $customId: accepted\")\n        } catch (e: IllegalArgumentException) {\n            println(\"custom_id $customId: refused, ${e.message}\")\n        }\n    }\n    for (params in listOf(mapOf<String, Any>(\"stream\" to true), mapOf(\"speed\" to \"fast\"), mapOf(\"max_tokens\" to 0))) {\n        try {\n            batchEntry(\"a1\", params)\n        } catch (e: IllegalArgumentException) {\n            println(\"refused: ${e.message}\")\n        }\n    }\n    val p = matchResults(listOf(\"a1\", \"a2\", \"a3\"), listOf(Matched(\"a2\", \"expired\"), Matched(\"z9\", \"succeeded\"), Matched(\"a1\", \"succeeded\")))\n    println(\"matched: \" + p.matched.joinToString(\", \") { \"${it.customId}=${it.kind}\" } + \"; unrequested: \" + p.unrequested.joinToString(\", \"))\n    val code = \"total = price * qty\"\n    val reasoning = \"qty is always positive, so no check\"\n    for (independent in listOf(false, true)) {\n        val request = reviewRequest(code, reasoning, independent)\n        println(\"independent=${if (independent) \"yes\" else \"no\"}: carries the reasoning: ${if (reasoning in request) \"yes\" else \"no\"}\")\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "worst-case wait with a 4 hour interval: 30 hours (SLA 30 hours)\nworst-case wait with a 6 hour interval: 32 hours (SLA 30 hours)\ncustom_id invoice-0042: accepted\ncustom_id invoice 0042: refused, custom_id 'invoice 0042' must be 1 to 64 letters, digits, hyphens or underscores\nrefused: stream is not supported in a batch\nrefused: speed is not supported in a batch\nrefused: a max_tokens of 0 is not supported in a batch\nmatched: a1=succeeded, a2=expired, a3=missing; unrequested: z9\nindependent=no: carries the reasoning: yes\nindependent=yes: carries the reasoning: no"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**\"Put the pre-merge check on the batch API; it is half the price.\"** It is tempting because the discount is real. The exam rejects it: a blocking check cannot wait for a window that has no latency guarantee. The discount buys latency tolerance and is spent only where there is some.",
+        "**\"Submit one batch a night; the SLA is 30 hours and batches take 24.\"** It is tempting because 24 is less than 30. The exam rejects it: an item that just missed tonight's batch waits a full day for the next, then 24 hours of processing, so the worst case is about 50 hours. The interval is part of the arithmetic.",
+        "**\"Some results failed, so resubmit the whole batch.\"** It is tempting because it is one call. The exam rejects it: the succeeded entries are paid for again. Resubmit the failed `custom_id`s only, and change the cause (chunk the oversized document) when the cause was in the request.",
+        "**\"Run the whole archive in one batch and tune the prompt afterwards.\"** It is tempting because the batch is cheap per item. The exam rejects it: a day passes before the failures show, and the whole run is repeated. Refine on a sample first."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "Scenario S5, Claude Code in CI. A pipeline runs two Claude jobs: a verdict that a pull request needs before it may merge, and a Sunday scan of every service for outdated patterns. A manager wants both moved to the discounted bulk queue. What should the architect do?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Keep the first on the immediate API and send the second through a batch",
+              "**b**: Move both, since half the price outweighs a wait of unknown length",
+              "**c**: Put the first through a batch and keep the second on the immediate API",
+              "**d**: Move both, but submit a batch every hour so that the wait stays short"
+            ]
+          }
+        ],
+        [
+          "Scenario S6, structured data extraction. A contract-intake service promises that every uploaded document is extracted within 30 hours. Extraction runs as batches that finish within 24 hours, and the results take 2 hours to validate and deliver. What is the longest gap, in hours, between batch submissions that still keeps the promise?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: 28",
+              "**b**: 24",
+              "**c**: 4",
+              "**d**: 6"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**a**. A merge verdict is a blocking check that cannot wait for a window without a latency guarantee, while the weekly scan can wait. *b* is ruled out because \"It is not a reason to move work that cannot\" wait, whatever the discount. *c* is ruled out because \"a blocking check cannot wait for a window that has no latency guarantee\", and this option sends exactly that check there. *d* is ruled out because \"the window is a ceiling and not a promise of an hour\", so more frequent submissions do not give the verdict a deadline.",
+            "**c**. The worst case is the interval plus the window plus the handling, so 30 minus 24 minus 2 leaves 4. *a* is ruled out because \"worst-case wait = submission interval + processing window + handling time\" includes the 24-hour window, which 28 ignores. *b* is ruled out because \"a nightly batch gives a worst wait of 24 + 24 + handling, which is 50 hours\". *d* is ruled out because the arithmetic starts from \"2 hours to read and deliver the results\", which 6 leaves out."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Adapted from the Claude Certified Architect - Foundations exam preparation guide by Daron Yondem (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/), changed for this course."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 12,
+    "paras": 16,
+    "code": 0,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 1,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "21e6eb75e4e1984408a91af103aea187b0984e5771f7611cd77021cffc50c33e"
+}

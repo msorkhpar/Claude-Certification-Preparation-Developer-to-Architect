@@ -1,0 +1,78 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-1",
+    "06-prompting-fundamentals"
+  ],
+  "variant": "prose",
+  "unit": 4,
+  "ordinal": 1,
+  "title": "Practice: a prompt template builder, graded on structure (Python)",
+  "lang": "python",
+  "main_file": "prompt_builder.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_prompt_builder.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-1/target/report.xml",
+    "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-1/test_prompt_builder.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_full_prompt_has_every_section_in_order",
+      "kind": "main",
+      "says": "A full spec renders every section in the order above"
+    },
+    {
+      "id": "test_e1_absent_optional_sections_are_omitted_not_empty",
+      "kind": "edge",
+      "says": "Absent, empty and whitespace-only optional sections are omitted, not rendered empty"
+    },
+    {
+      "id": "test_e2_variables_fill_once_and_a_missing_one_is_named",
+      "kind": "edge",
+      "says": "Variables are filled in one pass; a missing variable is named in the error"
+    },
+    {
+      "id": "test_e3_blank_task_is_refused",
+      "kind": "edge",
+      "says": "A missing, empty or whitespace-only task is refused"
+    },
+    {
+      "id": "test_e4_document_text_cannot_close_its_own_tag",
+      "kind": "edge",
+      "says": "Document text and names are escaped, so a document cannot close its own tag"
+    },
+    {
+      "id": "test_e5_placeholders_inside_documents_stay_literal",
+      "kind": "edge",
+      "says": "Placeholders inside document text stay literal"
+    },
+    {
+      "id": "test_e6_documents_and_examples_keep_their_order_and_index",
+      "kind": "edge",
+      "says": "Documents and examples keep their order and their numbering"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/06-prompting-fundamentals/04-diagnosing-a-weak-output.md"
+}

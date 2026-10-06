@@ -1,0 +1,122 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "54-distributing-tools-across-agents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 5,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: `tool_choice`, the call that must happen, caps on irreversible tools, and the practice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "To force a first tool on a model that rejects forcing, a team offers only that tool in the first request and the full list in every later one. Which cost does the first change carry?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Only the message blocks are processed again, as for any change of tool choice",
+            "correct": false,
+            "says": "Ruled out because that holds only for the choice: \"Modifying tool definitions (names, descriptions, parameters) invalidates the entire cache\"."
+          },
+          {
+            "id": "b",
+            "text": "Nothing is processed again, since definitions that are removed stay cached",
+            "correct": false,
+            "says": "Ruled out for the same reason, since the list is part of the cached prefix: \"Modifying tool definitions (names, descriptions, parameters) invalidates the entire cache\"."
+          },
+          {
+            "id": "c",
+            "text": "Only the system prompt is processed again, because it sits above the messages",
+            "correct": false,
+            "says": "Ruled out because the layers cascade downward: \"Changes at each level invalidate that level and all subsequent levels.\""
+          },
+          {
+            "id": "d",
+            "text": "The whole cached prefix is processed again, since the definitions differ",
+            "correct": true,
+            "says": "Changing the definitions changes the first layer of the cache, and every layer after it."
+          }
+        ],
+        "origin": {
+          "path": "course/54-distributing-tools-across-agents/02-tool-choice-the-call-that-must-happen-caps-and-the-practice.md",
+          "section": "`tool_choice`, the call that must happen, caps on irreversible tools, and the practice"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A loop on a model that rejects forced tool use offers one tool with automatic choice, and a reply comes back as plain text with no tool call. What should the loop do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Accept the text as the answer and go on to the next step",
+            "correct": false,
+            "says": "Ruled out because \"A reply of text only, when a call was required, is a miss\"."
+          },
+          {
+            "id": "b",
+            "text": "Resend the request with `any` as the choice and expect a call",
+            "correct": false,
+            "says": "Ruled out because the parameter is refused there: \"`any` and `tool` return a 400 error\"."
+          },
+          {
+            "id": "c",
+            "text": "Count it as a miss and ask once more before escalating",
+            "correct": true,
+            "says": "With `auto` the table's guarantee is \"Nothing: it may answer in text\", so a missed call is a miss that the loop handles."
+          },
+          {
+            "id": "d",
+            "text": "Repeat the same request until the turn limit ends the run",
+            "correct": false,
+            "says": "Ruled out because \"Looping until the turn limit turns a missed call into a run that ends with nothing\"."
+          }
+        ],
+        "origin": {
+          "path": "course/54-distributing-tools-across-agents/02-tool-choice-the-call-that-must-happen-caps-and-the-practice.md",
+          "section": "What `tool_choice` is for"
+        }
+      }
+    ],
+    "concepts": [
+      "Caps and authorisation on irreversible tools, as the page teaches it",
+      "`tool_choice`, the call that must happen, caps on irreversible tools, and the practice, as the page teaches it",
+      "What `tool_choice` is for, as the page teaches it"
+    ]
+  }
+}

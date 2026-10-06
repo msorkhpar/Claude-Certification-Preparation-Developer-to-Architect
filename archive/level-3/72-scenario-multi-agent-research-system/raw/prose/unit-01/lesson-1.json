@@ -1,0 +1,338 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "72-scenario-multi-agent-research-system"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "The research system: who owns coverage",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "The research system: who owns coverage"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Architect · **Module 72:** Scenario: multi-agent research system · **Page 1 of 2** **Exams:** A1, A2, A5; S3"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** describe the exam's research system and what each of its four subagents may do, route a symptom in a finished report to the failure behind it and to the first fix, say what the coordinator owns that no subagent can, and read a run in which the plan is too narrow, a search fails and a scoped tool checks a date."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-04 against Anthropic's engineering article on its multi-agent research system and the Architect exam guide (version 1.0, scenario 3 and its sample questions). The example runs offline in Python, TypeScript, Java and Kotlin: the subagents are functions over made-up data, so the example is about what the coordinator does with what comes back. This page is a capstone: it uses modules 46, 47, 52, 53 and 54, and names modules 66 (Errors across agents) and 69 (Provenance and uncertainty), which treat the failure path and the citations in full."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "Scenario S3 is the architecture the exam keeps returning to: one coordinator and several specialised subagents. The failures it asks about share a property that makes them hard to see. Every subagent can succeed, and the report can still be wrong, because the error is in what was assigned, in what came back and was passed on, or in what the final status claims. The exam rewards the habit of reading the coordinator's side: the plan it made, the errors it received and the status it wrote."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The scenario in plain words"
+    },
+    {
+      "type": "para",
+      "text": "A research system is built on the Claude Agent SDK. A coordinator receives a topic and delegates to four specialised subagents: one searches the web, one analyses documents, one synthesises the findings and one writes the report. The output is a comprehensive report with citations. The domains the exam draws on are the agent architecture, the design of tools and their integration, and the management of context and reliability."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Read a symptom as a failure shape"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "What the finished report or the logs show",
+        "The failure shape",
+        "The first fix",
+        "Taught in"
+      ],
+      "rows": [
+        [
+          "Every subagent succeeded, yet the report covers one part of the topic, and the coordinator's log shows narrow subtasks",
+          "A decomposition that is too narrow",
+          "Fix the plan: compare it with the scopes the question needs before any subagent runs",
+          "Modules 46 and 50"
+        ],
+        [
+          "A subagent returns work on the wrong period or the wrong scope",
+          "A brief that did not carry its context",
+          "Put the objective, the output format, the tools and sources, and the boundaries into the brief",
+          "Module 47"
+        ],
+        [
+          "The search times out and the coordinator is told \"unavailable\", or gets an empty result marked as a success",
+          "A failure with no context, or a failure turned into a success",
+          "A structured error: type, the query, partial results, alternatives",
+          "Module 53, and module 66 (Errors across agents)"
+        ],
+        [
+          "Synthesis keeps asking the coordinator to check a date, and each round trip adds latency",
+          "A tool the agent needs sits behind a round trip",
+          "A narrow tool for the frequent simple check, and the deep ones still go through the coordinator",
+          "Module 54"
+        ],
+        [
+          "Two sources give two figures and the report shows one",
+          "A conflict resolved silently",
+          "Show both values with their sources and dates",
+          "Module 62, and module 69 (Provenance and uncertainty)"
+        ],
+        [
+          "The coordinator's context fills with the raw output of its subagents",
+          "Large results passed through the hub",
+          "Subagents store their work and pass back references",
+          "Module 46"
+        ],
+        [
+          "The report says it is complete and a scope is missing",
+          "A status that is not derived from coverage",
+          "Compute the status from the scopes covered",
+          "This module"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The article on Anthropic's own research system gives the brief its four parts: \"Each subagent needs an objective, an output format, guidance on the tools and sources to use, and clear task boundaries.\" It describes the way large results travel: \"Subagents call tools to store their work in external systems, then pass lightweight references back to the coordinator.\" And it says what to do about a failing tool: \"Letting the agent know when a tool is failing and letting it adapt works surprisingly well.\" Each line is a design rule of the table above."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What the coordinator owns"
+    },
+    {
+      "type": "para",
+      "text": "A subagent owns the scope it was given. The coordinator owns everything that is about the whole question, and four of those duties are exactly where the exam's failures sit."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**The decomposition.** A plan is a claim that its subtasks, together, cover the question. The coordinator can check the claim: list the scopes the question needs and compare them with the scopes of the subtasks. The example's first plan covers one of four scopes, so the check names the other three before a single search runs. A subagent cannot do this check: it sees only its own brief. A downstream agent that is asked to notice gaps is a late and unreliable substitute for a check that costs one comparison.",
+        "**The recovery.** When a subagent fails, the coordinator decides: try an alternative, try another approach, or go on with what is partial. It can decide only if the error says what failed and what could be tried.",
+        "**The status.** A run is complete when every scope is covered. It is partial otherwise, whatever the reason, and the report says which scopes are missing and why.",
+        "**The conflicts.** When two subagents return different values for the same claim, the coordinator does not pick. It carries both, with their sources and dates, to the report."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "What each subagent may do"
+    },
+    {
+      "type": "para",
+      "text": "The least-privilege rule of module 54 applies to each of the four. The search agent has the web tools and nothing that writes. The analysis agent reads the documents it is given. The synthesis agent combines findings, and for the frequent simple check (a date, a name) it has one narrow verification tool and no search tools. The report agent writes the report and calls nothing else. A scoped tool of this kind removes the round trip for the common case and leaves the deep verification where it was: with the coordinator, who delegates it to the search agent. In the example, the tool answers for a date it can check, and returns `needs_search` for anything else."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "para",
+      "text": "The example runs the coordinator's side of one research run. A first plan of three subtasks, all in visual arts, is checked against the four scopes the question needs; the check finds three gaps, and the coordinator adds a subtask for each. The search for film then fails as a timeout, and the failure comes back as a result with its type, its query, the partial results (none) and an alternative query. The coordinator tries the alternative once and it works. The synthesis agent's verification tool confirms two dates and sends one statistic back. Finally the report is built twice, once with every source up and once with the film search down for good. In that second run the status is `partial`, three of four scopes are covered, and the note names the two queries that failed."
+    },
+    {
+      "type": "example",
+      "id": "m72-research-run",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/72-research-run/python/research_run.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/72-research-run/typescript/researchRun.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/72-research-run/java/ResearchRun.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/72-research-run/kotlin/ResearchRun.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"A multi-agent research run in miniature: a coordinator that checks its own decomposition, a search subagent whose failure comes back as structured context,\none retry through an alternative, a synthesis agent with a scoped verification tool, and a report that says what it could not cover.\n\nThe subagents are functions over made-up data: this example is about what the coordinator does with what comes back, not about what a model writes. The\nshapes (a result with a status, an error with a type, the query, partial results and alternatives) are this course's design, not an Anthropic interface.\n\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\nREQUIRED = [\"visual arts\", \"music\", \"writing\", \"film\"]\n\n# what the web search subagent finds for a query: (claim, value, source, date)\nSOURCES = {\n    \"AI in digital art\": [(\"studios using generative tools\", \"60%\", \"survey-a\", \"2025-02-01\")],\n    \"AI in graphic design\": [(\"designers using generative tools weekly\", \"48%\", \"survey-b\", \"2025-03-10\")],\n    \"AI in photography\": [(\"agencies labelling generated images\", \"yes\", \"policy-c\", \"2024-11-20\")],\n    \"AI in music\": [(\"labels licensing their catalogues for training\", \"3 of 5\", \"report-d\", \"2025-01-15\")],\n    \"AI in writing\": [(\"publishers with an AI policy\", \"70%\", \"survey-e\", \"2025-04-02\")],\n    \"AI in film production\": [(\"studios testing AI previsualisation\", \"4 of 6\", \"report-f\", \"2025-05-12\")],\n}\nALTERNATIVES = {\"AI in film\": [\"AI in film production\"]}\nPUBLISHED = {\"survey-a\": \"2025-02-01\", \"report-d\": \"2025-01-15\"}  # what the synthesis agent can check here\n\n\ndef search(query, down=()):\n    \"\"\"The search subagent. A failure is returned with its type, the query, the partial results and what to try instead.\"\"\"\n    if query in down or query not in SOURCES:\n        return {\"status\": \"error\", \"error\": {\"type\": \"timeout\", \"query\": query, \"partial\": [], \"alternatives\": ALTERNATIVES.get(query, []), \"tried\": [query]}}\n    return {\"status\": \"ok\", \"findings\": SOURCES[query]}\n\n\ndef coverage(plan):\n    covered = [s for s in REQUIRED if any(t[\"scope\"] == s for t in plan)]\n    return covered, [s for s in REQUIRED if s not in covered]\n\n\ndef replan(plan):\n    \"\"\"The coordinator compares its plan with the scopes the question needs and adds a subtask for each scope the plan leaves out.\"\"\"\n    return plan + [{\"scope\": s, \"query\": f\"AI in {s}\"} for s in coverage(plan)[1]]\n\n\ndef recover(result, down):\n    \"\"\"One retry through an alternative that the error offered. A second failure stays a failure and keeps both queries.\"\"\"\n    error = result.get(\"error\")\n    if result[\"status\"] == \"ok\" or not error[\"alternatives\"]:\n        return result\n    again = search(error[\"alternatives\"][0], down)\n    if again[\"status\"] == \"ok\":\n        return {**again, \"recovered_from\": error[\"query\"]}\n    return {\"status\": \"error\", \"error\": {**error, \"tried\": error[\"tried\"] + [error[\"alternatives\"][0]]}}\n\n\ndef research(plan, down=()):\n    return [{**task, **recover(search(task[\"query\"], down), down)} for task in plan]\n\n\ndef verify_fact(kind, source, value):\n    \"\"\"The synthesis agent's scoped tool: a date it can check here, and anything else goes back to the coordinator.\"\"\"\n    if kind == \"date\":\n        return \"confirmed\" if PUBLISHED.get(source) == value else \"mismatch\"\n    return \"needs_search\"\n\n\ndef report(results):\n    covered = [s for s in REQUIRED if any(r[\"scope\"] == s and r[\"status\"] == \"ok\" for r in results)]\n    notes = [f\"{r['scope']} not covered: timeout on \" + \" and on \".join(f\"'{q}'\" for q in r[\"error\"][\"tried\"]) for r in results if r[\"status\"] == \"error\"]\n    findings = [f for r in results if r[\"status\"] == \"ok\" for f in r[\"findings\"]]\n    return {\"status\": \"complete\" if len(covered) == len(REQUIRED) else \"partial\", \"covered\": len(covered), \"findings\": len(findings),\n            \"errors\": len(notes), \"notes\": notes or [\"nothing left uncovered\"]}\n\n\ndef main():\n    narrow = [{\"scope\": \"visual arts\", \"query\": q} for q in (\"AI in digital art\", \"AI in graphic design\", \"AI in photography\")]\n    covered, gaps = coverage(narrow)\n    print(f\"plan 1: {len(narrow)} subtasks, scopes covered {len(covered)} of {len(REQUIRED)}, gaps: {', '.join(gaps)}\")\n    plan = replan(narrow)\n    covered, gaps = coverage(plan)\n    print(f\"plan 2: {len(plan)} subtasks, scopes covered {len(covered)} of {len(REQUIRED)}, gaps: {', '.join(gaps) or 'none'}\")\n    first = search(\"AI in film\")\n    e = first[\"error\"]\n    print(f\"search '{e['query']}': {first['status']} {e['type']}, {len(e['partial'])} partial, alternative '{e['alternatives'][0]}'\")\n    results = research(plan)\n    recovered = next(r for r in results if \"recovered_from\" in r)\n    print(f\"recovered: '{recovered['recovered_from']}' -> '{ALTERNATIVES[recovered['recovered_from']][0]}' scope {recovered['scope']}, {len(recovered['findings'])} finding\")\n    checks = [(\"date\", \"survey-a\", \"2025-02-01\"), (\"date\", \"report-d\", \"2025-01-15\"), (\"statistic\", \"survey-a\", \"60%\")]\n    verdicts = [verify_fact(*c) for c in checks]\n    print(f\"verify_fact: {verdicts.count('confirmed')} confirmed here, {verdicts.count('needs_search')} sent back to the coordinator\")\n    for label, down in ((\"all sources up\", ()), (\"film search down for good\", (\"AI in film\", \"AI in film production\"))):\n        r = report(research(plan, down))\n        print(f\"report ({label}): status={r['status']}, covered={r['covered']}/{len(REQUIRED)}, findings={r['findings']}, errors={r['errors']}\")\n        print(f\"  note: {'; '.join(r['notes'])}\")\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "plan 1: 3 subtasks, scopes covered 1 of 4, gaps: music, writing, film\nplan 2: 6 subtasks, scopes covered 4 of 4, gaps: none\nsearch 'AI in film': error timeout, 0 partial, alternative 'AI in film production'\nrecovered: 'AI in film' -> 'AI in film production' scope film, 1 finding\nverify_fact: 2 confirmed here, 1 sent back to the coordinator\nreport (all sources up): status=complete, covered=4/4, findings=6, errors=0\n  note: nothing left uncovered\nreport (film search down for good): status=partial, covered=3/4, findings=5, errors=1\n  note: film not covered: timeout on 'AI in film' and on 'AI in film production'"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// A multi-agent research run in miniature: a coordinator that checks its own decomposition, a search subagent whose failure comes back as structured context,\n// one retry through an alternative, a synthesis agent with a scoped verification tool, and a report that says what it could not cover.\n//\n// The subagents are functions over made-up data: this example is about what the coordinator does with what comes back, not about what a model writes. The\n// shapes (a result with a status, an error with a type, the query, partial results and alternatives) are this course's design, not an Anthropic interface.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"research_run\");\n\nexport const REQUIRED = [\"visual arts\", \"music\", \"writing\", \"film\"];\n\ntype Finding = [claim: string, value: string, source: string, date: string];\nexport type Task = { scope: string; query: string };\nexport type SearchError = { type: string; query: string; partial: Finding[]; alternatives: string[]; tried: string[] };\nexport type Result = { status: \"ok\" | \"error\"; findings?: Finding[]; error?: SearchError; recovered_from?: string };\nexport type Done = Task & Result;\n\n// what the web search subagent finds for a query\nconst SOURCES: Record<string, Finding[]> = {\n  \"AI in digital art\": [[\"studios using generative tools\", \"60%\", \"survey-a\", \"2025-02-01\"]],\n  \"AI in graphic design\": [[\"designers using generative tools weekly\", \"48%\", \"survey-b\", \"2025-03-10\"]],\n  \"AI in photography\": [[\"agencies labelling generated images\", \"yes\", \"policy-c\", \"2024-11-20\"]],\n  \"AI in music\": [[\"labels licensing their catalogues for training\", \"3 of 5\", \"report-d\", \"2025-01-15\"]],\n  \"AI in writing\": [[\"publishers with an AI policy\", \"70%\", \"survey-e\", \"2025-04-02\"]],\n  \"AI in film production\": [[\"studios testing AI previsualisation\", \"4 of 6\", \"report-f\", \"2025-05-12\"]],\n};\nconst ALTERNATIVES: Record<string, string[]> = { \"AI in film\": [\"AI in film production\"] };\nconst PUBLISHED: Record<string, string> = { \"survey-a\": \"2025-02-01\", \"report-d\": \"2025-01-15\" }; // what the synthesis agent can check here\n\n/** The search subagent. A failure is returned with its type, the query, the partial results and what to try instead. */\nexport function search(query: string, down: string[] = []): Result {\n  if (down.includes(query) || !(query in SOURCES)) return { status: \"error\", error: { type: \"timeout\", query, partial: [], alternatives: ALTERNATIVES[query] ?? [], tried: [query] } };\n  return { status: \"ok\", findings: SOURCES[query] };\n}\n\nexport function coverage(plan: Task[]): [string[], string[]] {\n  const covered = REQUIRED.filter((s) => plan.some((t) => t.scope === s));\n  return [covered, REQUIRED.filter((s) => !covered.includes(s))];\n}\n\n/** The coordinator compares its plan with the scopes the question needs and adds a subtask for each scope the plan leaves out. */\nexport function replan(plan: Task[]): Task[] {\n  return [...plan, ...coverage(plan)[1].map((s) => ({ scope: s, query: `AI in ${s}` }))];\n}\n\n/** One retry through an alternative that the error offered. A second failure stays a failure and keeps both queries. */\nexport function recover(result: Result, down: string[]): Result {\n  const error = result.error;\n  if (result.status === \"ok\" || !error || error.alternatives.length === 0) return result;\n  const again = search(error.alternatives[0], down);\n  if (again.status === \"ok\") return { ...again, recovered_from: error.query };\n  return { status: \"error\", error: { ...error, tried: [...error.tried, error.alternatives[0]] } };\n}\n\nexport function research(plan: Task[], down: string[] = []): Done[] {\n  return plan.map((task) => ({ ...task, ...recover(search(task.query, down), down) }));\n}\n\n/** The synthesis agent's scoped tool: a date it can check here, and anything else goes back to the coordinator. */\nexport function verifyFact(kind: string, source: string, value: string): string {\n  if (kind === \"date\") return PUBLISHED[source] === value ? \"confirmed\" : \"mismatch\";\n  return \"needs_search\";\n}\n\nexport function report(results: Done[]) {\n  const covered = REQUIRED.filter((s) => results.some((r) => r.scope === s && r.status === \"ok\"));\n  const notes = results.filter((r) => r.status === \"error\").map((r) => `${r.scope} not covered: timeout on ` + r.error!.tried.map((q) => `'${q}'`).join(\" and on \"));\n  const findings = results.filter((r) => r.status === \"ok\").reduce((n, r) => n + r.findings!.length, 0);\n  return { status: covered.length === REQUIRED.length ? \"complete\" : \"partial\", covered: covered.length, findings, errors: notes.length, notes: notes.length ? notes : [\"nothing left uncovered\"] };\n}\n\nfunction main() {\n  const narrow: Task[] = [\"AI in digital art\", \"AI in graphic design\", \"AI in photography\"].map((query) => ({ scope: \"visual arts\", query }));\n  let [covered, gaps] = coverage(narrow);\n  console.log(`plan 1: ${narrow.length} subtasks, scopes covered ${covered.length} of ${REQUIRED.length}, gaps: ${gaps.join(\", \")}`);\n  const plan = replan(narrow);\n  [covered, gaps] = coverage(plan);\n  console.log(`plan 2: ${plan.length} subtasks, scopes covered ${covered.length} of ${REQUIRED.length}, gaps: ${gaps.join(\", \") || \"none\"}`);\n  const first = search(\"AI in film\");\n  const e = first.error!;\n  console.log(`search '${e.query}': ${first.status} ${e.type}, ${e.partial.length} partial, alternative '${e.alternatives[0]}'`);\n  const recovered = research(plan).find((r) => r.recovered_from)!;\n  console.log(`recovered: '${recovered.recovered_from}' -> '${ALTERNATIVES[recovered.recovered_from!][0]}' scope ${recovered.scope}, ${recovered.findings!.length} finding`);\n  const checks: [string, string, string][] = [[\"date\", \"survey-a\", \"2025-02-01\"], [\"date\", \"report-d\", \"2025-01-15\"], [\"statistic\", \"survey-a\", \"60%\"]];\n  const verdicts = checks.map((c) => verifyFact(...c));\n  console.log(`verify_fact: ${verdicts.filter((v) => v === \"confirmed\").length} confirmed here, ${verdicts.filter((v) => v === \"needs_search\").length} sent back to the coordinator`);\n  for (const [label, down] of [[\"all sources up\", []], [\"film search down for good\", [\"AI in film\", \"AI in film production\"]]] as [string, string[]][]) {\n    const r = report(research(plan, down));\n    console.log(`report (${label}): status=${r.status}, covered=${r.covered}/${REQUIRED.length}, findings=${r.findings}, errors=${r.errors}`);\n    console.log(`  note: ${r.notes.join(\"; \")}`);\n  }\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "plan 1: 3 subtasks, scopes covered 1 of 4, gaps: music, writing, film\nplan 2: 6 subtasks, scopes covered 4 of 4, gaps: none\nsearch 'AI in film': error timeout, 0 partial, alternative 'AI in film production'\nrecovered: 'AI in film' -> 'AI in film production' scope film, 1 finding\nverify_fact: 2 confirmed here, 1 sent back to the coordinator\nreport (all sources up): status=complete, covered=4/4, findings=6, errors=0\n  note: nothing left uncovered\nreport (film search down for good): status=partial, covered=3/4, findings=5, errors=1\n  note: film not covered: timeout on 'AI in film' and on 'AI in film production'"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.stream.Collectors;\n\n/**\n * A multi-agent research run in miniature: a coordinator that checks its own decomposition, a search subagent whose failure comes back as structured context,\n * one retry through an alternative, a synthesis agent with a scoped verification tool, and a report that says what it could not cover.\n *\n * <p>The subagents are functions over made-up data: this example is about what the coordinator does with what comes back, not about what a model writes. The\n * shapes (a result with a status, an error with a type, the query, partial results and alternatives) are this course's design, not an Anthropic interface.\n */\npublic final class ResearchRun {\n    private static final System.Logger LOG = System.getLogger(ResearchRun.class.getName());\n    static final List<String> REQUIRED = List.of(\"visual arts\", \"music\", \"writing\", \"film\");\n\n    record Finding(String claim, String value, String source, String date) {}\n\n    record Task(String scope, String query) {}\n\n    record SearchError(String type, String query, List<Finding> partial, List<String> alternatives, List<String> tried) {}\n\n    /** A result: status \"ok\" with findings, or \"error\" with its context; recoveredFrom is set when an alternative query succeeded. */\n    record Result(String status, List<Finding> findings, SearchError error, String recoveredFrom) {}\n\n    record Done(Task task, Result result) {}\n\n    record Report(String status, int covered, int findings, int errors, List<String> notes) {}\n\n    /** What the web search subagent finds for a query. */\n    static final Map<String, List<Finding>> SOURCES = new LinkedHashMap<>();\n    static final Map<String, List<String>> ALTERNATIVES = Map.of(\"AI in film\", List.of(\"AI in film production\"));\n    static final Map<String, String> PUBLISHED = Map.of(\"survey-a\", \"2025-02-01\", \"report-d\", \"2025-01-15\"); // what the synthesis agent can check here\n\n    static {\n        SOURCES.put(\"AI in digital art\", List.of(new Finding(\"studios using generative tools\", \"60%\", \"survey-a\", \"2025-02-01\")));\n        SOURCES.put(\"AI in graphic design\", List.of(new Finding(\"designers using generative tools weekly\", \"48%\", \"survey-b\", \"2025-03-10\")));\n        SOURCES.put(\"AI in photography\", List.of(new Finding(\"agencies labelling generated images\", \"yes\", \"policy-c\", \"2024-11-20\")));\n        SOURCES.put(\"AI in music\", List.of(new Finding(\"labels licensing their catalogues for training\", \"3 of 5\", \"report-d\", \"2025-01-15\")));\n        SOURCES.put(\"AI in writing\", List.of(new Finding(\"publishers with an AI policy\", \"70%\", \"survey-e\", \"2025-04-02\")));\n        SOURCES.put(\"AI in film production\", List.of(new Finding(\"studios testing AI previsualisation\", \"4 of 6\", \"report-f\", \"2025-05-12\")));\n    }\n\n    /** The search subagent. A failure is returned with its type, the query, the partial results and what to try instead. */\n    static Result search(String query, List<String> down) {\n        if (down.contains(query) || !SOURCES.containsKey(query)) {\n            return new Result(\"error\", null, new SearchError(\"timeout\", query, List.of(), ALTERNATIVES.getOrDefault(query, List.of()), List.of(query)), null);\n        }\n        return new Result(\"ok\", SOURCES.get(query), null, null);\n    }\n\n    static Result search(String query) {\n        return search(query, List.of());\n    }\n\n    /** The covered scopes and the gaps, in the order of the required scopes. */\n    static List<List<String>> coverage(List<Task> plan) {\n        List<String> covered = REQUIRED.stream().filter(s -> plan.stream().anyMatch(t -> t.scope().equals(s))).toList();\n        return List.of(covered, REQUIRED.stream().filter(s -> !covered.contains(s)).toList());\n    }\n\n    /** The coordinator compares its plan with the scopes the question needs and adds a subtask for each scope the plan leaves out. */\n    static List<Task> replan(List<Task> plan) {\n        List<Task> out = new ArrayList<>(plan);\n        for (String s : coverage(plan).get(1)) out.add(new Task(s, \"AI in \" + s));\n        return out;\n    }\n\n    /** One retry through an alternative that the error offered. A second failure stays a failure and keeps both queries. */\n    static Result recover(Result result, List<String> down) {\n        SearchError error = result.error();\n        if (result.status().equals(\"ok\") || error.alternatives().isEmpty()) return result;\n        String alternative = error.alternatives().get(0);\n        Result again = search(alternative, down);\n        if (again.status().equals(\"ok\")) return new Result(\"ok\", again.findings(), null, error.query());\n        List<String> tried = new ArrayList<>(error.tried());\n        tried.add(alternative);\n        return new Result(\"error\", null, new SearchError(error.type(), error.query(), error.partial(), error.alternatives(), tried), null);\n    }\n\n    static List<Done> research(List<Task> plan, List<String> down) {\n        return plan.stream().map(t -> new Done(t, recover(search(t.query(), down), down))).toList();\n    }\n\n    /** The synthesis agent's scoped tool: a date it can check here, and anything else goes back to the coordinator. */\n    static String verifyFact(String kind, String source, String value) {\n        if (kind.equals(\"date\")) return value.equals(PUBLISHED.get(source)) ? \"confirmed\" : \"mismatch\";\n        return \"needs_search\";\n    }\n\n    static Report report(List<Done> results) {\n        List<String> covered = REQUIRED.stream().filter(s -> results.stream().anyMatch(r -> r.task().scope().equals(s) && r.result().status().equals(\"ok\"))).toList();\n        List<String> notes = results.stream().filter(r -> r.result().status().equals(\"error\"))\n            .map(r -> r.task().scope() + \" not covered: timeout on \" + r.result().error().tried().stream().map(q -> \"'\" + q + \"'\").collect(Collectors.joining(\" and on \"))).toList();\n        int findings = results.stream().filter(r -> r.result().status().equals(\"ok\")).mapToInt(r -> r.result().findings().size()).sum();\n        return new Report(covered.size() == REQUIRED.size() ? \"complete\" : \"partial\", covered.size(), findings, notes.size(), notes.isEmpty() ? List.of(\"nothing left uncovered\") : notes);\n    }\n\n    public static void main(String[] args) {\n        List<Task> narrow = List.of(\"AI in digital art\", \"AI in graphic design\", \"AI in photography\").stream().map(q -> new Task(\"visual arts\", q)).toList();\n        List<List<String>> c = coverage(narrow);\n        System.out.println(\"plan 1: \" + narrow.size() + \" subtasks, scopes covered \" + c.get(0).size() + \" of \" + REQUIRED.size() + \", gaps: \" + String.join(\", \", c.get(1)));\n        List<Task> plan = replan(narrow);\n        c = coverage(plan);\n        System.out.println(\"plan 2: \" + plan.size() + \" subtasks, scopes covered \" + c.get(0).size() + \" of \" + REQUIRED.size() + \", gaps: \" + (c.get(1).isEmpty() ? \"none\" : String.join(\", \", c.get(1))));\n        Result first = search(\"AI in film\");\n        SearchError e = first.error();\n        System.out.println(\"search '\" + e.query() + \"': \" + first.status() + \" \" + e.type() + \", \" + e.partial().size() + \" partial, alternative '\" + e.alternatives().get(0) + \"'\");\n        Done recovered = research(plan, List.of()).stream().filter(r -> r.result().recoveredFrom() != null).findFirst().orElseThrow();\n        System.out.println(\"recovered: '\" + recovered.result().recoveredFrom() + \"' -> '\" + ALTERNATIVES.get(recovered.result().recoveredFrom()).get(0) + \"' scope \" + recovered.task().scope() + \", \" + recovered.result().findings().size() + \" finding\");\n        List<String> verdicts = List.of(verifyFact(\"date\", \"survey-a\", \"2025-02-01\"), verifyFact(\"date\", \"report-d\", \"2025-01-15\"), verifyFact(\"statistic\", \"survey-a\", \"60%\"));\n        System.out.println(\"verify_fact: \" + verdicts.stream().filter(v -> v.equals(\"confirmed\")).count() + \" confirmed here, \" + verdicts.stream().filter(v -> v.equals(\"needs_search\")).count() + \" sent back to the coordinator\");\n        Map<String, List<String>> runs = new LinkedHashMap<>();\n        runs.put(\"all sources up\", List.of());\n        runs.put(\"film search down for good\", List.of(\"AI in film\", \"AI in film production\"));\n        runs.forEach((label, down) -> {\n            Report r = report(research(plan, down));\n            System.out.println(\"report (\" + label + \"): status=\" + r.status() + \", covered=\" + r.covered() + \"/\" + REQUIRED.size() + \", findings=\" + r.findings() + \", errors=\" + r.errors());\n            System.out.println(\"  note: \" + String.join(\"; \", r.notes()));\n        });\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "plan 1: 3 subtasks, scopes covered 1 of 4, gaps: music, writing, film\nplan 2: 6 subtasks, scopes covered 4 of 4, gaps: none\nsearch 'AI in film': error timeout, 0 partial, alternative 'AI in film production'\nrecovered: 'AI in film' -> 'AI in film production' scope film, 1 finding\nverify_fact: 2 confirmed here, 1 sent back to the coordinator\nreport (all sources up): status=complete, covered=4/4, findings=6, errors=0\n  note: nothing left uncovered\nreport (film search down for good): status=partial, covered=3/4, findings=5, errors=1\n  note: film not covered: timeout on 'AI in film' and on 'AI in film production'"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "private val log = System.getLogger(\"research_run\")\n\n/**\n * A multi-agent research run in miniature: a coordinator that checks its own decomposition, a search subagent whose failure comes back as structured context,\n * one retry through an alternative, a synthesis agent with a scoped verification tool, and a report that says what it could not cover.\n *\n * The subagents are functions over made-up data: this example is about what the coordinator does with what comes back, not about what a model writes. The\n * shapes (a result with a status, an error with a type, the query, partial results and alternatives) are this course's design, not an Anthropic interface.\n */\nval REQUIRED = listOf(\"visual arts\", \"music\", \"writing\", \"film\")\n\ndata class Finding(val claim: String, val value: String, val source: String, val date: String)\n\ndata class Task(val scope: String, val query: String)\n\ndata class SearchError(val type: String, val query: String, val partial: List<Finding>, val alternatives: List<String>, val tried: List<String>)\n\n/** A result: status \"ok\" with findings, or \"error\" with its context; recoveredFrom is set when an alternative query succeeded. */\ndata class Result(val status: String, val findings: List<Finding> = listOf(), val error: SearchError? = null, val recoveredFrom: String? = null)\n\ndata class Done(val task: Task, val result: Result)\n\ndata class Report(val status: String, val covered: Int, val findings: Int, val errors: Int, val notes: List<String>)\n\n/** What the web search subagent finds for a query. */\nval SOURCES = mapOf(\n    \"AI in digital art\" to listOf(Finding(\"studios using generative tools\", \"60%\", \"survey-a\", \"2025-02-01\")),\n    \"AI in graphic design\" to listOf(Finding(\"designers using generative tools weekly\", \"48%\", \"survey-b\", \"2025-03-10\")),\n    \"AI in photography\" to listOf(Finding(\"agencies labelling generated images\", \"yes\", \"policy-c\", \"2024-11-20\")),\n    \"AI in music\" to listOf(Finding(\"labels licensing their catalogues for training\", \"3 of 5\", \"report-d\", \"2025-01-15\")),\n    \"AI in writing\" to listOf(Finding(\"publishers with an AI policy\", \"70%\", \"survey-e\", \"2025-04-02\")),\n    \"AI in film production\" to listOf(Finding(\"studios testing AI previsualisation\", \"4 of 6\", \"report-f\", \"2025-05-12\")),\n)\nval ALTERNATIVES = mapOf(\"AI in film\" to listOf(\"AI in film production\"))\nval PUBLISHED = mapOf(\"survey-a\" to \"2025-02-01\", \"report-d\" to \"2025-01-15\") // what the synthesis agent can check here\n\n/** The search subagent. A failure is returned with its type, the query, the partial results and what to try instead. */\nfun search(query: String, down: List<String> = listOf()): Result {\n    if (query in down || query !in SOURCES) return Result(\"error\", error = SearchError(\"timeout\", query, listOf(), ALTERNATIVES[query] ?: listOf(), listOf(query)))\n    return Result(\"ok\", SOURCES.getValue(query))\n}\n\n/** The covered scopes and the gaps, in the order of the required scopes. */\nfun coverage(plan: List<Task>): Pair<List<String>, List<String>> {\n    val covered = REQUIRED.filter { s -> plan.any { it.scope == s } }\n    return covered to REQUIRED.filter { it !in covered }\n}\n\n/** The coordinator compares its plan with the scopes the question needs and adds a subtask for each scope the plan leaves out. */\nfun replan(plan: List<Task>): List<Task> = plan + coverage(plan).second.map { Task(it, \"AI in $it\") }\n\n/** One retry through an alternative that the error offered. A second failure stays a failure and keeps both queries. */\nfun recover(result: Result, down: List<String>): Result {\n    val error = result.error\n    if (result.status == \"ok\" || error == null || error.alternatives.isEmpty()) return result\n    val alternative = error.alternatives[0]\n    val again = search(alternative, down)\n    if (again.status == \"ok\") return Result(\"ok\", again.findings, null, error.query)\n    return Result(\"error\", error = error.copy(tried = error.tried + alternative))\n}\n\nfun research(plan: List<Task>, down: List<String> = listOf()): List<Done> = plan.map { Done(it, recover(search(it.query, down), down)) }\n\n/** The synthesis agent's scoped tool: a date it can check here, and anything else goes back to the coordinator. */\nfun verifyFact(kind: String, source: String, value: String): String =\n    if (kind == \"date\") (if (PUBLISHED[source] == value) \"confirmed\" else \"mismatch\") else \"needs_search\"\n\nfun report(results: List<Done>): Report {\n    val covered = REQUIRED.filter { s -> results.any { it.task.scope == s && it.result.status == \"ok\" } }\n    val notes = results.filter { it.result.status == \"error\" }.map { r -> \"${r.task.scope} not covered: timeout on \" + r.result.error!!.tried.joinToString(\" and on \") { \"'$it'\" } }\n    val findings = results.filter { it.result.status == \"ok\" }.sumOf { it.result.findings.size }\n    return Report(if (covered.size == REQUIRED.size) \"complete\" else \"partial\", covered.size, findings, notes.size, notes.ifEmpty { listOf(\"nothing left uncovered\") })\n}\n\nfun main() {\n    val narrow = listOf(\"AI in digital art\", \"AI in graphic design\", \"AI in photography\").map { Task(\"visual arts\", it) }\n    var (covered, gaps) = coverage(narrow)\n    println(\"plan 1: ${narrow.size} subtasks, scopes covered ${covered.size} of ${REQUIRED.size}, gaps: ${gaps.joinToString(\", \")}\")\n    val plan = replan(narrow)\n    coverage(plan).let { covered = it.first; gaps = it.second }\n    println(\"plan 2: ${plan.size} subtasks, scopes covered ${covered.size} of ${REQUIRED.size}, gaps: ${gaps.joinToString(\", \").ifEmpty { \"none\" }}\")\n    val first = search(\"AI in film\")\n    val e = first.error!!\n    println(\"search '${e.query}': ${first.status} ${e.type}, ${e.partial.size} partial, alternative '${e.alternatives[0]}'\")\n    val recovered = research(plan).first { it.result.recoveredFrom != null }\n    println(\"recovered: '${recovered.result.recoveredFrom}' -> '${ALTERNATIVES.getValue(recovered.result.recoveredFrom!!)[0]}' scope ${recovered.task.scope}, ${recovered.result.findings.size} finding\")\n    val verdicts = listOf(verifyFact(\"date\", \"survey-a\", \"2025-02-01\"), verifyFact(\"date\", \"report-d\", \"2025-01-15\"), verifyFact(\"statistic\", \"survey-a\", \"60%\"))\n    println(\"verify_fact: ${verdicts.count { it == \"confirmed\" }} confirmed here, ${verdicts.count { it == \"needs_search\" }} sent back to the coordinator\")\n    for ((label, down) in listOf(\"all sources up\" to listOf<String>(), \"film search down for good\" to listOf(\"AI in film\", \"AI in film production\"))) {\n        val r = report(research(plan, down))\n        println(\"report ($label): status=${r.status}, covered=${r.covered}/${REQUIRED.size}, findings=${r.findings}, errors=${r.errors}\")\n        println(\"  note: ${r.notes.joinToString(\"; \")}\")\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "plan 1: 3 subtasks, scopes covered 1 of 4, gaps: music, writing, film\nplan 2: 6 subtasks, scopes covered 4 of 4, gaps: none\nsearch 'AI in film': error timeout, 0 partial, alternative 'AI in film production'\nrecovered: 'AI in film' -> 'AI in film production' scope film, 1 finding\nverify_fact: 2 confirmed here, 1 sent back to the coordinator\nreport (all sources up): status=complete, covered=4/4, findings=6, errors=0\n  note: nothing left uncovered\nreport (film search down for good): status=partial, covered=3/4, findings=5, errors=1\n  note: film not covered: timeout on 'AI in film' and on 'AI in film production'"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The point of the last two output lines is the second report's status and note. A report that did not cover film is still a useful report, and the status and the note are what keep it honest: the reader learns that a scope is missing, and which queries were tried. All four languages print the same lines."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "para",
+      "text": "These are the wrong answers that the exam's options for this scenario offer, each with the reason it is rejected."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**\"The synthesis agent needs instructions to spot missing coverage.\"** It is tempting because the synthesis agent sees all the findings. The exam rejects it as the root cause when the coordinator's plan was narrow: the subagents did what they were assigned, and the fault is the assignment. Fix the plan.",
+        "**\"Make the search agent's queries broader, or loosen the analysis agent's filter.\"** It is tempting because the agents are visible in the logs. The exam rejects both for the same reason: each agent worked correctly within its scope, so widening it does not reach the scope that was never assigned.",
+        "**\"Give the synthesis agent every search tool so that it never has to ask.\"** It is tempting because it removes the round trip. The exam rejects it: it gives one agent the tools of another, and the answer to a frequent small need is one narrow tool."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A report on AI in the creative industries covers only visual arts, with nothing on music, writing or film. Every subagent finished its task, and the log shows three subtasks: digital art, graphic design and photography. Which change fixes the cause?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Loosen the relevance filter of the analysis agent so that fewer documents are dropped",
+              "**b**: Instruct the synthesis agent to look for missing coverage in everything it receives",
+              "**c**: Widen the queries of the search agent so that it returns more kinds of source",
+              "**d**: Check the coordinator's plan against the question's scopes, ahead of any delegation"
+            ]
+          }
+        ],
+        [
+          "A run ends with a report marked complete. The film search timed out, nobody retried it, and the report holds nothing on film. Where is the defect?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The status is not derived from the scopes that were covered",
+              "**b**: The report agent should have written a longer summary of the other scopes",
+              "**c**: The search agent should have returned an empty list instead of an error",
+              "**d**: The timeout was set too short, so the search never had time to finish"
+            ]
+          }
+        ],
+        [
+          "In the example, the film search times out, the alternative query is down as well, and the run goes on. What does the report carry?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Partial, with a note that names only the first query that failed",
+              "**b**: Complete, since the alternative query was tried before the scope was given up",
+              "**c**: Partial, with three of four scopes covered and a note that names both failed queries",
+              "**d**: Failed, with no report at all because one scope has no findings"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**d**. The subagents did what they were assigned, so the plan is what to check, and it can be checked against the question. *b* is ruled out because it is a late substitute: \"A downstream agent that is asked to notice gaps is a late and unreliable substitute for a check that costs one comparison.\" *c* is ruled out because the search agent worked within its scope: \"each agent worked correctly within its scope, so widening it does not reach the scope that was never assigned\". *a* is ruled out for the same reason: \"the subagents did what they were assigned, and the fault is the assignment\".",
+            "**a**. A status must come from coverage. *b* is ruled out because more prose does not repair the claim: \"A run is complete when every scope is covered.\" *c* is ruled out because an empty success hides the gap: \"A failure with no context, or a failure turned into a success\". *d* is ruled out because the defect is in what the report claims and not in how long the search waited: \"It is partial otherwise, whatever the reason, and the report says which scopes are missing and why.\"",
+            "**c**. The page says what the second run shows: \"In that second run the status is `partial`, three of four scopes are covered, and the note names the two queries that failed.\" *b* is ruled out because trying is not covering: \"A run is complete when every scope is covered.\" *a* is ruled out because the note names both: \"the note names the two queries that failed\". *d* is ruled out because the report still has value: \"A report that did not cover film is still a useful report\"."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Adapted from the sample questions of the Claude Certified Architect, Foundations exam guide, version 1.0 (Anthropic), with credit; the questions are Anthropic's. The first question follows the guide's sample question on a report that covers only part of a topic, rewritten here."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 10,
+    "paras": 12,
+    "code": 0,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "5a2f7e6e068294cde32909723a6aed81e397008fdb45d63a9ccc956d83fb7d11"
+}

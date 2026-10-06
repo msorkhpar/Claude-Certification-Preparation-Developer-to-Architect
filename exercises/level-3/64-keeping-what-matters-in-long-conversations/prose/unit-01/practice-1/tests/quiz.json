@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "64-keeping-what-matters-in-long-conversations"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: Case facts, trimmed results and where a fact sits",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "Scenario S1, customer support resolution agent. A refund agent condenses the conversation every ten turns. At turn forty the condensed text says only that the customer awaits \"a refund soon\"; the sum and the promised day from turn six are gone, and the agent quotes something else. Which change fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Keep amounts, dates and statuses in a structured block on each request",
+            "correct": true,
+            "says": "The exact values leave the text that gets condensed, so no round of condensing can round them off."
+          },
+          {
+            "id": "b",
+            "text": "Condense each fifth turn instead, so that less is rounded off in each round",
+            "correct": false,
+            "says": "Ruled out because \"Each round compresses the previous summary, so a detail that survived once can be rounded off the next time\", and more rounds means more rounding."
+          },
+          {
+            "id": "c",
+            "text": "Ask the condensing prompt for longer summaries, with more detail kept in the prose",
+            "correct": false,
+            "says": "Ruled out because \"A reader of the summary cannot tell that anything was lost\", so more prose gives no check."
+          },
+          {
+            "id": "d",
+            "text": "Send the full transcript on each request in place of the condensed text",
+            "correct": false,
+            "says": "Ruled out because \"Resending the whole transcript is not the answer either\"."
+          }
+        ],
+        "origin": {
+          "path": "course/64-keeping-what-matters-in-long-conversations/01-case-facts-trimmed-results-and-position.md",
+          "section": "What a progressive summary loses"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "Scenario S1, customer support resolution agent. A lookup returns 42 fields, and the agent needs five of them to decide on a return. After thirty lookups in one conversation, answers are slower and costlier. Which change fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Move to a model with a bigger window so that all thirty results fit",
+            "correct": false,
+            "says": "Ruled out because the full result \"is carried and paid for on every later request\", whatever the window."
+          },
+          {
+            "id": "b",
+            "text": "Cut each result to its first 500 characters before it is kept in the chat",
+            "correct": false,
+            "says": "Ruled out because the advice is to \"trim by a list written for the decisions the agent makes, not by length\"."
+          },
+          {
+            "id": "c",
+            "text": "Pass on the handful the decision uses, word for word, plus an id",
+            "correct": true,
+            "says": "The decision's fields are kept with their exact values and the rest is dropped before it accumulates."
+          },
+          {
+            "id": "d",
+            "text": "Rewrite each result as one sentence of prose before it is kept in the chat",
+            "correct": false,
+            "says": "Ruled out because the fields are kept \"with their exact values (never rounded or reworded)\"."
+          }
+        ],
+        "origin": {
+          "path": "course/64-keeping-what-matters-in-long-conversations/01-case-facts-trimmed-results-and-position.md",
+          "section": "Trim tool output before it accumulates"
+        }
+      }
+    ]
+  }
+}

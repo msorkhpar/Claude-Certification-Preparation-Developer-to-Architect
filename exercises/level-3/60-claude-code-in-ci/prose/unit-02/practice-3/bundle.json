@@ -1,0 +1,102 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "60-claude-code-in-ci"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 3,
+  "title": "Practice: a review job that runs Claude Code in CI and gates on its JSON (Java)",
+  "lang": "java",
+  "main_file": "project/ReviewGate.java",
+  "files": [
+    "project/.github/workflows/claude-review.yml",
+    "project/CLAUDE.md",
+    "project/review-schema.json"
+  ],
+  "test_file": "src/test/java/CiReviewTest.java",
+  "build": [
+    "project/SchemaCheck.java",
+    "src/test/java/WorkflowLint.java",
+    "src/test/java/CiGate.java",
+    "src/test/java/harness/Show.java",
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-3/check_files.py",
+    "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-3/project/.github/workflows/claude-review.yml",
+    "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-3/project/CLAUDE.md",
+    "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-3/project/ReviewGate.java",
+    "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-3/project/review-schema.json"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-3/60-claude-code-in-ci/prose/unit-02/practice-3",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_aValidRunPostsTheFindingsAboveTheFloorAndOutsideTheDisabledCategories()",
+      "kind": "main",
+      "says": "A valid run produces the comments above the floor and outside the disabled categories"
+    },
+    {
+      "id": "e1_aFailedRunFailsTheJobInsteadOfPassingItSilently()",
+      "kind": "edge",
+      "says": "A failed run (non-zero status, not JSON, turn limit, no output) fails the job and says why"
+    },
+    {
+      "id": "e2_anAnswerThatBreaksTheSchemaFailsTheJobAndNamesThePathOfTheProblem()",
+      "kind": "edge",
+      "says": "An answer that breaks the schema fails the job and names the path of the problem"
+    },
+    {
+      "id": "e3_aFindingAtTheFailingSeverityBlocksTheMergeAndLowerOnesOnlyComment()",
+      "kind": "edge",
+      "says": "A finding at a failing severity blocks, and lower ones only comment"
+    },
+    {
+      "id": "e4_thePromptListsEarlierFindingsAndExistingTestsAndAsksForNewOrUnaddressedIssuesOnly()",
+      "kind": "edge",
+      "says": "The prompt lists earlier findings and existing tests, asks for new or unaddressed issues only, and ends with the diff"
+    },
+    {
+      "id": "e5_theSchemaFileIsValidDraft07AndRequiresEveryFieldOfAFinding()",
+      "kind": "edge",
+      "says": "The schema file is valid draft-07, requires every field of a finding and keeps enums closed"
+    },
+    {
+      "id": "e6_theWorkflowRunsClaudeHeadlessWithJsonOutputASchemaATurnLimitReadOnlyToolsAndTheContextFile()",
+      "kind": "edge",
+      "says": "The workflow runs Claude headless with JSON output, a schema, a turn limit, read-only tools and the context file, with a timeout and a secret key"
+    },
+    {
+      "id": "e7_theProjectFileStatesWhatToReportAndWhatToSkipWithASeverityExampleForEachLevel()",
+      "kind": "edge",
+      "says": "The criteria file says what to report and skip, and gives a severity example at each level"
+    },
+    {
+      "id": "e8_noFileHoldsAPersonalPathAnAddressOrAKey()",
+      "kind": "edge",
+      "says": "No file holds a personal path, an address or a key"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/60-claude-code-in-ci/02-context-independence-and-the-practice.md"
+}

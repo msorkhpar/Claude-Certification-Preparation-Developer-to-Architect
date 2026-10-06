@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/java/Bounded.java",
+      "old": "        return results;\n",
+      "new": "        for (Outcome<R> o : results) {\n            if (!o.ok()) throw new RuntimeException(o.error());\n        }\n        return results;\n"
+    }
+  ]
+}

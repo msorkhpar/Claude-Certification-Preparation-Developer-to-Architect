@@ -1,0 +1,362 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "55-mcp-in-claude-code"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: connect a team's MCP servers to Claude Code (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: connect a team's MCP servers to Claude Code"
+    },
+    {
+      "type": "para",
+      "text": "The orders platform team wants four MCP servers in Claude Code: a GitHub server, a documentation search server, a small server that holds the tools used on every turn, and a server that serves the database schemas. Each developer has their own tokens and a few experiments of their own. In this practice you write the files that make that work for everyone without a secret in the repository, and the tests read the project the way Claude Code does. The tests are the same in all four languages and read only the files: they are configuration, not code in a language, and the Java and Kotlin tests read the JSON with Jackson. The checks run on the course's own model of the documented rules (`examples/55-mcp-config`, in your language). Nothing here starts Claude Code, starts a server or touches the network."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working set of configuration files with eight gaps cut out of it. Everything that is plumbing is written and correct: the four server entries with their types, the GitHub and core server shapes, the settings and user-scope files with their structure, the tool's input schema and the notes' table and prose. Each gap is a spot in one file that holds a neutral value (an empty list, an empty text, a literal where a reference belongs) or a comment that says what goes there, and the list below names the file, the rule and the case it unlocks. The starter is read by the same tests, so it fails the cases on an assertion until you fill the gaps. These tests read files, not code, so there is no function to log from: read the failure message under the case, which names the file and the rule. Write the gaps in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "The command of the local servers, in `.mcp.json` (unlocks `m1`): `docs` and `schema` run `python3`; their `command` is empty in the starter.",
+        "The credentials, in `.mcp.json` (unlocks `e1`): the `Authorization` header is `Bearer ${GITHUB_TOKEN}` (the starter writes a token in the file), and `docs` passes `DOCS_API_KEY` through as `${DOCS_API_KEY}` with no default.",
+        "The defaults, in `.mcp.json` (unlocks `e2`): the URLs of `github` and `core` are `${GITHUB_MCP_URL:-https://github-mcp.example.com/mcp}` and `${CORE_MCP_URL:-https://core-mcp.example.com/mcp}`, and the `args` of `docs` and `schema` hold `${CLAUDE_PROJECT_DIR:-.}/tools/docs_server.py` and `.../schema_server.py`.",
+        "The start-up load, in `.mcp.json` (unlocks `e3`): `core` has `alwaysLoad` set to true and no other server has it.",
+        "The user-scope example, in `user-scope.example.json` (unlocks `e4`): the personal server `scratch` runs a script under `${HOME}/experiments/`, not under an absolute home path.",
+        "The permissions, in `.claude/settings.json` (unlocks `e5`): `allow` names every tool of `docs` and of `schema` by server (`mcp__docs__*`), and `deny` holds `mcp__github__delete_repository`.",
+        "The tool description, in `docs/tool-descriptions.json` (unlocks `e6`): a text of at most 2,048 characters that says in its first 300 characters when to use `search_docs` instead of `Grep`, then what it takes, what it returns and what it does not search.",
+        "The notes, in `docs/mcp-servers.md` (unlocks `e7`, `e8`): a row for `core` and for `schema` (scope `project`; `schema` exposes resources), the line `@schema:schema://orders`, and no personal path."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gap 1. About six lines in all, in the files of your language folder (the four folders hold the same files). The steps below describe the whole set, so you can see how your gaps are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`.mcp.json`, the project-scoped file that is committed. Four servers, named `github`, `docs`, `core` and `schema`.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`github` is a remote `http` server. Its URL comes from `GITHUB_MCP_URL`, with the default `https://github-mcp.example.com/mcp`. It sends the header `Authorization` with the value `Bearer ${GITHUB_TOKEN}`.",
+              "`docs` is a local `stdio` server: `python3` with the argument `tools/docs_server.py` under the project directory. It gets `DOCS_API_KEY` in its environment, passed through from yours.",
+              "`core` is a remote `http` server with the URL from `CORE_MCP_URL` and the default `https://core-mcp.example.com/mcp`. It is the only server loaded at the start (`alwaysLoad`).",
+              "`schema` is a local `stdio` server like `docs`, running `tools/schema_server.py`.",
+              "A variable that is not secret gets a default (`${NAME:-default}`); a credential never does. Claude Code sets `CLAUDE_PROJECT_DIR` in the environment of a stdio server it starts, not in its own, so a path in `command` or `args` that uses it needs a default of `.`.",
+              "A credential variable must not be one that Claude Code reads as empty toward a remote server (`NPM_TOKEN` is an example)."
+            ]
+          }
+        ],
+        "`.claude/settings.json`: allow every tool of `docs` and of `schema` without asking, by naming the server (`mcp__docs__*`), and deny the `github` tool `delete_repository`. Do not write an allow rule that does not name its server; it is ignored.",
+        "`user-scope.example.json`: what a developer would put in `~/.claude.json` for a personal server called `scratch`: a `stdio` server that runs `python3` on a script under `${HOME}/experiments/`. It is an example file in the repository so that the shape is shared; the server itself is not. Nothing from it belongs in `.mcp.json`, and it does not reuse a shared server's name.",
+        "`docs/tool-descriptions.json`: the `tools/list` entry for the `docs` server's one tool, `search_docs`, with a `query` string (required) and a `limit` integer, each with a description. The tool description fits in 2,048 characters, the point where Claude Code cuts it, so the details that matter come first: when to use it instead of `Grep`, what it takes, what it returns and what it does not search.",
+        "`docs/mcp-servers.md`: a table with one row per server, giving its scope (all four are `project`) and what it exposes, and one line that shows how to read the orders schema as a resource with an `@` mention, `@schema:schema://orders`. The schema server is a catalog, so the row says it exposes resources.",
+        "No file holds a personal path, an email address or a key. (The starter has one of each kind; find them.)"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**The project file and the shape of each server.** The exam asks which scope shares tooling with a team and what a server entry holds. *You should see* four servers, remote ones with a `url` and local ones with a `command`, and the course's lint finding nothing to report.",
+        "**Credentials by reference.** The exam asks how to share a configuration without committing a secret. *You should see* the token expand when your environment has it, no default hiding a token in the file, and a credential name that is not one of those Claude Code blanks out toward a remote server.",
+        "**Defaults for what is not secret.** An unset variable with no default leaves the text `${VAR}` in the URL or path and the server fails. *You should see* every URL and path usable with an empty environment.",
+        "**Load at the start, or find on demand.** With tool search the definitions of the other servers wait until they are needed. *You should see* `core` with `alwaysLoad` and no other server with it.",
+        "**Scope.** *You should see* the shared servers in the project file, the personal server only in the user-scope example, and the course's resolution of both scopes giving five servers with no conflict.",
+        "**Permissions that name a server.** *You should see* the documentation and schema tools allowed, the rest of GitHub asking, the destructive tool denied.",
+        "**The description.** A model that has Grep in front of it prefers Grep unless the description says why not. *You should see* the boundary in the first 300 characters and the whole text within the limit.",
+        "**Resources for a catalog.** *You should see* one row per server and an `@` reference that names a configured server."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "The shared file declares the four team servers with the right shape"
+        ],
+        [
+          "`e1`",
+          "Credentials come from the environment, never from the file, and not under a name Claude Code blanks out"
+        ],
+        [
+          "`e2`",
+          "Endpoints and paths that are not secret have a default, so the file works with nothing set"
+        ],
+        [
+          "`e3`",
+          "Only the small core server is loaded at the start"
+        ],
+        [
+          "`e4`",
+          "Shared servers are in the project file and the personal one only in the user-scope example"
+        ],
+        [
+          "`e5`",
+          "Permissions allow the read-only servers by name and deny the destructive tool"
+        ],
+        [
+          "`e6`",
+          "The tool description gives the boundary against Grep early and fits the limit"
+        ],
+        [
+          "`e7`",
+          "The notes list every server with its scope and read the catalog as a resource"
+        ],
+        [
+          "`e8`",
+          "No file holds a personal path, an address or a key"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "{\n  \"mcpServers\": {\n    \"github\": {\n      \"type\": \"http\",\n      \"url\": \"${GITHUB_MCP_URL:-https://github-mcp.example.com/mcp}\",\n      \"headers\": {\n        \"Authorization\": \"Bearer ${GITHUB_TOKEN}\"\n      }\n    },\n    \"docs\": {\n      \"type\": \"stdio\",\n      \"command\": \"python3\",\n      \"args\": [\"${CLAUDE_PROJECT_DIR:-.}/tools/docs_server.py\"],\n      \"env\": {\n        \"DOCS_API_KEY\": \"${DOCS_API_KEY}\"\n      }\n    },\n    \"core\": {\n      \"type\": \"http\",\n      \"url\": \"${CORE_MCP_URL:-https://core-mcp.example.com/mcp}\",\n      \"alwaysLoad\": true\n    },\n    \"schema\": {\n      \"type\": \"stdio\",\n      \"command\": \"python3\",\n      \"args\": [\"${CLAUDE_PROJECT_DIR:-.}/tools/schema_server.py\"]\n    }\n  }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.claude/settings.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"permissions\": {\n    \"allow\": [\"mcp__docs__*\", \"mcp__schema__*\"],\n    \"deny\": [\"mcp__github__delete_repository\"]\n  }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/docs/mcp-servers.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "# MCP servers of the orders platform\n\nThe shared servers live in `.mcp.json` at the project root and are committed. Credentials are never written in it: each one is read from\nan environment variable that every developer sets in their own shell (`GITHUB_TOKEN` and `DOCS_API_KEY`). A personal or experimental server\nis not added here; it goes into the user scope, and `user-scope.example.json` shows the shape.\n\n| Server | Scope | Exposes | Notes |\n|---|---|---|---|\n| `github` | project | tools: pull requests and issues | Needs `GITHUB_TOKEN`. Deleting a repository is denied in `.claude/settings.json`. |\n| `docs` | project | one tool, `search_docs` | Allowed without asking. Its description is in `docs/tool-descriptions.json`. |\n| `core` | project | a handful of tools used on every turn | The only server loaded at the start with `alwaysLoad`; the others are found by tool search. |\n| `schema` | project | resources: the database schemas | A catalog, so it is read as a resource and not through a search tool. |\n\nTo read a schema, mention the resource in a prompt: `@schema:schema://orders`. Claude Code fetches it and includes it as an attachment,\nso there is no exploratory sequence of calls to find the table first. Run `claude mcp list` to see which servers are connected.\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/docs/tool-descriptions.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"tools\": [\n    {\n      \"name\": \"search_docs\",\n      \"description\": \"Use this instead of Grep to search the team's published documentation: runbooks, API guides and architecture notes that are not in the repository. Use it when the question is about how a service behaves or how to operate it, and use Grep for code in the checkout. It takes a plain-language query such as 'refund retry policy' or an exact page title, and returns up to ten matches, each with the page title, a link and a short excerpt. It does not search the source code, and it does not return whole pages: open a link for that.\",\n      \"inputSchema\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"query\": {\"type\": \"string\", \"description\": \"What to look for, in plain language or as an exact page title.\"},\n          \"limit\": {\"type\": \"integer\", \"description\": \"How many matches to return, from 1 to 10. The default is 10.\"}\n        },\n        \"required\": [\"query\"]\n      }\n    }\n  ]\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/user-scope.example.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"mcpServers\": {\n    \"scratch\": {\n      \"type\": \"stdio\",\n      \"command\": \"python3\",\n      \"args\": [\"${HOME}/experiments/scratch_mcp.py\"]\n    }\n  }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "{\n  \"mcpServers\": {\n    \"github\": {\n      \"type\": \"http\",\n      \"url\": \"https://github-mcp.example.com/mcp\",\n      \"headers\": {\n        \"Authorization\": \"Bearer lit-tok\"\n      }\n    },\n    \"docs\": {\n      \"type\": \"stdio\",\n      \"command\": \"\",\n      \"args\": [],\n      \"env\": {}\n    },\n    \"core\": {\n      \"type\": \"http\",\n      \"url\": \"https://core-mcp.example.com/mcp\"\n    },\n    \"schema\": {\n      \"type\": \"stdio\",\n      \"command\": \"\",\n      \"args\": []\n    }\n  }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.claude/settings.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"permissions\": {\n    \"allow\": [],\n    \"deny\": []\n  }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/docs/mcp-servers.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "# MCP servers of the orders platform\n\nThe shared servers live in `.mcp.json` at the project root and are committed. Credentials are never written in it: each one is read from\nan environment variable that every developer sets in their own shell (`GITHUB_TOKEN` and `DOCS_API_KEY`). A personal or experimental server\nis not added here; it goes into the user scope, and `user-scope.example.json` shows the shape. The checkout of the original author was /home/dev/orders.\n\n| Server | Scope | Exposes | Notes |\n|---|---|---|---|\n| `github` | project | tools: pull requests and issues | Needs `GITHUB_TOKEN`. Deleting a repository is denied in `.claude/settings.json`. |\n| `docs` | project | one tool, `search_docs` | Allowed without asking. Its description is in `docs/tool-descriptions.json`. |\n<!-- TODO 7 of 8 (finish this to pass e7): add the rows of `core` (a handful of tools used on every turn) and of `schema` (resources: the database schemas), both with the scope project, and under the table the line that reads the orders schema as a resource: @schema:schema://orders. Remove the personal path above for e8. -->\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/docs/tool-descriptions.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"tools\": [\n    {\n      \"name\": \"search_docs\",\n      \"description\": \"\",\n      \"inputSchema\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"query\": {\"type\": \"string\", \"description\": \"What to look for, in plain language or as an exact page title.\"},\n          \"limit\": {\"type\": \"integer\", \"description\": \"How many matches to return, from 1 to 10. The default is 10.\"}\n        },\n        \"required\": [\"query\"]\n      }\n    }\n  ]\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/user-scope.example.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"mcpServers\": {\n    \"scratch\": {\n      \"type\": \"stdio\",\n      \"command\": \"python3\",\n      \"args\": [\"/home/dev/experiments/scratch_mcp.py\"]\n    }\n  }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 7,
+    "code": 5,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "41e94fa9890df255dbc56ca888f6339498e8cc2e0574993e22fbde74ee8677fa",
+  "starting_code": "{\n  \"mcpServers\": {\n    \"github\": {\n      \"type\": \"http\",\n      \"url\": \"https://github-mcp.example.com/mcp\",\n      \"headers\": {\n        \"Authorization\": \"Bearer lit-tok\"\n      }\n    },\n    \"docs\": {\n      \"type\": \"stdio\",\n      \"command\": \"\",\n      \"args\": [],\n      \"env\": {}\n    },\n    \"core\": {\n      \"type\": \"http\",\n      \"url\": \"https://core-mcp.example.com/mcp\"\n    },\n    \"schema\": {\n      \"type\": \"stdio\",\n      \"command\": \"\",\n      \"args\": []\n    }\n  }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-1/project/.mcp.json",
+    "test_path": "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-1/tests/test_mcp_setup.py",
+    "run_command": [
+      "python3",
+      "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-1/check_files.py",
+      "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-1/project/.claude/settings.json",
+      "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-1/project/.mcp.json",
+      "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-1/project/docs/mcp-servers.md",
+      "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-1/project/docs/tool-descriptions.json",
+      "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-1/project/user-scope.example.json"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-1/tests/test_mcp_setup.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_the_shared_file_declares_the_four_team_servers_with_the_right_shape",
+        "kind": "main",
+        "says": "The shared file declares the four team servers with the right shape"
+      },
+      {
+        "id": "test_e1_credentials_are_read_from_the_environment_and_never_written_in_the_file",
+        "kind": "edge",
+        "says": "Credentials come from the environment, never from the file, and not under a name Claude Code blanks out"
+      },
+      {
+        "id": "test_e2_endpoints_and_paths_that_are_not_secret_have_a_default_so_the_file_works_unset",
+        "kind": "edge",
+        "says": "Endpoints and paths that are not secret have a default, so the file works with nothing set"
+      },
+      {
+        "id": "test_e3_only_the_small_core_server_is_loaded_at_the_start",
+        "kind": "edge",
+        "says": "Only the small core server is loaded at the start"
+      },
+      {
+        "id": "test_e4_shared_servers_stay_in_the_project_file_and_personal_ones_in_the_user_scope_file",
+        "kind": "edge",
+        "says": "Shared servers are in the project file and the personal one only in the user-scope example"
+      },
+      {
+        "id": "test_e5_permissions_allow_the_read_only_servers_by_name_and_deny_the_destructive_tool",
+        "kind": "edge",
+        "says": "Permissions allow the read-only servers by name and deny the destructive tool"
+      },
+      {
+        "id": "test_e6_the_tool_description_says_when_to_use_it_instead_of_grep_and_fits_the_limit",
+        "kind": "edge",
+        "says": "The tool description gives the boundary against Grep early and fits the limit"
+      },
+      {
+        "id": "test_e7_the_notes_list_every_server_with_its_scope_and_read_the_catalog_as_a_resource",
+        "kind": "edge",
+        "says": "The notes list every server with its scope and read the catalog as a resource"
+      },
+      {
+        "id": "test_e8_no_file_holds_a_personal_path_an_address_or_a_key",
+        "kind": "edge",
+        "says": "No file holds a personal path, an address or a key"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/55-mcp-in-claude-code/02-tools-together-descriptions-resources-and-the-practice.md",
+    "concepts": [
+      "the practice of Tools together, descriptions that steer, resources and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-1/project/.claude/settings.json",
+      "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-1/project/docs/mcp-servers.md",
+      "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-1/project/docs/tool-descriptions.json",
+      "practice/level-3/55-mcp-in-claude-code/prose/unit-02/practice-1/project/user-scope.example.json"
+    ]
+  },
+  "lang": "python",
+  "edition": "mcp-in-claude-code-u2"
+}

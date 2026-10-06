@@ -1,0 +1,87 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "15-errors-retries-and-timeouts"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 3,
+  "title": "Practice: a retry policy, graded on scripted failures (Java)",
+  "lang": "java",
+  "main_file": "src/main/java/Retry.java",
+  "files": [
+    "src/main/java/TryIt.java"
+  ],
+  "test_file": "src/test/java/RetryTest.java",
+  "build": [
+    "src/main/java/Json.java",
+    "src/main/java/Types.java",
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/15-errors-retries-and-timeouts/prose/unit-02/practice-3",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/15-errors-retries-and-timeouts/prose/unit-02/practice-3",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_overloadedTwiceThenSuccessReturnsTheGoodReplyAfterTwoWaits()",
+      "kind": "main",
+      "says": "Overloaded twice, then success: the good reply comes back after waits of 0.5 and 1.0"
+    },
+    {
+      "id": "e1_clientErrorsAreNotRetried()",
+      "kind": "edge",
+      "says": "400, 401, 404 and 413 are not retried"
+    },
+    {
+      "id": "e2_retryAfterIsAFloorForTheWait()",
+      "kind": "edge",
+      "says": "retry-after is a floor for the wait"
+    },
+    {
+      "id": "e3_delayDoublesUpToTheCapAndTheJitterIsAppliedLast()",
+      "kind": "edge",
+      "says": "The delay doubles up to the cap, and the jitter is applied last"
+    },
+    {
+      "id": "e4_aSpendCap429IsNotRetried()",
+      "kind": "edge",
+      "says": "A spend-cap 429 is not retried"
+    },
+    {
+      "id": "e5_connectionErrorsAreRetriedLikeServerErrors()",
+      "kind": "edge",
+      "says": "Connection errors are retried like server errors, and give connection_error at the end"
+    },
+    {
+      "id": "e6_givingUpReportsTheLastReplyAndDoesNotWaitAfterTheLastAttempt()",
+      "kind": "edge",
+      "says": "Giving up reports the last reply, makes exactly max_attempts calls and waits one time fewer"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/15-errors-retries-and-timeouts/02-retry-back-off-and-idempotency.md"
+}

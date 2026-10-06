@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/java/Assemble.java",
+      "old": "if (event.get(\"usage\") instanceof Map<?, ?> u) ((Map<String, Object>) message.get(\"usage\")).putAll((Map<String, Object>) u);",
+      "new": "if (event.get(\"usage\") instanceof Map<?, ?> u) {\n            Map<String, Object> total = (Map<String, Object>) message.get(\"usage\");\n            total.put(\"output_tokens\", ((Number) total.get(\"output_tokens\")).longValue() + ((Number) ((Map<String, Object>) u).get(\"output_tokens\")).longValue());\n        }"
+    }
+  ]
+}

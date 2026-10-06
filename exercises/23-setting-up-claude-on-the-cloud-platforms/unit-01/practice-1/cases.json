@@ -1,0 +1,158 @@
+{
+  "practice": "23-setting-up-claude-on-the-cloud-platforms/unit-01/practice-1",
+  "name": "platformconfig",
+  "tests": {
+    "java": "PlatformConfigTest",
+    "kotlin": "PlatformConfigTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_the_policy_allows_invoking_one_model_in_one_region_and_nothing_else",
+      "typescript": "m1 the policy allows invoking one model in one region and nothing else",
+      "java": "m1_thePolicyAllowsInvokingOneModelInOneRegionAndNothingElse",
+      "kotlin": "m1_thePolicyAllowsInvokingOneModelInOneRegionAndNothingElse"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_no_action_is_a_wildcard_and_every_action_is_an_invoke_action",
+      "typescript": "e1 no action is a wildcard and every action is an invoke action",
+      "java": "e1_noActionIsAWildcardAndEveryActionIsAnInvokeAction",
+      "kotlin": "e1_noActionIsAWildcardAndEveryActionIsAnInvokeAction"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_every_resource_arn_names_one_documented_region_and_one_model",
+      "typescript": "e2 every resource arn names one documented region and one model",
+      "java": "e2_everyResourceArnNamesOneDocumentedRegionAndOneModel",
+      "kotlin": "e2_everyResourceArnNamesOneDocumentedRegionAndOneModel"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_every_statement_allows_and_the_policy_uses_the_current_version",
+      "typescript": "e3 every statement allows and the policy uses the current version",
+      "java": "e3_everyStatementAllowsAndThePolicyUsesTheCurrentVersion",
+      "kotlin": "e3_everyStatementAllowsAndThePolicyUsesTheCurrentVersion"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_the_vertex_role_is_a_custom_role_that_can_only_predict",
+      "typescript": "e4 the vertex role is a custom role that can only predict",
+      "java": "e4_theVertexRoleIsACustomRoleThatCanOnlyPredict",
+      "kotlin": "e4_theVertexRoleIsACustomRoleThatCanOnlyPredict"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_the_vertex_endpoint_keeps_the_data_where_residency_says_and_serves_the_model",
+      "typescript": "e5 the vertex endpoint keeps the data where residency says and serves the model",
+      "java": "e5_theVertexEndpointKeepsTheDataWhereResidencySaysAndServesTheModel",
+      "kotlin": "e5_theVertexEndpointKeepsTheDataWhereResidencySaysAndServesTheModel"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_model_ids_use_each_platforms_own_form",
+      "typescript": "e6 model ids use each platforms own form",
+      "java": "e6_modelIdsUseEachPlatformsOwnForm",
+      "kotlin": "e6_modelIdsUseEachPlatformsOwnForm"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_the_quota_request_stays_under_the_self_service_ceiling",
+      "typescript": "e7 the quota request stays under the self service ceiling",
+      "java": "e7_theQuotaRequestStaysUnderTheSelfServiceCeiling",
+      "kotlin": "e7_theQuotaRequestStaysUnderTheSelfServiceCeiling"
+    }
+  },
+  "plants": {
+    "wrong-wildcard-action": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "adds a wildcard action beside the invoke action"
+    },
+    "wrong-non-invoke-action": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "adds an action that is not an invoke action"
+    },
+    "wrong-resource-star": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "adds a resource that matches every resource"
+    },
+    "wrong-region-wildcard": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "adds a model ARN whose region is a wildcard"
+    },
+    "wrong-undocumented-region": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "adds a model ARN with a region Bedrock does not list"
+    },
+    "wrong-old-policy-version": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "uses the 2008 policy language version"
+    },
+    "wrong-deny-statement": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "makes the statement a Deny"
+    },
+    "wrong-predefined-role": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "binds a broad predefined role instead of a custom role"
+    },
+    "wrong-extra-permission": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "adds a deploy permission to the role"
+    },
+    "wrong-global-for-eu": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "sends EU-resident traffic to the global endpoint"
+    },
+    "wrong-regional-new-model": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "picks a specific region for a model that only the global and multi-region endpoints serve"
+    },
+    "wrong-bare-model-id": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "adds a model ARN without the Bedrock provider prefix"
+    },
+    "wrong-vertex-prefixed-model": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "gives the Vertex model the Bedrock provider prefix"
+    },
+    "wrong-haiku-undated": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "names Haiku 4.5 on Vertex without its date"
+    },
+    "wrong-quota-over": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "asks for more input tokens per minute than the self-service ceiling"
+    }
+  }
+}

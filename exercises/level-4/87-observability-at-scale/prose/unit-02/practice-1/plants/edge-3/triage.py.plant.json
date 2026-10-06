@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "triage.py",
+      "old": "    failed = [s for s in spans if s.status == \"error\"]\n    if failed:",
+      "new": "    failed = [s for s in spans if s.status == \"error\"]\n    b = _blamed_retrieval(spans)\n    if b is not None:\n        return {\"layer\": \"retrieval\", \"name\": b.name, \"why\": b.note, \"path\": [spans[0].name, b.name]}\n    if failed:"
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "14-the-messages-api"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: Turns, roles, the system prompt and content blocks",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A support bot works well in testing, where the developer types fast, but real users report that it answers each message as though it were the first. The code sends the newest user message and the system prompt each time. What is the cause?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The history of earlier turns is not part of the requests",
+            "correct": true,
+            "says": "The page says \"the Messages API is stateless\", so the client has to send the whole history each time."
+          },
+          {
+            "id": "b",
+            "text": "The system prompt should hold a summary of the earlier talk",
+            "correct": false,
+            "says": "Ruled out because the system prompt is a top-level field for \"instructions that apply from the start\", and a hand-made summary is not how history is kept."
+          },
+          {
+            "id": "c",
+            "text": "The output limit is too low for the model to recall earlier turns",
+            "correct": false,
+            "says": "Ruled out because \"a conversation exists only as the list your code sends each time\", and no output limit supplies a missing list."
+          },
+          {
+            "id": "d",
+            "text": "The model needs a different tier for multi-turn memory",
+            "correct": false,
+            "says": "Ruled out because \"the model keeps nothing between requests\", whichever tier answers."
+          }
+        ],
+        "origin": {
+          "path": "course/14-the-messages-api/01-turns-roles-and-content-blocks.md",
+          "section": "The API is stateless"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "After a move from Claude Sonnet 4.5 to Claude Sonnet 5.5, every request of a JSON-extraction job returns a 400. The code ends each list with a message from the model's side that holds an opening brace. Which fix is best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Put the brace in a message with the role system at the end of the list",
+            "correct": false,
+            "says": "Ruled out because a system-role message is for \"instructions that only become relevant later\" and does not pre-fill a reply."
+          },
+          {
+            "id": "b",
+            "text": "Keep the trailing message but lower the sampling temperature to zero",
+            "correct": false,
+            "says": "Ruled out because \"a request that does returns a 400 invalid_request_error\", whatever the temperature."
+          },
+          {
+            "id": "c",
+            "text": "Drop the final entry and ask for the format through structured outputs",
+            "correct": true,
+            "says": "Prefill is not supported on current models, and the page names structured outputs and system-prompt instructions as the replacements."
+          },
+          {
+            "id": "d",
+            "text": "Move the brace into the system field so that the reply still begins with it",
+            "correct": false,
+            "says": "Ruled out because the field is for \"instructions that hold from the first turn\", and an instruction does not start a reply with a given character."
+          }
+        ],
+        "origin": {
+          "path": "course/14-the-messages-api/01-turns-roles-and-content-blocks.md",
+          "section": "Roles"
+        }
+      }
+    ]
+  }
+}

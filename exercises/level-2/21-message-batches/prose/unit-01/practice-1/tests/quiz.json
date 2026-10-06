@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "21-message-batches"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: Submitting a batch: shape, limits and price",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A team has 40,000 classification requests, none needed before tomorrow, on Claude Sonnet 5.5. What does the page support?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Send them as a batch with `stream: true`, so results arrive as they finish",
+            "correct": false,
+            "says": "Ruled out because \"Batch results come back as a single file, not a stream.\""
+          },
+          {
+            "id": "b",
+            "text": "Send them as a batch at the standard price, since a batch only helps throughput",
+            "correct": false,
+            "says": "Ruled out because the discount covers \"input, output and special tokens\" at half price."
+          },
+          {
+            "id": "c",
+            "text": "Send them one by one, since a batch cannot take more than a few hundred",
+            "correct": false,
+            "says": "Ruled out because \"A Message Batch is limited to either 100,000 Message requests or 256 MB in size\", which is far above a few hundred."
+          },
+          {
+            "id": "d",
+            "text": "Send them as a batch, at 50% of the standard price, and read the results later",
+            "correct": true,
+            "says": "The page says \"All usage is charged at 50% of the standard API prices\" and that the batch suits work where \"Immediate responses are not required\"."
+          }
+        ],
+        "origin": {
+          "path": "course/21-message-batches/01-submitting-a-batch-limits-and-price.md",
+          "section": "The price"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A batch request body copied from a live endpoint contains `speed` set to fast. What is the outcome for that request?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A validation error comes back, since that parameter is unsupported here",
+            "correct": true,
+            "says": "The page says these parameters are \"refused with a validation error\"."
+          },
+          {
+            "id": "b",
+            "text": "The batch runs at the fast rate, since the parameter is passed through unchanged",
+            "correct": false,
+            "says": "Ruled out because \"Fast mode tunes synchronous latency, which doesn't apply to asynchronous batch processing.\""
+          },
+          {
+            "id": "c",
+            "text": "The parameter is dropped silently, and the batch runs at the standard rate",
+            "correct": false,
+            "says": "Ruled out because the page says they are \"refused with a validation error\", not dropped."
+          },
+          {
+            "id": "d",
+            "text": "The batch is accepted, but the fast rate is billed in place of the discount",
+            "correct": false,
+            "says": "Ruled out because \"All usage is charged at 50% of the standard API prices\", with no fast rate in a batch."
+          }
+        ],
+        "origin": {
+          "path": "course/21-message-batches/01-submitting-a-batch-limits-and-price.md",
+          "section": "What a batch can carry"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A job has 250,000 small requests. How must it be submitted?",
+        "options": [
+          {
+            "id": "a",
+            "text": "In two batches, since each holds up to 128,000 requests",
+            "correct": false,
+            "says": "Ruled out because the stated limit is \"either 100,000 Message requests or 256 MB\", not 128,000."
+          },
+          {
+            "id": "b",
+            "text": "In one batch, since the size limit is counted in bytes and not in requests",
+            "correct": false,
+            "says": "Ruled out because \"whichever is reached first\" means the request count limit applies as well as the size."
+          },
+          {
+            "id": "c",
+            "text": "In at least three parts, since one batch holds 100,000 items at most",
+            "correct": true,
+            "says": "The page says \"A Message Batch is limited to either 100,000 Message requests or 256 MB in size, whichever is reached first\", so 250,000 needs three."
+          },
+          {
+            "id": "d",
+            "text": "In one batch, and the system splits it into parts by itself",
+            "correct": false,
+            "says": "Ruled out because the splitting is the client's job: \"whichever is reached first\" is a limit on what you submit, and the practice's `split_batches` does the cutting."
+          }
+        ],
+        "origin": {
+          "path": "course/21-message-batches/01-submitting-a-batch-limits-and-price.md",
+          "section": "The limits"
+        }
+      }
+    ]
+  }
+}

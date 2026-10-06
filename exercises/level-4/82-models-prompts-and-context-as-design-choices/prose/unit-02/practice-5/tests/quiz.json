@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-4",
+    "82-models-prompts-and-context-as-design-choices"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 5,
+  "title": "Check yourself: Choosing a model and shaping the context",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "Scenario: Osprey Support needs ticket tagging answered within 800 ms. Candidates A and B are capable enough and fast enough, and B costs less per output token. Candidate C costs less still, but it takes 1,400 ms. Which candidate should the plan pick?",
+        "options": [
+          {
+            "id": "a",
+            "text": "C, since the lowest price decides the matter once capability has been established",
+            "correct": false,
+            "says": "Ruled out because C fails the limit, and price \"can only rank models that are already right\"."
+          },
+          {
+            "id": "b",
+            "text": "B, the lowest-priced of the ones that satisfy every requirement",
+            "correct": true,
+            "says": "Latency rules C out, and price ranks the models that remain."
+          },
+          {
+            "id": "c",
+            "text": "A, since the dearer option is the safer one for a first release to customers",
+            "correct": false,
+            "says": "Ruled out because the rule is to choose \"among the models whose tier is at least the workload's and whose latency is within the limit\" and take the cheapest, with no bonus for the dearer one."
+          },
+          {
+            "id": "d",
+            "text": "Whichever the team used last, because consistency across workloads outweighs the saving",
+            "correct": false,
+            "says": "Ruled out because the choice is \"a design choice per workload\", not one habit applied to all."
+          }
+        ],
+        "origin": {
+          "path": "course/82-models-prompts-and-context-as-design-choices/02-choosing-a-model-and-shaping-the-context.md",
+          "section": "A model is chosen for a workload"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "Scenario: Kestrel Labs needs a model for a task at tier 3 with a latency limit of 500 ms. The candidates are a tier 3 model at 2,500 ms and a tier 2 model at 300 ms. What should the plan record?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The tier 2 candidate, since it is the only one that stays within the limit",
+            "correct": false,
+            "says": "Ruled out because \"A model below the tier fails the task\"."
+          },
+          {
+            "id": "b",
+            "text": "The tier 3 candidate, since capability matters more than speed in a first release to customers",
+            "correct": false,
+            "says": "Ruled out because the limit is part of the requirement too, and the candidate would fall under \"A model slower than the limit\"."
+          },
+          {
+            "id": "c",
+            "text": "That nothing qualifies, since neither option satisfies both requirements",
+            "correct": true,
+            "says": "No candidate meets both the tier and the latency, so the finding is a mismatch that someone must resolve by relaxing a requirement."
+          },
+          {
+            "id": "d",
+            "text": "The cheaper of the two candidates, so that the budget of the project is protected",
+            "correct": false,
+            "says": "Ruled out because \"Price comes last because it is the only fact that cannot make a model wrong\"."
+          }
+        ],
+        "origin": {
+          "path": "course/82-models-prompts-and-context-as-design-choices/02-choosing-a-model-and-shaping-the-context.md",
+          "section": "A model is chosen for a workload"
+        }
+      }
+    ]
+  }
+}

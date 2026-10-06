@@ -1,0 +1,83 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "41-security-and-safety"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 2,
+  "title": "Practice: an injection-resistant tool gate (TypeScript)",
+  "lang": "typescript",
+  "main_file": "gate.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "gate.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-2/41-security-and-safety/prose/unit-03/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-2/41-security-and-safety/prose/unit-03/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-2/41-security-and-safety/prose/unit-03/practice-2/gate.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 untrusted text reaches the model only as one json string that says where it came from",
+      "kind": "main",
+      "says": "Untrusted text is delivered as one JSON string that names its source and says it is untrusted"
+    },
+    {
+      "id": "e1 a screen names injection signals and a flagged result is withheld with an error",
+      "kind": "edge",
+      "says": "The screen names the signals, ignores clean text, and a flagged result is withheld with an error that shows none of the text"
+    },
+    {
+      "id": "e2 reads and writes stay inside the project and away from secrets and protected folders",
+      "kind": "edge",
+      "says": "Paths stay inside the project, secrets and protected folders are refused, a sibling folder with a similar name is outside"
+    },
+    {
+      "id": "e3 bash is limited to a few read only commands and dangerous or chained ones are refused",
+      "kind": "edge",
+      "says": "Bash is limited to read-only commands; dangerous, chained and redirected commands and secret arguments are refused"
+    },
+    {
+      "id": "e4 fetch and email obey the host and domain lists and refuse credentials in a url",
+      "kind": "edge",
+      "says": "Fetch obeys the host list (a lookalike host fails) and refuses credentials; email obeys the domain list and the body check"
+    },
+    {
+      "id": "e5 once untrusted content is in the session anything that changes things asks or is refused",
+      "kind": "edge",
+      "says": "After untrusted content entered the session, changes ask, an email is refused, reads still work, and a denial stays a denial"
+    },
+    {
+      "id": "e6 secrets card numbers and addresses are redacted in text and in the audit",
+      "kind": "edge",
+      "says": "Redaction covers keys, addresses and Luhn-valid cards, leaves other numbers, and the audit never holds a raw secret"
+    },
+    {
+      "id": "e7 the hook answer follows the documented shapes and repeated denials raise an alert",
+      "kind": "edge",
+      "says": "The hook answer has the documented shapes and repeated denials by one actor raise an alert, while questions do not"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/41-security-and-safety/03-guardrails-monitoring-and-the-practice.md"
+}

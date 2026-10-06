@@ -1,0 +1,78 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-1",
+    "06-prompting-fundamentals"
+  ],
+  "variant": "prose",
+  "unit": 4,
+  "ordinal": 2,
+  "title": "Practice: a prompt template builder, graded on structure (TypeScript)",
+  "lang": "typescript",
+  "main_file": "promptBuilder.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "promptBuilder.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-1/06-prompting-fundamentals/prose/unit-04/practice-2/promptBuilder.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 full prompt has every section in order",
+      "kind": "main",
+      "says": "A full spec renders every section in the order above"
+    },
+    {
+      "id": "e1 absent optional sections are omitted not empty",
+      "kind": "edge",
+      "says": "Absent, empty and whitespace-only optional sections are omitted, not rendered empty"
+    },
+    {
+      "id": "e2 variables fill once and a missing one is named",
+      "kind": "edge",
+      "says": "Variables are filled in one pass; a missing variable is named in the error"
+    },
+    {
+      "id": "e3 blank task is refused",
+      "kind": "edge",
+      "says": "A missing, empty or whitespace-only task is refused"
+    },
+    {
+      "id": "e4 document text cannot close its own tag",
+      "kind": "edge",
+      "says": "Document text and names are escaped, so a document cannot close its own tag"
+    },
+    {
+      "id": "e5 placeholders inside documents stay literal",
+      "kind": "edge",
+      "says": "Placeholders inside document text stay literal"
+    },
+    {
+      "id": "e6 documents and examples keep their order and index",
+      "kind": "edge",
+      "says": "Documents and examples keep their order and their numbering"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/06-prompting-fundamentals/04-diagnosing-a-weak-output.md"
+}

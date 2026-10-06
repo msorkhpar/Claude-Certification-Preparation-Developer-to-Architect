@@ -1,0 +1,290 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "19-thinking-effort-and-speed"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: thinking, effort and speed set correctly per model (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: thinking, effort and speed set correctly per model"
+    },
+    {
+      "type": "para",
+      "text": "Write the function that turns what an application wants (thinking mode, effort, fast mode, sampling) into request parameters for one model, and refuses the combinations the API would answer with a 400. The rules come from the documentation read on 2026-10-02 and are summarised in `docs/VERSIONS.md`; the lesson pages explain them."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given types"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`RejectedRequest`",
+          "the error to raise: `param` names the offending parameter (`thinking`, `thinking.budget_tokens`, `output_config.effort`, `temperature`, `top_p`, `top_k`, `speed`, `max_tokens` or `model`)"
+        ],
+        [
+          "`options`",
+          "a map that may hold `thinking` (a map with `type`, and `budget_tokens` for `enabled`), `effort` (a string), `speed` (`fast` or `standard`), `batch` (true when the request goes into a Message Batch), `temperature`, `top_p`, `top_k`"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The four models are `claude-fable-5-1`, `claude-opus-5-5`, `claude-sonnet-5-5` and `claude-haiku-4-5-20251001` (the alias `claude-haiku-4-5` counts as Haiku). Any other model id is rejected with `param` set to `model`."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "`build_params(model, max_tokens, options)` (TypeScript `buildParams`, Java `Params.buildParams`, Kotlin `buildParams`)"
+    },
+    {
+      "type": "para",
+      "text": "Return a map with `model`, `max_tokens` and only the keys the options asked for, or raise `RejectedRequest`:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**`max_tokens`** below 1 is rejected.",
+        "**Effort** goes into `output_config` as `{\"effort\": level}`, never into `thinking`. Haiku 4.5 does not support effort. The levels are `low`, `medium`, `high`, `xhigh` and `max`; anything else (`adaptive` is a thinking mode, not a level) is rejected. Fable 5.1, Opus 5.5 and Sonnet 5.5 take all five.",
+        "**Thinking.** Fable 5.1 and Opus 5.5 take adaptive thinking only: `enabled` and `disabled` are rejected. Sonnet 5.5 takes `adaptive`, rejects `enabled` and `disabled`, and also takes `between_tools` (thinking off up front) when the effective effort is `low`, `medium` or `high` (the effort given, or the model's default: `high` on Sonnet 5.5 and Fable 5.1, `medium` on Opus 5.5). Haiku 4.5 takes `enabled` with a `budget_tokens` of at least 1,024 and below `max_tokens`, and `disabled`; it rejects `adaptive` and `between_tools`. No `thinking` option means no `thinking` key.",
+        "**Sampling.** Fable 5.1, Opus 5.5 and Sonnet 5.5 reject `top_p`, `top_k` and any `temperature` other than 1.0. Haiku 4.5 passes all three through.",
+        "**Fast mode** (`speed` of `fast`) exists on Opus 5.5 only and is refused inside a batch; it adds `speed: \"fast\"` and `betas: [\"fast-mode-2026-02-01\"]` to the result. A `speed` of `standard` adds nothing.",
+        "Never change the `options` you were given."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working request builder with seven gaps cut out of it. The model lookup, the `max_tokens` check, the order of the checks, the assembly of the result and the unknown-type refusal are written and correct. Each gap is one small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails every case on an assertion. To see what a gap receives, log its input with the `log` line at the top of the file (`log.debug(...)`); a run shows the lines under the failing case. The names below are Python's; TypeScript, Java and Kotlin use the camel-case forms (`checkEffort`, `checkMode`, `checkBudget`, `checkBetweenTools`, `thinkingObject`, `samplingAllowed`, `fastParams`)."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_check_effort` unlocks `e3`: Haiku has no effort and the level must be a real one.",
+        "`_check_mode` unlocks `e1`: the thinking modes a model does not have.",
+        "`_check_budget` unlocks `e6`: a manual budget of at least 1,024 and below `max_tokens`.",
+        "`_check_between_tools` unlocks `e2`: Sonnet only, and not at `xhigh` or `max` effort.",
+        "`_thinking_object` unlocks `m1` and `e7`: the `thinking` value, with no effort in it.",
+        "`_sampling_allowed` unlocks `e4`: Haiku keeps sampling parameters, the others only a temperature of 1.0.",
+        "`_fast_params` unlocks `e5`: Opus only, never in a batch, with the beta header."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Each course model gets the request it accepts"
+        ],
+        [
+          "`e1`",
+          "Thinking modes a model does not have are refused"
+        ],
+        [
+          "`e2`",
+          "The mode that skips thinking up front is Sonnet only and needs high effort or below"
+        ],
+        [
+          "`e3`",
+          "Effort needs a supporting model and a real level"
+        ],
+        [
+          "`e4`",
+          "Newer models reject sampling parameters and Haiku keeps them"
+        ],
+        [
+          "`e5`",
+          "Fast mode is Opus only, carries its beta header and is never sent in a batch"
+        ],
+        [
+          "`e6`",
+          "A manual budget is at least 1,024 and below `max_tokens`; `max_tokens` is at least 1"
+        ],
+        [
+          "`e7`",
+          "Effort lives in `output_config`, never inside `thinking`, and the options are left unchanged"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/** Request parameters for thinking, effort and speed, checked per model. See ../../statement.md for the contract. */\nfinal class Params {\n    private static final System.Logger LOG = System.getLogger(Params.class.getName());\n    private Params() {}\n\n    private static final List<String> EFFORTS = List.of(\"low\", \"medium\", \"high\", \"xhigh\", \"max\");\n    private static final String FAST_BETA = \"fast-mode-2026-02-01\";\n    private static final Map<String, String> DEFAULT_EFFORT = Map.of(\n            \"claude-fable-5-1\", \"high\", \"claude-opus-5-5\", \"medium\", \"claude-sonnet-5-5\", \"high\");\n\n    private static String family(String model) {\n        if (model.startsWith(\"claude-haiku-4-5\")) return \"claude-haiku-4-5\";\n        if (DEFAULT_EFFORT.containsKey(model)) return model;\n        throw new RejectedRequest(\"model\", \"unknown model \" + model);\n    }\n\n    /** Refuse an effort level the model cannot take. */\n    private static void checkEffort(boolean haiku, String effort) {\n        if (haiku) throw new RejectedRequest(\"output_config.effort\", \"this model does not support effort\");\n        if (!EFFORTS.contains(effort)) throw new RejectedRequest(\"output_config.effort\", effort + \" is not an effort level\");\n    }\n\n    /** Refuse a thinking mode the model does not have. */\n    private static void checkMode(boolean haiku, String kind) {\n        if (kind.equals(\"adaptive\") && haiku) throw new RejectedRequest(\"thinking\", \"adaptive thinking is not available on this model\");\n        if (kind.equals(\"enabled\") && !haiku) throw new RejectedRequest(\"thinking\", \"manual thinking budgets are not accepted on this model\");\n        if (kind.equals(\"disabled\") && !haiku) throw new RejectedRequest(\"thinking\", \"thinking cannot be turned off on this model\");\n    }\n\n    /** Refuse a manual thinking budget that is missing, below 1024 or not below maxTokens. */\n    private static void checkBudget(Number budget, int maxTokens) {\n        if (budget == null || budget.longValue() < 1024 || budget.longValue() >= maxTokens) {\n            throw new RejectedRequest(\"thinking.budget_tokens\", \"at least 1024 and below max_tokens\");\n        }\n    }\n\n    /** Refuse between_tools off Sonnet 5.5, or when the effective effort is xhigh or max. */\n    private static void checkBetweenTools(String family, String effort) {\n        if (!family.equals(\"claude-sonnet-5-5\")) throw new RejectedRequest(\"thinking\", \"between_tools exists only on Claude Sonnet 5.5\");\n        String level = effort != null ? effort : DEFAULT_EFFORT.get(family);\n        if (level.equals(\"xhigh\") || level.equals(\"max\")) {\n            throw new RejectedRequest(\"thinking\", \"between_tools works at low, medium and high effort only\");\n        }\n    }\n\n    /** The `thinking` value of the request: the type, and the budget for a manual one. */\n    private static Map<String, Object> thinkingObject(String kind, Number budget) {\n        Map<String, Object> thinking = new LinkedHashMap<>();\n        thinking.put(\"type\", kind);\n        if (kind.equals(\"enabled\")) thinking.put(\"budget_tokens\", budget);\n        return thinking;\n    }\n\n    /** Whether the model accepts this sampling parameter: Haiku all, the others only temperature 1.0. */\n    private static boolean samplingAllowed(boolean haiku, String name, Object value) {\n        return haiku || (name.equals(\"temperature\") && ((Number) value).doubleValue() == 1.0);\n    }\n\n    /** The parameters fast mode adds, or a refusal: Opus 5.5 only, and never in a batch. */\n    private static Map<String, Object> fastParams(String family, boolean batch) {\n        if (!family.equals(\"claude-opus-5-5\")) throw new RejectedRequest(\"speed\", \"fast mode is not available on this model\");\n        if (batch) throw new RejectedRequest(\"speed\", \"fast mode is not available in a batch\");\n        Map<String, Object> fast = new LinkedHashMap<>();\n        fast.put(\"speed\", \"fast\");\n        fast.put(\"betas\", List.of(FAST_BETA));\n        return fast;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> buildParams(String model, int maxTokens, Map<String, Object> options) {\n        LOG.log(System.Logger.Level.DEBUG, \"buildParams input: {0} {1} {2}\", model, maxTokens, options);\n        String family = family(model);\n        boolean haiku = family.equals(\"claude-haiku-4-5\");\n        if (maxTokens < 1) throw new RejectedRequest(\"max_tokens\", \"must be at least 1\");\n        Map<String, Object> params = new LinkedHashMap<>();\n        params.put(\"model\", model);\n        params.put(\"max_tokens\", maxTokens);\n\n        String effort = (String) options.get(\"effort\");\n        if (effort != null) {\n            checkEffort(haiku, effort);\n            params.put(\"output_config\", Map.of(\"effort\", effort));\n        }\n\n        Map<String, Object> thinking = (Map<String, Object>) options.get(\"thinking\");\n        if (thinking != null) {\n            String kind = (String) thinking.get(\"type\");\n            if (kind == null || !List.of(\"adaptive\", \"enabled\", \"disabled\", \"between_tools\").contains(kind)) {\n                throw new RejectedRequest(\"thinking\", \"unknown thinking type \" + kind);\n            }\n            if (kind.equals(\"between_tools\")) checkBetweenTools(family, effort);\n            else checkMode(haiku, kind);\n            Number budget = (Number) thinking.get(\"budget_tokens\");\n            if (kind.equals(\"enabled\")) checkBudget(budget, maxTokens);\n            params.put(\"thinking\", thinkingObject(kind, budget));\n        }\n\n        for (String name : List.of(\"temperature\", \"top_p\", \"top_k\")) {\n            Object value = options.get(name);\n            if (value == null) continue;\n            if (!samplingAllowed(haiku, name, value)) throw new RejectedRequest(name, \"this model rejects a non-default value\");\n            params.put(name, value);\n        }\n\n        if (\"fast\".equals(options.get(\"speed\"))) params.putAll(fastParams(family, Boolean.TRUE.equals(options.get(\"batch\"))));\n        return params;\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        String sonnet = \"claude-sonnet-5-5\";\n        String haiku = \"claude-haiku-4-5-20251001\";\n\n        // What the application wants, turned into the request parameters one model accepts.\n        System.out.println(\"sonnet adaptive: \" + Params.buildParams(sonnet, 4096, Map.of(\"thinking\", Map.of(\"type\", \"adaptive\"), \"effort\", \"medium\")));\n        System.out.println(\"haiku budget: \" + Params.buildParams(haiku, 4096, Map.of(\"thinking\", Map.of(\"type\", \"enabled\", \"budget_tokens\", 2048))));\n\n        // A combination the API would answer with a 400 is refused, naming the parameter.\n        try {\n            System.out.println(\"haiku with effort: \" + Params.buildParams(haiku, 4096, Map.of(\"effort\", \"high\")));\n        } catch (RejectedRequest err) {\n            System.out.println(\"refused: \" + err.param());\n        }\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/** Request parameters for thinking, effort and speed, checked per model. See ../../statement.md for the contract. */\nfinal class Params {\n    private static final System.Logger LOG = System.getLogger(Params.class.getName());\n    private Params() {}\n\n    private static final List<String> EFFORTS = List.of(\"low\", \"medium\", \"high\", \"xhigh\", \"max\");\n    private static final String FAST_BETA = \"fast-mode-2026-02-01\";\n    private static final Map<String, String> DEFAULT_EFFORT = Map.of(\n            \"claude-fable-5-1\", \"high\", \"claude-opus-5-5\", \"medium\", \"claude-sonnet-5-5\", \"high\");\n\n    private static String family(String model) {\n        if (model.startsWith(\"claude-haiku-4-5\")) return \"claude-haiku-4-5\";\n        if (DEFAULT_EFFORT.containsKey(model)) return model;\n        throw new RejectedRequest(\"model\", \"unknown model \" + model);\n    }\n\n    private static void checkEffort(boolean haiku, String effort) {\n        // TODO 1 of 7 (finish this to pass e3): refuse an effort level the model cannot take.\n        // Receives whether the model is Haiku and the effort given. Throws RejectedRequest(\"output_config.effort\", ...) for Haiku (it has no effort) and for a level that is not in EFFORTS.\n        // Example: checkEffort(true, \"low\") throws, checkEffort(false, \"adaptive\") throws, checkEffort(false, \"high\") returns\n    }\n\n    private static void checkMode(boolean haiku, String kind) {\n        // TODO 2 of 7 (finish this to pass e1): refuse a thinking mode the model does not have.\n        // Receives whether the model is Haiku and the thinking type. Throws RejectedRequest(\"thinking\", ...) for \"adaptive\" on Haiku, and for \"enabled\" or \"disabled\" on any model that is not Haiku.\n        // Example: checkMode(false, \"disabled\") throws, checkMode(true, \"disabled\") returns\n    }\n\n    private static void checkBudget(Number budget, int maxTokens) {\n        // TODO 3 of 7 (finish this to pass e6): refuse a manual thinking budget that does not fit.\n        // Receives the budget (null when missing) and maxTokens. Throws RejectedRequest(\"thinking.budget_tokens\", ...) when the budget is missing, below 1024 or not below maxTokens.\n        // Example: checkBudget(1023, 4096) throws, checkBudget(2048, 2048) throws, checkBudget(1024, 2048) returns\n    }\n\n    private static void checkBetweenTools(String family, String effort) {\n        // TODO 4 of 7 (finish this to pass e2): refuse between_tools where it does not work.\n        // Receives the model family and the effort given (null when absent). Throws RejectedRequest(\"thinking\", ...) unless the family is \"claude-sonnet-5-5\", and when the\n        // effective effort (the one given, else DEFAULT_EFFORT.get(family)) is \"xhigh\" or \"max\".\n        // Example: checkBetweenTools(\"claude-sonnet-5-5\", \"max\") throws, checkBetweenTools(\"claude-sonnet-5-5\", null) returns\n    }\n\n    private static Map<String, Object> thinkingObject(String kind, Number budget) {\n        // TODO 5 of 7 (finish this to pass m1 and e7): the `thinking` value of the request.\n        // Receives the thinking type and the budget (null unless \"enabled\"). Returns a map with \"type\" = kind, plus \"budget_tokens\" = budget for \"enabled\". Effort never goes in here.\n        // Example: thinkingObject(\"adaptive\", null) -> {type=adaptive}, thinkingObject(\"enabled\", 2048) -> {type=enabled, budget_tokens=2048}\n        return new LinkedHashMap<>();\n    }\n\n    private static boolean samplingAllowed(boolean haiku, String name, Object value) {\n        // TODO 6 of 7 (finish this to pass e4): whether the model accepts this sampling parameter.\n        // Receives whether the model is Haiku, the parameter name (temperature, top_p or top_k) and its value. Returns true for Haiku, and for the others only a temperature of exactly 1.0.\n        // Example: samplingAllowed(false, \"temperature\", 0.2) -> false, samplingAllowed(true, \"top_k\", 40) -> true\n        return true;\n    }\n\n    private static Map<String, Object> fastParams(String family, boolean batch) {\n        // TODO 7 of 7 (finish this to pass e5): the parameters fast mode adds, or a refusal.\n        // Receives the model family and whether the request goes into a batch. Throws RejectedRequest(\"speed\", ...) unless the family is \"claude-opus-5-5\", and when `batch` is true.\n        // Otherwise returns a map with \"speed\" = \"fast\" and \"betas\" = List.of(FAST_BETA).\n        // Example: fastParams(\"claude-opus-5-5\", false) -> {speed=fast, betas=[fast-mode-2026-02-01]}\n        return new LinkedHashMap<>();\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> buildParams(String model, int maxTokens, Map<String, Object> options) {\n        LOG.log(System.Logger.Level.DEBUG, \"buildParams input: {0} {1} {2}\", model, maxTokens, options);\n        String family = family(model);\n        boolean haiku = family.equals(\"claude-haiku-4-5\");\n        if (maxTokens < 1) throw new RejectedRequest(\"max_tokens\", \"must be at least 1\");\n        Map<String, Object> params = new LinkedHashMap<>();\n        params.put(\"model\", model);\n        params.put(\"max_tokens\", maxTokens);\n\n        String effort = (String) options.get(\"effort\");\n        if (effort != null) {\n            checkEffort(haiku, effort);\n            params.put(\"output_config\", Map.of(\"effort\", effort));\n        }\n\n        Map<String, Object> thinking = (Map<String, Object>) options.get(\"thinking\");\n        if (thinking != null) {\n            String kind = (String) thinking.get(\"type\");\n            if (kind == null || !List.of(\"adaptive\", \"enabled\", \"disabled\", \"between_tools\").contains(kind)) {\n                throw new RejectedRequest(\"thinking\", \"unknown thinking type \" + kind);\n            }\n            if (kind.equals(\"between_tools\")) checkBetweenTools(family, effort);\n            else checkMode(haiku, kind);\n            Number budget = (Number) thinking.get(\"budget_tokens\");\n            if (kind.equals(\"enabled\")) checkBudget(budget, maxTokens);\n            params.put(\"thinking\", thinkingObject(kind, budget));\n        }\n\n        for (String name : List.of(\"temperature\", \"top_p\", \"top_k\")) {\n            Object value = options.get(name);\n            if (value == null) continue;\n            if (!samplingAllowed(haiku, name, value)) throw new RejectedRequest(name, \"this model rejects a non-default value\");\n            params.put(name, value);\n        }\n\n        if (\"fast\".equals(options.get(\"speed\"))) params.putAll(fastParams(family, Boolean.TRUE.equals(options.get(\"batch\"))));\n        return params;\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        String sonnet = \"claude-sonnet-5-5\";\n        String haiku = \"claude-haiku-4-5-20251001\";\n\n        // What the application wants, turned into the request parameters one model accepts.\n        System.out.println(\"sonnet adaptive: \" + Params.buildParams(sonnet, 4096, Map.of(\"thinking\", Map.of(\"type\", \"adaptive\"), \"effort\", \"medium\")));\n        System.out.println(\"haiku budget: \" + Params.buildParams(haiku, 4096, Map.of(\"thinking\", Map.of(\"type\", \"enabled\", \"budget_tokens\", 2048))));\n\n        // A combination the API would answer with a 400 is refused, naming the parameter.\n        try {\n            System.out.println(\"haiku with effort: \" + Params.buildParams(haiku, 4096, Map.of(\"effort\", \"high\")));\n        } catch (RejectedRequest err) {\n            System.out.println(\"refused: \" + err.param());\n        }\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 6,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "f3c955fd22b9eacaed94067a4eb367412b86dfdd29c80799f408da1e8fd68590",
+  "starting_code": "import java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/** Request parameters for thinking, effort and speed, checked per model. See ../../statement.md for the contract. */\nfinal class Params {\n    private static final System.Logger LOG = System.getLogger(Params.class.getName());\n    private Params() {}\n\n    private static final List<String> EFFORTS = List.of(\"low\", \"medium\", \"high\", \"xhigh\", \"max\");\n    private static final String FAST_BETA = \"fast-mode-2026-02-01\";\n    private static final Map<String, String> DEFAULT_EFFORT = Map.of(\n            \"claude-fable-5-1\", \"high\", \"claude-opus-5-5\", \"medium\", \"claude-sonnet-5-5\", \"high\");\n\n    private static String family(String model) {\n        if (model.startsWith(\"claude-haiku-4-5\")) return \"claude-haiku-4-5\";\n        if (DEFAULT_EFFORT.containsKey(model)) return model;\n        throw new RejectedRequest(\"model\", \"unknown model \" + model);\n    }\n\n    private static void checkEffort(boolean haiku, String effort) {\n        // TODO 1 of 7 (finish this to pass e3): refuse an effort level the model cannot take.\n        // Receives whether the model is Haiku and the effort given. Throws RejectedRequest(\"output_config.effort\", ...) for Haiku (it has no effort) and for a level that is not in EFFORTS.\n        // Example: checkEffort(true, \"low\") throws, checkEffort(false, \"adaptive\") throws, checkEffort(false, \"high\") returns\n    }\n\n    private static void checkMode(boolean haiku, String kind) {\n        // TODO 2 of 7 (finish this to pass e1): refuse a thinking mode the model does not have.\n        // Receives whether the model is Haiku and the thinking type. Throws RejectedRequest(\"thinking\", ...) for \"adaptive\" on Haiku, and for \"enabled\" or \"disabled\" on any model that is not Haiku.\n        // Example: checkMode(false, \"disabled\") throws, checkMode(true, \"disabled\") returns\n    }\n\n    private static void checkBudget(Number budget, int maxTokens) {\n        // TODO 3 of 7 (finish this to pass e6): refuse a manual thinking budget that does not fit.\n        // Receives the budget (null when missing) and maxTokens. Throws RejectedRequest(\"thinking.budget_tokens\", ...) when the budget is missing, below 1024 or not below maxTokens.\n        // Example: checkBudget(1023, 4096) throws, checkBudget(2048, 2048) throws, checkBudget(1024, 2048) returns\n    }\n\n    private static void checkBetweenTools(String family, String effort) {\n        // TODO 4 of 7 (finish this to pass e2): refuse between_tools where it does not work.\n        // Receives the model family and the effort given (null when absent). Throws RejectedRequest(\"thinking\", ...) unless the family is \"claude-sonnet-5-5\", and when the\n        // effective effort (the one given, else DEFAULT_EFFORT.get(family)) is \"xhigh\" or \"max\".\n        // Example: checkBetweenTools(\"claude-sonnet-5-5\", \"max\") throws, checkBetweenTools(\"claude-sonnet-5-5\", null) returns\n    }\n\n    private static Map<String, Object> thinkingObject(String kind, Number budget) {\n        // TODO 5 of 7 (finish this to pass m1 and e7): the `thinking` value of the request.\n        // Receives the thinking type and the budget (null unless \"enabled\"). Returns a map with \"type\" = kind, plus \"budget_tokens\" = budget for \"enabled\". Effort never goes in here.\n        // Example: thinkingObject(\"adaptive\", null) -> {type=adaptive}, thinkingObject(\"enabled\", 2048) -> {type=enabled, budget_tokens=2048}\n        return new LinkedHashMap<>();\n    }\n\n    private static boolean samplingAllowed(boolean haiku, String name, Object value) {\n        // TODO 6 of 7 (finish this to pass e4): whether the model accepts this sampling parameter.\n        // Receives whether the model is Haiku, the parameter name (temperature, top_p or top_k) and its value. Returns true for Haiku, and for the others only a temperature of exactly 1.0.\n        // Example: samplingAllowed(false, \"temperature\", 0.2) -> false, samplingAllowed(true, \"top_k\", 40) -> true\n        return true;\n    }\n\n    private static Map<String, Object> fastParams(String family, boolean batch) {\n        // TODO 7 of 7 (finish this to pass e5): the parameters fast mode adds, or a refusal.\n        // Receives the model family and whether the request goes into a batch. Throws RejectedRequest(\"speed\", ...) unless the family is \"claude-opus-5-5\", and when `batch` is true.\n        // Otherwise returns a map with \"speed\" = \"fast\" and \"betas\" = List.of(FAST_BETA).\n        // Example: fastParams(\"claude-opus-5-5\", false) -> {speed=fast, betas=[fast-mode-2026-02-01]}\n        return new LinkedHashMap<>();\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> buildParams(String model, int maxTokens, Map<String, Object> options) {\n        LOG.log(System.Logger.Level.DEBUG, \"buildParams input: {0} {1} {2}\", model, maxTokens, options);\n        String family = family(model);\n        boolean haiku = family.equals(\"claude-haiku-4-5\");\n        if (maxTokens < 1) throw new RejectedRequest(\"max_tokens\", \"must be at least 1\");\n        Map<String, Object> params = new LinkedHashMap<>();\n        params.put(\"model\", model);\n        params.put(\"max_tokens\", maxTokens);\n\n        String effort = (String) options.get(\"effort\");\n        if (effort != null) {\n            checkEffort(haiku, effort);\n            params.put(\"output_config\", Map.of(\"effort\", effort));\n        }\n\n        Map<String, Object> thinking = (Map<String, Object>) options.get(\"thinking\");\n        if (thinking != null) {\n            String kind = (String) thinking.get(\"type\");\n            if (kind == null || !List.of(\"adaptive\", \"enabled\", \"disabled\", \"between_tools\").contains(kind)) {\n                throw new RejectedRequest(\"thinking\", \"unknown thinking type \" + kind);\n            }\n            if (kind.equals(\"between_tools\")) checkBetweenTools(family, effort);\n            else checkMode(haiku, kind);\n            Number budget = (Number) thinking.get(\"budget_tokens\");\n            if (kind.equals(\"enabled\")) checkBudget(budget, maxTokens);\n            params.put(\"thinking\", thinkingObject(kind, budget));\n        }\n\n        for (String name : List.of(\"temperature\", \"top_p\", \"top_k\")) {\n            Object value = options.get(name);\n            if (value == null) continue;\n            if (!samplingAllowed(haiku, name, value)) throw new RejectedRequest(name, \"this model rejects a non-default value\");\n            params.put(name, value);\n        }\n\n        if (\"fast\".equals(options.get(\"speed\"))) params.putAll(fastParams(family, Boolean.TRUE.equals(options.get(\"batch\"))));\n        return params;\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/19-thinking-effort-and-speed/prose/unit-02/practice-3/src/main/java/Params.java",
+    "test_path": "practice/level-2/19-thinking-effort-and-speed/prose/unit-02/practice-3/src/test/java/ParamsTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/19-thinking-effort-and-speed/prose/unit-02/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/19-thinking-effort-and-speed/prose/unit-02/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_eachCourseModelGetsTheRequestItAccepts()",
+        "kind": "main",
+        "says": "Each course model gets the request it accepts"
+      },
+      {
+        "id": "e1_thinkingModesAModelDoesNotHaveAreRefused()",
+        "kind": "edge",
+        "says": "Thinking modes a model does not have are refused"
+      },
+      {
+        "id": "e2_theModeThatSkipsThinkingUpFrontIsSonnetOnlyAndNeedsHighEffortOrBelow()",
+        "kind": "edge",
+        "says": "The mode that skips thinking up front is Sonnet only and needs high effort or below"
+      },
+      {
+        "id": "e3_effortNeedsASupportingModelAndARealLevel()",
+        "kind": "edge",
+        "says": "Effort needs a supporting model and a real level"
+      },
+      {
+        "id": "e4_newerModelsRejectSamplingParametersAndHaikuKeepsThem()",
+        "kind": "edge",
+        "says": "Newer models reject sampling parameters and Haiku keeps them"
+      },
+      {
+        "id": "e5_fastModeIsOpusOnlyWithItsBetaHeaderAndNeverInABatch()",
+        "kind": "edge",
+        "says": "Fast mode is Opus only, carries its beta header and is never sent in a batch"
+      },
+      {
+        "id": "e6_aManualBudgetIsAtLeast1024AndBelowMaxTokens()",
+        "kind": "edge",
+        "says": "A manual budget is at least 1,024 and below max_tokens; max_tokens is at least 1"
+      },
+      {
+        "id": "e7_effortLivesInOutputConfigAndNeverInsideThinking()",
+        "kind": "edge",
+        "says": "Effort lives in output_config, never inside thinking, and the options are left unchanged"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/19-thinking-effort-and-speed/prose/unit-02/practice-3/target/test-results/test"
+    },
+    "origin": "course/19-thinking-effort-and-speed/02-fast-mode-tools-and-caching.md",
+    "concepts": [
+      "the practice of Fast mode, thinking with tools, and thinking's effect on caching is solved"
+    ],
+    "files": [
+      "practice/level-2/19-thinking-effort-and-speed/prose/unit-02/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "thinking-effort-and-speed-u2"
+}

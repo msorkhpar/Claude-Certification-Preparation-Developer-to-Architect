@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/java/Triage.java",
+      "old": "        if (!failed.isEmpty()) {\n",
+      "new": "        Span b = blamedRetrieval(spans);\n        if (b != null) return new Cause(\"retrieval\", b.name(), b.note(), List.of(spans.get(0).name(), b.name()));\n        if (!failed.isEmpty()) {\n"
+    }
+  ]
+}

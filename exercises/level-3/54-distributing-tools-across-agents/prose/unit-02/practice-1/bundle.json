@@ -1,0 +1,83 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "54-distributing-tools-across-agents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: distributing tools across agents (Python)",
+  "lang": "python",
+  "main_file": "distribute.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_distribute.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/54-distributing-tools-across-agents/prose/unit-02/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-3/54-distributing-tools-across-agents/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-3/54-distributing-tools-across-agents/prose/unit-02/practice-1/test_distribute.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_each_role_gets_only_the_tools_of_its_specialisation_in_catalog_order",
+      "kind": "main",
+      "says": "Each role gets only the tools of its specialisation, in catalog order"
+    },
+    {
+      "id": "test_e1_a_role_over_its_budget_or_given_an_unknown_or_unscoped_outside_tool_or_a_duplicate_catalog_name_is_refused",
+      "kind": "edge",
+      "says": "A role over its budget, an unknown or unscoped outside tool, a duplicate catalog name and a role with no specialisation are refused"
+    },
+    {
+      "id": "test_e2_an_irreversible_tool_is_given_only_by_an_explicit_grant",
+      "kind": "edge",
+      "says": "An irreversible tool is given only by an explicit grant"
+    },
+    {
+      "id": "test_e3_a_model_that_accepts_forcing_gets_the_native_choice_and_the_others_get_auto_with_strict_tools_and_one_named_tool",
+      "kind": "edge",
+      "says": "The tool choice follows the model: native forcing where accepted, auto with strict tools and one named tool elsewhere"
+    },
+    {
+      "id": "test_e4_a_change_of_tool_choice_costs_the_cached_messages_a_change_of_tools_costs_everything_and_a_repeat_costs_nothing",
+      "kind": "edge",
+      "says": "A changed tool choice costs the cached messages, a changed tool list costs the whole cache, and a repeat costs nothing"
+    },
+    {
+      "id": "test_e5_a_reply_is_checked_against_the_call_that_was_required",
+      "kind": "edge",
+      "says": "A reply is checked against the call that was required"
+    },
+    {
+      "id": "test_e6_an_unknown_tool_a_wrong_owner_or_a_bad_amount_is_refused",
+      "kind": "edge",
+      "says": "An unknown tool, a wrong owner and a bad amount are refused, in that precedence"
+    },
+    {
+      "id": "test_e7_the_cap_is_inclusive_and_an_irreversible_call_needs_approval_that_never_lifts_the_cap",
+      "kind": "edge",
+      "says": "The cap is inclusive, an approval is needed for an irreversible call and never lifts the cap"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/54-distributing-tools-across-agents/02-tool-choice-the-call-that-must-happen-caps-and-the-practice.md"
+}

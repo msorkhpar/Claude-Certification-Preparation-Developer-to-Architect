@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/java/PromptPlan.java",
+      "old": "            if (!variables.containsKey(m.group(1))) throw new IllegalArgumentException(\"missing variable: \" + m.group(1));\n            return Matcher.quoteReplacement(variables.get(m.group(1)));\n",
+      "new": "            return Matcher.quoteReplacement(variables.getOrDefault(m.group(1), \"\"));\n"
+    }
+  ]
+}

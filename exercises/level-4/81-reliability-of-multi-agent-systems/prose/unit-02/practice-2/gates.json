@@ -1,0 +1,125 @@
+{
+  "gates_api": 1,
+  "inputs": [
+    {
+      "role": "statement",
+      "path": "statement.md",
+      "digest": "sha256:ea75c6d07e864b75cce7360aec99c1c1b70e72140b82700d5cba911b82ba1414"
+    },
+    {
+      "role": "starter",
+      "path": "starter/reliableAgents.ts",
+      "digest": "sha256:ab4d37885ab1c3a216dc2273d3ab00b0bfdb79e35c9606eb3fe6f2d75f7825dc"
+    },
+    {
+      "role": "reference",
+      "path": "reference/reliableAgents.ts",
+      "digest": "sha256:1fdb1289df9d16042c651c0ab6c481e085b472ebef3aa075794c43221a790786"
+    },
+    {
+      "role": "starter:try-it.ts",
+      "path": "starter/try-it.ts",
+      "digest": "sha256:383115c70c212a5b23a268b0efc74ecfc14f332955d661f2d632f48aae84c294"
+    },
+    {
+      "role": "reference:try-it.ts",
+      "path": "reference/try-it.ts",
+      "digest": "sha256:383115c70c212a5b23a268b0efc74ecfc14f332955d661f2d632f48aae84c294"
+    },
+    {
+      "role": "tests",
+      "path": "tests/reliableAgents.test.ts",
+      "digest": "sha256:d0544b016e9c3701e810adfe344781ced4a9ffb8e86e2f4c144fd36841456699"
+    },
+    {
+      "role": "plant:e1 every retry of a task carries the same idempotency key",
+      "path": "plants/edge-1/reliableAgents.ts.plant.json",
+      "digest": "sha256:c81f0edb43e02058ac5a75329dc087a80a86a36c360a6c020d6618f7dc450511"
+    },
+    {
+      "role": "plant:e2 retries stop at the limit and a fatal failure is not retried",
+      "path": "plants/edge-2/reliableAgents.ts.plant.json",
+      "digest": "sha256:292d80f28be57d8ee033cea1cb9b44bcbde73b77f762ef0c53bc20b61ac08cce"
+    },
+    {
+      "role": "plant:e3 a failure stays inside its branch and dependents are skipped",
+      "path": "plants/edge-3/reliableAgents.ts.plant.json",
+      "digest": "sha256:50cfdd14f2719f0ec20234e7c4297441d63d4e06e7e0dedbb01e7b6fdd0e306d"
+    },
+    {
+      "role": "plant:e4 a breaker stops calls to an agent that keeps failing and a success resets it",
+      "path": "plants/edge-4/reliableAgents.ts.plant.json",
+      "digest": "sha256:26caef416f4577edc7c02658b4112b3872ec02f2a765fa544ff9e79a537752e3"
+    },
+    {
+      "role": "plant:e5 a fallback degrades one task with its own key and is not checkpointed",
+      "path": "plants/edge-5/reliableAgents.ts.plant.json",
+      "digest": "sha256:588e72e8fdcea3bba1bca4b74fae9cf7bcdff8342d8b46f20caf74980d02accd"
+    },
+    {
+      "role": "plant:e6 a second run resumes from the checkpoint and retries only what failed",
+      "path": "plants/edge-6/reliableAgents.ts.plant.json",
+      "digest": "sha256:d6c7c4c22400eb83da2eb4dce9b5e1ab34e0b68fa32b923c1eb35fc2f1ced6d5"
+    },
+    {
+      "role": "plant:e7 an unexpected crash is not swallowed and keeps the work already checkpointed",
+      "path": "plants/edge-7/reliableAgents.ts.plant.json",
+      "digest": "sha256:3974a5f2c50bc2dbfdc677f730b356025a78badfd253395bf7171cbf64ecbfdf"
+    },
+    {
+      "role": "build:junit-file.mjs",
+      "path": "build/junit-file.mjs",
+      "digest": "sha256:eebbfd3bebdf18b0d715903d01abac0b7199da78c76c588b50c0c40352614cef"
+    },
+    {
+      "role": "build:logger.ts",
+      "path": "build/logger.ts",
+      "digest": "sha256:ee4ada918729a2eb77f3d514a0acf59bad03b63ca373a3a7b92f86d95f23197d"
+    }
+  ],
+  "origins": [
+    {
+      "role": "origin",
+      "path": "course/81-reliability-of-multi-agent-systems/02-isolation-fallbacks-and-resuming-a-run.md",
+      "section": null,
+      "digest": "sha256:5f0256bdab8316194c17fe238acbbddfda760d8396a6083840ce7761a9127934"
+    }
+  ],
+  "gates": [
+    {
+      "id": "G1",
+      "family": "code",
+      "held": true,
+      "says": "all 8 cases passed on the reference, on two runs alike",
+      "recorded": {}
+    },
+    {
+      "id": "G2",
+      "family": "code",
+      "held": true,
+      "says": "none of the 8 cases passed on the starter",
+      "recorded": {}
+    },
+    {
+      "id": "G3",
+      "family": "code",
+      "held": true,
+      "says": "each of the 7 edge cases was caught by its own plant",
+      "recorded": {}
+    },
+    {
+      "id": "G4",
+      "family": "code",
+      "held": true,
+      "says": "every test the report named mapped to one of the 8 cases, and every case was named",
+      "recorded": {}
+    },
+    {
+      "id": "G5",
+      "family": "code",
+      "held": true,
+      "says": "the cited passage of 'course/81-reliability-of-multi-agent-systems/02-isolation-fallbacks-and-resuming-a-run.md' still matches the ledger",
+      "recorded": {}
+    }
+  ]
+}

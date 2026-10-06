@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/kotlin/Pipeline.kt",
+      "old": "return Math.round(hits * 100.0 / relevant.size) / 100.0",
+      "new": "return Math.round(hits * 100.0 / maxOf(1, relevant.keys.count { it in results })) / 100.0"
+    }
+  ]
+}

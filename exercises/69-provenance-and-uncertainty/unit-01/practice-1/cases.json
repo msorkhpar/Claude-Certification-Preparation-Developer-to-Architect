@@ -1,0 +1,157 @@
+{
+  "practice": "69-provenance-and-uncertainty/unit-01/practice-1",
+  "name": "ledger",
+  "tests": {
+    "java": "LedgerTest",
+    "kotlin": "LedgerTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_findings_are_merged_per_claim_with_every_source_kept_once",
+      "typescript": "m1 findings are merged per claim with every source kept once",
+      "java": "m1_findingsAreMergedPerClaimWithEverySourceKeptOnce",
+      "kotlin": "m1_findingsAreMergedPerClaimWithEverySourceKeptOnce"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_finding_without_a_source_or_a_date_is_refused",
+      "typescript": "e1 a finding without a source or a date is refused",
+      "java": "e1_aFindingWithoutASourceOrADateIsRefused",
+      "kotlin": "e1_aFindingWithoutASourceOrADateIsRefused"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_two_values_from_the_same_date_are_a_conflict_that_keeps_both",
+      "typescript": "e2 two values from the same date are a conflict that keeps both",
+      "java": "e2_twoValuesFromTheSameDateAreAConflictThatKeepsBoth",
+      "kotlin": "e2_twoValuesFromTheSameDateAreAConflictThatKeepsBoth"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_two_values_from_different_dates_are_a_change_not_a_conflict",
+      "typescript": "e3 two values from different dates are a change not a conflict",
+      "java": "e3_twoValuesFromDifferentDatesAreAChangeNotAConflict",
+      "kotlin": "e3_twoValuesFromDifferentDatesAreAChangeNotAConflict"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_the_coverage_note_separates_what_is_well_supported_from_what_is_not",
+      "typescript": "e4 the coverage note separates what is well supported from what is not",
+      "java": "e4_theCoverageNoteSeparatesWhatIsWellSupportedFromWhatIsNot",
+      "kotlin": "e4_theCoverageNoteSeparatesWhatIsWellSupportedFromWhatIsNot"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_a_planned_claim_with_no_finding_is_a_gap_with_its_reason",
+      "typescript": "e5 a planned claim with no finding is a gap with its reason",
+      "java": "e5_aPlannedClaimWithNoFindingIsAGapWithItsReason",
+      "kotlin": "e5_aPlannedClaimWithNoFindingIsAGapWithItsReason"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_financial_data_is_rendered_as_a_table",
+      "typescript": "e6 financial data is rendered as a table",
+      "java": "e6_financialDataIsRenderedAsATable",
+      "kotlin": "e6_financialDataIsRenderedAsATable"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_news_is_rendered_as_prose_that_says_when_sources_disagree",
+      "typescript": "e7 news is rendered as prose that says when sources disagree",
+      "java": "e7_newsIsRenderedAsProseThatSaysWhenSourcesDisagree",
+      "kotlin": "e7_newsIsRenderedAsProseThatSaysWhenSourcesDisagree"
+    },
+    "e8": {
+      "kind": "edge",
+      "python": "test_e8_technical_findings_are_a_list_and_an_unknown_content_type_is_refused",
+      "typescript": "e8 technical findings are a list and an unknown content type is refused",
+      "java": "e8_technicalFindingsAreAListAndAnUnknownContentTypeIsRefused",
+      "kotlin": "e8_technicalFindingsAreAListAndAnUnknownContentTypeIsRefused"
+    }
+  },
+  "plants": {
+    "wrong-first-wins": {
+      "caught_by": [
+        "e2",
+        "e3"
+      ],
+      "defect": "keeps only the first value of a claim and drops the others"
+    },
+    "wrong-ignores-dates": {
+      "caught_by": [
+        "e3",
+        "e4"
+      ],
+      "defect": "calls every difference a conflict whatever the dates"
+    },
+    "wrong-sources-collapsed": {
+      "caught_by": [
+        "e4",
+        "m1"
+      ],
+      "defect": "keeps only the first source of a value"
+    },
+    "wrong-date-optional": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "does not require a date"
+    },
+    "wrong-accepts-incomplete": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "merges a finding with a missing field"
+    },
+    "wrong-gaps-hidden": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "leaves the planned claims with no finding out of the note"
+    },
+    "wrong-single-source-supported": {
+      "caught_by": [
+        "e4",
+        "e5"
+      ],
+      "defect": "calls a claim with one source well supported"
+    },
+    "wrong-unknown-kind-accepted": {
+      "caught_by": [
+        "e8"
+      ],
+      "defect": "renders an unknown content type"
+    },
+    "wrong-no-table": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "renders financial data as prose"
+    },
+    "wrong-conflict-unmarked": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "leaves the disagreement out of the prose"
+    },
+    "wrong-conflict-keeps-one": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "keeps only the first value of a conflict"
+    },
+    "wrong-changed-unordered": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "leaves the values of a changed claim in the order they came"
+    },
+    "wrong-changed-also-contested": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "files a changed claim under contested as well"
+    }
+  }
+}

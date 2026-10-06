@@ -1,0 +1,292 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "25-structured-output-and-defensive-parsing"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: an extractor with validation and a re-prompt (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an extractor with validation and a re-prompt"
+    },
+    {
+      "type": "para",
+      "text": "A model can be asked for JSON that follows a schema, and the reply can still be wrong: cut off, wrapped in prose, a number where a string belongs, or a quotation the document never contained. Write the code around the model that catches this and asks again, a bounded number of times. The rules come from the Claude documentation on structured outputs, tool use and stop reasons, read on 2026-10-03; the lesson pages explain them. Nothing here touches the network: the model is a function that you call, and the tests give it scripted replies in the shape of a Messages API response."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given types"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "schema",
+          "a JSON Schema as a map, using only `type` (`string`, `integer`, `number`, `boolean`, `array`, `object`, `null`), `enum`, `minimum`, `maximum`, `required`, `properties`, `additionalProperties: false` and `items`"
+        ],
+        [
+          "`ask(messages)`",
+          "the model: takes the list of `{\"role\", \"content\"}` messages and returns a reply `{\"content\": [blocks], \"stop_reason\": ...}`; the text blocks hold the model's words"
+        ],
+        [
+          "problem",
+          "`{\"path\", \"message\"}`; the path is `$` for the whole value, `$.total` for a field, `$.items[1].qty` for an array element"
+        ],
+        [
+          "`ParseError`",
+          "raised when no JSON object can be read from a reply"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working extractor with eight small gaps cut out of it. Everything that is plumbing is written and correct: the fence handling and the JSON parse in `parse_json`, the type table, the order of the checks in `validate` and its walk over properties and items, the first prompt, the loop of `extract` with its re-prompt messages and its result shape. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails every case on an assertion. The TypeScript, Java and Kotlin names are the camel-case forms (`objectSpan`, `isInteger`, `rangeErrors`, ...). Write them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_object_span` unlocks `m1`, `e1` and `e3`: the index of the first `{` and of the last `}`.",
+        "`_is_integer` unlocks `e6`: a whole number or a float with no fraction, never a boolean.",
+        "`_range_errors` unlocks `e2`: the `minimum` and `maximum` problems of a number.",
+        "`_required_errors` unlocks `e2`: one problem per missing `required` key.",
+        "`_extra_errors` unlocks `e2`: one problem per key the schema does not list.",
+        "`_feedback` unlocks `e2`: the text that sends every problem back to the model.",
+        "`_grounding_errors` unlocks `e5`: the quotes that the document does not contain.",
+        "`_early_status` unlocks `e4`: `refused` or `truncated`, so the reply is not retried."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs the first gap; the rest of the cases need the gaps named above. About twenty lines in all. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. `parse_json` already logs what it receives."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`parse_json(text)` returns the JSON value in a reply. If the text holds a code fence, use the body of the first fence; then take the span from the first `{` to the last `}` and parse it. Raise `ParseError` when there is no such span or it is not valid JSON.",
+        "`validate(schema, value)` returns the list of problems, in this order for one value: a wrong type stops the checks for that value (one problem, no more); then `enum`, then `minimum` and `maximum`; for an object, one problem per missing `required` key (path `$.key`, in the schema's order), then the checks of every property in the schema's order, then one problem per key that the schema does not list when `additionalProperties` is false; for an array, the checks of each element. An integer is a number with no fraction (`2.0` is an integer, `2.5` is not); a boolean is never a number or an integer. A conforming value gives an empty list.",
+        [
+          "`extract(ask, document, schema, max_attempts=3, evidence_fields=())` builds the first message (role `user`, containing the document), calls `ask`, and reads the reply:",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`stop_reason` of `refusal`: stop, status `refused`, no further call. `max_tokens`: stop, status `truncated`, no further call (asking again with the error list cannot fix a cut-off reply).",
+              "Otherwise parse the text and validate it. For every name in `evidence_fields`, a string field of that name must occur in the document; if it does not, add the problem `$.name`. A reply that parses and has no problems gives status `ok`.",
+              "On a problem and with attempts left, call `ask` again with the earlier messages, then the model's reply as an `assistant` message with exactly its text, then a `user` message that lists every problem with its path and message. A parse failure is the single problem at path `$`.",
+              "After `max_attempts` calls in all, give status `failed` with the problems of the last attempt.",
+              "The result is `{\"status\", \"value\", \"attempts\", \"errors\"}`; `value` is the parsed object for `ok` and nothing otherwise."
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A valid reply is returned after one call"
+        ],
+        [
+          "`e1`",
+          "JSON is found inside fences and prose, and text with no JSON is retried"
+        ],
+        [
+          "`e2`",
+          "Every schema violation is listed and sent back to the model"
+        ],
+        [
+          "`e3`",
+          "The number of attempts is bounded"
+        ],
+        [
+          "`e4`",
+          "A refusal or a cut-off reply is not retried"
+        ],
+        [
+          "`e5`",
+          "A quotation that is not in the document is rejected"
+        ],
+        [
+          "`e6`",
+          "Types are exact: booleans are not numbers and integers have no fraction"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.function.Function;\n\n/** Extract structured data from a document with validation and a bounded re-prompt. See ../../statement.md. JSON values are Map, List, String, Long, Double, Boolean or null. */\nfinal class Extractor {\n    private static final System.Logger LOG = System.getLogger(Extractor.class.getName());\n    private Extractor() {}\n\n    /** The index of the first { and of the last } in the text; -1 for a brace that is not there. */\n    private static int[] objectSpan(String body) {\n        return new int[] {body.indexOf('{'), body.lastIndexOf('}')};\n    }\n\n    /** The JSON value in a model reply: the body of a code fence, else the span from the first { to the last }. */\n    static Object parseJson(String text) {\n        LOG.log(System.Logger.Level.DEBUG, \"parseJson input: {0}\", text);\n        String body = text;\n        int fence = text.indexOf(\"```\");\n        if (fence != -1) {\n            int start = text.indexOf('\\n', fence);\n            int end = text.indexOf(\"```\", start != -1 ? start : fence + 3);\n            if (start != -1 && end != -1) body = text.substring(start + 1, end);\n        }\n        int[] span = objectSpan(body);\n        int first = span[0];\n        int last = span[1];\n        if (first == -1 || last < first) throw new ParseError(\"no JSON object found in the reply\");\n        try {\n            return Json.parse(body.substring(first, last + 1));\n        } catch (IllegalArgumentException e) {\n            throw new ParseError(\"invalid JSON: \" + e.getMessage());\n        }\n    }\n\n    /** Is this value an integer for the schema? A whole number, or a Double with no fraction; never a Boolean. */\n    private static boolean isInteger(Object v) {\n        if (v instanceof Long || v instanceof Integer || v instanceof Short || v instanceof Byte) return true;\n        return v instanceof Double d && !d.isInfinite() && !d.isNaN() && d == Math.rint(d);\n    }\n\n    private static boolean typeMatches(String type, Object v) {\n        return switch (type) {\n            case \"string\" -> v instanceof String;\n            case \"integer\" -> isInteger(v);\n            case \"number\" -> v instanceof Number;\n            case \"boolean\" -> v instanceof Boolean;\n            case \"array\" -> v instanceof List;\n            case \"object\" -> v instanceof Map;\n            case \"null\" -> v == null;\n            default -> throw new IllegalArgumentException(\"unknown type \" + type);\n        };\n    }\n\n    private static Map<String, Object> problem(String path, String message) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        m.put(\"path\", path);\n        m.put(\"message\", message);\n        return m;\n    }\n\n    static List<Map<String, Object>> validate(Map<String, Object> schema, Object value) {\n        return validate(schema, value, \"$\");\n    }\n\n    /** The problems of a number outside minimum and maximum. */\n    private static List<Map<String, Object>> rangeErrors(Map<String, Object> schema, Number n, String path) {\n        List<Map<String, Object>> errors = new ArrayList<>();\n        if (schema.containsKey(\"minimum\") && n.doubleValue() < ((Number) schema.get(\"minimum\")).doubleValue()) errors.add(problem(path, \"must be at least \" + schema.get(\"minimum\")));\n        if (schema.containsKey(\"maximum\") && n.doubleValue() > ((Number) schema.get(\"maximum\")).doubleValue()) errors.add(problem(path, \"must be at most \" + schema.get(\"maximum\")));\n        return errors;\n    }\n\n    /** The problems of missing required keys. */\n    @SuppressWarnings(\"unchecked\")\n    private static List<Map<String, Object>> requiredErrors(Map<String, Object> schema, Map<?, ?> obj, String path) {\n        List<Map<String, Object>> errors = new ArrayList<>();\n        for (Object key : (List<Object>) schema.getOrDefault(\"required\", List.of())) {\n            if (!obj.containsKey(key)) errors.add(problem(path + \".\" + key, \"is required\"));\n        }\n        return errors;\n    }\n\n    /** The problems of keys the schema does not list, when additionalProperties is false. */\n    @SuppressWarnings(\"unchecked\")\n    private static List<Map<String, Object>> extraErrors(Map<String, Object> schema, Map<?, ?> obj, String path) {\n        List<Map<String, Object>> errors = new ArrayList<>();\n        Map<String, Object> properties = (Map<String, Object>) schema.getOrDefault(\"properties\", Map.of());\n        if (Boolean.FALSE.equals(schema.get(\"additionalProperties\"))) {\n            for (Object key : obj.keySet()) if (!properties.containsKey(key)) errors.add(problem(path + \".\" + key, \"is not allowed\"));\n        }\n        return errors;\n    }\n\n    /** One problem {path, message} per way value breaks schema; an empty list when it conforms. */\n    @SuppressWarnings(\"unchecked\")\n    static List<Map<String, Object>> validate(Map<String, Object> schema, Object value, String path) {\n        List<Map<String, Object>> errors = new ArrayList<>();\n        Object type = schema.get(\"type\");\n        if (type != null && !typeMatches((String) type, value)) {\n            errors.add(problem(path, \"must be of type \" + type));\n            return errors;\n        }\n        if (schema.containsKey(\"enum\") && !((List<Object>) schema.get(\"enum\")).contains(value)) {\n            errors.add(problem(path, \"must be one of \" + Json.stringify(schema.get(\"enum\"))));\n        }\n        if (value instanceof Number n && !(value instanceof Boolean)) errors.addAll(rangeErrors(schema, n, path));\n        if (value instanceof Map<?, ?> obj) {\n            errors.addAll(requiredErrors(schema, obj, path));\n            Map<String, Object> properties = (Map<String, Object>) schema.getOrDefault(\"properties\", Map.of());\n            for (Map.Entry<String, Object> e : properties.entrySet()) {\n                if (obj.containsKey(e.getKey())) errors.addAll(validate((Map<String, Object>) e.getValue(), obj.get(e.getKey()), path + \".\" + e.getKey()));\n            }\n            errors.addAll(extraErrors(schema, obj, path));\n        }\n        if (value instanceof List<?> list && schema.containsKey(\"items\")) {\n            for (int i = 0; i < list.size(); i++) errors.addAll(validate((Map<String, Object>) schema.get(\"items\"), list.get(i), path + \"[\" + i + \"]\"));\n        }\n        return errors;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static String textOf(Map<String, Object> reply) {\n        StringBuilder out = new StringBuilder();\n        for (Object block : (List<Object>) reply.get(\"content\")) {\n            Map<String, Object> b = (Map<String, Object>) block;\n            if (\"text\".equals(b.get(\"type\"))) out.append(b.get(\"text\"));\n        }\n        return out.toString();\n    }\n\n    private static Map<String, Object> message(String role, String content) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        m.put(\"role\", role);\n        m.put(\"content\", content);\n        return m;\n    }\n\n    private static String prompt(String document, Map<String, Object> schema) {\n        return \"Extract the data from the document as one JSON object that follows this JSON Schema. Reply with the JSON only.\\n\"\n                + \"<schema>\" + Json.stringify(schema) + \"</schema>\\n<document>\\n\" + document + \"\\n</document>\";\n    }\n\n    /** The message that sends the problems back to the model. */\n    private static String feedback(List<Map<String, Object>> errors) {\n        StringBuilder lines = new StringBuilder();\n        for (Map<String, Object> e : errors) lines.append(\"- \").append(e.get(\"path\")).append(\": \").append(e.get(\"message\")).append('\\n');\n        return \"Your reply was rejected:\\n\" + lines + \"Return the corrected JSON only.\";\n    }\n\n    private static Map<String, Object> result(String status, Object value, int attempts, List<Map<String, Object>> errors) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        m.put(\"status\", status);\n        m.put(\"value\", value);\n        m.put(\"attempts\", attempts);\n        m.put(\"errors\", errors);\n        return m;\n    }\n\n    /** The quotes the document does not contain. */\n    private static List<Map<String, Object>> groundingErrors(Object value, String document, List<String> evidenceFields) {\n        List<Map<String, Object>> errors = new ArrayList<>();\n        for (String name : evidenceFields) {\n            Object quoted = value instanceof Map<?, ?> m ? m.get(name) : null;\n            if (quoted instanceof String s && !document.contains(s)) errors.add(problem(\"$.\" + name, \"is not found in the document\"));\n        }\n        return errors;\n    }\n\n    /** \"refused\" or \"truncated\" for a reply that must not be retried, else null. */\n    private static String earlyStatus(Map<String, Object> reply) {\n        if (\"refusal\".equals(reply.get(\"stop_reason\"))) return \"refused\";\n        if (\"max_tokens\".equals(reply.get(\"stop_reason\"))) return \"truncated\";\n        return null;\n    }\n\n    static Map<String, Object> extract(Function<List<Map<String, Object>>, Map<String, Object>> ask, String document, Map<String, Object> schema) {\n        return extract(ask, document, schema, 3, List.of());\n    }\n\n    /** Ask, parse, validate and, on a problem, re-prompt with the errors, at most maxAttempts calls. */\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> extract(Function<List<Map<String, Object>>, Map<String, Object>> ask, String document, Map<String, Object> schema,\n            int maxAttempts, List<String> evidenceFields) {\n        List<Map<String, Object>> messages = new ArrayList<>(List.of(message(\"user\", prompt(document, schema))));\n        List<Map<String, Object>> errors = new ArrayList<>();\n        for (int attempt = 1; attempt <= maxAttempts; attempt++) {\n            Map<String, Object> reply = ask.apply(List.copyOf(messages));\n            String early = earlyStatus(reply);\n            if (early != null) return result(early, null, attempt, new ArrayList<>());\n            String text = textOf(reply);\n            Object value = null;\n            try {\n                value = parseJson(text);\n                errors = validate(schema, value);\n                errors.addAll(groundingErrors(value, document, evidenceFields));\n            } catch (ParseError e) {\n                value = null;\n                errors = new ArrayList<>(List.of(problem(\"$\", e.getMessage())));\n            }\n            if (errors.isEmpty()) return result(\"ok\", value, attempt, new ArrayList<>());\n            if (attempt < maxAttempts) {\n                messages.add(message(\"assistant\", text));\n                messages.add(message(\"user\", feedback(errors)));\n            }\n        }\n        return result(\"failed\", null, maxAttempts, errors);\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.function.Function;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        String doc = \"Invoice from Acme Tools. Total due: 120.50 EUR. Thank you for your business.\";\n        @SuppressWarnings(\"unchecked\")\n        Map<String, Object> schema = (Map<String, Object>) Json.parse(\"\"\"\n            {\"type\":\"object\",\"required\":[\"vendor\",\"total\",\"currency\",\"evidence\"],\n             \"properties\":{\"vendor\":{\"type\":\"string\"},\"total\":{\"type\":\"number\",\"minimum\":0},\n                           \"currency\":{\"type\":\"string\",\"enum\":[\"USD\",\"EUR\",\"GBP\"]},\"evidence\":{\"type\":\"string\"}},\n             \"additionalProperties\":false}\"\"\");\n        String good = \"{\\\"vendor\\\":\\\"Acme Tools\\\",\\\"total\\\":120.5,\\\"currency\\\":\\\"EUR\\\",\\\"evidence\\\":\\\"Total due: 120.50 EUR\\\"}\";\n\n        // A hand-written stand-in for the model, in the shape of a Messages API reply: it always answers with valid JSON.\n        Function<List<Map<String, Object>>, Map<String, Object>> ask = messages ->\n            Map.of(\"type\", \"message\", \"role\", \"assistant\", \"stop_reason\", \"end_turn\",\n                \"content\", List.of(Map.of(\"type\", \"text\", \"text\", good)));\n\n        Map<String, Object> result = Extractor.extract(ask, doc, schema, 3, List.of(\"evidence\"));\n\n        System.out.println(\"status: \" + result.get(\"status\"));\n        System.out.println(\"attempts: \" + result.get(\"attempts\"));\n        System.out.println(\"value: \" + result.get(\"value\"));\n        System.out.println(\"errors: \" + result.get(\"errors\"));\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.function.Function;\n\n/** Extract structured data from a document with validation and a bounded re-prompt. See ../../statement.md. JSON values are Map, List, String, Long, Double, Boolean or null. */\nfinal class Extractor {\n    private static final System.Logger LOG = System.getLogger(Extractor.class.getName());\n    private Extractor() {}\n\n    /** The index of the first { and of the last } in the text; -1 for a brace that is not there. */\n    private static int[] objectSpan(String body) {\n        // TODO 1 of 8 (finish this to pass m1, e1 and e3): where the JSON object sits in the text.\n        // Receives the text. Returns {first, last}: the index of the first '{' and of the last '}', or -1 for a brace that is not there.\n        // Example: objectSpan(\"Sure! {\\\"a\\\": 1} Done.\") -> {6, 13}\n        return new int[] {-1, -1};\n    }\n\n    /** The JSON value in a model reply: the body of a code fence, else the span from the first { to the last }. */\n    static Object parseJson(String text) {\n        LOG.log(System.Logger.Level.DEBUG, \"parseJson input: {0}\", text);\n        String body = text;\n        int fence = text.indexOf(\"```\");\n        if (fence != -1) {\n            int start = text.indexOf('\\n', fence);\n            int end = text.indexOf(\"```\", start != -1 ? start : fence + 3);\n            if (start != -1 && end != -1) body = text.substring(start + 1, end);\n        }\n        int[] span = objectSpan(body);\n        int first = span[0];\n        int last = span[1];\n        if (first == -1 || last < first) throw new ParseError(\"no JSON object found in the reply\");\n        try {\n            return Json.parse(body.substring(first, last + 1));\n        } catch (IllegalArgumentException e) {\n            throw new ParseError(\"invalid JSON: \" + e.getMessage());\n        }\n    }\n\n    /** Is this value an integer for the schema? A whole number, or a Double with no fraction; never a Boolean. */\n    private static boolean isInteger(Object v) {\n        // TODO 2 of 8 (finish this to pass e6): is this value an integer for the schema?\n        // Receives any value. Returns true for a Long, Integer, Short or Byte and for a Double with no fraction; false otherwise (2.5, a Boolean).\n        // Example: isInteger(2.0) -> true, isInteger(2.5) -> false, isInteger(true) -> false\n        return false;\n    }\n\n    private static boolean typeMatches(String type, Object v) {\n        return switch (type) {\n            case \"string\" -> v instanceof String;\n            case \"integer\" -> isInteger(v);\n            case \"number\" -> v instanceof Number;\n            case \"boolean\" -> v instanceof Boolean;\n            case \"array\" -> v instanceof List;\n            case \"object\" -> v instanceof Map;\n            case \"null\" -> v == null;\n            default -> throw new IllegalArgumentException(\"unknown type \" + type);\n        };\n    }\n\n    private static Map<String, Object> problem(String path, String message) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        m.put(\"path\", path);\n        m.put(\"message\", message);\n        return m;\n    }\n\n    static List<Map<String, Object>> validate(Map<String, Object> schema, Object value) {\n        return validate(schema, value, \"$\");\n    }\n\n    /** The problems of a number outside minimum and maximum. */\n    private static List<Map<String, Object>> rangeErrors(Map<String, Object> schema, Number n, String path) {\n        // TODO 3 of 8 (finish this to pass e2): the problems of a number outside minimum and maximum.\n        // Receives the schema, a number and its path. Returns problems {path, message}: \"must be at least <minimum>\" first, then\n        // \"must be at most <maximum>\", each only when the schema has that key and the value breaks it.\n        // Example: rangeErrors(Map.of(\"minimum\", 0L), -1, \"$.total\") -> [{path=$.total, message=must be at least 0}]\n        return new ArrayList<>();\n    }\n\n    /** The problems of missing required keys. */\n    @SuppressWarnings(\"unchecked\")\n    private static List<Map<String, Object>> requiredErrors(Map<String, Object> schema, Map<?, ?> obj, String path) {\n        // TODO 4 of 8 (finish this to pass e2): the problems of missing required keys.\n        // Receives the schema, an object and its path. Returns one {path: \"<path>.<key>\", message: \"is required\"} per key of the schema's\n        // \"required\" list that the object lacks, in the schema's order.\n        // Example: requiredErrors(Map.of(\"required\", List.of(\"a\")), Map.of(), \"$\") -> [{path=$.a, message=is required}]\n        return new ArrayList<>();\n    }\n\n    /** The problems of keys the schema does not list, when additionalProperties is false. */\n    @SuppressWarnings(\"unchecked\")\n    private static List<Map<String, Object>> extraErrors(Map<String, Object> schema, Map<?, ?> obj, String path) {\n        // TODO 5 of 8 (finish this to pass e2): the problems of keys the schema does not list.\n        // Receives the schema, an object and its path. When \"additionalProperties\" is false, returns one\n        // {path: \"<path>.<key>\", message: \"is not allowed\"} per key that is not in \"properties\"; otherwise an empty list.\n        // Example: schema {additionalProperties: false, properties: {}}, object {x: 1}, path \"$\" -> [{path=$.x, message=is not allowed}]\n        return new ArrayList<>();\n    }\n\n    /** One problem {path, message} per way value breaks schema; an empty list when it conforms. */\n    @SuppressWarnings(\"unchecked\")\n    static List<Map<String, Object>> validate(Map<String, Object> schema, Object value, String path) {\n        List<Map<String, Object>> errors = new ArrayList<>();\n        Object type = schema.get(\"type\");\n        if (type != null && !typeMatches((String) type, value)) {\n            errors.add(problem(path, \"must be of type \" + type));\n            return errors;\n        }\n        if (schema.containsKey(\"enum\") && !((List<Object>) schema.get(\"enum\")).contains(value)) {\n            errors.add(problem(path, \"must be one of \" + Json.stringify(schema.get(\"enum\"))));\n        }\n        if (value instanceof Number n && !(value instanceof Boolean)) errors.addAll(rangeErrors(schema, n, path));\n        if (value instanceof Map<?, ?> obj) {\n            errors.addAll(requiredErrors(schema, obj, path));\n            Map<String, Object> properties = (Map<String, Object>) schema.getOrDefault(\"properties\", Map.of());\n            for (Map.Entry<String, Object> e : properties.entrySet()) {\n                if (obj.containsKey(e.getKey())) errors.addAll(validate((Map<String, Object>) e.getValue(), obj.get(e.getKey()), path + \".\" + e.getKey()));\n            }\n            errors.addAll(extraErrors(schema, obj, path));\n        }\n        if (value instanceof List<?> list && schema.containsKey(\"items\")) {\n            for (int i = 0; i < list.size(); i++) errors.addAll(validate((Map<String, Object>) schema.get(\"items\"), list.get(i), path + \"[\" + i + \"]\"));\n        }\n        return errors;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static String textOf(Map<String, Object> reply) {\n        StringBuilder out = new StringBuilder();\n        for (Object block : (List<Object>) reply.get(\"content\")) {\n            Map<String, Object> b = (Map<String, Object>) block;\n            if (\"text\".equals(b.get(\"type\"))) out.append(b.get(\"text\"));\n        }\n        return out.toString();\n    }\n\n    private static Map<String, Object> message(String role, String content) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        m.put(\"role\", role);\n        m.put(\"content\", content);\n        return m;\n    }\n\n    private static String prompt(String document, Map<String, Object> schema) {\n        return \"Extract the data from the document as one JSON object that follows this JSON Schema. Reply with the JSON only.\\n\"\n                + \"<schema>\" + Json.stringify(schema) + \"</schema>\\n<document>\\n\" + document + \"\\n</document>\";\n    }\n\n    /** The message that sends the problems back to the model. */\n    private static String feedback(List<Map<String, Object>> errors) {\n        // TODO 6 of 8 (finish this to pass e2): the message that sends the problems back to the model.\n        // Receives the list of problems. Returns \"Your reply was rejected:\", then one \"- <path>: <message>\" line per problem, then\n        // \"Return the corrected JSON only.\", each on its own line (a newline after every line but the last).\n        // Example: one problem {$.total, must be of type number} -> \"Your reply was rejected:\\n- $.total: must be of type number\\nReturn the corrected JSON only.\"\n        return \"\";\n    }\n\n    private static Map<String, Object> result(String status, Object value, int attempts, List<Map<String, Object>> errors) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        m.put(\"status\", status);\n        m.put(\"value\", value);\n        m.put(\"attempts\", attempts);\n        m.put(\"errors\", errors);\n        return m;\n    }\n\n    /** The quotes the document does not contain. */\n    private static List<Map<String, Object>> groundingErrors(Object value, String document, List<String> evidenceFields) {\n        // TODO 7 of 8 (finish this to pass e5): the quotes the document does not contain.\n        // Receives the parsed value, the document text and the names of the evidence fields. For each name whose value in the object is a\n        // String that does not occur in the document, returns {path: \"$.<name>\", message: \"is not found in the document\"}.\n        // Example: value {quote: \"x\"}, document \"abc\", fields [quote] -> [{path=$.quote, message=is not found in the document}]\n        return new ArrayList<>();\n    }\n\n    /** \"refused\" or \"truncated\" for a reply that must not be retried, else null. */\n    private static String earlyStatus(Map<String, Object> reply) {\n        // TODO 8 of 8 (finish this to pass e4): a reply that must not be retried.\n        // Receives a reply. Returns \"refused\" when its stop_reason is \"refusal\", \"truncated\" when it is \"max_tokens\", else null.\n        // Example: a reply with stop_reason \"max_tokens\" -> \"truncated\"\n        // The starter says \"truncated\" for every reply, so it stops after one call; write the real rule.\n        return \"truncated\";\n    }\n\n    static Map<String, Object> extract(Function<List<Map<String, Object>>, Map<String, Object>> ask, String document, Map<String, Object> schema) {\n        return extract(ask, document, schema, 3, List.of());\n    }\n\n    /** Ask, parse, validate and, on a problem, re-prompt with the errors, at most maxAttempts calls. */\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> extract(Function<List<Map<String, Object>>, Map<String, Object>> ask, String document, Map<String, Object> schema,\n            int maxAttempts, List<String> evidenceFields) {\n        List<Map<String, Object>> messages = new ArrayList<>(List.of(message(\"user\", prompt(document, schema))));\n        List<Map<String, Object>> errors = new ArrayList<>();\n        for (int attempt = 1; attempt <= maxAttempts; attempt++) {\n            Map<String, Object> reply = ask.apply(List.copyOf(messages));\n            String early = earlyStatus(reply);\n            if (early != null) return result(early, Map.of(), attempt, new ArrayList<>());\n            String text = textOf(reply);\n            Object value = null;\n            try {\n                value = parseJson(text);\n                errors = validate(schema, value);\n                errors.addAll(groundingErrors(value, document, evidenceFields));\n            } catch (ParseError e) {\n                value = null;\n                errors = new ArrayList<>(List.of(problem(\"$\", e.getMessage())));\n            }\n            if (errors.isEmpty()) return result(\"ok\", value, attempt, new ArrayList<>());\n            if (attempt < maxAttempts) {\n                messages.add(message(\"assistant\", text));\n                messages.add(message(\"user\", feedback(errors)));\n            }\n        }\n        return result(\"failed\", null, maxAttempts, errors);\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.function.Function;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        String doc = \"Invoice from Acme Tools. Total due: 120.50 EUR. Thank you for your business.\";\n        @SuppressWarnings(\"unchecked\")\n        Map<String, Object> schema = (Map<String, Object>) Json.parse(\"\"\"\n            {\"type\":\"object\",\"required\":[\"vendor\",\"total\",\"currency\",\"evidence\"],\n             \"properties\":{\"vendor\":{\"type\":\"string\"},\"total\":{\"type\":\"number\",\"minimum\":0},\n                           \"currency\":{\"type\":\"string\",\"enum\":[\"USD\",\"EUR\",\"GBP\"]},\"evidence\":{\"type\":\"string\"}},\n             \"additionalProperties\":false}\"\"\");\n        String good = \"{\\\"vendor\\\":\\\"Acme Tools\\\",\\\"total\\\":120.5,\\\"currency\\\":\\\"EUR\\\",\\\"evidence\\\":\\\"Total due: 120.50 EUR\\\"}\";\n\n        // A hand-written stand-in for the model, in the shape of a Messages API reply: it always answers with valid JSON.\n        Function<List<Map<String, Object>>, Map<String, Object>> ask = messages ->\n            Map.of(\"type\", \"message\", \"role\", \"assistant\", \"stop_reason\", \"end_turn\",\n                \"content\", List.of(Map.of(\"type\", \"text\", \"text\", good)));\n\n        Map<String, Object> result = Extractor.extract(ask, doc, schema, 3, List.of(\"evidence\"));\n\n        System.out.println(\"status: \" + result.get(\"status\"));\n        System.out.println(\"attempts: \" + result.get(\"attempts\"));\n        System.out.println(\"value: \" + result.get(\"value\"));\n        System.out.println(\"errors: \" + result.get(\"errors\"));\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 4,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "012216fa160b5bc5006f0a88f117e6616a6941a55f683d77fdafdfde9a969884",
+  "starting_code": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.function.Function;\n\n/** Extract structured data from a document with validation and a bounded re-prompt. See ../../statement.md. JSON values are Map, List, String, Long, Double, Boolean or null. */\nfinal class Extractor {\n    private static final System.Logger LOG = System.getLogger(Extractor.class.getName());\n    private Extractor() {}\n\n    /** The index of the first { and of the last } in the text; -1 for a brace that is not there. */\n    private static int[] objectSpan(String body) {\n        // TODO 1 of 8 (finish this to pass m1, e1 and e3): where the JSON object sits in the text.\n        // Receives the text. Returns {first, last}: the index of the first '{' and of the last '}', or -1 for a brace that is not there.\n        // Example: objectSpan(\"Sure! {\\\"a\\\": 1} Done.\") -> {6, 13}\n        return new int[] {-1, -1};\n    }\n\n    /** The JSON value in a model reply: the body of a code fence, else the span from the first { to the last }. */\n    static Object parseJson(String text) {\n        LOG.log(System.Logger.Level.DEBUG, \"parseJson input: {0}\", text);\n        String body = text;\n        int fence = text.indexOf(\"```\");\n        if (fence != -1) {\n            int start = text.indexOf('\\n', fence);\n            int end = text.indexOf(\"```\", start != -1 ? start : fence + 3);\n            if (start != -1 && end != -1) body = text.substring(start + 1, end);\n        }\n        int[] span = objectSpan(body);\n        int first = span[0];\n        int last = span[1];\n        if (first == -1 || last < first) throw new ParseError(\"no JSON object found in the reply\");\n        try {\n            return Json.parse(body.substring(first, last + 1));\n        } catch (IllegalArgumentException e) {\n            throw new ParseError(\"invalid JSON: \" + e.getMessage());\n        }\n    }\n\n    /** Is this value an integer for the schema? A whole number, or a Double with no fraction; never a Boolean. */\n    private static boolean isInteger(Object v) {\n        // TODO 2 of 8 (finish this to pass e6): is this value an integer for the schema?\n        // Receives any value. Returns true for a Long, Integer, Short or Byte and for a Double with no fraction; false otherwise (2.5, a Boolean).\n        // Example: isInteger(2.0) -> true, isInteger(2.5) -> false, isInteger(true) -> false\n        return false;\n    }\n\n    private static boolean typeMatches(String type, Object v) {\n        return switch (type) {\n            case \"string\" -> v instanceof String;\n            case \"integer\" -> isInteger(v);\n            case \"number\" -> v instanceof Number;\n            case \"boolean\" -> v instanceof Boolean;\n            case \"array\" -> v instanceof List;\n            case \"object\" -> v instanceof Map;\n            case \"null\" -> v == null;\n            default -> throw new IllegalArgumentException(\"unknown type \" + type);\n        };\n    }\n\n    private static Map<String, Object> problem(String path, String message) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        m.put(\"path\", path);\n        m.put(\"message\", message);\n        return m;\n    }\n\n    static List<Map<String, Object>> validate(Map<String, Object> schema, Object value) {\n        return validate(schema, value, \"$\");\n    }\n\n    /** The problems of a number outside minimum and maximum. */\n    private static List<Map<String, Object>> rangeErrors(Map<String, Object> schema, Number n, String path) {\n        // TODO 3 of 8 (finish this to pass e2): the problems of a number outside minimum and maximum.\n        // Receives the schema, a number and its path. Returns problems {path, message}: \"must be at least <minimum>\" first, then\n        // \"must be at most <maximum>\", each only when the schema has that key and the value breaks it.\n        // Example: rangeErrors(Map.of(\"minimum\", 0L), -1, \"$.total\") -> [{path=$.total, message=must be at least 0}]\n        return new ArrayList<>();\n    }\n\n    /** The problems of missing required keys. */\n    @SuppressWarnings(\"unchecked\")\n    private static List<Map<String, Object>> requiredErrors(Map<String, Object> schema, Map<?, ?> obj, String path) {\n        // TODO 4 of 8 (finish this to pass e2): the problems of missing required keys.\n        // Receives the schema, an object and its path. Returns one {path: \"<path>.<key>\", message: \"is required\"} per key of the schema's\n        // \"required\" list that the object lacks, in the schema's order.\n        // Example: requiredErrors(Map.of(\"required\", List.of(\"a\")), Map.of(), \"$\") -> [{path=$.a, message=is required}]\n        return new ArrayList<>();\n    }\n\n    /** The problems of keys the schema does not list, when additionalProperties is false. */\n    @SuppressWarnings(\"unchecked\")\n    private static List<Map<String, Object>> extraErrors(Map<String, Object> schema, Map<?, ?> obj, String path) {\n        // TODO 5 of 8 (finish this to pass e2): the problems of keys the schema does not list.\n        // Receives the schema, an object and its path. When \"additionalProperties\" is false, returns one\n        // {path: \"<path>.<key>\", message: \"is not allowed\"} per key that is not in \"properties\"; otherwise an empty list.\n        // Example: schema {additionalProperties: false, properties: {}}, object {x: 1}, path \"$\" -> [{path=$.x, message=is not allowed}]\n        return new ArrayList<>();\n    }\n\n    /** One problem {path, message} per way value breaks schema; an empty list when it conforms. */\n    @SuppressWarnings(\"unchecked\")\n    static List<Map<String, Object>> validate(Map<String, Object> schema, Object value, String path) {\n        List<Map<String, Object>> errors = new ArrayList<>();\n        Object type = schema.get(\"type\");\n        if (type != null && !typeMatches((String) type, value)) {\n            errors.add(problem(path, \"must be of type \" + type));\n            return errors;\n        }\n        if (schema.containsKey(\"enum\") && !((List<Object>) schema.get(\"enum\")).contains(value)) {\n            errors.add(problem(path, \"must be one of \" + Json.stringify(schema.get(\"enum\"))));\n        }\n        if (value instanceof Number n && !(value instanceof Boolean)) errors.addAll(rangeErrors(schema, n, path));\n        if (value instanceof Map<?, ?> obj) {\n            errors.addAll(requiredErrors(schema, obj, path));\n            Map<String, Object> properties = (Map<String, Object>) schema.getOrDefault(\"properties\", Map.of());\n            for (Map.Entry<String, Object> e : properties.entrySet()) {\n                if (obj.containsKey(e.getKey())) errors.addAll(validate((Map<String, Object>) e.getValue(), obj.get(e.getKey()), path + \".\" + e.getKey()));\n            }\n            errors.addAll(extraErrors(schema, obj, path));\n        }\n        if (value instanceof List<?> list && schema.containsKey(\"items\")) {\n            for (int i = 0; i < list.size(); i++) errors.addAll(validate((Map<String, Object>) schema.get(\"items\"), list.get(i), path + \"[\" + i + \"]\"));\n        }\n        return errors;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static String textOf(Map<String, Object> reply) {\n        StringBuilder out = new StringBuilder();\n        for (Object block : (List<Object>) reply.get(\"content\")) {\n            Map<String, Object> b = (Map<String, Object>) block;\n            if (\"text\".equals(b.get(\"type\"))) out.append(b.get(\"text\"));\n        }\n        return out.toString();\n    }\n\n    private static Map<String, Object> message(String role, String content) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        m.put(\"role\", role);\n        m.put(\"content\", content);\n        return m;\n    }\n\n    private static String prompt(String document, Map<String, Object> schema) {\n        return \"Extract the data from the document as one JSON object that follows this JSON Schema. Reply with the JSON only.\\n\"\n                + \"<schema>\" + Json.stringify(schema) + \"</schema>\\n<document>\\n\" + document + \"\\n</document>\";\n    }\n\n    /** The message that sends the problems back to the model. */\n    private static String feedback(List<Map<String, Object>> errors) {\n        // TODO 6 of 8 (finish this to pass e2): the message that sends the problems back to the model.\n        // Receives the list of problems. Returns \"Your reply was rejected:\", then one \"- <path>: <message>\" line per problem, then\n        // \"Return the corrected JSON only.\", each on its own line (a newline after every line but the last).\n        // Example: one problem {$.total, must be of type number} -> \"Your reply was rejected:\\n- $.total: must be of type number\\nReturn the corrected JSON only.\"\n        return \"\";\n    }\n\n    private static Map<String, Object> result(String status, Object value, int attempts, List<Map<String, Object>> errors) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        m.put(\"status\", status);\n        m.put(\"value\", value);\n        m.put(\"attempts\", attempts);\n        m.put(\"errors\", errors);\n        return m;\n    }\n\n    /** The quotes the document does not contain. */\n    private static List<Map<String, Object>> groundingErrors(Object value, String document, List<String> evidenceFields) {\n        // TODO 7 of 8 (finish this to pass e5): the quotes the document does not contain.\n        // Receives the parsed value, the document text and the names of the evidence fields. For each name whose value in the object is a\n        // String that does not occur in the document, returns {path: \"$.<name>\", message: \"is not found in the document\"}.\n        // Example: value {quote: \"x\"}, document \"abc\", fields [quote] -> [{path=$.quote, message=is not found in the document}]\n        return new ArrayList<>();\n    }\n\n    /** \"refused\" or \"truncated\" for a reply that must not be retried, else null. */\n    private static String earlyStatus(Map<String, Object> reply) {\n        // TODO 8 of 8 (finish this to pass e4): a reply that must not be retried.\n        // Receives a reply. Returns \"refused\" when its stop_reason is \"refusal\", \"truncated\" when it is \"max_tokens\", else null.\n        // Example: a reply with stop_reason \"max_tokens\" -> \"truncated\"\n        // The starter says \"truncated\" for every reply, so it stops after one call; write the real rule.\n        return \"truncated\";\n    }\n\n    static Map<String, Object> extract(Function<List<Map<String, Object>>, Map<String, Object>> ask, String document, Map<String, Object> schema) {\n        return extract(ask, document, schema, 3, List.of());\n    }\n\n    /** Ask, parse, validate and, on a problem, re-prompt with the errors, at most maxAttempts calls. */\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> extract(Function<List<Map<String, Object>>, Map<String, Object>> ask, String document, Map<String, Object> schema,\n            int maxAttempts, List<String> evidenceFields) {\n        List<Map<String, Object>> messages = new ArrayList<>(List.of(message(\"user\", prompt(document, schema))));\n        List<Map<String, Object>> errors = new ArrayList<>();\n        for (int attempt = 1; attempt <= maxAttempts; attempt++) {\n            Map<String, Object> reply = ask.apply(List.copyOf(messages));\n            String early = earlyStatus(reply);\n            if (early != null) return result(early, Map.of(), attempt, new ArrayList<>());\n            String text = textOf(reply);\n            Object value = null;\n            try {\n                value = parseJson(text);\n                errors = validate(schema, value);\n                errors.addAll(groundingErrors(value, document, evidenceFields));\n            } catch (ParseError e) {\n                value = null;\n                errors = new ArrayList<>(List.of(problem(\"$\", e.getMessage())));\n            }\n            if (errors.isEmpty()) return result(\"ok\", value, attempt, new ArrayList<>());\n            if (attempt < maxAttempts) {\n                messages.add(message(\"assistant\", text));\n                messages.add(message(\"user\", feedback(errors)));\n            }\n        }\n        return result(\"failed\", null, maxAttempts, errors);\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-3/src/main/java/Extractor.java",
+    "test_path": "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-3/src/test/java/ExtractorTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_aValidReplyIsReturnedAfterOneCall()",
+        "kind": "main",
+        "says": "A valid reply is returned after one call"
+      },
+      {
+        "id": "e1_jsonIsFoundInFencesAndProseAndBadTextIsRetried()",
+        "kind": "edge",
+        "says": "JSON is found inside fences and prose, and text with no JSON is retried"
+      },
+      {
+        "id": "e2_everySchemaViolationIsListedAndSentBackToTheModel()",
+        "kind": "edge",
+        "says": "Every schema violation is listed and sent back to the model"
+      },
+      {
+        "id": "e3_theNumberOfAttemptsIsBounded()",
+        "kind": "edge",
+        "says": "The number of attempts is bounded"
+      },
+      {
+        "id": "e4_aRefusalOrACutOffReplyIsNotRetried()",
+        "kind": "edge",
+        "says": "A refusal or a cut-off reply is not retried"
+      },
+      {
+        "id": "e5_aQuoteThatIsNotInTheDocumentIsRejected()",
+        "kind": "edge",
+        "says": "A quotation that is not in the document is rejected"
+      },
+      {
+        "id": "e6_typesAreExactBooleansAreNotNumbersAndIntegersHaveNoFraction()",
+        "kind": "edge",
+        "says": "Types are exact: booleans are not numbers and integers have no fraction"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-3/target/test-results/test"
+    },
+    "origin": "course/25-structured-output-and-defensive-parsing/02-defensive-parsing-validation-and-the-re-prompt.md",
+    "concepts": [
+      "the practice of Defensive parsing, validation and the re-prompt is solved"
+    ],
+    "files": [
+      "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "structured-output-and-defensive-parsing-u2"
+}

@@ -1,0 +1,121 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "17-streaming"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 5,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Streaming events and assembling a message",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A handler adds up the output token count of every `message_delta` it receives and reports three times the real cost. What does the page say it should do instead?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Overwrite the earlier figure, since each event restates the running tally",
+            "correct": true,
+            "says": "The page says \"The output count in message_delta is cumulative: replace the stored one, do not add to it\"."
+          },
+          {
+            "id": "b",
+            "text": "Take the input count from the final event and the output count from the first",
+            "correct": false,
+            "says": "Ruled out because \"the output count comes from the last message_delta\" and the input count from `message_start`."
+          },
+          {
+            "id": "c",
+            "text": "Sum them all and then subtract the figure that the opening event gave",
+            "correct": false,
+            "says": "Ruled out because the page says \"do not add to it\"."
+          },
+          {
+            "id": "d",
+            "text": "Drop the field and measure the pieces of text that arrived in the stream",
+            "correct": false,
+            "says": "Ruled out because usage is read from the events: \"Input tokens come from message_start\"."
+          }
+        ],
+        "origin": {
+          "path": "course/17-streaming/01-events-and-assembling-a-message.md",
+          "section": "The shape of a stream"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A stream breaks in the middle of the fragments of a tool call's input. What should the code do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Join the fragments received so far and parse them as the input",
+            "correct": false,
+            "says": "Ruled out because the fragments \"are not valid JSON until the block ends\"."
+          },
+          {
+            "id": "b",
+            "text": "Run the tool with whatever the first fragment held",
+            "correct": false,
+            "says": "Ruled out because \"A fragment of tool input is a piece of text, not an object\"."
+          },
+          {
+            "id": "c",
+            "text": "Throw the piece away and report the whole message as failed",
+            "correct": true,
+            "says": "The page says \"Raise, so that the caller can decide\" when a stream just stopped, because it \"is an incomplete message, not a short one\"."
+          },
+          {
+            "id": "d",
+            "text": "Keep the block and mark the message as a short one",
+            "correct": false,
+            "says": "Ruled out because the page says \"an incomplete message, not a short one\"."
+          }
+        ],
+        "origin": {
+          "path": "course/17-streaming/01-events-and-assembling-a-message.md",
+          "section": "Traps"
+        }
+      }
+    ],
+    "concepts": [
+      "The shape of a stream, as the page teaches it",
+      "Traps, as the page teaches it"
+    ]
+  }
+}

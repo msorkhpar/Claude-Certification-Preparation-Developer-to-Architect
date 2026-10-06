@@ -1,0 +1,121 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "15-errors-retries-and-timeouts"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 5,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Retry, back-off and idempotency, and a retry policy",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A service retries every 5xx and 429 at once, three times in a row. During a provider overload its own traffic triples and the errors last longer. What is the best change?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Retry five times in a row instead of three, with no pause between the attempts",
+            "correct": false,
+            "says": "Ruled out because immediate attempts add load, while the doubling means \"a long outage is met with fewer and fewer requests\"."
+          },
+          {
+            "id": "b",
+            "text": "Wait with a doubling, capped pause plus jitter, and honour any retry-after value",
+            "correct": true,
+            "says": "The page's three ideas are exponential growth, a cap and jitter, and \"wait the larger of your back-off and the header\"."
+          },
+          {
+            "id": "c",
+            "text": "Retry only the 429 responses and treat every 5xx response as final, not retryable",
+            "correct": false,
+            "says": "Ruled out because the table lists \"500, 504 and 529\" under \"Retry\"."
+          },
+          {
+            "id": "d",
+            "text": "Add a fixed one-second pause between the attempts and keep the count at three",
+            "correct": false,
+            "says": "Ruled out because \"after an outage, every client retries on the same schedule, and the recovering service meets all of them at once\"."
+          }
+        ],
+        "origin": {
+          "path": "course/15-errors-retries-and-timeouts/02-retry-back-off-and-idempotency.md",
+          "section": "retry-after: the server's own number"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A tool in an agent files a support ticket. A timeout makes the surrounding call retry, and customers receive two tickets. Which design fixes it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Wait longer between the attempts so that the first one can finish",
+            "correct": false,
+            "says": "Ruled out because the problem is that the first attempt may already have succeeded, and \"if the first attempt actually succeeded on the server and only the answer was lost\", waiting does not undo it."
+          },
+          {
+            "id": "b",
+            "text": "Lower the retry count of the call to zero for all tools",
+            "correct": false,
+            "says": "Ruled out because without retries a transient failure fails a customer, and \"retry the call, never the side effect\" separates the two."
+          },
+          {
+            "id": "c",
+            "text": "Ask the model in the prompt not to call the tool a second time",
+            "correct": false,
+            "says": "Ruled out because \"a prompt is a request to the model, not a guarantee\", and the retry happens in code."
+          },
+          {
+            "id": "d",
+            "text": "Give each action its own key and check it before it runs",
+            "correct": true,
+            "says": "The page says \"make such tools idempotent: pass your own unique key, check it before acting, and store the result under it\"."
+          }
+        ],
+        "origin": {
+          "path": "course/15-errors-retries-and-timeouts/02-retry-back-off-and-idempotency.md",
+          "section": "Idempotency: when is a retry safe"
+        }
+      }
+    ],
+    "concepts": [
+      "Idempotency: when is a retry safe, as the page teaches it",
+      "retry-after: the server's own number, as the page teaches it"
+    ]
+  }
+}

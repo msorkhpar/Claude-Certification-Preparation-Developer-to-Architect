@@ -1,0 +1,85 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-4",
+    "90-governance-safety-and-risk"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Practice: the governance files of a claims assistant (Python)",
+  "lang": "python",
+  "main_file": "project/governance/controls.json",
+  "files": [
+    "project/docs/risk-register.md",
+    "project/governance/retention.json",
+    "project/governance/routing.json"
+  ],
+  "test_file": "tests/test_governance.py",
+  "build": [
+    "pytest.ini",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-1/check_files.py",
+    "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-1/project/docs/risk-register.md",
+    "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-1/project/governance/controls.json",
+    "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-1/project/governance/retention.json",
+    "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-1/project/governance/routing.json"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-1/target/report.xml",
+    "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-1/tests/test_governance.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_no_control_that_guards_an_input_or_an_action_fails_open",
+      "kind": "main",
+      "says": "No control that guards an input or an action fails open"
+    },
+    {
+      "id": "test_e1_every_high_consequence_action_has_a_human_step_that_exists_and_holds",
+      "kind": "edge",
+      "says": "Every high-consequence action has a human step that exists, is high tier and holds"
+    },
+    {
+      "id": "test_e2_the_automatic_threshold_is_at_least_95_and_a_high_consequence_action_is_never_automatic",
+      "kind": "edge",
+      "says": "The automatic threshold is at least 95 (exactly 95 is allowed), a high-consequence action is never automatic and an unsupported answer is held"
+    },
+    {
+      "id": "test_e3_retention_keeps_at_least_90_days_within_the_ceiling_and_stores_no_content",
+      "kind": "edge",
+      "says": "The audit floor is at least 90 days, the days kept lie within the ceiling, no content is stored and a legal hold wins"
+    },
+    {
+      "id": "test_e4_the_risk_register_names_a_control_and_an_owner_for_each_of_four_failure_modes",
+      "kind": "edge",
+      "says": "The register has four rows with a defined control, a named owner and the four failure modes"
+    },
+    {
+      "id": "test_e5_users_are_told_that_ai_helped_and_no_file_holds_personal_data",
+      "kind": "edge",
+      "says": "The register says users are told that AI helped, and no file holds a personal path or address"
+    },
+    {
+      "id": "test_e6_erasure_removes_the_vault_mapping_within_30_days",
+      "kind": "edge",
+      "says": "Erasure removes the vault mapping and completes within 30 days (exactly 30 is allowed)"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/90-governance-safety-and-risk/01-controls-that-fail-closed-and-a-person-before-the-irreversible.md"
+}

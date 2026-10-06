@@ -1,0 +1,289 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "25-structured-output-and-defensive-parsing"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: an extractor with validation and a re-prompt (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an extractor with validation and a re-prompt"
+    },
+    {
+      "type": "para",
+      "text": "A model can be asked for JSON that follows a schema, and the reply can still be wrong: cut off, wrapped in prose, a number where a string belongs, or a quotation the document never contained. Write the code around the model that catches this and asks again, a bounded number of times. The rules come from the Claude documentation on structured outputs, tool use and stop reasons, read on 2026-10-03; the lesson pages explain them. Nothing here touches the network: the model is a function that you call, and the tests give it scripted replies in the shape of a Messages API response."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given types"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "schema",
+          "a JSON Schema as a map, using only `type` (`string`, `integer`, `number`, `boolean`, `array`, `object`, `null`), `enum`, `minimum`, `maximum`, `required`, `properties`, `additionalProperties: false` and `items`"
+        ],
+        [
+          "`ask(messages)`",
+          "the model: takes the list of `{\"role\", \"content\"}` messages and returns a reply `{\"content\": [blocks], \"stop_reason\": ...}`; the text blocks hold the model's words"
+        ],
+        [
+          "problem",
+          "`{\"path\", \"message\"}`; the path is `$` for the whole value, `$.total` for a field, `$.items[1].qty` for an array element"
+        ],
+        [
+          "`ParseError`",
+          "raised when no JSON object can be read from a reply"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working extractor with eight small gaps cut out of it. Everything that is plumbing is written and correct: the fence handling and the JSON parse in `parse_json`, the type table, the order of the checks in `validate` and its walk over properties and items, the first prompt, the loop of `extract` with its re-prompt messages and its result shape. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails every case on an assertion. The TypeScript, Java and Kotlin names are the camel-case forms (`objectSpan`, `isInteger`, `rangeErrors`, ...). Write them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_object_span` unlocks `m1`, `e1` and `e3`: the index of the first `{` and of the last `}`.",
+        "`_is_integer` unlocks `e6`: a whole number or a float with no fraction, never a boolean.",
+        "`_range_errors` unlocks `e2`: the `minimum` and `maximum` problems of a number.",
+        "`_required_errors` unlocks `e2`: one problem per missing `required` key.",
+        "`_extra_errors` unlocks `e2`: one problem per key the schema does not list.",
+        "`_feedback` unlocks `e2`: the text that sends every problem back to the model.",
+        "`_grounding_errors` unlocks `e5`: the quotes that the document does not contain.",
+        "`_early_status` unlocks `e4`: `refused` or `truncated`, so the reply is not retried."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs the first gap; the rest of the cases need the gaps named above. About twenty lines in all. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. `parse_json` already logs what it receives."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`parse_json(text)` returns the JSON value in a reply. If the text holds a code fence, use the body of the first fence; then take the span from the first `{` to the last `}` and parse it. Raise `ParseError` when there is no such span or it is not valid JSON.",
+        "`validate(schema, value)` returns the list of problems, in this order for one value: a wrong type stops the checks for that value (one problem, no more); then `enum`, then `minimum` and `maximum`; for an object, one problem per missing `required` key (path `$.key`, in the schema's order), then the checks of every property in the schema's order, then one problem per key that the schema does not list when `additionalProperties` is false; for an array, the checks of each element. An integer is a number with no fraction (`2.0` is an integer, `2.5` is not); a boolean is never a number or an integer. A conforming value gives an empty list.",
+        [
+          "`extract(ask, document, schema, max_attempts=3, evidence_fields=())` builds the first message (role `user`, containing the document), calls `ask`, and reads the reply:",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`stop_reason` of `refusal`: stop, status `refused`, no further call. `max_tokens`: stop, status `truncated`, no further call (asking again with the error list cannot fix a cut-off reply).",
+              "Otherwise parse the text and validate it. For every name in `evidence_fields`, a string field of that name must occur in the document; if it does not, add the problem `$.name`. A reply that parses and has no problems gives status `ok`.",
+              "On a problem and with attempts left, call `ask` again with the earlier messages, then the model's reply as an `assistant` message with exactly its text, then a `user` message that lists every problem with its path and message. A parse failure is the single problem at path `$`.",
+              "After `max_attempts` calls in all, give status `failed` with the problems of the last attempt.",
+              "The result is `{\"status\", \"value\", \"attempts\", \"errors\"}`; `value` is the parsed object for `ok` and nothing otherwise."
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A valid reply is returned after one call"
+        ],
+        [
+          "`e1`",
+          "JSON is found inside fences and prose, and text with no JSON is retried"
+        ],
+        [
+          "`e2`",
+          "Every schema violation is listed and sent back to the model"
+        ],
+        [
+          "`e3`",
+          "The number of attempts is bounded"
+        ],
+        [
+          "`e4`",
+          "A refusal or a cut-off reply is not retried"
+        ],
+        [
+          "`e5`",
+          "A quotation that is not in the document is rejected"
+        ],
+        [
+          "`e6`",
+          "Types are exact: booleans are not numbers and integers have no fraction"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Extract structured data from a document with validation and a bounded re-prompt. See ../../statement.md.\"\"\"\nimport json\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\nclass ParseError(Exception):\n    \"\"\"No JSON object could be read from the model's text.\"\"\"\n\n\ndef _object_span(body):\n    \"\"\"The index of the first { and of the last } in the text; -1 for a brace that is not there.\"\"\"\n    return body.find(\"{\"), body.rfind(\"}\")\n\n\ndef parse_json(text):\n    \"\"\"The JSON value in a model reply: the body of a code fence, else the span from the first { to the last }.\"\"\"\n    log.debug(\"parse_json input: %r\", text)\n    body = text\n    fence = text.find(\"```\")\n    if fence != -1:\n        start = text.find(\"\\n\", fence)\n        end = text.find(\"```\", start if start != -1 else fence + 3)\n        if start != -1 and end != -1:\n            body = text[start + 1:end]\n    first, last = _object_span(body)\n    if first == -1 or last < first:\n        raise ParseError(\"no JSON object found in the reply\")\n    try:\n        return json.loads(body[first:last + 1])\n    except ValueError as err:\n        raise ParseError(f\"invalid JSON: {err}\") from None\n\n\ndef _is_integer(value):\n    return (isinstance(value, int) and not isinstance(value, bool)) or (isinstance(value, float) and value.is_integer())\n\n\ndef _is_number(value):\n    return isinstance(value, (int, float)) and not isinstance(value, bool)\n\n\nTYPES = {\n    \"string\": lambda v: isinstance(v, str),\n    \"integer\": _is_integer,\n    \"number\": _is_number,\n    \"boolean\": lambda v: isinstance(v, bool),\n    \"array\": lambda v: isinstance(v, list),\n    \"object\": lambda v: isinstance(v, dict),\n    \"null\": lambda v: v is None,\n}\n\n\ndef _range_errors(schema, value, path):\n    \"\"\"The problems of a number outside minimum and maximum.\"\"\"\n    errors = []\n    if \"minimum\" in schema and value < schema[\"minimum\"]:\n        errors.append({\"path\": path, \"message\": f\"must be at least {schema['minimum']}\"})\n    if \"maximum\" in schema and value > schema[\"maximum\"]:\n        errors.append({\"path\": path, \"message\": f\"must be at most {schema['maximum']}\"})\n    return errors\n\n\ndef _required_errors(schema, value, path):\n    \"\"\"The problems of missing required keys.\"\"\"\n    return [{\"path\": f\"{path}.{key}\", \"message\": \"is required\"} for key in schema.get(\"required\", []) if key not in value]\n\n\ndef _extra_errors(schema, value, path):\n    \"\"\"The problems of keys the schema does not list, when additionalProperties is false.\"\"\"\n    if schema.get(\"additionalProperties\") is not False:\n        return []\n    properties = schema.get(\"properties\", {})\n    return [{\"path\": f\"{path}.{key}\", \"message\": \"is not allowed\"} for key in value if key not in properties]\n\n\ndef validate(schema, value, path=\"$\"):\n    \"\"\"A list of {\"path\", \"message\"} for every way value breaks schema; empty when it conforms.\"\"\"\n    errors = []\n    want = schema.get(\"type\")\n    if want is not None and not TYPES[want](value):\n        return [{\"path\": path, \"message\": f\"must be of type {want}\"}]\n    if \"enum\" in schema and value not in schema[\"enum\"]:\n        errors.append({\"path\": path, \"message\": f\"must be one of {schema['enum']}\"})\n    if _is_number(value):\n        errors += _range_errors(schema, value, path)\n    if isinstance(value, dict):\n        errors += _required_errors(schema, value, path)\n        properties = schema.get(\"properties\", {})\n        for key, sub in properties.items():\n            if key in value:\n                errors += validate(sub, value[key], f\"{path}.{key}\")\n        errors += _extra_errors(schema, value, path)\n    if isinstance(value, list) and \"items\" in schema:\n        for i, item in enumerate(value):\n            errors += validate(schema[\"items\"], item, f\"{path}[{i}]\")\n    return errors\n\n\ndef _text(reply):\n    return \"\".join(block[\"text\"] for block in reply[\"content\"] if block[\"type\"] == \"text\")\n\n\ndef _prompt(document, schema):\n    return (\"Extract the data from the document as one JSON object that follows this JSON Schema. Reply with the JSON only.\\n\"\n            f\"<schema>{json.dumps(schema)}</schema>\\n<document>\\n{document}\\n</document>\")\n\n\ndef _feedback(errors):\n    lines = \"\\n\".join(f\"- {e['path']}: {e['message']}\" for e in errors)\n    return f\"Your reply was rejected:\\n{lines}\\nReturn the corrected JSON only.\"\n\n\ndef _grounding_errors(value, document, evidence_fields):\n    \"\"\"The quotes the document does not contain.\"\"\"\n    errors = []\n    for name in evidence_fields:\n        quoted = value.get(name) if isinstance(value, dict) else None\n        if isinstance(quoted, str) and quoted not in document:\n            errors.append({\"path\": f\"$.{name}\", \"message\": \"is not found in the document\"})\n    return errors\n\n\ndef _early_status(reply):\n    \"\"\"\"refused\" or \"truncated\" for a reply that must not be retried, else None.\"\"\"\n    if reply.get(\"stop_reason\") == \"refusal\":\n        return \"refused\"\n    if reply.get(\"stop_reason\") == \"max_tokens\":\n        return \"truncated\"\n    return None\n\n\ndef extract(ask, document, schema, max_attempts=3, evidence_fields=()):\n    \"\"\"Ask, parse, validate and, on a problem, re-prompt with the errors, at most max_attempts calls.\"\"\"\n    messages = [{\"role\": \"user\", \"content\": _prompt(document, schema)}]\n    errors = []\n    for attempt in range(1, max_attempts + 1):\n        reply = ask(messages)\n        early = _early_status(reply)\n        if early:\n            return {\"status\": early, \"value\": None, \"attempts\": attempt, \"errors\": []}\n        text = _text(reply)\n        try:\n            value = parse_json(text)\n            errors = validate(schema, value)\n            errors += _grounding_errors(value, document, evidence_fields)\n        except ParseError as err:\n            value, errors = None, [{\"path\": \"$\", \"message\": str(err)}]\n        if not errors:\n            return {\"status\": \"ok\", \"value\": value, \"attempts\": attempt, \"errors\": []}\n        if attempt < max_attempts:\n            messages = messages + [{\"role\": \"assistant\", \"content\": text}, {\"role\": \"user\", \"content\": _feedback(errors)}]\n    return {\"status\": \"failed\", \"value\": None, \"attempts\": max_attempts, \"errors\": errors}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nimport json\n\nfrom extractor import extract\n\nDOC = \"Invoice from Acme Tools. Total due: 120.50 EUR. Thank you for your business.\"\nSCHEMA = {\n    \"type\": \"object\",\n    \"required\": [\"vendor\", \"total\", \"currency\", \"evidence\"],\n    \"properties\": {\n        \"vendor\": {\"type\": \"string\"},\n        \"total\": {\"type\": \"number\", \"minimum\": 0},\n        \"currency\": {\"type\": \"string\", \"enum\": [\"USD\", \"EUR\", \"GBP\"]},\n        \"evidence\": {\"type\": \"string\"},\n    },\n    \"additionalProperties\": False,\n}\nGOOD = {\"vendor\": \"Acme Tools\", \"total\": 120.5, \"currency\": \"EUR\", \"evidence\": \"Total due: 120.50 EUR\"}\n\n\ndef ask(messages):\n    \"\"\"A hand-written stand-in for the model, in the shape of a Messages API reply: it always answers with valid JSON.\"\"\"\n    return {\"id\": \"msg_illustrative\", \"type\": \"message\", \"role\": \"assistant\", \"model\": \"claude-sonnet-5-5\",\n            \"content\": [{\"type\": \"text\", \"text\": json.dumps(GOOD)}], \"stop_reason\": \"end_turn\",\n            \"usage\": {\"input_tokens\": 1, \"output_tokens\": 1}}\n\n\nresult = extract(ask, DOC, SCHEMA, evidence_fields=[\"evidence\"]) or {}\n\nprint(\"status:\", result.get(\"status\"))\nprint(\"attempts:\", result.get(\"attempts\"))\nprint(\"value:\", result.get(\"value\"))\nprint(\"errors:\", result.get(\"errors\"))\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Extract structured data from a document with validation and a bounded re-prompt. See ../../statement.md.\"\"\"\nimport json\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\nclass ParseError(Exception):\n    \"\"\"No JSON object could be read from the model's text.\"\"\"\n\n\ndef _object_span(body):\n    \"\"\"TODO 1 of 8 (finish this to pass m1, e1 and e3): where the JSON object sits in the text.\n\n    Receives the text. Returns (first, last): the index of the first `{` and of the last `}`, or -1 for a brace that is not there.\n    Example: _object_span('Sure! {\"a\": 1} Done.') -> (6, 13)\n    \"\"\"\n    return -1, -1\n\n\ndef parse_json(text):\n    \"\"\"The JSON value in a model reply: the body of a code fence, else the span from the first { to the last }.\"\"\"\n    log.debug(\"parse_json input: %r\", text)\n    body = text\n    fence = text.find(\"```\")\n    if fence != -1:\n        start = text.find(\"\\n\", fence)\n        end = text.find(\"```\", start if start != -1 else fence + 3)\n        if start != -1 and end != -1:\n            body = text[start + 1:end]\n    first, last = _object_span(body)\n    if first == -1 or last < first:\n        raise ParseError(\"no JSON object found in the reply\")\n    try:\n        return json.loads(body[first:last + 1])\n    except ValueError as err:\n        raise ParseError(f\"invalid JSON: {err}\") from None\n\n\ndef _is_integer(value):\n    \"\"\"TODO 2 of 8 (finish this to pass e6): is this value an integer for the schema?\n\n    Receives any value. Returns True for an int that is not a bool and for a float with no fraction; False otherwise.\n    Example: _is_integer(2.0) -> True, _is_integer(2.5) -> False, _is_integer(True) -> False\n    \"\"\"\n    return False\n\n\ndef _is_number(value):\n    return isinstance(value, (int, float)) and not isinstance(value, bool)\n\n\nTYPES = {\n    \"string\": lambda v: isinstance(v, str),\n    \"integer\": _is_integer,\n    \"number\": _is_number,\n    \"boolean\": lambda v: isinstance(v, bool),\n    \"array\": lambda v: isinstance(v, list),\n    \"object\": lambda v: isinstance(v, dict),\n    \"null\": lambda v: v is None,\n}\n\n\ndef _range_errors(schema, value, path):\n    \"\"\"TODO 3 of 8 (finish this to pass e2): the problems of a number outside minimum and maximum.\n\n    Receives the schema, a number and its path. Returns a list of {\"path\", \"message\"}: \"must be at least <minimum>\" first, then\n    \"must be at most <maximum>\", each only when the schema has that key and the value breaks it.\n    Example: _range_errors({\"minimum\": 0}, -1, \"$.total\") -> [{\"path\": \"$.total\", \"message\": \"must be at least 0\"}]\n    \"\"\"\n    return []\n\n\ndef _required_errors(schema, value, path):\n    \"\"\"TODO 4 of 8 (finish this to pass e2): the problems of missing required keys.\n\n    Receives the schema, an object (dict) and its path. Returns one {\"path\": \"<path>.<key>\", \"message\": \"is required\"} per key of the\n    schema's `required` list that the object lacks, in the schema's order.\n    Example: _required_errors({\"required\": [\"a\"]}, {}, \"$\") -> [{\"path\": \"$.a\", \"message\": \"is required\"}]\n    \"\"\"\n    return []\n\n\ndef _extra_errors(schema, value, path):\n    \"\"\"TODO 5 of 8 (finish this to pass e2): the problems of keys the schema does not list.\n\n    Receives the schema, an object (dict) and its path. When the schema says `additionalProperties` is False, returns one\n    {\"path\": \"<path>.<key>\", \"message\": \"is not allowed\"} per key that is not in `properties`; otherwise an empty list.\n    Example: _extra_errors({\"additionalProperties\": False, \"properties\": {}}, {\"x\": 1}, \"$\") -> [{\"path\": \"$.x\", \"message\": \"is not allowed\"}]\n    \"\"\"\n    return []\n\n\ndef validate(schema, value, path=\"$\"):\n    \"\"\"A list of {\"path\", \"message\"} for every way value breaks schema; empty when it conforms.\"\"\"\n    errors = []\n    want = schema.get(\"type\")\n    if want is not None and not TYPES[want](value):\n        return [{\"path\": path, \"message\": f\"must be of type {want}\"}]\n    if \"enum\" in schema and value not in schema[\"enum\"]:\n        errors.append({\"path\": path, \"message\": f\"must be one of {schema['enum']}\"})\n    if _is_number(value):\n        errors += _range_errors(schema, value, path)\n    if isinstance(value, dict):\n        errors += _required_errors(schema, value, path)\n        properties = schema.get(\"properties\", {})\n        for key, sub in properties.items():\n            if key in value:\n                errors += validate(sub, value[key], f\"{path}.{key}\")\n        errors += _extra_errors(schema, value, path)\n    if isinstance(value, list) and \"items\" in schema:\n        for i, item in enumerate(value):\n            errors += validate(schema[\"items\"], item, f\"{path}[{i}]\")\n    return errors\n\n\ndef _text(reply):\n    return \"\".join(block[\"text\"] for block in reply[\"content\"] if block[\"type\"] == \"text\")\n\n\ndef _prompt(document, schema):\n    return (\"Extract the data from the document as one JSON object that follows this JSON Schema. Reply with the JSON only.\\n\"\n            f\"<schema>{json.dumps(schema)}</schema>\\n<document>\\n{document}\\n</document>\")\n\n\ndef _feedback(errors):\n    \"\"\"TODO 6 of 8 (finish this to pass e2): the message that sends the problems back to the model.\n\n    Receives the list of problems. Returns \"Your reply was rejected:\", then one \"- <path>: <message>\" line per problem, then\n    \"Return the corrected JSON only.\", each on its own line.\n    Example: [{\"path\": \"$.total\", \"message\": \"must be of type number\"}] -> \"Your reply was rejected:\\n- $.total: must be of type number\\nReturn the corrected JSON only.\" \n    \"\"\"\n    return \"\"\n\n\ndef _grounding_errors(value, document, evidence_fields):\n    \"\"\"TODO 7 of 8 (finish this to pass e5): the quotes the document does not contain.\n\n    Receives the parsed value, the document text and the names of the evidence fields. For each name whose value in the object is a\n    string that does not occur in the document, returns {\"path\": \"$.<name>\", \"message\": \"is not found in the document\"}.\n    Example: _grounding_errors({\"quote\": \"x\"}, \"abc\", [\"quote\"]) -> [{\"path\": \"$.quote\", \"message\": \"is not found in the document\"}]\n    \"\"\"\n    return []\n\n\ndef _early_status(reply):\n    \"\"\"TODO 8 of 8 (finish this to pass e4): a reply that must not be retried.\n\n    Receives a reply. Returns \"refused\" when its stop_reason is \"refusal\", \"truncated\" when it is \"max_tokens\", else None.\n    Example: _early_status({\"stop_reason\": \"max_tokens\"}) -> \"truncated\"\n    The starter says \"truncated\" for every reply, so it stops after one call; write the real rule.\n    \"\"\"\n    return \"truncated\"\n\n\ndef extract(ask, document, schema, max_attempts=3, evidence_fields=()):\n    \"\"\"Ask, parse, validate and, on a problem, re-prompt with the errors, at most max_attempts calls.\"\"\"\n    messages = [{\"role\": \"user\", \"content\": _prompt(document, schema)}]\n    errors = []\n    for attempt in range(1, max_attempts + 1):\n        reply = ask(messages)\n        early = _early_status(reply)\n        if early:\n            return {\"status\": early, \"value\": None, \"attempts\": attempt, \"errors\": []}\n        text = _text(reply)\n        try:\n            value = parse_json(text)\n            errors = validate(schema, value)\n            errors += _grounding_errors(value, document, evidence_fields)\n        except ParseError as err:\n            value, errors = None, [{\"path\": \"$\", \"message\": str(err)}]\n        if not errors:\n            return {\"status\": \"ok\", \"value\": value, \"attempts\": attempt, \"errors\": []}\n        if attempt < max_attempts:\n            messages = messages + [{\"role\": \"assistant\", \"content\": text}, {\"role\": \"user\", \"content\": _feedback(errors)}]\n    return {\"status\": \"failed\", \"value\": None, \"attempts\": max_attempts, \"errors\": errors}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nimport json\n\nfrom extractor import extract\n\nDOC = \"Invoice from Acme Tools. Total due: 120.50 EUR. Thank you for your business.\"\nSCHEMA = {\n    \"type\": \"object\",\n    \"required\": [\"vendor\", \"total\", \"currency\", \"evidence\"],\n    \"properties\": {\n        \"vendor\": {\"type\": \"string\"},\n        \"total\": {\"type\": \"number\", \"minimum\": 0},\n        \"currency\": {\"type\": \"string\", \"enum\": [\"USD\", \"EUR\", \"GBP\"]},\n        \"evidence\": {\"type\": \"string\"},\n    },\n    \"additionalProperties\": False,\n}\nGOOD = {\"vendor\": \"Acme Tools\", \"total\": 120.5, \"currency\": \"EUR\", \"evidence\": \"Total due: 120.50 EUR\"}\n\n\ndef ask(messages):\n    \"\"\"A hand-written stand-in for the model, in the shape of a Messages API reply: it always answers with valid JSON.\"\"\"\n    return {\"id\": \"msg_illustrative\", \"type\": \"message\", \"role\": \"assistant\", \"model\": \"claude-sonnet-5-5\",\n            \"content\": [{\"type\": \"text\", \"text\": json.dumps(GOOD)}], \"stop_reason\": \"end_turn\",\n            \"usage\": {\"input_tokens\": 1, \"output_tokens\": 1}}\n\n\nresult = extract(ask, DOC, SCHEMA, evidence_fields=[\"evidence\"]) or {}\n\nprint(\"status:\", result.get(\"status\"))\nprint(\"attempts:\", result.get(\"attempts\"))\nprint(\"value:\", result.get(\"value\"))\nprint(\"errors:\", result.get(\"errors\"))\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 4,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "bebe1b4afab78bc1113a3545f4370128dbd4fced7e4aef7b88496fbb8088ec71",
+  "starting_code": "\"\"\"Extract structured data from a document with validation and a bounded re-prompt. See ../../statement.md.\"\"\"\nimport json\nimport logging\n\nlog = logging.getLogger(__name__)\n\n\nclass ParseError(Exception):\n    \"\"\"No JSON object could be read from the model's text.\"\"\"\n\n\ndef _object_span(body):\n    \"\"\"TODO 1 of 8 (finish this to pass m1, e1 and e3): where the JSON object sits in the text.\n\n    Receives the text. Returns (first, last): the index of the first `{` and of the last `}`, or -1 for a brace that is not there.\n    Example: _object_span('Sure! {\"a\": 1} Done.') -> (6, 13)\n    \"\"\"\n    return -1, -1\n\n\ndef parse_json(text):\n    \"\"\"The JSON value in a model reply: the body of a code fence, else the span from the first { to the last }.\"\"\"\n    log.debug(\"parse_json input: %r\", text)\n    body = text\n    fence = text.find(\"```\")\n    if fence != -1:\n        start = text.find(\"\\n\", fence)\n        end = text.find(\"```\", start if start != -1 else fence + 3)\n        if start != -1 and end != -1:\n            body = text[start + 1:end]\n    first, last = _object_span(body)\n    if first == -1 or last < first:\n        raise ParseError(\"no JSON object found in the reply\")\n    try:\n        return json.loads(body[first:last + 1])\n    except ValueError as err:\n        raise ParseError(f\"invalid JSON: {err}\") from None\n\n\ndef _is_integer(value):\n    \"\"\"TODO 2 of 8 (finish this to pass e6): is this value an integer for the schema?\n\n    Receives any value. Returns True for an int that is not a bool and for a float with no fraction; False otherwise.\n    Example: _is_integer(2.0) -> True, _is_integer(2.5) -> False, _is_integer(True) -> False\n    \"\"\"\n    return False\n\n\ndef _is_number(value):\n    return isinstance(value, (int, float)) and not isinstance(value, bool)\n\n\nTYPES = {\n    \"string\": lambda v: isinstance(v, str),\n    \"integer\": _is_integer,\n    \"number\": _is_number,\n    \"boolean\": lambda v: isinstance(v, bool),\n    \"array\": lambda v: isinstance(v, list),\n    \"object\": lambda v: isinstance(v, dict),\n    \"null\": lambda v: v is None,\n}\n\n\ndef _range_errors(schema, value, path):\n    \"\"\"TODO 3 of 8 (finish this to pass e2): the problems of a number outside minimum and maximum.\n\n    Receives the schema, a number and its path. Returns a list of {\"path\", \"message\"}: \"must be at least <minimum>\" first, then\n    \"must be at most <maximum>\", each only when the schema has that key and the value breaks it.\n    Example: _range_errors({\"minimum\": 0}, -1, \"$.total\") -> [{\"path\": \"$.total\", \"message\": \"must be at least 0\"}]\n    \"\"\"\n    return []\n\n\ndef _required_errors(schema, value, path):\n    \"\"\"TODO 4 of 8 (finish this to pass e2): the problems of missing required keys.\n\n    Receives the schema, an object (dict) and its path. Returns one {\"path\": \"<path>.<key>\", \"message\": \"is required\"} per key of the\n    schema's `required` list that the object lacks, in the schema's order.\n    Example: _required_errors({\"required\": [\"a\"]}, {}, \"$\") -> [{\"path\": \"$.a\", \"message\": \"is required\"}]\n    \"\"\"\n    return []\n\n\ndef _extra_errors(schema, value, path):\n    \"\"\"TODO 5 of 8 (finish this to pass e2): the problems of keys the schema does not list.\n\n    Receives the schema, an object (dict) and its path. When the schema says `additionalProperties` is False, returns one\n    {\"path\": \"<path>.<key>\", \"message\": \"is not allowed\"} per key that is not in `properties`; otherwise an empty list.\n    Example: _extra_errors({\"additionalProperties\": False, \"properties\": {}}, {\"x\": 1}, \"$\") -> [{\"path\": \"$.x\", \"message\": \"is not allowed\"}]\n    \"\"\"\n    return []\n\n\ndef validate(schema, value, path=\"$\"):\n    \"\"\"A list of {\"path\", \"message\"} for every way value breaks schema; empty when it conforms.\"\"\"\n    errors = []\n    want = schema.get(\"type\")\n    if want is not None and not TYPES[want](value):\n        return [{\"path\": path, \"message\": f\"must be of type {want}\"}]\n    if \"enum\" in schema and value not in schema[\"enum\"]:\n        errors.append({\"path\": path, \"message\": f\"must be one of {schema['enum']}\"})\n    if _is_number(value):\n        errors += _range_errors(schema, value, path)\n    if isinstance(value, dict):\n        errors += _required_errors(schema, value, path)\n        properties = schema.get(\"properties\", {})\n        for key, sub in properties.items():\n            if key in value:\n                errors += validate(sub, value[key], f\"{path}.{key}\")\n        errors += _extra_errors(schema, value, path)\n    if isinstance(value, list) and \"items\" in schema:\n        for i, item in enumerate(value):\n            errors += validate(schema[\"items\"], item, f\"{path}[{i}]\")\n    return errors\n\n\ndef _text(reply):\n    return \"\".join(block[\"text\"] for block in reply[\"content\"] if block[\"type\"] == \"text\")\n\n\ndef _prompt(document, schema):\n    return (\"Extract the data from the document as one JSON object that follows this JSON Schema. Reply with the JSON only.\\n\"\n            f\"<schema>{json.dumps(schema)}</schema>\\n<document>\\n{document}\\n</document>\")\n\n\ndef _feedback(errors):\n    \"\"\"TODO 6 of 8 (finish this to pass e2): the message that sends the problems back to the model.\n\n    Receives the list of problems. Returns \"Your reply was rejected:\", then one \"- <path>: <message>\" line per problem, then\n    \"Return the corrected JSON only.\", each on its own line.\n    Example: [{\"path\": \"$.total\", \"message\": \"must be of type number\"}] -> \"Your reply was rejected:\\n- $.total: must be of type number\\nReturn the corrected JSON only.\" \n    \"\"\"\n    return \"\"\n\n\ndef _grounding_errors(value, document, evidence_fields):\n    \"\"\"TODO 7 of 8 (finish this to pass e5): the quotes the document does not contain.\n\n    Receives the parsed value, the document text and the names of the evidence fields. For each name whose value in the object is a\n    string that does not occur in the document, returns {\"path\": \"$.<name>\", \"message\": \"is not found in the document\"}.\n    Example: _grounding_errors({\"quote\": \"x\"}, \"abc\", [\"quote\"]) -> [{\"path\": \"$.quote\", \"message\": \"is not found in the document\"}]\n    \"\"\"\n    return []\n\n\ndef _early_status(reply):\n    \"\"\"TODO 8 of 8 (finish this to pass e4): a reply that must not be retried.\n\n    Receives a reply. Returns \"refused\" when its stop_reason is \"refusal\", \"truncated\" when it is \"max_tokens\", else None.\n    Example: _early_status({\"stop_reason\": \"max_tokens\"}) -> \"truncated\"\n    The starter says \"truncated\" for every reply, so it stops after one call; write the real rule.\n    \"\"\"\n    return \"truncated\"\n\n\ndef extract(ask, document, schema, max_attempts=3, evidence_fields=()):\n    \"\"\"Ask, parse, validate and, on a problem, re-prompt with the errors, at most max_attempts calls.\"\"\"\n    messages = [{\"role\": \"user\", \"content\": _prompt(document, schema)}]\n    errors = []\n    for attempt in range(1, max_attempts + 1):\n        reply = ask(messages)\n        early = _early_status(reply)\n        if early:\n            return {\"status\": early, \"value\": None, \"attempts\": attempt, \"errors\": []}\n        text = _text(reply)\n        try:\n            value = parse_json(text)\n            errors = validate(schema, value)\n            errors += _grounding_errors(value, document, evidence_fields)\n        except ParseError as err:\n            value, errors = None, [{\"path\": \"$\", \"message\": str(err)}]\n        if not errors:\n            return {\"status\": \"ok\", \"value\": value, \"attempts\": attempt, \"errors\": []}\n        if attempt < max_attempts:\n            messages = messages + [{\"role\": \"assistant\", \"content\": text}, {\"role\": \"user\", \"content\": _feedback(errors)}]\n    return {\"status\": \"failed\", \"value\": None, \"attempts\": max_attempts, \"errors\": errors}\n",
+  "exercise": {
+    "main_path": "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-1/extractor.py",
+    "test_path": "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-1/test_extractor.py",
+    "run_command": [
+      "python3",
+      "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-1/test_extractor.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_a_valid_reply_is_returned_after_one_call",
+        "kind": "main",
+        "says": "A valid reply is returned after one call"
+      },
+      {
+        "id": "test_e1_json_is_found_in_fences_and_prose_and_bad_text_is_retried",
+        "kind": "edge",
+        "says": "JSON is found inside fences and prose, and text with no JSON is retried"
+      },
+      {
+        "id": "test_e2_every_schema_violation_is_listed_and_sent_back_to_the_model",
+        "kind": "edge",
+        "says": "Every schema violation is listed and sent back to the model"
+      },
+      {
+        "id": "test_e3_the_number_of_attempts_is_bounded",
+        "kind": "edge",
+        "says": "The number of attempts is bounded"
+      },
+      {
+        "id": "test_e4_a_refusal_or_a_cut_off_reply_is_not_retried",
+        "kind": "edge",
+        "says": "A refusal or a cut-off reply is not retried"
+      },
+      {
+        "id": "test_e5_a_quote_that_is_not_in_the_document_is_rejected",
+        "kind": "edge",
+        "says": "A quotation that is not in the document is rejected"
+      },
+      {
+        "id": "test_e6_types_are_exact_booleans_are_not_numbers_and_integers_have_no_fraction",
+        "kind": "edge",
+        "says": "Types are exact: booleans are not numbers and integers have no fraction"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/25-structured-output-and-defensive-parsing/02-defensive-parsing-validation-and-the-re-prompt.md",
+    "concepts": [
+      "the practice of Defensive parsing, validation and the re-prompt is solved"
+    ],
+    "files": [
+      "practice/level-2/25-structured-output-and-defensive-parsing/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "structured-output-and-defensive-parsing-u2"
+}

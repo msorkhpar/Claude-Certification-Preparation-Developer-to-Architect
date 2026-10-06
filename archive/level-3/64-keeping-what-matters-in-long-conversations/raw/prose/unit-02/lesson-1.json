@@ -1,0 +1,272 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "64-keeping-what-matters-in-long-conversations"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Long sessions: windows, stale facts, late updates, isolation and the practice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Long sessions: windows, stale facts, late updates, isolation and the practice"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Architect · **Module 64:** Keeping what matters in long conversations · **Page 2 of 2** **Exams:** A5.1; S1"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** trim a long history with a window that keeps tool calls whole, combine recent turns with a structured summary, decide what a returning customer's stored facts are worth, apply an update that arrives mid-conversation, and keep one customer's facts out of another customer's context, and you can write the module's practice."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-04 against the exam guide's task statement 5.1 and the scenario S1 description, against the Claude API documentation on context editing, compaction and the memory tool as module 29 summarises them, and against the Claude API's handling of tool results (a result must follow the call that produced it). Nothing here called a model: the practice is graded by Python, TypeScript, Java and Kotlin test suites, offline, on messages and facts written by hand. The outline of this module also names the effects of a returning user's stale data and of updates that arrive mid-conversation. The guide's task statement does not use those words; they are the practical form of \"preserve critical information across long interactions\", and the exam can ask them inside scenario S1."
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "**Exam guide and current product.** *What the guide states, and so what the exam keys:* task statement 5.1 pairs the case facts block with a separate context layer for structured issue data in multi-issue sessions. It does not say how a store is keyed, and the exam's isolation questions rest on the practice described below. *What the product offers now (documentation as read for module 29 on 2026-10-03, rechecked 2026-10-04):* context editing can clear old tool results by rule, server-side compaction replaces older turns with a summary, and the memory tool keeps files outside the context window across sessions, with the application deciding where they live. None of these is a customer boundary: the product gives mechanisms, and the application decides which customer's facts a request may contain. On the exam, a question about one customer seeing another's data has the answer: scope the store by the authenticated customer and build the context from it in code, never from the model's own text and never by an instruction in the prompt."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "The agent from the first page now has the facts block. A new set of problems appears with time. The conversation reaches the window and something must go: which messages? The customer comes back after nine days and the block says the parcel is \"out for delivery\": is that still true? Mid-conversation the customer says the address has changed, and a delayed copy of the old message is processed afterwards: which address wins? And one process serves thousands of customers: what stops customer B's facts from landing in customer A's request? These are the questions of S1 at scale."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "A window that keeps tool calls whole"
+    },
+    {
+      "type": "para",
+      "text": "When the history must shrink, the cheapest method is a window: keep the newest turns that fit the budget and drop the oldest. Two rules keep it valid. The unit to drop is the exchange, not the message: a tool call and its result stay together or go together, because a result with no call (or a call with no result) is an invalid conversation that the API refuses. And the window is one unbroken run from the newest message backwards: it stops at the first unit that does not fit and does not skip over it to keep an older, smaller one, since a hole in the middle of a conversation is worse than a shorter conversation. The practice's `window` does both, with tokens estimated as length over four."
+    },
+    {
+      "type": "para",
+      "text": "A window forgets. So it is paired with the two mechanisms of the first page: the case facts block carries the numbers, and a structured summary of the dropped turns carries the story: decisions made, questions still open, identifiers in play. Recent turns are kept verbatim; older turns exist as structure. Server-side compaction and the clearing of old tool results (module 29) do part of this work for you. They do not change the rule, since what the facts block holds must be rebuilt into the request whatever the platform summarised."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Facts have an age"
+    },
+    {
+      "type": "para",
+      "text": "A fact has a date, and the date decides. A value with the same or a later date replaces the stored one, which moves to the history; a value with an earlier date is recorded in the history and does not replace anything. Order of arrival does not decide: a delayed message that carries an old address must not undo a new one. The old value is kept in the history, since an audit or a dispute may ask what was known when. `update_facts` implements that, and it returns a new map and leaves its input alone, so that a failed step cannot leave half an update behind."
+    },
+    {
+      "type": "para",
+      "text": "A returning customer is the same problem across a longer gap. The facts in the block were true on the day they were read, and the world moved. A policy has a freshness limit for each kind of fact (a delivery status is stale in hours, a shipping address in months). A fact older than its limit is read again from the system of record before the agent acts on it, and the agent says which date it is going by. The example's `stale` is the one-line test. What the agent must not do is act on the stored value because \"facts outrank guesses\": a stale fact is a guess with a date on it."
+    },
+    {
+      "type": "para",
+      "text": "Interleaved issues belong here too. A customer raises a late parcel, then a billing error, then returns to the parcel, so no issue's entry is dropped until the case closes."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "One customer, one scope"
+    },
+    {
+      "type": "para",
+      "text": "The worst failure of a long-lived system is a context that contains another customer's data. It is a design question about scope: a conversation is bound to one customer when it starts, from the authenticated session, and everything that enters the context is read by that identity. Four rules follow."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "The facts are looked up by the session's customer id, which the application holds. An id taken from the model's text, a user message or a tool argument that the model filled in can be wrong or forged, and a wrong id loads the wrong customer.",
+        "The context is built by code that filters on the id, as `build_context` does: facts of other customers are excluded where the text is assembled, not left for the model to ignore.",
+        "A rule written in the prompt is not isolation. \"Never mention another customer's data\" asks the model to ignore text that is already in front of it, and a model that sees the data can use it.",
+        "Everything that is cached, remembered or summarised is scoped the same way: a memory directory per customer, a cache entry per conversation, a summary stored under the customer's id. A shared store keyed by a common name (`preferences`) is a leak waiting for two customers who use the name."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The practice: a context for a long support session"
+    },
+    {
+      "type": "para",
+      "text": "The practice is in [`exercises/64-keeping-what-matters-in-long-conversations`](../../exercises/64-keeping-what-matters-in-long-conversations/unit-01/practice-1/statement.md). You write the trimming of a tool record, the update of case facts, the assembly of a context for one customer, the check of a summary against the facts, and the sliding window. It is graded in Python, TypeScript, Java and Kotlin; the statement lists eight cases, each saying what you should see when it works."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**\"A delayed message arrived last, so its address is the current one.\"** It is tempting because the newest write usually wins. The exam rejects it: the fact's date decides, and a late older value goes into the history without replacing the current one.",
+        "**\"The customer's data is in the facts block, so it is right.\"** It is tempting because the block is structured. The exam rejects it: the block is as old as the day it was read, and a value past its freshness limit is read again before the agent acts.",
+        "**\"Tell the model never to mention other customers' data.\"** It is tempting because the instruction is one line. The exam rejects it: data that is in the request can be used whatever the prompt says. Keep it out of the request by scoping the store and filtering where the context is built.",
+        "**\"Look the facts up by the customer id that the model mentions.\"** It is tempting because the model has just read the customer's message. The exam rejects it: the id comes from the authenticated session, since an id in the model's text can be wrong or planted."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "Scenario S1, customer support resolution agent. At turn twelve a customer says the delivery address has changed. A delayed copy of the customer's turn-two message, which holds the old address, is processed afterwards. What should the facts store hold?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The old address, because it was the last one processed",
+              "**b**: The updated value as current, with the earlier one in the history",
+              "**c**: Both addresses as current values until the customer confirms one",
+              "**d**: The new address, with the old one deleted so that no trace remains"
+            ]
+          }
+        ],
+        [
+          "Scenario S1, customer support resolution agent. One agent process serves many customers. After a deploy, customers see another customer's order details. The engineers find that the facts store was keyed by an id that the model copied from the conversation. What should they change?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Add a prompt rule telling the model to leave other people's data out of its replies",
+              "**b**: Empty the store hourly so that stale entries cannot be reached by anyone",
+              "**c**: Add the customer's name to each fact so that the model can tell them apart",
+              "**d**: Take the key from the authenticated session and filter where the context is built"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**b**. The date decides, so the late older value goes to the history and the current value is untouched. *a* is ruled out because \"Order of arrival does not decide\". *c* is ruled out because \"a value with an earlier date is recorded in the history and does not replace anything\", so nothing is left unsettled. *d* is ruled out because \"The old value is kept in the history, since an audit or a dispute may ask what was known when\".",
+            "**d**. The identity comes from the session the application holds, and the exclusion happens in code before the model sees anything. *a* is ruled out because \"A rule written in the prompt is not isolation\". *c* is ruled out because facts of other customers are \"excluded where the text is assembled, not left for the model to ignore\". *b* is ruled out because the leak comes from the key, and the page's remedy is \"Everything that is cached, remembered or summarised is scoped the same way\", not a periodic clearing."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Module quiz"
+    },
+    {
+      "type": "para",
+      "text": "This quiz covers both pages of the module."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "Scenario S1, customer support resolution agent. A customer returns after nine days. The facts block says the parcel is out for delivery, a state that the team treats as stale after a few hours. What should the agent do before replying?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Answer from the block, because stored facts outrank guesses",
+              "**b**: Ask the customer what the status was when they last looked",
+              "**c**: Read the value again from the order system and say which date applies",
+              "**d**: Discard every stored fact and rebuild the case from the customer's messages"
+            ]
+          }
+        ],
+        [
+          "Scenario S3, multi-agent research system. A synthesis agent receives forty findings from subagents as one long text, and its report leaves out findings from the middle of that text. Which change fits best?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Ask each subagent for longer explanations so that every finding takes more room",
+              "**b**: Open with a short digest of key points, then group detail under headers",
+              "**c**: Send the same forty findings twice so that each one appears in two places",
+              "**d**: Sort the findings alphabetically before they are joined into the input"
+            ]
+          }
+        ],
+        [
+          "Scenario S1, customer support resolution agent. A customer raises a late parcel and a billing error in one chat, each carrying a different sum, and later returns to the parcel. The agent mixes the sums. Which structure fits?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: A single running total of the sums that spans both matters at once",
+              "**b**: One summary sentence that covers both matters and their sums",
+              "**c**: Dropping the first matter's data as soon as the second matter begins",
+              "**d**: A separate entry per matter with figures and dates, kept to closure"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**c**. A fact past its freshness limit is read again from the system of record, and the agent states the date it is going by. *a* is ruled out because \"a stale fact is a guess with a date on it\". *b* is ruled out because the remedy is to read the value again \"from the system of record\", not to ask the customer to recall it. *d* is ruled out because the facts are valid until their limit, and the block is how the numbers survive: \"the case facts block carries the numbers\".",
+            "**b**. Key findings go first under a header, with the detail under explicit headers. *a* is ruled out because \"the middle is where findings go missing\", and longer text makes the middle longer. *c* is ruled out because the guide's remedy is placement: \"Put the key findings and the case facts at the beginning of the aggregated input\". *d* is ruled out because ordering by name changes nothing about where a finding sits: \"Organise the detail under explicit headers\".",
+            "**d**. Each matter has its own entry, and no entry is dropped until the case closes. *a* is ruled out because \"each issue has its own entry in the block, so that two refunds in one conversation never share an amount\". *b* is ruled out because \"A reader of the summary cannot tell that anything was lost\". *c* is ruled out because \"no issue's entry is dropped until the case closes\"."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Adapted from the Claude Certified Architect - Foundations exam preparation guide by Daron Yondem (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/), changed for this course."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 10,
+    "paras": 13,
+    "code": 0,
+    "tables": 0,
+    "lists": 4,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 1,
+    "html": 0,
+    "disclosures": 2
+  },
+  "content_sha256": "6dc561842233b048bccd3cdd375ce650a5a99fda4c2040bf1d2e1ba26f366505"
+}

@@ -1,0 +1,122 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-1",
+    "06-prompting-fundamentals"
+  ],
+  "variant": "prose",
+  "unit": 4,
+  "kind": "practice",
+  "ordinal": 5,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Diagnosing a weak output, and a template builder",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A prompt asks Claude to describe \"our current pricing\", and the reply lists plausible but wrong tiers. The team's first idea is a longer prompt with stronger wording. What is the best diagnosis?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The rate card never reached the request, so the answer is a guess",
+            "correct": true,
+            "says": "Content absent from the prompt is filled with a plausible guess, which is missing context plus a hallucination (the diagnosis table and its first illustrative case)."
+          },
+          {
+            "id": "b",
+            "text": "The wording lacks force, so a longer prompt with firmer phrasing will make the tiers right",
+            "correct": false,
+            "says": "Ruled out because \"No wording makes a model know yesterday's news or add exactly\", and by the same reasoning no wording supplies a rate card."
+          },
+          {
+            "id": "c",
+            "text": "The wrong model is answering, so moving up one tier fixes it",
+            "correct": false,
+            "says": "Ruled out because the table reserves the wrong-model cause for \"Correct instructions, correct context, still a capability or speed miss\", and here the context is missing."
+          },
+          {
+            "id": "d",
+            "text": "The format is unclear, so the reply needs an explicit table layout",
+            "correct": false,
+            "says": "Ruled out because the symptom is \"Generic or invented content; the answer ignores facts only you know\", which the table assigns to missing context, not format."
+          }
+        ],
+        "origin": {
+          "path": "course/06-prompting-fundamentals/04-diagnosing-a-weak-output.md",
+          "section": "Traps"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "After a revision of a classification prompt, one ticket that used to fail now passes, but two that used to pass now fail. Four changes were made at once. What should the team do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Keep all four, since the case that failed before now passes",
+            "correct": false,
+            "says": "Ruled out because \"A fix that repairs one input and quietly breaks three others is a regression\"."
+          },
+          {
+            "id": "b",
+            "text": "Add a fifth to cover the two new failures, then re-run the set",
+            "correct": false,
+            "says": "Ruled out because \"Several simultaneous edits leave you unable to say what helped\", and a fifth edit adds to them."
+          },
+          {
+            "id": "c",
+            "text": "Revert, then reapply the edits singly, checking the whole set each time",
+            "correct": true,
+            "says": "One change at a time against a fixed set is the method, and a regression means the edits interact (the one-at-a-time section)."
+          },
+          {
+            "id": "d",
+            "text": "Switch to a larger model to absorb the interactions between the four",
+            "correct": false,
+            "says": "Ruled out because the method says \"or switch the model. Not several\", and a larger model adds yet another variable."
+          }
+        ],
+        "origin": {
+          "path": "course/06-prompting-fundamentals/04-diagnosing-a-weak-output.md",
+          "section": "Traps"
+        }
+      }
+    ],
+    "concepts": [
+      "Diagnose first: four causes, as the page teaches it",
+      "Diagnosing a weak output, and a template builder, as the page teaches it",
+      "Traps, as the page teaches it"
+    ]
+  }
+}

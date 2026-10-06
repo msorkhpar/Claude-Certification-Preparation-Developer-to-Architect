@@ -1,0 +1,78 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "45-the-agentic-loop-in-depth"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: an agent loop that is driven by the stop reason (TypeScript)",
+  "lang": "typescript",
+  "main_file": "agent.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "agent.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-3/45-the-agentic-loop-in-depth/prose/unit-02/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-3/45-the-agentic-loop-in-depth/prose/unit-02/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-3/45-the-agentic-loop-in-depth/prose/unit-02/practice-2/agent.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 a run alternates model and tools until the model ends its turn",
+      "kind": "main",
+      "says": "A run alternates model and tools until the model ends its turn, and the model sees the growing conversation"
+    },
+    {
+      "id": "e1 the stop reason decides and the words of the text do not",
+      "kind": "edge",
+      "says": "The stop reason decides: a reply that says \"done\" but calls a tool continues, and one that announces a tool but ends its turn ends"
+    },
+    {
+      "id": "e2 every call of a turn is answered in one user message in order",
+      "kind": "edge",
+      "says": "Every call of a turn is answered in one user message, in order, with the assistant turn kept as it came"
+    },
+    {
+      "id": "e3 a failing or unknown tool becomes an error result and the run goes on",
+      "kind": "edge",
+      "says": "A failing or unknown tool becomes an error result and the run goes on"
+    },
+    {
+      "id": "e4 the turn limit is a backstop that ends only a run the model has not ended",
+      "kind": "edge",
+      "says": "The turn limit is a backstop: it ends an endless run with its own status and does not cut off a run that ends on the last turn"
+    },
+    {
+      "id": "e5 a cut off or refused reply ends the run with its own status",
+      "kind": "edge",
+      "says": "A cut-off, refused, stop-sequence or never-seen stop reason ends the run with the right status"
+    },
+    {
+      "id": "e6 a tool use reply without a tool call is malformed and sends nothing more",
+      "kind": "edge",
+      "says": "A tool_use reply with no tool call is malformed and nothing more is sent"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/45-the-agentic-loop-in-depth/02-results-parallel-calls-context-and-the-practice.md"
+}

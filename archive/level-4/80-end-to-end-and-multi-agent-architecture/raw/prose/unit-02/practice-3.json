@@ -1,0 +1,304 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "80-end-to-end-and-multi-agent-architecture"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: an architecture review against a rubric (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an architecture review against a rubric"
+    },
+    {
+      "type": "para",
+      "text": "A solution architect is asked to review three proposed designs for the same claims-intake service before the board meets: a plain workflow, a single agent and a team of agents. The review has to be the same for every design, so the rubric is code: the findings it raises, the verdict that follows from them, and the pick of the cheapest design that the rubric does not reject. The model is not called: the tests give you design descriptions. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`review`, `verdict`, `cheapest_adequate`); TypeScript has `review`, `verdict` and `cheapestAdequate`; Java has the same camel-case names as static methods of `ArchitectureReview` and Kotlin has top-level functions. A design is a map (JSON-like) and so is a finding, as the starters show."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The design"
+    },
+    {
+      "type": "para",
+      "text": "A design has `name`, `pattern` (`workflow`, `augmented`, `agent` or `multi-agent`), `agents` (a count, default 1), `cost` (a whole number, the relative price of one task), `path_known`, `parallel_independent`, `shared_context`, `needs_audit` and `writes_without_approval` (booleans; a missing one is false), and `stages`: a map with the lists `input`, `processing`, `output` and `feedback`. An empty list or a missing key means the stage is absent."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working review with eight gaps cut out of it. The severity table, the helper that builds a finding and `review`, which joins the findings of the rules and orders them, are written and correct. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`stage_findings` unlocks `e1`: the absent stages and the missing feedback loop.",
+        "`team_findings` unlocks `e3`: more than one agent needs independent parts and no shared context.",
+        "`write_findings` unlocks `e4`: an unapproved write when an audit is needed.",
+        "`autonomy_findings` unlocks `e2`: an agent or a team on a known path.",
+        "`output_findings` unlocks `e5`: an output stage with no validation step.",
+        "`order_findings` unlocks `e6`: severity first, then rule name.",
+        "`verdict` unlocks `m1` and `e6`: reject, revise or approve from the worst finding.",
+        "`cheapest_adequate` unlocks `e7`: the cheapest design that is not rejected, ties by name."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About fifteen lines in all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`review(design)` returns a list of findings `{\"rule\", \"severity\"}`. The rubric:",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`missing-stage:input`, `missing-stage:processing` and `missing-stage:output` (one finding per absent stage), severity `high`.",
+              "`no-feedback` when the `feedback` stage is absent, severity `high`.",
+              "`team-without-independence` when there is more than one agent and either the context is shared or the parts are not independent, severity `high`.",
+              "`unapproved-write` when the design writes without approval and an audit is needed, severity `high`.",
+              "`autonomy-without-need` when the pattern is `agent` or `multi-agent` and the path is known, severity `medium`.",
+              "`unvalidated-output` when the `output` stage is present and does not contain `validate`, severity `medium`.",
+              "The findings are ordered by severity (`high` first) and then by rule name."
+            ]
+          }
+        ],
+        "`verdict(findings)` is `reject` when any finding is `high`, otherwise `revise` when any is `medium`, otherwise `approve`.",
+        "`cheapest_adequate(designs)` is the name of the design with the lowest `cost` among those whose verdict is not `reject`; equal costs are broken by the lower name. It is `None` (TypeScript: `null`; Java and Kotlin: `null`) when every design is rejected or the list is empty."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**The loop is part of the design.** A design that takes input, processes and answers, but never learns from its output, is a pipeline and not a system. *You should see* `no-feedback`, and a finding for each absent stage, both `high`.",
+        "**Autonomy has to be bought.** An agent or a team on a path that is already known costs several times a workflow's tokens for nothing. *You should see* a `medium` finding for a known path and none for an open one.",
+        "**A team needs parts that do not depend on each other.** *You should see* `team-without-independence` for a shared context and for dependent parts, and none for one agent.",
+        "**An unapproved write is judged by what the audit needs.** *You should see* `high` when an audit is needed and nothing when it is not.",
+        "**Output is checked before it leaves.** *You should see* `unvalidated-output` for an output stage without a validation step, and none when the stage is absent (the missing stage is already reported).",
+        "**The verdict follows the worst finding.** *You should see* `reject`, `revise` and `approve`, and the exact order of the findings.",
+        "**Price decides only among designs that pass.** *You should see* the cheapest design that is not rejected, ties broken by name, and `None` when none passes."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A sound design passes review with no findings and is approved"
+        ],
+        [
+          "`e1`",
+          "A missing feedback loop or a missing stage is a `high` finding"
+        ],
+        [
+          "`e2`",
+          "Autonomy is flagged only when the path is known"
+        ],
+        [
+          "`e3`",
+          "A team needs independent parts and no shared context; one agent is exempt"
+        ],
+        [
+          "`e4`",
+          "An unapproved write is a finding only when an audit is needed"
+        ],
+        [
+          "`e5`",
+          "Output without a validation step is flagged; an absent output stage is not flagged twice"
+        ],
+        [
+          "`e6`",
+          "The findings are ordered by severity and then rule, and the verdict follows the worst"
+        ],
+        [
+          "`e7`",
+          "The cheapest design that is not rejected wins, ties go by name, and none passing gives no name"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.Collection;\nimport java.util.Comparator;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\n\n/** An architecture review against a rubric: the findings, the verdict and the cheapest design that is not rejected. See ../../statement.md. Designs and findings are JSON-like maps. */\nfinal class ArchitectureReview {\n    private static final System.Logger LOG = System.getLogger(ArchitectureReview.class.getName());\n    private ArchitectureReview() {}\n\n    static final Map<String, Integer> SEVERITY_ORDER = Map.of(\"high\", 0, \"medium\", 1);\n    static final List<String> AUTONOMOUS = List.of(\"agent\", \"multi-agent\");\n\n    private static Map<String, Object> finding(String rule, String severity) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        m.put(\"rule\", rule);\n        m.put(\"severity\", severity);\n        return m;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static Map<String, Object> asMap(Object value) {\n        return value == null ? Map.of() : (Map<String, Object>) value;\n    }\n\n    private static boolean empty(Object value) {\n        return value == null || (value instanceof Collection<?> c && c.isEmpty());\n    }\n\n    private static boolean truthy(Object value) {\n        return Boolean.TRUE.equals(value);\n    }\n\n    /** missing-stage:<stage> for each absent stage, then no-feedback when the feedback stage is absent; all high. */\n    static List<Map<String, Object>> stageFindings(Map<String, Object> stages) {\n        List<Map<String, Object>> found = new ArrayList<>();\n        for (String stage : List.of(\"input\", \"processing\", \"output\")) {\n            if (empty(stages.get(stage))) found.add(finding(\"missing-stage:\" + stage, \"high\"));\n        }\n        if (empty(stages.get(\"feedback\"))) found.add(finding(\"no-feedback\", \"high\"));\n        return found;\n    }\n\n    /** team-without-independence (high) for more than one agent with a shared context or parts that are not independent. */\n    static List<Map<String, Object>> teamFindings(Map<String, Object> design) {\n        int agents = design.get(\"agents\") == null ? 1 : (Integer) design.get(\"agents\");\n        boolean team = agents > 1 && (truthy(design.get(\"shared_context\")) || !truthy(design.get(\"parallel_independent\")));\n        return team ? List.of(finding(\"team-without-independence\", \"high\")) : List.of();\n    }\n\n    /** unapproved-write (high) when the design writes without approval and an audit is needed. */\n    static List<Map<String, Object>> writeFindings(Map<String, Object> design) {\n        return truthy(design.get(\"writes_without_approval\")) && truthy(design.get(\"needs_audit\")) ? List.of(finding(\"unapproved-write\", \"high\")) : List.of();\n    }\n\n    /** autonomy-without-need (medium) when an agent or a team is used on a known path. */\n    static List<Map<String, Object>> autonomyFindings(Map<String, Object> design) {\n        return AUTONOMOUS.contains(design.get(\"pattern\")) && truthy(design.get(\"path_known\")) ? List.of(finding(\"autonomy-without-need\", \"medium\")) : List.of();\n    }\n\n    /** unvalidated-output (medium) when the output stage is present and has no validate step. */\n    static List<Map<String, Object>> outputFindings(Map<String, Object> stages) {\n        return !empty(stages.get(\"output\")) && !((List<?>) stages.get(\"output\")).contains(\"validate\") ? List.of(finding(\"unvalidated-output\", \"medium\")) : List.of();\n    }\n\n    /** High first, then by rule name. */\n    static List<Map<String, Object>> orderFindings(List<Map<String, Object>> findings) {\n        List<Map<String, Object>> ordered = new ArrayList<>(findings);\n        ordered.sort(Comparator.comparingInt((Map<String, Object> f) -> SEVERITY_ORDER.get((String) f.get(\"severity\"))).thenComparing(f -> (String) f.get(\"rule\")));\n        return ordered;\n    }\n\n    /** reject for any high finding, revise for any medium finding, otherwise approve. */\n    static String verdict(List<Map<String, Object>> findings) {\n        Set<Object> severities = new java.util.HashSet<>();\n        for (Map<String, Object> f : findings) severities.add(f.get(\"severity\"));\n        return severities.contains(\"high\") ? \"reject\" : severities.contains(\"medium\") ? \"revise\" : \"approve\";\n    }\n\n    static List<Map<String, Object>> review(Map<String, Object> design) {\n        LOG.log(System.Logger.Level.DEBUG, \"review input: {0}\", design);\n        Map<String, Object> stages = asMap(design.get(\"stages\"));\n        List<Map<String, Object>> found = new ArrayList<>(stageFindings(stages));\n        found.addAll(teamFindings(design));\n        found.addAll(writeFindings(design));\n        found.addAll(autonomyFindings(design));\n        found.addAll(outputFindings(stages));\n        return orderFindings(found);\n    }\n\n    /** The name of the cheapest design whose verdict is not reject; ties go to the lower name; null when none qualifies. */\n    static String cheapestAdequate(List<Map<String, Object>> designs) {\n        List<Map<String, Object>> adequate = new ArrayList<>();\n        for (Map<String, Object> d : designs) if (!verdict(review(d)).equals(\"reject\")) adequate.add(d);\n        if (adequate.isEmpty()) return null;\n        adequate.sort(Comparator.comparingInt((Map<String, Object> d) -> (Integer) d.get(\"cost\")).thenComparing(d -> (String) d.get(\"name\")));\n        return (String) adequate.get(0).get(\"name\");\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.*;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // A sound workflow design passes; a multi-agent design that writes without approval and has no feedback loop does not.\n        Map<String, Object> stages = new LinkedHashMap<>();\n        stages.put(\"input\", List.of(\"parse\"));\n        stages.put(\"processing\", List.of(\"classify\", \"route\"));\n        stages.put(\"output\", List.of(\"validate\", \"send\"));\n        stages.put(\"feedback\", List.of(\"review a sample\"));\n        Map<String, Object> sound = design(\"intake\", \"workflow\", 1, false, stages);\n        Map<String, Object> noFeedback = new LinkedHashMap<>(stages);\n        noFeedback.put(\"feedback\", List.of());\n        Map<String, Object> risky = design(\"research\", \"multi-agent\", 4, true, noFeedback);\n        for (Map<String, Object> d : List.of(sound, risky)) {\n            List<Map<String, Object>> findings = ArchitectureReview.review(d);\n            System.out.println(d.get(\"name\") + \" -> \" + ArchitectureReview.verdict(findings) + \" \" + findings);\n        }\n        System.out.println(\"cheapest design that is not rejected: \" + ArchitectureReview.cheapestAdequate(List.of(sound, risky)));\n    }\n\n    static Map<String, Object> design(String name, String pattern, int agents, boolean writes, Map<String, Object> stages) {\n        Map<String, Object> d = new LinkedHashMap<>();\n        d.put(\"name\", name);\n        d.put(\"pattern\", pattern);\n        d.put(\"agents\", agents);\n        d.put(\"cost\", 3);\n        d.put(\"path_known\", true);\n        d.put(\"parallel_independent\", false);\n        d.put(\"shared_context\", false);\n        d.put(\"needs_audit\", true);\n        d.put(\"writes_without_approval\", writes);\n        d.put(\"stages\", stages);\n        return d;\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.ArrayList;\nimport java.util.Collection;\nimport java.util.Comparator;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\n\n/** An architecture review against a rubric: the findings, the verdict and the cheapest design that is not rejected. See ../../statement.md. Designs and findings are JSON-like maps. */\nfinal class ArchitectureReview {\n    private static final System.Logger LOG = System.getLogger(ArchitectureReview.class.getName());\n    private ArchitectureReview() {}\n\n    static final Map<String, Integer> SEVERITY_ORDER = Map.of(\"high\", 0, \"medium\", 1);\n    static final List<String> AUTONOMOUS = List.of(\"agent\", \"multi-agent\");\n\n    private static Map<String, Object> finding(String rule, String severity) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        m.put(\"rule\", rule);\n        m.put(\"severity\", severity);\n        return m;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static Map<String, Object> asMap(Object value) {\n        return value == null ? Map.of() : (Map<String, Object>) value;\n    }\n\n    private static boolean empty(Object value) {\n        return value == null || (value instanceof Collection<?> c && c.isEmpty());\n    }\n\n    private static boolean truthy(Object value) {\n        return Boolean.TRUE.equals(value);\n    }\n\n    /**\n     * TODO 1 of 8 (unlocks e1): the findings about absent stages.\n     * Receives the design's {@code stages} map. Returns a list of findings (use {@code finding(rule, severity)}): {@code missing-stage:input}, {@code missing-stage:processing}\n     * and {@code missing-stage:output} for each of those stages that is absent or empty, then {@code no-feedback} when {@code feedback} is absent or empty; every one with severity {@code high}.\n     * Example: {input: [parse], processing: [act], output: [send]} -> [{rule: no-feedback, severity: high}]\n     */\n    static List<Map<String, Object>> stageFindings(Map<String, Object> stages) {\n        return new ArrayList<>();\n    }\n\n    /**\n     * TODO 2 of 8 (unlocks e3): the finding about a team.\n     * Receives the design. Returns [{@code team-without-independence}, severity {@code high}] when there is more than one agent ({@code agents}, default 1) and either\n     * {@code shared_context} is true or {@code parallel_independent} is not true; otherwise an empty list.\n     * Example: {agents: 3, shared_context: true, parallel_independent: true} -> one finding; {agents: 1, shared_context: true} -> []\n     */\n    static List<Map<String, Object>> teamFindings(Map<String, Object> design) {\n        return List.of();\n    }\n\n    /**\n     * TODO 3 of 8 (unlocks e4): the finding about an unapproved write.\n     * Receives the design. Returns [{@code unapproved-write}, severity {@code high}] when {@code writes_without_approval} and {@code needs_audit} are both true; otherwise an empty list.\n     * Example: {writes_without_approval: true, needs_audit: false} -> []\n     */\n    static List<Map<String, Object>> writeFindings(Map<String, Object> design) {\n        return List.of();\n    }\n\n    /**\n     * TODO 4 of 8 (unlocks e2): the finding about autonomy.\n     * Receives the design. Returns [{@code autonomy-without-need}, severity {@code medium}] when {@code pattern} is in {@code AUTONOMOUS} and {@code path_known} is true; otherwise an empty list.\n     * Example: {pattern: agent, path_known: false} -> []\n     */\n    static List<Map<String, Object>> autonomyFindings(Map<String, Object> design) {\n        return List.of();\n    }\n\n    /**\n     * TODO 5 of 8 (unlocks e5): the finding about unvalidated output.\n     * Receives the design's {@code stages} map. Returns [{@code unvalidated-output}, severity {@code medium}] when the {@code output} stage is present and does not contain {@code validate};\n     * otherwise an empty list (an absent output stage is already reported as a missing stage).\n     * Example: {output: [send]} -> one finding; {output: [validate, send]} -> []\n     */\n    static List<Map<String, Object>> outputFindings(Map<String, Object> stages) {\n        return List.of();\n    }\n\n    /**\n     * TODO 6 of 8 (unlocks e6): order the findings.\n     * Receives a list of findings. Returns them ordered by severity ({@code high} before {@code medium}, see {@code SEVERITY_ORDER}) and then by rule name.\n     * Example: [medium autonomy-without-need, high no-feedback] -> the high one first\n     */\n    static List<Map<String, Object>> orderFindings(List<Map<String, Object>> findings) {\n        return findings;\n    }\n\n    /**\n     * TODO 7 of 8 (unlocks m1 and e6): the verdict.\n     * Receives a list of findings. Returns {@code reject} when any is {@code high}, otherwise {@code revise} when any is {@code medium}, otherwise {@code approve}.\n     * Example: verdict(List.of()) -> \"approve\"\n     */\n    static String verdict(List<Map<String, Object>> findings) {\n        return \"\";\n    }\n\n    static List<Map<String, Object>> review(Map<String, Object> design) {\n        LOG.log(System.Logger.Level.DEBUG, \"review input: {0}\", design);\n        Map<String, Object> stages = asMap(design.get(\"stages\"));\n        List<Map<String, Object>> found = new ArrayList<>(stageFindings(stages));\n        found.addAll(teamFindings(design));\n        found.addAll(writeFindings(design));\n        found.addAll(autonomyFindings(design));\n        found.addAll(outputFindings(stages));\n        return orderFindings(found);\n    }\n\n    /**\n     * TODO 8 of 8 (unlocks e7): the cheapest design that is not rejected.\n     * Receives a list of designs, each with {@code name} and {@code cost}. Returns the name of the one with the lowest {@code cost} among those whose {@code verdict(review(d))} is not\n     * {@code reject}; equal costs go to the lower name; {@code null} when none qualifies or the list is empty.\n     * Example: costs 2 (name \"zeta\") and 2 (name \"alpha\"), both sound -> \"alpha\"\n     */\n    static String cheapestAdequate(List<Map<String, Object>> designs) {\n        return null;\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.*;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // A sound workflow design passes; a multi-agent design that writes without approval and has no feedback loop does not.\n        Map<String, Object> stages = new LinkedHashMap<>();\n        stages.put(\"input\", List.of(\"parse\"));\n        stages.put(\"processing\", List.of(\"classify\", \"route\"));\n        stages.put(\"output\", List.of(\"validate\", \"send\"));\n        stages.put(\"feedback\", List.of(\"review a sample\"));\n        Map<String, Object> sound = design(\"intake\", \"workflow\", 1, false, stages);\n        Map<String, Object> noFeedback = new LinkedHashMap<>(stages);\n        noFeedback.put(\"feedback\", List.of());\n        Map<String, Object> risky = design(\"research\", \"multi-agent\", 4, true, noFeedback);\n        for (Map<String, Object> d : List.of(sound, risky)) {\n            List<Map<String, Object>> findings = ArchitectureReview.review(d);\n            System.out.println(d.get(\"name\") + \" -> \" + ArchitectureReview.verdict(findings) + \" \" + findings);\n        }\n        System.out.println(\"cheapest design that is not rejected: \" + ArchitectureReview.cheapestAdequate(List.of(sound, risky)));\n    }\n\n    static Map<String, Object> design(String name, String pattern, int agents, boolean writes, Map<String, Object> stages) {\n        Map<String, Object> d = new LinkedHashMap<>();\n        d.put(\"name\", name);\n        d.put(\"pattern\", pattern);\n        d.put(\"agents\", agents);\n        d.put(\"cost\", 3);\n        d.put(\"path_known\", true);\n        d.put(\"parallel_independent\", false);\n        d.put(\"shared_context\", false);\n        d.put(\"needs_audit\", true);\n        d.put(\"writes_without_approval\", writes);\n        d.put(\"stages\", stages);\n        return d;\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 6,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "3aeea03cb54f931087a728191bc1937bc63fa6e6d10bea4e87bd3b05ae0b26ad",
+  "starting_code": "import java.util.ArrayList;\nimport java.util.Collection;\nimport java.util.Comparator;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\n\n/** An architecture review against a rubric: the findings, the verdict and the cheapest design that is not rejected. See ../../statement.md. Designs and findings are JSON-like maps. */\nfinal class ArchitectureReview {\n    private static final System.Logger LOG = System.getLogger(ArchitectureReview.class.getName());\n    private ArchitectureReview() {}\n\n    static final Map<String, Integer> SEVERITY_ORDER = Map.of(\"high\", 0, \"medium\", 1);\n    static final List<String> AUTONOMOUS = List.of(\"agent\", \"multi-agent\");\n\n    private static Map<String, Object> finding(String rule, String severity) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        m.put(\"rule\", rule);\n        m.put(\"severity\", severity);\n        return m;\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    private static Map<String, Object> asMap(Object value) {\n        return value == null ? Map.of() : (Map<String, Object>) value;\n    }\n\n    private static boolean empty(Object value) {\n        return value == null || (value instanceof Collection<?> c && c.isEmpty());\n    }\n\n    private static boolean truthy(Object value) {\n        return Boolean.TRUE.equals(value);\n    }\n\n    /**\n     * TODO 1 of 8 (unlocks e1): the findings about absent stages.\n     * Receives the design's {@code stages} map. Returns a list of findings (use {@code finding(rule, severity)}): {@code missing-stage:input}, {@code missing-stage:processing}\n     * and {@code missing-stage:output} for each of those stages that is absent or empty, then {@code no-feedback} when {@code feedback} is absent or empty; every one with severity {@code high}.\n     * Example: {input: [parse], processing: [act], output: [send]} -> [{rule: no-feedback, severity: high}]\n     */\n    static List<Map<String, Object>> stageFindings(Map<String, Object> stages) {\n        return new ArrayList<>();\n    }\n\n    /**\n     * TODO 2 of 8 (unlocks e3): the finding about a team.\n     * Receives the design. Returns [{@code team-without-independence}, severity {@code high}] when there is more than one agent ({@code agents}, default 1) and either\n     * {@code shared_context} is true or {@code parallel_independent} is not true; otherwise an empty list.\n     * Example: {agents: 3, shared_context: true, parallel_independent: true} -> one finding; {agents: 1, shared_context: true} -> []\n     */\n    static List<Map<String, Object>> teamFindings(Map<String, Object> design) {\n        return List.of();\n    }\n\n    /**\n     * TODO 3 of 8 (unlocks e4): the finding about an unapproved write.\n     * Receives the design. Returns [{@code unapproved-write}, severity {@code high}] when {@code writes_without_approval} and {@code needs_audit} are both true; otherwise an empty list.\n     * Example: {writes_without_approval: true, needs_audit: false} -> []\n     */\n    static List<Map<String, Object>> writeFindings(Map<String, Object> design) {\n        return List.of();\n    }\n\n    /**\n     * TODO 4 of 8 (unlocks e2): the finding about autonomy.\n     * Receives the design. Returns [{@code autonomy-without-need}, severity {@code medium}] when {@code pattern} is in {@code AUTONOMOUS} and {@code path_known} is true; otherwise an empty list.\n     * Example: {pattern: agent, path_known: false} -> []\n     */\n    static List<Map<String, Object>> autonomyFindings(Map<String, Object> design) {\n        return List.of();\n    }\n\n    /**\n     * TODO 5 of 8 (unlocks e5): the finding about unvalidated output.\n     * Receives the design's {@code stages} map. Returns [{@code unvalidated-output}, severity {@code medium}] when the {@code output} stage is present and does not contain {@code validate};\n     * otherwise an empty list (an absent output stage is already reported as a missing stage).\n     * Example: {output: [send]} -> one finding; {output: [validate, send]} -> []\n     */\n    static List<Map<String, Object>> outputFindings(Map<String, Object> stages) {\n        return List.of();\n    }\n\n    /**\n     * TODO 6 of 8 (unlocks e6): order the findings.\n     * Receives a list of findings. Returns them ordered by severity ({@code high} before {@code medium}, see {@code SEVERITY_ORDER}) and then by rule name.\n     * Example: [medium autonomy-without-need, high no-feedback] -> the high one first\n     */\n    static List<Map<String, Object>> orderFindings(List<Map<String, Object>> findings) {\n        return findings;\n    }\n\n    /**\n     * TODO 7 of 8 (unlocks m1 and e6): the verdict.\n     * Receives a list of findings. Returns {@code reject} when any is {@code high}, otherwise {@code revise} when any is {@code medium}, otherwise {@code approve}.\n     * Example: verdict(List.of()) -> \"approve\"\n     */\n    static String verdict(List<Map<String, Object>> findings) {\n        return \"\";\n    }\n\n    static List<Map<String, Object>> review(Map<String, Object> design) {\n        LOG.log(System.Logger.Level.DEBUG, \"review input: {0}\", design);\n        Map<String, Object> stages = asMap(design.get(\"stages\"));\n        List<Map<String, Object>> found = new ArrayList<>(stageFindings(stages));\n        found.addAll(teamFindings(design));\n        found.addAll(writeFindings(design));\n        found.addAll(autonomyFindings(design));\n        found.addAll(outputFindings(stages));\n        return orderFindings(found);\n    }\n\n    /**\n     * TODO 8 of 8 (unlocks e7): the cheapest design that is not rejected.\n     * Receives a list of designs, each with {@code name} and {@code cost}. Returns the name of the one with the lowest {@code cost} among those whose {@code verdict(review(d))} is not\n     * {@code reject}; equal costs go to the lower name; {@code null} when none qualifies or the list is empty.\n     * Example: costs 2 (name \"zeta\") and 2 (name \"alpha\"), both sound -> \"alpha\"\n     */\n    static String cheapestAdequate(List<Map<String, Object>> designs) {\n        return null;\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-4/80-end-to-end-and-multi-agent-architecture/prose/unit-02/practice-3/src/main/java/ArchitectureReview.java",
+    "test_path": "practice/level-4/80-end-to-end-and-multi-agent-architecture/prose/unit-02/practice-3/src/test/java/ArchitectureReviewTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-4/80-end-to-end-and-multi-agent-architecture/prose/unit-02/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-4/80-end-to-end-and-multi-agent-architecture/prose/unit-02/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_aSoundDesignPassesReviewWithNoFindings()",
+        "kind": "main",
+        "says": "A sound design passes review with no findings and is approved"
+      },
+      {
+        "id": "e1_aDesignWithoutAFeedbackLoopOrAStageIsRejected()",
+        "kind": "edge",
+        "says": "A missing feedback loop or a missing stage is a high finding"
+      },
+      {
+        "id": "e2_autonomyIsFlaggedOnlyWhenThePathIsKnown()",
+        "kind": "edge",
+        "says": "Autonomy is flagged only when the path is known"
+      },
+      {
+        "id": "e3_severalAgentsNeedIndependentPartsAndNoSharedContext()",
+        "kind": "edge",
+        "says": "A team needs independent parts and no shared context; one agent is exempt"
+      },
+      {
+        "id": "e4_anUnapprovedWriteIsAFindingOnlyWhenAnAuditIsNeeded()",
+        "kind": "edge",
+        "says": "An unapproved write is a finding only when an audit is needed"
+      },
+      {
+        "id": "e5_outputThatNobodyValidatesIsFlagged()",
+        "kind": "edge",
+        "says": "Output without a validation step is flagged; an absent output stage is not flagged twice"
+      },
+      {
+        "id": "e6_findingsAreOrderedBySeverityThenRuleAndTheVerdictFollowsTheWorst()",
+        "kind": "edge",
+        "says": "The findings are ordered by severity and then rule, and the verdict follows the worst"
+      },
+      {
+        "id": "e7_theCheapestDesignThatIsNotRejectedWinsAndTiesGoByName()",
+        "kind": "edge",
+        "says": "The cheapest design that is not rejected wins, ties go by name, and none passing gives no name"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-4/80-end-to-end-and-multi-agent-architecture/prose/unit-02/practice-3/target/test-results/test"
+    },
+    "origin": "course/80-end-to-end-and-multi-agent-architecture/02-contracts-between-parts-and-the-review.md",
+    "concepts": [
+      "the practice of Contracts between parts, and the review is solved"
+    ],
+    "files": [
+      "practice/level-4/80-end-to-end-and-multi-agent-architecture/prose/unit-02/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "end-to-end-and-multi-agent-architecture-u2"
+}

@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "41-security-and-safety"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: Prompt injection, jailbreaks and keeping untrusted input apart",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A customer of a support bot rephrases requests again and again until it drops its restrictions. Which threat model is this?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A jailbreak, where the user is the one attacking",
+            "correct": true,
+            "says": "The table gives jailbreaks and direct injection \"The user of your application\" as the adversary, so the person typing is the attacker, who \"crafts inputs intended to bypass your guardrails\"."
+          },
+          {
+            "id": "b",
+            "text": "An indirect injection, where a third party's content is the carrier",
+            "correct": false,
+            "says": "Ruled out because indirect injection has \"A third party whose content Claude reads\" as the adversary, and the user is \"Trusted\"."
+          },
+          {
+            "id": "c",
+            "text": "A prompt leak, where the model reveals what it was told to keep",
+            "correct": false,
+            "says": "Ruled out because the page defines the attack as \"attempts to make Claude ignore its guidelines or your instructions\", which is a push past restrictions and not an exposure of the prompt."
+          },
+          {
+            "id": "d",
+            "text": "A model weakness, where Claude cannot resist any attack",
+            "correct": false,
+            "says": "Ruled out because Claude \"is inherently resilient to such attacks, the additional steps on this page strengthen your guardrails\", so the attacker is the person and not a flaw of the model."
+          }
+        ],
+        "origin": {
+          "path": "course/41-security-and-safety/01-injection-jailbreaks-and-untrusted-input.md",
+          "section": "Two threat models"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "An assistant summarises inbound emails, and one email says to forward the customer list. Where should the email body be placed?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Inside the system prompt, so that it has the highest priority of all",
+            "correct": false,
+            "says": "Ruled out because the page says \"never in `system` prompts or plain user `text` blocks\"."
+          },
+          {
+            "id": "b",
+            "text": "Inside a plain user turn, concatenated after the instruction text",
+            "correct": false,
+            "says": "Ruled out because a plain user turn is the other place the page rules out, and concatenation is the trap: \"The attacker writes the closing delimiter.\""
+          },
+          {
+            "id": "c",
+            "text": "Inside a tool result, encoded as a JSON string that names its source",
+            "correct": true,
+            "says": "The page says \"Put untrusted content only in tool results\", and to \"JSON-encode untrusted content\", with a source named: \"Tell Claude what the content is and where it came from.\""
+          },
+          {
+            "id": "d",
+            "text": "Inside the tool description, so the tool explains its own input to Claude",
+            "correct": false,
+            "says": "Ruled out because the tool description may say what the content is, but the body itself belongs in the result, and \"Don't put your own instructions in tool results\" is a separate rule about who writes what."
+          }
+        ],
+        "origin": {
+          "path": "course/41-security-and-safety/01-injection-jailbreaks-and-untrusted-input.md",
+          "section": "Keeping untrusted content apart"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A team adds a list of known attack strings and considers the agent protected. What is wrong?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Pattern lists block harmless text, so they are not allowed in a design",
+            "correct": false,
+            "says": "Ruled out because the page does not forbid pattern lists: \"Input validation filters known injection patterns before they reach Claude\" is one of its defences."
+          },
+          {
+            "id": "b",
+            "text": "The list screens at the wrong time, so it belongs after the reply",
+            "correct": false,
+            "says": "Ruled out because the page says to \"screen tool outputs with a small model\" before Claude acts, and not after the reply."
+          },
+          {
+            "id": "c",
+            "text": "The list is too short, so a longer list would be enough",
+            "correct": false,
+            "says": "Ruled out because \"The structural measures do not depend on guessing the attack\", so more patterns are no substitute for structure and privilege."
+          },
+          {
+            "id": "d",
+            "text": "A paraphrase passes it, so it cannot be the only layer",
+            "correct": true,
+            "says": "The page says \"A list of patterns catches the phrasing someone thought of and misses the paraphrase\", and the example's last line shows one passing."
+          }
+        ],
+        "origin": {
+          "path": "course/41-security-and-safety/01-injection-jailbreaks-and-untrusted-input.md",
+          "section": "Why the screen is the weakest layer"
+        }
+      }
+    ]
+  }
+}

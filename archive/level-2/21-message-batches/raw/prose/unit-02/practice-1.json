@@ -1,0 +1,311 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "21-message-batches"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: submit a batch and handle its results (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: submit a batch and handle its results"
+    },
+    {
+      "type": "para",
+      "text": "A Message Batch takes many Messages requests at half price and returns one result per request, in any order, up to 24 hours later. Write the three functions around it: build the request list, cut a big job into batches, and read the results. The rules come from the Claude documentation on batch processing, read on 2026-10-02; the lesson pages explain them. Nothing here touches the network: results are the lines of the `.jsonl` file the API serves at `results_url`."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given types"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "item",
+          "`{\"id\": <your key>, \"params\": <a Messages request body>}`"
+        ],
+        [
+          "request",
+          "`{\"custom_id\": ..., \"params\": ...}`, one element of a batch's `requests`"
+        ],
+        [
+          "result line",
+          "one line of JSON: `{\"custom_id\": ..., \"result\": {...}}` where `result.type` is `succeeded` (with `message`, whose `content` blocks and `usage` are those of a normal reply), `errored` (with `error.error.type`, such as `invalid_request_error` or `overloaded_error`), `canceled` or `expired`"
+        ],
+        [
+          "`BatchError`",
+          "the error to raise: `field` names the offending part (`custom_id`, `params.max_tokens`, `params.stream`, `params.speed` or `size`)"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working batch tool with six gaps cut out of it. Everything that is plumbing is written and correct: the constants, `BatchError`, the loops of the three functions, the size measure, the parsing of the result lines, the matching by custom id, the outcome of every kind of result, and the assembling of the answer. Each gap is a small function with its signature, a comment that says what it receives and returns, one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. Python names them with a leading underscore; TypeScript, Java and Kotlin use camel case without it (`checkCustomId`, `mustStartNew`). Write them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_check_custom_id` unlocks `e1`: the pattern, and an id used twice.",
+        "`_check_params` unlocks `e2`: `max_tokens`, `stream` and `speed`.",
+        "`_must_start_new` unlocks `e3`: when the next request opens a new batch, by count or by size.",
+        "`_keep_result` unlocks `m1` and `e5`: a result is filed by its custom id, a stranger is reported, the first result wins.",
+        "`_needs_fix` unlocks `e4`: which error type is fixed and which is retried.",
+        "`_add_usage` unlocks `e6`: the four usage sums."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About fifteen lines in all. To see what a gap receives, log its input with the `log` line at the top of the file: `build_requests` already logs its input at debug level, and a run shows the logged lines under the failing case."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "`build_requests(items)` (TypeScript `buildRequests`, Java `Batches.buildRequests`, Kotlin `buildRequests`)"
+    },
+    {
+      "type": "para",
+      "text": "Return the requests, one per item, `custom_id` being the item's id, in the same order. Raise `BatchError` when:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "an id is not 1 to 64 characters of letters, digits, hyphens and underscores (`custom_id`), or is used twice (`custom_id`);",
+        "`max_tokens` is missing or below 1 (`params.max_tokens`);",
+        "`stream` is true (`params.stream`) or `speed` is present (`params.speed`)."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "`split_batches(requests, max_requests=100000, max_bytes=268435456)` (TypeScript `splitBatches`, Java `Batches.splitBatches`, Kotlin `splitBatches`)"
+    },
+    {
+      "type": "para",
+      "text": "Cut the requests, in order, into consecutive batches so that no batch holds more than `max_requests` requests or more than `max_bytes` bytes. A request's size is the length in UTF-8 bytes of its compact JSON (no spaces after `,` or `:`). A single request larger than `max_bytes` raises `BatchError` with `size`. An empty list gives an empty list."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "`collect(requests, result_lines)` (TypeScript `collect`, Java `Batches.collect`, Kotlin `collect`)"
+    },
+    {
+      "type": "para",
+      "text": "Return a map with:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`outcomes`: one per request **in request order**, matched by `custom_id` and never by position: `{custom_id, status}` plus `text` (the text blocks joined) and `usage` for `succeeded`, `error_type` for `errored`; a request with no result line has `status` `missing`;",
+        "`retry`: ids worth sending again unchanged, in request order: `expired`, `canceled`, `missing`, and `errored` for any type other than `invalid_request_error`;",
+        "`fix`: ids of `errored` results of type `invalid_request_error`, which fail again until the request is corrected;",
+        "`unknown`: custom ids in the file that no request carries, in file order (they are otherwise ignored);",
+        "`usage`: the sums of `input_tokens`, `output_tokens`, `cache_creation_input_tokens` and `cache_read_input_tokens` over the `succeeded` results only (the other kinds are not billed)."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Blank lines are skipped, and when one custom id appears twice the first result wins."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Results are matched to requests by custom id, not by position"
+        ],
+        [
+          "`e1`",
+          "A custom id is 1 to 64 safe characters and unique"
+        ],
+        [
+          "`e2`",
+          "Parameters a batch cannot take are refused"
+        ],
+        [
+          "`e3`",
+          "A big job is cut in order by request count and by size"
+        ],
+        [
+          "`e4`",
+          "Invalid requests are fixed, the other failures are retried"
+        ],
+        [
+          "`e5`",
+          "A request with no result is missing and retried, and a stranger id is reported"
+        ],
+        [
+          "`e6`",
+          "Only succeeded requests count toward usage"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Build, split and read Message Batches. See ../../statement.md for the contract.\"\"\"\nimport json\nimport logging\nimport re\n\nlog = logging.getLogger(__name__)\n\nCUSTOM_ID = re.compile(r\"^[a-zA-Z0-9_-]{1,64}$\")\nMAX_REQUESTS = 100_000\nMAX_BYTES = 256 * 1024 * 1024\nUSAGE_KEYS = (\"input_tokens\", \"output_tokens\", \"cache_creation_input_tokens\", \"cache_read_input_tokens\")\n\n\nclass BatchError(Exception):\n    \"\"\"The batch would be refused. `field` names the offending part.\"\"\"\n\n    def __init__(self, field, reason):\n        super().__init__(f\"{field}: {reason}\")\n        self.field, self.reason = field, reason\n\n\ndef _check_custom_id(custom_id, seen):\n    if not isinstance(custom_id, str) or not CUSTOM_ID.match(custom_id):\n        raise BatchError(\"custom_id\", f\"{custom_id!r} is not 1 to 64 letters, digits, hyphens or underscores\")\n    if custom_id in seen:\n        raise BatchError(\"custom_id\", f\"{custom_id} is used twice\")\n    seen.add(custom_id)\n\n\ndef _check_params(params):\n    if params.get(\"max_tokens\", 0) < 1:\n        raise BatchError(\"params.max_tokens\", \"must be at least 1 inside a batch\")\n    if params.get(\"stream\"):\n        raise BatchError(\"params.stream\", \"batch results are a file, not a stream\")\n    if \"speed\" in params:\n        raise BatchError(\"params.speed\", \"fast mode is not available in a batch\")\n\n\ndef build_requests(items):\n    log.debug(\"build_requests input: %r\", items)\n    seen, requests = set(), []\n    for item in items:\n        custom_id, params = item[\"id\"], item[\"params\"]\n        _check_custom_id(custom_id, seen)\n        _check_params(params)\n        requests.append({\"custom_id\": custom_id, \"params\": params})\n    return requests\n\n\ndef _size(request):\n    return len(json.dumps(request, separators=(\",\", \":\")).encode(\"utf-8\"))\n\n\ndef _must_start_new(count, used, size, max_requests, max_bytes):\n    return count > 0 and (count >= max_requests or used + size > max_bytes)\n\n\ndef split_batches(requests, max_requests=MAX_REQUESTS, max_bytes=MAX_BYTES):\n    batches, current, used = [], [], 0\n    for request in requests:\n        size = _size(request)\n        if size > max_bytes:\n            raise BatchError(\"size\", f\"{request['custom_id']} alone is larger than a batch may be\")\n        if _must_start_new(len(current), used, size, max_requests, max_bytes):\n            batches.append(current)\n            current, used = [], 0\n        current.append(request)\n        used += size\n    if current:\n        batches.append(current)\n    return batches\n\n\ndef _keep_result(wanted, by_id, unknown, record):\n    cid = record[\"custom_id\"]\n    if cid not in wanted:\n        unknown.append(cid)\n    elif cid not in by_id:\n        by_id[cid] = record[\"result\"]\n\n\ndef _needs_fix(error_type):\n    return error_type == \"invalid_request_error\"\n\n\ndef _add_usage(usage, used):\n    for key in USAGE_KEYS:\n        usage[key] += used.get(key, 0)\n\n\ndef collect(requests, result_lines):\n    wanted = [r[\"custom_id\"] for r in requests]\n    by_id, unknown = {}, []\n    for line in result_lines:\n        if line.strip():\n            _keep_result(wanted, by_id, unknown, json.loads(line))\n    outcomes, retry, fix = [], [], []\n    usage = {key: 0 for key in USAGE_KEYS}\n    for cid in wanted:\n        result = by_id.get(cid)\n        if result is None:\n            outcomes.append({\"custom_id\": cid, \"status\": \"missing\"})\n            retry.append(cid)\n        elif result[\"type\"] == \"succeeded\":\n            message = result[\"message\"]\n            text = \"\".join(b.get(\"text\", \"\") for b in message[\"content\"] if b.get(\"type\") == \"text\")\n            outcomes.append({\"custom_id\": cid, \"status\": \"succeeded\", \"text\": text, \"usage\": message[\"usage\"]})\n            _add_usage(usage, message[\"usage\"])\n        elif result[\"type\"] == \"errored\":\n            kind = result[\"error\"][\"error\"][\"type\"]\n            outcomes.append({\"custom_id\": cid, \"status\": \"errored\", \"error_type\": kind})\n            (fix if _needs_fix(kind) else retry).append(cid)\n        else:  # canceled or expired: the request never reached the model\n            outcomes.append({\"custom_id\": cid, \"status\": result[\"type\"]})\n            retry.append(cid)\n    return {\"outcomes\": outcomes, \"retry\": retry, \"fix\": fix, \"unknown\": unknown, \"usage\": usage}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nimport json\n\nfrom batches import BatchError, build_requests, collect\n\nMODEL = \"claude-haiku-4-5-20251001\"\n\n\ndef item(id):\n    return {\"id\": id, \"params\": {\"model\": MODEL, \"max_tokens\": 200,\n                                 \"messages\": [{\"role\": \"user\", \"content\": f\"Classify ticket {id}\"}]}}\n\n\ndef result_line(custom_id, text):\n    \"\"\"One line of the .jsonl results file, like the ones the tests build.\"\"\"\n    message = {\"id\": \"msg_illustrative\", \"type\": \"message\", \"role\": \"assistant\", \"model\": MODEL, \"stop_reason\": \"end_turn\",\n               \"content\": [{\"type\": \"text\", \"text\": text}], \"usage\": {\"input_tokens\": 50, \"output_tokens\": 7}}\n    return json.dumps({\"custom_id\": custom_id, \"result\": {\"type\": \"succeeded\", \"message\": message}})\n\n\ntry:\n    requests = build_requests([item(\"t-1\"), item(\"t-2\"), item(\"t-3\")]) or []\n    print(\"custom ids:\", [r[\"custom_id\"] for r in requests])\n    # The results come back in any order: they are matched by custom_id, not by position.\n    done = collect(requests, [result_line(\"t-3\", \"billing\"), result_line(\"t-1\", \"refund\"), result_line(\"t-2\", \"shipping\")]) or {}\n    print(\"outcomes:\", [(o[\"custom_id\"], o[\"status\"], o.get(\"text\")) for o in done.get(\"outcomes\", [])])\n    print(\"to retry / fix / unknown:\", done.get(\"retry\"), done.get(\"fix\"), done.get(\"unknown\"))\nexcept BatchError as err:\n    print(\"batch error:\", err)\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Build, split and read Message Batches. See ../../statement.md for the contract.\"\"\"\nimport json\nimport logging\nimport re\n\nlog = logging.getLogger(__name__)\n\nCUSTOM_ID = re.compile(r\"^[a-zA-Z0-9_-]{1,64}$\")\nMAX_REQUESTS = 100_000\nMAX_BYTES = 256 * 1024 * 1024\nUSAGE_KEYS = (\"input_tokens\", \"output_tokens\", \"cache_creation_input_tokens\", \"cache_read_input_tokens\")\n\n\nclass BatchError(Exception):\n    \"\"\"The batch would be refused. `field` names the offending part.\"\"\"\n\n    def __init__(self, field, reason):\n        super().__init__(f\"{field}: {reason}\")\n        self.field, self.reason = field, reason\n\n\ndef _check_custom_id(custom_id, seen):\n    \"\"\"TODO 1 of 6 (finish this to pass e1): refuse a bad or repeated custom id, and remember a good one.\n\n    Receives the id and the set `seen` of ids already used. Raises BatchError(\"custom_id\", reason) when the id is not a string matching\n    CUSTOM_ID (1 to 64 letters, digits, hyphens or underscores) or is already in `seen`; otherwise adds it to `seen`.\n    Example: _check_custom_id(\"has space\", set()) raises; calling _check_custom_id(\"a\", seen) twice raises the second time\n    \"\"\"\n\n\ndef _check_params(params):\n    \"\"\"TODO 2 of 6 (finish this to pass e2): refuse the parameters a batch cannot take.\n\n    Receives a request body. Raises BatchError(\"params.max_tokens\", reason) when max_tokens is missing or below 1,\n    BatchError(\"params.stream\", reason) when stream is true, and BatchError(\"params.speed\", reason) when speed is present at all.\n    Example: _check_params({\"max_tokens\": 0}) raises with field \"params.max_tokens\"\n    \"\"\"\n\n\ndef build_requests(items):\n    log.debug(\"build_requests input: %r\", items)\n    seen, requests = set(), []\n    for item in items:\n        custom_id, params = item[\"id\"], item[\"params\"]\n        _check_custom_id(custom_id, seen)\n        _check_params(params)\n        requests.append({\"custom_id\": custom_id, \"params\": params})\n    return requests\n\n\ndef _size(request):\n    return len(json.dumps(request, separators=(\",\", \":\")).encode(\"utf-8\"))\n\n\ndef _must_start_new(count, used, size, max_requests, max_bytes):\n    \"\"\"TODO 3 of 6 (finish this to pass e3): must this request go into a new batch?\n\n    Receives the number of requests in the current batch, their total bytes `used`, the size of the next request and both limits.\n    Returns True when the current batch is not empty and adding the request would pass either limit (count already at max_requests, or\n    used + size above max_bytes). Example: _must_start_new(3, 10, 5, 3, 1000) -> True, _must_start_new(0, 0, 5, 3, 1000) -> False\n    \"\"\"\n    return False\n\n\ndef split_batches(requests, max_requests=MAX_REQUESTS, max_bytes=MAX_BYTES):\n    batches, current, used = [], [], 0\n    for request in requests:\n        size = _size(request)\n        if size > max_bytes:\n            raise BatchError(\"size\", f\"{request['custom_id']} alone is larger than a batch may be\")\n        if _must_start_new(len(current), used, size, max_requests, max_bytes):\n            batches.append(current)\n            current, used = [], 0\n        current.append(request)\n        used += size\n    if current:\n        batches.append(current)\n    return batches\n\n\ndef _keep_result(wanted, by_id, unknown, record):\n    \"\"\"TODO 4 of 6 (finish this to pass m1 and e5): file one parsed result line by its custom id.\n\n    Receives the list `wanted` of request ids, the dict `by_id`, the list `unknown` and the parsed `record` ({\"custom_id\", \"result\"}).\n    Adds the id to `unknown` when no request carries it; otherwise stores record[\"result\"] in `by_id` unless the id is already there\n    (the first result wins). Example: a record for \"zzz\" when wanted is [\"a\"] puts \"zzz\" in unknown\n    \"\"\"\n\n\ndef _needs_fix(error_type):\n    \"\"\"TODO 5 of 6 (finish this to pass e4): does an errored result need a corrected request?\n\n    Receives the error type of an errored result. Returns True for \"invalid_request_error\" (it fails again until fixed), False for any\n    other type, which is worth sending again unchanged. Example: _needs_fix(\"overloaded_error\") -> False\n    \"\"\"\n    return False\n\n\ndef _add_usage(usage, used):\n    \"\"\"TODO 6 of 6 (finish this to pass e6): add one succeeded reply's usage to the totals.\n\n    Receives the dict `usage` of totals (every key of USAGE_KEYS starts at 0) and the reply's `usage` map, which may lack a key.\n    Adds each key of USAGE_KEYS from `used` to `usage`, a missing key counting as 0. Example: adding {\"input_tokens\": 5} raises\n    usage[\"input_tokens\"] by 5 and leaves the other three alone\n    \"\"\"\n\n\ndef collect(requests, result_lines):\n    wanted = [r[\"custom_id\"] for r in requests]\n    by_id, unknown = {}, []\n    for line in result_lines:\n        if line.strip():\n            _keep_result(wanted, by_id, unknown, json.loads(line))\n    outcomes, retry, fix = [], [], []\n    usage = {key: 0 for key in USAGE_KEYS}\n    for cid in wanted:\n        result = by_id.get(cid)\n        if result is None:\n            outcomes.append({\"custom_id\": cid, \"status\": \"missing\"})\n            retry.append(cid)\n        elif result[\"type\"] == \"succeeded\":\n            message = result[\"message\"]\n            text = \"\".join(b.get(\"text\", \"\") for b in message[\"content\"] if b.get(\"type\") == \"text\")\n            outcomes.append({\"custom_id\": cid, \"status\": \"succeeded\", \"text\": text, \"usage\": message[\"usage\"]})\n            _add_usage(usage, message[\"usage\"])\n        elif result[\"type\"] == \"errored\":\n            kind = result[\"error\"][\"error\"][\"type\"]\n            outcomes.append({\"custom_id\": cid, \"status\": \"errored\", \"error_type\": kind})\n            (fix if _needs_fix(kind) else retry).append(cid)\n        else:  # canceled or expired: the request never reached the model\n            outcomes.append({\"custom_id\": cid, \"status\": result[\"type\"]})\n            retry.append(cid)\n    return {\"outcomes\": outcomes, \"retry\": retry, \"fix\": fix, \"unknown\": unknown, \"usage\": usage}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nimport json\n\nfrom batches import BatchError, build_requests, collect\n\nMODEL = \"claude-haiku-4-5-20251001\"\n\n\ndef item(id):\n    return {\"id\": id, \"params\": {\"model\": MODEL, \"max_tokens\": 200,\n                                 \"messages\": [{\"role\": \"user\", \"content\": f\"Classify ticket {id}\"}]}}\n\n\ndef result_line(custom_id, text):\n    \"\"\"One line of the .jsonl results file, like the ones the tests build.\"\"\"\n    message = {\"id\": \"msg_illustrative\", \"type\": \"message\", \"role\": \"assistant\", \"model\": MODEL, \"stop_reason\": \"end_turn\",\n               \"content\": [{\"type\": \"text\", \"text\": text}], \"usage\": {\"input_tokens\": 50, \"output_tokens\": 7}}\n    return json.dumps({\"custom_id\": custom_id, \"result\": {\"type\": \"succeeded\", \"message\": message}})\n\n\ntry:\n    requests = build_requests([item(\"t-1\"), item(\"t-2\"), item(\"t-3\")]) or []\n    print(\"custom ids:\", [r[\"custom_id\"] for r in requests])\n    # The results come back in any order: they are matched by custom_id, not by position.\n    done = collect(requests, [result_line(\"t-3\", \"billing\"), result_line(\"t-1\", \"refund\"), result_line(\"t-2\", \"shipping\")]) or {}\n    print(\"outcomes:\", [(o[\"custom_id\"], o[\"status\"], o.get(\"text\")) for o in done.get(\"outcomes\", [])])\n    print(\"to retry / fix / unknown:\", done.get(\"retry\"), done.get(\"fix\"), done.get(\"unknown\"))\nexcept BatchError as err:\n    print(\"batch error:\", err)\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 10,
+    "paras": 8,
+    "code": 2,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "1549358a5b7ea43ab0e975174d930c2ae11dc56cedba6b9e011b515fcaac84fd",
+  "starting_code": "\"\"\"Build, split and read Message Batches. See ../../statement.md for the contract.\"\"\"\nimport json\nimport logging\nimport re\n\nlog = logging.getLogger(__name__)\n\nCUSTOM_ID = re.compile(r\"^[a-zA-Z0-9_-]{1,64}$\")\nMAX_REQUESTS = 100_000\nMAX_BYTES = 256 * 1024 * 1024\nUSAGE_KEYS = (\"input_tokens\", \"output_tokens\", \"cache_creation_input_tokens\", \"cache_read_input_tokens\")\n\n\nclass BatchError(Exception):\n    \"\"\"The batch would be refused. `field` names the offending part.\"\"\"\n\n    def __init__(self, field, reason):\n        super().__init__(f\"{field}: {reason}\")\n        self.field, self.reason = field, reason\n\n\ndef _check_custom_id(custom_id, seen):\n    \"\"\"TODO 1 of 6 (finish this to pass e1): refuse a bad or repeated custom id, and remember a good one.\n\n    Receives the id and the set `seen` of ids already used. Raises BatchError(\"custom_id\", reason) when the id is not a string matching\n    CUSTOM_ID (1 to 64 letters, digits, hyphens or underscores) or is already in `seen`; otherwise adds it to `seen`.\n    Example: _check_custom_id(\"has space\", set()) raises; calling _check_custom_id(\"a\", seen) twice raises the second time\n    \"\"\"\n\n\ndef _check_params(params):\n    \"\"\"TODO 2 of 6 (finish this to pass e2): refuse the parameters a batch cannot take.\n\n    Receives a request body. Raises BatchError(\"params.max_tokens\", reason) when max_tokens is missing or below 1,\n    BatchError(\"params.stream\", reason) when stream is true, and BatchError(\"params.speed\", reason) when speed is present at all.\n    Example: _check_params({\"max_tokens\": 0}) raises with field \"params.max_tokens\"\n    \"\"\"\n\n\ndef build_requests(items):\n    log.debug(\"build_requests input: %r\", items)\n    seen, requests = set(), []\n    for item in items:\n        custom_id, params = item[\"id\"], item[\"params\"]\n        _check_custom_id(custom_id, seen)\n        _check_params(params)\n        requests.append({\"custom_id\": custom_id, \"params\": params})\n    return requests\n\n\ndef _size(request):\n    return len(json.dumps(request, separators=(\",\", \":\")).encode(\"utf-8\"))\n\n\ndef _must_start_new(count, used, size, max_requests, max_bytes):\n    \"\"\"TODO 3 of 6 (finish this to pass e3): must this request go into a new batch?\n\n    Receives the number of requests in the current batch, their total bytes `used`, the size of the next request and both limits.\n    Returns True when the current batch is not empty and adding the request would pass either limit (count already at max_requests, or\n    used + size above max_bytes). Example: _must_start_new(3, 10, 5, 3, 1000) -> True, _must_start_new(0, 0, 5, 3, 1000) -> False\n    \"\"\"\n    return False\n\n\ndef split_batches(requests, max_requests=MAX_REQUESTS, max_bytes=MAX_BYTES):\n    batches, current, used = [], [], 0\n    for request in requests:\n        size = _size(request)\n        if size > max_bytes:\n            raise BatchError(\"size\", f\"{request['custom_id']} alone is larger than a batch may be\")\n        if _must_start_new(len(current), used, size, max_requests, max_bytes):\n            batches.append(current)\n            current, used = [], 0\n        current.append(request)\n        used += size\n    if current:\n        batches.append(current)\n    return batches\n\n\ndef _keep_result(wanted, by_id, unknown, record):\n    \"\"\"TODO 4 of 6 (finish this to pass m1 and e5): file one parsed result line by its custom id.\n\n    Receives the list `wanted` of request ids, the dict `by_id`, the list `unknown` and the parsed `record` ({\"custom_id\", \"result\"}).\n    Adds the id to `unknown` when no request carries it; otherwise stores record[\"result\"] in `by_id` unless the id is already there\n    (the first result wins). Example: a record for \"zzz\" when wanted is [\"a\"] puts \"zzz\" in unknown\n    \"\"\"\n\n\ndef _needs_fix(error_type):\n    \"\"\"TODO 5 of 6 (finish this to pass e4): does an errored result need a corrected request?\n\n    Receives the error type of an errored result. Returns True for \"invalid_request_error\" (it fails again until fixed), False for any\n    other type, which is worth sending again unchanged. Example: _needs_fix(\"overloaded_error\") -> False\n    \"\"\"\n    return False\n\n\ndef _add_usage(usage, used):\n    \"\"\"TODO 6 of 6 (finish this to pass e6): add one succeeded reply's usage to the totals.\n\n    Receives the dict `usage` of totals (every key of USAGE_KEYS starts at 0) and the reply's `usage` map, which may lack a key.\n    Adds each key of USAGE_KEYS from `used` to `usage`, a missing key counting as 0. Example: adding {\"input_tokens\": 5} raises\n    usage[\"input_tokens\"] by 5 and leaves the other three alone\n    \"\"\"\n\n\ndef collect(requests, result_lines):\n    wanted = [r[\"custom_id\"] for r in requests]\n    by_id, unknown = {}, []\n    for line in result_lines:\n        if line.strip():\n            _keep_result(wanted, by_id, unknown, json.loads(line))\n    outcomes, retry, fix = [], [], []\n    usage = {key: 0 for key in USAGE_KEYS}\n    for cid in wanted:\n        result = by_id.get(cid)\n        if result is None:\n            outcomes.append({\"custom_id\": cid, \"status\": \"missing\"})\n            retry.append(cid)\n        elif result[\"type\"] == \"succeeded\":\n            message = result[\"message\"]\n            text = \"\".join(b.get(\"text\", \"\") for b in message[\"content\"] if b.get(\"type\") == \"text\")\n            outcomes.append({\"custom_id\": cid, \"status\": \"succeeded\", \"text\": text, \"usage\": message[\"usage\"]})\n            _add_usage(usage, message[\"usage\"])\n        elif result[\"type\"] == \"errored\":\n            kind = result[\"error\"][\"error\"][\"type\"]\n            outcomes.append({\"custom_id\": cid, \"status\": \"errored\", \"error_type\": kind})\n            (fix if _needs_fix(kind) else retry).append(cid)\n        else:  # canceled or expired: the request never reached the model\n            outcomes.append({\"custom_id\": cid, \"status\": result[\"type\"]})\n            retry.append(cid)\n    return {\"outcomes\": outcomes, \"retry\": retry, \"fix\": fix, \"unknown\": unknown, \"usage\": usage}\n",
+  "exercise": {
+    "main_path": "practice/level-2/21-message-batches/prose/unit-02/practice-1/batches.py",
+    "test_path": "practice/level-2/21-message-batches/prose/unit-02/practice-1/test_batches.py",
+    "run_command": [
+      "python3",
+      "practice/level-2/21-message-batches/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-2/21-message-batches/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-2/21-message-batches/prose/unit-02/practice-1/test_batches.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_results_are_matched_to_requests_by_custom_id_not_by_position",
+        "kind": "main",
+        "says": "Results are matched to requests by custom id, not by position"
+      },
+      {
+        "id": "test_e1_a_custom_id_is_1_to_64_safe_characters_and_unique",
+        "kind": "edge",
+        "says": "A custom id is 1 to 64 safe characters and unique"
+      },
+      {
+        "id": "test_e2_parameters_a_batch_cannot_take_are_refused",
+        "kind": "edge",
+        "says": "Parameters a batch cannot take are refused"
+      },
+      {
+        "id": "test_e3_a_big_job_is_cut_in_order_by_request_count_and_by_size",
+        "kind": "edge",
+        "says": "A big job is cut in order by request count and by size"
+      },
+      {
+        "id": "test_e4_invalid_requests_are_fixed_and_the_rest_are_retried",
+        "kind": "edge",
+        "says": "Invalid requests are fixed, the other failures are retried"
+      },
+      {
+        "id": "test_e5_a_request_with_no_result_is_missing_and_a_stranger_is_reported",
+        "kind": "edge",
+        "says": "A request with no result is missing and retried, and a stranger id is reported"
+      },
+      {
+        "id": "test_e6_only_requests_that_succeeded_count_toward_usage",
+        "kind": "edge",
+        "says": "Only succeeded requests count toward usage"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/21-message-batches/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/21-message-batches/02-polling-results-and-retries.md",
+    "concepts": [
+      "the practice of Polling, results and retries is solved"
+    ],
+    "files": [
+      "practice/level-2/21-message-batches/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "message-batches-u2"
+}

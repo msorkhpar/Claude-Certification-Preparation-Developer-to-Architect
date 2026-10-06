@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "73-scenario-developer-productivity"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: Two subagents and the tools each one gets",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "The audit of the draft prints `bare-write-allowed`. What removes that finding?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Giving the scaffolding subagent a tools line of its own, with a few names",
+            "correct": false,
+            "says": "Ruled out because that is a third: \"`agent-inherits-all` and `agent-bare-bash`: a subagent with no `tools` line, or with the shell tool in it\"."
+          },
+          {
+            "id": "b",
+            "text": "Adding the file-writing tool to the tools line of the subagent that generates the code",
+            "correct": false,
+            "says": "Ruled out because a tools line lists tools and approves nothing in settings: \"The `tools` line is the allowlist.\""
+          },
+          {
+            "id": "c",
+            "text": "Denying `Read(./.env)` in the same settings file as the allow rule",
+            "correct": false,
+            "says": "Ruled out because that is another finding: \"`env-readable`: the settings do not deny `Read(./.env)`.\""
+          },
+          {
+            "id": "d",
+            "text": "Replacing the whole-tool allow rule with one limited to `src/generated/`",
+            "correct": true,
+            "says": "The finding is about an allow rule that covers the whole tool: \"`bare-write-allowed`: an allow rule that approves the whole `Edit` or `Write` tool.\""
+          }
+        ],
+        "origin": {
+          "path": "course/73-scenario-developer-productivity/01-two-subagents-and-the-tools-each-one-gets.md",
+          "section": "The audit: a checklist that reads the files"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A boilerplate agent may change files only in `src/generated`. Which settings give that?",
+        "options": [
+          {
+            "id": "a",
+            "text": "An allow rule for the Edit tool, limited to that folder",
+            "correct": true,
+            "says": "An Edit rule covers every built-in file-editing tool and a path keeps it to one folder."
+          },
+          {
+            "id": "b",
+            "text": "An allow rule for the Write tool, limited to that folder",
+            "correct": false,
+            "says": "Ruled out because a Write path rule is never read: \"A path rule written for the Write tool is accepted and never consulted\"."
+          },
+          {
+            "id": "c",
+            "text": "An allow rule for the whole Edit tool, plus a prompt naming the folder",
+            "correct": false,
+            "says": "Ruled out because a bare rule has no path: \"A bare `Edit` rule has no path and approves every edit.\""
+          },
+          {
+            "id": "d",
+            "text": "A deny rule for the shell tool, since only commands can write",
+            "correct": false,
+            "says": "Ruled out because the file tools have rules of their own: \"Denying the shell does not limit the file tools\"."
+          }
+        ],
+        "origin": {
+          "path": "course/73-scenario-developer-productivity/01-two-subagents-and-the-tools-each-one-gets.md",
+          "section": "Writing in one folder: the rule must be about Edit"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A ticket server lets a caller fetch, add and remove tickets, and agents may only look at them. Which settings give that?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Deny the delete tool in the settings with a rule that matches on the ticket number",
+            "correct": false,
+            "says": "Ruled out because the rule is skipped: \"In a settings file, a rule for an MCP tool that carries parentheses is skipped, so it matches nothing\"."
+          },
+          {
+            "id": "b",
+            "text": "Allow every tool of the server, and tell the agents to read only",
+            "correct": false,
+            "says": "Ruled out because a sentence is no limit: \"A sentence in the prompt is a request that the model weighs\"."
+          },
+          {
+            "id": "c",
+            "text": "Allow the get tool by name, and deny the create and delete tools by name",
+            "correct": true,
+            "says": "Allow by name and deny the others by name."
+          },
+          {
+            "id": "d",
+            "text": "Deny the whole server, then allow its get tool by name",
+            "correct": false,
+            "says": "Ruled out because a deny rule beats every allow: \"A matching deny rule wins over any allow rule, whatever the specificity.\""
+          }
+        ],
+        "origin": {
+          "path": "course/73-scenario-developer-productivity/01-two-subagents-and-the-tools-each-one-gets.md",
+          "section": "MCP servers: one name in three places"
+        }
+      }
+    ]
+  }
+}

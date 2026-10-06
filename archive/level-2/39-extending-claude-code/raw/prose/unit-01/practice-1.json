@@ -1,0 +1,156 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "39-extending-claude-code"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Skills, and how they compare with the other ways to extend Claude Code",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A description reads only \"Release helper\", and Claude never loads that skill when users ask for a changelog. What is the first fix?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Raise the tool grant so that the skill may run any shell command",
+            "correct": false,
+            "says": "Ruled out because a tool grant is for \"Tools Claude may use without asking while the skill runs\", and a skill that is never loaded never runs."
+          },
+          {
+            "id": "b",
+            "text": "State what it does and when to use it, in everyday words",
+            "correct": true,
+            "says": "The page says the description is \"What the skill does and when to use it. Claude uses this to decide when to apply the skill.\""
+          },
+          {
+            "id": "c",
+            "text": "Move the folder into the enterprise location so it takes priority",
+            "correct": false,
+            "says": "Ruled out because location decides which skill wins when \"two skills share a name\", and has no bearing on whether Claude matches a request."
+          },
+          {
+            "id": "d",
+            "text": "Add the value true on the model-invocation field in the frontmatter",
+            "correct": false,
+            "says": "Ruled out because the table says `true` \"stops Claude from starting it by itself\", which is the opposite of what the team wants."
+          }
+        ],
+        "origin": {
+          "path": "course/39-extending-claude-code/01-skills-and-how-they-compare.md",
+          "section": "The frontmatter that matters"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A team needs to guarantee that no agent pushes to the main branch, whatever Claude decides in a given turn. Which extension fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A memory line, which loads as persistent context in each conversation",
+            "correct": false,
+            "says": "Ruled out because the table calls it \"Persistent context loaded every conversation\" for conventions, which is guidance Claude may still get wrong, and the page says a rule that must never be broken needs a hook or a deny rule."
+          },
+          {
+            "id": "b",
+            "text": "A skill, which holds instructions that Claude may follow",
+            "correct": false,
+            "says": "Ruled out because \"a skill is instructions Claude may follow\", and an instruction that may be followed is not a guarantee."
+          },
+          {
+            "id": "c",
+            "text": "A hook, which runs as a program on every matching event",
+            "correct": true,
+            "says": "The page says \"A rule that must never be broken belongs in a hook or a deny rule\", and a hook is \"a program that always runs\"."
+          },
+          {
+            "id": "d",
+            "text": "A subagent, which is an isolated context returning summaries",
+            "correct": false,
+            "says": "Ruled out because a subagent is \"An isolated context that returns summarised results\" for \"A side task that would flood the conversation\", and not a gate that every command must pass."
+          }
+        ],
+        "origin": {
+          "path": "course/39-extending-claude-code/01-skills-and-how-they-compare.md",
+          "section": "Which extension for which job"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A skill tags a release and creates a GitHub release. Which frontmatter is right?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Automatic invocation off, with two command patterns pre-approved",
+            "correct": true,
+            "says": "The page says a task skill with side effects should set `disable-model-invocation: true`, and that `allowed-tools: Bash(git tag *) Bash(gh release create *)` \"approves two command families\"."
+          },
+          {
+            "id": "b",
+            "text": "Automatic invocation on, with the whole Bash tool pre-approved",
+            "correct": false,
+            "says": "Ruled out because the page says bare `Bash` \"approves every shell command for that turn\"."
+          },
+          {
+            "id": "c",
+            "text": "Automatic invocation on, with the two command patterns pre-approved",
+            "correct": false,
+            "says": "Ruled out because \"a person should start it\" when a skill has side effects."
+          },
+          {
+            "id": "d",
+            "text": "Automatic invocation off, with the whole Bash tool pre-approved",
+            "correct": false,
+            "says": "Ruled out because it keeps the person in control but the page says bare `Bash` \"turns a narrow skill into an open one\"."
+          }
+        ],
+        "origin": {
+          "path": "course/39-extending-claude-code/01-skills-and-how-they-compare.md",
+          "section": "Who starts it and what it may do"
+        }
+      }
+    ],
+    "concepts": [
+      "The frontmatter that matters, as the page teaches it",
+      "Which extension for which job, as the page teaches it",
+      "Who starts it and what it may do, as the page teaches it"
+    ]
+  }
+}

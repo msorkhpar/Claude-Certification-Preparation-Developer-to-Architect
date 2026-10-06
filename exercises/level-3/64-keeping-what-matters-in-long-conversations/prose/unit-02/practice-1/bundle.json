@@ -1,0 +1,83 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-3",
+    "64-keeping-what-matters-in-long-conversations"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Practice: a context that keeps the facts, trims the noise, never mixes customers and never splits a tool call (Python)",
+  "lang": "python",
+  "main_file": "context_builder.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_context_builder.py",
+  "build": [
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-3/64-keeping-what-matters-in-long-conversations/prose/unit-02/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-3/64-keeping-what-matters-in-long-conversations/prose/unit-02/practice-1/target/report.xml",
+    "practice/level-3/64-keeping-what-matters-in-long-conversations/prose/unit-02/practice-1/test_context_builder.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_trimming_keeps_only_the_named_fields_with_their_exact_values_in_the_named_order",
+      "kind": "main",
+      "says": "Trimming keeps only the named fields with their exact values in the named order"
+    },
+    {
+      "id": "test_e1_a_field_that_the_record_does_not_have_is_skipped",
+      "kind": "edge",
+      "says": "A field that the record does not have is skipped"
+    },
+    {
+      "id": "test_e2_a_newer_fact_replaces_the_old_one_and_the_old_value_is_kept_as_history",
+      "kind": "edge",
+      "says": "A newer fact replaces the old one and the old value is kept as history"
+    },
+    {
+      "id": "test_e3_an_older_fact_that_arrives_late_does_not_replace_the_current_one",
+      "kind": "edge",
+      "says": "An older fact that arrives late does not replace the current one"
+    },
+    {
+      "id": "test_e4_the_case_facts_of_another_customer_never_enter_the_context",
+      "kind": "edge",
+      "says": "The case facts of another customer never enter the context"
+    },
+    {
+      "id": "test_e5_the_context_puts_case_facts_first_then_the_summary_then_the_recent_messages",
+      "kind": "edge",
+      "says": "The context puts case facts first, then the summary, then the recent messages"
+    },
+    {
+      "id": "test_e6_a_summary_that_loses_an_exact_value_is_reported",
+      "kind": "edge",
+      "says": "A summary that loses an exact value is reported"
+    },
+    {
+      "id": "test_e7_the_window_drops_the_oldest_messages_and_keeps_a_tool_call_with_its_result",
+      "kind": "edge",
+      "says": "The window drops the oldest messages and keeps a tool call with its result"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/64-keeping-what-matters-in-long-conversations/02-long-sessions-stale-facts-isolation-and-the-practice.md"
+}

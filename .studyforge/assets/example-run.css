@@ -1,0 +1,61 @@
+/* The Run strip under an example's code: one line of controls and what the run said. */
+p[data-example-run] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0 0;
+}
+
+p[data-example-run][hidden],
+pre[data-example-part="output"][hidden] {
+  display: none;
+}
+
+p[data-example-run] [data-example-part="status"] {
+  color: var(--muted, inherit);
+}
+
+pre[data-example-part="output"] {
+  margin: 0.5rem 0 0;
+  max-height: 20rem;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
+/* ⭐ The strip wears the page's own control and code looks: palette tokens only, no value of its own. */
+p[data-example-run] button {
+  font: inherit;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: .95rem;
+  padding: .3rem .85rem;
+  color: var(--fg);
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+p[data-example-run] button:hover:not([disabled]) { background: var(--surface-2); }
+
+p[data-example-run] button[disabled] {
+  color: var(--muted);
+  cursor: default;
+  opacity: .65;
+}
+
+p[data-example-run] [data-example-part="status"] {
+  font-family: var(--font-ui);
+  font-size: .9rem;
+}
+
+pre[data-example-part="output"] {
+  padding: .6rem .8rem;
+  font-family: var(--font-mono);
+  font-size: .85rem;
+  line-height: 1.5;
+  color: var(--code-fg);
+  background: var(--code-bg);
+  border-radius: var(--radius-control);
+}

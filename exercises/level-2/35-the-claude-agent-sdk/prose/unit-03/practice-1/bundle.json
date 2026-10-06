@@ -1,0 +1,84 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "35-the-claude-agent-sdk"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 1,
+  "title": "Practice: an agent that may read, but not do harm (Python)",
+  "lang": "python",
+  "main_file": "agent.py",
+  "files": [
+    "try_it.py"
+  ],
+  "test_file": "test_agent.py",
+  "build": [
+    "harness/fake_claude.py",
+    "pytest.ini"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-2/35-the-claude-agent-sdk/prose/unit-03/practice-1/try_it.py"
+  ],
+  "test_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=practice/level-2/35-the-claude-agent-sdk/prose/unit-03/practice-1/target/report.xml",
+    "practice/level-2/35-the-claude-agent-sdk/prose/unit-03/practice-1/test_agent.py"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "test_m1_every_tool_call_goes_through_the_permission_callback_and_the_run_is_summarised",
+      "kind": "main",
+      "says": "Every tool call goes through the permission callback, and the run is summarised"
+    },
+    {
+      "id": "test_e1_the_options_reach_the_cli_as_flags_and_the_run_starts_in_the_project",
+      "kind": "edge",
+      "says": "The options reach the CLI as flags, and the run starts in the project"
+    },
+    {
+      "id": "test_e2_file_tools_stay_inside_the_project_and_away_from_secrets",
+      "kind": "edge",
+      "says": "File tools stay inside the project and away from secrets"
+    },
+    {
+      "id": "test_e3_bash_is_limited_to_a_few_commands_and_dangerous_ones_stop_the_run",
+      "kind": "edge",
+      "says": "Bash is limited to a few commands, and dangerous ones stop the run"
+    },
+    {
+      "id": "test_e4_a_hook_blocks_a_push_before_the_permission_callback_is_asked",
+      "kind": "edge",
+      "says": "A hook blocks a push before the permission callback is asked"
+    },
+    {
+      "id": "test_e5_the_messages_of_a_run_fold_into_a_summary",
+      "kind": "edge",
+      "says": "The messages of a run fold into a summary"
+    },
+    {
+      "id": "test_e6_an_error_result_still_gives_its_summary_and_a_crash_is_not_hidden",
+      "kind": "edge",
+      "says": "An error result still gives its summary, and a crash is not hidden"
+    },
+    {
+      "id": "test_e7_denied_calls_are_counted_and_the_run_still_ends_with_a_result",
+      "kind": "edge",
+      "says": "Denied calls are counted, and the run still ends with a result"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/35-the-claude-agent-sdk/03-driving-the-sdk-offline-and-the-practice.md"
+}

@@ -1,0 +1,305 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "69-provenance-and-uncertainty"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Keeping claims tied to their sources: summaries, conflicts and dates",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Keeping claims tied to their sources: summaries, conflicts and dates"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Architect · **Module 69:** Provenance and uncertainty · **Page 1 of 2** **Exams:** A5.6; S3"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** say where a source is lost when findings are compressed, require a claim to carry its source and its date from the subagent that found it to the report that uses it, annotate two credible sources that disagree instead of choosing between them, tell a change over time from a contradiction, and read a ledger of claims with a status for each."
+    },
+    {
+      "type": "para",
+      "text": "Checked on 2026-10-04 against the exam guide's task statement 5.6 and scenario S3 (multi-agent research system). Nothing here called a model: the example compresses seven invented findings two ways and counts what each keeps (`examples/69-provenance-loss`), and the practice is graded by test suites. Module 47 kept the content of a finding apart from its source so that a merge keeps every source, and module 29 covered citations on a single answer. This page is about what happens to a finding on its way through several agents and a summary, and what the report does when sources disagree."
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "**Exam guide and current product.** *What the guide states, and so what the exam keys:* attribution \"is lost during summarization steps when findings are compressed without preserving claim-source mappings\"; the synthesis agent must \"preserve and merge\" structured claim-source mappings; for \"conflicting statistics from credible sources\" the answer is \"annotating conflicts with source attribution rather than arbitrarily selecting one value\"; and subagents are required to output publication or data collection dates \"to prevent temporal differences from being misinterpreted as contradictions\". *What the product offers now:* the citations feature (module 29) returns the passage and location behind a claim in one answer, and the Agent SDK passes a subagent's final message to its parent as a result (module 47). Neither carries a claim-source mapping from one agent to the next: the mapping is data that your schema defines and your code preserves. The merge, the conflict status and the date rule below are the exam's design and the course's, not a product feature. On the exam, a question about sources that vanish or numbers that disagree has the answer: structured claim and source fields kept through every step, conflicts annotated with their sources, dates required."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "Three subagents read three kinds of source for a report on a market. One returns \"the market grew 12% in 2024\" from a consultancy report, another \"9%\" from a trade survey, and a third \"7%\" from a yearbook. The synthesis agent writes \"the market grew about 10%\". The number belongs to nobody: it is not in any source, it hides that two credible sources disagree, and it mixes a 2022 forecast with 2024 measurements. A reader who wants to check it cannot. The scenario (S3) tests whether the design keeps the evidence that a research report is for."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Where a source is lost"
+    },
+    {
+      "type": "para",
+      "text": "A source survives as long as it travels with its claim in a field. It is lost the moment a step turns findings into prose: a subagent that writes \"according to several reports, growth was strong\", a summary that shortens forty findings to one paragraph, a synthesis that merges two sentences into one. Each step is reasonable, and each is lossy: a summary has no obligation to keep what it was not told to keep. The guide's point is that the loss happens in compression, so the fix is in the step. Every hand-off between agents carries claim-source mappings (claim, value, source, excerpt, date), and a compression step keeps them next to the text it produces, or passes them on untouched for the final step to use."
+    },
+    {
+      "type": "para",
+      "text": "Module 47's lesson is the first half of this: keep content and source in separate fields so that a merge sees one claim. The second half is the discipline over the whole pipeline. A single prose hand-off anywhere in the chain is where attribution drops out."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Provenance is a required field"
+    },
+    {
+      "type": "para",
+      "text": "The guide asks for subagents that \"output structured claim-source mappings (source URLs, document names, relevant excerpts)\". The design choice is to make the source part of the schema and required, so that a finding without one is refused where it enters the pipeline, and not discovered in the final report. The practice's `check_finding` names the missing fields and `merge` refuses an incomplete finding."
+    },
+    {
+      "type": "para",
+      "text": "A required source has a trap beside it, which module 62 met in extraction: a required field pushes a model to invent a value when there is none. The answer is the same here. A subagent that cannot name a source for a statement does not return it as a finding: it reports it separately as unsourced, or leaves it out, and the schema stays honest. What the pipeline never does is fill the field with a plausible name."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Conflicts are annotated, not settled"
+    },
+    {
+      "type": "para",
+      "text": "When two credible sources give different values for the same claim, the report has learned something: the figure is contested. An agent that picks the newer, the larger or the one from the more familiar publisher has made a decision that nobody asked it to make and that the reader cannot see. Averaging is worse, as the example above shows. The practice keeps both values, each with its sources, and gives the claim the status `conflict`. The guide adds a step before the synthesis: finish the document analysis with the conflicting values included and annotated, and let the coordinator decide how to reconcile before the synthesis. The coordinator may know that one survey sampled a narrower population, or may send a subagent to look for a third source. The one thing the system does not do is hide the disagreement."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "A date can explain a difference"
+    },
+    {
+      "type": "para",
+      "text": "Two figures that differ may be answers to different questions. A 2022 forecast of 7% and a 2024 measurement of 9% do not contradict each other: the world, or the estimate, moved. Without dates, an agent cannot tell, and it reports a contradiction that is not one, or it silently takes one value. So the date is required, like the source: the publication date or the data collection date, whichever the source gives. The practice's rule is a simple one. Two findings for a claim with different values and the same date are a `conflict`. With different dates they are `changed`, listed oldest first, and the report says that the figures come from different dates. A date can only tell a change from a conflict when it describes the data: a publication date is a proxy for the collection date, and a careful report says which one it holds."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Reading the ledger"
+    },
+    {
+      "type": "para",
+      "text": "The merged claims are a ledger, and each entry has one of three statuses:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Status",
+        "Meaning",
+        "The report"
+      ],
+      "rows": [
+        [
+          "`agreed`",
+          "One value, with one or more sources",
+          "States it with its sources; two or more sources make it well supported"
+        ],
+        [
+          "`changed`",
+          "Several values on different dates",
+          "Shows each value with its date, oldest first"
+        ],
+        [
+          "`conflict`",
+          "Several values on the same date",
+          "Shows each value with its sources and says the sources disagree"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "example",
+      "id": "m69-provenance-loss",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/69-provenance-loss/python/provenance_loss.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/69-provenance-loss/typescript/provenanceLoss.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/69-provenance-loss/java/ProvenanceLoss.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/69-provenance-loss/kotlin/ProvenanceLoss.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"What a summary loses, and what a ledger keeps: sources, dates and disagreement.\n\nThe exam guide (task 5.6) says that source attribution is lost when findings are compressed without their claim-source mappings, that conflicting statistics from credible sources are annotated with their sources and not\nsettled by choosing one, and that dates are required so that a difference over time is not read as a contradiction. Below, seven findings from five invented sources are compressed twice (nothing here calls a model): once into\na plain summary that keeps one value per claim, and once into a ledger line per claim that keeps every value with its source and date. The names and figures are invented for the illustration.\n\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\nFINDINGS = [\n    (\"market growth 2024\", \"12%\", \"Firm A report\", \"2024-05-01\"),\n    (\"market growth 2024\", \"9%\", \"Firm B survey\", \"2024-05-01\"),\n    (\"growth forecast\", \"7%\", \"Firm C yearbook\", \"2022-04-01\"),\n    (\"growth forecast\", \"9%\", \"Firm B survey\", \"2024-05-01\"),\n    (\"inflation 2023\", \"4%\", \"Firm A report\", \"2024-05-01\"),\n    (\"inflation 2023\", \"4%\", \"Trade paper\", \"2024-06-10\"),\n    (\"headcount\", \"910\", \"Press release\", \"2024-03-01\"),\n]\n\n\ndef claims_in_order(findings):\n    return list(dict.fromkeys(claim for claim, _, _, _ in findings))\n\n\ndef status(rows):\n    \"\"\"agreed: one value; conflict: different values on the same date; changed: different values on different dates.\"\"\"\n    if len({value for _, value, _, _ in rows}) == 1:\n        return \"agreed\"\n    if any(a[1] != b[1] and a[3] == b[3] for a in rows for b in rows):\n        return \"conflict\"\n    return \"changed\"\n\n\ndef plain_summary(findings):\n    \"\"\"One line per claim with the first value seen: short, and the sources are gone.\"\"\"\n    return \"\\n\".join(f\"{claim}: {next(v for c, v, _, _ in findings if c == claim)}\" for claim in claims_in_order(findings))\n\n\ndef ledger_lines(findings):\n    \"\"\"One line per claim: its status, then every value with its source and date, the oldest date first for a change.\"\"\"\n    lines = []\n    for claim in claims_in_order(findings):\n        rows = [f for f in findings if f[0] == claim]\n        if status(rows) == \"changed\":\n            rows = sorted(rows, key=lambda r: r[3])\n        lines.append(f\"{claim} [{status(rows)}]: \" + \"; \".join(f\"{value} ({source}, {date})\" for _, value, source, date in rows))\n    return \"\\n\".join(lines)\n\n\ndef sources_named(text, findings):\n    return len({source for _, _, source, _ in findings if source in text})\n\n\ndef main():\n    total = len({source for _, _, source, _ in FINDINGS})\n    print(f\"findings: {len(FINDINGS)} from {total} sources\")\n    summary = plain_summary(FINDINGS)\n    print(\"plain summary:\")\n    print(summary)\n    print(f\"sources named by the plain summary: {sources_named(summary, FINDINGS)} of {total}\")\n    ledger = ledger_lines(FINDINGS)\n    print(\"ledger:\")\n    print(ledger)\n    print(f\"sources named by the ledger: {sources_named(ledger, FINDINGS)} of {total}\")\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "findings: 7 from 5 sources\nplain summary:\nmarket growth 2024: 12%\ngrowth forecast: 7%\ninflation 2023: 4%\nheadcount: 910\nsources named by the plain summary: 0 of 5\nledger:\nmarket growth 2024 [conflict]: 12% (Firm A report, 2024-05-01); 9% (Firm B survey, 2024-05-01)\ngrowth forecast [changed]: 7% (Firm C yearbook, 2022-04-01); 9% (Firm B survey, 2024-05-01)\ninflation 2023 [agreed]: 4% (Firm A report, 2024-05-01); 4% (Trade paper, 2024-06-10)\nheadcount [agreed]: 910 (Press release, 2024-03-01)\nsources named by the ledger: 5 of 5"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "import { logger } from \"./logger.ts\";\nconst log = logger(\"provenance_loss\");\n/**\n * What a summary loses, and what a ledger keeps: sources, dates and disagreement.\n *\n * The exam guide (task 5.6) says that source attribution is lost when findings are compressed without their claim-source mappings, that conflicting statistics from credible sources are annotated with their sources and not\n * settled by choosing one, and that dates are required so that a difference over time is not read as a contradiction. Below, seven findings from five invented sources are compressed twice (nothing here calls a model): once into\n * a plain summary that keeps one value per claim, and once into a ledger line per claim that keeps every value with its source and date. The names and figures are invented for the illustration.\n */\nexport type Row = [string, string, string, string];\n\nexport const FINDINGS: Row[] = [\n  [\"market growth 2024\", \"12%\", \"Firm A report\", \"2024-05-01\"],\n  [\"market growth 2024\", \"9%\", \"Firm B survey\", \"2024-05-01\"],\n  [\"growth forecast\", \"7%\", \"Firm C yearbook\", \"2022-04-01\"],\n  [\"growth forecast\", \"9%\", \"Firm B survey\", \"2024-05-01\"],\n  [\"inflation 2023\", \"4%\", \"Firm A report\", \"2024-05-01\"],\n  [\"inflation 2023\", \"4%\", \"Trade paper\", \"2024-06-10\"],\n  [\"headcount\", \"910\", \"Press release\", \"2024-03-01\"],\n];\n\nconst claimsInOrder = (findings: Row[]): string[] => [...new Set(findings.map((f) => f[0]))];\n\n/** agreed: one value; conflict: different values on the same date; changed: different values on different dates. */\nexport function status(rows: Row[]): string {\n  if (new Set(rows.map((r) => r[1])).size === 1) return \"agreed\";\n  if (rows.some((a) => rows.some((b) => a[1] !== b[1] && a[3] === b[3]))) return \"conflict\";\n  return \"changed\";\n}\n\n/** One line per claim with the first value seen: short, and the sources are gone. */\nexport function plainSummary(findings: Row[]): string {\n  return claimsInOrder(findings).map((claim) => `${claim}: ${findings.find((f) => f[0] === claim)![1]}`).join(\"\\n\");\n}\n\n/** One line per claim: its status, then every value with its source and date, the oldest date first for a change. */\nexport function ledgerLines(findings: Row[]): string {\n  return claimsInOrder(findings).map((claim) => {\n    let rows = findings.filter((f) => f[0] === claim);\n    if (status(rows) === \"changed\") rows = [...rows].sort((a, b) => (a[3] < b[3] ? -1 : a[3] > b[3] ? 1 : 0));\n    return `${claim} [${status(rows)}]: ` + rows.map(([, value, source, date]) => `${value} (${source}, ${date})`).join(\"; \");\n  }).join(\"\\n\");\n}\n\nexport function sourcesNamed(text: string, findings: Row[]): number {\n  return new Set(findings.filter((f) => text.includes(f[2])).map((f) => f[2])).size;\n}\n\nexport function main(): void {\n  const total = new Set(FINDINGS.map((f) => f[2])).size;\n  console.log(`findings: ${FINDINGS.length} from ${total} sources`);\n  const summary = plainSummary(FINDINGS);\n  console.log(\"plain summary:\");\n  console.log(summary);\n  console.log(`sources named by the plain summary: ${sourcesNamed(summary, FINDINGS)} of ${total}`);\n  const ledger = ledgerLines(FINDINGS);\n  console.log(\"ledger:\");\n  console.log(ledger);\n  console.log(`sources named by the ledger: ${sourcesNamed(ledger, FINDINGS)} of ${total}`);\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "findings: 7 from 5 sources\nplain summary:\nmarket growth 2024: 12%\ngrowth forecast: 7%\ninflation 2023: 4%\nheadcount: 910\nsources named by the plain summary: 0 of 5\nledger:\nmarket growth 2024 [conflict]: 12% (Firm A report, 2024-05-01); 9% (Firm B survey, 2024-05-01)\ngrowth forecast [changed]: 7% (Firm C yearbook, 2022-04-01); 9% (Firm B survey, 2024-05-01)\ninflation 2023 [agreed]: 4% (Firm A report, 2024-05-01); 4% (Trade paper, 2024-06-10)\nheadcount [agreed]: 910 (Press release, 2024-03-01)\nsources named by the ledger: 5 of 5"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.Comparator;\nimport java.util.LinkedHashSet;\nimport java.util.List;\nimport java.util.Set;\n\n/**\n * What a summary loses, and what a ledger keeps: sources, dates and disagreement.\n *\n * <p>The exam guide (task 5.6) says that source attribution is lost when findings are compressed without their claim-source mappings, that conflicting statistics from credible sources are annotated with their sources and not\n * settled by choosing one, and that dates are required so that a difference over time is not read as a contradiction. Below, seven findings from five invented sources are compressed twice (nothing here calls a model): once into\n * a plain summary that keeps one value per claim, and once into a ledger line per claim that keeps every value with its source and date. The names and figures are invented for the illustration.\n */\npublic final class ProvenanceLoss {\n    private static final System.Logger LOG = System.getLogger(ProvenanceLoss.class.getName());\n    record Row(String claim, String value, String source, String date) {}\n\n    static final List<Row> FINDINGS = List.of(\n        new Row(\"market growth 2024\", \"12%\", \"Firm A report\", \"2024-05-01\"),\n        new Row(\"market growth 2024\", \"9%\", \"Firm B survey\", \"2024-05-01\"),\n        new Row(\"growth forecast\", \"7%\", \"Firm C yearbook\", \"2022-04-01\"),\n        new Row(\"growth forecast\", \"9%\", \"Firm B survey\", \"2024-05-01\"),\n        new Row(\"inflation 2023\", \"4%\", \"Firm A report\", \"2024-05-01\"),\n        new Row(\"inflation 2023\", \"4%\", \"Trade paper\", \"2024-06-10\"),\n        new Row(\"headcount\", \"910\", \"Press release\", \"2024-03-01\"));\n\n    private static List<String> claimsInOrder(List<Row> findings) {\n        Set<String> claims = new LinkedHashSet<>();\n        for (Row r : findings) claims.add(r.claim());\n        return new ArrayList<>(claims);\n    }\n\n    /** agreed: one value; conflict: different values on the same date; changed: different values on different dates. */\n    static String status(List<Row> rows) {\n        if (rows.stream().map(Row::value).distinct().count() == 1) return \"agreed\";\n        if (rows.stream().anyMatch(a -> rows.stream().anyMatch(b -> !a.value().equals(b.value()) && a.date().equals(b.date())))) return \"conflict\";\n        return \"changed\";\n    }\n\n    /** One line per claim with the first value seen: short, and the sources are gone. */\n    static String plainSummary(List<Row> findings) {\n        List<String> lines = new ArrayList<>();\n        for (String claim : claimsInOrder(findings)) lines.add(claim + \": \" + findings.stream().filter(f -> f.claim().equals(claim)).findFirst().orElseThrow().value());\n        return String.join(\"\\n\", lines);\n    }\n\n    /** One line per claim: its status, then every value with its source and date, the oldest date first for a change. */\n    static String ledgerLines(List<Row> findings) {\n        List<String> lines = new ArrayList<>();\n        for (String claim : claimsInOrder(findings)) {\n            List<Row> rows = new ArrayList<>(findings.stream().filter(f -> f.claim().equals(claim)).toList());\n            String status = status(rows);\n            if (status.equals(\"changed\")) rows.sort(Comparator.comparing(Row::date));\n            List<String> parts = new ArrayList<>();\n            for (Row r : rows) parts.add(r.value() + \" (\" + r.source() + \", \" + r.date() + \")\");\n            lines.add(claim + \" [\" + status + \"]: \" + String.join(\"; \", parts));\n        }\n        return String.join(\"\\n\", lines);\n    }\n\n    static int sourcesNamed(String text, List<Row> findings) {\n        return (int) findings.stream().filter(f -> text.contains(f.source())).map(Row::source).distinct().count();\n    }\n\n    public static void main(String[] args) {\n        int total = (int) FINDINGS.stream().map(Row::source).distinct().count();\n        System.out.println(\"findings: \" + FINDINGS.size() + \" from \" + total + \" sources\");\n        String summary = plainSummary(FINDINGS);\n        System.out.println(\"plain summary:\");\n        System.out.println(summary);\n        System.out.println(\"sources named by the plain summary: \" + sourcesNamed(summary, FINDINGS) + \" of \" + total);\n        String ledger = ledgerLines(FINDINGS);\n        System.out.println(\"ledger:\");\n        System.out.println(ledger);\n        System.out.println(\"sources named by the ledger: \" + sourcesNamed(ledger, FINDINGS) + \" of \" + total);\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "findings: 7 from 5 sources\nplain summary:\nmarket growth 2024: 12%\ngrowth forecast: 7%\ninflation 2023: 4%\nheadcount: 910\nsources named by the plain summary: 0 of 5\nledger:\nmarket growth 2024 [conflict]: 12% (Firm A report, 2024-05-01); 9% (Firm B survey, 2024-05-01)\ngrowth forecast [changed]: 7% (Firm C yearbook, 2022-04-01); 9% (Firm B survey, 2024-05-01)\ninflation 2023 [agreed]: 4% (Firm A report, 2024-05-01); 4% (Trade paper, 2024-06-10)\nheadcount [agreed]: 910 (Press release, 2024-03-01)\nsources named by the ledger: 5 of 5"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "private val log = System.getLogger(\"provenance_loss\")\n\n/**\n * What a summary loses, and what a ledger keeps: sources, dates and disagreement.\n *\n * The exam guide (task 5.6) says that source attribution is lost when findings are compressed without their claim-source mappings, that conflicting statistics from credible sources are annotated with their sources and not\n * settled by choosing one, and that dates are required so that a difference over time is not read as a contradiction. Below, seven findings from five invented sources are compressed twice (nothing here calls a model): once into\n * a plain summary that keeps one value per claim, and once into a ledger line per claim that keeps every value with its source and date. The names and figures are invented for the illustration.\n */\ndata class Row(val claim: String, val value: String, val source: String, val date: String)\n\nval FINDINGS = listOf(\n    Row(\"market growth 2024\", \"12%\", \"Firm A report\", \"2024-05-01\"),\n    Row(\"market growth 2024\", \"9%\", \"Firm B survey\", \"2024-05-01\"),\n    Row(\"growth forecast\", \"7%\", \"Firm C yearbook\", \"2022-04-01\"),\n    Row(\"growth forecast\", \"9%\", \"Firm B survey\", \"2024-05-01\"),\n    Row(\"inflation 2023\", \"4%\", \"Firm A report\", \"2024-05-01\"),\n    Row(\"inflation 2023\", \"4%\", \"Trade paper\", \"2024-06-10\"),\n    Row(\"headcount\", \"910\", \"Press release\", \"2024-03-01\"),\n)\n\n/** agreed: one value; conflict: different values on the same date; changed: different values on different dates. */\nfun status(rows: List<Row>): String = when {\n    rows.map { it.value }.distinct().size == 1 -> \"agreed\"\n    rows.any { a -> rows.any { b -> a.value != b.value && a.date == b.date } } -> \"conflict\"\n    else -> \"changed\"\n}\n\n/** One line per claim with the first value seen: short, and the sources are gone. */\nfun plainSummary(findings: List<Row>): String = findings.map { it.claim }.distinct().joinToString(\"\\n\") { claim -> \"$claim: ${findings.first { it.claim == claim }.value}\" }\n\n/** One line per claim: its status, then every value with its source and date, the oldest date first for a change. */\nfun ledgerLines(findings: List<Row>): String = findings.map { it.claim }.distinct().joinToString(\"\\n\") { claim ->\n    val group = findings.filter { it.claim == claim }\n    val rows = if (status(group) == \"changed\") group.sortedBy { it.date } else group\n    \"$claim [${status(rows)}]: \" + rows.joinToString(\"; \") { \"${it.value} (${it.source}, ${it.date})\" }\n}\n\nfun sourcesNamed(text: String, findings: List<Row>): Int = findings.filter { text.contains(it.source) }.map { it.source }.distinct().size\n\nfun main() {\n    val total = FINDINGS.map { it.source }.distinct().size\n    println(\"findings: ${FINDINGS.size} from $total sources\")\n    val summary = plainSummary(FINDINGS)\n    println(\"plain summary:\")\n    println(summary)\n    println(\"sources named by the plain summary: ${sourcesNamed(summary, FINDINGS)} of $total\")\n    val ledger = ledgerLines(FINDINGS)\n    println(\"ledger:\")\n    println(ledger)\n    println(\"sources named by the ledger: ${sourcesNamed(ledger, FINDINGS)} of $total\")\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "findings: 7 from 5 sources\nplain summary:\nmarket growth 2024: 12%\ngrowth forecast: 7%\ninflation 2023: 4%\nheadcount: 910\nsources named by the plain summary: 0 of 5\nledger:\nmarket growth 2024 [conflict]: 12% (Firm A report, 2024-05-01); 9% (Firm B survey, 2024-05-01)\ngrowth forecast [changed]: 7% (Firm C yearbook, 2022-04-01); 9% (Firm B survey, 2024-05-01)\ninflation 2023 [agreed]: 4% (Firm A report, 2024-05-01); 4% (Trade paper, 2024-06-10)\nheadcount [agreed]: 910 (Press release, 2024-03-01)\nsources named by the ledger: 5 of 5"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The example compresses seven findings from five invented sources twice. The plain summary keeps the first value of each claim: it is shorter, it hides the second source of the conflict entirely, and it names none of the five sources. The ledger lines keep every value with its source and date, flag the conflict, put the changed claim's older value first and name all five sources. The figures are invented for the illustration, and the count of sources named is the measurement the example is about."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**\"Summarise the findings first; the writer will add sources later.\"** It is tempting because short input is easier to write from. The exam rejects it: the sources are lost in the compression and cannot be rebuilt from prose, so the claim-source mappings travel through every step.",
+        "**\"Where two sources disagree, report the more recent figure.\"** It is tempting because newer sounds more reliable. The exam rejects it: choosing one value hides a disagreement the reader needs, so annotate the conflict with both sources.",
+        "**\"Average the two figures into one number.\"** It is tempting because it reads as a compromise. The exam rejects it: the number appears in no source and cannot be checked.",
+        "**\"Two different figures mean the sources contradict each other.\"** It is tempting because the numbers differ. The exam rejects it: one may be a forecast from 2022 and the other a measurement from 2024, so require dates before calling it a conflict."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "Scenario S3, multi-agent research system. A consultancy report gives a market's growth for 2024 as 12%, and an equally reputable trade survey gives 9% for the same year. How should the final report treat the two?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Present both values with the name of each source and a note that they disagree",
+              "**b**: Present the value from the larger of the two publishers, because it is likelier to be right",
+              "**c**: Present a single figure between the two, which fairly reflects both of the sources",
+              "**d**: Present only the more recently published value and leave the other out for brevity"
+            ]
+          }
+        ],
+        [
+          "Scenario S3, multi-agent research system. A report calls two numbers contradictory: one subagent found 7% in a source and another found 9% in a different source. Which change to the subagents' output prevents the misreading?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Require each subagent to rank its sources by how well known they are",
+              "**b**: Require a longer excerpt from each source around every number",
+              "**c**: Require a publication or data collection date next to every value",
+              "**d**: Require the subagents to agree a single number before they return"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**a**. The guide's answer is \"annotating conflicts with source attribution rather than arbitrarily selecting one value\", so both values stay, each with its sources. *b* is ruled out because \"choosing one value hides a disagreement the reader needs\". *c* is ruled out because the averaged number \"appears in no source and cannot be checked\". *d* is ruled out because an agent that picks the newer figure \"has made a decision that nobody asked it to make and that the reader cannot see\".",
+            "**c**. The guide asks for dates \"to prevent temporal differences from being misinterpreted as contradictions\", since the date shows whether the two numbers describe the same moment. *b* is ruled out because an excerpt shows the wording and not the moment, and \"Without dates, an agent cannot tell\". *a* is ruled out because ranking sources by reputation says nothing about when a number was gathered, and the page's rule turns on whether \"Two findings for a claim with different values and the same date\" exist. *d* is ruled out because \"choosing one value hides a disagreement the reader needs\"."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Adapted from the Claude Certified Architect - Foundations exam preparation guide by Daron Yondem (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/), changed for this course."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 11,
+    "paras": 13,
+    "code": 0,
+    "tables": 1,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 1,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "f27d49a9c2cfa2255539cdca2554fb371dd808c666460a63f7613d690e5da0ef"
+}

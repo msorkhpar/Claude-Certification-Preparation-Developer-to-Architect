@@ -1,0 +1,294 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "41-security-and-safety"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: an injection-resistant tool gate (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an injection-resistant tool gate"
+    },
+    {
+      "type": "para",
+      "text": "An agent that reads the web, mail or files is exposed to text that someone else wrote and that may carry instructions. The defence is not one clever prompt. It is layers around the model: untrusted text is kept apart from your instructions, every tool call is checked against least privilege before it runs, a session that has read untrusted text gets less freedom, secrets never reach logs, and every decision is recorded. In this practice you write the code layer: a small gate that sits between the model's tool calls and the tools. It is a design the course proposes from the documented advice (untrusted content only in tool results and JSON-encoded, least privilege, screening, a hook that decides before the permission prompt); it is not a feature of any product. Nothing here calls a model or the network: the tests call the gate the way a hook would."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "para",
+      "text": "The Java and Kotlin folders give you `Json` (parse text into maps, lists, strings, numbers, booleans and null, and write them back compactly, keys in insertion order). Python and TypeScript have JSON built in. Decisions and records are plain data: a map with string keys in every language."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working gate with six gaps cut out of it. Everything that is plumbing is written and correct: the injection patterns and the `screen` function, the path resolver, the dangerous-command, chaining, secret-argument and taint checks, the URL parsing, the audit, the card and key redaction around the Luhn check, and the hook answer. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. Write them in this order (the Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`wrap_untrusted` unlocks `m1` and `e1`: the JSON block for clean text and the withheld error for flagged text.",
+        "`_is_secret` unlocks `e2`: which file names count as secrets.",
+        "`_command_allowed` unlocks `e3`: the allow-list of first words, and the `git` sub-commands.",
+        "`_is_card` unlocks `e6`: the length and Luhn test that decides whether a run of digits is a card number.",
+        "`_email_decision` unlocks `e4` and `e5`: the domain list, the body check and the tainted-session refusal.",
+        "`alerts` unlocks `e7`: actors with three denials, in the order they reached three."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole gate; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "Names are written in Python style; TypeScript uses camelCase (`wrapUntrusted`, `markUntrusted`, `hookResponse`, `tainted` as a getter, `audit` as a getter); Java and Kotlin put the three functions on the class as static or companion members (`Gate.screen`, `Gate.wrapUntrusted`, `Gate.redact`, `Gate.hookResponse`) and use `isTainted()` / `isTainted`, `audit()` and `alerts()` as methods."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`screen(text)` returns the names of the injection signals found in the text, in this order: `override`, `role-tag`, `exfiltrate`, `reveal`. All four patterns ignore letter case and let `.` match a newline.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`override`: `\\b(ignore|disregard|forget)\\b.{0,40}\\b(previous|prior|above|earlier|system)\\b.{0,20}\\b(instructions?|prompts?|rules)\\b`",
+              "`role-tag`: `<\\s*/?\\s*(system|assistant|tool_result|instructions?)\\s*>`",
+              "`exfiltrate`: `\\b(send|email|forward|post|upload)\\b.{0,60}\\b(to|at)\\b.{0,40}[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)+`",
+              "`reveal`: `\\b(reveal|print|show|repeat)\\b.{0,40}\\b(system prompt|password|secret|api key)\\b`"
+            ]
+          }
+        ],
+        "`wrap_untrusted(tool_use_id, source, content)` returns a tool result block. For clean text it is `{\"type\": \"tool_result\", \"tool_use_id\": ..., \"content\": <one line of compact JSON>}` where the JSON is the object `{\"source\": source, \"trust\": \"untrusted\", \"content\": content}` with those keys in that order. When `screen` finds a signal it returns `{\"type\": \"tool_result\", \"tool_use_id\": ..., \"is_error\": true, \"content\": \"Content from <source> withheld: possible prompt injection (<signals joined by \", \">)\"}` and nothing of the text.",
+        "`redact(text)` replaces, in this order: `sk-ant-[A-Za-z0-9_-]{8,}` with `[SECRET]`; `AKIA` followed by 16 capital letters or digits, as a whole word, with `[SECRET]`; `Bearer ` followed by 16 or more of `[A-Za-z0-9._-]` with `Bearer [SECRET]`; an address, `[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)+`, with `[EMAIL]`; and a card number with `[CARD]`. A card number is 13 to 19 digits, written with at most one space or hyphen between digits, that passes the Luhn check; a long number that fails the check is left as it is.",
+        [
+          "`Gate(root, allowed_hosts, allowed_email_domains)` decides tool calls. `decide(actor, tool, args)` returns `{\"decision\": \"allow\" | \"ask\" | \"deny\", \"reason\": ...}` and appends a record to the audit. The tools are `read_file(path)`, `write_file(path, content)`, `bash(command)`, `fetch(url)` and `send_email(to, subject, body)`; any other name is `deny` with the reason `unknown tool`. An allow has the reason `ok`. A missing string argument counts as an empty string.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**Paths** (`read_file`, `write_file`): turn backslashes into `/`, join a relative path to `root`, drop `.` parts and apply `..` (never above the top). A path not equal to `root` and not under `root + \"/\"` is `deny`, `outside the project`. A secret file is `deny`, `secret file`: a name `.env`, or starting `.env.` unless it is `.env.example`, a folder called `secrets` anywhere in the path, or a name ending in `.pem` or `.key`. A write into a folder called `.git` or `.claude` is `deny`, `protected path`.",
+              "**`bash`**: first, a word that is `sudo` or `rm` (or ends in `/sudo` or `/rm`) is `deny`, `dangerous command`. Then a command containing any of `;` `&` `|` `>` `<` a backtick, `$(` or a newline is `deny`, `chaining or redirection`. Then the first word must be `ls`, `cat`, `pytest` or `git`, and `git` only with `status`, `diff` or `log` as its next word; anything else, and an empty command, is `deny`, `command not allowed`. An argument that does not start with `-` and names a secret file is `deny`, `secret file`.",
+              "**`fetch`**: read the URL as `scheme://authority path ?query #fragment` with the pattern `([A-Za-z][A-Za-z0-9+.-]*)://([^/?#]*)([^?#]*)(\\?[^#]*)?(#.*)?` over the whole text. A URL that does not match, or whose scheme is not `https`, is `deny`, `https only`. An authority with an `@` is `deny`, `credentials in the URL`. The host is the authority in lower case without a `:port`; it must equal an allowed host or end with a dot and an allowed host, else `deny`, `host not allowed`.",
+              "**`send_email`**: the recipient's domain (after the last `@`, lower case) must be in the allowed domains, else `deny`, `recipient not allowed`. If `redact(subject + \"\\n\" + body)` differs from the text, `deny`, `sensitive data in the body`.",
+              "**Taint**: `mark_untrusted(source)` marks the session. Afterwards `write_file`, and `bash` with `pytest`, return `ask` with `untrusted content in this session`; a `fetch` whose URL has a query or a fragment returns `ask` with `data could leave in the URL`; `send_email` returns `deny` with `a person must send it`. Reads, the other bash commands and a plain `fetch` stay `allow`. Every `deny` above still wins over an `ask`: check the other rules first. `tainted` tells whether the session is marked; a new `Gate` is clean.",
+              "**Audit**: `audit` is the list of records so far, each `{\"actor\", \"tool\", \"decision\", \"reason\", \"args\"}`, where `args` is the call's arguments with every string value passed through `redact` and other values left as they are.",
+              "`alerts()` lists the actors with three or more `deny` records, each as `{\"actor\", \"denials\"}` with the actor's current count, ordered by when each reached three. An `ask` is not a denial."
+            ]
+          }
+        ],
+        "`hook_response(decision)` gives the answer of a `PreToolUse` hook as `{\"exit_code\", \"stdout\", \"stderr\"}`. An `allow` is exit code 0 with nothing printed. A `deny` or an `ask` is exit code 0 with the compact JSON `{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": <decision>, \"permissionDecisionReason\": <reason>}}` on standard output and an empty standard error."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Untrusted text is delivered as one JSON string that names its source and says it is untrusted"
+        ],
+        [
+          "`e1`",
+          "The screen names the signals, ignores clean text, and a flagged result is withheld with an error that shows none of the text"
+        ],
+        [
+          "`e2`",
+          "Paths stay inside the project, secrets and protected folders are refused, a sibling folder with a similar name is outside"
+        ],
+        [
+          "`e3`",
+          "Bash is limited to read-only commands; dangerous, chained and redirected commands and secret arguments are refused"
+        ],
+        [
+          "`e4`",
+          "Fetch obeys the host list (a lookalike host fails) and refuses credentials; email obeys the domain list and the body check"
+        ],
+        [
+          "`e5`",
+          "After untrusted content entered the session, changes ask, an email is refused, reads still work, and a denial stays a denial"
+        ],
+        [
+          "`e6`",
+          "Redaction covers keys, addresses and Luhn-valid cards, leaves other numbers, and the audit never holds a raw secret"
+        ],
+        [
+          "`e7`",
+          "The hook answer has the documented shapes and repeated denials by one actor raise an alert, while questions do not"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// An injection-resistant tool gate. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"gate\");\nexport type Args = Record<string, unknown>;\nexport type Decision = { decision: \"allow\" | \"ask\" | \"deny\"; reason: string };\n\nconst TOOLS = new Set([\"read_file\", \"write_file\", \"bash\", \"fetch\", \"send_email\"]);\nconst SIGNALS: Array<[string, RegExp]> = [\n  [\"override\", /\\b(ignore|disregard|forget)\\b[\\s\\S]{0,40}\\b(previous|prior|above|earlier|system)\\b[\\s\\S]{0,20}\\b(instructions?|prompts?|rules)\\b/i],\n  [\"role-tag\", /<\\s*\\/?\\s*(system|assistant|tool_result|instructions?)\\s*>/i],\n  [\"exfiltrate\", /\\b(send|email|forward|post|upload)\\b[\\s\\S]{0,60}\\b(to|at)\\b[\\s\\S]{0,40}[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)+/i],\n  [\"reveal\", /\\b(reveal|print|show|repeat)\\b[\\s\\S]{0,40}\\b(system prompt|password|secret|api key)\\b/i],\n];\nconst SHELL_TRICKS = [\";\", \"&\", \"|\", \">\", \"<\", \"`\", \"$(\", \"\\n\"];\n\n/** The names of the injection signals found in the text, in the fixed order of SIGNALS. */\nexport function screen(text: string): string[] {\n  return SIGNALS.filter(([, pattern]) => pattern.test(text)).map(([name]) => name);\n}\n\n/** A tool_result block that carries untrusted text as one JSON string, or an error result when the text is flagged. */\nexport function wrapUntrusted(toolUseId: string, source: string, content: string) {\n  log.debug(\"wrapUntrusted input\", content);\n  const signals = screen(content);\n  if (signals.length) {\n    return { type: \"tool_result\", tool_use_id: toolUseId, is_error: true, content: `Content from ${source} withheld: possible prompt injection (${signals.join(\", \")})` } as Record<string, unknown>;\n  }\n  return { type: \"tool_result\", tool_use_id: toolUseId, content: JSON.stringify({ source, trust: \"untrusted\", content }) } as Record<string, unknown>;\n}\n\nfunction luhn(digits: string): boolean {\n  let total = 0;\n  [...digits].reverse().forEach((ch, i) => {\n    let d = Number(ch);\n    if (i % 2 === 1) d = d * 2 > 9 ? d * 2 - 9 : d * 2;\n    total += d;\n  });\n  return total % 10 === 0;\n}\n\n/** Secrets become [SECRET], addresses [EMAIL] and card numbers that pass the Luhn check [CARD]. */\nexport function redact(input: string): string {\n  let text = input.replace(/sk-ant-[A-Za-z0-9_-]{8,}/g, \"[SECRET]\");\n  text = text.replace(/\\bAKIA[0-9A-Z]{16}\\b/g, \"[SECRET]\");\n  text = text.replace(/Bearer [A-Za-z0-9._-]{16,}/g, \"Bearer [SECRET]\");\n  text = text.replace(/[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)+/g, \"[EMAIL]\");\n  return text.replace(/\\b(?:[0-9][ -]?){12,18}[0-9]\\b/g, (m) => {\n    const digits = m.replace(/[ -]/g, \"\");\n    return isCard(digits) ? \"[CARD]\" : m;\n  });\n}\n\nfunction resolve(root: string, path: string): string {\n  const p = path.replaceAll(\"\\\\\", \"/\");\n  const stack: string[] = [];\n  for (const part of (p.startsWith(\"/\") ? p : `${root}/${p}`).split(\"/\")) {\n    if (part === \"\" || part === \".\") continue;\n    if (part === \"..\") stack.pop();\n    else stack.push(part);\n  }\n  return \"/\" + stack.join(\"/\");\n}\n\nfunction isSecret(path: string): boolean {\n  const parts = path.replaceAll(\"\\\\\", \"/\").split(\"/\");\n  const base = parts[parts.length - 1];\n  return base === \".env\" || (base.startsWith(\".env.\") && base !== \".env.example\") || parts.slice(0, -1).includes(\"secrets\") || base.endsWith(\".pem\") || base.endsWith(\".key\");\n}\n\nfunction commandAllowed(words: string[]): boolean {\n  if (!words.length || ![\"ls\", \"cat\", \"pytest\", \"git\"].includes(words[0])) return false;\n  if (words[0] === \"git\") return words.length > 1 && [\"status\", \"diff\", \"log\"].includes(words[1]);\n  return true;\n}\n\nfunction isCard(digits: string): boolean {\n  return digits.length >= 13 && digits.length <= 19 && luhn(digits);\n}\n\nconst result = (decision: Decision[\"decision\"], reason = \"ok\"): Decision => ({ decision, reason });\n\nexport class Gate {\n  readonly root: string;\n  private allowedHosts: string[];\n  private allowedEmailDomains: string[];\n  private isTainted = false;\n  private records: Array<Record<string, unknown>> = [];\n\n  constructor(root: string, allowedHosts: string[], allowedEmailDomains: string[]) {\n    this.root = resolve(\"/\", root);\n    this.allowedHosts = allowedHosts.map((h) => h.toLowerCase());\n    this.allowedEmailDomains = allowedEmailDomains.map((d) => d.toLowerCase());\n  }\n\n  get tainted(): boolean {\n    return this.isTainted;\n  }\n\n  get audit(): Array<Record<string, unknown>> {\n    return [...this.records];\n  }\n\n  markUntrusted(_source: string): void {\n    this.isTainted = true;\n  }\n\n  private inside(path: string): boolean {\n    return path === this.root || path.startsWith(this.root + \"/\");\n  }\n\n  decide(actor: string, tool: string, args: Args): Decision {\n    const r = this.choose(tool, args);\n    const clean: Args = {};\n    for (const [k, v] of Object.entries(args)) clean[k] = typeof v === \"string\" ? redact(v) : v;\n    this.records.push({ actor, tool, decision: r.decision, reason: r.reason, args: clean });\n    return r;\n  }\n\n  private choose(tool: string, args: Args): Decision {\n    if (!TOOLS.has(tool)) return result(\"deny\", \"unknown tool\");\n    if (tool === \"read_file\" || tool === \"write_file\") {\n      const path = resolve(this.root, String(args.path ?? \"\"));\n      if (!this.inside(path)) return result(\"deny\", \"outside the project\");\n      if (isSecret(path)) return result(\"deny\", \"secret file\");\n      if (tool === \"write_file\") {\n        if (path.split(\"/\").some((s) => s === \".git\" || s === \".claude\")) return result(\"deny\", \"protected path\");\n        if (this.isTainted) return result(\"ask\", \"untrusted content in this session\");\n      }\n      return result(\"allow\");\n    }\n    if (tool === \"bash\") return this.bash(String(args.command ?? \"\"));\n    if (tool === \"fetch\") return this.fetch(String(args.url ?? \"\"));\n    return this.email(args);\n  }\n\n  private bash(command: string): Decision {\n    const words = command.split(/\\s+/).filter(Boolean);\n    if (words.some((w) => [\"sudo\", \"rm\"].includes(w.split(\"/\").at(-1) as string))) return result(\"deny\", \"dangerous command\");\n    if (SHELL_TRICKS.some((t) => command.includes(t))) return result(\"deny\", \"chaining or redirection\");\n    if (!commandAllowed(words)) return result(\"deny\", \"command not allowed\");\n    if (words.slice(1).some((w) => !w.startsWith(\"-\") && isSecret(w))) return result(\"deny\", \"secret file\");\n    if (words[0] === \"pytest\" && this.isTainted) return result(\"ask\", \"untrusted content in this session\");\n    return result(\"allow\");\n  }\n\n  private fetch(url: string): Decision {\n    const m = /^([A-Za-z][A-Za-z0-9+.-]*):\\/\\/([^/?#]*)([^?#]*)(\\?[^#]*)?(#.*)?$/.exec(url);\n    if (!m || m[1].toLowerCase() !== \"https\") return result(\"deny\", \"https only\");\n    if (m[2].includes(\"@\")) return result(\"deny\", \"credentials in the URL\");\n    const host = m[2].toLowerCase().replace(/:[0-9]+$/, \"\");\n    if (!this.allowedHosts.some((h) => host === h || host.endsWith(\".\" + h))) return result(\"deny\", \"host not allowed\");\n    if (this.isTainted && (m[4] || m[5])) return result(\"ask\", \"data could leave in the URL\");\n    return result(\"allow\");\n  }\n\n  private email(args: Args): Decision {\n    const to = String(args.to ?? \"\");\n    const domain = to.includes(\"@\") ? to.slice(to.lastIndexOf(\"@\") + 1).toLowerCase() : \"\";\n    const text = `${args.subject ?? \"\"}\\n${args.body ?? \"\"}`;\n    return this.emailDecision(domain, text);\n  }\n\n  private emailDecision(domain: string, text: string): Decision {\n    if (!this.allowedEmailDomains.includes(domain)) return result(\"deny\", \"recipient not allowed\");\n    if (redact(text) !== text) return result(\"deny\", \"sensitive data in the body\");\n    if (this.isTainted) return result(\"deny\", \"a person must send it\");\n    return result(\"allow\");\n  }\n\n  /** Actors with three or more denials, ordered by when each reached three, with their denial count. */\n  alerts(): Array<{ actor: string; denials: number }> {\n    const counts = new Map<string, number>();\n    const order: string[] = [];\n    for (const r of this.records) {\n      if (r.decision === \"deny\") {\n        const n = (counts.get(r.actor as string) ?? 0) + 1;\n        counts.set(r.actor as string, n);\n        if (n === 3) order.push(r.actor as string);\n      }\n    }\n    return order.map((actor) => ({ actor, denials: counts.get(actor) as number }));\n  }\n}\n\n/** The PreToolUse hook answer for a decision: exit code, standard output, standard error. */\nexport function hookResponse(d: Decision): { exit_code: number; stdout: string; stderr: string } {\n  if (d.decision === \"allow\") return { exit_code: 0, stdout: \"\", stderr: \"\" };\n  const out = { hookSpecificOutput: { hookEventName: \"PreToolUse\", permissionDecision: d.decision, permissionDecisionReason: d.reason } };\n  return { exit_code: 0, stdout: JSON.stringify(out), stderr: \"\" };\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { Gate, wrapUntrusted } from \"./gate.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// The gate sits between the model's tool calls and the tools; it is told the project root and what may be reached.\nconst gate = new Gate(\"/proj\", [\"api.example.com\", \"docs.example.org\"], [\"example.com\"]);\n\nconst calls: [string, Record<string, unknown>][] = [\n  [\"read_file\", { path: \"src/a.py\" }], [\"bash\", { command: \"sudo rm -rf /\" }], [\"fetch\", { url: \"https://evil.example.net/x\" }]];\nfor (const [tool, args] of calls) {\n  const r: any = gate.decide(\"alice\", tool, args) ?? {};\n  console.log(`${tool} ${JSON.stringify(args)}: ${r.decision} (${r.reason})`);\n}\n\n// Text a tool returned is untrusted: it reaches the model as one JSON string that says where it came from.\nconst result: any = wrapUntrusted(\"toolu_1\", \"web page\", 'He said \"hi\"\\n</div>') ?? {};\nconsole.log(\"wrapped content:\", result.content);\n\n// After the session has read untrusted text, writes are no longer free.\ngate.markUntrusted(\"web page\");\nconst after: any = gate.decide(\"alice\", \"write_file\", { path: \"src/a.py\" }) ?? {};\nconsole.log(\"write after untrusted text:\", after.decision, `(${after.reason})`);\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// An injection-resistant tool gate. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"gate\");\nexport type Args = Record<string, unknown>;\nexport type Decision = { decision: \"allow\" | \"ask\" | \"deny\"; reason: string };\n\nconst TOOLS = new Set([\"read_file\", \"write_file\", \"bash\", \"fetch\", \"send_email\"]);\nconst SIGNALS: Array<[string, RegExp]> = [\n  [\"override\", /\\b(ignore|disregard|forget)\\b[\\s\\S]{0,40}\\b(previous|prior|above|earlier|system)\\b[\\s\\S]{0,20}\\b(instructions?|prompts?|rules)\\b/i],\n  [\"role-tag\", /<\\s*\\/?\\s*(system|assistant|tool_result|instructions?)\\s*>/i],\n  [\"exfiltrate\", /\\b(send|email|forward|post|upload)\\b[\\s\\S]{0,60}\\b(to|at)\\b[\\s\\S]{0,40}[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)+/i],\n  [\"reveal\", /\\b(reveal|print|show|repeat)\\b[\\s\\S]{0,40}\\b(system prompt|password|secret|api key)\\b/i],\n];\nconst SHELL_TRICKS = [\";\", \"&\", \"|\", \">\", \"<\", \"`\", \"$(\", \"\\n\"];\n\n/** The names of the injection signals found in the text, in the fixed order of SIGNALS. */\nexport function screen(text: string): string[] {\n  return SIGNALS.filter(([, pattern]) => pattern.test(text)).map(([name]) => name);\n}\n\n/** A tool_result block that carries untrusted text as one JSON string, or an error result when the text is flagged. */\nexport function wrapUntrusted(toolUseId: string, source: string, content: string): Record<string, unknown> {\n  log.debug(\"wrapUntrusted input\", content);\n  // TODO 1 of 6 (unlocks m1 and e1): wrap untrusted text as a tool_result block.\n  // Receives the tool use id, where the text came from and the text. Returns a tool_result object. Clean text becomes one line of\n  // compact JSON (JSON.stringify) with the keys source, trust (\"untrusted\") and content, in that order. When `screen` finds a signal,\n  // return the error block from the statement instead and leave the text out of it.\n  // Example: wrapUntrusted(\"t1\", \"web page\", \"hi\")\n  //   -> { type: \"tool_result\", tool_use_id: \"t1\", content: '{\"source\":\"web page\",\"trust\":\"untrusted\",\"content\":\"hi\"}' }\n  return { type: \"tool_result\", tool_use_id: toolUseId, content };\n}\n\nfunction luhn(digits: string): boolean {\n  let total = 0;\n  [...digits].reverse().forEach((ch, i) => {\n    let d = Number(ch);\n    if (i % 2 === 1) d = d * 2 > 9 ? d * 2 - 9 : d * 2;\n    total += d;\n  });\n  return total % 10 === 0;\n}\n\n/** Secrets become [SECRET], addresses [EMAIL] and card numbers that pass the Luhn check [CARD]. */\nexport function redact(input: string): string {\n  let text = input.replace(/sk-ant-[A-Za-z0-9_-]{8,}/g, \"[SECRET]\");\n  text = text.replace(/\\bAKIA[0-9A-Z]{16}\\b/g, \"[SECRET]\");\n  text = text.replace(/Bearer [A-Za-z0-9._-]{16,}/g, \"Bearer [SECRET]\");\n  text = text.replace(/[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)+/g, \"[EMAIL]\");\n  return text.replace(/\\b(?:[0-9][ -]?){12,18}[0-9]\\b/g, (m) => {\n    const digits = m.replace(/[ -]/g, \"\");\n    return isCard(digits) ? \"[CARD]\" : m;\n  });\n}\n\nfunction resolve(root: string, path: string): string {\n  const p = path.replaceAll(\"\\\\\", \"/\");\n  const stack: string[] = [];\n  for (const part of (p.startsWith(\"/\") ? p : `${root}/${p}`).split(\"/\")) {\n    if (part === \"\" || part === \".\") continue;\n    if (part === \"..\") stack.pop();\n    else stack.push(part);\n  }\n  return \"/\" + stack.join(\"/\");\n}\n\nfunction isSecret(path: string): boolean {\n  // TODO 2 of 6 (unlocks e2): does this path name a secret file?\n  // Receives a path and returns true for a file named `.env`, a file starting `.env.` unless it is `.env.example`, any file inside a\n  // folder called `secrets`, and a name ending in `.pem` or `.key`; false otherwise. Backslashes count as `/`.\n  // Example: isSecret(\"app/.env.local\") -> true, isSecret(\".env.example\") -> false\n  return false;\n}\n\nfunction commandAllowed(words: string[]): boolean {\n  // TODO 3 of 6 (finish this to pass e3): is the first word of a bash command on the allow-list?\n  // Receives the command split into words. Returns true for `ls`, `cat`, `pytest`, and `git` followed by `status`, `diff` or `log`;\n  // false for anything else, including an empty list. (The checks for sudo, rm, chaining and secret arguments are written.)\n  // Example: commandAllowed([\"git\", \"log\", \"--oneline\"]) -> true, commandAllowed([\"git\", \"push\"]) -> false\n  return false;\n}\n\nfunction isCard(digits: string): boolean {\n  // TODO 4 of 6 (finish this to pass e6): is this run of digits a card number?\n  // Receives the digits with spaces and hyphens already removed. Returns true when there are 13 to 19 of them and `luhn` accepts them\n  // (a long number that fails the check is not a card). Example: isCard(\"4111111111111111\") -> true, isCard(\"4111111111111112\") -> false\n  return false;\n}\n\nconst result = (decision: Decision[\"decision\"], reason = \"ok\"): Decision => ({ decision, reason });\n\nexport class Gate {\n  readonly root: string;\n  private allowedHosts: string[];\n  private allowedEmailDomains: string[];\n  private isTainted = false;\n  private records: Array<Record<string, unknown>> = [];\n\n  constructor(root: string, allowedHosts: string[], allowedEmailDomains: string[]) {\n    this.root = resolve(\"/\", root);\n    this.allowedHosts = allowedHosts.map((h) => h.toLowerCase());\n    this.allowedEmailDomains = allowedEmailDomains.map((d) => d.toLowerCase());\n  }\n\n  get tainted(): boolean {\n    return this.isTainted;\n  }\n\n  get audit(): Array<Record<string, unknown>> {\n    return [...this.records];\n  }\n\n  markUntrusted(_source: string): void {\n    this.isTainted = true;\n  }\n\n  private inside(path: string): boolean {\n    return path === this.root || path.startsWith(this.root + \"/\");\n  }\n\n  decide(actor: string, tool: string, args: Args): Decision {\n    const r = this.choose(tool, args);\n    const clean: Args = {};\n    for (const [k, v] of Object.entries(args)) clean[k] = typeof v === \"string\" ? redact(v) : v;\n    this.records.push({ actor, tool, decision: r.decision, reason: r.reason, args: clean });\n    return r;\n  }\n\n  private choose(tool: string, args: Args): Decision {\n    if (!TOOLS.has(tool)) return result(\"deny\", \"unknown tool\");\n    if (tool === \"read_file\" || tool === \"write_file\") {\n      const path = resolve(this.root, String(args.path ?? \"\"));\n      if (!this.inside(path)) return result(\"deny\", \"outside the project\");\n      if (isSecret(path)) return result(\"deny\", \"secret file\");\n      if (tool === \"write_file\") {\n        if (path.split(\"/\").some((s) => s === \".git\" || s === \".claude\")) return result(\"deny\", \"protected path\");\n        if (this.isTainted) return result(\"ask\", \"untrusted content in this session\");\n      }\n      return result(\"allow\");\n    }\n    if (tool === \"bash\") return this.bash(String(args.command ?? \"\"));\n    if (tool === \"fetch\") return this.fetch(String(args.url ?? \"\"));\n    return this.email(args);\n  }\n\n  private bash(command: string): Decision {\n    const words = command.split(/\\s+/).filter(Boolean);\n    if (words.some((w) => [\"sudo\", \"rm\"].includes(w.split(\"/\").at(-1) as string))) return result(\"deny\", \"dangerous command\");\n    if (SHELL_TRICKS.some((t) => command.includes(t))) return result(\"deny\", \"chaining or redirection\");\n    if (!commandAllowed(words)) return result(\"deny\", \"command not allowed\");\n    if (words.slice(1).some((w) => !w.startsWith(\"-\") && isSecret(w))) return result(\"deny\", \"secret file\");\n    if (words[0] === \"pytest\" && this.isTainted) return result(\"ask\", \"untrusted content in this session\");\n    return result(\"allow\");\n  }\n\n  private fetch(url: string): Decision {\n    const m = /^([A-Za-z][A-Za-z0-9+.-]*):\\/\\/([^/?#]*)([^?#]*)(\\?[^#]*)?(#.*)?$/.exec(url);\n    if (!m || m[1].toLowerCase() !== \"https\") return result(\"deny\", \"https only\");\n    if (m[2].includes(\"@\")) return result(\"deny\", \"credentials in the URL\");\n    const host = m[2].toLowerCase().replace(/:[0-9]+$/, \"\");\n    if (!this.allowedHosts.some((h) => host === h || host.endsWith(\".\" + h))) return result(\"deny\", \"host not allowed\");\n    if (this.isTainted && (m[4] || m[5])) return result(\"ask\", \"data could leave in the URL\");\n    return result(\"allow\");\n  }\n\n  private email(args: Args): Decision {\n    const to = String(args.to ?? \"\");\n    const domain = to.includes(\"@\") ? to.slice(to.lastIndexOf(\"@\") + 1).toLowerCase() : \"\";\n    const text = `${args.subject ?? \"\"}\\n${args.body ?? \"\"}`;\n    return this.emailDecision(domain, text);\n  }\n\n  private emailDecision(domain: string, text: string): Decision {\n    // TODO 5 of 6 (finish this to pass e4 and e5): decide a send_email call.\n    // Receives the recipient's lower-case domain and the subject and body joined by a newline. Returns result(decision, reason): deny\n    // \"recipient not allowed\" when the domain is not in this.allowedEmailDomains; deny \"sensitive data in the body\" when redact(text)\n    // differs from the text; deny \"a person must send it\" when the session is tainted (this.isTainted); else allow.\n    // Example: a clean mail to \"example.com\" in a tainted session -> { decision: \"deny\", reason: \"a person must send it\" }\n    return result(\"allow\");\n  }\n\n  alerts(): Array<{ actor: string; denials: number }> {\n    // TODO 6 of 6 (finish this to pass e7): actors with three or more denials.\n    // Reads this.records (objects with actor and decision). Returns one { actor, denials } per actor with three or more \"deny\" records\n    // (an \"ask\" is not a denial), with that actor's current count, ordered by when each reached three.\n    // Example: alice denied 3 times, then bob 3 times, then alice once more -> [{ actor: \"alice\", denials: 4 }, { actor: \"bob\", denials: 3 }]\n    return [];\n  }\n}\n\n/** The PreToolUse hook answer for a decision: exit code, standard output, standard error. */\nexport function hookResponse(d: Decision): { exit_code: number; stdout: string; stderr: string } {\n  if (d.decision === \"allow\") return { exit_code: 0, stdout: \"\", stderr: \"\" };\n  const out = { hookSpecificOutput: { hookEventName: \"PreToolUse\", permissionDecision: d.decision, permissionDecisionReason: d.reason } };\n  return { exit_code: 0, stdout: JSON.stringify(out), stderr: \"\" };\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { Gate, wrapUntrusted } from \"./gate.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// The gate sits between the model's tool calls and the tools; it is told the project root and what may be reached.\nconst gate = new Gate(\"/proj\", [\"api.example.com\", \"docs.example.org\"], [\"example.com\"]);\n\nconst calls: [string, Record<string, unknown>][] = [\n  [\"read_file\", { path: \"src/a.py\" }], [\"bash\", { command: \"sudo rm -rf /\" }], [\"fetch\", { url: \"https://evil.example.net/x\" }]];\nfor (const [tool, args] of calls) {\n  const r: any = gate.decide(\"alice\", tool, args) ?? {};\n  console.log(`${tool} ${JSON.stringify(args)}: ${r.decision} (${r.reason})`);\n}\n\n// Text a tool returned is untrusted: it reaches the model as one JSON string that says where it came from.\nconst result: any = wrapUntrusted(\"toolu_1\", \"web page\", 'He said \"hi\"\\n</div>') ?? {};\nconsole.log(\"wrapped content:\", result.content);\n\n// After the session has read untrusted text, writes are no longer free.\ngate.markUntrusted(\"web page\");\nconst after: any = gate.decide(\"alice\", \"write_file\", { path: \"src/a.py\" }) ?? {};\nconsole.log(\"write after untrusted text:\", after.decision, `(${after.reason})`);\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 6,
+    "code": 2,
+    "tables": 1,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "6a7aead1e873a4dd0689e46d4bc3ef311153393bad9fd17dff1e9a31f8456777",
+  "starting_code": "// An injection-resistant tool gate. See ../../statement.md.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"gate\");\nexport type Args = Record<string, unknown>;\nexport type Decision = { decision: \"allow\" | \"ask\" | \"deny\"; reason: string };\n\nconst TOOLS = new Set([\"read_file\", \"write_file\", \"bash\", \"fetch\", \"send_email\"]);\nconst SIGNALS: Array<[string, RegExp]> = [\n  [\"override\", /\\b(ignore|disregard|forget)\\b[\\s\\S]{0,40}\\b(previous|prior|above|earlier|system)\\b[\\s\\S]{0,20}\\b(instructions?|prompts?|rules)\\b/i],\n  [\"role-tag\", /<\\s*\\/?\\s*(system|assistant|tool_result|instructions?)\\s*>/i],\n  [\"exfiltrate\", /\\b(send|email|forward|post|upload)\\b[\\s\\S]{0,60}\\b(to|at)\\b[\\s\\S]{0,40}[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)+/i],\n  [\"reveal\", /\\b(reveal|print|show|repeat)\\b[\\s\\S]{0,40}\\b(system prompt|password|secret|api key)\\b/i],\n];\nconst SHELL_TRICKS = [\";\", \"&\", \"|\", \">\", \"<\", \"`\", \"$(\", \"\\n\"];\n\n/** The names of the injection signals found in the text, in the fixed order of SIGNALS. */\nexport function screen(text: string): string[] {\n  return SIGNALS.filter(([, pattern]) => pattern.test(text)).map(([name]) => name);\n}\n\n/** A tool_result block that carries untrusted text as one JSON string, or an error result when the text is flagged. */\nexport function wrapUntrusted(toolUseId: string, source: string, content: string): Record<string, unknown> {\n  log.debug(\"wrapUntrusted input\", content);\n  // TODO 1 of 6 (unlocks m1 and e1): wrap untrusted text as a tool_result block.\n  // Receives the tool use id, where the text came from and the text. Returns a tool_result object. Clean text becomes one line of\n  // compact JSON (JSON.stringify) with the keys source, trust (\"untrusted\") and content, in that order. When `screen` finds a signal,\n  // return the error block from the statement instead and leave the text out of it.\n  // Example: wrapUntrusted(\"t1\", \"web page\", \"hi\")\n  //   -> { type: \"tool_result\", tool_use_id: \"t1\", content: '{\"source\":\"web page\",\"trust\":\"untrusted\",\"content\":\"hi\"}' }\n  return { type: \"tool_result\", tool_use_id: toolUseId, content };\n}\n\nfunction luhn(digits: string): boolean {\n  let total = 0;\n  [...digits].reverse().forEach((ch, i) => {\n    let d = Number(ch);\n    if (i % 2 === 1) d = d * 2 > 9 ? d * 2 - 9 : d * 2;\n    total += d;\n  });\n  return total % 10 === 0;\n}\n\n/** Secrets become [SECRET], addresses [EMAIL] and card numbers that pass the Luhn check [CARD]. */\nexport function redact(input: string): string {\n  let text = input.replace(/sk-ant-[A-Za-z0-9_-]{8,}/g, \"[SECRET]\");\n  text = text.replace(/\\bAKIA[0-9A-Z]{16}\\b/g, \"[SECRET]\");\n  text = text.replace(/Bearer [A-Za-z0-9._-]{16,}/g, \"Bearer [SECRET]\");\n  text = text.replace(/[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)+/g, \"[EMAIL]\");\n  return text.replace(/\\b(?:[0-9][ -]?){12,18}[0-9]\\b/g, (m) => {\n    const digits = m.replace(/[ -]/g, \"\");\n    return isCard(digits) ? \"[CARD]\" : m;\n  });\n}\n\nfunction resolve(root: string, path: string): string {\n  const p = path.replaceAll(\"\\\\\", \"/\");\n  const stack: string[] = [];\n  for (const part of (p.startsWith(\"/\") ? p : `${root}/${p}`).split(\"/\")) {\n    if (part === \"\" || part === \".\") continue;\n    if (part === \"..\") stack.pop();\n    else stack.push(part);\n  }\n  return \"/\" + stack.join(\"/\");\n}\n\nfunction isSecret(path: string): boolean {\n  // TODO 2 of 6 (unlocks e2): does this path name a secret file?\n  // Receives a path and returns true for a file named `.env`, a file starting `.env.` unless it is `.env.example`, any file inside a\n  // folder called `secrets`, and a name ending in `.pem` or `.key`; false otherwise. Backslashes count as `/`.\n  // Example: isSecret(\"app/.env.local\") -> true, isSecret(\".env.example\") -> false\n  return false;\n}\n\nfunction commandAllowed(words: string[]): boolean {\n  // TODO 3 of 6 (finish this to pass e3): is the first word of a bash command on the allow-list?\n  // Receives the command split into words. Returns true for `ls`, `cat`, `pytest`, and `git` followed by `status`, `diff` or `log`;\n  // false for anything else, including an empty list. (The checks for sudo, rm, chaining and secret arguments are written.)\n  // Example: commandAllowed([\"git\", \"log\", \"--oneline\"]) -> true, commandAllowed([\"git\", \"push\"]) -> false\n  return false;\n}\n\nfunction isCard(digits: string): boolean {\n  // TODO 4 of 6 (finish this to pass e6): is this run of digits a card number?\n  // Receives the digits with spaces and hyphens already removed. Returns true when there are 13 to 19 of them and `luhn` accepts them\n  // (a long number that fails the check is not a card). Example: isCard(\"4111111111111111\") -> true, isCard(\"4111111111111112\") -> false\n  return false;\n}\n\nconst result = (decision: Decision[\"decision\"], reason = \"ok\"): Decision => ({ decision, reason });\n\nexport class Gate {\n  readonly root: string;\n  private allowedHosts: string[];\n  private allowedEmailDomains: string[];\n  private isTainted = false;\n  private records: Array<Record<string, unknown>> = [];\n\n  constructor(root: string, allowedHosts: string[], allowedEmailDomains: string[]) {\n    this.root = resolve(\"/\", root);\n    this.allowedHosts = allowedHosts.map((h) => h.toLowerCase());\n    this.allowedEmailDomains = allowedEmailDomains.map((d) => d.toLowerCase());\n  }\n\n  get tainted(): boolean {\n    return this.isTainted;\n  }\n\n  get audit(): Array<Record<string, unknown>> {\n    return [...this.records];\n  }\n\n  markUntrusted(_source: string): void {\n    this.isTainted = true;\n  }\n\n  private inside(path: string): boolean {\n    return path === this.root || path.startsWith(this.root + \"/\");\n  }\n\n  decide(actor: string, tool: string, args: Args): Decision {\n    const r = this.choose(tool, args);\n    const clean: Args = {};\n    for (const [k, v] of Object.entries(args)) clean[k] = typeof v === \"string\" ? redact(v) : v;\n    this.records.push({ actor, tool, decision: r.decision, reason: r.reason, args: clean });\n    return r;\n  }\n\n  private choose(tool: string, args: Args): Decision {\n    if (!TOOLS.has(tool)) return result(\"deny\", \"unknown tool\");\n    if (tool === \"read_file\" || tool === \"write_file\") {\n      const path = resolve(this.root, String(args.path ?? \"\"));\n      if (!this.inside(path)) return result(\"deny\", \"outside the project\");\n      if (isSecret(path)) return result(\"deny\", \"secret file\");\n      if (tool === \"write_file\") {\n        if (path.split(\"/\").some((s) => s === \".git\" || s === \".claude\")) return result(\"deny\", \"protected path\");\n        if (this.isTainted) return result(\"ask\", \"untrusted content in this session\");\n      }\n      return result(\"allow\");\n    }\n    if (tool === \"bash\") return this.bash(String(args.command ?? \"\"));\n    if (tool === \"fetch\") return this.fetch(String(args.url ?? \"\"));\n    return this.email(args);\n  }\n\n  private bash(command: string): Decision {\n    const words = command.split(/\\s+/).filter(Boolean);\n    if (words.some((w) => [\"sudo\", \"rm\"].includes(w.split(\"/\").at(-1) as string))) return result(\"deny\", \"dangerous command\");\n    if (SHELL_TRICKS.some((t) => command.includes(t))) return result(\"deny\", \"chaining or redirection\");\n    if (!commandAllowed(words)) return result(\"deny\", \"command not allowed\");\n    if (words.slice(1).some((w) => !w.startsWith(\"-\") && isSecret(w))) return result(\"deny\", \"secret file\");\n    if (words[0] === \"pytest\" && this.isTainted) return result(\"ask\", \"untrusted content in this session\");\n    return result(\"allow\");\n  }\n\n  private fetch(url: string): Decision {\n    const m = /^([A-Za-z][A-Za-z0-9+.-]*):\\/\\/([^/?#]*)([^?#]*)(\\?[^#]*)?(#.*)?$/.exec(url);\n    if (!m || m[1].toLowerCase() !== \"https\") return result(\"deny\", \"https only\");\n    if (m[2].includes(\"@\")) return result(\"deny\", \"credentials in the URL\");\n    const host = m[2].toLowerCase().replace(/:[0-9]+$/, \"\");\n    if (!this.allowedHosts.some((h) => host === h || host.endsWith(\".\" + h))) return result(\"deny\", \"host not allowed\");\n    if (this.isTainted && (m[4] || m[5])) return result(\"ask\", \"data could leave in the URL\");\n    return result(\"allow\");\n  }\n\n  private email(args: Args): Decision {\n    const to = String(args.to ?? \"\");\n    const domain = to.includes(\"@\") ? to.slice(to.lastIndexOf(\"@\") + 1).toLowerCase() : \"\";\n    const text = `${args.subject ?? \"\"}\\n${args.body ?? \"\"}`;\n    return this.emailDecision(domain, text);\n  }\n\n  private emailDecision(domain: string, text: string): Decision {\n    // TODO 5 of 6 (finish this to pass e4 and e5): decide a send_email call.\n    // Receives the recipient's lower-case domain and the subject and body joined by a newline. Returns result(decision, reason): deny\n    // \"recipient not allowed\" when the domain is not in this.allowedEmailDomains; deny \"sensitive data in the body\" when redact(text)\n    // differs from the text; deny \"a person must send it\" when the session is tainted (this.isTainted); else allow.\n    // Example: a clean mail to \"example.com\" in a tainted session -> { decision: \"deny\", reason: \"a person must send it\" }\n    return result(\"allow\");\n  }\n\n  alerts(): Array<{ actor: string; denials: number }> {\n    // TODO 6 of 6 (finish this to pass e7): actors with three or more denials.\n    // Reads this.records (objects with actor and decision). Returns one { actor, denials } per actor with three or more \"deny\" records\n    // (an \"ask\" is not a denial), with that actor's current count, ordered by when each reached three.\n    // Example: alice denied 3 times, then bob 3 times, then alice once more -> [{ actor: \"alice\", denials: 4 }, { actor: \"bob\", denials: 3 }]\n    return [];\n  }\n}\n\n/** The PreToolUse hook answer for a decision: exit code, standard output, standard error. */\nexport function hookResponse(d: Decision): { exit_code: number; stdout: string; stderr: string } {\n  if (d.decision === \"allow\") return { exit_code: 0, stdout: \"\", stderr: \"\" };\n  const out = { hookSpecificOutput: { hookEventName: \"PreToolUse\", permissionDecision: d.decision, permissionDecisionReason: d.reason } };\n  return { exit_code: 0, stdout: JSON.stringify(out), stderr: \"\" };\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/41-security-and-safety/prose/unit-03/practice-2/gate.ts",
+    "test_path": "practice/level-2/41-security-and-safety/prose/unit-03/practice-2/gate.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-2/41-security-and-safety/prose/unit-03/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-2/41-security-and-safety/prose/unit-03/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-2/41-security-and-safety/prose/unit-03/practice-2/gate.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 untrusted text reaches the model only as one json string that says where it came from",
+        "kind": "main",
+        "says": "Untrusted text is delivered as one JSON string that names its source and says it is untrusted"
+      },
+      {
+        "id": "e1 a screen names injection signals and a flagged result is withheld with an error",
+        "kind": "edge",
+        "says": "The screen names the signals, ignores clean text, and a flagged result is withheld with an error that shows none of the text"
+      },
+      {
+        "id": "e2 reads and writes stay inside the project and away from secrets and protected folders",
+        "kind": "edge",
+        "says": "Paths stay inside the project, secrets and protected folders are refused, a sibling folder with a similar name is outside"
+      },
+      {
+        "id": "e3 bash is limited to a few read only commands and dangerous or chained ones are refused",
+        "kind": "edge",
+        "says": "Bash is limited to read-only commands; dangerous, chained and redirected commands and secret arguments are refused"
+      },
+      {
+        "id": "e4 fetch and email obey the host and domain lists and refuse credentials in a url",
+        "kind": "edge",
+        "says": "Fetch obeys the host list (a lookalike host fails) and refuses credentials; email obeys the domain list and the body check"
+      },
+      {
+        "id": "e5 once untrusted content is in the session anything that changes things asks or is refused",
+        "kind": "edge",
+        "says": "After untrusted content entered the session, changes ask, an email is refused, reads still work, and a denial stays a denial"
+      },
+      {
+        "id": "e6 secrets card numbers and addresses are redacted in text and in the audit",
+        "kind": "edge",
+        "says": "Redaction covers keys, addresses and Luhn-valid cards, leaves other numbers, and the audit never holds a raw secret"
+      },
+      {
+        "id": "e7 the hook answer follows the documented shapes and repeated denials raise an alert",
+        "kind": "edge",
+        "says": "The hook answer has the documented shapes and repeated denials by one actor raise an alert, while questions do not"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/41-security-and-safety/prose/unit-03/practice-2/target/report.xml"
+    },
+    "origin": "course/41-security-and-safety/03-guardrails-monitoring-and-the-practice.md",
+    "concepts": [
+      "the practice of Layered guardrails, monitoring and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/41-security-and-safety/prose/unit-03/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "security-and-safety-u3"
+}

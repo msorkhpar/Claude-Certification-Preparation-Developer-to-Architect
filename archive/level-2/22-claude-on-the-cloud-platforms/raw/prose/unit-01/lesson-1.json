@@ -1,0 +1,336 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "22-claude-on-the-cloud-platforms"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "One Messages API, three front doors",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "One Messages API, three front doors"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Developer · **Module 22:** Claude on the cloud platforms · **Page 1 of 2** **Exams:** DV2"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** name the ways to reach Claude from a cloud account, write the request for the direct API, Amazon Bedrock and Google Cloud, say where the model and the version go on each, and choose the authentication path that fits a security policy."
+    },
+    {
+      "type": "para",
+      "text": "Checked against the Claude API documentation (Claude in Amazon Bedrock, Claude on Google Cloud) on 2026-10-02, and by running the example offline in the course container (`anthropic` 1.11.0, `@anthropic-ai/sdk` 0.131.0). Nothing in the example is signed or sent: the replies are scripted, and the credentials a platform needs are described, not used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "Many companies cannot call a third party's API directly. Their security rules, their billing and their data location are bound to a cloud account, so they reach Claude through AWS or Google Cloud. The Messages API is close to the same everywhere, but the differences are exactly the ones that break a program on the first call: the address, the model name, the place of the version, the credentials. The exam asks which differences exist and what each platform lacks."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The doors"
+    },
+    {
+      "type": "para",
+      "text": "There are three doors you build requests for in this module. The **direct API** is Anthropic's own endpoint, with an API key. **Claude in Amazon Bedrock** serves Claude on AWS-managed infrastructure; its page says it \"runs on AWS-managed infrastructure with zero operator access (Anthropic personnel have no access to the inference infrastructure)\". **Claude on Google Cloud** serves Claude through Google's Agent Platform; the SDKs and the example call this door Vertex. The docs mention a fourth, Claude Platform on AWS, described as \"an Anthropic-operated alternative on AWS with AWS Marketplace billing and typically same-day feature access\". The practice and the examples cover the first three."
+    },
+    {
+      "type": "para",
+      "text": "On every door the request body is the Messages body of module 14, and the response keeps the shape of the direct API. A parser written once works for all three. What changes is around the body."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Bedrock"
+    },
+    {
+      "type": "para",
+      "text": "The endpoint follows a fixed pattern: \"The endpoint follows the pattern `https://bedrock-mantle.{region}.api.aws/anthropic/v1/messages`.\" It sends standard server-sent events for streaming \"and the same request body shape as Anthropic's first-party API\". Two things differ from the direct call. The model id carries a prefix: \"Model IDs in Claude in Amazon Bedrock carry an `anthropic.` provider prefix\", so `claude-opus-5-5` becomes `anthropic.claude-opus-5-5`. And the call is signed with AWS credentials instead of an API key, using SigV4. The version header, `anthropic-version: 2023-06-01`, stays a header, as on the direct API."
+    },
+    {
+      "type": "para",
+      "text": "Bedrock has its own access criteria per model, so a model must be enabled in the AWS account before it can be called. The older Bedrock integration, based on `InvokeModel` and `Converse` with ARN-versioned ids, still exists on a separate page for Opus 4.6 and earlier; this course uses the Messages endpoint above."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Google Cloud"
+    },
+    {
+      "type": "para",
+      "text": "The Google Cloud page lists the two differences in two bullets:"
+    },
+    {
+      "type": "quote",
+      "blocks": [
+        {
+          "type": "para",
+          "text": "On Agent Platform, `model` is not passed in the request body. Instead, it is specified in the Google Cloud endpoint URL. On Agent Platform, `anthropic_version` is passed in the request body (rather than as a header), and must be set to the value `vertex-2023-10-16`."
+        }
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Source: Claude on Google Cloud."
+    },
+    {
+      "type": "para",
+      "text": "The call goes to a `rawPredict` URL of the form `https://aiplatform.googleapis.com/v1/projects/<project>/locations/global/publishers/anthropic/models/<model>:rawPredict`. The model id there is the plain name, such as `claude-sonnet-5-5`, with a dated form for some models (`claude-haiku-4-5@20251001`). The version is the body field `anthropic_version`, and the call carries a Google access token, for example from `gcloud auth print-access-token`."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Side by side"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "",
+        "Direct API",
+        "Bedrock",
+        "Google Cloud"
+      ],
+      "rows": [
+        [
+          "Address",
+          "`api.anthropic.com/v1/messages`",
+          "`bedrock-mantle.<region>.api.aws/anthropic/v1/messages`",
+          "`aiplatform.googleapis.com/v1/projects/<project>/locations/<endpoint>/publishers/anthropic/models/<model>:rawPredict`"
+        ],
+        [
+          "Model",
+          "in the body",
+          "in the body, `anthropic.` prefix",
+          "in the URL"
+        ],
+        [
+          "Version",
+          "header `anthropic-version`",
+          "header `anthropic-version`",
+          "body field `anthropic_version`"
+        ],
+        [
+          "Credential",
+          "API key",
+          "AWS SigV4 or a bearer token",
+          "Google access token"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Credentials on Bedrock"
+    },
+    {
+      "type": "para",
+      "text": "The Bedrock page gives three paths and a preference order. The first is the recommended one: \"Use a Bedrock service role with AWS-managed keys for the most secure, long-lived access\". An administrator provisions the role and the developer passes it, so Bedrock assumes the role on the caller's behalf. The second is an IAM assumed role, for federated access \"with a 12-hour maximum session\": the trust policy names your identity provider, and the permissions policy grants `bedrock-mantle:CreateInference` only on the allowed model ARNs (module 23 writes such a policy). The third is a bearer token, \"(12-hour maximum, least preferred)\", minted with a token generator and sent in the `x-api-key` header, where an administrator can deny long-term keys."
+    },
+    {
+      "type": "para",
+      "text": "On Google Cloud, a developer runs `gcloud auth application-default login` or uses a service account, and the SDK adds the token. Neither platform needs an Anthropic API key. Data handling follows the cloud: \"Data handling for this offering is governed by Amazon Bedrock\", and Google Cloud's page says the same of Google."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "para",
+      "text": "The example builds the same question for the three doors, sends each through a scripted transport and prints what was sent: the URL, the version header, the model and the body version. Then it parses the reply with one function."
+    },
+    {
+      "type": "example",
+      "id": "m22-three-front-doors",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/22-three-front-doors/python/front_doors.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/22-three-front-doors/typescript/frontDoors.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/22-three-front-doors/java/FrontDoors.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/22-three-front-doors/kotlin/FrontDoors.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"The same question sent to the direct API, to Claude in Amazon Bedrock and to Claude on Google Vertex AI.\n\nEach request is written out by hand and sent through a scripted transport, so nothing leaves the container and nothing\nis signed: AWS SigV4 (Bedrock), a Google access token (Vertex) or an API key (direct) is added by an SDK or a proxy. The\nreply is the same illustrative, hand-written Messages response for all three, because the response body keeps the same shape.\n\"\"\"\nimport logging\nimport httpx2\n\nfrom harness import ScriptedTransport\nfrom harness.scripted import message, text\n\nlog = logging.getLogger(__name__)\n\nBASE = {\"max_tokens\": 64, \"messages\": [{\"role\": \"user\", \"content\": \"Capital of France?\"}]}\nPROJECT, REGION = \"example-project\", \"us-east-1\"\nDOORS = {\n    \"anthropic\": (\"https://api.anthropic.com/v1/messages\",\n                  {\"anthropic-version\": \"2023-06-01\", \"content-type\": \"application/json\"},\n                  {\"model\": \"claude-sonnet-5-5\", **BASE}),\n    \"bedrock\": (f\"https://bedrock-mantle.{REGION}.api.aws/anthropic/v1/messages\",\n                {\"anthropic-version\": \"2023-06-01\", \"content-type\": \"application/json\"},\n                {\"model\": \"anthropic.claude-sonnet-5-5\", **BASE}),\n    \"vertex\": (f\"https://aiplatform.googleapis.com/v1/projects/{PROJECT}/locations/global/publishers/anthropic/models/claude-sonnet-5-5:rawPredict\",\n               {\"content-type\": \"application/json\"},\n               {\"anthropic_version\": \"vertex-2023-10-16\", **BASE}),\n}\n\n\ndef send(name):\n    url, headers, body = DOORS[name]\n    transport = ScriptedTransport(message([text(\"Paris.\")]))\n    with httpx2.Client(transport=transport) as http:\n        reply = http.post(url, headers=headers, json=body)\n    return transport, reply\n\n\ndef main():\n    for name in DOORS:\n        transport, reply = send(name)\n        sent, headers = transport.requests[0], transport.headers[0]\n        print(f\"{name:9} {transport.urls[0]}\")\n        print(f\"          version header: {headers.get('anthropic-version', 'none')} | body model: {sent.get('model', 'none')} | body version: {sent.get('anthropic_version', 'none')}\")\n        print(f\"          reply: {reply.status_code} {reply.json()['content'][0]['text']!r} (same parser for every door)\")\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "anthropic https://api.anthropic.com/v1/messages\n          version header: 2023-06-01 | body model: claude-sonnet-5-5 | body version: none\n          reply: 200 'Paris.' (same parser for every door)\nbedrock   https://bedrock-mantle.us-east-1.api.aws/anthropic/v1/messages\n          version header: 2023-06-01 | body model: anthropic.claude-sonnet-5-5 | body version: none\n          reply: 200 'Paris.' (same parser for every door)\nvertex    https://aiplatform.googleapis.com/v1/projects/example-project/locations/global/publishers/anthropic/models/claude-sonnet-5-5:rawPredict\n          version header: none | body model: none | body version: vertex-2023-10-16\n          reply: 200 'Paris.' (same parser for every door)"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// The same question sent to the direct API, to Claude in Amazon Bedrock and to Claude on Google Vertex AI.\n// Each request is written out by hand and sent through a scripted fetch, so nothing leaves the container and nothing\n// is signed: AWS SigV4 (Bedrock), a Google access token (Vertex) or an API key (direct) is added by an SDK or a proxy. The\n// reply is the same illustrative, hand-written Messages response for all three, because the response body keeps the same shape.\nimport { message, scriptedFetch, text } from \"../../../harness/ts/scriptedFetch.ts\";\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"front_doors\");\n\nconst BASE = { max_tokens: 64, messages: [{ role: \"user\", content: \"Capital of France?\" }] };\nconst PROJECT = \"example-project\";\nconst REGION = \"us-east-1\";\nexport const DOORS: Record<string, [string, Record<string, string>, Record<string, unknown>]> = {\n  anthropic: [\"https://api.anthropic.com/v1/messages\", { \"anthropic-version\": \"2023-06-01\", \"content-type\": \"application/json\" }, { model: \"claude-sonnet-5-5\", ...BASE }],\n  bedrock: [`https://bedrock-mantle.${REGION}.api.aws/anthropic/v1/messages`, { \"anthropic-version\": \"2023-06-01\", \"content-type\": \"application/json\" }, { model: \"anthropic.claude-sonnet-5-5\", ...BASE }],\n  vertex: [\n    `https://aiplatform.googleapis.com/v1/projects/${PROJECT}/locations/global/publishers/anthropic/models/claude-sonnet-5-5:rawPredict`,\n    { \"content-type\": \"application/json\" },\n    { anthropic_version: \"vertex-2023-10-16\", ...BASE },\n  ],\n};\n\nexport async function send(name: string) {\n  const [url, headers, body] = DOORS[name];\n  const fake = scriptedFetch([{ body: message([text(\"Paris.\")]) }]);\n  const reply = await fake.fetch(url, { method: \"POST\", headers, body: JSON.stringify(body) });\n  return { seen: fake.seen[0], status: reply.status, json: (await reply.json()) as any };\n}\n\nasync function main() {\n  for (const name of Object.keys(DOORS)) {\n    const { seen, status, json } = await send(name);\n    console.log(`${name.padEnd(9)} ${seen.url}`);\n    console.log(`          version header: ${seen.headers[\"anthropic-version\"] ?? \"none\"} | body model: ${seen.body.model ?? \"none\"} | body version: ${seen.body.anthropic_version ?? \"none\"}`);\n    console.log(`          reply: ${status} '${json.content[0].text}' (same parser for every door)`);\n  }\n}\n\nif (import.meta.main) await main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "anthropic https://api.anthropic.com/v1/messages\n          version header: 2023-06-01 | body model: claude-sonnet-5-5 | body version: none\n          reply: 200 'Paris.' (same parser for every door)\nbedrock   https://bedrock-mantle.us-east-1.api.aws/anthropic/v1/messages\n          version header: 2023-06-01 | body model: anthropic.claude-sonnet-5-5 | body version: none\n          reply: 200 'Paris.' (same parser for every door)\nvertex    https://aiplatform.googleapis.com/v1/projects/example-project/locations/global/publishers/anthropic/models/claude-sonnet-5-5:rawPredict\n          version header: none | body model: none | body version: vertex-2023-10-16\n          reply: 200 'Paris.' (same parser for every door)"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import static harness.Scripted.map;\nimport static harness.Scripted.message;\nimport static harness.Scripted.text;\n\nimport com.fasterxml.jackson.databind.JsonNode;\nimport harness.Reply;\nimport harness.ScriptedHttp;\nimport harness.Scripted;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Map;\n\n/**\n * The same question sent to the direct API, to Claude in Amazon Bedrock and to Claude on Google Vertex AI.\n *\n * <p>Each request is written out by hand and sent through a scripted transport, so nothing leaves the container and nothing\n * is signed: AWS SigV4 (Bedrock), a Google access token (Vertex) or an API key (direct) is added by an SDK or a proxy. The\n * reply is the same illustrative, hand-written Messages response for all three, because the response body keeps the same shape.\n */\npublic final class FrontDoors {\n    private static final System.Logger LOG = System.getLogger(FrontDoors.class.getName());\n    static final List<Map<String, Object>> MESSAGES = List.of(map(\"role\", \"user\", \"content\", \"Capital of France?\"));\n    static final String PROJECT = \"example-project\", REGION = \"us-east-1\";\n\n    /** One front door: where the request goes, its headers and its body. */\n    record Door(String url, Map<String, String> headers, Map<String, Object> body) {}\n\n    static final Map<String, Door> DOORS = new LinkedHashMap<>();\n\n    static {\n        DOORS.put(\"anthropic\", new Door(\"https://api.anthropic.com/v1/messages\",\n            Map.of(\"anthropic-version\", \"2023-06-01\", \"content-type\", \"application/json\"),\n            map(\"model\", \"claude-sonnet-5-5\", \"max_tokens\", 64, \"messages\", MESSAGES)));\n        DOORS.put(\"bedrock\", new Door(\"https://bedrock-mantle.\" + REGION + \".api.aws/anthropic/v1/messages\",\n            Map.of(\"anthropic-version\", \"2023-06-01\", \"content-type\", \"application/json\"),\n            map(\"model\", \"anthropic.claude-sonnet-5-5\", \"max_tokens\", 64, \"messages\", MESSAGES)));\n        DOORS.put(\"vertex\", new Door(\"https://aiplatform.googleapis.com/v1/projects/\" + PROJECT + \"/locations/global/publishers/anthropic/models/claude-sonnet-5-5:rawPredict\",\n            Map.of(\"content-type\", \"application/json\"),\n            map(\"anthropic_version\", \"vertex-2023-10-16\", \"max_tokens\", 64, \"messages\", MESSAGES)));\n    }\n\n    /** What went out and what came back for one door. */\n    record Sent(ScriptedHttp transport, Reply reply) {}\n\n    static Sent send(String name) {\n        Door door = DOORS.get(name);\n        ScriptedHttp transport = Scripted.http(message(List.of(text(\"Paris.\"))));\n        Reply reply = transport.send(\"POST\", door.url(), door.headers(), door.body());\n        return new Sent(transport, reply);\n    }\n\n    static String orNone(JsonNode node, String field) {\n        return node.has(field) ? node.get(field).asText() : \"none\";\n    }\n\n    public static void main(String[] args) {\n        for (String name : DOORS.keySet()) {\n            Sent s = send(name);\n            JsonNode sent = s.transport().requests.get(0);\n            Map<String, String> headers = s.transport().headers.get(0);\n            System.out.println(String.format(\"%-9s %s\", name, s.transport().urls.get(0)));\n            System.out.println(\"          version header: \" + headers.getOrDefault(\"anthropic-version\", \"none\") + \" | body model: \" + orNone(sent, \"model\")\n                + \" | body version: \" + orNone(sent, \"anthropic_version\"));\n            System.out.println(\"          reply: \" + s.reply().status() + \" '\" + s.reply().json().at(\"/content/0/text\").asText() + \"' (same parser for every door)\");\n        }\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "anthropic https://api.anthropic.com/v1/messages\n          version header: 2023-06-01 | body model: claude-sonnet-5-5 | body version: none\n          reply: 200 'Paris.' (same parser for every door)\nbedrock   https://bedrock-mantle.us-east-1.api.aws/anthropic/v1/messages\n          version header: 2023-06-01 | body model: anthropic.claude-sonnet-5-5 | body version: none\n          reply: 200 'Paris.' (same parser for every door)\nvertex    https://aiplatform.googleapis.com/v1/projects/example-project/locations/global/publishers/anthropic/models/claude-sonnet-5-5:rawPredict\n          version header: none | body model: none | body version: vertex-2023-10-16\n          reply: 200 'Paris.' (same parser for every door)"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import com.fasterxml.jackson.databind.JsonNode\nimport harness.Reply\nimport harness.Scripted\nimport harness.Scripted.map\nimport harness.Scripted.message\nimport harness.Scripted.text\nimport harness.ScriptedHttp\n\nprivate val log = System.getLogger(\"front_doors\")\n\n/**\n * The same question sent to the direct API, to Claude in Amazon Bedrock and to Claude on Google Vertex AI.\n *\n * Each request is written out by hand and sent through a scripted transport, so nothing leaves the container and nothing\n * is signed: AWS SigV4 (Bedrock), a Google access token (Vertex) or an API key (direct) is added by an SDK or a proxy. The\n * reply is the same illustrative, hand-written Messages response for all three, because the response body keeps the same shape.\n */\nval MESSAGES = listOf(map(\"role\", \"user\", \"content\", \"Capital of France?\"))\nconst val PROJECT = \"example-project\"\nconst val REGION = \"us-east-1\"\n\n/** One front door: where the request goes, its headers and its body. */\ndata class Door(val url: String, val headers: Map<String, String>, val body: Map<String, Any?>)\n\nval DOORS = linkedMapOf(\n    \"anthropic\" to Door(\n        \"https://api.anthropic.com/v1/messages\",\n        mapOf(\"anthropic-version\" to \"2023-06-01\", \"content-type\" to \"application/json\"),\n        map(\"model\", \"claude-sonnet-5-5\", \"max_tokens\", 64, \"messages\", MESSAGES),\n    ),\n    \"bedrock\" to Door(\n        \"https://bedrock-mantle.$REGION.api.aws/anthropic/v1/messages\",\n        mapOf(\"anthropic-version\" to \"2023-06-01\", \"content-type\" to \"application/json\"),\n        map(\"model\", \"anthropic.claude-sonnet-5-5\", \"max_tokens\", 64, \"messages\", MESSAGES),\n    ),\n    \"vertex\" to Door(\n        \"https://aiplatform.googleapis.com/v1/projects/$PROJECT/locations/global/publishers/anthropic/models/claude-sonnet-5-5:rawPredict\",\n        mapOf(\"content-type\" to \"application/json\"),\n        map(\"anthropic_version\", \"vertex-2023-10-16\", \"max_tokens\", 64, \"messages\", MESSAGES),\n    ),\n)\n\n/** What went out and what came back for one door. */\ndata class Sent(val transport: ScriptedHttp, val reply: Reply)\n\nfun send(name: String): Sent {\n    val door = DOORS.getValue(name)\n    val transport = Scripted.http(message(listOf(text(\"Paris.\"))))\n    return Sent(transport, transport.send(\"POST\", door.url, door.headers, door.body))\n}\n\nfun orNone(node: JsonNode, field: String): String = if (node.has(field)) node[field].asText() else \"none\"\n\nfun main() {\n    for (name in DOORS.keys) {\n        val (transport, reply) = send(name)\n        val sent = transport.requests[0]\n        println(\"${name.padEnd(9)} ${transport.urls[0]}\")\n        println(\"          version header: ${transport.headers[0][\"anthropic-version\"] ?: \"none\"} | body model: ${orNone(sent, \"model\")} | body version: ${orNone(sent, \"anthropic_version\")}\")\n        println(\"          reply: ${reply.status()} '${reply.json().at(\"/content/0/text\").asText()}' (same parser for every door)\")\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "anthropic https://api.anthropic.com/v1/messages\n          version header: 2023-06-01 | body model: claude-sonnet-5-5 | body version: none\n          reply: 200 'Paris.' (same parser for every door)\nbedrock   https://bedrock-mantle.us-east-1.api.aws/anthropic/v1/messages\n          version header: 2023-06-01 | body model: anthropic.claude-sonnet-5-5 | body version: none\n          reply: 200 'Paris.' (same parser for every door)\nvertex    https://aiplatform.googleapis.com/v1/projects/example-project/locations/global/publishers/anthropic/models/claude-sonnet-5-5:rawPredict\n          version header: none | body model: none | body version: vertex-2023-10-16\n          reply: 200 'Paris.' (same parser for every door)"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Read the output. All three replies parse as 200 with the text \"Paris.\". The Bedrock row shows the model `anthropic.claude-sonnet-5-5` in the body and the version in the header. The Vertex row shows no version header and no body model, but a body version `vertex-2023-10-16`, and the model sits in the URL before `:rawPredict`. The example's project name is a placeholder."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Sending the direct-API request body to Vertex unchanged.** The model in the body and the version header are both wrong there. Vertex wants the model in the URL and `anthropic_version` in the body.",
+        "**Using the direct model id on Bedrock.** The id needs the `anthropic.` prefix, and the version header stays.",
+        "**Reaching for an API key on a cloud platform.** The cloud's own credentials sign the call. A key that works on the direct API does nothing here."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A team moves a working direct-API request to Google Cloud and keeps the body unchanged. It is refused. Which changes does the page require?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Add an `anthropic-version` header and remove nothing else from the body",
+              "**b**: Keep the model in the payload and send the version as a request header",
+              "**c**: Move both the model and the version into the query string of the address",
+              "**d**: Name the model in the address and carry the version in the payload"
+            ]
+          }
+        ],
+        [
+          "A developer calls Claude Opus 5.5 through Bedrock with the identifier `claude-opus-5-5` and gets an error. What fixes it?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Add the provider prefix so the name starts with anthropic",
+              "**b**: Use the dated name that the direct API shows, with no prefix at all",
+              "**c**: Use the Vertex form of the name, with an at sign and a date after it",
+              "**d**: Send the name in a request header called x-model instead of the body"
+            ]
+          }
+        ],
+        [
+          "A security team wants no long-lived keys on developer laptops when calling Claude through Bedrock. Which path does the page favour?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: A single shared access key stored with the source code of the project",
+              "**b**: Bearer tokens kept in each laptop's configuration file for daily use",
+              "**c**: A provisioned service role that the platform assumes for the caller",
+              "**d**: An assumed role with a session that lasts for a full working week"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**d**. The page says \"`model` is not passed in the request body\" and that it \"is specified in the Google Cloud endpoint URL\", while `anthropic_version` goes \"in the request body\". *b* is ruled out because \"`model` is not passed in the request body\", and the version is \"rather than as a header\". *c* is ruled out because the model \"is specified in the Google Cloud endpoint URL\", which is the address path, not a query string. *a* is ruled out because the version is passed \"rather than as a header\".",
+            "**a**. The page says \"Model IDs in Claude in Amazon Bedrock carry an `anthropic.` provider prefix\". *b* is ruled out because the Bedrock ids \"carry an `anthropic.` provider prefix\" and are not the direct API names. *c* is ruled out because the at-sign form belongs to Google Cloud, where \"`model` is not passed in the request body\". *d* is ruled out because the model stays in the body on Bedrock, \"the same request body shape as Anthropic's first-party API\".",
+            "**c**. The page marks the service role as the recommended path: \"Use a Bedrock service role with AWS-managed keys for the most secure, long-lived access\". *b* is ruled out because bearer tokens are \"(12-hour maximum, least preferred)\". *a* is ruled out because the service role is the path \"for the most secure, long-lived access\", with \"AWS-managed keys\" and no shared key in the source. *d* is ruled out because an assumed role has \"a 12-hour maximum session\", not a week."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 11,
+    "paras": 15,
+    "code": 0,
+    "tables": 1,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 1,
+    "html": 0,
+    "disclosures": 1,
+    "examples": 1
+  },
+  "content_sha256": "042ee48116d3e17fc4daccf00d3040de06a0a4c768d35f861706e04a1133fa79"
+}

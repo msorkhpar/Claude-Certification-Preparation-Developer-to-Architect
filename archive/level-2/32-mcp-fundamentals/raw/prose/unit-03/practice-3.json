@@ -1,0 +1,273 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "32-mcp-fundamentals"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: a notes server for the Model Context Protocol (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a notes server for the Model Context Protocol"
+    },
+    {
+      "type": "para",
+      "text": "An MCP server is a program that a client starts and talks to over its standard input and output (the `stdio` transport), or reaches over HTTP. It offers three kinds of things: tools that a model can call, resources that a person or an application can read, and prompts that a person can pick. The official SDKs do the protocol work (the handshake, the JSON-RPC framing, the schema validation); you write what the server offers. Write a small notes server and prove it the way a real client would: the tests start your server as a separate process and connect the SDK's own client to it. Edit the file (`notes_server.py`, `notes_server.ts`, `NotesServer.java` or `NotesServer.kt`). The server uses the official SDK of its language at the versions in `docs/VERSIONS.md`; the lesson pages explain the SDK calls and what the course checked. Nothing here touches a network: the client and the server talk through pipes."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What the server offers"
+    },
+    {
+      "type": "para",
+      "text": "The server is named `notes`, version `1.0.0`, and keeps its notes in memory. The id of a note is its position, counting from 1. It declares the tools, resources and prompts capabilities."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Tool `add_note(title, text)`, with a description. Both arguments are required strings. It strips the spaces around both, then refuses: an empty title (`title is required`), an empty text (`text is required`), a text longer than 500 characters (`text is too long (max 500)`). A refusal is a **tool error**: an ordinary result whose `isError` is true and whose text says why, so the model can read it and try again (it is not a protocol error). Otherwise it saves the note and answers `Saved note {id}: {title}`. A refused call does not use an id. The tool is annotated as not read-only, not destructive and not idempotent.",
+        "Tool `search_notes(query, limit)`, with a description. `query` is a required string, `limit` an optional integer with the default 5 that the tool's input schema states. The query is stripped; an empty one is the tool error `query is required`; a limit outside 1 to 20 is the tool error `limit must be between 1 and 20`. A note matches when its title or its text contains the query, in any letter case. The answer is one line per match, `{id}. {title}`, in id order, at most `limit` lines; with no match it is `No notes match \"{query}\"` (the stripped query), which is not an error. The tool is annotated as read-only.",
+        "Resource `notes://count` (plain text): `0 notes`, `1 note`, `2 notes`, and so on.",
+        "Resource template `notes://note/{id}` (plain text): the note as `{title}`, an empty line, then `{text}`. An id that is not a whole number of an existing note (`0`, `3` of two notes, `abc`) is a protocol error whose message says `No note {id}`.",
+        "Prompt `review_notes` with one optional argument `tone` (default `brief`): one user message. With no notes it says `There are no notes to review.`; otherwise `Review these notes in a {tone} tone:` followed by one line `- {title}` per note."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "A message you write for a tool error may arrive with a prefix that the SDK adds (some SDKs prepend the tool name); the tests look for your text inside the result."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working notes server with nine gaps cut out of it. Everything that is plumbing is written and correct: the server name and version, the capabilities, the tool, resource and prompt registrations with their descriptions, schemas and annotations, the stripping of the inputs, the saving of a note and the answer to `add_note`. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks; it returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file (the starter already logs the input of `add_note` this way); a run shows the logged lines under the failing case. Write them in this order (the names are the Python forms; TypeScript, Java and Kotlin use camel case, `validateNote` is `noteError` there and returns the message or `null` instead of raising):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`validate_note` unlocks `e2` and `e7`: the three refusals of a bad note, in order.",
+        "`validate_search` unlocks `e2`: the query and the limit checks.",
+        "`find_hits` unlocks `m1` and `e3`: the matching notes as `{id}. {title}` lines, ignoring letter case.",
+        "`format_hits` unlocks `e3`: the limit and the no-match sentence.",
+        "`count_text` unlocks `e5`: `0 notes`, `1 note`, `2 notes`.",
+        "`note_text` unlocks `m1` and `e5`: the note as text, or the `No note {id}` error.",
+        "`review_text` unlocks `e6`: the prompt text, with and without notes.",
+        "`default_limit` unlocks `e1`: the limit a search uses when none is given, also advertised in the input schema (`defaultLimit` in the other languages).",
+        "`search_annotations` unlocks `e4`: the read-only annotation of `search_notes` (`searchAnnotations` in the other languages)."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About fifteen lines in all. The rest of the registration is written."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A client can save a note, find it and read it back"
+        ],
+        [
+          "`e1`",
+          "The server declares tools, resources and prompts, and names its tools"
+        ],
+        [
+          "`e2`",
+          "Bad input comes back as a tool error the model can read"
+        ],
+        [
+          "`e3`",
+          "Search ignores case, keeps id order, honours the limit and says when nothing matches"
+        ],
+        [
+          "`e4`",
+          "Tool annotations tell a client which tool only reads"
+        ],
+        [
+          "`e5`",
+          "Resources give the count, a note by id and an error for a missing one"
+        ],
+        [
+          "`e6`",
+          "The prompt lists the notes and defaults the tone"
+        ],
+        [
+          "`e7`",
+          "Ids are sequential and a failed call does not use one"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The Java and Kotlin tests start the server with `java -cp`, using the class path that the build file hands them."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "// A notes server for the Model Context Protocol, over stdio. See ../../statement.md.\nimport io.modelcontextprotocol.json.McpJsonDefaults;\nimport io.modelcontextprotocol.json.McpJsonMapper;\nimport io.modelcontextprotocol.server.McpServer;\nimport io.modelcontextprotocol.server.McpServerFeatures.SyncPromptSpecification;\nimport io.modelcontextprotocol.server.McpServerFeatures.SyncResourceSpecification;\nimport io.modelcontextprotocol.server.McpServerFeatures.SyncResourceTemplateSpecification;\nimport io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;\nimport io.modelcontextprotocol.server.transport.StdioServerTransportProvider;\nimport io.modelcontextprotocol.spec.McpError;\nimport io.modelcontextprotocol.spec.McpSchema;\nimport io.modelcontextprotocol.spec.McpSchema.CallToolResult;\nimport io.modelcontextprotocol.spec.McpSchema.Tool;\nimport io.modelcontextprotocol.spec.McpSchema.ToolAnnotations;\n\nimport java.util.ArrayList;\nimport java.util.List;\nimport java.util.Locale;\nimport java.util.Map;\n\npublic class NotesServer {\n    private static final System.Logger LOG = System.getLogger(NotesServer.class.getName());\n    static final int MAX_TEXT = 500;\n    record Note(String title, String text) {}\n    static final List<Note> NOTES = new ArrayList<>(); // the id of a note is its position, counting from 1\n\n    static CallToolResult ok(String text) {\n        return CallToolResult.builder().addTextContent(text).isError(false).build();\n    }\n\n    static CallToolResult fail(String message) {\n        return CallToolResult.builder().addTextContent(message).isError(true).build();\n    }\n\n    /** Refuse a bad note: the error message, or null when the (stripped) title and text are fine. */\n    static String noteError(String title, String text) {\n        if (title.isEmpty()) return \"title is required\";\n        if (text.isEmpty()) return \"text is required\";\n        if (text.length() > MAX_TEXT) return \"text is too long (max \" + MAX_TEXT + \")\";\n        return null;\n    }\n\n    /** Refuse a bad search: the error message, or null when the (stripped) query and the limit are fine. */\n    static String searchError(String query, int limit) {\n        if (query.isEmpty()) return \"query is required\";\n        if (limit < 1 || limit > 20) return \"limit must be between 1 and 20\";\n        return null;\n    }\n\n    /** The lines {id}. {title} of the notes whose title or text contains the query, in any letter case, in id order. */\n    static List<String> findHits(String query) {\n        String needle = query.toLowerCase(Locale.ROOT);\n        List<String> hits = new ArrayList<>();\n        for (int i = 0; i < NOTES.size(); i++) {\n            Note n = NOTES.get(i);\n            if (n.title().toLowerCase(Locale.ROOT).contains(needle) || n.text().toLowerCase(Locale.ROOT).contains(needle)) hits.add((i + 1) + \". \" + n.title());\n        }\n        return hits;\n    }\n\n    /** The answer of a search: at most limit hit lines joined by newlines, or the no-match sentence. */\n    static String formatHits(List<String> hits, int limit, String query) {\n        return hits.isEmpty() ? \"No notes match \\\"\" + query + \"\\\"\" : String.join(\"\\n\", hits.subList(0, Math.min(limit, hits.size())));\n    }\n\n    /** The text of the count resource: 0 notes, 1 note, 2 notes. */\n    static String countText(int count) {\n        return count + \" note\" + (count == 1 ? \"\" : \"s\");\n    }\n\n    /** The text of one note, or an McpError \"No note {id}\" when the id is not a whole number of an existing note. */\n    static String noteText(String id) {\n        if (!id.matches(\"\\\\d+\") || Integer.parseInt(id) < 1 || Integer.parseInt(id) > NOTES.size()) throw McpError.builder(-32602).message(\"No note \" + id).build();\n        Note n = NOTES.get(Integer.parseInt(id) - 1);\n        return n.title() + \"\\n\\n\" + n.text();\n    }\n\n    /** The text of the review prompt. */\n    static String reviewText(String tone) {\n        if (NOTES.isEmpty()) return \"There are no notes to review.\";\n        return \"Review these notes in a \" + tone + \" tone:\\n\" + String.join(\"\\n\", NOTES.stream().map(n -> \"- \" + n.title()).toList());\n    }\n\n    /** How many hits a search returns when the caller gives no limit. */\n    static int defaultLimit() {\n        return 5;\n    }\n\n    /** The annotations that tell a client search_notes only reads. */\n    static ToolAnnotations searchAnnotations() {\n        return ToolAnnotations.builder().readOnlyHint(true).build();\n    }\n\n    static CallToolResult addNote(Map<String, Object> args) {\n        LOG.log(System.Logger.Level.DEBUG, \"addNote input: {0}\", args);\n        String title = String.valueOf(args.getOrDefault(\"title\", \"\")).strip(), text = String.valueOf(args.getOrDefault(\"text\", \"\")).strip();\n        String error = noteError(title, text);\n        if (error != null) return fail(error);\n        NOTES.add(new Note(title, text));\n        return ok(\"Saved note \" + NOTES.size() + \": \" + title);\n    }\n\n    static CallToolResult searchNotes(Map<String, Object> args) {\n        String query = String.valueOf(args.getOrDefault(\"query\", \"\")).strip();\n        int limit = ((Number) args.getOrDefault(\"limit\", defaultLimit())).intValue();\n        String error = searchError(query, limit);\n        if (error != null) return fail(error);\n        return ok(formatHits(findHits(query), limit, query));\n    }\n\n    public static void main(String[] args) throws InterruptedException {\n        McpJsonMapper json = McpJsonDefaults.getMapper();\n        Tool add = Tool.builder().name(\"add_note\").description(\"Save a note with a title and a text.\")\n                .inputSchema(json, \"{\\\"type\\\":\\\"object\\\",\\\"properties\\\":{\\\"title\\\":{\\\"type\\\":\\\"string\\\"},\\\"text\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"title\\\",\\\"text\\\"]}\")\n                .annotations(ToolAnnotations.builder().readOnlyHint(false).destructiveHint(false).idempotentHint(false).build()).build();\n        Tool search = Tool.builder().name(\"search_notes\").description(\"Find notes whose title or text contains the query.\")\n                .inputSchema(json, \"{\\\"type\\\":\\\"object\\\",\\\"properties\\\":{\\\"query\\\":{\\\"type\\\":\\\"string\\\"},\\\"limit\\\":{\\\"type\\\":\\\"integer\\\",\\\"default\\\":\" + defaultLimit() + \"}},\\\"required\\\":[\\\"query\\\"]}\")\n                .annotations(searchAnnotations()).build();\n        McpSchema.Resource count = McpSchema.Resource.builder().uri(\"notes://count\").name(\"count\").description(\"How many notes there are.\").mimeType(\"text/plain\").build();\n        McpSchema.ResourceTemplate noteTemplate = McpSchema.ResourceTemplate.builder().uriTemplate(\"notes://note/{id}\").name(\"note\").description(\"One note by id.\").mimeType(\"text/plain\").build();\n        McpSchema.Prompt review = new McpSchema.Prompt(\"review_notes\", \"Ask for a review of the notes.\", List.of(new McpSchema.PromptArgument(\"tone\", null, false)));\n\n        McpServer.sync(new StdioServerTransportProvider(json))\n                .serverInfo(\"notes\", \"1.0.0\")\n                .capabilities(McpSchema.ServerCapabilities.builder().tools(false).resources(false, false).prompts(false).build())\n                .tools(new SyncToolSpecification(add, (exchange, request) -> addNote(request.arguments())),\n                        new SyncToolSpecification(search, (exchange, request) -> searchNotes(request.arguments())))\n                .resources(new SyncResourceSpecification(count, (exchange, request) -> new McpSchema.ReadResourceResult(\n                        List.of(new McpSchema.TextResourceContents(request.uri(), \"text/plain\", countText(NOTES.size()))))))\n                .resourceTemplates(new SyncResourceTemplateSpecification(noteTemplate, (exchange, request) -> {\n                    String id = request.uri().substring(\"notes://note/\".length());\n                    return new McpSchema.ReadResourceResult(List.of(new McpSchema.TextResourceContents(request.uri(), \"text/plain\", noteText(id))));\n                }))\n                .prompts(new SyncPromptSpecification(review, (exchange, request) -> {\n                    Object tone = request.arguments() == null ? null : request.arguments().get(\"tone\");\n                    String text = reviewText(tone == null ? \"brief\" : String.valueOf(tone));\n                    return new McpSchema.GetPromptResult(null, List.of(new McpSchema.PromptMessage(McpSchema.Role.USER, new McpSchema.TextContent(text))));\n                }))\n                .build();\n        Thread.currentThread().join(); // the transport reads stdin on its own threads; keep the process alive until the client closes it\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // The tool functions of the server are plain static methods, so you can call them here without starting a client.\n        // (The tests start the server as a separate process and connect the SDK's client to it.)\n        var saved = NotesServer.addNote(Map.of(\"title\", \"Plan\", \"text\", \"ship it\"));\n        System.out.println(\"add_note: \" + ((io.modelcontextprotocol.spec.McpSchema.TextContent) saved.content().get(0)).text());\n        var found = NotesServer.searchNotes(Map.of(\"query\", \"ship\"));\n        System.out.println(\"search_notes: \" + ((io.modelcontextprotocol.spec.McpSchema.TextContent) found.content().get(0)).text());\n        System.out.println(\"count resource: \" + NotesServer.countText(NotesServer.NOTES.size()));\n        System.out.println(\"note 1 resource: \" + NotesServer.noteText(\"1\"));\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "// A notes server for the Model Context Protocol, over stdio. See ../../statement.md.\nimport io.modelcontextprotocol.json.McpJsonDefaults;\nimport io.modelcontextprotocol.json.McpJsonMapper;\nimport io.modelcontextprotocol.server.McpServer;\nimport io.modelcontextprotocol.server.McpServerFeatures.SyncPromptSpecification;\nimport io.modelcontextprotocol.server.McpServerFeatures.SyncResourceSpecification;\nimport io.modelcontextprotocol.server.McpServerFeatures.SyncResourceTemplateSpecification;\nimport io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;\nimport io.modelcontextprotocol.server.transport.StdioServerTransportProvider;\nimport io.modelcontextprotocol.spec.McpError;\nimport io.modelcontextprotocol.spec.McpSchema;\nimport io.modelcontextprotocol.spec.McpSchema.CallToolResult;\nimport io.modelcontextprotocol.spec.McpSchema.Tool;\nimport io.modelcontextprotocol.spec.McpSchema.ToolAnnotations;\n\nimport java.util.ArrayList;\nimport java.util.List;\nimport java.util.Locale;\nimport java.util.Map;\n\npublic class NotesServer {\n    private static final System.Logger LOG = System.getLogger(NotesServer.class.getName());\n    static final int MAX_TEXT = 500;\n    record Note(String title, String text) {}\n    static final List<Note> NOTES = new ArrayList<>(); // the id of a note is its position, counting from 1\n\n    static CallToolResult ok(String text) {\n        return CallToolResult.builder().addTextContent(text).isError(false).build();\n    }\n\n    static CallToolResult fail(String message) {\n        return CallToolResult.builder().addTextContent(message).isError(true).build();\n    }\n\n    // GAP 1 of 9 (unlocks e2 and e7): refuse a bad note.\n    // Receives the title and the text, both already stripped. Returns the error message, or null when they are fine: \"title is required\" for an empty\n    // title, \"text is required\" for an empty text and \"text is too long (max \" + MAX_TEXT + \")\" for a text longer than MAX_TEXT, checked in that order.\n    // Example: noteError(\"\", \"x\") -> \"title is required\"; noteError(\"T\", \"x\") -> null\n    static String noteError(String title, String text) {\n        return null;\n    }\n\n    // GAP 2 of 9 (unlocks e2): refuse a bad search.\n    // Receives the stripped query and the limit. Returns the error message, or null when they are fine: \"query is required\" for an empty query and\n    // \"limit must be between 1 and 20\" for a limit outside 1 to 20, in that order.\n    // Example: searchError(\"x\", 21) -> \"limit must be between 1 and 20\"\n    static String searchError(String query, int limit) {\n        return null;\n    }\n\n    // GAP 3 of 9 (unlocks m1 and e3): the notes that match a search.\n    // Receives the stripped query. Returns the lines \"{id}. {title}\" of the notes in NOTES (ids count from 1) whose title or text contains the query\n    // in any letter case, in id order.\n    // Example: with notes (\"Alpha\", \"x\") and (\"beta\", \"ALPHA again\"), findHits(\"alpha\") -> [\"1. Alpha\", \"2. beta\"]\n    static List<String> findHits(String query) {\n        return new ArrayList<>();\n    }\n\n    // GAP 4 of 9 (unlocks e3): the answer of a search.\n    // Receives the hit lines, the limit and the stripped query. Returns at most limit lines joined by newlines; with no hits the sentence\n    // No notes match \"<query>\".\n    // Example: formatHits([\"1. A\", \"2. B\"], 1, \"a\") -> \"1. A\"; formatHits([], 5, \"zeta\") -> No notes match \"zeta\"\n    static String formatHits(List<String> hits, int limit, String query) {\n        return \"\";\n    }\n\n    // GAP 5 of 9 (unlocks e5): the text of the count resource.\n    // Receives the number of notes. Returns \"0 notes\", \"1 note\", \"2 notes\" and so on.\n    // Example: countText(1) -> \"1 note\"\n    static String countText(int count) {\n        return \"\";\n    }\n\n    // GAP 6 of 9 (unlocks m1 and e5): the text of one note.\n    // Receives the id from the URI as a string. Returns the title, an empty line, then the text. An id that is not a whole number of an existing note\n    // (\"0\", \"3\" of two notes, \"abc\") throws McpError.builder(-32602).message(\"No note \" + id).build().\n    // Example: with one note (\"Plan\", \"ship it\"), noteText(\"1\") -> \"Plan\\n\\nship it\"\n    static String noteText(String id) {\n        return \"\";\n    }\n\n    // GAP 7 of 9 (unlocks e6): the text of the review prompt.\n    // With no notes it is \"There are no notes to review.\"; otherwise \"Review these notes in a <tone> tone:\" and one line \"- <title>\" per note,\n    // each after a newline.\n    // Example: with one note titled \"Plan\", reviewText(\"brief\") -> \"Review these notes in a brief tone:\\n- Plan\"\n    static String reviewText(String tone) {\n        return \"\";\n    }\n\n    // GAP 8 of 9 (unlocks e1): how many hits a search returns when the caller gives no limit.\n    // Takes nothing; returns that number, which is also the default the tool's input schema advertises.\n    // Example: defaultLimit() -> 5\n    static int defaultLimit() {\n        return 0;\n    }\n\n    // GAP 9 of 9 (unlocks e4): the annotations that tell a client search_notes only reads.\n    // Takes nothing; returns ToolAnnotations with readOnlyHint true.\n    // Example: searchAnnotations().readOnlyHint() -> true\n    static ToolAnnotations searchAnnotations() {\n        return null;\n    }\n\n    static CallToolResult addNote(Map<String, Object> args) {\n        LOG.log(System.Logger.Level.DEBUG, \"addNote input: {0}\", args);\n        String title = String.valueOf(args.getOrDefault(\"title\", \"\")).strip(), text = String.valueOf(args.getOrDefault(\"text\", \"\")).strip();\n        String error = noteError(title, text);\n        if (error != null) return fail(error);\n        NOTES.add(new Note(title, text));\n        return ok(\"Saved note \" + NOTES.size() + \": \" + title);\n    }\n\n    static CallToolResult searchNotes(Map<String, Object> args) {\n        String query = String.valueOf(args.getOrDefault(\"query\", \"\")).strip();\n        int limit = ((Number) args.getOrDefault(\"limit\", defaultLimit())).intValue();\n        String error = searchError(query, limit);\n        if (error != null) return fail(error);\n        return ok(formatHits(findHits(query), limit, query));\n    }\n\n    public static void main(String[] args) throws InterruptedException {\n        McpJsonMapper json = McpJsonDefaults.getMapper();\n        Tool add = Tool.builder().name(\"add_note\").description(\"Save a note with a title and a text.\")\n                .inputSchema(json, \"{\\\"type\\\":\\\"object\\\",\\\"properties\\\":{\\\"title\\\":{\\\"type\\\":\\\"string\\\"},\\\"text\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"title\\\",\\\"text\\\"]}\")\n                .annotations(ToolAnnotations.builder().readOnlyHint(false).destructiveHint(false).idempotentHint(false).build()).build();\n        Tool search = Tool.builder().name(\"search_notes\").description(\"Find notes whose title or text contains the query.\")\n                .inputSchema(json, \"{\\\"type\\\":\\\"object\\\",\\\"properties\\\":{\\\"query\\\":{\\\"type\\\":\\\"string\\\"},\\\"limit\\\":{\\\"type\\\":\\\"integer\\\",\\\"default\\\":\" + defaultLimit() + \"}},\\\"required\\\":[\\\"query\\\"]}\")\n                .annotations(searchAnnotations()).build();\n        McpSchema.Resource count = McpSchema.Resource.builder().uri(\"notes://count\").name(\"count\").description(\"How many notes there are.\").mimeType(\"text/plain\").build();\n        McpSchema.ResourceTemplate noteTemplate = McpSchema.ResourceTemplate.builder().uriTemplate(\"notes://note/{id}\").name(\"note\").description(\"One note by id.\").mimeType(\"text/plain\").build();\n        McpSchema.Prompt review = new McpSchema.Prompt(\"review_notes\", \"Ask for a review of the notes.\", List.of(new McpSchema.PromptArgument(\"tone\", null, false)));\n\n        McpServer.sync(new StdioServerTransportProvider(json))\n                .serverInfo(\"notes\", \"1.0.0\")\n                .capabilities(McpSchema.ServerCapabilities.builder().tools(false).resources(false, false).prompts(false).build())\n                .tools(new SyncToolSpecification(add, (exchange, request) -> addNote(request.arguments())),\n                        new SyncToolSpecification(search, (exchange, request) -> searchNotes(request.arguments())))\n                .resources(new SyncResourceSpecification(count, (exchange, request) -> new McpSchema.ReadResourceResult(\n                        List.of(new McpSchema.TextResourceContents(request.uri(), \"text/plain\", countText(NOTES.size()))))))\n                .resourceTemplates(new SyncResourceTemplateSpecification(noteTemplate, (exchange, request) -> {\n                    String id = request.uri().substring(\"notes://note/\".length());\n                    return new McpSchema.ReadResourceResult(List.of(new McpSchema.TextResourceContents(request.uri(), \"text/plain\", noteText(id))));\n                }))\n                .prompts(new SyncPromptSpecification(review, (exchange, request) -> {\n                    Object tone = request.arguments() == null ? null : request.arguments().get(\"tone\");\n                    String text = reviewText(tone == null ? \"brief\" : String.valueOf(tone));\n                    return new McpSchema.GetPromptResult(null, List.of(new McpSchema.PromptMessage(McpSchema.Role.USER, new McpSchema.TextContent(text))));\n                }))\n                .build();\n        Thread.currentThread().join(); // the transport reads stdin on its own threads; keep the process alive until the client closes it\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.List;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // The tool functions of the server are plain static methods, so you can call them here without starting a client.\n        // (The tests start the server as a separate process and connect the SDK's client to it.)\n        var saved = NotesServer.addNote(Map.of(\"title\", \"Plan\", \"text\", \"ship it\"));\n        System.out.println(\"add_note: \" + ((io.modelcontextprotocol.spec.McpSchema.TextContent) saved.content().get(0)).text());\n        var found = NotesServer.searchNotes(Map.of(\"query\", \"ship\"));\n        System.out.println(\"search_notes: \" + ((io.modelcontextprotocol.spec.McpSchema.TextContent) found.content().get(0)).text());\n        System.out.println(\"count resource: \" + NotesServer.countText(NotesServer.NOTES.size()));\n        System.out.println(\"note 1 resource: \" + NotesServer.noteText(\"1\"));\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 7,
+    "paras": 7,
+    "code": 2,
+    "tables": 1,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "8092af45c526a57f5f795acede8c80ce9b6b15e6cd62c2ae50824a79a28e85dc",
+  "starting_code": "// A notes server for the Model Context Protocol, over stdio. See ../../statement.md.\nimport io.modelcontextprotocol.json.McpJsonDefaults;\nimport io.modelcontextprotocol.json.McpJsonMapper;\nimport io.modelcontextprotocol.server.McpServer;\nimport io.modelcontextprotocol.server.McpServerFeatures.SyncPromptSpecification;\nimport io.modelcontextprotocol.server.McpServerFeatures.SyncResourceSpecification;\nimport io.modelcontextprotocol.server.McpServerFeatures.SyncResourceTemplateSpecification;\nimport io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;\nimport io.modelcontextprotocol.server.transport.StdioServerTransportProvider;\nimport io.modelcontextprotocol.spec.McpError;\nimport io.modelcontextprotocol.spec.McpSchema;\nimport io.modelcontextprotocol.spec.McpSchema.CallToolResult;\nimport io.modelcontextprotocol.spec.McpSchema.Tool;\nimport io.modelcontextprotocol.spec.McpSchema.ToolAnnotations;\n\nimport java.util.ArrayList;\nimport java.util.List;\nimport java.util.Locale;\nimport java.util.Map;\n\npublic class NotesServer {\n    private static final System.Logger LOG = System.getLogger(NotesServer.class.getName());\n    static final int MAX_TEXT = 500;\n    record Note(String title, String text) {}\n    static final List<Note> NOTES = new ArrayList<>(); // the id of a note is its position, counting from 1\n\n    static CallToolResult ok(String text) {\n        return CallToolResult.builder().addTextContent(text).isError(false).build();\n    }\n\n    static CallToolResult fail(String message) {\n        return CallToolResult.builder().addTextContent(message).isError(true).build();\n    }\n\n    // GAP 1 of 9 (unlocks e2 and e7): refuse a bad note.\n    // Receives the title and the text, both already stripped. Returns the error message, or null when they are fine: \"title is required\" for an empty\n    // title, \"text is required\" for an empty text and \"text is too long (max \" + MAX_TEXT + \")\" for a text longer than MAX_TEXT, checked in that order.\n    // Example: noteError(\"\", \"x\") -> \"title is required\"; noteError(\"T\", \"x\") -> null\n    static String noteError(String title, String text) {\n        return null;\n    }\n\n    // GAP 2 of 9 (unlocks e2): refuse a bad search.\n    // Receives the stripped query and the limit. Returns the error message, or null when they are fine: \"query is required\" for an empty query and\n    // \"limit must be between 1 and 20\" for a limit outside 1 to 20, in that order.\n    // Example: searchError(\"x\", 21) -> \"limit must be between 1 and 20\"\n    static String searchError(String query, int limit) {\n        return null;\n    }\n\n    // GAP 3 of 9 (unlocks m1 and e3): the notes that match a search.\n    // Receives the stripped query. Returns the lines \"{id}. {title}\" of the notes in NOTES (ids count from 1) whose title or text contains the query\n    // in any letter case, in id order.\n    // Example: with notes (\"Alpha\", \"x\") and (\"beta\", \"ALPHA again\"), findHits(\"alpha\") -> [\"1. Alpha\", \"2. beta\"]\n    static List<String> findHits(String query) {\n        return new ArrayList<>();\n    }\n\n    // GAP 4 of 9 (unlocks e3): the answer of a search.\n    // Receives the hit lines, the limit and the stripped query. Returns at most limit lines joined by newlines; with no hits the sentence\n    // No notes match \"<query>\".\n    // Example: formatHits([\"1. A\", \"2. B\"], 1, \"a\") -> \"1. A\"; formatHits([], 5, \"zeta\") -> No notes match \"zeta\"\n    static String formatHits(List<String> hits, int limit, String query) {\n        return \"\";\n    }\n\n    // GAP 5 of 9 (unlocks e5): the text of the count resource.\n    // Receives the number of notes. Returns \"0 notes\", \"1 note\", \"2 notes\" and so on.\n    // Example: countText(1) -> \"1 note\"\n    static String countText(int count) {\n        return \"\";\n    }\n\n    // GAP 6 of 9 (unlocks m1 and e5): the text of one note.\n    // Receives the id from the URI as a string. Returns the title, an empty line, then the text. An id that is not a whole number of an existing note\n    // (\"0\", \"3\" of two notes, \"abc\") throws McpError.builder(-32602).message(\"No note \" + id).build().\n    // Example: with one note (\"Plan\", \"ship it\"), noteText(\"1\") -> \"Plan\\n\\nship it\"\n    static String noteText(String id) {\n        return \"\";\n    }\n\n    // GAP 7 of 9 (unlocks e6): the text of the review prompt.\n    // With no notes it is \"There are no notes to review.\"; otherwise \"Review these notes in a <tone> tone:\" and one line \"- <title>\" per note,\n    // each after a newline.\n    // Example: with one note titled \"Plan\", reviewText(\"brief\") -> \"Review these notes in a brief tone:\\n- Plan\"\n    static String reviewText(String tone) {\n        return \"\";\n    }\n\n    // GAP 8 of 9 (unlocks e1): how many hits a search returns when the caller gives no limit.\n    // Takes nothing; returns that number, which is also the default the tool's input schema advertises.\n    // Example: defaultLimit() -> 5\n    static int defaultLimit() {\n        return 0;\n    }\n\n    // GAP 9 of 9 (unlocks e4): the annotations that tell a client search_notes only reads.\n    // Takes nothing; returns ToolAnnotations with readOnlyHint true.\n    // Example: searchAnnotations().readOnlyHint() -> true\n    static ToolAnnotations searchAnnotations() {\n        return null;\n    }\n\n    static CallToolResult addNote(Map<String, Object> args) {\n        LOG.log(System.Logger.Level.DEBUG, \"addNote input: {0}\", args);\n        String title = String.valueOf(args.getOrDefault(\"title\", \"\")).strip(), text = String.valueOf(args.getOrDefault(\"text\", \"\")).strip();\n        String error = noteError(title, text);\n        if (error != null) return fail(error);\n        NOTES.add(new Note(title, text));\n        return ok(\"Saved note \" + NOTES.size() + \": \" + title);\n    }\n\n    static CallToolResult searchNotes(Map<String, Object> args) {\n        String query = String.valueOf(args.getOrDefault(\"query\", \"\")).strip();\n        int limit = ((Number) args.getOrDefault(\"limit\", defaultLimit())).intValue();\n        String error = searchError(query, limit);\n        if (error != null) return fail(error);\n        return ok(formatHits(findHits(query), limit, query));\n    }\n\n    public static void main(String[] args) throws InterruptedException {\n        McpJsonMapper json = McpJsonDefaults.getMapper();\n        Tool add = Tool.builder().name(\"add_note\").description(\"Save a note with a title and a text.\")\n                .inputSchema(json, \"{\\\"type\\\":\\\"object\\\",\\\"properties\\\":{\\\"title\\\":{\\\"type\\\":\\\"string\\\"},\\\"text\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"title\\\",\\\"text\\\"]}\")\n                .annotations(ToolAnnotations.builder().readOnlyHint(false).destructiveHint(false).idempotentHint(false).build()).build();\n        Tool search = Tool.builder().name(\"search_notes\").description(\"Find notes whose title or text contains the query.\")\n                .inputSchema(json, \"{\\\"type\\\":\\\"object\\\",\\\"properties\\\":{\\\"query\\\":{\\\"type\\\":\\\"string\\\"},\\\"limit\\\":{\\\"type\\\":\\\"integer\\\",\\\"default\\\":\" + defaultLimit() + \"}},\\\"required\\\":[\\\"query\\\"]}\")\n                .annotations(searchAnnotations()).build();\n        McpSchema.Resource count = McpSchema.Resource.builder().uri(\"notes://count\").name(\"count\").description(\"How many notes there are.\").mimeType(\"text/plain\").build();\n        McpSchema.ResourceTemplate noteTemplate = McpSchema.ResourceTemplate.builder().uriTemplate(\"notes://note/{id}\").name(\"note\").description(\"One note by id.\").mimeType(\"text/plain\").build();\n        McpSchema.Prompt review = new McpSchema.Prompt(\"review_notes\", \"Ask for a review of the notes.\", List.of(new McpSchema.PromptArgument(\"tone\", null, false)));\n\n        McpServer.sync(new StdioServerTransportProvider(json))\n                .serverInfo(\"notes\", \"1.0.0\")\n                .capabilities(McpSchema.ServerCapabilities.builder().tools(false).resources(false, false).prompts(false).build())\n                .tools(new SyncToolSpecification(add, (exchange, request) -> addNote(request.arguments())),\n                        new SyncToolSpecification(search, (exchange, request) -> searchNotes(request.arguments())))\n                .resources(new SyncResourceSpecification(count, (exchange, request) -> new McpSchema.ReadResourceResult(\n                        List.of(new McpSchema.TextResourceContents(request.uri(), \"text/plain\", countText(NOTES.size()))))))\n                .resourceTemplates(new SyncResourceTemplateSpecification(noteTemplate, (exchange, request) -> {\n                    String id = request.uri().substring(\"notes://note/\".length());\n                    return new McpSchema.ReadResourceResult(List.of(new McpSchema.TextResourceContents(request.uri(), \"text/plain\", noteText(id))));\n                }))\n                .prompts(new SyncPromptSpecification(review, (exchange, request) -> {\n                    Object tone = request.arguments() == null ? null : request.arguments().get(\"tone\");\n                    String text = reviewText(tone == null ? \"brief\" : String.valueOf(tone));\n                    return new McpSchema.GetPromptResult(null, List.of(new McpSchema.PromptMessage(McpSchema.Role.USER, new McpSchema.TextContent(text))));\n                }))\n                .build();\n        Thread.currentThread().join(); // the transport reads stdin on its own threads; keep the process alive until the client closes it\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/32-mcp-fundamentals/prose/unit-03/practice-3/src/main/java/NotesServer.java",
+    "test_path": "practice/level-2/32-mcp-fundamentals/prose/unit-03/practice-3/src/test/java/NotesTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/32-mcp-fundamentals/prose/unit-03/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/32-mcp-fundamentals/prose/unit-03/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_aClientCanSaveANoteFindItAndReadItBack()",
+        "kind": "main",
+        "says": "A client can save a note, find it and read it back"
+      },
+      {
+        "id": "e1_theServerDeclaresToolsResourcesAndPromptsAndNamesItsTools()",
+        "kind": "edge",
+        "says": "The server declares tools, resources and prompts, and names its tools"
+      },
+      {
+        "id": "e2_badInputComesBackAsAToolErrorTheModelCanRead()",
+        "kind": "edge",
+        "says": "Bad input comes back as a tool error the model can read"
+      },
+      {
+        "id": "e3_searchIgnoresCaseKeepsIdOrderHonoursTheLimitAndSaysWhenNothingMatches()",
+        "kind": "edge",
+        "says": "Search ignores case, keeps id order, honours the limit and says when nothing matches"
+      },
+      {
+        "id": "e4_toolAnnotationsTellAClientWhichToolOnlyReads()",
+        "kind": "edge",
+        "says": "Tool annotations tell a client which tool only reads"
+      },
+      {
+        "id": "e5_resourcesGiveTheCountANoteByIdAndAnErrorForAMissingOne()",
+        "kind": "edge",
+        "says": "Resources give the count, a note by id and an error for a missing one"
+      },
+      {
+        "id": "e6_thePromptListsTheNotesAndDefaultsTheTone()",
+        "kind": "edge",
+        "says": "The prompt lists the notes and defaults the tone"
+      },
+      {
+        "id": "e7_idsAreSequentialAndAFailedCallDoesNotUseOne()",
+        "kind": "edge",
+        "says": "Ids are sequential and a failed call does not use one"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/32-mcp-fundamentals/prose/unit-03/practice-3/target/test-results/test"
+    },
+    "origin": "course/32-mcp-fundamentals/03-clients-testing-and-debugging.md",
+    "concepts": [
+      "the practice of MCP clients, testing a server and debugging it is solved"
+    ],
+    "files": [
+      "practice/level-2/32-mcp-fundamentals/prose/unit-03/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "mcp-fundamentals-u3"
+}

@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "47-invoking-subagents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 3,
+  "title": "Check yourself: Passing context, running subagents in parallel and keeping sources",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A coordinator spawns a subagent when it did not set `run_in_background`, and then writes its answer to the user before the subagent has reported. What explains it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Delegated work launches immediately unless the call asks for a foreground wait",
+            "correct": true,
+            "says": "The documentation's default is a background launch, and a coordinator that needs the result first has to ask for a foreground run."
+          },
+          {
+            "id": "b",
+            "text": "The spend cap was reached, so the subagent never started and nothing was reported",
+            "correct": false,
+            "says": "Ruled out because a spent cap is reported, not silent: \"spawning another subagent fails with `Budget limit reached`\"."
+          },
+          {
+            "id": "c",
+            "text": "Subagents are started one at a time, so the second one was still queued",
+            "correct": false,
+            "says": "Ruled out because the SDK runs them together: \"Multiple subagents can run concurrently, so independent subtasks finish in the time of the slowest one rather than the sum of all of them.\""
+          },
+          {
+            "id": "d",
+            "text": "The concurrency limit refused the spawn without telling the coordinator anything",
+            "correct": false,
+            "says": "Ruled out because the refusal is a result that the coordinator reads: \"the spawn is refused with the tool result `Concurrent subagent limit reached`, and the coordinator reads it like any other result\"."
+          }
+        ],
+        "origin": {
+          "path": "course/47-invoking-subagents/02-context-parallel-subagents-and-the-practice.md",
+          "section": "Parallel subagents"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A research coordinator merges the prose reports of three subagents. The final answer repeats a figure that nobody can trace to a document, and two subagents had reported the same fact. Which change fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Keep only the first source of every repeated fact",
+            "correct": false,
+            "says": "Ruled out because the sources are the evidence: \"two subagents that found the same fact independently strengthen it, and the reader sees both sources\"."
+          },
+          {
+            "id": "b",
+            "text": "Ask the synthesizer to cite sources by recalling where each figure appeared",
+            "correct": false,
+            "says": "Ruled out because \"attribution is a property of the data, and the synthesis cannot be asked to rebuild it from prose.\""
+          },
+          {
+            "id": "c",
+            "text": "Write the source into each claim sentence, in brackets right after the text",
+            "correct": false,
+            "says": "Ruled out because \"The metadata is never written into the claim string, because then the merge could not recognise that two sentences are the same claim.\""
+          },
+          {
+            "id": "d",
+            "text": "Return each claim and its origin as separate fields, and combine on claims",
+            "correct": true,
+            "says": "Content and metadata in separate fields let the merge recognise one claim and keep every source."
+          }
+        ],
+        "origin": {
+          "path": "course/47-invoking-subagents/02-context-parallel-subagents-and-the-practice.md",
+          "section": "Keep the content apart from the metadata"
+        }
+      }
+    ]
+  }
+}

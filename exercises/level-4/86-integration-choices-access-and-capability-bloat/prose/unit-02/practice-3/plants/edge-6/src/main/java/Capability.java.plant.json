@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/java/Capability.java",
+      "old": "        if (!policy.models().get(team).contains(request.model())) return List.of(\"deny\", \"model not allowed\");\n",
+      "new": "        if (request.recent() >= policy.limits().get(team)) return List.of(\"deny\", \"rate limited\");\n        if (!policy.models().get(team).contains(request.model())) return List.of(\"deny\", \"model not allowed\");\n"
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "39-extending-claude-code"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 2,
+  "title": "Practice: a release plugin with a guard hook (TypeScript)",
+  "lang": "typescript",
+  "main_file": "project/scripts/guard.py",
+  "files": [
+    "project/.claude/settings.json",
+    "project/.claude-plugin/plugin.json",
+    "project/agents/changelog-reviewer.md",
+    "project/hooks/hooks.json",
+    "project/skills/publish/SKILL.md",
+    "project/skills/release-notes/SKILL.md"
+  ],
+  "test_file": "tests/pluginSetup.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "tests/examples/39-hook-gate/typescript/hookGate.ts",
+    "tests/examples/39-hook-gate/typescript/miniyaml.ts",
+    "tests/examples/39-hook-gate/typescript/example-logger.ts",
+    "logger.ts",
+    "check_files.py"
+  ],
+  "run_command": [
+    "python3",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/check_files.py",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/project/.claude-plugin/plugin.json",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/project/.claude/settings.json",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/project/agents/changelog-reviewer.md",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/project/hooks/hooks.json",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/project/scripts/guard.py",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/project/skills/publish/SKILL.md",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/project/skills/release-notes/SKILL.md"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-2/39-extending-claude-code/prose/unit-03/practice-2/tests/pluginSetup.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 the hook script blocks pushes deletes and piped downloads in any spelling",
+      "kind": "main",
+      "says": "The guard refuses pushes, forced recursive deletes and piped downloads in every spelling, with a reason, and leaves safe commands alone"
+    },
+    {
+      "id": "e1 edits to protected paths stop with exit two and a reason",
+      "kind": "edge",
+      "says": "Edits to protected paths stop with exit code 2 and a reason, in any of three tools and with Windows separators"
+    },
+    {
+      "id": "e2 an event it cannot read blocks the call and other tools are left alone",
+      "kind": "edge",
+      "says": "An unreadable event blocks the call, while other tools and a Bash event with no command are left alone"
+    },
+    {
+      "id": "e3 the hook is registered for every tool it guards and found through the plugin root",
+      "kind": "edge",
+      "says": "The hook is registered once for the three tools it guards and found through the plugin root"
+    },
+    {
+      "id": "e4 the skills set the right invocation rules and approve only patterns",
+      "kind": "edge",
+      "says": "The skills have the right invocation rules, approve only patterns and say when to use them"
+    },
+    {
+      "id": "e5 the subagent only reads is bounded and uses only fields a plugin agent honours",
+      "kind": "edge",
+      "says": "The subagent only reads, is bounded, and uses only fields a plugin agent honours"
+    },
+    {
+      "id": "e6 the manifest names the plugin and pins its dependency to patch updates",
+      "kind": "edge",
+      "says": "The manifest names the plugin and pins the dependency to patch updates"
+    },
+    {
+      "id": "e7 the team settings register the marketplace the enabled plugin comes from",
+      "kind": "edge",
+      "says": "The team settings register a marketplace and enable the plugin from it"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/39-extending-claude-code/03-plugins-sharing-and-the-practice.md"
+}

@@ -1,0 +1,279 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "72-scenario-multi-agent-research-system"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: the coordinator's last step in a research run (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: the coordinator's last step in a research run"
+    },
+    {
+      "type": "para",
+      "text": "A coordinator hands subtasks to a search subagent, a document-analysis subagent and a synthesis subagent. The subagents have finished, some of them with a failure, and the coordinator has a list of results. Before the report is written, the coordinator must decide what it knows: which of the question's scopes were really covered, which claims several sources agree on, which claims the sources disagree about, what failed and what could be tried instead, and what the report cannot say. In this practice you write that step. The model is not called: the tests give you the results of the subagents. The shapes of a result and of the report are this course's own design for the capstone, not an Anthropic interface. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`synthesize`); TypeScript has the same name and the same fields. Java has the static method `Synthesis.synthesize` and the records `Finding`, `Failure`, `Result`, `Claim`, `Conflict` and `Report`; Kotlin has the top-level function `synthesize` and the data classes of the same names."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working synthesis step with seven gaps cut out of it. The plumbing is written and correct: collecting the findings of `ok` results and of the `partial` lists, grouping them by claim, telling a conflict (two or more values) from an agreed claim, and building the report from the pieces. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (Java and Kotlin use the camel-case names):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`covered_scopes` unlocks `e1` and `e5`, and the coverage in every case: the covered scopes and the gaps.",
+        "`sources_of` unlocks `e6`: the sources of a claim, in arrival order, without duplicates.",
+        "`observed_values` unlocks `e3`: the values and sources of a conflicting claim.",
+        "`all_partial` unlocks `e4`: whether every finding of a claim came from a partial list.",
+        "`unresolved_errors` unlocks `e2` and `e4`: the errors that a later result did not make up for.",
+        "`partial_scopes` unlocks `e4`: the gaps that a failed search still returned findings for.",
+        "`coverage_note` unlocks `e1`, `e2` and `e5`: the sentence about what is not covered."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About fifteen lines in all. The sections below describe the whole step."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "A finding is `{claim, value, source, date}`. A result of a subagent is `{scope, status, findings, error}`: `status` is `ok` (with `findings`) or `error` (with `error`, an object `{type, query, partial, alternatives}`, where `partial` is a list of findings that came back before the failure and `alternatives` lists queries to try instead)."
+    },
+    {
+      "type": "para",
+      "text": "`synthesize(required, results)` takes the scopes the question needs, in order, and returns a report with:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`covered`: the required scopes (in the order of `required`) that have an `ok` result with at least one finding; `gaps`: the other required scopes; `status`: `complete` when there are no gaps and `partial` otherwise.",
+        "`claims`: a list, sorted by the text of the claim, with `{claim, value, sources, partial}` for every claim on which all findings agree. `sources` is a list of `{source, date}` in the order the findings arrived, without duplicates. Findings come from `ok` results and from the `partial` lists of errors. `partial` is true only when every finding of the claim came from a `partial` list.",
+        "`conflicts`: a list, sorted by claim, with `{claim, values}` for every claim that has two or more different values; `values` lists `{value, source, date}` for each distinct value and source, in arrival order. A conflicting claim is not in `claims`: the report does not choose.",
+        "`errors`: for each result with status `error` whose scope is not covered, `{scope, type, query, alternatives}`. An error that a later `ok` result for the same scope made up for is not listed.",
+        "`partial`: the gaps for which an error returned partial findings.",
+        "`note`: `all scopes covered` when there are no gaps; otherwise `not covered: ` and the gaps in order, separated by `, `, each as `<scope> (<type> on '<query>')` when an unresolved error is recorded for it, `<scope> (not researched)` when no result at all names the scope (the plan never covered it), and `<scope> (no findings)` otherwise."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Coverage is checked against the question, not against the plan.** The exam's example is a report on the creative industries that covers only visual arts: every subagent succeeded and the coordinator's decomposition was too narrow. *You should see* a scope nobody researched reported as a gap and as `not researched`, which differs from a scope whose search failed.",
+        "**A failure travels with its context.** A bare \"search failed\" tells the coordinator nothing. *You should see* the type, the query and the alternatives kept, and a note that names them.",
+        "**A partial result is still information, and it is not coverage.** *You should see* partial findings in the claims, flagged, while their scope stays a gap.",
+        "**A conflict is information.** Two sources with two values are both shown, with their dates, and the report does not average or pick. *You should see* a conflict that names both sources and no claim for it.",
+        "**A status that cannot lie.** `complete` means that every scope was covered. *You should see* `partial` whenever a scope is missing, whatever the reason."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A full run with agreement: claims with every source, a complete status and the all-clear note"
+        ],
+        [
+          "`e1`",
+          "No results: every scope is a gap, `not researched`"
+        ],
+        [
+          "`e2`",
+          "A scope the plan never covered and a scope whose search failed read differently in the note"
+        ],
+        [
+          "`e3`",
+          "Two values for one claim are a conflict naming both sources and no claim"
+        ],
+        [
+          "`e4`",
+          "Partial results kept and flagged, not covering their scope, and an error that a retry made up for disappears"
+        ],
+        [
+          "`e5`",
+          "An `ok` result with no findings does not cover its scope"
+        ],
+        [
+          "`e6`",
+          "Claims sorted, sources in arrival order without duplicates, scopes in the order of `required`"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "private val log = System.getLogger(\"synthesis\")\n\ndata class Finding(val claim: String, val value: String, val source: String, val date: String)\n\n/** What a failed subagent returns: its type, the query, the partial findings and what to try instead. */\ndata class Failure(val type: String, val query: String, val partial: List<Finding>, val alternatives: List<String>)\n\n/** A subagent's result: status \"ok\" with findings, or \"error\" with a failure. */\ndata class Result(val scope: String, val status: String, val findings: List<Finding>, val error: Failure?)\n\ndata class Source(val source: String, val date: String)\n\ndata class Claim(val claim: String, val value: String, val sources: List<Source>, val partial: Boolean)\n\ndata class Observed(val value: String, val source: String, val date: String)\n\ndata class Conflict(val claim: String, val values: List<Observed>)\n\ndata class Unresolved(val scope: String, val type: String, val query: String, val alternatives: List<String>)\n\ndata class Report(\n    val status: String, val covered: List<String>, val gaps: List<String>, val partial: List<String>, val claims: List<Claim>,\n    val conflicts: List<Conflict>, val errors: List<Unresolved>, val note: String,\n)\n\nprivate fun <T> MutableList<T>.addNew(item: T) {\n    if (item !in this) add(item)\n}\n\n/** Every finding with its partial flag, in arrival order. */\nprivate fun findings(results: List<Result>): List<Pair<Finding, Boolean>> {\n    val seen = mutableListOf<Pair<Finding, Boolean>>()\n    for (r in results) {\n        if (r.status == \"ok\") r.findings.forEach { seen += it to false } else r.error!!.partial.forEach { seen += it to true }\n    }\n    return seen\n}\n\nprivate fun coveredScopes(required: List<String>, results: List<Result>): Pair<List<String>, List<String>> {\n    val okScopes = results.filter { it.status == \"ok\" && it.findings.isNotEmpty() }.map { it.scope }\n    return required.filter { it in okScopes } to required.filter { it !in okScopes }\n}\n\nprivate fun sourcesOf(group: List<Pair<Finding, Boolean>>): List<Source> {\n    val sources = mutableListOf<Source>()\n    group.forEach { (f, _) -> sources.addNew(Source(f.source, f.date)) }\n    return sources\n}\n\nprivate fun observedValues(group: List<Pair<Finding, Boolean>>): List<Observed> {\n    val observed = mutableListOf<Observed>()\n    group.forEach { (f, _) -> observed.addNew(Observed(f.value, f.source, f.date)) }\n    return observed\n}\n\nprivate fun allPartial(group: List<Pair<Finding, Boolean>>): Boolean = group.all { it.second }\n\nprivate fun unresolvedErrors(results: List<Result>, covered: List<String>): List<Unresolved> =\n    results.filter { it.status == \"error\" && it.scope !in covered }.map { Unresolved(it.scope, it.error!!.type, it.error.query, it.error.alternatives) }\n\nprivate fun partialScopes(results: List<Result>, gaps: List<String>): List<String> =\n    gaps.filter { s -> results.any { it.status == \"error\" && it.scope == s && it.error!!.partial.isNotEmpty() } }\n\nprivate fun coverageNote(gaps: List<String>, errors: List<Unresolved>, results: List<Result>): String {\n    val parts = gaps.map { g ->\n        val failed = errors.firstOrNull { it.scope == g }\n        when {\n            failed != null -> \"$g (${failed.type} on '${failed.query}')\"\n            results.none { it.scope == g } -> \"$g (not researched)\"\n            else -> \"$g (no findings)\"\n        }\n    }\n    return if (parts.isEmpty()) \"all scopes covered\" else \"not covered: \" + parts.joinToString(\", \")\n}\n\n/** The coordinator's last step in a research run: merge what the subagents returned into claims with their sources, conflicts, errors and a coverage note. */\nfun synthesize(required: List<String>, results: List<Result>): Report {\n    log.log(System.Logger.Level.DEBUG, \"synthesize input: {0}\", results)\n    val (covered, gaps) = coveredScopes(required, results)\n    val claims = mutableListOf<Claim>()\n    val conflicts = mutableListOf<Conflict>()\n    for ((claim, group) in findings(results).groupBy { it.first.claim }.toSortedMap()) {\n        val values = mutableListOf<String>()\n        group.forEach { values.addNew(it.first.value) }\n        if (values.size > 1) conflicts += Conflict(claim, observedValues(group))\n        else claims += Claim(claim, values[0], sourcesOf(group), allPartial(group))\n    }\n    val errors = unresolvedErrors(results, covered)\n    return Report(if (gaps.isEmpty()) \"complete\" else \"partial\", covered, gaps, partialScopes(results, gaps), claims, conflicts, errors, coverageNote(gaps, errors, results))\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // Two subagents agree on claim X; a third scope timed out and is not covered.\n    val a = Result(\"a\", \"ok\", listOf(Finding(\"X\", \"1\", \"s1\", \"2025-01-01\"), Finding(\"Y\", \"2\", \"s2\", \"2025-01-01\")), null)\n    val b = Result(\"b\", \"ok\", listOf(Finding(\"X\", \"1\", \"s3\", \"2025-01-01\")), null)\n    val c = Result(\"c\", \"error\", emptyList(), Failure(\"timeout\", \"q-c\", emptyList(), listOf(\"q-c-narrow\")))\n    val report = synthesize(listOf(\"a\", \"b\", \"c\"), listOf(a, b, c))\n    println(\"status: ${report.status}\")\n    println(\"covered: ${report.covered} | gaps: ${report.gaps}\")\n    println(\"claims: ${report.claims}\")\n    println(\"note: ${report.note}\")\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "private val log = System.getLogger(\"synthesis\")\n\ndata class Finding(val claim: String, val value: String, val source: String, val date: String)\n\n/** What a failed subagent returns: its type, the query, the partial findings and what to try instead. */\ndata class Failure(val type: String, val query: String, val partial: List<Finding>, val alternatives: List<String>)\n\n/** A subagent's result: status \"ok\" with findings, or \"error\" with a failure. */\ndata class Result(val scope: String, val status: String, val findings: List<Finding>, val error: Failure?)\n\ndata class Source(val source: String, val date: String)\n\ndata class Claim(val claim: String, val value: String, val sources: List<Source>, val partial: Boolean)\n\ndata class Observed(val value: String, val source: String, val date: String)\n\ndata class Conflict(val claim: String, val values: List<Observed>)\n\ndata class Unresolved(val scope: String, val type: String, val query: String, val alternatives: List<String>)\n\ndata class Report(\n    val status: String, val covered: List<String>, val gaps: List<String>, val partial: List<String>, val claims: List<Claim>,\n    val conflicts: List<Conflict>, val errors: List<Unresolved>, val note: String,\n)\n\nprivate fun <T> MutableList<T>.addNew(item: T) {\n    if (item !in this) add(item)\n}\n\n/** Every finding with its partial flag, in arrival order. */\nprivate fun findings(results: List<Result>): List<Pair<Finding, Boolean>> {\n    val seen = mutableListOf<Pair<Finding, Boolean>>()\n    for (r in results) {\n        if (r.status == \"ok\") r.findings.forEach { seen += it to false } else r.error!!.partial.forEach { seen += it to true }\n    }\n    return seen\n}\n\n/**\n * TODO 1 of 7 (unlocks e1, e5 and the coverage of every other case): split the required scopes into covered and gaps.\n * Receives the required scopes and the results. Returns (covered, gaps), both in the order of `required`: a scope is covered\n * when an \"ok\" result for it has at least one finding.\n * Example: required [\"a\", \"b\"], one ok result for \"a\" with a finding -> ([\"a\"], [\"b\"])\n */\nprivate fun coveredScopes(required: List<String>, results: List<Result>): Pair<List<String>, List<String>> = listOf<String>() to listOf()\n\n/**\n * TODO 2 of 7 (unlocks e6): the sources of one claim.\n * Receives the (finding, partial) pairs of one claim. Returns a list of Source in arrival order, no duplicates.\n * Example: findings from s9, s1, s9 -> [Source(\"s9\", ...), Source(\"s1\", ...)]\n */\nprivate fun sourcesOf(group: List<Pair<Finding, Boolean>>): List<Source> = listOf()\n\n/**\n * TODO 3 of 7 (unlocks e3): what the sources said about a conflicting claim.\n * Receives the (finding, partial) pairs of one claim. Returns a list of Observed (value, source, date) in arrival order, no duplicates.\n * Example: s1 says \"12\", s2 says \"14\" twice -> [Observed(\"12\", \"s1\", ...), Observed(\"14\", \"s2\", ...)]\n */\nprivate fun observedValues(group: List<Pair<Finding, Boolean>>): List<Observed> = listOf()\n\n/**\n * TODO 4 of 7 (unlocks e4): is every finding of the claim from a partial list?\n * Receives the (finding, partial) pairs of one claim. Returns true only when all of them are partial.\n * Example: [(f, true), (f, false)] -> false\n */\nprivate fun allPartial(group: List<Pair<Finding, Boolean>>): Boolean = false\n\n/**\n * TODO 5 of 7 (unlocks e2 and e4): the errors that nothing made up for.\n * Receives the results and the covered scopes. Returns an Unresolved (scope, type, query, alternatives) for each \"error\" result whose scope is not covered.\n * Example: an error for \"b\" while only \"a\" is covered -> [Unresolved(\"b\", \"timeout\", \"qb\", [...])]\n */\nprivate fun unresolvedErrors(results: List<Result>, covered: List<String>): List<Unresolved> = listOf()\n\n/**\n * TODO 6 of 7 (unlocks e4): the gaps for which a failed search still returned findings.\n * Receives the results and the gaps. Returns the gaps that have an \"error\" result with a non-empty partial list.\n * Example: gap \"b\" with an error that carries one partial finding -> [\"b\"]\n */\nprivate fun partialScopes(results: List<Result>, gaps: List<String>): List<String> = listOf()\n\n/**\n * TODO 7 of 7 (unlocks e1, e2 and e5): say what the report cannot cover.\n * Receives the gaps, the unresolved errors and the results. Returns \"all scopes covered\" for no gaps; otherwise \"not covered: \" and\n * each gap as \"<scope> (<type> on '<query>')\" for an unresolved error, \"<scope> (not researched)\" when no result names the scope,\n * or \"<scope> (no findings)\", joined by \", \".\n * Example: gaps [\"b\", \"c\"], an error for \"b\" (timeout on \"qb\"), no result for \"c\" -> \"not covered: b (timeout on 'qb'), c (not researched)\"\n */\nprivate fun coverageNote(gaps: List<String>, errors: List<Unresolved>, results: List<Result>): String = \"\"\n\n/** The coordinator's last step in a research run: merge what the subagents returned into claims with their sources, conflicts, errors and a coverage note. */\nfun synthesize(required: List<String>, results: List<Result>): Report {\n    log.log(System.Logger.Level.DEBUG, \"synthesize input: {0}\", results)\n    val (covered, gaps) = coveredScopes(required, results)\n    val claims = mutableListOf<Claim>()\n    val conflicts = mutableListOf<Conflict>()\n    for ((claim, group) in findings(results).groupBy { it.first.claim }.toSortedMap()) {\n        val values = mutableListOf<String>()\n        group.forEach { values.addNew(it.first.value) }\n        if (values.size > 1) conflicts += Conflict(claim, observedValues(group))\n        else claims += Claim(claim, values[0], sourcesOf(group), allPartial(group))\n    }\n    val errors = unresolvedErrors(results, covered)\n    return Report(if (gaps.isEmpty()) \"complete\" else \"partial\", covered, gaps, partialScopes(results, gaps), claims, conflicts, errors, coverageNote(gaps, errors, results))\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // Two subagents agree on claim X; a third scope timed out and is not covered.\n    val a = Result(\"a\", \"ok\", listOf(Finding(\"X\", \"1\", \"s1\", \"2025-01-01\"), Finding(\"Y\", \"2\", \"s2\", \"2025-01-01\")), null)\n    val b = Result(\"b\", \"ok\", listOf(Finding(\"X\", \"1\", \"s3\", \"2025-01-01\")), null)\n    val c = Result(\"c\", \"error\", emptyList(), Failure(\"timeout\", \"q-c\", emptyList(), listOf(\"q-c-narrow\")))\n    val report = synthesize(listOf(\"a\", \"b\", \"c\"), listOf(a, b, c))\n    println(\"status: ${report.status}\")\n    println(\"covered: ${report.covered} | gaps: ${report.gaps}\")\n    println(\"claims: ${report.claims}\")\n    println(\"note: ${report.note}\")\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 7,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "b346bebeab44b73fe9f476c13dfa9b49e657a47a8b50d07206b99bc4e3e50247",
+  "starting_code": "private val log = System.getLogger(\"synthesis\")\n\ndata class Finding(val claim: String, val value: String, val source: String, val date: String)\n\n/** What a failed subagent returns: its type, the query, the partial findings and what to try instead. */\ndata class Failure(val type: String, val query: String, val partial: List<Finding>, val alternatives: List<String>)\n\n/** A subagent's result: status \"ok\" with findings, or \"error\" with a failure. */\ndata class Result(val scope: String, val status: String, val findings: List<Finding>, val error: Failure?)\n\ndata class Source(val source: String, val date: String)\n\ndata class Claim(val claim: String, val value: String, val sources: List<Source>, val partial: Boolean)\n\ndata class Observed(val value: String, val source: String, val date: String)\n\ndata class Conflict(val claim: String, val values: List<Observed>)\n\ndata class Unresolved(val scope: String, val type: String, val query: String, val alternatives: List<String>)\n\ndata class Report(\n    val status: String, val covered: List<String>, val gaps: List<String>, val partial: List<String>, val claims: List<Claim>,\n    val conflicts: List<Conflict>, val errors: List<Unresolved>, val note: String,\n)\n\nprivate fun <T> MutableList<T>.addNew(item: T) {\n    if (item !in this) add(item)\n}\n\n/** Every finding with its partial flag, in arrival order. */\nprivate fun findings(results: List<Result>): List<Pair<Finding, Boolean>> {\n    val seen = mutableListOf<Pair<Finding, Boolean>>()\n    for (r in results) {\n        if (r.status == \"ok\") r.findings.forEach { seen += it to false } else r.error!!.partial.forEach { seen += it to true }\n    }\n    return seen\n}\n\n/**\n * TODO 1 of 7 (unlocks e1, e5 and the coverage of every other case): split the required scopes into covered and gaps.\n * Receives the required scopes and the results. Returns (covered, gaps), both in the order of `required`: a scope is covered\n * when an \"ok\" result for it has at least one finding.\n * Example: required [\"a\", \"b\"], one ok result for \"a\" with a finding -> ([\"a\"], [\"b\"])\n */\nprivate fun coveredScopes(required: List<String>, results: List<Result>): Pair<List<String>, List<String>> = listOf<String>() to listOf()\n\n/**\n * TODO 2 of 7 (unlocks e6): the sources of one claim.\n * Receives the (finding, partial) pairs of one claim. Returns a list of Source in arrival order, no duplicates.\n * Example: findings from s9, s1, s9 -> [Source(\"s9\", ...), Source(\"s1\", ...)]\n */\nprivate fun sourcesOf(group: List<Pair<Finding, Boolean>>): List<Source> = listOf()\n\n/**\n * TODO 3 of 7 (unlocks e3): what the sources said about a conflicting claim.\n * Receives the (finding, partial) pairs of one claim. Returns a list of Observed (value, source, date) in arrival order, no duplicates.\n * Example: s1 says \"12\", s2 says \"14\" twice -> [Observed(\"12\", \"s1\", ...), Observed(\"14\", \"s2\", ...)]\n */\nprivate fun observedValues(group: List<Pair<Finding, Boolean>>): List<Observed> = listOf()\n\n/**\n * TODO 4 of 7 (unlocks e4): is every finding of the claim from a partial list?\n * Receives the (finding, partial) pairs of one claim. Returns true only when all of them are partial.\n * Example: [(f, true), (f, false)] -> false\n */\nprivate fun allPartial(group: List<Pair<Finding, Boolean>>): Boolean = false\n\n/**\n * TODO 5 of 7 (unlocks e2 and e4): the errors that nothing made up for.\n * Receives the results and the covered scopes. Returns an Unresolved (scope, type, query, alternatives) for each \"error\" result whose scope is not covered.\n * Example: an error for \"b\" while only \"a\" is covered -> [Unresolved(\"b\", \"timeout\", \"qb\", [...])]\n */\nprivate fun unresolvedErrors(results: List<Result>, covered: List<String>): List<Unresolved> = listOf()\n\n/**\n * TODO 6 of 7 (unlocks e4): the gaps for which a failed search still returned findings.\n * Receives the results and the gaps. Returns the gaps that have an \"error\" result with a non-empty partial list.\n * Example: gap \"b\" with an error that carries one partial finding -> [\"b\"]\n */\nprivate fun partialScopes(results: List<Result>, gaps: List<String>): List<String> = listOf()\n\n/**\n * TODO 7 of 7 (unlocks e1, e2 and e5): say what the report cannot cover.\n * Receives the gaps, the unresolved errors and the results. Returns \"all scopes covered\" for no gaps; otherwise \"not covered: \" and\n * each gap as \"<scope> (<type> on '<query>')\" for an unresolved error, \"<scope> (not researched)\" when no result names the scope,\n * or \"<scope> (no findings)\", joined by \", \".\n * Example: gaps [\"b\", \"c\"], an error for \"b\" (timeout on \"qb\"), no result for \"c\" -> \"not covered: b (timeout on 'qb'), c (not researched)\"\n */\nprivate fun coverageNote(gaps: List<String>, errors: List<Unresolved>, results: List<Result>): String = \"\"\n\n/** The coordinator's last step in a research run: merge what the subagents returned into claims with their sources, conflicts, errors and a coverage note. */\nfun synthesize(required: List<String>, results: List<Result>): Report {\n    log.log(System.Logger.Level.DEBUG, \"synthesize input: {0}\", results)\n    val (covered, gaps) = coveredScopes(required, results)\n    val claims = mutableListOf<Claim>()\n    val conflicts = mutableListOf<Conflict>()\n    for ((claim, group) in findings(results).groupBy { it.first.claim }.toSortedMap()) {\n        val values = mutableListOf<String>()\n        group.forEach { values.addNew(it.first.value) }\n        if (values.size > 1) conflicts += Conflict(claim, observedValues(group))\n        else claims += Claim(claim, values[0], sourcesOf(group), allPartial(group))\n    }\n    val errors = unresolvedErrors(results, covered)\n    return Report(if (gaps.isEmpty()) \"complete\" else \"partial\", covered, gaps, partialScopes(results, gaps), claims, conflicts, errors, coverageNote(gaps, errors, results))\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/72-scenario-multi-agent-research-system/prose/unit-02/practice-4/src/main/kotlin/Synthesis.kt",
+    "test_path": "practice/level-3/72-scenario-multi-agent-research-system/prose/unit-02/practice-4/src/test/kotlin/SynthesisTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/72-scenario-multi-agent-research-system/prose/unit-02/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/72-scenario-multi-agent-research-system/prose/unit-02/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_aFullRunWithAgreementReturnsClaimsWithEverySourceAndACompleteStatus()",
+        "kind": "main",
+        "says": "A full run with agreement: claims with every source, a complete status and the all-clear note"
+      },
+      {
+        "id": "e1_noResultsLeaveEveryScopeAGapAndSayNotResearched()",
+        "kind": "edge",
+        "says": "No results: every scope is a gap, not researched"
+      },
+      {
+        "id": "e2_aScopeThePlanNeverCoveredAndAScopeWhoseSearchFailedReadDifferentlyInTheNote()",
+        "kind": "edge",
+        "says": "A scope the plan never covered and a scope whose search failed read differently in the note"
+      },
+      {
+        "id": "e3_twoValuesForOneClaimAreAConflictThatNamesBothSourcesAndNoClaim()",
+        "kind": "edge",
+        "says": "Two values for one claim are a conflict naming both sources and no claim"
+      },
+      {
+        "id": "e4_partialResultsAreKeptAndFlaggedButDoNotCoverTheScopeAndARetryThatWorkedClearsTheError()",
+        "kind": "edge",
+        "says": "Partial results kept and flagged, not covering their scope, and an error that a retry made up for disappears"
+      },
+      {
+        "id": "e5_aResultWithNoFindingsDoesNotCoverItsScope()",
+        "kind": "edge",
+        "says": "An ok result with no findings does not cover its scope"
+      },
+      {
+        "id": "e6_claimsSourcesAndScopesComeOutInAFixedOrderWithoutDuplicates()",
+        "kind": "edge",
+        "says": "Claims sorted, sources in arrival order without duplicates, scopes in the order of required"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/72-scenario-multi-agent-research-system/prose/unit-02/practice-4/target/test-results/test"
+    },
+    "origin": "course/72-scenario-multi-agent-research-system/02-failures-conflicts-the-coverage-note-and-the-practice.md",
+    "concepts": [
+      "the practice of Failures, conflicts, the coverage note and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/72-scenario-multi-agent-research-system/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "scenario-multi-agent-research-system-u2"
+}

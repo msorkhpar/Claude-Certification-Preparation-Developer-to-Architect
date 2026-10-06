@@ -1,0 +1,298 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "41-security-and-safety"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: an injection-resistant tool gate (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an injection-resistant tool gate"
+    },
+    {
+      "type": "para",
+      "text": "An agent that reads the web, mail or files is exposed to text that someone else wrote and that may carry instructions. The defence is not one clever prompt. It is layers around the model: untrusted text is kept apart from your instructions, every tool call is checked against least privilege before it runs, a session that has read untrusted text gets less freedom, secrets never reach logs, and every decision is recorded. In this practice you write the code layer: a small gate that sits between the model's tool calls and the tools. It is a design the course proposes from the documented advice (untrusted content only in tool results and JSON-encoded, least privilege, screening, a hook that decides before the permission prompt); it is not a feature of any product. Nothing here calls a model or the network: the tests call the gate the way a hook would."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "para",
+      "text": "The Java and Kotlin folders give you `Json` (parse text into maps, lists, strings, numbers, booleans and null, and write them back compactly, keys in insertion order). Python and TypeScript have JSON built in. Decisions and records are plain data: a map with string keys in every language."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working gate with six gaps cut out of it. Everything that is plumbing is written and correct: the injection patterns and the `screen` function, the path resolver, the dangerous-command, chaining, secret-argument and taint checks, the URL parsing, the audit, the card and key redaction around the Luhn check, and the hook answer. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. Write them in this order (the Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`wrap_untrusted` unlocks `m1` and `e1`: the JSON block for clean text and the withheld error for flagged text.",
+        "`_is_secret` unlocks `e2`: which file names count as secrets.",
+        "`_command_allowed` unlocks `e3`: the allow-list of first words, and the `git` sub-commands.",
+        "`_is_card` unlocks `e6`: the length and Luhn test that decides whether a run of digits is a card number.",
+        "`_email_decision` unlocks `e4` and `e5`: the domain list, the body check and the tainted-session refusal.",
+        "`alerts` unlocks `e7`: actors with three denials, in the order they reached three."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole gate; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "Names are written in Python style; TypeScript uses camelCase (`wrapUntrusted`, `markUntrusted`, `hookResponse`, `tainted` as a getter, `audit` as a getter); Java and Kotlin put the three functions on the class as static or companion members (`Gate.screen`, `Gate.wrapUntrusted`, `Gate.redact`, `Gate.hookResponse`) and use `isTainted()` / `isTainted`, `audit()` and `alerts()` as methods."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`screen(text)` returns the names of the injection signals found in the text, in this order: `override`, `role-tag`, `exfiltrate`, `reveal`. All four patterns ignore letter case and let `.` match a newline.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`override`: `\\b(ignore|disregard|forget)\\b.{0,40}\\b(previous|prior|above|earlier|system)\\b.{0,20}\\b(instructions?|prompts?|rules)\\b`",
+              "`role-tag`: `<\\s*/?\\s*(system|assistant|tool_result|instructions?)\\s*>`",
+              "`exfiltrate`: `\\b(send|email|forward|post|upload)\\b.{0,60}\\b(to|at)\\b.{0,40}[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)+`",
+              "`reveal`: `\\b(reveal|print|show|repeat)\\b.{0,40}\\b(system prompt|password|secret|api key)\\b`"
+            ]
+          }
+        ],
+        "`wrap_untrusted(tool_use_id, source, content)` returns a tool result block. For clean text it is `{\"type\": \"tool_result\", \"tool_use_id\": ..., \"content\": <one line of compact JSON>}` where the JSON is the object `{\"source\": source, \"trust\": \"untrusted\", \"content\": content}` with those keys in that order. When `screen` finds a signal it returns `{\"type\": \"tool_result\", \"tool_use_id\": ..., \"is_error\": true, \"content\": \"Content from <source> withheld: possible prompt injection (<signals joined by \", \">)\"}` and nothing of the text.",
+        "`redact(text)` replaces, in this order: `sk-ant-[A-Za-z0-9_-]{8,}` with `[SECRET]`; `AKIA` followed by 16 capital letters or digits, as a whole word, with `[SECRET]`; `Bearer ` followed by 16 or more of `[A-Za-z0-9._-]` with `Bearer [SECRET]`; an address, `[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)+`, with `[EMAIL]`; and a card number with `[CARD]`. A card number is 13 to 19 digits, written with at most one space or hyphen between digits, that passes the Luhn check; a long number that fails the check is left as it is.",
+        [
+          "`Gate(root, allowed_hosts, allowed_email_domains)` decides tool calls. `decide(actor, tool, args)` returns `{\"decision\": \"allow\" | \"ask\" | \"deny\", \"reason\": ...}` and appends a record to the audit. The tools are `read_file(path)`, `write_file(path, content)`, `bash(command)`, `fetch(url)` and `send_email(to, subject, body)`; any other name is `deny` with the reason `unknown tool`. An allow has the reason `ok`. A missing string argument counts as an empty string.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**Paths** (`read_file`, `write_file`): turn backslashes into `/`, join a relative path to `root`, drop `.` parts and apply `..` (never above the top). A path not equal to `root` and not under `root + \"/\"` is `deny`, `outside the project`. A secret file is `deny`, `secret file`: a name `.env`, or starting `.env.` unless it is `.env.example`, a folder called `secrets` anywhere in the path, or a name ending in `.pem` or `.key`. A write into a folder called `.git` or `.claude` is `deny`, `protected path`.",
+              "**`bash`**: first, a word that is `sudo` or `rm` (or ends in `/sudo` or `/rm`) is `deny`, `dangerous command`. Then a command containing any of `;` `&` `|` `>` `<` a backtick, `$(` or a newline is `deny`, `chaining or redirection`. Then the first word must be `ls`, `cat`, `pytest` or `git`, and `git` only with `status`, `diff` or `log` as its next word; anything else, and an empty command, is `deny`, `command not allowed`. An argument that does not start with `-` and names a secret file is `deny`, `secret file`.",
+              "**`fetch`**: read the URL as `scheme://authority path ?query #fragment` with the pattern `([A-Za-z][A-Za-z0-9+.-]*)://([^/?#]*)([^?#]*)(\\?[^#]*)?(#.*)?` over the whole text. A URL that does not match, or whose scheme is not `https`, is `deny`, `https only`. An authority with an `@` is `deny`, `credentials in the URL`. The host is the authority in lower case without a `:port`; it must equal an allowed host or end with a dot and an allowed host, else `deny`, `host not allowed`.",
+              "**`send_email`**: the recipient's domain (after the last `@`, lower case) must be in the allowed domains, else `deny`, `recipient not allowed`. If `redact(subject + \"\\n\" + body)` differs from the text, `deny`, `sensitive data in the body`.",
+              "**Taint**: `mark_untrusted(source)` marks the session. Afterwards `write_file`, and `bash` with `pytest`, return `ask` with `untrusted content in this session`; a `fetch` whose URL has a query or a fragment returns `ask` with `data could leave in the URL`; `send_email` returns `deny` with `a person must send it`. Reads, the other bash commands and a plain `fetch` stay `allow`. Every `deny` above still wins over an `ask`: check the other rules first. `tainted` tells whether the session is marked; a new `Gate` is clean.",
+              "**Audit**: `audit` is the list of records so far, each `{\"actor\", \"tool\", \"decision\", \"reason\", \"args\"}`, where `args` is the call's arguments with every string value passed through `redact` and other values left as they are.",
+              "`alerts()` lists the actors with three or more `deny` records, each as `{\"actor\", \"denials\"}` with the actor's current count, ordered by when each reached three. An `ask` is not a denial."
+            ]
+          }
+        ],
+        "`hook_response(decision)` gives the answer of a `PreToolUse` hook as `{\"exit_code\", \"stdout\", \"stderr\"}`. An `allow` is exit code 0 with nothing printed. A `deny` or an `ask` is exit code 0 with the compact JSON `{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": <decision>, \"permissionDecisionReason\": <reason>}}` on standard output and an empty standard error."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Untrusted text is delivered as one JSON string that names its source and says it is untrusted"
+        ],
+        [
+          "`e1`",
+          "The screen names the signals, ignores clean text, and a flagged result is withheld with an error that shows none of the text"
+        ],
+        [
+          "`e2`",
+          "Paths stay inside the project, secrets and protected folders are refused, a sibling folder with a similar name is outside"
+        ],
+        [
+          "`e3`",
+          "Bash is limited to read-only commands; dangerous, chained and redirected commands and secret arguments are refused"
+        ],
+        [
+          "`e4`",
+          "Fetch obeys the host list (a lookalike host fails) and refuses credentials; email obeys the domain list and the body check"
+        ],
+        [
+          "`e5`",
+          "After untrusted content entered the session, changes ask, an email is refused, reads still work, and a denial stays a denial"
+        ],
+        [
+          "`e6`",
+          "Redaction covers keys, addresses and Luhn-valid cards, leaves other numbers, and the audit never holds a raw secret"
+        ],
+        [
+          "`e7`",
+          "The hook answer has the documented shapes and repeated denials by one actor raise an alert, while questions do not"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "private val log = System.getLogger(\"gate\")\n/** An injection-resistant tool gate. See ../../statement.md. */\nclass Gate(root: String, allowedHosts: List<String>, allowedEmailDomains: List<String>) {\n    private val root = resolve(\"/\", root)\n    private val allowedHosts = allowedHosts.map { it.lowercase() }\n    private val allowedEmailDomains = allowedEmailDomains.map { it.lowercase() }\n    private var tainted = false\n    private val records = mutableListOf<Map<String, Any?>>()\n\n    companion object {\n        private val tools = setOf(\"read_file\", \"write_file\", \"bash\", \"fetch\", \"send_email\")\n        private val flags = setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)\n        private val signals = linkedMapOf(\n            \"override\" to Regex(\"\\\\b(ignore|disregard|forget)\\\\b.{0,40}\\\\b(previous|prior|above|earlier|system)\\\\b.{0,20}\\\\b(instructions?|prompts?|rules)\\\\b\", flags),\n            \"role-tag\" to Regex(\"<\\\\s*/?\\\\s*(system|assistant|tool_result|instructions?)\\\\s*>\", flags),\n            \"exfiltrate\" to Regex(\"\\\\b(send|email|forward|post|upload)\\\\b.{0,60}\\\\b(to|at)\\\\b.{0,40}[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\\\.[A-Za-z0-9_-]+)+\", flags),\n            \"reveal\" to Regex(\"\\\\b(reveal|print|show|repeat)\\\\b.{0,40}\\\\b(system prompt|password|secret|api key)\\\\b\", flags),\n        )\n        private val shellTricks = listOf(\";\", \"&\", \"|\", \">\", \"<\", \"`\", \"$(\", \"\\n\")\n        private val url = Regex(\"([A-Za-z][A-Za-z0-9+.-]*)://([^/?#]*)([^?#]*)(\\\\?[^#]*)?(#.*)?\", RegexOption.DOT_MATCHES_ALL)\n\n        /** The names of the injection signals found in the text, in the fixed order override, role-tag, exfiltrate, reveal. */\n        fun screen(text: String): List<String> = signals.filter { it.value.containsMatchIn(text) }.keys.toList()\n\n        /** A tool_result block that carries untrusted text as one JSON string, or an error result when the text is flagged. */\n        fun wrapUntrusted(toolUseId: String, source: String, content: String): Map<String, Any?> {\n            log.log(System.Logger.Level.DEBUG, \"wrapUntrusted input: {0}\", content)\n            val found = screen(content)\n            if (found.isNotEmpty()) {\n                return linkedMapOf(\"type\" to \"tool_result\", \"tool_use_id\" to toolUseId, \"is_error\" to true,\n                    \"content\" to \"Content from $source withheld: possible prompt injection (${found.joinToString(\", \")})\")\n            }\n            return linkedMapOf(\"type\" to \"tool_result\", \"tool_use_id\" to toolUseId,\n                \"content\" to Json.stringify(linkedMapOf(\"source\" to source, \"trust\" to \"untrusted\", \"content\" to content)))\n        }\n\n        private fun luhn(digits: String): Boolean {\n            var total = 0\n            for ((i, ch) in digits.reversed().withIndex()) {\n                var d = ch - '0'\n                if (i % 2 == 1) d = if (d * 2 > 9) d * 2 - 9 else d * 2\n                total += d\n            }\n            return total % 10 == 0\n        }\n\n        /** Secrets become [SECRET], addresses [EMAIL] and card numbers that pass the Luhn check [CARD]. */\n        fun redact(input: String): String {\n            var text = input.replace(Regex(\"sk-ant-[A-Za-z0-9_-]{8,}\"), \"[SECRET]\")\n            text = text.replace(Regex(\"\\\\bAKIA[0-9A-Z]{16}\\\\b\"), \"[SECRET]\")\n            text = text.replace(Regex(\"Bearer [A-Za-z0-9._-]{16,}\"), \"Bearer [SECRET]\")\n            text = text.replace(Regex(\"[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\\\.[A-Za-z0-9_-]+)+\"), \"[EMAIL]\")\n            return text.replace(Regex(\"\\\\b(?:[0-9][ -]?){12,18}[0-9]\\\\b\")) { m ->\n                val digits = m.value.replace(Regex(\"[ -]\"), \"\")\n                if (isCard(digits)) \"[CARD]\" else m.value\n            }\n        }\n\n        private fun resolve(root: String, path: String): String {\n            val p = path.replace('\\\\', '/')\n            val stack = mutableListOf<String>()\n            for (part in (if (p.startsWith(\"/\")) p else \"$root/$p\").split(\"/\")) {\n                if (part.isEmpty() || part == \".\") continue\n                if (part == \"..\") {\n                    if (stack.isNotEmpty()) stack.removeAt(stack.size - 1)\n                } else stack.add(part)\n            }\n            return \"/\" + stack.joinToString(\"/\")\n        }\n\n        private fun isSecret(path: String): Boolean {\n            val parts = path.replace('\\\\', '/').split(\"/\")\n            val base = parts.last()\n            return base == \".env\" || (base.startsWith(\".env.\") && base != \".env.example\") || parts.dropLast(1).contains(\"secrets\") || base.endsWith(\".pem\") || base.endsWith(\".key\")\n        }\n\n        private fun commandAllowed(words: List<String>): Boolean {\n            if (words.isEmpty() || words[0] !in setOf(\"ls\", \"cat\", \"pytest\", \"git\")) return false\n            if (words[0] == \"git\") return words.size > 1 && words[1] in setOf(\"status\", \"diff\", \"log\")\n            return true\n        }\n\n        private fun isCard(digits: String): Boolean {\n            return digits.length in 13..19 && luhn(digits)\n        }\n\n        private fun result(decision: String, reason: String = \"ok\"): Map<String, Any?> = linkedMapOf(\"decision\" to decision, \"reason\" to reason)\n\n        /** The PreToolUse hook answer for a decision: exit code, standard output, standard error. */\n        fun hookResponse(decision: Map<String, Any?>): Map<String, Any?> {\n            if (decision[\"decision\"] == \"allow\") return linkedMapOf(\"exit_code\" to 0, \"stdout\" to \"\", \"stderr\" to \"\")\n            val out = linkedMapOf(\"hookSpecificOutput\" to linkedMapOf(\"hookEventName\" to \"PreToolUse\", \"permissionDecision\" to decision[\"decision\"], \"permissionDecisionReason\" to decision[\"reason\"]))\n            return linkedMapOf(\"exit_code\" to 0, \"stdout\" to Json.stringify(out), \"stderr\" to \"\")\n        }\n    }\n\n    val isTainted: Boolean get() = tainted\n\n    fun audit(): List<Map<String, Any?>> = records.toList()\n\n    fun markUntrusted(source: String) {\n        tainted = true\n    }\n\n    private fun inside(path: String) = path == root || path.startsWith(\"$root/\")\n\n    fun decide(actor: String, tool: String, args: Map<String, Any?>): Map<String, Any?> {\n        val r = choose(tool, args)\n        val clean = args.mapValues { (_, v) -> if (v is String) redact(v) else v }\n        records.add(linkedMapOf(\"actor\" to actor, \"tool\" to tool, \"decision\" to r[\"decision\"], \"reason\" to r[\"reason\"], \"args\" to clean))\n        return r\n    }\n\n    private fun choose(tool: String, args: Map<String, Any?>): Map<String, Any?> {\n        if (tool !in tools) return result(\"deny\", \"unknown tool\")\n        if (tool == \"read_file\" || tool == \"write_file\") {\n            val path = resolve(root, (args[\"path\"] ?: \"\").toString())\n            if (!inside(path)) return result(\"deny\", \"outside the project\")\n            if (isSecret(path)) return result(\"deny\", \"secret file\")\n            if (tool == \"write_file\") {\n                val segments = path.split(\"/\")\n                if (\".git\" in segments || \".claude\" in segments) return result(\"deny\", \"protected path\")\n                if (tainted) return result(\"ask\", \"untrusted content in this session\")\n            }\n            return result(\"allow\")\n        }\n        if (tool == \"bash\") return bash((args[\"command\"] ?: \"\").toString())\n        if (tool == \"fetch\") return fetch((args[\"url\"] ?: \"\").toString())\n        return email(args)\n    }\n\n    private fun bash(command: String): Map<String, Any?> {\n        val words = command.trim().split(Regex(\"\\\\s+\")).filter { it.isNotEmpty() }\n        if (words.any { it.substringAfterLast('/') == \"sudo\" || it.substringAfterLast('/') == \"rm\" }) return result(\"deny\", \"dangerous command\")\n        if (shellTricks.any { it in command }) return result(\"deny\", \"chaining or redirection\")\n        if (!commandAllowed(words)) return result(\"deny\", \"command not allowed\")\n        if (words.drop(1).any { !it.startsWith(\"-\") && isSecret(it) }) return result(\"deny\", \"secret file\")\n        if (words[0] == \"pytest\" && tainted) return result(\"ask\", \"untrusted content in this session\")\n        return result(\"allow\")\n    }\n\n    private fun fetch(address: String): Map<String, Any?> {\n        val m = url.matchEntire(address)\n        if (m == null || m.groupValues[1].lowercase() != \"https\") return result(\"deny\", \"https only\")\n        if (\"@\" in m.groupValues[2]) return result(\"deny\", \"credentials in the URL\")\n        val host = m.groupValues[2].lowercase().replace(Regex(\":[0-9]+$\"), \"\")\n        if (allowedHosts.none { host == it || host.endsWith(\".$it\") }) return result(\"deny\", \"host not allowed\")\n        if (tainted && (m.groups[4] != null || m.groups[5] != null)) return result(\"ask\", \"data could leave in the URL\")\n        return result(\"allow\")\n    }\n\n    private fun email(args: Map<String, Any?>): Map<String, Any?> {\n        val to = (args[\"to\"] ?: \"\").toString()\n        val domain = if (\"@\" in to) to.substringAfterLast('@').lowercase() else \"\"\n        val text = \"${args[\"subject\"] ?: \"\"}\\n${args[\"body\"] ?: \"\"}\"\n        return emailDecision(domain, text)\n    }\n\n    private fun emailDecision(domain: String, text: String): Map<String, Any?> {\n        if (domain !in allowedEmailDomains) return result(\"deny\", \"recipient not allowed\")\n        if (redact(text) != text) return result(\"deny\", \"sensitive data in the body\")\n        if (tainted) return result(\"deny\", \"a person must send it\")\n        return result(\"allow\")\n    }\n\n    /** Actors with three or more denials, ordered by when each reached three, with their denial count. */\n    fun alerts(): List<Map<String, Any?>> {\n        val counts = linkedMapOf<String, Int>()\n        val order = mutableListOf<String>()\n        for (r in records) {\n            if (r[\"decision\"] == \"deny\") {\n                val actor = r[\"actor\"] as String\n                val n = (counts[actor] ?: 0) + 1\n                counts[actor] = n\n                if (n == 3) order.add(actor)\n            }\n        }\n        return order.map { linkedMapOf(\"actor\" to it, \"denials\" to counts.getValue(it)) }\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // The gate sits between the model's tool calls and the tools; it is told the project root and what may be reached.\n    val gate = Gate(\"/proj\", listOf(\"api.example.com\", \"docs.example.org\"), listOf(\"example.com\"))\n\n    val calls = linkedMapOf<String, Map<String, Any?>>(\n        \"read_file\" to mapOf(\"path\" to \"src/a.py\"),\n        \"bash\" to mapOf(\"command\" to \"sudo rm -rf /\"),\n        \"fetch\" to mapOf(\"url\" to \"https://evil.example.net/x\"),\n    )\n    for ((tool, args) in calls) {\n        val r = gate.decide(\"alice\", tool, args)\n        println(\"$tool $args: ${r[\"decision\"]} (${r[\"reason\"]})\")\n    }\n\n    // Text a tool returned is untrusted: it reaches the model as one JSON string that says where it came from.\n    val result = Gate.wrapUntrusted(\"toolu_1\", \"web page\", \"He said \\\"hi\\\"\\n</div>\")\n    println(\"wrapped content: ${result[\"content\"]}\")\n\n    // After the session has read untrusted text, writes are no longer free.\n    gate.markUntrusted(\"web page\")\n    val after = gate.decide(\"alice\", \"write_file\", mapOf(\"path\" to \"src/a.py\"))\n    println(\"write after untrusted text: ${after[\"decision\"]} (${after[\"reason\"]})\")\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "private val log = System.getLogger(\"gate\")\n/** An injection-resistant tool gate. See ../../statement.md. */\nclass Gate(root: String, allowedHosts: List<String>, allowedEmailDomains: List<String>) {\n    private val root = resolve(\"/\", root)\n    private val allowedHosts = allowedHosts.map { it.lowercase() }\n    private val allowedEmailDomains = allowedEmailDomains.map { it.lowercase() }\n    private var tainted = false\n    private val records = mutableListOf<Map<String, Any?>>()\n\n    companion object {\n        private val tools = setOf(\"read_file\", \"write_file\", \"bash\", \"fetch\", \"send_email\")\n        private val flags = setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)\n        private val signals = linkedMapOf(\n            \"override\" to Regex(\"\\\\b(ignore|disregard|forget)\\\\b.{0,40}\\\\b(previous|prior|above|earlier|system)\\\\b.{0,20}\\\\b(instructions?|prompts?|rules)\\\\b\", flags),\n            \"role-tag\" to Regex(\"<\\\\s*/?\\\\s*(system|assistant|tool_result|instructions?)\\\\s*>\", flags),\n            \"exfiltrate\" to Regex(\"\\\\b(send|email|forward|post|upload)\\\\b.{0,60}\\\\b(to|at)\\\\b.{0,40}[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\\\.[A-Za-z0-9_-]+)+\", flags),\n            \"reveal\" to Regex(\"\\\\b(reveal|print|show|repeat)\\\\b.{0,40}\\\\b(system prompt|password|secret|api key)\\\\b\", flags),\n        )\n        private val shellTricks = listOf(\";\", \"&\", \"|\", \">\", \"<\", \"`\", \"$(\", \"\\n\")\n        private val url = Regex(\"([A-Za-z][A-Za-z0-9+.-]*)://([^/?#]*)([^?#]*)(\\\\?[^#]*)?(#.*)?\", RegexOption.DOT_MATCHES_ALL)\n\n        /** The names of the injection signals found in the text, in the fixed order override, role-tag, exfiltrate, reveal. */\n        fun screen(text: String): List<String> = signals.filter { it.value.containsMatchIn(text) }.keys.toList()\n\n        /** A tool_result block that carries untrusted text as one JSON string, or an error result when the text is flagged. */\n        fun wrapUntrusted(toolUseId: String, source: String, content: String): Map<String, Any?> {\n            log.log(System.Logger.Level.DEBUG, \"wrapUntrusted input: {0}\", content)\n            // TODO 1 of 6 (unlocks m1 and e1): wrap untrusted text as a tool_result block.\n            // Receives the tool use id, where the text came from and the text. Returns a tool_result map. Clean text becomes one line of\n            // compact JSON (Json.stringify) with the keys source, trust (\"untrusted\") and content, in that order. When `screen` finds a\n            // signal, return the error block from the statement instead and leave the text out of it.\n            // Example: wrapUntrusted(\"t1\", \"web page\", \"hi\")\n            //   -> {type=tool_result, tool_use_id=t1, content={\"source\":\"web page\",\"trust\":\"untrusted\",\"content\":\"hi\"}}\n            return linkedMapOf(\"type\" to \"tool_result\", \"tool_use_id\" to toolUseId, \"content\" to content)\n        }\n\n        private fun luhn(digits: String): Boolean {\n            var total = 0\n            for ((i, ch) in digits.reversed().withIndex()) {\n                var d = ch - '0'\n                if (i % 2 == 1) d = if (d * 2 > 9) d * 2 - 9 else d * 2\n                total += d\n            }\n            return total % 10 == 0\n        }\n\n        /** Secrets become [SECRET], addresses [EMAIL] and card numbers that pass the Luhn check [CARD]. */\n        fun redact(input: String): String {\n            var text = input.replace(Regex(\"sk-ant-[A-Za-z0-9_-]{8,}\"), \"[SECRET]\")\n            text = text.replace(Regex(\"\\\\bAKIA[0-9A-Z]{16}\\\\b\"), \"[SECRET]\")\n            text = text.replace(Regex(\"Bearer [A-Za-z0-9._-]{16,}\"), \"Bearer [SECRET]\")\n            text = text.replace(Regex(\"[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\\\.[A-Za-z0-9_-]+)+\"), \"[EMAIL]\")\n            return text.replace(Regex(\"\\\\b(?:[0-9][ -]?){12,18}[0-9]\\\\b\")) { m ->\n                val digits = m.value.replace(Regex(\"[ -]\"), \"\")\n                if (isCard(digits)) \"[CARD]\" else m.value\n            }\n        }\n\n        private fun resolve(root: String, path: String): String {\n            val p = path.replace('\\\\', '/')\n            val stack = mutableListOf<String>()\n            for (part in (if (p.startsWith(\"/\")) p else \"$root/$p\").split(\"/\")) {\n                if (part.isEmpty() || part == \".\") continue\n                if (part == \"..\") {\n                    if (stack.isNotEmpty()) stack.removeAt(stack.size - 1)\n                } else stack.add(part)\n            }\n            return \"/\" + stack.joinToString(\"/\")\n        }\n\n        private fun isSecret(path: String): Boolean {\n            // TODO 2 of 6 (unlocks e2): does this path name a secret file?\n            // Receives a path and returns true for a file named `.env`, a file starting `.env.` unless it is `.env.example`, any file inside\n            // a folder called `secrets`, and a name ending in `.pem` or `.key`; false otherwise. Backslashes count as `/`.\n            // Example: isSecret(\"app/.env.local\") -> true, isSecret(\".env.example\") -> false\n            return false\n        }\n\n        private fun commandAllowed(words: List<String>): Boolean {\n            // TODO 3 of 6 (finish this to pass e3): is the first word of a bash command on the allow-list?\n            // Receives the command split into words. Returns true for `ls`, `cat`, `pytest`, and `git` followed by `status`, `diff` or\n            // `log`; false for anything else, including an empty list. (The checks for sudo, rm, chaining and secret arguments are written.)\n            // Example: commandAllowed(listOf(\"git\", \"log\", \"--oneline\")) -> true, commandAllowed(listOf(\"git\", \"push\")) -> false\n            return false\n        }\n\n        private fun isCard(digits: String): Boolean {\n            // TODO 4 of 6 (finish this to pass e6): is this run of digits a card number?\n            // Receives the digits with spaces and hyphens already removed. Returns true when there are 13 to 19 of them and `luhn` accepts\n            // them (a long number that fails the check is not a card). Example: isCard(\"4111111111111111\") -> true, isCard(\"4111111111111112\") -> false\n            return false\n        }\n\n        private fun result(decision: String, reason: String = \"ok\"): Map<String, Any?> = linkedMapOf(\"decision\" to decision, \"reason\" to reason)\n\n        /** The PreToolUse hook answer for a decision: exit code, standard output, standard error. */\n        fun hookResponse(decision: Map<String, Any?>): Map<String, Any?> {\n            if (decision[\"decision\"] == \"allow\") return linkedMapOf(\"exit_code\" to 0, \"stdout\" to \"\", \"stderr\" to \"\")\n            val out = linkedMapOf(\"hookSpecificOutput\" to linkedMapOf(\"hookEventName\" to \"PreToolUse\", \"permissionDecision\" to decision[\"decision\"], \"permissionDecisionReason\" to decision[\"reason\"]))\n            return linkedMapOf(\"exit_code\" to 0, \"stdout\" to Json.stringify(out), \"stderr\" to \"\")\n        }\n    }\n\n    val isTainted: Boolean get() = tainted\n\n    fun audit(): List<Map<String, Any?>> = records.toList()\n\n    fun markUntrusted(source: String) {\n        tainted = true\n    }\n\n    private fun inside(path: String) = path == root || path.startsWith(\"$root/\")\n\n    fun decide(actor: String, tool: String, args: Map<String, Any?>): Map<String, Any?> {\n        val r = choose(tool, args)\n        val clean = args.mapValues { (_, v) -> if (v is String) redact(v) else v }\n        records.add(linkedMapOf(\"actor\" to actor, \"tool\" to tool, \"decision\" to r[\"decision\"], \"reason\" to r[\"reason\"], \"args\" to clean))\n        return r\n    }\n\n    private fun choose(tool: String, args: Map<String, Any?>): Map<String, Any?> {\n        if (tool !in tools) return result(\"deny\", \"unknown tool\")\n        if (tool == \"read_file\" || tool == \"write_file\") {\n            val path = resolve(root, (args[\"path\"] ?: \"\").toString())\n            if (!inside(path)) return result(\"deny\", \"outside the project\")\n            if (isSecret(path)) return result(\"deny\", \"secret file\")\n            if (tool == \"write_file\") {\n                val segments = path.split(\"/\")\n                if (\".git\" in segments || \".claude\" in segments) return result(\"deny\", \"protected path\")\n                if (tainted) return result(\"ask\", \"untrusted content in this session\")\n            }\n            return result(\"allow\")\n        }\n        if (tool == \"bash\") return bash((args[\"command\"] ?: \"\").toString())\n        if (tool == \"fetch\") return fetch((args[\"url\"] ?: \"\").toString())\n        return email(args)\n    }\n\n    private fun bash(command: String): Map<String, Any?> {\n        val words = command.trim().split(Regex(\"\\\\s+\")).filter { it.isNotEmpty() }\n        if (words.any { it.substringAfterLast('/') == \"sudo\" || it.substringAfterLast('/') == \"rm\" }) return result(\"deny\", \"dangerous command\")\n        if (shellTricks.any { it in command }) return result(\"deny\", \"chaining or redirection\")\n        if (!commandAllowed(words)) return result(\"deny\", \"command not allowed\")\n        if (words.drop(1).any { !it.startsWith(\"-\") && isSecret(it) }) return result(\"deny\", \"secret file\")\n        if (words[0] == \"pytest\" && tainted) return result(\"ask\", \"untrusted content in this session\")\n        return result(\"allow\")\n    }\n\n    private fun fetch(address: String): Map<String, Any?> {\n        val m = url.matchEntire(address)\n        if (m == null || m.groupValues[1].lowercase() != \"https\") return result(\"deny\", \"https only\")\n        if (\"@\" in m.groupValues[2]) return result(\"deny\", \"credentials in the URL\")\n        val host = m.groupValues[2].lowercase().replace(Regex(\":[0-9]+$\"), \"\")\n        if (allowedHosts.none { host == it || host.endsWith(\".$it\") }) return result(\"deny\", \"host not allowed\")\n        if (tainted && (m.groups[4] != null || m.groups[5] != null)) return result(\"ask\", \"data could leave in the URL\")\n        return result(\"allow\")\n    }\n\n    private fun email(args: Map<String, Any?>): Map<String, Any?> {\n        val to = (args[\"to\"] ?: \"\").toString()\n        val domain = if (\"@\" in to) to.substringAfterLast('@').lowercase() else \"\"\n        val text = \"${args[\"subject\"] ?: \"\"}\\n${args[\"body\"] ?: \"\"}\"\n        return emailDecision(domain, text)\n    }\n\n    private fun emailDecision(domain: String, text: String): Map<String, Any?> {\n        // TODO 5 of 6 (finish this to pass e4 and e5): decide a send_email call.\n        // Receives the recipient's lower-case domain and the subject and body joined by a newline. Returns result(decision, reason):\n        // deny \"recipient not allowed\" when the domain is not in allowedEmailDomains; deny \"sensitive data in the body\" when redact(text)\n        // differs from the text; deny \"a person must send it\" when the session is tainted (the `tainted` field); else allow.\n        // Example: a clean mail to \"example.com\" in a tainted session -> {decision=deny, reason=a person must send it}\n        return result(\"allow\")\n    }\n\n    fun alerts(): List<Map<String, Any?>> {\n        // TODO 6 of 6 (finish this to pass e7): actors with three or more denials.\n        // Reads `records` (maps with \"actor\" and \"decision\"). Returns one linkedMapOf(\"actor\" to ..., \"denials\" to ...) per actor with three or\n        // more \"deny\" records (an \"ask\" is not a denial), with that actor's current count, ordered by when each reached three.\n        // Example: alice denied 3 times, then bob 3 times, then alice once more -> [{actor=alice, denials=4}, {actor=bob, denials=3}]\n        return emptyList()\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    // The gate sits between the model's tool calls and the tools; it is told the project root and what may be reached.\n    val gate = Gate(\"/proj\", listOf(\"api.example.com\", \"docs.example.org\"), listOf(\"example.com\"))\n\n    val calls = linkedMapOf<String, Map<String, Any?>>(\n        \"read_file\" to mapOf(\"path\" to \"src/a.py\"),\n        \"bash\" to mapOf(\"command\" to \"sudo rm -rf /\"),\n        \"fetch\" to mapOf(\"url\" to \"https://evil.example.net/x\"),\n    )\n    for ((tool, args) in calls) {\n        val r = gate.decide(\"alice\", tool, args)\n        println(\"$tool $args: ${r[\"decision\"]} (${r[\"reason\"]})\")\n    }\n\n    // Text a tool returned is untrusted: it reaches the model as one JSON string that says where it came from.\n    val result = Gate.wrapUntrusted(\"toolu_1\", \"web page\", \"He said \\\"hi\\\"\\n</div>\")\n    println(\"wrapped content: ${result[\"content\"]}\")\n\n    // After the session has read untrusted text, writes are no longer free.\n    gate.markUntrusted(\"web page\")\n    val after = gate.decide(\"alice\", \"write_file\", mapOf(\"path\" to \"src/a.py\"))\n    println(\"write after untrusted text: ${after[\"decision\"]} (${after[\"reason\"]})\")\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 6,
+    "code": 2,
+    "tables": 1,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "d17722169eb993c7c04d328a65d96c818f3ee6c200816a5c2d8ecfd7d339f371",
+  "starting_code": "private val log = System.getLogger(\"gate\")\n/** An injection-resistant tool gate. See ../../statement.md. */\nclass Gate(root: String, allowedHosts: List<String>, allowedEmailDomains: List<String>) {\n    private val root = resolve(\"/\", root)\n    private val allowedHosts = allowedHosts.map { it.lowercase() }\n    private val allowedEmailDomains = allowedEmailDomains.map { it.lowercase() }\n    private var tainted = false\n    private val records = mutableListOf<Map<String, Any?>>()\n\n    companion object {\n        private val tools = setOf(\"read_file\", \"write_file\", \"bash\", \"fetch\", \"send_email\")\n        private val flags = setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)\n        private val signals = linkedMapOf(\n            \"override\" to Regex(\"\\\\b(ignore|disregard|forget)\\\\b.{0,40}\\\\b(previous|prior|above|earlier|system)\\\\b.{0,20}\\\\b(instructions?|prompts?|rules)\\\\b\", flags),\n            \"role-tag\" to Regex(\"<\\\\s*/?\\\\s*(system|assistant|tool_result|instructions?)\\\\s*>\", flags),\n            \"exfiltrate\" to Regex(\"\\\\b(send|email|forward|post|upload)\\\\b.{0,60}\\\\b(to|at)\\\\b.{0,40}[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\\\.[A-Za-z0-9_-]+)+\", flags),\n            \"reveal\" to Regex(\"\\\\b(reveal|print|show|repeat)\\\\b.{0,40}\\\\b(system prompt|password|secret|api key)\\\\b\", flags),\n        )\n        private val shellTricks = listOf(\";\", \"&\", \"|\", \">\", \"<\", \"`\", \"$(\", \"\\n\")\n        private val url = Regex(\"([A-Za-z][A-Za-z0-9+.-]*)://([^/?#]*)([^?#]*)(\\\\?[^#]*)?(#.*)?\", RegexOption.DOT_MATCHES_ALL)\n\n        /** The names of the injection signals found in the text, in the fixed order override, role-tag, exfiltrate, reveal. */\n        fun screen(text: String): List<String> = signals.filter { it.value.containsMatchIn(text) }.keys.toList()\n\n        /** A tool_result block that carries untrusted text as one JSON string, or an error result when the text is flagged. */\n        fun wrapUntrusted(toolUseId: String, source: String, content: String): Map<String, Any?> {\n            log.log(System.Logger.Level.DEBUG, \"wrapUntrusted input: {0}\", content)\n            // TODO 1 of 6 (unlocks m1 and e1): wrap untrusted text as a tool_result block.\n            // Receives the tool use id, where the text came from and the text. Returns a tool_result map. Clean text becomes one line of\n            // compact JSON (Json.stringify) with the keys source, trust (\"untrusted\") and content, in that order. When `screen` finds a\n            // signal, return the error block from the statement instead and leave the text out of it.\n            // Example: wrapUntrusted(\"t1\", \"web page\", \"hi\")\n            //   -> {type=tool_result, tool_use_id=t1, content={\"source\":\"web page\",\"trust\":\"untrusted\",\"content\":\"hi\"}}\n            return linkedMapOf(\"type\" to \"tool_result\", \"tool_use_id\" to toolUseId, \"content\" to content)\n        }\n\n        private fun luhn(digits: String): Boolean {\n            var total = 0\n            for ((i, ch) in digits.reversed().withIndex()) {\n                var d = ch - '0'\n                if (i % 2 == 1) d = if (d * 2 > 9) d * 2 - 9 else d * 2\n                total += d\n            }\n            return total % 10 == 0\n        }\n\n        /** Secrets become [SECRET], addresses [EMAIL] and card numbers that pass the Luhn check [CARD]. */\n        fun redact(input: String): String {\n            var text = input.replace(Regex(\"sk-ant-[A-Za-z0-9_-]{8,}\"), \"[SECRET]\")\n            text = text.replace(Regex(\"\\\\bAKIA[0-9A-Z]{16}\\\\b\"), \"[SECRET]\")\n            text = text.replace(Regex(\"Bearer [A-Za-z0-9._-]{16,}\"), \"Bearer [SECRET]\")\n            text = text.replace(Regex(\"[A-Za-z0-9_.+-]+@[A-Za-z0-9_-]+(?:\\\\.[A-Za-z0-9_-]+)+\"), \"[EMAIL]\")\n            return text.replace(Regex(\"\\\\b(?:[0-9][ -]?){12,18}[0-9]\\\\b\")) { m ->\n                val digits = m.value.replace(Regex(\"[ -]\"), \"\")\n                if (isCard(digits)) \"[CARD]\" else m.value\n            }\n        }\n\n        private fun resolve(root: String, path: String): String {\n            val p = path.replace('\\\\', '/')\n            val stack = mutableListOf<String>()\n            for (part in (if (p.startsWith(\"/\")) p else \"$root/$p\").split(\"/\")) {\n                if (part.isEmpty() || part == \".\") continue\n                if (part == \"..\") {\n                    if (stack.isNotEmpty()) stack.removeAt(stack.size - 1)\n                } else stack.add(part)\n            }\n            return \"/\" + stack.joinToString(\"/\")\n        }\n\n        private fun isSecret(path: String): Boolean {\n            // TODO 2 of 6 (unlocks e2): does this path name a secret file?\n            // Receives a path and returns true for a file named `.env`, a file starting `.env.` unless it is `.env.example`, any file inside\n            // a folder called `secrets`, and a name ending in `.pem` or `.key`; false otherwise. Backslashes count as `/`.\n            // Example: isSecret(\"app/.env.local\") -> true, isSecret(\".env.example\") -> false\n            return false\n        }\n\n        private fun commandAllowed(words: List<String>): Boolean {\n            // TODO 3 of 6 (finish this to pass e3): is the first word of a bash command on the allow-list?\n            // Receives the command split into words. Returns true for `ls`, `cat`, `pytest`, and `git` followed by `status`, `diff` or\n            // `log`; false for anything else, including an empty list. (The checks for sudo, rm, chaining and secret arguments are written.)\n            // Example: commandAllowed(listOf(\"git\", \"log\", \"--oneline\")) -> true, commandAllowed(listOf(\"git\", \"push\")) -> false\n            return false\n        }\n\n        private fun isCard(digits: String): Boolean {\n            // TODO 4 of 6 (finish this to pass e6): is this run of digits a card number?\n            // Receives the digits with spaces and hyphens already removed. Returns true when there are 13 to 19 of them and `luhn` accepts\n            // them (a long number that fails the check is not a card). Example: isCard(\"4111111111111111\") -> true, isCard(\"4111111111111112\") -> false\n            return false\n        }\n\n        private fun result(decision: String, reason: String = \"ok\"): Map<String, Any?> = linkedMapOf(\"decision\" to decision, \"reason\" to reason)\n\n        /** The PreToolUse hook answer for a decision: exit code, standard output, standard error. */\n        fun hookResponse(decision: Map<String, Any?>): Map<String, Any?> {\n            if (decision[\"decision\"] == \"allow\") return linkedMapOf(\"exit_code\" to 0, \"stdout\" to \"\", \"stderr\" to \"\")\n            val out = linkedMapOf(\"hookSpecificOutput\" to linkedMapOf(\"hookEventName\" to \"PreToolUse\", \"permissionDecision\" to decision[\"decision\"], \"permissionDecisionReason\" to decision[\"reason\"]))\n            return linkedMapOf(\"exit_code\" to 0, \"stdout\" to Json.stringify(out), \"stderr\" to \"\")\n        }\n    }\n\n    val isTainted: Boolean get() = tainted\n\n    fun audit(): List<Map<String, Any?>> = records.toList()\n\n    fun markUntrusted(source: String) {\n        tainted = true\n    }\n\n    private fun inside(path: String) = path == root || path.startsWith(\"$root/\")\n\n    fun decide(actor: String, tool: String, args: Map<String, Any?>): Map<String, Any?> {\n        val r = choose(tool, args)\n        val clean = args.mapValues { (_, v) -> if (v is String) redact(v) else v }\n        records.add(linkedMapOf(\"actor\" to actor, \"tool\" to tool, \"decision\" to r[\"decision\"], \"reason\" to r[\"reason\"], \"args\" to clean))\n        return r\n    }\n\n    private fun choose(tool: String, args: Map<String, Any?>): Map<String, Any?> {\n        if (tool !in tools) return result(\"deny\", \"unknown tool\")\n        if (tool == \"read_file\" || tool == \"write_file\") {\n            val path = resolve(root, (args[\"path\"] ?: \"\").toString())\n            if (!inside(path)) return result(\"deny\", \"outside the project\")\n            if (isSecret(path)) return result(\"deny\", \"secret file\")\n            if (tool == \"write_file\") {\n                val segments = path.split(\"/\")\n                if (\".git\" in segments || \".claude\" in segments) return result(\"deny\", \"protected path\")\n                if (tainted) return result(\"ask\", \"untrusted content in this session\")\n            }\n            return result(\"allow\")\n        }\n        if (tool == \"bash\") return bash((args[\"command\"] ?: \"\").toString())\n        if (tool == \"fetch\") return fetch((args[\"url\"] ?: \"\").toString())\n        return email(args)\n    }\n\n    private fun bash(command: String): Map<String, Any?> {\n        val words = command.trim().split(Regex(\"\\\\s+\")).filter { it.isNotEmpty() }\n        if (words.any { it.substringAfterLast('/') == \"sudo\" || it.substringAfterLast('/') == \"rm\" }) return result(\"deny\", \"dangerous command\")\n        if (shellTricks.any { it in command }) return result(\"deny\", \"chaining or redirection\")\n        if (!commandAllowed(words)) return result(\"deny\", \"command not allowed\")\n        if (words.drop(1).any { !it.startsWith(\"-\") && isSecret(it) }) return result(\"deny\", \"secret file\")\n        if (words[0] == \"pytest\" && tainted) return result(\"ask\", \"untrusted content in this session\")\n        return result(\"allow\")\n    }\n\n    private fun fetch(address: String): Map<String, Any?> {\n        val m = url.matchEntire(address)\n        if (m == null || m.groupValues[1].lowercase() != \"https\") return result(\"deny\", \"https only\")\n        if (\"@\" in m.groupValues[2]) return result(\"deny\", \"credentials in the URL\")\n        val host = m.groupValues[2].lowercase().replace(Regex(\":[0-9]+$\"), \"\")\n        if (allowedHosts.none { host == it || host.endsWith(\".$it\") }) return result(\"deny\", \"host not allowed\")\n        if (tainted && (m.groups[4] != null || m.groups[5] != null)) return result(\"ask\", \"data could leave in the URL\")\n        return result(\"allow\")\n    }\n\n    private fun email(args: Map<String, Any?>): Map<String, Any?> {\n        val to = (args[\"to\"] ?: \"\").toString()\n        val domain = if (\"@\" in to) to.substringAfterLast('@').lowercase() else \"\"\n        val text = \"${args[\"subject\"] ?: \"\"}\\n${args[\"body\"] ?: \"\"}\"\n        return emailDecision(domain, text)\n    }\n\n    private fun emailDecision(domain: String, text: String): Map<String, Any?> {\n        // TODO 5 of 6 (finish this to pass e4 and e5): decide a send_email call.\n        // Receives the recipient's lower-case domain and the subject and body joined by a newline. Returns result(decision, reason):\n        // deny \"recipient not allowed\" when the domain is not in allowedEmailDomains; deny \"sensitive data in the body\" when redact(text)\n        // differs from the text; deny \"a person must send it\" when the session is tainted (the `tainted` field); else allow.\n        // Example: a clean mail to \"example.com\" in a tainted session -> {decision=deny, reason=a person must send it}\n        return result(\"allow\")\n    }\n\n    fun alerts(): List<Map<String, Any?>> {\n        // TODO 6 of 6 (finish this to pass e7): actors with three or more denials.\n        // Reads `records` (maps with \"actor\" and \"decision\"). Returns one linkedMapOf(\"actor\" to ..., \"denials\" to ...) per actor with three or\n        // more \"deny\" records (an \"ask\" is not a denial), with that actor's current count, ordered by when each reached three.\n        // Example: alice denied 3 times, then bob 3 times, then alice once more -> [{actor=alice, denials=4}, {actor=bob, denials=3}]\n        return emptyList()\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/41-security-and-safety/prose/unit-03/practice-4/src/main/kotlin/Gate.kt",
+    "test_path": "practice/level-2/41-security-and-safety/prose/unit-03/practice-4/src/test/kotlin/GateTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/41-security-and-safety/prose/unit-03/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/41-security-and-safety/prose/unit-03/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_untrustedTextReachesTheModelOnlyAsOneJsonStringThatSaysWhereItCameFrom()",
+        "kind": "main",
+        "says": "Untrusted text is delivered as one JSON string that names its source and says it is untrusted"
+      },
+      {
+        "id": "e1_aScreenNamesInjectionSignalsAndAFlaggedResultIsWithheldWithAnError()",
+        "kind": "edge",
+        "says": "The screen names the signals, ignores clean text, and a flagged result is withheld with an error that shows none of the text"
+      },
+      {
+        "id": "e2_readsAndWritesStayInsideTheProjectAndAwayFromSecretsAndProtectedFolders()",
+        "kind": "edge",
+        "says": "Paths stay inside the project, secrets and protected folders are refused, a sibling folder with a similar name is outside"
+      },
+      {
+        "id": "e3_bashIsLimitedToAFewReadOnlyCommandsAndDangerousOrChainedOnesAreRefused()",
+        "kind": "edge",
+        "says": "Bash is limited to read-only commands; dangerous, chained and redirected commands and secret arguments are refused"
+      },
+      {
+        "id": "e4_fetchAndEmailObeyTheHostAndDomainListsAndRefuseCredentialsInAUrl()",
+        "kind": "edge",
+        "says": "Fetch obeys the host list (a lookalike host fails) and refuses credentials; email obeys the domain list and the body check"
+      },
+      {
+        "id": "e5_onceUntrustedContentIsInTheSessionAnythingThatChangesThingsAsksOrIsRefused()",
+        "kind": "edge",
+        "says": "After untrusted content entered the session, changes ask, an email is refused, reads still work, and a denial stays a denial"
+      },
+      {
+        "id": "e6_secretsCardNumbersAndAddressesAreRedactedInTextAndInTheAudit()",
+        "kind": "edge",
+        "says": "Redaction covers keys, addresses and Luhn-valid cards, leaves other numbers, and the audit never holds a raw secret"
+      },
+      {
+        "id": "e7_theHookAnswerFollowsTheDocumentedShapesAndRepeatedDenialsRaiseAnAlert()",
+        "kind": "edge",
+        "says": "The hook answer has the documented shapes and repeated denials by one actor raise an alert, while questions do not"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/41-security-and-safety/prose/unit-03/practice-4/target/test-results/test"
+    },
+    "origin": "course/41-security-and-safety/03-guardrails-monitoring-and-the-practice.md",
+    "concepts": [
+      "the practice of Layered guardrails, monitoring and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/41-security-and-safety/prose/unit-03/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "security-and-safety-u3"
+}

@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-1",
+    "04-capabilities-and-limits"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 1,
+  "title": "Check yourself: Thinking, computer use and when not to use a model",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A support tool runs its deepest reasoning setting on every request, including one-word intent labels. Spend is rising with no gain in quality. What does the documentation support as the first remedy?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Raise `max_tokens` so the reasoning always has room to finish",
+            "correct": false,
+            "says": "Ruled out because reasoning tokens \"count toward max_tokens alongside the response text\", so a larger cap only allows more spend."
+          },
+          {
+            "id": "b",
+            "text": "Use low effort on trivial inputs and keep high effort for demanding ones",
+            "correct": true,
+            "says": "Thinking tokens are billed as output, so reserving them for tasks that benefit cuts the spend, and effort is the steering lever (the facts list and the first trap)."
+          },
+          {
+            "id": "c",
+            "text": "Move the labels to the model with the largest context window",
+            "correct": false,
+            "says": "Ruled out because the waste is in the reasoning: \"Paying for reasoning on a one-word classification is waste\", and a bigger window does not change that."
+          },
+          {
+            "id": "d",
+            "text": "Switch to manual budgets everywhere, since adaptive thinking cannot be tuned",
+            "correct": false,
+            "says": "Ruled out because with adaptive thinking \"the model decides how much to think, steered by effort\", so it can be tuned without manual budgets."
+          }
+        ],
+        "origin": {
+          "path": "course/04-capabilities-and-limits/02-thinking-computer-use-and-when-not-to-use-a-model.md",
+          "section": "Thinking at a glance"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A team must flag uploaded invoices issued within the past thirty days. Every entry carries a timestamp in one known format. Which design is best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Ask Claude to judge each timestamp and pass the verdict through",
+            "correct": false,
+            "says": "Ruled out because \"The model approximates; code is exact\"."
+          },
+          {
+            "id": "b",
+            "text": "Ask Claude for each verdict at high effort so the date arithmetic is dependable",
+            "correct": false,
+            "says": "Ruled out because the table gives code as the answer for a one-line rule for the reason \"Cheaper, faster, deterministic, testable\", and a higher effort setting is none of those."
+          },
+          {
+            "id": "c",
+            "text": "Give Claude a clock tool and have it compare each timestamp",
+            "correct": false,
+            "says": "Ruled out because the table sends \"Anything that must happen every time\" to a check in code, and a model comparing dates through a tool is still the model deciding."
+          },
+          {
+            "id": "d",
+            "text": "Parse the field and compare it with today's date in code",
+            "correct": true,
+            "says": "A rule in a known format is code's job, cheaper, faster, deterministic and testable (the when-not-to table and the third trap)."
+          }
+        ],
+        "origin": {
+          "path": "course/04-capabilities-and-limits/02-thinking-computer-use-and-when-not-to-use-a-model.md",
+          "section": "When not to use a model"
+        }
+      }
+    ]
+  }
+}

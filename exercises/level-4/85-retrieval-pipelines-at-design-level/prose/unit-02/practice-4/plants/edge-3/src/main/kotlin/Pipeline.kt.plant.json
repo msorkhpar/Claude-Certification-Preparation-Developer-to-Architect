@@ -1,0 +1,15 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/kotlin/Pipeline.kt",
+      "old": "        if (!visible(chunk, allowedDocs)) return@mapIndexedNotNull null\n",
+      "new": ""
+    },
+    {
+      "file": "src/main/kotlin/Pipeline.kt",
+      "old": "    return scored.sortedWith(compareBy({ it.first }, { it.second })).take(k).map { it.third }",
+      "new": "    return scored.sortedWith(compareBy({ it.first }, { it.second })).take(k).map { it.third }.filter { id -> chunks.any { it.id == id && visible(it, allowedDocs) } }"
+    }
+  ]
+}

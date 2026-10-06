@@ -1,0 +1,276 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "67-exploring-a-large-codebase"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: an exploration that writes down what it learns and can be resumed after a crash (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an exploration that writes down what it learns and can be resumed after a crash"
+    },
+    {
+      "type": "para",
+      "text": "A team lets agents explore a large codebase for hours. The main conversation fills with file contents until its answers talk about \"typical patterns\" instead of the classes it found an hour ago; when a worker crashes, the whole exploration starts again from nothing; and the manifest the coordinator wrote lists a worker as finished although its notes were never saved. In this practice you write the pieces that keep an exploration alive outside any one context window: the scratchpad of findings, the manifest of agent state, the plan for resuming after a crash, the prompt that continues an agent from its exported state, and the `/compact` command that tells compaction what to keep. The model is not called. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`add_finding`, `render_scratchpad`, `build_manifest`, `resume_plan`, `resume_prompt`, `compact_command`); TypeScript has the camel-case names; Java has the same camel-case names as static methods of `Recovery` with the records the starter defines (`Finding`, `AgentEntry`, `Manifest`, `Action`); Kotlin has top-level functions and data classes."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working exploration recovery helper with six gaps cut out of it. Everything that is plumbing is written and correct: the records, the order of the areas, the sorting of the manifest and the join of the lines. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript, Java and Kotlin names are the camel-case forms where a name is given):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "One finding per area and fact (unlocks `m1`): a finding whose area and fact are already recorded is not added again; the first one stays, in first-seen order, and the list given is never changed.",
+        "The grouping by area (unlocks `e1`): the scratchpad has one `## area` block per area, in first-seen order, and each block lists only the findings of that area as `- fact (location)`.",
+        "The bad manifest input (unlocks `e2`): two agents with the same name, or an agent with a status other than `done`, `running` or `failed`, are refused with an error.",
+        "The resume actions (unlocks `e3`, `e4`, `e5`): an agent whose state file is missing is restarted from scratch (`restart`); a finished agent with its state file is reused (`reuse`) and not run again; a running or failed agent with a state file is resumed from it (`resume`).",
+        "The resume prompt (unlocks `e6`): the prompt is the task, then a blank line, `State from the last run:`, one `- line` per state line and `Continue from the first unfinished step.`, and nothing else; with no state lines it is the task alone.",
+        "The compact command (unlocks `e7`): `/compact` alone when there is nothing to keep, otherwise `/compact Focus on ` and the things to keep joined with `, `."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gap 1. About fourteen lines in all. The steps below describe the whole helper, so you can see how your gaps are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`add_finding(findings, area, fact, location)` returns a new list (the input is not changed). A finding is `{area, fact, location}`. The same `fact` in the same `area` is recorded once, whatever its location; the same text under another area is a different finding. Findings stay in the order they were first added.",
+        "`render_scratchpad(findings)` returns Markdown: for each area, in the order the areas first appear, a heading `## <area>` and one line `- <fact> (<location>)` for each of its findings in order; the blocks are separated by one blank line. No findings give an empty string.",
+        "`build_manifest(agents)` takes agents `{name, state_file, status}` with status `done`, `running` or `failed`, and returns `{version: 1, agents: [...]}` with the agents sorted by name and each one holding exactly those three fields. A duplicate name or an unknown status is an error.",
+        "`resume_plan(manifest, existing_files)` returns `(name, action)` for every agent of the manifest, in its order: `restart` when the agent's state file is not among the existing files (whatever its status), otherwise `reuse` for a `done` agent and `resume` for any other.",
+        "`resume_prompt(task, state_lines)` returns the task alone when there are no state lines. Otherwise it returns the task, a blank line, `State from the last run:`, one line `- <line>` for each state line and a last line `Continue from the first unfinished step.`",
+        "`compact_command(keep)` returns `/compact` when there is nothing to keep, otherwise `/compact Focus on ` followed by the items joined by `, `."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**The scratchpad.** Findings written to a file survive the context window that found them, and a fact recorded twice is noise. *You should see* each fact once, grouped by area.",
+        "**The manifest.** The coordinator needs one place to learn which agent did what. *You should see* every agent with its state file and status, in a stable order, and a bad status refused.",
+        "**Trust the file, not the status.** A manifest that says `running` or even `done` is only a claim until the state file exists. *You should see* `restart` for an agent whose file is missing.",
+        "**Reuse what is done.** A finished agent is not run again; its exported state goes into the next prompt. *You should see* `reuse`, and `resume` for the agent that stopped half-way.",
+        "**Inject state, not transcripts.** A resumed agent gets the lines it exported and an instruction to continue, and nothing from the old conversation. *You should see* exactly that prompt.",
+        "**Steer compaction.** `/compact` accepts instructions about what to keep. *You should see* the command carry them."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A finding is recorded once per area and fact, in first-seen order"
+        ],
+        [
+          "`e1`",
+          "The scratchpad groups findings under their area"
+        ],
+        [
+          "`e2`",
+          "The manifest lists every agent with its state file and status, and refuses bad input"
+        ],
+        [
+          "`e3`",
+          "A finished agent with its state file is reused and not run again"
+        ],
+        [
+          "`e4`",
+          "A running or failed agent with a state file is resumed from it"
+        ],
+        [
+          "`e5`",
+          "An agent whose state file is missing is restarted from scratch"
+        ],
+        [
+          "`e6`",
+          "The resume prompt carries the task and the state lines and nothing else"
+        ],
+        [
+          "`e7`",
+          "The compact command names what to keep"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "import { logger } from \"./logger.ts\";\nconst log = logger(\"recovery\");\n/** What a long exploration keeps outside its context: a scratchpad of findings, a manifest of agent state, and the prompt that resumes an agent after a crash. See ../../statement.md. */\n\nexport const STATUSES = [\"done\", \"running\", \"failed\"];\n\nexport function addFinding(findings: any[], area: string, fact: string, location: string): any[] {\n  if (findings.some((f) => f.area === area && f.fact === fact)) return [...findings];\n  return [...findings, { area, fact, location }];\n}\n\nexport function renderScratchpad(findings: any[]): string {\n  const areas: string[] = [];\n  for (const f of findings) if (!areas.includes(f.area)) areas.push(f.area);\n  const blocks = areas.map((area) => `## ${area}\\n` + findings.filter((f) => f.area === area).map((f) => `- ${f.fact} (${f.location})`).join(\"\\n\"));\n  return blocks.join(\"\\n\\n\");\n}\n\nexport function buildManifest(agents: any[]): any {\n  log.debug(\"buildManifest input\", agents);\n  const names = agents.map((a) => a.name);\n  if (new Set(names).size !== names.length) throw new Error(\"duplicate agent name\");\n  for (const a of agents) if (!STATUSES.includes(a.status)) throw new Error(`unknown status ${a.status}`);\n  const sorted = [...agents].sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));\n  return { version: 1, agents: sorted.map((a) => ({ name: a.name, state_file: a.state_file, status: a.status })) };\n}\n\nexport function resumePlan(manifest: any, existingFiles: Set<string>): Array<[string, string]> {\n  return manifest.agents.map((a: any): [string, string] => {\n    let action: string;\n    if (!existingFiles.has(a.state_file)) action = \"restart\";\n    else if (a.status === \"done\") action = \"reuse\";\n    else action = \"resume\";\n    return [a.name, action];\n  });\n}\n\nexport function resumePrompt(task: string, stateLines: string[]): string {\n  if (stateLines.length === 0) return task;\n  return task + \"\\n\\nState from the last run:\\n\" + stateLines.map((line) => `- ${line}`).join(\"\\n\") + \"\\nContinue from the first unfinished step.\";\n}\n\nexport function compactCommand(keep: string[]): string {\n  return keep.length === 0 ? \"/compact\" : \"/compact Focus on \" + keep.join(\", \");\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { addFinding, buildManifest, compactCommand, renderScratchpad, resumePlan } from \"./recovery.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// The scratchpad: one line per finding, a fact is recorded once per area.\nlet findings: any[] = addFinding([], \"auth\", \"tokens are signed in TokenSigner\", \"auth/TokenSigner.java:12\");\nfindings = addFinding(findings, \"billing\", \"invoices use cents\", \"billing/Money.java:5\");\nfindings = addFinding(findings, \"auth\", \"tokens are signed in TokenSigner\", \"auth/Other.java:99\");\nconsole.log(renderScratchpad(findings));\n\n// The manifest of the subagents, and what to do with each after a crash.\nconst agents = [\n  { name: \"search\", state_file: \"state/search.md\", status: \"running\" },\n  { name: \"auth\", state_file: \"state/auth.md\", status: \"done\" },\n  { name: \"billing\", state_file: \"state/billing.md\", status: \"failed\" },\n];\nconst manifest = buildManifest(agents);\nconsole.log(\"manifest:\", JSON.stringify(manifest));\nconsole.log(\"resume plan:\", JSON.stringify(resumePlan(manifest, new Set([\"state/auth.md\", \"state/search.md\"]))));\nconsole.log(\"compact command:\", compactCommand([\"the open questions\", \"file paths\"]));\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "import { logger } from \"./logger.ts\";\nconst log = logger(\"recovery\");\n/** What a long exploration keeps outside its context: a scratchpad of findings, a manifest of agent state, and the prompt that resumes an agent after a crash. See ../../statement.md. */\n\nexport const STATUSES = [\"done\", \"running\", \"failed\"];\n\nexport function addFinding(findings: any[], area: string, fact: string, location: string): any[] {\n  // TODO 1 of 6 (finish this to pass m1): the scratchpad's duplicate rule. Receives the findings so far and a new one\n  //   (area, fact, location). When a finding with the same area and the same fact already exists, return the findings\n  //   unchanged; otherwise return them with the new one added last. Example: adding (api, \"uses JWT\") twice -> one entry.\n  return [...findings, { area, fact, location }];\n}\n\nexport function renderScratchpad(findings: any[]): string {\n  const areas: string[] = [];\n  for (const f of findings) if (!areas.includes(f.area)) areas.push(f.area);\n  // TODO 2 of 6 (finish this to pass e1): the lines of one area. Receives all the findings and one area. Return one line\n  //   \"- fact (location)\" for each finding of that area only, in order. Example: findings of api and db, area api -> the\n  //   api lines only.\n  const blocks = areas.map((area) => `## ${area}\\n` + findings.map((f) => `- ${f.fact} (${f.location})`).join(\"\\n\"));\n  return blocks.join(\"\\n\\n\");\n}\n\nexport function buildManifest(agents: any[]): any {\n  log.debug(\"buildManifest input\", agents);\n  const names = agents.map((a) => a.name);\n  // TODO 3 of 6 (finish this to pass e2): the checks of the manifest. Refuse with an error when two agents have the same\n  //   name, and when an agent's status is not one of STATUSES. Example: two agents named a -> refused; status \"paused\" ->\n  //   refused.\n  const sorted = [...agents].sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));\n  return { version: 1, agents: sorted.map((a) => ({ name: a.name, state_file: a.state_file, status: a.status })) };\n}\n\nexport function resumePlan(manifest: any, existingFiles: Set<string>): Array<[string, string]> {\n  return manifest.agents.map((a: any): [string, string] => {\n    let action: string;\n    // TODO 4 of 6 (finish this to pass e3, e4, e5): the action for one agent. When its state file does not exist,\n    //   restart; otherwise when its status is done, reuse it; otherwise resume it from the state file. Example: done with\n    //   its file -> reuse; failed with its file -> resume; any status without its file -> restart.\n    action = \"skip\";\n    return [a.name, action];\n  });\n}\n\nexport function resumePrompt(task: string, stateLines: string[]): string {\n  // TODO 5 of 6 (finish this to pass e6): the resume prompt. Receives the task and the state lines. With no state lines,\n  //   return the task alone; otherwise the task, a blank line, \"State from the last run:\", one \"- line\" per state line,\n  //   and \"Continue from the first unfinished step.\". Example: [] -> the task.\n  return task;\n}\n\nexport function compactCommand(keep: string[]): string {\n  // TODO 6 of 6 (finish this to pass e7): the compact command. Receives the things to keep. Return /compact when there\n  //   are none, otherwise \"/compact Focus on \" followed by them joined with \", \". Example: [auth flow, schema] -> /compact\n  //   Focus on auth flow, schema.\n  return \"/compact\";\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { addFinding, buildManifest, compactCommand, renderScratchpad, resumePlan } from \"./recovery.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\n// The scratchpad: one line per finding, a fact is recorded once per area.\nlet findings: any[] = addFinding([], \"auth\", \"tokens are signed in TokenSigner\", \"auth/TokenSigner.java:12\");\nfindings = addFinding(findings, \"billing\", \"invoices use cents\", \"billing/Money.java:5\");\nfindings = addFinding(findings, \"auth\", \"tokens are signed in TokenSigner\", \"auth/Other.java:99\");\nconsole.log(renderScratchpad(findings));\n\n// The manifest of the subagents, and what to do with each after a crash.\nconst agents = [\n  { name: \"search\", state_file: \"state/search.md\", status: \"running\" },\n  { name: \"auth\", state_file: \"state/auth.md\", status: \"done\" },\n  { name: \"billing\", state_file: \"state/billing.md\", status: \"failed\" },\n];\nconst manifest = buildManifest(agents);\nconsole.log(\"manifest:\", JSON.stringify(manifest));\nconsole.log(\"resume plan:\", JSON.stringify(resumePlan(manifest, new Set([\"state/auth.md\", \"state/search.md\"]))));\nconsole.log(\"compact command:\", compactCommand([\"the open questions\", \"file paths\"]));\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 1,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "a4352295cf7018c271241ce9d5d16231c0f533c42a437c860f1e5cdb9764112a",
+  "starting_code": "import { logger } from \"./logger.ts\";\nconst log = logger(\"recovery\");\n/** What a long exploration keeps outside its context: a scratchpad of findings, a manifest of agent state, and the prompt that resumes an agent after a crash. See ../../statement.md. */\n\nexport const STATUSES = [\"done\", \"running\", \"failed\"];\n\nexport function addFinding(findings: any[], area: string, fact: string, location: string): any[] {\n  // TODO 1 of 6 (finish this to pass m1): the scratchpad's duplicate rule. Receives the findings so far and a new one\n  //   (area, fact, location). When a finding with the same area and the same fact already exists, return the findings\n  //   unchanged; otherwise return them with the new one added last. Example: adding (api, \"uses JWT\") twice -> one entry.\n  return [...findings, { area, fact, location }];\n}\n\nexport function renderScratchpad(findings: any[]): string {\n  const areas: string[] = [];\n  for (const f of findings) if (!areas.includes(f.area)) areas.push(f.area);\n  // TODO 2 of 6 (finish this to pass e1): the lines of one area. Receives all the findings and one area. Return one line\n  //   \"- fact (location)\" for each finding of that area only, in order. Example: findings of api and db, area api -> the\n  //   api lines only.\n  const blocks = areas.map((area) => `## ${area}\\n` + findings.map((f) => `- ${f.fact} (${f.location})`).join(\"\\n\"));\n  return blocks.join(\"\\n\\n\");\n}\n\nexport function buildManifest(agents: any[]): any {\n  log.debug(\"buildManifest input\", agents);\n  const names = agents.map((a) => a.name);\n  // TODO 3 of 6 (finish this to pass e2): the checks of the manifest. Refuse with an error when two agents have the same\n  //   name, and when an agent's status is not one of STATUSES. Example: two agents named a -> refused; status \"paused\" ->\n  //   refused.\n  const sorted = [...agents].sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));\n  return { version: 1, agents: sorted.map((a) => ({ name: a.name, state_file: a.state_file, status: a.status })) };\n}\n\nexport function resumePlan(manifest: any, existingFiles: Set<string>): Array<[string, string]> {\n  return manifest.agents.map((a: any): [string, string] => {\n    let action: string;\n    // TODO 4 of 6 (finish this to pass e3, e4, e5): the action for one agent. When its state file does not exist,\n    //   restart; otherwise when its status is done, reuse it; otherwise resume it from the state file. Example: done with\n    //   its file -> reuse; failed with its file -> resume; any status without its file -> restart.\n    action = \"skip\";\n    return [a.name, action];\n  });\n}\n\nexport function resumePrompt(task: string, stateLines: string[]): string {\n  // TODO 5 of 6 (finish this to pass e6): the resume prompt. Receives the task and the state lines. With no state lines,\n  //   return the task alone; otherwise the task, a blank line, \"State from the last run:\", one \"- line\" per state line,\n  //   and \"Continue from the first unfinished step.\". Example: [] -> the task.\n  return task;\n}\n\nexport function compactCommand(keep: string[]): string {\n  // TODO 6 of 6 (finish this to pass e7): the compact command. Receives the things to keep. Return /compact when there\n  //   are none, otherwise \"/compact Focus on \" followed by them joined with \", \". Example: [auth flow, schema] -> /compact\n  //   Focus on auth flow, schema.\n  return \"/compact\";\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/67-exploring-a-large-codebase/prose/unit-02/practice-2/recovery.ts",
+    "test_path": "practice/level-3/67-exploring-a-large-codebase/prose/unit-02/practice-2/recovery.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-3/67-exploring-a-large-codebase/prose/unit-02/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-3/67-exploring-a-large-codebase/prose/unit-02/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-3/67-exploring-a-large-codebase/prose/unit-02/practice-2/recovery.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 a finding is recorded once per area and fact in first seen order",
+        "kind": "main",
+        "says": "A finding is recorded once per area and fact, in first-seen order"
+      },
+      {
+        "id": "e1 the scratchpad groups findings under their area",
+        "kind": "edge",
+        "says": "The scratchpad groups findings under their area"
+      },
+      {
+        "id": "e2 the manifest lists every agent with its state file and status and refuses bad input",
+        "kind": "edge",
+        "says": "The manifest lists every agent with its state file and status, and refuses bad input"
+      },
+      {
+        "id": "e3 a finished agent with its state file is reused and not run again",
+        "kind": "edge",
+        "says": "A finished agent with its state file is reused and not run again"
+      },
+      {
+        "id": "e4 a running or failed agent with a state file is resumed from it",
+        "kind": "edge",
+        "says": "A running or failed agent with a state file is resumed from it"
+      },
+      {
+        "id": "e5 an agent whose state file is missing is restarted from scratch",
+        "kind": "edge",
+        "says": "An agent whose state file is missing is restarted from scratch"
+      },
+      {
+        "id": "e6 the resume prompt carries the task and the state lines and nothing else",
+        "kind": "edge",
+        "says": "The resume prompt carries the task and the state lines and nothing else"
+      },
+      {
+        "id": "e7 the compact command names what to keep",
+        "kind": "edge",
+        "says": "The compact command names what to keep"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/67-exploring-a-large-codebase/prose/unit-02/practice-2/target/report.xml"
+    },
+    "origin": "course/67-exploring-a-large-codebase/02-compaction-crash-recovery-and-the-practice.md",
+    "concepts": [
+      "the practice of Compaction, crash recovery and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/67-exploring-a-large-codebase/prose/unit-02/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "exploring-a-large-codebase-u2"
+}

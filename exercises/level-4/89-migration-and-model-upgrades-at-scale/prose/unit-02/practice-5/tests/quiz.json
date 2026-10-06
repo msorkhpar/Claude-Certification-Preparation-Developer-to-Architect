@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-4",
+    "89-migration-and-model-upgrades-at-scale"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 5,
+  "title": "Check yourself: The gate, the roll-out and the way back",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A staged roll-out sits at 5 percent of traffic. Only 300 requests have been counted, with no errors, and the minimum is 1,000. What is the next step?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Advance to 25 percent, since a clean record needs no further evidence",
+            "correct": false,
+            "says": "Ruled out because \"A stage with fewer requests than the minimum (1,000 in the example) says nothing yet\"."
+          },
+          {
+            "id": "b",
+            "text": "Hold where it is, since a sample this small shows nothing yet",
+            "correct": true,
+            "says": "A stage with fewer requests than the minimum says nothing yet, so the rule is to hold at the stage."
+          },
+          {
+            "id": "c",
+            "text": "Roll back to zero, since too few requests counts as a failed stage",
+            "correct": false,
+            "says": "Ruled out because the share goes back to zero only when errors pass the limit: \"Over it, the share goes back to zero\"."
+          },
+          {
+            "id": "d",
+            "text": "Declare the roll-out complete, since no error has been seen so far",
+            "correct": false,
+            "says": "Ruled out because a roll-out ends with \"One stage up, and `complete` at 100 percent\"."
+          }
+        ],
+        "origin": {
+          "path": "course/89-migration-and-model-upgrades-at-scale/02-the-gate-the-roll-out-and-the-way-back.md",
+          "section": "A staged roll-out"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A staged roll-out is at 25 percent of requests when the error rate passes its limit. What happens next?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Drop to 5 percent and keep the roll-out running, to gather more evidence from a smaller share",
+            "correct": false,
+            "says": "Ruled out because \"Reducing to a smaller share keeps part of the damage on the path\"."
+          },
+          {
+            "id": "b",
+            "text": "Hold at 25 percent and investigate, leaving those customers on the new model while the errors continue to arrive",
+            "correct": false,
+            "says": "Ruled out because \"Holding at the stage while errors continue leaves the share of customers who see them where it is\"."
+          },
+          {
+            "id": "c",
+            "text": "Advance to 100 percent so that the failure shows up clearly in the data of the whole base",
+            "correct": false,
+            "says": "Ruled out because \"Advancing to 100 percent to see the failure in the full data makes every customer the sample\"."
+          },
+          {
+            "id": "d",
+            "text": "Send all traffic back to the previous model, which stays available until its own retirement",
+            "correct": true,
+            "says": "The limit is passed, so the share goes back to zero and the previous model, still configured, takes the traffic."
+          }
+        ],
+        "origin": {
+          "path": "course/89-migration-and-model-upgrades-at-scale/02-the-gate-the-roll-out-and-the-way-back.md",
+          "section": "Rolling back, and how long you can"
+        }
+      }
+    ]
+  }
+}

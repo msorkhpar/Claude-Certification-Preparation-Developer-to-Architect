@@ -1,0 +1,326 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "90-governance-safety-and-risk"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: the governance files of a claims assistant (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: the governance files of a claims assistant"
+    },
+    {
+      "type": "para",
+      "text": "A claims assistant drafts replies, answers policy questions and can issue refunds and close accounts. Its governance is written down in four files, and the draft of them is wrong in several places: a screen lets a request through when it is down, a refund has no person in front of it, an answer goes out unreviewed at a confidence of 80, the audit log keeps the text of every prompt for two years, and the risk register has two rows, no owner and a control that does not exist. In this practice you correct the files. There is no program to write and no model is called: the tests read your files. The numbers the tests check (a confidence of at least 95, a floor of at least 90 days, an erasure within 30 days) are this course's design values, to be tuned to your own error costs and your own legal advice. It is in Python, TypeScript, Java and Kotlin; pick your language folder, open `starter/` and edit the files there; each language folder holds its own copy of the files."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The four files exist as a working draft: the controls, the routing, the retention settings and the register are all there, in the right shape, and the tests read them. You change values and fill in cells; there is no code to write and no function to log from. The draft is wrong in six places, and each one unlocks the cases named:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "The input screen and the refund approval proceed when they fail, and `untrusted-content` is not defined: fix `on_failure` and add the control (`m1`; the missing control is also needed by `e4`).",
+        "`human_review` is empty: give each high-consequence action a review control that exists, has the tier `high` and holds (`e1`).",
+        "The routing sends at a confidence of 80, lets a high-consequence action run on its own and sends an unsupported answer: correct the three values (`e2`).",
+        "The audit window has a floor of 30 days, keeps entries for 730, stores content and lets the ceiling purge a hold: correct the five values (`e3`).",
+        "The register has two rows, no owner and a control that does not fit: add the two missing rows and name a control and an owner in each (`e4`).",
+        "The register has a `TODO` where the disclosure sentence belongs, and erasure keeps the map and takes 90 days: write the sentence (`e5`) and correct the erasure block (`e6`)."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About a dozen small edits in all. The sections below describe the whole set of files."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "The project folder holds four files."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`governance/controls.json`: the `controls`, each with an `id`, a `layer` (`input`, `output`, `action` or `monitor`), a `tier` (`all` or `high`) and `on_failure` (`hold` or `proceed-flagged`); the list `high_consequence_actions`; and `human_review`, which maps each of those actions to the id of the control that puts a person in front of it.",
+        "`governance/routing.json`: `auto_confidence_min`, `high_consequence_auto` and `unsupported_answer`.",
+        "`governance/retention.json`: the `audit` block (`floor_days`, `ceiling_days`, `retain_days`, `store_content`, `legal_hold_overrides_ceiling`) and the `erasure` block (`remove_vault_mapping`, `max_days_to_complete`).",
+        "`docs/risk-register.md`: one sentence on disclosure, and a table with the columns Risk, Failure mode, Control, Owner and Residual."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Rules the files must follow:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "A control with the tier `high`, or in the layer `input` or `action`, holds when it fails. Only an output or monitor control of the tier `all` may proceed with a flag.",
+        "Every high-consequence action has a human review step: a control that exists, has the tier `high` and holds.",
+        "`auto_confidence_min` is a whole number from 95 to 100. A high-consequence action is never automatic, and an unsupported answer is held.",
+        "The audit window has a floor of at least 90 days. The days kept lie between the floor and the ceiling (the ceiling itself is allowed), the log stores no content, and a legal hold outranks the ceiling.",
+        "The register has at least four rows covering a hallucination, a prompt injection, a privacy leak and an unfair outcome. Each row names a control that is defined in `controls.json` and a named owner (a role, not \"TBD\").",
+        "The register says that users are told that AI helped produce the output.",
+        "Erasure removes the map from tokens to people and completes in at most 30 days.",
+        "No file holds a home path or an address other than `example.com`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**A control that fails open on an input or an action is a hole.** When the screen is down, a request that is let through unscreened is the one an attacker waits for. *You should see* every input and action control hold, and only an output or monitor control proceed, flagged.",
+        "**A person in front of an irreversible action is a control, and a line in a prompt is not.** *You should see* each high-consequence action mapped to a high-tier control that holds.",
+        "**A threshold is a decision about error cost.** *You should see* an automatic threshold of at least 95, no automatic path for a high-consequence action, and a held answer when the source does not support it.",
+        "**The audit log proves what happened and is not a second copy of the data.** *You should see* a floor, a ceiling, a stored period between them, no content, and a legal hold that outranks the ceiling.",
+        "**A risk with no owner and no control is a wish.** *You should see* four rows, each with a control that exists and an owner you could telephone.",
+        "**People are told, and the data can be unlinked.** *You should see* the disclosure sentence and an erasure that removes the vault mapping within 30 days."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "No control that guards an input or an action fails open"
+        ],
+        [
+          "`e1`",
+          "Every high-consequence action has a human step that exists, is high tier and holds"
+        ],
+        [
+          "`e2`",
+          "The automatic threshold is at least 95 (exactly 95 is allowed), a high-consequence action is never automatic and an unsupported answer is held"
+        ],
+        [
+          "`e3`",
+          "The audit floor is at least 90 days, the days kept lie within the ceiling, no content is stored and a legal hold wins"
+        ],
+        [
+          "`e4`",
+          "The register has four rows with a defined control, a named owner and the four failure modes"
+        ],
+        [
+          "`e5`",
+          "The register says users are told that AI helped, and no file holds a personal path or address"
+        ],
+        [
+          "`e6`",
+          "Erasure removes the vault mapping and completes within 30 days (exactly 30 is allowed)"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "{\n  \"controls\": [\n    {\"id\": \"input-screen\", \"layer\": \"input\", \"tier\": \"all\", \"on_failure\": \"hold\"},\n    {\"id\": \"untrusted-content\", \"layer\": \"input\", \"tier\": \"all\", \"on_failure\": \"hold\"},\n    {\"id\": \"grounding-check\", \"layer\": \"output\", \"tier\": \"all\", \"on_failure\": \"hold\"},\n    {\"id\": \"refund-approval\", \"layer\": \"action\", \"tier\": \"high\", \"on_failure\": \"hold\"},\n    {\"id\": \"parity-report\", \"layer\": \"monitor\", \"tier\": \"all\", \"on_failure\": \"proceed-flagged\"}\n  ],\n  \"high_consequence_actions\": [\"issue_refund\", \"close_account\"],\n  \"human_review\": {\"issue_refund\": \"refund-approval\", \"close_account\": \"refund-approval\"}\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/docs/risk-register.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "# Risk register\n\nEvery person who receives output is told that AI helped produce it. Disclosure is part of the deployment and not an option.\n\n| Risk | Failure mode | Control | Owner | Residual |\n|---|---|---|---|---|\n| A confident answer that is wrong | hallucination | grounding-check | Claims quality lead | Low: an unsupported answer is held |\n| Instructions hidden in a document | prompt injection | untrusted-content | Platform security lead | Low: untrusted text never reaches the system prompt |\n| Personal data in a prompt or a log | privacy leak | input-screen | Data protection officer | Medium: patterns do not find names |\n| Different outcomes for different groups | unfair outcome | parity-report | Model risk lead | Medium: monitored and not prevented |\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/governance/retention.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"audit\": {\"floor_days\": 90, \"ceiling_days\": 365, \"retain_days\": 365, \"store_content\": false, \"legal_hold_overrides_ceiling\": true},\n  \"erasure\": {\"remove_vault_mapping\": true, \"max_days_to_complete\": 30}\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/governance/routing.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"auto_confidence_min\": 95,\n  \"high_consequence_auto\": false,\n  \"unsupported_answer\": \"hold\"\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "{\n  \"controls\": [\n    {\"id\": \"input-screen\", \"layer\": \"input\", \"tier\": \"all\", \"on_failure\": \"proceed-flagged\"},\n    {\"id\": \"grounding-check\", \"layer\": \"output\", \"tier\": \"all\", \"on_failure\": \"hold\"},\n    {\"id\": \"refund-approval\", \"layer\": \"action\", \"tier\": \"high\", \"on_failure\": \"proceed-flagged\"},\n    {\"id\": \"parity-report\", \"layer\": \"monitor\", \"tier\": \"all\", \"on_failure\": \"proceed-flagged\"}\n  ],\n  \"high_consequence_actions\": [\"issue_refund\", \"close_account\"],\n  \"human_review\": {}\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/docs/risk-register.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "# Risk register\n\nTODO: say how users are told about AI help.\n\n| Risk | Failure mode | Control | Owner | Residual |\n|---|---|---|---|---|\n| A confident answer that is wrong | hallucination | pii-filter | TBD | Low |\n| Instructions hidden in a document | prompt injection | untrusted-content | TBD | Low |\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/governance/retention.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"audit\": {\"floor_days\": 30, \"ceiling_days\": 365, \"retain_days\": 730, \"store_content\": true, \"legal_hold_overrides_ceiling\": false},\n  \"erasure\": {\"remove_vault_mapping\": false, \"max_days_to_complete\": 90}\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/governance/routing.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"auto_confidence_min\": 80,\n  \"high_consequence_auto\": true,\n  \"unsupported_answer\": \"send\"\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 8,
+    "code": 4,
+    "tables": 1,
+    "lists": 4,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "85678240ad7776aef9bd1748528af72039598a129ff0cda7dbc232b28dba9b5f",
+  "starting_code": "{\n  \"controls\": [\n    {\"id\": \"input-screen\", \"layer\": \"input\", \"tier\": \"all\", \"on_failure\": \"proceed-flagged\"},\n    {\"id\": \"grounding-check\", \"layer\": \"output\", \"tier\": \"all\", \"on_failure\": \"hold\"},\n    {\"id\": \"refund-approval\", \"layer\": \"action\", \"tier\": \"high\", \"on_failure\": \"proceed-flagged\"},\n    {\"id\": \"parity-report\", \"layer\": \"monitor\", \"tier\": \"all\", \"on_failure\": \"proceed-flagged\"}\n  ],\n  \"high_consequence_actions\": [\"issue_refund\", \"close_account\"],\n  \"human_review\": {}\n}\n",
+  "exercise": {
+    "main_path": "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-1/project/governance/controls.json",
+    "test_path": "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-1/tests/test_governance.py",
+    "run_command": [
+      "python3",
+      "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-1/check_files.py",
+      "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-1/project/docs/risk-register.md",
+      "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-1/project/governance/controls.json",
+      "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-1/project/governance/retention.json",
+      "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-1/project/governance/routing.json"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-1/target/report.xml",
+      "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-1/tests/test_governance.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_no_control_that_guards_an_input_or_an_action_fails_open",
+        "kind": "main",
+        "says": "No control that guards an input or an action fails open"
+      },
+      {
+        "id": "test_e1_every_high_consequence_action_has_a_human_step_that_exists_and_holds",
+        "kind": "edge",
+        "says": "Every high-consequence action has a human step that exists, is high tier and holds"
+      },
+      {
+        "id": "test_e2_the_automatic_threshold_is_at_least_95_and_a_high_consequence_action_is_never_automatic",
+        "kind": "edge",
+        "says": "The automatic threshold is at least 95 (exactly 95 is allowed), a high-consequence action is never automatic and an unsupported answer is held"
+      },
+      {
+        "id": "test_e3_retention_keeps_at_least_90_days_within_the_ceiling_and_stores_no_content",
+        "kind": "edge",
+        "says": "The audit floor is at least 90 days, the days kept lie within the ceiling, no content is stored and a legal hold wins"
+      },
+      {
+        "id": "test_e4_the_risk_register_names_a_control_and_an_owner_for_each_of_four_failure_modes",
+        "kind": "edge",
+        "says": "The register has four rows with a defined control, a named owner and the four failure modes"
+      },
+      {
+        "id": "test_e5_users_are_told_that_ai_helped_and_no_file_holds_personal_data",
+        "kind": "edge",
+        "says": "The register says users are told that AI helped, and no file holds a personal path or address"
+      },
+      {
+        "id": "test_e6_erasure_removes_the_vault_mapping_within_30_days",
+        "kind": "edge",
+        "says": "Erasure removes the vault mapping and completes within 30 days (exactly 30 is allowed)"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-1/target/report.xml"
+    },
+    "origin": "course/90-governance-safety-and-risk/01-controls-that-fail-closed-and-a-person-before-the-irreversible.md",
+    "concepts": [
+      "the practice of Controls that fail closed, and a person before the irreversible is solved"
+    ],
+    "files": [
+      "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-1/project/docs/risk-register.md",
+      "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-1/project/governance/retention.json",
+      "practice/level-4/90-governance-safety-and-risk/prose/unit-01/practice-1/project/governance/routing.json"
+    ]
+  },
+  "lang": "python",
+  "edition": "governance-safety-and-risk-u1"
+}

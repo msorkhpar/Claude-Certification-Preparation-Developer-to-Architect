@@ -1,0 +1,83 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-4",
+    "80-end-to-end-and-multi-agent-architecture"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Practice: an architecture review against a rubric (TypeScript)",
+  "lang": "typescript",
+  "main_file": "architectureReview.ts",
+  "files": [
+    "try-it.ts"
+  ],
+  "test_file": "architectureReview.test.ts",
+  "build": [
+    "junit-file.mjs",
+    "logger.ts"
+  ],
+  "run_command": [
+    "node",
+    "practice/level-4/80-end-to-end-and-multi-agent-architecture/prose/unit-02/practice-2/try-it.ts"
+  ],
+  "test_command": [
+    "node",
+    "--test",
+    "--test-reporter=spec",
+    "--test-reporter-destination=stdout",
+    "--test-reporter=./practice/level-4/80-end-to-end-and-multi-agent-architecture/prose/unit-02/practice-2/junit-file.mjs",
+    "--test-reporter-destination=stdout",
+    "practice/level-4/80-end-to-end-and-multi-agent-architecture/prose/unit-02/practice-2/architectureReview.test.ts"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1 a sound design passes review with no findings",
+      "kind": "main",
+      "says": "A sound design passes review with no findings and is approved"
+    },
+    {
+      "id": "e1 a design without a feedback loop or a stage is rejected",
+      "kind": "edge",
+      "says": "A missing feedback loop or a missing stage is a high finding"
+    },
+    {
+      "id": "e2 autonomy is flagged only when the path is known",
+      "kind": "edge",
+      "says": "Autonomy is flagged only when the path is known"
+    },
+    {
+      "id": "e3 several agents need independent parts and no shared context",
+      "kind": "edge",
+      "says": "A team needs independent parts and no shared context; one agent is exempt"
+    },
+    {
+      "id": "e4 an unapproved write is a finding only when an audit is needed",
+      "kind": "edge",
+      "says": "An unapproved write is a finding only when an audit is needed"
+    },
+    {
+      "id": "e5 output that nobody validates is flagged",
+      "kind": "edge",
+      "says": "Output without a validation step is flagged; an absent output stage is not flagged twice"
+    },
+    {
+      "id": "e6 findings are ordered by severity then rule and the verdict follows the worst",
+      "kind": "edge",
+      "says": "The findings are ordered by severity and then rule, and the verdict follows the worst"
+    },
+    {
+      "id": "e7 the cheapest design that is not rejected wins and ties go by name",
+      "kind": "edge",
+      "says": "The cheapest design that is not rejected wins, ties go by name, and none passing gives no name"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/report.xml"
+  },
+  "origin": "course/80-end-to-end-and-multi-agent-architecture/02-contracts-between-parts-and-the-review.md"
+}

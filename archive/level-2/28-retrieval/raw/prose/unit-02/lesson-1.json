@@ -1,0 +1,483 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "28-retrieval"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "lesson",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Fusion, reranking, context and recall",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Fusion, reranking, context and recall"
+    },
+    {
+      "type": "para",
+      "text": "**Level:** Developer · **Module 28:** Retrieval · **Page 2 of 2** **Exams:** DV4"
+    },
+    {
+      "type": "para",
+      "text": "**After this page you can** merge two rankings with reciprocal rank fusion, say what a reranker adds and what it costs, explain contextual retrieval and the figures Anthropic reports for it, decide when retrieval is unnecessary, hand retrieved passages to Claude as search results, and measure a pipeline by recall instead of by how its answers read."
+    },
+    {
+      "type": "para",
+      "text": "Checked against Anthropic's write-up on contextual retrieval, the Claude API documentation (Embeddings and Search results) and the course practice, on 2026-10-03. The practice and the example ran offline in the course container and call no API. **Their embedding is a toy** and their knowledge base is invented, so their recall numbers describe the code, not any real system. The percentages for contextual retrieval below are Anthropic's measurements on its own datasets, as reported in its write-up."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why it matters"
+    },
+    {
+      "type": "para",
+      "text": "A retrieval system can read fluently and still be wrong, because the passage with the answer never reached the prompt. Fluent output hides that. The way to see it is to measure retrieval on its own: for a set of questions whose source documents are known, how often does the right document appear in the top few results? The exam asks which stage to change when that number is low."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The idea"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Merging two rankings: reciprocal rank fusion"
+    },
+    {
+      "type": "para",
+      "text": "The keyword index and the embedding index return rankings with scores on different scales, so the scores cannot be added. Fusion uses only the ranks. In reciprocal rank fusion an id's score is the sum, over the lists that hold it, of `1 / (k + rank)`, where rank starts at 1 and `k` is 60 in the practice. An id near the top of both lists scores high; an id at the top of one list and absent from the other still scores. A repeat of an id in one list is ignored. Ties break by id, so that the output is the same on every run."
+    },
+    {
+      "type": "para",
+      "text": "The effect shows in the example. The first relevant chunk for \"send back parcel\" is at rank 1 in BM25 and rank 6 in the embedding list, and in the fused list it is at rank 2. For \"resetting passwords\" BM25 finds nothing and the embedding finds the chunk at rank 1; in the fused list it is at rank 1. Over the eight questions the mean recall at 3 is 0.5 for BM25, 0.75 for the embedding and 1.0 for the fused list. On a real knowledge base the figures differ, and you measure them on your own questions."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Reranking"
+    },
+    {
+      "type": "para",
+      "text": "A reranker takes the query and the best few candidates and scores each pair with a stronger and slower model. Because it is slower, it sees only a pool: the first `pool` ids of the merged ranking, which it re-orders and cuts to `k`. The documentation lists a family of rerankers from Voyage AI that \"take a query and a list of documents and return them ranked by relevance to the query\". The practice passes a scoring function in, since it has no model. Only the pool takes part: a chunk outside it is never considered, however well the scorer would have rated it. So the pool must be large enough to contain the answer, and reranking cannot fix a retrieval that missed."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Contextual retrieval"
+    },
+    {
+      "type": "para",
+      "text": "A chunk lifted out of its document can lose its meaning. Anthropic's example is a chunk that says \"The company's revenue grew by 3% over the previous quarter\": it does not say which company or which quarter. The write-up's fix is to prepend \"chunk-specific explanatory context to each chunk before embedding\" and before building the keyword index, so that the chunk is indexed as a short sentence of context followed by the text. The model is asked to write that sentence for each chunk, with the whole document in view."
+    },
+    {
+      "type": "para",
+      "text": "The practice's `contexts` argument models it: a map from chunk id to a sentence that is indexed in front of the chunk's text, for both indexes, while the chunk shown to the model is unchanged. In the example the query \"return window\" finds nothing on the bare chunks and finds the right chunk once a context sentence is indexed in front."
+    },
+    {
+      "type": "para",
+      "text": "Anthropic reports the effect as a drop in the top-20-chunk retrieval failure rate:"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Technique",
+        "Failure rate",
+        "Reduction"
+      ],
+      "rows": [
+        [
+          "Baseline",
+          "5.7%",
+          ""
+        ],
+        [
+          "Contextual embeddings",
+          "3.7%",
+          "35%"
+        ],
+        [
+          "Contextual embeddings and contextual BM25",
+          "2.9%",
+          "49%"
+        ],
+        [
+          "Those two, with reranking added",
+          "1.9%",
+          "67%"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "These are the write-up's figures, measured on its datasets. They show an order of magnitude and a ranking of the techniques, and they do not promise a number for your data. The same write-up gives two practical guides: retrieve 20 chunks rather than fewer, and make contextualization affordable with prompt caching, at a one-time cost it states as \"$1.02 per million document tokens\", under its own assumptions about chunk and document sizes."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "When retrieval is unnecessary"
+    },
+    {
+      "type": "para",
+      "text": "The write-up has a rule of thumb for small knowledge bases: under about 200,000 tokens, put the whole knowledge base in the prompt and cache it, and skip retrieval. A pipeline adds stages that can each fail, and a model reading everything cannot miss a passage. The rule is about size, not quality: above the limit, or when the base changes every minute, retrieval is the tool."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Handing passages to Claude"
+    },
+    {
+      "type": "para",
+      "text": "Retrieved chunks go into the prompt, and answers should cite them. The documentation's search result block exists for this: a block of type `search_result` with a required `source`, a required `title` and a `content` array of text blocks, \"Use them in RAG (Retrieval-Augmented Generation) applications where Claude needs to attribute answers to your documents.\" They can come from a tool call or as top-level content in a user message. Citations are off by default and are switched on with `\"enabled\": true`; the rule is all or nothing: \"either all search results in a request must have citations enabled, or all must have them disabled.\" Search results hold text only. The next module covers citations in full."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Measure recall"
+    },
+    {
+      "type": "para",
+      "text": "Recall at k is the share of the relevant documents that appear among the first `k` chunk ids. The practice defines it over documents, not chunks: a document counts once, however many of its chunks are in the list. Three habits follow."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Build a small set of questions, each with the document or documents that hold the answer, before tuning anything.",
+        "Change one stage at a time (chunk size, overlap, the indexes, fusion, the pool, the reranker, the context sentence) and re-measure.",
+        "Look at the misses. A document that never appears in the top 20 points at chunking or at the index. A document that appears at rank 15 and not at rank 3 points at fusion or reranking."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "A question with no relevant documents has no recall, and the practice treats it as an error."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "The example"
+    },
+    {
+      "type": "para",
+      "text": "The example builds the chunks, ranks the eight questions with each index and with the fusion, reranks a pool and indexes a context sentence."
+    },
+    {
+      "type": "example",
+      "id": "m28-retrieval-recall",
+      "tabs": [
+        {
+          "lang": "python",
+          "span": 2,
+          "code": "examples/28-retrieval-recall/python/retrieval_recall.py"
+        },
+        {
+          "lang": "typescript",
+          "span": 2,
+          "code": "examples/28-retrieval-recall/typescript/retrievalRecall.ts"
+        },
+        {
+          "lang": "java",
+          "span": 2,
+          "code": "examples/28-retrieval-recall/java/RetrievalRecall.java"
+        },
+        {
+          "lang": "kotlin",
+          "span": 2,
+          "code": "examples/28-retrieval-recall/kotlin/RetrievalRecall.kt"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"A retrieval pipeline measured on recall: BM25, a toy embedding, rank fusion, a reranker and contextual indexing.\n\nEverything is local and deterministic. The embedding is a TOY (hashed letter trigrams, no model), and the reranker is a\nhand-written scoring function standing in for a reranking model. The knowledge base is invented. No API is called.\n\"\"\"\nimport logging\nimport math\nimport re\n\nlog = logging.getLogger(__name__)\n\nCORPUS = [\n    ('refunds', 'Refund policy: customers may request a refund within 30 days of purchase. Refunds are issued to the original payment method within five business days. Digital goods are not refundable after download.'),\n    ('shipping', 'Shipping times: standard delivery takes three to five business days. Express delivery arrives the next day. Orders over fifty dollars ship free to domestic addresses.'),\n    ('password', 'To reset a forgotten password, open the sign in page and choose forgot password. A reset link is emailed to you and expires after one hour.'),\n    ('payment-errors', 'Error E-4012 means the payment gateway rejected the card. Check the billing address and try again, or use another card. Error E-4013 means the card has expired.'),\n    ('warranty', 'All hardware carries a two year warranty that covers manufacturing defects. Accidental damage is covered only with the protection plan.'),\n    ('deletion', 'You can delete your account from the privacy settings. Deletion removes personal data within thirty days and cannot be undone.'),\n    ('api-limits', 'The API allows sixty requests per minute for each key. Exceeding the limit returns status 429 with a retry-after header.'),\n    ('invoices', 'Invoices are generated on the first day of each month and sent as PDF attachments. Past invoices can be downloaded from the billing page.'),\n    ('returns', 'To return a physical item, print the prepaid label from your orders page and drop the parcel at any carrier point. Returns must arrive within fourteen days and items must be unused.'),\n    ('international', 'International orders ship with a tracked carrier and take seven to twelve business days. Customs duties are paid by the recipient and are not included in the order total.'),\n    ('billing', 'Your plan renews automatically each month on the billing date. You can switch plans or cancel renewal from the billing page before the date.'),\n    ('api-keys', 'Create API keys in the developer console. Rotate a key by creating a new one and deleting the old one. Keys are shown only once, so store them safely.'),\n    ('warranty-claims', 'Warranty claims. Hardware owners can open a claim from the support portal. Send the serial number and a photo of the damage within thirty days. We reply within two business days.'),\n]\n\nQUERIES = [\n    ('send back parcel', ['returns']),\n    ('free shipping threshold', ['shipping']),\n    ('tracked carrier', ['international']),\n    ('deleting accounts', ['deletion']),\n    ('resetting passwords', ['password']),\n    ('monthly invoicing', ['invoices']),\n    ('deliveries arrive', ['shipping']),\n    ('refund', ['refunds']),\n]\n\nCHUNK_WORDS, OVERLAP = 14, 4\n\n\ndef tokenize(text):\n    \"\"\"Lower-case words and numbers: the runs of [a-z0-9] in the text.\"\"\"\n    return re.findall(r\"[a-z0-9]+\", text.lower())\n\n\n# ---- given: a deterministic toy embedding (not a real model) -------------------------------------------------------\nDIMS = 64\n\n\ndef _fnv1a(text):\n    h = 2166136261\n    for byte in text.encode(\"utf-8\"):\n        h = ((h ^ byte) * 16777619) & 0xFFFFFFFF\n    return h\n\n\ndef embed(text):\n    \"\"\"64 numbers: letter-trigram counts of the tokenised text hashed into buckets, scaled to length 1.\n    It sees spelling, not meaning: 'delete' and 'deleting' are close, 'delete' and 'remove' are not.\"\"\"\n    padded = \" \" + \" \".join(tokenize(text)) + \" \"\n    vector = [0.0] * DIMS\n    for i in range(len(padded) - 2):\n        vector[_fnv1a(padded[i:i + 3]) % DIMS] += 1.0\n    length = math.sqrt(sum(x * x for x in vector))\n    return [x / length for x in vector] if length else vector\n# ---------------------------------------------------------------------------------------------------------------------\n\n\ndef chunk(text, size, overlap):\n    \"\"\"Windows of `size` words that start `size - overlap` words apart; the last window ends at the last word.\"\"\"\n    if size < 1 or overlap < 0 or overlap >= size:\n        raise ValueError(\"size must be at least 1 and overlap must be in 0 .. size - 1\")\n    words = text.split()\n    chunks, start = [], 0\n    while start < len(words):\n        chunks.append(\" \".join(words[start:start + size]))\n        if start + size >= len(words):\n            break\n        start += size - overlap\n    return chunks\n\n\ndef _texts(chunks, index_text):\n    return {c[\"id\"]: (index_text or {}).get(c[\"id\"], c[\"text\"]) for c in chunks}\n\n\ndef _ordered(scores):\n    return [cid for cid, score in sorted(scores.items(), key=lambda kv: (-kv[1], kv[0])) if score > 0]\n\n\ndef bm25_rank(chunks, query, index_text=None, k1=1.5, b=0.75):\n    \"\"\"Chunk ids by BM25 score, best first, ties by id, chunks that share no word with the query left out.\"\"\"\n    docs = {cid: tokenize(text) for cid, text in _texts(chunks, index_text).items()}\n    n = len(docs)\n    average = sum(len(d) for d in docs.values()) / n if n else 0.0\n    df = {}\n    for tokens in docs.values():\n        for term in set(tokens):\n            df[term] = df.get(term, 0) + 1\n    terms = list(dict.fromkeys(tokenize(query)))\n    scores = {}\n    for cid, tokens in docs.items():\n        score = 0.0\n        for term in terms:\n            tf = tokens.count(term)\n            if tf == 0:\n                continue\n            idf = math.log(1 + (n - df[term] + 0.5) / (df[term] + 0.5))\n            score += idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * len(tokens) / average))\n        scores[cid] = score\n    return _ordered(scores)\n\n\ndef embedding_rank(chunks, query, index_text=None):\n    \"\"\"Chunk ids by cosine similarity of embed() vectors, best first, ties by id, zero similarity left out.\"\"\"\n    q = embed(query)\n    scores = {}\n    for cid, text in _texts(chunks, index_text).items():\n        total = 0.0\n        for a, b in zip(q, embed(text)):\n            total += a * b\n        scores[cid] = total\n    return _ordered(scores)\n\n\ndef fuse(rankings, k=60):\n    \"\"\"Reciprocal rank fusion: each id scores the sum of 1 / (k + rank) over the lists that hold it (rank from 1, a repeat\n    in one list ignored); best first, ties by id.\"\"\"\n    scores = {}\n    for ranking in rankings:\n        for rank, cid in enumerate(dict.fromkeys(ranking), start=1):\n            scores[cid] = scores.get(cid, 0.0) + 1.0 / (k + rank)\n    return _ordered(scores)\n\n\ndef rerank(query, ids, texts, scorer, top_n=None):\n    \"\"\"The given ids reordered by scorer(query, text) high to low (equal scores keep their input order), cut to top_n.\"\"\"\n    ordered = sorted(ids, key=lambda cid: -scorer(query, texts[cid]))  # sorted is stable\n    return ordered if top_n is None else ordered[:top_n]\n\n\ndef doc_of(chunks):\n    return {c[\"id\"]: c[\"doc\"] for c in chunks}\n\n\ndef first_rank(ids, chunks, relevant):\n    \"\"\"1-based position of the first chunk of a relevant document, or None.\"\"\"\n    docs = doc_of(chunks)\n    return next((i for i, cid in enumerate(ids, start=1) if docs[cid] in relevant), None)\n\n\ndef recall(ids, chunks, relevant, k):\n    return len({doc_of(chunks)[cid] for cid in ids[:k]} & set(relevant)) / len(set(relevant))\n\n\ndef rankers(chunks, query):\n    lexical, semantic = bm25_rank(chunks, query), embedding_rank(chunks, query)\n    return {\"bm25\": lexical, \"embedding\": semantic, \"hybrid\": fuse([lexical, semantic])}\n\n\nSYNONYMS = {\"send\": [\"return\", \"returns\"], \"back\": [\"return\", \"returns\"]}\n\n\ndef toy_reranker(query, text):\n    \"\"\"Stands in for a reranking model: it reads the query with a tiny synonym list added and scores the share of those words that the chunk holds.\"\"\"\n    words = []\n    for w in tokenize(query):\n        words += [w] + SYNONYMS.get(w, [])\n    words = list(dict.fromkeys(words))\n    have = set(tokenize(text))\n    return sum(w in have for w in words) / len(words)\n\n\ndef main():\n    chunks = [{\"id\": f\"{doc}#{n}\", \"doc\": doc, \"text\": piece} for doc, text in CORPUS for n, piece in enumerate(chunk(text, CHUNK_WORDS, OVERLAP))]\n    print(f\"{len(CORPUS)} documents, {len(chunks)} chunks of at most {CHUNK_WORDS} words, overlap {OVERLAP}\")\n    print(f\"{'rank of the first relevant chunk':34}{'bm25':>6}{'embedding':>11}{'hybrid':>8}\")\n    totals = {\"bm25\": 0.0, \"embedding\": 0.0, \"hybrid\": 0.0}\n    for query, relevant in QUERIES:\n        ranked = rankers(chunks, query)\n        cells = {mode: first_rank(ids, chunks, relevant) for mode, ids in ranked.items()}\n        for mode, ids in ranked.items():\n            totals[mode] += recall(ids, chunks, relevant, 3) / len(QUERIES)\n        print(f\"{query:34}{cells['bm25'] or '-':>6}{cells['embedding'] or '-':>11}{cells['hybrid'] or '-':>8}\")\n    print(\"mean recall@3:\", {mode: round(value, 3) for mode, value in totals.items()})\n    texts = {c[\"id\"]: c[\"text\"] for c in chunks}\n    query = \"send back parcel\"\n    hybrid = rankers(chunks, query)[\"hybrid\"]\n    reranked = rerank(query, hybrid[:10], texts, toy_reranker, 3)\n    print(f\"{query!r}: hybrid top 3 {hybrid[:3]} -> reranked top 3 {reranked}\")\n    bare = [{\"id\": \"a#0\", \"doc\": \"a\", \"text\": \"The limit is 30 days after delivery.\"}, {\"id\": \"b#0\", \"doc\": \"b\", \"text\": \"The limit is 5 users per workspace.\"}]\n    context = {\"a#0\": \"Returns policy: the return window for physical orders. \"}\n    indexed = {c[\"id\"]: context.get(c[\"id\"], \"\") + c[\"text\"] for c in bare}\n    print(\"'return window' on the bare chunks:\", bm25_rank(bare, \"return window\"), \"| with a context sentence indexed in front:\", bm25_rank(bare, \"return window\", indexed))\n\n\nif __name__ == \"__main__\":\n    main()"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "13 documents, 34 chunks of at most 14 words, overlap 4\nrank of the first relevant chunk    bm25  embedding  hybrid\nsend back parcel                       1          6       2\nfree shipping threshold                1          7       1\ntracked carrier                        1          3       1\ndeleting accounts                      -          3       3\nresetting passwords                    -          1       1\nmonthly invoicing                      -          1       1\ndeliveries arrive                      -          1       3\nrefund                                 1          1       1\nmean recall@3: {'bm25': 0.5, 'embedding': 0.75, 'hybrid': 1.0}\n'send back parcel': hybrid top 3 ['warranty-claims#1', 'returns#1', 'warranty-claims#0'] -> reranked top 3 ['returns#1', 'warranty-claims#1', 'warranty-claims#0']\n'return window' on the bare chunks: [] | with a context sentence indexed in front: ['a#0']"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// A retrieval pipeline measured on recall: BM25, a toy embedding, rank fusion, a reranker and contextual indexing.\n// Everything is local and deterministic. The embedding is a TOY (hashed letter trigrams, no model), and the reranker is a\n// hand-written scoring function standing in for a reranking model. The knowledge base is invented. No API is called.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"retrieval_recall\");\ntype Chunk = { id: string; doc: string; text: string };\ntype Scorer = (query: string, text: string) => number;\n\nexport const CORPUS: Array<[string, string]> = [\n  [\"refunds\", \"Refund policy: customers may request a refund within 30 days of purchase. Refunds are issued to the original payment method within five business days. Digital goods are not refundable after download.\"],\n  [\"shipping\", \"Shipping times: standard delivery takes three to five business days. Express delivery arrives the next day. Orders over fifty dollars ship free to domestic addresses.\"],\n  [\"password\", \"To reset a forgotten password, open the sign in page and choose forgot password. A reset link is emailed to you and expires after one hour.\"],\n  [\"payment-errors\", \"Error E-4012 means the payment gateway rejected the card. Check the billing address and try again, or use another card. Error E-4013 means the card has expired.\"],\n  [\"warranty\", \"All hardware carries a two year warranty that covers manufacturing defects. Accidental damage is covered only with the protection plan.\"],\n  [\"deletion\", \"You can delete your account from the privacy settings. Deletion removes personal data within thirty days and cannot be undone.\"],\n  [\"api-limits\", \"The API allows sixty requests per minute for each key. Exceeding the limit returns status 429 with a retry-after header.\"],\n  [\"invoices\", \"Invoices are generated on the first day of each month and sent as PDF attachments. Past invoices can be downloaded from the billing page.\"],\n  [\"returns\", \"To return a physical item, print the prepaid label from your orders page and drop the parcel at any carrier point. Returns must arrive within fourteen days and items must be unused.\"],\n  [\"international\", \"International orders ship with a tracked carrier and take seven to twelve business days. Customs duties are paid by the recipient and are not included in the order total.\"],\n  [\"billing\", \"Your plan renews automatically each month on the billing date. You can switch plans or cancel renewal from the billing page before the date.\"],\n  [\"api-keys\", \"Create API keys in the developer console. Rotate a key by creating a new one and deleting the old one. Keys are shown only once, so store them safely.\"],\n  [\"warranty-claims\", \"Warranty claims. Hardware owners can open a claim from the support portal. Send the serial number and a photo of the damage within thirty days. We reply within two business days.\"],\n];\n\nexport const QUERIES: Array<[string, string[]]> = [\n  [\"send back parcel\", [\"returns\"]],\n  [\"free shipping threshold\", [\"shipping\"]],\n  [\"tracked carrier\", [\"international\"]],\n  [\"deleting accounts\", [\"deletion\"]],\n  [\"resetting passwords\", [\"password\"]],\n  [\"monthly invoicing\", [\"invoices\"]],\n  [\"deliveries arrive\", [\"shipping\"]],\n  [\"refund\", [\"refunds\"]],\n];\n\nexport const CHUNK_WORDS = 14;\nexport const OVERLAP = 4;\n\n/** Lower-case words and numbers: the runs of [a-z0-9] in the text. */\nexport function tokenize(text: string): string[] {\n  return text.toLowerCase().match(/[a-z0-9]+/g) ?? [];\n}\n\n// ---- given: a deterministic toy embedding (not a real model) -------------------------------------------------------\nconst DIMS = 64;\n\nfunction fnv1a(text: string): number {\n  let h = 2166136261;\n  for (const byte of new TextEncoder().encode(text)) h = Math.imul(h ^ byte, 16777619) >>> 0;\n  return h;\n}\n\n/** 64 numbers: letter-trigram counts of the tokenised text hashed into buckets, scaled to length 1.\n *  It sees spelling, not meaning: 'delete' and 'deleting' are close, 'delete' and 'remove' are not. */\nexport function embed(text: string): number[] {\n  const padded = \" \" + tokenize(text).join(\" \") + \" \";\n  const vector = new Array<number>(DIMS).fill(0);\n  for (let i = 0; i < padded.length - 2; i++) vector[fnv1a(padded.slice(i, i + 3)) % DIMS] += 1;\n  const length = Math.sqrt(vector.reduce((sum, x) => sum + x * x, 0));\n  return length ? vector.map((x) => x / length) : vector;\n}\n// ---------------------------------------------------------------------------------------------------------------------\n\n/** Windows of `size` words that start `size - overlap` words apart; the last window ends at the last word. */\nexport function chunk(text: string, size: number, overlap: number): string[] {\n  if (size < 1 || overlap < 0 || overlap >= size) throw new RangeError(\"size must be at least 1 and overlap must be in 0 .. size - 1\");\n  const words = text.split(/\\s+/).filter((w) => w.length > 0);\n  const chunks: string[] = [];\n  for (let start = 0; start < words.length; start += size - overlap) {\n    chunks.push(words.slice(start, start + size).join(\" \"));\n    if (start + size >= words.length) break;\n  }\n  return chunks;\n}\n\nconst texts = (chunks: Chunk[], indexText?: Record<string, string>) => new Map(chunks.map((c) => [c.id, indexText?.[c.id] ?? c.text] as const));\n\nfunction ordered(scores: Map<string, number>): string[] {\n  return [...scores].filter(([, s]) => s > 0).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)).map(([id]) => id);\n}\n\n/** Chunk ids by BM25 score, best first, ties by id, chunks that share no word with the query left out. */\nexport function bm25Rank(chunks: Chunk[], query: string, indexText?: Record<string, string>, k1 = 1.5, b = 0.75): string[] {\n  const docs = new Map([...texts(chunks, indexText)].map(([id, text]) => [id, tokenize(text)] as const));\n  const n = docs.size;\n  const average = n ? [...docs.values()].reduce((sum, d) => sum + d.length, 0) / n : 0;\n  const df = new Map<string, number>();\n  for (const tokens of docs.values()) for (const term of new Set(tokens)) df.set(term, (df.get(term) ?? 0) + 1);\n  const terms = [...new Set(tokenize(query))];\n  const scores = new Map<string, number>();\n  for (const [id, tokens] of docs) {\n    let score = 0;\n    for (const term of terms) {\n      const tf = tokens.filter((t) => t === term).length;\n      if (tf === 0) continue;\n      const idf = Math.log(1 + (n - df.get(term)! + 0.5) / (df.get(term)! + 0.5));\n      score += (idf * tf * (k1 + 1)) / (tf + k1 * (1 - b + (b * tokens.length) / average));\n    }\n    scores.set(id, score);\n  }\n  return ordered(scores);\n}\n\n/** Chunk ids by cosine similarity of embed() vectors, best first, ties by id, zero similarity left out. */\nexport function embeddingRank(chunks: Chunk[], query: string, indexText?: Record<string, string>): string[] {\n  const q = embed(query);\n  const scores = new Map<string, number>();\n  for (const [id, text] of texts(chunks, indexText)) {\n    const v = embed(text);\n    let total = 0;\n    for (let i = 0; i < q.length; i++) total += q[i] * v[i];\n    scores.set(id, total);\n  }\n  return ordered(scores);\n}\n\n/** Reciprocal rank fusion: each id scores the sum of 1 / (k + rank) over the lists that hold it (rank from 1, a repeat in\n *  one list ignored); best first, ties by id. */\nexport function fuse(rankings: string[][], k = 60): string[] {\n  const scores = new Map<string, number>();\n  for (const ranking of rankings) {\n    [...new Set(ranking)].forEach((id, i) => scores.set(id, (scores.get(id) ?? 0) + 1 / (k + i + 1)));\n  }\n  return ordered(scores);\n}\n\n/** The given ids reordered by scorer(query, text) high to low (equal scores keep their input order), cut to topN. */\nexport function rerank(query: string, ids: string[], textOf: Record<string, string>, scorer: Scorer, topN?: number): string[] {\n  const sorted = ids.map((id, i) => ({ id, i, s: scorer(query, textOf[id]) })).sort((a, b) => b.s - a.s || a.i - b.i).map((x) => x.id);\n  return topN === undefined ? sorted : sorted.slice(0, topN);\n}\n\nconst docOf = (chunks: Chunk[]) => new Map(chunks.map((c) => [c.id, c.doc] as const));\n\n/** 1-based position of the first chunk of a relevant document, or null. */\nexport function firstRank(ids: string[], chunks: Chunk[], relevant: string[]): number | null {\n  const docs = docOf(chunks);\n  const i = ids.findIndex((id) => relevant.includes(docs.get(id)!));\n  return i === -1 ? null : i + 1;\n}\n\nexport function recall(ids: string[], chunks: Chunk[], relevant: string[], k: number): number {\n  const docs = docOf(chunks);\n  const found = new Set(ids.slice(0, k).map((id) => docs.get(id)!));\n  return new Set(relevant.filter((d) => found.has(d))).size / new Set(relevant).size;\n}\n\nexport function rankers(chunks: Chunk[], query: string): Record<string, string[]> {\n  const lexical = bm25Rank(chunks, query);\n  const semantic = embeddingRank(chunks, query);\n  return { bm25: lexical, embedding: semantic, hybrid: fuse([lexical, semantic]) };\n}\n\nconst SYNONYMS: Record<string, string[]> = { send: [\"return\", \"returns\"], back: [\"return\", \"returns\"] };\n\n/** Stands in for a reranking model: it reads the query with a tiny synonym list added and scores the share of those words that the chunk holds. */\nexport function toyReranker(query: string, text: string): number {\n  const words = [...new Set(tokenize(query).flatMap((w) => [w, ...(SYNONYMS[w] ?? [])]))];\n  const have = new Set(tokenize(text));\n  return words.filter((w) => have.has(w)).length / words.length;\n}\n\nexport function buildAll(): Chunk[] {\n  return CORPUS.flatMap(([doc, text]) => chunk(text, CHUNK_WORDS, OVERLAP).map((piece, n) => ({ id: `${doc}#${n}`, doc, text: piece })));\n}\n\nconst py = (ids: string[]) => `[${ids.map((i) => `'${i}'`).join(\", \")}]`;\n\nfunction main() {\n  const chunks = buildAll();\n  console.log(`${CORPUS.length} documents, ${chunks.length} chunks of at most ${CHUNK_WORDS} words, overlap ${OVERLAP}`);\n  console.log(`${\"rank of the first relevant chunk\".padEnd(34)}${\"bm25\".padStart(6)}${\"embedding\".padStart(11)}${\"hybrid\".padStart(8)}`);\n  const totals: Record<string, number> = { bm25: 0, embedding: 0, hybrid: 0 };\n  for (const [query, relevant] of QUERIES) {\n    const ranked = rankers(chunks, query);\n    const cell = (mode: string) => String(firstRank(ranked[mode], chunks, relevant) ?? \"-\");\n    for (const mode of Object.keys(ranked)) totals[mode] += recall(ranked[mode], chunks, relevant, 3) / QUERIES.length;\n    console.log(`${query.padEnd(34)}${cell(\"bm25\").padStart(6)}${cell(\"embedding\").padStart(11)}${cell(\"hybrid\").padStart(8)}`);\n  }\n  const num = (v: number) => (Number.isInteger(v) ? v.toFixed(1) : String(Math.round(v * 1000) / 1000));\n  console.log(\"mean recall@3:\", `{${Object.entries(totals).map(([m, v]) => `'${m}': ${num(v)}`).join(\", \")}}`);\n  const texts = Object.fromEntries(chunks.map((c) => [c.id, c.text]));\n  const query = \"send back parcel\";\n  const hybrid = rankers(chunks, query).hybrid;\n  const reranked = rerank(query, hybrid.slice(0, 10), texts, toyReranker, 3);\n  console.log(`'${query}': hybrid top 3 ${py(hybrid.slice(0, 3))} -> reranked top 3 ${py(reranked)}`);\n  const bare = [{ id: \"a#0\", doc: \"a\", text: \"The limit is 30 days after delivery.\" }, { id: \"b#0\", doc: \"b\", text: \"The limit is 5 users per workspace.\" }];\n  const context: Record<string, string> = { \"a#0\": \"Returns policy: the return window for physical orders. \" };\n  const indexed = Object.fromEntries(bare.map((c) => [c.id, (context[c.id] ?? \"\") + c.text]));\n  console.log(\"'return window' on the bare chunks:\", py(bm25Rank(bare, \"return window\")), \"| with a context sentence indexed in front:\", py(bm25Rank(bare, \"return window\", indexed)));\n}\n\nif (import.meta.main) main();"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "13 documents, 34 chunks of at most 14 words, overlap 4\nrank of the first relevant chunk    bm25  embedding  hybrid\nsend back parcel                       1          6       2\nfree shipping threshold                1          7       1\ntracked carrier                        1          3       1\ndeleting accounts                      -          3       3\nresetting passwords                    -          1       1\nmonthly invoicing                      -          1       1\ndeliveries arrive                      -          1       3\nrefund                                 1          1       1\nmean recall@3: {'bm25': 0.5, 'embedding': 0.75, 'hybrid': 1.0}\n'send back parcel': hybrid top 3 ['warranty-claims#1', 'returns#1', 'warranty-claims#0'] -> reranked top 3 ['returns#1', 'warranty-claims#1', 'warranty-claims#0']\n'return window' on the bare chunks: [] | with a context sentence indexed in front: ['a#0']"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.nio.charset.StandardCharsets;\nimport java.util.ArrayList;\nimport java.util.Comparator;\nimport java.util.HashSet;\nimport java.util.LinkedHashMap;\nimport java.util.LinkedHashSet;\nimport java.util.List;\nimport java.util.Locale;\nimport java.util.Map;\nimport java.util.Set;\nimport java.util.function.BiFunction;\nimport java.util.regex.Matcher;\nimport java.util.regex.Pattern;\nimport java.util.stream.Collectors;\n\n/**\n * A retrieval pipeline measured on recall: BM25, a toy embedding, rank fusion, a reranker and contextual indexing.\n *\n * <p>Everything is local and deterministic. The embedding is a TOY (hashed letter trigrams, no model), and the reranker is a\n * hand-written scoring function standing in for a reranking model. The knowledge base is invented. No API is called.\n */\npublic final class RetrievalRecall {\n    private static final System.Logger LOG = System.getLogger(RetrievalRecall.class.getName());\n    record Chunk(String id, String doc, String text) {}\n\n    record Query(String text, List<String> relevant) {}\n\n    static final String[][] CORPUS = {\n        new String[] {\"refunds\",\n            \"Refund policy: customers may request a refund within 30 days of purchase. Refunds are issued to the original payment method within five business days. Digital goods are not refundable after download.\"},\n        new String[] {\"shipping\",\n            \"Shipping times: standard delivery takes three to five business days. Express delivery arrives the next day. Orders over fifty dollars ship free to domestic addresses.\"},\n        new String[] {\"password\",\n            \"To reset a forgotten password, open the sign in page and choose forgot password. A reset link is emailed to you and expires after one hour.\"},\n        new String[] {\"payment-errors\",\n            \"Error E-4012 means the payment gateway rejected the card. Check the billing address and try again, or use another card. Error E-4013 means the card has expired.\"},\n        new String[] {\"warranty\",\n            \"All hardware carries a two year warranty that covers manufacturing defects. Accidental damage is covered only with the protection plan.\"},\n        new String[] {\"deletion\",\n            \"You can delete your account from the privacy settings. Deletion removes personal data within thirty days and cannot be undone.\"},\n        new String[] {\"api-limits\",\n            \"The API allows sixty requests per minute for each key. Exceeding the limit returns status 429 with a retry-after header.\"},\n        new String[] {\"invoices\",\n            \"Invoices are generated on the first day of each month and sent as PDF attachments. Past invoices can be downloaded from the billing page.\"},\n        new String[] {\"returns\",\n            \"To return a physical item, print the prepaid label from your orders page and drop the parcel at any carrier point. Returns must arrive within fourteen days and items must be unused.\"},\n        new String[] {\"international\",\n            \"International orders ship with a tracked carrier and take seven to twelve business days. Customs duties are paid by the recipient and are not included in the order total.\"},\n        new String[] {\"billing\",\n            \"Your plan renews automatically each month on the billing date. You can switch plans or cancel renewal from the billing page before the date.\"},\n        new String[] {\"api-keys\",\n            \"Create API keys in the developer console. Rotate a key by creating a new one and deleting the old one. Keys are shown only once, so store them safely.\"},\n        new String[] {\"warranty-claims\",\n            \"Warranty claims. Hardware owners can open a claim from the support portal. Send the serial number and a photo of the damage within thirty days. We reply within two business days.\"}\n    };\n\n    static final List<Query> QUERIES = List.of(\n        new Query(\"send back parcel\", List.of(\"returns\")),\n        new Query(\"free shipping threshold\", List.of(\"shipping\")),\n        new Query(\"tracked carrier\", List.of(\"international\")),\n        new Query(\"deleting accounts\", List.of(\"deletion\")),\n        new Query(\"resetting passwords\", List.of(\"password\")),\n        new Query(\"monthly invoicing\", List.of(\"invoices\")),\n        new Query(\"deliveries arrive\", List.of(\"shipping\")),\n        new Query(\"refund\", List.of(\"refunds\")));\n\n    static final int CHUNK_WORDS = 14;\n    static final int OVERLAP = 4;\n\n    /** Lower-case words and numbers: the runs of [a-z0-9] in the text. */\n    static List<String> tokenize(String text) {\n        List<String> out = new ArrayList<>();\n        Matcher m = Pattern.compile(\"[a-z0-9]+\").matcher(text.toLowerCase(Locale.ROOT));\n        while (m.find()) out.add(m.group());\n        return out;\n    }\n\n    // ---- given: a deterministic toy embedding (not a real model) ---------------------------------------------------\n    static final int DIMS = 64;\n\n    static long fnv1a(String text) {\n        long h = 2166136261L;\n        for (byte b : text.getBytes(StandardCharsets.UTF_8)) h = ((h ^ (b & 0xFF)) * 16777619L) & 0xFFFFFFFFL;\n        return h;\n    }\n\n    /**\n     * 64 numbers: letter-trigram counts of the tokenised text hashed into buckets, scaled to length 1.\n     * It sees spelling, not meaning: 'delete' and 'deleting' are close, 'delete' and 'remove' are not.\n     */\n    static double[] embed(String text) {\n        String padded = \" \" + String.join(\" \", tokenize(text)) + \" \";\n        double[] vector = new double[DIMS];\n        for (int i = 0; i < padded.length() - 2; i++) vector[(int) (fnv1a(padded.substring(i, i + 3)) % DIMS)] += 1.0;\n        double sum = 0;\n        for (double x : vector) sum += x * x;\n        double length = Math.sqrt(sum);\n        if (length == 0) return vector;\n        for (int i = 0; i < DIMS; i++) vector[i] /= length;\n        return vector;\n    }\n    // -----------------------------------------------------------------------------------------------------------------\n\n    /** Windows of `size` words that start `size - overlap` words apart; the last window ends at the last word. */\n    static List<String> chunk(String text, int size, int overlap) {\n        if (size < 1 || overlap < 0 || overlap >= size) throw new IllegalArgumentException(\"size must be at least 1 and overlap must be in 0 .. size - 1\");\n        String[] words = text.trim().isEmpty() ? new String[0] : text.trim().split(\"\\\\s+\");\n        List<String> chunks = new ArrayList<>();\n        int start = 0;\n        while (start < words.length) {\n            chunks.add(String.join(\" \", java.util.Arrays.copyOfRange(words, start, Math.min(start + size, words.length))));\n            if (start + size >= words.length) break;\n            start += size - overlap;\n        }\n        return chunks;\n    }\n\n    private static Map<String, String> texts(List<Chunk> chunks, Map<String, String> indexText) {\n        Map<String, String> out = new LinkedHashMap<>();\n        for (Chunk c : chunks) out.put(c.id(), indexText == null ? c.text() : indexText.getOrDefault(c.id(), c.text()));\n        return out;\n    }\n\n    private static List<String> ordered(Map<String, Double> scores) {\n        return scores.entrySet().stream()\n            .filter(e -> e.getValue() > 0)\n            .sorted(Comparator.<Map.Entry<String, Double>>comparingDouble(e -> -e.getValue()).thenComparing(Map.Entry::getKey))\n            .map(Map.Entry::getKey)\n            .toList();\n    }\n\n    /** Chunk ids by BM25 score, best first, ties by id, chunks that share no word with the query left out. */\n    static List<String> bm25Rank(List<Chunk> chunks, String query, Map<String, String> indexText) {\n        double k1 = 1.5, b = 0.75;\n        Map<String, List<String>> docs = new LinkedHashMap<>();\n        texts(chunks, indexText).forEach((id, text) -> docs.put(id, tokenize(text)));\n        int n = docs.size();\n        double average = n == 0 ? 0.0 : docs.values().stream().mapToInt(List::size).sum() / (double) n;\n        Map<String, Integer> df = new java.util.HashMap<>();\n        for (List<String> tokens : docs.values()) for (String term : new HashSet<>(tokens)) df.merge(term, 1, Integer::sum);\n        List<String> terms = new ArrayList<>(new LinkedHashSet<>(tokenize(query)));\n        Map<String, Double> scores = new LinkedHashMap<>();\n        for (Map.Entry<String, List<String>> d : docs.entrySet()) {\n            List<String> tokens = d.getValue();\n            double score = 0.0;\n            for (String term : terms) {\n                long tf = tokens.stream().filter(term::equals).count();\n                if (tf == 0) continue;\n                double idf = Math.log(1 + (n - df.get(term) + 0.5) / (df.get(term) + 0.5));\n                score += idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * tokens.size() / average));\n            }\n            scores.put(d.getKey(), score);\n        }\n        return ordered(scores);\n    }\n\n    /** Chunk ids by cosine similarity of embed() vectors, best first, ties by id, zero similarity left out. */\n    static List<String> embeddingRank(List<Chunk> chunks, String query, Map<String, String> indexText) {\n        double[] q = embed(query);\n        Map<String, Double> scores = new LinkedHashMap<>();\n        texts(chunks, indexText).forEach((id, text) -> {\n            double total = 0.0;\n            double[] v = embed(text);\n            for (int i = 0; i < q.length; i++) total += q[i] * v[i];\n            scores.put(id, total);\n        });\n        return ordered(scores);\n    }\n\n    /** Reciprocal rank fusion: each id scores the sum of 1 / (k + rank) over the lists that hold it (rank from 1, a repeat in one list ignored). */\n    static List<String> fuse(List<List<String>> rankings, int k) {\n        Map<String, Double> scores = new LinkedHashMap<>();\n        for (List<String> ranking : rankings) {\n            int rank = 1;\n            for (String id : new LinkedHashSet<>(ranking)) scores.merge(id, 1.0 / (k + rank++), Double::sum);\n        }\n        return ordered(scores);\n    }\n\n    /** The given ids reordered by scorer(query, text) high to low (equal scores keep their input order), cut to topN. */\n    static List<String> rerank(String query, List<String> ids, Map<String, String> texts, BiFunction<String, String, Double> scorer, Integer topN) {\n        List<String> sorted = ids.stream().sorted(Comparator.comparingDouble(id -> -scorer.apply(query, texts.get(id)))).toList(); // a stable sort\n        return topN == null ? sorted : sorted.subList(0, Math.min(topN, sorted.size()));\n    }\n\n    static Map<String, String> docOf(List<Chunk> chunks) {\n        return chunks.stream().collect(Collectors.toMap(Chunk::id, Chunk::doc));\n    }\n\n    /** 1-based position of the first chunk of a relevant document, or null. */\n    static Integer firstRank(List<String> ids, List<Chunk> chunks, List<String> relevant) {\n        Map<String, String> docs = docOf(chunks);\n        for (int i = 0; i < ids.size(); i++) if (relevant.contains(docs.get(ids.get(i)))) return i + 1;\n        return null;\n    }\n\n    static double recall(List<String> ids, List<Chunk> chunks, List<String> relevant, int k) {\n        Map<String, String> docs = docOf(chunks);\n        Set<String> found = new HashSet<>();\n        for (String id : ids.subList(0, Math.min(k, ids.size()))) found.add(docs.get(id));\n        found.retainAll(relevant);\n        return found.size() / (double) new HashSet<>(relevant).size();\n    }\n\n    static Map<String, List<String>> rankers(List<Chunk> chunks, String query) {\n        List<String> lexical = bm25Rank(chunks, query, null);\n        List<String> semantic = embeddingRank(chunks, query, null);\n        Map<String, List<String>> out = new LinkedHashMap<>();\n        out.put(\"bm25\", lexical);\n        out.put(\"embedding\", semantic);\n        out.put(\"hybrid\", fuse(List.of(lexical, semantic), 60));\n        return out;\n    }\n\n    static final Map<String, List<String>> SYNONYMS = Map.of(\"send\", List.of(\"return\", \"returns\"), \"back\", List.of(\"return\", \"returns\"));\n\n    /** Stands in for a reranking model: it reads the query with a tiny synonym list added and scores the share of those words that the chunk holds. */\n    static double toyReranker(String query, String text) {\n        Set<String> words = new LinkedHashSet<>();\n        for (String w : tokenize(query)) {\n            words.add(w);\n            words.addAll(SYNONYMS.getOrDefault(w, List.of()));\n        }\n        Set<String> have = new HashSet<>(tokenize(text));\n        return words.stream().filter(have::contains).count() / (double) words.size();\n    }\n\n    static List<Chunk> buildAll() {\n        List<Chunk> chunks = new ArrayList<>();\n        for (String[] doc : CORPUS) {\n            List<String> pieces = chunk(doc[1], CHUNK_WORDS, OVERLAP);\n            for (int n = 0; n < pieces.size(); n++) chunks.add(new Chunk(doc[0] + \"#\" + n, doc[0], pieces.get(n)));\n        }\n        return chunks;\n    }\n\n    private static String py(List<String> ids) {\n        return ids.stream().map(i -> \"'\" + i + \"'\").collect(Collectors.joining(\", \", \"[\", \"]\"));\n    }\n\n    private static String num(double v) {\n        return v == Math.rint(v) ? String.format(Locale.ROOT, \"%.1f\", v) : String.valueOf(Math.round(v * 1000) / 1000.0);\n    }\n\n    public static void main(String[] args) {\n        List<Chunk> chunks = buildAll();\n        System.out.println(CORPUS.length + \" documents, \" + chunks.size() + \" chunks of at most \" + CHUNK_WORDS + \" words, overlap \" + OVERLAP);\n        System.out.println(String.format(\"%-34s%6s%11s%8s\", \"rank of the first relevant chunk\", \"bm25\", \"embedding\", \"hybrid\"));\n        Map<String, Double> totals = new LinkedHashMap<>(Map.of());\n        for (String mode : List.of(\"bm25\", \"embedding\", \"hybrid\")) totals.put(mode, 0.0);\n        for (Query q : QUERIES) {\n            Map<String, List<String>> ranked = rankers(chunks, q.text());\n            Map<String, String> cells = new LinkedHashMap<>();\n            for (Map.Entry<String, List<String>> e : ranked.entrySet()) {\n                Integer rank = firstRank(e.getValue(), chunks, q.relevant());\n                cells.put(e.getKey(), rank == null ? \"-\" : String.valueOf(rank));\n                totals.merge(e.getKey(), recall(e.getValue(), chunks, q.relevant(), 3) / QUERIES.size(), Double::sum);\n            }\n            System.out.println(String.format(\"%-34s%6s%11s%8s\", q.text(), cells.get(\"bm25\"), cells.get(\"embedding\"), cells.get(\"hybrid\")));\n        }\n        System.out.println(\"mean recall@3: \" + totals.entrySet().stream().map(e -> \"'\" + e.getKey() + \"': \" + num(e.getValue())).collect(Collectors.joining(\", \", \"{\", \"}\")));\n        Map<String, String> texts = new LinkedHashMap<>();\n        for (Chunk c : chunks) texts.put(c.id(), c.text());\n        String query = \"send back parcel\";\n        List<String> hybrid = rankers(chunks, query).get(\"hybrid\");\n        List<String> reranked = rerank(query, hybrid.subList(0, 10), texts, RetrievalRecall::toyReranker, 3);\n        System.out.println(\"'\" + query + \"': hybrid top 3 \" + py(hybrid.subList(0, 3)) + \" -> reranked top 3 \" + py(reranked));\n        List<Chunk> bare = List.of(new Chunk(\"a#0\", \"a\", \"The limit is 30 days after delivery.\"), new Chunk(\"b#0\", \"b\", \"The limit is 5 users per workspace.\"));\n        Map<String, String> context = Map.of(\"a#0\", \"Returns policy: the return window for physical orders. \");\n        Map<String, String> indexed = new LinkedHashMap<>();\n        for (Chunk c : bare) indexed.put(c.id(), context.getOrDefault(c.id(), \"\") + c.text());\n        System.out.println(\"'return window' on the bare chunks: \" + py(bm25Rank(bare, \"return window\", null))\n            + \" | with a context sentence indexed in front: \" + py(bm25Rank(bare, \"return window\", indexed)));\n    }\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "13 documents, 34 chunks of at most 14 words, overlap 4\nrank of the first relevant chunk    bm25  embedding  hybrid\nsend back parcel                       1          6       2\nfree shipping threshold                1          7       1\ntracked carrier                        1          3       1\ndeleting accounts                      -          3       3\nresetting passwords                    -          1       1\nmonthly invoicing                      -          1       1\ndeliveries arrive                      -          1       3\nrefund                                 1          1       1\nmean recall@3: {'bm25': 0.5, 'embedding': 0.75, 'hybrid': 1.0}\n'send back parcel': hybrid top 3 ['warranty-claims#1', 'returns#1', 'warranty-claims#0'] -> reranked top 3 ['returns#1', 'warranty-claims#1', 'warranty-claims#0']\n'return window' on the bare chunks: [] | with a context sentence indexed in front: ['a#0']"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import kotlin.math.ln\nimport kotlin.math.sqrt\n\nprivate val log = System.getLogger(\"retrieval_recall\")\n\n/**\n * A retrieval pipeline measured on recall: BM25, a toy embedding, rank fusion, a reranker and contextual indexing.\n *\n * Everything is local and deterministic. The embedding is a TOY (hashed letter trigrams, no model), and the reranker is a\n * hand-written scoring function standing in for a reranking model. The knowledge base is invented. No API is called.\n */\ndata class Chunk(val id: String, val doc: String, val text: String)\n\ndata class Query(val text: String, val relevant: List<String>)\n\nval CORPUS = listOf(\n    \"refunds\" to\n        \"Refund policy: customers may request a refund within 30 days of purchase. Refunds are issued to the original payment method within five business days. Digital goods are not refundable after download.\",\n    \"shipping\" to\n        \"Shipping times: standard delivery takes three to five business days. Express delivery arrives the next day. Orders over fifty dollars ship free to domestic addresses.\",\n    \"password\" to\n        \"To reset a forgotten password, open the sign in page and choose forgot password. A reset link is emailed to you and expires after one hour.\",\n    \"payment-errors\" to\n        \"Error E-4012 means the payment gateway rejected the card. Check the billing address and try again, or use another card. Error E-4013 means the card has expired.\",\n    \"warranty\" to\n        \"All hardware carries a two year warranty that covers manufacturing defects. Accidental damage is covered only with the protection plan.\",\n    \"deletion\" to\n        \"You can delete your account from the privacy settings. Deletion removes personal data within thirty days and cannot be undone.\",\n    \"api-limits\" to\n        \"The API allows sixty requests per minute for each key. Exceeding the limit returns status 429 with a retry-after header.\",\n    \"invoices\" to\n        \"Invoices are generated on the first day of each month and sent as PDF attachments. Past invoices can be downloaded from the billing page.\",\n    \"returns\" to\n        \"To return a physical item, print the prepaid label from your orders page and drop the parcel at any carrier point. Returns must arrive within fourteen days and items must be unused.\",\n    \"international\" to\n        \"International orders ship with a tracked carrier and take seven to twelve business days. Customs duties are paid by the recipient and are not included in the order total.\",\n    \"billing\" to\n        \"Your plan renews automatically each month on the billing date. You can switch plans or cancel renewal from the billing page before the date.\",\n    \"api-keys\" to\n        \"Create API keys in the developer console. Rotate a key by creating a new one and deleting the old one. Keys are shown only once, so store them safely.\",\n    \"warranty-claims\" to\n        \"Warranty claims. Hardware owners can open a claim from the support portal. Send the serial number and a photo of the damage within thirty days. We reply within two business days.\",\n)\n\nval QUERIES = listOf(\n    Query(\"send back parcel\", listOf(\"returns\")),\n    Query(\"free shipping threshold\", listOf(\"shipping\")),\n    Query(\"tracked carrier\", listOf(\"international\")),\n    Query(\"deleting accounts\", listOf(\"deletion\")),\n    Query(\"resetting passwords\", listOf(\"password\")),\n    Query(\"monthly invoicing\", listOf(\"invoices\")),\n    Query(\"deliveries arrive\", listOf(\"shipping\")),\n    Query(\"refund\", listOf(\"refunds\")),\n)\n\nconst val CHUNK_WORDS = 14\nconst val OVERLAP = 4\n\n/** Lower-case words and numbers: the runs of [a-z0-9] in the text. */\nfun tokenize(text: String): List<String> = Regex(\"[a-z0-9]+\").findAll(text.lowercase()).map { it.value }.toList()\n\n// ---- given: a deterministic toy embedding (not a real model) -------------------------------------------------------\nconst val DIMS = 64\n\nfun fnv1a(text: String): Long {\n    var h = 2166136261L\n    for (byte in text.toByteArray(Charsets.UTF_8)) h = ((h xor (byte.toLong() and 0xFF)) * 16777619L) and 0xFFFFFFFFL\n    return h\n}\n\n/** 64 numbers: letter-trigram counts of the tokenised text hashed into buckets, scaled to length 1.\n *  It sees spelling, not meaning: 'delete' and 'deleting' are close, 'delete' and 'remove' are not. */\nfun embed(text: String): List<Double> {\n    val padded = \" \" + tokenize(text).joinToString(\" \") + \" \"\n    val vector = DoubleArray(DIMS)\n    for (i in 0 until padded.length - 2) vector[(fnv1a(padded.substring(i, i + 3)) % DIMS).toInt()] += 1.0\n    val length = sqrt(vector.sumOf { it * it })\n    return if (length != 0.0) vector.map { it / length } else vector.toList()\n}\n// ---------------------------------------------------------------------------------------------------------------------\n\n/** Windows of `size` words that start `size - overlap` words apart; the last window ends at the last word. */\nfun chunk(text: String, size: Int, overlap: Int): List<String> {\n    require(size >= 1 && overlap in 0 until size) { \"size must be at least 1 and overlap must be in 0 .. size - 1\" }\n    val words = text.trim().split(Regex(\"\\\\s+\")).filter { it.isNotEmpty() }\n    val chunks = mutableListOf<String>()\n    var start = 0\n    while (start < words.size) {\n        chunks += words.subList(start, minOf(start + size, words.size)).joinToString(\" \")\n        if (start + size >= words.size) break\n        start += size - overlap\n    }\n    return chunks\n}\n\nprivate fun texts(chunks: List<Chunk>, indexText: Map<String, String>?) = chunks.associate { it.id to (indexText?.get(it.id) ?: it.text) }\n\nprivate fun ordered(scores: Map<String, Double>): List<String> =\n    scores.entries.filter { it.value > 0 }.sortedWith(compareBy({ -it.value }, { it.key })).map { it.key }\n\n/** Chunk ids by BM25 score, best first, ties by id, chunks that share no word with the query left out. */\nfun bm25Rank(chunks: List<Chunk>, query: String, indexText: Map<String, String>? = null, k1: Double = 1.5, b: Double = 0.75): List<String> {\n    val docs = texts(chunks, indexText).mapValues { tokenize(it.value) }\n    val n = docs.size\n    val average = if (n == 0) 0.0 else docs.values.sumOf { it.size } / n.toDouble()\n    val df = mutableMapOf<String, Int>()\n    for (tokens in docs.values) for (term in tokens.toSet()) df.merge(term, 1, Int::plus)\n    val terms = tokenize(query).distinct()\n    val scores = docs.mapValues { (_, tokens) ->\n        var score = 0.0\n        for (term in terms) {\n            val tf = tokens.count { it == term }\n            if (tf == 0) continue\n            val idf = ln(1 + (n - df.getValue(term) + 0.5) / (df.getValue(term) + 0.5))\n            score += idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * tokens.size / average))\n        }\n        score\n    }\n    return ordered(scores)\n}\n\n/** Chunk ids by cosine similarity of embed() vectors, best first, ties by id, zero similarity left out. */\nfun embeddingRank(chunks: List<Chunk>, query: String, indexText: Map<String, String>? = null): List<String> {\n    val q = embed(query)\n    return ordered(texts(chunks, indexText).mapValues { (_, text) -> q.zip(embed(text)).fold(0.0) { total, (a, b) -> total + a * b } })\n}\n\n/** Reciprocal rank fusion: each id scores the sum of 1 / (k + rank) over the lists that hold it (rank from 1, a repeat\n *  in one list ignored); best first, ties by id. */\nfun fuse(rankings: List<List<String>>, k: Int = 60): List<String> {\n    val scores = mutableMapOf<String, Double>()\n    for (ranking in rankings) for ((i, id) in ranking.distinct().withIndex()) scores.merge(id, 1.0 / (k + i + 1), Double::plus)\n    return ordered(scores)\n}\n\n/** The given ids reordered by scorer(query, text) high to low (equal scores keep their input order), cut to topN. */\nfun rerank(query: String, ids: List<String>, texts: Map<String, String>, scorer: (String, String) -> Double, topN: Int? = null): List<String> {\n    val sorted = ids.sortedBy { -scorer(query, texts.getValue(it)) } // sortedBy is stable\n    return if (topN == null) sorted else sorted.take(topN)\n}\n\nfun docOf(chunks: List<Chunk>) = chunks.associate { it.id to it.doc }\n\n/** 1-based position of the first chunk of a relevant document, or null. */\nfun firstRank(ids: List<String>, chunks: List<Chunk>, relevant: List<String>): Int? {\n    val docs = docOf(chunks)\n    return ids.indexOfFirst { docs[it] in relevant }.takeIf { it >= 0 }?.plus(1)\n}\n\nfun recall(ids: List<String>, chunks: List<Chunk>, relevant: List<String>, k: Int): Double {\n    val docs = docOf(chunks)\n    return (ids.take(k).map { docs.getValue(it) }.toSet() intersect relevant.toSet()).size / relevant.toSet().size.toDouble()\n}\n\nfun rankers(chunks: List<Chunk>, query: String): Map<String, List<String>> {\n    val lexical = bm25Rank(chunks, query)\n    val semantic = embeddingRank(chunks, query)\n    return linkedMapOf(\"bm25\" to lexical, \"embedding\" to semantic, \"hybrid\" to fuse(listOf(lexical, semantic)))\n}\n\nval SYNONYMS = mapOf(\"send\" to listOf(\"return\", \"returns\"), \"back\" to listOf(\"return\", \"returns\"))\n\n/** Stands in for a reranking model: it reads the query with a tiny synonym list added and scores the share of those words that the chunk holds. */\nfun toyReranker(query: String, text: String): Double {\n    val words = tokenize(query).flatMap { listOf(it) + (SYNONYMS[it] ?: emptyList()) }.distinct()\n    val have = tokenize(text).toSet()\n    return words.count { it in have } / words.size.toDouble()\n}\n\nfun buildAll(): List<Chunk> = CORPUS.flatMap { (doc, text) -> chunk(text, CHUNK_WORDS, OVERLAP).mapIndexed { n, piece -> Chunk(\"$doc#$n\", doc, piece) } }\n\nprivate fun py(ids: List<String>) = ids.joinToString(\", \", \"[\", \"]\") { \"'$it'\" }\n\nprivate fun num(v: Double) = if (v == Math.rint(v)) \"%.1f\".format(v) else (Math.round(v * 1000) / 1000.0).toString()\n\nfun main() {\n    val chunks = buildAll()\n    println(\"${CORPUS.size} documents, ${chunks.size} chunks of at most $CHUNK_WORDS words, overlap $OVERLAP\")\n    println(\"rank of the first relevant chunk\".padEnd(34) + \"bm25\".padStart(6) + \"embedding\".padStart(11) + \"hybrid\".padStart(8))\n    val totals = linkedMapOf(\"bm25\" to 0.0, \"embedding\" to 0.0, \"hybrid\" to 0.0)\n    for ((query, relevant) in QUERIES) {\n        val ranked = rankers(chunks, query)\n        val cells = ranked.mapValues { (_, ids) -> firstRank(ids, chunks, relevant)?.toString() ?: \"-\" }\n        for ((mode, ids) in ranked) totals[mode] = totals.getValue(mode) + recall(ids, chunks, relevant, 3) / QUERIES.size\n        println(query.padEnd(34) + cells.getValue(\"bm25\").padStart(6) + cells.getValue(\"embedding\").padStart(11) + cells.getValue(\"hybrid\").padStart(8))\n    }\n    println(\"mean recall@3: \" + totals.entries.joinToString(\", \", \"{\", \"}\") { \"'${it.key}': ${num(it.value)}\" })\n    val texts = chunks.associate { it.id to it.text }\n    val query = \"send back parcel\"\n    val hybrid = rankers(chunks, query).getValue(\"hybrid\")\n    val reranked = rerank(query, hybrid.take(10), texts, ::toyReranker, 3)\n    println(\"'$query': hybrid top 3 ${py(hybrid.take(3))} -> reranked top 3 ${py(reranked)}\")\n    val bare = listOf(Chunk(\"a#0\", \"a\", \"The limit is 30 days after delivery.\"), Chunk(\"b#0\", \"b\", \"The limit is 5 users per workspace.\"))\n    val context = mapOf(\"a#0\" to \"Returns policy: the return window for physical orders. \")\n    val indexed = bare.associate { it.id to (context[it.id] ?: \"\") + it.text }\n    println(\"'return window' on the bare chunks: ${py(bm25Rank(bare, \"return window\"))} | with a context sentence indexed in front: ${py(bm25Rank(bare, \"return window\", indexed))}\")\n}"
+        },
+        {
+          "type": "code",
+          "lang": "text",
+          "text": "13 documents, 34 chunks of at most 14 words, overlap 4\nrank of the first relevant chunk    bm25  embedding  hybrid\nsend back parcel                       1          6       2\nfree shipping threshold                1          7       1\ntracked carrier                        1          3       1\ndeleting accounts                      -          3       3\nresetting passwords                    -          1       1\nmonthly invoicing                      -          1       1\ndeliveries arrive                      -          1       3\nrefund                                 1          1       1\nmean recall@3: {'bm25': 0.5, 'embedding': 0.75, 'hybrid': 1.0}\n'send back parcel': hybrid top 3 ['warranty-claims#1', 'returns#1', 'warranty-claims#0'] -> reranked top 3 ['returns#1', 'warranty-claims#1', 'warranty-claims#0']\n'return window' on the bare chunks: [] | with a context sentence indexed in front: ['a#0']"
+        }
+      ],
+      "support": [
+        "harness",
+        "package.json",
+        "package-lock.json"
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Read the table first. A dash means that the index never returned the relevant chunk. The last line of the table shows the mean recall at 3 for the three modes: 0.5, 0.75 and 1.0. Then read the rerank line: the pool's top three change order and the relevant chunk moves to the front. The last line is the context sentence: the bare chunks return nothing for \"return window\"."
+    },
+    {
+      "type": "para",
+      "text": "Java and Kotlin readers: the practice follows in your language, and every function in it is plain list and map code."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The practice: a retrieval pipeline graded on recall"
+    },
+    {
+      "type": "para",
+      "text": "You write `chunk`, `build_chunks`, `bm25_rank`, `embedding_rank`, `fuse`, `rerank`, `recall_at_k`, `retrieve` and `evaluate`. The statement is in `exercises/28-retrieval/unit-01/practice-1/statement.md`; each language folder has a `starter`, the tests, a knowledge base in `tests/fixture.json` and a build file, and the starter fails every test. `embed` is given, and it is a toy."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Hybrid search finds what each single index misses, measured on a small knowledge base"
+        ],
+        [
+          "`e1`",
+          "Chunks overlap and end at the last word"
+        ],
+        [
+          "`e2`",
+          "A rare word outweighs common ones, and short chunks win"
+        ],
+        [
+          "`e3`",
+          "Fusion rewards agreement between lists and breaks ties by id"
+        ],
+        [
+          "`e4`",
+          "Reranking orders only the pool by the scorer"
+        ],
+        [
+          "`e5`",
+          "Recall counts documents, not chunks"
+        ],
+        [
+          "`e6`",
+          "A context sentence makes a bare chunk findable"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "Case `m1` is the measurement habit in code: it asks for the mean recall of each mode over the same questions and requires the hybrid mode to beat either single index."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Traps"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**Judging retrieval by the final answer.** A fluent answer can come from the wrong passage. Measure recall on its own.",
+        "**A pool smaller than the answer's rank.** A reranker only orders the pool. If the answer is outside it, no scorer helps.",
+        "**Treating the published percentages as a promise.** They are Anthropic's measurements on its datasets. Measure your own.",
+        "**Building retrieval for a small base.** Under about 200,000 tokens the write-up suggests the whole base in a cached prompt."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Quiz"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "Two result lists come from indexes whose scores sit on different scales. How does the fusion method of the practice combine them?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: It adds the raw scores of both indexes and sorts the totals that result",
+              "**b**: It sums `1 / (k + rank)` for each place where an id is found",
+              "**c**: It keeps the longer list and ignores the shorter one completely",
+              "**d**: It multiplies each chunk's two scores together before sorting them"
+            ]
+          }
+        ],
+        [
+          "A reranker is given a pool of 10 chunks, and the passage with the answer is ranked 14th by the merged list. What happens?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The reranker finds it and moves it to the front of the final list",
+              "**b**: The candidate count is raised for that question by the scorer itself",
+              "**c**: It is added to the candidates when its score is high enough to qualify",
+              "**d**: It is never considered, since the scorer sees only the first ten"
+            ]
+          }
+        ],
+        [
+          "A company's reference material has 80,000 tokens and changes once a month. What does the write-up's rule of thumb suggest?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Build the full pipeline, since every base needs one of its own to work well",
+              "**b**: Skip retrieval, and place the whole of it in a prompt that is cached",
+              "**c**: Split it into 20 chunks and index only the first ones that are written",
+              "**d**: Train an embedding model of its own on the text of the material"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**b**. The page says \"an id's score is the sum, over the lists that hold it, of `1 / (k + rank)`\". *a* is ruled out because \"the scores cannot be added\" when they are on different scales. *c* is ruled out because \"an id at the top of one list and absent from the other still scores\". *d* is ruled out because \"Fusion uses only the ranks\", with no multiplication of scores.",
+            "**d**. The page says \"Only the pool takes part: a chunk outside it is never considered\". *a* is ruled out because \"reranking cannot fix a retrieval that missed\". *c* is ruled out because the pool is \"the first `pool` ids of the merged ranking\" and nothing is added to it afterwards. *b* is ruled out because \"the pool must be large enough to contain the answer\", and a scorer has no control over it.",
+            "**b**. The page says \"under about 200,000 tokens, put the whole knowledge base in the prompt and cache it, and skip retrieval\". *a* is ruled out because \"A pipeline adds stages that can each fail\". *c* is ruled out because the guide for retrieval is to \"retrieve 20 chunks rather than fewer\", which is a count to retrieve and not a way to index. *d* is ruled out because \"The rule is about size, not quality\", and it says nothing about training a model."
+          ]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Module quiz"
+    },
+    {
+      "type": "para",
+      "text": "This quiz covers both pages of the module."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        [
+          "A question returns a fluent answer from the wrong passage, and the team wants to find which stage failed. What should they do first?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Switch to a larger model and read a few more answers",
+              "**b**: Measure recall at k on a set with known source documents",
+              "**c**: Lengthen the prompt with more rules about citing sources",
+              "**d**: Raise the temperature to see whether another passage appears"
+            ]
+          }
+        ],
+        [
+          "A passage reads \"The company's revenue grew by 3% over the previous quarter\" and matches many unrelated questions. Which fix does the write-up describe?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: Prepend a sentence of explanatory context before indexing it",
+              "**b**: Shorten it to a single sentence of three or four words",
+              "**c**: Delete it and rely on the model's own knowledge of the firm",
+              "**d**: Embed it twice and average the two vectors that result"
+            ]
+          }
+        ],
+        [
+          "A keyword index and an embedding index disagree on the best chunk for a query. Why is a hybrid usually better than either alone?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: They miss different questions, so merging the results keeps what each finds",
+              "**b**: Their scores share one scale, which makes adding them a sound choice",
+              "**c**: The embedding side handles exact strings well, and the keyword side adds speed",
+              "**d**: The merge makes chunking of the documents unnecessary for later stages"
+            ]
+          }
+        ],
+        [
+          "A team reads a published failure-rate drop of 67% and promises the same drop to a customer. What is wrong with the promise?",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "**a**: The figure applies only to embeddings, which the customer does not use",
+              "**b**: The figure is too small to be useful for any real system that is deployed",
+              "**c**: The figure comes from the source's datasets, and yours needs measuring",
+              "**d**: The figure was measured with a retired model that no longer exists"
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "disclosure",
+      "summary": "Answer key",
+      "open": false,
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "**b**. The page says \"The way to see it is to measure retrieval on its own\", with questions \"whose source documents are known\". *a* is ruled out because \"Fluent output hides that\", and a larger model reads the same retrieved passages. *c* is ruled out because the failure sits in what was retrieved: \"the passage with the answer never reached the prompt\". *d* is ruled out because temperature changes the wording of the answer, and \"A fluent answer can come from the wrong passage\".",
+            "**a**. The page says to prepend \"chunk-specific explanatory context to each chunk before embedding\" and before building the keyword index. *b* is ruled out because the problem is lost surroundings: \"A chunk lifted out of its document can lose its meaning.\" *c* is ruled out because the fix keeps the chunk: the model is asked \"to write that sentence for each chunk\". *d* is ruled out because the fix is that \"the chunk is indexed as a short sentence of context followed by the text\", and a doubled vector adds no information.",
+            "**a**. The page says \"The two indexes fail on different questions, which is why most systems use both.\" *b* is ruled out because \"the scores cannot be added\" when they sit on different scales. *c* is ruled out because \"BM25 is exact\", and the embedding \"is weaker with exact strings\". *d* is ruled out because \"A chunk is a window of words\", and the merge works on chunks that already exist.",
+            "**c**. The page says \"These are the write-up's figures, measured on its datasets\" and \"Measure your own.\" *b* is ruled out because the figures \"show an order of magnitude and a ranking of the techniques\". *a* is ruled out because the 67% row is \"Those two, with reranking added\", so it is not embeddings alone. *d* is ruled out because \"The percentages for contextual retrieval below are Anthropic's measurements on its own datasets\", and the page names no model."
+          ]
+        }
+      ]
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 14,
+    "paras": 21,
+    "code": 0,
+    "tables": 2,
+    "lists": 4,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 2,
+    "examples": 1
+  },
+  "content_sha256": "95e95bd7440596f68bdb6689f39ef241d6c4c45bac029cc921256e3f0741a35c"
+}

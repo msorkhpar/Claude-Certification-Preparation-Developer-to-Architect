@@ -1,0 +1,130 @@
+{
+  "gates_api": 1,
+  "inputs": [
+    {
+      "role": "statement",
+      "path": "statement.md",
+      "digest": "sha256:61e00035a2424ad0c21147e947e53e8e9bbfd209b1f2789f2a6f1b8069f90401"
+    },
+    {
+      "role": "starter",
+      "path": "starter/extraction.py",
+      "digest": "sha256:56a46033fc885ff39b019f33cbd63181155829eb64de84049ea2d3764abec392"
+    },
+    {
+      "role": "reference",
+      "path": "reference/extraction.py",
+      "digest": "sha256:be7b9c9a649852aac88428ff353c86515471416a3b110b9674707a6c62ecf8db"
+    },
+    {
+      "role": "starter:try_it.py",
+      "path": "starter/try_it.py",
+      "digest": "sha256:365d6226ef33797ad111cf8936b6e51fcce51def121f7241abaab10d5165802d"
+    },
+    {
+      "role": "reference:try_it.py",
+      "path": "reference/try_it.py",
+      "digest": "sha256:365d6226ef33797ad111cf8936b6e51fcce51def121f7241abaab10d5165802d"
+    },
+    {
+      "role": "tests",
+      "path": "tests/test_extraction.py",
+      "digest": "sha256:f684a2928d15f4381cc777347166ade13c96409390202849464ef33063d53e53"
+    },
+    {
+      "role": "plant:test_e1_a_value_the_document_does_not_give_is_null_and_needs_no_quote_while_an_invented_value_fails_as_ungrounded",
+      "path": "plants/edge-1/extraction.py.plant.json",
+      "digest": "sha256:a01f3de8f6fede58369872461124aed21c081e32427b780c8504b712a08eb837"
+    },
+    {
+      "role": "plant:test_e2_a_retry_carries_the_original_document_the_failed_record_and_only_the_errors_a_second_look_can_fix",
+      "path": "plants/edge-2/extraction.py.plant.json",
+      "digest": "sha256:d0d7c964764256d168f4a5e1a9fa9ec00ff06e507098483b0367bbaeb9c78a84"
+    },
+    {
+      "role": "plant:test_e3_a_required_value_that_the_model_reports_as_absent_is_not_retried_and_goes_to_review",
+      "path": "plants/edge-3/extraction.py.plant.json",
+      "digest": "sha256:c207542b199792d4723d9533f1e623564ec4f6a276911db9da5f221e9caeed96"
+    },
+    {
+      "role": "plant:test_e4_retries_stop_after_the_limit_and_the_document_is_marked_failed",
+      "path": "plants/edge-4/extraction.py.plant.json",
+      "digest": "sha256:844218d7c272d231f57fc477b9ae551787c05978e9225aa0b8e8cda4530365f9"
+    },
+    {
+      "role": "plant:test_e5_a_total_that_differs_from_the_line_items_is_a_semantic_error_and_a_flagged_conflict_goes_to_review_without_a_retry",
+      "path": "plants/edge-5/extraction.py.plant.json",
+      "digest": "sha256:6deb4e11318c9e9935ee3febccfb79cca8d6e69a4be0330ee1819626623e69cb"
+    },
+    {
+      "role": "plant:test_e6_currency_takes_unclear_and_other_with_a_detail_and_rejects_anything_else_as_a_syntax_error",
+      "path": "plants/edge-6/extraction.py.plant.json",
+      "digest": "sha256:1a1bb0a665e38014c5f334d4e1253d72e079ddcfe6534d50da8982c93a4125ac"
+    },
+    {
+      "role": "plant:test_e7_chunk_results_merge_by_keeping_the_first_value_and_recording_a_conflict_when_two_chunks_disagree",
+      "path": "plants/edge-7/extraction.py.plant.json",
+      "digest": "sha256:e8d3f015e0a465cab020bb2c2b287dc8d4ada6f40dddb5eae028172c8c922af9"
+    },
+    {
+      "role": "plant:test_e8_accuracy_counts_every_document_and_not_only_the_validated_ones",
+      "path": "plants/edge-8/extraction.py.plant.json",
+      "digest": "sha256:cd44c5f986e62c0310da4cb9ed5828f7f411977eed37aa1fb859697d3f0dc722"
+    },
+    {
+      "role": "plant:test_e9_the_request_forces_a_tool_where_the_model_allows_it_and_falls_back_to_auto_with_a_reply_check_where_it_does_not",
+      "path": "plants/edge-9/extraction.py.plant.json",
+      "digest": "sha256:d91761c8c7cdc0e2fb52b9e8b494d75a7d2342326bb64e23bacaa9d1315d01a6"
+    },
+    {
+      "role": "build:pytest.ini",
+      "path": "build/pytest.ini",
+      "digest": "sha256:78b695b449e8bb92c850493180f73fc8d1122b2b99925d12dddab5c285e8d026"
+    }
+  ],
+  "origins": [
+    {
+      "role": "origin",
+      "path": "course/62-structured-output-at-the-architect-level/02-retries-conflicts-chunks-and-the-practice.md",
+      "section": null,
+      "digest": "sha256:ac1820d6fdb3681efcbae54c9b614a556ae24c28744d0249273a4ea34acb4920"
+    }
+  ],
+  "gates": [
+    {
+      "id": "G1",
+      "family": "code",
+      "held": true,
+      "says": "all 10 cases passed on the reference, on two runs alike",
+      "recorded": {}
+    },
+    {
+      "id": "G2",
+      "family": "code",
+      "held": true,
+      "says": "none of the 10 cases passed on the starter",
+      "recorded": {}
+    },
+    {
+      "id": "G3",
+      "family": "code",
+      "held": true,
+      "says": "each of the 9 edge cases was caught by its own plant",
+      "recorded": {}
+    },
+    {
+      "id": "G4",
+      "family": "code",
+      "held": true,
+      "says": "every test the report named mapped to one of the 10 cases, and every case was named",
+      "recorded": {}
+    },
+    {
+      "id": "G5",
+      "family": "code",
+      "held": true,
+      "says": "the cited passage of 'course/62-structured-output-at-the-architect-level/02-retries-conflicts-chunks-and-the-practice.md' still matches the ledger",
+      "recorded": {}
+    }
+  ]
+}

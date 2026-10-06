@@ -1,0 +1,324 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "33-mcp-advanced"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: an MCP server's side of a multi round-trip request (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: an MCP server's side of a multi round-trip request"
+    },
+    {
+      "type": "para",
+      "text": "In the MCP revision of 2026-07-28 a server no longer calls the client in the middle of a request. When a tool needs a person's answer or a model completion, it ends the call with an `input_required` result that lists what it needs, and the client retries the same call with the answers. The server keeps nothing between the two calls, so whatever it needs to remember travels in an opaque `requestState` that the client echoes back. That state crosses a client the server does not trust, so it must be signed, bound to the user and the call, and given an expiry. Write the tool handler that does this. The message shapes, the rules for `requestState`, the error codes and the capability checks come from the MCP specification of revision 2026-07-28 (the multi round-trip requests, tools, elicitation and sampling pages), read on 2026-10-03; the lesson pages explain them. Nothing here uses a network or an MCP SDK: the handler is a function from the parameters of a request to the result, which is what the SDKs call underneath."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "request",
+          "the parameters of a `tools/call`: `{\"name\", \"arguments\", \"_meta\", optionally \"inputResponses\" and \"requestState\"}`; `_meta` holds the protocol version under `io.modelcontextprotocol/protocolVersion` and the capabilities the client declares under `io.modelcontextprotocol/clientCapabilities`"
+        ],
+        [
+          "`TOOLS`, `VERSION`, `TTL_SECONDS`",
+          "the two tool definitions (`deploy` and `status`), the one protocol version served, and the lifetime of a state: 300 seconds"
+        ],
+        [
+          "`mint_state(secret, payload)`",
+          "a `requestState` for the payload, signed with the secret"
+        ],
+        [
+          "`read_state(secret, token)`",
+          "the payload of a `requestState`, or nothing when it is not one this secret signed (changed, cut short, signed by another secret, or not a state at all)"
+        ],
+        [
+          "`args_digest(arguments)`",
+          "a fingerprint of the arguments, the same in any key order"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working handler with eight gaps cut out of it. Everything that is plumbing is written and correct: the state signing (`mint_state`, `read_state`, `args_digest`), the error and result builders, the two request messages, the version check, and the order in which `call_tool` runs its steps. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. Debug a gap by logging its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the Java, Kotlin and TypeScript names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_validate` unlocks `e6`: the protocol error for an unknown tool, a missing service or a bad env.",
+        "`_can_elicit` unlocks `e2`: which declared capabilities mean the client can be asked.",
+        "`_confirm_usable` unlocks `m1` and `e3`: which answers count as an answer to the question.",
+        "`_confirmed` unlocks `e3`: only an accept with `confirm` exactly true goes on.",
+        "`_notes_text` unlocks `m1`: the sentence the client wrote for the release notes.",
+        "`_state_error` unlocks `e4` and `e5`: the three checks on a returned state, in order.",
+        "`_new_state` unlocks `e7`: the payload that carries the whole context.",
+        "`_tool_listing` unlocks `e1`: the cacheable tool list."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole handler; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`list_tools(request)`: a request whose version is not `VERSION` is a protocol error (below). Otherwise `{\"resultType\": \"complete\", \"tools\": TOOLS sorted by name, \"ttlMs\": 300000, \"cacheScope\": \"public\"}`.",
+        [
+          "`call_tool(request, secret, principal, now)` where `principal` is the authenticated user and `now` is the time in seconds. It returns a result, or a protocol error `{\"error\": {\"code\", \"message\", optionally \"data\"}}`. Check in this order:",
+          {
+            "type": "list",
+            "ordered": true,
+            "items": [
+              "Version not `VERSION`: code `-32022`, message `Unsupported protocol version`, `data` `{\"supported\": [VERSION]}`.",
+              "A tool name other than `deploy` and `status`: `-32602`, `Unknown tool: NAME`.",
+              "`arguments.service` missing, not a string or only spaces: `-32602`, `Invalid params: service is required`. For `deploy`, an `env` that is not `staging` or `production`: `-32602`, `Invalid params: env must be staging or production`.",
+              "`status` completes with the text `SERVICE: running`. `deploy` to `staging` completes with `Deployed SERVICE to staging`. Both need no input from the client."
+            ]
+          },
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "A complete result is `{\"resultType\": \"complete\", \"content\": [{\"type\": \"text\", \"text\": ...}], \"isError\": false}`.",
+              "`deploy` to `production` needs a person's confirmation by elicitation. The client can be asked only when it declared an `elicitation` capability that is empty (which means form mode) or holds `form`; a capability with only `url`, or none, cannot be asked. Then the result is complete with `isError` true and the text `Deploying to production needs confirmation, and this client cannot be asked.` and nothing is requested.",
+              [
+                "Otherwise there are up to two steps, kept in the signed state, not in the server:",
+                {
+                  "type": "list",
+                  "ordered": false,
+                  "items": [
+                    "Step `confirm`: with no usable answer, return `{\"resultType\": \"input_required\", \"inputRequests\": {\"confirm\": ...}, \"requestState\": ...}`. The request is `{\"method\": \"elicitation/create\", \"params\": {\"mode\": \"form\", \"message\": \"Deploy SERVICE to production?\", \"requestedSchema\": {\"type\": \"object\", \"properties\": {\"confirm\": {\"type\": \"boolean\", \"title\": \"Confirm the deployment\"}}, \"required\": [\"confirm\"]}}}`. An answer is usable when `inputResponses.confirm` is an object whose `action` is `accept`, `decline` or `cancel`; anything else, or a missing answer, is asked again with a fresh state. Only `accept` with `content.confirm` exactly true goes on; every other usable answer completes with `Deployment cancelled` (and `isError` false). After a confirmation, a client that declared a `sampling` capability gets step `notes`; one that did not completes with `Deployed SERVICE to production`.",
+                    "Step `notes`: ask with `{\"notes\": {\"method\": \"sampling/createMessage\", \"params\": {\"messages\": [{\"role\": \"user\", \"content\": {\"type\": \"text\", \"text\": \"Write one sentence of release notes for SERVICE.\"}}], \"maxTokens\": 100}}}`. The answer is usable when `inputResponses.notes.content.text` is a string; the result is then `Deployed SERVICE to production. Release notes: TEXT`. An unusable or missing answer is asked again."
+                  ]
+                }
+              ],
+              "The state payload is `{\"v\": 1, \"tool\", \"digest\": args_digest(arguments), \"sub\": principal, \"exp\": now + TTL_SECONDS, \"step\"}`; `step` is the step that the next call must answer (`confirm` or `notes`).",
+              "A call with no `requestState` starts at step `confirm` and ignores any `inputResponses`: an answer alone never skips the question. A call with a `requestState` is checked in this order, with code `-32602`: a state that `read_state` does not accept: `Invalid requestState`; `now` later than `exp`: `Expired requestState`; a `sub`, `tool` or `digest` that differs from this call: `requestState does not match this request`. A valid state sets the step. Unknown keys in `inputResponses` are ignored."
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A production deploy takes three round trips and keeps no state"
+        ],
+        [
+          "`e1`",
+          "A staging deploy and a status call finish at once, and the tool list is cacheable"
+        ],
+        [
+          "`e2`",
+          "The server only asks what the client declared it can answer"
+        ],
+        [
+          "`e3`",
+          "A no or a missing answer is handled without an error"
+        ],
+        [
+          "`e4`",
+          "A state the server did not sign is refused"
+        ],
+        [
+          "`e5`",
+          "A state works only for the same user, the same call and before it expires"
+        ],
+        [
+          "`e6`",
+          "A request the server cannot serve is a protocol error with a code"
+        ],
+        [
+          "`e7`",
+          "The state carries the whole context, and an answer alone never skips a step"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.security.MessageDigest\nimport java.util.Base64\nimport javax.crypto.Mac\nimport javax.crypto.spec.SecretKeySpec\n\nprivate val log = System.getLogger(\"mrtr\")\n\n/** An MCP server's side of multi round-trip requests, with no state kept between calls. See ../../statement.md. Requests and results are JSON-like maps. */\n\nconst val VERSION = \"2026-07-28\"\nconst val META_VERSION = \"io.modelcontextprotocol/protocolVersion\"\nconst val META_CAPS = \"io.modelcontextprotocol/clientCapabilities\"\nconst val TTL_SECONDS = 300\n\nval TOOLS: List<Map<String, Any?>> = listOf(\n    mapOf(\"name\" to \"deploy\", \"description\" to \"Deploy a service to an environment. Production needs a person's confirmation.\",\n        \"inputSchema\" to mapOf(\"type\" to \"object\", \"properties\" to mapOf(\"service\" to mapOf(\"type\" to \"string\"), \"env\" to mapOf(\"type\" to \"string\", \"enum\" to listOf(\"staging\", \"production\"))), \"required\" to listOf(\"service\", \"env\"))),\n    mapOf(\"name\" to \"status\", \"description\" to \"Report whether a service is running.\",\n        \"inputSchema\" to mapOf(\"type\" to \"object\", \"properties\" to mapOf(\"service\" to mapOf(\"type\" to \"string\")), \"required\" to listOf(\"service\"))),\n)\n\n/** JSON with the keys of every object in sorted order. */\nprivate fun canonical(v: Any?): String = when (v) {\n    is Map<*, *> -> v.entries.sortedBy { it.key as String }.joinToString(\",\", \"{\", \"}\") { Json.stringify(it.key) + \":\" + canonical(it.value) }\n    is List<*> -> v.joinToString(\",\", \"[\", \"]\") { canonical(it) }\n    else -> Json.stringify(v)\n}\n\nprivate fun b64(data: ByteArray): String = Base64.getUrlEncoder().withoutPadding().encodeToString(data)\n\nprivate fun hmac(secret: String, body: String): ByteArray {\n    val mac = Mac.getInstance(\"HmacSHA256\")\n    mac.init(SecretKeySpec(secret.toByteArray(), \"HmacSHA256\"))\n    return mac.doFinal(body.toByteArray())\n}\n\n/** Given: a requestState for payload: its JSON, then a HMAC-SHA256 signature of it, both in base64url, joined by a dot. */\nfun mintState(secret: String, payload: Map<String, Any?>): String {\n    val body = b64(canonical(payload).toByteArray())\n    return body + \".\" + b64(hmac(secret, body))\n}\n\n/** Given: the payload of a requestState, or null when it is not one this secret signed (tampered, truncated, foreign, garbage). */\n@Suppress(\"UNCHECKED_CAST\")\nfun readState(secret: String, token: String): Map<String, Any?>? = try {\n    val parts = token.split(\".\")\n    if (parts.size != 2 || !MessageDigest.isEqual(b64(hmac(secret, parts[0])).toByteArray(), parts[1].toByteArray())) null\n    else Json.parse(String(Base64.getUrlDecoder().decode(parts[0]))) as? Map<String, Any?>\n} catch (e: RuntimeException) {\n    null\n}\n\n/** Given: a fingerprint of the call's arguments, the same for the same arguments in any key order. */\nfun argsDigest(arguments: Map<String, Any?>): String =\n    MessageDigest.getInstance(\"SHA-256\").digest(canonical(arguments).toByteArray()).joinToString(\"\") { \"%02x\".format(it) }\n\nprivate fun error(code: Int, message: String, data: Any? = null): Map<String, Any?> =\n    mapOf(\"error\" to linkedMapOf<String, Any?>(\"code\" to code, \"message\" to message).also { if (data != null) it[\"data\"] = data })\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun meta(request: Map<String, Any?>): Map<String, Any?> = (request[\"_meta\"] as? Map<String, Any?>) ?: emptyMap()\n\nprivate fun metaError(request: Map<String, Any?>): Map<String, Any?>? =\n    if (meta(request)[META_VERSION] != VERSION) error(-32022, \"Unsupported protocol version\", mapOf(\"supported\" to listOf(VERSION))) else null\n\nprivate fun toolListing(): Map<String, Any?> =\n    mapOf(\"resultType\" to \"complete\", \"tools\" to TOOLS.sortedBy { it[\"name\"] as String }, \"ttlMs\" to 300000, \"cacheScope\" to \"public\")\n\nfun listTools(request: Map<String, Any?>): Map<String, Any?> = metaError(request) ?: toolListing()\n\nprivate fun complete(text: String, isError: Boolean = false): Map<String, Any?> =\n    mapOf(\"resultType\" to \"complete\", \"content\" to listOf(mapOf(\"type\" to \"text\", \"text\" to text)), \"isError\" to isError)\n\nprivate fun confirmRequest(service: String): Map<String, Any?> = mapOf(\"confirm\" to mapOf(\"method\" to \"elicitation/create\", \"params\" to mapOf(\"mode\" to \"form\", \"message\" to \"Deploy $service to production?\",\n    \"requestedSchema\" to mapOf(\"type\" to \"object\", \"properties\" to mapOf(\"confirm\" to mapOf(\"type\" to \"boolean\", \"title\" to \"Confirm the deployment\")), \"required\" to listOf(\"confirm\")))))\n\nprivate fun notesRequest(service: String): Map<String, Any?> = mapOf(\"notes\" to mapOf(\"method\" to \"sampling/createMessage\", \"params\" to mapOf(\n    \"messages\" to listOf(mapOf(\"role\" to \"user\", \"content\" to mapOf(\"type\" to \"text\", \"text\" to \"Write one sentence of release notes for $service.\"))), \"maxTokens\" to 100)))\n\nprivate fun newState(name: Any?, arguments: Map<String, Any?>, principal: String, now: Long, step: String): Map<String, Any?> =\n    mapOf(\"v\" to 1, \"tool\" to name, \"digest\" to argsDigest(arguments), \"sub\" to principal, \"exp\" to now + TTL_SECONDS, \"step\" to step)\n\nprivate fun validate(name: Any?, arguments: Map<String, Any?>): Map<String, Any?>? {\n    if (name != \"deploy\" && name != \"status\") return error(-32602, \"Unknown tool: $name\")\n    val service = arguments[\"service\"]\n    if (service !is String || service.isBlank()) return error(-32602, \"Invalid params: service is required\")\n    if (name == \"deploy\" && arguments[\"env\"] != \"staging\" && arguments[\"env\"] != \"production\") return error(-32602, \"Invalid params: env must be staging or production\")\n    return null\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun canElicit(caps: Map<String, Any?>): Boolean {\n    val elicitation = caps[\"elicitation\"] as? Map<String, Any?>\n    return elicitation != null && (elicitation.isEmpty() || elicitation.containsKey(\"form\"))\n}\n\nprivate fun stateError(secret: String, token: String, principal: String, name: Any?, arguments: Map<String, Any?>, now: Long): Map<String, Any?>? {\n    val state = readState(secret, token) ?: return error(-32602, \"Invalid requestState\")\n    if (now > ((state[\"exp\"] as? Number)?.toLong() ?: 0L)) return error(-32602, \"Expired requestState\")\n    if (state[\"sub\"] != principal || state[\"tool\"] != name || state[\"digest\"] != argsDigest(arguments)) return error(-32602, \"requestState does not match this request\")\n    return null\n}\n\nprivate fun confirmUsable(answer: Any?): Boolean = answer is Map<*, *> && answer[\"action\"] in listOf(\"accept\", \"decline\", \"cancel\")\n\nprivate fun confirmed(answer: Map<String, Any?>): Boolean =\n    answer[\"action\"] == \"accept\" && ((answer[\"content\"] as? Map<*, *>)?.get(\"confirm\")) == true\n\nprivate fun notesText(answers: Map<String, Any?>): String? {\n    val content = (answers[\"notes\"] as? Map<*, *>)?.get(\"content\") as? Map<*, *>\n    return content?.get(\"text\") as? String\n}\n\nprivate fun ask(requests: Map<String, Any?>, step: String, secret: String, name: String, arguments: Map<String, Any?>, principal: String, now: Long): Map<String, Any?> {\n    val state = newState(name, arguments, principal, now, step)\n    return mapOf(\"resultType\" to \"input_required\", \"inputRequests\" to requests, \"requestState\" to mintState(secret, state))\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun callTool(request: Map<String, Any?>, secret: String, principal: String, now: Long): Map<String, Any?> {\n    log.log(System.Logger.Level.DEBUG, \"callTool input: {0}\", request)\n    metaError(request)?.let { return it }\n    val name = request[\"name\"]\n    val arguments = (request[\"arguments\"] as? Map<String, Any?>) ?: emptyMap()\n    validate(name, arguments)?.let { return it }\n    val service = arguments[\"service\"] as String\n    if (name == \"status\") return complete(\"$service: running\")\n    if (arguments[\"env\"] == \"staging\") return complete(\"Deployed $service to staging\")\n    val caps = (meta(request)[META_CAPS] as? Map<String, Any?>) ?: emptyMap()\n    if (!canElicit(caps)) return complete(\"Deploying to production needs confirmation, and this client cannot be asked.\", true)\n    var step = \"confirm\"\n    val token = request[\"requestState\"]\n    if (token != null) {\n        stateError(secret, token.toString(), principal, name, arguments, now)?.let { return it }\n        step = readState(secret, token.toString())?.get(\"step\").toString()\n    }\n    val answers = if (token != null) (request[\"inputResponses\"] as? Map<String, Any?>) ?: emptyMap() else emptyMap()\n    if (step == \"confirm\") {\n        val answer = answers[\"confirm\"]\n        if (!confirmUsable(answer)) return ask(confirmRequest(service), \"confirm\", secret, \"deploy\", arguments, principal, now)\n        if (!confirmed(answer as Map<String, Any?>)) return complete(\"Deployment cancelled\")\n        if (!caps.containsKey(\"sampling\")) return complete(\"Deployed $service to production\")\n        return ask(notesRequest(service), \"notes\", secret, \"deploy\", arguments, principal, now)\n    }\n    val text = notesText(answers) ?: return ask(notesRequest(service), \"notes\", secret, \"deploy\", arguments, principal, now)\n    return complete(\"Deployed $service to production. Release notes: $text\")\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    val secret = \"s3cret\"\n    val meta = mapOf(\"io.modelcontextprotocol/protocolVersion\" to \"2026-07-28\",\n        \"io.modelcontextprotocol/clientCapabilities\" to mapOf(\"elicitation\" to emptyMap<String, Any?>(), \"sampling\" to emptyMap<String, Any?>()))\n    val base = mapOf(\"name\" to \"deploy\", \"arguments\" to mapOf(\"service\" to \"api\", \"env\" to \"production\"), \"_meta\" to meta)\n\n    // Round trip 1: the server needs a person's confirmation, so it ends the call with input_required and a signed state.\n    val first = callTool(base, secret, \"alice\", 1000)\n    println(\"first call: ${first[\"resultType\"]} | asks for: ${(first[\"inputRequests\"] as? Map<*, *>)?.keys ?: \"[]\"}\")\n    println(\"state is a string: ${first[\"requestState\"] is String}\")\n\n    // Round trip 2: the client retries the same call with the answer and echoes the state back.\n    val retry = base + mapOf(\"inputResponses\" to mapOf(\"confirm\" to mapOf(\"action\" to \"accept\", \"content\" to mapOf(\"confirm\" to true))),\n        \"requestState\" to first[\"requestState\"])\n    val second = callTool(retry, secret, \"alice\", 1010)\n    println(\"second call: ${second[\"resultType\"]} | asks for: ${(second[\"inputRequests\"] as? Map<*, *>)?.keys ?: \"[]\"}\")\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.security.MessageDigest\nimport java.util.Base64\nimport javax.crypto.Mac\nimport javax.crypto.spec.SecretKeySpec\n\nprivate val log = System.getLogger(\"mrtr\")\n\n/** An MCP server's side of multi round-trip requests, with no state kept between calls. See ../../statement.md. Requests and results are JSON-like maps. */\n\nconst val VERSION = \"2026-07-28\"\nconst val META_VERSION = \"io.modelcontextprotocol/protocolVersion\"\nconst val META_CAPS = \"io.modelcontextprotocol/clientCapabilities\"\nconst val TTL_SECONDS = 300\n\nval TOOLS: List<Map<String, Any?>> = listOf(\n    mapOf(\"name\" to \"deploy\", \"description\" to \"Deploy a service to an environment. Production needs a person's confirmation.\",\n        \"inputSchema\" to mapOf(\"type\" to \"object\", \"properties\" to mapOf(\"service\" to mapOf(\"type\" to \"string\"), \"env\" to mapOf(\"type\" to \"string\", \"enum\" to listOf(\"staging\", \"production\"))), \"required\" to listOf(\"service\", \"env\"))),\n    mapOf(\"name\" to \"status\", \"description\" to \"Report whether a service is running.\",\n        \"inputSchema\" to mapOf(\"type\" to \"object\", \"properties\" to mapOf(\"service\" to mapOf(\"type\" to \"string\")), \"required\" to listOf(\"service\"))),\n)\n\n/** JSON with the keys of every object in sorted order. */\nprivate fun canonical(v: Any?): String = when (v) {\n    is Map<*, *> -> v.entries.sortedBy { it.key as String }.joinToString(\",\", \"{\", \"}\") { Json.stringify(it.key) + \":\" + canonical(it.value) }\n    is List<*> -> v.joinToString(\",\", \"[\", \"]\") { canonical(it) }\n    else -> Json.stringify(v)\n}\n\nprivate fun b64(data: ByteArray): String = Base64.getUrlEncoder().withoutPadding().encodeToString(data)\n\nprivate fun hmac(secret: String, body: String): ByteArray {\n    val mac = Mac.getInstance(\"HmacSHA256\")\n    mac.init(SecretKeySpec(secret.toByteArray(), \"HmacSHA256\"))\n    return mac.doFinal(body.toByteArray())\n}\n\n/** Given: a requestState for payload: its JSON, then a HMAC-SHA256 signature of it, both in base64url, joined by a dot. */\nfun mintState(secret: String, payload: Map<String, Any?>): String {\n    val body = b64(canonical(payload).toByteArray())\n    return body + \".\" + b64(hmac(secret, body))\n}\n\n/** Given: the payload of a requestState, or null when it is not one this secret signed (tampered, truncated, foreign, garbage). */\n@Suppress(\"UNCHECKED_CAST\")\nfun readState(secret: String, token: String): Map<String, Any?>? = try {\n    val parts = token.split(\".\")\n    if (parts.size != 2 || !MessageDigest.isEqual(b64(hmac(secret, parts[0])).toByteArray(), parts[1].toByteArray())) null\n    else Json.parse(String(Base64.getUrlDecoder().decode(parts[0]))) as? Map<String, Any?>\n} catch (e: RuntimeException) {\n    null\n}\n\n/** Given: a fingerprint of the call's arguments, the same for the same arguments in any key order. */\nfun argsDigest(arguments: Map<String, Any?>): String =\n    MessageDigest.getInstance(\"SHA-256\").digest(canonical(arguments).toByteArray()).joinToString(\"\") { \"%02x\".format(it) }\n\nprivate fun error(code: Int, message: String, data: Any? = null): Map<String, Any?> =\n    mapOf(\"error\" to linkedMapOf<String, Any?>(\"code\" to code, \"message\" to message).also { if (data != null) it[\"data\"] = data })\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun meta(request: Map<String, Any?>): Map<String, Any?> = (request[\"_meta\"] as? Map<String, Any?>) ?: emptyMap()\n\nprivate fun metaError(request: Map<String, Any?>): Map<String, Any?>? =\n    if (meta(request)[META_VERSION] != VERSION) error(-32022, \"Unsupported protocol version\", mapOf(\"supported\" to listOf(VERSION))) else null\n\n/**\n * TODO 1 of 8 (unlocks e1): the result of tools/list.\n * Receives nothing and returns the map from the statement: resultType \"complete\", the TOOLS sorted by name, ttlMs 300000, cacheScope \"public\".\n * Example: toolListing()[\"tools\"] first name -> \"deploy\"\n */\nprivate fun toolListing(): Map<String, Any?> = emptyMap()\n\nfun listTools(request: Map<String, Any?>): Map<String, Any?> = metaError(request) ?: toolListing()\n\nprivate fun complete(text: String, isError: Boolean = false): Map<String, Any?> =\n    mapOf(\"resultType\" to \"complete\", \"content\" to listOf(mapOf(\"type\" to \"text\", \"text\" to text)), \"isError\" to isError)\n\nprivate fun confirmRequest(service: String): Map<String, Any?> = mapOf(\"confirm\" to mapOf(\"method\" to \"elicitation/create\", \"params\" to mapOf(\"mode\" to \"form\", \"message\" to \"Deploy $service to production?\",\n    \"requestedSchema\" to mapOf(\"type\" to \"object\", \"properties\" to mapOf(\"confirm\" to mapOf(\"type\" to \"boolean\", \"title\" to \"Confirm the deployment\")), \"required\" to listOf(\"confirm\")))))\n\nprivate fun notesRequest(service: String): Map<String, Any?> = mapOf(\"notes\" to mapOf(\"method\" to \"sampling/createMessage\", \"params\" to mapOf(\n    \"messages\" to listOf(mapOf(\"role\" to \"user\", \"content\" to mapOf(\"type\" to \"text\", \"text\" to \"Write one sentence of release notes for $service.\"))), \"maxTokens\" to 100)))\n\n/**\n * TODO 2 of 8 (unlocks e7): the payload of a requestState.\n * Receives the tool name, the arguments, the user, the time in seconds and the step. Returns the map from the statement: v, tool, digest, sub, exp, step.\n * Example: newState(\"deploy\", mapOf(\"service\" to \"api\"), \"alice\", 1000, \"confirm\")[\"exp\"] -> 1300\n */\nprivate fun newState(name: Any?, arguments: Map<String, Any?>, principal: String, now: Long, step: String): Map<String, Any?> = emptyMap()\n\n/**\n * TODO 3 of 8 (unlocks e6): the protocol error for a call that cannot be served, in the order of the statement.\n * Receives the tool name and the arguments. Returns error(-32602, ...) for an unknown tool, a missing or blank service, or (for deploy) an env\n * that is not staging or production; null when the call is valid.\n * Example: validate(\"deploy\", mapOf(\"service\" to \"api\", \"env\" to \"dev\")) -> error(-32602, \"Invalid params: env must be staging or production\")\n */\nprivate fun validate(name: Any?, arguments: Map<String, Any?>): Map<String, Any?>? = null\n\n/**\n * TODO 4 of 8 (unlocks e2): can the client be asked for a confirmation?\n * Receives the client capabilities map. Returns true when \"elicitation\" is present and is empty or holds \"form\"; false for none or only \"url\".\n * Example: canElicit(mapOf(\"elicitation\" to emptyMap<String, Any?>())) -> true, canElicit(mapOf(\"elicitation\" to mapOf(\"url\" to emptyMap<String, Any?>()))) -> false\n */\nprivate fun canElicit(caps: Map<String, Any?>): Boolean = false\n\n/**\n * TODO 5 of 8 (unlocks e4 and e5): the error for a requestState that cannot be used.\n * Receives the secret, the token, the user, the tool name, the arguments and the time. Returns error(-32602, ...) with \"Invalid requestState\"\n * (readState gives null), \"Expired requestState\" (now after exp) or \"requestState does not match this request\" (sub, tool or digest differ), checked in\n * that order; null when the state is good.\n * Example: a state minted for \"alice\" and read for \"bob\" -> error(-32602, \"requestState does not match this request\")\n */\nprivate fun stateError(secret: String, token: String, principal: String, name: Any?, arguments: Map<String, Any?>, now: Long): Map<String, Any?>? = null\n\n/**\n * TODO 6 of 8 (unlocks m1 and e3): is this an answer to the confirmation question?\n * Receives inputResponses.confirm (anything, or null). Returns true when it is a map whose \"action\" is accept, decline or cancel.\n * Example: confirmUsable(mapOf(\"action\" to \"decline\")) -> true, confirmUsable(\"yes\") -> false\n */\nprivate fun confirmUsable(answer: Any?): Boolean = false\n\n/**\n * TODO 7 of 8 (unlocks e3): did the person accept?\n * Receives a usable answer. Returns true only for action \"accept\" with content.confirm exactly true.\n * Example: confirmed(mapOf(\"action\" to \"accept\", \"content\" to mapOf(\"confirm\" to false))) -> false\n */\nprivate fun confirmed(answer: Map<String, Any?>): Boolean = false\n\n/**\n * TODO 8 of 8 (unlocks m1): the release notes the client wrote.\n * Receives the inputResponses map. Returns answers[\"notes\"][\"content\"][\"text\"] when that is a string; null for anything else.\n * Example: notesText(mapOf(\"notes\" to mapOf(\"content\" to mapOf(\"type\" to \"text\", \"text\" to \"Faster.\")))) -> \"Faster.\"\n */\nprivate fun notesText(answers: Map<String, Any?>): String? = null\n\nprivate fun ask(requests: Map<String, Any?>, step: String, secret: String, name: String, arguments: Map<String, Any?>, principal: String, now: Long): Map<String, Any?> {\n    val state = newState(name, arguments, principal, now, step)\n    return mapOf(\"resultType\" to \"input_required\", \"inputRequests\" to requests, \"requestState\" to mintState(secret, state))\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun callTool(request: Map<String, Any?>, secret: String, principal: String, now: Long): Map<String, Any?> {\n    log.log(System.Logger.Level.DEBUG, \"callTool input: {0}\", request)\n    metaError(request)?.let { return it }\n    val name = request[\"name\"]\n    val arguments = (request[\"arguments\"] as? Map<String, Any?>) ?: emptyMap()\n    validate(name, arguments)?.let { return it }\n    val service = arguments[\"service\"] as String\n    if (name == \"status\") return complete(\"$service: running\")\n    if (arguments[\"env\"] == \"staging\") return complete(\"Deployed $service to staging\")\n    val caps = (meta(request)[META_CAPS] as? Map<String, Any?>) ?: emptyMap()\n    if (!canElicit(caps)) return complete(\"Deploying to production needs confirmation, and this client cannot be asked.\", true)\n    var step = \"confirm\"\n    val token = request[\"requestState\"]\n    if (token != null) {\n        stateError(secret, token.toString(), principal, name, arguments, now)?.let { return it }\n        step = readState(secret, token.toString())?.get(\"step\").toString()\n    }\n    val answers = if (token != null) (request[\"inputResponses\"] as? Map<String, Any?>) ?: emptyMap() else emptyMap()\n    if (step == \"confirm\") {\n        val answer = answers[\"confirm\"]\n        if (!confirmUsable(answer)) return ask(confirmRequest(service), \"confirm\", secret, \"deploy\", arguments, principal, now)\n        if (!confirmed(answer as Map<String, Any?>)) return complete(\"Deployment cancelled\")\n        if (!caps.containsKey(\"sampling\")) return complete(\"Deployed $service to production\")\n        return ask(notesRequest(service), \"notes\", secret, \"deploy\", arguments, principal, now)\n    }\n    val text = notesText(answers) ?: return ask(notesRequest(service), \"notes\", secret, \"deploy\", arguments, principal, now)\n    return complete(\"Deployed $service to production. Release notes: $text\")\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    val secret = \"s3cret\"\n    val meta = mapOf(\"io.modelcontextprotocol/protocolVersion\" to \"2026-07-28\",\n        \"io.modelcontextprotocol/clientCapabilities\" to mapOf(\"elicitation\" to emptyMap<String, Any?>(), \"sampling\" to emptyMap<String, Any?>()))\n    val base = mapOf(\"name\" to \"deploy\", \"arguments\" to mapOf(\"service\" to \"api\", \"env\" to \"production\"), \"_meta\" to meta)\n\n    // Round trip 1: the server needs a person's confirmation, so it ends the call with input_required and a signed state.\n    val first = callTool(base, secret, \"alice\", 1000)\n    println(\"first call: ${first[\"resultType\"]} | asks for: ${(first[\"inputRequests\"] as? Map<*, *>)?.keys ?: \"[]\"}\")\n    println(\"state is a string: ${first[\"requestState\"] is String}\")\n\n    // Round trip 2: the client retries the same call with the answer and echoes the state back.\n    val retry = base + mapOf(\"inputResponses\" to mapOf(\"confirm\" to mapOf(\"action\" to \"accept\", \"content\" to mapOf(\"confirm\" to true))),\n        \"requestState\" to first[\"requestState\"])\n    val second = callTool(retry, secret, \"alice\", 1010)\n    println(\"second call: ${second[\"resultType\"]} | asks for: ${(second[\"inputRequests\"] as? Map<*, *>)?.keys ?: \"[]\"}\")\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 4,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "c66867ca853ba89152f47d68646edf0c66b6d11232c3791f76a97ca48e0bdc82",
+  "starting_code": "import java.security.MessageDigest\nimport java.util.Base64\nimport javax.crypto.Mac\nimport javax.crypto.spec.SecretKeySpec\n\nprivate val log = System.getLogger(\"mrtr\")\n\n/** An MCP server's side of multi round-trip requests, with no state kept between calls. See ../../statement.md. Requests and results are JSON-like maps. */\n\nconst val VERSION = \"2026-07-28\"\nconst val META_VERSION = \"io.modelcontextprotocol/protocolVersion\"\nconst val META_CAPS = \"io.modelcontextprotocol/clientCapabilities\"\nconst val TTL_SECONDS = 300\n\nval TOOLS: List<Map<String, Any?>> = listOf(\n    mapOf(\"name\" to \"deploy\", \"description\" to \"Deploy a service to an environment. Production needs a person's confirmation.\",\n        \"inputSchema\" to mapOf(\"type\" to \"object\", \"properties\" to mapOf(\"service\" to mapOf(\"type\" to \"string\"), \"env\" to mapOf(\"type\" to \"string\", \"enum\" to listOf(\"staging\", \"production\"))), \"required\" to listOf(\"service\", \"env\"))),\n    mapOf(\"name\" to \"status\", \"description\" to \"Report whether a service is running.\",\n        \"inputSchema\" to mapOf(\"type\" to \"object\", \"properties\" to mapOf(\"service\" to mapOf(\"type\" to \"string\")), \"required\" to listOf(\"service\"))),\n)\n\n/** JSON with the keys of every object in sorted order. */\nprivate fun canonical(v: Any?): String = when (v) {\n    is Map<*, *> -> v.entries.sortedBy { it.key as String }.joinToString(\",\", \"{\", \"}\") { Json.stringify(it.key) + \":\" + canonical(it.value) }\n    is List<*> -> v.joinToString(\",\", \"[\", \"]\") { canonical(it) }\n    else -> Json.stringify(v)\n}\n\nprivate fun b64(data: ByteArray): String = Base64.getUrlEncoder().withoutPadding().encodeToString(data)\n\nprivate fun hmac(secret: String, body: String): ByteArray {\n    val mac = Mac.getInstance(\"HmacSHA256\")\n    mac.init(SecretKeySpec(secret.toByteArray(), \"HmacSHA256\"))\n    return mac.doFinal(body.toByteArray())\n}\n\n/** Given: a requestState for payload: its JSON, then a HMAC-SHA256 signature of it, both in base64url, joined by a dot. */\nfun mintState(secret: String, payload: Map<String, Any?>): String {\n    val body = b64(canonical(payload).toByteArray())\n    return body + \".\" + b64(hmac(secret, body))\n}\n\n/** Given: the payload of a requestState, or null when it is not one this secret signed (tampered, truncated, foreign, garbage). */\n@Suppress(\"UNCHECKED_CAST\")\nfun readState(secret: String, token: String): Map<String, Any?>? = try {\n    val parts = token.split(\".\")\n    if (parts.size != 2 || !MessageDigest.isEqual(b64(hmac(secret, parts[0])).toByteArray(), parts[1].toByteArray())) null\n    else Json.parse(String(Base64.getUrlDecoder().decode(parts[0]))) as? Map<String, Any?>\n} catch (e: RuntimeException) {\n    null\n}\n\n/** Given: a fingerprint of the call's arguments, the same for the same arguments in any key order. */\nfun argsDigest(arguments: Map<String, Any?>): String =\n    MessageDigest.getInstance(\"SHA-256\").digest(canonical(arguments).toByteArray()).joinToString(\"\") { \"%02x\".format(it) }\n\nprivate fun error(code: Int, message: String, data: Any? = null): Map<String, Any?> =\n    mapOf(\"error\" to linkedMapOf<String, Any?>(\"code\" to code, \"message\" to message).also { if (data != null) it[\"data\"] = data })\n\n@Suppress(\"UNCHECKED_CAST\")\nprivate fun meta(request: Map<String, Any?>): Map<String, Any?> = (request[\"_meta\"] as? Map<String, Any?>) ?: emptyMap()\n\nprivate fun metaError(request: Map<String, Any?>): Map<String, Any?>? =\n    if (meta(request)[META_VERSION] != VERSION) error(-32022, \"Unsupported protocol version\", mapOf(\"supported\" to listOf(VERSION))) else null\n\n/**\n * TODO 1 of 8 (unlocks e1): the result of tools/list.\n * Receives nothing and returns the map from the statement: resultType \"complete\", the TOOLS sorted by name, ttlMs 300000, cacheScope \"public\".\n * Example: toolListing()[\"tools\"] first name -> \"deploy\"\n */\nprivate fun toolListing(): Map<String, Any?> = emptyMap()\n\nfun listTools(request: Map<String, Any?>): Map<String, Any?> = metaError(request) ?: toolListing()\n\nprivate fun complete(text: String, isError: Boolean = false): Map<String, Any?> =\n    mapOf(\"resultType\" to \"complete\", \"content\" to listOf(mapOf(\"type\" to \"text\", \"text\" to text)), \"isError\" to isError)\n\nprivate fun confirmRequest(service: String): Map<String, Any?> = mapOf(\"confirm\" to mapOf(\"method\" to \"elicitation/create\", \"params\" to mapOf(\"mode\" to \"form\", \"message\" to \"Deploy $service to production?\",\n    \"requestedSchema\" to mapOf(\"type\" to \"object\", \"properties\" to mapOf(\"confirm\" to mapOf(\"type\" to \"boolean\", \"title\" to \"Confirm the deployment\")), \"required\" to listOf(\"confirm\")))))\n\nprivate fun notesRequest(service: String): Map<String, Any?> = mapOf(\"notes\" to mapOf(\"method\" to \"sampling/createMessage\", \"params\" to mapOf(\n    \"messages\" to listOf(mapOf(\"role\" to \"user\", \"content\" to mapOf(\"type\" to \"text\", \"text\" to \"Write one sentence of release notes for $service.\"))), \"maxTokens\" to 100)))\n\n/**\n * TODO 2 of 8 (unlocks e7): the payload of a requestState.\n * Receives the tool name, the arguments, the user, the time in seconds and the step. Returns the map from the statement: v, tool, digest, sub, exp, step.\n * Example: newState(\"deploy\", mapOf(\"service\" to \"api\"), \"alice\", 1000, \"confirm\")[\"exp\"] -> 1300\n */\nprivate fun newState(name: Any?, arguments: Map<String, Any?>, principal: String, now: Long, step: String): Map<String, Any?> = emptyMap()\n\n/**\n * TODO 3 of 8 (unlocks e6): the protocol error for a call that cannot be served, in the order of the statement.\n * Receives the tool name and the arguments. Returns error(-32602, ...) for an unknown tool, a missing or blank service, or (for deploy) an env\n * that is not staging or production; null when the call is valid.\n * Example: validate(\"deploy\", mapOf(\"service\" to \"api\", \"env\" to \"dev\")) -> error(-32602, \"Invalid params: env must be staging or production\")\n */\nprivate fun validate(name: Any?, arguments: Map<String, Any?>): Map<String, Any?>? = null\n\n/**\n * TODO 4 of 8 (unlocks e2): can the client be asked for a confirmation?\n * Receives the client capabilities map. Returns true when \"elicitation\" is present and is empty or holds \"form\"; false for none or only \"url\".\n * Example: canElicit(mapOf(\"elicitation\" to emptyMap<String, Any?>())) -> true, canElicit(mapOf(\"elicitation\" to mapOf(\"url\" to emptyMap<String, Any?>()))) -> false\n */\nprivate fun canElicit(caps: Map<String, Any?>): Boolean = false\n\n/**\n * TODO 5 of 8 (unlocks e4 and e5): the error for a requestState that cannot be used.\n * Receives the secret, the token, the user, the tool name, the arguments and the time. Returns error(-32602, ...) with \"Invalid requestState\"\n * (readState gives null), \"Expired requestState\" (now after exp) or \"requestState does not match this request\" (sub, tool or digest differ), checked in\n * that order; null when the state is good.\n * Example: a state minted for \"alice\" and read for \"bob\" -> error(-32602, \"requestState does not match this request\")\n */\nprivate fun stateError(secret: String, token: String, principal: String, name: Any?, arguments: Map<String, Any?>, now: Long): Map<String, Any?>? = null\n\n/**\n * TODO 6 of 8 (unlocks m1 and e3): is this an answer to the confirmation question?\n * Receives inputResponses.confirm (anything, or null). Returns true when it is a map whose \"action\" is accept, decline or cancel.\n * Example: confirmUsable(mapOf(\"action\" to \"decline\")) -> true, confirmUsable(\"yes\") -> false\n */\nprivate fun confirmUsable(answer: Any?): Boolean = false\n\n/**\n * TODO 7 of 8 (unlocks e3): did the person accept?\n * Receives a usable answer. Returns true only for action \"accept\" with content.confirm exactly true.\n * Example: confirmed(mapOf(\"action\" to \"accept\", \"content\" to mapOf(\"confirm\" to false))) -> false\n */\nprivate fun confirmed(answer: Map<String, Any?>): Boolean = false\n\n/**\n * TODO 8 of 8 (unlocks m1): the release notes the client wrote.\n * Receives the inputResponses map. Returns answers[\"notes\"][\"content\"][\"text\"] when that is a string; null for anything else.\n * Example: notesText(mapOf(\"notes\" to mapOf(\"content\" to mapOf(\"type\" to \"text\", \"text\" to \"Faster.\")))) -> \"Faster.\"\n */\nprivate fun notesText(answers: Map<String, Any?>): String? = null\n\nprivate fun ask(requests: Map<String, Any?>, step: String, secret: String, name: String, arguments: Map<String, Any?>, principal: String, now: Long): Map<String, Any?> {\n    val state = newState(name, arguments, principal, now, step)\n    return mapOf(\"resultType\" to \"input_required\", \"inputRequests\" to requests, \"requestState\" to mintState(secret, state))\n}\n\n@Suppress(\"UNCHECKED_CAST\")\nfun callTool(request: Map<String, Any?>, secret: String, principal: String, now: Long): Map<String, Any?> {\n    log.log(System.Logger.Level.DEBUG, \"callTool input: {0}\", request)\n    metaError(request)?.let { return it }\n    val name = request[\"name\"]\n    val arguments = (request[\"arguments\"] as? Map<String, Any?>) ?: emptyMap()\n    validate(name, arguments)?.let { return it }\n    val service = arguments[\"service\"] as String\n    if (name == \"status\") return complete(\"$service: running\")\n    if (arguments[\"env\"] == \"staging\") return complete(\"Deployed $service to staging\")\n    val caps = (meta(request)[META_CAPS] as? Map<String, Any?>) ?: emptyMap()\n    if (!canElicit(caps)) return complete(\"Deploying to production needs confirmation, and this client cannot be asked.\", true)\n    var step = \"confirm\"\n    val token = request[\"requestState\"]\n    if (token != null) {\n        stateError(secret, token.toString(), principal, name, arguments, now)?.let { return it }\n        step = readState(secret, token.toString())?.get(\"step\").toString()\n    }\n    val answers = if (token != null) (request[\"inputResponses\"] as? Map<String, Any?>) ?: emptyMap() else emptyMap()\n    if (step == \"confirm\") {\n        val answer = answers[\"confirm\"]\n        if (!confirmUsable(answer)) return ask(confirmRequest(service), \"confirm\", secret, \"deploy\", arguments, principal, now)\n        if (!confirmed(answer as Map<String, Any?>)) return complete(\"Deployment cancelled\")\n        if (!caps.containsKey(\"sampling\")) return complete(\"Deployed $service to production\")\n        return ask(notesRequest(service), \"notes\", secret, \"deploy\", arguments, principal, now)\n    }\n    val text = notesText(answers) ?: return ask(notesRequest(service), \"notes\", secret, \"deploy\", arguments, principal, now)\n    return complete(\"Deployed $service to production. Release notes: $text\")\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/33-mcp-advanced/prose/unit-02/practice-4/src/main/kotlin/Mrtr.kt",
+    "test_path": "practice/level-2/33-mcp-advanced/prose/unit-02/practice-4/src/test/kotlin/MrtrTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/33-mcp-advanced/prose/unit-02/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/33-mcp-advanced/prose/unit-02/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_aProductionDeployTakesThreeRoundTripsAndKeepsNoState()",
+        "kind": "main",
+        "says": "A production deploy takes three round trips and keeps no state"
+      },
+      {
+        "id": "e1_aStagingDeployAndAStatusCallFinishAtOnceAndTheToolListIsCacheable()",
+        "kind": "edge",
+        "says": "A staging deploy and a status call finish at once, and the tool list is cacheable"
+      },
+      {
+        "id": "e2_theServerOnlyAsksWhatTheClientDeclaredItCanAnswer()",
+        "kind": "edge",
+        "says": "The server only asks what the client declared it can answer"
+      },
+      {
+        "id": "e3_aNoOrAMissingAnswerIsHandledWithoutAnError()",
+        "kind": "edge",
+        "says": "A no or a missing answer is handled without an error"
+      },
+      {
+        "id": "e4_aStateTheServerDidNotSignIsRefused()",
+        "kind": "edge",
+        "says": "A state the server did not sign is refused"
+      },
+      {
+        "id": "e5_aStateWorksOnlyForTheSameUserTheSameCallAndBeforeItExpires()",
+        "kind": "edge",
+        "says": "A state works only for the same user, the same call and before it expires"
+      },
+      {
+        "id": "e6_aRequestTheServerCannotServeIsAProtocolErrorWithACode()",
+        "kind": "edge",
+        "says": "A request the server cannot serve is a protocol error with a code"
+      },
+      {
+        "id": "e7_theStateCarriesTheWholeContextAndAnAnswerAloneNeverSkipsAStep()",
+        "kind": "edge",
+        "says": "The state carries the whole context, and an answer alone never skips a step"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/33-mcp-advanced/prose/unit-02/practice-4/target/test-results/test"
+    },
+    "origin": "course/33-mcp-advanced/02-streamable-http-state-and-authorization.md",
+    "concepts": [
+      "the practice of MCP advanced: Streamable HTTP, state and authorization is solved"
+    ],
+    "files": [
+      "practice/level-2/33-mcp-advanced/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "mcp-advanced-u2"
+}

@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "55-mcp-in-claude-code"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: Scopes, the project file and environment expansion",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A team commits `.mcp.json` with the header `Bearer ${NPM_TOKEN}` for a hosted package registry. Every developer exports the variable, yet the registry answers 401. What is the cause?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The file loads only after an interactive approval that the developers skipped",
+            "correct": false,
+            "says": "Ruled out because a server that waits for approval is not connected at all: \"claude mcp list shows it as pending\", and it does not answer with a 401."
+          },
+          {
+            "id": "b",
+            "text": "Header values are expanded only for entries that start a local process",
+            "correct": false,
+            "says": "Ruled out because the documentation lists the places where expansion applies: `headers` (\"for HTTP server authentication\")."
+          },
+          {
+            "id": "c",
+            "text": "Claude Code reads names of this kind, which carry sign-in secrets, as empty",
+            "correct": true,
+            "says": "Credential names such as this one read as empty toward a remote endpoint."
+          },
+          {
+            "id": "d",
+            "text": "A variable in a header needs a fallback after the colon and dash before use",
+            "correct": false,
+            "says": "Ruled out because a default is optional, and the plain form works: \"expands to the value of environment variable\"."
+          }
+        ],
+        "origin": {
+          "path": "course/55-mcp-in-claude-code/01-scopes-the-project-file-and-environment-expansion.md",
+          "section": "Who approves a project server"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A developer needs an integration that signs in with a personal account's token. It should exist in this repository only, and the token must never reach teammates through version control. Where should it be registered?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Local scope, the default for a newly added server",
+            "correct": true,
+            "says": "Local scope is the default and belongs to its owner and that one project. The guide names user-level scope for personal servers, and the product has a third scope between the two, which is the one that fits a single repository."
+          },
+          {
+            "id": "b",
+            "text": "Project scope, kept in the shared `.mcp.json` file",
+            "correct": false,
+            "says": "Ruled out because \"Selecting the wrong scope for a personal tool can leak credentials into a shared repo\"."
+          },
+          {
+            "id": "c",
+            "text": "User scope, which loads the server in every project",
+            "correct": false,
+            "says": "Ruled out because user scope is for \"services you frequently use across different projects\", which is wider than this repository."
+          },
+          {
+            "id": "d",
+            "text": "The local settings file, kept inside the repository",
+            "correct": false,
+            "says": "Ruled out because that file holds settings and not servers: \"while the general local settings file is `.claude/settings.local.json` in the project\"."
+          }
+        ],
+        "origin": {
+          "path": "course/55-mcp-in-claude-code/01-scopes-the-project-file-and-environment-expansion.md",
+          "section": "Three scopes: who loads it and who shares it"
+        }
+      }
+    ]
+  }
+}

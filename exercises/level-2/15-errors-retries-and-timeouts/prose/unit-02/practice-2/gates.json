@@ -1,0 +1,120 @@
+{
+  "gates_api": 1,
+  "inputs": [
+    {
+      "role": "statement",
+      "path": "statement.md",
+      "digest": "sha256:c0678a7ef06cc5d70bfa813d6a7b4442798952cfef1d55e0c18bddd01537ce30"
+    },
+    {
+      "role": "starter",
+      "path": "starter/retry.ts",
+      "digest": "sha256:78d12ae7260e6b5909cc1f5c974e5d3d38fbceffd4dcabfd7cbc8f277c6e8012"
+    },
+    {
+      "role": "reference",
+      "path": "reference/retry.ts",
+      "digest": "sha256:35a0d0257af3c686f7d9831db6389848dc78009199add298522c575d5ea3ba4e"
+    },
+    {
+      "role": "starter:try-it.ts",
+      "path": "starter/try-it.ts",
+      "digest": "sha256:ac1f22c9e39b5226771d25180f4c899bf8ce408c13df40a9ae14f271134443d1"
+    },
+    {
+      "role": "reference:try-it.ts",
+      "path": "reference/try-it.ts",
+      "digest": "sha256:ac1f22c9e39b5226771d25180f4c899bf8ce408c13df40a9ae14f271134443d1"
+    },
+    {
+      "role": "tests",
+      "path": "tests/retry.test.ts",
+      "digest": "sha256:c50614ae449a38b5e24fd6c730510d07283e82f493447fe3689cff952b6f517f"
+    },
+    {
+      "role": "plant:e1 client errors are not retried",
+      "path": "plants/edge-1/retry.ts.plant.json",
+      "digest": "sha256:85ce257e77caff7f6169c4f72cf4b8f95b0ba6b1813eaea67823200b911bb29f"
+    },
+    {
+      "role": "plant:e2 retry after is a floor for the wait",
+      "path": "plants/edge-2/retry.ts.plant.json",
+      "digest": "sha256:dd1f60b09a4b98451bf17f2f8642c72a3e9aab3753e2ca65be0cc646bcb31b27"
+    },
+    {
+      "role": "plant:e3 delay doubles up to the cap and the jitter is applied last",
+      "path": "plants/edge-3/retry.ts.plant.json",
+      "digest": "sha256:2c88cb793f33ed1f26d7a26937d3a7c914644bbc9476d892ae005250a00aec75"
+    },
+    {
+      "role": "plant:e4 a spend cap 429 is not retried",
+      "path": "plants/edge-4/retry.ts.plant.json",
+      "digest": "sha256:68670f3b939c798eac7fd40749d347ceeff9c3bbc94a6e126b96397aab2fc155"
+    },
+    {
+      "role": "plant:e5 connection errors are retried like server errors",
+      "path": "plants/edge-5/retry.ts.plant.json",
+      "digest": "sha256:e179d8000deb338b1913cbf7ee5fdbbadc351c289835f68a5328dfcf6211975f"
+    },
+    {
+      "role": "plant:e6 giving up reports the last reply and does not wait after the last attempt",
+      "path": "plants/edge-6/retry.ts.plant.json",
+      "digest": "sha256:d14b062a02601e4f83d6f9756b1429f2e5de7f581453156a4c7aa58fab437417"
+    },
+    {
+      "role": "build:junit-file.mjs",
+      "path": "build/junit-file.mjs",
+      "digest": "sha256:eebbfd3bebdf18b0d715903d01abac0b7199da78c76c588b50c0c40352614cef"
+    },
+    {
+      "role": "build:logger.ts",
+      "path": "build/logger.ts",
+      "digest": "sha256:ee4ada918729a2eb77f3d514a0acf59bad03b63ca373a3a7b92f86d95f23197d"
+    }
+  ],
+  "origins": [
+    {
+      "role": "origin",
+      "path": "course/15-errors-retries-and-timeouts/02-retry-back-off-and-idempotency.md",
+      "section": null,
+      "digest": "sha256:3e0c11c57d619e22e35e3c164d4790c2acda7921223617f02b7d1e2d75838f15"
+    }
+  ],
+  "gates": [
+    {
+      "id": "G1",
+      "family": "code",
+      "held": true,
+      "says": "all 7 cases passed on the reference, on two runs alike",
+      "recorded": {}
+    },
+    {
+      "id": "G2",
+      "family": "code",
+      "held": true,
+      "says": "none of the 7 cases passed on the starter",
+      "recorded": {}
+    },
+    {
+      "id": "G3",
+      "family": "code",
+      "held": true,
+      "says": "each of the 6 edge cases was caught by its own plant",
+      "recorded": {}
+    },
+    {
+      "id": "G4",
+      "family": "code",
+      "held": true,
+      "says": "every test the report named mapped to one of the 7 cases, and every case was named",
+      "recorded": {}
+    },
+    {
+      "id": "G5",
+      "family": "code",
+      "held": true,
+      "says": "the cited passage of 'course/15-errors-retries-and-timeouts/02-retry-back-off-and-idempotency.md' still matches the ledger",
+      "recorded": {}
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "bundle_api": 1,
+  "address": [
+    "level-2",
+    "41-security-and-safety"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 3,
+  "title": "Practice: an injection-resistant tool gate (Java)",
+  "lang": "java",
+  "main_file": "src/main/java/Gate.java",
+  "files": [
+    "src/main/java/TryIt.java"
+  ],
+  "test_file": "src/test/java/GateTest.java",
+  "build": [
+    "src/main/java/Json.java",
+    "build.gradle.kts",
+    "settings.gradle.kts",
+    "src/test/java/studyforge/StudyforgeLog.java",
+    "src/test/resources/junit-platform.properties",
+    "src/test/resources/META-INF/services/org.junit.jupiter.api.extension.Extension"
+  ],
+  "run_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/41-security-and-safety/prose/unit-03/practice-3",
+    "tryIt"
+  ],
+  "test_command": [
+    "gradle",
+    "--offline",
+    "-q",
+    "-p",
+    "practice/level-2/41-security-and-safety/prose/unit-03/practice-3",
+    "cleanTest",
+    "test"
+  ],
+  "provenance": "generated",
+  "trust": "advisory",
+  "cases": [
+    {
+      "id": "m1_untrustedTextReachesTheModelOnlyAsOneJsonStringThatSaysWhereItCameFrom()",
+      "kind": "main",
+      "says": "Untrusted text is delivered as one JSON string that names its source and says it is untrusted"
+    },
+    {
+      "id": "e1_aScreenNamesInjectionSignalsAndAFlaggedResultIsWithheldWithAnError()",
+      "kind": "edge",
+      "says": "The screen names the signals, ignores clean text, and a flagged result is withheld with an error that shows none of the text"
+    },
+    {
+      "id": "e2_readsAndWritesStayInsideTheProjectAndAwayFromSecretsAndProtectedFolders()",
+      "kind": "edge",
+      "says": "Paths stay inside the project, secrets and protected folders are refused, a sibling folder with a similar name is outside"
+    },
+    {
+      "id": "e3_bashIsLimitedToAFewReadOnlyCommandsAndDangerousOrChainedOnesAreRefused()",
+      "kind": "edge",
+      "says": "Bash is limited to read-only commands; dangerous, chained and redirected commands and secret arguments are refused"
+    },
+    {
+      "id": "e4_fetchAndEmailObeyTheHostAndDomainListsAndRefuseCredentialsInAUrl()",
+      "kind": "edge",
+      "says": "Fetch obeys the host list (a lookalike host fails) and refuses credentials; email obeys the domain list and the body check"
+    },
+    {
+      "id": "e5_onceUntrustedContentIsInTheSessionAnythingThatChangesThingsAsksOrIsRefused()",
+      "kind": "edge",
+      "says": "After untrusted content entered the session, changes ask, an email is refused, reads still work, and a denial stays a denial"
+    },
+    {
+      "id": "e6_secretsCardNumbersAndAddressesAreRedactedInTextAndInTheAudit()",
+      "kind": "edge",
+      "says": "Redaction covers keys, addresses and Luhn-valid cards, leaves other numbers, and the audit never holds a raw secret"
+    },
+    {
+      "id": "e7_theHookAnswerFollowsTheDocumentedShapesAndRepeatedDenialsRaiseAnAlert()",
+      "kind": "edge",
+      "says": "The hook answer has the documented shapes and repeated denials by one actor raise an alert, while questions do not"
+    }
+  ],
+  "report": {
+    "format": "junit",
+    "path": "target/test-results/test"
+  },
+  "origin": "course/41-security-and-safety/03-guardrails-monitoring-and-the-practice.md"
+}

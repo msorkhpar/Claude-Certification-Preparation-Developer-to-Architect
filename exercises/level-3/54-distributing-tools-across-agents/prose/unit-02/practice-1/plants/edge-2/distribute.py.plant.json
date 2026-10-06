@@ -1,0 +1,10 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "distribute.py",
+      "old": "            if extra not in names:\n                names.append(extra)\n",
+      "new": "            if extra not in names and (tags & set(tool.get(\"tags\", [])) or not tool.get(\"irreversible\")):\n                names.append(extra)\n"
+    }
+  ]
+}

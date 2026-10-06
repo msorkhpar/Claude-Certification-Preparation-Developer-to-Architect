@@ -1,0 +1,449 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "93-professional-capstone"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: a launch review (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a launch review"
+    },
+    {
+      "type": "para",
+      "text": "A team brings a design to the architecture board: a claims assistant that reads policy documents, answers customers and passes the costly decisions to a person. The board does not read the whole design again each time. It runs a review that turns the design into findings, groups them by the seven domains of the Professional exam and returns one verdict. In this practice you write that review. The model is not called: the tests give you a design as a set of facts (flags) and a set of numbers, and you return findings. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`launch_review`, `verdict`, `scorecard`, `needed_accuracy`); TypeScript has the camel-case names (`launchReview`, `neededAccuracy`); Java has the same camel-case names as static methods of `LaunchReview`; Kotlin has top-level functions. The flags are a set of strings and the numbers are a map from a name to a whole number; a missing number counts as 0."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working review with eight gaps cut out of it. The plumbing is written: the `add` function that records a finding, the call of every domain's rules in turn, and the rules of the domains P2, P6 and P7. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks; a gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_p1_rules` unlocks `e1`, `e4` and `e7`: the three rules of domain P1.",
+        "`_p3_rules` unlocks `e4` and `e8`: the four rules of domain P3.",
+        "`_p4_rules` unlocks `e1`, `e3` and `e4`: the four rules of domain P4.",
+        "`_p5_rules` unlocks `e4`, `e7` and `e8`: the five rules of domain P5.",
+        "`_order` unlocks `e3`: severity, then domain, then rule id.",
+        "`verdict` unlocks `e1` and `e2`: reject, revise or approve.",
+        "`scorecard` unlocks `e5`: the seven domain counts.",
+        "`needed_accuracy` unlocks `m1` and `e6`: the break-even accuracy, rounded up on the cost side."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all. The sections below describe the whole review."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`launch_review(flags, numbers)` returns the findings, each a string `<severity> <domain> <rule>` such as `high P1 missing-feedback`. The findings run from high to medium to low, then by domain (P1 to P7), then by rule id in alphabetical order. The 22 rules are in the table below.",
+        "`verdict(findings)` returns `reject` when any finding is high, `revise` when none is high and any is medium, and `approve` otherwise, so a design with only low findings is approved.",
+        "`scorecard(findings)` returns a list of seven counts, the findings of P1, P2, P3, P4, P5, P6 and P7 in that order.",
+        "`needed_accuracy(error_cost, review_cost)` returns the accuracy in whole percent above which a design should let answers go out without a check: 100 minus the review cost as a percent of the error cost, with that percent rounded up, and never below 0. It returns 0 when an error costs nothing or less."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The rules"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Domain",
+        "Rule id",
+        "Severity",
+        "Fires when"
+      ],
+      "rows": [
+        [
+          "P1",
+          "`missing-feedback`",
+          "high",
+          "the flag `feedback_loop` is absent"
+        ],
+        [
+          "P1",
+          "`autonomy-without-need`",
+          "medium",
+          "`agent` or `team` is present and `path_known` is present"
+        ],
+        [
+          "P1",
+          "`team-below-price`",
+          "medium",
+          "`team` is present and `team_value_chats` is below 15"
+        ],
+        [
+          "P2",
+          "`volatile-prefix`",
+          "medium",
+          "`volatile_prefix` is present"
+        ],
+        [
+          "P2",
+          "`model-not-measured`",
+          "low",
+          "`model_measured` is absent"
+        ],
+        [
+          "P3",
+          "`filter-after-ranking`",
+          "high",
+          "`filter_after_ranking` is present"
+        ],
+        [
+          "P3",
+          "`stale-index`",
+          "high",
+          "`replace_on_change` is absent"
+        ],
+        [
+          "P3",
+          "`tool-bloat`",
+          "medium",
+          "`tool_tokens` is above 10000 and `deferral` is absent"
+        ],
+        [
+          "P3",
+          "`agent-rights-only`",
+          "high",
+          "`agent_rights_only` is present"
+        ],
+        [
+          "P4",
+          "`no-protected-segment`",
+          "medium",
+          "`protected_segment` is absent"
+        ],
+        [
+          "P4",
+          "`small-eval-set`",
+          "low",
+          "`eval_cases` is below 20"
+        ],
+        [
+          "P4",
+          "`no-way-back`",
+          "high",
+          "`rollback` is absent"
+        ],
+        [
+          "P4",
+          "`big-bang-rollout`",
+          "medium",
+          "`rollout_stages` is below 3"
+        ],
+        [
+          "P5",
+          "`identifiers-reach-model`",
+          "high",
+          "`pii_reaches_model` is present"
+        ],
+        [
+          "P5",
+          "`residency-unmet`",
+          "high",
+          "`residency_unmet` is present"
+        ],
+        [
+          "P5",
+          "`audit-keeps-content`",
+          "medium",
+          "`audit_keeps_content` is present"
+        ],
+        [
+          "P5",
+          "`irreversible-without-person`",
+          "high",
+          "`irreversible_action` is present and `human_step` is absent"
+        ],
+        [
+          "P5",
+          "`retention-outside-window`",
+          "medium",
+          "`retain_days` is below `floor_days` or above `ceiling_days`"
+        ],
+        [
+          "P6",
+          "`no-accountable-owner`",
+          "medium",
+          "`owner` is absent"
+        ],
+        [
+          "P6",
+          "`sla-without-numbers`",
+          "medium",
+          "`latency_ms` is 0 or less, or `availability_tenths` is 0 or less"
+        ],
+        [
+          "P6",
+          "`accuracy-unstated`",
+          "low",
+          "`accuracy_stated` is absent"
+        ],
+        [
+          "P7",
+          "`unmanaged-team-settings`",
+          "medium",
+          "`team_size` is above 10 and `managed_settings` is absent"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why each part is there, and what you should see"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**A design at the limits.** *You should see* a design that sits exactly on every threshold get no findings and an approval.",
+        "**High findings.** *You should see* one missing feedback loop, one filter after ranking or one missing way back reject the design.",
+        "**The verdict ladder.** *You should see* a medium finding ask for a revision and low findings alone pass.",
+        "**A stable order.** *You should see* severity first, then domain, then rule id, so two reviews of the same design read the same.",
+        "**Thresholds with an edge.** *You should see* each number pass exactly at its value and fail one step beyond it.",
+        "**The scorecard.** *You should see* the seven counts, with zero for a domain that has no finding.",
+        "**The accuracy a design needs.** *You should see* 98 for an error that costs 250 against a check that costs 5, 66 when three is the error cost and one the check, and 0 when a check costs as much as an error.",
+        "**Rules with a second fact.** *You should see* a rule stay quiet when its second fact is missing.",
+        "**Every flaw at once.** *You should see* all 22 findings for a design that breaks every rule."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "A design that sits exactly at every threshold has no findings and is approved"
+        ],
+        [
+          "`e1`",
+          "A missing feedback loop, a filter after ranking or no way back is a high finding and the design is rejected"
+        ],
+        [
+          "`e2`",
+          "Medium findings revise the design and low findings alone approve it"
+        ],
+        [
+          "`e3`",
+          "Findings are ordered by severity, then domain, then rule id"
+        ],
+        [
+          "`e4`",
+          "Each numeric threshold passes exactly at its value and fails one step beyond"
+        ],
+        [
+          "`e5`",
+          "The scorecard counts the findings of each domain from P1 to P7"
+        ],
+        [
+          "`e6`",
+          "The accuracy a design needs is the break-even rounded up from the two costs"
+        ],
+        [
+          "`e7`",
+          "Rules that depend on a second fact fire only when both hold"
+        ],
+        [
+          "`e8`",
+          "Retrieval and privacy flaws are high findings in domains P3 and P5"
+        ],
+        [
+          "`e9`",
+          "A design with every flaw gets all 22 findings and a scorecard that adds up"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.Comparator;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\n\n/** Launch review: the findings of a design against the seven domains, the verdict, the scorecard and the accuracy a design needs. See ../../statement.md. */\nfinal class LaunchReview {\n    private static final System.Logger LOG = System.getLogger(LaunchReview.class.getName());\n    private LaunchReview() {}\n\n    private static final Map<String, Integer> SEVERITY = Map.of(\"high\", 0, \"medium\", 1, \"low\", 2);\n    private static final List<String> DOMAINS = List.of(\"P1\", \"P2\", \"P3\", \"P4\", \"P5\", \"P6\", \"P7\");\n\n    private static void add(List<String> found, boolean condition, String severity, String domain, String rule) {\n        if (condition) found.add(severity + \" \" + domain + \" \" + rule);\n    }\n\n    private static void p1Rules(List<String> found, Set<String> f, Map<String, Integer> n) {\n        add(found, !f.contains(\"feedback_loop\"), \"high\", \"P1\", \"missing-feedback\");\n        add(found, (f.contains(\"agent\") || f.contains(\"team\")) && f.contains(\"path_known\"), \"medium\", \"P1\", \"autonomy-without-need\");\n        add(found, f.contains(\"team\") && n.getOrDefault(\"team_value_chats\", 0) < 15, \"medium\", \"P1\", \"team-below-price\");\n    }\n\n    private static void p3Rules(List<String> found, Set<String> f, Map<String, Integer> n) {\n        add(found, f.contains(\"filter_after_ranking\"), \"high\", \"P3\", \"filter-after-ranking\");\n        add(found, !f.contains(\"replace_on_change\"), \"high\", \"P3\", \"stale-index\");\n        add(found, n.getOrDefault(\"tool_tokens\", 0) > 10000 && !f.contains(\"deferral\"), \"medium\", \"P3\", \"tool-bloat\");\n        add(found, f.contains(\"agent_rights_only\"), \"high\", \"P3\", \"agent-rights-only\");\n    }\n\n    private static void p4Rules(List<String> found, Set<String> f, Map<String, Integer> n) {\n        add(found, !f.contains(\"protected_segment\"), \"medium\", \"P4\", \"no-protected-segment\");\n        add(found, n.getOrDefault(\"eval_cases\", 0) < 20, \"low\", \"P4\", \"small-eval-set\");\n        add(found, !f.contains(\"rollback\"), \"high\", \"P4\", \"no-way-back\");\n        add(found, n.getOrDefault(\"rollout_stages\", 0) < 3, \"medium\", \"P4\", \"big-bang-rollout\");\n    }\n\n    private static void p5Rules(List<String> found, Set<String> f, Map<String, Integer> n) {\n        add(found, f.contains(\"pii_reaches_model\"), \"high\", \"P5\", \"identifiers-reach-model\");\n        add(found, f.contains(\"residency_unmet\"), \"high\", \"P5\", \"residency-unmet\");\n        add(found, f.contains(\"audit_keeps_content\"), \"medium\", \"P5\", \"audit-keeps-content\");\n        add(found, f.contains(\"irreversible_action\") && !f.contains(\"human_step\"), \"high\", \"P5\", \"irreversible-without-person\");\n        add(found, n.getOrDefault(\"retain_days\", 0) < n.getOrDefault(\"floor_days\", 0) || n.getOrDefault(\"retain_days\", 0) > n.getOrDefault(\"ceiling_days\", 0), \"medium\", \"P5\", \"retention-outside-window\");\n    }\n\n    private static void p2Rules(List<String> found, Set<String> f, Map<String, Integer> n) {\n        add(found, f.contains(\"volatile_prefix\"), \"medium\", \"P2\", \"volatile-prefix\");\n        add(found, !f.contains(\"model_measured\"), \"low\", \"P2\", \"model-not-measured\");\n    }\n\n    private static void p6Rules(List<String> found, Set<String> f, Map<String, Integer> n) {\n        add(found, !f.contains(\"owner\"), \"medium\", \"P6\", \"no-accountable-owner\");\n        add(found, n.getOrDefault(\"latency_ms\", 0) <= 0 || n.getOrDefault(\"availability_tenths\", 0) <= 0, \"medium\", \"P6\", \"sla-without-numbers\");\n        add(found, !f.contains(\"accuracy_stated\"), \"low\", \"P6\", \"accuracy-unstated\");\n    }\n\n    private static void p7Rules(List<String> found, Set<String> f, Map<String, Integer> n) {\n        add(found, n.getOrDefault(\"team_size\", 0) > 10 && !f.contains(\"managed_settings\"), \"medium\", \"P7\", \"unmanaged-team-settings\");\n    }\n\n    private static List<String> order(List<String> found) {\n        found.sort(Comparator.comparing((String s) -> SEVERITY.get(s.split(\" \")[0])).thenComparing(s -> s.split(\" \")[1]).thenComparing(s -> s.split(\" \")[2]));\n        return found;\n    }\n\n    /** The findings, each \"<severity> <domain> <rule>\", high first, then by domain, then by rule. */\n    static List<String> launchReview(Set<String> f, Map<String, Integer> n) {\n        LOG.log(System.Logger.Level.DEBUG, \"launchReview input: {0}\", f);\n        List<String> found = new ArrayList<>();\n        p1Rules(found, f, n);\n        p2Rules(found, f, n);\n        p3Rules(found, f, n);\n        p4Rules(found, f, n);\n        p5Rules(found, f, n);\n        p6Rules(found, f, n);\n        p7Rules(found, f, n);\n        return order(found);\n    }\n\n    /** reject for any high finding, revise for any medium one, otherwise approve. */\n    static String verdict(List<String> findings) {\n        if (findings.stream().anyMatch(x -> x.startsWith(\"high \"))) return \"reject\";\n        if (findings.stream().anyMatch(x -> x.startsWith(\"medium \"))) return \"revise\";\n        return \"approve\";\n    }\n\n    /** The number of findings in each domain, P1 to P7. */\n    static List<Integer> scorecard(List<String> findings) {\n        List<Integer> out = new ArrayList<>();\n        for (String d : DOMAINS) out.add((int) findings.stream().filter(x -> x.split(\" \")[1].equals(d)).count());\n        return out;\n    }\n\n    /** The break-even accuracy in whole percent, rounded up on the cost side; 0 when an error costs nothing or no more than a check. */\n    static int neededAccuracy(int errorCost, int reviewCost) {\n        if (errorCost <= 0) return 0;\n        int needed = (100 * reviewCost + errorCost - 1) / errorCost;\n        return Math.max(0, 100 - needed);\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.*;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // A design that sits at every threshold of the review, as the tests' clean design does.\n        Set<String> cleanFlags = new LinkedHashSet<>(List.of(\"feedback_loop\", \"model_measured\", \"replace_on_change\", \"deferral\", \"protected_segment\", \"rollback\",\n            \"human_step\", \"owner\", \"accuracy_stated\", \"managed_settings\", \"irreversible_action\", \"team\"));\n        Map<String, Integer> numbers = Map.of(\"team_value_chats\", 15, \"tool_tokens\", 10000, \"eval_cases\", 20, \"rollout_stages\", 3, \"retain_days\", 365,\n            \"floor_days\", 90, \"ceiling_days\", 365, \"team_size\", 10, \"latency_ms\", 2000, \"availability_tenths\", 995);\n\n        List<String> findings = LaunchReview.launchReview(cleanFlags, numbers);\n        System.out.println(\"clean design: \" + findings + \" -> \" + LaunchReview.verdict(findings));\n\n        // The same design with an agent that does not need to be one, and PII reaching the model.\n        Set<String> riskyFlags = new LinkedHashSet<>(cleanFlags);\n        riskyFlags.addAll(List.of(\"agent\", \"path_known\", \"pii_reaches_model\"));\n        List<String> risky = LaunchReview.launchReview(riskyFlags, numbers);\n        System.out.println(\"risky design: \" + risky + \" -> \" + LaunchReview.verdict(risky));\n        System.out.println(\"findings per domain: \" + LaunchReview.scorecard(risky));\n        System.out.println(\"accuracy needed when an error costs 250 and a review 5: \" + LaunchReview.neededAccuracy(250, 5));\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.ArrayList;\nimport java.util.Comparator;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\n\n/** Launch review: the findings of a design against the seven domains, the verdict, the scorecard and the accuracy a design needs. See ../../statement.md. */\nfinal class LaunchReview {\n    private static final System.Logger LOG = System.getLogger(LaunchReview.class.getName());\n    private LaunchReview() {}\n\n    private static final Map<String, Integer> SEVERITY = Map.of(\"high\", 0, \"medium\", 1, \"low\", 2);\n    private static final List<String> DOMAINS = List.of(\"P1\", \"P2\", \"P3\", \"P4\", \"P5\", \"P6\", \"P7\");\n\n    private static void add(List<String> found, boolean condition, String severity, String domain, String rule) {\n        if (condition) found.add(severity + \" \" + domain + \" \" + rule);\n    }\n\n    /**\n     * TODO 1 of 8 (unlocks e1, e4 and e7): the rules of domain P1.\n     * Receives the flags and the numbers and reports each rule it finds through `add`. The rules: missing-feedback, autonomy-without-need and team-below-price from the statement's table. Example: missing-feedback: the flag feedback_loop is absent -> one finding `high P1 missing-feedback`.\n     */\n    private static void p1Rules(List<String> found, Set<String> f, Map<String, Integer> n) {\n    }\n\n    /**\n     * TODO 2 of 8 (unlocks e4 and e8): the rules of domain P3.\n     * Receives the flags and the numbers and reports each rule it finds through `add`. The rules: filter-after-ranking, stale-index, tool-bloat and agent-rights-only. Example: stale-index: the flag replace_on_change is absent -> one finding `high P3 stale-index`.\n     */\n    private static void p3Rules(List<String> found, Set<String> f, Map<String, Integer> n) {\n    }\n\n    /**\n     * TODO 3 of 8 (unlocks e1, e3 and e4): the rules of domain P4.\n     * Receives the flags and the numbers and reports each rule it finds through `add`. The rules: no-protected-segment, small-eval-set, no-way-back and big-bang-rollout. Example: no-way-back: the flag rollback is absent -> one finding `high P4 no-way-back`.\n     */\n    private static void p4Rules(List<String> found, Set<String> f, Map<String, Integer> n) {\n    }\n\n    /**\n     * TODO 4 of 8 (unlocks e4, e7 and e8): the rules of domain P5.\n     * Receives the flags and the numbers and reports each rule it finds through `add`. The rules: identifiers-reach-model, residency-unmet, audit-keeps-content, irreversible-without-person and retention-outside-window. Example: irreversible-without-person: irreversible_action present and human_step absent -> `high P5 irreversible-without-person`.\n     */\n    private static void p5Rules(List<String> found, Set<String> f, Map<String, Integer> n) {\n    }\n\n    private static void p2Rules(List<String> found, Set<String> f, Map<String, Integer> n) {\n        add(found, f.contains(\"volatile_prefix\"), \"medium\", \"P2\", \"volatile-prefix\");\n        add(found, !f.contains(\"model_measured\"), \"low\", \"P2\", \"model-not-measured\");\n    }\n\n    private static void p6Rules(List<String> found, Set<String> f, Map<String, Integer> n) {\n        add(found, !f.contains(\"owner\"), \"medium\", \"P6\", \"no-accountable-owner\");\n        add(found, n.getOrDefault(\"latency_ms\", 0) <= 0 || n.getOrDefault(\"availability_tenths\", 0) <= 0, \"medium\", \"P6\", \"sla-without-numbers\");\n        add(found, !f.contains(\"accuracy_stated\"), \"low\", \"P6\", \"accuracy-unstated\");\n    }\n\n    private static void p7Rules(List<String> found, Set<String> f, Map<String, Integer> n) {\n        add(found, n.getOrDefault(\"team_size\", 0) > 10 && !f.contains(\"managed_settings\"), \"medium\", \"P7\", \"unmanaged-team-settings\");\n    }\n\n    /**\n     * TODO 5 of 8 (unlocks e3): order the findings.\n     * Receives the findings. Returns them ordered by severity (high, medium, low), then by domain, then by rule id in alphabetical order. Example: low P2 a, high P6 z, high P1 y -> high P1 y, high P6 z, low P2 a\n     */\n    private static List<String> order(List<String> found) {\n        return found;\n    }\n\n    /** The findings, each \"<severity> <domain> <rule>\", high first, then by domain, then by rule. */\n    static List<String> launchReview(Set<String> f, Map<String, Integer> n) {\n        LOG.log(System.Logger.Level.DEBUG, \"launchReview input: {0}\", f);\n        List<String> found = new ArrayList<>();\n        p1Rules(found, f, n);\n        p2Rules(found, f, n);\n        p3Rules(found, f, n);\n        p4Rules(found, f, n);\n        p5Rules(found, f, n);\n        p6Rules(found, f, n);\n        p7Rules(found, f, n);\n        return order(found);\n    }\n\n    /**\n     * TODO 6 of 8 (unlocks e1 and e2): the verdict.\n     * Receives the findings. Returns `reject` when any is high, `revise` when none is high and any is medium, `approve` otherwise. Example: [low P2 a] -> approve\n     */\n    static String verdict(List<String> findings) {\n        return \"\";\n    }\n\n    /**\n     * TODO 7 of 8 (unlocks e5): the scorecard.\n     * Receives the findings. Returns the seven counts of the findings of P1 to P7 in that order. Example: [high P1 a, low P7 c] -> [1, 0, 0, 0, 0, 0, 1]\n     */\n    static List<Integer> scorecard(List<String> findings) {\n        return List.of();\n    }\n\n    /**\n     * TODO 8 of 8 (unlocks m1 and e6): the accuracy a design needs.\n     * Receives the cost of an error and the cost of a check. Returns 100 minus the check cost as a percent of the error cost, the percent rounded up, never below 0, and 0 when an error costs nothing or less. Example: neededAccuracy(250, 5) -> 98\n     */\n    static int neededAccuracy(int errorCost, int reviewCost) {\n        return -1;\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.*;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        // A design that sits at every threshold of the review, as the tests' clean design does.\n        Set<String> cleanFlags = new LinkedHashSet<>(List.of(\"feedback_loop\", \"model_measured\", \"replace_on_change\", \"deferral\", \"protected_segment\", \"rollback\",\n            \"human_step\", \"owner\", \"accuracy_stated\", \"managed_settings\", \"irreversible_action\", \"team\"));\n        Map<String, Integer> numbers = Map.of(\"team_value_chats\", 15, \"tool_tokens\", 10000, \"eval_cases\", 20, \"rollout_stages\", 3, \"retain_days\", 365,\n            \"floor_days\", 90, \"ceiling_days\", 365, \"team_size\", 10, \"latency_ms\", 2000, \"availability_tenths\", 995);\n\n        List<String> findings = LaunchReview.launchReview(cleanFlags, numbers);\n        System.out.println(\"clean design: \" + findings + \" -> \" + LaunchReview.verdict(findings));\n\n        // The same design with an agent that does not need to be one, and PII reaching the model.\n        Set<String> riskyFlags = new LinkedHashSet<>(cleanFlags);\n        riskyFlags.addAll(List.of(\"agent\", \"path_known\", \"pii_reaches_model\"));\n        List<String> risky = LaunchReview.launchReview(riskyFlags, numbers);\n        System.out.println(\"risky design: \" + risky + \" -> \" + LaunchReview.verdict(risky));\n        System.out.println(\"findings per domain: \" + LaunchReview.scorecard(risky));\n        System.out.println(\"accuracy needed when an error costs 250 and a review 5: \" + LaunchReview.neededAccuracy(250, 5));\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 9,
+    "paras": 5,
+    "code": 2,
+    "tables": 2,
+    "lists": 3,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "8e2f127603cfad00eb52429a140932d28eb71092e2de1ac1012a9f561893df71",
+  "starting_code": "import java.util.ArrayList;\nimport java.util.Comparator;\nimport java.util.List;\nimport java.util.Map;\nimport java.util.Set;\n\n/** Launch review: the findings of a design against the seven domains, the verdict, the scorecard and the accuracy a design needs. See ../../statement.md. */\nfinal class LaunchReview {\n    private static final System.Logger LOG = System.getLogger(LaunchReview.class.getName());\n    private LaunchReview() {}\n\n    private static final Map<String, Integer> SEVERITY = Map.of(\"high\", 0, \"medium\", 1, \"low\", 2);\n    private static final List<String> DOMAINS = List.of(\"P1\", \"P2\", \"P3\", \"P4\", \"P5\", \"P6\", \"P7\");\n\n    private static void add(List<String> found, boolean condition, String severity, String domain, String rule) {\n        if (condition) found.add(severity + \" \" + domain + \" \" + rule);\n    }\n\n    /**\n     * TODO 1 of 8 (unlocks e1, e4 and e7): the rules of domain P1.\n     * Receives the flags and the numbers and reports each rule it finds through `add`. The rules: missing-feedback, autonomy-without-need and team-below-price from the statement's table. Example: missing-feedback: the flag feedback_loop is absent -> one finding `high P1 missing-feedback`.\n     */\n    private static void p1Rules(List<String> found, Set<String> f, Map<String, Integer> n) {\n    }\n\n    /**\n     * TODO 2 of 8 (unlocks e4 and e8): the rules of domain P3.\n     * Receives the flags and the numbers and reports each rule it finds through `add`. The rules: filter-after-ranking, stale-index, tool-bloat and agent-rights-only. Example: stale-index: the flag replace_on_change is absent -> one finding `high P3 stale-index`.\n     */\n    private static void p3Rules(List<String> found, Set<String> f, Map<String, Integer> n) {\n    }\n\n    /**\n     * TODO 3 of 8 (unlocks e1, e3 and e4): the rules of domain P4.\n     * Receives the flags and the numbers and reports each rule it finds through `add`. The rules: no-protected-segment, small-eval-set, no-way-back and big-bang-rollout. Example: no-way-back: the flag rollback is absent -> one finding `high P4 no-way-back`.\n     */\n    private static void p4Rules(List<String> found, Set<String> f, Map<String, Integer> n) {\n    }\n\n    /**\n     * TODO 4 of 8 (unlocks e4, e7 and e8): the rules of domain P5.\n     * Receives the flags and the numbers and reports each rule it finds through `add`. The rules: identifiers-reach-model, residency-unmet, audit-keeps-content, irreversible-without-person and retention-outside-window. Example: irreversible-without-person: irreversible_action present and human_step absent -> `high P5 irreversible-without-person`.\n     */\n    private static void p5Rules(List<String> found, Set<String> f, Map<String, Integer> n) {\n    }\n\n    private static void p2Rules(List<String> found, Set<String> f, Map<String, Integer> n) {\n        add(found, f.contains(\"volatile_prefix\"), \"medium\", \"P2\", \"volatile-prefix\");\n        add(found, !f.contains(\"model_measured\"), \"low\", \"P2\", \"model-not-measured\");\n    }\n\n    private static void p6Rules(List<String> found, Set<String> f, Map<String, Integer> n) {\n        add(found, !f.contains(\"owner\"), \"medium\", \"P6\", \"no-accountable-owner\");\n        add(found, n.getOrDefault(\"latency_ms\", 0) <= 0 || n.getOrDefault(\"availability_tenths\", 0) <= 0, \"medium\", \"P6\", \"sla-without-numbers\");\n        add(found, !f.contains(\"accuracy_stated\"), \"low\", \"P6\", \"accuracy-unstated\");\n    }\n\n    private static void p7Rules(List<String> found, Set<String> f, Map<String, Integer> n) {\n        add(found, n.getOrDefault(\"team_size\", 0) > 10 && !f.contains(\"managed_settings\"), \"medium\", \"P7\", \"unmanaged-team-settings\");\n    }\n\n    /**\n     * TODO 5 of 8 (unlocks e3): order the findings.\n     * Receives the findings. Returns them ordered by severity (high, medium, low), then by domain, then by rule id in alphabetical order. Example: low P2 a, high P6 z, high P1 y -> high P1 y, high P6 z, low P2 a\n     */\n    private static List<String> order(List<String> found) {\n        return found;\n    }\n\n    /** The findings, each \"<severity> <domain> <rule>\", high first, then by domain, then by rule. */\n    static List<String> launchReview(Set<String> f, Map<String, Integer> n) {\n        LOG.log(System.Logger.Level.DEBUG, \"launchReview input: {0}\", f);\n        List<String> found = new ArrayList<>();\n        p1Rules(found, f, n);\n        p2Rules(found, f, n);\n        p3Rules(found, f, n);\n        p4Rules(found, f, n);\n        p5Rules(found, f, n);\n        p6Rules(found, f, n);\n        p7Rules(found, f, n);\n        return order(found);\n    }\n\n    /**\n     * TODO 6 of 8 (unlocks e1 and e2): the verdict.\n     * Receives the findings. Returns `reject` when any is high, `revise` when none is high and any is medium, `approve` otherwise. Example: [low P2 a] -> approve\n     */\n    static String verdict(List<String> findings) {\n        return \"\";\n    }\n\n    /**\n     * TODO 7 of 8 (unlocks e5): the scorecard.\n     * Receives the findings. Returns the seven counts of the findings of P1 to P7 in that order. Example: [high P1 a, low P7 c] -> [1, 0, 0, 0, 0, 0, 1]\n     */\n    static List<Integer> scorecard(List<String> findings) {\n        return List.of();\n    }\n\n    /**\n     * TODO 8 of 8 (unlocks m1 and e6): the accuracy a design needs.\n     * Receives the cost of an error and the cost of a check. Returns 100 minus the check cost as a percent of the error cost, the percent rounded up, never below 0, and 0 when an error costs nothing or less. Example: neededAccuracy(250, 5) -> 98\n     */\n    static int neededAccuracy(int errorCost, int reviewCost) {\n        return -1;\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-4/93-professional-capstone/prose/unit-01/practice-3/src/main/java/LaunchReview.java",
+    "test_path": "practice/level-4/93-professional-capstone/prose/unit-01/practice-3/src/test/java/LaunchReviewTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-4/93-professional-capstone/prose/unit-01/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-4/93-professional-capstone/prose/unit-01/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_aDesignThatSitsExactlyAtEveryThresholdHasNoFindingsAndIsApproved()",
+        "kind": "main",
+        "says": "A design that sits exactly at every threshold has no findings and is approved"
+      },
+      {
+        "id": "e1_aMissingFeedbackLoopAFilterAfterRankingOrNoWayBackIsAHighFindingAndTheDesignIsRejected()",
+        "kind": "edge",
+        "says": "A missing feedback loop, a filter after ranking or no way back is a high finding and the design is rejected"
+      },
+      {
+        "id": "e2_mediumFindingsReviseTheDesignAndLowFindingsAloneApproveIt()",
+        "kind": "edge",
+        "says": "Medium findings revise the design and low findings alone approve it"
+      },
+      {
+        "id": "e3_findingsAreOrderedBySeverityThenDomainThenRuleId()",
+        "kind": "edge",
+        "says": "Findings are ordered by severity, then domain, then rule id"
+      },
+      {
+        "id": "e4_eachNumericThresholdPassesExactlyAtItsValueAndFailsOneStepBeyond()",
+        "kind": "edge",
+        "says": "Each numeric threshold passes exactly at its value and fails one step beyond"
+      },
+      {
+        "id": "e5_theScorecardCountsTheFindingsOfEachDomainFromP1ToP7()",
+        "kind": "edge",
+        "says": "The scorecard counts the findings of each domain from P1 to P7"
+      },
+      {
+        "id": "e6_theAccuracyADesignNeedsIsTheBreakEvenRoundedUpFromTheTwoCosts()",
+        "kind": "edge",
+        "says": "The accuracy a design needs is the break-even rounded up from the two costs"
+      },
+      {
+        "id": "e7_rulesThatDependOnASecondFactFireOnlyWhenBothHold()",
+        "kind": "edge",
+        "says": "Rules that depend on a second fact fire only when both hold"
+      },
+      {
+        "id": "e8_retrievalAndPrivacyFlawsAreHighFindingsInDomainsP3AndP5()",
+        "kind": "edge",
+        "says": "Retrieval and privacy flaws are high findings in domains P3 and P5"
+      },
+      {
+        "id": "e9_aDesignWithEveryFlawGetsAll22FindingsAndAScorecardThatAddsUp()",
+        "kind": "edge",
+        "says": "A design with every flaw gets all 22 findings and a scorecard that adds up"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-4/93-professional-capstone/prose/unit-01/practice-3/target/test-results/test"
+    },
+    "origin": "course/93-professional-capstone/01-a-claims-assistant-end-to-end-across-the-seven-domains.md",
+    "concepts": [
+      "the practice of A claims assistant end to end, across the seven domains is solved"
+    ],
+    "files": [
+      "practice/level-4/93-professional-capstone/prose/unit-01/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "professional-capstone-u1"
+}

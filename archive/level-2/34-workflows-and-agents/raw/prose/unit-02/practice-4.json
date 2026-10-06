@@ -1,0 +1,308 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "34-workflows-and-agents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Practice: four workflow patterns around a model (Kotlin)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: four workflow patterns around a model"
+    },
+    {
+      "type": "para",
+      "text": "A workflow is code that decides the steps and calls the model inside them, as opposed to an agent, where the model decides the steps. Most production systems that \"use agents\" are workflows, and the patterns are small enough to write by hand: an orchestrator that splits a task and hands the pieces to workers, an evaluator that sends a draft back until it is good enough, a router that picks a path, and a vote that asks the same question several times. Each has a failure that the plain version hides: a plan the model wrote badly, a worker that fails, a judge that answers in prose, a tie. Write all four, with those failures handled. The patterns come from the Claude documentation and Anthropic's engineering write-up on building effective agents; the lesson pages explain them and what the course checked. Nothing here touches the network: the model is a function from a prompt (text) to a reply (text) that the tests script."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given parts"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`ask`, `write`, `judge`",
+          "the model: a function that takes the prompt text and returns the reply text; it may throw"
+        ],
+        [
+          "`routes`",
+          "a map from a label to a handler, a function of the text that returns text; its key order is the label order"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working set of four workflows with nine small gaps cut out of it. The plumbing is written and correct: the two defensive readers (`_slice`, `parse_plan`, `read_judgement`), the loops, the counting of calls and the results of `orchestrate`, `refine`, `route` and `vote`. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (the TypeScript, Java and Kotlin names are the camel-case forms, `cleanSteps` and so on):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_clean_steps` unlocks `e1`: the string subtasks of the plan, stripped, without empty ones or repeats.",
+        "`_run_worker` unlocks `m1` and `e2`: one worker call that never raises and reports `ok` or `failed`.",
+        "`_combine_prompt` unlocks `m1`: the combine prompt with one line per subtask.",
+        "`_score_ok` unlocks `e4`: which judge scores count (a number from 0 to 10, never a boolean).",
+        "`_writer_prompt` unlocks `e3`: the first prompt, and the revision prompt with the previous draft and the feedback.",
+        "`_is_better` unlocks `e4`: when a draft replaces the best one (strictly higher, so the earliest wins a tie).",
+        "`_error_result` unlocks `e7`: the result when the writer raises.",
+        "`_normalise_label` unlocks `e5`: the label read from the classifier's reply.",
+        "`_pick_winner` unlocks `e6`: the most frequent answer, the first seen on a tie."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About a dozen lines in all. The sections below describe the whole workflows; the parts you do not write are there so you can see how your functions are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "para",
+      "text": "Prompts are part of the contract, so that a test can answer by the start of a prompt. Write them exactly; `\\n` is a newline."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        [
+          "`orchestrate(ask, task, max_subtasks=5)` returns `{\"status\", \"plan\", \"fallback\", \"results\", \"answer\", \"calls\"}`.",
+          {
+            "type": "list",
+            "ordered": true,
+            "items": [
+              "Plan with one call: `Plan: split the task into at most {max_subtasks} independent subtasks. Reply with a JSON array of strings only.\\nTask: {task}`. Read the reply defensively: take the text from the first `[` to the last `]` and parse it. Keep the string items, stripped, dropping empty ones and repeats (the first of a repeat stays), then keep at most `max_subtasks`. When nothing is usable (no array, bad JSON, no string items) the plan is just `[task]` and `fallback` is true.",
+              "Run one worker call per subtask, in order: `Subtask: {subtask}\\nTask: {task}`. A reply that is empty or only spaces, or a call that throws, makes that subtask `{\"subtask\", \"status\": \"failed\", \"error\"}` (the error text is the exception's message, or `empty reply`) and the others still run. A good one is `{\"subtask\", \"status\": \"ok\", \"output\"}`.",
+              "When every subtask failed, do not combine: status `failed`, `answer` null. Otherwise combine with one call, `Combine: write one answer to the task from the results.\\nTask: {task}` followed by one line per subtask in plan order, `\\n{i}. {subtask} -> {output}` or `\\n{i}. {subtask} -> FAILED` (i from 1), and return status `done`, or `partial` when some failed, with the reply as `answer`. `calls` counts every model call made."
+            ]
+          }
+        ],
+        [
+          "`refine(write, judge, task, max_rounds=3, threshold=8)` returns `{\"status\", \"draft\", \"score\", \"rounds\", \"history\"}` and, on an error, `\"error\"`. Each round, the writer prompt is `Task: {task}` in round 1 and afterwards `Task: {task}\\nPrevious draft: {draft}\\nFeedback: {feedback}\\nRevise the draft.` (the latest draft and the judge's latest feedback). Then judge the draft with `Judge: score the draft from 0 to 10 and reply with JSON {\"score\": n, \"feedback\": \"...\"}.\\nTask: {task}\\nDraft: {draft}`. Read the judge's reply the same defensive way, from the first `{` to the last `}`: it is readable when it is an object whose `score` is a number from 0 to 10 (a boolean is not a number); `feedback` is its text, or empty when missing. An unreadable reply scores 0 with the feedback `The judge reply could not be read.` and the loop goes on. Every round adds `{\"round\", \"score\", \"feedback\"}` to `history`.",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "A score at or above `threshold` ends the loop: status `accepted`, the current draft, its score, the round number.",
+              "After `max_rounds` without that: status `max_rounds`, the best-scoring draft (the earliest on a tie), its score, `rounds` equal to `max_rounds`.",
+              "When the writer throws, stop at once: status `error`, the best draft so far and its score (both null before any draft was judged), `rounds` is the number of rounds completed, and `error` is the exception's message."
+            ]
+          }
+        ],
+        "`route(ask, text, routes, default)` returns `{\"label\", \"output\", \"fallback\"}`. Classify with one call, `Classify: {text}\\nLabels: {labels joined by \", \"}`. The label is the reply stripped of spaces, then of the punctuation `.,;:!\"'` and the backtick at both ends, then of spaces again, in lower case. When it is not a key of `routes`, use `default` and set `fallback` to true. `output` is the handler's result for the text.",
+        "`vote(ask, prompt, n=5)` returns `{\"answer\", \"votes\", \"agreement\"}`: ask the same prompt `n` times, count the replies stripped and in lower case (in order of first appearance), and answer with the most frequent one; on a tie the one seen first. `agreement` is the winner's count divided by `n`. With `n` of 0 the answer is null, the votes are empty and `agreement` is 0."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "An orchestrator plans, runs a worker per subtask and combines"
+        ],
+        [
+          "`e1`",
+          "The plan is read from prose, cleaned, capped, and replaced when unusable"
+        ],
+        [
+          "`e2`",
+          "One failing worker does not stop the others or the answer"
+        ],
+        [
+          "`e3`",
+          "A draft is revised with the feedback until the judge accepts it"
+        ],
+        [
+          "`e4`",
+          "When the rounds run out the best draft wins, and an unreadable judge scores zero"
+        ],
+        [
+          "`e5`",
+          "A label is read from the reply, and anything else takes the default route"
+        ],
+        [
+          "`e6`",
+          "The majority answer wins, and a tie goes to the one seen first"
+        ],
+        [
+          "`e7`",
+          "A writer that fails ends the loop with the best draft so far"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.Locale\n\nprivate val log = System.getLogger(\"workflows\")\n\n/** Workflow patterns around a model: orchestrator and workers, evaluator and optimiser, routing and voting. See ../../statement.md. */\n\ntypealias Ask = (String) -> String\n\nprivate fun slice(text: String, open: Char, close: Char): String {\n    val first = text.indexOf(open)\n    val last = text.lastIndexOf(close)\n    return if (first != -1 && last > first) text.substring(first, last + 1) else \"\"\n}\n\nprivate fun parseJson(text: String): Any? = try {\n    Json.parse(text)\n} catch (e: RuntimeException) {\n    null\n}\n\nprivate fun cleanSteps(data: Any?): List<String> {\n    val steps = mutableListOf<String>()\n    (data as? List<*>)?.forEach { item ->\n        if (item is String && item.isNotBlank() && item.trim() !in steps) steps.add(item.trim())\n    }\n    return steps\n}\n\nprivate fun runWorker(ask: Ask, subtask: String, task: String): Map<String, Any?> {\n    log.log(System.Logger.Level.DEBUG, \"runWorker input: {0}\", subtask)\n    return try {\n        val output = ask(\"Subtask: $subtask\\nTask: $task\")\n        if (output.isBlank()) throw IllegalStateException(\"empty reply\")\n        linkedMapOf(\"subtask\" to subtask, \"status\" to \"ok\", \"output\" to output)\n    } catch (e: RuntimeException) { // one worker failing must not stop the others\n        linkedMapOf(\"subtask\" to subtask, \"status\" to \"failed\", \"error\" to e.message)\n    }\n}\n\nprivate fun combinePrompt(task: String, results: List<Map<String, Any?>>): String {\n    val lines = results.mapIndexed { i, r -> \"${i + 1}. ${r[\"subtask\"]} -> ${if (r[\"status\"] == \"ok\") r[\"output\"] else \"FAILED\"}\" }\n    return \"Combine: write one answer to the task from the results.\\nTask: $task\\n\" + lines.joinToString(\"\\n\")\n}\n\nfun orchestrate(ask: Ask, task: String, maxSubtasks: Int = 5): Map<String, Any?> {\n    var calls = 1\n    val planReply = ask(\"Plan: split the task into at most $maxSubtasks independent subtasks. Reply with a JSON array of strings only.\\nTask: $task\")\n    val steps = cleanSteps(parseJson(slice(planReply, '[', ']')))\n    val fallback = steps.isEmpty()\n    val plan = if (fallback) listOf(task) else steps.take(maxSubtasks)\n    val results = mutableListOf<Map<String, Any?>>()\n    for (subtask in plan) {\n        calls++\n        results.add(runWorker(ask, subtask, task))\n    }\n    val ok = results.count { it[\"status\"] == \"ok\" }\n    if (ok == 0) return linkedMapOf(\"status\" to \"failed\", \"plan\" to plan, \"fallback\" to fallback, \"results\" to results, \"answer\" to null, \"calls\" to calls)\n    val answer = ask(combinePrompt(task, results))\n    return linkedMapOf(\"status\" to if (ok == results.size) \"done\" else \"partial\", \"plan\" to plan, \"fallback\" to fallback, \"results\" to results, \"answer\" to answer, \"calls\" to calls + 1)\n}\n\nprivate const val UNREADABLE = \"The judge reply could not be read.\"\n\nprivate fun scoreOk(score: Any?): Boolean {\n    return score is Number && score.toDouble() >= 0 && score.toDouble() <= 10\n}\n\n/** The score and the feedback from the judge's reply; a score of 0 and a fixed note when the reply cannot be read. */\nprivate fun readJudgement(text: String): Pair<Number, String> {\n    val data = parseJson(slice(text, '{', '}')) as? Map<*, *>\n    val score = data?.get(\"score\")\n    if (!scoreOk(score)) return Pair(0, UNREADABLE)\n    return Pair(score as Number, data!![\"feedback\"] as? String ?: \"\")\n}\n\nprivate fun writerPrompt(task: String, draft: String?, feedback: String, round: Int): String {\n    return if (round == 1) \"Task: $task\" else \"Task: $task\\nPrevious draft: $draft\\nFeedback: $feedback\\nRevise the draft.\"\n}\n\nprivate fun isBetter(score: Number, bestScore: Number?): Boolean {\n    return bestScore == null || score.toDouble() > bestScore.toDouble()\n}\n\nprivate fun errorResult(best: String?, bestScore: Number?, rounds: Int, history: List<Map<String, Any?>>, e: RuntimeException): Map<String, Any?> {\n    return linkedMapOf(\"status\" to \"error\", \"draft\" to best, \"score\" to bestScore, \"rounds\" to rounds, \"history\" to history, \"error\" to e.message)\n}\n\nfun refine(write: Ask, judge: Ask, task: String, maxRounds: Int = 3, threshold: Int = 8): Map<String, Any?> {\n    val history = mutableListOf<Map<String, Any?>>()\n    var best: String? = null\n    var bestScore: Number? = null\n    var draft: String? = null\n    var feedback = \"\"\n    for (round in 1..maxRounds) {\n        val prompt = writerPrompt(task, draft, feedback, round)\n        try {\n            draft = write(prompt)\n        } catch (e: RuntimeException) {\n            return errorResult(best, bestScore, round - 1, history, e)\n        }\n        val (score, note) = readJudgement(judge(\"Judge: score the draft from 0 to 10 and reply with JSON {\\\"score\\\": n, \\\"feedback\\\": \\\"...\\\"}.\\nTask: $task\\nDraft: $draft\"))\n        feedback = note\n        history.add(linkedMapOf(\"round\" to round, \"score\" to score, \"feedback\" to feedback))\n        if (isBetter(score, bestScore)) {\n            best = draft\n            bestScore = score\n        }\n        if (score.toDouble() >= threshold) return linkedMapOf(\"status\" to \"accepted\", \"draft\" to draft, \"score\" to score, \"rounds\" to round, \"history\" to history)\n    }\n    return linkedMapOf(\"status\" to \"max_rounds\", \"draft\" to best, \"score\" to bestScore, \"rounds\" to maxRounds, \"history\" to history)\n}\n\nprivate fun normaliseLabel(reply: String): String {\n    return reply.trim().replace(Regex(\"^[.,;:!\\\"'`]+|[.,;:!\\\"'`]+$\"), \"\").trim().lowercase(Locale.ROOT)\n}\n\n/** Classify the text with one model call, then run the handler of the label. routes maps label to a function of the text. */\nfun route(ask: Ask, text: String, routes: Map<String, (String) -> String>, defaultLabel: String): Map<String, Any?> {\n    val reply = ask(\"Classify: $text\\nLabels: ${routes.keys.joinToString(\", \")}\")\n    var label = normaliseLabel(reply)\n    val fallback = label !in routes\n    if (fallback) label = defaultLabel\n    return linkedMapOf(\"label\" to label, \"output\" to routes.getValue(label)(text), \"fallback\" to fallback)\n}\n\nprivate fun pickWinner(counts: Map<String, Int>, top: Int): String {\n    return counts.entries.first { it.value == top }.key\n}\n\nfun vote(ask: Ask, prompt: String, n: Int = 5): Map<String, Any?> {\n    val counts = linkedMapOf<String, Int>()\n    repeat(n) { counts.merge(ask(prompt).trim().lowercase(Locale.ROOT), 1, Int::plus) }\n    if (counts.isEmpty()) return linkedMapOf(\"answer\" to null, \"votes\" to counts, \"agreement\" to 0.0)\n    val top = counts.values.max()\n    val winner = pickWinner(counts, top)\n    return linkedMapOf(\"answer\" to winner, \"votes\" to counts, \"agreement\" to top.toDouble() / n)\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/kotlin/TryIt.kt"
+        },
+        {
+          "type": "code",
+          "lang": "kotlin",
+          "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    val plan = \"\"\"[\"research the topic\", \"draft the outline\", \"check the facts\"]\"\"\"\n\n    // A stand-in for the model, like the one the tests script: the start of the prompt says which step is asking.\n    val model: Ask = { prompt ->\n        when {\n            prompt.startsWith(\"Plan\") -> plan\n            prompt.startsWith(\"Subtask\") -> \"done: \" + prompt.lines().first().removePrefix(\"Subtask: \")\n            else -> \"FINAL\"\n        }\n    }\n\n    // The orchestrator asks for a plan, runs one worker per subtask, then combines the results.\n    val result = orchestrate(model, \"Write a guide\")\n\n    println(\"status: ${result[\"status\"]} | fallback: ${result[\"fallback\"]} | calls: ${result[\"calls\"]}\")\n    println(\"plan: ${result[\"plan\"]}\")\n    println(\"results: ${result[\"results\"]}\")\n    println(\"answer: ${result[\"answer\"]}\")\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.Locale\n\nprivate val log = System.getLogger(\"workflows\")\n\n/** Workflow patterns around a model: orchestrator and workers, evaluator and optimiser, routing and voting. See ../../statement.md. */\n\ntypealias Ask = (String) -> String\n\nprivate fun slice(text: String, open: Char, close: Char): String {\n    val first = text.indexOf(open)\n    val last = text.lastIndexOf(close)\n    return if (first != -1 && last > first) text.substring(first, last + 1) else \"\"\n}\n\nprivate fun parseJson(text: String): Any? = try {\n    Json.parse(text)\n} catch (e: RuntimeException) {\n    null\n}\n\n/**\n * TODO 1 of 9 (unlocks e1): the usable subtasks from the parsed plan.\n * Receives whatever Json.parse gave (a list, or anything else, or null) and returns the string items of a list, trimmed, with empty\n * ones and repeats dropped (the first of a repeat stays), in order; anything that is not a list gives an empty list.\n * Example: cleanSteps(listOf(\"a\", \" a \", \"\", 3, \"b\")) -> [\"a\", \"b\"]\n */\nprivate fun cleanSteps(data: Any?): List<String> {\n    return emptyList()\n}\n\n/**\n * TODO 2 of 9 (unlocks m1 and e2): run one worker call for one subtask.\n * Receives ask, the subtask and the task. Calls ask with \"Subtask: $subtask\\nTask: $task\" and returns the map\n * {subtask, status \"ok\", output} for a good reply, or {subtask, status \"failed\", error} when the reply is empty or only spaces\n * (error \"empty reply\") or the call throws (error: the exception's message). It never throws.\n * Example: a worker that replies \"  \" -> {subtask: \"s\", status: \"failed\", error: \"empty reply\"}\n */\nprivate fun runWorker(ask: Ask, subtask: String, task: String): Map<String, Any?> {\n    log.log(System.Logger.Level.DEBUG, \"runWorker input: {0}\", subtask)\n    return linkedMapOf(\"subtask\" to subtask, \"status\" to \"failed\", \"error\" to \"\")\n}\n\n/**\n * TODO 3 of 9 (unlocks m1): the prompt of the combine call.\n * Receives the task and the results in plan order. Returns \"Combine: write one answer to the task from the results.\\nTask: $task\"\n * followed by one line per result, \"\\n{i}. {subtask} -> {output}\" or \"\\n{i}. {subtask} -> FAILED\" (i from 1).\n * Example: task \"T\", one ok result \"a\" with output \"x\" -> \"Combine: write one answer to the task from the results.\\nTask: T\\n1. a -> x\"\n */\nprivate fun combinePrompt(task: String, results: List<Map<String, Any?>>): String {\n    return \"\"\n}\n\nfun orchestrate(ask: Ask, task: String, maxSubtasks: Int = 5): Map<String, Any?> {\n    var calls = 1\n    val planReply = ask(\"Plan: split the task into at most $maxSubtasks independent subtasks. Reply with a JSON array of strings only.\\nTask: $task\")\n    val steps = cleanSteps(parseJson(slice(planReply, '[', ']')))\n    val fallback = steps.isEmpty()\n    val plan = if (fallback) listOf(task) else steps.take(maxSubtasks)\n    val results = mutableListOf<Map<String, Any?>>()\n    for (subtask in plan) {\n        calls++\n        results.add(runWorker(ask, subtask, task))\n    }\n    val ok = results.count { it[\"status\"] == \"ok\" }\n    if (ok == 0) return linkedMapOf(\"status\" to \"failed\", \"plan\" to plan, \"fallback\" to fallback, \"results\" to results, \"answer\" to null, \"calls\" to calls)\n    val answer = ask(combinePrompt(task, results))\n    return linkedMapOf(\"status\" to if (ok == results.size) \"done\" else \"partial\", \"plan\" to plan, \"fallback\" to fallback, \"results\" to results, \"answer\" to answer, \"calls\" to calls + 1)\n}\n\nprivate const val UNREADABLE = \"The judge reply could not be read.\"\n\n/**\n * TODO 4 of 9 (unlocks e4): is this a usable judge score?\n * Receives the score field of the judge's JSON (any value, or null). Returns true for a number from 0 to 10 and false for anything\n * else, a boolean included.\n * Example: scoreOk(7.5) -> true, scoreOk(true) -> false, scoreOk(11) -> false\n */\nprivate fun scoreOk(score: Any?): Boolean {\n    return score is Number // a number of any size; add the range\n}\n\n/** The score and the feedback from the judge's reply; a score of 0 and a fixed note when the reply cannot be read. */\nprivate fun readJudgement(text: String): Pair<Number, String> {\n    val data = parseJson(slice(text, '{', '}')) as? Map<*, *>\n    val score = data?.get(\"score\")\n    if (!scoreOk(score)) return Pair(0, UNREADABLE)\n    return Pair(score as Number, data!![\"feedback\"] as? String ?: \"\")\n}\n\n/**\n * TODO 5 of 9 (unlocks e3): the prompt for the writer in one round.\n * Receives the task, the latest draft, the judge's latest feedback and the round number (from 1). Returns \"Task: $task\" in round 1\n * and afterwards \"Task: $task\\nPrevious draft: $draft\\nFeedback: $feedback\\nRevise the draft.\"\n * Example: writerPrompt(\"T\", \"d\", \"f\", 2) -> \"Task: T\\nPrevious draft: d\\nFeedback: f\\nRevise the draft.\"\n */\nprivate fun writerPrompt(task: String, draft: String?, feedback: String, round: Int): String {\n    return \"Task: $task\"\n}\n\n/**\n * TODO 6 of 9 (unlocks e4): does this draft replace the best one so far?\n * Receives the new score and the best score so far (null before any draft was judged). Returns true when there is no best yet or the\n * new score is strictly higher (so the earliest wins a tie).\n * Example: isBetter(5, null) -> true, isBetter(5, 5) -> false\n */\nprivate fun isBetter(score: Number, bestScore: Number?): Boolean {\n    return false\n}\n\n/**\n * TODO 7 of 9 (unlocks e7): the result when the writer threw.\n * Receives the best draft and score so far (null, null before any), the rounds completed, the history and the exception. Returns the\n * map {status \"error\", draft, score, rounds, history, error: the exception's message}.\n * Example: errorResult(\"d\", 4, 1, listOf(), RuntimeException(\"boom\"))[\"error\"] -> \"boom\"\n */\nprivate fun errorResult(best: String?, bestScore: Number?, rounds: Int, history: List<Map<String, Any?>>, e: RuntimeException): Map<String, Any?> {\n    return linkedMapOf(\"status\" to \"error\", \"draft\" to best, \"score\" to bestScore, \"rounds\" to rounds, \"history\" to history, \"error\" to \"\")\n}\n\nfun refine(write: Ask, judge: Ask, task: String, maxRounds: Int = 3, threshold: Int = 8): Map<String, Any?> {\n    val history = mutableListOf<Map<String, Any?>>()\n    var best: String? = null\n    var bestScore: Number? = null\n    var draft: String? = null\n    var feedback = \"\"\n    for (round in 1..maxRounds) {\n        val prompt = writerPrompt(task, draft, feedback, round)\n        try {\n            draft = write(prompt)\n        } catch (e: RuntimeException) {\n            return errorResult(best, bestScore, round - 1, history, e)\n        }\n        val (score, note) = readJudgement(judge(\"Judge: score the draft from 0 to 10 and reply with JSON {\\\"score\\\": n, \\\"feedback\\\": \\\"...\\\"}.\\nTask: $task\\nDraft: $draft\"))\n        feedback = note\n        history.add(linkedMapOf(\"round\" to round, \"score\" to score, \"feedback\" to feedback))\n        if (isBetter(score, bestScore)) {\n            best = draft\n            bestScore = score\n        }\n        if (score.toDouble() >= threshold) return linkedMapOf(\"status\" to \"accepted\", \"draft\" to draft, \"score\" to score, \"rounds\" to round, \"history\" to history)\n    }\n    return linkedMapOf(\"status\" to \"max_rounds\", \"draft\" to best, \"score\" to bestScore, \"rounds\" to maxRounds, \"history\" to history)\n}\n\n/**\n * TODO 8 of 9 (unlocks e5): the label in a classifier's reply.\n * Receives the reply. Returns it trimmed of spaces, then of the punctuation .,;:!\"' and the backtick at both ends, then of spaces\n * again, in lower case.\n * Example: normaliseLabel(\"  \\\"Billing.\\\" \") -> \"billing\"\n */\nprivate fun normaliseLabel(reply: String): String {\n    return \"\"\n}\n\n/** Classify the text with one model call, then run the handler of the label. routes maps label to a function of the text. */\nfun route(ask: Ask, text: String, routes: Map<String, (String) -> String>, defaultLabel: String): Map<String, Any?> {\n    val reply = ask(\"Classify: $text\\nLabels: ${routes.keys.joinToString(\", \")}\")\n    var label = normaliseLabel(reply)\n    val fallback = label !in routes\n    if (fallback) label = defaultLabel\n    return linkedMapOf(\"label\" to label, \"output\" to routes.getValue(label)(text), \"fallback\" to fallback)\n}\n\n/**\n * TODO 9 of 9 (unlocks e6): the answer that wins the vote.\n * Receives the counts (answer to count, in order of first appearance) and the highest count. Returns the first answer whose count is\n * that highest count, so a tie goes to the one seen first.\n * Example: pickWinner(linkedMapOf(\"a\" to 2, \"b\" to 2), 2) -> \"a\"\n */\nprivate fun pickWinner(counts: Map<String, Int>, top: Int): String {\n    return \"\"\n}\n\nfun vote(ask: Ask, prompt: String, n: Int = 5): Map<String, Any?> {\n    val counts = linkedMapOf<String, Int>()\n    repeat(n) { counts.merge(ask(prompt).trim().lowercase(Locale.ROOT), 1, Int::plus) }\n    if (counts.isEmpty()) return linkedMapOf(\"answer\" to null, \"votes\" to counts, \"agreement\" to 0.0)\n    val top = counts.values.max()\n    val winner = pickWinner(counts, top)\n    return linkedMapOf(\"answer\" to winner, \"votes\" to counts, \"agreement\" to top.toDouble() / n)\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/kotlin/TryIt.kt"
+    },
+    {
+      "type": "code",
+      "lang": "kotlin",
+      "text": "import java.util.logging.ConsoleHandler\nimport java.util.logging.Level\nimport java.util.logging.Logger\n\n// Run executes this file. Change the calls in main to try your code; Submit runs the tests.\nfun main() {\n    // Turn the logger up, so the log.log(DEBUG, ...) lines of your code show under the printed lines.\n    System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4\\$s %5\\$s%n\")\n    val handler = ConsoleHandler().apply { level = Level.ALL }\n    Logger.getLogger(\"\").apply { level = Level.ALL; addHandler(handler) }\n\n    val plan = \"\"\"[\"research the topic\", \"draft the outline\", \"check the facts\"]\"\"\"\n\n    // A stand-in for the model, like the one the tests script: the start of the prompt says which step is asking.\n    val model: Ask = { prompt ->\n        when {\n            prompt.startsWith(\"Plan\") -> plan\n            prompt.startsWith(\"Subtask\") -> \"done: \" + prompt.lines().first().removePrefix(\"Subtask: \")\n            else -> \"FINAL\"\n        }\n    }\n\n    // The orchestrator asks for a plan, runs one worker per subtask, then combines the results.\n    val result = orchestrate(model, \"Write a guide\")\n\n    println(\"status: ${result[\"status\"]} | fallback: ${result[\"fallback\"]} | calls: ${result[\"calls\"]}\")\n    println(\"plan: ${result[\"plan\"]}\")\n    println(\"results: ${result[\"results\"]}\")\n    println(\"answer: ${result[\"answer\"]}\")\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "8e72c300b15b1f037be8a6d16b10ebafcc1d5fe75eccad1fa890051d9a4db270",
+  "starting_code": "import java.util.Locale\n\nprivate val log = System.getLogger(\"workflows\")\n\n/** Workflow patterns around a model: orchestrator and workers, evaluator and optimiser, routing and voting. See ../../statement.md. */\n\ntypealias Ask = (String) -> String\n\nprivate fun slice(text: String, open: Char, close: Char): String {\n    val first = text.indexOf(open)\n    val last = text.lastIndexOf(close)\n    return if (first != -1 && last > first) text.substring(first, last + 1) else \"\"\n}\n\nprivate fun parseJson(text: String): Any? = try {\n    Json.parse(text)\n} catch (e: RuntimeException) {\n    null\n}\n\n/**\n * TODO 1 of 9 (unlocks e1): the usable subtasks from the parsed plan.\n * Receives whatever Json.parse gave (a list, or anything else, or null) and returns the string items of a list, trimmed, with empty\n * ones and repeats dropped (the first of a repeat stays), in order; anything that is not a list gives an empty list.\n * Example: cleanSteps(listOf(\"a\", \" a \", \"\", 3, \"b\")) -> [\"a\", \"b\"]\n */\nprivate fun cleanSteps(data: Any?): List<String> {\n    return emptyList()\n}\n\n/**\n * TODO 2 of 9 (unlocks m1 and e2): run one worker call for one subtask.\n * Receives ask, the subtask and the task. Calls ask with \"Subtask: $subtask\\nTask: $task\" and returns the map\n * {subtask, status \"ok\", output} for a good reply, or {subtask, status \"failed\", error} when the reply is empty or only spaces\n * (error \"empty reply\") or the call throws (error: the exception's message). It never throws.\n * Example: a worker that replies \"  \" -> {subtask: \"s\", status: \"failed\", error: \"empty reply\"}\n */\nprivate fun runWorker(ask: Ask, subtask: String, task: String): Map<String, Any?> {\n    log.log(System.Logger.Level.DEBUG, \"runWorker input: {0}\", subtask)\n    return linkedMapOf(\"subtask\" to subtask, \"status\" to \"failed\", \"error\" to \"\")\n}\n\n/**\n * TODO 3 of 9 (unlocks m1): the prompt of the combine call.\n * Receives the task and the results in plan order. Returns \"Combine: write one answer to the task from the results.\\nTask: $task\"\n * followed by one line per result, \"\\n{i}. {subtask} -> {output}\" or \"\\n{i}. {subtask} -> FAILED\" (i from 1).\n * Example: task \"T\", one ok result \"a\" with output \"x\" -> \"Combine: write one answer to the task from the results.\\nTask: T\\n1. a -> x\"\n */\nprivate fun combinePrompt(task: String, results: List<Map<String, Any?>>): String {\n    return \"\"\n}\n\nfun orchestrate(ask: Ask, task: String, maxSubtasks: Int = 5): Map<String, Any?> {\n    var calls = 1\n    val planReply = ask(\"Plan: split the task into at most $maxSubtasks independent subtasks. Reply with a JSON array of strings only.\\nTask: $task\")\n    val steps = cleanSteps(parseJson(slice(planReply, '[', ']')))\n    val fallback = steps.isEmpty()\n    val plan = if (fallback) listOf(task) else steps.take(maxSubtasks)\n    val results = mutableListOf<Map<String, Any?>>()\n    for (subtask in plan) {\n        calls++\n        results.add(runWorker(ask, subtask, task))\n    }\n    val ok = results.count { it[\"status\"] == \"ok\" }\n    if (ok == 0) return linkedMapOf(\"status\" to \"failed\", \"plan\" to plan, \"fallback\" to fallback, \"results\" to results, \"answer\" to null, \"calls\" to calls)\n    val answer = ask(combinePrompt(task, results))\n    return linkedMapOf(\"status\" to if (ok == results.size) \"done\" else \"partial\", \"plan\" to plan, \"fallback\" to fallback, \"results\" to results, \"answer\" to answer, \"calls\" to calls + 1)\n}\n\nprivate const val UNREADABLE = \"The judge reply could not be read.\"\n\n/**\n * TODO 4 of 9 (unlocks e4): is this a usable judge score?\n * Receives the score field of the judge's JSON (any value, or null). Returns true for a number from 0 to 10 and false for anything\n * else, a boolean included.\n * Example: scoreOk(7.5) -> true, scoreOk(true) -> false, scoreOk(11) -> false\n */\nprivate fun scoreOk(score: Any?): Boolean {\n    return score is Number // a number of any size; add the range\n}\n\n/** The score and the feedback from the judge's reply; a score of 0 and a fixed note when the reply cannot be read. */\nprivate fun readJudgement(text: String): Pair<Number, String> {\n    val data = parseJson(slice(text, '{', '}')) as? Map<*, *>\n    val score = data?.get(\"score\")\n    if (!scoreOk(score)) return Pair(0, UNREADABLE)\n    return Pair(score as Number, data!![\"feedback\"] as? String ?: \"\")\n}\n\n/**\n * TODO 5 of 9 (unlocks e3): the prompt for the writer in one round.\n * Receives the task, the latest draft, the judge's latest feedback and the round number (from 1). Returns \"Task: $task\" in round 1\n * and afterwards \"Task: $task\\nPrevious draft: $draft\\nFeedback: $feedback\\nRevise the draft.\"\n * Example: writerPrompt(\"T\", \"d\", \"f\", 2) -> \"Task: T\\nPrevious draft: d\\nFeedback: f\\nRevise the draft.\"\n */\nprivate fun writerPrompt(task: String, draft: String?, feedback: String, round: Int): String {\n    return \"Task: $task\"\n}\n\n/**\n * TODO 6 of 9 (unlocks e4): does this draft replace the best one so far?\n * Receives the new score and the best score so far (null before any draft was judged). Returns true when there is no best yet or the\n * new score is strictly higher (so the earliest wins a tie).\n * Example: isBetter(5, null) -> true, isBetter(5, 5) -> false\n */\nprivate fun isBetter(score: Number, bestScore: Number?): Boolean {\n    return false\n}\n\n/**\n * TODO 7 of 9 (unlocks e7): the result when the writer threw.\n * Receives the best draft and score so far (null, null before any), the rounds completed, the history and the exception. Returns the\n * map {status \"error\", draft, score, rounds, history, error: the exception's message}.\n * Example: errorResult(\"d\", 4, 1, listOf(), RuntimeException(\"boom\"))[\"error\"] -> \"boom\"\n */\nprivate fun errorResult(best: String?, bestScore: Number?, rounds: Int, history: List<Map<String, Any?>>, e: RuntimeException): Map<String, Any?> {\n    return linkedMapOf(\"status\" to \"error\", \"draft\" to best, \"score\" to bestScore, \"rounds\" to rounds, \"history\" to history, \"error\" to \"\")\n}\n\nfun refine(write: Ask, judge: Ask, task: String, maxRounds: Int = 3, threshold: Int = 8): Map<String, Any?> {\n    val history = mutableListOf<Map<String, Any?>>()\n    var best: String? = null\n    var bestScore: Number? = null\n    var draft: String? = null\n    var feedback = \"\"\n    for (round in 1..maxRounds) {\n        val prompt = writerPrompt(task, draft, feedback, round)\n        try {\n            draft = write(prompt)\n        } catch (e: RuntimeException) {\n            return errorResult(best, bestScore, round - 1, history, e)\n        }\n        val (score, note) = readJudgement(judge(\"Judge: score the draft from 0 to 10 and reply with JSON {\\\"score\\\": n, \\\"feedback\\\": \\\"...\\\"}.\\nTask: $task\\nDraft: $draft\"))\n        feedback = note\n        history.add(linkedMapOf(\"round\" to round, \"score\" to score, \"feedback\" to feedback))\n        if (isBetter(score, bestScore)) {\n            best = draft\n            bestScore = score\n        }\n        if (score.toDouble() >= threshold) return linkedMapOf(\"status\" to \"accepted\", \"draft\" to draft, \"score\" to score, \"rounds\" to round, \"history\" to history)\n    }\n    return linkedMapOf(\"status\" to \"max_rounds\", \"draft\" to best, \"score\" to bestScore, \"rounds\" to maxRounds, \"history\" to history)\n}\n\n/**\n * TODO 8 of 9 (unlocks e5): the label in a classifier's reply.\n * Receives the reply. Returns it trimmed of spaces, then of the punctuation .,;:!\"' and the backtick at both ends, then of spaces\n * again, in lower case.\n * Example: normaliseLabel(\"  \\\"Billing.\\\" \") -> \"billing\"\n */\nprivate fun normaliseLabel(reply: String): String {\n    return \"\"\n}\n\n/** Classify the text with one model call, then run the handler of the label. routes maps label to a function of the text. */\nfun route(ask: Ask, text: String, routes: Map<String, (String) -> String>, defaultLabel: String): Map<String, Any?> {\n    val reply = ask(\"Classify: $text\\nLabels: ${routes.keys.joinToString(\", \")}\")\n    var label = normaliseLabel(reply)\n    val fallback = label !in routes\n    if (fallback) label = defaultLabel\n    return linkedMapOf(\"label\" to label, \"output\" to routes.getValue(label)(text), \"fallback\" to fallback)\n}\n\n/**\n * TODO 9 of 9 (unlocks e6): the answer that wins the vote.\n * Receives the counts (answer to count, in order of first appearance) and the highest count. Returns the first answer whose count is\n * that highest count, so a tie goes to the one seen first.\n * Example: pickWinner(linkedMapOf(\"a\" to 2, \"b\" to 2), 2) -> \"a\"\n */\nprivate fun pickWinner(counts: Map<String, Int>, top: Int): String {\n    return \"\"\n}\n\nfun vote(ask: Ask, prompt: String, n: Int = 5): Map<String, Any?> {\n    val counts = linkedMapOf<String, Int>()\n    repeat(n) { counts.merge(ask(prompt).trim().lowercase(Locale.ROOT), 1, Int::plus) }\n    if (counts.isEmpty()) return linkedMapOf(\"answer\" to null, \"votes\" to counts, \"agreement\" to 0.0)\n    val top = counts.values.max()\n    val winner = pickWinner(counts, top)\n    return linkedMapOf(\"answer\" to winner, \"votes\" to counts, \"agreement\" to top.toDouble() / n)\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/34-workflows-and-agents/prose/unit-02/practice-4/src/main/kotlin/Workflows.kt",
+    "test_path": "practice/level-2/34-workflows-and-agents/prose/unit-02/practice-4/src/test/kotlin/WorkflowsTest.kt",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/34-workflows-and-agents/prose/unit-02/practice-4",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-2/34-workflows-and-agents/prose/unit-02/practice-4",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_anOrchestratorPlansRunsAWorkerPerSubtaskAndCombines()",
+        "kind": "main",
+        "says": "An orchestrator plans, runs a worker per subtask and combines"
+      },
+      {
+        "id": "e1_thePlanIsReadFromProseCleanedCappedAndReplacedWhenUnusable()",
+        "kind": "edge",
+        "says": "The plan is read from prose, cleaned, capped, and replaced when unusable"
+      },
+      {
+        "id": "e2_oneFailingWorkerDoesNotStopTheOthersOrTheAnswer()",
+        "kind": "edge",
+        "says": "One failing worker does not stop the others or the answer"
+      },
+      {
+        "id": "e3_aDraftIsRevisedWithTheFeedbackUntilTheJudgeAcceptsIt()",
+        "kind": "edge",
+        "says": "A draft is revised with the feedback until the judge accepts it"
+      },
+      {
+        "id": "e4_whenTheRoundsRunOutTheBestDraftWinsAndAnUnreadableJudgeScoresZero()",
+        "kind": "edge",
+        "says": "When the rounds run out the best draft wins, and an unreadable judge scores zero"
+      },
+      {
+        "id": "e5_aLabelIsReadFromTheReplyAndAnythingElseTakesTheDefaultRoute()",
+        "kind": "edge",
+        "says": "A label is read from the reply, and anything else takes the default route"
+      },
+      {
+        "id": "e6_theMajorityAnswerWinsAndATieGoesToTheOneSeenFirst()",
+        "kind": "edge",
+        "says": "The majority answer wins, and a tie goes to the one seen first"
+      },
+      {
+        "id": "e7_aWriterThatFailsEndsTheLoopWithTheBestDraftSoFar()",
+        "kind": "edge",
+        "says": "A writer that fails ends the loop with the best draft so far"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/34-workflows-and-agents/prose/unit-02/practice-4/target/test-results/test"
+    },
+    "origin": "course/34-workflows-and-agents/02-orchestrators-evaluators-agents-and-the-practice.md",
+    "concepts": [
+      "the practice of Orchestrators, evaluators, agents and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/34-workflows-and-agents/prose/unit-02/practice-4/src/main/kotlin/TryIt.kt"
+    ]
+  },
+  "lang": "kotlin",
+  "edition": "workflows-and-agents-u2"
+}

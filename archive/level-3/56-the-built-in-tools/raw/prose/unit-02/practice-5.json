@@ -1,0 +1,122 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "56-the-built-in-tools"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 5,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Permissions that bound the tools, exploring a codebase and the practice",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A repository's settings deny `Read(./.env)`. The agent, trying to fix a bug, calls Edit on `.env`. What happens?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It is refused, as the rule reaches the tools that write there",
+            "correct": true,
+            "says": "A read denial covers the tools that change content at the same path."
+          },
+          {
+            "id": "b",
+            "text": "It proceeds, since only reading calls are matched by that rule",
+            "correct": false,
+            "says": "Ruled out because \"A `Read(...)` deny rule also blocks the Edit and Write tools on the same path, including creating a new file there\"."
+          },
+          {
+            "id": "c",
+            "text": "A person is asked, since no edit rule names that path",
+            "correct": false,
+            "says": "Ruled out because a deny is checked before anything else: \"Deny is checked before ask and allow\"."
+          },
+          {
+            "id": "d",
+            "text": "It proceeds, since the working directory counts as trusted",
+            "correct": false,
+            "says": "Ruled out because \"If a deny rule matches, the tool is blocked, even in `bypassPermissions` mode.\""
+          }
+        ],
+        "origin": {
+          "path": "course/56-the-built-in-tools/02-permissions-exploring-a-codebase-and-the-practice.md",
+          "section": "Which rule covers which tool"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A team's audit hook has the matcher `Grep` and logs nothing in a default Linux session, though the agent searches constantly. What explains it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Hook matchers apply only to tools that come from MCP servers",
+            "correct": false,
+            "says": "Ruled out because the tool names are \"the exact strings you use in permission rules, subagent tool lists, and hook matchers\"."
+          },
+          {
+            "id": "b",
+            "text": "Hooks cannot observe the search tools on any platform",
+            "correct": false,
+            "says": "Ruled out because \"the searches reach your hooks and permission rules as `Bash` calls\"."
+          },
+          {
+            "id": "c",
+            "text": "Its lookups run through the shell tool, so only a Bash entry sees them",
+            "correct": true,
+            "says": "On macOS, Linux and WSL the default set has no Grep, and its job is done through the shell tool."
+          },
+          {
+            "id": "d",
+            "text": "A matcher takes the parenthesised rule form, so a bare tool name never fires",
+            "correct": false,
+            "says": "Ruled out because \"Hook `matcher` fields use bare tool names, not the parenthesized rule format.\""
+          }
+        ],
+        "origin": {
+          "path": "course/56-the-built-in-tools/02-permissions-exploring-a-codebase-and-the-practice.md",
+          "section": "Which rule covers which tool"
+        }
+      }
+    ],
+    "concepts": [
+      "Exploring an unfamiliar codebase, as the page teaches it",
+      "Permissions that bound the tools, exploring a codebase and the practice, as the page teaches it",
+      "Which rule covers which tool, as the page teaches it"
+    ]
+  }
+}

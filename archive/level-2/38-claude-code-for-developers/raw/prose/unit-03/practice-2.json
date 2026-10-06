@@ -1,0 +1,348 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "38-claude-code-for-developers"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: set up a repository for Claude Code (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: set up a repository for Claude Code"
+    },
+    {
+      "type": "para",
+      "text": "A repository is ready for Claude Code when the right instructions load every session, the permission rules say what runs freely, what asks and what never runs, the personal settings stay on one machine, and the unattended runs are bounded. All of that is plain files. In this practice you write them for a small service, the invoice API, and tests read the project the way Claude Code would. The tests are the same in all four languages and read only the project: the files are not code, and the checks run on the course's own models of the documented rules (`examples/38-settings-layers` and `examples/39-hook-gate`, in your language). The Java and Kotlin tests read JSON with Jackson and YAML front matter with its YAML module. Nothing here starts Claude Code or touches the network."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The project"
+    },
+    {
+      "type": "para",
+      "text": "`starter/` is the finished project with eight gaps cut out of it: `docs/architecture.md`, the Conventions and Gotchas of `CLAUDE.md`, the skill's body and the script's plumbing are written. The tests merge your files with two fixed layers: an organisation policy that denies `Bash(sudo *)`, and a user file that sets the model to `haiku` and allows `Bash(ls *)`. Everything is plain files, so a gap is a `TODO` comment where a comment is possible (Markdown, the skill, the script) and is named below where it is not (JSON). A run reports what each failing case read; to debug a gap, put the file's content or the merged settings in a `print` of the test you are working on. These files are not code, so there is no logger line to add (the `log` line of the code practices has no file to live in here)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "About a dozen lines in all. In this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`CLAUDE.md`, Commands: the two bullets with `make test` and `make lint` in backticks. Unlocks `m1`.",
+        "`CLAUDE.md`, Architecture: the `@docs/architecture.md` import line. Unlocks `m1`.",
+        "`.claude/settings.json`: `model` is `opus` and `permissions.defaultMode` is `acceptEdits`. Unlocks `e2` and `e3`.",
+        "`.claude/settings.json`, allow: add `make lint` and the three read-only git commands to the one rule given. Unlocks `e1`.",
+        "`.claude/settings.json`, deny: add `Read(./.env)`, `Read(./secrets/**)` and `Bash(git push *)` to the `curl` rule given. Unlocks `e1` and `e2`.",
+        "`.claude/settings.local.json` and `.gitignore`: replace the personal path by the one `model` key, and ignore the two personal files. Unlocks `e3` and `e6`.",
+        "`.claude/skills/fix-issue/SKILL.md`: the `argument-hint`, the line that only lets a person start it, and the `make test` step. Unlocks `e4`.",
+        "`scripts/ci-review.sh`: the permission mode, the turn limit, the dollar cap and the read-only `--allowedTools`. Unlocks `e5`."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What to write"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`CLAUDE.md`: at most 200 lines. Name the commands `make test` and `make lint` in backticks, import `docs/architecture.md` with an `@` line, and keep the emphasis for at most two lines. Everything in it is a fact Claude would otherwise get wrong.",
+        [
+          "`.claude/settings.json`, the shared file:",
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              "`model` is `opus`, the team default;",
+              "`permissions.defaultMode` is `acceptEdits`;",
+              "allow `make test`, `make lint` and the read-only git commands `git status`, `git diff` and `git log` (with any arguments);",
+              "ask before `git commit` (with any arguments);",
+              "deny reading `.env` and everything under `secrets/`, deny `git push` and deny `curl`. Use only the rule forms that are consulted: a path rule for the `Write` tool is never checked, and a bare `Bash` allow rule approves every command. Nothing else belongs in the file."
+            ]
+          }
+        ],
+        "`.claude/settings.local.json`: one key, `model`, set to `sonnet`, so that this developer's sessions use it and the team's do not. Add `.claude/settings.local.json` and `CLAUDE.local.md` to `.gitignore`.",
+        "`.claude/skills/fix-issue/SKILL.md`: a custom command, `/fix-issue <number>`. It has a `name`, a `description` and an `argument-hint`, only a person can start it (it edits code and calls `gh`), its body uses `$ARGUMENTS` and tells Claude to run `make test`.",
+        "`scripts/ci-review.sh`: reviews the diff headlessly with `claude -p`, in `--bare` mode, with `--output-format json`, at most 10 turns, a dollar cap, a permission mode that never prompts and never auto-approves (`dontAsk` or `plan`), and `--allowedTools` listing `Read` and read-only git patterns, not whole tools that change things. It never skips permissions and never holds a key: the key comes from the environment.",
+        "No file in the project holds a personal path, an email address or a key."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "The memory file is short, names the commands, and its import resolves to the architecture notes"
+        ],
+        [
+          "`e1`",
+          "Sixteen sample calls get the right answer from the merged rules: allow, ask or deny"
+        ],
+        [
+          "`e2`",
+          "The shared file sets a mode it is allowed to set and uses only rules that Claude Code consults"
+        ],
+        [
+          "`e3`",
+          "The personal file wins for its owner, is ignored by git and stays small"
+        ],
+        [
+          "`e4`",
+          "The custom command is a skill with an argument hint that Claude cannot start by itself"
+        ],
+        [
+          "`e5`",
+          "The headless script is capped, does not skip permissions and pre-approves no whole tool that changes things"
+        ],
+        [
+          "`e6`",
+          "No file holds a personal path, an address or a key"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "# Invoice API\n\nA small service that stores invoices and exports them as CSV.\n\n## Commands\n\n- Run the tests: `make test`\n- Lint: `make lint`\n- Releases go through CI. Do not run `make deploy` from a session.\n\n## Conventions\n\n- Python 3.12, type hints on public functions.\n- Handlers live in `src/api/handlers/`, one module per resource.\n- Branch names are `feature/<ticket>`; commit messages start with the ticket id.\n\n## Architecture\n\nSee @docs/architecture.md for the module layout.\n\n## Gotchas\n\n- Tests need `INVOICE_DB_URL` to point at the local SQLite file; `make test` sets it.\n- IMPORTANT: never edit files under `migrations/` by hand; add a new migration instead.\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.claude/settings.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"model\": \"opus\",\n  \"permissions\": {\n    \"defaultMode\": \"acceptEdits\",\n    \"allow\": [\n      \"Bash(make test)\",\n      \"Bash(make lint)\",\n      \"Bash(git status *)\",\n      \"Bash(git diff *)\",\n      \"Bash(git log *)\"\n    ],\n    \"ask\": [\n      \"Bash(git commit *)\"\n    ],\n    \"deny\": [\n      \"Read(./.env)\",\n      \"Read(./secrets/**)\",\n      \"Bash(git push *)\",\n      \"Bash(curl *)\"\n    ]\n  }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.claude/settings.local.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"model\": \"sonnet\"\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.claude/skills/fix-issue/SKILL.md"
+        },
+        {
+          "type": "code",
+          "lang": "markdown",
+          "text": "---\nname: fix-issue\ndescription: Fix a GitHub issue by number, then run the tests and the linter\nargument-hint: [issue-number]\ndisable-model-invocation: true\n---\nFix issue $ARGUMENTS:\n\n1. Read the issue with `gh issue view $ARGUMENTS`.\n2. Write a failing test that reproduces it, then make it pass.\n3. Run `make test` and `make lint`, and report their output.\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/.gitignore"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": ".env\n.claude/settings.local.json\nCLAUDE.local.md\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/scripts/ci-review.sh"
+        },
+        {
+          "type": "code",
+          "lang": "bash",
+          "text": "#!/bin/sh\n# Review the current diff without a person at the keyboard. The key comes from the environment, never from this file.\nset -eu\ngit diff origin/main...HEAD | claude -p \"Review this diff for bugs and reply with a short list.\" \\\n  --bare \\\n  --output-format json \\\n  --permission-mode dontAsk \\\n  --max-turns 5 \\\n  --max-budget-usd 1 \\\n  --allowedTools \"Read,Bash(git diff *),Bash(git log *)\"\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "# Invoice API\n\nA small service that stores invoices and exports them as CSV.\n\n## Commands\n\n<!-- TODO 1 of 8 (unlocks m1): one bullet each for the test and the lint command, each command in backticks.\n     Example: - Run the tests: `make test` -->\n- TODO\n\n## Conventions\n\n- Python 3.12, type hints on public functions.\n- Handlers live in `src/api/handlers/`, one module per resource.\n- Branch names are `feature/<ticket>`; commit messages start with the ticket id.\n\n## Architecture\n\n<!-- TODO 2 of 8 (unlocks m1): import the architecture notes with an @ line instead of naming them.\n     Example: See @docs/other.md for the details. -->\nSee the architecture notes for the module layout.\n\n## Gotchas\n\n- Tests need `INVOICE_DB_URL` to point at the local SQLite file; `make test` sets it.\n- IMPORTANT: never edit files under `migrations/` by hand; add a new migration instead.\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.claude/settings.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"permissions\": {\n    \"allow\": [\n      \"Bash(make test)\"\n    ],\n    \"ask\": [\n      \"Bash(git commit *)\"\n    ],\n    \"deny\": [\n      \"Bash(curl *)\"\n    ]\n  }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.claude/settings.local.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"env\": {\n    \"PROJECT_DIR\": \"/home/dev/invoice-api\"\n  }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.claude/skills/fix-issue/SKILL.md"
+    },
+    {
+      "type": "code",
+      "lang": "markdown",
+      "text": "---\nname: fix-issue\ndescription: Fix a GitHub issue by number, then run the tests and the linter\n---\n<!-- TODO 7 of 8 (unlocks e4): add two front matter lines: `argument-hint: [issue-number]` and the line that stops Claude from starting\n     this command by itself (`disable-model-invocation: true`). The body must also tell Claude to run `make test`. -->\nFix issue $ARGUMENTS:\n\n1. Read the issue with `gh issue view $ARGUMENTS`.\n2. Write a failing test that reproduces it, then make it pass.\n3. Report the result.\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/.gitignore"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": ".env\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/scripts/ci-review.sh"
+    },
+    {
+      "type": "code",
+      "lang": "bash",
+      "text": "#!/bin/sh\n# Review the current diff without a person at the keyboard. The key comes from the environment, never from this file.\n# TODO 8 of 8 (unlocks e5): bound the run. Add the permission-mode flag set to a mode that never prompts, a turn cap of five and a\n# spend cap of one dollar, and make the allowed-tools list hold `Read` and read-only git patterns, never a whole tool that changes things.\n# Example of one capped flag: the turn-cap flag followed by the number 5.\nset -eu\ngit diff origin/main...HEAD | claude -p \"Review this diff for bugs and reply with a short list.\" \\\n  --bare \\\n  --output-format json \\\n  --allowedTools \"Read\"\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 8,
+    "code": 6,
+    "tables": 1,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "2a442f2e2c8d7c058605d2dde670c98416b6bbea8fd7b038b24bf0bf90838ddb",
+  "starting_code": "# Invoice API\n\nA small service that stores invoices and exports them as CSV.\n\n## Commands\n\n<!-- TODO 1 of 8 (unlocks m1): one bullet each for the test and the lint command, each command in backticks.\n     Example: - Run the tests: `make test` -->\n- TODO\n\n## Conventions\n\n- Python 3.12, type hints on public functions.\n- Handlers live in `src/api/handlers/`, one module per resource.\n- Branch names are `feature/<ticket>`; commit messages start with the ticket id.\n\n## Architecture\n\n<!-- TODO 2 of 8 (unlocks m1): import the architecture notes with an @ line instead of naming them.\n     Example: See @docs/other.md for the details. -->\nSee the architecture notes for the module layout.\n\n## Gotchas\n\n- Tests need `INVOICE_DB_URL` to point at the local SQLite file; `make test` sets it.\n- IMPORTANT: never edit files under `migrations/` by hand; add a new migration instead.\n",
+  "exercise": {
+    "main_path": "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-2/project/CLAUDE.md",
+    "test_path": "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-2/tests/projectSetup.test.ts",
+    "run_command": [
+      "python3",
+      "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-2/check_files.py",
+      "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-2/project/.claude/settings.json",
+      "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-2/project/.claude/settings.local.json",
+      "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-2/project/.claude/skills/fix-issue/SKILL.md",
+      "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-2/project/.gitignore",
+      "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-2/project/CLAUDE.md",
+      "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-2/project/scripts/ci-review.sh"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-2/tests/projectSetup.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 the memory file is short concrete and pulls in the architecture notes",
+        "kind": "main",
+        "says": "The memory file is short, names the commands, and its import resolves to the architecture notes"
+      },
+      {
+        "id": "e1 the permission rules allow the daily commands ask before commits and deny secrets and pushes",
+        "kind": "edge",
+        "says": "Sixteen sample calls get the right answer from the merged rules: allow, ask or deny"
+      },
+      {
+        "id": "e2 the shared file sets a mode it may set and uses only rules that are consulted",
+        "kind": "edge",
+        "says": "The shared file sets a mode it is allowed to set and uses only rules that Claude Code consults"
+      },
+      {
+        "id": "e3 personal settings stay local and the local file wins",
+        "kind": "edge",
+        "says": "The personal file wins for its owner, is ignored by git and stays small"
+      },
+      {
+        "id": "e4 the custom command is a skill that only a person can start",
+        "kind": "edge",
+        "says": "The custom command is a skill with an argument hint that Claude cannot start by itself"
+      },
+      {
+        "id": "e5 the headless script is bounded and does not skip permissions",
+        "kind": "edge",
+        "says": "The headless script is capped, does not skip permissions and pre-approves no whole tool that changes things"
+      },
+      {
+        "id": "e6 no file holds a personal path an address or a key",
+        "kind": "edge",
+        "says": "No file holds a personal path, an address or a key"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-2/target/report.xml"
+    },
+    "origin": "course/38-claude-code-for-developers/03-commands-headless-runs-and-the-practice.md",
+    "concepts": [
+      "the practice of Commands, headless runs, auto mode and the practice is solved"
+    ],
+    "files": [
+      "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-2/project/.claude/settings.json",
+      "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-2/project/.claude/settings.local.json",
+      "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-2/project/.claude/skills/fix-issue/SKILL.md",
+      "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-2/project/.gitignore",
+      "practice/level-2/38-claude-code-for-developers/prose/unit-03/practice-2/project/scripts/ci-review.sh"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "claude-code-for-developers-u3"
+}

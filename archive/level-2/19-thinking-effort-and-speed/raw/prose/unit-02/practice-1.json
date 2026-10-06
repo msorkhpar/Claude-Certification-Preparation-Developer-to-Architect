@@ -1,0 +1,287 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "19-thinking-effort-and-speed"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: thinking, effort and speed set correctly per model (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: thinking, effort and speed set correctly per model"
+    },
+    {
+      "type": "para",
+      "text": "Write the function that turns what an application wants (thinking mode, effort, fast mode, sampling) into request parameters for one model, and refuses the combinations the API would answer with a 400. The rules come from the documentation read on 2026-10-02 and are summarised in `docs/VERSIONS.md`; the lesson pages explain them."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given types"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`RejectedRequest`",
+          "the error to raise: `param` names the offending parameter (`thinking`, `thinking.budget_tokens`, `output_config.effort`, `temperature`, `top_p`, `top_k`, `speed`, `max_tokens` or `model`)"
+        ],
+        [
+          "`options`",
+          "a map that may hold `thinking` (a map with `type`, and `budget_tokens` for `enabled`), `effort` (a string), `speed` (`fast` or `standard`), `batch` (true when the request goes into a Message Batch), `temperature`, `top_p`, `top_k`"
+        ]
+      ]
+    },
+    {
+      "type": "para",
+      "text": "The four models are `claude-fable-5-1`, `claude-opus-5-5`, `claude-sonnet-5-5` and `claude-haiku-4-5-20251001` (the alias `claude-haiku-4-5` counts as Haiku). Any other model id is rejected with `param` set to `model`."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "`build_params(model, max_tokens, options)` (TypeScript `buildParams`, Java `Params.buildParams`, Kotlin `buildParams`)"
+    },
+    {
+      "type": "para",
+      "text": "Return a map with `model`, `max_tokens` and only the keys the options asked for, or raise `RejectedRequest`:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "**`max_tokens`** below 1 is rejected.",
+        "**Effort** goes into `output_config` as `{\"effort\": level}`, never into `thinking`. Haiku 4.5 does not support effort. The levels are `low`, `medium`, `high`, `xhigh` and `max`; anything else (`adaptive` is a thinking mode, not a level) is rejected. Fable 5.1, Opus 5.5 and Sonnet 5.5 take all five.",
+        "**Thinking.** Fable 5.1 and Opus 5.5 take adaptive thinking only: `enabled` and `disabled` are rejected. Sonnet 5.5 takes `adaptive`, rejects `enabled` and `disabled`, and also takes `between_tools` (thinking off up front) when the effective effort is `low`, `medium` or `high` (the effort given, or the model's default: `high` on Sonnet 5.5 and Fable 5.1, `medium` on Opus 5.5). Haiku 4.5 takes `enabled` with a `budget_tokens` of at least 1,024 and below `max_tokens`, and `disabled`; it rejects `adaptive` and `between_tools`. No `thinking` option means no `thinking` key.",
+        "**Sampling.** Fable 5.1, Opus 5.5 and Sonnet 5.5 reject `top_p`, `top_k` and any `temperature` other than 1.0. Haiku 4.5 passes all three through.",
+        "**Fast mode** (`speed` of `fast`) exists on Opus 5.5 only and is refused inside a batch; it adds `speed: \"fast\"` and `betas: [\"fast-mode-2026-02-01\"]` to the result. A `speed` of `standard` adds nothing.",
+        "Never change the `options` you were given."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working request builder with seven gaps cut out of it. The model lookup, the `max_tokens` check, the order of the checks, the assembly of the result and the unknown-type refusal are written and correct. Each gap is one small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails every case on an assertion. To see what a gap receives, log its input with the `log` line at the top of the file (`log.debug(...)`); a run shows the lines under the failing case. The names below are Python's; TypeScript, Java and Kotlin use the camel-case forms (`checkEffort`, `checkMode`, `checkBudget`, `checkBetweenTools`, `thinkingObject`, `samplingAllowed`, `fastParams`)."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_check_effort` unlocks `e3`: Haiku has no effort and the level must be a real one.",
+        "`_check_mode` unlocks `e1`: the thinking modes a model does not have.",
+        "`_check_budget` unlocks `e6`: a manual budget of at least 1,024 and below `max_tokens`.",
+        "`_check_between_tools` unlocks `e2`: Sonnet only, and not at `xhigh` or `max` effort.",
+        "`_thinking_object` unlocks `m1` and `e7`: the `thinking` value, with no effort in it.",
+        "`_sampling_allowed` unlocks `e4`: Haiku keeps sampling parameters, the others only a temperature of 1.0.",
+        "`_fast_params` unlocks `e5`: Opus only, never in a batch, with the beta header."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About twenty lines in all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Each course model gets the request it accepts"
+        ],
+        [
+          "`e1`",
+          "Thinking modes a model does not have are refused"
+        ],
+        [
+          "`e2`",
+          "The mode that skips thinking up front is Sonnet only and needs high effort or below"
+        ],
+        [
+          "`e3`",
+          "Effort needs a supporting model and a real level"
+        ],
+        [
+          "`e4`",
+          "Newer models reject sampling parameters and Haiku keeps them"
+        ],
+        [
+          "`e5`",
+          "Fast mode is Opus only, carries its beta header and is never sent in a batch"
+        ],
+        [
+          "`e6`",
+          "A manual budget is at least 1,024 and below `max_tokens`; `max_tokens` is at least 1"
+        ],
+        [
+          "`e7`",
+          "Effort lives in `output_config`, never inside `thinking`, and the options are left unchanged"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Request parameters for thinking, effort and speed, checked per model. See ../../statement.md for the contract.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\nEFFORTS = (\"low\", \"medium\", \"high\", \"xhigh\", \"max\")\nFAST_BETA = \"fast-mode-2026-02-01\"\nDEFAULT_EFFORT = {\"claude-fable-5-1\": \"high\", \"claude-opus-5-5\": \"medium\", \"claude-sonnet-5-5\": \"high\"}\n\n\nclass RejectedRequest(Exception):\n    \"\"\"The API would answer 400. `param` names the offending parameter.\"\"\"\n\n    def __init__(self, param, reason):\n        super().__init__(f\"{param}: {reason}\")\n        self.param, self.reason = param, reason\n\n\ndef _family(model):\n    if model.startswith(\"claude-haiku-4-5\"):\n        return \"claude-haiku-4-5\"\n    if model in DEFAULT_EFFORT:\n        return model\n    raise RejectedRequest(\"model\", f\"unknown model {model}\")\n\n\ndef _check_effort(haiku, effort):\n    \"\"\"Refuse an effort level the model cannot take.\"\"\"\n    if haiku:\n        raise RejectedRequest(\"output_config.effort\", \"this model does not support effort\")\n    if effort not in EFFORTS:\n        raise RejectedRequest(\"output_config.effort\", f\"{effort} is not an effort level\")\n\n\ndef _check_mode(haiku, kind):\n    \"\"\"Refuse a thinking mode the model does not have.\"\"\"\n    if kind == \"adaptive\" and haiku:\n        raise RejectedRequest(\"thinking\", \"adaptive thinking is not available on this model\")\n    if kind == \"enabled\" and not haiku:\n        raise RejectedRequest(\"thinking\", \"manual thinking budgets are not accepted on this model\")\n    if kind == \"disabled\" and not haiku:\n        raise RejectedRequest(\"thinking\", \"thinking cannot be turned off on this model\")\n\n\ndef _check_budget(budget, max_tokens):\n    \"\"\"Refuse a manual thinking budget that is missing, below 1024 or not below max_tokens.\"\"\"\n    if budget is None or budget < 1024 or budget >= max_tokens:\n        raise RejectedRequest(\"thinking.budget_tokens\", \"at least 1024 and below max_tokens\")\n\n\ndef _check_between_tools(family, effort):\n    \"\"\"Refuse between_tools off Sonnet 5.5, or when the effective effort is xhigh or max.\"\"\"\n    if family != \"claude-sonnet-5-5\":\n        raise RejectedRequest(\"thinking\", \"between_tools exists only on Claude Sonnet 5.5\")\n    if (effort or DEFAULT_EFFORT[family]) in (\"xhigh\", \"max\"):\n        raise RejectedRequest(\"thinking\", \"between_tools works at low, medium and high effort only\")\n\n\ndef _thinking_object(kind, budget):\n    \"\"\"The `thinking` value of the request: the type, and the budget for a manual one.\"\"\"\n    if kind == \"enabled\":\n        return {\"type\": \"enabled\", \"budget_tokens\": budget}\n    return {\"type\": kind}\n\n\ndef _sampling_allowed(haiku, name, value):\n    \"\"\"Whether the model accepts this sampling parameter: Haiku all, the others only temperature 1.0.\"\"\"\n    return haiku or (name == \"temperature\" and value == 1.0)\n\n\ndef _fast_params(family, batch):\n    \"\"\"The parameters fast mode adds, or a refusal: Opus 5.5 only, and never in a batch.\"\"\"\n    if family != \"claude-opus-5-5\":\n        raise RejectedRequest(\"speed\", \"fast mode is not available on this model\")\n    if batch:\n        raise RejectedRequest(\"speed\", \"fast mode is not available in a batch\")\n    return {\"speed\": \"fast\", \"betas\": [FAST_BETA]}\n\n\ndef build_params(model, max_tokens, options=None):\n    log.debug(\"build_params input: %r %r %r\", model, max_tokens, options)\n    options = options or {}\n    family = _family(model)\n    haiku = family == \"claude-haiku-4-5\"\n    if max_tokens < 1:\n        raise RejectedRequest(\"max_tokens\", \"must be at least 1\")\n    params = {\"model\": model, \"max_tokens\": max_tokens}\n\n    effort = options.get(\"effort\")\n    if effort is not None:\n        _check_effort(haiku, effort)\n        params[\"output_config\"] = {\"effort\": effort}\n\n    thinking = options.get(\"thinking\")\n    if thinking is not None:\n        kind = thinking.get(\"type\")\n        if kind not in (\"adaptive\", \"enabled\", \"disabled\", \"between_tools\"):\n            raise RejectedRequest(\"thinking\", f\"unknown thinking type {kind}\")\n        if kind == \"between_tools\":\n            _check_between_tools(family, effort)\n        else:\n            _check_mode(haiku, kind)\n        if kind == \"enabled\":\n            _check_budget(thinking.get(\"budget_tokens\"), max_tokens)\n        params[\"thinking\"] = _thinking_object(kind, thinking.get(\"budget_tokens\"))\n\n    for name in (\"temperature\", \"top_p\", \"top_k\"):\n        value = options.get(name)\n        if value is None:\n            continue\n        if not _sampling_allowed(haiku, name, value):\n            raise RejectedRequest(name, \"this model rejects a non-default value\")\n        params[name] = value\n\n    if options.get(\"speed\") == \"fast\":\n        params.update(_fast_params(family, options.get(\"batch\")))\n    return params\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try_it.py"
+        },
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom params import RejectedRequest, build_params\n\nSONNET, HAIKU = \"claude-sonnet-5-5\", \"claude-haiku-4-5-20251001\"\n\n# What the application wants, turned into the request parameters one model accepts.\nprint(\"sonnet adaptive:\", build_params(SONNET, 4096, {\"thinking\": {\"type\": \"adaptive\"}, \"effort\": \"medium\"}))\nprint(\"haiku budget:\", build_params(HAIKU, 4096, {\"thinking\": {\"type\": \"enabled\", \"budget_tokens\": 2048}}))\n\n# A combination the API would answer with a 400 is refused, naming the parameter.\ntry:\n    print(\"haiku with effort:\", build_params(HAIKU, 4096, {\"effort\": \"high\"}))\nexcept RejectedRequest as err:\n    print(\"refused:\", err.param)\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Request parameters for thinking, effort and speed, checked per model. See ../../statement.md for the contract.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\nEFFORTS = (\"low\", \"medium\", \"high\", \"xhigh\", \"max\")\nFAST_BETA = \"fast-mode-2026-02-01\"\nDEFAULT_EFFORT = {\"claude-fable-5-1\": \"high\", \"claude-opus-5-5\": \"medium\", \"claude-sonnet-5-5\": \"high\"}\n\n\nclass RejectedRequest(Exception):\n    \"\"\"The API would answer 400. `param` names the offending parameter.\"\"\"\n\n    def __init__(self, param, reason):\n        super().__init__(f\"{param}: {reason}\")\n        self.param, self.reason = param, reason\n\n\ndef _family(model):\n    if model.startswith(\"claude-haiku-4-5\"):\n        return \"claude-haiku-4-5\"\n    if model in DEFAULT_EFFORT:\n        return model\n    raise RejectedRequest(\"model\", f\"unknown model {model}\")\n\n\ndef _check_effort(haiku, effort):\n    \"\"\"TODO 1 of 7 (finish this to pass e3): refuse an effort level the model cannot take.\n\n    Receives whether the model is Haiku and the effort given. Raises RejectedRequest(\"output_config.effort\", ...) for Haiku (it has no effort) and for a level that is not in EFFORTS.\n    Example: _check_effort(True, \"low\") raises, _check_effort(False, \"adaptive\") raises, _check_effort(False, \"high\") returns\n    \"\"\"\n\n\ndef _check_mode(haiku, kind):\n    \"\"\"TODO 2 of 7 (finish this to pass e1): refuse a thinking mode the model does not have.\n\n    Receives whether the model is Haiku and the thinking type. Raises RejectedRequest(\"thinking\", ...) for `adaptive` on Haiku, and for `enabled` or `disabled` on any model that is not Haiku.\n    Example: _check_mode(False, \"disabled\") raises, _check_mode(True, \"disabled\") returns\n    \"\"\"\n\n\ndef _check_budget(budget, max_tokens):\n    \"\"\"TODO 3 of 7 (finish this to pass e6): refuse a manual thinking budget that does not fit.\n\n    Receives the budget (None when missing) and max_tokens. Raises RejectedRequest(\"thinking.budget_tokens\", ...) when the budget is missing, below 1024 or not below max_tokens.\n    Example: _check_budget(1023, 4096) raises, _check_budget(2048, 2048) raises, _check_budget(1024, 2048) returns\n    \"\"\"\n\n\ndef _check_between_tools(family, effort):\n    \"\"\"TODO 4 of 7 (finish this to pass e2): refuse between_tools where it does not work.\n\n    Receives the model family and the effort given (None when absent). Raises RejectedRequest(\"thinking\", ...) unless the family is \"claude-sonnet-5-5\", and when the effective\n    effort (the one given, else DEFAULT_EFFORT[family]) is \"xhigh\" or \"max\".\n    Example: _check_between_tools(\"claude-sonnet-5-5\", \"max\") raises, _check_between_tools(\"claude-sonnet-5-5\", None) returns\n    \"\"\"\n\n\ndef _thinking_object(kind, budget):\n    \"\"\"TODO 5 of 7 (finish this to pass m1 and e7): the `thinking` value of the request.\n\n    Receives the thinking type and the budget (None unless `enabled`). Returns {\"type\": kind}, plus \"budget_tokens\": budget for `enabled`. Effort never goes in here.\n    Example: _thinking_object(\"adaptive\", None) -> {\"type\": \"adaptive\"}, _thinking_object(\"enabled\", 2048) -> {\"type\": \"enabled\", \"budget_tokens\": 2048}\n    \"\"\"\n    return {}\n\n\ndef _sampling_allowed(haiku, name, value):\n    \"\"\"TODO 6 of 7 (finish this to pass e4): whether the model accepts this sampling parameter.\n\n    Receives whether the model is Haiku, the parameter name (temperature, top_p or top_k) and its value. Returns True for Haiku, and for the others only a temperature of exactly 1.0.\n    Example: _sampling_allowed(False, \"temperature\", 0.2) -> False, _sampling_allowed(True, \"top_k\", 40) -> True\n    \"\"\"\n    return True\n\n\ndef _fast_params(family, batch):\n    \"\"\"TODO 7 of 7 (finish this to pass e5): the parameters fast mode adds, or a refusal.\n\n    Receives the model family and whether the request goes into a batch. Raises RejectedRequest(\"speed\", ...) unless the family is \"claude-opus-5-5\", and when `batch` is true.\n    Otherwise returns {\"speed\": \"fast\", \"betas\": [FAST_BETA]}.\n    Example: _fast_params(\"claude-opus-5-5\", False) -> {\"speed\": \"fast\", \"betas\": [\"fast-mode-2026-02-01\"]}\n    \"\"\"\n    return {}\n\n\ndef build_params(model, max_tokens, options=None):\n    log.debug(\"build_params input: %r %r %r\", model, max_tokens, options)\n    options = options or {}\n    family = _family(model)\n    haiku = family == \"claude-haiku-4-5\"\n    if max_tokens < 1:\n        raise RejectedRequest(\"max_tokens\", \"must be at least 1\")\n    params = {\"model\": model, \"max_tokens\": max_tokens}\n\n    effort = options.get(\"effort\")\n    if effort is not None:\n        _check_effort(haiku, effort)\n        params[\"output_config\"] = {\"effort\": effort}\n\n    thinking = options.get(\"thinking\")\n    if thinking is not None:\n        kind = thinking.get(\"type\")\n        if kind not in (\"adaptive\", \"enabled\", \"disabled\", \"between_tools\"):\n            raise RejectedRequest(\"thinking\", f\"unknown thinking type {kind}\")\n        if kind == \"between_tools\":\n            _check_between_tools(family, effort)\n        else:\n            _check_mode(haiku, kind)\n        if kind == \"enabled\":\n            _check_budget(thinking.get(\"budget_tokens\"), max_tokens)\n        params[\"thinking\"] = _thinking_object(kind, thinking.get(\"budget_tokens\"))\n\n    for name in (\"temperature\", \"top_p\", \"top_k\"):\n        value = options.get(name)\n        if value is None:\n            continue\n        if not _sampling_allowed(haiku, name, value):\n            raise RejectedRequest(name, \"this model rejects a non-default value\")\n        params[name] = value\n\n    if options.get(\"speed\") == \"fast\":\n        params.update(_fast_params(family, options.get(\"batch\")))\n    return params\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try_it.py"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "\"\"\"Run executes this file. Change the calls to try your code; Submit runs the tests.\"\"\"\nimport logging\n\n# Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogging.basicConfig(level=logging.DEBUG, format=\"%(levelname)s %(message)s\")\n\nfrom params import RejectedRequest, build_params\n\nSONNET, HAIKU = \"claude-sonnet-5-5\", \"claude-haiku-4-5-20251001\"\n\n# What the application wants, turned into the request parameters one model accepts.\nprint(\"sonnet adaptive:\", build_params(SONNET, 4096, {\"thinking\": {\"type\": \"adaptive\"}, \"effort\": \"medium\"}))\nprint(\"haiku budget:\", build_params(HAIKU, 4096, {\"thinking\": {\"type\": \"enabled\", \"budget_tokens\": 2048}}))\n\n# A combination the API would answer with a 400 is refused, naming the parameter.\ntry:\n    print(\"haiku with effort:\", build_params(HAIKU, 4096, {\"effort\": \"high\"}))\nexcept RejectedRequest as err:\n    print(\"refused:\", err.param)\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 6,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "78bc94afccfdfcf59719eaaaafcd1b90633f6ca87af70abee87c239e25f6b11d",
+  "starting_code": "\"\"\"Request parameters for thinking, effort and speed, checked per model. See ../../statement.md for the contract.\"\"\"\nimport logging\n\nlog = logging.getLogger(__name__)\n\nEFFORTS = (\"low\", \"medium\", \"high\", \"xhigh\", \"max\")\nFAST_BETA = \"fast-mode-2026-02-01\"\nDEFAULT_EFFORT = {\"claude-fable-5-1\": \"high\", \"claude-opus-5-5\": \"medium\", \"claude-sonnet-5-5\": \"high\"}\n\n\nclass RejectedRequest(Exception):\n    \"\"\"The API would answer 400. `param` names the offending parameter.\"\"\"\n\n    def __init__(self, param, reason):\n        super().__init__(f\"{param}: {reason}\")\n        self.param, self.reason = param, reason\n\n\ndef _family(model):\n    if model.startswith(\"claude-haiku-4-5\"):\n        return \"claude-haiku-4-5\"\n    if model in DEFAULT_EFFORT:\n        return model\n    raise RejectedRequest(\"model\", f\"unknown model {model}\")\n\n\ndef _check_effort(haiku, effort):\n    \"\"\"TODO 1 of 7 (finish this to pass e3): refuse an effort level the model cannot take.\n\n    Receives whether the model is Haiku and the effort given. Raises RejectedRequest(\"output_config.effort\", ...) for Haiku (it has no effort) and for a level that is not in EFFORTS.\n    Example: _check_effort(True, \"low\") raises, _check_effort(False, \"adaptive\") raises, _check_effort(False, \"high\") returns\n    \"\"\"\n\n\ndef _check_mode(haiku, kind):\n    \"\"\"TODO 2 of 7 (finish this to pass e1): refuse a thinking mode the model does not have.\n\n    Receives whether the model is Haiku and the thinking type. Raises RejectedRequest(\"thinking\", ...) for `adaptive` on Haiku, and for `enabled` or `disabled` on any model that is not Haiku.\n    Example: _check_mode(False, \"disabled\") raises, _check_mode(True, \"disabled\") returns\n    \"\"\"\n\n\ndef _check_budget(budget, max_tokens):\n    \"\"\"TODO 3 of 7 (finish this to pass e6): refuse a manual thinking budget that does not fit.\n\n    Receives the budget (None when missing) and max_tokens. Raises RejectedRequest(\"thinking.budget_tokens\", ...) when the budget is missing, below 1024 or not below max_tokens.\n    Example: _check_budget(1023, 4096) raises, _check_budget(2048, 2048) raises, _check_budget(1024, 2048) returns\n    \"\"\"\n\n\ndef _check_between_tools(family, effort):\n    \"\"\"TODO 4 of 7 (finish this to pass e2): refuse between_tools where it does not work.\n\n    Receives the model family and the effort given (None when absent). Raises RejectedRequest(\"thinking\", ...) unless the family is \"claude-sonnet-5-5\", and when the effective\n    effort (the one given, else DEFAULT_EFFORT[family]) is \"xhigh\" or \"max\".\n    Example: _check_between_tools(\"claude-sonnet-5-5\", \"max\") raises, _check_between_tools(\"claude-sonnet-5-5\", None) returns\n    \"\"\"\n\n\ndef _thinking_object(kind, budget):\n    \"\"\"TODO 5 of 7 (finish this to pass m1 and e7): the `thinking` value of the request.\n\n    Receives the thinking type and the budget (None unless `enabled`). Returns {\"type\": kind}, plus \"budget_tokens\": budget for `enabled`. Effort never goes in here.\n    Example: _thinking_object(\"adaptive\", None) -> {\"type\": \"adaptive\"}, _thinking_object(\"enabled\", 2048) -> {\"type\": \"enabled\", \"budget_tokens\": 2048}\n    \"\"\"\n    return {}\n\n\ndef _sampling_allowed(haiku, name, value):\n    \"\"\"TODO 6 of 7 (finish this to pass e4): whether the model accepts this sampling parameter.\n\n    Receives whether the model is Haiku, the parameter name (temperature, top_p or top_k) and its value. Returns True for Haiku, and for the others only a temperature of exactly 1.0.\n    Example: _sampling_allowed(False, \"temperature\", 0.2) -> False, _sampling_allowed(True, \"top_k\", 40) -> True\n    \"\"\"\n    return True\n\n\ndef _fast_params(family, batch):\n    \"\"\"TODO 7 of 7 (finish this to pass e5): the parameters fast mode adds, or a refusal.\n\n    Receives the model family and whether the request goes into a batch. Raises RejectedRequest(\"speed\", ...) unless the family is \"claude-opus-5-5\", and when `batch` is true.\n    Otherwise returns {\"speed\": \"fast\", \"betas\": [FAST_BETA]}.\n    Example: _fast_params(\"claude-opus-5-5\", False) -> {\"speed\": \"fast\", \"betas\": [\"fast-mode-2026-02-01\"]}\n    \"\"\"\n    return {}\n\n\ndef build_params(model, max_tokens, options=None):\n    log.debug(\"build_params input: %r %r %r\", model, max_tokens, options)\n    options = options or {}\n    family = _family(model)\n    haiku = family == \"claude-haiku-4-5\"\n    if max_tokens < 1:\n        raise RejectedRequest(\"max_tokens\", \"must be at least 1\")\n    params = {\"model\": model, \"max_tokens\": max_tokens}\n\n    effort = options.get(\"effort\")\n    if effort is not None:\n        _check_effort(haiku, effort)\n        params[\"output_config\"] = {\"effort\": effort}\n\n    thinking = options.get(\"thinking\")\n    if thinking is not None:\n        kind = thinking.get(\"type\")\n        if kind not in (\"adaptive\", \"enabled\", \"disabled\", \"between_tools\"):\n            raise RejectedRequest(\"thinking\", f\"unknown thinking type {kind}\")\n        if kind == \"between_tools\":\n            _check_between_tools(family, effort)\n        else:\n            _check_mode(haiku, kind)\n        if kind == \"enabled\":\n            _check_budget(thinking.get(\"budget_tokens\"), max_tokens)\n        params[\"thinking\"] = _thinking_object(kind, thinking.get(\"budget_tokens\"))\n\n    for name in (\"temperature\", \"top_p\", \"top_k\"):\n        value = options.get(name)\n        if value is None:\n            continue\n        if not _sampling_allowed(haiku, name, value):\n            raise RejectedRequest(name, \"this model rejects a non-default value\")\n        params[name] = value\n\n    if options.get(\"speed\") == \"fast\":\n        params.update(_fast_params(family, options.get(\"batch\")))\n    return params\n",
+  "exercise": {
+    "main_path": "practice/level-2/19-thinking-effort-and-speed/prose/unit-02/practice-1/params.py",
+    "test_path": "practice/level-2/19-thinking-effort-and-speed/prose/unit-02/practice-1/test_params.py",
+    "run_command": [
+      "python3",
+      "practice/level-2/19-thinking-effort-and-speed/prose/unit-02/practice-1/try_it.py"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-2/19-thinking-effort-and-speed/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-2/19-thinking-effort-and-speed/prose/unit-02/practice-1/test_params.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_each_course_model_gets_the_request_it_accepts",
+        "kind": "main",
+        "says": "Each course model gets the request it accepts"
+      },
+      {
+        "id": "test_e1_thinking_modes_a_model_does_not_have_are_refused",
+        "kind": "edge",
+        "says": "Thinking modes a model does not have are refused"
+      },
+      {
+        "id": "test_e2_the_mode_that_skips_thinking_up_front_is_sonnet_only_and_needs_high_effort_or_below",
+        "kind": "edge",
+        "says": "The mode that skips thinking up front is Sonnet only and needs high effort or below"
+      },
+      {
+        "id": "test_e3_effort_needs_a_supporting_model_and_a_real_level",
+        "kind": "edge",
+        "says": "Effort needs a supporting model and a real level"
+      },
+      {
+        "id": "test_e4_newer_models_reject_sampling_parameters_and_haiku_keeps_them",
+        "kind": "edge",
+        "says": "Newer models reject sampling parameters and Haiku keeps them"
+      },
+      {
+        "id": "test_e5_fast_mode_is_opus_only_with_its_beta_header_and_never_in_a_batch",
+        "kind": "edge",
+        "says": "Fast mode is Opus only, carries its beta header and is never sent in a batch"
+      },
+      {
+        "id": "test_e6_a_manual_budget_is_at_least_1024_and_below_max_tokens",
+        "kind": "edge",
+        "says": "A manual budget is at least 1,024 and below max_tokens; max_tokens is at least 1"
+      },
+      {
+        "id": "test_e7_effort_lives_in_output_config_and_never_inside_thinking",
+        "kind": "edge",
+        "says": "Effort lives in output_config, never inside thinking, and the options are left unchanged"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/19-thinking-effort-and-speed/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/19-thinking-effort-and-speed/02-fast-mode-tools-and-caching.md",
+    "concepts": [
+      "the practice of Fast mode, thinking with tools, and thinking's effect on caching is solved"
+    ],
+    "files": [
+      "practice/level-2/19-thinking-effort-and-speed/prose/unit-02/practice-1/try_it.py"
+    ]
+  },
+  "lang": "python",
+  "edition": "thinking-effort-and-speed-u2"
+}

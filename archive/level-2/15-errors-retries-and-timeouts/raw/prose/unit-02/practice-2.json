@@ -1,0 +1,285 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "15-errors-retries-and-timeouts"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Practice: a retry policy, graded on scripted failures (TypeScript)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: a retry policy, graded on scripted failures"
+    },
+    {
+      "type": "para",
+      "text": "Write the function that decides whether to try an API call again, and for how long to wait. No test waits: the sleep is injected and the failures are scripted."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working retry policy with seven gaps cut out of it. The plumbing is written and correct: the given types, `call_with_retry` itself (the loop, the attempt count, the status check, the sleep and the decision to give up), and the way a retryable status and a spend cap combine. Each gap is a small function with its signature, a comment that says what it receives and returns with one example, and the cases it unlocks. A gap returns a neutral value, so the starter runs and fails the cases on an assertion. To see what a gap receives, debug it by logging its input with the `log` line at the top of the file; a run shows the lines under the failing case. Write them in this order (Python names; the TypeScript, Java and Kotlin names are the camel-case forms, with `delayFor` for `_delay`):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`_status_retryable` unlocks `m1` and `e1`: which statuses may be tried again.",
+        "`_spend_cap` unlocks `e4`: a 429 that says the spend limit is reached.",
+        "`_error_type` unlocks `e1`, `e4` and `e6`: the API's error type, or `unknown`.",
+        "`_request_id` unlocks `e1`, `e4` and `e6`: the `request-id` header.",
+        "`_connection_failure` unlocks `e5`: status 0 and `connection_error`.",
+        "`_retry_after` unlocks `e2`: the header as seconds.",
+        "`_delay` unlocks `m1`, `e3` and `e5`: the doubling delay, the cap and the jitter applied last."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gaps 1 and 7. A few lines each, about fifteen in all."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The given types"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Name",
+        "Meaning"
+      ],
+      "rows": [
+        [
+          "`Response`",
+          "`status`, `headers` (lower-case names) and `body` (the parsed JSON object, or empty)"
+        ],
+        [
+          "`send`",
+          "a function with no arguments that returns a `Response` or raises `TransportError` (the connection failed or timed out, so no reply came)"
+        ],
+        [
+          "`sleep`",
+          "a function that takes the seconds to wait; the tests record them"
+        ],
+        [
+          "`CallFailed`",
+          "the final failure: `status`, `error_type`, `attempts`, `request_id` (TypeScript, Java and Kotlin: `errorType`, `requestId`)"
+        ],
+        [
+          "policy",
+          "`max_attempts` (default 4), `base_delay` (0.5), `cap` (8.0) and `jitter`, a function applied to each computed delay (default: the delay itself). Python takes them as keyword arguments, TypeScript as an options object, Java and Kotlin as a `Policy`"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "`call_with_retry(send, sleep, ...)` (TypeScript `callWithRetry`, Java `Retry.callWithRetry`, Kotlin `callWithRetry`)"
+    },
+    {
+      "type": "para",
+      "text": "Call `send` up to `max_attempts` times."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "A reply with a status **below 400** is returned at once.",
+        "**Retry** on a connection failure and on the statuses 408, 409, 429 and every 500 and above (529 included). Every other status of 400 and above is **not** retried: raise `CallFailed` with that attempt count.",
+        "A **429 whose body says `error.details.error_code` is `enforced_spend_limit_reached`** is a spend cap, not a rate limit: retrying cannot succeed, so do not retry it.",
+        "The wait before attempt *n + 1* is `jitter(min(cap, base_delay * 2^(n-1)))`, where *n* is the attempt that just failed (`n` starts at 1).",
+        "If the failed reply has a **`retry-after`** header (seconds), the wait is at least that long: wait the larger of the jittered delay and the header.",
+        "**Never wait after the last attempt.** When the attempts run out, raise `CallFailed` with the last reply's status, its `error.type` (`unknown` when the body has none), the number of attempts made and the `request-id` header. When the last failure was a lost connection: status `0`, error type `connection_error`, no request id."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Overloaded twice, then success: the good reply comes back after waits of 0.5 and 1.0"
+        ],
+        [
+          "`e1`",
+          "400, 401, 404 and 413 are not retried"
+        ],
+        [
+          "`e2`",
+          "`retry-after` is a floor for the wait"
+        ],
+        [
+          "`e3`",
+          "The delay doubles up to the cap, and the jitter is applied last"
+        ],
+        [
+          "`e4`",
+          "A spend-cap 429 is not retried"
+        ],
+        [
+          "`e5`",
+          "Connection errors are retried like server errors, and give `connection_error` at the end"
+        ],
+        [
+          "`e6`",
+          "Giving up reports the last reply, makes exactly `max_attempts` calls and waits one time fewer"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// A retry policy for API calls. See ../../statement.md for the contract.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"retry\");\n\nexport type Response = { status: number; headers: Record<string, string>; body: any }; // header names in lower case; body is parsed JSON or {}\n\n/** The connection failed or timed out: no reply was received. */\nexport class TransportError extends Error {}\n\n/** The call did not succeed. errorType is the API's error type, \"connection_error\" or \"unknown\". */\nexport class CallFailed extends Error {\n  status: number;\n  errorType: string;\n  attempts: number;\n  requestId: string | null;\n  constructor(status: number, errorType: string, attempts: number, requestId: string | null = null) {\n    super(`${status} ${errorType} after ${attempts} attempt(s)`);\n    this.status = status;\n    this.errorType = errorType;\n    this.attempts = attempts;\n    this.requestId = requestId;\n  }\n}\n\nexport type Options = { maxAttempts?: number; baseDelay?: number; cap?: number; jitter?: (delay: number) => number };\n\nfunction statusRetryable(status: number): boolean {\n  return status === 408 || status === 409 || status === 429 || status >= 500;\n}\n\nfunction spendCap(response: Response): boolean {\n  return response.body?.error?.details?.error_code === \"enforced_spend_limit_reached\";\n}\n\nfunction retryable(response: Response): boolean {\n  return statusRetryable(response.status) && !spendCap(response);\n}\n\nfunction errorType(response: Response): string {\n  return response.body?.error?.type ?? \"unknown\";\n}\n\nfunction requestId(response: Response): string | null {\n  return response.headers[\"request-id\"] ?? null;\n}\n\nfunction failure(response: Response, attempts: number): CallFailed {\n  return new CallFailed(response.status, errorType(response), attempts, requestId(response));\n}\n\nfunction connectionFailure(attempts: number): CallFailed {\n  return new CallFailed(0, \"connection_error\", attempts);\n}\n\nfunction retryAfter(response: Response): number {\n  const seconds = Number.parseFloat(response.headers[\"retry-after\"] ?? \"\");\n  return Number.isFinite(seconds) && seconds > 0 ? seconds : 0;\n}\n\nfunction delayFor(attempt: number, baseDelay: number, cap: number, jitter: (delay: number) => number): number {\n  return jitter(Math.min(cap, baseDelay * 2 ** (attempt - 1)));\n}\n\nexport function callWithRetry(send: () => Response, sleep: (seconds: number) => void, options: Options = {}): Response {\n  log.debug(\"callWithRetry input\", options);\n  const { maxAttempts = 4, baseDelay = 0.5, cap = 8, jitter = (delay: number) => delay } = options;\n  for (let attempt = 1; ; attempt++) {\n    let wait = 0;\n    try {\n      const response = send();\n      if (response.status < 400) return response;\n      if (!retryable(response) || attempt >= maxAttempts) throw failure(response, attempt);\n      wait = retryAfter(response);\n    } catch (err) {\n      if (!(err instanceof TransportError)) throw err;\n      if (attempt >= maxAttempts) throw connectionFailure(attempt);\n    }\n    sleep(Math.max(delayFor(attempt, baseDelay, cap, jitter), wait));\n  }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: try-it.ts"
+        },
+        {
+          "type": "code",
+          "lang": "typescript",
+          "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { CallFailed, callWithRetry } from \"./retry.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\nconst failure = (status: number, kind = \"api_error\") =>\n  ({ status, headers: {}, body: { type: \"error\", error: { type: kind, message: \"x\" } } });\n\n// A scripted send(), like the one the tests use: overloaded twice, then a good reply.\nconst replies = [failure(529, \"overloaded_error\"), failure(503), { status: 200, headers: {}, body: { type: \"message\" } }];\nlet calls = 0;\nconst send = () => {\n  calls++;\n  return replies.shift()!;\n};\n\n// The sleep is injected, so nothing really waits: it just records the delays asked for.\nconst waits: number[] = [];\ntry {\n  const result = callWithRetry(send, (seconds) => waits.push(seconds));\n  console.log(\"final status:\", result?.status);\n} catch (err) {\n  if (err instanceof CallFailed) console.log(\"gave up:\", err.message);\n  else throw err;\n}\nconsole.log(\"calls made:\", calls);\nconsole.log(\"waits requested:\", waits);\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// A retry policy for API calls. See ../../statement.md for the contract.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"retry\");\n\nexport type Response = { status: number; headers: Record<string, string>; body: any }; // header names in lower case; body is parsed JSON or {}\n\n/** The connection failed or timed out: no reply was received. */\nexport class TransportError extends Error {}\n\n/** The call did not succeed. errorType is the API's error type, \"connection_error\" or \"unknown\". */\nexport class CallFailed extends Error {\n  status: number;\n  errorType: string;\n  attempts: number;\n  requestId: string | null;\n  constructor(status: number, errorType: string, attempts: number, requestId: string | null = null) {\n    super(`${status} ${errorType} after ${attempts} attempt(s)`);\n    this.status = status;\n    this.errorType = errorType;\n    this.attempts = attempts;\n    this.requestId = requestId;\n  }\n}\n\nexport type Options = { maxAttempts?: number; baseDelay?: number; cap?: number; jitter?: (delay: number) => number };\n\nfunction statusRetryable(status: number): boolean {\n  // TODO 1 of 7 (finish this to pass m1 and e1): may a reply with this status be tried again?\n  // Receives the HTTP status. Returns true for 408, 409, 429 and every status of 500 and above (529 included); false for every other one.\n  // Example: statusRetryable(529) -> true, statusRetryable(404) -> false\n  return false;\n}\n\nfunction spendCap(response: Response): boolean {\n  // TODO 2 of 7 (finish this to pass e4): is this 429 a spend cap rather than a rate limit?\n  // Receives the Response. Returns true when its body's error.details.error_code is \"enforced_spend_limit_reached\" (any level may be\n  // missing); retrying cannot succeed then.\n  // Example: a body { error: { details: { error_code: \"enforced_spend_limit_reached\" } } } -> true; {} -> false\n  return false;\n}\n\nfunction retryable(response: Response): boolean {\n  return statusRetryable(response.status) && !spendCap(response);\n}\n\nfunction errorType(response: Response): string {\n  // TODO 3 of 7 (finish this to pass e1, e4 and e6): the API's error type of a reply.\n  // Receives the Response. Returns body.error.type, or \"unknown\" when the body has none.\n  // Example: a body { error: { type: \"overloaded_error\" } } -> \"overloaded_error\"; {} -> \"unknown\"\n  return \"\";\n}\n\nfunction requestId(response: Response): string | null {\n  // TODO 4 of 7 (finish this to pass e1, e4 and e6): the request id of a reply.\n  // Receives the Response. Returns its `request-id` header (header names are lower case), or null when there is none.\n  // Example: headers { \"request-id\": \"req_1\" } -> \"req_1\"; {} -> null\n  return null;\n}\n\nfunction failure(response: Response, attempts: number): CallFailed {\n  return new CallFailed(response.status, errorType(response), attempts, requestId(response));\n}\n\nfunction connectionFailure(attempts: number): CallFailed {\n  // TODO 5 of 7 (finish this to pass e5): the failure when the last attempt lost its connection.\n  // Receives the number of attempts made. Returns a CallFailed with status 0, error type \"connection_error\", that many attempts and no\n  // request id. Example: connectionFailure(2) -> CallFailed(0, \"connection_error\", 2)\n  return new CallFailed(0, \"\", attempts);\n}\n\nfunction retryAfter(response: Response): number {\n  // TODO 6 of 7 (finish this to pass e2): the wait the server asked for.\n  // Receives the Response. Returns its `retry-after` header as seconds (never below 0); 0 when the header is absent or not a number.\n  // Example: headers { \"retry-after\": \"3\" } -> 3; {} -> 0; { \"retry-after\": \"soon\" } -> 0\n  return 0;\n}\n\nfunction delayFor(attempt: number, baseDelay: number, cap: number, jitter: (delay: number) => number): number {\n  // TODO 7 of 7 (finish this to pass m1, e3 and e5): the wait before the next attempt.\n  // Receives the attempt that just failed (1 for the first), baseDelay, cap and the jitter function. Returns\n  // jitter(min(cap, baseDelay * 2 ** (attempt - 1))): the jitter is applied last, after the cap.\n  // Example: delayFor(3, 1, 5, (d) => d) -> 4, delayFor(4, 1, 5, (d) => d) -> 5\n  return 0;\n}\n\nexport function callWithRetry(send: () => Response, sleep: (seconds: number) => void, options: Options = {}): Response {\n  log.debug(\"callWithRetry input\", options);\n  const { maxAttempts = 4, baseDelay = 0.5, cap = 8, jitter = (delay: number) => delay } = options;\n  for (let attempt = 1; ; attempt++) {\n    let wait = 0;\n    try {\n      const response = send();\n      if (response.status < 400) return response;\n      if (!retryable(response) || attempt >= maxAttempts) throw failure(response, attempt);\n      wait = retryAfter(response);\n    } catch (err) {\n      if (!(err instanceof TransportError)) throw err;\n      if (attempt >= maxAttempts) throw connectionFailure(attempt);\n    }\n    sleep(Math.max(delayFor(attempt, baseDelay, cap, jitter), wait));\n  }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: try-it.ts"
+    },
+    {
+      "type": "code",
+      "lang": "typescript",
+      "text": "// Run executes this file. Change the calls to try your code; Submit runs the tests.\nimport { logTo } from \"./logger.ts\";\nimport { CallFailed, callWithRetry } from \"./retry.ts\";\n\n// Turn the logger up, so the `log.debug` lines of your code show under the printed lines.\nlogTo(\"try-it\");\n\nconst failure = (status: number, kind = \"api_error\") =>\n  ({ status, headers: {}, body: { type: \"error\", error: { type: kind, message: \"x\" } } });\n\n// A scripted send(), like the one the tests use: overloaded twice, then a good reply.\nconst replies = [failure(529, \"overloaded_error\"), failure(503), { status: 200, headers: {}, body: { type: \"message\" } }];\nlet calls = 0;\nconst send = () => {\n  calls++;\n  return replies.shift()!;\n};\n\n// The sleep is injected, so nothing really waits: it just records the delays asked for.\nconst waits: number[] = [];\ntry {\n  const result = callWithRetry(send, (seconds) => waits.push(seconds));\n  console.log(\"final status:\", result?.status);\n} catch (err) {\n  if (err instanceof CallFailed) console.log(\"gave up:\", err.message);\n  else throw err;\n}\nconsole.log(\"calls made:\", calls);\nconsole.log(\"waits requested:\", waits);\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 5,
+    "code": 2,
+    "tables": 2,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "2d5f51c8f01aad9b628ed9565b1155d812dba2cd0ae828889d9d6e5a7cc6f57c",
+  "starting_code": "// A retry policy for API calls. See ../../statement.md for the contract.\nimport { logger } from \"./logger.ts\";\nconst log = logger(\"retry\");\n\nexport type Response = { status: number; headers: Record<string, string>; body: any }; // header names in lower case; body is parsed JSON or {}\n\n/** The connection failed or timed out: no reply was received. */\nexport class TransportError extends Error {}\n\n/** The call did not succeed. errorType is the API's error type, \"connection_error\" or \"unknown\". */\nexport class CallFailed extends Error {\n  status: number;\n  errorType: string;\n  attempts: number;\n  requestId: string | null;\n  constructor(status: number, errorType: string, attempts: number, requestId: string | null = null) {\n    super(`${status} ${errorType} after ${attempts} attempt(s)`);\n    this.status = status;\n    this.errorType = errorType;\n    this.attempts = attempts;\n    this.requestId = requestId;\n  }\n}\n\nexport type Options = { maxAttempts?: number; baseDelay?: number; cap?: number; jitter?: (delay: number) => number };\n\nfunction statusRetryable(status: number): boolean {\n  // TODO 1 of 7 (finish this to pass m1 and e1): may a reply with this status be tried again?\n  // Receives the HTTP status. Returns true for 408, 409, 429 and every status of 500 and above (529 included); false for every other one.\n  // Example: statusRetryable(529) -> true, statusRetryable(404) -> false\n  return false;\n}\n\nfunction spendCap(response: Response): boolean {\n  // TODO 2 of 7 (finish this to pass e4): is this 429 a spend cap rather than a rate limit?\n  // Receives the Response. Returns true when its body's error.details.error_code is \"enforced_spend_limit_reached\" (any level may be\n  // missing); retrying cannot succeed then.\n  // Example: a body { error: { details: { error_code: \"enforced_spend_limit_reached\" } } } -> true; {} -> false\n  return false;\n}\n\nfunction retryable(response: Response): boolean {\n  return statusRetryable(response.status) && !spendCap(response);\n}\n\nfunction errorType(response: Response): string {\n  // TODO 3 of 7 (finish this to pass e1, e4 and e6): the API's error type of a reply.\n  // Receives the Response. Returns body.error.type, or \"unknown\" when the body has none.\n  // Example: a body { error: { type: \"overloaded_error\" } } -> \"overloaded_error\"; {} -> \"unknown\"\n  return \"\";\n}\n\nfunction requestId(response: Response): string | null {\n  // TODO 4 of 7 (finish this to pass e1, e4 and e6): the request id of a reply.\n  // Receives the Response. Returns its `request-id` header (header names are lower case), or null when there is none.\n  // Example: headers { \"request-id\": \"req_1\" } -> \"req_1\"; {} -> null\n  return null;\n}\n\nfunction failure(response: Response, attempts: number): CallFailed {\n  return new CallFailed(response.status, errorType(response), attempts, requestId(response));\n}\n\nfunction connectionFailure(attempts: number): CallFailed {\n  // TODO 5 of 7 (finish this to pass e5): the failure when the last attempt lost its connection.\n  // Receives the number of attempts made. Returns a CallFailed with status 0, error type \"connection_error\", that many attempts and no\n  // request id. Example: connectionFailure(2) -> CallFailed(0, \"connection_error\", 2)\n  return new CallFailed(0, \"\", attempts);\n}\n\nfunction retryAfter(response: Response): number {\n  // TODO 6 of 7 (finish this to pass e2): the wait the server asked for.\n  // Receives the Response. Returns its `retry-after` header as seconds (never below 0); 0 when the header is absent or not a number.\n  // Example: headers { \"retry-after\": \"3\" } -> 3; {} -> 0; { \"retry-after\": \"soon\" } -> 0\n  return 0;\n}\n\nfunction delayFor(attempt: number, baseDelay: number, cap: number, jitter: (delay: number) => number): number {\n  // TODO 7 of 7 (finish this to pass m1, e3 and e5): the wait before the next attempt.\n  // Receives the attempt that just failed (1 for the first), baseDelay, cap and the jitter function. Returns\n  // jitter(min(cap, baseDelay * 2 ** (attempt - 1))): the jitter is applied last, after the cap.\n  // Example: delayFor(3, 1, 5, (d) => d) -> 4, delayFor(4, 1, 5, (d) => d) -> 5\n  return 0;\n}\n\nexport function callWithRetry(send: () => Response, sleep: (seconds: number) => void, options: Options = {}): Response {\n  log.debug(\"callWithRetry input\", options);\n  const { maxAttempts = 4, baseDelay = 0.5, cap = 8, jitter = (delay: number) => delay } = options;\n  for (let attempt = 1; ; attempt++) {\n    let wait = 0;\n    try {\n      const response = send();\n      if (response.status < 400) return response;\n      if (!retryable(response) || attempt >= maxAttempts) throw failure(response, attempt);\n      wait = retryAfter(response);\n    } catch (err) {\n      if (!(err instanceof TransportError)) throw err;\n      if (attempt >= maxAttempts) throw connectionFailure(attempt);\n    }\n    sleep(Math.max(delayFor(attempt, baseDelay, cap, jitter), wait));\n  }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/15-errors-retries-and-timeouts/prose/unit-02/practice-2/retry.ts",
+    "test_path": "practice/level-2/15-errors-retries-and-timeouts/prose/unit-02/practice-2/retry.test.ts",
+    "run_command": [
+      "node",
+      "practice/level-2/15-errors-retries-and-timeouts/prose/unit-02/practice-2/try-it.ts"
+    ],
+    "test_command": [
+      "node",
+      "--test",
+      "--test-reporter=spec",
+      "--test-reporter-destination=stdout",
+      "--test-reporter=./practice/level-2/15-errors-retries-and-timeouts/prose/unit-02/practice-2/junit-file.mjs",
+      "--test-reporter-destination=stdout",
+      "practice/level-2/15-errors-retries-and-timeouts/prose/unit-02/practice-2/retry.test.ts"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1 overloaded twice then success returns the good reply after two waits",
+        "kind": "main",
+        "says": "Overloaded twice, then success: the good reply comes back after waits of 0.5 and 1.0"
+      },
+      {
+        "id": "e1 client errors are not retried",
+        "kind": "edge",
+        "says": "400, 401, 404 and 413 are not retried"
+      },
+      {
+        "id": "e2 retry after is a floor for the wait",
+        "kind": "edge",
+        "says": "retry-after is a floor for the wait"
+      },
+      {
+        "id": "e3 delay doubles up to the cap and the jitter is applied last",
+        "kind": "edge",
+        "says": "The delay doubles up to the cap, and the jitter is applied last"
+      },
+      {
+        "id": "e4 a spend cap 429 is not retried",
+        "kind": "edge",
+        "says": "A spend-cap 429 is not retried"
+      },
+      {
+        "id": "e5 connection errors are retried like server errors",
+        "kind": "edge",
+        "says": "Connection errors are retried like server errors, and give connection_error at the end"
+      },
+      {
+        "id": "e6 giving up reports the last reply and does not wait after the last attempt",
+        "kind": "edge",
+        "says": "Giving up reports the last reply, makes exactly max_attempts calls and waits one time fewer"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/15-errors-retries-and-timeouts/prose/unit-02/practice-2/target/report.xml"
+    },
+    "origin": "course/15-errors-retries-and-timeouts/02-retry-back-off-and-idempotency.md",
+    "concepts": [
+      "the practice of Retry, back-off and idempotency, and a retry policy is solved"
+    ],
+    "files": [
+      "practice/level-2/15-errors-retries-and-timeouts/prose/unit-02/practice-2/try-it.ts"
+    ]
+  },
+  "lang": "typescript",
+  "edition": "errors-retries-and-timeouts-u2"
+}

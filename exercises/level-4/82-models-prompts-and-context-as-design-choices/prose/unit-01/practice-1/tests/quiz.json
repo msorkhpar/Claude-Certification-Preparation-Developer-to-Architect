@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-4",
+    "82-models-prompts-and-context-as-design-choices"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "ordinal": 1,
+  "title": "Check yourself: Assembling a prompt in cache-friendly order",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "Scenario: Egret Support's request holds fixed rules, a conversation history at priority 5 and marketing blurbs at priority 1. It exceeds its token budget by a small margin. What does the assembler do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Truncates the end of the rules until the whole request fits within the budget",
+            "correct": false,
+            "says": "Ruled out because \"The static modules are never dropped\"."
+          },
+          {
+            "id": "b",
+            "text": "Drops the conversation history first, because it is the largest block of the three",
+            "correct": false,
+            "says": "Ruled out because \"the assembler drops the lowest first\", by priority and not by size."
+          },
+          {
+            "id": "c",
+            "text": "Refuses the request at once, since it is over budget by any amount at all",
+            "correct": false,
+            "says": "Ruled out because refusal is for when \"only static modules remain and they still exceed the budget, the assembler refuses the request\"."
+          },
+          {
+            "id": "d",
+            "text": "Sheds the least important block first, stopping as soon as it fits",
+            "correct": true,
+            "says": "The lowest-priority dynamic block goes first, and the assembler climbs only while the request is still over."
+          }
+        ],
+        "origin": {
+          "path": "course/82-models-prompts-and-context-as-design-choices/01-assembling-a-prompt-in-cache-friendly-order.md",
+          "section": "A budget drops the least useful context first"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "Scenario: Heron Retail has four teams that each write the support prompt by hand as one string, with a slightly different order, and the cache hit rate is low. Which change helps most?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A reminder in the team wiki that the policy text ought to come first in the prompt",
+            "correct": false,
+            "says": "Ruled out because a reminder leaves the order to each caller, where \"the assembler decides the order and callers cannot\"."
+          },
+          {
+            "id": "b",
+            "text": "A longer cache lifetime, so that the different strings are all kept for longer",
+            "correct": false,
+            "says": "Ruled out because \"Two requests share a cache entry only when everything up to the breakpoint is identical\", and a longer lifetime does not make the strings identical."
+          },
+          {
+            "id": "c",
+            "text": "A standard header that every team adds to the start of its own prompt",
+            "correct": false,
+            "says": "Ruled out because a header does not fix the order that follows it: \"The order is the same every time\" only when one assembler decides it."
+          },
+          {
+            "id": "d",
+            "text": "A single assembler that arranges named modules, with callers passing only values",
+            "correct": true,
+            "says": "One assembler fixes the order, so every team's prefix matches."
+          }
+        ],
+        "origin": {
+          "path": "course/82-models-prompts-and-context-as-design-choices/01-assembling-a-prompt-in-cache-friendly-order.md",
+          "section": "A request is modules, not a string"
+        }
+      }
+    ]
+  }
+}

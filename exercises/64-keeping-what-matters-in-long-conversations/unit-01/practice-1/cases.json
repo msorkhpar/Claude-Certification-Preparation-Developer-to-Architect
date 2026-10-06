@@ -1,0 +1,117 @@
+{
+  "practice": "64-keeping-what-matters-in-long-conversations/unit-01/practice-1",
+  "name": "context_builder",
+  "tests": {
+    "java": "ContextBuilderTest",
+    "kotlin": "ContextBuilderTest"
+  },
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_trimming_keeps_only_the_named_fields_with_their_exact_values_in_the_named_order",
+      "typescript": "m1 trimming keeps only the named fields with their exact values in the named order",
+      "java": "m1_trimmingKeepsOnlyTheNamedFieldsWithTheirExactValuesInTheNamedOrder",
+      "kotlin": "m1_trimmingKeepsOnlyTheNamedFieldsWithTheirExactValuesInTheNamedOrder"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_field_that_the_record_does_not_have_is_skipped",
+      "typescript": "e1 a field that the record does not have is skipped",
+      "java": "e1_aFieldThatTheRecordDoesNotHaveIsSkipped",
+      "kotlin": "e1_aFieldThatTheRecordDoesNotHaveIsSkipped"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_newer_fact_replaces_the_old_one_and_the_old_value_is_kept_as_history",
+      "typescript": "e2 a newer fact replaces the old one and the old value is kept as history",
+      "java": "e2_aNewerFactReplacesTheOldOneAndTheOldValueIsKeptAsHistory",
+      "kotlin": "e2_aNewerFactReplacesTheOldOneAndTheOldValueIsKeptAsHistory"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_an_older_fact_that_arrives_late_does_not_replace_the_current_one",
+      "typescript": "e3 an older fact that arrives late does not replace the current one",
+      "java": "e3_anOlderFactThatArrivesLateDoesNotReplaceTheCurrentOne",
+      "kotlin": "e3_anOlderFactThatArrivesLateDoesNotReplaceTheCurrentOne"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_the_case_facts_of_another_customer_never_enter_the_context",
+      "typescript": "e4 the case facts of another customer never enter the context",
+      "java": "e4_theCaseFactsOfAnotherCustomerNeverEnterTheContext",
+      "kotlin": "e4_theCaseFactsOfAnotherCustomerNeverEnterTheContext"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_the_context_puts_case_facts_first_then_the_summary_then_the_recent_messages",
+      "typescript": "e5 the context puts case facts first then the summary then the recent messages",
+      "java": "e5_theContextPutsCaseFactsFirstThenTheSummaryThenTheRecentMessages",
+      "kotlin": "e5_theContextPutsCaseFactsFirstThenTheSummaryThenTheRecentMessages"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_a_summary_that_loses_an_exact_value_is_reported",
+      "typescript": "e6 a summary that loses an exact value is reported",
+      "java": "e6_aSummaryThatLosesAnExactValueIsReported",
+      "kotlin": "e6_aSummaryThatLosesAnExactValueIsReported"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_the_window_drops_the_oldest_messages_and_keeps_a_tool_call_with_its_result",
+      "typescript": "e7 the window drops the oldest messages and keeps a tool call with its result",
+      "java": "e7_theWindowDropsTheOldestMessagesAndKeepsAToolCallWithItsResult",
+      "kotlin": "e7_theWindowDropsTheOldestMessagesAndKeepsAToolCallWithItsResult"
+    }
+  },
+  "plants": {
+    "wrong-no-trim": {
+      "caught_by": [
+        "e1",
+        "m1"
+      ],
+      "defect": "returns the whole tool record instead of the named fields"
+    },
+    "wrong-older-overwrites": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "lets a fact that arrives late replace a newer one"
+    },
+    "wrong-all-customers": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "puts the case facts of every customer into the context"
+    },
+    "wrong-facts-last": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "places the case facts after the summary and the recent messages"
+    },
+    "wrong-pair-split": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "keeps a tool result without the call that produced it"
+    },
+    "wrong-loose-summary-check": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "counts a value as kept when only its first two characters appear"
+    },
+    "wrong-missing-field-blank": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "keeps a named field that the record does not have, with an empty value"
+    },
+    "wrong-equal-date-ignored": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "ignores a fact dated the same day as the stored one"
+    }
+  }
+}

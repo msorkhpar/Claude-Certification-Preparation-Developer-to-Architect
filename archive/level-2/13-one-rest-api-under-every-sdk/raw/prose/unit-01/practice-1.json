@@ -1,0 +1,121 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "13-one-rest-api-under-every-sdk"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: The HTTP contract under every SDK",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A team hand-writes a client in a language that has no SDK. The request carries the content type and the key, and the body copies the documentation's example, yet every call fails with a 400. Which addition is most likely missing?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The version header that names the API revision in use by the caller",
+            "correct": true,
+            "says": "The overview lists the version header as required, and a hand-written client has to send it itself."
+          },
+          {
+            "id": "b",
+            "text": "An accept header that names the media type the client wants back",
+            "correct": false,
+            "says": "Ruled out because \"Authentication, version and body type are all a plain request needs\", and the media type of the reply is not among them."
+          },
+          {
+            "id": "c",
+            "text": "A user-agent header that names the client library and its version",
+            "correct": false,
+            "says": "Ruled out because \"the overview marks no Accept or User-Agent header as required\", and the SDKs add that header for their own sake."
+          },
+          {
+            "id": "d",
+            "text": "A workspace header that names the workspace this call should run under",
+            "correct": false,
+            "says": "Ruled out because the workspace header is needed \"only when the key spans several workspaces\"."
+          }
+        ],
+        "origin": {
+          "path": "course/13-one-rest-api-under-every-sdk/01-the-http-contract.md",
+          "section": "One endpoint carries the conversation"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A gateway between a service and the provider starts answering some failures with web pages. The service's failure handler throws while decoding them. Which design is best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Decode the body as JSON first and stop the process whenever that decoding fails",
+            "correct": false,
+            "says": "Ruled out because \"a hand-written client must keep working when the body is HTML\"."
+          },
+          {
+            "id": "b",
+            "text": "Ask the gateway team to promise that every reply stays JSON in the provider's own format",
+            "correct": false,
+            "says": "Ruled out because \"always JSON is the API's promise about its own errors\", and a gateway is not covered by it."
+          },
+          {
+            "id": "c",
+            "text": "Map each non-2xx status to a typed fault, using the raw text if the body is not JSON",
+            "correct": true,
+            "says": "A hand-written client has to cope with a non-JSON body, so the handler falls back to the text."
+          },
+          {
+            "id": "d",
+            "text": "Retry each failing call until the body decodes cleanly into the expected shape",
+            "correct": false,
+            "says": "Ruled out because \"the proxy answers the same page again\"."
+          }
+        ],
+        "origin": {
+          "path": "course/13-one-rest-api-under-every-sdk/01-the-http-contract.md",
+          "section": "Errors are JSON too, mostly"
+        }
+      }
+    ],
+    "concepts": [
+      "Errors are JSON too, mostly, as the page teaches it",
+      "One endpoint carries the conversation, as the page teaches it"
+    ]
+  }
+}

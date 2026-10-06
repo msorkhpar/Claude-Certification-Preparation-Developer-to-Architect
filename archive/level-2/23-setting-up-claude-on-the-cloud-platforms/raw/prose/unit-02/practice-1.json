@@ -1,0 +1,298 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "23-setting-up-claude-on-the-cloud-platforms"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Practice: platform access as configuration, graded by tests (Python)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: platform access as configuration, graded by tests"
+    },
+    {
+      "type": "para",
+      "text": "Calling Claude through a cloud platform starts with set-up that no Messages call can fix: who may call which model, where the traffic goes and how much of it is allowed. Here that set-up is three JSON files, and the tests are the reviewer. **Edit the three files**; the tests read them and check every rule. The files are language-neutral: the same three files are in each folder, and the four test suites ask the same questions. The facts come from the Anthropic pages for Amazon Bedrock and Google Cloud, from AWS's policy documentation and from Google's IAM documentation, all read on 2026-10-02; the lesson pages name them and explain the rules. Every name in the files is a placeholder: no real account, project or key belongs here."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The three files"
+    },
+    {
+      "type": "para",
+      "text": "**`bedrock-policy.json`** is an IAM identity policy for the application's role. Task: let the application invoke Claude Sonnet 5.5 in `us-east-1` and do nothing else. A statement has `Effect`, `Action` and `Resource`; the policy has a `Version`. The invoke actions are `bedrock-mantle:CreateInference` (the action named on Anthropic's Bedrock page) and `bedrock:InvokeModel` and `bedrock:InvokeModelWithResponseStream` (the actions in AWS's policy examples). A model resource has the form `arn:aws:bedrock:<region>::foundation-model/<model id>`, with the Bedrock model id `anthropic.claude-sonnet-5-5`. Confirm the resource type for your endpoint in AWS's service authorization reference before you use a policy for real; the tests check the shape above and nothing else about the ARN."
+    },
+    {
+      "type": "para",
+      "text": "**`vertex.json`** is the Vertex AI set-up: `project_id`, `caller` (the service account), `role` (`id` and `permissions`), `residency` (`eu`, `us` or `none`), `endpoint` (`global`, the multi-region `us` or `eu`, or a specific region) and `model` (the Vertex model id). Task: a service account in an EU-resident project that can call Sonnet 5.5 and can do nothing else."
+    },
+    {
+      "type": "para",
+      "text": "**`quotas.json`** is a quota request for Bedrock: `input_tpm` and `output_tpm` (tokens per minute) and `anthropic_approval` (true once Anthropic has approved more than the self-service ceiling)."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter holds the three files with their plumbing in place (the statement shape, the project, the caller and the platform field) and eight values cut out or left wrong. A file is data, so there is no code and no logger to write: run the tests, read the failing case, and the message under it names the value the test found. Fix them in this order:"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "`bedrock-policy.json`: the `Action` is a wildcard where it should be one invoke action. Unlocks `m1` and `e1`.",
+        "`bedrock-policy.json`: the `Resource` is `*` where it should be the one model ARN. Unlocks `m1` and `e2`.",
+        "`bedrock-policy.json`: the `Version` is the 2008 language version. Unlocks `e3`.",
+        "`vertex.json`: the role `id` is a predefined role. Unlocks `e4`.",
+        "`vertex.json`: the role `permissions` hold a wildcard. Unlocks `e4`.",
+        "`vertex.json`: the `endpoint` is the global one for EU-resident data. Unlocks `e5`.",
+        "`vertex.json`: the `model` carries the Bedrock prefix. Unlocks `e6`.",
+        "`quotas.json`: `input_tpm` and `output_tpm` are over the self-service ceiling. Unlocks `e7`."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "About five edited lines in all, the same in every language folder."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The rules"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "The policy has the version `2012-10-17`, only `Allow` statements, and no `NotAction` or `NotResource`.",
+        "Every action is one of the three invoke actions; no wildcard anywhere in an action.",
+        "Every resource is a model ARN with a region from the Bedrock region list, the `anthropic.` model id form, and no wildcard. For the main task the one resource is `arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-5-5`.",
+        "The Vertex role is a **custom** role (its `id` starts with `projects/` or `organizations/`, not `roles/`) whose only permission is `aiplatform.endpoints.predict`.",
+        "Residency `eu` needs the `eu` multi-region endpoint or a `europe-` region; `us` needs `us` or a `us-` region. A specific region serves `claude-sonnet-4-6` only, never the newer models. The model is one of the Vertex ids (`claude-fable-5-1`, `claude-opus-5-5`, `claude-sonnet-5-5`, `claude-haiku-4-5@20251001`, `claude-sonnet-4-6`).",
+        "A Vertex model id never carries the `anthropic.` prefix; the dated Haiku id is `claude-haiku-4-5@20251001`.",
+        "Without Anthropic's approval a quota request is at most 5,000,000 input tokens and 500,000 output tokens per minute."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "The policy has one statement that allows an invoke action on the one model in the one region"
+        ],
+        [
+          "`e1`",
+          "No action is a wildcard and every action is an invoke action, so nothing else is allowed"
+        ],
+        [
+          "`e2`",
+          "Every resource is a Bedrock model ARN with a documented region and no wildcard"
+        ],
+        [
+          "`e3`",
+          "Every statement allows, and the policy uses the current version"
+        ],
+        [
+          "`e4`",
+          "The Vertex role is a custom role that can only predict"
+        ],
+        [
+          "`e5`",
+          "The Vertex endpoint keeps the data where residency says and serves the model"
+        ],
+        [
+          "`e6`",
+          "Model ids use each platform's own form: `anthropic.` on Bedrock, a Vertex id on Vertex"
+        ],
+        [
+          "`e7`",
+          "The quota request stays under the self-service ceiling"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "python",
+          "text": "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Sid\": \"InvokeSonnetInOneRegion\",\n      \"Effect\": \"Allow\",\n      \"Action\": [\n        \"bedrock-mantle:CreateInference\"\n      ],\n      \"Resource\": [\n        \"arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-5-5\"\n      ]\n    }\n  ]\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/quotas.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"platform\": \"bedrock\",\n  \"input_tpm\": 4000000,\n  \"output_tpm\": 400000,\n  \"anthropic_approval\": false\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: project/vertex.json"
+        },
+        {
+          "type": "code",
+          "lang": "json",
+          "text": "{\n  \"project_id\": \"example-project\",\n  \"caller\": \"serviceAccount:claude-caller@example.com\",\n  \"role\": {\n    \"id\": \"projects/example-project/roles/claudeInvoker\",\n    \"permissions\": [\"aiplatform.endpoints.predict\"]\n  },\n  \"residency\": \"eu\",\n  \"endpoint\": \"eu\",\n  \"model\": \"claude-sonnet-5-5\"\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "python",
+      "text": "{\n  \"Version\": \"2008-10-17\",\n  \"Statement\": [\n    {\n      \"Effect\": \"Allow\",\n      \"Action\": [\"bedrock:*\"],\n      \"Resource\": \"*\"\n    }\n  ]\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/quotas.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"platform\": \"bedrock\",\n  \"input_tpm\": 8000000,\n  \"output_tpm\": 800000,\n  \"anthropic_approval\": false\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: project/vertex.json"
+    },
+    {
+      "type": "code",
+      "lang": "json",
+      "text": "{\n  \"project_id\": \"example-project\",\n  \"caller\": \"serviceAccount:claude-caller@example.com\",\n  \"role\": {\n    \"id\": \"roles/aiplatform.user\",\n    \"permissions\": [\"aiplatform.*\"]\n  },\n  \"residency\": \"eu\",\n  \"endpoint\": \"global\",\n  \"model\": \"anthropic.claude-sonnet-5-5\"\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 8,
+    "paras": 8,
+    "code": 3,
+    "tables": 1,
+    "lists": 2,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "8d9cbaab2286c40bc05fd5c8e104d464b52ac6037e0085bed328e6cbe7e83a7d",
+  "starting_code": "{\n  \"Version\": \"2008-10-17\",\n  \"Statement\": [\n    {\n      \"Effect\": \"Allow\",\n      \"Action\": [\"bedrock:*\"],\n      \"Resource\": \"*\"\n    }\n  ]\n}\n",
+  "exercise": {
+    "main_path": "practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-1/project/bedrock-policy.json",
+    "test_path": "practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-1/tests/test_platformconfig.py",
+    "run_command": [
+      "python3",
+      "practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-1/check_files.py",
+      "practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-1/project/bedrock-policy.json",
+      "practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-1/project/quotas.json",
+      "practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-1/project/vertex.json"
+    ],
+    "test_command": [
+      "python3",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-1/target/report.xml",
+      "practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-1/tests/test_platformconfig.py"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "test_m1_the_policy_allows_invoking_one_model_in_one_region_and_nothing_else",
+        "kind": "main",
+        "says": "The policy has one statement that allows an invoke action on the one model in the one region"
+      },
+      {
+        "id": "test_e1_no_action_is_a_wildcard_and_every_action_is_an_invoke_action",
+        "kind": "edge",
+        "says": "No action is a wildcard and every action is an invoke action, so nothing else is allowed"
+      },
+      {
+        "id": "test_e2_every_resource_arn_names_one_documented_region_and_one_model",
+        "kind": "edge",
+        "says": "Every resource is a Bedrock model ARN with a documented region and no wildcard"
+      },
+      {
+        "id": "test_e3_every_statement_allows_and_the_policy_uses_the_current_version",
+        "kind": "edge",
+        "says": "Every statement allows, and the policy uses the current version"
+      },
+      {
+        "id": "test_e4_the_vertex_role_is_a_custom_role_that_can_only_predict",
+        "kind": "edge",
+        "says": "The Vertex role is a custom role that can only predict"
+      },
+      {
+        "id": "test_e5_the_vertex_endpoint_keeps_the_data_where_residency_says_and_serves_the_model",
+        "kind": "edge",
+        "says": "The Vertex endpoint keeps the data where residency says and serves the model"
+      },
+      {
+        "id": "test_e6_model_ids_use_each_platforms_own_form",
+        "kind": "edge",
+        "says": "Model ids use each platform's own form: anthropic. on Bedrock, a Vertex id on Vertex"
+      },
+      {
+        "id": "test_e7_the_quota_request_stays_under_the_self_service_ceiling",
+        "kind": "edge",
+        "says": "The quota request stays under the self-service ceiling"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-1/target/report.xml"
+    },
+    "origin": "course/23-setting-up-claude-on-the-cloud-platforms/02-residency-quotas-logging-and-the-configuration-practice.md",
+    "concepts": [
+      "the practice of Residency, quotas, logging and the configuration practice is solved"
+    ],
+    "files": [
+      "practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-1/project/quotas.json",
+      "practice/level-2/23-setting-up-claude-on-the-cloud-platforms/prose/unit-02/practice-1/project/vertex.json"
+    ]
+  },
+  "lang": "python",
+  "edition": "setting-up-claude-on-the-cloud-platforms-u2"
+}

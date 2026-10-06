@@ -1,0 +1,131 @@
+{
+  "practice": "47-invoking-subagents/unit-01/practice-1",
+  "name": "subagents",
+  "cases": {
+    "m1": {
+      "kind": "main",
+      "python": "test_m1_the_options_register_each_named_agent_with_its_description_prompt_tools_and_model",
+      "typescript": "m1 the options register each named agent with its description prompt tools and model"
+    },
+    "e1": {
+      "kind": "edge",
+      "python": "test_e1_a_subagent_gets_read_only_tools_by_default_and_never_the_right_to_spawn_another",
+      "typescript": "e1 a subagent gets read only tools by default and never the right to spawn another"
+    },
+    "e2": {
+      "kind": "edge",
+      "python": "test_e2_a_definition_with_a_bad_name_or_no_description_or_no_prompt_is_refused",
+      "typescript": "e2 a definition with a bad name or no description or no prompt is refused"
+    },
+    "e3": {
+      "kind": "edge",
+      "python": "test_e3_depth_concurrency_budget_and_turn_limits_are_set_on_the_options",
+      "typescript": "e3 depth concurrency budget and turn limits are set on the options"
+    },
+    "e4": {
+      "kind": "edge",
+      "python": "test_e4_a_spawn_is_recognised_under_the_new_and_the_old_tool_name_and_nothing_else_is",
+      "typescript": "e4 a spawn is recognised under the new and the old tool name and nothing else is"
+    },
+    "e5": {
+      "kind": "edge",
+      "python": "test_e5_messages_from_inside_a_subagent_are_grouped_under_the_call_that_started_it",
+      "typescript": "e5 messages from inside a subagent are grouped under the call that started it"
+    },
+    "e6": {
+      "kind": "edge",
+      "python": "test_e6_a_brief_carries_the_task_and_every_fact_the_subagent_needs_in_a_fixed_layout",
+      "typescript": "e6 a brief carries the task and every fact the subagent needs in a fixed layout"
+    },
+    "e7": {
+      "kind": "edge",
+      "python": "test_e7_findings_keep_the_claim_apart_from_its_source_and_merging_keeps_every_source",
+      "typescript": "e7 findings keep the claim apart from its source and merging keeps every source"
+    },
+    "e8": {
+      "kind": "edge",
+      "python": "test_e8_a_run_through_the_sdk_shows_the_spawn_the_inner_messages_and_the_agents_sent_to_the_binary",
+      "typescript": "e8 a run through the sdk shows the spawn the inner messages and the agents sent to the binary"
+    }
+  },
+  "plants": {
+    "wrong-allows-nesting": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "keeps the Agent tool in a subagent's own tool list"
+    },
+    "wrong-empty-list-widened": {
+      "caught_by": [
+        "e1"
+      ],
+      "defect": "treats an explicitly empty tool list as no list and hands out the read only tools"
+    },
+    "wrong-name-unchecked": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "accepts any agent name"
+    },
+    "wrong-blank-description-accepted": {
+      "caught_by": [
+        "e2"
+      ],
+      "defect": "accepts a description that is only spaces"
+    },
+    "wrong-no-depth-limit": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "does not limit how deep subagents may nest"
+    },
+    "wrong-concurrency-fixed": {
+      "caught_by": [
+        "e3"
+      ],
+      "defect": "ignores the requested number of subagents at once"
+    },
+    "wrong-only-new-name": {
+      "caught_by": [
+        "e4"
+      ],
+      "defect": "recognises a spawn only under the current tool name"
+    },
+    "wrong-tools-repeated": {
+      "caught_by": [
+        "e5"
+      ],
+      "defect": "lists a tool once for every time it was used inside the subagent"
+    },
+    "wrong-brief-drops-facts": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "leaves the known facts out of the brief"
+    },
+    "wrong-blank-items-kept": {
+      "caught_by": [
+        "e6"
+      ],
+      "defect": "keeps blank items as empty list lines in the brief"
+    },
+    "wrong-first-source-only": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "keeps only the first source of a merged claim"
+    },
+    "wrong-source-in-claim": {
+      "caught_by": [
+        "e7"
+      ],
+      "defect": "writes the source into the claim text"
+    },
+    "wrong-run-keeps-nothing": {
+      "caught_by": [
+        "e8"
+      ],
+      "defect": "collects no message of the run"
+    }
+  }
+}

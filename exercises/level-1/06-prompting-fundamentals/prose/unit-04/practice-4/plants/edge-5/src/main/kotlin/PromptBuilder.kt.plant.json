@@ -1,0 +1,20 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "src/main/kotlin/PromptBuilder.kt",
+      "old": "renderDocument(index: Int, doc: Doc): String {",
+      "new": "renderDocument(index: Int, doc: Doc, variables: Map<String, String>): String {"
+    },
+    {
+      "file": "src/main/kotlin/PromptBuilder.kt",
+      "old": "${escape(doc.text)}",
+      "new": "${escape(fill(doc.text, variables))}"
+    },
+    {
+      "file": "src/main/kotlin/PromptBuilder.kt",
+      "old": "renderDocument(i + 1, doc)",
+      "new": "renderDocument(i + 1, doc, variables)"
+    }
+  ]
+}

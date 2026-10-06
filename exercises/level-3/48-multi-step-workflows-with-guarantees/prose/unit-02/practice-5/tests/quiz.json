@@ -1,0 +1,86 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "48-multi-step-workflows-with-guarantees"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 5,
+  "title": "Check yourself: Prerequisite chains, limits, hand-offs and the practice",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A refund gate becomes stricter after three failed identity checks: it now refuses every protected step. A locked-out customer's chat loops until the turn limit. What went wrong?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The lock should have waited for ten failures instead of three",
+            "correct": false,
+            "says": "Ruled out because the number of failures is not what looped the chat, and a lock is needed at all: without it, \"a person who is guessing at an identity code, or a model that is being led to guess, gets unlimited tries\". The loop came from the dead end: \"An agent that cannot verify identity and is also barred from escalating is a dead end that loops until the turn limit\"."
+          },
+          {
+            "id": "b",
+            "text": "The route to a person depended on the same safeguard that had tripped",
+            "correct": true,
+            "says": "An escape route must not sit behind a prerequisite that may be what failed."
+          },
+          {
+            "id": "c",
+            "text": "The turn limit should have been set a lot lower",
+            "correct": false,
+            "says": "Ruled out because a lower limit only shortens a dead end: \"An agent that cannot verify identity and is also barred from escalating is a dead end that loops until the turn limit\"."
+          },
+          {
+            "id": "d",
+            "text": "The model should have been asked to hand the case over on its own",
+            "correct": false,
+            "says": "Ruled out because asking does not open a route: handing over is a tool call, and it only works when \"one tool outside the gate, `escalate`, which is always allowed\" exists."
+          }
+        ],
+        "origin": {
+          "path": "course/48-multi-step-workflows-with-guarantees/02-prerequisite-chains-limits-hand-offs-and-the-practice.md",
+          "section": "The way out must stay open"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A refund over the limit is escalated with the full chat transcript attached, and reviewers spend minutes finding what was verified and what was blocked. Which change helps most?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Keep the transcript, but have the model highlight its key lines",
+            "correct": false,
+            "says": "Ruled out because the model is again choosing what the reviewer sees: \"The gate's state is the source for what was verified, looked up and refunded; the model's account of them is not.\""
+          },
+          {
+            "id": "b",
+            "text": "Attach a model-written summary of the conversation beside the full transcript",
+            "correct": false,
+            "says": "Ruled out because \"A summary written by the model can leave out what went wrong.\""
+          },
+          {
+            "id": "c",
+            "text": "Add the customer's complete order history to the escalation",
+            "correct": false,
+            "says": "Ruled out because a record carries only what is needed: \"identifiers and amounts, not the whole order contents\"."
+          },
+          {
+            "id": "d",
+            "text": "Send a gate-built record, with the agent's reason as one field",
+            "correct": true,
+            "says": "The gate holds the facts, and a record answers the reviewer's questions in a fixed place."
+          }
+        ],
+        "origin": {
+          "path": "course/48-multi-step-workflows-with-guarantees/02-prerequisite-chains-limits-hand-offs-and-the-practice.md",
+          "section": "The structured hand-off"
+        }
+      }
+    ]
+  }
+}

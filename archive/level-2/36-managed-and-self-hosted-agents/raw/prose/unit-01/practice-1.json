@@ -1,0 +1,156 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "36-managed-and-self-hosted-agents"
+  ],
+  "variant": "prose",
+  "unit": 1,
+  "kind": "practice",
+  "ordinal": 1,
+  "ingested": "2026-10-03",
+  "title": "Check yourself: Managed Agents: Anthropic runs the agent",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "q1",
+        "stem": "A team needs an agent to run a task for several hours, survive restarts of its own service, and be resumed the next day, and it does not want to build a sandbox. Which option fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The Client SDK's tool runner, which hosts the sandbox for the loop",
+            "correct": false,
+            "says": "Ruled out because the page says the tool runner \"drives the same kind of loop inside your process and hosts nothing\", while the sandbox belongs to the hosted product."
+          },
+          {
+            "id": "b",
+            "text": "The Messages API alone, which stores the conversation for each request",
+            "correct": false,
+            "says": "Ruled out because the Messages API is \"Direct model prompting access\", for \"Custom agent loops and fine-grained control\", and you keep the history yourself."
+          },
+          {
+            "id": "c",
+            "text": "The Claude Code CLI, started again by hand each morning",
+            "correct": false,
+            "says": "Ruled out because the CLI is something you drive yourself: \"You use the CLI by hand.\""
+          },
+          {
+            "id": "d",
+            "text": "The hosted harness, which stores sessions on Anthropic's side",
+            "correct": true,
+            "says": "The overview table gives \"Long-running tasks and asynchronous work\" as the best fit, and says sessions \"resume cleanly after pauses\" with history and outputs stored server-side, so your service holds only an ID."
+          }
+        ],
+        "origin": {
+          "path": "course/36-managed-and-self-hosted-agents/01-what-managed-agents-is.md",
+          "section": "Two ways to build, and the SDK in between"
+        }
+      },
+      {
+        "id": "q2",
+        "stem": "A session is created with a tools override that names one tool, while the saved agent lists eight. What does the session have?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Only that lone entry, with nothing else carried over",
+            "correct": true,
+            "says": "The page says \"Overrides never merge with the agent's configuration, so a `tools` override must list every tool the session should have.\""
+          },
+          {
+            "id": "b",
+            "text": "The entry together with the agent's eight, merged into one list",
+            "correct": false,
+            "says": "Ruled out because \"Overrides never merge with the agent's configuration\", so nothing is added to the entry."
+          },
+          {
+            "id": "c",
+            "text": "The agent's eight, which an override cannot remove",
+            "correct": false,
+            "says": "Ruled out because \"overrides replace and never merge\", so the agent's own list is not kept beside the entry."
+          },
+          {
+            "id": "d",
+            "text": "None, until the agent is updated to a new version",
+            "correct": false,
+            "says": "Ruled out because \"They apply to that one session, and the agent resource and its version are untouched.\", so nothing waits for a new agent version."
+          }
+        ],
+        "origin": {
+          "path": "course/36-managed-and-self-hosted-agents/01-what-managed-agents-is.md",
+          "section": "An agent is a versioned resource"
+        }
+      },
+      {
+        "id": "q3",
+        "stem": "A compliance team requires Zero Data Retention for every Claude workload. What follows for Managed Agents?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It qualifies once the sandbox runs on the team's own network",
+            "correct": false,
+            "says": "Ruled out because \"Self-hosted sandboxes keep the orchestration on Anthropic's side but move tool execution into infrastructure you control\", so the session data still sits with Anthropic."
+          },
+          {
+            "id": "b",
+            "text": "It qualifies, since ZDR covers every endpoint of the API",
+            "correct": false,
+            "says": "Ruled out because the overview says \"Managed Agents is not currently eligible for Zero Data Retention or HIPAA Business Associate Agreement (BAA) coverage\", not that it is covered."
+          },
+          {
+            "id": "c",
+            "text": "It is ineligible today, since sessions store history server-side",
+            "correct": true,
+            "says": "The overview says sessions \"store conversation history, sandbox state, and outputs server-side\", so they are held on Anthropic's side."
+          },
+          {
+            "id": "d",
+            "text": "It qualifies once the sessions have been deleted afterwards",
+            "correct": false,
+            "says": "Ruled out because \"You can delete sessions and files through the API, but the data exists on Anthropic's side first\", so deletion does not make it qualify."
+          }
+        ],
+        "origin": {
+          "path": "course/36-managed-and-self-hosted-agents/01-what-managed-agents-is.md",
+          "section": "What it costs you"
+        }
+      }
+    ],
+    "concepts": [
+      "An agent is a versioned resource, as the page teaches it",
+      "Two ways to build, and the SDK in between, as the page teaches it",
+      "What it costs you, as the page teaches it"
+    ]
+  }
+}

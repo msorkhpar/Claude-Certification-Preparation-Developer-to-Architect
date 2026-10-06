@@ -1,0 +1,314 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "50-task-decomposition"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 3,
+  "ingested": "2026-10-03",
+  "title": "Practice: decompose a task in code (Java)",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Problem statement"
+    },
+    {
+      "type": "heading",
+      "level": 1,
+      "text": "Practice: decompose a task in code"
+    },
+    {
+      "type": "para",
+      "text": "A big review does not have to be one request, and an open-ended investigation cannot be planned in advance. This practice has you write the control flow for both: a review that looks at each file alone and then looks across files, an investigation loop in which a planner chooses each step from the result of the last, and the rule that picks between the two. The model is a function you are given (the tests script it), so the practice grades the part that is yours: what each call is given, what is kept, what stops the work and what is reported when something goes wrong. It is in Python, TypeScript, Java and Kotlin;"
+    },
+    {
+      "type": "para",
+      "text": "Names are Python's (`review_changes`, `run_adaptive`, `choose_strategy`); TypeScript has `reviewChanges`, `runAdaptive`, `chooseStrategy` and the argument `maxLines` for `max_lines`, `maxSteps` for `max_steps`; Java has `Decompose.reviewChanges`, `Decompose.runAdaptive` and `Decompose.chooseStrategy` with an interface `FilePass`; Kotlin has top-level functions of the same names and the type aliases `FilePass`, `CrossPass` and `StepPlanner`. Results are maps, as the examples show."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What is already written, and what you write"
+    },
+    {
+      "type": "para",
+      "text": "The starter is a working task decomposer with nine gaps cut out of it. Everything that is plumbing is written and correct: the loops over the files and over the steps, the result maps, the calls to the worker, the step limit and the check of the task's fields. Each gap is marked `TODO k of N` with a comment that says what it receives and returns, with one example, and the cases it unlocks. A gap leaves a neutral value (nothing added, an empty list, `null`, the unchanged input), so the starter runs and fails the cases on an assertion. To debug a gap, log its input with the `log` line at the top of the file: a run shows the logged lines under the failing case. Write the gaps in this order (the TypeScript, Java and Kotlin names are the camel-case forms where a name is given):"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "The call of the file pass unlocks `m1`, `e1`: each part of a file goes to the file pass alone, with the path, the part's text, the part number and the number of parts; its findings are collected and its summaries joined.",
+        "The blank file unlocks `e2`: a file that holds only blank lines is added to `skipped` and never sent to the file pass.",
+        "The number of parts unlocks `e2`: a file of N lines is reviewed in ceil(N / max_lines) parts.",
+        "The failing file unlocks `e3`: a file whose pass throws is recorded in `failed` with the error message, left out of `files`, and does not stop the other files.",
+        "The two file rule unlocks `e3`: the cross pass runs only when at least two files were reviewed.",
+        "The call of the cross pass unlocks `m1`, `e1`: the cross pass gets one entry `{path, summary}` per reviewed file, never the file text.",
+        "The history for the planner unlocks `e4`: the planner is asked again after each step with a copy of the steps so far.",
+        "The stuck rules unlocks `e5`: an empty next step ends with `stuck` and \"no next step\"; a subtask already done (ignoring case) ends with `stuck` and \"repeated subtask: NAME\".",
+        "The strategy unlocks `e6`: `adaptive` when the steps are not known, `per_item_then_cross` when they are known, there are two items or more and they interact, otherwise `fixed_chain`."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "`m1` needs gaps 1 and 6. About eighteen lines in all. The steps below describe the whole decomposer, so you can see how your gaps are used."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Build it in three steps"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Step 1: `review_changes(files, file_pass, cross_pass, max_lines=40)`"
+    },
+    {
+      "type": "para",
+      "text": "`files` is a list of `{\"path\", \"text\"}`. `file_pass(path, text, part, parts)` is one model call about one piece of one file and returns `{\"findings\": [text], \"summary\": text}`. `cross_pass(summaries)` is one model call that receives a list of `{\"path\", \"summary\"}` and returns a list of findings."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Review the files in order, each in its own call, and give the call the text of that file only. A file of more than `max_lines` lines goes in parts of at most that many lines, `part` counting from 1 and `parts` the number of parts; the findings of the parts are joined in order and so are the summaries, with a space between them. A file whose text is blank is skipped and listed.",
+        "A call that raises an exception puts that file in the failed map (its path and the message) and the other files go on.",
+        "When at least two files were reviewed, call `cross_pass` once with the path and summary of each reviewed file, in order, and never with the text. A failure of the cross pass leaves an empty list of findings and its message in `cross_error`.",
+        "Return `{\"files\": {path: {\"findings\", \"summary\", \"parts\"}}, \"cross\", \"failed\", \"skipped\", \"cross_error\"}`."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "**Why the exam cares.** The Architect exam asks for a per-file pass and a separate cross-file pass to avoid attention dilution, and it offers answers that put the whole change in one request or that give the second pass everything again. Your code is where the isolation is real: it decides what each call sees. **What you should see when it works:** the file pass tests record exactly one file per call, the cross pass records only summaries, a seven-line file shows up as three labelled parts, and a failed file is named without stopping the rest."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Step 2: `run_adaptive(planner, worker, goal, max_steps=6)`"
+    },
+    {
+      "type": "para",
+      "text": "`planner(goal, steps)` returns `{\"done\": bool, \"summary\": text, \"next\": text}`; `steps` is the list of `{\"subtask\", \"result\"}` done so far. `worker(subtask)` does one subtask and returns its result text."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Ask the planner before every step, with a copy of the steps so far (the first call gets an empty list). When it answers `done`, return status `done` with its summary.",
+        "Otherwise run the worker on `next` (stripped) and record the step. A worker that raises records the result `ERROR: <message>`, and the planner decides what that means.",
+        "A reply that is not a map or has no boolean `done` returns `bad_plan`. A blank `next` returns `stuck` (reason `no next step`). A `next` that repeats an earlier subtask, ignoring case and outer spaces, returns `stuck` (the reason names it). When `max_steps` steps have run and the planner still wants another new one, return `step_limit`; a `done` after the last allowed step is still `done`.",
+        "Return `{\"status\", \"summary\", \"steps\", \"reason\"}`."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "**Why the exam cares.** Dynamic decomposition lets the findings of one step set the next, which is the point of an open-ended investigation, and the exam distinguishes it from a fixed pipeline. A loop with no guard is the other half of the lesson: the planner can repeat itself, give up or answer nonsense, and the step limit must be a backstop with its own status. **What you should see when it works:** the planner call counts are 0, 1, 2 steps in its history, a repeated subtask stops the run at once as `stuck`, and an endless planner stops after exactly `max_steps` worker runs with one more planner call."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "Step 3: `choose_strategy(task)`"
+    },
+    {
+      "type": "para",
+      "text": "`task` is `{\"steps_known\": bool, \"items\": whole number, \"items_interact\": bool (optional)}`."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "`adaptive` when the steps are not known, whatever the number of items.",
+        "`per_item_then_cross` when the steps are known, there are at least two items and they interact.",
+        "`fixed_chain` otherwise.",
+        "Anything else (a missing or non-boolean `steps_known`, an `items` that is missing, negative or not a whole number) is refused: raise `ValueError` (TypeScript: throw an `Error`; Java and Kotlin: `IllegalArgumentException`)."
+      ]
+    },
+    {
+      "type": "para",
+      "text": "**Why the exam cares.** Choosing the pattern is the task statement. The order of the questions matters: whether the steps can be written down comes first, and only then does the shape of the items matter. **What you should see when it works:** an investigation of twelve interacting items is still `adaptive` when its steps are unknown, and a single item that \"interacts\" with nothing is a `fixed_chain`."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The cases"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Id",
+        "What it checks"
+      ],
+      "rows": [
+        [
+          "`m1`",
+          "Each file is reviewed alone and the cross pass reads their summaries"
+        ],
+        [
+          "`e1`",
+          "A file pass sees only its own file and the cross pass sees summaries, never the text"
+        ],
+        [
+          "`e2`",
+          "A long file is reviewed in labelled parts and a blank file is skipped"
+        ],
+        [
+          "`e3`",
+          "A failing file is reported and left out of the cross pass, which needs two files"
+        ],
+        [
+          "`e4`",
+          "The planner is asked again after each step with the steps so far and the loop ends when it says done"
+        ],
+        [
+          "`e5`",
+          "The loop stops on a repeated subtask, no next step or an unreadable reply, and counts the step limit exactly"
+        ],
+        [
+          "`e6`",
+          "The strategy follows what is known about the steps and whether the items interact"
+        ]
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lesson"
+    },
+    {
+      "type": "disclosure",
+      "summary": "Show a worked solution",
+      "open": false,
+      "blocks": [
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Locale;\nimport java.util.Map;\nimport java.util.function.BiFunction;\nimport java.util.function.Function;\n\n/** Task decomposition: a per-item pass and a cross-item pass, an adaptive loop, and the choice between them. See ../../statement.md. Results are JSON-like maps. */\nfinal class Decompose {\n    private static final System.Logger LOG = System.getLogger(Decompose.class.getName());\n    private Decompose() {}\n\n    /** The model's review of one file, or of one part of it: a map with \"findings\" (a list of text) and \"summary\" (text). */\n    interface FilePass {\n        Map<String, Object> apply(String path, String text, int part, int parts);\n    }\n\n    private static Map<String, Object> map(Object... kv) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);\n        return m;\n    }\n\n    static Map<String, Object> reviewChanges(List<Map<String, String>> files, FilePass filePass, Function<List<Map<String, String>>, List<String>> crossPass) {\n        return reviewChanges(files, filePass, crossPass, 40);\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> reviewChanges(List<Map<String, String>> files, FilePass filePass, Function<List<Map<String, String>>, List<String>> crossPass, int maxLines) {\n        LOG.log(System.Logger.Level.DEBUG, \"reviewChanges input: {0}\", files);\n        Map<String, Object> reviewed = new LinkedHashMap<>();\n        Map<String, Object> failed = new LinkedHashMap<>();\n        List<String> skipped = new ArrayList<>();\n        for (Map<String, String> item : files) {\n            String path = item.get(\"path\");\n            String text = item.get(\"text\");\n            if (text.isBlank()) {\n                skipped.add(path); // nothing to review is not worth a model call\n                continue;\n            }\n            List<String> lines = text.lines().toList();\n            int parts = (lines.size() + maxLines - 1) / maxLines;\n            List<String> findings = new ArrayList<>();\n            List<String> summaries = new ArrayList<>();\n            try {\n                for (int part = 0; part < parts; part++) {\n                    String chunk = String.join(\"\\n\", lines.subList(part * maxLines, Math.min(lines.size(), (part + 1) * maxLines)));\n                    Map<String, Object> result = filePass.apply(path, chunk, part + 1, parts);\n                    findings.addAll((List<String>) result.get(\"findings\"));\n                    summaries.add((String) result.get(\"summary\"));\n                }\n            } catch (RuntimeException error) { // one file failing must not stop the others\n                failed.put(path, String.valueOf(error.getMessage()));\n                continue;\n            }\n            reviewed.put(path, map(\"findings\", findings, \"summary\", String.join(\" \", summaries), \"parts\", parts));\n        }\n        List<String> cross = new ArrayList<>();\n        String crossError = null;\n        if (reviewed.size() >= 2) { // a relation between files needs at least two of them\n            List<Map<String, String>> summaries = new ArrayList<>();\n            for (Map.Entry<String, Object> e : reviewed.entrySet()) {\n                Map<String, String> one = new LinkedHashMap<>();\n                one.put(\"path\", e.getKey());\n                one.put(\"summary\", (String) ((Map<String, Object>) e.getValue()).get(\"summary\"));\n                summaries.add(one);\n            }\n            try {\n                cross = new ArrayList<>(crossPass.apply(summaries));\n            } catch (RuntimeException error) {\n                crossError = String.valueOf(error.getMessage());\n            }\n        }\n        return map(\"files\", reviewed, \"cross\", cross, \"failed\", failed, \"skipped\", skipped, \"cross_error\", crossError);\n    }\n\n    static Map<String, Object> runAdaptive(BiFunction<String, List<Map<String, String>>, Object> planner, Function<String, String> worker, String goal) {\n        return runAdaptive(planner, worker, goal, 6);\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> runAdaptive(BiFunction<String, List<Map<String, String>>, Object> planner, Function<String, String> worker, String goal, int maxSteps) {\n        List<Map<String, String>> steps = new ArrayList<>();\n        while (true) {\n            List<Map<String, String>> history = new ArrayList<>();\n            for (Map<String, String> step : steps) history.add(new LinkedHashMap<>(step));\n            Object reply = planner.apply(goal, history);\n            if (!(reply instanceof Map<?, ?> plan) || !(plan.get(\"done\") instanceof Boolean done)) {\n                return map(\"status\", \"bad_plan\", \"summary\", \"\", \"steps\", steps, \"reason\", \"the planner reply could not be read\");\n            }\n            if (done) return map(\"status\", \"done\", \"summary\", plan.get(\"summary\") == null ? \"\" : String.valueOf(plan.get(\"summary\")), \"steps\", steps, \"reason\", \"\");\n            String subtask = plan.get(\"next\") == null ? \"\" : String.valueOf(plan.get(\"next\")).strip();\n            if (subtask.isEmpty()) return map(\"status\", \"stuck\", \"summary\", \"\", \"steps\", steps, \"reason\", \"no next step\");\n            for (Map<String, String> step : steps) {\n                if (step.get(\"subtask\").toLowerCase(Locale.ROOT).equals(subtask.toLowerCase(Locale.ROOT))) {\n                    return map(\"status\", \"stuck\", \"summary\", \"\", \"steps\", steps, \"reason\", \"repeated subtask: \" + subtask);\n                }\n            }\n            if (steps.size() >= maxSteps) return map(\"status\", \"step_limit\", \"summary\", \"\", \"steps\", steps, \"reason\", \"step limit reached\");\n            String result;\n            try {\n                result = worker.apply(subtask);\n            } catch (RuntimeException error) { // the planner decides what a failed step means\n                result = \"ERROR: \" + error.getMessage();\n            }\n            Map<String, String> step = new LinkedHashMap<>();\n            step.put(\"subtask\", subtask);\n            step.put(\"result\", result);\n            steps.add(step);\n        }\n    }\n\n    static String chooseStrategy(Map<String, Object> task) {\n        Object stepsKnown = task.get(\"steps_known\");\n        Object items = task.get(\"items\");\n        if (!(stepsKnown instanceof Boolean known) || !(items instanceof Integer count) || count < 0) {\n            throw new IllegalArgumentException(\"steps_known must be true or false and items a whole number of at least 0\");\n        }\n        if (!known) return \"adaptive\";\n        if (count >= 2 && Boolean.TRUE.equals(task.get(\"items_interact\"))) return \"per_item_then_cross\";\n        return \"fixed_chain\";\n    }\n}\n"
+        },
+        {
+          "type": "para",
+          "text": "File: src/main/java/TryIt.java"
+        },
+        {
+          "type": "code",
+          "lang": "java",
+          "text": "import java.util.List;\nimport java.util.function.Function;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        List<Map<String, String>> files = List.of(Map.of(\"path\", \"api.py\", \"text\", \"def get(): ...\"),\n            Map.of(\"path\", \"db.py\", \"text\", \"def query(): ...\"), Map.of(\"path\", \"ui.py\", \"text\", \"def show(): ...\"));\n        Map<String, Map<String, Object>> script = Map.of(\n            \"api\", Map.of(\"findings\", List.of(\"api: no auth\"), \"summary\", \"api calls db.query(id)\"),\n            \"db\", Map.of(\"findings\", List.of(), \"summary\", \"db.query takes a name\"),\n            \"ui\", Map.of(\"findings\", List.of(\"ui: unused\"), \"summary\", \"ui shows rows\"));\n\n        // A scripted stand-in for the model reviewing one file (or one part of it).\n        Decompose.FilePass filePass = (path, text, part, parts) -> script.get(path.split(\"\\\\.\")[0]);\n        // The second look: it reads only the summaries, and finds what no single file shows.\n        Function<List<Map<String, String>>, List<String>> crossPass = summaries -> List.of(\"api passes id but db expects a name\");\n\n        // Each file is reviewed alone, then the cross pass reads their summaries.\n        Map<String, Object> result = Decompose.reviewChanges(files, filePass, crossPass);\n\n        if (result != null && result.get(\"files\") instanceof Map<?, ?> reviewed) {\n            reviewed.forEach((path, review) -> System.out.println(path + \" -> \" + ((Map<?, ?>) review).get(\"findings\") + \" | parts: \" + ((Map<?, ?>) review).get(\"parts\")));\n        }\n        System.out.println(\"cross findings: \" + (result == null ? null : result.get(\"cross\")));\n        System.out.println(\"failed: \" + (result == null ? null : result.get(\"failed\") + \" | skipped: \" + result.get(\"skipped\")));\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Starting code"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Locale;\nimport java.util.Map;\nimport java.util.function.BiFunction;\nimport java.util.function.Function;\n\n/** Task decomposition: a per-item pass and a cross-item pass, an adaptive loop, and the choice between them. See ../../statement.md. Results are JSON-like maps. */\nfinal class Decompose {\n    private static final System.Logger LOG = System.getLogger(Decompose.class.getName());\n    private Decompose() {}\n\n    /** The model's review of one file, or of one part of it: a map with \"findings\" (a list of text) and \"summary\" (text). */\n    interface FilePass {\n        Map<String, Object> apply(String path, String text, int part, int parts);\n    }\n\n    private static Map<String, Object> map(Object... kv) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);\n        return m;\n    }\n\n    static Map<String, Object> reviewChanges(List<Map<String, String>> files, FilePass filePass, Function<List<Map<String, String>>, List<String>> crossPass) {\n        return reviewChanges(files, filePass, crossPass, 40);\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> reviewChanges(List<Map<String, String>> files, FilePass filePass, Function<List<Map<String, String>>, List<String>> crossPass, int maxLines) {\n        LOG.log(System.Logger.Level.DEBUG, \"reviewChanges input: {0}\", files);\n        Map<String, Object> reviewed = new LinkedHashMap<>();\n        Map<String, Object> failed = new LinkedHashMap<>();\n        List<String> skipped = new ArrayList<>();\n        for (Map<String, String> item : files) {\n            String path = item.get(\"path\");\n            String text = item.get(\"text\");\n            // TODO 2 of 9 (finish this to pass e2): the blank file rule. When the file's text is blank, add its path to\n            //   `skipped` and go on to the next file. Example: \"\\n  \\n\" -> skipped.\n            List<String> lines = text.lines().toList();\n            // TODO 3 of 9 (finish this to pass e2): the number of parts. Receives the lines of the file and max_lines.\n            //   Return how many parts of at most max_lines lines the file needs, rounding up. Example: 41 lines, max_lines\n            //   40 -> 2.\n            int parts = 1;\n            List<String> findings = new ArrayList<>();\n            List<String> summaries = new ArrayList<>();\n            try {\n                for (int part = 0; part < parts; part++) {\n                    // TODO 1 of 9 (finish this to pass m1, e1): the review of one part of a file. Slice the part's lines\n                    //   (part number 1..parts, max_lines per part), call the file pass with (path, text of the part, part\n                    //   number from 1, parts), add its findings to `findings` and its summary to `summaries`. Example: a 5\n                    //   line file, max_lines 3 -> two calls, parts 1 and 2 of 2.\n                }\n            } catch (RuntimeException error) {\n                // TODO 4 of 9 (finish this to pass e3): the failing file. When the file pass throws, record the path with\n                //   the error's message in `failed` and go on to the next file. Example: the pass raises \"boom\" for a.py ->\n                //   failed {a.py: \"boom\"}, and b.py is still reviewed.\n                continue;\n            }\n            reviewed.put(path, map(\"findings\", findings, \"summary\", String.join(\" \", summaries), \"parts\", parts));\n        }\n        List<String> cross = new ArrayList<>();\n        String crossError = null;\n        // TODO 5 of 9 (finish this to pass e3): the guard of the cross pass. Run it only when at least two files were\n        //   reviewed (a relation between files needs two). Example: one reviewed file and one failed -> no cross pass.\n        if (reviewed.size() >= 0) {\n            List<Map<String, String>> summaries = new ArrayList<>();\n            for (Map.Entry<String, Object> e : reviewed.entrySet()) {\n                Map<String, String> one = new LinkedHashMap<>();\n                one.put(\"path\", e.getKey());\n                one.put(\"summary\", (String) ((Map<String, Object>) e.getValue()).get(\"summary\"));\n                summaries.add(one);\n            }\n            try {\n                // TODO 6 of 9 (finish this to pass m1, e1): the cross pass call. Call the cross pass with one {path,\n                //   summary} entry per reviewed file (the joined summary, never the text) and keep what it returns in\n                //   `cross`. Example: two files -> one call with two entries.\n                cross = new ArrayList<>();\n            } catch (RuntimeException error) {\n                crossError = String.valueOf(error.getMessage());\n            }\n        }\n        return map(\"files\", reviewed, \"cross\", cross, \"failed\", failed, \"skipped\", skipped, \"cross_error\", crossError);\n    }\n\n    static Map<String, Object> runAdaptive(BiFunction<String, List<Map<String, String>>, Object> planner, Function<String, String> worker, String goal) {\n        return runAdaptive(planner, worker, goal, 6);\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> runAdaptive(BiFunction<String, List<Map<String, String>>, Object> planner, Function<String, String> worker, String goal, int maxSteps) {\n        List<Map<String, String>> steps = new ArrayList<>();\n        while (true) {\n            List<Map<String, String>> history = new ArrayList<>();\n            // TODO 7 of 9 (finish this to pass e4): the question to the planner. Call the planner with the goal and a\n            //   copy of the steps done so far (each {subtask, result}). Example: after two steps the planner receives a\n            //   list of two.\n            Object reply = planner.apply(goal, history);\n            if (!(reply instanceof Map<?, ?> plan) || !(plan.get(\"done\") instanceof Boolean done)) {\n                return map(\"status\", \"bad_plan\", \"summary\", \"\", \"steps\", steps, \"reason\", \"the planner reply could not be read\");\n            }\n            if (done) return map(\"status\", \"done\", \"summary\", plan.get(\"summary\") == null ? \"\" : String.valueOf(plan.get(\"summary\")), \"steps\", steps, \"reason\", \"\");\n            String subtask = plan.get(\"next\") == null ? \"\" : String.valueOf(plan.get(\"next\")).strip();\n            // TODO 8 of 9 (finish this to pass e5): the stuck rules. When the planner gives no next step, finish with\n            //   status stuck and the reason \"no next step\"; when the next step was already done (compare ignoring case),\n            //   finish with status stuck and the reason \"repeated subtask: NAME\". Example: next \"Fix A\" after \"fix a\" ->\n            //   stuck.\n            if (steps.size() >= maxSteps) return map(\"status\", \"step_limit\", \"summary\", \"\", \"steps\", steps, \"reason\", \"step limit reached\");\n            String result;\n            try {\n                result = worker.apply(subtask);\n            } catch (RuntimeException error) { // the planner decides what a failed step means\n                result = \"ERROR: \" + error.getMessage();\n            }\n            Map<String, String> step = new LinkedHashMap<>();\n            step.put(\"subtask\", subtask);\n            step.put(\"result\", result);\n            steps.add(step);\n        }\n    }\n\n    static String chooseStrategy(Map<String, Object> task) {\n        Object stepsKnown = task.get(\"steps_known\");\n        Object items = task.get(\"items\");\n        if (!(stepsKnown instanceof Boolean known) || !(items instanceof Integer count) || count < 0) {\n            throw new IllegalArgumentException(\"steps_known must be true or false and items a whole number of at least 0\");\n        }\n        // TODO 9 of 9 (finish this to pass e6): the choice. Receives the validated fields. Return adaptive when the\n        //   steps are not known; otherwise per_item_then_cross when there are at least 2 items and items_interact is true;\n        //   otherwise fixed_chain. Example: steps known, 3 items that interact -> per_item_then_cross.\n        return \"fixed_chain\";\n    }\n}\n"
+    },
+    {
+      "type": "para",
+      "text": "File: src/main/java/TryIt.java"
+    },
+    {
+      "type": "code",
+      "lang": "java",
+      "text": "import java.util.List;\nimport java.util.function.Function;\nimport java.util.Map;\nimport java.util.logging.ConsoleHandler;\nimport java.util.logging.Level;\nimport java.util.logging.Logger;\n\n/** Run executes this file. Change the calls in main to try your code; Submit runs the tests. */\npublic class TryIt {\n    public static void main(String[] args) {\n        // Turn the logger up, so the LOG.log(DEBUG, ...) lines of your code show under the printed lines.\n        System.setProperty(\"java.util.logging.SimpleFormatter.format\", \"%4$s %5$s%n\");\n        ConsoleHandler handler = new ConsoleHandler();\n        handler.setLevel(Level.ALL);\n        Logger root = Logger.getLogger(\"\");\n        root.setLevel(Level.ALL);\n        root.addHandler(handler);\n\n        List<Map<String, String>> files = List.of(Map.of(\"path\", \"api.py\", \"text\", \"def get(): ...\"),\n            Map.of(\"path\", \"db.py\", \"text\", \"def query(): ...\"), Map.of(\"path\", \"ui.py\", \"text\", \"def show(): ...\"));\n        Map<String, Map<String, Object>> script = Map.of(\n            \"api\", Map.of(\"findings\", List.of(\"api: no auth\"), \"summary\", \"api calls db.query(id)\"),\n            \"db\", Map.of(\"findings\", List.of(), \"summary\", \"db.query takes a name\"),\n            \"ui\", Map.of(\"findings\", List.of(\"ui: unused\"), \"summary\", \"ui shows rows\"));\n\n        // A scripted stand-in for the model reviewing one file (or one part of it).\n        Decompose.FilePass filePass = (path, text, part, parts) -> script.get(path.split(\"\\\\.\")[0]);\n        // The second look: it reads only the summaries, and finds what no single file shows.\n        Function<List<Map<String, String>>, List<String>> crossPass = summaries -> List.of(\"api passes id but db expects a name\");\n\n        // Each file is reviewed alone, then the cross pass reads their summaries.\n        Map<String, Object> result = Decompose.reviewChanges(files, filePass, crossPass);\n\n        if (result != null && result.get(\"files\") instanceof Map<?, ?> reviewed) {\n            reviewed.forEach((path, review) -> System.out.println(path + \" -> \" + ((Map<?, ?>) review).get(\"findings\") + \" | parts: \" + ((Map<?, ?>) review).get(\"parts\")));\n        }\n        System.out.println(\"cross findings: \" + (result == null ? null : result.get(\"cross\")));\n        System.out.println(\"failed: \" + (result == null ? null : result.get(\"failed\") + \" | skipped: \" + result.get(\"skipped\")));\n    }\n}\n"
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 10,
+    "paras": 11,
+    "code": 2,
+    "tables": 1,
+    "lists": 4,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 1
+  },
+  "content_sha256": "49f95bb25e8006d66e69d36d131b62ba660986a54982d351a2a2b90f0ebf4d81",
+  "starting_code": "import java.util.ArrayList;\nimport java.util.LinkedHashMap;\nimport java.util.List;\nimport java.util.Locale;\nimport java.util.Map;\nimport java.util.function.BiFunction;\nimport java.util.function.Function;\n\n/** Task decomposition: a per-item pass and a cross-item pass, an adaptive loop, and the choice between them. See ../../statement.md. Results are JSON-like maps. */\nfinal class Decompose {\n    private static final System.Logger LOG = System.getLogger(Decompose.class.getName());\n    private Decompose() {}\n\n    /** The model's review of one file, or of one part of it: a map with \"findings\" (a list of text) and \"summary\" (text). */\n    interface FilePass {\n        Map<String, Object> apply(String path, String text, int part, int parts);\n    }\n\n    private static Map<String, Object> map(Object... kv) {\n        Map<String, Object> m = new LinkedHashMap<>();\n        for (int i = 0; i < kv.length; i += 2) m.put((String) kv[i], kv[i + 1]);\n        return m;\n    }\n\n    static Map<String, Object> reviewChanges(List<Map<String, String>> files, FilePass filePass, Function<List<Map<String, String>>, List<String>> crossPass) {\n        return reviewChanges(files, filePass, crossPass, 40);\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> reviewChanges(List<Map<String, String>> files, FilePass filePass, Function<List<Map<String, String>>, List<String>> crossPass, int maxLines) {\n        LOG.log(System.Logger.Level.DEBUG, \"reviewChanges input: {0}\", files);\n        Map<String, Object> reviewed = new LinkedHashMap<>();\n        Map<String, Object> failed = new LinkedHashMap<>();\n        List<String> skipped = new ArrayList<>();\n        for (Map<String, String> item : files) {\n            String path = item.get(\"path\");\n            String text = item.get(\"text\");\n            // TODO 2 of 9 (finish this to pass e2): the blank file rule. When the file's text is blank, add its path to\n            //   `skipped` and go on to the next file. Example: \"\\n  \\n\" -> skipped.\n            List<String> lines = text.lines().toList();\n            // TODO 3 of 9 (finish this to pass e2): the number of parts. Receives the lines of the file and max_lines.\n            //   Return how many parts of at most max_lines lines the file needs, rounding up. Example: 41 lines, max_lines\n            //   40 -> 2.\n            int parts = 1;\n            List<String> findings = new ArrayList<>();\n            List<String> summaries = new ArrayList<>();\n            try {\n                for (int part = 0; part < parts; part++) {\n                    // TODO 1 of 9 (finish this to pass m1, e1): the review of one part of a file. Slice the part's lines\n                    //   (part number 1..parts, max_lines per part), call the file pass with (path, text of the part, part\n                    //   number from 1, parts), add its findings to `findings` and its summary to `summaries`. Example: a 5\n                    //   line file, max_lines 3 -> two calls, parts 1 and 2 of 2.\n                }\n            } catch (RuntimeException error) {\n                // TODO 4 of 9 (finish this to pass e3): the failing file. When the file pass throws, record the path with\n                //   the error's message in `failed` and go on to the next file. Example: the pass raises \"boom\" for a.py ->\n                //   failed {a.py: \"boom\"}, and b.py is still reviewed.\n                continue;\n            }\n            reviewed.put(path, map(\"findings\", findings, \"summary\", String.join(\" \", summaries), \"parts\", parts));\n        }\n        List<String> cross = new ArrayList<>();\n        String crossError = null;\n        // TODO 5 of 9 (finish this to pass e3): the guard of the cross pass. Run it only when at least two files were\n        //   reviewed (a relation between files needs two). Example: one reviewed file and one failed -> no cross pass.\n        if (reviewed.size() >= 0) {\n            List<Map<String, String>> summaries = new ArrayList<>();\n            for (Map.Entry<String, Object> e : reviewed.entrySet()) {\n                Map<String, String> one = new LinkedHashMap<>();\n                one.put(\"path\", e.getKey());\n                one.put(\"summary\", (String) ((Map<String, Object>) e.getValue()).get(\"summary\"));\n                summaries.add(one);\n            }\n            try {\n                // TODO 6 of 9 (finish this to pass m1, e1): the cross pass call. Call the cross pass with one {path,\n                //   summary} entry per reviewed file (the joined summary, never the text) and keep what it returns in\n                //   `cross`. Example: two files -> one call with two entries.\n                cross = new ArrayList<>();\n            } catch (RuntimeException error) {\n                crossError = String.valueOf(error.getMessage());\n            }\n        }\n        return map(\"files\", reviewed, \"cross\", cross, \"failed\", failed, \"skipped\", skipped, \"cross_error\", crossError);\n    }\n\n    static Map<String, Object> runAdaptive(BiFunction<String, List<Map<String, String>>, Object> planner, Function<String, String> worker, String goal) {\n        return runAdaptive(planner, worker, goal, 6);\n    }\n\n    @SuppressWarnings(\"unchecked\")\n    static Map<String, Object> runAdaptive(BiFunction<String, List<Map<String, String>>, Object> planner, Function<String, String> worker, String goal, int maxSteps) {\n        List<Map<String, String>> steps = new ArrayList<>();\n        while (true) {\n            List<Map<String, String>> history = new ArrayList<>();\n            // TODO 7 of 9 (finish this to pass e4): the question to the planner. Call the planner with the goal and a\n            //   copy of the steps done so far (each {subtask, result}). Example: after two steps the planner receives a\n            //   list of two.\n            Object reply = planner.apply(goal, history);\n            if (!(reply instanceof Map<?, ?> plan) || !(plan.get(\"done\") instanceof Boolean done)) {\n                return map(\"status\", \"bad_plan\", \"summary\", \"\", \"steps\", steps, \"reason\", \"the planner reply could not be read\");\n            }\n            if (done) return map(\"status\", \"done\", \"summary\", plan.get(\"summary\") == null ? \"\" : String.valueOf(plan.get(\"summary\")), \"steps\", steps, \"reason\", \"\");\n            String subtask = plan.get(\"next\") == null ? \"\" : String.valueOf(plan.get(\"next\")).strip();\n            // TODO 8 of 9 (finish this to pass e5): the stuck rules. When the planner gives no next step, finish with\n            //   status stuck and the reason \"no next step\"; when the next step was already done (compare ignoring case),\n            //   finish with status stuck and the reason \"repeated subtask: NAME\". Example: next \"Fix A\" after \"fix a\" ->\n            //   stuck.\n            if (steps.size() >= maxSteps) return map(\"status\", \"step_limit\", \"summary\", \"\", \"steps\", steps, \"reason\", \"step limit reached\");\n            String result;\n            try {\n                result = worker.apply(subtask);\n            } catch (RuntimeException error) { // the planner decides what a failed step means\n                result = \"ERROR: \" + error.getMessage();\n            }\n            Map<String, String> step = new LinkedHashMap<>();\n            step.put(\"subtask\", subtask);\n            step.put(\"result\", result);\n            steps.add(step);\n        }\n    }\n\n    static String chooseStrategy(Map<String, Object> task) {\n        Object stepsKnown = task.get(\"steps_known\");\n        Object items = task.get(\"items\");\n        if (!(stepsKnown instanceof Boolean known) || !(items instanceof Integer count) || count < 0) {\n            throw new IllegalArgumentException(\"steps_known must be true or false and items a whole number of at least 0\");\n        }\n        // TODO 9 of 9 (finish this to pass e6): the choice. Receives the validated fields. Return adaptive when the\n        //   steps are not known; otherwise per_item_then_cross when there are at least 2 items and items_interact is true;\n        //   otherwise fixed_chain. Example: steps known, 3 items that interact -> per_item_then_cross.\n        return \"fixed_chain\";\n    }\n}\n",
+  "exercise": {
+    "main_path": "practice/level-3/50-task-decomposition/prose/unit-02/practice-3/src/main/java/Decompose.java",
+    "test_path": "practice/level-3/50-task-decomposition/prose/unit-02/practice-3/src/test/java/DecomposeTest.java",
+    "run_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/50-task-decomposition/prose/unit-02/practice-3",
+      "tryIt"
+    ],
+    "test_command": [
+      "gradle",
+      "--offline",
+      "-q",
+      "-p",
+      "practice/level-3/50-task-decomposition/prose/unit-02/practice-3",
+      "cleanTest",
+      "test"
+    ],
+    "provenance": "generated",
+    "trust": "advisory",
+    "cases": [
+      {
+        "id": "m1_eachFileIsReviewedAloneAndTheCrossPassReadsTheirSummaries()",
+        "kind": "main",
+        "says": "Each file is reviewed alone and the cross pass reads their summaries"
+      },
+      {
+        "id": "e1_aFilePassSeesOnlyItsOwnFileAndTheCrossPassSeesSummariesNeverTheText()",
+        "kind": "edge",
+        "says": "A file pass sees only its own file and the cross pass sees summaries, never the text"
+      },
+      {
+        "id": "e2_aLongFileIsReviewedInLabelledPartsAndABlankFileIsSkipped()",
+        "kind": "edge",
+        "says": "A long file is reviewed in labelled parts and a blank file is skipped"
+      },
+      {
+        "id": "e3_aFailingFileIsReportedAndLeftOutOfTheCrossPassWhichNeedsTwoFiles()",
+        "kind": "edge",
+        "says": "A failing file is reported and left out of the cross pass, which needs two files"
+      },
+      {
+        "id": "e4_thePlannerIsAskedAgainAfterEachStepWithTheStepsSoFarAndTheLoopEndsWhenItSaysDone()",
+        "kind": "edge",
+        "says": "The planner is asked again after each step with the steps so far and the loop ends when it says done"
+      },
+      {
+        "id": "e5_theLoopStopsOnARepeatedSubtaskOrNoNextStepOrAnUnreadableReplyAndCountsTheStepLimitExactly()",
+        "kind": "edge",
+        "says": "The loop stops on a repeated subtask, no next step or an unreadable reply, and counts the step limit exactly"
+      },
+      {
+        "id": "e6_theStrategyFollowsWhatIsKnownAboutTheStepsAndWhetherTheItemsInteract()",
+        "kind": "edge",
+        "says": "The strategy follows what is known about the steps and whether the items interact"
+      }
+    ],
+    "report": {
+      "format": "junit",
+      "path": "practice/level-3/50-task-decomposition/prose/unit-02/practice-3/target/test-results/test"
+    },
+    "origin": "course/50-task-decomposition/02-per-item-passes-adaptive-guards-and-the-practice.md",
+    "concepts": [
+      "the practice of Per-item passes, adaptive guards and the practice is solved"
+    ],
+    "files": [
+      "practice/level-3/50-task-decomposition/prose/unit-02/practice-3/src/main/java/TryIt.java"
+    ]
+  },
+  "lang": "java",
+  "edition": "task-decomposition-u2"
+}

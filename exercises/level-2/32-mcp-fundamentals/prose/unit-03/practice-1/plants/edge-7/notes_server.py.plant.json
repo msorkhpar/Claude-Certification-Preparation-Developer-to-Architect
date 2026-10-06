@@ -1,0 +1,15 @@
+{
+  "plant_version": 1,
+  "replacements": [
+    {
+      "file": "notes_server.py",
+      "old": "    title, text = title.strip(), text.strip()\n",
+      "new": "    raw_title, raw_text = title, text\n    title, text = title.strip(), text.strip()\n"
+    },
+    {
+      "file": "notes_server.py",
+      "old": "    NOTES.append((title, text))\n    return f\"Saved note {len(NOTES)}: {title}\"",
+      "new": "    NOTES.append((raw_title, raw_text))\n    return f\"Saved note {len(NOTES)}: {raw_title}\""
+    }
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "gates_api": 1,
+  "inputs": [
+    {
+      "role": "statement",
+      "path": "statement.md",
+      "digest": "sha256:a6b8443bc983214a94a4f523a523d99f194aaa19a6c7f84343f97eb1313ea824"
+    },
+    {
+      "role": "starter",
+      "path": "starter/batchReview.ts",
+      "digest": "sha256:fa95d6f131440b49f2eb03beedbc855586023df46baa5a25bbc74f0d768c1db5"
+    },
+    {
+      "role": "reference",
+      "path": "reference/batchReview.ts",
+      "digest": "sha256:a38a5dfcc8ec84176a3ea8eb41fb007fa38ed820ea16ab8cd7cf8e63791c9ce8"
+    },
+    {
+      "role": "starter:try-it.ts",
+      "path": "starter/try-it.ts",
+      "digest": "sha256:e9c51197e5103db032226eb30b81298f50fb0cacdd1e43b4531cfbfa06e406a3"
+    },
+    {
+      "role": "reference:try-it.ts",
+      "path": "reference/try-it.ts",
+      "digest": "sha256:e9c51197e5103db032226eb30b81298f50fb0cacdd1e43b4531cfbfa06e406a3"
+    },
+    {
+      "role": "tests",
+      "path": "tests/batchReview.test.ts",
+      "digest": "sha256:7ed87554c4485522d61b94b506ff871b02dd8d015ead840127b0828682593041"
+    },
+    {
+      "role": "plant:e1 an sla without room for a batch is refused",
+      "path": "plants/edge-1/batchReview.ts.plant.json",
+      "digest": "sha256:e8008e20a5ff8dcb8b07ed7a31c136d1e276aec2d8214b449d5f197bca526547"
+    },
+    {
+      "role": "plant:e2 a blocking check or a tool loop needs the synchronous api",
+      "path": "plants/edge-2/batchReview.ts.plant.json",
+      "digest": "sha256:d70a61cefd2cf6b9ea6e629a6803d721c2e022e4a624d730d5a082f11870e4c2"
+    },
+    {
+      "role": "plant:e3 only the items that did not succeed are resubmitted by custom id",
+      "path": "plants/edge-3/batchReview.ts.plant.json",
+      "digest": "sha256:6ef88101f5f8c896c1034f6079dd42812ce7aa8814a6e7483d6b5d702594857e"
+    },
+    {
+      "role": "plant:e4 an item over the limit is chunked and a rejected request is fixed first",
+      "path": "plants/edge-4/batchReview.ts.plant.json",
+      "digest": "sha256:2e29d47ba6879cc7711ec07d8454f372dc5456f435ff40e4478b31aec3676899"
+    },
+    {
+      "role": "plant:e5 a multi file review gets a local pass per file and one integration pass",
+      "path": "plants/edge-5/batchReview.ts.plant.json",
+      "digest": "sha256:f040fd3ffc562f3fbf790e9cffed63ccc81fb44c1fd35a0274b63926732199ce"
+    },
+    {
+      "role": "plant:e6 the same finding from two passes is one finding with the highest severity and the lowest confidence",
+      "path": "plants/edge-6/batchReview.ts.plant.json",
+      "digest": "sha256:79194fc111d046c68eaa0fb7414e33cea10ba7f64680eb62fbed9820539a0a7f"
+    },
+    {
+      "role": "plant:e7 a finding is accepted only when two independent passes agree with confidence",
+      "path": "plants/edge-7/batchReview.ts.plant.json",
+      "digest": "sha256:c43b466516716aac79ff0b328a4d36f4801524da67679e18c2788e9bd360faf7"
+    },
+    {
+      "role": "build:junit-file.mjs",
+      "path": "build/junit-file.mjs",
+      "digest": "sha256:eebbfd3bebdf18b0d715903d01abac0b7199da78c76c588b50c0c40352614cef"
+    },
+    {
+      "role": "build:logger.ts",
+      "path": "build/logger.ts",
+      "digest": "sha256:ee4ada918729a2eb77f3d514a0acf59bad03b63ca373a3a7b92f86d95f23197d"
+    }
+  ],
+  "origins": [
+    {
+      "role": "origin",
+      "path": "course/63-batch-and-multi-pass-review/02-independent-passes-combined-verdicts-and-the-practice.md",
+      "section": null,
+      "digest": "sha256:8b312c3254da11690bc127f54fa66ff0c3231b0f6fb8d632d609110c737eddc8"
+    }
+  ],
+  "gates": [
+    {
+      "id": "G1",
+      "family": "code",
+      "held": true,
+      "says": "all 8 cases passed on the reference, on two runs alike",
+      "recorded": {}
+    },
+    {
+      "id": "G2",
+      "family": "code",
+      "held": true,
+      "says": "none of the 8 cases passed on the starter",
+      "recorded": {}
+    },
+    {
+      "id": "G3",
+      "family": "code",
+      "held": true,
+      "says": "each of the 7 edge cases was caught by its own plant",
+      "recorded": {}
+    },
+    {
+      "id": "G4",
+      "family": "code",
+      "held": true,
+      "says": "every test the report named mapped to one of the 8 cases, and every case was named",
+      "recorded": {}
+    },
+    {
+      "id": "G5",
+      "family": "code",
+      "held": true,
+      "says": "the cited passage of 'course/63-batch-and-multi-pass-review/02-independent-passes-combined-verdicts-and-the-practice.md' still matches the ledger",
+      "recorded": {}
+    }
+  ]
+}
