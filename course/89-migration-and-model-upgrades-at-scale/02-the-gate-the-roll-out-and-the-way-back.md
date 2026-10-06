@@ -716,10 +716,10 @@ The practice is in [`exercises/89-migration-and-model-upgrades-at-scale`](../../
 This quiz covers both pages of the module.
 
 1. The new model costs about a third more per answer and fixes the refund errors. The product owner asks whether to move. What should the architect reply?
-   - **a**: Show both figures and advise staying, because a third more per answer outweighs the refund fix
-   - **b**: Show both figures and advise moving, because the vendor named the newer model as the replacement
-   - **c**: Show both figures and let them decide, because staying put also ends on a fixed retirement date
-   - **d**: Show both figures and defer the choice, because more evidence on cost arrives as retirement nears
+   - **a**: Advise staying on the old model, because a cost rise of a third outweighs the refund it fixes
+   - **b**: Recommend the move, because the vendor has named the newer model as the replacement to adopt
+   - **c**: Put the gain, the higher bill and the date side by side, because staying has an end date too
+   - **d**: Hold off any answer until the retirement date, because the cost evidence on the new model grows
 
 2. After a migration, a parser that reads `content[0].text` breaks on some replies and works on others. Which step was missed?
    - **a**: Lowering max_tokens so that the thinking is cut off before the text of the reply begins
@@ -729,15 +729,15 @@ This quiz covers both pages of the module.
 
 3. On the day the new model took all traffic, the team deleted the old model's id from its configuration to keep it tidy. Two days later errors spike. What did the cleanup take away?
    - **a**: Nothing, since faults that surface after a passed gate are fixed forward on the new model
-   - **b**: The cost baseline, since a new baseline is set by billing the old model beside the new one
-   - **c**: The latency check, whose p95 limit the gate reads from the old model's live timings
-   - **d**: The way back, since no tested fallback remains to receive requests while the fault is fixed
+   - **b**: The record of which key called which model, since only the configuration holds that record
+   - **c**: The error limit per stage, since the roll-out step reads it from the old model's entry
+   - **d**: The way back, since no tested fallback remains to serve requests while the fault is fixed
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. The architect's job "is to state the trade", including "the date that forces the choice", and the owner decides, since "staying has a date that ends it". *b* is ruled out because "A recommended replacement is a starting point, not a decision". *a* is ruled out because "A rise in cost is a number to put before the owner, not a verdict". *d* is ruled out because "Waiting for the retirement date hands the decision to the calendar, and gives up the rollback".
+1. **c**. The architect's job "is to state the trade": what improves, what it costs against the budget, what is at risk, and "the date that forces the choice", since "staying has a date that ends it" as well. *b* is ruled out because "A recommended replacement is a starting point, not a decision". *a* is ruled out because "A rise in cost is a number to put before the owner, not a verdict". *d* is ruled out because "Waiting for the retirement date hands the decision to the calendar, and gives up the rollback".
 2. **b**. With adaptive thinking on by default "the first content block of a reply may be thinking text", so the parser must "Read content blocks by `type`". *a* is ruled out because "`max_tokens` covers thinking plus text, and thinking tokens are billed as output tokens", so a lower limit cuts the text as well. *c* is ruled out because the guide lists `thinking: {"type": "disabled"}` among the "five settings that return a 400 error". *d* is ruled out because "A reply need not begin with thinking text either, so a rule that always drops the first block loses real text".
-3. **d**. The page says "the old model is the rollback, and it stays so until its own retirement date". *a* is ruled out because "When the limit is passed, the response is to send every request back to the previous model", not to fix forward. *b* is ruled out because a new baseline comes from the new model's own traffic: "measure usage afresh, set a new baseline". *c* is ruled out because the gate's latency check takes "the nearest-rank 95th percentile of the new timings, against a limit".
+3. **d**. The page says "the old model is the rollback, and it stays so until its own retirement date". *a* is ruled out because "When the limit is passed, the response is to send every request back to the previous model", not to fix forward. *b* is ruled out because the Console export gives "usage broken down by API key and model", so the record does not live in the configuration. *c* is ruled out because the errors per thousand are "compared with a limit (5 in the example)", one of the "values to tune to your own traffic", not a value taken from the old model.
 
 </details>

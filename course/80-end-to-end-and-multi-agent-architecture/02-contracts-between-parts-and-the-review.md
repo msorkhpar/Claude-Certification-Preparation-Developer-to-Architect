@@ -67,7 +67,7 @@ These are the wrong answers the exam's options for this domain offer, each with 
 
 1. Scenario: At Alder Freight an intake service and a pricing service each pass every one of their own tests. In production about one request in fifty stalls between them, and always for shipments with no matching tariff. What should the architect fix?
    - **a**: The pricing service's model, swapped for a larger one that copes with odd shipments
-   - **b**: The unwritten rule for how the two parts treat a lookup that finds nothing
+   - **b**: The empty result, by writing down what both parts do when a lookup finds nothing
    - **c**: The transient network fault, by adding an automatic retry on each stall
    - **d**: The missing visibility, by placing a logging component between the two
 
@@ -105,7 +105,7 @@ This quiz covers both pages of the module.
    - **a**: A medium finding, because the refunds can be checked after the fact
    - **b**: No finding, since the agent's answers have already been validated before the write
    - **c**: An autonomy finding, since the agent acts with no person in the loop
-   - **d**: A high finding, so the design is rejected before price is compared
+   - **d**: A high finding, because each payment goes out with no one signing it off first
 
 <details>
 <summary>Answer key</summary>

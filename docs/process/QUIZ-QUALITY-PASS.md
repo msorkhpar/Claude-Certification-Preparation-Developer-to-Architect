@@ -20,8 +20,9 @@ Every item was judged against the course quiz rules in `CLAUDE.md` with these po
 - **Rule-outs that work.** Each wrong option's explanation quotes, verbatim, a passage that makes that option false.
 
 Items that already met these points were left byte-identical. Every changed item was judged by an independent
-reader; an item that a reader still judged weak after the fix rounds was either repaired once more or restored to
-its earlier text, so no item is worse than before the pass.
+reader. In batch 1, an item that a reader still judged weak after the fix rounds was repaired once more or restored
+to its earlier text, and a judge compared it with its earlier version, so no item is worse than before the pass. In
+the batches stopped part-way, some modules have not reached that comparison yet (see the batch log).
 
 ## What is guaranteed unchanged
 
@@ -82,6 +83,13 @@ Base commit of the pass: `c32f09b`. Each batch lands as one or more commits on t
 | Batch | Modules | Items judged | Items changed | Still weak (kept or restored) | Lesson lines changed |
 |---|---|---|---|---|---|
 | 1 | 1 to 11 (Level 1, both mock exams) | 220 | 195 | 22 (2 restored to their base text) | 0 |
+| 2 (stopped part-way) | 12 to 27 | 166 | 152 | see `quiz-pass/stopped-state.json` | 0 |
+| 4 (stopped part-way) | 45 to 61 | 123 | 104 | see `quiz-pass/stopped-state.json` | 0 |
+| 6 (stopped part-way) | 79 to 93 (the module 94 mock exams not started) | 105 | 95 | see `quiz-pass/stopped-state.json` | 0 |
+
+Batches 3 (modules 28 to 44) and 5 (62 to 78) and the module 94 mock exams are not started: their items are as they
+were at the base commit. The pass stopped after the rows above; `quiz-pass/README.md` gives the stage
+each touched module reached and how to continue.
 
 ## Items whose tested point changed
 
@@ -91,10 +99,15 @@ scenario, so a reader comparing them with an earlier copy should not expect the 
 - Level 1: `07-claude-in-the-apps` 03#m1 (the earlier key, syncing the source, does not hold for a shared Project;
   the new key follows page 1) and 03#m4 (new scenario, same key letter); `08-claudes-apps-in-depth` 03#m3 (recast
   to the visible Chrome tabs, as it duplicated page 3 q2) and 03#m4 (new scenario); Level 1 mock 1 x27 (new stem).
+- Level 3: `57-memory-files-and-rules` 02#m2 (now asks why imports written as inline code load nothing, instead of
+  what splitting a file into imports does).
+- Batches 2, 4 and 6 stopped before this list was compiled for them; `git diff c32f09b -- course/<module>` shows each
+  item's change.
 
 ## Open points
 
-- `docs/process/QUIZ-POLISH.md` lists the items an independent reader still judges WEAK after this pass, with the
-  reason. They pass every automatic check and are no worse than before the pass.
+- `docs/process/QUIZ-POLISH.md` lists the Level 1 items an independent reader still judges WEAK after this pass, with
+  the reason. Its entries for Levels 2 to 4 predate the pass; for the modules this pass touched, the reader's current
+  verdicts are in `quiz-pass/stopped-state.json`.
 - Key letters follow a per-module sequence set by `tools/balance_keys.py`, and several modules share the same
   sequence. Varying it would move options in every module; it is left for a separate change.

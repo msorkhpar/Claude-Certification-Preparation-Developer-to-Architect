@@ -64,17 +64,17 @@
       "scope": "page",
       "stem": "Scenario: Rowan Insights' search agent fails, and a cheaper backup agent answers the task. The runner keeps the backup's answer. What should it do with that result?",
       "options": {
-        "a": "Write it to the store of finished work, so that a later run does not spend effort on the task again",
+        "a": "Use it and write it to the store of finished work, so that a later run does not spend effort on the task again",
         "b": "Flag it as degraded and leave it out of the store, so that a later run tries the primary again",
-        "c": "Record it under the primary's idempotency key, so that a retry of the primary returns this answer",
-        "d": "Retry the backup until its answer matches the primary's, so that the report needs no flag on it"
+        "c": "Use it and record it under the primary's idempotency key, so that a retry of the primary returns this answer",
+        "d": "Use it and list the task as done like any other, so that the report stays simple for the caller"
       },
       "key": "b",
       "explanation": {
         "b": "A degraded result is used and flagged, and it is not stored, so a later run can try the primary again.",
         "a": "Ruled out because a stored answer makes the task look done: \"the weaker answer would become permanent by accident\".",
         "c": "Ruled out because the fallback is a different attempt with a different effect, so \"it carries its own idempotency key (the primary's key with a suffix)\".",
-        "d": "Ruled out because the backup is not retried to a target and its weaker answer is flagged, not hidden: \"It is tried once, under its own key\"."
+        "d": "Ruled out because the task is listed as degraded \"so that the report and the caller know the answer is weaker than planned\"."
       }
     },
     {

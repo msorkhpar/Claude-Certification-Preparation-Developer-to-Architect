@@ -5,19 +5,19 @@
       "id": "01-hub-and-spoke-and-what-the-coordinator-owns#q1",
       "page": "01-hub-and-spoke-and-what-the-coordinator-owns.md",
       "scope": "page",
-      "stem": "A coordinator spends ten turns locating the broken check and its failure text, then tells a subagent only to \"fix the broken check\". The subagent opens other modules and edits the wrong one. What should the coordinator have done?",
+      "stem": "A coordinator spends ten turns investigating a failing build, then tells a subagent only to \"fix the broken check\". The subagent opens other modules and edits the wrong one. What should the coordinator have done?",
       "options": {
-        "a": "Pass on the file path and error output it had already found",
+        "a": "Put the file's location and the error text into its prompt",
         "b": "Let the subagent look up the parent's earlier tool results in the session",
         "c": "Name a stronger model for the subagent in its definition file",
-        "d": "Add a line telling the subagent to ask the coordinator whenever it is unsure"
+        "d": "Have a second subagent review every edit before it is saved"
       },
       "key": "a",
       "explanation": {
         "a": "The subagent's context starts fresh, so the brief is the only channel for facts the coordinator already found.",
         "b": "Ruled out because nothing is inherited: \"The only content you pass from parent to subagent is the Agent tool's prompt string\".",
-        "c": "Ruled out because a stronger model still lacks the facts: \"If a fact is not in the brief, the subagent does not have it\".",
-        "d": "Ruled out because the subagent cannot converse with its parent while it runs: \"only its final message returns to the parent\"."
+        "c": "Ruled out because a stronger model still lacks the facts, and \"a vague brief produces vague work.\"",
+        "d": "Ruled out because a reviewing subagent starts from the same bare brief and cannot tell which edit is wrong: \"If a fact is not in the brief, the subagent does not have it\"."
       }
     },
     {
@@ -72,7 +72,7 @@
       "key": "d",
       "explanation": {
         "d": "The review names the gaps, only they are sent out again, and the rounds are capped.",
-        "b": "Ruled out because no first wave, however large, can aim at gaps that the review names only afterwards, and a larger one still leaves some: \"The first round of a research team rarely answers the question.\"",
+        "b": "Ruled out because a larger wave raises the price of every section, the three sound ones included, when each wave must earn its cost: \"multi-agent systems require tasks where the value of the task is high enough to pay for the increased performance.\"",
         "c": "Ruled out because \"a gap is found by the review and closed by a subagent, never invented by the synthesis.\"",
         "a": "Ruled out because even one extra round repeats work that is already done: \"the first-round findings are already in hand\"."
       }
@@ -119,19 +119,19 @@
       "id": "02-review-iteration-failures-and-the-practice#m3",
       "page": "02-review-iteration-failures-and-the-practice.md",
       "scope": "module",
-      "stem": "Scenario S3, a multi-agent research system. A coordinator splits each research question across search, analysis and synthesis subagents and returns a cited report. Specialist agents hand forty-page drafts up through the coordinator, and the cost of each run climbs with every handoff, yet the final report may not lose any detail from those drafts. Which architecture change fits best?",
+      "stem": "Scenario S3, a multi-agent research system. A coordinator splits each research question across search, analysis and synthesis subagents and returns a cited report. Specialist agents hand forty-page drafts up through the coordinator, and the cost of each run climbs with every handoff, yet the final report must keep every detail from those drafts. Which architecture change fits best?",
       "options": {
-        "a": "Ask each specialist to hand up a much shorter draft instead",
+        "a": "Cap the number of turns each specialist may take",
         "b": "Have the coordinator condense each draft before relaying it",
-        "c": "Hand each specialist the coordinator's whole conversation",
-        "d": "Keep each output in an outside store and pass on only a pointer"
+        "c": "Give every specialist a full copy of the coordinator's conversation",
+        "d": "Write each output to a store and pass on a pointer"
       },
       "key": "d",
       "explanation": {
         "d": "A reference keeps the output out of the lead's window and out of its summaries.",
-        "b": "Ruled out because a lead that summarizes what it relays \"loses detail at every summary\".",
+        "b": "Ruled out because the coordinator still reads each full draft, so it \"pays for each token twice\", and it \"loses detail at every summary\".",
         "c": "Ruled out because copying through conversation history is the cost: \"reduces token overhead from copying large outputs through conversation history\".",
-        "a": "Ruled out because a shorter draft drops detail and still travels the same route through the lead: \"Rather than requiring subagents to communicate everything through the lead agent\"."
+        "a": "Ruled out because a cap on turns does not change where the drafts travel, and the lead still reads each one: \"Rather than requiring subagents to communicate everything through the lead agent\"."
       }
     }
   ]

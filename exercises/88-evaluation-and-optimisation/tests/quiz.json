@@ -5,18 +5,18 @@
       "id": "01-metrics-evaluation-sets-and-where-a-headline-hides-the-failure#q1",
       "page": "01-metrics-evaluation-sets-and-where-a-headline-hides-the-failure.md",
       "scope": "page",
-      "stem": "Two versions of a support assistant both score 92 percent on the evaluation set. One of them gets refund answers wrong far more often, and a wrong refund answer is far dearer than a wrong status answer. What should the report show?",
+      "stem": "Two versions of a support assistant both score 92 percent on an evaluation set of refund and order-status questions. A wrong refund answer does far more harm than a wrong status answer. What should the report show?",
       "options": {
-        "a": "The accuracy and the cost of errors for each kind of question",
-        "b": "The overall accuracy of each version across the whole set",
-        "c": "The cost per answered case for each of the two versions",
-        "d": "The number of cases in the set behind each of the scores"
+        "a": "The accuracy and the error cost of each, split by kind of case",
+        "b": "The overall accuracy and the average latency of each version",
+        "c": "The cost per answered case and the response time of both",
+        "d": "The size of the set and the margin of error on each score"
       },
       "key": "a",
       "explanation": {
-        "a": "A table by segment with the cost of the errors shows the regression that the overall figure averages away.",
+        "a": "A table by segment with the cost of the errors shows any regression that the overall figure averages away, and the refund rows weigh more.",
         "b": "Ruled out because \"Equal overall scores can hide unequal failures\".",
-        "c": "Ruled out because \"a faster or cheaper system is not better where it is wrong\".",
+        "c": "Ruled out because \"A figure from another dimension cannot stand in for the segment that is failing: a faster or cheaper system is not better where it is wrong\".",
         "d": "Ruled out because \"More cases make the score steadier and do not show where it is low\"."
       }
     },
@@ -64,7 +64,7 @@
       "scope": "page",
       "stem": "A new model version matches the current one on overall accuracy in a shadow run. It gains answers in order status and loses answers in refunds, an area the team guards. What does the gate described on this page do?",
       "options": {
-        "a": "Hold it back until its overall accuracy is higher than the current version's",
+        "a": "Ship it, since in total it lost no more cases than it gained elsewhere",
         "b": "Average the accuracy of the two segments and ship if that average has risen",
         "c": "Ship it to half of the live traffic and watch whether any customers complain",
         "d": "Hold the change back until the costly segment stops losing any of its cases"
@@ -72,7 +72,7 @@
       "key": "d",
       "explanation": {
         "d": "The gate has a key for guarded segments, and a loss there blocks the change.",
-        "a": "Ruled out because a higher total can come from gains elsewhere while refunds still lose, and \"A gain in one segment does not pay for a loss in another\".",
+        "a": "Ruled out because \"First, no protected segment may lose a case, because those segments are protected for their cost\", and \"A gain in one segment does not pay for a loss in another\".",
         "c": "Ruled out because \"A change that ships to half of the traffic exposes half of the users to the regression before anyone has measured it\".",
         "b": "Ruled out because \"An average of segment accuracies weights a rare segment like a common one and hides its price\"."
       }

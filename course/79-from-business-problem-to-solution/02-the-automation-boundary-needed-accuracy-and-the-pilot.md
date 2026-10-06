@@ -104,7 +104,7 @@ This quiz covers both pages of the module.
    - **a**: Send each of them to a person, because a human check lowers the error count and so repays its price
    - **b**: Pass them through unreviewed, because reviewing them would burn more than the errors it prevents
    - **c**: Sample a tenth of them for review, since a sample is cheaper than a full check
-   - **d**: Route them by the same rule as the unconfident items, since one policy for the whole flow is simpler to run
+   - **d**: Hold them back until the model is right on every one, since an unchecked error is too costly to accept
 
 3. Scenario: Corvid Care pilots a discharge-letter drafting assistant on two wards. Ward staff still check and sign every letter, and the sponsor's case rests on what they do with the time the drafts give back. The sponsor must say which value pillar the project serves and how it will be shown. Which answer fits best?
    - **a**: Productivity, measured by the number of patients sent home per person in a shift
@@ -116,7 +116,7 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **a**. An unbounded requirement cannot be designed against, so it is made concrete first: "needed accuracy comes from two costs". *b* is ruled out because capability without a target spends money without a bar: "cannot be designed against, tested or priced". *c* is ruled out because the ladder buys complexity only for a stated requirement, and the page says "find the simplest solution possible". *d* is ruled out because the design is aimed at a number, and "the first piece of work" is finding it before the pilot is built.
-2. **b**. The expected error cost of 2.50 per item is below the review cost of 5, so a review loses money. *a* is ruled out because "reviewing the item loses money" where the model beats the break-even, and the page says "Reviewing everything wastes review". *c* is ruled out because a sample is a guess at the same trade-off, and the page asks for design that spends attention "only where it changes the outcome". *d* is ruled out because the needed accuracy is "a property of the slice of work, not of the model", and the page asks for a target per slice, "not one number for the whole system".
+2. **b**. The expected error cost of 2.50 per item is below the review cost of 5, so a review loses money. *a* is ruled out because "reviewing the item loses money" where the model beats the break-even, and the page says "Reviewing everything wastes review". *c* is ruled out because each sampled item still costs 5 to check against 2.50 of expected error, and "Where the model is more accurate than that, reviewing the item loses money". *d* is ruled out because the bar is set by the two costs, not by perfection: "the break-even accuracy is 98 percent", and the confident items already beat it at 99 percent.
 3. **a**. Time handed back to staff who then send more patients home is people getting more done, so the pillar is productivity and the measure follows the people, not the tool. *b* is ruled out because the page says the cost pillar counts "tokens, review time and rework, not model price alone". *c* is ruled out because transformation claims "Something that could not be done before", and ward staff wrote discharge letters before the pilot. *d* is ruled out because a draft's turnaround time is a system target of the performance pillar, with "95th percentile latency, availability, accuracy by case type", and says nothing of what the staff complete.
 
 </details>

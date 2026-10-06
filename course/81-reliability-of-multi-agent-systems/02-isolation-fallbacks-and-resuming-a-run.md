@@ -62,16 +62,16 @@ These are the wrong answers the exam's options for this domain offer, each with 
    - **d**: a done and b failed, with c, d and e held back until someone has repaired b
 
 2. Scenario: Rowan Insights' search agent fails, and a cheaper backup agent answers the task. The runner keeps the backup's answer. What should it do with that result?
-   - **a**: Write it to the store of finished work, so that a later run does not spend effort on the task again
+   - **a**: Use it and write it to the store of finished work, so that a later run does not spend effort on the task again
    - **b**: Flag it as degraded and leave it out of the store, so that a later run tries the primary again
-   - **c**: Record it under the primary's idempotency key, so that a retry of the primary returns this answer
-   - **d**: Retry the backup until its answer matches the primary's, so that the report needs no flag on it
+   - **c**: Use it and record it under the primary's idempotency key, so that a retry of the primary returns this answer
+   - **d**: Use it and list the task as done like any other, so that the report stays simple for the caller
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. Only the task that needed b is affected, and the report lists what is done, what failed and what was skipped. *b* is ruled out because d did not fail on its own, and the report keeps apart "what failed and why, and what was skipped because of it". *c* is ruled out because d needs b and cannot be done, so the runner marks it skipped "with a reason that names the failed one". *d* is ruled out because c and e need neither, and the runner "carries on with the independent tasks".
-2. **b**. A degraded result is used and flagged, and it is not stored, so a later run can try the primary again. *a* is ruled out because a stored answer makes the task look done: "the weaker answer would become permanent by accident". *c* is ruled out because the fallback is a different attempt with a different effect, so "it carries its own idempotency key (the primary's key with a suffix)". *d* is ruled out because the backup is not retried to a target and its weaker answer is flagged, not hidden: "It is tried once, under its own key".
+2. **b**. A degraded result is used and flagged, and it is not stored, so a later run can try the primary again. *a* is ruled out because a stored answer makes the task look done: "the weaker answer would become permanent by accident". *c* is ruled out because the fallback is a different attempt with a different effect, so "it carries its own idempotency key (the primary's key with a suffix)". *d* is ruled out because the task is listed as degraded "so that the report and the caller know the answer is weaker than planned".
 
 </details>
 

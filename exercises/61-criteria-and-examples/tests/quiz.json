@@ -24,18 +24,18 @@
       "id": "01-explicit-criteria-and-the-trust-in-a-category#q2",
       "page": "01-explicit-criteria-and-the-trust-in-a-category.md",
       "scope": "page",
-      "stem": "One category of findings was dismissed in two thirds of its first twenty reviews, and developers have begun skipping the other remarks too. What does the guide recommend for that category?",
+      "stem": "One category of findings was dismissed in two thirds of its first twenty reviews, and developers have begun skipping the other remarks too. What should the team do with that category?",
       "options": {
         "a": "Pause it while its prompt and examples improve",
-        "b": "Remove it from the criteria for good",
-        "c": "Keep it, with every finding marked low severity",
-        "d": "Keep it, with a confidence score on each finding"
+        "b": "Remove it from the review criteria for good",
+        "c": "Raise the severity floor its findings must pass",
+        "d": "Attach a confidence score to each of its findings"
       },
       "key": "a",
       "explanation": {
         "a": "Disabling a high false-positive category while its prompt is improved restores trust in the rest.",
         "b": "Ruled out because \"Deleting the category from the criteria loses the examples that the next attempt needs\".",
-        "c": "Ruled out because the remarks would still be posted and dismissed, since \"each dismissed comment lowers trust in the accepted ones\".",
+        "c": "Ruled out because the findings that clear a higher floor come from the same criteria and are still dismissed, and \"each dismissed comment lowers trust in the accepted ones\".",
         "d": "Ruled out because \"self-reported confidence is another vague instruction\"."
       }
     },
@@ -62,7 +62,7 @@
       "id": "02-examples-asking-and-the-practice#q2",
       "page": "02-examples-asking-and-the-practice.md",
       "scope": "page",
-      "stem": "A review job in CI receives a request with no reviewer named, and the project holds no default reviewer. What should the run do?",
+      "stem": "In this module's practice, a review job in CI receives a request with no reviewer named, although the review requires one, and the project holds no default reviewer. What should the run do?",
       "options": {
         "a": "Ask the author who the reviewer should be, and wait",
         "b": "Stop with a plain failure that lists the absent field",
@@ -121,17 +121,17 @@
       "scope": "module",
       "stem": "Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests. Its prompt holds three worked cases, one reported unchecked access and two skipped guarded ones, each made of the code and its verdict. A new kind of guard that resembles none of them is still flagged. What should change?",
       "options": {
-        "a": "Add skipped examples until every guard style has one",
-        "b": "Swap the examples for typical changes from recent commits",
-        "c": "Give each example a sentence on why its label was chosen",
-        "d": "Copy the skipped examples so the skip label weighs more"
+        "a": "Add skipped examples for each of the newest guard styles",
+        "b": "Wrap each example in its own tag inside an examples block",
+        "c": "Give each example a line on why its label was chosen",
+        "d": "Move the examples after the diff, nearest the input"
       },
       "key": "c",
       "explanation": {
         "c": "The set is targeted and shows both verdicts, so what it lacks is the reason, and \"The reason is what transfers to a case that matches no example\".",
-        "a": "Ruled out because new guard styles keep coming and \"the guide asks for two to four targeted examples, and a long list teaches accidents\".",
-        "b": "Ruled out because the guard is a border case, while \"typical cases are settled by the criteria\".",
-        "d": "Ruled out because copies add no new case and tilt the set toward one label, while examples \"should be diverse enough that the reviewer does not learn an accident\"."
+        "a": "Ruled out because new guard styles keep coming, the set would grow past four, and \"the guide asks for two to four targeted examples, and a long list teaches accidents\".",
+        "b": "Ruled out because tags only help the model \"tell instructions from examples from data\", and a tagged example still says nothing about a guard it does not show.",
+        "d": "Ruled out because moving the examples changes no verdict they teach, and \"Examples sit between the criteria and the input, each in its own tag, with the diff last\"."
       }
     }
   ]

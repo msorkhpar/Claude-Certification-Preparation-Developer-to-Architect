@@ -1,0 +1,1230 @@
+{
+ "12-from-business-need-to-a-testable-spec": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1"
+  ],
+  "interrupted": [],
+  "last_reader": "reread1",
+  "open": [
+   {
+    "id": "01-requirements-for-a-claude-feature#q2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The new rule-out of a is too loose. The quote 'rerun whenever the prompt, the model or the code changes' does not make 'the exact prompt, examples and settings' a wrong thing to ask for. The inference that the prompt changes under the spec is the author's, not the page's. The key and the other options are fine: c matches the 'fourth row is the one teams forget', b is excluded by 'not as a single expected string', and d by 'impresses everyone and cannot say whether it is done'.",
+    "fix": "Keep option a. Rewrite its rule-out around a passage that really excludes it. Use 'A requirement is a sentence a test can fail': the prompt text is an implementation choice that no test fails on. Alternatively use the page's own spec shape: the one-page spec names the design and the pinned model id, and no line lists prompt text. Do not rely on the 'rerun whenever' quote."
+   },
+   {
+    "id": "02-budgets-and-matching-an-architecture#q2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The rework trades a mirror pair (400 against 429) for a different tell. Key d is the longest option. It is the only one with a 'so' consequence clause and the only one that names no status code. It also overclaims: 'meeting the residency rule needs a newer model' is not what the page says. The page says a platform can also decide residency ('On Amazon Bedrock and Google Cloud the region comes from the endpoint instead'), so a newer model is not the only route. Rule-outs a, b and c are fine: 'supported on Claude 4.6 and later', 'return a 400 error' and 'Rate limits are shared across all geos' are all verbatim and exclude their options.",
+    "fix": "Rewrite d as a plain outcome of about 80 characters, for example 'It is rejected with an error, because the setting is not supported on that model'. Drop the clause about needing a newer model from both the option and the key explanation. Keep the 'return a 400 error' quote in the key. Give c a different failure verb ('refused with a 429') so d is not a mirror of it. Align the lengths of a to d."
+   }
+  ]
+ },
+ "13-one-rest-api-under-every-sdk": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1"
+  ],
+  "interrupted": [],
+  "last_reader": "reread1",
+  "open": [
+   {
+    "id": "01-the-http-contract#q2",
+    "changed": false,
+    "verdict": "WEAK",
+    "reason": "Key c is the only option with a conditional fallback clause (\", using the raw text if the body is not JSON\"), and a (\"stop the process whenever that decoding fails\") is close to a strawman. Key is correct and rule-outs work (\"a hand-written client must keep working when the body is HTML\"; \"the proxy answers the same page again\").",
+    "fix": "Reword option a to a plausible mistake without the extreme, such as \"Decode the body as JSON and let the decoding error escape from the failure handler\", still ruled out by \"must keep working when the body is HTML\". Give b or d a similar clause so the key is not the only one with a condition, for example d: \"Retry each failing call a set number of times until the body decodes cleanly\", still ruled out by \"the proxy answers the same page again\"."
+   },
+   {
+    "id": "03-streaming-transport-and-connections#m1",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Two rule-outs do not make their options false. a: \"a successful reply is a JSON object\" only names the topic and does not say retries do not apply. d: \"the only current value of anthropic-version is 2023-06-01\" and an older one \"may be unavailable for new users\" does not show that an old header cannot be the cause of a failure on a new enum value, whereas the page's real exclusion is that new values arrive under the same version. The key itself is correct and derived.",
+    "fix": "Rule-out a: use the page 2 table sentence \"certain errors are automatically retried 2 times by default\", since a new stop reason arrives in a successful reply, so there is no error to retry. Rule-out d: use \"add new variants to enum-like output values\" from the versioning paragraph, so a new value is allowed under the same version and the header is not the cause. No option text needs to change."
+   },
+   {
+    "id": "03-streaming-transport-and-connections#m3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The rework traded one tell for another: b, c and d now all assert that the call is fine or will finish, so the key a is the only sceptical option and the only one telling the developer to do more. The stem \"What should the page's reader tell them?\" invites recall of the page, and the key restates the trap (\"A streamed reply can start with a 200 and still end with an error event\"). Rule-outs themselves are sound (\"Start a new request\" rules out d; \"the connection stays open until the message is complete\" rules out c).",
+    "fix": "Make a second option action-shaped and cautionary, for example replace d with \"Reconnect and resume from the last event, then store the finished result\", still ruled out by the table row \"Reconnect | Start a new request\". Reword the stem to drop \"the page's reader\", for example \"What is wrong with the record?\". Keep key a and its letter."
+   }
+  ]
+ },
+ "14-the-messages-api": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1"
+  ],
+  "interrupted": [],
+  "last_reader": "reread1",
+  "open": [
+   {
+    "id": "01-turns-roles-and-content-blocks#q1",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Key is correct and the d rule-out quote is verbatim. The rework trades one defect for another. The old b (a summary in the system prompt) was a defensible technique. The new b, c and d all blame the model (session memory, output limit, tier). Only the key a blames the client's request list, so it is the odd one out by form (R3). c and d are close to strawmen (R2). The key is also the shortest option and the stem already says the code sends only the newest message (R4).",
+    "fix": "Make one distractor a client-side cause that the page rules out. For b or d, use 'The system prompt is sent as a top-level field and not as the first entry of the list'. Rule it out with the page passage 'a message with the role `system` as the first entry is not allowed' and 'Here it is a separate field'. Keep the other model-side options. Optionally lengthen the key slightly."
+   },
+   {
+    "id": "02-limits-stop-reasons-and-usage#q2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The key d is correct ('a non-default value of any of them is rejected with a 400 error'; 'the documentation tells you to omit them'). c ('only the temperature setting is rejected, the others pass') and d ('refuses the three knobs alike') are an opposite pair, and the key is one of them (R3 mirror pair). The stem also says the team 'will delete the temperature line', which cues that top_p is the open question. The same fact (non-default sampling values rejected on these models) is asked in module 01 page 2 module quiz m1 (R7, for the register).",
+    "fix": "Replace c with a different plausible mistake that the page rules out, so that no option is the negation of the key. For example 'Keep it at 0.9, since only values far from the default are rejected', ruled out by 'a non-default value of any of them is rejected with a 400 error'. Alternatively 'Keep it and add top_k so the two settings limit each other', ruled out by the same quote. Keep the a, b and d rule-outs. The register should decide whether module 01 m1 and this item are one fact asked twice."
+   },
+   {
+    "id": "03-the-conversation-state-the-client-keeps#q1",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The key b is correct and the new a and d are good plausible distractors. The a rule-out ('on any failure remove it before the error leaves the function') and the d rule-out ('can fail after you appended the user turn') work. The c rule-out does not. It says a merge leaves 'the next request contains two user turns in a row' 'in the very same way', but merging at save time removes the two-in-a-row, so the quote does not make c false (R6). a is a legitimate mitigation (retry with backoff for a 529) that the explanation excludes only by reasoning.",
+    "fix": "Rewrite the c rule-out with a passage that really excludes a merge. The page says the retry logic 'will send a different conversation from the one the user saw'. A merged history is still not what the user saw, and the unanswered question stays. Cite 'commit a turn only when the whole exchange succeeded', plus that quote. Drop the claim that two user turns remain after a merge."
+   },
+   {
+    "id": "03-the-conversation-state-the-client-keeps#m3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The key a is correct. Two problems remain. (1) The b rule-out contradicts the page. b says 'each turn adds the same number of tokens', and the page's own arithmetic assumes 'if each exchange adds about 200 tokens', so a turn count is a defensible rough proxy. The rule-out claims each turn adds more than the one before. That is a wrong rule-out and a distractor that is also defensible (R5, R6). (2) The new key is the only option that names a concrete field (`usage`, `input_tokens`) and has a mechanism clause, so it stands out as the specific, bounded one (R3).",
+    "fix": "Replace b with a signal that the page clearly excludes and that a practitioner might use. For example 'The length of the newest user message alone, since that is what the call adds', ruled out by 'every turn resends everything before it'. Alternatively 'The `max_tokens` value set on each request', ruled out by 'the `max_tokens` parameter does not factor into OTPM rate limit calculations' and by the fact that it is a setting, not a count. Make the other options as concrete as the key, for example by naming the output field in c as `output_tokens`, so the key is not the only option that names a field. Keep the a, c and d rule-outs."
+   }
+  ]
+ },
+ "15-errors-retries-and-timeouts": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1"
+  ],
+  "interrupted": [],
+  "last_reader": "reread1",
+  "open": [
+   {
+    "id": "03-timeouts-logging-and-debugging#m1",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The rework trades the old composite key for a mirror pair. Options a ('Repeat both at once') and b ('Repeat both') have the same shape and differ only in timing and reason. The stem asks 'how should the job handle the two kinds?', yet the key reads as one handling for both, so the whole difference sits in the key's reason clause 'once the clash is resolved'. A skimmer can narrow to a/b by form. The key also overclaims ('will succeed too'). The options never offer 'repeat only the first', so the real contrast on the page (409 retried only 'once the conflict is resolved') has no lone distractor.",
+    "fix": "Keep key b. Change option a to a different real mistake, e.g. 'Repeat only the first kind, since a 409 is the fault of the request that was sent'. The page rules it out with '408, 409 (once the conflict is resolved)' listed under 'Retry'. Or reword the key to 'Repeat both, the second one only after the clash is resolved' and reword a away from 'Repeat both'. Update the a explanation to match."
+   }
+  ]
+ },
+ "16-async-concurrency-and-backpressure": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1"
+  ],
+  "interrupted": [],
+  "last_reader": "reread1",
+  "open": [
+   {
+    "id": "02-rate-limits-and-backpressure#q2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "R5/R6. New option a (write each result out as soon as its call returns) is a legitimate mitigation, and the stem says calls start 'before it processes any result', which makes a look right. Its rule-out claims 'the rows, not the results, fill memory here', which the stem does not state, and the quote \"should take a line only when a worker is free\" names the right design without making a false.",
+    "fix": "Change the stem so the rows are plainly the problem, e.g. 'A job reads every row of a very large file into a list, then starts one call per row, and the process runs out of memory'. Rewrite a's rule-out around \"Reading them all first puts the file in memory and starts every call at once\", so writing results out later cannot relieve it. Alternatively replace a with a distractor the page falsifies outright (for example 'Add retries for the rows that fail to start')."
+   },
+   {
+    "id": "02-rate-limits-and-backpressure#m2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "R6, minor. Rewritten b and d are plausible and well excluded (\"a fast producer and a slow consumer meet in an unbounded buffer\"; \"instead of letting work pile up\"). The unchanged rule-out of a rests on \"the buffer is your memory\", which names the topic but does not make 'give the process more memory' false. The key is also the shortest option by a few characters.",
+    "fix": "Rule out a with \"must slow the stage in front of it instead of letting work pile up\", since more memory only lets work pile up. Rule out d with \"take the next item only when there is room for it\", because a disk backlog takes items regardless of room. No change to the options."
+   }
+  ]
+ },
+ "17-streaming": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1"
+  ],
+  "interrupted": [],
+  "last_reader": "reread1",
+  "open": []
+ },
+ "18-model-choice-cost-and-migration": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1"
+  ],
+  "interrupted": [],
+  "last_reader": "reread1",
+  "open": [
+   {
+    "id": "01-matching-a-tier-to-a-workload#q1",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Better than base (the stem no longer states the finding that the cheapest tier is as accurate as the others), and key d is correct by the method 'keep the last tier that held'. Distractor b is a strawman: 'ticket text can always hide a hard case' is an absolute, and the stem already says the hardest tickets were sampled. Distractor a is also thin: 'a later model has the lowest price' is false on its face.",
+    "fix": "Rewrite b as a mistake a practitioner makes, for example 'The most capable tier, since a bigger name is the safer choice'. It is ruled out by the page's trap 'Choosing by reputation. A tier is right only if it passed your evaluation at the lowest cost.' and by 'the cheapest tier that passes'. Keep d unchanged."
+   },
+   {
+    "id": "02-usage-token-counting-and-a-cost-model#q3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Options b and d form a mirror pair (Sonnet 5.5 against Opus 5.5, tier against quality) and are the only two that name a model, so the tie rule is guessable by elimination. The stem copies the page's case e6 ($2 at 0.1 against $4 at 0.05), and the key's 'when the totals match' echoes the stem's 'costs the same', so this is recall of 'A cost tie goes to the lower tier' (R1, R3, R4). Quotes are verbatim and each works against its own option.",
+    "fix": "Keep key b. Replace distractor d (Opus 5.5, quality) with a non-mirror mistake such as 'Neither model: it raises NoModelError, since a tie leaves no best choice', ruled out by the page's `e5` row (NoModelError is for 'a choice with no model') and 'A cost tie goes to the lower tier'. Reword the key to 'Sonnet 5.5, the lower of the two tiers' and the stem to drop the case's own numbers or the 'costs the same' echo, e.g. cache-read-only usage whose totals the learner must compute (2 x 0.1 against 4 x 0.05) to see the tie."
+   },
+   {
+    "id": "03-pinning-ids-and-migrating-safely#q3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Key c is the only option not tied to the API date: a (API date plus 60 days), b (same day) and d (alias on that day) all tie Bedrock to the API date, and b/c are a mirror pair, so the key is the odd one out in form. The stem names Bedrock, the page's own example, so the key is near-verbatim ('Partner-operated platforms ... set their own retirement schedules'). Quotes work: 'the Claude API, Claude Platform on AWS and Microsoft Foundry' and 'at least 60 days' notice before model retirement'.",
+    "fix": "Keep key c. Rewrite a so it is a distinct mistake outside the 'same date' family, for example 'It follows the Model deprecations table, since that page covers every platform', ruled out by 'The dates apply to the Claude API, Claude Platform on AWS and Microsoft Foundry'. Avoid the stem's 'published retirement day' echoing the key. Register: this fact is also asked in the Level 4 professional mock exam item x36."
+   },
+   {
+    "id": "03-pinning-ids-and-migrating-safely#m3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Key d is correct ('runs those turns without them') and answerable. Two of three distractors are near-strawmen: c ('the counting endpoint trims long input') is arbitrary, since the endpoint only counts, and b ('read through an older snapshot of itself') is not a mistake anyone makes. The rule-out of a quotes 'the total input is the sum of the three input fields', which only loosely excludes 'a shortened history'.",
+    "fix": "Replace c with a real misconception that the page excludes, for example 'The full turns and reasoning, with the thinking billed again as output', ruled out by 'runs those turns without them'. Replace b with another plausible mistake, such as 'The turns only up to the last tool call', or sharpen the quote that rules out a (for instance with 'thinking blocks are tied to the model that wrote them') so that it excludes a directly. Keep d unchanged."
+   }
+  ]
+ },
+ "19-thinking-effort-and-speed": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1"
+  ],
+  "interrupted": [],
+  "last_reader": "reread1",
+  "open": [
+   {
+    "id": "01-thinking-and-effort#q3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The key is sound (\"Haiku 4.5 does not support effort\") and the options are parallel, but the rule-out of a is weak (R6). The quote \"in output_config, not inside thinking\" only says where effort lives. It does not make \"takes the setting only together with a manual budget\" false. The key is also a near paraphrase of one page sentence.",
+    "fix": "Change only the rule-out of a. Rule it out with \"It works with or without thinking\" (effort needs no manual budget), and keep \"Haiku 4.5 does not support effort\" as the general ground. Options and key stay as they are."
+   },
+   {
+    "id": "02-fast-mode-tools-and-caching#m2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The key a is correct and the stem is better. Option d (\"the premium price outweighs the gain on any job\") is an absolute strawman (R2); no practitioner would claim it. The page itself says to \"measure whether the seconds saved are worth twice the price\". The same fact (fast mode not available with batch) is also asked in 21-message-batches#q2, which is a near-duplicate the register should decide (R7).",
+    "fix": "Replace \"on any job\" in d with a bounded, plausible claim such as \"for this bot\", so d reads as a cost-based objection that \"measure whether the seconds saved are worth twice the price\" still rules out. Register to decide whether the batch-exclusion fact stays here or in module 21."
+   },
+   {
+    "id": "02-fast-mode-tools-and-caching#m3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The new d (pass-through) is plausible, but the stem says the helper \"must never emit a parameter that one of them rejects\". That contradicts b (\"sends one body to every tier and retries\") and d (\"passes each field ... unchanged\"), so two distractors are excluded by the stem alone (R2). The item also only asks what design the practice uses, which is page recall (R1). The rule-outs are verbatim and valid.",
+    "fix": "Drop the clause \"must never emit a parameter that one of them rejects\" from the stem, for example \"A shared helper serves three Claude models. What design does the practice use for each request's parameters?\". Then b, c and d become real alternative designs, and \"Build the thinking setting from the model, as the practice does\", \"for what the API would answer with a 400\" and \"The rules are the tables of this module\" still rule them out. Keep the course-practice wording."
+   }
+  ]
+ },
+ "20-prompt-caching": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1"
+  ],
+  "interrupted": [],
+  "last_reader": "reread1",
+  "open": [
+   {
+    "id": "02-prices-lifetimes-lookback-and-invalidation#m4",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "R7: the fact is the same as page 1 q3. Both items test that changing content ahead of the breakpoint changes the hash, so every call writes and none reads. q3 asks for the cause and m4 for the fix. The scenario was changed from a clock line to template details, but the fact is unchanged. The rest is sound: the key is not the longest (79 against 79, 80 and 84), the distractors (padding, a longer TTL, more markers) are real mistakes, and every rule-out quote is verbatim and answers its own option.",
+    "fix": "Recast m4 on a different page-2 fact so that no item repeats the volatile-content-before-the-marker fact. One option is the per-request change of `tool_choice` or an image, which empties the messages cache. Rule out the TTL option with 'Changes at each level invalidate that level and all subsequent levels', and use the table rows and the trap 'Either empties the messages cache'. Another option is traffic split across workspaces, using 'a team that splits traffic across workspaces splits its cache too'. Otherwise the register may accept the overlap, since the two items ask different questions (cause against remedy)."
+   }
+  ]
+ },
+ "21-message-batches": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1"
+  ],
+  "interrupted": [],
+  "last_reader": "reread1",
+  "open": [
+   {
+    "id": "01-submitting-a-batch-limits-and-price#q2",
+    "changed": false,
+    "verdict": "WEAK",
+    "reason": "R1/R3: the key restates the page sentence \"refused with a validation error\" and is the only option that is a rejection; the other three are variations of 'runs anyway'. c's rule-out repeats the key's own quote, which does not exclude c specifically. Unchanged by the author; register to decide.",
+    "fix": "Recast as a scenario: a 500-request batch has one request body with `speed` set. Ask when and how the problem shows up. Key: it comes back with the results as a failed entry for that request. Distractors: the submit call rejects the whole batch; the batch runs and that request is billed at the standard rate; the field is ignored and the request runs. Page passages: \"validation errors are returned when processing of the entire batch has ended\" and \"the failure of one request in a batch does not affect the processing of other requests.\""
+   },
+   {
+    "id": "02-polling-results-and-retries#q1",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "R1/R3: the rework made the key the page's own words, \"always use the `custom_id` field\", and it is now the only option that names a concrete field in backticks, so a skimmer can pick it by form. The base was vaguer but did not have this tell. R6: c's quote \"The result lines carry `custom_id` and a `result` whose `type` is one of the four.\" only lists fields and does not state that finishing time is absent. \"Position in the file means nothing.\" rules out d, not c.",
+    "fix": "Keep b's idea but drop the field name from the key, for example 'Look each entry up by the id its request was sent with, since the order carries no meaning', and give a wrong option the same specificity, for example 'Match each entry by its `model` field ...'. Rewrite c so a page passage excludes it, for example 'Sort entries by the time they ended', ruled out by \"Batch results can be returned in any order, and may not match the ordering of requests when the batch was created.\" Use \"Position in the file means nothing.\" against d."
+   },
+   {
+    "id": "02-polling-results-and-retries#q3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "R6: c's rule-out quote \"once a batch has been submitted, it cannot be modified\" does not make 'wait for the same batch to retry it' false; the 'does not retry on its own' step is the author's inference. R4: the key's 'its content is at fault' only paraphrases the error name in the stem. The reworked b is acceptable in form (66 characters, a since-clause like the others).",
+    "fix": "Fix c's rule-out. Use \"the same request fails again\" (the table row) to show that a retry without a change cannot help, or change c to a mistake the page excludes, for example 'Cancel the batch and resubmit it whole', ruled out by \"the failure of one request in a batch does not affect the processing of other requests.\" and \"Collect the failures into a new, smaller batch.\" Optionally reword b's clause so it does not paraphrase the stem's error name."
+   },
+   {
+    "id": "02-polling-results-and-retries#m2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "R3: the reworked key a is the only option without a 'since' clause and the only one with a 'but' contrast. b and d now share the prefix 'The downloads are fine, since', which makes the key the odd one out. R1: the key paraphrases the page sentence \"you may still view the Batch, but its results will no longer be available for download\". The derivation 35 - 29 = about a week is good, and the rule-outs hold (\"Results live for 29 days after `created_at`\", \"you may still view the Batch\", \"Batch results are available for 29 days after creation.\").",
+    "fix": "Give the key a reason clause and give b and d different openings. For example key: 'The results are gone, since the window ran out almost a week ago', with the record still viewable only in the explanation. Make d 'The window is extended, since each read of the batch renews it'. Keep c and b. The page passages that exclude them stay the same."
+   },
+   {
+    "id": "02-polling-results-and-retries#m4",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "R7: the new key (the program uses standard rates and the batch charges half) tests the same fact as 01#q1 and the Developer mock 2 item that asks what 8M/2M tokens on Sonnet 5.5 cost as a batch. The base duplicated 02#q2 on billed results; the rework trades one duplicate for another. R6: d's quote \"Poll the batch by its `id`, with a wait between polls.\" does not say polling is unbilled. The key is the only option opening 'where' and containing 'only half'. The stem gives $2 and $10, which the page names 'standard', so the key is close to given.",
+    "fix": "Aim m4 at a fact not yet asked, for example a small overshoot of a Workspace spend limit with an invoice that is still correct. Key: batches may go slightly over the limit, by the page's \"batches may go slightly over your Workspace's configured spend limit\". Rule out distractors with \"All usage is charged at 50% of the standard API prices.\" and \"every request has exactly one result\". If the price item stays, replace d with a mistake that the page's table excludes, for example billing canceled requests, ruled out by \"You will not be billed for these requests.\""
+   }
+  ]
+ },
+ "22-claude-on-the-cloud-platforms": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1"
+  ],
+  "interrupted": [],
+  "last_reader": "reread1",
+  "open": [
+   {
+    "id": "02-what-each-platform-lacks-where-it-runs-and-what-it-costs#q2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The item is sound: a (regional for residency, global for throughput) is a good new distractor, ruled out by '(provisioned throughput requires regional endpoints)'. Two tells remain. (1) Key d is the only option with a figure ('a 10% premium') and echoes the stem ('region' to 'regional kind', 'also' to 'both of the needs'). (2) The 10% premium in the key gives away the fact that module quiz m1 asks, so the same fact is tested twice in one module (R7).",
+    "fix": "Rewrite only the tail of option d, dropping 'at a 10% premium'. For example: 'The regional kind, since one kind of address covers both of the needs'. The page passage 'Required for single-region data residency, strict compliance mandates, or provisioned throughput' still supports the key. Keep the rule-outs, which do not mention the premium."
+   },
+   {
+    "id": "02-what-each-platform-lacks-where-it-runs-and-what-it-costs#q3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "R1: the stem only asks 'What do the pages show?'. The key is a near-verbatim paraphrase of Trap 3 ('Web search and structured outputs are on Google Cloud and not on Bedrock.'), and that sentence is also the key's own quote. Options a and b share the tail 'while Google Cloud offers both of them', which makes them a near mirror pair with b as the key. The rule-outs themselves are verbatim and work (a: Bedrock's 'Server-side tools (code execution, web search, web fetch, advisor)'; c: 'does offer more than Bedrock in two places'; d: 'among its supported feature highlights'). The fix is a better stem, not new rule-outs.",
+    "fix": "Recast the stem as a design decision. For example: a design needs both the web search tool and structured outputs, so which platform can host it without dropping a feature? Keep key b and keep the four options in the same shape. Reword a so it does not share b's tail, for example 'Bedrock offers web search only, while Google Cloud offers structured outputs only'. The rule-out for that reworded a would be the Bedrock list item 'Structured outputs' plus the Google Cloud page's 'Web search tool'."
+   },
+   {
+    "id": "02-what-each-platform-lacks-where-it-runs-and-what-it-costs#m4",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Replaces the old quota item, which duplicated module 23. Two problems. (1) R5/R6: the rule-out of d ('multi-region endpoints are the Google Cloud term, and \"Bedrock has the same idea with different words\"') cites a sentence that actually says the same idea exists on Bedrock. The page maps Google's multi-region kind onto Bedrock's inference profile, so the quote undercuts the rule-out and d looks defensible. (2) R4: the stem says 'Japan' and the key says 'JP', which is an echo that lets a skimmer match the key. Key c is correct per the page and the official Bedrock page.",
+    "fix": "Rule-out of d: quote 'Google Cloud offers three endpoint types', verbatim on the page, with 'Multi-region endpoints' among them, and state that Bedrock's page names only a global endpoint, a regional endpoint and an inference profile. Do not use 'same idea with different words' here. Option c: drop 'JP', for example 'An inference profile for that geography, which spreads calls over several regions', supported by 'use an inference profile (US, EU, JP or AU)'. Keep the key letter c."
+   }
+  ]
+ },
+ "23-setting-up-claude-on-the-cloud-platforms": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1"
+  ],
+  "interrupted": [],
+  "last_reader": "reread1",
+  "open": [
+   {
+    "id": "01-least-privilege-for-bedrock-and-vertex#q2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Much better than the base question (it was a recall question that asked what the page favours). The key is correct and every quote is verbatim and rules out its own option: \"but not the ability of controlling the endpoint\" (b), \"You grant access by assigning IAM roles to principals.\" (c), \"what it may do comes from the role it holds\" (d). The weakness is d: it carries the absolute \"may never\" and predicts the same outcome (refused) as the key, so only its reason is wrong. R2/R5 tell.",
+    "fix": "Rewrite option d only, keeping the letter and the 'refused' shape. Replace the absolute 'a service account may never change an endpoint' with a plausible mistaken reason, for example 'since the project's owner role is needed for any change to an endpoint'. Rule it out with \"what it may do comes from the role it holds\" or with the deploy-permission sentence on the page."
+   },
+   {
+    "id": "02-residency-quotas-logging-and-the-configuration-practice#q3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Improved from recall to a scenario, and the key is correct. Two problems remain. (1) Option d ('rotated weekly, since abuse surfaces within days') contradicts the stem, because the report came three weeks after, so it is a strawman (R2). (2) The rule-out of d quotes the Bedrock sentence \"recommends retaining activity logs on at least a 30-day rolling basis\" in a Google Cloud scenario. The Vertex sentence is on the page: \"log your activity on at least a 30-day rolling basis\". The other rule-outs hold: \"Turning on this service does not give Google or Anthropic any access to your content.\" (a); \"prompt and completion activity\" (c).",
+    "fix": "Replace option d with a distractor that fits the stem, for example 'Logging switched on only once a report arrives, since earlier logging adds no value'. Rule it out with \"Enable 30-day request-response logging of your prompt and completion activity to track any model misuse\". If d stays, quote the Vertex sentence (\"log your activity on at least a 30-day rolling basis\") in its rule-out."
+   }
+  ]
+ },
+ "24-prompt-engineering-for-applications": {
+  "done": [
+   "author",
+   "read",
+   "fix1"
+  ],
+  "interrupted": [
+   "reread1"
+  ],
+  "last_reader": "read",
+  "open": [
+   {
+    "id": "01-templates-placement-and-instructions#q2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The mechanism (rules that matter become a small share) is the course's own account: the page says 'Prompt dilution is the course's name, not a term from the documentation'. The stem now says only 'What best explains the drop?', and the base wording 'fits the page' was dropped. R5 asks for the stem to say so. The key is a near-verbatim page sentence. The new option c ('Conditional complaint rules outrank the general rules') is a priority claim that the page never makes. Its rule-out quote, 'Silent on every case not listed', describes coverage, not priority, so it does not make c false. b and d remain mild strawmen.",
+    "fix": "Open the stem with 'In this module's account of prompt dilution, what best explains the drop?'. Replace c with a claim the page can exclude directly, for example 'The longer prompt makes the model think less on the original tasks', ruled out by 'If you find the model thinking more often than you'd like, which can happen with large or complex system prompts'. Keep a as the key and keep the other rule-outs."
+   },
+   {
+    "id": "02-examples-reasoning-long-documents-and-chains#q3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The key is correct ('To get less thinking, lower the effort level first') and is no longer the odd one out. But the new rule-out of d ('Prefer general instructions over prescriptive steps') is about reasoning quality, not the amount of thinking, so it does not make a step-by-step plan false for this goal. The passage that does exclude d, 'Steer the amount with effort (module 19), not with words', is spent on a. The stem 'What does the page advise?' is page-recall wording. Option a's new rule-out is the course's own sentence, where the base used the documented Sonnet 5.5 line.",
+    "fix": "Change the stem to 'What should they change?'. Cite 'Steer the amount with effort (module 19), not with words' for d, since a plan is words. Rule out a with a different passage, or recast d as an option the page excludes cleanly, for example 'Ask for the reasoning in an output field and discard it', ruled out by 'may lead to a `reasoning_extraction` refusal'."
+   },
+   {
+    "id": "02-examples-reasoning-long-documents-and-chains#m2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Key a is the module's own editorial cure ('The cures are editorial', 'If deleting it changes nothing on your evaluation set, it was not working'). The stem does not say it rests on the module's advice (R5). d ('Restate each rule as a conditional') is only loosely excluded, because the page also says 'Use conditionals where behaviour must be exact', so 'Silent on every case not listed' does not make it false.",
+    "fix": "Prefix the stem with 'By this module's advice on a prompt that has grown too long, what should the team do first?'. Rule out d with 'Say a rule once, in one place', or 'Delete before you add, and test the deletion', since conditionals add more lines. Give c a different passage if needed."
+   },
+   {
+    "id": "02-examples-reasoning-long-documents-and-chains#m3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The key repeats a stem word: 'cited quotes' against 'the model cites'. The rule-out of c quotes 'Diverse: Cover edge cases and vary enough that Claude doesn't pick up unintended patterns', which is about example diversity and does not exclude c, which is about verifying a quote. The rule-outs of d and b are good ('a place to check a step's output in code'; 'Each step is a separate API call so you can log, evaluate, or branch at any point').",
+    "fix": "Reword the key without 'cited', for example 'A chain whose first call returns only the supporting passages'. For c, quote a passage that excludes it, such as 'Worked examples in your prompt shape how Claude approaches similar problems in its own thinking blocks', so examples shape the approach and give no step to check."
+   },
+   {
+    "id": "02-examples-reasoning-long-documents-and-chains#m4",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The key is correct: the table row 'Structured outputs, or a tool with an `enum` field'. The rule-out of d quotes 'What the rule does not touch is an assistant message elsewhere in the conversation', which says such a turn is allowed, not that it fails to force a label. The added clause 'and it does not restrict an answer' has no page support. d is also arbitrary. b is correctly excluded by 'non-default `temperature`, `top_p` or `top_k`, which these models reject'.",
+    "fix": "Replace d with a real alternative the page assigns to a different job, for example 'A system instruction not to start with phrases like Here is', ruled out because the table pairs forcing a label with a schema or an enum tool and pairs preamble-skipping with that instruction. Or keep d and drop the unsupported clause, but then the quote still does not exclude it."
+   }
+  ]
+ },
+ "25-structured-output-and-defensive-parsing": {
+  "done": [
+   "author",
+   "read",
+   "fix1"
+  ],
+  "interrupted": [
+   "reread1"
+  ],
+  "last_reader": "read",
+  "open": [
+   {
+    "id": "01-getting-json-schemas-structured-outputs-and-strict-tools#q1",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "R5: option b (strict tool with tool choice auto) is also the documented advice for this model, and it is the smallest migration because the code keeps reading the call's input. The key rests on 'must return a record' while the stem never says the reply itself must be the record. Page passage: \"Its advice for these models is `auto` with strict tool use to guarantee schema-valid tool inputs, or structured outputs\".",
+    "fix": "Change option b so it is not documented advice, for example 'The invoice tool with `strict: true` and a tool choice of `tool` naming it'. It is ruled out by \"`any` and `tool` \\\"return a 400 error\\\"\" and gets its own rule-out instead of the weak 'task that must return a record' quote. Keep a, c, d and the key. Alternatively add a stem clause that the extractor has to return the record itself and never act."
+   },
+   {
+    "id": "01-getting-json-schemas-structured-outputs-and-strict-tools#q2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "R3/R1: key a is the longest option (73 characters against 57 to 65), the only one that names a concrete error code, and a near-paraphrase of \"If you use an unsupported feature, you'll receive a 400 error with details.\" The reworked d is a good plausible mistake and its rule-out quote is verbatim and works.",
+    "fix": "Shorten the key to about 60 characters, for example 'The request is rejected with a 400 error that names the item'. Lengthen b or c to about 62 with a plain clause. Keep the other rule-outs."
+   },
+   {
+    "id": "02-defensive-parsing-validation-and-the-re-prompt#q2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "R5/R1: the key is the course's own validator decision (\"A wrong type stops the checks of that value\") but the stem no longer says so. The base said 'What does the page decide?'. The scenario nearly repeats the page's own e6 sentence \"`true` for a `qty` of type `integer` is one problem\". The a/b pair (both 'None') and the c/d pair (Two / One) make form-based narrowing easy. Distractors a and b are good, and the quotes are verbatim and work.",
+    "fix": "Open the stem with 'In this module's validator,' (or 'In the practice's validator'). Optionally reword d to a less formulaic shape, for example 'A single entry, for the type, and the minimum is not checked'. Quotes stay."
+   },
+   {
+    "id": "02-defensive-parsing-validation-and-the-re-prompt#q3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "R7: the fact (a cut-off reply ends the loop and is not re-prompted) is asked again in module quiz m4, and the refusal half in m2. R5: 'the extractor loop' rests on the course's own loop and the stem does not say so, while the documented action for max_tokens is 'Raise `max_tokens` or continue the response'. c's rule-out is looser than the page offers. Option a says a total of zero 'breaks the minimum', but the page's own minimum is 0.",
+    "fix": "Replace the item with a different fact of page 2, for example which fault the re-prompt fixes, or the 'assistant message with exactly its text' rule. If the register keeps it, put 'In this module's extractor loop,' in the stem and change a to a minimum of 1. For c use the verbatim \"text with no JSON is retried\"."
+   },
+   {
+    "id": "02-defensive-parsing-validation-and-the-re-prompt#m2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "R3: the key a is now the shortest option (61 characters against 72, 68, 70), where it was mid-length in the base, so a length tell is traded in. It is also the only option that stops, while b, c and d all keep retrying. The stem flag 'Following this module's loop' is good. The new c (treat as cut-off, raise max_tokens) is a better distractor than the old forced-tool one. b's rule-out quote about an 'error list' does not exactly address 'refusal text'.",
+    "fix": "Lengthen the key to 68 to 72 characters, for example 'End the attempts there and hand the refused status back to the caller to log'. Add a plain clause to d or b only if the lengths drift. For b, quote \"a refusal is a decision, not a malformed answer\" or keep the 'error list' quote with a tie to feeding the model more text."
+   },
+   {
+    "id": "02-defensive-parsing-validation-and-the-re-prompt#m3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "R2/R3: the item was in the author's list as changed, but the diff changed only the rule-outs of b and c. They now quote verbatim and work (\"The example's `normalise_enum` maps `Eur` back to `EUR` before it validates\"). The distractors are still weak. c (API 400 error) contradicts the stem, which says a reply returns `Eur`. d (refusal) is not a mistake a practitioner makes for a case change. The key is the longest (75 characters against 72, 63, 70) and a near-paraphrase of \"Compare enum values case-insensitively\".",
+    "fix": "Replace c with a real mistake, for example 'As a typo to repair by re-prompting with the error list', ruled out by \"Compare enum values case-insensitively\" and the normalise_enum quote. Replace d with a design mistake, for example 'As a new currency to add to the enum', ruled out by \"avoid enum values that differ only in capitalization\". Trim the key to about 66 characters."
+   }
+  ]
+ },
+ "26-tool-use": {
+  "done": [
+   "author",
+   "read",
+   "fix1"
+  ],
+  "interrupted": [],
+  "last_reader": "read",
+  "open": [
+   {
+    "id": "01-tools-schemas-descriptions-and-tool-choice#q2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Distractors are now plausible (full-history record, a thoughts field) and d is cleanly excluded by 'may lead to a `reasoning_extraction` refusal'. But the b rule-out ('only the fields the model needs for its next step, since bloated results waste context') is about what a tool returns, not about how to write a description, so it does not exclude option b as a description. The base rule-out ('never says what the tool does not return') fitted better. The c rule-out 'Provide extremely detailed descriptions.' also fails: c is the same length as the key (112 against 99 characters), so 'short description' is untrue of it. a and b are also close to a mirror pair (current only against history included).",
+    "fix": "Rule b out with the page's own list for a description, 'what the tool does not return' and 'when to use it and when not to': b says what comes back but names no limit. Rule c out with the same 'when not to' passage: c says to call it 'whenever any ticker is named' and says nothing of when not to. Drop the 'short description' claim. Optional, if the register wants more: make b state a limit so that it is not a near-mirror of a."
+   },
+   {
+    "id": "03-parallel-calls-the-tool-runner-and-the-practice#q2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The stem is now a scenario, but the key 'With `disable_parallel_tool_use: true` in the `tool_choice` object' is near-verbatim from 'Set `disable_parallel_tool_use: true` inside the `tool_choice` object' (R1). b and d are the same text with only the location changed, so the key differs from them by one phrase (R3 mirror family). The b rule-out repeats the key's own claim ('It is a field of the `tool_choice` object'), which R6 discourages. The d and c quotes are verbatim and sound.",
+    "fix": "Recast the options as different requests, not one flag in three places. For example: key 'Send `tool_choice` as `{\"type\": \"auto\", \"disable_parallel_tool_use\": true}`'; b 'Send `{\"type\": \"auto\"}` and run only the first returned call' (excluded by 'Skipping a result leaves a `tool_use` without its answer'); c keep the prompt line (excluded by 'Prose in a prompt cannot switch parallel calls off'); d the top-level flag (excluded by 'It is not a top-level request parameter.'). If the register accepts a location item, a pass is defensible, but the key is a page sentence."
+   },
+   {
+    "id": "03-parallel-calls-the-tool-runner-and-the-practice#m2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The distractors are better: a is a real misconception, since the page sends human-in-the-loop to the manual loop. But the key is the only option that carries a code identifier (`max_iterations`) and the only one that states two page facts (beta and a bound), and it is close to the page's wording ('The tool runner is in beta', 'until it reaches `max_iterations`'). A skimmer can pick it by form. The d rule-out is thin: 'manages the conversation state' only implies that tool_result blocks stay in the history.",
+    "fix": "Give a distractor a page-sourced identifier too. For example b: 'It builds the `tool_result` block for a server tool on the team's behalf', excluded by 'you never construct a `tool_result` block'. Keep d, or strengthen its rule-out with the page's 'Keep untrusted content inside `tool_result` blocks', which stay in the history."
+   }
+  ]
+ },
+ "27-choosing-an-extension": {
+  "done": [
+   "author",
+   "read",
+   "fix1"
+  ],
+  "interrupted": [],
+  "last_reader": "read",
+  "open": [
+   {
+    "id": "01-the-extension-surface-and-what-each-costs#q3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "R3/R4: the key says 'whose script runs outside the conversation'. That clause is the cost table's reason ('they run externally') and answers the stem's 'adds the least to each request'. The key is the only option that states why it costs little. The distractors are plain instruction carriers, and option a's 'short description' is a decoy hint. Rule-outs are fine ('the active style's full instructions', 'CLAUDE.md is paid for on every request').",
+    "fix": "Give all four options the same kind of clause that names what it does, not where it runs. For example: a. 'A skill whose description names the logging steps', b. 'An output style that tells Claude to log each change', c. 'A hook that appends the line on each edit event', d. 'A CLAUDE.md section that lists the logging rules'. Keep the rule-out quotes ('nothing, since they run externally', 'descriptions are in every request') in the key paragraph."
+   },
+   {
+    "id": "02-choosing-between-similar-features-and-combining-them#q1",
+    "changed": false,
+    "verdict": "WEAK",
+    "reason": "R4/R3: the stem ends 'Which feature gives the guarantee?' and the key paragraph quotes 'is a request, not a guarantee'. The stem names the key's quality. The key is also the only option with a code identifier (PreToolUse) and 'rejects it'. The scenario is the page's own '.env' example. It also shares its option set and rule-outs with module quiz m1 (R7).",
+    "fix": "Reword the stem to a need without the word guarantee, for example 'A review found two edits to .env last month. What stops a third?'. Keep option b as the key but give a, c and d a similar clause shape. The rule-outs 'is a request, not a guarantee' and 'neither is enforced' still work."
+   },
+   {
+    "id": "03-choosing-in-practice-scenarios-reasons-and-the-practice#q1",
+    "changed": false,
+    "verdict": "WEAK",
+    "reason": "R1/R4/R3: the stem asks 'What does the page place first?', which is a recall question. 'needs a login' echoes the page's own MCP row. Every option carries a 'because' clause, and the key alone says 'only a connection can reach that system'. The scenario and the rule-out of a ('a subagent alone cannot reach the tracker') are lifted from bank row 13.",
+    "fix": "Ask 'What should be set up first?'. Drop 'which needs a login' or replace it with 'which sits outside the machine'. Remove 'only' from the key's reason. Keep the rule-outs from rows 13 and 7 and the question-table quote."
+   },
+   {
+    "id": "03-choosing-in-practice-scenarios-reasons-and-the-practice#m1",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "R7: the item tests the same fact as 02#q1. Hook is guaranteed, and a skill, project file or output style is only an instruction. It has the same distractor set and the same rule-outs ('Claude interprets the instructions; outcome can vary.', 'is a request, not a guarantee', 'neither is enforced'). The edit removed the stem leak and the reason clause, which helps R4, but the duplicate remains. In the key, 'the matching event fires it each time' is also near the page sentence 'Always fires on its event'.",
+    "fix": "Keep the linter scenario but ask a different tested fact so that it does not repeat 02#q1. For example, ask how the linter's output reaches Claude and what acts on it, using the page 2 passage 'a hook's output lands in context as text Claude reads (a linter's results), and a `/fix-lint` skill tells Claude how to resolve them'. Alternatively, rework 02#q1 and leave m1 as the guarantee item. Decide which of the two is dropped."
+   },
+   {
+    "id": "03-choosing-in-practice-scenarios-reasons-and-the-practice#m2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "R4/R1/R5: the stem restates the plugin definition ('skills, hooks and MCP servers' is the page's bundle list), and the key ('Package them as one plugin that each repository installs') paraphrases 'A plugin bundles ... into a single installable unit'. The new option d (one skill loaded on demand) is a better distractor, and its rule-out is good. But b ('Copy the files by hand and keep them in step') is a legitimate-sounding mitigation, and its rule-out quotes the plugin trigger, which only names the key and does not show that b fails.",
+    "fix": "Rule out b with the page's row 10: 'copying files by hand lets the six copies drift apart'. Shape the stem around the problem, for example 'The same review skill, hook and server are copied into six repositories and the copies keep drifting. What should the team do?'. This keeps key a and the letter slots."
+   },
+   {
+    "id": "03-choosing-in-practice-scenarios-reasons-and-the-practice#m4",
+    "changed": false,
+    "verdict": "WEAK",
+    "reason": "R3/R4/R1: the stem says 'matters only when endpoints are written' and the key says 'loads the full content only when used'. The key repeats stem wording and is the only option whose reason is a mechanism ('which loads ...'); the others use 'so that'. The scenario is bank row 5 and the key is almost the cost-table text.",
+    "fix": "Put the key in the same 'so that' form as a, b and d, without 'only when', for example 'In a skill, so that just its description sits in context'. The quote 'descriptions at start, full content when used' in the key paragraph still supports it. The rule-outs stay."
+   }
+  ]
+ },
+ "45-the-agentic-loop-in-depth": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1",
+   "fix2",
+   "reread2"
+  ],
+  "interrupted": [],
+  "last_reader": "reread2",
+  "open": [
+   {
+    "id": "01-what-ends-a-run#q2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The author's edited-item list omits it, but the diff and the invariant checker show it was replaced. Its key (end once a response requests no tool, plus a higher cap) restates q1's key, which breaks R7 inside the page, and it overlaps the Developer mock 2 x41 fact (own limit and status). Option a (raise to twenty so the longest known task fits) is a legitimate partial mitigation, so R5 is shaky. Option d ('however long the task') is a near-strawman. The rule-outs themselves are verbatim and work ('A task that needs six steps is cut off in the middle'; 'the text in front of a `tool_use` block is narration, and only the reply that ends the turn holds the answer.').",
+    "fix": "Keep the item and the key letter c but aim the key at the cap's status alone. Make every option agree that the stop reason ends the run, and vary what the cap does. The key says to set the cap well above real need and report `max_turns` apart from `done` when it is hit. Rule-outs: a raises the cap but still reports `done` ('A run that meets the count reports `max_turns`, and the caller can tell it from `done`.'); b relies on text ('the text in front of a `tool_use` block is narration'). Replace d's 'however long the task' with a plausible option, such as a cap set from the typical task ('generous: set above what real tasks need'). Alternatively, if the register accepts that q1 and q2 share a core, record it as a known overlap."
+   }
+  ]
+ },
+ "46-coordinator-and-subagents": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1",
+   "fix2",
+   "reread2",
+   "resolve"
+  ],
+  "interrupted": [],
+  "last_reader": "reread2",
+  "open": [
+   {
+    "id": "01-hub-and-spoke-and-what-the-coordinator-owns#q1",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Better than the base: b is no longer a strawman, and c now has a rule-out that answers it. Two problems remain. (1) The key echoes the stem: 'file path and error output it had already found' restates 'locating the broken check and its failure text'. (2) The rule-out of d (unchanged from the base) claims the subagent 'cannot converse with its parent while it runs', which the page never says. Its own box says a subagent with the `SendMessage` tool is told the names of other agents. The quote 'only its final message returns to the parent' is about what comes back, not about asking, and asking back is a defensible mitigation (R5, R6).",
+    "fix": "Replace option d with a symptom-aimed fix, for example 'Limit the subagent to read-only tools so it cannot edit the wrong module'. Rule it out with 'If a fact is not in the brief, the subagent does not have it, and a vague brief produces vague work.'. Alternatively keep d and rewrite its rule-out so the page really excludes it. Soften the key's echo of the stem, for example 'Put the check's location and failure message into the prompt', and keep the stem wording about ten turns of investigation distinct from the key's verbs."
+   },
+   {
+    "id": "02-review-iteration-failures-and-the-practice#q4",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Key d and the rule-outs of a and c are fine: a is excluded by 'the first-round findings are already in hand' and c by 'never invented by the synthesis'. The rule-out of b is not. The quote 'The first round of a research team rarely answers the question.' does not make 'start a larger first wave' false. 'However large' is not on the page, and the page's cost quote that the base used was dropped. b is also a defensible mitigation, so R5 and R6 are not met. a is close to a mirror of the key (resend all once, with a cap, against gaps only, with a cap), which is acceptable but gives the item only one real discriminator.",
+    "fix": "Rewrite the rule-out of b around a passage that makes it false. Cost fits the stem's problem: 'multi-agent systems use about 15\u00d7 more tokens than chats' or 'multi-agent systems require tasks where the value of the task is high enough to pay for the increased performance', so more subagents in the first wave adds to the bill the stem complains about. Alternatively change option b into a clearer wrong fix that existing text excludes, such as 'Raise the budget cap so every assignment can run again'."
+   },
+   {
+    "id": "02-review-iteration-failures-and-the-practice#m3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Three things. (1) The key d is the longest option (13 words against 11, 9 and 7) and the only 'X and Y' one. (2) The stem's 'may not lose any detail' is ambiguous (might not, or must not) and hands the learner the criterion that rules out a and b. (3) The rule-out of a quotes 'Rather than requiring subagents to communicate everything through the lead agent', which speaks to the route and not to a shorter draft. The 'drops detail' half rests on no quote, so the quote only half-excludes a (R6). a and b are also near-twins: both shorten the drafts, one at the specialist and one at the coordinator.",
+    "fix": "Shorten the key, for example 'Store each output outside the chain and pass a pointer', and lengthen or equalise b and c. Word the stem 'the final report must keep every detail'. Rule out a with 'loses detail at every summary' (a shorter draft is a summary). For b, use a different passage that excludes it, such as 'pays for each token twice'. Alternatively swap a for a different plausible mistake, such as 'Cap the turns of each specialist', ruled out by the page's own cause, 'reduces token overhead from copying large outputs through conversation history'."
+   }
+  ]
+ },
+ "47-invoking-subagents": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1"
+  ],
+  "interrupted": [],
+  "last_reader": "reread1",
+  "open": []
+ },
+ "48-multi-step-workflows-with-guarantees": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1"
+  ],
+  "interrupted": [],
+  "last_reader": "reread1",
+  "open": []
+ },
+ "49-hooks": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1",
+   "fix2",
+   "reread2"
+  ],
+  "interrupted": [
+   "resolve"
+  ],
+  "last_reader": "reread2",
+  "open": [
+   {
+    "id": "01-what-a-hook-decides-and-what-it-cannot-undo#q2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Better than the base (the strawman 'raise the timeout' is gone, and a/d are tighter), but the new option b is partly defensible and its rule-out asserts something the page does not say. The page nowhere says that a write is never made through a shell command, and a Bash hook reading the command is a real way to catch shell writes. The quote 'which is how the SDK page registers its file guard' only shows what the file guard uses; it does not make b false. b and c also share the form 'Attach it to the ... tool(s) and ...', so they read as a pair. a and d are ruled out properly ('Matchers only match tool names, not file paths or other arguments.'; 'For tool events it is tested against the tool name').",
+    "fix": "Keep the key and a, d. Make b a mistake the page excludes. Either (1) change the rule-out of b to rest on the page only: a Bash hook sees only what `tool_input.command` holds, whereas the page registers its file guard on `Write|Edit` ('which is how the SDK page registers its file guard'), so it would miss the writes the file tools make; drop the claim 'not by a shell command'. Or (2) replace b with a wrong-tool or wrong-place option whose rule-out the page gives directly, for example one that names a registration the page says never fires (a path in the matcher, other than a), and vary its opening so it is not a mirror of c."
+   }
+  ]
+ },
+ "50-task-decomposition": {
+  "done": [
+   "author",
+   "read"
+  ],
+  "interrupted": [],
+  "last_reader": "read",
+  "open": []
+ },
+ "51-session-state": {
+  "done": [
+   "author",
+   "read"
+  ],
+  "interrupted": [],
+  "last_reader": "read",
+  "open": []
+ },
+ "52-designing-tool-interfaces": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1",
+   "fix2",
+   "reread2"
+  ],
+  "interrupted": [],
+  "last_reader": "reread2",
+  "open": [
+   {
+    "id": "01-descriptions-names-and-boundaries#q2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Better than base: the key no longer copies the trap wording and the stem no longer says 'pull'. Remaining defect is R6: the rule-out of a quotes \"More tools don't always lead to better outcomes.\", which is hedged and does not make a wrapper tool false. Options are otherwise parallel (key is neither longest nor shortest) and the key is correct and derivable (page 1, 'The system prompt can overrule the descriptions').",
+    "fix": "Keep the item. In the explanation, replace the quote for a with a passage that really excludes it, e.g. the wrapper still leaves the instruction in the prompt: \"keep the prompt free of tool-specific triggers\" (page 1, Traps 4), or \"hides two contracts behind one name\". No change to the options is needed."
+   },
+   {
+    "id": "02-results-annotations-large-tool-sets-and-the-practice#m1",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The stem now names four tools and the key is better grounded, but option a ('too many tools') is contradicted by the stem itself, and the explanation concedes it ('four tools are far below the scale'): a strawman under R2. The stem's 'three rewrites of the system prompt have not changed that' also repeats the page sentence \"rewording the system prompt for the fourth time will not change that\", which disposes of b and d in advance (R4). Key c is correct and quotes verify; the b and a quotes are verbatim.",
+    "fix": "Replace option a (same letter slot) with a real alternative a practitioner would reach for, e.g. 'The refund requests need a routing layer that sends them to the right tool', ruled out by \"a routing layer bypasses the model's own reading of the request\" (page 1) and by the fault lying in the texts. Optionally soften the stem clause to 'a reworded system prompt has not changed that'."
+   },
+   {
+    "id": "02-results-annotations-large-tool-sets-and-the-practice#m3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Replacing the old c ('defers the three least used tools', a strawman) with 'defers once the conversation passes 10%' is a real improvement: it is a plausible misreading and is excluded by the verbatim \"counts the tokens of the definitions that can be deferred against the context window\". Remaining issues: d ('the tools that the first prompt happens to name') is an arbitrary filler option and its quoted rule-out only restates the key's threshold; the key is the longest option by about 7 characters and the only one carrying a 'since'-style reason clause apart from b. The 10% threshold is also asked directly in the Architect mock exam x22 (exercises/78 quiz, item 03-architect-mock-exam-1#x22), so the same fact is asked twice in the course.",
+    "fix": "Replace d with another real misreading of the setting, e.g. a 5% or 'half the window' trigger, or 'Defers all eight, since tool search is on by default', and rule it out with \"When the total reaches 10% of the window, tool search activates. Below that, the SDK loads every tool definition into context upfront.\" or \"`auto:5` moves the point to 5%\". Trim the key's clause ('as they are under the activation level') so it is not the longest. Register to decide the x22 duplication (see items)."
+   }
+  ]
+ },
+ "53-tool-errors-agents-can-act-on": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1",
+   "fix2",
+   "reread2"
+  ],
+  "interrupted": [],
+  "last_reader": "reread2",
+  "open": [
+   {
+    "id": "02-a-call-with-an-unknown-outcome-retries-and-the-practice#m3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The options are now parallel (\"Retry ..., and ...\", 66 to 72 characters) and each wrong option is plausible: they are the page's traps. But the key's explanation quotes \"perform the action once however often it receives the key\". The page says \"performs the action once however often it receives the key\", so the quote is not verbatim. The checker does not test key quotes, so it missed this. The scenario also still overlaps module 15 page 2 q2 (duplicates after a timeout, fixed with keys). The new three-way key (reads, keyed writes, other writes unknown) makes it a distinct item, so this is minor.",
+    "fix": "In the folded key and in quiz.json, change \"perform the action once however often it receives the key\" to the page's exact words, \"performs the action once however often it receives the key\", or drop that quotation and keep \"A retry is safe when repeating the call cannot do harm\". Register to decide whether the overlap with module 15 02#q2 is acceptable."
+   }
+  ]
+ },
+ "54-distributing-tools-across-agents": {
+  "done": [
+   "author",
+   "read"
+  ],
+  "interrupted": [],
+  "last_reader": "read",
+  "open": []
+ },
+ "55-mcp-in-claude-code": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1",
+   "fix2",
+   "reread2"
+  ],
+  "interrupted": [],
+  "last_reader": "reread2",
+  "open": [
+   {
+    "id": "01-scopes-the-project-file-and-environment-expansion#q2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The rework is better than the base, because the old option c 'every project' is now a plausible user-scope option and the stem now rests on the current product. Two problems remain. (1) The stem phrase 'Given the three options the current product offers' sits over four options a-d, and d (the local settings file) is not a scope, so the stem itself makes d implausible (R2) and the wording is confusing. (2) The rule-out of b quotes 'Selecting the wrong scope for a personal tool can leak credentials into a shared repo', which is a general warning and does not state that project scope is the shared one (R6).",
+    "fix": "Replace the stem clause with 'In the current product, where should it be registered?', keeping 'this repository only' as the discriminator, so that d stays a plausible mix-up with the settings file. For b, quote 'Check `.mcp.json` into version control so everyone on your team gets the same MCP tools and services', which is verbatim in the 'Three scopes' section and says project scope is shared. Keep a as the key, and keep c and d."
+   },
+   {
+    "id": "02-tools-together-descriptions-resources-and-the-practice#q3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The base's absolutes ('never sees any of the rows') are gone, and the rule-outs of b and d are now accurate and verbatim ('a failed refresh keeps the previous list'; 'a definition is loaded when Claude needs it'). Option b is still arbitrary: a failed list refresh has no link to the stem's database scenario, so no practitioner would choose it (R2, filler). Options b and d also both say 'the tool becomes unavailable', which makes them a near mirror pair, while the key is the only option about permissions and therefore the only one that matches 'architectural concern'. The key itself is correct, quoting 'a permission rule can allow or deny a tool by name'.",
+    "fix": "Replace option b with a plausible scope-based mistake in the same 'X, with Y' shape, for example 'The server sits in the wrong scope, with its tools loaded in other projects'. It is ruled out by the page passage 'Nor does the scope: it decides where a server loads and not what it exposes'. Keep a, c and d. That leaves one availability option (d) and one result-size option (a), and breaks the b/d pairing."
+   }
+  ]
+ },
+ "56-the-built-in-tools": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1",
+   "fix2",
+   "reread2"
+  ],
+  "interrupted": [],
+  "last_reader": "reread2",
+  "open": []
+ },
+ "57-memory-files-and-rules": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1",
+   "fix2",
+   "reread2"
+  ],
+  "interrupted": [],
+  "last_reader": "reread2",
+  "open": []
+ },
+ "58-commands-and-skills": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1",
+   "fix2",
+   "reread2"
+  ],
+  "interrupted": [],
+  "last_reader": "reread2",
+  "open": [
+   {
+    "id": "01-commands-and-skills-are-one-mechanism#q1",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The reworked options b and d are more plausible, and the quotes for a and b hold. Two problems remain. (1) R6: the quote for d, \"Existing command files keep working\", does not make 'Neither, until one is renamed or removed' false, because it says nothing about a name clash. The passage that excludes d is \"When a skill and a command file share a name, the skill runs\" (page 1, guide box), and the key explanation cites it only for b. (2) R7: the same fact in the same scenario (a command file and a skill both called deploy, 'what runs?') is asked by 05-architect-scenario-question-pool#x2, and the key is a near-verbatim page sentence (R1).",
+    "fix": "Preferably re-aim q1 at a fact asked nowhere else on the page: a root skill and a nested skill that share one name, with a question on how to run the nested one by itself (page 1: \"the nested one is also reachable as `/apps/web:deploy`\"). Keep key letter c. If the register keeps the scenario, change the pool x2 item instead, and in q1 re-quote d with \"A skill beats a command file of the same name\" and say that the skill wins rather than neither running."
+   },
+   {
+    "id": "02-tools-arguments-forked-skills-and-the-practice#m2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "R7: 02#q1 is named as near this item in the polish list, and the rework keeps the overlap. The new option c, allowed-tools with gh patterns, is again the 'allowed-tools does not restrict' fact that q1 asks, and the key is its mirror (the removal field). The explanation for c quotes \"Edit and Write stay callable\", which is verbatim only from Trap 1. Option d repeats the scoped-entry fact of Developer mock 2 x26. Also, a's quote \"removes the tool from Claude's context entirely\" shows only that Bash is removed, and does not itself say Edit and Write stay. That step is an inference, so a only half-excluded. Form and key letter b are fine, but anyone who answered q1 can pick b.",
+    "fix": "Re-aim m2 at a fact q1 does not test. Option 1: the pre-approval lifetime (page 2 table: the grant \"clears when you send your next message\"). Option 2: keep the stem and replace c with a non-allowed-tools header, then quote \"remove what it must not have\" to rule out a. Keep key letter b and the same 'Edit Write' key text if the stem still asks for 'unable to change files'."
+   },
+   {
+    "id": "02-tools-arguments-forked-skills-and-the-practice#m3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Changed but not on the author's edited list. The reword of a and c is sound and a is plausible. The rule-out of b is the problem (R6). It quotes \"stays in the content unchanged\", which describes an indexed placeholder and so the opposite case, and does not make 'a blank where the name belongs' false. The page sentence that does is \"a named one expands to an empty string\", which applies only to named placeholders. The quote for a (\"All arguments, as typed\") and for c (\"no placeholder receives them\") are verbatim and work. The key d is the natural reading, but the distractors are the page's traps, so the item is acceptable.",
+    "fix": "In the explanation for b, replace the quote with \"a named one expands to an empty string\" (verbatim page 2, Arguments section) and say that blank belongs to a declared name, while `$ARGUMENTS` receives all arguments. Options and key stay as they are. Optionally add m3 to the author's edited list."
+   }
+  ]
+ },
+ "59-plan-mode-and-iterative-refinement": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1",
+   "fix2",
+   "reread2"
+  ],
+  "interrupted": [],
+  "last_reader": "reread2",
+  "open": []
+ },
+ "60-claude-code-in-ci": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1",
+   "fix2"
+  ],
+  "interrupted": [
+   "reread2"
+  ],
+  "last_reader": "reread1",
+  "open": [
+   {
+    "id": "01-a-headless-run-its-json-and-the-job-status#q1",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The new d is better and the form is balanced, but the rule-out of b quotes the table cell \"The run exits with an error at the limit\", which says what happens at a limit and does not make \"a high limit so that the list is complete\" false (R6). The key is also close to the exam-guide sentence on the page (json with --json-schema), so it is mostly recall.",
+    "fix": "In the key paragraph, replace the quote that rules out b with the table cell \"The schema's, validated before the run ends\" (verbatim on the page), showing that the answer's shape comes from the schema and not from the turn limit. Leave the options as they are."
+   },
+   {
+    "id": "02-context-independence-and-the-practice#m1",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The quota option a is a good distractor and all rule-outs are verbatim and apply (\"flag only what affects correctness or the stated requirements\"; \"A session that wrote a change carries its reasoning\"; \"a separate invocation, not a second pass in the same conversation\"). But three options (a, b, d) keep the same session and only the key moves the step to a fresh job, so the key is the odd one out by form (R3).",
+    "fix": "Replace distractor b (full history) with a separate-job option that still carries the author's reasoning, for example \"Move that step to its own job that starts from the author's session notes\", and rule it out with \"sees only the diff and the criteria you give it, not the reasoning that produced the change\" (verbatim on page 2). Keep the key letter c."
+   },
+   {
+    "id": "03-running-unattended-and-on-a-rhythm#q1",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Two problems. (1) R5: the stem says laptops are off \"until Monday morning\" and the digest must be ready \"at six\", but the page says that when the app starts or the computer wakes Desktop starts one catch-up run for the most recently missed time, so option c (desktop task) is arguably defensible, and the rule-out \"only fires while the app is open and your computer is awake\" does not exclude a run after wake. (2) R7: it tests the same fact as 40-claude-in-the-software-life-cycle#m4 (a scheduled job while no laptop is on, key routine), and the base version was the same.",
+    "fix": "Stem: say that the laptops stay off until nine on Monday while the digest is due at six, so a catch-up on wake would be late, and keep the key letter b. Explanation of c: add the page's \"If the computer sleeps through a run, the run is skipped\". Register: decide whether this item should instead test a different fact (the one-hour minimum, or the fresh clone with no local files) so it does not repeat 40 m4."
+   }
+  ]
+ },
+ "61-criteria-and-examples": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1",
+   "fix2"
+  ],
+  "interrupted": [],
+  "last_reader": "reread1",
+  "open": [
+   {
+    "id": "01-explicit-criteria-and-the-trust-in-a-category#q2",
+    "changed": false,
+    "verdict": "WEAK",
+    "reason": "Unchanged. The stem asks 'What does the guide recommend', so the key is a near-paraphrase of the page sentence 'disable the category temporarily while its prompt is improved' (R1); c ('every finding marked low severity') is a strawman, and c and d are a mirror-form pair ('Keep it, with ...') while the key is the odd form. Not on the polish list, so register decides whether to rework.",
+    "fix": "Change the stem to 'What should the team do with that category?'. Replace c with a real mistake, for example 'Keep it posting but raise the severity floor for it', ruled out by 'each dismissed comment lowers trust in the accepted ones'. Keep key letter a."
+   },
+   {
+    "id": "02-examples-asking-and-the-practice#q2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The strawman 'pick a reviewer at random' is replaced by a plausible 'name the author and state it', and its rule-out 'it proceeds on stated assumptions where a default exists' works. But the stem never says the reviewer is a required field, so d (carry on without a reviewer) is defensible if the reviewer is optional, and the d rule-out 'stops with a clear failure where a required field has none' only works for a required field. The page lists 'no reviewer' only as an example of an incomplete request. Item rests on the course's own practice (next_step) without saying so.",
+    "fix": "Stem clause: 'a request with no reviewer named, although the review requires one, and the project holds no default reviewer'. Optionally open with 'In this module's practice,'. Options and key unchanged."
+   },
+   {
+    "id": "02-examples-asking-and-the-practice#m3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Good derivation item (all verdicts present, reason missing; key quote 'The reason is what transfers to a case that matches no example' is verbatim). Remaining tells: d ('Copy the skipped examples so the skip label weighs more') is arbitrary, not something a practitioner does (R2); a ends 'until every guard style has one', an extreme; b repeats the 'typical cases from recent changes' distractor of 02#q1 d (R7 on distractor); key is the longest option (62 against 53 to 55). Rule-out quotes themselves are verbatim and exclusive ('the guide asks for two to four targeted examples, and a long list teaches accidents', 'typical cases are settled by the criteria', 'should be diverse enough that the reviewer does not learn an accident').",
+    "fix": "Replace d with a real placement mistake, for example 'Move the examples after the diff so they sit nearest the input', ruled out by the page passage 'Examples sit between the criteria and the input, each in its own tag, with the diff last'. Replace b with a different plausible fix, for example 'Add one more skipped example for the new guard style' with 'a long list teaches accidents' as rule-out only if the set stays within two to four, otherwise reword a to 'Add skipped examples for the newest guard styles' (drop 'every'). Shorten the key to about 55 chars, for example 'Add a sentence on why each label was chosen'."
+   }
+  ]
+ },
+ "79-from-business-problem-to-solution": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1",
+   "fix2",
+   "reread2",
+   "resolve",
+   "judge"
+  ],
+  "interrupted": [],
+  "last_reader": "judge",
+  "open": []
+ },
+ "80-end-to-end-and-multi-agent-architecture": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1",
+   "fix2",
+   "reread2",
+   "resolve"
+  ],
+  "interrupted": [
+   "judge"
+  ],
+  "last_reader": "reread2",
+  "open": [
+   {
+    "id": "02-contracts-between-parts-and-the-review#q1",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The rework fixed the base problems: the stem 'most likely indicate' is now 'what should the architect fix', and the explanation quotes now exclude each option. It trades one tell for another. Options a, c and d are each 'The X, <action clause>' (swapped for a larger one / by adding an automatic retry / by placing a logging component), while key b is the only bare noun phrase with no action clause. A skimmer can pick it as the odd one out (R3).",
+    "fix": "Give b the same shape as a, c and d, for example 'The unwritten rule for a lookup that finds nothing, by writing down what both parts do then'. Alternatively, trim the action clauses off a, c and d. The existing rule-out quotes still work: \"a bigger model only changes how the same ambiguity is worded\", \"is deterministic, and a retry repeats it\", \"More components, a larger model or a retry do not touch it\"."
+   },
+   {
+    "id": "02-contracts-between-parts-and-the-review#m3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Better than base: c no longer states 'the path of a return is known in advance', which would have made it correct, and the rule-outs are tighter. A mild form tell remains. Key d is the only option that ends in a verdict consequence ('so the design is rejected before price is compared'). a, b and c give only a finding plus a reason (because/since). The key's 'rejected' and 'price' also echo page phrases (\"rejected first\", \"Price enters last\"), which a skimmer can match (R3).",
+    "fix": "Make d's clause a reason in the same form as the others, for example 'A high finding, because the rubric rates a write with no approval at its top severity'. Alternatively, add the verdict to a, b and c as well. Keep the rule-out quotes: \"The design writes without approval and an audit is needed\" and \"An agent or a team is used on a path that is already known\"."
+   }
+  ]
+ },
+ "81-reliability-of-multi-agent-systems": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1",
+   "fix2",
+   "reread2",
+   "resolve",
+   "judge"
+  ],
+  "interrupted": [],
+  "last_reader": "judge",
+  "open": []
+ },
+ "82-models-prompts-and-context-as-design-choices": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1",
+   "fix2",
+   "reread2",
+   "resolve"
+  ],
+  "interrupted": [],
+  "last_reader": "reread2",
+  "open": [
+   {
+    "id": "02-choosing-a-model-and-shaping-the-context#m2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The key is the joint longest option (89 characters, with b at 88; a is 69 and c 80), and \"able and quick enough\" is clumsy against the other options. Rule-out of b: the quote \"A model below the tier fails the task\" does not clearly exclude \"cheapest model of any tier\" for a tier-1 task, because few or no models sit below tier 1. The real flaw in b is the final-message placement, and the explanation does not address that half. This is a weak rule-out, which is not what R6 asks for, so it needs rework.",
+    "fix": "Rule-out of b: quote a page passage that excludes the final-message placement, for example \"put what never changes first so that the cache can read it\" (page 1, After this page you can) or \"the stable content goes first and the variables go after the breakpoint\" (page 1 trap 1). Optionally add \"A model slower than the limit\" for the speed half. Shorten the key to about 80 characters, for example \"Take the cheapest model that is capable and quick enough, and put the constant passage first\" minus a few words, so that it is not the longest option."
+   },
+   {
+    "id": "02-choosing-a-model-and-shaping-the-context#m3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The key is correct and the wording is clearer than the base, with the key no longer a generic phrase. The distractors, though, are permutation filler. Option d (only the fare policy static, house rules dynamic) is not a mistake a practitioner would make, and b (query static) is also a bare swap. The more realistic wrong arrangement, the earlier chat treated as static because it was fixed in the past, is missing. The options also use synonyms for the stem's pieces (conduct guide, pricing terms, latest query, prior messages), which adds friction for no purpose. Rule-outs a, b and d are verbatim and exclude their options.",
+    "fix": "Replace option d with \"The conduct guide, pricing terms and prior messages as static modules, the latest query as dynamic\", with a length near 106 characters. It is ruled out by the page's definition of a dynamic module as one that \"changes with the customer, the question or the history\". Rewrite the d rule-out around the history; the existing quote \"the same on every request\" no longer fits. Optionally reuse the stem's own words (house rules, fare policy, current question, earlier chat) in the options."
+   }
+  ]
+ },
+ "83-deployment-architecture-and-data-handling": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1",
+   "fix2",
+   "reread2",
+   "resolve"
+  ],
+  "interrupted": [
+   "judge"
+  ],
+  "last_reader": "reread2",
+  "open": [
+   {
+    "id": "02-the-identifier-boundary-the-audit-log-and-the-practice#m1",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Two problems remain after the rework. (1) The key (decline and retry) is the only option that sends the request nowhere: b, c and d all process it on a deployment, and b and c are near mirrors (US deployment, since / after tokenising), so the key is the odd one out in form. (2) The stem never states a residency requirement, and the new option c (US deployment after tokenising) is defensible without one. The router rule is the course's design, so the stem should say so. The c rule-out quotes ('A person's name has no fixed shape, so a pattern layer leaves it in'; 'a user's data goes only to a deployment that keeps it in the user's region') are verbatim. They only work once the residency requirement is stated.",
+    "fix": "Stem: add that the customer's contract requires European patients' data to stay in Europe (or open with 'In this module's design, ...'). Option d: replace it, or one of b/c, with an option of a different shape that does not process the request on a US deployment, e.g. a European deployment run for another tenant (breaks the tenant boundary, ruled out by 'one workspace per tenant'). That also removes the mirror pair. Keep a as key, with the existing quotes 'is the failure the router exists to prevent' and 'only to a deployment that keeps it in that region'."
+   },
+   {
+    "id": "02-the-identifier-boundary-the-audit-log-and-the-practice#m2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Key b ('A failed check, because that arrangement does not cover the one they have picked') echoes the stem's 'has chosen a model that requires 30-day retention' with a synonym (picked/chosen). The stem already carries the whole answer, so the item tests little derivation. The key is also vague ('the one they have picked'). It is the only option that says 'failed check', while a and d both open 'None' and c opens 'A minor warning'. The rule-outs themselves are verbatim and sound (a 'excludes models that need 30-day retention'; c 'A model that requires 30-day retention cannot satisfy a zero-retention requirement'; d 'Anthropic does not store prompts or responses at rest'). The weakness is the stem and key echo, not the rule-outs.",
+    "fix": "Stem: name a model the page lists as requiring 30-day retention (e.g. Claude Mythos 5) instead of 'a model that requires 30-day retention', so the learner must apply the page's list. Key: restate as the finding for the model, e.g. 'A failed check, because that model cannot run under zero retention'. Page passage: the exam-guide note lists 'Claude Fable 5.1, Claude Mythos 5.1, Claude Fable 5 and Claude Mythos 5' as requiring 30-day retention. Keep the c and d rule-outs."
+   }
+  ]
+ },
+ "84-cost-and-capacity-engineering": {
+  "done": [
+   "author",
+   "read"
+  ],
+  "interrupted": [],
+  "last_reader": "read",
+  "open": []
+ },
+ "85-retrieval-pipelines-at-design-level": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1"
+  ],
+  "interrupted": [],
+  "last_reader": "reread1",
+  "open": []
+ },
+ "86-integration-choices-access-and-capability-bloat": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1"
+  ],
+  "interrupted": [],
+  "last_reader": "reread1",
+  "open": []
+ },
+ "87-observability-at-scale": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1"
+  ],
+  "interrupted": [],
+  "last_reader": "reread1",
+  "open": []
+ },
+ "88-evaluation-and-optimisation": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1",
+   "fix2",
+   "reread2",
+   "resolve"
+  ],
+  "interrupted": [],
+  "last_reader": "reread2",
+  "open": [
+   {
+    "id": "01-metrics-evaluation-sets-and-where-a-headline-hides-the-failure#q1",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The rework removes the 'because' clauses that only the wrong options carried, which helps. Three tells remain. (1) The stem names both ingredients of the key: 'refund answers wrong far more often' (per kind of question) and 'far dearer' (cost of errors). The key is 'The accuracy and the cost of errors for each kind of question', so a skimmer matches it by word overlap (R4). (2) The key is the only two-part 'X and Y' option, and the longest at 62 characters against 55 to 57 (R3). (3) The key is nearly the page's report description, 'for each type of case, the number of cases, the accuracy, and the cost of its errors' (R1). The rule-out of c quotes 'a faster or cheaper system is not better where it is wrong', which is verbatim and answers the cost-per-case option, though only loosely.",
+    "fix": "Make the options parallel by making every one a two-part 'A and B' from different dimensions. For example: b 'The overall accuracy and the average latency of each version'; c 'The cost per answered case and the speed of each version'; d 'The size of the set and the spread of the scores across runs'. Keep the key to a similar length. Trim the stem so it keeps the 92 percent tie and the unequal refund and status cost but does not describe the per-segment, priced report. Keep the existing rule-outs, which still work: 'Equal overall scores can hide unequal failures', 'A figure from another dimension cannot stand in for the segment that is failing', 'More cases make the score steadier and do not show where it is low'."
+   },
+   {
+    "id": "02-changing-safely-diagnosing-and-the-practice#q2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The stem now says 'the gate described on this page', which is right for a course-design rule, and the strawman 'ship to everyone' is gone. The new option a, 'Hold it back until its overall accuracy is higher than the current version's', gives the same immediate decision (hold) as the key d in this scenario. Only the release condition differs, and the stem asks what the gate 'does', not when it releases. So a is arguably also defensible (R5). It also reads as a near-mirror of d ('Hold ... until ...', 76 against 73 characters). Its rule-out is indirect: it needs the inference that a higher total can come from gains elsewhere. The page's gate would ship an equal-total change that has no protected loss and losses not above gains, which is the actual contrast, but the stem does not set it up. The key d is also close to the page rule 'no protected segment may lose a case'.",
+    "fix": "Change option a so it is a different decision, not a second 'hold'. Use a ship decision built on the page's second key only, for example 'Ship it, since it lost no more cases in total than it gained'. Rule it out with the verbatim passage 'First, no protected segment may lose a case, because those segments are protected for their cost' plus 'A gain in one segment does not pay for a loss in another'. Equal overall accuracy in the stem implies equal lost and gained counts, so the option is plausible. Keep b, c, d and the key letter."
+   }
+  ]
+ },
+ "89-migration-and-model-upgrades-at-scale": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1",
+   "fix2",
+   "reread2",
+   "resolve"
+  ],
+  "interrupted": [],
+  "last_reader": "reread2",
+  "open": [
+   {
+    "id": "01-the-calendar-the-audit-and-the-settings-a-new-model-changes#q2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "R2/R3. Option a ('a legacy listing comes with a successor and a date') contradicts the stem, which says no retirement is scheduled. d ('Reroute every call at once') is an extreme strawman built on a false definition of legacy. The key is tied for longest (95) and is the only option with two reasons ('updates have stopped and any later cut-off comes with finite notice'). The rule-out of b quotes 'a migration of forty applications can take longer than that', but the stem says only 'several' applications. Same 'start early' theme as q1 (a mild R7 overlap).",
+    "fix": "Rewrite a and d as mistakes a practitioner could make without contradicting the stem. a: 'Keep it for now, since a legacy model is still fully supported', ruled out by the legacy definition 'will no longer receive updates and may be deprecated in the future' against active 'fully supported and recommended for use'. d: a plausible mistake such as 'Move only after the status reads deprecated, since only then is a replacement named', ruled out by 'consider thorough testing of your applications with the new models well before the retirement date'. Give the key a single reason clause, for example 'since the model is heading for deprecation and any notice is finite', and bring its length to about 88. Add 'several' or similar to the rule-out of b, or quote 'There is notice, and it is finite' instead of the forty-applications sentence."
+   },
+   {
+    "id": "02-the-gate-the-roll-out-and-the-way-back#m1",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "R5/R1/R6. All four options begin 'Show both figures', so the recommendation rides entirely on the because-clause. 'Advise moving' (b) is defensible as a recommendation, since the page itself says staying 'has a date that ends it'; only b's stated reason is wrong. The key's 'let them decide' is not stated on the page: the page says the architect states the trade and puts the number 'before the owner', not that the architect must not recommend. The key's reason is near-verbatim 'staying has a date that ends it', and it would equally support advising a move. The explanation's claim that 'the owner decides' is not supported by the quote beside it. c and d ('let them decide' and 'defer the choice') come close to a mirror pair. d's reason is weak, though 'hands the decision to the calendar' does exclude it.",
+    "fix": "Make the options differ in the content of the reply, not the verdict, and make the key what the page says the architect does: state what improves, what it costs against the budget with its reason, what is at risk, and the date that forces the choice. Keep the three distractor ideas (recommend staying because a cost rise is a verdict, recommend moving because the vendor named a replacement, wait for the calendar), each excluded by its existing quote: 'not a verdict', 'a starting point, not a decision', 'hands the decision to the calendar, and gives up the rollback'. Write the key as 'Lay the improvement, the cost rise and the date side by side, because staying has an end date too'. Drop 'let them decide' and the 'the owner decides' gloss in the explanation. Keep the options within 5 characters of each other."
+   },
+   {
+    "id": "02-the-gate-the-roll-out-and-the-way-back#m3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "R6/R5. The rule-out of c quotes 'the nearest-rank 95th percentile of the new timings, against a limit', which says nothing about where the limit comes from, so it does not make c ('p95 limit read from the old model's live timings') false. The rule-out of b ('measure usage afresh, set a new baseline') only half-excludes it: the page's gate takes the cost rise from old and new costs on the same cases, so b is arguable, and the page does not say that a baseline comes only from the new model's traffic, which the explanation asserts. The key is the longest, by 1 character (91 against 90), which is minor. The page says the gate already ran before go-live, so b and c are weak mistakes. Same fact as Developer-level-free professional mock 1 item 52 (the old model stays the fallback until its retirement date); the base item had the same overlap.",
+    "fix": "Replace c and, if needed, b with options that existing text makes false. Restore the base form of b: 'The record of which key called which model, since only the configuration holds it', excluded by 'usage broken down by API key and model'. For c use 'The error limit for each stage, since the roll-out rule reads its limit from the old model's entry', excluded by 'a limit (5 in the example)' and 'values to tune to your own traffic'. Keep a and d. The register should decide whether m3 and mock 1 item 52 count as the same fact."
+   }
+  ]
+ },
+ "90-governance-safety-and-risk": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1",
+   "fix2",
+   "reread2",
+   "resolve"
+  ],
+  "interrupted": [],
+  "last_reader": "reread2",
+  "open": [
+   {
+    "id": "02-compliance-fairness-transparency-and-the-register#m1",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "R7: the fact (a register row whose control is not defined anywhere is a wish and fails) is already asked in the module 94 mock exam x50 ('Hollis Mutual's risk register ... pattern filter that does not appear anywhere in the architecture ... a wish'; key 'It is a wish'). The author's rework moved m1 onto a fact that the course already asks, while the base m1 (screen fail-open, page 1) was not duplicated. Option form is otherwise fine (a and b pass; c and d fail; rule-outs verbatim and aimed correctly), and the stem is close to a statement of the key ('no part of the system implements').",
+    "fix": "Rework m1 onto a page fact not asked in mock 94, keeping letter c. Candidates: a failure mode matched to its right-layer control (privacy leak: identifiers swapped for tokens before the call, 'no content in the audit log'), or the low-consequence reply with the screen down (goes on flagged, 'auto (unscreened)'); check mock 94 and module 83 for each before using it. Alternatively restore the base m1 about holding a high-consequence call, modified to avoid duplicating q1's fact. Keep the rule-out of d ('a line in a prompt is a request, and a control is a step the model cannot skip') only if the new item still has a prompt-line distractor that q2 does not already make the main point."
+   },
+   {
+    "id": "02-compliance-fairness-transparency-and-the-register#m2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "R2: option a ('a language group is not a segment that is reported') contradicts the stem, which says the group scores 70 percent and so is measured. The key's own rule-out has to say 'this group was labelled, since it was scored', so a is excluded by the stem and not by a page passage. The skimmer-proofing is otherwise fine: the key is derived (reject, judge the gap), c is ruled out by 'a headline average hides a failing group exactly as it hides a failing segment', d by 'fairness is a property of outcomes by group'. Slight strain in c ('well above 94 percent').",
+    "fix": "Replace option a (keep letter a, shape 'Accept it, since ...') with a plausible acceptance rationale that the stem does not contradict, for example 'Accept it, since a group that small is outweighed by the rest of the traffic', ruled out by Trap 3 'an average hides a group that fails' (not the quote already used for c). Keep its explanation sentence ruling out a with that passage. Optionally drop 'well above' from c."
+   }
+  ]
+ },
+ "91-stakeholders-and-the-project-lifecycle": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1",
+   "fix2",
+   "reread2",
+   "resolve"
+  ],
+  "interrupted": [],
+  "last_reader": "reread2",
+  "open": [
+   {
+    "id": "02-service-levels-feedback-and-the-lifecycle-from-pilot-to-scale#m1",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The rework is better than base: the 'excluded from the figure' strawman is gone, and the rule-out of d now cites 'is made in the unit that is measured'. Two problems remain. (1) In key c, 'each of those' follows 'results go by segment', so its nearest antecedent is the segments. That reads as a person deciding every segment, which the page contradicts ('status answers go out automatically'). The key can be misread as wrong. (2) Options a, b and d all defend the overall figure and only c moves to segments, so a learner can pick c as the odd one out. The key is also the only option that does not leave the 98 figure standing, and the stem's '63 times in 100' for the costly kind points the same way.",
+    "fix": "Change the end of option c to name the costly kind: 'That results go by segment, with a person deciding the costly kind until it improves'. The page passage is 'a person decides every credit until the measured accuracy rises'. Optionally make one distractor propose a non-overall but still wrong fix, for example reporting the costly kind alone but 'promising' a future figure. Keep the key letter c and the current rule-outs of a, b and d."
+   },
+   {
+    "id": "02-service-levels-feedback-and-the-lifecycle-from-pilot-to-scale#m2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "The key and the rule-outs of a and d work: 'the people who run the system need an owner, a runbook, monitors and a rollback on day one' and 'a diagram without the runbook leaves the first incident to the person who happens to remember'. The rule-out of c does not work. It says an alert goes to 'the owner of the runbook that explains each alert', but the page only lists that role in the hand-off and never says alerts are routed to it. The quote does not make a monthly sponsor report false, and 'weeks after the Saturday' is the author's inference. The base quote 'The people who run the system are not the people who built it' answered c better. A smaller point: the key is the only option without the word 'alert', while a, c and d all use it.",
+    "fix": "Rewrite the rule-out of c around the passage 'The people who run the system are not the people who built it, and the record says who they are': a report to the sponsor reaches the sponsor and not the operations team, and it names nobody to act on the alert. Optionally put 'alert' into the key's wording ('explaining each alert') if the checker's stem-word rule allows it, or drop 'alert' from the distractors to remove the contrast."
+   }
+  ]
+ },
+ "92-enabling-teams-and-operations": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1",
+   "fix2",
+   "reread2",
+   "resolve"
+  ],
+  "interrupted": [],
+  "last_reader": "reread2",
+  "open": [
+   {
+    "id": "02-rolling-out-plugins-servers-spend-and-adoption#m3",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "(1) R1/R4: key d ('spans a release cycle, so any shift is measured against it') is near-verbatim from \"enough to include a release cycle and a quiet week\". The stem's second question ('what does the record allow later?') is answered only by the key's second clause, so a skimmer can pick d by form alone. (2) R6: the rule-out of b quotes the same sentence as the key, \"enough to include a release cycle and a quiet week\", which names the real reason and does not make 'the dashboard keeps only four weeks' false. (3) R2: a (usage credits reset every four weeks) and b (the dashboard keeps only four weeks) are arbitrary fillers that no page passage mentions, and the second half of c ('so no outcome target is needed') is a strawman. (4) R5: the first half of c ('a month evens out weekly noise') is close to the page's own reasoning for four weeks, so only its second half excludes it.",
+    "fix": "Recast the stem as an application, for example: after the rollout the time to merge has fallen by a day, and the team compares it with the four weeks recorded beforehand; what makes that comparison fair? The key would say the window held a release cycle and a quiet week, so the usual swing is known. Replace b (an invented dashboard limit) with a plausible mistake that the page rules out, for example 'Because lines accepted need four weeks to settle', ruled out by \"Lines and suggestions accepted are reported and not targeted\". Drop 'so no outcome target is needed' from c, or rule c out with \"A target on an outcome needs a baseline\". Keep the quote for the key only."
+   }
+  ]
+ },
+ "93-professional-capstone": {
+  "done": [
+   "author",
+   "read",
+   "fix1",
+   "reread1",
+   "fix2",
+   "reread2",
+   "resolve"
+  ],
+  "interrupted": [],
+  "last_reader": "reread2",
+  "open": [
+   {
+    "id": "02-the-written-design-review-findings-verdict-and-scorecard#q2",
+    "changed": true,
+    "verdict": "WEAK",
+    "reason": "Option b ('Two reviewers would still produce different lists') is not cleanly ruled out. The stem says only 'grouped by domain, P1 first', which leaves the order inside a domain open, and that could make two lists differ. The key explanation assumes 'a fixed order by domain and rule id', which the stem does not give and the page does not say would be deterministic. The quote 'Two reviewers must produce the same list' is the requirement b relies on, not a statement that excludes b. The rewritten key and the new rule-outs for a and c are good: 'the verdict first, then the scorecard, then the findings in their order' and 'Each finding is a severity, a domain and a rule' are verbatim and exclude their options.",
+    "fix": "Replace option b with a distractor that a page passage excludes, e.g. 'The scorecard would have to list the domains in another order'. Rule it out with 'a count of findings per domain, in the order P1 to P7'. Keep it about the same length (about 66 characters) and keep a, c and d as they are. Delete the 'fixed order by domain and rule id' clause from the b explanation."
+   }
+  ]
+ }
+}

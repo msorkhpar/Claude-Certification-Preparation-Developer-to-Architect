@@ -417,16 +417,16 @@ The practice is in [`exercises/90-governance-safety-and-risk`](../../exercises/9
 
 This quiz covers both pages of the module.
 
-1. Scenario: Ines reviews the risk register of a claims assistant. It has four rows, one for each of the four risks, each with an owner, and the prompt-injection row names a source filter that no part of the system implements. What should the review conclude about that row?
-   - **a**: It passes, because the row names an owner who answers for it
-   - **b**: It passes, because its residual column rates the risk as medium
-   - **c**: It fails until that check is built as a control on a layer
-   - **d**: It fails until the system prompt tells the model to filter input
+1. Scenario: Ines reviews the risk register of a claims assistant. It has two rows, one for hallucination and one for prompt injection, and each names a control the design defines, an owner and a residual in words. What should the review conclude about the register?
+   - **a**: It passes, because each row names an owner who answers for it
+   - **b**: It passes, because each row names a control the design defines
+   - **c**: It fails until privacy leaks and unfair outcomes each get a row
+   - **d**: It fails until the residual on each row is brought down to low
 
 2. Scenario: A review finds that a model system's average accuracy is 94 percent, and that one language group, a small part of the traffic, scores 70 percent. The team says the system passes. How should the reviewer answer that claim?
-   - **a**: Accept it, since a language group is not a segment that is reported
+   - **a**: Accept it, since a group that small is outweighed by the rest of the traffic
    - **b**: Reject it, since the measure to judge is the gap between segments
-   - **c**: Reject it until the overall accuracy rises well above 94 percent
+   - **c**: Reject it until the overall accuracy is raised to 98 percent
    - **d**: Accept it, since the launch test covered the traffic broadly
 
 3. Scenario: An auditor asks a team to show that a refund paid 200 days ago was put in front of a person. The team's audit entry for it holds the request id, the action, the consequence high, the outcome human and a character count. The team keeps entries for 365 days, above a floor of 90. What should the team tell the auditor?
@@ -438,8 +438,8 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **c**. Every control in the register must be a real control in the design, with a layer and a failure mode, so a filter that exists only on paper fails the row. *b* is ruled out because a residual comes on top of a control, as each failure mode "gets a control, an owner and a stated residual". *a* is ruled out because an owner does not create the control, and "a row with a control that does not exist is a wish". *d* is ruled out because "a line in a prompt is a request, and a control is a step the model cannot skip".
-2. **b**. Fairness is the same metric computed per group, with the gap between the best and the worst group shown, and a group at 70 beside an average of 94 is a gap the average does not show. *a* is ruled out because "a segment you cannot label cannot be reported", and this group was labelled, since it was scored at 70 percent. *c* is ruled out because "a headline average hides a failing group exactly as it hides a failing segment", so a higher average can still hide the group at 70. *d* is ruled out because "fairness is a property of outcomes by group", and a broad launch test is not a gap measure.
+1. **c**. The register is judged against the four failure modes of a model system, and this one leaves a privacy leak and an unfair outcome with no control and nobody to call. *b* is ruled out because "Four recur in every design review, and each gets a control, an owner and a stated residual", so two defined controls still leave two modes without one. *a* is ruled out because "a register of two rows covers two of four modes", and an owner on each row answers only for the modes that are listed. *d* is ruled out because the residual column says what is left, as in "medium because patterns do not find names", so a residual above low is a stated residual and not a failure.
+2. **b**. Fairness is the same metric computed per group, with the gap between the best and the worst group shown, and a group at 70 beside an average of 94 is a gap the average does not show. *a* is ruled out because "an average hides a group that fails", and the group's small share of the traffic does not change its score of 70 percent. *c* is ruled out because "a headline average hides a failing group exactly as it hides a failing segment", so a higher average can still hide the group at 70. *d* is ruled out because "fairness is a property of outcomes by group", and a broad launch test is not a gap measure.
 3. **d**. A high-consequence action is routed to a person, and the outcome field records that route for this refund, with no text needed to show it. *b* is ruled out because the floor is "the shortest period kept, so that an incident found late can still be examined", and an entry of 200 days is still inside a window of 365. *c* is ruled out because the entry holds "request id, action, consequence, outcome and the size of the text", none of which names the customer. *a* is ruled out because the log is meant to "keep proof of what happened, and keep content only where the requirement says so", and the route is proven by the entry without the text.
 
 </details>

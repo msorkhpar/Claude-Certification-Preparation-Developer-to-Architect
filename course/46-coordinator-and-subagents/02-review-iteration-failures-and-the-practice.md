@@ -74,7 +74,7 @@ These are the wrong answers that the exam's options for this task statement offe
 <summary>Answer key</summary>
 
 3. **b**. A failure belongs to its scope, and the user is owed a list of what is missing. *a* is ruled out because a caveat does not change what the line is: "A failure is never turned into a finding." *c* is ruled out because the problem is then hidden: "A partial answer looks like a full one". *d* is ruled out because it is the other coordinator mistake: "Sending every brief out again in the next round doubles the cost and adds repeats".
-4. **d**. The review names the gaps, only they are sent out again, and the rounds are capped. *b* is ruled out because no first wave, however large, can aim at gaps that the review names only afterwards, and a larger one still leaves some: "The first round of a research team rarely answers the question." *c* is ruled out because "a gap is found by the review and closed by a subagent, never invented by the synthesis." *a* is ruled out because even one extra round repeats work that is already done: "the first-round findings are already in hand".
+4. **d**. The review names the gaps, only they are sent out again, and the rounds are capped. *b* is ruled out because a larger wave raises the price of every section, the three sound ones included, when each wave must earn its cost: "multi-agent systems require tasks where the value of the task is high enough to pay for the increased performance." *c* is ruled out because "a gap is found by the review and closed by a subagent, never invented by the synthesis." *a* is ruled out because even one extra round repeats work that is already done: "the first-round findings are already in hand".
 
 </details>
 
@@ -94,17 +94,17 @@ This quiz covers both pages of the module.
    - **c**: Let the five subagents work in one shared context
    - **d**: Start the team only when the user asks for a long report
 
-3. Scenario S3, a multi-agent research system. A coordinator splits each research question across search, analysis and synthesis subagents and returns a cited report. Specialist agents hand forty-page drafts up through the coordinator, and the cost of each run climbs with every handoff, yet the final report may not lose any detail from those drafts. Which architecture change fits best?
-   - **a**: Ask each specialist to hand up a much shorter draft instead
+3. Scenario S3, a multi-agent research system. A coordinator splits each research question across search, analysis and synthesis subagents and returns a cited report. Specialist agents hand forty-page drafts up through the coordinator, and the cost of each run climbs with every handoff, yet the final report must keep every detail from those drafts. Which architecture change fits best?
+   - **a**: Cap the number of turns each specialist may take
    - **b**: Have the coordinator condense each draft before relaying it
-   - **c**: Hand each specialist the coordinator's whole conversation
-   - **d**: Keep each output in an outside store and pass on only a pointer
+   - **c**: Give every specialist a full copy of the coordinator's conversation
+   - **d**: Write each output to a store and pass on a pointer
 
 <details>
 <summary>Answer key</summary>
 
 1. **c**. Overlap comes from the brief, because the subagents cannot see each other. *b* is ruled out because nothing crosses between subagents: "A subagent does not know the user's original question, the plan, the other subagents". *a* is ruled out because review cannot undo duplicate work already paid for, and the page puts the cause in the briefs: "Without detailed task descriptions, agents duplicate work, leave gaps, or fail to find necessary information." *d* is ruled out because no model of any size sees the other briefs, and the page warns against "hoping that the model will see what its siblings are doing, because it cannot".
 2. **b**. The effort should follow the question: "Simple fact-finding requires just 1 agent with 3-10 tool calls". *a* is ruled out because a lower limit still starts the whole team for the plain fact: "A fixed team runs on every query and costs most on the simplest". *c* is ruled out because sharing does not shrink the team's work and undoes the isolation: "it removes the isolation that keeps the context small". *d* is ruled out because the length of a report is not the difficulty of the question, and "the coordinator chooses which subagents to invoke from the complexity of the query".
-3. **d**. A reference keeps the output out of the lead's window and out of its summaries. *b* is ruled out because a lead that summarizes what it relays "loses detail at every summary". *c* is ruled out because copying through conversation history is the cost: "reduces token overhead from copying large outputs through conversation history". *a* is ruled out because a shorter draft drops detail and still travels the same route through the lead: "Rather than requiring subagents to communicate everything through the lead agent".
+3. **d**. A reference keeps the output out of the lead's window and out of its summaries. *b* is ruled out because the coordinator still reads each full draft, so it "pays for each token twice", and it "loses detail at every summary". *c* is ruled out because copying through conversation history is the cost: "reduces token overhead from copying large outputs through conversation history". *a* is ruled out because a cap on turns does not change where the drafts travel, and the lead still reads each one: "Rather than requiring subagents to communicate everything through the lead agent".
 
 </details>

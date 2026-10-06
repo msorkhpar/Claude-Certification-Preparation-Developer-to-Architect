@@ -105,13 +105,13 @@
         "a": "Take the largest model for safety, and put the constant passage first",
         "b": "Take the cheapest model of any tier, and place the constant passage in the final message",
         "c": "Take the model that was used last time, and cache the whole request as one piece",
-        "d": "Take the cheapest model that is able and quick enough, and put the constant passage first"
+        "d": "Take the cheapest model that is capable and fast, and put the constant passage first"
       },
       "key": "d",
       "explanation": {
         "d": "The model is chosen by tier and latency with price ranking the rest, and the stable text leads so that it can be cached.",
         "a": "Ruled out because the largest model is not needed when \"the cheapest model that meets the first two is the right one for each workload\".",
-        "b": "Ruled out because \"A model below the tier fails the task\", whatever its price.",
+        "b": "Ruled out because a model chosen by price alone may be \"A model slower than the limit\", and the constant text belongs at the front, where \"the stable content goes first and the variables go after the breakpoint\".",
         "c": "Ruled out because \"Two requests share a cache entry only when everything up to the breakpoint is identical\", so the whole request, which includes the changing part, cannot be cached as one piece."
       }
     },
@@ -124,14 +124,14 @@
         "a": "The conduct guide, pricing terms, latest query and prior messages all as static modules",
         "b": "The conduct guide and latest query as static modules, the pricing terms and prior messages as dynamic ones",
         "c": "The conduct guide and pricing terms as static modules, the latest query and prior messages as dynamic ones",
-        "d": "Only the pricing terms as a static module, the conduct guide, latest query and prior messages as dynamic ones"
+        "d": "The conduct guide, pricing terms and prior messages as static modules, the latest query as a dynamic one"
       },
       "key": "c",
       "explanation": {
         "c": "The rules and the policy are the same for every traveller, so they go first as static modules, and the question and the chat follow as dynamic ones, so that the stable prefix can be cached.",
         "a": "Ruled out because \"Two requests share a cache entry only when everything up to the breakpoint is identical\", and the question and the chat differ on every request, so no entry would ever match.",
-        "b": "Ruled out because the question changes on every request, and a dynamic module is one that \"changes with the customer, the question or the history\".",
-        "d": "Ruled out because the house rules are the same for every traveller, and a static module is one that is \"the same on every request\"."
+        "b": "Ruled out because the question changes on every request, and \"a changing value in the prefix breaks the cache on every request\".",
+        "d": "Ruled out because the earlier chat is the history, which grows with each turn, and a dynamic module is one that \"changes with the customer, the question or the history\"."
       }
     }
   ]

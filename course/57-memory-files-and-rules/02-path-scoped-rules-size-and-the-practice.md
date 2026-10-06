@@ -733,7 +733,7 @@ This quiz covers both pages of the module.
    - **c**: The local file's presence turns off the earlier fallback
    - **d**: Git-ignored files are read in place of the committed ones
 
-2. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A developer moves the sections of a four-hundred-line `CLAUDE.md` into five files in the repository and lists each one in the root file as an `@` path formatted as inline code. After a restart, `/context` shows the root file and none of the five. What explains it?
+2. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. An engineer moves the sections of a four-hundred-line `CLAUDE.md` into five files of the project and lists each one in the root file as an `@` path formatted as inline code. After a restart, `/context` shows the root file and none of the five. What explains it?
    - **a**: Import parsing passes over anything set between backticks
    - **b**: Imported files wait until Claude reads inside their folder
    - **c**: Five imports in one file go past the limit on import depth

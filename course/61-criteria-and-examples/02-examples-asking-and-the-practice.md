@@ -418,7 +418,7 @@ The practice is in [`exercises/61-criteria-and-examples`](../../exercises/61-cri
    - **c**: One flagged sample and one skipped sample, each explained
    - **d**: A few typical samples taken from recent changes in the codebase
 
-2. A review job in CI receives a request with no reviewer named, and the project holds no default reviewer. What should the run do?
+2. In this module's practice, a review job in CI receives a request with no reviewer named, although the review requires one, and the project holds no default reviewer. What should the run do?
    - **a**: Ask the author who the reviewer should be, and wait
    - **b**: Stop with a plain failure that lists the absent field
    - **c**: Name the author as reviewer and state that assumption
@@ -449,17 +449,17 @@ This quiz covers both pages of the module.
    - **d**: Leave the group unchanged while more reviews accumulate
 
 3. Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests. Its prompt holds three worked cases, one reported unchecked access and two skipped guarded ones, each made of the code and its verdict. A new kind of guard that resembles none of them is still flagged. What should change?
-   - **a**: Add skipped examples until every guard style has one
-   - **b**: Swap the examples for typical changes from recent commits
-   - **c**: Give each example a sentence on why its label was chosen
-   - **d**: Copy the skipped examples so the skip label weighs more
+   - **a**: Add skipped examples for each of the newest guard styles
+   - **b**: Wrap each example in its own tag inside an examples block
+   - **c**: Give each example a line on why its label was chosen
+   - **d**: Move the examples after the diff, nearest the input
 
 <details>
 <summary>Answer key</summary>
 
 1. **c**. A level with a code sample has a boundary, and a closed list can be compared with a floor. *a* is ruled out because "A definition with a code example gives the reviewer a case to compare with", and adjectives give none. *b* is ruled out because a number the model gives about its own certainty says nothing about how bad a finding is, and "self-reported confidence is another vague instruction". *d* is ruled out because the gate "drops findings below a floor and fails the job at a severity", and without a floor it has no policy.
 2. **b**. The recorded pattern shows that one pattern draws every dismissal, so only its criterion changes and the remarks developers accept keep coming. *a* is ruled out because "The fix is then to adjust the criteria for the one pattern and not to disable the category". *c* is ruled out because "Deleting the category from the criteria loses the examples that the next attempt needs". *d* is ruled out because leaving the group unchanged keeps the noise, which has a cost, since "each dismissed comment lowers trust in the accepted ones".
-3. **c**. The set is targeted and shows both verdicts, so what it lacks is the reason, and "The reason is what transfers to a case that matches no example". *a* is ruled out because new guard styles keep coming and "the guide asks for two to four targeted examples, and a long list teaches accidents". *b* is ruled out because the guard is a border case, while "typical cases are settled by the criteria". *d* is ruled out because copies add no new case and tilt the set toward one label, while examples "should be diverse enough that the reviewer does not learn an accident".
+3. **c**. The set is targeted and shows both verdicts, so what it lacks is the reason, and "The reason is what transfers to a case that matches no example". *a* is ruled out because new guard styles keep coming, the set would grow past four, and "the guide asks for two to four targeted examples, and a long list teaches accidents". *b* is ruled out because tags only help the model "tell instructions from examples from data", and a tagged example still says nothing about a guard it does not show. *d* is ruled out because moving the examples changes no verdict they teach, and "Examples sit between the criteria and the input, each in its own tag, with the diff last".
 
 </details>
 

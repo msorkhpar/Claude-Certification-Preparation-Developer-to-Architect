@@ -544,17 +544,17 @@ This quiz covers both pages of the module.
    - **c**: `allowManagedHooksOnly`
    - **d**: `allowManagedMcpServersOnly`
 
-3. Scenario: Following this module's rollout plan, a team records four weeks of the time to merge for pull requests before the rollout starts. Why four weeks, and what does the record allow later?
-   - **a**: Because usage credits reset every four weeks and the data must match
-   - **b**: Because the dashboard keeps only four weeks, so older data is lost
-   - **c**: Because a month evens out weekly noise, so no outcome target is needed
-   - **d**: Because it spans a release cycle, so any shift is measured against it
+3. Scenario: Following this module's rollout plan, a team records four weeks of the time to merge for pull requests before the rollout starts. Two months in, the time to merge has fallen by a day, and the team compares it with that record. What makes the comparison fair?
+   - **a**: Accepted lines rose in the same months, which ties the faster merges to the tool
+   - **b**: Daily active users were logged as well, so the fall can be scaled by use
+   - **c**: The time to merge is a contribution metric, so the dashboard holds both periods
+   - **d**: The window took in a release and a lull, so the normal swing in speed is known
 
 <details>
 <summary>Answer key</summary>
 
 1. **c**. Without `allowManagedMcpServersOnly`, a list combines across files, so the developer's own entry widens the managed allowlist. *b* is ruled out because the administrator "can restrict MCP servers to a managed allowlist", so the managed list is read and applies alongside the developer's own. *a* is ruled out because "no user, project or local value overrides it" for the managed level. *d* is ruled out because a list "is combined across files and not replaced".
 2. **b**. A plugin loaded from a folder for one session comes in through a sideload flag, and that key rejects those flags. *a* is ruled out because "the allowlist does not stop a developer from loading a plugin from a folder for one run with a command-line flag". *c* is ruled out because "only managed hooks run" is all that key does, and the plugin's skills and agents still load. *d* is ruled out because "only the managed `allowedMcpServers` list applies", which governs servers and leaves the plugin's skills and agents loaded.
-3. **d**. A baseline with a release cycle in it lets a later change be measured. *b* is ruled out because the page says "enough to include a release cycle and a quiet week", not a limit of the dashboard. *c* is ruled out because the plan "states two outcome targets: the share of merged pull requests with assistance, and the time to merge". *a* is ruled out because "the baseline of four weeks and the way the limits add up are this course's design values", not a cycle of usage credits.
+3. **d**. The plan takes four weeks, "enough to include a release cycle and a quiet week", so the record already shows how far the time to merge swings on its own, and a fall of a day can be set against that swing. *b* is ruled out because daily active users are among the "Usage metrics (lines accepted, suggestions accepted, daily active users, sessions)", which measure activity and say nothing about how much the time to merge varies. *c* is ruled out because the time to merge is one of "the measures a team already has", not a contribution metric from the dashboard. *a* is ruled out because "lines accepted can be raised by accepting more lines", so their rise is activity and does not tie the faster merges to the tool.
 
 </details>

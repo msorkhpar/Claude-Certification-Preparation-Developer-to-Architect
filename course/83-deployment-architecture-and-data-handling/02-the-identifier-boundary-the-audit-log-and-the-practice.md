@@ -351,17 +351,17 @@ These are the wrong answers the exam's options for this domain offer, each with 
 
 This quiz covers both pages of the module.
 
-1. Scenario: Marlow Care's service holds data of patients in the United States and in the European Union. It runs a deployment in each region. A European patient's request arrives while the European deployment is down for maintenance. What should the router do?
+1. Scenario: Marlow Care's service holds data of patients in the United States and in the European Union, and its contract requires European patients' data to stay in Europe. It runs a deployment in each region. A European patient's request arrives while the European deployment is down for maintenance. What should the router do?
    - **a**: Turn it away for now with an error, and let the caller try again once the local site is back up
    - **b**: Send it to the United States deployment, since being available matters more than where the data sits
-   - **c**: Send it to the United States deployment, after tokenising the identifiers in the request
+   - **c**: Send it to the European deployment kept for another customer, since the region still matches
    - **d**: Process it on whichever deployment answers the fastest, and record the exception in the audit log
 
-2. Scenario: Alder Dental needs zero data retention on its Claude API deployment and has chosen a model that requires 30-day retention. What is the finding?
+2. Scenario: Alder Dental needs zero data retention on its Claude API deployment and has chosen Claude Mythos 5. What is the finding?
    - **a**: None, because the arrangement is organisation-wide and covers the models that are in use
-   - **b**: A failed check, because that arrangement does not cover the one they have picked
-   - **c**: A minor warning, since thirty days is short enough to be treated as nothing kept
-   - **d**: None, provided the deployment's audit log is set to expire after thirty days
+   - **b**: A failed check, because the arrangement excludes that model unless Anthropic expressly allows it
+   - **c**: A minor warning, since that model's retention period is short enough to count as nothing kept
+   - **d**: None, provided the deployment's own audit log is set never to store the prompts
 
 3. Scenario: Wren Logistics must keep audit entries for at least 90 days and at most 365. An entry is 400 days old, and counsel has placed it under a legal hold. What does the purge rule do?
    - **a**: Purges it, because the ceiling applies to every entry alike
@@ -372,8 +372,8 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **a**. Serving the user from another region breaks the residency requirement, so with no deployment that keeps the data in the region the answer is none. *b* is ruled out because "serving a European user from a United States deployment because it was available is the failure the router exists to prevent". *c* is ruled out because tokenising does not change where the request is processed and does not remove every identifier, since "A person's name has no fixed shape, so a pattern layer leaves it in", and "a user's data goes only to a deployment that keeps it in the user's region". *d* is ruled out because speed is not a criterion, and the router sends a user's data "only to a deployment that keeps it in that region".
-2. **b**. A model that requires 30-day retention cannot meet a zero-retention requirement. *a* is ruled out because the arrangement "excludes models that need 30-day retention" so it does not cover every model. *c* is ruled out because the requirement is zero, not short, and "A model that requires 30-day retention cannot satisfy a zero-retention requirement". *d* is ruled out because the arrangement means "Anthropic does not store prompts or responses at rest", which the deployment's own audit log does not change, and "the model is part of the check and not only the platform".
+1. **a**. Serving the user from another region breaks the residency requirement, so with no deployment of its own that keeps the data in the region the answer is none. *b* is ruled out because "serving a European user from a United States deployment because it was available is the failure the router exists to prevent". *c* is ruled out because another customer's deployment breaks the tenant boundary, which exists "so that a key, a log or a limit for one tenant cannot reach another". *d* is ruled out because speed is not a criterion, and the router sends a user's data "only to a deployment that keeps it in that region".
+2. **b**. Claude Mythos 5 is one of the models that "require 30-day retention and are not available under zero data retention", so the check fails. *a* is ruled out because the arrangement "excludes models that need 30-day retention" so it does not cover every model. *c* is ruled out because the requirement is zero, not short, and "A model that requires 30-day retention cannot satisfy a zero-retention requirement". *d* is ruled out because the arrangement means "Anthropic does not store prompts or responses at rest", which the deployment's own audit log does not change, and "the model is part of the check and not only the platform".
 3. **c**. A legal hold keeps an entry whatever its age. *a* is ruled out because an entry under a hold "is never removed, whatever its age". *b* is ruled out because the hold "keeps the entry itself and not a copy made at purge time", so nothing is removed first. *d* is ruled out because no audit date decides: "A hold ends only when counsel releases it".
 
 </details>

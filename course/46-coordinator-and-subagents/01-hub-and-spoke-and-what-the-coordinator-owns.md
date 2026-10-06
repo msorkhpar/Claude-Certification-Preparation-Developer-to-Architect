@@ -493,11 +493,11 @@ These are the wrong answers that the exam's options for this task statement offe
 
 ## Quiz
 
-1. A coordinator spends ten turns locating the broken check and its failure text, then tells a subagent only to "fix the broken check". The subagent opens other modules and edits the wrong one. What should the coordinator have done?
-   - **a**: Pass on the file path and error output it had already found
+1. A coordinator spends ten turns investigating a failing build, then tells a subagent only to "fix the broken check". The subagent opens other modules and edits the wrong one. What should the coordinator have done?
+   - **a**: Put the file's location and the error text into its prompt
    - **b**: Let the subagent look up the parent's earlier tool results in the session
    - **c**: Name a stronger model for the subagent in its definition file
-   - **d**: Add a line telling the subagent to ask the coordinator whenever it is unsure
+   - **d**: Have a second subagent review every edit before it is saved
 
 2. A team plans a multi-agent design for a feature built in three steps. Each step needs what the step before it found, and the user redirects the work after every step. Which choice fits best?
    - **a**: Chain three fixed prompts that run end to end without a pause
@@ -508,7 +508,7 @@ These are the wrong answers that the exam's options for this task statement offe
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The subagent's context starts fresh, so the brief is the only channel for facts the coordinator already found. *b* is ruled out because nothing is inherited: "The only content you pass from parent to subagent is the Agent tool's prompt string". *c* is ruled out because a stronger model still lacks the facts: "If a fact is not in the brief, the subagent does not have it". *d* is ruled out because the subagent cannot converse with its parent while it runs: "only its final message returns to the parent".
+1. **a**. The subagent's context starts fresh, so the brief is the only channel for facts the coordinator already found. *b* is ruled out because nothing is inherited: "The only content you pass from parent to subagent is the Agent tool's prompt string". *c* is ruled out because a stronger model still lacks the facts, and "a vague brief produces vague work." *d* is ruled out because a reviewing subagent starts from the same bare brief and cannot tell which edit is wrong: "If a fact is not in the brief, the subagent does not have it".
 2. **c**. Each step builds on the last and the user steers between them, so the work keeps one context and stays open to the user. *b* is ruled out because the documentation lists this case for the main conversation: "multiple phases share significant context, such as planning, implementation, and testing". *a* is ruled out because a fixed chain leaves no room for the user's redirection, and the task "needs frequent back-and-forth or iterative refinement". *d* is ruled out because the dependencies are the problem: "some domains that require all agents to share the same context or involve many dependencies between agents are not a good fit".
 
 </details>

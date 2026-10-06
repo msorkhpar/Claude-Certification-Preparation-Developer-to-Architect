@@ -698,15 +698,15 @@ roll-out at 100% with 50000 requests and 10 errors: complete
    - **d**: Plan to keep the model in use past that date, since a tentative date is not one that is enforced
 
 2. A model that several of a team's applications call is listed as legacy, with no retirement scheduled for it yet. The team asks whether its migration plan can wait. What should they decide?
-   - **a**: Switch to the named replacement today, since a legacy listing comes with a successor and a date
+   - **a**: Keep the plan on hold, since a legacy model is still fully supported and recommended for use
    - **b**: Let the plan wait for a retirement date, since the 60-day notice leaves time to move then
-   - **c**: Begin the move early, since updates have stopped and any later cut-off comes with finite notice
-   - **d**: Reroute every call at once, since legacy is the state in which requests to the model fail
+   - **c**: Begin the move early, since it is heading for deprecation and any notice it gets is finite
+   - **d**: Change the model id to the newest one today, since a newer model accepts the same requests
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. The advice is to "consider thorough testing of your applications with the new models well before the retirement date", and "Sixty days is the shortest warning, and a migration of forty applications can take longer than that", so testing starts now and the plan ends well ahead of the date. *b* is ruled out because a tentative date on an active model "is never a date to wait for". *c* is ruled out because such a date "marks a date that may move later", not sooner, and the replacement is "where to begin testing, and the decision is yours to make on your own tasks". *d* is ruled out because once the date arrives "Requests to retired models will fail".
-2. **c**. Legacy means "The model will no longer receive updates and may be deprecated in the future", and once a date is set "There is notice, and it is finite", so the plan starts before any retirement date exists. *a* is ruled out because the successor and the date belong to the deprecated state, where "Anthropic provides a recommended replacement and assigns a retirement date". *b* is ruled out because "Sixty days is the shortest warning, and a migration of forty applications can take longer than that". *d* is ruled out because "Requests to retired models will fail" describes the retired state, not legacy.
+2. **c**. A legacy model "may be deprecated in the future", and once a date is set "There is notice, and it is finite", so the plan starts before any retirement date exists. *a* is ruled out because "The model is fully supported and recommended for use" describes the active state, while a legacy model "will no longer receive updates". *b* is ruled out because "Sixty days is the shortest warning", and the testing belongs "well before the retirement date". *d* is ruled out because a swap of the id alone fails, since "the new model refuses settings the old one accepted", and the replacement is only "where to begin testing".
 
 </details>

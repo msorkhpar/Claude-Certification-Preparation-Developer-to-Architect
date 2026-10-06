@@ -659,11 +659,11 @@ model for 90% accuracy within 2000 ms: medium; for 94% within 2000 ms: none
 
 ## Quiz
 
-1. Two versions of a support assistant both score 92 percent on the evaluation set. One of them gets refund answers wrong far more often, and a wrong refund answer is far dearer than a wrong status answer. What should the report show?
-   - **a**: The accuracy and the cost of errors for each kind of question
-   - **b**: The overall accuracy of each version across the whole set
-   - **c**: The cost per answered case for each of the two versions
-   - **d**: The number of cases in the set behind each of the scores
+1. Two versions of a support assistant both score 92 percent on an evaluation set of refund and order-status questions. A wrong refund answer does far more harm than a wrong status answer. What should the report show?
+   - **a**: The accuracy and the error cost of each, split by kind of case
+   - **b**: The overall accuracy and the average latency of each version
+   - **c**: The cost per answered case and the response time of both
+   - **d**: The size of the set and the margin of error on each score
 
 2. A team grades a research assistant's free-form reports only with exact-match checks, and the score barely moves when the quality of the reports visibly changes. Which addition fits best?
    - **a**: A longer answer key, with many more phrasings of each answer listed
@@ -674,7 +674,7 @@ model for 90% accuracy within 2000 ms: medium; for 94% within 2000 ms: none
 <details>
 <summary>Answer key</summary>
 
-1. **a**. A table by segment with the cost of the errors shows the regression that the overall figure averages away. *b* is ruled out because "Equal overall scores can hide unequal failures". *c* is ruled out because "a faster or cheaper system is not better where it is wrong". *d* is ruled out because "More cases make the score steadier and do not show where it is low".
+1. **a**. A table by segment with the cost of the errors shows any regression that the overall figure averages away, and the refund rows weigh more. *b* is ruled out because "Equal overall scores can hide unequal failures". *c* is ruled out because "A figure from another dimension cannot stand in for the segment that is failing: a faster or cheaper system is not better where it is wrong". *d* is ruled out because "More cases make the score steadier and do not show where it is low".
 2. **c**. Free text has no single correct form, so a rubric grader scales and people sample for what it misses. *a* is ruled out because "Exact match suits answers with one correct form and rejects a correct report that is worded differently". *b* is ruled out because "Human review of every output does not scale". *d* is ruled out because the documentation advises "More questions with slightly lower signal automated grading is better than fewer questions with high-quality human hand-graded evals".
 
 </details>

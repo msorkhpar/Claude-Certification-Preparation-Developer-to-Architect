@@ -409,16 +409,16 @@ The practice is in [`exercises/91-stakeholders-and-the-project-lifecycle`](../..
 This quiz covers both pages of the module.
 
 1. Scenario: Noor tells a sponsor that an assistant is "98 percent accurate overall". The system answers three kinds of dispute, and the one that costs 250 per error is right 63 times in 100. What should the record say to the sponsor?
-   - **a**: That the costly kind will reach 98 percent by launch, so the figure still holds
+   - **a**: That each segment is reported, with the costly kind promised at 98 percent by launch
    - **b**: That the overall figure stands, since the costly kind is a small share of the traffic
-   - **c**: That results go by segment, with a person deciding each of those until they improve
+   - **c**: That results go by segment, with a person deciding the expensive one until it improves
    - **d**: That the figure will be re-measured once per quarter, with the same overall method
 
 2. Scenario: Lars hands a finished assistant to an operations team with an architecture diagram and a list of settings. The first alert fires on a Saturday and nobody knows who should act on it. Which part of the hand-off was missing?
-   - **a**: A longer pilot, so that more alerts would have fired before the launch
+   - **a**: A longer pilot, so that more incidents would have surfaced before the launch
    - **b**: A runbook kept by a named owner of the service, explaining each warning
    - **c**: A monthly report to the sponsor listing the alerts of the previous period
-   - **d**: A second diagram showing the alert thresholds drawn on the architecture
+   - **d**: A second diagram showing the monitor thresholds drawn on the architecture
 
 3. Scenario: A reviewer corrects forty answers in a week, and the notes of the sponsor review record them. Nothing else changes, and the same errors appear the next week. Which step would have closed the loop?
    - **a**: Sending the notes to the engineers with a request to read them before the next release
@@ -429,8 +429,8 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **c**. The promise is made per segment, and a person decides the costly one. *b* is ruled out because "an average hides the segments that cost the most", whatever the traffic share. *a* is ruled out because the page says to "Promise what you measure and measure what you promise", and a future figure is not yet measured. *d* is ruled out because a promise "is made in the unit that is measured", which here is the segment, so re-measuring the same overall figure repeats the same blind spot.
-2. **b**. The record names an owner and a runbook for each alert. *a* is ruled out because "the people who run the system need an owner, a runbook, monitors and a rollback on day one", and a longer pilot adds none of them. *c* is ruled out because an alert goes to "the owner of the runbook that explains each alert", and a monthly report to the sponsor arrives weeks after the Saturday. *d* is ruled out because "a diagram without the runbook leaves the first incident to the person who happens to remember", and a second diagram is still a diagram.
+1. **c**. The promise is made per segment, and a person decides the costly one. *b* is ruled out because "an average hides the segments that cost the most", whatever the traffic share. *a* is ruled out because the page says to "Promise what you measure and measure what you promise", and 98 percent by launch is a figure nobody has measured. *d* is ruled out because a promise "is made in the unit that is measured", which here is the segment, so re-measuring the same overall figure repeats the same blind spot.
+2. **b**. The record names an owner and a runbook for each alert. *a* is ruled out because "the people who run the system need an owner, a runbook, monitors and a rollback on day one", and a longer pilot adds none of them. *c* is ruled out because "The people who run the system are not the people who built it, and the record says who they are", and a report to the sponsor reaches the sponsor and not the operations team, and names nobody to act on the alert. *d* is ruled out because "a diagram without the runbook leaves the first incident to the person who happens to remember", and a second diagram is still a diagram.
 3. **d**. A correction kept as a labelled evaluation case is run against every later release, so the same error cannot return unseen. *b* is ruled out because a count against a baseline is a signal, while the reviewer's fix must become a case "so the same failure is tested after every change". *c* is ruled out because "A loop is closed when a change goes back out through the gate of module 89", and a fresher review sends no change. *a* is ruled out because "A stakeholder review that produces notes and no cases has not closed anything", and notes sent on are still notes.
 
 </details>

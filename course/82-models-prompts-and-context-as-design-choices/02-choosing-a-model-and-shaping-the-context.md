@@ -96,19 +96,19 @@ This quiz covers both pages of the module.
    - **a**: Take the largest model for safety, and put the constant passage first
    - **b**: Take the cheapest model of any tier, and place the constant passage in the final message
    - **c**: Take the model that was used last time, and cache the whole request as one piece
-   - **d**: Take the cheapest model that is able and quick enough, and put the constant passage first
+   - **d**: Take the cheapest model that is capable and fast, and put the constant passage first
 
 3. Scenario: Avocet Travel builds a request from four pieces: the house rules, the fare policy, the traveller's current question and the traveller's earlier chat. Which arrangement fits best?
    - **a**: The conduct guide, pricing terms, latest query and prior messages all as static modules
    - **b**: The conduct guide and latest query as static modules, the pricing terms and prior messages as dynamic ones
    - **c**: The conduct guide and pricing terms as static modules, the latest query and prior messages as dynamic ones
-   - **d**: Only the pricing terms as a static module, the conduct guide, latest query and prior messages as dynamic ones
+   - **d**: The conduct guide, pricing terms and prior messages as static modules, the latest query as a dynamic one
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. A missing value is a defect in the caller, so the assembler stops with an error and sends nothing. *a* is ruled out because "A request that goes out with `{customer}` in its text" is sent with a gap that nobody checks. *c* is ruled out because a blank is the same silent gap, and such a request "is a defect that no model will report". *d* is ruled out because an old value is only a guess, and "A missing variable is an error": "the assembler refuses it".
-2. **d**. The model is chosen by tier and latency with price ranking the rest, and the stable text leads so that it can be cached. *a* is ruled out because the largest model is not needed when "the cheapest model that meets the first two is the right one for each workload". *b* is ruled out because "A model below the tier fails the task", whatever its price. *c* is ruled out because "Two requests share a cache entry only when everything up to the breakpoint is identical", so the whole request, which includes the changing part, cannot be cached as one piece.
-3. **c**. The rules and the policy are the same for every traveller, so they go first as static modules, and the question and the chat follow as dynamic ones, so that the stable prefix can be cached. *a* is ruled out because "Two requests share a cache entry only when everything up to the breakpoint is identical", and the question and the chat differ on every request, so no entry would ever match. *b* is ruled out because the question changes on every request, and a dynamic module is one that "changes with the customer, the question or the history". *d* is ruled out because the house rules are the same for every traveller, and a static module is one that is "the same on every request".
+2. **d**. The model is chosen by tier and latency with price ranking the rest, and the stable text leads so that it can be cached. *a* is ruled out because the largest model is not needed when "the cheapest model that meets the first two is the right one for each workload". *b* is ruled out because a model chosen by price alone may be "A model slower than the limit", and the constant text belongs at the front, where "the stable content goes first and the variables go after the breakpoint". *c* is ruled out because "Two requests share a cache entry only when everything up to the breakpoint is identical", so the whole request, which includes the changing part, cannot be cached as one piece.
+3. **c**. The rules and the policy are the same for every traveller, so they go first as static modules, and the question and the chat follow as dynamic ones, so that the stable prefix can be cached. *a* is ruled out because "Two requests share a cache entry only when everything up to the breakpoint is identical", and the question and the chat differ on every request, so no entry would ever match. *b* is ruled out because the question changes on every request, and "a changing value in the prefix breaks the cache on every request". *d* is ruled out because the earlier chat is the history, which grows with each turn, and a dynamic module is one that "changes with the customer, the question or the history".
 
 </details>

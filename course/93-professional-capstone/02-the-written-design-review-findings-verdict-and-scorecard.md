@@ -601,7 +601,7 @@ The practice is in [`exercises/93-professional-capstone`](../../exercises/93-pro
 
 2. Scenario: A reviewer proposes to write the findings grouped by domain, P1 first, because the course is organised in that order. What is the objection?
    - **a**: The sponsor would have to read every finding to reach the verdict
-   - **b**: Two reviewers would still produce different lists from the same design
+   - **b**: The scorecard would then have to list the domains in another order
    - **c**: A finding that spans two domains would be listed twice in the review
    - **d**: A flaw that rejects could sit below flaws that only ask for revision
 
@@ -609,7 +609,7 @@ The practice is in [`exercises/93-professional-capstone`](../../exercises/93-pro
 <summary>Answer key</summary>
 
 1. **b**. With no high finding and a medium one, the review asks for a revision. *a* is ruled out because "revise if none is high and any is medium", so a medium finding stops an approval. *c* is ruled out because "A fixed ladder keeps a pile of small findings from becoming a rejection", and a rejection needs a high finding, which is absent. *d* is ruled out because the ladder approves "a design with only low findings", and this one also has a medium finding.
-2. **d**. A list ordered only by domain puts severity second, so a high finding in a later domain falls below milder ones in earlier domains. *a* is ruled out because the review is written with "the verdict first, then the scorecard, then the findings in their order", so the sponsor reaches the verdict before any finding. *b* is ruled out because "Two reviewers must produce the same list", and a fixed order by domain and rule id also gives the same list. *c* is ruled out because "Each finding is a severity, a domain and a rule", so a finding sits under one domain and is listed once.
+2. **d**. A list ordered only by domain puts severity second, so a high finding in a later domain falls below milder ones in earlier domains. *a* is ruled out because the review is written with "the verdict first, then the scorecard, then the findings in their order", so the sponsor reaches the verdict before any finding. *b* is ruled out because the scorecard is "a count of findings per domain, in the order P1 to P7", whatever order the findings take. *c* is ruled out because "Each finding is a severity, a domain and a rule", so a finding sits under one domain and is listed once.
 
 </details>
 
