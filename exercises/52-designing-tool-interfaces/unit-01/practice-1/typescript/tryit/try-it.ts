@@ -20,4 +20,6 @@ const good = {
 const poor = { name: "helper", description: "Gets stuff.", input_schema: { type: "object", properties: { q: { type: "string" } }, required: ["q"] } };
 
 console.log("good tool:", JSON.stringify(lintTool(good)));
-console.log("poor tool:", JSON.stringify(lintTool(poor)));
+const poorRules = lintTool(poor) ?? [];
+console.log("poor tool:", JSON.stringify(poorRules));
+console.log("rules the poor tool breaks:", poorRules.length);

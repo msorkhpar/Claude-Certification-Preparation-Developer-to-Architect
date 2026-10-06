@@ -12,7 +12,7 @@ const img = (name: string, width: number, height: number, media_type = "image/pn
 const items = [img("chart", 1000, 1000), img("photo", 200, 200, "image/jpeg", "url", "https://example.invalid/p.jpg")];
 try {
   const plan: any = planRequest("claude-opus-5-5", items, "What changed?") ?? {};
-  for (const block of plan.content ?? []) console.log("block:", block.type, block.text ?? "");
+  console.log("blocks:", (plan.content ?? []).map((block: any) => block.text ?? block.type));
   console.log("image tokens:", plan.image_tokens);
   console.log("resized:", JSON.stringify(plan.resized));
 } catch (err) {

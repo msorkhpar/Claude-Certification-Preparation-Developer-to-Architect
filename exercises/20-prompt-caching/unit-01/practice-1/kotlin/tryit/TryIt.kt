@@ -24,6 +24,7 @@ fun main() {
         val plan = planRequest(blocks, 1024)
         println("order: ${plan.map { it["id"] }}")
         println("cache per block: ${plan.map { "${it["id"]}=${it["cache"]}" }}")
+        println("breakpoints at: ${plan.filter { it["cache"] != null }.map { it["id"] }}")
     } catch (err: PlanError) {
         println("plan error: ${err.message}")
     }

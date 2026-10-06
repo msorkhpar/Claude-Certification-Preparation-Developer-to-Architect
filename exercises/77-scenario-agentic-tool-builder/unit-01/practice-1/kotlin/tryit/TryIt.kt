@@ -12,10 +12,11 @@ fun main() {
     val policy = Policy(12, 10, 256, listOf("network", "run_process"), listOf("write_files"))
     val words = List(15) { "word" }.joinToString(" ")
 
-    // A tool another agent proposes: one that only reads a file, one that shells out.
+    // A tool another agent proposes: one that only reads a file, one that shells out, one that writes a file.
     val reader = Proposal("summarise_report", words, listOf("read_files"), 5, 128, "def run(path):\n    return open(path).read()\n")
     val shell = Proposal("clean_up", words, listOf("read_files"), 5, 128, "import subprocess\ndef run(cmd):\n    subprocess.run(cmd)\n")
-    for (p in listOf(reader, shell)) {
+    val writer = Proposal("save_notes", words, listOf("write_files"), 5, 128, "def run(path, text):\n    path.write(text)\n")
+    for (p in listOf(reader, shell, writer)) {
         val result = review(p, policy)
         println("${result.audit} | refusals: ${result.refusals} | findings: ${result.findings}")
     }

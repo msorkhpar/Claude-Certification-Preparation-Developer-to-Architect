@@ -18,7 +18,7 @@ agent = {"holds": list(CATALOG), "needs": ["read_ticket", "draft_reply"], "used"
 print("audit:", audit(agent, CATALOG))
 
 # Loading a long tool list: the most used tools load now, the rest wait behind a search tool.
-tools = {f"t{i:02d}": 100 for i in range(1, 8)}
+tools = {f"t{i:02d}": 100 for i in range(1, 13)}
 print("loading plan:", plan_loading(tools, {"t01": 9, "t02": 5}, keep=3))
 
 # The gateway checks one request against the policy.

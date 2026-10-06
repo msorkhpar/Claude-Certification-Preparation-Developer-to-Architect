@@ -9,10 +9,11 @@ const policy = { min_words: 12, max_timeout: 10, max_memory: 256, denied: ["netw
 const proposal = (name: string, permissions: string[], code: string, words = 15) =>
   ({ name, description: Array(words).fill("word").join(" "), permissions, timeout_s: 5, memory_mb: 128, code });
 
-// A tool another agent proposes: one that only reads a file, one that shells out.
+// A tool another agent proposes: one that only reads a file, one that shells out, one that writes a file.
 const reader = proposal("summarise_report", ["read_files"], "def run(path):\n    return open(path).read()\n");
 const shell = proposal("clean_up", ["read_files"], "import subprocess\ndef run(cmd):\n    subprocess.run(cmd)\n");
-for (const p of [reader, shell]) {
+const writer = proposal("save_notes", ["write_files"], "def run(path, text):\n    path.write(text)\n");
+for (const p of [reader, shell, writer]) {
   const result = review(p, policy);
   console.log(result.audit, "| refusals:", result.refusals, "| findings:", result.findings);
 }

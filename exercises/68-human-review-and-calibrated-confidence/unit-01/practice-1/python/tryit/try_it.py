@@ -10,8 +10,7 @@ from review_routing import accuracy_by, calibrate_threshold, checkpoint, route
 records = [{"doc_type": "invoice", "field": "total", "correct": True}] * 90 + \
           [{"doc_type": "receipt", "field": "date", "correct": True}] * 8 + \
           [{"doc_type": "receipt", "field": "date", "correct": False}] * 2
-for row in accuracy_by(records):
-    print("accuracy:", row)
+print("accuracy:", accuracy_by(records))
 
 # The lowest confidence at which the model still reaches the target accuracy, from labelled outcomes.
 labeled = [(95, True), (90, True), (85, True), (80, False), (60, False)]

@@ -18,8 +18,7 @@ fun main() {
         val doors = listOf("anthropic" to emptyMap<String, Any?>(), "bedrock" to mapOf("region" to "us-east-1"), "vertex" to mapOf("project" to "my-project"))
         for ((platform, config) in doors) {
             val request = buildRequest(platform, opus, body, config)
-            println("$platform -> ${request["url"]}")
-            println("   model in body: ${(request["body"] as? Map<*, *>)?.get("model")} | headers: ${(request["headers"] as? Map<*, *>)?.keys?.sortedBy { it.toString() }}")
+            println("$platform -> ${request["url"]} | model in body: ${(request["body"] as? Map<*, *>)?.get("model")} | headers: ${(request["headers"] as? Map<*, *>)?.keys?.sortedBy { it.toString() }}")
         }
     } catch (err: PlatformError) {
         println("platform error: ${err.message}")

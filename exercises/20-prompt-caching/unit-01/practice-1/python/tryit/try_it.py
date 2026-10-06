@@ -23,5 +23,6 @@ try:
     plan = plan_request(blocks, min_tokens=1024) or []
     print("order:", [p["id"] for p in plan])
     print("cache per block:", {p["id"]: p["cache"] for p in plan})
+    print("breakpoints at:", [p["id"] for p in plan if p["cache"]])
 except PlanError as err:
     print("plan error:", err)

@@ -24,4 +24,4 @@ const result = runAgent(ask, tools, "Weather in Oslo?");
 console.log("status:", result.status);
 console.log("text:", result.text);
 console.log("model calls:", result.turns);
-for (const message of result.messages) console.log("message:", message.role, JSON.stringify(message.content));
+console.log("messages:", JSON.stringify(result.messages));

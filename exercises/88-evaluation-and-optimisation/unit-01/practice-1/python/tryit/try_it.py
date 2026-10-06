@@ -9,8 +9,7 @@ from evalkit import ab_verdict, choose_model, segment_table, shadow_gate
 # Results of an evaluation as (segment, correct) rows; a wrong refund costs more than a wrong order status.
 COSTS = {"order status": 1, "refund": 20, "policy": 5}
 results = [("order status", True)] * 30 + [("refund", True)] * 5 + [("refund", False)] * 3 + [("policy", True)] * 9 + [("policy", False)]
-for line in segment_table(results, COSTS):
-    print("segment:", line)
+print("segments:", segment_table(results, COSTS))
 
 # The same cases under the old and the new prompt: a gain in one segment must not hide a loss in a protected one.
 pairs = [("refund", True, False), ("policy", False, True), ("policy", False, True), ("order status", True, True)]

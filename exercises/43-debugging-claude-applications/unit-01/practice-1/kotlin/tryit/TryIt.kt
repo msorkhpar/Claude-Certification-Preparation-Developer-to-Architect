@@ -13,7 +13,7 @@ fun main() {
     val request = mapOf("kind" to "request", "model" to "claude-sonnet-5-5", "max_tokens" to 1024,
         "tools" to listOf("get_weather"), "last_user_blocks" to listOf("text"))
 
-    for ((status, errorType) in listOf(401 to "authentication_error", 529 to "overloaded_error")) {
+    for ((status, errorType) in listOf(401 to "authentication_error", 504 to "timeout_error", 529 to "overloaded_error")) {
         val error = mapOf("kind" to "error", "status" to status, "error_type" to errorType, "message" to "m")
         val d = Diagnose.diagnose(listOf(request, error))
         println("HTTP $status: type=${d["type"]} origin=${d["origin"]} recovery=${d["recovery"]}")

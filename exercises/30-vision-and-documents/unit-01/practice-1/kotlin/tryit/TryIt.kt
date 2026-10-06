@@ -16,10 +16,7 @@ fun main() {
     val items = listOf(img("chart", 1000, 1000), img("photo", 200, 200, "image/jpeg", "url", "https://example.invalid/p.jpg"))
     try {
         val plan = planRequest("claude-opus-5-5", items, "What changed?")
-        for (block in plan["content"] as? List<*> ?: emptyList<Any?>()) {
-            block as Map<*, *>
-            println("block: ${block["type"]} ${block["text"] ?: ""}")
-        }
+        println("blocks: ${(plan["content"] as? List<*> ?: emptyList<Any?>()).map { (it as Map<*, *>).let { b -> b["text"] ?: b["type"] } }}")
         println("image tokens: ${plan["image_tokens"]}")
         println("resized: ${plan["resized"]}")
     } catch (err: RequestError) {

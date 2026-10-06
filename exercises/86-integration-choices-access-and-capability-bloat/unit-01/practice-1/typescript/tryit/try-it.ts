@@ -18,7 +18,7 @@ console.log("audit:", JSON.stringify(audit(agent, catalog)));
 
 // Loading a long tool list: the most used tools load now, the rest wait behind a search tool.
 const tools: Record<string, number> = {};
-for (let i = 1; i <= 7; i++) tools[`t${String(i).padStart(2, "0")}`] = 100;
+for (let i = 1; i <= 12; i++) tools[`t${String(i).padStart(2, "0")}`] = 100;
 console.log("loading plan:", JSON.stringify(planLoading(tools, { t01: 9, t02: 5 }, 3)));
 
 // The gateway checks one request against the policy.

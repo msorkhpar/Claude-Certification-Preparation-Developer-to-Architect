@@ -11,7 +11,7 @@ fun main() {
 
     // Accuracy per document type and field, next to the overall figure.
     val records = List(90) { Rec("invoice", "total", true) } + List(8) { Rec("receipt", "date", true) } + List(2) { Rec("receipt", "date", false) }
-    for (row in accuracyBy(records)) println("accuracy: $row")
+    println("accuracy: ${accuracyBy(records)}")
 
     // The lowest confidence at which the model still reaches the target accuracy, from labelled outcomes.
     val labeled = listOf(Labeled(95, true), Labeled(90, true), Labeled(85, true), Labeled(80, false), Labeled(60, false))

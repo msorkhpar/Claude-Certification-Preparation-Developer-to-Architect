@@ -30,6 +30,8 @@ public class TryIt {
             "input_schema", Map.of("type", "object", "properties", Map.of("q", Map.of("type", "string")), "required", List.of("q")));
 
         System.out.println("good tool: " + Toolset.lintTool(good));
-        System.out.println("poor tool: " + Toolset.lintTool(poor));
+        var poorRules = Toolset.lintTool(poor);
+        System.out.println("poor tool: " + poorRules);
+        System.out.println("rules the poor tool breaks: " + (poorRules == null ? 0 : poorRules.size()));
     }
 }

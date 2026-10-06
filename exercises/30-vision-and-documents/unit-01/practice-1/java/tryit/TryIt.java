@@ -22,10 +22,12 @@ public class TryIt {
         try {
             Map<String, Object> plan = Vision.planRequest("claude-opus-5-5", items, "What changed?");
             if (plan != null && plan.get("content") instanceof List<?> content) {
+                java.util.List<Object> blocks = new java.util.ArrayList<>();
                 for (Object block : content) {
                     Map<?, ?> b = (Map<?, ?>) block;
-                    System.out.println("block: " + b.get("type") + " " + (b.get("text") == null ? "" : b.get("text")));
+                    blocks.add(b.get("text") == null ? b.get("type") : b.get("text"));
                 }
+                System.out.println("blocks: " + blocks);
             }
             System.out.println("image tokens: " + (plan == null ? null : plan.get("image_tokens")));
             System.out.println("resized: " + (plan == null ? null : plan.get("resized")));

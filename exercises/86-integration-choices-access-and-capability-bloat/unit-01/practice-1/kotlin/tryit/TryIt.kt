@@ -17,7 +17,7 @@ fun main() {
     println("audit: ${audit(agent, catalog)}")
 
     // Loading a long tool list: the most used tools load now, the rest wait behind a search tool.
-    val tools = (1..7).associate { "t%02d".format(it) to 100 }
+    val tools = (1..12).associate { "t%02d".format(it) to 100 }
     println("loading plan: ${planLoading(tools, mapOf("t01" to 9, "t02" to 5), keep = 3)}")
 
     // The gateway checks one request against the policy.

@@ -27,10 +27,10 @@ public class TryIt {
             doors.put("vertex", Map.of("project", "my-project"));
             for (var door : doors.entrySet()) {
                 Map<String, Object> request = Platforms.buildRequest(door.getKey(), opus, new java.util.HashMap<>(body), door.getValue());
-                System.out.println(door.getKey() + " -> " + (request == null ? null : request.get("url")));
                 Object reqBody = request == null ? null : request.get("body");
                 Object headers = request == null ? null : request.get("headers");
-                System.out.println("   model in body: " + (reqBody instanceof Map<?, ?> b ? b.get("model") : null)
+                System.out.println(door.getKey() + " -> " + (request == null ? null : request.get("url"))
+                    + " | model in body: " + (reqBody instanceof Map<?, ?> b ? b.get("model") : null)
                     + " | headers: " + (headers instanceof Map<?, ?> h ? new java.util.TreeSet<>(h.keySet()) : null));
             }
         } catch (PlatformError err) {

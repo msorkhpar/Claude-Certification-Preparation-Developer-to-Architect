@@ -25,5 +25,7 @@ fun main() {
         "input_schema" to mapOf("type" to "object", "properties" to mapOf("q" to mapOf("type" to "string")), "required" to listOf("q")))
 
     println("good tool: ${lintTool(good)}")
-    println("poor tool: ${lintTool(poor)}")
+    val poorRules = lintTool(poor)
+    println("poor tool: $poorRules")
+    println("rules the poor tool breaks: ${poorRules.size}")
 }

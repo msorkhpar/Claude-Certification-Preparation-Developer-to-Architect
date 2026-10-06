@@ -27,8 +27,7 @@ public class TryIt {
         // The application under test is a plain function: here it just looks the answer up.
         Map<String, Object> report = Harness.runEval(cases, answers::get, null, 1);
 
-        System.out.println("passed: " + report.get("passed") + " of " + report.get("total"));
-        System.out.println("pass rate: " + report.get("pass_rate"));
+        System.out.println("passed: " + report.get("passed") + " of " + report.get("total") + " | pass rate: " + report.get("pass_rate"));
         if (report.get("results") instanceof List<?> results) {
             for (Object r : results) {
                 Map<?, ?> result = (Map<?, ?>) r;

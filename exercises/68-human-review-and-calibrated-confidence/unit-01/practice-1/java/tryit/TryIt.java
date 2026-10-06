@@ -19,7 +19,7 @@ public class TryIt {
         for (int i = 0; i < 90; i++) records.add(new ReviewRouting.Rec("invoice", "total", true));
         for (int i = 0; i < 8; i++) records.add(new ReviewRouting.Rec("receipt", "date", true));
         for (int i = 0; i < 2; i++) records.add(new ReviewRouting.Rec("receipt", "date", false));
-        for (ReviewRouting.Seg row : ReviewRouting.accuracyBy(records)) System.out.println("accuracy: " + row);
+        System.out.println("accuracy: " + ReviewRouting.accuracyBy(records));
 
         // The lowest confidence at which the model still reaches the target accuracy, from labelled outcomes.
         List<ReviewRouting.Labeled> labeled = List.of(new ReviewRouting.Labeled(95, true), new ReviewRouting.Labeled(90, true),

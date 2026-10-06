@@ -8,7 +8,7 @@ logTo("try-it");
 // Accuracy per document type and field, next to the overall figure.
 const rec = (doc_type: string, field: string, correct: boolean) => ({ doc_type, field, correct });
 const records = [...Array(90).fill(rec("invoice", "total", true)), ...Array(8).fill(rec("receipt", "date", true)), ...Array(2).fill(rec("receipt", "date", false))];
-for (const row of accuracyBy(records)) console.log("accuracy:", JSON.stringify(row));
+console.log("accuracy:", JSON.stringify(accuracyBy(records)));
 
 // The lowest confidence at which the model still reaches the target accuracy, from labelled outcomes.
 const labeled: Array<[number, boolean]> = [[95, true], [90, true], [85, true], [80, false], [60, false]];
