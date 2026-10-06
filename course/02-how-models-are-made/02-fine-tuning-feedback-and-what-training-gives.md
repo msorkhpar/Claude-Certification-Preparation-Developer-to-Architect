@@ -6,7 +6,7 @@
 **After this page you can** explain how a pretrained model becomes an assistant, name the transformer and
 attention at the level of an idea, and list what training does and does not give a model.
 
-Checked against the Anthropic glossary, the Constitutional AI research page and the constitution pages on 2026-10-02. Concepts only: no training practice, and no claim
+Checked against the Anthropic glossary, the Constitutional AI research page and the constitution pages on 2026-10-06. Concepts only: no training practice, and no claim
 about the internals of a specific Claude model.
 
 ## Why it matters
@@ -59,12 +59,12 @@ only human oversight is provided through a list of rules or principles."
 Source: Constitutional AI: Harmlessness from AI Feedback, Anthropic research.
 
 The principles are public and have been rewritten. Anthropic published a new version of Claude's
-constitution on 2026-01-21, a detailed description of its intentions for Claude's values and behaviour.
+constitution on 2026-01-22, a detailed description of its intentions for Claude's values and behaviour.
 It prefers judgment to rigid rules: "We generally favor cultivating good values and judgment over strict
 rules and decision procedures", and "we try to explain any rules we do want Claude to follow", so that
 Claude can understand the reasoning behind a rule rather than only obey it.
 
-Sources: Claude's constitution, and the 2026-01-21 update note on Anthropic's constitution news page.
+Sources: Claude's constitution, and the 2026-01-22 announcement on Anthropic's news page.
 
 The idea to keep for the exams is the effect: behaviour is shaped by stated principles that people can
 read, not only by thousands of unexplained rankings. The glossary describes the framework behind this as HHH, **helpful, honest,

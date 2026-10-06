@@ -1,7 +1,7 @@
 # Versions
 
 What the course pins, read from the official documentation and the package registries on
-**2026-10-02**. **To be re-checked at release** (board milestone M9): model ids, SDK versions and
+**2026-10-02**. **Re-checked before each release:** model ids, SDK versions and
 the feature gaps below all move. A page that makes a claim names the versions it was checked on.
 
 ## Models (Claude API)
@@ -137,7 +137,7 @@ either and must set `pathToClaudeCodeExecutable`. The SDK reads `ANTHROPIC_API_K
 process environment and does not load `.env` files. It also runs on Bedrock, Google Cloud, Foundry
 and Claude Platform on AWS by environment switch. Consequence for the course: graded practices
 cannot call the real binary offline, so Agent SDK practices run against the course's scripted
-stand-in, and the live path is optional (board rows C-04 and C-05).
+stand-in, and the live path is optional.
 
 ## Features each language lacks
 
@@ -155,8 +155,7 @@ A Java or Kotlin team that needs Agent SDK behaviour can run the Claude Code CLI
 with `-p` and `--output-format json`, which the Agent SDK documentation names as the route for
 other languages; the course teaches that route in the modules marked Python and TypeScript only.
 The "tool runner" and "MCP helpers" rows for Java and Kotlin say "not documented" because the
-official pages checked do not describe them, not because they were proved absent: C-07 settles
-them by running the build.
+official pages checked do not describe them, not because they were proved absent.
 
 ## Vision, documents, computer use, MCP and the Agent SDK in practice (modules 30 to 35)
 
@@ -227,7 +226,7 @@ prompt leak". Re-check at release.
 - Claude Code behaviour that the pages state with a version: the built-in starting permission mode is `auto` from v2.1.283 (terminal and
   VS Code; earlier versions depend on plan and feature flags), the `manual` alias and the Manual label need v2.1.200, `--bare` is the
   recommended mode for scripted calls and its limits hold fully from v2.1.286, plugin validation (`claude plugin validate`) needs
-  v2.1.233. The highest version any of these pages mentions is v2.1.286. No Claude Code binary was run for this batch.
+  v2.1.233. The highest version any of these pages mentions is v2.1.286. No Claude Code binary was run for these claims.
 - Managed Agents: beta header `managed-agents-2026-04-01` (the SDKs set it); agents are versioned, environments are not; a session
   override of `tools` replaces the agent's list and never merges; permission policies `always_allow`, `always_ask`, `auto`; the agent
   toolset defaults to `always_allow` and MCP toolsets to `always_ask`; custom tools are not governed by a policy; an environment
@@ -276,8 +275,8 @@ Read on 2026-10-03 from the Claude API documentation pages "Define success crite
 - The eval harness semantics and the diagnosis table of the practices are the course's own design, built from this advice. They are not product
   features. Not verified by a run: model-graded agreement with people and live refusals.
 
-## Not yet pinned
+## Container run-times
 
-Python, Node, JDK and Kotlin versions for the container, Gradle, and the test runners are chosen
-in the heavy rows C-04 and C-07 and recorded here when they are. Every figure above is a registry
-or documentation reading, not yet a run in the container.
+The runner image carries Python 3.14.7 with pytest 9.1.1, Node 24.21.0 and JDK 25.0.4 (Temurin);
+Java and Kotlin practices build with Gradle 9.8.0 (checksum-verified) and the Kotlin plugin
+2.4.20. TypeScript runs on Node's built-in type stripping, with no compiler.

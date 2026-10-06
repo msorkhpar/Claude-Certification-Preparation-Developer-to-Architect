@@ -20,7 +20,7 @@ must keep working for every existing course.
   write lessons itself.
 - **Offices** (background agents) do the heavy work, each on its own branch in its own worktree
   beside the project: a survey, a lesson batch, an example batch, a practice batch.
-- **One heavy job at a time** through the shared heavy-job slot; file work runs in parallel. Test
+- **At most two heavy jobs at a time** through the heavy-job slots; file work runs in parallel. Test
   runs use at most 4 workers.
 - **The register verifies every hand-back:** read the commit, plant a bug of its own, run the
   gate, then merge.

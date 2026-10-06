@@ -12,14 +12,29 @@ M9.**
 | M1 | Survey: exam facts confirmed, what runs in the container, the harness proved | **done** | A feasibility table, every cell run; the exam map marked confirmed where an official page says so; sources and licences recorded outside the repository |
 | M2 | Framework readiness: Python wheels in a profile, mock-exam quiz units, Python and TypeScript tabs, optional live key for the editor; planned and tracked on the framework's own boards | **done:** every framework row merged into the toolchain and studyforge release branches `release/claude-cert-support`, both full suites green | A fixture unit goes from markdown to a graded Python practice and a mock exam on the site |
 | M3 | Outline frozen, layout settled | **done:** outline draft 5 frozen (94 modules, D13) | The owner's yes; `corpus.json` layout settled |
-| M4 | Course prose, level by level | doing: Level 1 modules 1-11 written; Level 2 modules 12-44 written (81 pages; Level 2 is complete); Level 3 modules 45-62 written (Architect Foundations: loop, coordinator, subagents, workflows with guarantees, hooks, task decomposition, session state, tool interfaces, tool errors, tool distribution, MCP in Claude Code, built-in tools, memory files and rules, commands and skills, plan mode and refinement, Claude Code in CI, criteria and examples, structured output at the architect level) (prose complete for Level 1; module 11 pages and mock exam included), awaiting review | Each level reviewed by the register and a plain-language read |
-| M5 | Examples with recorded exchanges, verified offline in the container | doing: Level 1 modules 1-6; Level 2 modules 12-44 (thirty examples in Python and TypeScript, harness extended with a scripted stand-in for the Claude Code binary); Level 3 modules 45-62 (eighteen examples in Python and TypeScript; the stand-in gained parent ids for subagent messages, the agents of the handshake and the hook answers that change a call) | Every example's tests pass offline; planted wrong output fails |
-| M6 | Practices, quizzes and mock exams | doing: Level 1 modules 1-11 (quizzes for every page and module, the Level 1 mock exam of 30 questions, a flashcard set and a spaced-review bank), awaiting the independent quiz reader; Level 2 modules 12-44 (twenty-seven practices proved offline, those of modules 12-34, 41, 42 and 43 in four languages and modules 35, 38, 39 and 40 in Python and TypeScript; quizzes for every page and module; modules 18-23 passed one independent reader and one fix round; modules 24-29 await the register's check; modules 30-35 passed one independent reader and one fix round; modules 36-41 likewise; Level 3 modules 45-50 (six practices proved offline, those of modules 45, 46, 48 and 50 in four languages and modules 47 and 49 in Python and TypeScript, with 180 planted wrong solutions in all; quizzes for every page and module; passed one independent reader and one fix round, the replacements re-read; with exam-guide framing boxes and exam-style traps on every page); modules 42-44 passed one independent reader and one fix round, with two Developer mock exams of 53 questions, a Level 2 flashcard set of 218 cards and a review bank of 110 items; see the log) | Reference passes, planted wrong solutions fail on assertions, starter fails; quizzes passed the reader |
+| M4 | Course prose, level by level | **done:** all four levels written: 94 modules, 219 pages (Level 1 modules 1-11, Level 2 modules 12-44, Level 3 modules 45-78, Level 4 modules 79-94); model ids and dated product claims re-checked against the official pages on 2026-10-06 | Each level reviewed by the register and a plain-language read |
+| M5 | Examples with recorded exchanges, verified offline in the container | doing: 78 examples under `examples/` across Levels 1 to 4, each with offline tests against scripted exchanges (the stand-in for the Claude Code binary covers the Agent SDK examples); the one capture pass of real exchanges before release (D9) has not run | Every example's tests pass offline; planted wrong output fails |
+| M6 | Practices, quizzes and mock exams | **done:** 78 practices (Level 1: 1, Level 2: 30, Level 3: 33, Level 4: 14) with planted wrong solutions proved offline; quizzes for every page and module; mock exams in two forms per level with select-two items and scenario pools; every level's quizzes judged by an independent reader (rounds cloud-r3-read-l1 to l4, merged) and the fixes merged; try-it files (Run) for 34 practices, modules 6 to 53; the remaining try-it files are an M9 item | Reference passes, planted wrong solutions fail on assertions, starter fails; quizzes passed the reader |
 | Q-L1 | A quiz polish pass over all of Level 1: one independent reader judges the whole level | done | Level 1 judged by readers; remaining WEAK items are listed in docs/process/QUIZ-POLISH.md |
 | M7a | Early site: Levels 1 and 2 built with studyforge without narration (ingest, validate, site, runner, editor) and served locally for review | **done:** served locally for review; validate 0 findings; 153 pages, 0 site console errors; practices graded in four languages, the Agent SDK practice, a page quiz, the Level 2 mock and the editor proven in a browser. Build sources stay on branch `build/site-l1-l2`. Framework gaps found (multi-file practices, Run on example blocks, flashcards and review banks, cross-site page links, a reader and a privacy-gate quirk, a doubled quiz, the editor link) are planned in the framework | Zero console errors; practices run end to end; editor opens; the owner can open it |
-| M7b | The site rebuilt without narration after each later level merges: once when Level 3 is complete (after L3-F), once when Level 4 is complete | todo | Every merged level appears; the M7a checks still pass |
+| M7b | The site rebuilt without narration after each later level merges: once when Level 3 is complete (after L3-F), once when Level 4 is complete | todo: Levels 3 and 4 are complete; no rebuild of the site with them is recorded in the repository (the only build is M7a, Levels 1 and 2) | Every merged level appears; the M7a checks still pass |
 | M8 | Narration of the lesson prose of all four levels, after the first release (M9) is done (D15) | deferred until after the first release | A listened sample from every level |
-| M9 | Release-ready: exam facts and model ids re-checked, images, learner `main`, README | todo | A cold pull on a clean machine runs the course |
+| M9 | Release-ready: exam facts and model ids re-checked, images, learner `main`, README | doing: model ids and product facts re-checked 2026-10-06; learner README written; process split listed in `docs/process/PROCESS-SPLIT.md`; see the M9 checklist | A cold pull on a clean machine runs the course |
+
+## M9 checklist
+
+- [x] Model ids and dated product claims in `course/` and `docs/` re-checked against the official pages (2026-10-06).
+- [x] Learner `README.md`.
+- [x] Current-state wording in `docs/` outside `docs/process/`.
+- [x] Process split listed (`docs/process/PROCESS-SPLIT.md`).
+- [ ] Facts the check could not reach: the MCP revision 2026-07-28 claims (modules 32, 33, 35, 52, 53 and `docs/VERSIONS.md`); exam fees, timing, scoring, retakes and eligibility in `docs/EXAM-MAP.md` and module 11 (the exam guides and policy pages were not reachable).
+- [ ] Re-pin or re-date the SDK and Claude Code versions in `docs/VERSIONS.md` (newer releases exist: `mcp` 2.3.0, `@modelcontextprotocol/sdk` 1.32.1, `@anthropic-ai/claude-agent-sdk` 0.3.290, Claude Code 2.1.290).
+- [ ] The capture pass of real exchanges for the examples (D9), with the owner's key from the environment.
+- [ ] Try-it files for the code practices of modules 54 to 93.
+- [ ] Rebuild the site with Levels 3 and 4 (M7b, S-3, S-4).
+- [ ] Publish the site and runner images by digest; add the compose file and the exact start commands to `README.md` and `docs/SETUP.md`.
+- [ ] Move the process paths to the `process` branch as listed in `docs/process/PROCESS-SPLIT.md`.
+- [ ] Cold pull on a clean machine (Windows included) runs the course.
 
 ## Decisions
 
@@ -76,10 +91,10 @@ C-05 build or run containers and go through the heavy-job slot one at a time.
 | L3-C | Level 3 batch: modules 57 to 62, Claude Code configuration, CI, criteria and structured output (A3, A4.1 to A4.4) | **done:** merged; gate clean in all four languages, the planted test defect caught |
 | L3-D | Level 3 batch: modules 63 to 69, review passes and reliability (A4.5, A4.6, A5) | **done** (boundary tests added for practices 63, 64 and 68) |
 | L3-E | Level 3 batch: modules 70 to 74, scenarios S1 to S5 with capstones | **done** |
-| L3-F | Level 3 batch: modules 75 to 78, scenarios S6 and the two beyond the blueprint, Exam readiness 3 with Architect mock exams | doing |
-| S-3 | Rebuild the site with Level 3 (M7b) | todo, after L3-F |
-| L4 | Level 4 batches: L4-A modules 79 to 84 and L4-B 85 to 89 **done**; L4-C 90 to 94 with the Professional capstone and Exam readiness 4 doing | doing |
-| S-4 | Rebuild the site with Level 4 (M7b), then release checks (M9); narration (M8) follows the first release | todo, after L4 |
+| L3-F | Level 3 batch: modules 75 to 78, scenarios S6 and the two beyond the blueprint, Exam readiness 3 with Architect mock exams | **done:** merged |
+| S-3 | Rebuild the site with Level 3 (M7b) | todo: Level 3 is complete |
+| L4 | Level 4 batches: L4-A modules 79 to 84, L4-B 85 to 89 and L4-C 90 to 94 with the Professional capstone and Exam readiness 4 | **done:** merged |
+| S-4 | Rebuild the site with Level 4 (M7b), then release checks (M9); narration (M8) follows the first release | todo: Level 4 is complete |
 
 ## Framework work
 
