@@ -35,7 +35,6 @@ changes printed text or loop shape, or adds a call to an existing reference func
 
 ## Left open
 
-- 32 and 35 Python and TypeScript were not run: the installed `mcp` and `claude-agent-sdk` are older than
-  the pinned versions. Rerun them in the course container.
+- 32 and 35 Python and TypeScript were not run (installed `mcp`, `claude-agent-sdk` older than pinned); rerun them.
 - Java and Kotlin are not run here; run `tryIt` for the JVM files above through the heavy-job slots.
 - Checks: `make_tryit.py check`, `check_logger.py`, `check_personal_data.py --modules '.*'` exit 0.
