@@ -13,8 +13,8 @@ OPUS = "claude-opus-5-5"
 try:
     for platform, config in (("anthropic", {}), ("bedrock", {"region": "us-east-1"}), ("vertex", {"project": "my-project"})):
         request = build_request(platform, OPUS, dict(body), config) or {}
-        print(platform, "->", request.get("url"))
-        print("   model in body:", (request.get("body") or {}).get("model"), "| headers:", sorted(request.get("headers") or {}))
+        print(platform, "->", request.get("url"), "| model in body:", (request.get("body") or {}).get("model"),
+              "| headers:", sorted(request.get("headers") or {}))
 except PlatformError as err:
     print("platform error:", err)
 

@@ -17,4 +17,7 @@ const sessions = [
   session([step("get_customer")], "escalated"),
 ];
 const report = audit(sessions);
-for (const [key, value] of Object.entries(report)) console.log(`${key}: ${value}`);
+console.log("sessions:", report.sessions, "| resolved:", report.resolved, "| fcr:", report.fcr, "| meets target:", report.meets_target);
+console.log("over-escalated:", report.over_escalated, "| under-escalated:", report.under_escalated);
+console.log("skipped prerequisite:", report.skipped_prerequisite, "| wrong tool:", report.wrong_tool, "| over-limit refunds:", report.over_limit_refunds);
+console.log("diagnosis:", report.diagnosis);

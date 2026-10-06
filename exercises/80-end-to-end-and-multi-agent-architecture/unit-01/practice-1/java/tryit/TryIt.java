@@ -28,6 +28,7 @@ public class TryIt {
             List<Map<String, Object>> findings = ArchitectureReview.review(d);
             System.out.println(d.get("name") + " -> " + ArchitectureReview.verdict(findings) + " " + findings);
         }
+        System.out.println("cheapest design that is not rejected: " + ArchitectureReview.cheapestAdequate(List.of(sound, risky)));
     }
 
     static Map<String, Object> design(String name, String pattern, int agents, boolean writes, Map<String, Object> stages) {

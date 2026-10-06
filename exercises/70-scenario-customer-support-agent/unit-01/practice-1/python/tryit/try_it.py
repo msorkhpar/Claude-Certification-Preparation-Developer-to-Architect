@@ -20,5 +20,7 @@ sessions = [
     session([step("get_customer")], outcome="escalated"),
 ]
 report = audit(sessions)
-for key, value in report.items():
-    print(f"{key}: {value}")
+print("sessions:", report["sessions"], "| resolved:", report["resolved"], "| fcr:", report["fcr"], "| meets target:", report["meets_target"])
+print("over-escalated:", report["over_escalated"], "| under-escalated:", report["under_escalated"])
+print("skipped prerequisite:", report["skipped_prerequisite"], "| wrong tool:", report["wrong_tool"], "| over-limit refunds:", report["over_limit_refunds"])
+print("diagnosis:", report["diagnosis"])

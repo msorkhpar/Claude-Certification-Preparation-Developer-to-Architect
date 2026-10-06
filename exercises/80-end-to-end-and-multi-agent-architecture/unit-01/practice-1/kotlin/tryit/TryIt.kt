@@ -21,4 +21,5 @@ fun main() {
         val findings = review(d)
         println("${d["name"]} -> ${findings?.let { verdict(it) }} $findings")
     }
+    println("cheapest design that is not rejected: ${cheapestAdequate(listOf(sound, risky))}")
 }

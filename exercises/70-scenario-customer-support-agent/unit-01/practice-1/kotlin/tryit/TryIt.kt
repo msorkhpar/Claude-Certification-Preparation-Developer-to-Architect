@@ -15,5 +15,9 @@ fun main() {
         Session("s", clean, "resolved", false, 2000, 10000),
         Session("s", listOf(Step("lookup_order"), Step("get_customer"), Step("process_refund")), "resolved", false, 0, 10000),
         Session("s", listOf(Step("get_customer")), "escalated", false, 0, 10000))
-    println(audit(sessions))
+    val report = audit(sessions)
+    println("sessions: ${report.sessions} | resolved: ${report.resolved} | fcr: ${report.fcr} | meets target: ${report.meetsTarget}")
+    println("over-escalated: ${report.overEscalated} | under-escalated: ${report.underEscalated}")
+    println("skipped prerequisite: ${report.skippedPrerequisite} | wrong tool: ${report.wrongTool} | over-limit refunds: ${report.overLimitRefunds}")
+    println("diagnosis: ${report.diagnosis}")
 }

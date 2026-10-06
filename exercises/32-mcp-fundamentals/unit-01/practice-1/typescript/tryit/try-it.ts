@@ -17,9 +17,10 @@ const text = (result: any) => (result?.content ?? []).map((c: any) => c.text ?? 
 
 try {
   await client.connect(transport);
-  console.log("server:", JSON.stringify(client.getServerVersion()));
   console.log("add_note:", text(await client.callTool({ name: "add_note", arguments: { title: "Plan", text: "ship it" } })));
   console.log("search_notes:", text(await client.callTool({ name: "search_notes", arguments: { query: "ship" } })));
+  const counted: any = await client.readResource({ uri: "notes://count" });
+  console.log("count resource:", counted.contents?.[0]?.text);
   const read: any = await client.readResource({ uri: "notes://note/1" });
   console.log("note 1 resource:", JSON.stringify(read.contents?.[0]?.text));
 } catch (err) {

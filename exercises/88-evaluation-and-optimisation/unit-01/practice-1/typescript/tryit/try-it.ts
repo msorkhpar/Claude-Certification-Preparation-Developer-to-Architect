@@ -14,7 +14,7 @@ const results: Array<[string, boolean]> = [
   ...Array.from({ length: 9 }, (): [string, boolean] => ["policy", true]),
   ["policy", false],
 ];
-for (const line of segmentTable(results, costs)) console.log("segment:", JSON.stringify(line));
+console.log("segments:", JSON.stringify(segmentTable(results, costs)));
 
 // The same cases under the old and the new prompt: a gain in one segment must not hide a loss in a protected one.
 const pairs: Array<[string, boolean, boolean]> = [["refund", true, false], ["policy", false, true], ["policy", false, true], ["order status", true, true]];

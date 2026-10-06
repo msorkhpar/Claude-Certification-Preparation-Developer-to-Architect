@@ -1,4 +1,5 @@
 """Run executes this file. Change the calls to try your code; Submit runs the tests."""
+import json
 import logging
 
 # Turn the logger up, so the `log.debug` lines of your code show under the printed lines.
@@ -28,5 +29,4 @@ result = run_agent(ask, tools, "Weather in Oslo?")
 print("status:", result["status"])
 print("text:", result["text"])
 print("model calls:", result["turns"])
-for message in result["messages"]:
-    print("message:", message["role"], message["content"])
+print("messages:", json.dumps(result["messages"]))

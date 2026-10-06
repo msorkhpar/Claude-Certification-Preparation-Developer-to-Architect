@@ -21,8 +21,7 @@ fun main() {
     // The application under test is a plain function: here it just looks the answer up.
     val report = Harness.runEval(cases, { text -> answers.getValue(text) }, null, 1)
 
-    println("passed: ${report["passed"]} of ${report["total"]}")
-    println("pass rate: ${report["pass_rate"]}")
+    println("passed: ${report["passed"]} of ${report["total"]} | pass rate: ${report["pass_rate"]}")
     for (result in report["results"] as? List<*> ?: emptyList<Any?>()) {
         result as Map<*, *>
         println("  ${result["id"]} ${if (result["passed"] == true) "passed" else "failed"} - ${result["reason"]}")

@@ -14,6 +14,6 @@ def error(status, error_type):
     return {"kind": "error", "status": status, "error_type": error_type, "message": "m"}
 
 
-for status, error_type in ((401, "authentication_error"), (529, "overloaded_error")):
+for status, error_type in ((401, "authentication_error"), (504, "timeout_error"), (529, "overloaded_error")):
     d = diagnose([REQUEST, error(status, error_type)]) or {}
     print(f"HTTP {status}: type={d.get('type')} origin={d.get('origin')} recovery={d.get('recovery')}")

@@ -23,4 +23,3 @@ print("wrapped content:", result.get("content"))
 gate.mark_untrusted("web page")
 r = gate.decide("alice", "write_file", {"path": "src/a.py"}) or {}
 print("write after untrusted text:", r.get("decision"), f"({r.get('reason')})")
-print("audit records:", len(gate.audit))

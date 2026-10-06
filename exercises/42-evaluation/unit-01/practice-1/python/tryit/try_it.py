@@ -18,7 +18,6 @@ answers = {"I love it": "positive", "awful": "negative", "order 7": "The order i
 # The application under test is a plain function: here it just looks the answer up.
 report = run_eval(cases, lambda text: answers[text]) or {}
 
-print("passed:", report.get("passed"), "of", report.get("total"))
-print("pass rate:", report.get("pass_rate"))
+print("passed:", report.get("passed"), "of", report.get("total"), "| pass rate:", report.get("pass_rate"))
 for result in report.get("results", []):
     print(" ", result["id"], "passed" if result["passed"] else "failed", "-", result["reason"])

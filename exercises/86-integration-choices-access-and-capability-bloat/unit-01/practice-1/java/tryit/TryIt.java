@@ -26,7 +26,7 @@ public class TryIt {
 
         // Loading a long tool list: the most used tools load now, the rest wait behind a search tool.
         Map<String, Integer> tools = new LinkedHashMap<>();
-        for (int i = 1; i <= 7; i++) tools.put(String.format("t%02d", i), 100);
+        for (int i = 1; i <= 12; i++) tools.put(String.format("t%02d", i), 100);
         System.out.println("loading plan: " + Capability.planLoading(tools, Map.of("t01", 9, "t02", 5), 3, 350));
 
         // The gateway checks one request against the policy.

@@ -13,8 +13,8 @@ try {
   const doors: [string, Record<string, string>][] = [["anthropic", {}], ["bedrock", { region: "us-east-1" }], ["vertex", { project: "my-project" }]];
   for (const [platform, config] of doors) {
     const request: any = buildRequest(platform, OPUS, { ...body }, config) ?? {};
-    console.log(platform, "->", request.url);
-    console.log("   model in body:", request.body?.model, "| headers:", Object.keys(request.headers ?? {}).sort().join(", "));
+    console.log(platform, "->", request.url, "| model in body:", request.body?.model,
+      "| headers:", Object.keys(request.headers ?? {}).sort().join(", "));
   }
 } catch (err) {
   if (err instanceof PlatformError) console.log("platform error:", err.message);

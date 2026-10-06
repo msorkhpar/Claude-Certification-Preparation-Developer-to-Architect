@@ -17,6 +17,5 @@ const answers: Record<string, string> = { "I love it": "positive", awful: "negat
 // The application under test is a plain function: here it just looks the answer up.
 const report: any = runEval(cases, (text) => answers[text]) ?? {};
 
-console.log("passed:", report.passed, "of", report.total);
-console.log("pass rate:", report.pass_rate);
+console.log("passed:", report.passed, "of", report.total, "| pass rate:", report.pass_rate);
 for (const result of report.results ?? []) console.log(" ", result.id, result.passed ? "passed" : "failed", "-", result.reason);

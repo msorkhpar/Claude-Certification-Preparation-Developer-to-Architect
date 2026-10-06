@@ -20,6 +20,10 @@ public class TryIt {
             new Audit.Session("s", clean, "resolved", false, 2000, 10000),
             new Audit.Session("s", List.of(new Audit.Step("lookup_order", true, null), new Audit.Step("get_customer", true, null), new Audit.Step("process_refund", true, null)), "resolved", false, 0, 10000),
             new Audit.Session("s", List.of(new Audit.Step("get_customer", true, null)), "escalated", false, 0, 10000));
-        System.out.println(Audit.audit(sessions));
+        Audit.Report report = Audit.audit(sessions);
+        System.out.println("sessions: " + report.sessions() + " | resolved: " + report.resolved() + " | fcr: " + report.fcr() + " | meets target: " + report.meetsTarget());
+        System.out.println("over-escalated: " + report.overEscalated() + " | under-escalated: " + report.underEscalated());
+        System.out.println("skipped prerequisite: " + report.skippedPrerequisite() + " | wrong tool: " + report.wrongTool() + " | over-limit refunds: " + report.overLimitRefunds());
+        System.out.println("diagnosis: " + report.diagnosis());
     }
 }

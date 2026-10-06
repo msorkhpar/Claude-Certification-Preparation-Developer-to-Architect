@@ -1,6 +1,6 @@
 // Run executes this file. Change the calls to try your code; Submit runs the tests.
 import { logTo } from "./logger.ts";
-import { review, verdict } from "./architectureReview.ts";
+import { cheapestAdequate, review, verdict } from "./architectureReview.ts";
 
 // Turn the logger up, so the `log.debug` lines of your code show under the printed lines.
 logTo("try-it");
@@ -18,3 +18,4 @@ for (const d of [sound, risky]) {
   const findings = review(d);
   console.log(d.name, "->", verdict(findings), findings.map((f: any) => f.rule));
 }
+console.log("cheapest design that is not rejected:", cheapestAdequate([sound, risky]));

@@ -22,4 +22,6 @@ poor = {"name": "helper", "description": "Gets stuff.",
         "input_schema": {"type": "object", "properties": {"q": {"type": "string"}}, "required": ["q"]}}
 
 print("good tool:", lint_tool(good))
-print("poor tool:", lint_tool(poor))
+poor_rules = lint_tool(poor)
+print("poor tool:", poor_rules)
+print("rules the poor tool breaks:", len(poor_rules or []))

@@ -13,7 +13,7 @@ fun main() {
     val costs = mapOf("order status" to 1, "refund" to 20, "policy" to 5)
     val results = List(30) { Result("order status", true) } + List(5) { Result("refund", true) } + List(3) { Result("refund", false) } +
         List(9) { Result("policy", true) } + Result("policy", false)
-    for (line in segmentTable(results, costs)) println("segment: $line")
+    println("segments: ${segmentTable(results, costs)}")
 
     // The same cases under the old and the new prompt: a gain in one segment must not hide a loss in a protected one.
     val pairs = listOf(Paired("refund", true, false), Paired("policy", false, true), Paired("policy", false, true), Paired("order status", true, true))

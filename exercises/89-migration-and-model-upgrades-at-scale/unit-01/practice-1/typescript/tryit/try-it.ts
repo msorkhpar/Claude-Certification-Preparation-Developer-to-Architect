@@ -7,13 +7,13 @@ logTo("try-it");
 
 // The retirement calendar: days left per model, nearest first, with the level of urgency.
 const models: Array<[string, string, boolean]> = [["claude-old-a", "2026-10-18", true], ["claude-old-b", "2026-11-30", false], ["claude-old-c", "2027-01-01", false]];
-for (const line of retirementStatus(models, "2026-10-04")) console.log("calendar:", line);
+console.log("calendar:", retirementStatus(models, "2026-10-04").join("; "));
 
 // A request written for an older model, and what the migration changes in it.
 const old = { model: "claude-sonnet-4-5-20250929", temperature: 0.7, topP: 0.9, topK: 40, thinking: "disabled", toolChoice: "any", strict: false, prefill: true };
 const [migrated, changes] = migrateRequest(old);
 console.log("migrated model:", migrated.model);
-for (const change of changes) console.log("change:", change);
+console.log("changes:", changes.join("; "));
 
 // A staged rollout: one decision per stage from the traffic and the errors seen so far.
 console.log("stage 1:", rolloutStep(1, 2000, 6, 1000, 5));

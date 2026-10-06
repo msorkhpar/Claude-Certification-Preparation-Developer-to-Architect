@@ -4,7 +4,7 @@ import logging
 # Turn the logger up, so the `log.debug` lines of your code show under the printed lines.
 logging.basicConfig(level=logging.DEBUG, format="%(levelname)s %(message)s")
 
-from architecture_review import review, verdict
+from architecture_review import cheapest_adequate, review, verdict
 
 STAGES = {"input": ["parse"], "processing": ["classify", "route"], "output": ["validate", "send"], "feedback": ["review a sample"]}
 
@@ -19,3 +19,4 @@ risky = design(name="research", pattern="multi-agent", agents=4, writes_without_
 for d in (sound, risky):
     findings = review(d)
     print(d["name"], "->", verdict(findings), [f["rule"] for f in findings])
+print("cheapest design that is not rejected:", cheapest_adequate([sound, risky]))

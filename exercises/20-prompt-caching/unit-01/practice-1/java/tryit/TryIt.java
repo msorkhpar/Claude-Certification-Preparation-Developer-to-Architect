@@ -27,6 +27,7 @@ public class TryIt {
             List<Map<String, Object>> plan = CachePlan.planRequest(blocks, 1024);
             System.out.println("order: " + plan.stream().map(p -> p.get("id")).toList());
             System.out.println("cache per block: " + plan.stream().map(p -> p.get("id") + "=" + p.get("cache")).toList());
+            System.out.println("breakpoints at: " + plan.stream().filter(p -> p.get("cache") != null).map(p -> p.get("id")).toList());
         } catch (PlanError err) {
             System.out.println("plan error: " + err.getMessage());
         }

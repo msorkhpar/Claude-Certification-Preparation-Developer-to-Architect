@@ -22,7 +22,7 @@ public class TryIt {
         for (int i = 0; i < 3; i++) results.add(new EvalKit.Result("refund", false));
         for (int i = 0; i < 9; i++) results.add(new EvalKit.Result("policy", true));
         results.add(new EvalKit.Result("policy", false));
-        for (EvalKit.Line line : EvalKit.segmentTable(results, costs)) System.out.println("segment: " + line);
+        System.out.println("segments: " + EvalKit.segmentTable(results, costs));
 
         // The same cases under the old and the new prompt: a gain in one segment must not hide a loss in a protected one.
         List<EvalKit.Paired> pairs = List.of(new EvalKit.Paired("refund", true, false), new EvalKit.Paired("policy", false, true),

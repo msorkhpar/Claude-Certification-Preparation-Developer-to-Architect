@@ -16,8 +16,7 @@ items = [img("chart", 1000, 1000),
          img("photo", 200, 200, "image/jpeg", "url", "https://example.invalid/p.jpg")]
 try:
     plan = plan_request("claude-opus-5-5", items, "What changed?") or {}
-    for block in plan.get("content", []):
-        print("block:", block["type"], block.get("text", ""))
+    print("blocks:", [block.get("text") or block["type"] for block in plan.get("content", [])])
     print("image tokens:", plan.get("image_tokens"))
     print("resized:", plan.get("resized"))
 except RequestError as err:

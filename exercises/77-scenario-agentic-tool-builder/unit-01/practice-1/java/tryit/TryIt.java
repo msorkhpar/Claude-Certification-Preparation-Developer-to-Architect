@@ -17,10 +17,11 @@ public class TryIt {
         ToolReview.Policy policy = new ToolReview.Policy(12, 10, 256, List.of("network", "run_process"), List.of("write_files"));
         String words = String.join(" ", Collections.nCopies(15, "word"));
 
-        // A tool another agent proposes: one that only reads a file, one that shells out.
+        // A tool another agent proposes: one that only reads a file, one that shells out, one that writes a file.
         ToolReview.Proposal reader = new ToolReview.Proposal("summarise_report", words, List.of("read_files"), 5, 128, "def run(path):\n    return open(path).read()\n");
         ToolReview.Proposal shell = new ToolReview.Proposal("clean_up", words, List.of("read_files"), 5, 128, "import subprocess\ndef run(cmd):\n    subprocess.run(cmd)\n");
-        for (ToolReview.Proposal p : List.of(reader, shell)) {
+        ToolReview.Proposal writer = new ToolReview.Proposal("save_notes", words, List.of("write_files"), 5, 128, "def run(path, text):\n    path.write(text)\n");
+        for (ToolReview.Proposal p : List.of(reader, shell, writer)) {
             ToolReview.Report result = ToolReview.review(p, policy);
             System.out.println(result.audit() + " | refusals: " + result.refusals() + " | findings: " + result.findings());
         }

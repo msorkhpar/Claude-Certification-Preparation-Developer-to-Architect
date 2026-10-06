@@ -17,6 +17,7 @@ try {
   const plan = planRequest(blocks, 1024) ?? [];
   console.log("order:", plan.map((p) => p.id).join(", "));
   console.log("cache per block:", plan.map((p) => `${p.id}=${p.cache}`).join(", "));
+  console.log("breakpoints at:", plan.filter((p) => p.cache).map((p) => p.id).join(", "));
 } catch (err) {
   if (err instanceof PlanError) console.log("plan error:", err.message);
   else throw err;
