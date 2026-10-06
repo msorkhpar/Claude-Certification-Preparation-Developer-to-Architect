@@ -5,10 +5,10 @@ used. The stand-in puts the messages of the subagent after the call that started
 0.2.163, checked on 2026-10-03 against the Agent SDK pages of the Claude Code documentation.
 """
 import logging
-import shutil
 import asyncio
 import json
 import os
+import shutil
 import tempfile
 from pathlib import Path
 

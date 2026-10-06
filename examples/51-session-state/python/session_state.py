@@ -5,9 +5,9 @@ The session ids come from the script (the stand-in does not store sessions); the
 checked on 2026-10-03 against the "Work with sessions" page of the Claude Code documentation.
 """
 import asyncio
-import shutil
 import json
 import os
+import shutil
 import tempfile
 from pathlib import Path
 

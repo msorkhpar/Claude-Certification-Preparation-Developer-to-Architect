@@ -6,10 +6,10 @@ which speaks the same stream-json protocol and replays a script, so no model is 
 0.2.163, checked on 2026-10-03 against the Agent SDK pages of the Claude Code documentation.
 """
 import logging
-import shutil
 import asyncio
 import json
 import os
+import shutil
 import tempfile
 from collections import Counter
 from pathlib import Path
