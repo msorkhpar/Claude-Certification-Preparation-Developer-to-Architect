@@ -9,6 +9,7 @@ import logging
 import asyncio
 import json
 import os
+import shutil
 import tempfile
 from collections import Counter
 from pathlib import Path
@@ -18,7 +19,10 @@ from claude_agent_sdk import (AssistantMessage, ClaudeAgentOptions, HookMatcher,
 
 log = logging.getLogger(__name__)
 
-FAKE = str(Path(__file__).resolve().parents[3] / "harness" / "fake_claude.py")
+_found = str(Path(__file__).resolve().parents[3] / "harness" / "fake_claude.py")
+# The SDK starts the stand-in as a program, so it must be executable: use a copy marked so (the harness folder may be read-only).
+FAKE = shutil.copy(_found, Path(tempfile.mkdtemp(), "fake_claude.py"))
+os.chmod(FAKE, 0o755)
 
 
 @tool("add", "Add two whole numbers", {"a": int, "b": int})

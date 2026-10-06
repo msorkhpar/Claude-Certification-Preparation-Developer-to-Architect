@@ -84,6 +84,7 @@ The refund and order tools are scripted: their output is what the stand-in repor
 import asyncio
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -96,7 +97,10 @@ import logging
 log = logging.getLogger(__name__)
 
 HERE = Path(__file__).resolve()
-FAKE = str(HERE.parents[3] / "harness" / "fake_claude.py")
+_found = str(HERE.parents[3] / "harness" / "fake_claude.py")
+# The SDK starts the stand-in as a program, so it must be executable: use a copy marked so (the harness folder may be read-only).
+FAKE = shutil.copy(_found, Path(tempfile.mkdtemp(), "fake_claude.py"))
+os.chmod(FAKE, 0o755)
 GUARD = str(HERE.parents[1] / "guard_hook.py")
 log = []
 
@@ -220,14 +224,21 @@ the command hook, as a process:
 // The refund and order tools are scripted: their output is what the stand-in reports when a call is allowed.
 // `@anthropic-ai/claude-agent-sdk` 0.3.287, checked on 2026-10-03 against the hooks pages of the Claude Code documentation.
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { chmodSync, copyFileSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { logger } from "./logger.ts";
 const log = logger("hook_gates");
 
-export const FAKE = new URL("../../../harness/fake_claude.py", import.meta.url).pathname;
+// The SDK starts the stand-in as a program, so it must be executable: use a copy marked so (the harness folder may be read-only).
+const FAKE_SOURCE = new URL("../../../harness/fake_claude.py", import.meta.url).pathname;
+export const FAKE = (() => {
+  const exe = join(mkdtempSync(join(tmpdir(), "fake-claude-")), "fake_claude.py");
+  copyFileSync(FAKE_SOURCE, exe);
+  chmodSync(exe, 0o755);
+  return exe;
+})();
 const GUARD = new URL("../guard_hook.py", import.meta.url).pathname;
 export const ran: string[] = [];
 

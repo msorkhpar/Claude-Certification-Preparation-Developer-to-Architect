@@ -36,6 +36,7 @@ import logging
 import asyncio
 import json
 import os
+import shutil
 import tempfile
 from collections import Counter
 from pathlib import Path
@@ -45,7 +46,10 @@ from claude_agent_sdk import (AssistantMessage, ClaudeAgentOptions, HookMatcher,
 
 log = logging.getLogger(__name__)
 
-FAKE = str(Path(__file__).resolve().parents[3] / "harness" / "fake_claude.py")
+_found = str(Path(__file__).resolve().parents[3] / "harness" / "fake_claude.py")
+# The SDK starts the stand-in as a program, so it must be executable: use a copy marked so (the harness folder may be read-only).
+FAKE = shutil.copy(_found, Path(tempfile.mkdtemp(), "fake_claude.py"))
+os.chmod(FAKE, 0o755)
 
 
 @tool("add", "Add two whole numbers", {"a": int, "b": int})
@@ -150,7 +154,7 @@ what the binary asked your process: {'can_use_tool': 3, 'hook_callback': 2, 'mcp
 // binary's control requests (hooks, permission questions, calls to your in-process tools). Here the binary is `harness/fake_claude.py`,
 // which speaks the same stream-json protocol and replays a script, so no model is called and no network is used.
 // `@anthropic-ai/claude-agent-sdk` 0.3.287, checked on 2026-10-03 against the Agent SDK pages of the Claude Code documentation.
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { chmodSync, copyFileSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createSdkMcpServer, query, tool } from "@anthropic-ai/claude-agent-sdk";
@@ -158,7 +162,14 @@ import { z } from "zod";
 import { logger } from "./logger.ts";
 const log = logger("agent_offline");
 
-export const FAKE = new URL("../../../harness/fake_claude.py", import.meta.url).pathname;
+// The SDK starts the stand-in as a program, so it must be executable: use a copy marked so (the harness folder may be read-only).
+const FAKE_SOURCE = new URL("../../../harness/fake_claude.py", import.meta.url).pathname;
+export const FAKE = (() => {
+  const exe = join(mkdtempSync(join(tmpdir(), "fake-claude-")), "fake_claude.py");
+  copyFileSync(FAKE_SOURCE, exe);
+  chmodSync(exe, 0o755);
+  return exe;
+})();
 
 export const add = tool("add", "Add two whole numbers", { a: z.number().int(), b: z.number().int() }, async (args) => ({ content: [{ type: "text" as const, text: `Sum: ${args.a + args.b}` }] }));
 

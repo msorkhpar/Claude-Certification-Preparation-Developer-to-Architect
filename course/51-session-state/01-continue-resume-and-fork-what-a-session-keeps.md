@@ -80,6 +80,7 @@ checked on 2026-10-03 against the "Work with sessions" page of the Claude Code d
 import asyncio
 import json
 import os
+import shutil
 import tempfile
 from pathlib import Path
 
@@ -88,7 +89,10 @@ import logging
 
 log = logging.getLogger(__name__)
 
-FAKE = str(Path(__file__).resolve().parents[3] / "harness" / "fake_claude.py")
+_found = str(Path(__file__).resolve().parents[3] / "harness" / "fake_claude.py")
+# The SDK starts the stand-in as a program, so it must be executable: use a copy marked so (the harness folder may be read-only).
+FAKE = shutil.copy(_found, Path(tempfile.mkdtemp(), "fake_claude.py"))
+os.chmod(FAKE, 0o755)
 DAY = 24 * 3600
 
 
@@ -180,14 +184,21 @@ the notice for the second case
 // The Agent SDK starts the Claude Code binary; here the binary is `harness/fake_claude.py`, which replays a script, so no model is called and no network is used.
 // The session ids come from the script (the stand-in does not store sessions); the flags are the ones the real SDK builds.
 // `@anthropic-ai/claude-agent-sdk` 0.3.287, checked on 2026-10-03 against the "Work with sessions" page of the Claude Code documentation.
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { chmodSync, copyFileSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { logger } from "./logger.ts";
 const log = logger("session_state");
 
-const FAKE = new URL("../../../harness/fake_claude.py", import.meta.url).pathname;
+// The SDK starts the stand-in as a program, so it must be executable: use a copy marked so (the harness folder may be read-only).
+const FAKE_SOURCE = new URL("../../../harness/fake_claude.py", import.meta.url).pathname;
+const FAKE = (() => {
+  const exe = join(mkdtempSync(join(tmpdir(), "fake-claude-")), "fake_claude.py");
+  copyFileSync(FAKE_SOURCE, exe);
+  chmodSync(exe, 0o755);
+  return exe;
+})();
 
 /** resume, resume with a notice, or start fresh with a summary, from the files a session analysed and the files now. */
 export function decide(saved: Record<string, string>, current: Record<string, string>, idleDays: number): [string, string[]] {

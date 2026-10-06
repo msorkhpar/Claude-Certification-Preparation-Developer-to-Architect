@@ -82,6 +82,7 @@ import logging
 import asyncio
 import json
 import os
+import shutil
 import tempfile
 from pathlib import Path
 
@@ -89,7 +90,10 @@ from claude_agent_sdk import AgentDefinition, AssistantMessage, ClaudeAgentOptio
 
 log = logging.getLogger(__name__)
 
-FAKE = str(Path(__file__).resolve().parents[3] / "harness" / "fake_claude.py")
+_found = str(Path(__file__).resolve().parents[3] / "harness" / "fake_claude.py")
+# The SDK starts the stand-in as a program, so it must be executable: use a copy marked so (the harness folder may be read-only).
+FAKE = shutil.copy(_found, Path(tempfile.mkdtemp(), "fake_claude.py"))
+os.chmod(FAKE, 0o755)
 
 AGENTS = {
     "reviewer": AgentDefinition(description="Reviews one module for security problems. Use for any review request.", prompt="You review code and report findings only.",
@@ -172,14 +176,21 @@ flag --max-turns 10
 // The Agent SDK starts the Claude Code binary; here the binary is `harness/fake_claude.py`, which replays a script, so no model is called and no network is
 // used. The stand-in puts the messages of the subagent after the call that started it, which the real binary may order differently.
 // `@anthropic-ai/claude-agent-sdk` 0.3.287, checked on 2026-10-03 against the Agent SDK pages of the Claude Code documentation.
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { chmodSync, copyFileSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { logger } from "./logger.ts";
 const log = logger("subagent_run");
 
-export const FAKE = new URL("../../../harness/fake_claude.py", import.meta.url).pathname;
+// The SDK starts the stand-in as a program, so it must be executable: use a copy marked so (the harness folder may be read-only).
+const FAKE_SOURCE = new URL("../../../harness/fake_claude.py", import.meta.url).pathname;
+export const FAKE = (() => {
+  const exe = join(mkdtempSync(join(tmpdir(), "fake-claude-")), "fake_claude.py");
+  copyFileSync(FAKE_SOURCE, exe);
+  chmodSync(exe, 0o755);
+  return exe;
+})();
 
 export const AGENTS = {
   reviewer: { description: "Reviews one module for security problems. Use for any review request.", prompt: "You review code and report findings only.", tools: ["Read", "Grep"], model: "sonnet" },
