@@ -2,15 +2,17 @@
 import { logTo } from "./logger.ts";
 import { chmodSync, copyFileSync, existsSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { runAgent } from "./agent.ts";
 
 // Turn the logger up, so the `log.debug` lines of your code show under the printed lines.
 logTo("try-it");
 
 // The tests never call the model: they start harness/fake_claude.py, a scripted stand-in for the Claude Code binary.
+// Search upward from this file, as Run starts it from the workspace root, not from its own folder.
 const candidates = ["/w/harness/fake_claude.py"];
-for (let d = resolve("."), i = 0; i < 8; i++, d = resolve(d, "..")) candidates.push(join(d, "harness", "fake_claude.py"));
+for (let d = dirname(fileURLToPath(import.meta.url)), i = 0; i < 8; i++, d = resolve(d, "..")) candidates.push(join(d, "harness", "fake_claude.py"));
 const found = candidates.find((c) => existsSync(c)) as string;
 
 // The script: the agent reads a file, runs the tests with Bash, then finishes.
