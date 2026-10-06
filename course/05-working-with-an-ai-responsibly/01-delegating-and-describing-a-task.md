@@ -129,7 +129,7 @@ code; the habit starts here.
 2. Someone asks Claude: "Summarise this report." The result is accurate, but the sales team who asked cannot
    use it. Which gap in the request most likely caused this?
    - **a**: It lacked a role line naming Claude an expert summariser
-   - **b**: It omitted a word limit, which is why the summary missed the sales angle
+   - **b**: It set no word limit, so Claude could not tell which points to cut
    - **c**: It never said who would read it or what they must decide with it
    - **d**: It ran on a tier too small to judge what matters to sales
 
@@ -137,6 +137,6 @@ code; the habit starts here.
 <summary>Answer key</summary>
 
 1. **a**. Drafting is language-shaped and reviewable, while checking facts and approving the send stay with a person (the worked example's table). *d* is ruled out because the table keeps "Check every figure in the draft against the source" with a person or a script, and spot checks later come after readers have the email. *b* is ruled out because Claude "saves the time spent on prose", the main saving, which a person writing everything forgoes. *c* is ruled out because escalation is "judgment that carries accountability", which stays with a person.
-2. **c**. The description should cover the goal and the context, who reads it and why, and a generic request gets a generic reply. *a* is ruled out because a role line names no reader or purpose, and the page says to "Add what a colleague new to the job would need". *b* is ruled out because without the goal "Claude cannot choose between reasonable readings", and a limit is only a constraint on form. *d* is ruled out because "the description is where most of the quality is decided", and a larger tier does not know the readers either.
+2. **c**. The description should cover the goal and the context, who reads it and why, and a generic request gets a generic reply. *a* is ruled out because what is missing is the goal and "the context (who reads it, what happened before)", and a role line supplies neither. *b* is ruled out because without the goal "Claude cannot choose between reasonable readings", so a limit forces cuts without saying which points matter to sales. *d* is ruled out because "the description is where most of the quality is decided", and a larger tier does not know the readers either.
 
 </details>

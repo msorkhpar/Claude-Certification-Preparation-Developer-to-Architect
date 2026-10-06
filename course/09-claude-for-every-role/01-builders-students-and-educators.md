@@ -123,12 +123,12 @@ aligned?) and ownership.
 1. A developer asks Claude for a data-import function, pastes it into the codebase and ships it after a glance because
    it reads cleanly. Which habit did the developer skip?
    - **a**: Responsibility: tell the users that an AI assisted with the release
-   - **b**: Delegation: hand the whole function to a different person to write instead
+   - **b**: Delegation: keep import code out of Claude's hands and write it alone
    - **c**: Description: phrase the request as a longer, more detailed paragraph
    - **d**: Discernment: execute it against realistic cases and inspect the results
 
-2. A university student drafts a graded argumentative essay. The course allows AI help for planning only, and they
-   want to find where their case is weakest. Which use fits?
+2. A university student drafts a graded argumentative essay. The course allows some AI help, and they want to find
+   where their case is weakest. Which use fits?
    - **a**: Ask Claude for a model paragraph on their topic, then rewrite it in their voice
    - **b**: Have Claude draft their weakest section, cite it as a source, and write the rest themselves
    - **c**: Paste the essay prompt and keep only the sentences that match their view
@@ -138,19 +138,19 @@ aligned?) and ownership.
    ownership?
    - **a**: Share it with the class so the pupils can find any faults
    - **b**: Trust it, because the model wrote a similar quiz last month
-   - **c**: Check the answers and their fit with the stated outcome
+   - **c**: Work out each answer and match it to the lesson's aim
    - **d**: Ask Claude to rate how correct its own questions are
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The builder's costly mistake is "Shipping unrun output", and the natural check is to "Run it, test it, review it". *b* is ruled out because "A builder is someone who owns the whole arc from a customer's problem to a shipped solution", so the function is theirs to verify. *c* is ruled out because the weight for builders falls on "Discernment of code and user experience", and a longer request does not test the result. *a* is ruled out because telling users is honest but does not test anything, and the natural check is to "Run it, test it, review it".
+1. **d**. The builder's costly mistake is "Shipping unrun output", and the natural check is to "Run it, test it, review it". *b* is ruled out because a builder delegates "first drafts of code and tests", so handing Claude the function was a fair choice and the slip came afterwards. *c* is ruled out because the weight for builders falls on "Discernment of code and user experience", and a longer request does not test the result. *a* is ruled out because a disclosure tests nothing, and the builder still answers for the import "If it fails in production".
 2. **d**. A student uses Claude as a partner by questioning the plan while the thinking and the writing stay theirs.
    *a* is ruled out because "writing the analysis with Claude and submitting it defeats the point and may breach the
    institution's rules", and rewording a model paragraph still hands the thinking over. *b* is ruled out because the
    student does not delegate "the thinking the course exists to build", and a citation does not return it. *c* is
-   ruled out because "one who submits its essay as their own is not" using it as a partner, and selecting sentences
-   keeps that authorship problem.
-3. **c**. Discernment is judging accuracy and alignment with the stated outcome, and the educator owns what students are taught. *b* is ruled out because the educator "Checks: accuracy of the content taught", and a past good quiz does not show this one is right. *a* is ruled out because the educator "Owns: what students are taught, how they are assessed and the fairness of grades", and passing the checking to pupils gives that up. *d* is ruled out because asking Claude to mark itself is not the check, and the page lists "accuracy of the content taught" among the things the educator checks personally.
+   ruled out because the student checks "whether the tool is leading them to a conclusion rather than helping them
+   reach one", and keeping only the sentences that agree with them finds none of the weak points.
+3. **c**. Discernment is judging accuracy and alignment with the stated outcome, and the educator owns what students are taught. *b* is ruled out because the educator "Checks: accuracy of the content taught", and a past good quiz does not show this one is right. *a* is ruled out because the educator "Owns: what students are taught, how they are assessed and the fairness of grades", and passing the checking to pupils gives that up. *d* is ruled out because the question "Is what came back accurate, complete, fair and fit for its reader?" is the person's to ask, and a self-rating hands it back to the tool.
 
 </details>

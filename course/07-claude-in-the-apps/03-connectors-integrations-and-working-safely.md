@@ -116,31 +116,31 @@ Module 8 teaches both, with Cowork and Claude Tag.
 1. A manager links the company's cloud storage, then asks Claude to summarise a restricted finance directory. Claude
    cannot find it, although an administrator colleague sees it in the same storage. What explains this?
    - **a**: The tool carries the signed-in person's rights, which exclude that location
-   - **b**: The tool reads only material above a certain age, and that area is newer
+   - **b**: The tool is set to need approval, which holds back reading until a click
    - **c**: The workspace holding the chat must be shared before the area becomes visible
    - **d**: The area is too big for retrieval to cope with in a single request
 
 2. A company connects its helpdesk to Claude. Agents may read tickets and add internal notes freely, but ending a ticket must wait for a person's click, and trainees must not see escalated tickets. Which design meets both rules?
    - **a**: Require approval to close, and write the group's limit into the connector's instructions
-   - **b**: Allow every tool without approval and expect the helpdesk to stop the trainees
+   - **b**: Require approval to close, and give trainees a custom connector of their own
    - **c**: Require approval to close, and leave the group's limit in the source system itself
-   - **d**: Require approval to close, and give that group wider access through Claude's settings
+   - **d**: Require approval to close, and hide those tickets with a Claude tool setting
 
 3. A team lead finds a handy link on a forum that would add a custom connector in seconds. What is the best step?
    - **a**: Install it, then watch the first few replies for anything odd
-   - **b**: Install it on the free plan first, since that permits one trial server
-   - **c**: Check who operates it, and which scopes it requests, before approving
-   - **d**: Install it in On demand mode, which restricts what the server can do
+   - **b**: Install it only after checking the forum thread's ratings and replies
+   - **c**: Install it only after checking its operator and the scopes it requests
+   - **d**: Install it only after checking that the plan allows a custom connector
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. "Claude inherits each person's permissions from the connected service", so the manager's reach, not the administrator's, decides what appears. *b* is ruled out because the page names permissions as the cause of a missing result ("the connector cannot reach it from Claude for them either") and says nothing about the age of material. *c* is ruled out because "Fixing a connector's reach is done in the source system", not by sharing a workspace. *d* is ruled out because the page ties a missing result to access, as in "the connector cannot reach it from Claude for them either", and never to size.
+1. **a**. "Claude inherits each person's permissions from the connected service", so the manager's reach, not the administrator's, decides what appears. *b* is ruled out because an organisation can "let Claude read a system and require a human click before it writes to it", so an approval rule asks for a click and does not hide a location. *c* is ruled out because "Fixing a connector's reach is done in the source system", not by sharing a workspace. *d* is ruled out because the page says "a missing result often means the person cannot see the file", and size is not a cause it names.
 2. **c**. Each tool can be set to need approval, and Claude inherits each person's permissions, so a restriction on one group belongs in the source system. *a* is ruled out because "Fixing a connector's reach is done in the source system,
-   by changing who can open what, not by rewording an instruction". *b* is ruled out because an organisation can
-   "let Claude read a system and require a human click before it writes to it", and always allowing every tool gives
-   that up. *d* is ruled out because "A connector cannot give anyone more access than they already have".
-3. **c**. The checklist says to connect only to servers from trusted organisations and to read the scopes before approving them. *b* is ruled out because "a custom connector has not been verified by Anthropic", whatever the plan allows. *a* is ruled out because "Remote tools can change after you approve them", so a good first reply proves nothing about later behaviour. *d* is ruled out because "the page suggests On demand when you have ten or more connectors", which is about tool loading and not about what a server may do.
+   by changing who can open what, not by rewording an instruction". *b* is ruled out because "Claude inherits
+   each person's permissions from the connected service", so a second connector still shows a trainee every ticket
+   their helpdesk account can open. *d* is ruled out because "Owners can set what the tools may do", which acts on tools and not on which tickets a person may open.
+3. **c**. The checklist says to connect only to servers from trusted organisations and to read the scopes before approving them. *b* is ruled out because "Anything outside the directory is untrusted until you have reviewed who runs it", and forum ratings are not that review. *a* is ruled out because "Remote tools can change after you approve them", so a good first reply proves nothing about later behaviour. *d* is ruled out because "a custom connector has not been verified by Anthropic", whatever the plan allows.
 
 </details>
 
@@ -148,51 +148,51 @@ Module 8 teaches both, with Cowork and Claude Tag.
 
 This quiz covers every page of the module.
 
-1. A recruiter's Project answers hiring questions from a policy file that HR revises each quarter in a shared drive.
-   The recruiter wants current answers without re-uploading, and wants candidate notes unseen by others who have
-   access. Which design fits?
-   - **a**: Upload the latest version each period, and share the space so HR can check it
-   - **b**: Sync the source document, and leave private material out of the knowledge
+1. A recruiter's private Project answers hiring questions from a policy that HR revises each quarter in a shared
+   drive. The recruiter wants answers that stay current and can be traced. Which design fits?
+   - **a**: Upload a copy now, and note a review date at the top of the instructions
+   - **b**: Sync the source document, and ask in the instructions for the file it used
    - **c**: Type the policy wording into the instructions, since those are always read
-   - **d**: Switch on Research for every question, so the wording is looked up on the web
+   - **d**: Keep the policy in memory, and ask Claude to quote it with its source
 
 2. A department wants a monthly report in one layout, built from figures kept in a shared spreadsheet and delivered
    to a client in editable form. Which combination fits best?
-   - **a**: A Project for the data, a plugin for the buyer and a skill for the output
+   - **a**: A Project for the procedure, an upload for the data and a table for the output
    - **b**: Research for the data, memory for the procedure and an inline reply for the output
    - **c**: A skill for the procedure, a connector for the data, an artifact for the output
    - **d**: Three separate chats, one per stage, with material copied across by hand
 
 3. A new hire installs a free skill found on a public forum. Its page says the skill also needs a custom connector
-   to the hire's work email, and the hire's plan allows both. Which step belongs before installing?
-   - **a**: Confirm that the plan lists skills and custom connectors, then install it
-   - **b**: Trial it in a private chat first and judge it by the first few replies
-   - **c**: Install it on the hire's account only, so colleagues stay out of reach
-   - **d**: Inspect the package contents and confirm who operates the server it calls
+   to the hire's work email, and the hire's plan allows both. What is the main risk of the pair?
+   - **a**: The pair would fill the context window with tools and skill text
+   - **b**: The connector could open mail folders that the hire cannot open
+   - **c**: The skill would be shared with the hire's team once installed
+   - **d**: Hidden instructions could pass inbox contents to an outside party
 
-4. Two colleagues ask the same shared Project about one finance folder. One receives a summary, the other is told
-   nothing was found. Both reached the storage through the same custom connector, which the owner enabled. What
-   should the owner check first?
-   - **a**: Reconnect the storage for the second colleague under the owner's credentials
-   - **b**: Reword the Project instructions to search the whole folder
+4. A team works from a shared drive through a connector the owner enabled. One member asks the same
+   travel question twice and gets last year's allowance once and this year's the next time. What should the owner
+   fix first?
+   - **a**: Ask Claude to name the file it used, so the old figure can be spotted
+   - **b**: Add an instruction telling Claude to prefer the most recent figure
    - **c**: Switch the connector to On demand so tools stop crowding the chat
-   - **d**: Compare what each of them is allowed to see in the source system
+   - **d**: Delete the outdated copies where they are stored, keeping a single version
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. A synced document follows its source, and the knowledge base is readable by everyone with access, so private notes stay out (pages 1 and 3). *a* is ruled out because "an uploaded file is a copy as of the day you uploaded it", and sharing exposes everything the knowledge holds. *c* is ruled out because "A figure typed into the instructions is a second copy that no file update will touch". *d* is ruled out because "Do not use it for a question that one document answers", and a policy file is that case.
-2. **c**. A skill carries a repeatable procedure, a connector reads live data, and an artifact is a deliverable someone can open and edit. *b* is ruled out because "A short answer stays inline in the chat", which does not suit a file to be edited. *a* is ruled out because a plugin is "A role's bundle of procedures and connections", and not the means of handing one deliverable to one buyer. *d* is ruled out because "A skill is a reusable procedure Claude pulls in when the task matches", which copying by hand gives up.
-3. **d**. A skill carries instructions and scripts that Claude follows, and a custom connector "has not been
-   verified by Anthropic", so the contents and the operator need checking first. *a* is ruled out because "A skill
-   can carry scripts and instructions that Claude follows", so plan availability says nothing about safety. *b* is
-   ruled out because the page says to "review code dependencies and bundled resources first", and a first reply
-   cannot show them. *c* is ruled out because "The page names prompt injection and data exfiltration as the most
-   significant risks", and the mailbox in danger is the installer's own.
-4. **d**. Claude inherits each person's permissions, so two people can get different answers because they can see
-   different files. *a* is ruled out because a connector "does not bypass the source system's permissions". *b* is
-   ruled out because "Fixing a connector's reach is done in the source system, by changing who can open what, not by
-   rewording an instruction". *c* is ruled out because On demand is suggested "when you have ten or more connectors,
-   so that the conversation is not crowded with tools", which is about loading and not about reach.
+1. **b**. A synced document follows its source, and "A reply that names the file it used shows at once when it used an old one" (page 1). *a* is ruled out because "an uploaded file is a copy as of the day you uploaded it", and a review date does not make a reply name its source. *c* is ruled out because "A figure typed into the instructions is a second copy that no file update will touch". *d* is ruled out because "memory is not a substitute for a knowledge file", and it holds what Claude picked up, not the authoritative text of the policy.
+2. **c**. A skill carries a repeatable procedure, a connector reads live data, and an artifact is a deliverable someone can open and edit. *b* is ruled out because "A short answer stays inline in the chat", which does not suit a file to be edited. *a* is ruled out because "an uploaded file is a copy as of the day you uploaded it", so the monthly figures go stale, and a table suits "Data that another program will read", not a client. *d* is ruled out because "A skill is a reusable procedure Claude pulls in when the task matches", which copying by hand gives up.
+3. **d**. The page names "prompt injection and data exfiltration as the most significant risks" of skills, and
+   "Each connector is an extra route for data and for injected instructions", so the pair joins hidden instructions
+   to a way out of the mailbox. *a* is ruled out because "Only the pertinent skills enter the context window", and
+   On demand is suggested only "when you have ten or more connectors". *b* is ruled out because "A connector cannot
+   give anyone more access than they already have". *c* is ruled out because "Free, Pro and Max users manage only
+   their own skills", and on Team and Enterprise plans a skill is shared only "with named colleagues".
+4. **d**. "A connector shows Claude what is in the system, mistakes included", so two versions in the drive give
+   Claude two figures to quote (page 3). *a* is ruled out because a reply that names its
+   file only "shows at once when it used an old one", and the old copy stays in the drive to be quoted again. *b* is ruled out because "an instruction is a
+   request and a deleted file is a guarantee", so a preference leaves the old copy in reach. *c* is ruled out because
+   On demand is suggested "when you have ten or more connectors, so that the conversation is not crowded with tools",
+   which is about loading and not about which version is read.
 
 </details>

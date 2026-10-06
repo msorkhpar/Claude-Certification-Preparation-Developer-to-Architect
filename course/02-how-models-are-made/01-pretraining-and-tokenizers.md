@@ -390,7 +390,7 @@ larger scale.
    - **a**: The weights absorb the fix and apply it to every later session by default
    - **b**: A tuned copy of the model is created under the account for later calls
    - **c**: Only a request that carries the amended guidance in its own input gains from it
-   - **d**: A window large enough keeps the correction available to every future request
+   - **d**: Requests to a model with a larger window gain from it whatever they carry
 
 <details>
 <summary>Answer key</summary>
@@ -400,6 +400,7 @@ larger scale.
    so only a call that carries the fix in its input can use it. *a* is ruled out because "A conversation with Claude
    does not teach it anything that carries to the next conversation". *b* is ruled out because "The Claude API does
    not currently offer fine-tuning", so no tuned copy is made by calling it. *d* is ruled out because "The window is
-   how much text fits per request", and a request holds only what is sent with it.
+   how much text fits per request", and a request holds only what is sent with it, so a larger window does not
+   bring the fix into a call that leaves it out.
 
 </details>

@@ -128,7 +128,7 @@ guarantees you need all come from what you build around the model.
    - **a**: Rely on what the model absorbed in training from earlier editions
    - **b**: Retrain the weights each month through a fine-tuning request to the API
    - **c**: Paste corrections into the chat and rely on the model to recall them later
-   - **d**: Send the current edition with each call, as the standard route
+   - **d**: Include the current edition in the context sent with each call
 
 <details>
 <summary>Answer key</summary>
@@ -142,44 +142,44 @@ guarantees you need all come from what you build around the model.
 
 This quiz covers both pages of the module.
 
-1. A new engineer asks which stage of making a Claude model is behind its skill at carrying on any text, and which
-   is behind its polite replies to questions. Which pairing is right?
-   - **a**: Pretraining gave next-word prediction; human-ranked tuning gave helpfulness
-   - **b**: Feedback training gave next-word prediction; pretraining gave the helpful manner
-   - **c**: Tuning on curated examples gave both; pretraining only supplied the vocabulary
-   - **d**: Pretraining gave both; a larger corpus is enough to make a raw model obey
+1. A research team trains a model for harmlessness the Constitutional AI way and wants it to handle one kind of
+   request differently in the next run. In that method, what do people edit to steer that behaviour?
+   - **a**: The written principles that both the critiques and the AI judge apply
+   - **b**: The rankings that people give to pairs of answers for the preference model
+   - **c**: The revised answers, corrected by hand before they become training data
+   - **d**: The pretraining corpus, labelled by hand as harmful or harmless text
 
 2. A localisation lead budgets translation runs by word count, then finds that one paragraph needs noticeably more tokens in one language than in another. Which explanation fits best?
    - **a**: That language was added by later fine-tuning, which re-cut its text into extra pieces
    - **b**: The larger window used for that language forces the text into finer pieces
-   - **c**: Its learned vocabulary stores longer chunks for the script that dominated the corpus
+   - **c**: The learned vocabulary stores longer pieces for text that was common in the corpus
    - **d**: The translated text simply contains more words, and tokens track words one to one
 
 3. A reviewer waves through a number in a report because the assistant is described as built to tell the
    truth. Which reply is the soundest?
    - **a**: Written principles removed unsupported claims, so a skim of the figure is enough
-   - **b**: Training aims at honesty without a promise, so the figure needs checking
-   - **c**: The model states high confidence, so asking it to re-check is the control
+   - **b**: Recall can be fluent yet wrong, so trace the figure to its source before use
+   - **c**: The model said it was sure of the figure, so its own second look is the control
    - **d**: A prompt can demand truthfulness, so add that line and skip the check
 
 4. A team is automating four chores. Which one should be done by a deterministic program instead of the model
    alone?
-   - **a**: Sorting incoming emails by urgency from the message text
-   - **b**: Rewriting release notes for a non-technical audience of customers
-   - **c**: Proposing likely causes for an intermittent failing test
-   - **d**: Verifying every product code is exactly eight characters long
+   - **a**: Sorting yesterday's incoming emails by urgency from the message text
+   - **b**: Rewriting this week's release notes for a non-technical customer audience
+   - **c**: Proposing likely causes for last night's intermittent failing test
+   - **d**: Pulling yesterday's order count from the company database
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. Pretraining teaches continuation, and fine-tuning and feedback training turn the continuer into an
-   assistant (page 2, the stages section). *b* is ruled out because pretraining is where the model starts to "learn
-   to continue text on a very large corpus", so the order is reversed. *c* is ruled out because the tokenizer "is
-   built before pretraining and fixed afterwards" and pretraining is where the model learns to continue text, so
-   tuning cannot have given that skill. *d* is ruled out because a pretrained model "is not inherently good at
-   answering questions or following instructions", whatever the corpus size.
-2. **c**. The vocabulary was learned from a corpus, so a script that was common gets longer pieces and a rarer one splits into more (page 1, what the tokenizer does to your work). *a* is ruled out because the tokenizer is "built before pretraining and fixed afterwards", so later fine-tuning cannot re-cut any text. *b* is ruled out because "The window is how much text fits per request", and the vocabulary is a separate thing, so the window does not set the piece size. *d* is ruled out because a token is not a word: "a Claude token is about 3.5 English characters", and "the exact number can vary depending on the language used".
-3. **b**. The glossary frames HHH as how Claude is trained, a goal and a direction, and the first trap says verification is still the user's job. *a* is ruled out because the table lists "A guarantee that any statement is true" among the things training does not give. *d* is ruled out because "an instruction that fights the training may not win", so a prompt cannot make a trained behaviour certain. *c* is ruled out because "Verification is still the user's job", and a model's own report of high confidence is not a check.
-4. **d**. Exact character work is a tokenizer-level weakness, so code should do it (page 1, first trap). *b* is ruled out because the table credits training with "Fluent language, many languages, code", which covers rewording for customers. *c* is ruled out because the table credits training with "Reasoning patterns it can apply to new problems", which covers proposing causes. *a* is ruled out because the table lists "Following instructions and a helpful manner", and a model reads message text well.
+1. **a**. In Constitutional AI "the only human oversight is provided through a list of rules or principles", so the
+   principles are what people rewrite to change the behaviour (page 2, the Constitutional AI section). *b* is ruled
+   out because the preference model "is trained from this dataset of AI preferences", and for harmlessness "no human
+   labels are needed for it". *c* is ruled out because "The model critiques its own answers against the principles
+   and rewrites them", and those revisions become the training data without a hand edit. *d* is ruled out because
+   pretraining needs no labels: "Nobody labels the data; the text itself is the answer key."
+2. **c**. The vocabulary was learned from a corpus, so a language that was common gets longer pieces and a rarer one splits into more (page 1, what the tokenizer does to your work). *a* is ruled out because the tokenizer is "built before pretraining and fixed afterwards", so later fine-tuning cannot re-cut any text. *b* is ruled out because "The window is how much text fits per request", and the trap on window and vocabulary says "They are unrelated settings", so the window does not set the piece size. *d* is ruled out because a token is not a word: "a Claude token is about 3.5 English characters", and "the exact number can vary depending on the language used".
+3. **b**. Facts sit in the weights as tendencies, "which is why recall can be wrong in a fluent way" (page 1), and the glossary calls HHH "a research framework that informs how Claude is trained", not a certificate on a reply, so the figure is traced to its source before it goes in the report. *a* is ruled out because the table lists "A guarantee that any statement is true" among the things training does not give. *d* is ruled out because the table sets "Tendencies toward honest, harmless replies" against "A rule that can never be broken", so a line asking for truthfulness only restates a tendency and the figure still needs a check. *c* is ruled out because "Verification is still the user's job", so the model saying it is sure, and looking again, does not replace a check against the source.
+4. **d**. The table lists "Access to your files, systems or today's date" among the things training does not give, so a figure held in a company system has to be fetched by code (page 2, the table). *b* is ruled out because the table credits training with "Following instructions and a helpful manner", which covers rewording notes for a reader. *c* is ruled out because the table credits training with "Reasoning patterns it can apply to new problems", which covers proposing causes. *a* is ruled out because the table credits training with "Fluent language, many languages, code", and judging urgency from message text is language work.
 
 </details>

@@ -120,40 +120,40 @@ trust and review before sharing.
 ## Quiz
 
 1. A consultant must hand a client a one-page dashboard that the client will open, adjust and forward. The
-   consultant also wants to try a different layout without losing the first one. Which approach fits?
-   - **a**: An inline reply, with each layout pasted into a fresh chat and compared by eye
-   - **b**: A skill, with each layout saved as its own custom skill in the account
-   - **c**: An artifact, with the alternative started by editing an earlier message
-   - **d**: A Research run, with each layout requested as a new report with citations
+   consultant also wants to try a different layout without losing the first. Which approach fits?
+   - **a**: An inline reply, with each design pasted into a fresh chat and compared by eye
+   - **b**: A skill, with each design saved as its own custom skill in the account
+   - **c**: An artifact, with each design kept in a separate branch of the same chat
+   - **d**: A Project, with each new layout written in turn into its instructions
 
-2. A finance team builds its monthly report inside a Project called Finance. A manager who works in separate chats
-   outside that Project needs the same house layout. Which feature carries that procedure to both places?
-   - **a**: Written rules in the Finance Project's own instructions
-   - **b**: A plugin installed for the whole department
-   - **c**: An artifact kept as the pattern for each new report
-   - **d**: A custom skill that Claude loads when the task matches
+2. A consultant writes client briefings in one house layout, in unrelated chats, some inside Projects and some
+   outside any Project. Which feature lets all of those chats follow the layout?
+   - **a**: Written rules in one Project's own instructions
+   - **b**: A plugin installed for the consultant's role
+   - **c**: An artifact kept as the pattern for each briefing
+   - **d**: A custom skill kept in the account's skill list
 
 3. A colleague shares a ZIP file of a "free time-saving skill" from an unknown site and asks you to upload it. What is
    the best response?
-   - **a**: Upload it straight away and watch the first few replies for anything odd
+   - **a**: Read the instructions file inside, and upload it if nothing looks harmful
    - **b**: Decline the archive and ask for a copy from a source you already trust
-   - **c**: Upload it for yourself only and keep every colleague away from it
+   - **c**: Hold off until the colleague has run it for a week without trouble
    - **d**: Upload it to a test chat and judge it by the first reply it gives
 
 <details>
 <summary>Answer key</summary>
 
 1. **c**. An artifact opens in its own panel for editing and sharing, and editing an earlier message branches the
-   chat so "each branch has its own artifact". *a* is ruled out because an artifact opens in a panel "so you can
-   edit and re-use it without scrolling back through a conversation". *b* is ruled out because a skill is "A
+   chat so "each branch has its own artifact". *a* is ruled out because "A short answer stays inline in the
+   chat", and a dashboard the client will open and adjust is not a short answer. *b* is ruled out because a skill is "A
    repeatable procedure used across many chats", not a deliverable the client can open. *d* is ruled out because
-   Research is for "An open question that needs many sources and citations", and this task has known content to lay
-   out.
+   "Project instructions apply to every chat in that Project", so each new layout written there replaces the first
+   for every chat and leaves no file for the client to open.
 2. **d**. A skill is a reusable procedure that Claude pulls in "in any chat where it is enabled", inside or outside
-   a Project. *a* is ruled out because "Project instructions apply to every chat in that Project", and the manager's
-   chats sit elsewhere. *b* is ruled out because a plugin is "A role's bundle of procedures and connections", far
-   more than one layout. *c* is ruled out because an artifact is "A document, deck, dashboard or small tool to hand
+   a Project, and a simple one needs no code. *a* is ruled out because "Project instructions apply to every chat in that Project", and the consultant's
+   other chats sit elsewhere. *b* is ruled out because "Where a skill is one playbook, a plugin is several", so a
+   role's bundle is the wrong size for one layout. *c* is ruled out because an artifact is "A document, deck, dashboard or small tool to hand
    to someone" and does not make later chats follow a layout.
-3. **b**. Skills carry instructions and scripts that Claude follows, so the page says to install skills only from trusted sources and to review what they bundle. *a* is ruled out because "from an unknown source it is a route for prompt injection", and odd behaviour may never show in a reply. *c* is ruled out because the risks named, "prompt injection and data exfiltration", apply to the person who installs the skill, not only to colleagues. *d* is ruled out because the first reply cannot show hidden scripts or instructions, which is why the page says to review "code dependencies and bundled resources" first.
+3. **b**. Skills carry instructions and scripts that Claude follows, so the page says to install skills only from trusted sources and to review what they bundle. *a* is ruled out because "A skill can carry scripts and instructions that Claude follows", and reading the instructions alone leaves any scripts unchecked. *c* is ruled out because a skill from an unknown source is "a route for prompt injection", and a quiet week of use neither changes the source nor reveals hidden instructions. *d* is ruled out because the first reply cannot show hidden scripts or instructions, which is why the page says to review "code dependencies and bundled resources" first.
 
 </details>

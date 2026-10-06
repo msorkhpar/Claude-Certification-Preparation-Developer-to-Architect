@@ -103,33 +103,35 @@ quickly, so confirm features and plan limits on the official page the day you de
 1. A recruiter needs one short, polite decline email for a single candidate, with the facts supplied. Which surface
    suits it best?
    - **a**: Plain chat, with a quick check of the details before sending
-   - **b**: Cowork on a dedicated folder, with a weekly schedule added
+   - **b**: Cowork on a dedicated folder holding the candidate's file
    - **c**: A shared Project holding every past letter, opened to the team
    - **d**: A Research run that gathers sources on rejection etiquette
 
 2. A product team wants one visible place in Slack to chase open checklist entries, where anyone can steer the work.
    One entry is a pay dispute. Which approach fits?
-   - **a**: Keep the whole list in the thread, then mark the dispute as sensitive
-   - **b**: Share a Project holding the whole list, then limit who sees the dispute
-   - **c**: Move the whole list to a direct message, then paste the results back
-   - **d**: Run routine items in the channel, then send the HR case to its policy
+   - **a**: Keep routine items in the thread, and flag the HR matter there as sensitive
+   - **b**: Keep routine items in the thread, and move the HR matter to a shared Project
+   - **c**: Move every item to a direct message, and post the results to the thread
+   - **d**: Keep routine items in the thread, and keep the HR matter out of the tool
 
-3. An analyst must revise a spreadsheet model, then refresh a deck and a memo that quote it. Which surface fits best?
+3. An analyst is editing a pricing workbook in Excel, and has the sales deck and cover memo built on its figures
+   open beside it in PowerPoint and Word. A discount rate changes, and the new numbers must reach all three. Which
+   surface fits best?
    - **a**: Claude Tag in a channel, with the three files attached
-   - **b**: A Project whose knowledge base holds the model, deck and memo
-   - **c**: The add-ins for Microsoft 365, working across open files
-   - **d**: Claude in Chrome, copying figures between browser tabs
+   - **b**: A Project whose knowledge base holds the workbook, deck and memo
+   - **c**: The Microsoft 365 add-ins, set to let Claude act across files
+   - **d**: Cowork on a connected folder holding copies of the three files
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. A single short draft needs none of the machinery; plain chat plus a check of the facts is enough (task 6). *b* is ruled out because "Cowork or a scheduled task for a one-line draft adds risk and cost", and a weekly schedule is wrong for a single email. *c* is ruled out because "A shared Project, a published artifact and a shared skill show their content to everyone with access", which is a poor home for candidate details. *d* is ruled out because Research is for an open question with many sources, and the table lists "A job one document answers" as what Research must not be given.
-2. **d**. A channel suits shared work that anyone can steer (task 5), while a sensitive personnel matter belongs
-   with the people and policy that govern it. *a* is ruled out because a sensitive HR matter belongs "not in a tool
-   whose results the whole channel can read", and a sensitivity mark does not hide it. *b* is ruled out because "A shared Project, a published artifact and a
-   shared skill show their content to everyone with access", dispute included. *c* is ruled out because the channel is chosen "so the
-   thread is visible and anyone can steer it", and pasted results leave nobody able to steer.
-3. **c**. The work lives in open Excel, PowerPoint and Word files and context passes between them (task 3). *b* is ruled out because a Project suits "Recurring work with fixed rules and reference files", and does not edit the open files. *a* is ruled out because "Claude Tag in a channel shows everything to everyone in the channel", which is the wrong audience for a model under revision. *d* is ruled out because Claude in Chrome reaches "The pages and tabs in front of it, with your logins", not the desktop files.
+1. **a**. A single short draft needs none of the machinery; plain chat plus a check of the facts is enough (task 6). *b* is ruled out because for a single draft "adding a Project or Cowork would add setup, allowance use and risk with no gain". *c* is ruled out because "A shared Project, a published artifact and a shared skill show their content to everyone with access", which is a poor home for candidate details. *d* is ruled out because Research is for an open question with many sources, and the table lists "A job one document answers" as what Research must not be given.
+2. **d**. A channel suits shared work that anyone can steer (task 5), while a sensitive HR matter belongs
+   with the people and policy that govern it, so the pay dispute stays out of the tool. *a* is ruled out because a sensitive HR matter belongs "not in a tool
+   whose results the whole channel can read", and a sensitivity mark does not hide it. *b* is ruled out because the table says chat surfaces must not be given
+   "a shared Project holding material the audience may not see", and the team would see the dispute. *c* is ruled out because the channel is chosen "so the
+   thread is visible and anyone can steer it", and work done in a direct message leaves nobody else able to steer.
+3. **c**. The work lives in open Excel, PowerPoint and Word files and context passes between them (task 3). *b* is ruled out because a Project suits "Recurring work with fixed rules and reference files", and does not edit the open files. *a* is ruled out because Claude Tag reaches "The thread, what an admin connected, public channels by search", while the figures must change in "The files and mail open at that moment". *d* is ruled out because the checklist gives Cowork "A multi-step job over files and tools" and gives "A task inside an open Office file" to the add-in, and these files are open in their apps, so copies in a folder would leave them as they were.
 
 </details>
 
@@ -137,34 +139,36 @@ quickly, so confirm features and plan limits on the official page the day you de
 
 This quiz covers every page of the module.
 
-1. A finance team's job reconciles bank statements into one summary. The team wants it to run weekly from
-   the first week, in Auto approval, and to compare against last year's statements kept elsewhere on the drive.
-   Which plan does the module support?
+1. A team sets up a Cowork job that reads supplier meeting notes and updates the rows of a shared action tracker.
+   They want it in Auto approval, running weekly from the first week, and checking last year's notes kept elsewhere
+   on the drive. Which plan does the module support?
    - **a**: Keep Auto approval on, open the drive wide to the job, then run it every week
-   - **b**: Move it to the Excel add-in, let it reach workbooks on the drive, then run it weekly
-   - **c**: Approve actions by hand, keep the older files in a dedicated folder, then schedule it
-   - **d**: Switch to Skip all approvals, grant the connectors it might want, then run it every week
+   - **b**: Move it to the Excel add-in, let it reach notes on the drive, then run it weekly
+   - **c**: Approve actions by hand, use one dedicated folder, then schedule after clean runs
+   - **d**: Leave Auto approval on, give it one folder holding both years, then run it from week one
 
 2. A consultant opens a spreadsheet from an unknown sender in Excel with the add-in, and asks Claude to update the
    assumptions. The cells hide text telling Claude to send data elsewhere. Which handling fits?
-   - **a**: Ask Claude in Chrome to verify the file's contents on the sender's website
-   - **b**: Turn on cross-app work so that a second document can check each of the changes
-   - **c**: Work from a trusted copy, review each change and study every prompt raised
+   - **a**: Ask Claude in Chrome to open the sender's page and compare the figures
+   - **b**: Turn on cross-app work, so that a second document checks each change
+   - **c**: Make the edits manually, and keep the assistant off this workbook
    - **d**: Rely on Auto approval, which blocks anything unsafe in Office files
 
-3. A manager must decide on a disciplinary case about a named employee, and Claude Tag is installed in their team's
-   busy channel. Which course of action matches the module?
-   - **a**: Take it to the people and policy that govern such matters
-   - **b**: Ask in the channel, with the employee's name left out of the request
-   - **c**: Put the case notes in a shared Project, then ask Claude from inside it
-   - **d**: Ask in the channel, then have Claude Tag delete the thread afterwards
+3. Contractors from a partner firm are added to a project channel where Claude Tag files and updates tickets for
+   staff in the company's ticket tool. The contractors must not be able to file or change tickets through Claude.
+   What should the organisation do?
+   - **a**: Have an admin choose which members are allowed to call on the assistant
+   - **b**: Disconnect the workspace from Claude until the contractors have left
+   - **c**: Have the staff use Claude only through their own direct messages
+   - **d**: Give Claude's ticket account the narrowest role that covers the work
 
-4. A sales lead needs an editable proposal built from last year's winning documents and a handful of fresh market
-   statistics. Which combination fits best?
-   - **a**: Cowork scheduled weekly, a connector for the facts, plain chat for the output
-   - **b**: A Project of earlier winners, Research for the figures, an artifact for the output
-   - **c**: Claude in Chrome for the facts, memory for the past pitches, a skill for the output
-   - **d**: A Project of earlier winners, Research for the figures, an inline reply for the output
+4. Each month a facilities manager wants help to go through contractors' repair write-ups stored as files, update a
+   spreadsheet of overdue jobs, and share the list where all their colleagues can see it and steer the follow-ups.
+   Which combination fits best?
+   - **a**: Plain chat with the write-ups uploaded, then Claude Tag in the team channel
+   - **b**: Cowork on a dedicated reports folder, then Claude Tag in the team channel
+   - **c**: Claude in Chrome on the write-up files, then Claude Tag in a direct message
+   - **d**: The Excel add-in on the open spreadsheet, then Claude Tag in a direct message
 
 <details>
 <summary>Answer key</summary>
@@ -173,13 +177,16 @@ This quiz covers every page of the module.
    and to start scheduled tasks simple and review each run (Cowork page). *a* is ruled out because the habits say to
    "grant access selectively and avoid financial documents, credentials and personal records", and an entire drive
    does the opposite. *b* is ruled out because the add-in can "read and write only files that are open at that
-   moment". *d* is ruled out because in that mode "nothing checks its actions", which is the reverse of review.
-2. **c**. The page asks you to start from a trusted copy, review changes before finalising and read each confirmation. *b* is ruled out because cross-app work lets Claude read and write more open files, which widens reach, and the page's pattern is "least reach, least action". *a* is ruled out because Claude in Chrome reaches "The pages and tabs in front of it, with your logins", and it would read untrusted content too. *d* is ruled out because the Auto mode described is for Chrome and Cowork, and the add-in page warns that "files from outside sources can contain hidden instructions".
-3. **a**. A sensitive HR matter belongs "with the people and policy that govern it", not in a tool whose results
-   others can read (task 5). *d* is ruled out because "A channel shows everything to everyone in it", and deleting
-   afterwards does not undo that. *b* is ruled out because "Claude Tag in a channel shows everything to everyone in
-   the channel", and removing a name leaves the matter visible. *c* is ruled out because "A shared Project, a
-   published artifact and a shared skill show their content to everyone with access", so it is not private.
-4. **b**. A Project holds recurring reference material, Research fetches fresh facts across many sources, and an artifact is the editable deliverable (task 1). *a* is ruled out because "Cowork or a scheduled task for a one-line draft adds risk and cost", and a weekly schedule is not asked for. *c* is ruled out because Claude in Chrome reaches "The pages and tabs in front of it, with your logins", which is an odd way to source market statistics. *d* is ruled out because the page names "A deliverable to hand over" as the job of an artifact, and an inline reply is not an editable document.
+   moment". *d* is ruled out because the first runs use Manual "because the task is new and writes files", and
+   "Only once the output is reliably right is a weekly schedule added".
+2. **c**. The add-in page says to "only use it with trusted spreadsheets", and a workbook from an unknown sender with hidden instructions is not one. *b* is ruled out because with cross-app work "one conversation can read an Excel model and write a Word memo or a slide", which widens what the hidden text can reach. *a* is ruled out because the Chrome habits say to "avoid unfamiliar pages or those with content from unknown people", and the sender's page is one. *d* is ruled out because the Auto mode described is for Chrome and Cowork, and the add-in page warns that "files from outside sources can contain hidden instructions".
+3. **a**. In a channel everyone gets the same access, and "Admins can restrict who can invoke Claude and where it
+   works", which is the check a channel that gained guests deserves (pages 2 and 3). *d* is ruled out because "the
+   narrowest role that covers the work" still lets Claude file and change tickets, and in a channel "everyone there gets the same
+   access", so the contractors could use it too. *b* is ruled out because disconnecting a workspace "permanently
+   deletes that workspace's Claude data", far more than the change needs. *c* is ruled out because a direct message
+   changes only the staff's route to "Your own claude.ai account and your own connectors", and the channel set-up
+   stays open to the contractors.
+4. **b**. A multi-step job over files is Cowork, kept to a dedicated folder, and work the whole team must see and steer belongs in a channel (pages 1 and 3). *a* is ruled out because chat is best for "work light on files and sources", and a month of write-ups plus a spreadsheet to update is a multi-step job over files. *c* is ruled out because Claude in Chrome reaches "The pages and tabs in front of it, with your logins", not a folder of files, and "Claude Tag in a channel shows everything to everyone in the channel; a direct message does not". *d* is ruled out because "Claude can read and write only files that are open at that moment" and "it cannot open, create or switch files itself", so the add-in cannot work through the stored write-ups, and a direct message is seen by its sender alone.
 
 </details>

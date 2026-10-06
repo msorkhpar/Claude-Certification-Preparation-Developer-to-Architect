@@ -101,8 +101,8 @@ Choosing a surface is therefore choosing how much of that wrapping you want to o
 
 ## Quiz
 
-1. A marketing manager with no engineering support needs weekly newsletters drafted in the house voice, using
-   last quarter's issues as reference. Which approach fits best?
+1. A marketing manager who does not write code wants weekly newsletters drafted in the house voice, using
+   last quarter's issues as reference. An IT colleague offers to build whatever they need. Which approach fits best?
    - **a**: A cloud-platform deployment so the drafts stay inside the company account
    - **b**: A scheduled script that calls the Messages API weekly with the issues attached
    - **c**: A bespoke agent on the Agent SDK that reads the archive before each draft
@@ -110,10 +110,10 @@ Choosing a surface is therefore choosing how much of that wrapping you want to o
 
 2. A bank must run every model call under the identity and permission setup of the cloud provider that already hosts
    its servers. Developers still want the same Claude models from their own code. Which option fits?
-   - **a**: Install Claude Code on every laptop and share one settings file
+   - **a**: Build on the Agent SDK and set its permission options there
    - **b**: Order access through that vendor's matching platform listing
    - **c**: Call the Messages API directly with rules in the system prompt
-   - **d**: Create an app Project and write the rules into its instructions
+   - **d**: Send the calls to Claude Managed Agents and its hosted harness
 
 3. A developer wrote "answer in French" into a Project's instructions. Their own integration, calling the
    Messages API, still replies in English. What is the best explanation?
@@ -125,13 +125,14 @@ Choosing a surface is therefore choosing how much of that wrapping you want to o
 <details>
 <summary>Answer key</summary>
 
-1. **d**. A Project holds instructions and reference files for recurring non-developer work (the apps bullet and the first trap). *b* is ruled out because "A recurring chat workflow for a non-developer does not need code". *c* is ruled out because the Agent SDK row is for "Developers building custom agents", and a Project already holds the archive without code. *a* is ruled out because the cloud platforms row is for "Organisations that buy Claude through a cloud account", which the scenario never mentions.
+1. **d**. A Project holds instructions and reference files for recurring non-developer work, and the colleague's offer does not change who does the work (the apps bullet and the first trap). *b* is ruled out because "A recurring chat workflow for a non-developer does not need code", and "building an endpoint adds cost and maintenance for nothing". *c* is ruled out because the Agent SDK row is for "Developers building custom agents", and a Project already holds the archive without code. *a* is ruled out because the table points "Security requires all traffic through the company's cloud account" to a cloud platform, and the scenario states no such rule.
 2. **b**. The table sends "Security requires all traffic through the company's cloud account" to a cloud platform,
    which adds its own identity and permission model while serving the same models. *a* is ruled out because the
-   shared engine only means "your repo's CLAUDE.md files, settings, and MCP servers work across all of them", not
-   that identity rules are enforced. *c* is ruled out because "a cloud platform adds its own identity and permission
-   model", while a system prompt only instructs the model. *d* is ruled out because "A Project's instructions do not
-   reach the API", and the developers call the models from code.
+   Agent SDK row is for "Developers building custom agents", and the scenario asks for no custom agent, only the
+   cloud provider's identity setup. *c* is ruled out because "a cloud platform
+   adds its own identity and permission model", while a system prompt only instructs the model. *d* is ruled out
+   because the managed agents row is for "Teams with long-running, asynchronous work", and the scenario describes
+   no long-running job, only calls that must run under the provider's identity setup.
 3. **d**. Where instructions live decides where they are read, and a Project's instructions do not reach the API (the carry-across section and the third trap). *a* is ruled out because "The model is the same family behind every door, so its capabilities and its quirks are the same". *c* is ruled out because the instruction lives "In the API, in the system prompt your code sends", and no model parameter is involved. *b* is ruled out because "Instructions written for one place do not appear in another unless you put them there", and no other surface is a precondition.
 
 </details>
@@ -143,7 +144,7 @@ This quiz covers both pages of the module.
 1. A team's research job runs for hours with nobody watching: mostly routine page fetching and note-taking,
    with a few hard judgment calls. Which design fits?
    - **a**: Hand it to managed agents with cheap workers and one strong decider
-   - **b**: Chat through an app Project, with a person starting each step by hand
+   - **b**: Run it through the app's research feature with a Project for notes
    - **c**: Run the strongest tier through the Messages API on the team's own servers
    - **d**: Use the fastest tier for each step, then escalate only when the job fails
 
@@ -151,7 +152,7 @@ This quiz covers both pages of the module.
    the source. What is the most likely concern?
    - **a**: That snapshot has a retirement date, and nothing plans the move
    - **b**: Dated ids are rejected by the Messages API in favour of aliases
-   - **c**: A shorter alias would always follow new releases and should replace it
+   - **c**: A shorter alias would follow new releases and should replace it
    - **d**: Hard-coded ids bypass the pinned snapshot, so replies drift between calls
 
 3. A team's helper remembered the conversation when it ran in an app chat. Rebuilt on the Messages API, it answers
@@ -159,22 +160,22 @@ This quiz covers both pages of the module.
    - **a**: Turn on the endpoint's stored-chat setting for the account
    - **b**: Add "remember our history" to the system prompt
    - **c**: Include the prior exchange in the body of each call
-   - **d**: Move the helper to a cloud platform that keeps the thread
+   - **d**: Copy the app's Project instructions into the new setup
 
 4. A team calls the same Claude model through the Claude API and through Amazon Bedrock, reusing one config
    file with a single name string for both. Both platforms list the model as current and access is granted,
    but Bedrock answers that the name is unknown. What is the most likely cause?
    - **a**: Bedrock runs a different generation of the family, so the name never matched
    - **b**: Each vendor gives the family its own id, so the value must differ
-   - **c**: The account lacks the identity and permission setup that Bedrock requires
-   - **d**: Bedrock already retired that model, so its name is unknown there
+   - **c**: Cloud platforms expect a date-stamped snapshot name, not a plain one
+   - **d**: The file holds the full id, while Bedrock accepts only the short alias
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. A job that runs for hours belongs in managed agents, and an orchestrator that hands bulk work to cheaper workers puts most tokens on the cheaper model while a stronger one takes the hard calls. *b* is ruled out because the apps give "Chat, Projects, artifacts, research, connectors; a person in the loop", and nobody is watching here. *c* is ruled out because the situation table points "A job runs for hours and should not tie up your servers" to managed agents. *d* is ruled out because "the cheapest model for everything under-serves exactly the cases that need depth".
-2. **a**. The table shows retirement dates, and an id with a retirement date needs a migration plan before the date (the third trap). *d* is ruled out because "every Claude model id is a pinned snapshot", so replies do not drift under a fixed id. *b* is ruled out because "For Haiku 4.5 the dated id is the snapshot and the shorter name is an alias", so dated ids are accepted. *c* is ruled out because the page counts "including the dateless IDs used from the 4.6 generation on" among the pinned snapshots, so an alias is no more of a tracker.
-3. **c**. Ownership of state decides where history lives: "The API keeps nothing; your code resends history", so each request must carry the earlier turns (the carry-across section). *a* is ruled out because "The API keeps nothing", so no account setting stores the chat. *b* is ruled out because "The API sends only what you put in the request", and a sentence in the system prompt carries no history. *d* is ruled out because the platforms offer "Same model family; different ids, access and sometimes features", and "a cloud platform adds its own identity and permission model", not a stored thread.
-4. **b**. The cloud platforms bullet lists a separate id for each platform, for example anthropic.claude-opus-5-5 on Amazon Bedrock. *a* is ruled out because the page says "Same model family; different ids, access and sometimes features", so the generation is the same and only the id differs. *c* is ruled out because the scenario grants access and the error concerns the name: "The ids differ, and the platform sets its own dates". *d* is ruled out because the scenario says both platforms list the model as current, as the page's example "anthropic.claude-opus-5-5 on Amazon Bedrock" shows for a current model.
+1. **a**. A job that runs for hours belongs in managed agents, and an orchestrator that hands bulk work to cheaper workers puts most tokens on the cheaper model while a stronger one takes the hard calls. *b* is ruled out because "An app has a person at every step", and nobody is watching this job. *c* is ruled out because the situation table points "A job runs for hours and should not tie up your servers" to managed agents. *d* is ruled out because the page's executor "escalates hard decisions to an advisor", while a wrong judgment call does not make the job fail, so escalating on failure never sends the hard calls upward and leaves them with the model that "under-serves exactly the cases that need depth".
+2. **a**. The table shows retirement dates, and an id with a retirement date needs a migration plan before the date (the third trap). *d* is ruled out because "every Claude model id is a pinned snapshot", so replies do not drift under a fixed id. *b* is ruled out because "For Haiku 4.5 the dated id is the snapshot and the shorter name is an alias", so dated ids are accepted. *c* is ruled out because the page counts "including the dateless IDs used from the 4.6 generation on" among the pinned snapshots, so an alias is no more of a tracker, and its advice is to "Pin ids in production and migrate on purpose".
+3. **c**. Ownership of state decides where history lives: "The API keeps nothing; your code resends history", so each request must carry the earlier turns (the carry-across section). *a* is ruled out because "The API keeps nothing", so no account setting stores the chat. *b* is ruled out because "The API sends only what you put in the request", and a sentence in the system prompt carries no history. *d* is ruled out because the memory came from the app itself, since "An app keeps your conversation", and "Instructions written for one place do not appear in another unless you put them there" concerns instructions, which carry no earlier turns.
+4. **b**. The cloud platforms bullet lists a separate id for each platform, for example anthropic.claude-opus-5-5 on Amazon Bedrock. *a* is ruled out because the page says "Same model family; different ids, access and sometimes features", so the generation is the same and only the id differs. *c* is ruled out because the page's example "anthropic.claude-opus-5-5 on Amazon Bedrock" carries no date, and the dated form "claude-haiku-4-5@20251001 on Google Cloud" is one platform's own id. *d* is ruled out because the models overview "lists a separate id for each platform", and the page's example "anthropic.claude-opus-5-5 on Amazon Bedrock" is a Bedrock id of its own, not a short Claude API alias.
 
 </details>

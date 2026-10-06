@@ -122,39 +122,38 @@ Review:    the file name is March. The pricing file for October exists in Drive.
 
 ## Quiz
 
-1. A sales team's Project holds a price list saved as a file in March. Finance revises that list every month in a
-   cloud-hosted document, and reps keep quoting March figures. What is the best fix?
+1. A sales rep's private Project holds a price list saved as a file in March. Finance revises that list every month
+   in a cloud-hosted document, and the rep keeps quoting March figures. What is the best fix?
    - **a**: Add each month's file next to the old ones and keep every one of them in view
    - **b**: Tell the instructions to favour whichever figure looks most recent in the files
    - **c**: Ask Claude to mention any figure it feels unsure about at the end of each reply
-   - **d**: Replace the snapshot with a synced Drive link, so the newest edition is read
+   - **d**: Swap the snapshot for a synced Drive link that tracks each new edition
 
 2. In March a colleague pastes the refund percentage into a Project's instructions. In June the policy changes, the
    team deletes the March policy file and uploads the June one, yet July replies still quote the March percentage.
    What explains it?
-   - **a**: A second copy of the figure sits in text that no replaced document reaches
+   - **a**: An earlier figure lives on in the standing rules, which the swap never touched
    - **b**: Memory carried the March percentage over from an earlier conversation
    - **c**: Retrieval over a large knowledge base returned an older passage than the June file
    - **d**: Sharing the Project keeps showing members the percentage they saw first
 
 3. An operations lead supports several outside organisations, whose background material and house rules must never
    mix. Which set-up fits?
-   - **a**: Run one long chat and paste each one's material into it in turn as the work arrives
-   - **b**: Create one Project and put everyone's guidance into a single instruction block
-   - **c**: Give each one a Project holding its own instructions and documents
-   - **d**: Rely on memory alone to keep each one's context apart from the others
+   - **a**: One Project, with each organisation's work kept in a chat of its own
+   - **b**: One Project, with each organisation's rules headed by its name in the instructions
+   - **c**: A Project apiece, each holding only its own instructions and reference files
+   - **d**: Plain chats outside Projects, with memory keeping each organisation's details
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. A synced document follows its source, so the next read gets the latest version (connecting a document instead of copying it). *b* is ruled out because "an instruction is a request and a deleted file is a guarantee", and the old figure would still be in the knowledge base. *c* is ruled out because "Quality in is quality out", and asking for self-doubt does not repair a stale source. *a* is ruled out because "Two versions of one document side by side invite Claude to quote either".
+1. **d**. A synced document follows its source, so the next read gets the latest version (connecting a document instead of copying it). *b* is ruled out because "an instruction is a request and a deleted file is a guarantee", and the old figure would still be in the knowledge base. *c* is ruled out because "nothing alerts you when a file goes stale", so Claude has no reason to doubt a March figure and the stale file stays in place. *a* is ruled out because "Two versions of one document side by side invite Claude to quote either".
 2. **a**. Instructions say how to work and files say what is true, so a figure typed into the instructions is a
    second copy that no file update will touch (the first trap). *b* is ruled out because memory "holds preferences
    and context that Claude picked up, not the authoritative text of a policy". *c* is ruled out because the team
-   deleted the March file, so no older passage remains to retrieve, and "a retrieved passage is only as good as its
-   source" says nothing about a figure that never lived in a file. *d* is ruled
+   deleted the March file, and "a deleted file is a guarantee" that no older passage remains to retrieve. *d* is ruled
    out because "anyone with access can read the instructions and every file in the knowledge base" describes who
    sees the content, not whether it is current.
-3. **c**. Each Project is a self-contained space, so "one Project's context does not leak into another" (the memory paragraph). *b* is ruled out because "Everything in a Project competes for the context window", and one block of mixed rules lets one organisation's rules bleed into another's. *a* is ruled out because the table says chats are "The actual tasks; each can be restarted without losing the first two", and one long chat gives that up. *d* is ruled out because "memory is not a substitute for a knowledge file" and holds preferences, not each organisation's authoritative documents.
+3. **c**. Each Project is a self-contained space, so "one Project's context does not leak into another" (the memory paragraph). *b* is ruled out because instructions are "Standing rules every chat in the Project starts with", so headings by name still put every organisation's rules into every chat. *a* is ruled out because a Project lets you "hold focused chats that start with all of that already in view", so a chat of its own still sees every organisation's files and rules. *d* is ruled out because "memory is not a substitute for a knowledge file" and holds preferences, not each organisation's authoritative documents.
 
 </details>

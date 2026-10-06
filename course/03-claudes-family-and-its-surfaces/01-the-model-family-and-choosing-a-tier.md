@@ -103,19 +103,19 @@ under-serves exactly the cases that need depth.
    - **a**: Begin with the lowest-priced tier and score it on genuine samples
    - **b**: Begin with Claude Opus 5.5, because the overview names it the usual starting point
    - **c**: Begin with the top tier, then step down if the budget complains
-   - **d**: Send the first thousand to each tier and keep whichever answers quickest
+   - **d**: Send the first thousand to each tier and keep whichever bills least
 
 2. A coding agent running on the mid tier fails a handful of hard tasks each day. The team plans to move the
    entire system to the top tier. Which alternative should they try first?
-   - **a**: Move all traffic to Claude Fable 5.1, then work the effort down later
+   - **a**: Switch on fast mode for the hard tasks and compare the new results
    - **b**: Drop to the fastest tier and retry each failure several times
    - **c**: Run the difficult cases at higher effort and measure the change
-   - **d**: Pin the id to a dated snapshot so results stop varying
+   - **d**: Pin the id to a dated snapshot in case the model has drifted
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. Simple, high-volume, cost-sensitive work fits the efficiency-first path, validated on real data (the two strategies). *c* is ruled out because the capability-first path is "Suited to complex reasoning, accuracy that outweighs cost, and high-autonomy agent work", and this task is the opposite. *b* is ruled out because the efficiency-first path says to "Begin with the fast, low-cost tier, test thoroughly, and move up only for a gap you can name", and the overview's default is only a starting point for most workloads. *d* is ruled out because the decision rule is to "compare accuracy, quality and edge-case handling", and speed per ticket is irrelevant here.
-2. **c**. The page says tuning effort is often a better lever than switching models, and a narrower change targets the hard tasks only. *a* is ruled out because the largest model "raises cost and latency on work that does not need it", and effort would do. *b* is ruled out because the efficiency-first path says to "move up only for a gap you can name", and retrying hard tasks on a weaker tier moves the wrong way. *d* is ruled out because "an id with a retirement date needs a migration plan before the date, not after" is about the life of an id and says nothing about capability.
+1. **a**. Simple, high-volume, cost-sensitive work fits the efficiency-first path, validated on real data (the two strategies). *c* is ruled out because the capability-first path is "Suited to complex reasoning, accuracy that outweighs cost, and high-autonomy agent work", and this task is the opposite. *b* is ruled out because the efficiency-first path says to "Begin with the fast, low-cost tier, test thoroughly, and move up only for a gap you can name", and the overview's default is only a starting point for most workloads. *d* is ruled out because the decision rule is to "compare accuracy, quality and edge-case handling, then weigh cost", and a choice on price alone never checks the labels.
+2. **c**. The page says tuning effort is often a better lever than switching models, and a narrower change targets the hard tasks only. *a* is ruled out because fast mode offers "up to 2.5x higher output speed at premium pricing", which buys speed at a higher price, not more depth on hard tasks. *b* is ruled out because "the cheapest model for everything under-serves exactly the cases that need depth", and retrying hard tasks on a weaker tier moves the wrong way. *d* is ruled out because "every Claude model id is a pinned snapshot", so the model behind a fixed id has not drifted and pinning it again adds no depth on hard tasks.
 
 </details>

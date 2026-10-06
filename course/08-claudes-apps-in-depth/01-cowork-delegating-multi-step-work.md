@@ -123,30 +123,31 @@ changed and actions taken by scheduled tasks on your behalf.
 
 1. A finance analyst wants Claude to turn a folder of invoices into a reconciled spreadsheet and a summary, handled
    on its own while they are in meetings. Which choice fits?
-   - **a**: Run a Research query on the web, then type the totals into a sheet by hand
-   - **b**: Paste each invoice into a chat and steer the reply one turn at a time
+   - **a**: Add the invoices to a Project, then request the sheet and summary in chat
+   - **b**: Upload the invoices to a chat and ask for both outputs in a single turn
    - **c**: Attach the whole company drive so that nothing the task needs is missing
    - **d**: Delegate it to Cowork with a dedicated directory, then inspect the result
 
 2. A team lead sets up a weekly Cowork task that reads a shared inbox and replies to customers. On the first
-   scheduled run no one is watching. Which practice does the safety page recommend instead?
-   - **a**: Begin with something harmless like summaries, then inspect every outcome
+   scheduled run no one is watching. What should the team lead change first?
+   - **a**: Limit early runs to summarising messages, so someone reviews each output
    - **b**: Start in Auto mode, as it checks every action for safety on its own
-   - **c**: Give the task access to every folder, so that replies can cite old threads
-   - **d**: Keep the task unscheduled but let it send messages straight away
+   - **c**: Connect the folder of past replies too, so drafts can match earlier answers
+   - **d**: Run it daily rather than weekly, so that any mistakes surface sooner
 
-3. A user connects a documents folder to Cowork. One file contains hidden text telling Claude to send the folder's
-   contents to an address. The cloud sandbox is isolated and temporary. Why can this still cause harm?
-   - **a**: Hidden text works only when the desktop app is closed
-   - **b**: The sandbox is permanent, so injected text stays in it after the session
-   - **c**: Protection covers the network only, not actions via linked services
-   - **d**: Cowork cannot tell files from instructions unless approval mode is off
+3. A user connects a documents folder and their mailbox to Cowork. One file carries an invisible instruction telling
+   Claude to mail the folder's contents to an address. The cloud environment is isolated and temporary. Why can this
+   still cause harm?
+   - **a**: The hidden text can reach the home network from inside the sandbox
+   - **b**: The hidden text stays in the sandbox and acts again in later sessions
+   - **c**: The hidden text can send messages via a linked tool the sandbox leaves open
+   - **d**: The hidden text lets Claude reach folders the user never connected
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. There is a clear deliverable that touches files, so it is a delegation, and a dedicated folder keeps the reach narrow (the worked task). *b* is ruled out because chat is "A conversation you steer turn by turn", which defeats working alone while they are away. *c* is ruled out because the safety habits say to "create a dedicated working folder" and not to grant whole drives. *a* is ruled out because Research suits open questions across many sources, and the table puts "A clear deliverable that touches your files or tools" under Cowork.
-2. **a**. The page says to start scheduled tasks with low-risk work such as summaries and to review the output after each run. *b* is ruled out because Auto mode checks each action "but it still runs on its own", and the habits recommend Manual approval for new tools and hard-to-undo actions. *c* is ruled out because the habits say to "grant access selectively and avoid financial documents, credentials and personal records". *d* is ruled out because an unscheduled task that sends messages immediately has no review step, and the page says "Review the output after each run".
-3. **c**. The isolation "doesn't limit what Claude reads or does" through the connected tools, so the protection covers the network and not the files Claude can already reach. *b* is ruled out because the environment is "created for that session" and "removed when the session ends". *a* is ruled out because the page says injected instructions are risky "when Claude can read untrusted content and also take consequential actions", whether or not the app is open. *d* is ruled out because nothing on the page links the risk to switching approval off, and the page says to "use Manual approval for sensitive files, new tools and hard-to-undo actions".
+1. **d**. There is a clear deliverable that touches files, so it is a delegation, and a dedicated folder keeps the reach narrow (the worked task). *b* is ruled out because chat is best for "work light on files and sources", and a folder of invoices is heavy on files. *c* is ruled out because the safety habits say to "create a dedicated working folder" and not to grant whole drives. *a* is ruled out because a Project still works as chat, "A conversation you steer turn by turn", while "A clear deliverable that touches your files or tools" that runs on its own during meetings is what Cowork is for.
+2. **a**. Replying to customers is a consequential action, and the page says to start scheduled tasks with low-risk work such as summaries and to review the output after each run. *b* is ruled out because Auto mode checks each action "but it still runs on its own", and the habits recommend Manual approval for new tools and hard-to-undo actions. *c* is ruled out because more context leaves the cause in place: "Scheduled tasks run while you are away, so you cannot watch them", and the replies would still go out unchecked. *d* is ruled out because more frequent runs only repeat errors faster: "A recurring task repeats its mistakes unattended".
+3. **c**. The isolation "doesn't limit what Claude reads or does" through the connected tools, so the protection covers the network and not what Claude can send through the connected mailbox. *b* is ruled out because the environment "is removed when the session ends", so nothing in it carries into a later session. *a* is ruled out because the sandbox "cannot reach your home or company network", which is the part isolation does protect. *d* is ruled out because Claude "reaches only folders you explicitly connected", and the harm here comes from what it already reaches.
 
 </details>

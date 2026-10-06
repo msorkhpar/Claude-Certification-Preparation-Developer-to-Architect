@@ -141,19 +141,19 @@ is not recommended on pages with regulated data. A tool's availability can itsel
    - **a**: Upload the comments unchanged and tell Claude to leave all names out of the summary
    - **b**: Get a manager's approval and upload the file to a tool the team already likes
    - **c**: Swap each name for a code and treat the file as anonymous
-   - **d**: Redact identifiers and clinical specifics, keep the grouping, then check the output
+   - **d**: Strip identifiers and medical specifics, keeping the grouping field
 
 2. A team uses Claude to draft decision letters about loan applications that go straight to applicants. Under the Usage
    Policy which pair of safeguards applies to this use?
    - **a**: A qualified reviewer before sending, and disclosure that AI helped
-   - **b**: A confidentiality footer on each letter, and a monthly accuracy count
+   - **b**: A reviewer who samples letters after sending, and an AI notice in each
    - **c**: A second model's approval of each letter, and removal of applicants' names
-   - **d**: A legal sign-off once a year, and a note in the privacy policy
+   - **d**: A loan officer's sign-off on each letter, and no AI notice after that
 
 3. A consultant says: "These sales figures are for internal analysis only, so the customer identities can stay in
-   the file." The analyst must compare purchases across two years, and policy restricts regulated personal data.
+   the file." The analyst must compare how each customer group's spending changed between two years, and policy restricts regulated personal data.
    What is the best response?
-   - **a**: Swap each name for a code, keep the codes in the file, and then call the data anonymous
+   - **a**: Drop the names but keep each customer's exact purchase dates and home town
    - **b**: Keep the file as it is, since internal analysis lowers the data's class to internal
    - **c**: Aggregate to totals per segment and per period, then remove names and account numbers
    - **d**: Keep the file and ask Claude not to retain the figures after the session ends
@@ -165,10 +165,10 @@ is not recommended on pages with regulated data. A tool's availability can itsel
    summary needs, then check for re-identification. *a* is ruled out because asking Claude to leave names out "is a
    request, and it does not satisfy a policy control". *b* is ruled out because the organisation's policy "decides which tools and data are permitted at work", and a manager's liking for a tool does not change that. *c* is ruled out because "Pseudonymised
    data is still personal data under many rules, because the key can reverse it".
-2. **a**. Financial decisions that affect individuals are high-risk: a qualified professional reviews them and recipients are told AI helped. *b* is ruled out because the requirement is that you "disclose that AI helped produce it, at a minimum at the beginning of each session", which a footer and a count do not provide. *c* is ruled out because the reviewer must be a "qualified professional in the field", and a second model is not one. *d* is ruled out because the review must happen "before it is disseminated or finalised", not once a year.
-3. **c**. Aggregation is the strongest technique, the comparison needs trends and not rows, and the class is set by
-   the data. *a* is ruled out because "Pseudonymised data is still personal data under many rules, because the key
-   can reverse it". *b* is ruled out because "internal use does not change the class of the data". *d* is ruled out
+2. **a**. Financial decisions that affect individuals are high-risk: a qualified professional reviews them and recipients are told AI helped. *b* is ruled out because the review must happen "before it is disseminated or finalised", and a sample checked after sending comes too late. *c* is ruled out because the reviewer must be a "qualified professional in the field", and a second model is not one. *d* is ruled out because when output is presented directly to individuals "you must disclose that AI helped produce it", whoever reviewed it.
+3. **c**. Aggregation is the strongest technique, a comparison of groups needs totals and not rows, and the class is set by
+   the data. *a* is ruled out because "a rare job title, a small town and an exact date can identify a person without a
+   name", and a comparison of groups needs neither the dates nor the towns. *b* is ruled out because "internal use does not change the class of the data". *d* is ruled out
    because asking Claude not to retain the file "is a request, and it does not satisfy a policy control".
 
 </details>

@@ -10,14 +10,14 @@
         "a": "Begin with the lowest-priced tier and score it on genuine samples",
         "b": "Begin with Claude Opus 5.5, because the overview names it the usual starting point",
         "c": "Begin with the top tier, then step down if the budget complains",
-        "d": "Send the first thousand to each tier and keep whichever answers quickest"
+        "d": "Send the first thousand to each tier and keep whichever bills least"
       },
       "key": "a",
       "explanation": {
         "a": "Simple, high-volume, cost-sensitive work fits the efficiency-first path, validated on real data (the two strategies).",
         "c": "Ruled out because the capability-first path is \"Suited to complex reasoning, accuracy that outweighs cost, and high-autonomy agent work\", and this task is the opposite.",
         "b": "Ruled out because the efficiency-first path says to \"Begin with the fast, low-cost tier, test thoroughly, and move up only for a gap you can name\", and the overview's default is only a starting point for most workloads.",
-        "d": "Ruled out because the decision rule is to \"compare accuracy, quality and edge-case handling\", and speed per ticket is irrelevant here."
+        "d": "Ruled out because the decision rule is to \"compare accuracy, quality and edge-case handling, then weigh cost\", and a choice on price alone never checks the labels."
       }
     },
     {
@@ -26,24 +26,24 @@
       "scope": "page",
       "stem": "A coding agent running on the mid tier fails a handful of hard tasks each day. The team plans to move the entire system to the top tier. Which alternative should they try first?",
       "options": {
-        "a": "Move all traffic to Claude Fable 5.1, then work the effort down later",
+        "a": "Switch on fast mode for the hard tasks and compare the new results",
         "b": "Drop to the fastest tier and retry each failure several times",
         "c": "Run the difficult cases at higher effort and measure the change",
-        "d": "Pin the id to a dated snapshot so results stop varying"
+        "d": "Pin the id to a dated snapshot in case the model has drifted"
       },
       "key": "c",
       "explanation": {
         "c": "The page says tuning effort is often a better lever than switching models, and a narrower change targets the hard tasks only.",
-        "a": "Ruled out because the largest model \"raises cost and latency on work that does not need it\", and effort would do.",
-        "b": "Ruled out because the efficiency-first path says to \"move up only for a gap you can name\", and retrying hard tasks on a weaker tier moves the wrong way.",
-        "d": "Ruled out because \"an id with a retirement date needs a migration plan before the date, not after\" is about the life of an id and says nothing about capability."
+        "a": "Ruled out because fast mode offers \"up to 2.5x higher output speed at premium pricing\", which buys speed at a higher price, not more depth on hard tasks.",
+        "b": "Ruled out because \"the cheapest model for everything under-serves exactly the cases that need depth\", and retrying hard tasks on a weaker tier moves the wrong way.",
+        "d": "Ruled out because \"every Claude model id is a pinned snapshot\", so the model behind a fixed id has not drifted and pinning it again adds no depth on hard tasks."
       }
     },
     {
       "id": "02-the-surfaces-one-model-behind-many#q1",
       "page": "02-the-surfaces-one-model-behind-many.md",
       "scope": "page",
-      "stem": "A marketing manager with no engineering support needs weekly newsletters drafted in the house voice, using last quarter's issues as reference. Which approach fits best?",
+      "stem": "A marketing manager who does not write code wants weekly newsletters drafted in the house voice, using last quarter's issues as reference. An IT colleague offers to build whatever they need. Which approach fits best?",
       "options": {
         "a": "A cloud-platform deployment so the drafts stay inside the company account",
         "b": "A scheduled script that calls the Messages API weekly with the issues attached",
@@ -52,10 +52,10 @@
       },
       "key": "d",
       "explanation": {
-        "d": "A Project holds instructions and reference files for recurring non-developer work (the apps bullet and the first trap).",
-        "b": "Ruled out because \"A recurring chat workflow for a non-developer does not need code\".",
+        "d": "A Project holds instructions and reference files for recurring non-developer work, and the colleague's offer does not change who does the work (the apps bullet and the first trap).",
+        "b": "Ruled out because \"A recurring chat workflow for a non-developer does not need code\", and \"building an endpoint adds cost and maintenance for nothing\".",
         "c": "Ruled out because the Agent SDK row is for \"Developers building custom agents\", and a Project already holds the archive without code.",
-        "a": "Ruled out because the cloud platforms row is for \"Organisations that buy Claude through a cloud account\", which the scenario never mentions."
+        "a": "Ruled out because the table points \"Security requires all traffic through the company's cloud account\" to a cloud platform, and the scenario states no such rule."
       }
     },
     {
@@ -64,17 +64,17 @@
       "scope": "page",
       "stem": "A bank must run every model call under the identity and permission setup of the cloud provider that already hosts its servers. Developers still want the same Claude models from their own code. Which option fits?",
       "options": {
-        "a": "Install Claude Code on every laptop and share one settings file",
+        "a": "Build on the Agent SDK and set its permission options there",
         "b": "Order access through that vendor's matching platform listing",
         "c": "Call the Messages API directly with rules in the system prompt",
-        "d": "Create an app Project and write the rules into its instructions"
+        "d": "Send the calls to Claude Managed Agents and its hosted harness"
       },
       "key": "b",
       "explanation": {
         "b": "The table sends \"Security requires all traffic through the company's cloud account\" to a cloud platform,\n   which adds its own identity and permission model while serving the same models.",
-        "a": "Ruled out because the\n   shared engine only means \"your repo's CLAUDE.md files, settings, and MCP servers work across all of them\", not\n   that identity rules are enforced.",
-        "c": "Ruled out because \"a cloud platform adds its own identity and permission\n   model\", while a system prompt only instructs the model.",
-        "d": "Ruled out because \"A Project's instructions do not\n   reach the API\", and the developers call the models from code."
+        "a": "Ruled out because the\n   Agent SDK row is for \"Developers building custom agents\", and the scenario asks for no custom agent, only the\n   cloud provider's identity setup.",
+        "c": "Ruled out because \"a cloud platform\n   adds its own identity and permission model\", while a system prompt only instructs the model.",
+        "d": "is ruled out\n   because the managed agents row is for \"Teams with long-running, asynchronous work\", and the scenario describes\n   no long-running job, only calls that must run under the provider's identity setup."
       }
     },
     {
@@ -103,16 +103,16 @@
       "stem": "A team's research job runs for hours with nobody watching: mostly routine page fetching and note-taking, with a few hard judgment calls. Which design fits?",
       "options": {
         "a": "Hand it to managed agents with cheap workers and one strong decider",
-        "b": "Chat through an app Project, with a person starting each step by hand",
+        "b": "Run it through the app's research feature with a Project for notes",
         "c": "Run the strongest tier through the Messages API on the team's own servers",
         "d": "Use the fastest tier for each step, then escalate only when the job fails"
       },
       "key": "a",
       "explanation": {
         "a": "A job that runs for hours belongs in managed agents, and an orchestrator that hands bulk work to cheaper workers puts most tokens on the cheaper model while a stronger one takes the hard calls.",
-        "b": "Ruled out because the apps give \"Chat, Projects, artifacts, research, connectors; a person in the loop\", and nobody is watching here.",
+        "b": "Ruled out because \"An app has a person at every step\", and nobody is watching this job.",
         "c": "Ruled out because the situation table points \"A job runs for hours and should not tie up your servers\" to managed agents.",
-        "d": "Ruled out because \"the cheapest model for everything under-serves exactly the cases that need depth\"."
+        "d": "Ruled out because the page's executor \"escalates hard decisions to an advisor\", while a wrong judgment call does not make the job fail, so escalating on failure never sends the hard calls upward and leaves them with the model that \"under-serves exactly the cases that need depth\"."
       }
     },
     {
@@ -123,7 +123,7 @@
       "options": {
         "a": "That snapshot has a retirement date, and nothing plans the move",
         "b": "Dated ids are rejected by the Messages API in favour of aliases",
-        "c": "A shorter alias would always follow new releases and should replace it",
+        "c": "A shorter alias would follow new releases and should replace it",
         "d": "Hard-coded ids bypass the pinned snapshot, so replies drift between calls"
       },
       "key": "a",
@@ -131,7 +131,7 @@
         "a": "The table shows retirement dates, and an id with a retirement date needs a migration plan before the date (the third trap).",
         "d": "Ruled out because \"every Claude model id is a pinned snapshot\", so replies do not drift under a fixed id.",
         "b": "Ruled out because \"For Haiku 4.5 the dated id is the snapshot and the shorter name is an alias\", so dated ids are accepted.",
-        "c": "Ruled out because the page counts \"including the dateless IDs used from the 4.6 generation on\" among the pinned snapshots, so an alias is no more of a tracker."
+        "c": "Ruled out because the page counts \"including the dateless IDs used from the 4.6 generation on\" among the pinned snapshots, so an alias is no more of a tracker, and its advice is to \"Pin ids in production and migrate on purpose\"."
       }
     },
     {
@@ -143,14 +143,14 @@
         "a": "Turn on the endpoint's stored-chat setting for the account",
         "b": "Add \"remember our history\" to the system prompt",
         "c": "Include the prior exchange in the body of each call",
-        "d": "Move the helper to a cloud platform that keeps the thread"
+        "d": "Copy the app's Project instructions into the new setup"
       },
       "key": "c",
       "explanation": {
         "c": "Ownership of state decides where history lives: \"The API keeps nothing; your code resends history\", so each request must carry the earlier turns (the carry-across section).",
         "a": "Ruled out because \"The API keeps nothing\", so no account setting stores the chat.",
         "b": "Ruled out because \"The API sends only what you put in the request\", and a sentence in the system prompt carries no history.",
-        "d": "Ruled out because the platforms offer \"Same model family; different ids, access and sometimes features\", and \"a cloud platform adds its own identity and permission model\", not a stored thread."
+        "d": "Ruled out because the memory came from the app itself, since \"An app keeps your conversation\", and \"Instructions written for one place do not appear in another unless you put them there\" concerns instructions, which carry no earlier turns."
       }
     },
     {
@@ -161,15 +161,15 @@
       "options": {
         "a": "Bedrock runs a different generation of the family, so the name never matched",
         "b": "Each vendor gives the family its own id, so the value must differ",
-        "c": "The account lacks the identity and permission setup that Bedrock requires",
-        "d": "Bedrock already retired that model, so its name is unknown there"
+        "c": "Cloud platforms expect a date-stamped snapshot name, not a plain one",
+        "d": "The file holds the full id, while Bedrock accepts only the short alias"
       },
       "key": "b",
       "explanation": {
         "b": "The cloud platforms bullet lists a separate id for each platform, for example anthropic.claude-opus-5-5 on Amazon Bedrock.",
         "a": "Ruled out because the page says \"Same model family; different ids, access and sometimes features\", so the generation is the same and only the id differs.",
-        "c": "Ruled out because the scenario grants access and the error concerns the name: \"The ids differ, and the platform sets its own dates\".",
-        "d": "Ruled out because the scenario says both platforms list the model as current, as the page's example \"anthropic.claude-opus-5-5 on Amazon Bedrock\" shows for a current model."
+        "c": "Ruled out because the page's example \"anthropic.claude-opus-5-5 on Amazon Bedrock\" carries no date, and the dated form \"claude-haiku-4-5@20251001 on Google Cloud\" is one platform's own id.",
+        "d": "Ruled out because the models overview \"lists a separate id for each platform\", and the page's example \"anthropic.claude-opus-5-5 on Amazon Bedrock\" is a Bedrock id of its own, not a short Claude API alias."
       }
     }
   ]

@@ -139,39 +139,42 @@ same thread.
 ## Quiz
 
 1. An operations lead runs Claude in Chrome in Automatically approve mode on a supplier portal. A page there holds
-   white-on-white text telling the assistant to open a payment form. Which behaviour does the page describe?
+   white-on-white text telling the assistant to settle an open invoice through the portal's payment form. What happens?
    - **a**: Claude follows the text, since the portal is a site the lead chose to visit
    - **b**: The extension strips hidden text before reading, so it never reaches Claude
-   - **c**: Screening switches off in this mode, since the lead has delegated the decisions
-   - **d**: Screening covers each step, and financial transactions stay off limits
+   - **c**: Claude asks the lead for approval at the form, then settles it once they agree
+   - **d**: Screening covers each step, and transactions are off limits under any setting
 
-2. An Enterprise team with the Compliance API enabled wants one record of the Excel add-in's use, and wants its
-   custom data-retention rule to govern it. What does the page support?
-   - **a**: Sessions are logged centrally, and the deletion schedule does not reach them
-   - **b**: Sessions appear in neither central log, and no schedule can apply
-   - **c**: Chat history is held on Anthropic's servers, and the deletion schedule governs it
-   - **d**: Use shows in the audit logs, and the deletion schedule applies to it
+2. An Enterprise team has the Compliance API enabled, and wants that API to hold a record of the Excel add-in's
+   use, governed by the organisation's custom rules on how long data is kept. Which gap should the team expect?
+   - **a**: Sessions are captured there, but the in-house retention policy does not cover them
+   - **b**: The audit logs record the sessions, but the Compliance API leaves them out
+   - **c**: Chat history sits on Anthropic's servers, beyond the in-house retention policy
+   - **d**: Sessions are captured there, but the backend keeps them until an admin deletes them
 
 3. A manager wants Claude Tag to draft a delicate reply from their saved connectors, hidden from the team, with the
    usage counted against their individual account. Where should they write to it?
    - **a**: In a channel where an admin set up the connectors for everyone there
-   - **b**: In a direct message, whose access and cost belong to the sender
+   - **b**: In a direct message of their own, outside any channel
    - **c**: In a channel, then ask Claude to hide the reply afterwards
    - **d**: In a group direct message with one trusted colleague
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The page describes classifiers that screen incoming content and each action, and purchases and other
-   financial transactions are off limits whatever the mode. *a* is ruled out because the page lists "completing
+1. **d**. The page describes classifiers that screen incoming content and each action, and "Making purchases or
+   financial transactions" is prohibited regardless of permission mode, so the invoice is not settled. *a* is ruled out because the page lists "completing
    instructions found in emails or web content" among the actions that are off limits. *b* is ruled out because the
-   page reports an attack rate while "saying plainly that the risk is not zero". *c* is ruled out because in this
-   mode "Claude keeps working and reviews each action for safety, blocking what it judges unsafe".
-2. **a**. The page says add-in sessions are included in the Compliance API, and that the add-ins "do not inherit
-   your organisation's custom data-retention settings". *d* is ruled out because "their activity is not in the
-   Enterprise audit logs". *b* is ruled out because "add-in sessions are included in it" for Enterprise
-   organisations with the Compliance API enabled. *c* is ruled out because "Chat history is stored in your browser,
-   not on Anthropic's servers".
+   page's own risk is "invisible text that tells Claude to fetch bank statements", which "Claude's classifiers screen
+   incoming content" to catch, so such text does reach Claude. *c* is ruled out because the permissions guide lists
+   "Making purchases or financial transactions" among the actions Claude is prohibited from "regardless of permission
+   mode", so no approval from the lead lets the payment go through.
+2. **a**. The page says add-in sessions are included in the Compliance API, but the add-ins "do not inherit
+   your organisation's custom data-retention settings", so the record exists and the team's own rules do not govern
+   it. *d* is ruled out because "Inputs and outputs are deleted from Anthropic's backend within 30 days", with no
+   admin step. *b* is ruled out because "their activity is not in the Enterprise audit logs", while "add-in sessions
+   are included in it" for Enterprise organisations with the Compliance API enabled. *c* is ruled out because "Chat
+   history is stored in your browser, not on Anthropic's servers".
 3. **b**. A direct message uses "Your own claude.ai account and your own connectors", and only you see it (the
    table). *a* is ruled out because a channel gives "What an admin set up for that channel; everyone there gets the
    same access" and the organisation pays. *d* is ruled out because a group direct message uses "The access an admin

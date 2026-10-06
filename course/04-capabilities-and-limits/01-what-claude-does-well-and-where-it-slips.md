@@ -119,7 +119,7 @@ produced with a confident voice.
 
 1. A finance team pastes forty invoice amounts into a prompt and asks Claude for the sum. The reply reads
    fluently and is off by a few cents. What is the most dependable correction?
-   - **a**: Let it call a code tool and pass on the tool's result
+   - **a**: Let it call a code tool to add them and pass on the tool's result
    - **b**: Add a closing line asking Claude to flag how sure it is of the total
    - **c**: Reformat the amounts into one column so the sum is easier to follow
    - **d**: Ask for the sum again with an instruction to double-check each step
@@ -127,10 +127,10 @@ produced with a confident voice.
 2. An inspection app sends shelf photographs and asks Claude how many bottles are visible. Totals are sometimes
    wrong on crowded shelves, and the total feeds a purchasing decision. Which design response fits what the
    documentation says?
-   - **a**: Shrink each photo heavily so the scene looks simpler to the model
+   - **a**: Shrink each photo to 150 pixels so the crowded scene looks simpler
    - **b**: Take the coordinates it returns for each bottle as exact positions to count
-   - **c**: Label the figures approximate and verify the important ones against real stock
-   - **d**: Switch to a larger model and treat its counts as final in the weekly purchasing report
+   - **c**: Label the figures approximate and check the important ones against stock
+   - **d**: Ask it to count slowly and list each bottle before giving the total
 
 <details>
 <summary>Answer key</summary>
@@ -139,8 +139,8 @@ produced with a confident voice.
 2. **c**. The vision page says counts can be approximate, and its closing advice is to verify interpretations in
    high-stakes cases, so the figures are labelled as estimates and the ones that matter are checked. *a* is ruled
    out because Claude "might hallucinate or make mistakes when interpreting low-quality, rotated, or very small
-   images under 200 pixels", so heavy shrinking makes it worse. *b* is ruled out because the vision list says "Coordinates and localisation outputs are approximate", so
-   they cannot give an exact count either. *d* is ruled out because the page says "Do not use Claude for
-   tasks requiring perfect precision or sensitive image analysis without human oversight", for any tier.
+   images under 200 pixels", so a 150 pixel photo makes it worse. *b* is ruled out because the vision list says "Coordinates and localisation outputs are approximate", so
+   they cannot give an exact count either. *d* is ruled out because the first trap says asking it to count carefully "does not change that the model sees pieces", and
+   counts "might not always be precisely accurate, especially with large numbers of small objects", however the request is worded.
 
 </details>

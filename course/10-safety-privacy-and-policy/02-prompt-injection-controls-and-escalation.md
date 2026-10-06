@@ -116,25 +116,25 @@ path**, and the wrong answers either comply silently with something unsafe, refu
 ## Quiz
 
 1. A company lets Claude read incoming support emails and also move money to buyers, both unattended. An email
-   carries hidden text telling it to pay a stranger. Which change preserves the mailbox reading and breaks the attack's condition?
+   carries hidden text telling it to pay a stranger. Which change stops the attack most reliably while the support workflow keeps running?
    - **a**: Tell Claude in standing instructions to ignore emails that change its task
-   - **b**: Have a person approve every transfer and leave the inbox access alone
-   - **c**: Add a home-built screen that scores each email, leaving transfers unattended
+   - **b**: Have a staff member review and approve each transfer before it goes out
+   - **c**: Add a home-built screen that scores each email before Claude reads it
    - **d**: Switch to a stronger model trained to resist hidden text in emails
 
 2. A security team must show which actions the company's Slack agent took in its ticket tool, under a name that is
-   not a person's, and must be able to cut the agent's access without touching staff accounts. Which setup meets
+   not a person's, and must be able to shut the agent out while every staff account stays usable. Which setup meets
    both?
-   - **a**: Let it act under the login of whoever tagged it
-   - **b**: Share one administrator login among the staff who use the agent
-   - **c**: Give it a login of its own, with a narrow role for the work
-   - **d**: Rely on the Microsoft 365 audit logs for every Claude product
+   - **a**: Let it act in the ticket tool under the login of whoever tagged it
+   - **b**: Limit where it answers in Slack to chosen channels and people
+   - **c**: Give it a separate login, with rights limited to what its work needs
+   - **d**: Rely on the Enterprise audit logs for every Claude product
 
 3. A manager asks an analyst to put a full customer export into Claude to get a report by tonight. Policy forbids regulated
    personal data in the tool. What is the best step?
    - **a**: Upload the export anyway, since the manager approved the request verbally
-   - **b**: Explain the clash, offer an aggregated version, and ask the rule's owner
-   - **c**: Refuse to produce the report and say nothing more about the matter to anyone
+   - **b**: Offer an aggregated version and take the clash to the rule's owner
+   - **c**: Decline the report and tell the manager the policy forbids it
    - **d**: Paste the export into a personal account that has no organisational policy attached
 
 <details>
@@ -142,13 +142,13 @@ path**, and the wrong answers either comply silently with something unsafe, refu
 
 1. **b**. The risk "exists when Claude can read untrusted content and take consequential actions", and a person on
    the consequential step removes the second condition while the first stays. *a* is ruled out because harm needs reading and acting together, "Take either away and the danger drops", and a standing instruction takes neither away. *d* is ruled out because the page's summary is "safer than before, not safe enough to stop paying attention", and a stronger model leaves reading and acting in place. *c*
-   is ruled out because a screen only filters, and the page's habit is to "Keep a person on consequential steps".
-2. **c**. Claude Tag acts through its own accounts, so its actions are traceable and its access can be cut off
+   is ruled out because a screen leaves Claude both reading the mail and moving money, while "the controls aim to separate them" and the habit is to "Keep a person on consequential steps".
+2. **c**. Claude Tag acts through its own accounts, each with the narrowest role, so its actions are traceable and its access can be cut off
    separately (the controls table). *a* is ruled out because the agent's "access can be cut off without touching
-   anyone else's" only when it does not borrow someone's login. *b* is ruled out because each account gets "the
-   narrowest role that covers the work", which a shared administrator login does not. *d* is ruled out because
-   "coverage is not uniform: the Microsoft 365 add-ins are outside the Enterprise audit logs".
-3. **b**. The best answer "raises the conflict with the person who owns the policy and proposes a compliant path". *a* is ruled out because "Missing or unclear policy is not permission", and a verbal approval is not an exception from the policy owner. *c* is ruled out because the wrong answers include those that "refuse everything, or quietly find a way around", and an aggregated report is a compliant path. *d* is ruled out because "do not work around the rule (a personal account, a different tool, a rewording that hides the data)".
+   anyone else's" only when it does not borrow someone's login. *b* is ruled out because "access limited to chosen channels and people" governs where it
+   acts in the chat tool, while its traceable name in the ticket tool comes from "its own accounts in other tools". *d* is ruled out because
+   "coverage is not uniform: the Microsoft 365 add-ins are outside the Enterprise audit logs", and a log cannot shut the agent out.
+3. **b**. The best answer "raises the conflict with the person who owns the policy and proposes a compliant path". *a* is ruled out because "Missing or unclear policy is not permission", and a verbal approval is not an exception from the policy owner. *c* is ruled out because a refusal alone skips the step "Offer a compliant alternative while you wait", and the wrong answers include those that "refuse everything, or quietly find a way around". *d* is ruled out because "do not work around the rule (a personal account, a different tool, a rewording that hides the data)".
 
 </details>
 
@@ -157,9 +157,9 @@ path**, and the wrong answers either comply silently with something unsafe, refu
 This quiz covers both pages of the module.
 
 1. A staffing firm lets Claude sort CVs into two piles for hiring managers, and also deploys it as the public face
-   of its applicant helpdesk. Which pair of duties does the Usage Policy impose?
-   - **a**: A qualified reviewer for the piles, and no notice of any kind at the helpdesk
-   - **b**: A notice of AI use on each pile that also covers the helpdesk, and no reviewer
+   of its applicant helpdesk, answering applicants directly. Which pair of duties does the Usage Policy impose?
+   - **a**: A qualified reviewer for the piles, and an AI notice only if an applicant asks
+   - **b**: An AI notice on each pile, and a qualified reviewer for helpdesk answers only
    - **c**: Removal of candidates' names from the piles, and a yearly audit of helpdesk answers
    - **d**: A qualified reviewer for each result, and an AI disclosure when each chat begins
 
@@ -168,29 +168,29 @@ This quiz covers both pages of the module.
    - **a**: Strip identifiers first and use only features its agreements allow
    - **b**: Upload it to a consumer account where chats are not used for training
    - **c**: Replace names with codes, keep the key in the sheet, and upload it
-   - **d**: Ask an owner to enable every feature, then upload to the strongest one
+   - **d**: Ask an owner to unlock the blocked features, then upload the sheet whole
 
 3. An analyst discovers that a shared document contains a hidden line aimed at AI tools, telling them to send a summary to
    an outside address. What should they do?
    - **a**: Report it to security and keep the file from assistants
    - **b**: Delete the line from the file and carry on working as before
-   - **c**: Test the line in a spare chat to see whether it really works
+   - **c**: Open the file in an assistant to see whether the line really works
    - **d**: Ask the author if the line is theirs, and wait for a reply
 
 4. A hospital group on a HIPAA-ready Enterprise plan asks whether staff may turn on memory, and also use Cowork on a
    shared folder of patient letters. Which answer fits the module?
-   - **a**: Turn on both, enabled for everyone by an owner
-   - **b**: Turn on Cowork only, restricted to a dedicated folder
-   - **c**: Turn on memory only, switched off per chat before the first message
+   - **a**: Enable both for an owner-approved pilot group
+   - **b**: Leave memory off and give Cowork a dedicated folder
+   - **c**: Enable memory only for staff without patient letters
    - **d**: Keep both switched off across the organisation
 
 <details>
 <summary>Answer key</summary>
 
 1. **d**. Employment decisions are high-risk, so a qualified professional reviews them, and a consumer-facing
-   chatbot must disclose that it is AI at the beginning of each chat session. *a* is ruled out because "consumer-facing chatbots must also disclose that the user is talking to AI rather than a human". *b* is ruled out because
-   a "qualified professional in the field must review the content or decision", so a notice cannot replace the
-   reviewer. *c* is ruled out because the review comes "before it is disseminated or finalised", not as a yearly
+   chatbot must disclose that it is AI at the beginning of each chat session. *a* is ruled out because a consumer-facing chatbot discloses "at a minimum at the beginning of each chat session", not only when asked. *b* is ruled out because
+   a "qualified professional in the field must review the content or decision", so the CV sorting needs the
+   reviewer, not the helpdesk alone. *c* is ruled out because the review comes "before it is disseminated or finalised", not as a yearly
    audit afterwards.
 2. **a**. Regulated data stays out of a tool unless the contract allows it, so identifiers go first, and strict
    agreements switch some features off. *d* is ruled out because "a strict setting can switch a feature off", so an
@@ -198,11 +198,11 @@ This quiz covers both pages of the module.
    unless policy and the contract explicitly allow it; otherwise anonymise first", whatever the plan's training
    terms. *c* is ruled out because "Pseudonymised data is still personal data under many rules, because the key can
    reverse it".
-3. **a**. A suspicious file is reported to the security or IT contact straight away, because the same file may reach others. *b* is ruled out because deleting the line leaves others unaware, and "the same file may reach others". *c* is ruled out because running it in a tool that reads untrusted content re-creates the danger, and "Take either away and the danger drops". *d* is ruled out because "A leak or a suspicious file is reported quickly; waiting lets it spread", and the route is the security or IT contact, not the author.
+3. **a**. A suspicious file is reported to the security or IT contact straight away, because the same file may reach others. *b* is ruled out because an odd instruction found in a document "goes to your security or IT contact", and deleting the line skips that report while "the same file may reach others". *c* is ruled out because Claude's apps "read your mail, your files and the web and can act on them", so opening the file in one hands the planted instruction to a tool that can carry it out. *d* is ruled out because "A leak or a suspicious file is reported quickly; waiting lets it spread", and the route is the security or IT contact, not the author.
 4. **d**. Memory is unavailable under HIPAA agreements and Cowork is not yet covered by the business associate
    agreement, so both stay off, and anything further goes to the person who owns the policy. *a* is ruled out because "a strict setting can
    switch a feature off", so an owner cannot enable what the agreement removes. *b* is ruled out because Cowork is
    "not yet covered under Anthropic's business associate agreement", and a dedicated folder limits reach, not
-   coverage. *c* is ruled out because "the memory feature is not available to organisations with HIPAA, public-sector or custom retention agreements".
+   coverage. *c* is ruled out because "the memory feature is not available to organisations with HIPAA, public-sector or custom retention agreements", which applies to the organisation, not to chosen staff.
 
 </details>

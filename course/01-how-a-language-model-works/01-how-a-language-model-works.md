@@ -139,7 +139,7 @@ for. The window sizes in the model table of module 3 matter for the same reason.
 ## Quiz
 
 1. A nightly job sends one request per report to a model with a one-million context window. The reports
-   average about 650,000 words and are accepted. After the vendor moves the job to Claude Opus 5.5, which has
+   run up to about 650,000 words and are accepted. After the vendor moves the job to Claude Opus 5.5, which has
    the same window, the largest reports fail with "prompt is too long". The reports have not changed. What is
    the most likely cause?
    - **a**: The newer tokenizer turns identical prose into noticeably more tokens than before
