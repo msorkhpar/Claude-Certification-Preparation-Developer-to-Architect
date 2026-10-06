@@ -64,6 +64,5 @@ nothing about Claude.
 - **The licence decides how a source is used.** Material whose licence permits copying is
   credited on the page where it is used; everything else is read for understanding and written
   fresh.
-- **Claude moves fast.** Model names, limits and features are pinned per page, and a release
-  pass re-checks them before each publish.
-- **Nothing is published without the owner's review.** Pushing is the owner's act.
+- **Claude moves fast.** Model names, limits and features are pinned per page, and they are
+  re-checked against the official pages before each release.

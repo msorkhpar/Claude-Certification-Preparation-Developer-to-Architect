@@ -6,10 +6,9 @@ A studyforge course that prepares engineers for the Claude Developer and Archite
 certifications in one incremental path, where every concept an exam asks about is something the
 reader has built and seen graded, offline, in a container.
 
-## Why this is different from the earlier courses
+## What the practices grade
 
-The earlier courses taught a language, and their practices compile and run code with no outside
-service. **This course's subject is a remote model.** A practice cannot call the API: graded runs
+**This course's subject is a remote model.** A practice cannot call the API: graded runs
 are offline, a call costs money and the answer changes between runs. So the course separates
 two things the exam questions are about:
 
@@ -83,25 +82,22 @@ that has the topic.
 | Claude Code itself, the Agent SDK against the real model, the apps | Live only, with the reader's own key; reading and recorded output otherwise |
 | Evaluation suites (code-graded, model-graded with recorded grades) | Runs |
 
-## What the course needs from the framework
+## What the site provides
 
-Planned and tracked on the framework repositories' own boards, backward compatible with every
-existing course. This repository only states the need:
+The course is built into a site with studyforge, which also runs the graded practices:
 
-1. **SDKs in a profile, for four languages:** the toolchain's profile mechanism gains pinned
-   Python-wheel and npm-package entry kinds (its Maven and Gradle kinds already exist), so a
-   profile image carries the Anthropic, MCP and Agent SDKs for Python and TypeScript and the
-   Anthropic and MCP SDKs for Java and Kotlin, offline, without moving any shared base tag.
-   TypeScript runs on the base image's Node if its built-in type stripping suffices (survey C-07).
-2. **A quiz-heavy unit:** a mock-exam page of many scenario questions that covers a whole level,
-   graded in the page, within the quiz gates.
+1. **The SDKs, offline, for four languages:** the runner image carries the Anthropic, MCP and
+   Agent SDKs for Python and TypeScript and the Anthropic and MCP SDKs for Java and Kotlin, pinned
+   and installed without network. TypeScript runs on Node's built-in type stripping.
+2. **Mock-exam pages:** a page of many scenario questions that covers a whole level, graded in
+   the page.
 3. **Optional live runs:** the reader types their own key in the site; it is kept in the browser,
    passed to a live run as an environment variable, never stored on disk and never given to the
-   graded runner (board D9).
-4. **Four-language tabs and reading languages:** the example tab block and the reading-mode choice
-   generalised from the Kotlin course to any list of languages, with greyed-out languages.
+   graded runner.
+4. **Four-language tabs:** one example block with a tab per language, with the languages a topic
+   does not exist in greyed out.
 
-## How the repository is laid out (draft)
+## How the repository is laid out
 
 ```
 course/            the lessons, one markdown file per unit, and corpus.json
@@ -109,7 +105,7 @@ examples/          one project per example, with tests and its recorded exchange
 exercises/         the authored practices: statement, starter, tests, reference solution
 harness/           the stand-in for the API: replay, script, optional live
 docs/              what the course is and how it is built
-docs/process/      the board and the working notes (moves to a branch before any publish)
+docs/process/      the board and the working notes (not part of the learner release)
 ```
 
 ## Principles

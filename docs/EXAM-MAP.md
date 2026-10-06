@@ -4,8 +4,8 @@ How the course maps to Anthropic's Claude certifications. Exam facts change: the
 pages are the authority, and this map is re-checked before every publish.
 
 **Confidence:** every fact below is marked **confirmed** (read on an official exam page or exam
-guide, version 1.0, effective July 2026) or **reported** (not read on an official page). The
-sources are kept outside the repository. Every exam in the table has a public official guide.
+guide, version 1.0, effective July 2026) or **reported** (not read on an official page).
+Every exam in the table has a public official guide.
 
 ## The exams
 
@@ -135,5 +135,5 @@ evaluation and observability.
 
 ## How a page uses this map
 
-Every page states the exam codes it serves in its header. The coverage check (board row C-06)
+Every page states the exam codes it serves in its header. The coverage check (`tools/check_coverage.py`)
 fails if a topic above has no page, or a page names a code that is not here.

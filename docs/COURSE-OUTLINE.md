@@ -1,9 +1,10 @@
-# Course outline (draft 5)
+# Course outline
 
-**Status: draft 5, frozen (board M3).** Every module of draft 4 is kept and nothing is cut (board D13): the course aims to be the most comprehensive course possible on its subject. Draft 5 adds 11 modules (94 in all) and renumbers them. Each module will hold one to four pages; the page count is set when its level is authored.
-Draft 4 widened the Covers cells of 28 modules after a topic-coverage audit against public prep material. Draft 3 follows the four exams' published blueprints: Level 2 covers every Developer topic,
-Level 3 every Architect Foundations task statement, Level 4 the seven Professional domains; it keeps the
-official Academy's topics (skills, subagents, managed agents, retrieval, enterprise rollout).
+94 modules in four levels, each of one to five pages. The course follows the four exams' published
+blueprints: Level 1 covers the Associate exam and the base all exams share, Level 2 every Developer
+topic, Level 3 every Architect Foundations task statement, Level 4 the seven Professional domains.
+It also covers the official Academy's topics (skills, subagents, managed agents, retrieval,
+enterprise rollout) and, to be as complete as possible, topics no blueprint tests.
 
 **Exam codes used below** (defined in [`EXAM-MAP.md`](EXAM-MAP.md)):
 
@@ -27,13 +28,13 @@ or replayed model),
 **config** (Claude Code or MCP files, graded by tests that validate them and run their hooks),
 **quiz** (exam-style scenario questions), **reading** (no practice).
 
-**Languages (board D3):** modules whose practice needs the Agent SDK (35, and the Level 3
+**Languages:** modules whose practice needs the Agent SDK (35, and the Level 3
 modules that use its subagent, hook and session features: 47, 49 and 51) are Python and TypeScript
 only; every other code module is in all four. Each such module says what a Java or Kotlin team
 uses instead.
 
 **Versions:** pinned in [`VERSIONS.md`](VERSIONS.md) (model ids; the Anthropic, MCP and Agent SDKs
-per language); Python, Node, JDK and Kotlin follow from the heavy rows.
+per language) and the language run-times.
 A claim on a page names the versions it was checked on.
 
 ## Level 1: Foundations (shared by every exam)
@@ -134,7 +135,7 @@ introduced a topic, the Level 3 module deepens it and links back; it does not re
 
 ## Level 4: Architect Professional (Claude Certified Architect, Professional)
 
-Drafted from the exam's seven published domains (board C-08). The exam tests design judgment and
+Built from the exam's seven published domains. The exam tests design judgment and
 communication at the level of a solution architect: choosing patterns, protocols and models,
 evaluating and governing a system, and explaining the trade-offs to the people who fund it. Where
 a Level 2 or 3 module introduced a topic, the Level 4 module deepens it from the architect's seat
@@ -161,11 +162,11 @@ and links back.
 
 ## Beyond the exams
 
-Nothing is excluded (board D13). These modules go past the official blueprints and carry the code
+Nothing is excluded. These modules go past the official blueprints and carry the code
 `X` (some beside exam codes, where part of the module is tested): how models are made (2), Claude's
 apps in depth (8), Claude for every role (9), setting up Claude on the cloud platforms (23),
 computer use (31), and the two extra scenario capstones, the conversational AI assistant (76) and
-the agentic tool builder (77). Four Level 4 modules restore topics the blueprint covers only
+the agentic tool builder (77). Four Level 4 modules cover topics the blueprint covers only
 lightly and carry exam codes: reliability of multi-agent systems (81), deployment architecture and
 data handling (83), cost and capacity engineering (84), and migration and model upgrades at
 scale (89). Modules marked X are never needed to pass; they are there to make the course complete.
@@ -175,5 +176,5 @@ scale (89). Modules marked X are never needed to pass; they are there to make th
 94 modules: Level 1 has 11, Level 2 has 33, Level 3 has 34, Level 4 has 16. Level 2 is the widest
 because the Developer exam spans the whole platform; Level 3 is the deepest because the Architect
 Foundations exam has the most detailed blueprint and the scenario capstones (the six official
-ones, then two beyond them); Level 4 grows the most from draft 4 because it restores the
-deployment, cost, reliability and migration topics the blueprint touches only lightly.
+ones, then two beyond them); Level 4 adds deployment, cost, reliability and migration modules for
+topics its blueprint touches only lightly.
