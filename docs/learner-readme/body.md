@@ -41,7 +41,45 @@ Scripted answers are stand-ins, so a practice shows that your code handles the s
 
 The pictures were taken from a fresh copy of the course, with no progress and no edits.
 
-<!--SHOTS-->
+**The course index** shows your reading progress, the next unit to read and a filter for the contents.
+
+![The course index: reading progress by level, the next unit, a filter and the contents](shots/course-index.png)
+
+**A lesson** has the course contents on the left, an outline of the page on the right, and the language switch at the top.
+
+![A lesson page with the contents, the outline and the four reading languages](shots/lesson-languages.png)
+
+The same page in the dark theme:
+
+![The same lesson in the dark theme](shots/lesson-dark.png)
+
+**A page quiz** explains each answer as soon as you choose it.
+
+![A page quiz with one answer chosen and its explanation shown](shots/page-quiz.png)
+
+**A module quiz** at the end of a module covers all its pages.
+
+![A module quiz with an explanation under the chosen answer](shots/module-quiz.png)
+
+**A mock exam** is written in the exams' scenario style, with a progress count and a flag for review.
+
+![A mock exam with questions answered and a progress count](shots/mock-exam.png)
+
+**A practice** opens with its statement beside an in-browser editor.
+
+![A practice: the statement on the left, the editor on the right](shots/editor.png)
+
+**Run** executes a try-it file and shows what it printed and logged. It grades nothing.
+
+![The output of Run under the editor](shots/try-it-run.png)
+
+**Submit** runs the practice's tests and reports the main ask and the edge cases.
+
+![The Submit report: main ask done, edge cases passed](shots/practice-submit.png)
+
+**Search** covers every page of the course.
+
+![Search results for a phrase, with the matching passages highlighted](shots/search.png)
 
 ### Two ways to use it
 
