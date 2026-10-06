@@ -144,6 +144,9 @@ def run(practice: Path, lang: str, variant: str) -> int:
         return subprocess.call([*gradle, "--offline", "-q", "-p", str(practice / lang), f"-Psolution={variant}", "tryIt"])
     work.mkdir(parents=True)
     for source in sorted((practice / lang / variant).iterdir()):
+        if source.is_dir():  # a project folder (.github, governance, docs) travels with the file
+            shutil.copytree(source, work / source.name)
+            continue
         text = source.read_text(encoding="utf-8")
         # the workspace holds the harness logger beside the file, as the site builds it
         shutil.copy(source, work / source.name) if lang == "python" else (work / source.name).write_text(text.replace('from "../logger.ts"', 'from "./logger.ts"'), encoding="utf-8")

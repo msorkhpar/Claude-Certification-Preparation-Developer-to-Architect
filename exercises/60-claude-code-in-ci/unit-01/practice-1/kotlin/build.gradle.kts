@@ -14,7 +14,7 @@ dependencies {
     testImplementation(project(":60-ci-gate"))
 }
 sourceSets {
-    main { kotlin.setSrcDirs(listOf(solution)) }
+    main { kotlin.setSrcDirs(listOf(solution, "tryit")) }
     test { kotlin.setSrcDirs(listOf("tests")) }
 }
 layout.buildDirectory.set(file("../.build-kotlin/$solution"))
@@ -23,3 +23,6 @@ tasks.test {
     systemProperty("config.dir", layout.projectDirectory.dir(solution).asFile.absolutePath)
     testLogging { events("passed", "failed"); showExceptions = true; exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.SHORT }
 }
+
+// Run: the reader's own try-it file, with the logger turned up (no tests, no grade): gradle -Psolution=reference tryIt
+tasks.register<JavaExec>("tryIt") { classpath = sourceSets["main"].runtimeClasspath; mainClass.set("TryItKt") }
