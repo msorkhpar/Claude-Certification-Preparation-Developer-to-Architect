@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-4",
+    "82-models-prompts-and-context-as-design-choices"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 6,
+  "title": "Module quiz: Models, prompts and context as design choices",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario: Plover Insurance's assembler receives a dynamic module with the placeholder {claim_id}, and the caller supplies no value for it. What should the assembler do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Send the request, leaving the placeholder in its text",
+            "correct": false,
+            "says": "Ruled out because \"A request that goes out with `{customer}` in its text\" is sent with a gap that nobody checks."
+          },
+          {
+            "id": "b",
+            "text": "Refuse to build the request, naming the absent item",
+            "correct": true,
+            "says": "A missing value is a defect in the caller, so the assembler refuses and names it."
+          },
+          {
+            "id": "c",
+            "text": "Send it, replacing the placeholder with an empty string",
+            "correct": false,
+            "says": "Ruled out because a blank is the same silent defect, and \"A missing variable is an error\"."
+          },
+          {
+            "id": "d",
+            "text": "Fill the gap with a guess, drawn from the caller's previous call",
+            "correct": false,
+            "says": "Ruled out because a guess invents data nobody supplied, and a request with a gap \"is a defect that no model will report\"."
+          }
+        ],
+        "origin": {
+          "path": "course/82-models-prompts-and-context-as-design-choices/01-assembling-a-prompt-in-cache-friendly-order.md",
+          "section": "A request is modules, not a string"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario: Teal Logistics runs a ticket tagger that must answer within 300 ms at tier 1, and its prompt carries a long block of unchanging text. Which two decisions follow?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Take the largest model for safety, and place the long text last in the request",
+            "correct": false,
+            "says": "Ruled out because the largest model is not needed when \"the cheapest model that meets the first two is the right one for each workload\", and the page says \"static modules first, in the order given, then the dynamic ones\"."
+          },
+          {
+            "id": "b",
+            "text": "Take the cheapest model of any tier, and place the long text in the final message",
+            "correct": false,
+            "says": "Ruled out because \"A model below the tier fails the task\", whatever its price."
+          },
+          {
+            "id": "c",
+            "text": "Take the model that was used last time, and cache the whole request as one piece",
+            "correct": false,
+            "says": "Ruled out because \"Two requests share a cache entry only when everything up to the breakpoint is identical\", so the whole request, which includes the changing part, cannot be cached as one piece."
+          },
+          {
+            "id": "d",
+            "text": "Take the cheapest that is capable and quick enough, and put the bulky constant passage first",
+            "correct": true,
+            "says": "The model is chosen by tier and latency with price ranking the rest, and the stable text leads so that it can be cached."
+          }
+        ],
+        "origin": {
+          "path": "course/82-models-prompts-and-context-as-design-choices/02-choosing-a-model-and-shaping-the-context.md",
+          "section": "Traps"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario: Avocet Travel builds a request from four pieces: the house rules, the fare policy, the traveller's current question and the traveller's earlier chat. Which arrangement fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "All four as static modules, so that they are cached together",
+            "correct": false,
+            "says": "Ruled out because \"A static module whose text holds a `{variable}` is refused\", and the question changes on every request."
+          },
+          {
+            "id": "b",
+            "text": "Rules and question as static modules, policy and chat as dynamic ones",
+            "correct": false,
+            "says": "Ruled out because it puts the changing question among the static modules and the stable policy among the dynamic ones, against \"static modules first, in the order given, then the dynamic ones\"."
+          },
+          {
+            "id": "c",
+            "text": "Fixed guidance as static modules, per-visit text as dynamic ones",
+            "correct": true,
+            "says": "The pieces that never change go first as static modules, and the per-request pieces follow as dynamic ones, so that the stable prefix can be cached."
+          },
+          {
+            "id": "d",
+            "text": "All four as dynamic modules, so that any piece is edited freely",
+            "correct": false,
+            "says": "Ruled out because the cache works on \"the request from its start up to a marked breakpoint\", so with no static modules there is nothing to cache."
+          }
+        ],
+        "origin": {
+          "path": "course/82-models-prompts-and-context-as-design-choices/01-assembling-a-prompt-in-cache-friendly-order.md",
+          "section": "A request is modules, not a string"
+        }
+      }
+    ]
+  }
+}

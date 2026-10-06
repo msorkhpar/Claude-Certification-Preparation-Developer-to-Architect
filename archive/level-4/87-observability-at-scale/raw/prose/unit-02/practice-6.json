@@ -1,0 +1,151 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "87-observability-at-scale"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 6,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Observability at scale",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A project commits a settings file in its repository that turns on prompt logging for telemetry, so that a reviewer can read developers' prompts. What does Claude Code do with it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It captures the prompts of everyone who clones the repository, starting with the first session",
+            "correct": false,
+            "says": "Ruled out because \"a repository can't use them to turn telemetry on\"."
+          },
+          {
+            "id": "b",
+            "text": "It captures the prompts only in sessions where each developer has also enabled tracing",
+            "correct": false,
+            "says": "Ruled out because \"a repository cannot turn any of it on\", whether or not a developer enables tracing."
+          },
+          {
+            "id": "c",
+            "text": "It ignores them, since the exporter variables come from managed or per-user configuration",
+            "correct": true,
+            "says": "Claude Code ignores the exporter variables in a repository's settings."
+          },
+          {
+            "id": "d",
+            "text": "It applies the setting but redacts the prompts anyway, because redaction cannot be changed",
+            "correct": false,
+            "says": "Ruled out because \"each is opened by a separate variable\", so redaction can be changed, just not from a repository."
+          }
+        ],
+        "origin": {
+          "path": "course/87-observability-at-scale/01-what-to-keep-where-it-failed-and-what-must-not-be-logged.md",
+          "section": "What must not be logged"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "A complaint must be followed through the gateway, the orchestrator, two subagents and a tool, each logging in its own format. The records cannot be joined into one story. What was missing?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A common timestamp format across the services, so that the records can be sorted into a single list",
+            "correct": false,
+            "says": "Ruled out because \"Time alone cannot join records: two requests at the same millisecond look the same\"."
+          },
+          {
+            "id": "b",
+            "text": "A single identifier taken at the edge, passed to every service and kept beside whatever they write",
+            "correct": true,
+            "says": "A shared identifier, taken at the edge and written everywhere, joins the records."
+          },
+          {
+            "id": "c",
+            "text": "A longer retention period for the logs, so that all of the records are still there when somebody needs them",
+            "correct": false,
+            "says": "Ruled out because \"keeping records longer keeps the same unjoinable records longer\"."
+          },
+          {
+            "id": "d",
+            "text": "One central log store that every service writes to, in place of the separate stores that each of them has now",
+            "correct": false,
+            "says": "Ruled out because \"A central store collects the records and still does not say which belong together\"."
+          }
+        ],
+        "origin": {
+          "path": "course/87-observability-at-scale/01-what-to-keep-where-it-failed-and-what-must-not-be-logged.md",
+          "section": "Tying one request together"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "After each team added the conversation id as a metric label, the metrics bill tripled, and the dashboards are used no differently. Which fix fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Move the metrics to a larger store and keep the labels",
+            "correct": false,
+            "says": "Ruled out because \"Moving to a larger store pays for the series and leaves their count growing\"."
+          },
+          {
+            "id": "b",
+            "text": "Remove the id from the whole system, traces and all",
+            "correct": false,
+            "says": "Ruled out because \"Dropping the id from everything gives up the ability to look at one conversation, which the traces exist for\"."
+          },
+          {
+            "id": "c",
+            "text": "Store a random tenth of the metric points to cut the series",
+            "correct": false,
+            "says": "Ruled out because \"a random sample of metric points gives a wrong rate: metrics are counts, and a missing count is a wrong count\"."
+          },
+          {
+            "id": "d",
+            "text": "Move the value from the series to traces and events",
+            "correct": true,
+            "says": "The id is high-cardinality, so it belongs on the traces and events, which are meant for single occurrences."
+          }
+        ],
+        "origin": {
+          "path": "course/87-observability-at-scale/02-drift-alerts-and-the-practice.md",
+          "section": "The cost of telemetry"
+        }
+      }
+    ]
+  }
+}

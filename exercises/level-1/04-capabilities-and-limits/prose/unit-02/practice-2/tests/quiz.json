@@ -1,0 +1,154 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-1",
+    "04-capabilities-and-limits"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Module quiz: Capabilities and limits",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A firm wants a model to help review a 200-page contract: a plain-language summary, the sum of the charges it lists, and the decision to proceed. Which split of the work follows the module?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Claude summarises, code adds the amounts, a lawyer approves the deal",
+            "correct": true,
+            "says": "Summarising is language-shaped work, exact addition belongs to code, and a decision with legal consequences stays with a person (page 1, maths and counting; page 2, the when-not-to table)."
+          },
+          {
+            "id": "b",
+            "text": "Claude summarises, Claude adds the amounts, a lawyer approves the deal",
+            "correct": false,
+            "says": "Ruled out because exact arithmetic is \"approximate unless the model does the work in a tool\"."
+          },
+          {
+            "id": "c",
+            "text": "Claude summarises, code adds the amounts, Claude approves the deal",
+            "correct": false,
+            "says": "Ruled out because the table sends \"A decision with legal, medical, financial or safety consequences\" to a qualified person."
+          },
+          {
+            "id": "d",
+            "text": "Claude summarises and adds the amounts at the highest effort, a lawyer approves the deal",
+            "correct": false,
+            "says": "Ruled out because \"The fix is not a better prompt; it is code\", and an effort setting is a prompting lever, not a calculator."
+          }
+        ],
+        "origin": {
+          "path": "course/04-capabilities-and-limits/01-what-claude-does-well-and-where-it-slips.md",
+          "section": "Maths and counting"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "A computer-use loop sends full-resolution monitor captures as tool results, and the API refuses some of them. The agent's pointer actions also sometimes land beside their target. What does the documentation support?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Resend oversized screenshots as they are, and ask in the prompt for better aim",
+            "correct": false,
+            "says": "Ruled out because \"Spatial output is approximate\", so a prompt line cannot make positions exact, and an unchanged screenshot is refused again."
+          },
+          {
+            "id": "b",
+            "text": "Let the API downscale oversized screenshots, and resend any click that missed",
+            "correct": false,
+            "says": "Ruled out because the API \"rejects a tool-result screenshot that exceeds the model's limits instead of downscaling it\"."
+          },
+          {
+            "id": "c",
+            "text": "Resize screenshots yourself first, and treat clicks as approximate",
+            "correct": true,
+            "says": "The API rejects an oversized tool-result screenshot instead of downscaling it, so the program resizes first, and spatial output is approximate (page 2, computer use at a glance)."
+          },
+          {
+            "id": "d",
+            "text": "Move to a model with a larger window, which takes bigger screenshots and aims better",
+            "correct": false,
+            "says": "Ruled out because \"Coordinates and localisation outputs are approximate\", whatever the model."
+          }
+        ],
+        "origin": {
+          "path": "course/04-capabilities-and-limits/02-thinking-computer-use-and-when-not-to-use-a-model.md",
+          "section": "Computer use at a glance"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A product owner wants an assistant that books flights by operating an airline's website through screenshots and clicks. Which design point matters most for safety?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Run it in the customer's own browser profile, so saved logins already work",
+            "correct": false,
+            "says": "Ruled out because computer use \"runs in an isolated machine, without secrets\", and a saved login is exactly such a secret."
+          },
+          {
+            "id": "b",
+            "text": "Sandbox it with no credentials, and have a person approve each payment",
+            "correct": true,
+            "says": "Computer use runs in an isolated machine, without secrets, with a person confirming consequential steps (the computer use section)."
+          },
+          {
+            "id": "c",
+            "text": "Add a prompt line telling it to ignore instructions found on web pages",
+            "correct": false,
+            "says": "Ruled out because \"A prompt is a request, not a guarantee\", so a line of text cannot replace isolation and confirmation."
+          },
+          {
+            "id": "d",
+            "text": "Restrict it to the airline's own site, so its pages can be treated as trusted",
+            "correct": false,
+            "says": "Ruled out because \"A screen is untrusted input\", and text on any web page can try to give the model instructions."
+          }
+        ],
+        "origin": {
+          "path": "course/04-capabilities-and-limits/02-thinking-computer-use-and-when-not-to-use-a-model.md",
+          "section": "Computer use at a glance"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "Which request is the best fit for Claude without extra machinery?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Checking whether a claim photo is AI-generated, to block fraud",
+            "correct": false,
+            "says": "Ruled out because the vision page says Claude \"cannot determine whether an image is AI-generated\"."
+          },
+          {
+            "id": "b",
+            "text": "Calculating the payroll for 800 staff exactly, to the cent",
+            "correct": false,
+            "says": "Ruled out because the table sends \"An exact, repeatable result (totals, dates, ids, string edits)\" to code."
+          },
+          {
+            "id": "c",
+            "text": "Reporting today's closing price of a listed stock",
+            "correct": false,
+            "says": "Ruled out because \"Anything recent, private or fast-changing has to come in through the prompt\" or a tool, and a live price is after the cut-off."
+          },
+          {
+            "id": "d",
+            "text": "Drafting a polite, well-organised reply to a customer's complaint",
+            "correct": true,
+            "says": "Drafting language is the strong-fit row of the summary table, with the usual review for accuracy and fit."
+          }
+        ],
+        "origin": {
+          "path": "course/04-capabilities-and-limits/01-what-claude-does-well-and-where-it-slips.md",
+          "section": "Vision"
+        }
+      }
+    ]
+  }
+}

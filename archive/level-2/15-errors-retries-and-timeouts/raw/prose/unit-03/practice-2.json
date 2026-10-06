@@ -1,0 +1,185 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "15-errors-retries-and-timeouts"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Errors, retries and timeouts",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A job's calls sometimes fail with a lost network link, and sometimes with a 409 because two workers touched the same resource. Which handling fits the page?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Repeat both at once with no delay, since every failure is temporary and clears by itself",
+            "correct": false,
+            "says": "Ruled out because a 409 is retried only \"once the conflict is resolved\"."
+          },
+          {
+            "id": "b",
+            "text": "Repeat the first kind, and the second only after the clash is resolved",
+            "correct": true,
+            "says": "The page's table lists \"A lost or timed-out connection (no status)\" and \"408, 409 (once the conflict is resolved)\" under \"Retry\"."
+          },
+          {
+            "id": "c",
+            "text": "Repeat neither, since a status error is always the fault of the request that was sent",
+            "correct": false,
+            "says": "Ruled out because a lost link is retried: \"A lost or timed-out connection (no status)\" is the first row."
+          },
+          {
+            "id": "d",
+            "text": "Repeat only the second, since the first has no status that the code could read",
+            "correct": false,
+            "says": "Ruled out because the SDKs retry \"because of a network connectivity problem\" as well."
+          }
+        ],
+        "origin": {
+          "path": "course/15-errors-retries-and-timeouts/02-retry-back-off-and-idempotency.md",
+          "section": "What to retry"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "A user-facing summary call has a budget of 2,000 ms. Its client allows three attempts with a 1,000 ms timeout and waits 500 ms, then 1,000 ms, between them. What is the worst case for the caller?",
+        "options": [
+          {
+            "id": "a",
+            "text": "About four and a half seconds, which is more than twice the target",
+            "correct": true,
+            "says": "The page's formula is \"attempts x timeout + sum of the waits between attempts\": three seconds of attempts and one and a half seconds of waits make four and a half."
+          },
+          {
+            "id": "b",
+            "text": "One second, because the timeout bounds the whole call from start to finish",
+            "correct": false,
+            "says": "Ruled out because \"the time a caller may wait is not the timeout\"."
+          },
+          {
+            "id": "c",
+            "text": "About two seconds, because the waits between the attempts are not counted",
+            "correct": false,
+            "says": "Ruled out because the formula adds \"the waits between attempts\"."
+          },
+          {
+            "id": "d",
+            "text": "Thirty seconds, because the default timeout still applies to every attempt",
+            "correct": false,
+            "says": "Ruled out because the page has you \"choose a per-attempt timeout and an attempt count that fit under it\", and a one-second timeout replaces the ten-minute default."
+          }
+        ],
+        "origin": {
+          "path": "course/15-errors-retries-and-timeouts/03-timeouts-logging-and-debugging.md",
+          "section": "The worst case is a product"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Users behind a corporate proxy report that streamed answers arrive in one lump and, now and then, as an HTML page. Which origin does the page point to first?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The network path, where a device rewrites or buffers the traffic",
+            "correct": true,
+            "says": "The page's table lists \"works locally, fails behind the proxy\" under the path, with the checks \"Is the body still JSON? Is the stream buffered?\"."
+          },
+          {
+            "id": "b",
+            "text": "Their credential, which the proxy has stripped from the calls",
+            "correct": false,
+            "says": "Ruled out because a credential fault is a \"401 or 403 from one environment only\", and a stripped key would not give an HTML page with partial streaming."
+          },
+          {
+            "id": "c",
+            "text": "Capacity, because the provider could not take every request",
+            "correct": false,
+            "says": "Ruled out because capacity means \"the request was fine and the service could not take it now\", with a 429 or 529 status."
+          },
+          {
+            "id": "d",
+            "text": "The output limit, because the replies are cut before the end",
+            "correct": false,
+            "says": "Ruled out because a cut reply is \"replies cut mid-sentence, status 200\" and does not come as HTML."
+          }
+        ],
+        "origin": {
+          "path": "course/15-errors-retries-and-timeouts/03-timeouts-logging-and-debugging.md",
+          "section": "Debugging by type and origin"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "Errors with status 529 appear in bursts each time a marketing campaign multiplies the job's traffic. What does the page's table suggest?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Raise the output limit, since the replies are probably being cut before the end",
+            "correct": false,
+            "says": "Ruled out because a cut reply is \"Replies cut mid-sentence, status 200\", not a 529."
+          },
+          {
+            "id": "b",
+            "text": "Rotate the key, since the credential is the likely origin of such errors",
+            "correct": false,
+            "says": "Ruled out because the credential row is about \"Which key does that environment load?\", and a 529 is no credential fault."
+          },
+          {
+            "id": "c",
+            "text": "Back off, and bring the load up in gradual steps",
+            "correct": true,
+            "says": "The table lists \"529 in bursts\" with the check \"Is your traffic ramping fast?\" and the cure \"Back off; ramp up gradually\"."
+          },
+          {
+            "id": "d",
+            "text": "Fix the proxy, since the network path is the likely origin of such errors",
+            "correct": false,
+            "says": "Ruled out because the path row is \"Is the body still JSON? Is the stream buffered?\", and a 529 carries a JSON body."
+          }
+        ],
+        "origin": {
+          "path": "course/15-errors-retries-and-timeouts/03-timeouts-logging-and-debugging.md",
+          "section": "Debugging by type and origin"
+        }
+      }
+    ]
+  }
+}

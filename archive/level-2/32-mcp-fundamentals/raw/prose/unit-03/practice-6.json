@@ -1,0 +1,185 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "32-mcp-fundamentals"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 6,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: MCP fundamentals",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A server works in the Inspector, but the host cannot start it from its configuration file, which gives a relative path to the data folder. What does the documentation blame?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A host can launch only servers that were first registered with the Inspector",
+            "correct": false,
+            "says": "Ruled out because the guide says \"the same principles apply to any stdio-based MCP client\", and no registration with the Inspector exists."
+          },
+          {
+            "id": "b",
+            "text": "The directory can be undefined, so locations should be written in full",
+            "correct": true,
+            "says": "The third page quotes the guide: the directory of a launched server \"may be undefined (like / on macOS) since the client could be started from anywhere\", so use absolute paths."
+          },
+          {
+            "id": "c",
+            "text": "A host can pass along no environment variables, so the data path is lost",
+            "correct": false,
+            "says": "Ruled out because servers \"inherit only a limited subset of environment variables automatically\", which is some of them and not none."
+          },
+          {
+            "id": "d",
+            "text": "Relative paths can resolve only when the server runs over Streamable HTTP",
+            "correct": false,
+            "says": "Ruled out because \"testing from the command line uses the directory where you run the command\", which is the contrast, and the transport is not part of it."
+          }
+        ],
+        "origin": {
+          "path": "course/32-mcp-fundamentals/03-clients-testing-and-debugging.md",
+          "section": "Where a server fails in front of a host"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Under the 2026-07-28 revision, a server needs to ask the user a question in the middle of a call, but the incoming call declared no matching feature. What does the server return?",
+        "options": [
+          {
+            "id": "a",
+            "text": "An unsupported-version error that lists the versions it accepts",
+            "correct": false,
+            "says": "Ruled out because an unsupported-version error is one that \"lists the server's supported versions in its data field\", and the version was fine here."
+          },
+          {
+            "id": "b",
+            "text": "An invalid-params error, since the metadata fields are absent",
+            "correct": false,
+            "says": "Ruled out because \"A request missing either required field is rejected with error -32602\", and the required fields were sent."
+          },
+          {
+            "id": "c",
+            "text": "A missing-capability error, naming whatever the metadata omitted",
+            "correct": true,
+            "says": "The third page says that if the server needs a capability that the request's client capabilities did not declare, \"it returns a MissingRequiredClientCapabilityError (code -32021) naming the missing capabilities\"."
+          },
+          {
+            "id": "d",
+            "text": "A tool result flagged as an error, saying the user cannot be reached",
+            "correct": false,
+            "says": "Ruled out because the error is \"returned as an error with its own code\", so a client can tell it from a failed tool."
+          }
+        ],
+        "origin": {
+          "path": "course/32-mcp-fundamentals/03-clients-testing-and-debugging.md",
+          "section": "Where a server fails in front of a host"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A team must build an MCP server that speaks the newest protocol version. Which of the four SDKs used in the course reached that version when it was checked?",
+        "options": [
+          {
+            "id": "a",
+            "text": "All four libraries alike",
+            "correct": false,
+            "says": "Ruled out because \"only the Python one reached 2026-07-28 when it was checked\"."
+          },
+          {
+            "id": "b",
+            "text": "Only the Kotlin library",
+            "correct": false,
+            "says": "Ruled out because the Kotlin SDK is one of those that \"contain no support for 2026-07-28\"."
+          },
+          {
+            "id": "c",
+            "text": "The TypeScript and Java libraries",
+            "correct": false,
+            "says": "Ruled out because the TypeScript and Java SDKs have \"their latest revision is 2025-11-25\" as well."
+          },
+          {
+            "id": "d",
+            "text": "Only the Python library",
+            "correct": true,
+            "says": "The first page says the Python SDK speaks both eras, and that the other three \"contain no support for 2026-07-28, and their latest revision is 2025-11-25\"."
+          }
+        ],
+        "origin": {
+          "path": "course/32-mcp-fundamentals/01-hosts-clients-servers-and-primitives.md",
+          "section": "Two eras of the protocol"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A query matches no stored entries. How does the course's notes server answer?",
+        "options": [
+          {
+            "id": "a",
+            "text": "With a tool error that tells the model to ask the user for a new query",
+            "correct": false,
+            "says": "Ruled out because the answer is \"which is not an error\", so there is no tool error to read."
+          },
+          {
+            "id": "b",
+            "text": "With ordinary text saying that nothing fits, and the error flag stays off",
+            "correct": true,
+            "says": "The third page says that with no match the search answers `No notes match \"{query}\"`, in the practice statement's words \"which is not an error\"."
+          },
+          {
+            "id": "c",
+            "text": "With a resource error for the missing note, as for a bad id",
+            "correct": false,
+            "says": "Ruled out because the protocol error that says `No note {id}` is \"for reading a note that does not exist\", and \"a search that finds nothing is a normal answer\"."
+          },
+          {
+            "id": "d",
+            "text": "With a protocol error, as for an unknown tool, so that the client logs it",
+            "correct": false,
+            "says": "Ruled out because protocol errors \"indicate issues with the request structure itself that models are less likely to be able to fix\", and the request here is valid."
+          }
+        ],
+        "origin": {
+          "path": "course/32-mcp-fundamentals/03-clients-testing-and-debugging.md",
+          "section": "The practice: a notes server"
+        }
+      }
+    ]
+  }
+}

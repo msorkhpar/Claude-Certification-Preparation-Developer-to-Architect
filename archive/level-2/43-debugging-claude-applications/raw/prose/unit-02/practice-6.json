@@ -1,0 +1,185 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "43-debugging-claude-applications"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 6,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Debugging Claude applications",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A call returns a 429 that carries no `retry-after` header, and its error code says the organisation reached its monthly spend ceiling. What does the module advise?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Back off with jitter, since capacity frees up within seconds",
+            "correct": false,
+            "says": "Ruled out because capacity failures are the ones where you \"Wait for the header, or back off with jitter, then retry\", and this response has no such header."
+          },
+          {
+            "id": "b",
+            "text": "Hand it to a person, since only a higher limit or the reset restores access",
+            "correct": true,
+            "says": "The table sends \"Your credential or account (401, 402, 403, a spend cap)\" to a person, because \"a spend cap lifts only at the monthly reset or with a higher limit\", and \"No retry can supply a key or a payment\"."
+          },
+          {
+            "id": "c",
+            "text": "Split the work into smaller calls so that each one fits beneath the ceiling",
+            "correct": false,
+            "says": "Ruled out because the module's rule is to \"retry only what can change by itself\", and smaller calls do not change an organisation's ceiling."
+          },
+          {
+            "id": "d",
+            "text": "Move the call to a fallback model, since this one is overloaded",
+            "correct": false,
+            "says": "Ruled out because a fallback model is the recovery for a refusal, where the table says \"Use a fallback model, or reset the context\", and this is not an overload."
+          }
+        ],
+        "origin": {
+          "path": "course/43-debugging-claude-applications/01-failure-types-origins-and-recoveries.md",
+          "section": "Choosing the recovery"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "After switching the model id, every call returns a 400 whose message says that a forced invocation is not supported for the model. The incident notes list four suspects. Which should the team investigate first?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The `tool_choice` field that the new release rejects",
+            "correct": true,
+            "says": "The migration table lists `tool_choice` of `any` or a named tool as returning a 400 on Claude Opus 5.5, Sonnet 5.5, Fable 5.1 and Mythos 5.1, with the message \"forced tool use is not supported for those models\"."
+          },
+          {
+            "id": "b",
+            "text": "The prefilled turn that the new release rejects",
+            "correct": false,
+            "says": "Ruled out because the rejected prefill has its own message: \"This model does not support assistant message prefill\"."
+          },
+          {
+            "id": "c",
+            "text": "The thinking mode that the new release rejects",
+            "correct": false,
+            "says": "Ruled out because a rejected thinking mode is a \"400, with a message that points to adaptive thinking and `output_config.effort`\"."
+          },
+          {
+            "id": "d",
+            "text": "The capacity that the provider holds in that region",
+            "correct": false,
+            "says": "Ruled out because a 400 is a request status and capacity failures are \"429 with `retry-after`, 529\"."
+          }
+        ],
+        "origin": {
+          "path": "course/43-debugging-claude-applications/01-failure-types-origins-and-recoveries.md",
+          "section": "Migration errors: your request, after a model change"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A reply ends cleanly with stop reason `end_turn`, but the downstream code throws on it, and the logged output is a sentence followed by a fenced block of JSON. Which statement is true?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The fault is the integration's parser, so a test should script this sample",
+            "correct": true,
+            "says": "The table says an object between the first `{` and the last `}` makes it \"The integration: the parser was too strict, so extract the object first\", and the page says to prove a fix \"with a test that scripts the trace\"."
+          },
+          {
+            "id": "b",
+            "text": "The fault is the service's, so the call should be repeated until it is clean",
+            "correct": false,
+            "says": "Ruled out because the module's rule is to \"retry only what can change by itself\", and a repeat gives the same shape."
+          },
+          {
+            "id": "c",
+            "text": "The fault is the model's, so the system prompt should forbid code fences",
+            "correct": false,
+            "says": "Ruled out because the trap warns \"Assuming the model when the output is odd\", and the output does hold the JSON."
+          },
+          {
+            "id": "d",
+            "text": "The fault is the integration's limit, so `max_tokens` should be raised",
+            "correct": false,
+            "says": "Ruled out because a limit shows as a cut-off: \"A reply that stops mid-sentence with status 200 is the integration's configuration\", while this reply ends cleanly with `end_turn`."
+          }
+        ],
+        "origin": {
+          "path": "course/43-debugging-claude-applications/02-reading-a-trace-and-the-practice.md",
+          "section": "Integration or model: the question that decides"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A bug in a tool-use loop is fixed in production on a Friday evening. Which follow-up does the module recommend?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Close the incident, since the fix was deployed",
+            "correct": false,
+            "says": "Ruled out because \"A bug that is fixed without a test or an eval case will return\", as the last trap puts it."
+          },
+          {
+            "id": "b",
+            "text": "Add a note to the runbook and rely on the next on-call",
+            "correct": false,
+            "says": "Ruled out because a runbook note records the bug and does not test for it, and the page says \"The bug cannot return unseen\" once it is a case."
+          },
+          {
+            "id": "c",
+            "text": "Scrub the trace and add it to the eval set as a case",
+            "correct": true,
+            "says": "The page says \"A trace that went wrong in production is the best test case you will ever get: scrub it, give it an id and a tag, and add it to the eval set or the test suite.\""
+          },
+          {
+            "id": "d",
+            "text": "Lower the retry budget so that the failure is less visible",
+            "correct": false,
+            "says": "Ruled out because a smaller budget hides failures, while the routine says to \"note whether the application recovered\"."
+          }
+        ],
+        "origin": {
+          "path": "course/43-debugging-claude-applications/02-reading-a-trace-and-the-practice.md",
+          "section": "Fix at the right layer, then keep the case"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,185 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "41-security-and-safety"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 6,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Security and safety",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A mail assistant reads inbound messages. Which combination gives the best protection against a hostile message?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A pattern list, a firm tone in the prompt and a larger context window",
+            "correct": false,
+            "says": "Ruled out because a pattern list \"catches the phrasing someone thought of and misses the paraphrase\", and \"Whatever the injected text asks for, the agent can do only what its grants allow\", so tone adds no grant."
+          },
+          {
+            "id": "b",
+            "text": "Encoded results, narrow tools and a gate that tightens after outside text",
+            "correct": true,
+            "says": "The layers table puts structure (JSON encoding), privilege (narrow tools, \"a stricter gate after untrusted text was read\") and a decision gate in the path of one request."
+          },
+          {
+            "id": "c",
+            "text": "Encoded results, a pattern list and broad tools kept for convenience",
+            "correct": false,
+            "says": "Ruled out because \"An agent that can read a file, send mail to anyone and has the production key can leak.\""
+          },
+          {
+            "id": "d",
+            "text": "Narrow tools and a gate, with the message text placed in the system prompt",
+            "correct": false,
+            "says": "Ruled out because the page says untrusted content goes \"never in `system` prompts or plain user `text` blocks\"."
+          }
+        ],
+        "origin": {
+          "path": "course/41-security-and-safety/03-guardrails-monitoring-and-the-practice.md",
+          "section": "Layers around the model"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "After an agent has read an untrusted web page, which request should be refused or escalated?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Reading a file inside the project folder",
+            "correct": false,
+            "says": "Ruled out because \"Reads stay allowed, since they change nothing\"."
+          },
+          {
+            "id": "b",
+            "text": "Fetching a plain address with no query string and no fragment",
+            "correct": false,
+            "says": "Ruled out because only a network call \"that carries data in its URL, a query string or a fragment asks\", so a plain address stays allowed."
+          },
+          {
+            "id": "c",
+            "text": "Sending mail to an outside recipient",
+            "correct": true,
+            "says": "The page says that in a tainted session \"Sending mail is refused until a person does it\"."
+          },
+          {
+            "id": "d",
+            "text": "Running a read-only command such as `git status`",
+            "correct": false,
+            "says": "Ruled out because the practice gate \"limits `bash` to read-only commands and refuses chaining\", so a read-only command stays allowed."
+          }
+        ],
+        "origin": {
+          "path": "course/41-security-and-safety/02-least-privilege-hooks-sandboxes-and-secrets.md",
+          "section": "A session that has read untrusted text"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A team builds a hook to stop recursive forced deletes. Which design choice should the hook follow?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Parse the line into parts, fail closed, and stay silent on safe ones",
+            "correct": true,
+            "says": "The page says a hook can \"parse the command into its parts\", should \"fail closed\", and that a command \"that cannot be parsed, or an event the hook cannot read, is blocked and not waved through\"."
+          },
+          {
+            "id": "b",
+            "text": "Match the text `rm -rf` and allow whatever it cannot parse",
+            "correct": false,
+            "says": "Ruled out because \"A guard that exits 0 on a parse error is a guard an attacker can walk through\"."
+          },
+          {
+            "id": "c",
+            "text": "Match the text `rm -rf` and rely on the model's caution for the rest",
+            "correct": false,
+            "says": "Ruled out because \"A memory line asks, and a hook enforces\", and the model's caution is not a control."
+          },
+          {
+            "id": "d",
+            "text": "Answer `allow` on every safe command so the call goes straight through",
+            "correct": false,
+            "says": "Ruled out because the hook \"should answer the safe case with no opinion and not with an allow, so that it never overrides a stricter rule elsewhere\"."
+          }
+        ],
+        "origin": {
+          "path": "course/41-security-and-safety/02-least-privilege-hooks-sandboxes-and-secrets.md",
+          "section": "Hooks that block destructive actions"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A team's key is stored in the environment for a CI job. Which practice fits both CI and an agent in production?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Track the `.env` file so every runner receives the same value",
+            "correct": false,
+            "says": "Ruled out because keys are \"loaded from an untracked file such as `.env`\", and a secret never enters \"a file anyone can commit\"."
+          },
+          {
+            "id": "b",
+            "text": "Pass it to the agent's sandbox as an ordinary environment variable",
+            "correct": false,
+            "says": "Ruled out because for production agents, \"keep the value out of the sandbox\"."
+          },
+          {
+            "id": "c",
+            "text": "Log the value once at the start so later checks can compare it",
+            "correct": false,
+            "says": "Ruled out because \"A key that appears in a tool result or an audit line has left your control.\""
+          },
+          {
+            "id": "d",
+            "text": "Keep the value out of the model's reach, and redact it in logs",
+            "correct": true,
+            "says": "The page says \"a secret never enters anything the model can read or a file anyone can commit\", and \"In logs and results, redact before writing.\""
+          }
+        ],
+        "origin": {
+          "path": "course/41-security-and-safety/02-least-privilege-hooks-sandboxes-and-secrets.md",
+          "section": "Secrets in development and in production"
+        }
+      }
+    ]
+  }
+}

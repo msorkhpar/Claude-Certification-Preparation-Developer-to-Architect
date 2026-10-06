@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "58-commands-and-skills"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 6,
+  "title": "Module quiz: Commands and skills",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A skill explains how an old billing system works, and Claude should consult it when relevant, while typing its name would do nothing useful. Which header line fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "`disable-model-invocation: true`",
+            "correct": false,
+            "says": "Ruled out because it does the opposite, so that only the person starts it and \"the full skill loads only when you invoke it\"."
+          },
+          {
+            "id": "b",
+            "text": "`allowed-tools: Bash(git log *) Bash(git show *)`",
+            "correct": false,
+            "says": "Ruled out because a pre-approval for git commands says nothing about who may start the skill, since the field \"Pre-approves the listed tools for the turn that invokes the skill\"."
+          },
+          {
+            "id": "c",
+            "text": "`user-invocable: false`",
+            "correct": true,
+            "says": "It hides the skill from the person and leaves it available to Claude, which suits background knowledge."
+          },
+          {
+            "id": "d",
+            "text": "`context: fork`",
+            "correct": false,
+            "says": "Ruled out because \"The subagent doesn't see your conversation history\", so a fork would run a background note as a task with nothing to do."
+          }
+        ],
+        "origin": {
+          "path": "course/58-commands-and-skills/01-commands-and-skills-are-one-mechanism.md",
+          "section": "Who may start it"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. The team's review skill must be unable to change files for the turn that runs it. Which header line does that?",
+        "options": [
+          {
+            "id": "a",
+            "text": "`allowed-tools: Read Grep Glob`",
+            "correct": false,
+            "says": "Ruled out because the pre-approval field \"does not restrict which tools are available\"."
+          },
+          {
+            "id": "b",
+            "text": "`disallowed-tools: Edit Write`",
+            "correct": true,
+            "says": "A bare name in the removal field takes the tool out of the pool while the skill is active."
+          },
+          {
+            "id": "c",
+            "text": "`argument-hint: [read-only]`",
+            "correct": false,
+            "says": "Ruled out because `argument-hint` \"only shows the expected shape in autocomplete\"."
+          },
+          {
+            "id": "d",
+            "text": "`disallowed-tools: Edit(src/**)`",
+            "correct": false,
+            "says": "Ruled out because \"only a bare name removes a tool\", so the scoped entry leaves editing in place."
+          }
+        ],
+        "origin": {
+          "path": "course/58-commands-and-skills/02-tools-arguments-forked-skills-and-the-practice.md",
+          "section": "Tools, arguments, forked skills and the practice"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A command text reads 'Summarise the commits by $ARGUMENTS since yesterday', and a developer runs `/standup ana`. What does Claude receive?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The sentence unchanged, with the name in a separate note",
+            "correct": false,
+            "says": "Ruled out because the placeholder takes \"All arguments, as typed\" and is replaced in the text."
+          },
+          {
+            "id": "b",
+            "text": "The sentence with a blank where the name belongs",
+            "correct": false,
+            "says": "Ruled out because a blank arises only for a named placeholder without an argument, since an indexed one \"stays in the content unchanged\", and here the input is given."
+          },
+          {
+            "id": "c",
+            "text": "The sentence with the name filled in and a line `ARGUMENTS: ana` after it",
+            "correct": false,
+            "says": "Ruled out because the extra line appears only when \"no placeholder receives them\", and this one did."
+          },
+          {
+            "id": "d",
+            "text": "The sentence with the name filled in and nothing appended",
+            "correct": true,
+            "says": "The placeholder received the input, so it is substituted and nothing is added."
+          }
+        ],
+        "origin": {
+          "path": "course/58-commands-and-skills/02-tools-arguments-forked-skills-and-the-practice.md",
+          "section": "Arguments"
+        }
+      }
+    ]
+  }
+}

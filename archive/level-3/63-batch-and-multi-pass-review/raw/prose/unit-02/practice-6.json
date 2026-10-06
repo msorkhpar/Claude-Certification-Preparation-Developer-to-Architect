@@ -1,0 +1,151 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "63-batch-and-multi-pass-review"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 6,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Batch processing and multi-pass review",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario S5, Claude Code in CI. A weekly audit submits per-file entries as one batch. When it ends, an integration pass over those results is submitted as a second batch. Each batch finishes within 24 hours, and handling takes 1 hour after each. What is the longest the audit can take, in hours?",
+        "options": [
+          {
+            "id": "a",
+            "text": "26",
+            "correct": false,
+            "says": "Ruled out because \"it cannot be in the same batch as them\", so the audit is not one window."
+          },
+          {
+            "id": "b",
+            "text": "48",
+            "correct": false,
+            "says": "Ruled out because the worst case is \"two processing windows plus the handling after each\", and 48 has no handling."
+          },
+          {
+            "id": "c",
+            "text": "50",
+            "correct": true,
+            "says": "The integration pass reads the first batch's results, so the two windows run one after the other, with the handling after each: 24 + 1 + 24 + 1."
+          },
+          {
+            "id": "d",
+            "text": "49",
+            "correct": false,
+            "says": "Ruled out for the same sentence, since the handling is \"plus the handling after each\" batch and not once."
+          }
+        ],
+        "origin": {
+          "path": "course/63-batch-and-multi-pass-review/02-independent-passes-combined-verdicts-and-the-practice.md",
+          "section": "Local passes and an integration pass"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario S6, structured data extraction. A team will extract fields from 400,000 archived documents through a batch. A trial on 100 easy documents shows no failures. What should happen before the full submission?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Submit everything and repair the prompt from whatever fails",
+            "correct": false,
+            "says": "Ruled out because \"a day passes before the failures show, and the whole run is repeated\"."
+          },
+          {
+            "id": "b",
+            "text": "Run a varied sample synchronously and refine the prompt on it",
+            "correct": true,
+            "says": "A prompt is proven on a sample that includes the awkward documents, run synchronously so the answer comes at once, before the discount is spent on volume."
+          },
+          {
+            "id": "c",
+            "text": "Repeat the trial on another hundred easy ones and then submit",
+            "correct": false,
+            "says": "Ruled out because \"a sample of easy documents proves nothing\"."
+          },
+          {
+            "id": "d",
+            "text": "Run a varied sample through the batch queue and refine the prompt on it",
+            "correct": false,
+            "says": "Ruled out because the advice is to \"run the prompt synchronously on a small, varied sample\", and a trial in the queue waits a window for each result."
+          }
+        ],
+        "origin": {
+          "path": "course/63-batch-and-multi-pass-review/01-when-a-batch-fits-and-what-to-resubmit.md",
+          "section": "Traps"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario S2, code generation with Claude Code. Two independent review passes report the same injection risk. One rates it 1 on a severity scale of 1 to 3 with confidence 95, and the other rates it 3 with confidence 70. Which entry does the combined list carry?",
+        "options": [
+          {
+            "id": "a",
+            "text": "2 / 83",
+            "correct": false,
+            "says": "Ruled out because the rule is \"Take the highest severity any pass gave\", and nothing is averaged."
+          },
+          {
+            "id": "b",
+            "text": "1 / 95",
+            "correct": false,
+            "says": "Ruled out because the rule is \"so that a pass that saw the danger is not overruled by one that missed it\"."
+          },
+          {
+            "id": "c",
+            "text": "3 / 95",
+            "correct": false,
+            "says": "Ruled out because the rule is \"the lowest confidence, so that the weakest evidence caps the claim\"."
+          },
+          {
+            "id": "d",
+            "text": "3 / 70",
+            "correct": true,
+            "says": "The entry keeps the highest severity and the lowest confidence."
+          }
+        ],
+        "origin": {
+          "path": "course/63-batch-and-multi-pass-review/02-independent-passes-combined-verdicts-and-the-practice.md",
+          "section": "Combining the passes"
+        }
+      }
+    ]
+  }
+}

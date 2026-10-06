@@ -1,0 +1,154 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "70-scenario-customer-support-agent"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 6,
+  "title": "Module quiz: Scenario: customer support agent",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A worker process keeps one state object for every conversation it serves, and a customer is shown a note that belongs to someone else's order. Which change addresses the cause?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Clear the shared object once an hour, limiting how long a note stays",
+            "correct": false,
+            "says": "Ruled out because an hourly clear still lets a note travel between cases: \"so a customer's identity, the orders looked up and the refunds made cannot reach another case\"."
+          },
+          {
+            "id": "b",
+            "text": "Create a new instance for each ticket, with nothing kept after it",
+            "correct": true,
+            "says": "A state that belongs to one case cannot reach another."
+          },
+          {
+            "id": "c",
+            "text": "Instruct the model never to repeat what another person has written",
+            "correct": false,
+            "says": "Ruled out because a request in a prompt is not a guarantee: \"a long-lived shared state is a defect\"."
+          },
+          {
+            "id": "d",
+            "text": "Encrypt the stored notes, with only their owner able to read them later",
+            "correct": false,
+            "says": "Ruled out because the fault is that one object serves every conversation, and encryption leaves it shared: \"the example builds a new desk for each conversation\"."
+          }
+        ],
+        "origin": {
+          "path": "course/70-scenario-customer-support-agent/01-the-scenario-the-layers-and-the-first-fix.md",
+          "section": "The layers of the dispatcher"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A refund above the limit is refused, and the model asks for the same refund again, and again. What does the dispatcher need so that the run ends in a useful way?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A guard on identical calls that halts the loop and transfers to staff",
+            "correct": true,
+            "says": "A guard on identical calls turns a loop into a hand-off."
+          },
+          {
+            "id": "b",
+            "text": "A line in the prompt telling the model to stop once a refund is refused",
+            "correct": false,
+            "says": "Ruled out because a sentence of the prompt does not stop a loop: \"If the same call, with the same arguments, has been made three times in a row\"."
+          },
+          {
+            "id": "c",
+            "text": "A silent retry of the refund until the backend finally accepts it",
+            "correct": false,
+            "says": "Ruled out because a refused refund is a permanent refusal: \"A permanent error is never retried.\""
+          },
+          {
+            "id": "d",
+            "text": "A larger turn limit that gives the model room to find another approach",
+            "correct": false,
+            "says": "Ruled out because more turns only prolong the loop: \"the cap only ends a run, and the guard ends it with a hand-off\"."
+          }
+        ],
+        "origin": {
+          "path": "course/70-scenario-customer-support-agent/01-the-scenario-the-layers-and-the-first-fix.md",
+          "section": "The layers of the dispatcher"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. An audit finds no skipped identity step and no refund over the limit, wrong tools in 14 sessions, and escalation errors in 9. Which fix comes first?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Reword the descriptions of the confusable pair, giving formats and examples",
+            "correct": true,
+            "says": "With nothing about money, the wrong tool in more sessions than escalation errors goes to the descriptions."
+          },
+          {
+            "id": "b",
+            "text": "Write criteria and worked examples for when the agent should hand over a case",
+            "correct": false,
+            "says": "Ruled out because the wrong-tool count is the larger: \"A wrong tool in at least as many sessions as escalation errors\"."
+          },
+          {
+            "id": "c",
+            "text": "Add a prerequisite gate in the dispatcher in front of the order tools",
+            "correct": false,
+            "says": "Ruled out because no session skipped a step and no refund went over the limit: \"A protected call before a successful identity check, or a refund over the limit that was made\"."
+          },
+          {
+            "id": "d",
+            "text": "Move the whole policy into a retrieval index that the agent can search",
+            "correct": false,
+            "says": "Ruled out because the cause is in how the tools are described and not in a missing source: \"the model chose by what the descriptions said\"."
+          }
+        ],
+        "origin": {
+          "path": "course/70-scenario-customer-support-agent/02-audit-the-sessions-and-the-practice.md",
+          "section": "The order of the fixes"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A team adds a rule that hands a case to a person whenever the message holds three exclamation marks. Which audit count is likely to rise?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Sessions settled by the agent although a person was needed",
+            "correct": false,
+            "says": "Ruled out because the rule only adds handovers: \"the agent resolved the case, and a person was needed\"."
+          },
+          {
+            "id": "b",
+            "text": "Sessions with a refund made over the limit",
+            "correct": false,
+            "says": "Ruled out because the rule does not touch refunds: \"A refund over the limit that was refused and handed to a person is not a failure.\""
+          },
+          {
+            "id": "c",
+            "text": "Sessions passed upward that never required a human decision",
+            "correct": true,
+            "says": "Mood is not need, so handovers that needed no person rise."
+          },
+          {
+            "id": "d",
+            "text": "Sessions that ran an order call before the customer was identified",
+            "correct": false,
+            "says": "Ruled out because the rule does not change the order of the calls: \"A protected call before a successful identity check\"."
+          }
+        ],
+        "origin": {
+          "path": "course/70-scenario-customer-support-agent/02-audit-the-sessions-and-the-practice.md",
+          "section": "First-contact resolution has a denominator"
+        }
+      }
+    ]
+  }
+}

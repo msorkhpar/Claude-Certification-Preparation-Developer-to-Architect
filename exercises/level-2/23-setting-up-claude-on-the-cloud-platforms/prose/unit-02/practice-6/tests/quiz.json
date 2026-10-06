@@ -1,0 +1,154 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "23-setting-up-claude-on-the-cloud-platforms"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 6,
+  "title": "Module quiz: Setting up Claude on the cloud platforms",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A reviewer finds a single star in the resource field of a policy statement. Which practice rule does it break?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The document must carry the current version string at the top",
+            "correct": false,
+            "says": "Ruled out because that rule concerns the version: \"The policy has the version `2012-10-17`\", which a star in a resource does not change."
+          },
+          {
+            "id": "b",
+            "text": "Each entry must be a model ARN in a documented region, without wildcards",
+            "correct": true,
+            "says": "The rule is \"Every resource is a model ARN with a region from the Bedrock region list, the `anthropic.` model id form, and no wildcard.\""
+          },
+          {
+            "id": "c",
+            "text": "Every action must be one of the three invoke actions allowed",
+            "correct": false,
+            "says": "Ruled out because that rule concerns actions: \"Every action is one of the three invoke actions\"."
+          },
+          {
+            "id": "d",
+            "text": "The statements must be allow statements and nothing else at all",
+            "correct": false,
+            "says": "Ruled out because that rule concerns the effect: \"only `Allow` statements, and no `NotAction` or `NotResource`\"."
+          }
+        ],
+        "origin": {
+          "path": "course/23-setting-up-claude-on-the-cloud-platforms/02-residency-quotas-logging-and-the-configuration-practice.md",
+          "section": "The practice: platform access as configuration, graded by tests"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "A reviewer sees the ready-made aiplatform user bundle attached to the calling service account. What does the practice require instead?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A custom role whose only permission is predict",
+            "correct": true,
+            "says": "The rule is \"The Vertex role is a custom role (its `id` starts with `projects/` or `organizations/`, not `roles/`) whose only permission is `aiplatform.endpoints.predict`.\""
+          },
+          {
+            "id": "b",
+            "text": "The same bundle plus a deny for the deploy permission",
+            "correct": false,
+            "says": "Ruled out because the rule asks for a role \"whose only permission is `aiplatform.endpoints.predict`\", and adding a deny leaves the bundle's extra permissions in place."
+          },
+          {
+            "id": "c",
+            "text": "A basic Editor grant scoped to one endpoint of the project",
+            "correct": false,
+            "says": "Ruled out because the rule requires a custom role \"whose only permission is `aiplatform.endpoints.predict`\"."
+          },
+          {
+            "id": "d",
+            "text": "An organization-level predefined bundle with fewer permissions",
+            "correct": false,
+            "says": "Ruled out because the id \"starts with `projects/` or `organizations/`, not `roles/`\", and a predefined id starts with `roles/`."
+          }
+        ],
+        "origin": {
+          "path": "course/23-setting-up-claude-on-the-cloud-platforms/02-residency-quotas-logging-and-the-configuration-practice.md",
+          "section": "The practice: platform access as configuration, graded by tests"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A quota file asks for 6,000,000 input tokens per minute with anthropic_approval false. What does the review do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It fails the request, since 5,000,000 is the unapproved ceiling",
+            "correct": true,
+            "says": "The rule is \"Without Anthropic's approval a quota request is at most 5,000,000 input tokens and 500,000 output tokens per minute.\""
+          },
+          {
+            "id": "b",
+            "text": "It passes the request, since the default is 2,000,000 already",
+            "correct": false,
+            "says": "Ruled out because \"Default quota is 2 million input tokens per minute (TPM).\" is the starting quota, and a request may go higher up to the ceiling."
+          },
+          {
+            "id": "c",
+            "text": "It passes the request, since the output figure is under 500,000",
+            "correct": false,
+            "says": "Ruled out because the ceiling covers both figures: \"You can request up to 5 million input TPM and 500,000 output TPM\"."
+          },
+          {
+            "id": "d",
+            "text": "It passes the request once the region has been named in it",
+            "correct": false,
+            "says": "Ruled out because only approval lifts the ceiling: \"without additional Anthropic approval\"."
+          }
+        ],
+        "origin": {
+          "path": "course/23-setting-up-claude-on-the-cloud-platforms/02-residency-quotas-logging-and-the-configuration-practice.md",
+          "section": "The practice: platform access as configuration, graded by tests"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A project with residency us asks for endpoint us-central1 and model claude-opus-5-5. What does the review say?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It passes, since the global value always satisfies any residency",
+            "correct": false,
+            "says": "Ruled out because the global value is \"Dynamic routing for maximum availability\", which says nothing of residency."
+          },
+          {
+            "id": "b",
+            "text": "It passes, since the region begins with the us prefix",
+            "correct": false,
+            "says": "Ruled out because the prefix rule, \"`us` needs `us` or a `us-` region\", is met but is not the only rule."
+          },
+          {
+            "id": "c",
+            "text": "It fails, since a named location serves one older name only",
+            "correct": true,
+            "says": "The rule is \"A specific region serves `claude-sonnet-4-6` only\", and the model asked for is newer."
+          },
+          {
+            "id": "d",
+            "text": "It fails, since the region is spelled in the wrong form",
+            "correct": false,
+            "says": "Ruled out because the spelling is fine: \"`us` needs `us` or a `us-` region\"."
+          }
+        ],
+        "origin": {
+          "path": "course/23-setting-up-claude-on-the-cloud-platforms/02-residency-quotas-logging-and-the-configuration-practice.md",
+          "section": "The practice: platform access as configuration, graded by tests"
+        }
+      }
+    ]
+  }
+}

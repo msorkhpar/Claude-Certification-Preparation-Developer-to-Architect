@@ -1,0 +1,185 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "77-scenario-agentic-tool-builder"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 6,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Scenario: agentic tool builder",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario: an agent that writes and proposes its own tools, which a gate reviews before anything runs. A tool's code opens a file for writing, while the proposal declares only reading, and the policy sends writes to a person. What does the gate do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Refuses it, since an effect nobody mentioned cannot be approved on its behalf",
+            "correct": true,
+            "says": "An undeclared effect is refused."
+          },
+          {
+            "id": "b",
+            "text": "Sends it back for a revision of the description, since the declaration is thin",
+            "correct": false,
+            "says": "Ruled out because an undeclared effect is one of the refusals and not a matter of the description: \"Three things refuse a proposal.\" and \"Its code shows a permission that the proposal did not declare\""
+          },
+          {
+            "id": "c",
+            "text": "Approves it behind a gate, since the policy already covers writes",
+            "correct": false,
+            "says": "Ruled out because the gate approves only what was declared: \"Its code shows a permission that the proposal did not declare, which is the case of a tool that says it reads and fetches a page.\""
+          },
+          {
+            "id": "d",
+            "text": "Approves it outright, since the proposal declares a permission that the policy allows",
+            "correct": false,
+            "says": "Ruled out because a declared read does not cover the write the code shows: \"Its code shows a permission that the proposal did not declare\", and a refusal wins: \"A proposal with a refusal is refused, whatever else is true of it.\""
+          }
+        ],
+        "origin": {
+          "path": "course/77-scenario-agentic-tool-builder/02-reviewing-a-proposal-and-the-practice.md",
+          "section": "What is refused, and what is only sent back"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario: an agent that writes and proposes its own tools, which a gate reviews before anything runs. A team proposes to run generated tools in a container and to drop the gate, because the container limits the damage. Which gap remains?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Nothing, because a container makes every tool safe to run",
+            "correct": false,
+            "says": "Ruled out because a container is only one of the five jobs: \"Containment is the environment's job.\""
+          },
+          {
+            "id": "b",
+            "text": "Nothing checks what the code does against what was declared",
+            "correct": true,
+            "says": "The container holds the run, and only the gate compares the code with its declaration."
+          },
+          {
+            "id": "c",
+            "text": "The container's memory limit, which the gate cannot read",
+            "correct": false,
+            "says": "Ruled out because the gate reads and flags the limits: \"a timeout above the limit and a memory request above the limit\"."
+          },
+          {
+            "id": "d",
+            "text": "The tool's network access, which the container cannot limit",
+            "correct": false,
+            "says": "Ruled out because the container already closes it (page 1): \"The container has no internet access\"."
+          }
+        ],
+        "origin": {
+          "path": "course/77-scenario-agentic-tool-builder/01-the-tool-builder-what-the-agent-may-write.md",
+          "section": "A text scan is not a sandbox"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario: an agent that writes and proposes its own tools, which a gate reviews before anything runs. Which record satisfies the audit part of the design?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A file that the agent keeps and updates for itself after every one of its runs",
+            "correct": false,
+            "says": "Ruled out because an editable file is not an audit: \"A log that the agent can edit is not an audit.\""
+          },
+          {
+            "id": "b",
+            "text": "A summary that the agent writes by itself at the end of each working day",
+            "correct": false,
+            "says": "Ruled out because a summary by the agent is its own account: \"The record has to be written by the gate and the runner and kept where the agent has no write access\"."
+          },
+          {
+            "id": "c",
+            "text": "One line per run, kept in the folder where the agent saves its tools",
+            "correct": false,
+            "says": "Ruled out because the agent can write where the log is kept: \"kept where the agent has no write access\"."
+          },
+          {
+            "id": "d",
+            "text": "One line per decision and per run, kept where its subject has no access",
+            "correct": true,
+            "says": "The audit is kept out of the agent's reach."
+          }
+        ],
+        "origin": {
+          "path": "course/77-scenario-agentic-tool-builder/02-reviewing-a-proposal-and-the-practice.md",
+          "section": "What an audit is"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "Scenario: an agent that writes and proposes its own tools, which a gate reviews before anything runs. A proposed name is 64 characters of lower-case letters, digits and underscores, starting with a letter. What does the gate do with the name?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Flags it, since the longest name has to leave a spare character",
+            "correct": false,
+            "says": "Ruled out because the length is allowed: \"A name may be 64 characters long, and 65 is too long.\""
+          },
+          {
+            "id": "b",
+            "text": "Flags it, because names this long are hard for the model to choose",
+            "correct": false,
+            "says": "Ruled out because the gate checks the form and not the model's taste: \"Four things only send it back: a name that is not in the fixed form\"."
+          },
+          {
+            "id": "c",
+            "text": "Accepts it, as it sits at the ceiling for such labels and not above it",
+            "correct": true,
+            "says": "A name may be 64 characters."
+          },
+          {
+            "id": "d",
+            "text": "Accepts it, since the description also has at least 64 words",
+            "correct": false,
+            "says": "Ruled out because the description has its own minimum: \"The description needs at least the minimum number of words, and exactly the minimum is enough.\""
+          }
+        ],
+        "origin": {
+          "path": "course/77-scenario-agentic-tool-builder/02-reviewing-a-proposal-and-the-practice.md",
+          "section": "Limits are inclusive"
+        }
+      }
+    ]
+  }
+}

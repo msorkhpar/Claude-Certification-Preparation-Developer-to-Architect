@@ -1,0 +1,154 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "20-prompt-caching"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 6,
+  "title": "Module quiz: Prompt caching",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A service fires ten calls together, all sharing a 30,000-token prefix, against a cold cache. What does the module predict?",
+        "options": [
+          {
+            "id": "a",
+            "text": "One writes and nine read, since all ten share the same hash and the same prefix",
+            "correct": false,
+            "says": "Ruled out because the entry \"only becomes available after the first response begins\", so the others have nothing to read."
+          },
+          {
+            "id": "b",
+            "text": "Each one writes, since the entry appears only once a first reply starts",
+            "correct": true,
+            "says": "The page says a cache entry \"only becomes available after the first response begins\", so all ten write."
+          },
+          {
+            "id": "c",
+            "text": "All read, since the entry is created the moment a request arrives",
+            "correct": false,
+            "says": "Ruled out because the same sentence says it is available only \"after the first response begins\"."
+          },
+          {
+            "id": "d",
+            "text": "One writes and nine fail, since an entry allows a single writer",
+            "correct": false,
+            "says": "Ruled out because the advice is \"wait for the first response before sending subsequent requests\", not that extra requests fail."
+          }
+        ],
+        "origin": {
+          "path": "course/20-prompt-caching/02-prices-lifetimes-lookback-and-invalidation.md",
+          "section": "How long an entry lives"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "A prefix is sent twice within five minutes on a model that reads at 0.1 times the base price. How does the spend on the pair compare with two ordinary sends?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Roughly two thirds as much",
+            "correct": true,
+            "says": "A five-minute write at 1.25 plus a read at 0.1 gives 1.35 against 2, about two thirds."
+          },
+          {
+            "id": "b",
+            "text": "Roughly one third as much",
+            "correct": false,
+            "says": "Ruled out because the first send alone costs more than that: \"5-minute cache write tokens are 1.25 times the base input tokens price\"."
+          },
+          {
+            "id": "c",
+            "text": "A few percent more",
+            "correct": false,
+            "says": "Ruled out because that figure is the one-hour case, from \"1-hour cache write tokens are 2 times the base input tokens price\"."
+          },
+          {
+            "id": "d",
+            "text": "About the same as two plain sends",
+            "correct": false,
+            "says": "Ruled out because the second send is a read: \"Cache read tokens are 0.1 times the base input tokens price\"."
+          }
+        ],
+        "origin": {
+          "path": "course/20-prompt-caching/02-prices-lifetimes-lookback-and-invalidation.md",
+          "section": "The price of a write and a read"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A request marks the system block with a five-minute breakpoint and the final message with a one-hour breakpoint. What does the module say?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It violates the ordering rule, since the longer entry has to come first",
+            "correct": true,
+            "says": "The page says \"Cache entries with longer TTL must appear before shorter TTLs\"."
+          },
+          {
+            "id": "b",
+            "text": "It is accepted, with both entries billed at one common rate",
+            "correct": false,
+            "says": "Ruled out because the writes are billed differently: \"1-hour cache write tokens are 2 times the base input tokens price\"."
+          },
+          {
+            "id": "c",
+            "text": "It is accepted, with only the short entry written",
+            "correct": false,
+            "says": "Ruled out because \"The usage object then splits the writes\" by lifetime, so both can be written."
+          },
+          {
+            "id": "d",
+            "text": "It violates a one-TTL rule, since a request carries one lifetime",
+            "correct": false,
+            "says": "Ruled out because \"You can use both 1-hour and 5-minute cache controls in the same request\" when ordered correctly."
+          }
+        ],
+        "origin": {
+          "path": "course/20-prompt-caching/02-prices-lifetimes-lookback-and-invalidation.md",
+          "section": "How long an entry lives"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A 600-token system prompt is marked on a model whose minimum is 512, and usage shows a write on every call and no reads. The prompt begins with the clock reading. What should the team do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Pad the prompt so it clears the floor by a wider margin and stays well above it",
+            "correct": false,
+            "says": "Ruled out because padding only helps a prefix that falls short, since \"A prefix shorter than the model's minimum is not cached\", and writes on every call show that this prompt is cached and is not short."
+          },
+          {
+            "id": "b",
+            "text": "Raise the TTL to an hour so the entry survives between uses and keeps being read",
+            "correct": false,
+            "says": "Ruled out because \"Changes at each level invalidate that level and all subsequent levels\", whatever the TTL."
+          },
+          {
+            "id": "c",
+            "text": "Shift that line to the end and set the boundary where unchanging text stops",
+            "correct": true,
+            "says": "The planner puts \"a volatile block moves to the very end of the request\", after the last breakpoint."
+          },
+          {
+            "id": "d",
+            "text": "Switch to a larger number of explicit markers so more segments are cached separately",
+            "correct": false,
+            "says": "Ruled out because \"You can define up to 4 cache breakpoints\", yet an earlier changing block still changes the hash."
+          }
+        ],
+        "origin": {
+          "path": "course/20-prompt-caching/02-prices-lifetimes-lookback-and-invalidation.md",
+          "section": "The practice: order a request for cache hits"
+        }
+      }
+    ]
+  }
+}

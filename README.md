@@ -6,7 +6,7 @@ Claude Certification Preparation: Developer to Architect is a self-study course:
 
 It has 219 units in 94 modules, grouped in 4 topic areas: Foundations, Developer, Architect and Architect Professional.
 
-It holds 523 practices: 304 to write in code, graded by a real runner, and 219 short quizzes, graded in the page.
+It holds 612 practices: 304 to write in code, graded by a real runner, and 308 short quizzes, graded in the page.
 
 ## What you get
 

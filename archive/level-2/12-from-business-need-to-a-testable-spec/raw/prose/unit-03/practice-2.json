@@ -1,0 +1,185 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "12-from-business-need-to-a-testable-spec"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: From business need to a testable spec",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A feature must return a complete answer to a waiting user within two seconds. The team's design is a chain of five calls, each taking about one second. Which action fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Stream the final stage so that its first words appear sooner for the person waiting",
+            "correct": false,
+            "says": "Ruled out because \"streaming does not shorten the total time\", and the requirement is for the complete answer."
+          },
+          {
+            "id": "b",
+            "text": "Merge or remove stages until the summed time sits inside the budget",
+            "correct": true,
+            "says": "Chained calls add up, so the fix is to cut the sequence: \"a requirement of two seconds rules out a five-call pipeline\"."
+          },
+          {
+            "id": "c",
+            "text": "Request a higher usage plan from the provider so that each individual call runs faster",
+            "correct": false,
+            "says": "Ruled out because a higher tier \"does not make one call finish sooner\"."
+          },
+          {
+            "id": "d",
+            "text": "Move the whole pipeline to asynchronous batches, which are processed at half the price",
+            "correct": false,
+            "says": "Ruled out because a batch \"is the right design when nobody is waiting\", and a user is waiting."
+          }
+        ],
+        "origin": {
+          "path": "course/12-from-business-need-to-a-testable-spec/02-budgets-and-matching-an-architecture.md",
+          "section": "Latency: what you can and cannot tune"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "After a team swaps its model for a newer id, the support lead says the new one feels better. What should happen before release?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Rerun the fixed evaluation set on the candidate id and compare it with the acceptance rate",
+            "correct": true,
+            "says": "The maintain routine is to re-run the evaluation set against the new model and compare, so the change is judged on numbers."
+          },
+          {
+            "id": "b",
+            "text": "Accept the lead's impression, since the replacement is the more recent release of the family",
+            "correct": false,
+            "says": "Ruled out because \"a requirement that only a person's impression can settle is a wish\"."
+          },
+          {
+            "id": "c",
+            "text": "Switch to the moving alias so that every later upgrade arrives without any change in the code",
+            "correct": false,
+            "says": "Ruled out because \"a silent change of model is a silent change of behaviour\"."
+          },
+          {
+            "id": "d",
+            "text": "Compare the monthly bill of the two models over a single representative week of production traffic",
+            "correct": false,
+            "says": "Ruled out because a bill covers cost alone, while the routine says to \"re-run the evaluation set against the new model\" for quality."
+          }
+        ],
+        "origin": {
+          "path": "course/12-from-business-need-to-a-testable-spec/01-requirements-for-a-claude-feature.md",
+          "section": "Traps"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A feature runs comfortably under its entry-level request limit on average, but a quarterly campaign sends four times that rate for ten minutes, and the first requests of the burst are refused. Which response fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Size for the highest peak, then ask for a bigger allowance or smooth the traffic",
+            "correct": true,
+            "says": "The bucket can be emptied by a burst whatever the average is, so the page asks for the peak and offers a higher tier or a smoother load."
+          },
+          {
+            "id": "b",
+            "text": "Size for the daily average, because capacity refills continuously over each minute of the day",
+            "correct": false,
+            "says": "Ruled out because the page says \"write the peak, not the mean\"."
+          },
+          {
+            "id": "c",
+            "text": "Shorten every reply from the model so that each single request counts for less against the limit",
+            "correct": false,
+            "says": "Ruled out because \"a request counts against the request limit however short its reply is\"."
+          },
+          {
+            "id": "d",
+            "text": "Switch the residency setting to global so that a second and separate pool becomes available",
+            "correct": false,
+            "says": "Ruled out because \"rate limits are shared across all geos\", so no second pool appears."
+          }
+        ],
+        "origin": {
+          "path": "course/12-from-business-need-to-a-testable-spec/02-budgets-and-matching-an-architecture.md",
+          "section": "Traps"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A help site must answer visitors only from the company's own policy documents, one answer for each visitor, with the visitor waiting. Which design fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Chain three separate calls that draft, check and polish the reply before it is shown",
+            "correct": false,
+            "says": "Ruled out because a chain is for \"several dependent steps, each checkable\", and three calls would also cost latency."
+          },
+          {
+            "id": "b",
+            "text": "Run an agent loop that explores the documents until the loop is satisfied with what it found",
+            "correct": false,
+            "says": "Ruled out because an agent loop is for when \"the path depends on what is found and cannot be listed in advance\"."
+          },
+          {
+            "id": "c",
+            "text": "Fetch the matching passages, then ask once for a reply grounded in them",
+            "correct": true,
+            "says": "Answers that must come from the company's own documents point to retrieval followed by one call."
+          },
+          {
+            "id": "d",
+            "text": "Submit each question as part of an overnight batch that is collected the next morning",
+            "correct": false,
+            "says": "Ruled out because a batch \"is the right design when nobody is waiting\"."
+          }
+        ],
+        "origin": {
+          "path": "course/12-from-business-need-to-a-testable-spec/02-budgets-and-matching-an-architecture.md",
+          "section": "Matching an architecture to the requirement"
+        }
+      }
+    ]
+  }
+}

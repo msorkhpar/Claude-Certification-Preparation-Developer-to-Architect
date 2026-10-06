@@ -1,0 +1,154 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "71-scenario-code-generation-with-claude-code"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 6,
+  "title": "Module quiz: Scenario: code generation with Claude Code",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario S2, a team using Claude Code on a shared codebase. A rule file for the handlers lists `paths: src/api`, and the audit says that it matches none of the project's files. What is the likely cause?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Rule files are read only when a session is first started",
+            "correct": false,
+            "says": "Ruled out because path-scoped rules load when a matching file is read: \"A rule with a `paths` list loads when Claude works with a file that matches one of its globs\"."
+          },
+          {
+            "id": "b",
+            "text": "The entry is a bare folder name and not a glob that ends in a double star",
+            "correct": true,
+            "says": "A bare folder name is not a glob: \"write a folder as `src/api/**`\"."
+          },
+          {
+            "id": "c",
+            "text": "Handlers are covered by the command folder, which takes priority in every session",
+            "correct": false,
+            "says": "Ruled out because the command folder holds commands and not conventions: \"A command file in the project, `.claude/commands/review.md`, committed to the repository\"."
+          },
+          {
+            "id": "d",
+            "text": "The path needs the word handlers in it for the rule to be found",
+            "correct": false,
+            "says": "Ruled out because the match is by glob on file paths and not by a word: \"`**` crosses folders and `*` stays inside one\"."
+          }
+        ],
+        "origin": {
+          "path": "course/71-scenario-code-generation-with-claude-code/01-the-team-setup-where-each-instruction-lives.md",
+          "section": "What a glob matches"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario S2, a team using Claude Code on a shared codebase. Three specs of the flawed project get no conventions at all. What closes the gap?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A testing rule whose glob, such as `**/*.test.tsx`, reaches test files in any folder",
+            "correct": true,
+            "says": "A rule with a glob reaches test files wherever they sit: \"`**/*.test.tsx` reaches test files in any folder\"."
+          },
+          {
+            "id": "b",
+            "text": "A longer root file that names each test file under a heading of its own",
+            "correct": false,
+            "says": "Ruled out because the root file leaves the choice to the model: \"One root file with a section per area leaves Claude to infer which section applies\"."
+          },
+          {
+            "id": "c",
+            "text": "A skill for tests that each developer starts by hand before a commit",
+            "correct": false,
+            "says": "Ruled out because a path starts no skill: \"a skill is invoked, or chosen by the model from its description, and a path match does not start it\"."
+          },
+          {
+            "id": "d",
+            "text": "A memory file placed in the one folder that holds most of the tests",
+            "correct": false,
+            "says": "Ruled out because a folder file does not reach the others: \"each file is bound to its directory, and test files next to their sources are in all of them\"."
+          }
+        ],
+        "origin": {
+          "path": "course/71-scenario-code-generation-with-claude-code/01-the-team-setup-where-each-instruction-lives.md",
+          "section": "What a glob matches"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario S2, a team using Claude Code on a shared codebase. In the example's fixed project, `docs/readme.md` is opened. Which conventions load for it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Only the root file's, since no rule has a glob that matches it",
+            "correct": true,
+            "says": "The output shows `docs/readme.md <- CLAUDE.md only`: no rule reaches it, and the root file loads in every session."
+          },
+          {
+            "id": "b",
+            "text": "The testing rule as well, since a readme is also a kind of test",
+            "correct": false,
+            "says": "Ruled out because the testing rule has globs for test files: \"`**/*.test.tsx` reaches test files in any folder\"."
+          },
+          {
+            "id": "c",
+            "text": "The components rule, as the nearest rule by folder",
+            "correct": false,
+            "says": "Ruled out because a match is by glob and not by nearness: \"`**` crosses folders and `*` stays inside one\"."
+          },
+          {
+            "id": "d",
+            "text": "None at all, since the root file loads only for source files",
+            "correct": false,
+            "says": "Ruled out because the root file is not conditional: \"The root `CLAUDE.md` and the rule files without a `paths` list load at the start of every session\"."
+          }
+        ],
+        "origin": {
+          "path": "course/71-scenario-code-generation-with-claude-code/01-the-team-setup-where-each-instruction-lives.md",
+          "section": "What a glob matches"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "Scenario S2, a team using Claude Code on a shared codebase. The audit of the flawed project prints `env-readable`. What removes that finding?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A rule file whose glob matches `.env`",
+            "correct": false,
+            "says": "Ruled out because a rule loads conventions and denies nothing: \"A rule with a `paths` list loads when Claude works with a file that matches one of its globs\"."
+          },
+          {
+            "id": "b",
+            "text": "A line in the root file that asks Claude not to read `.env`",
+            "correct": false,
+            "says": "Ruled out because a sentence in a file is a request: \"a sentence in a memory file is a request that the model weighs\"."
+          },
+          {
+            "id": "c",
+            "text": "A deny rule for reading `.env` in the settings",
+            "correct": true,
+            "says": "The finding says that the settings do not deny the file: \"`env-readable` and `bare-bash-allowed`: the settings do not deny reading `.env`, or allow the whole Bash tool.\""
+          },
+          {
+            "id": "d",
+            "text": "A review command with a read-only list of tools",
+            "correct": false,
+            "says": "Ruled out because the command's tools are another matter: \"a shared review command with a description and read-only tools\"."
+          }
+        ],
+        "origin": {
+          "path": "course/71-scenario-code-generation-with-claude-code/01-the-team-setup-where-each-instruction-lives.md",
+          "section": "The audit: a checklist that reads the files"
+        }
+      }
+    ]
+  }
+}

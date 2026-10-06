@@ -1,0 +1,185 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "35-the-claude-agent-sdk"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: The Claude Agent SDK",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A team writes its services in Java and wants the same agent loop. What does the documentation offer?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A Java edition of the SDK, installed from Maven",
+            "correct": false,
+            "says": "Ruled out because the SDK is \"programmable in Python and TypeScript\", and there is no Java edition."
+          },
+          {
+            "id": "b",
+            "text": "Run the CLI as a subprocess in headless mode with JSON output",
+            "correct": true,
+            "says": "The first page says the documentation's route for other languages is to run the CLI as a subprocess, with the `-p` flag and `--output-format json`."
+          },
+          {
+            "id": "c",
+            "text": "Managed Agents, which expose the loop as a Java library",
+            "correct": false,
+            "says": "Ruled out because Managed Agents are \"A hosted agent harness that runs the agent loop, with sessions in an Anthropic-managed cloud sandbox\", and not a library."
+          },
+          {
+            "id": "d",
+            "text": "The Client SDK's tool runner, which is the same loop as the Agent SDK",
+            "correct": false,
+            "says": "Ruled out because for the Client SDK \"You write the tool loop yourself, or let the client SDK's beta tool runner drive it\", which is not the Agent SDK's loop."
+          }
+        ],
+        "origin": {
+          "path": "course/35-the-claude-agent-sdk/01-the-sdk-and-its-loop.md",
+          "section": "Four ways to build an agent"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "In the example output a denied push appears as \"Permission denied: Nothing is pushed from an agent\". Which part is written by the example's own hook and not by the stand-in's code?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The words Permission denied, before the colon",
+            "correct": false,
+            "says": "Ruled out because \"The prefix Permission denied: in front of it is the stand-in's wording and not the real binary's.\""
+          },
+          {
+            "id": "b",
+            "text": "The whole line, from the first word to the last",
+            "correct": false,
+            "says": "Ruled out because part of the line, the reason, is \"which is the text of your hook\", so the line is not all the stand-in's."
+          },
+          {
+            "id": "c",
+            "text": "The reason that follows the colon",
+            "correct": true,
+            "says": "The third page says the reason \"is the text of your hook\"."
+          },
+          {
+            "id": "d",
+            "text": "No part of the line, which is copied from the real binary",
+            "correct": false,
+            "says": "Ruled out because \"It is not the real binary, and nothing here shows how the real binary words its messages or schedules its calls.\""
+          }
+        ],
+        "origin": {
+          "path": "course/35-the-claude-agent-sdk/03-driving-the-sdk-offline-and-the-practice.md",
+          "section": "The example: three kinds of callback in one run"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "An agent in production must not run unbounded. Which two limits does the SDK offer?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A cap on tokens for each message and a cap on wall-clock time",
+            "correct": false,
+            "says": "Ruled out because the two options are \"Maximum tool-use round trips\" and \"Maximum cost before stopping\", with no per-message token cap."
+          },
+          {
+            "id": "b",
+            "text": "A cap on files read and a cap on files written",
+            "correct": false,
+            "says": "Ruled out because `max_turns` \"counts tool-use turns only\", and no file cap exists."
+          },
+          {
+            "id": "c",
+            "text": "A cap on hooks and a cap on tools for each turn",
+            "correct": false,
+            "says": "Ruled out because without limits \"the loop runs until Claude finishes on its own\", and hooks and tools are not what the two options count."
+          },
+          {
+            "id": "d",
+            "text": "A cap on tool-use turns and a cap on spend in dollars",
+            "correct": true,
+            "says": "The first page lists `max_turns` (\"Maximum tool-use round trips\") and `max_budget_usd` (\"Maximum cost before stopping\")."
+          }
+        ],
+        "origin": {
+          "path": "course/35-the-claude-agent-sdk/01-the-sdk-and-its-loop.md",
+          "section": "Limits and results"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A CI job uses bypassPermissions and also lists Read in allowed_tools, hoping to keep the agent read-only. Which fix does the documentation give?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Nothing is needed, since the allowed list already limits the agent",
+            "correct": false,
+            "says": "Ruled out because \"allowed_tools does not constrain bypassPermissions.\""
+          },
+          {
+            "id": "b",
+            "text": "Block the unwanted ones with deny rules",
+            "correct": true,
+            "says": "The second page says \"allowed_tools does not constrain bypassPermissions\", and that the way to block specific tools in that mode is deny rules."
+          },
+          {
+            "id": "c",
+            "text": "Move the list into the callback, which is consulted first",
+            "correct": false,
+            "says": "Ruled out because \"Auto-approved tools never reach canUseTool\", so the callback does not see them."
+          },
+          {
+            "id": "d",
+            "text": "Switch to the default mode, which makes the list exclusive",
+            "correct": false,
+            "says": "Ruled out because \"This does not restrict Claude to only these tools\", in any mode."
+          }
+        ],
+        "origin": {
+          "path": "course/35-the-claude-agent-sdk/02-tools-permissions-hooks-and-custom-tools.md",
+          "section": "The order of evaluation"
+        }
+      }
+    ]
+  }
+}

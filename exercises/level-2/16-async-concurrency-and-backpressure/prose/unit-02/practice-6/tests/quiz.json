@@ -1,0 +1,154 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "16-async-concurrency-and-backpressure"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 6,
+  "title": "Module quiz: Async, concurrency and backpressure",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Twelve tickets are sent together, and the provider refuses one with a 429. The team wants fewer refusals. What comes first?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Cap the parallel work with a semaphore, then pace what remains",
+            "correct": true,
+            "says": "The page's order is \"Bound and pace first; retry last\"."
+          },
+          {
+            "id": "b",
+            "text": "Raise the retry count so that each refusal is repeated sooner than before",
+            "correct": false,
+            "says": "Ruled out because \"retrying a burst you could have avoided spends the time and the quota twice\"."
+          },
+          {
+            "id": "c",
+            "text": "Send the work through more clients so that each one carries fewer calls",
+            "correct": false,
+            "says": "Ruled out because the page says \"Don't create more than one client in the same application\", since each has its own pools."
+          },
+          {
+            "id": "d",
+            "text": "Raise the timeout on every request so that slow calls are not abandoned",
+            "correct": false,
+            "says": "Ruled out because the bound is what \"protects the connection pool and the rate limit\", and a timeout does not bound the burst."
+          }
+        ],
+        "origin": {
+          "path": "course/16-async-concurrency-and-backpressure/02-rate-limits-and-backpressure.md",
+          "section": "Traps"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "A pipeline's first stage outpaces the stage behind it, and memory grows during long runs. Which fix is best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Give the process more memory so that the buffer can hold the whole run",
+            "correct": false,
+            "says": "Ruled out because \"the buffer is your memory\"."
+          },
+          {
+            "id": "b",
+            "text": "Add a second producer so that the buffer fills twice as fast as before",
+            "correct": false,
+            "says": "Ruled out because \"a fast producer and a slow consumer meet in an unbounded buffer\"."
+          },
+          {
+            "id": "c",
+            "text": "Limit the buffer between the two so that a full one slows the producer",
+            "correct": true,
+            "says": "The page says \"bound the queue between them: a full queue makes the model stage wait\"."
+          },
+          {
+            "id": "d",
+            "text": "Retry the slow writes so that fewer of them fail during the long run",
+            "correct": false,
+            "says": "Ruled out because retries only repeat load, and \"spends the time and the quota twice\"."
+          }
+        ],
+        "origin": {
+          "path": "course/16-async-concurrency-and-backpressure/02-rate-limits-and-backpressure.md",
+          "section": "Backpressure: the slow stage holds back the fast one"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Each call takes two seconds, and the account may send ten requests a second. About how many calls run at once at that rate?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Five, found by dividing the latency by the throughput of the account",
+            "correct": false,
+            "says": "Ruled out because \"requests in flight equal the rate times\" the duration, with no division."
+          },
+          {
+            "id": "b",
+            "text": "Twenty, found by multiplying throughput by latency",
+            "correct": true,
+            "says": "The page's relation is \"requests in flight equal the rate times the call duration\", so ten times two gives twenty."
+          },
+          {
+            "id": "c",
+            "text": "Ten, the same as the sends that the account is allowed each second",
+            "correct": false,
+            "says": "Ruled out because the page says \"Use the limit and your measured latency\"."
+          },
+          {
+            "id": "d",
+            "text": "Two, the duration of a single call measured in whole seconds",
+            "correct": false,
+            "says": "Ruled out because \"equal the rate times the call duration\" keeps the rate in the product."
+          }
+        ],
+        "origin": {
+          "path": "course/16-async-concurrency-and-backpressure/02-rate-limits-and-backpressure.md",
+          "section": "Traps"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "One ticket in a gathered batch fails with a bad request while the others succeed. What does the page's rule produce?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Only the successes, listed in the order in which they finished running",
+            "correct": false,
+            "says": "Ruled out because the pool \"returns one outcome per item in input order\"."
+          },
+          {
+            "id": "b",
+            "text": "Cancelled siblings and the first error raised to the caller of the batch",
+            "correct": false,
+            "says": "Ruled out because that is what a bare gather does, and \"rejects on the first rejection\" loses the rest."
+          },
+          {
+            "id": "c",
+            "text": "A repeat of the failing item that continues until it finally succeeds",
+            "correct": false,
+            "says": "Ruled out because the pool \"lets one failure stand alone\" and does not loop on it."
+          },
+          {
+            "id": "d",
+            "text": "An error record in its slot, with every other answer kept in order",
+            "correct": true,
+            "says": "The pool \"returns one outcome per item in input order\" and \"lets one failure stand alone\"."
+          }
+        ],
+        "origin": {
+          "path": "course/16-async-concurrency-and-backpressure/02-rate-limits-and-backpressure.md",
+          "section": "The practice: a bounded worker pool"
+        }
+      }
+    ]
+  }
+}

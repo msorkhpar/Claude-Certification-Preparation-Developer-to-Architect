@@ -1,7 +1,7 @@
 name: "${COURSE_PROJECT:-claude-certification-preparation}"
 services:
   site:
-    image: "${STUDYFORGE_NAMESPACE:?STUDYFORGE_NAMESPACE is not set. It is the Docker Hub account the course images are published under: set it in .env (copy course.env) to the account you were given}/claude-certification-preparation-site:7a073f34537b-8d167e01611f-${COURSE_NARRATION:-without-narration}"
+    image: "${STUDYFORGE_NAMESPACE:?STUDYFORGE_NAMESPACE is not set. It is the Docker Hub account the course images are published under: set it in .env (copy course.env) to the account you were given}/claude-certification-preparation-site:3c5eaedc6bb9-8d167e01611f-${COURSE_NARRATION:-without-narration}"
     user: "1000:1000"
     command:
       - serve
@@ -39,7 +39,7 @@ services:
       - runs
     restart: "no"
   runner:
-    image: "${STUDYFORGE_NAMESPACE:?STUDYFORGE_NAMESPACE is not set. It is the Docker Hub account the course images are published under: set it in .env (copy course.env) to the account you were given}/claude-certification-preparation-runner:7a073f34537b-4e2a85fa5591"
+    image: "${STUDYFORGE_NAMESPACE:?STUDYFORGE_NAMESPACE is not set. It is the Docker Hub account the course images are published under: set it in .env (copy course.env) to the account you were given}/claude-certification-preparation-runner:3c5eaedc6bb9-4e2a85fa5591"
     user: "1000:1000"
     init: true
     volumes:
@@ -56,7 +56,7 @@ services:
         condition: service_healthy
     restart: "no"
   editor:
-    image: "${STUDYFORGE_NAMESPACE:?STUDYFORGE_NAMESPACE is not set. It is the Docker Hub account the course images are published under: set it in .env (copy course.env) to the account you were given}/claude-certification-preparation-editor:7a073f34537b-faf3181cdd1d"
+    image: "${STUDYFORGE_NAMESPACE:?STUDYFORGE_NAMESPACE is not set. It is the Docker Hub account the course images are published under: set it in .env (copy course.env) to the account you were given}/claude-certification-preparation-editor:3c5eaedc6bb9-faf3181cdd1d"
     labels:
       org.studyforge.binds: course=/home/coder/repo/sources;practice=/home/coder/repo/practice;.studyforge/execution/code=/home/coder/repo/code
     user: "1000:1000"

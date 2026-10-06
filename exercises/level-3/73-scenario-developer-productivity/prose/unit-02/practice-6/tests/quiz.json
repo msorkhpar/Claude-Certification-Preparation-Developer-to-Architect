@@ -1,0 +1,154 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "73-scenario-developer-productivity"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 6,
+  "title": "Module quiz: Scenario: developer productivity",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario S4, a helper that explores a legacy system and generates boilerplate. A check reports `unknown-server: wiki (explorer)`. What does the finding mean?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A header holds a credential that somebody typed in by hand, in plain text",
+            "correct": false,
+            "says": "Ruled out because that is another finding: \"`literal-secret`: a header or environment entry whose name says token, key, secret or authorization\"."
+          },
+          {
+            "id": "b",
+            "text": "A reference points at an entry that the project file never defines",
+            "correct": true,
+            "says": "The finding is about a name that is not configured."
+          },
+          {
+            "id": "c",
+            "text": "A subagent has no tools line and inherits everything",
+            "correct": false,
+            "says": "Ruled out for the same reason: \"`agent-inherits-all` and `agent-bare-bash`: a subagent with no `tools` line, or with the shell tool in it\"."
+          },
+          {
+            "id": "d",
+            "text": "A permission rule approves the whole tool rather than one path of it",
+            "correct": false,
+            "says": "Ruled out because that is a third: \"`bare-write-allowed`: an allow rule that approves the whole `Edit` or `Write` tool.\""
+          }
+        ],
+        "origin": {
+          "path": "course/73-scenario-developer-productivity/01-two-subagents-and-the-tools-each-one-gets.md",
+          "section": "The audit: a checklist that reads the files"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario S4, a helper that explores a legacy system and generates boilerplate. Which entry does the check for typed-in credentials report?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A header named Authorization whose value is `Bearer <token>`",
+            "correct": true,
+            "says": "The check reports a secret-looking name whose value has no reference: \"a header or environment entry whose name says token, key, secret or authorization and whose value has no `${` reference\"."
+          },
+          {
+            "id": "b",
+            "text": "A header named Authorization whose value is `Bearer ${TICKETS_TOKEN}`",
+            "correct": false,
+            "says": "Ruled out because its value is a reference: \"whose value has no `${` reference\"."
+          },
+          {
+            "id": "c",
+            "text": "A header named X-Trace whose value is `abc`, sent with every request",
+            "correct": false,
+            "says": "Ruled out because the name says nothing of a secret: \"whose name says token, key, secret or authorization\"."
+          },
+          {
+            "id": "d",
+            "text": "A variable named REGION whose value is `eu`, passed to the local server",
+            "correct": false,
+            "says": "Ruled out for the same reason: \"whose name says token, key, secret or authorization\"."
+          }
+        ],
+        "origin": {
+          "path": "course/73-scenario-developer-productivity/01-two-subagents-and-the-tools-each-one-gets.md",
+          "section": "The audit: a checklist that reads the files"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario S4, a helper that explores a legacy system and generates boilerplate. Which explorer definition passes the practice's explorer case?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A description that starts `Use when`, and a tools line of `Read`, `Grep` and `Glob`",
+            "correct": true,
+            "says": "The page states the case: \"The explorer case passes when its description starts with `Use when`, its `tools` line exists, and the line lists only `Read`, `Grep`, `Glob` and `mcp__docs__search`.\""
+          },
+          {
+            "id": "b",
+            "text": "A description that says `Explores the legacy system`, and the same tools line",
+            "correct": false,
+            "says": "Ruled out by the first condition: \"its description starts with `Use when`\"."
+          },
+          {
+            "id": "c",
+            "text": "A description that starts `Use when`, and a tools line of `Read`, `Grep` and `Bash`",
+            "correct": false,
+            "says": "Ruled out by the last: \"the line lists only `Read`, `Grep`, `Glob` and `mcp__docs__search`\"."
+          },
+          {
+            "id": "d",
+            "text": "A description that starts `Use when`, and no tools line at all",
+            "correct": false,
+            "says": "Ruled out by the second: \"its `tools` line exists\"."
+          }
+        ],
+        "origin": {
+          "path": "course/73-scenario-developer-productivity/02-sessions-variables-and-the-practice.md",
+          "section": "What the tests accept"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "Scenario S4, a helper that explores a legacy system and generates boilerplate. A team writes the header as `Bearer ${TICKETS_TOKEN:-dev-token}` so the tools work on a fresh clone. What is wrong with it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A default is applied to the address and never to a header",
+            "correct": false,
+            "says": "Ruled out because a header is one of the places where it works: \"`${VAR:-default}` expands to the variable if it is set and to the default otherwise\"."
+          },
+          {
+            "id": "b",
+            "text": "Expansion in headers handles only the plain form of a reference",
+            "correct": false,
+            "says": "Ruled out because expansion has both forms: \"Expansion of `${VAR}` and `${VAR:-default}` works in a server's `command`, `args`, `env`, `url` and `headers`\"."
+          },
+          {
+            "id": "c",
+            "text": "The default puts a usable credential into a committed file",
+            "correct": true,
+            "says": "A default for a token is a credential in the file."
+          },
+          {
+            "id": "d",
+            "text": "A file that carries a default cannot be shared through version control",
+            "correct": false,
+            "says": "Ruled out because sharing is the file's purpose: \"The `.mcp.json` of a project is committed so that the team shares its servers.\""
+          }
+        ],
+        "origin": {
+          "path": "course/73-scenario-developer-productivity/01-two-subagents-and-the-tools-each-one-gets.md",
+          "section": "Credentials come from the environment"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,154 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "39-extending-claude-code"
+  ],
+  "variant": "prose",
+  "unit": 4,
+  "ordinal": 6,
+  "title": "Module quiz: Extending Claude Code",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A team needs one rule enforced for every command, with an explanation given to Claude, and the rule must hold in every project that installs their tooling. Which design fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A skill in each repository that tells Claude to avoid the action",
+            "correct": false,
+            "says": "Ruled out because \"a skill is instructions Claude may follow\", and not a rule that holds."
+          },
+          {
+            "id": "b",
+            "text": "A hook in a plugin that blocks with exit code 2 and a reason",
+            "correct": true,
+            "says": "The hooks section gives \"deterministic control: certain actions always happen rather than relying on the LLM to choose to run them\", exit 2 blocks and \"Write a reason to stderr\", and a plugin carries the hook to every project that enables it."
+          },
+          {
+            "id": "c",
+            "text": "A subagent in the plugin that reviews each command before it runs",
+            "correct": false,
+            "says": "Ruled out because a subagent is \"An isolated context that returns summarised results\" and is not a gate for every command."
+          },
+          {
+            "id": "d",
+            "text": "A line in each memory file that forbids the action by its name",
+            "correct": false,
+            "says": "Ruled out because a memory file holds \"Persistent context loaded every conversation\", which is guidance and not enforcement."
+          }
+        ],
+        "origin": {
+          "path": "course/39-extending-claude-code/02-subagents-and-hooks.md",
+          "section": "Hooks"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "One skill drafts release summaries, and another tags and ships a release. Which pair of settings fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Automatic loading off for the first, left on for the second",
+            "correct": false,
+            "says": "Ruled out because a skill that tags a release \"has side effects, and a person should start it\", and this reversal leaves that skill to Claude."
+          },
+          {
+            "id": "b",
+            "text": "Automatic loading left on for both, with `Bash` pre-approved on the second",
+            "correct": false,
+            "says": "Ruled out because \"`allowed-tools: Bash` approves every shell command for that turn\", and a skill with side effects should not load by itself either."
+          },
+          {
+            "id": "c",
+            "text": "Automatic loading off for both, with nothing pre-approved on either",
+            "correct": false,
+            "says": "Ruled out because \"Claude loads it by itself when your request matches its description\", and the harmless skill gains from that."
+          },
+          {
+            "id": "d",
+            "text": "Automatic loading left on for the first, off for the second",
+            "correct": true,
+            "says": "The page says \"A skill that writes release notes is harmless and Claude can start it when asked\", while a skill with side effects needs `disable-model-invocation: true`."
+          }
+        ],
+        "origin": {
+          "path": "course/39-extending-claude-code/01-skills-and-how-they-compare.md",
+          "section": "Who starts it and what it may do"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A repository's `.claude/settings.json` registers a marketplace and enables a plugin, but a new contributor has not yet approved the folder. What happens?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The entries apply only to managed settings, never to a repository",
+            "correct": false,
+            "says": "Ruled out because the page says \"the same two keys go in managed settings\" for a whole organisation, and the repository's file covers its own contributors."
+          },
+          {
+            "id": "b",
+            "text": "The plugin installs at once, because the file is in the repository",
+            "correct": false,
+            "says": "Ruled out because trust comes first: \"A repository cannot install code on a machine that has not trusted it.\""
+          },
+          {
+            "id": "c",
+            "text": "Claude Code ignores the entries without a message until trust is given",
+            "correct": true,
+            "says": "The page says the entries \"apply only in a folder the contributor has trusted, and in an untrusted folder Claude Code ignores them without a message.\""
+          },
+          {
+            "id": "d",
+            "text": "A prompt appears for each plugin, listing its hooks and its scripts",
+            "correct": false,
+            "says": "Ruled out because the page says \"Claude Code ignores them without a message\", which describes no prompt."
+          }
+        ],
+        "origin": {
+          "path": "course/39-extending-claude-code/03-plugins-sharing-and-the-practice.md",
+          "section": "Sharing across a team"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A subagent should review code and remember wording the team prefers, with that knowledge committed with the code. Which fields fit?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Read-only tools and the project memory scope",
+            "correct": true,
+            "says": "The page says a reviewer needs `Read`, `Grep` and `Glob`, and that the `project` scope is for knowledge that is \"shareable via version control\"."
+          },
+          {
+            "id": "b",
+            "text": "Every tool and the user memory scope",
+            "correct": false,
+            "says": "Ruled out because \"Omit it and the subagent inherits every tool\", and the `user` scope lives in the home directory and is not committed."
+          },
+          {
+            "id": "c",
+            "text": "Read-only tools and the local memory scope",
+            "correct": false,
+            "says": "Ruled out because the `local` scope is for knowledge that \"should not be checked in\"."
+          },
+          {
+            "id": "d",
+            "text": "Every tool and no memory field at all",
+            "correct": false,
+            "says": "Ruled out because \"Omit it and the subagent inherits every tool\", and without `memory` the subagent keeps no knowledge across conversations."
+          }
+        ],
+        "origin": {
+          "path": "course/39-extending-claude-code/02-subagents-and-hooks.md",
+          "section": "Subagent memory"
+        }
+      }
+    ]
+  }
+}

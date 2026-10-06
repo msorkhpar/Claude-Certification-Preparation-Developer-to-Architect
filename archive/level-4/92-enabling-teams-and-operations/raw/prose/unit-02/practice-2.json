@@ -1,0 +1,151 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "92-enabling-teams-and-operations"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Enabling teams and operations",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario: A developer reports that the managed policy \"does nothing\" for the allowlist of MCP servers on their laptop. The organisation's allowlist, and the key that makes it the only list, are both in the shared project file of the repository. Which fact explains it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Lists in settings files merge, so their own list has been added to the policy",
+            "correct": false,
+            "says": "Ruled out because the page says managed-only keys are not merged: \"A lower file that sets one of these has **no effect**\"."
+          },
+          {
+            "id": "b",
+            "text": "The command line always outranks the managed file, so the list is overridden",
+            "correct": false,
+            "says": "Ruled out because the page orders the levels \"highest first\" with managed settings above the command line, and \"no user, project or local value overrides it\"."
+          },
+          {
+            "id": "c",
+            "text": "Settings of that kind are honoured at the top tier alone and inert below it",
+            "correct": true,
+            "says": "A key that only managed settings read has no effect elsewhere."
+          },
+          {
+            "id": "d",
+            "text": "The shared project file is read first, so the policy file replaced it",
+            "correct": false,
+            "says": "Ruled out because \"Some keys are read only from managed settings, because their purpose is to be out of a developer's reach\"."
+          }
+        ],
+        "origin": {
+          "path": "course/92-enabling-teams-and-operations/01-one-setting-in-five-places-precedence-locks-and-managed-only-keys.md",
+          "section": "Keys that only an organisation can set"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario: A security lead asks for a way to refuse the options that bring in a plugin, an agent or an MCP server for one run only. Which key does that, and where is it set?",
+        "options": [
+          {
+            "id": "a",
+            "text": "`strictKnownMarketplaces`, in the shared project file",
+            "correct": false,
+            "says": "Ruled out because \"An empty list blocks every source, the official one included\", and the allowlist does not stop sideloading."
+          },
+          {
+            "id": "b",
+            "text": "`disableSideloadFlags`, in managed settings",
+            "correct": true,
+            "says": "That key rejects the flags that sideload plugins, agents and MCP servers."
+          },
+          {
+            "id": "c",
+            "text": "`allowManagedHooksOnly`, in the user file",
+            "correct": false,
+            "says": "Ruled out because \"only managed hooks run\" is what that key does."
+          },
+          {
+            "id": "d",
+            "text": "`availableModels`, in managed settings",
+            "correct": false,
+            "says": "Ruled out because \"The **lock** is `availableModels`, a list\" and concerns the model choice."
+          }
+        ],
+        "origin": {
+          "path": "course/92-enabling-teams-and-operations/02-rolling-out-plugins-servers-spend-and-adoption.md",
+          "section": "Where plugins and servers may come from"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario: Before starting a rollout, a team records four weeks of the time to merge for pull requests. Why four weeks, and what does the record allow later?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Because usage credits reset every four weeks and the data must match",
+            "correct": false,
+            "says": "Ruled out because \"A target on an outcome needs a baseline\", and usage credits play no part in it."
+          },
+          {
+            "id": "b",
+            "text": "Because the dashboard keeps only four weeks, so older data is lost",
+            "correct": false,
+            "says": "Ruled out because the page says \"enough to include a release cycle and a quiet week\", not a limit of the dashboard."
+          },
+          {
+            "id": "c",
+            "text": "To show leadership how many lines developers write without the tool",
+            "correct": false,
+            "says": "Ruled out because \"Lines and suggestions accepted are reported and not targeted\"."
+          },
+          {
+            "id": "d",
+            "text": "Because a release cycle fits inside it, so any shift is judged against it",
+            "correct": true,
+            "says": "A baseline with a release cycle in it lets a later change be measured."
+          }
+        ],
+        "origin": {
+          "path": "course/92-enabling-teams-and-operations/02-rolling-out-plugins-servers-spend-and-adoption.md",
+          "section": "Adoption is a result"
+        }
+      }
+    ]
+  }
+}

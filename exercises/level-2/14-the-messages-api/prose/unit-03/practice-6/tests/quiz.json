@@ -1,0 +1,154 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "14-the-messages-api"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 6,
+  "title": "Module quiz: The Messages API",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "After a team adds a tool, some conversations fail with a 400 or lose the model's reasoning when they are resumed from the database. The save code keeps only the text of each reply. What is the best fix?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Save the usage totals with each turn so that the conversation can be rebuilt from them",
+            "correct": false,
+            "says": "Ruled out because usage totals are \"cost, and an early warning for the context window\", not a way to rebuild a conversation."
+          },
+          {
+            "id": "b",
+            "text": "Store each reply's content list exactly as received and send it back unchanged",
+            "correct": true,
+            "says": "Storing only text drops `tool_use` and thinking blocks, and the page says to \"store the content list as received\"."
+          },
+          {
+            "id": "c",
+            "text": "Save the model id with each turn so that the same tier answers after a resume",
+            "correct": false,
+            "says": "Ruled out because the model id belongs to the \"settings that do not change per turn\", and it does not carry blocks."
+          },
+          {
+            "id": "d",
+            "text": "Follow every tool result with an explanatory text block when the turn is rebuilt",
+            "correct": false,
+            "says": "Ruled out because adding text after tool results \"can teach the model to expect user input after every tool call\"."
+          }
+        ],
+        "origin": {
+          "path": "course/14-the-messages-api/03-the-conversation-state-the-client-keeps.md",
+          "section": "Traps"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "A client receives `stop_reason` of `max_tokens` on the fifth turn of a conversation. Which handling fits the module?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Mark the reply truncated, keep it in the history, and let the user ask to continue next",
+            "correct": true,
+            "says": "A truncated reply is kept: \"cut replies stay in the history\", and the user can ask to continue in a normal turn."
+          },
+          {
+            "id": "b",
+            "text": "End the list with the cut text as an assistant turn so that the model resumes writing",
+            "correct": false,
+            "says": "Ruled out because \"a request that does returns a 400 invalid_request_error\", and ending the list with an assistant turn is a prefill."
+          },
+          {
+            "id": "c",
+            "text": "Treat the turn as failed and remove it, because a cut reply is not a whole exchange",
+            "correct": false,
+            "says": "Ruled out because the rollback rule is to \"commit a turn only when the whole exchange succeeded\", and a cut reply is a completed exchange."
+          },
+          {
+            "id": "d",
+            "text": "Raise the sampling temperature so that the model finishes inside the limit the next time it runs",
+            "correct": false,
+            "says": "Ruled out because \"a non-default value of any of them is rejected with a 400 error\", and sampling does not control where the limit cuts."
+          }
+        ],
+        "origin": {
+          "path": "course/14-the-messages-api/03-the-conversation-state-the-client-keeps.md",
+          "section": "Cut replies stay in the history"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A team wants an early warning before long chats approach the context window and become expensive. Which signal can the client compute from every reply?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The total of the three input-token fields in the usage object",
+            "correct": true,
+            "says": "The page says the total input is the sum of three numbers, and that counting tokens makes the growth visible."
+          },
+          {
+            "id": "b",
+            "text": "The count of turns so far, since each turn adds the same number of tokens",
+            "correct": false,
+            "says": "Ruled out because \"turn n sends about 200 n input tokens\", so each turn adds more than the one before and a turn count is a poor proxy."
+          },
+          {
+            "id": "c",
+            "text": "The output-token count alone, because the reply is what fills the window",
+            "correct": false,
+            "says": "Ruled out because the page says \"the input cost of a conversation grows with the square of its length\", and the history is input."
+          },
+          {
+            "id": "d",
+            "text": "The appearance of the context-window stop reason, which says the limit is close",
+            "correct": false,
+            "says": "Ruled out because that value reports that \"the context window filled before max_tokens\", which is already too late."
+          }
+        ],
+        "origin": {
+          "path": "course/14-the-messages-api/03-the-conversation-state-the-client-keeps.md",
+          "section": "The cost of a long conversation"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A developer logs each request body for debugging and finds that bodies logged earlier in a conversation change after later turns. Which defect fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A failed call was not rolled back before the error finally left the function that made it",
+            "correct": false,
+            "says": "Ruled out because the rollback rule is to \"commit a turn only when the whole exchange succeeded\", and it concerns failures."
+          },
+          {
+            "id": "b",
+            "text": "The assistant content was rebuilt from text and not stored as received",
+            "correct": false,
+            "says": "Ruled out because the page says to \"store the content list as received\", which concerns what a turn contains, not whether old requests change."
+          },
+          {
+            "id": "c",
+            "text": "The payload holds the client's own history list instead of a snapshot of it",
+            "correct": true,
+            "says": "The page describes it: \"if the request body holds the client's own history list, a later turn changes earlier requests\"."
+          },
+          {
+            "id": "d",
+            "text": "The system prompt is resent with every turn and grows each time",
+            "correct": false,
+            "says": "Ruled out because \"system is the same top-level field on every request\", so it does not grow."
+          }
+        ],
+        "origin": {
+          "path": "course/14-the-messages-api/03-the-conversation-state-the-client-keeps.md",
+          "section": "Failure leaves no mark"
+        }
+      }
+    ]
+  }
+}

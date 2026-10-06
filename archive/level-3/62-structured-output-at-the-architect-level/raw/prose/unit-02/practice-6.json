@@ -1,0 +1,151 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "62-structured-output-at-the-architect-level"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 6,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Structured output at the architect level",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario S6, structured data extraction. A 300-page contract is cut into chunks, and the per-chunk results are merged. Two chunks give different vendor names. Which merge rule fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Take the value from the later chunk",
+            "correct": false,
+            "says": "Ruled out because \"A merge that always takes the last value or the longest is a guess presented as data\"."
+          },
+          {
+            "id": "b",
+            "text": "Record both and send them for review",
+            "correct": true,
+            "says": "A disagreement between chunks is a conflict to record and review, and not a choice to make silently."
+          },
+          {
+            "id": "c",
+            "text": "Take the longer of the two names",
+            "correct": false,
+            "says": "Ruled out because a later chunk with a different vendor is to be handled with \"do not pick silently\", and choosing the longer name is the same kind of pick."
+          },
+          {
+            "id": "d",
+            "text": "Drop the field from the merged result",
+            "correct": false,
+            "says": "Ruled out because the rule is to record the clash \"so that the document goes to review\", and dropping the field hides it."
+          }
+        ],
+        "origin": {
+          "path": "course/62-structured-output-at-the-architect-level/02-retries-conflicts-chunks-and-the-practice.md",
+          "section": "A long document in chunks"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario S6, structured data extraction. A team extracts invoice fields. Each failed extraction gets two more attempts. One failure is a currency written outside the allowed list, and another is a purchase order number that the document does not contain but downstream needs. Which handling is right?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Return the first with its error, review the second",
+            "correct": true,
+            "says": "The currency error is fixable by a second look and the missing number is absent from the source."
+          },
+          {
+            "id": "b",
+            "text": "Return both with their errors until each is filled",
+            "correct": false,
+            "says": "Ruled out because for an absent value \"No second look will find what is not there\"."
+          },
+          {
+            "id": "c",
+            "text": "Reject both documents at once",
+            "correct": false,
+            "says": "Ruled out because a format error is what feedback is for, since \"The information is in the document; the form was wrong\"."
+          },
+          {
+            "id": "d",
+            "text": "Review the first, return the second with a firmer prompt",
+            "correct": false,
+            "says": "Ruled out because it inverts the two, while \"A required value that the model reports as absent is not retried\"."
+          }
+        ],
+        "origin": {
+          "path": "course/62-structured-output-at-the-architect-level/02-retries-conflicts-chunks-and-the-practice.md",
+          "section": "What a retry can and cannot fix"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario S6, structured data extraction. A team extracts invoice fields with a strict schema through a forced tool, and caches a long instruction block and a 200-page document. For some requests it switches `tool_choice` from `any` to `auto` and back, and costs run above plan. What explains it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Each change also discards the stored tool definitions and the system prompt text",
+            "correct": false,
+            "says": "Ruled out because \"Tool definitions and system prompts remain cached\"."
+          },
+          {
+            "id": "b",
+            "text": "Moving between modes turns off structured output for the next request",
+            "correct": false,
+            "says": "Ruled out because the documented effect of a change is on the cache: \"changing tool_choice between requests invalidates cached message blocks\"."
+          },
+          {
+            "id": "c",
+            "text": "Each change discards stored conversation content, which is processed again",
+            "correct": true,
+            "says": "Changing the mode invalidates cached message blocks, so the content must be reprocessed."
+          },
+          {
+            "id": "d",
+            "text": "Requests in automatic mode are billed at a higher rate than the others",
+            "correct": false,
+            "says": "Ruled out because the cost described is reprocessing, since a pipeline that alternates modes \"pays to reprocess the document\"."
+          }
+        ],
+        "origin": {
+          "path": "course/62-structured-output-at-the-architect-level/02-retries-conflicts-chunks-and-the-practice.md",
+          "section": "Retries, conflicts, chunks, honest accuracy and the practice"
+        }
+      }
+    ]
+  }
+}

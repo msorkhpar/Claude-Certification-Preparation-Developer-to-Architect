@@ -1,0 +1,185 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "22-claude-on-the-cloud-platforms"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 6,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Claude on the cloud platforms",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A team sends the same traffic through a global endpoint and then a regional endpoint on Bedrock. How do the prices compare?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The two routes cost the same, since the models behind them are identical",
+            "correct": false,
+            "says": "Ruled out because the same sentence prices the two kinds differently: \"Regional endpoints carry a 10% pricing premium over global endpoints.\""
+          },
+          {
+            "id": "b",
+            "text": "The specific-region route costs ten percent more than the dynamic one",
+            "correct": true,
+            "says": "The page says \"Regional endpoints carry a 10% pricing premium over global endpoints.\""
+          },
+          {
+            "id": "c",
+            "text": "The dynamic route costs ten percent more, since it covers more locations",
+            "correct": false,
+            "says": "Ruled out because a global endpoint gives \"dynamic routing across all available regions for maximum availability\" with no premium."
+          },
+          {
+            "id": "d",
+            "text": "The specific-region route costs half as much, since it uses idle capacity",
+            "correct": false,
+            "says": "Ruled out because the regional kind is the one with the premium, \"10% pricing premium over global endpoints\"."
+          }
+        ],
+        "origin": {
+          "path": "course/22-claude-on-the-cloud-platforms/02-what-each-platform-lacks-where-it-runs-and-what-it-costs.md",
+          "section": "Where it runs: endpoints and price"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "build_request is called for Vertex with claude-opus-5-5 and a single named region. What happens?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It raises PlatformError for the endpoint field, as newer models use other routes",
+            "correct": true,
+            "says": "The page's comment is \"Specific regional endpoints support Claude Sonnet 4.6 and earlier; newer models use the global or multi-region endpoints\", and the practice says a specific region serves `claude-sonnet-4-6` only."
+          },
+          {
+            "id": "b",
+            "text": "It builds the URL with the region host, as every model is served by those hosts",
+            "correct": false,
+            "says": "Ruled out because \"Specific regional endpoints support Claude Sonnet 4.6 and earlier\"."
+          },
+          {
+            "id": "c",
+            "text": "It falls back to the worldwide host without complaint and returns the request",
+            "correct": false,
+            "says": "Ruled out because the practice states \"An unsupported model and endpoint pair is a `PlatformError`\"."
+          },
+          {
+            "id": "d",
+            "text": "It raises PlatformError for the model field, as that model id is not known",
+            "correct": false,
+            "says": "Ruled out because \"a specific region serves `claude-sonnet-4-6` only\", so the model is known and the endpoint is the fault."
+          }
+        ],
+        "origin": {
+          "path": "course/22-claude-on-the-cloud-platforms/02-what-each-platform-lacks-where-it-runs-and-what-it-costs.md",
+          "section": "Where it runs: endpoints and price"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A team wants the faster output option for its streamed chat, running on Opus 5.5 through AWS. What do the docs say?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The speed mode is limited to Anthropic's own endpoint",
+            "correct": true,
+            "says": "The page says fast mode \"is available on the Claude API (first-party) only\"."
+          },
+          {
+            "id": "b",
+            "text": "It works the same on AWS, at the same twice-standard rate",
+            "correct": false,
+            "says": "Ruled out because fast mode \"is not available on Claude Platform on AWS or partner-operated cloud platforms\"."
+          },
+          {
+            "id": "c",
+            "text": "It works on AWS for the Haiku tier alone, at the standard rate",
+            "correct": false,
+            "says": "Ruled out because the same sentence has no exception by tier: \"is available on the Claude API (first-party) only\"."
+          },
+          {
+            "id": "d",
+            "text": "It works on AWS once the beta header has been sent in the call",
+            "correct": false,
+            "says": "Ruled out because a header does not change that: \"it is not available on Claude Platform on AWS or partner-operated cloud platforms\"."
+          }
+        ],
+        "origin": {
+          "path": "course/22-claude-on-the-cloud-platforms/02-what-each-platform-lacks-where-it-runs-and-what-it-costs.md",
+          "section": "What Google Cloud does not offer"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A team's Bedrock traffic needs 4 million input tokens per minute. What do the docs say?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It sits beyond every limit, so a second account is needed",
+            "correct": false,
+            "says": "Ruled out because \"You can request up to 5 million input TPM\" covers 4 million."
+          },
+          {
+            "id": "b",
+            "text": "It fits inside the default, so nothing extra is asked of anyone",
+            "correct": false,
+            "says": "Ruled out because \"Default quota is 2 million input tokens per minute (TPM).\" and 4 million exceeds it."
+          },
+          {
+            "id": "c",
+            "text": "It exceeds the default but stays beneath the requestable ceiling",
+            "correct": true,
+            "says": "The page gives \"Default quota is 2 million input tokens per minute (TPM).\" and \"You can request up to 5 million input TPM and 500,000 output TPM without additional Anthropic approval.\""
+          },
+          {
+            "id": "d",
+            "text": "It follows the direct API quota rather than the cloud one",
+            "correct": false,
+            "says": "Ruled out because \"AWS enforces requests-per-minute (RPM) limits on the Bedrock side\"."
+          }
+        ],
+        "origin": {
+          "path": "course/22-claude-on-the-cloud-platforms/02-what-each-platform-lacks-where-it-runs-and-what-it-costs.md",
+          "section": "Quotas, limits and records"
+        }
+      }
+    ]
+  }
+}

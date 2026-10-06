@@ -1,0 +1,151 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "52-designing-tool-interfaces"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 6,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Designing tool interfaces",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that look up customers and orders, issue refunds and escalate to a person. Over a week of logs it repeatedly picks a tool that is unable to serve the request, although the system prompt was reworded three times. What does this indicate?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The list is too short and needs more tools to cover the cases",
+            "correct": false,
+            "says": "Ruled out because the article warns that \"Too many tools or overlapping tools can also distract agents from pursuing efficient strategies.\""
+          },
+          {
+            "id": "b",
+            "text": "The prompt needs more instructions about the tools to steer the choice",
+            "correct": false,
+            "says": "Ruled out because more instructions can pull the wrong way: an instruction \"contains a keyword that now pulls every order question toward\" one tool, over the descriptions."
+          },
+          {
+            "id": "c",
+            "text": "The descriptions fail to separate the options and need a redesign",
+            "correct": true,
+            "says": "Repeated wrong selection means the tools cannot be told apart from their texts, which is a design fault."
+          },
+          {
+            "id": "d",
+            "text": "The services behind the tools differ, which makes selection unstable",
+            "correct": false,
+            "says": "Ruled out because where a tool is served is not a selection fault: the choice runs on \"a name, a description and a schema\"."
+          }
+        ],
+        "origin": {
+          "path": "course/52-designing-tool-interfaces/02-results-annotations-large-tool-sets-and-the-practice.md",
+          "section": "When to redesign and not to reprompt"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario S3, a multi-agent research system. A coordinator delegates to a web search agent and a document agent, and the cited reports mix up their sources. Both agents hold tools named `analyze_content` and `analyze_document` whose descriptions are nearly the same. Which change fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Give both agents the same pair and add a rule to prefer the first",
+            "correct": false,
+            "says": "Ruled out because the overlap stays in the texts the model chooses from, and the page says \"Fix the text the model chooses from.\""
+          },
+          {
+            "id": "b",
+            "text": "Rename one for fetched pages and narrow its text to those pages",
+            "correct": true,
+            "says": "A web-specific name and description removes the overlap at its source."
+          },
+          {
+            "id": "c",
+            "text": "Drop the descriptions and let the names alone decide the choice",
+            "correct": false,
+            "says": "Ruled out because the description is where the model learns \"When it should be used (and when it shouldn't)\"."
+          },
+          {
+            "id": "d",
+            "text": "Add a parameter where each agent explains its reasoning",
+            "correct": false,
+            "says": "Ruled out because \"A parameter that asks for the model's thinking or step-by-step reasoning may lead to a `reasoning_extraction` refusal.\""
+          }
+        ],
+        "origin": {
+          "path": "course/52-designing-tool-interfaces/01-descriptions-names-and-boundaries.md",
+          "section": "Traps"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. It uses one MCP server with eight tools whose schemas take about 3% of the context window, and the team sets `ENABLE_TOOL_SEARCH=auto`. What does the SDK do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Loads all of them at the start, as they are under the activation level",
+            "correct": true,
+            "says": "Under `auto` the point is 10% of the window, and below it everything loads at the start."
+          },
+          {
+            "id": "b",
+            "text": "Defers all eight and loads them on demand, since the mode is enabled",
+            "correct": false,
+            "says": "Ruled out because \"Below that, the SDK loads every tool definition into context upfront.\""
+          },
+          {
+            "id": "c",
+            "text": "Defers the three least used tools and keeps the rest loaded at the start",
+            "correct": false,
+            "says": "Ruled out because the rule gives no partial deferral, and \"Below that, the SDK loads every tool definition into context upfront.\""
+          },
+          {
+            "id": "d",
+            "text": "Defers all but the tools that the first prompt happens to name",
+            "correct": false,
+            "says": "Ruled out because the choice turns on the size of the definitions, not on the prompt: \"When the total reaches 10% of the window, tool search activates.\""
+          }
+        ],
+        "origin": {
+          "path": "course/52-designing-tool-interfaces/02-results-annotations-large-tool-sets-and-the-practice.md",
+          "section": "Large tool sets and tool search"
+        }
+      }
+    ]
+  }
+}

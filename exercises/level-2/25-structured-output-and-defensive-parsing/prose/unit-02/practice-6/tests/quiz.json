@@ -1,0 +1,154 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "25-structured-output-and-defensive-parsing"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 6,
+  "title": "Module quiz: Structured output and defensive parsing",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "An invoice extractor runs on a model that supports structured outputs. The reply has the right fields and types, yet the cited sentence is one the document never contained. Who catches it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The API, because the schema lists the evidence field as a string type",
+            "correct": false,
+            "says": "Ruled out because \"A schema cannot say that a number is at least 0, that a quotation occurs in the document\"."
+          },
+          {
+            "id": "b",
+            "text": "Only the program, by searching the source text for that exact wording",
+            "correct": true,
+            "says": "The page says \"If the string is not in the document, the model made it up or changed it\", and the check \"needs no model\"."
+          },
+          {
+            "id": "c",
+            "text": "The grammar cache, which compares each reply with the earlier replies",
+            "correct": false,
+            "says": "Ruled out because the cache only holds a compiled grammar: \"Compiled grammars are cached for 24 hours from last use\"."
+          },
+          {
+            "id": "d",
+            "text": "The stop reason, which flags every invented sentence at the end of the reply",
+            "correct": false,
+            "says": "Ruled out because \"The loop reads `stop_reason` before the body\", and it reports why generation ended, not whether the text is true."
+          }
+        ],
+        "origin": {
+          "path": "course/25-structured-output-and-defensive-parsing/02-defensive-parsing-validation-and-the-re-prompt.md",
+          "section": "A quotation must occur in the source"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "A team's code retries every failed reply up to five times. A document triggers a `refusal`. What is the right change?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Stop there and report it, rather than repeating the same request",
+            "correct": true,
+            "says": "The page says that \"a refusal is a decision, not a malformed answer\", so the loop reports it; the documented fallback model is a different request, not a repeat."
+          },
+          {
+            "id": "b",
+            "text": "Add the refusal text to the next prompt, for the model to explain itself",
+            "correct": false,
+            "says": "Ruled out because \"Asking again with an error list cannot fix either\"."
+          },
+          {
+            "id": "c",
+            "text": "Switch to a forced tool, which accepts every document without objection",
+            "correct": false,
+            "says": "Ruled out because on some models `any` and `tool` \"return a 400 error\", and no tool choice overrides a refusal."
+          },
+          {
+            "id": "d",
+            "text": "Raise the attempts to ten, so that one of the later calls gets past it",
+            "correct": false,
+            "says": "Ruled out because \"The same request gets the same decision, and each call is billed.\""
+          }
+        ],
+        "origin": {
+          "path": "course/25-structured-output-and-defensive-parsing/02-defensive-parsing-validation-and-the-re-prompt.md",
+          "section": "Stop reasons that are not retried"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A schema has an enum of `USD`, `EUR` and `GBP`, and a reply returns `Eur`. How should the program treat it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "As a match, since the comparison should ignore capital letters in the value",
+            "correct": true,
+            "says": "The page says \"Compare enum values case-insensitively, and avoid enum values that differ only in capitalization.\""
+          },
+          {
+            "id": "b",
+            "text": "As a schema violation, since the characters differ from the allowed list",
+            "correct": false,
+            "says": "Ruled out because the response completes normally, \"with no error and no special `stop_reason`\", and the difference is only in capital letters."
+          },
+          {
+            "id": "c",
+            "text": "As an API error, reported with a 400 status code on the request",
+            "correct": false,
+            "says": "Ruled out for the same reason, since the response is \"with no error and no special `stop_reason`\"."
+          },
+          {
+            "id": "d",
+            "text": "As a refusal, because the promised shape was not honoured by the model",
+            "correct": false,
+            "says": "Ruled out because \"A refusal is a result to report\", and it is marked by its stop reason, which this reply lacks."
+          }
+        ],
+        "origin": {
+          "path": "course/25-structured-output-and-defensive-parsing/01-getting-json-schemas-structured-outputs-and-strict-tools.md",
+          "section": "Capital letters in an enum"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A reply with `stop_reason` of `max_tokens` holds `{\"vendor\": \"Acme`. Which step should the program take?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Close the braces itself and validate the value it guessed from the text",
+            "correct": false,
+            "says": "Ruled out because \"guessing missing braces turns a cut-off reply into a wrong record\"."
+          },
+          {
+            "id": "b",
+            "text": "Re-prompt with the error list, so that the model finishes the missing text",
+            "correct": false,
+            "says": "Ruled out because \"Asking again with an error list cannot fix either: a cut-off reply needs a larger limit\"."
+          },
+          {
+            "id": "c",
+            "text": "Report the status as truncated, and raise the limit before asking again",
+            "correct": true,
+            "says": "The page says \"Raise `max_tokens` or continue the response\", and \"The reader repairs a harmless habit. It does not repair a broken value\"."
+          },
+          {
+            "id": "d",
+            "text": "Treat it as a refusal and switch over to a fallback model for the retry",
+            "correct": false,
+            "says": "Ruled out because \"a refusal is a decision, not a malformed answer\", and a cut-off reply is a different stop reason."
+          }
+        ],
+        "origin": {
+          "path": "course/25-structured-output-and-defensive-parsing/02-defensive-parsing-validation-and-the-re-prompt.md",
+          "section": "Stop reasons that are not retried"
+        }
+      }
+    ]
+  }
+}

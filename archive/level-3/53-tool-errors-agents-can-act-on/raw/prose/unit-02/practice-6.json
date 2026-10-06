@@ -1,0 +1,151 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "53-tool-errors-agents-can-act-on"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 6,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Tool errors that agents can act on",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. The billing system refuses a refund because the amount is above the customer's refundable balance. What should the refund tool return?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A failure marked as transient, with a wait of a few seconds before the next try",
+            "correct": false,
+            "says": "Ruled out because a rule answers the same way every time: \"a validation, permission or business failure gives the same answer every time\"."
+          },
+          {
+            "id": "b",
+            "text": "A flagged failure not worth repeating, with a sentence to pass on to the shopper",
+            "correct": true,
+            "says": "A business rule is understood and refused, and the shopper can be told why."
+          },
+          {
+            "id": "c",
+            "text": "A success whose text mentions the balance, so that the model can decide freely",
+            "correct": false,
+            "says": "Ruled out because the refusal must come back flagged: \"a business-rule violation comes back with retriable: false\"."
+          },
+          {
+            "id": "d",
+            "text": "A failure marked as a validation problem, asking for a smaller number to be tried",
+            "correct": false,
+            "says": "Ruled out because the amount was valid and a rule refused it: \"The request is understood and refused by a rule\"."
+          }
+        ],
+        "origin": {
+          "path": "course/53-tool-errors-agents-can-act-on/01-the-error-result-and-what-the-loop-does-with-it.md",
+          "section": "Traps"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario S3, a multi-agent research system. A coordinator delegates to a web search subagent, a document analysis subagent and a synthesis subagent, and it produces a cited report. The web search subagent retries a timeout twice and the service stays down. What should it hand the coordinator?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A single line stating that the lookup service was unavailable, and no more",
+            "correct": false,
+            "says": "Ruled out because a generic status hides what the coordinator needs: \"The two opposite mistakes in the guide's sample are the generic status that hides the context\"."
+          },
+          {
+            "id": "b",
+            "text": "An empty set of results marked as a success, with no mention of the timeout",
+            "correct": false,
+            "says": "Ruled out because \"an empty list marked as a success tells the agent that the search found nothing\"."
+          },
+          {
+            "id": "c",
+            "text": "The failure kind, the query run, partial findings and alternative routes",
+            "correct": true,
+            "says": "The coordinator needs the context to choose a recovery."
+          },
+          {
+            "id": "d",
+            "text": "The unhandled timeout, which stops the coordinator and every other subagent",
+            "correct": false,
+            "says": "Ruled out because the other subagents can go on: \"a failing subagent must not stop the others\"."
+          }
+        ],
+        "origin": {
+          "path": "course/53-tool-errors-agents-can-act-on/02-a-call-with-an-unknown-outcome-retries-and-the-practice.md",
+          "section": "Recover locally, propagate what is left"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A wrapper retries any failed tool call twice, and customers are being refunded twice after timeouts. Which change to the wrapper is best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Retry nothing, and route every failure to a person for review",
+            "correct": false,
+            "says": "Ruled out because recovery belongs at the tool: \"Recover locally and pass up what cannot be resolved\"."
+          },
+          {
+            "id": "b",
+            "text": "Retry five times instead of twice, with a longer wait between attempts",
+            "correct": false,
+            "says": "Ruled out because more attempts multiply the duplicates: \"a refund sent twice refunds twice\"."
+          },
+          {
+            "id": "c",
+            "text": "Retry after a fixed pause long enough for a late answer to arrive",
+            "correct": false,
+            "says": "Ruled out because a pause does not tell whether the first call worked: \"A timeout after sending is not a failure of the effect; it is the absence of news\"."
+          },
+          {
+            "id": "d",
+            "text": "Repeat only reads and writes that carry an idempotency key",
+            "correct": true,
+            "says": "\"A retry is safe when repeating the call cannot do harm\", which holds for a read and for a write whose key makes the service \"perform the action once however often it receives the key\"."
+          }
+        ],
+        "origin": {
+          "path": "course/53-tool-errors-agents-can-act-on/02-a-call-with-an-unknown-outcome-retries-and-the-practice.md",
+          "section": "When a retry is safe"
+        }
+      }
+    ]
+  }
+}

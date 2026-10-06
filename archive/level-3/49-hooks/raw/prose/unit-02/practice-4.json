@@ -1,0 +1,151 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "49-hooks"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Hooks",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A team checks the refund limit in a PostToolUse hook and, when a refund is above the limit, the hook exits with code 2. Large refunds still happen. What is the cause, and the fix?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Exit 2 does not block in the SDK, so the hook must return a denial",
+            "correct": false,
+            "says": "Ruled out because exit 2 reports back and cannot stop what has run: for `PostToolUse` it \"Shows stderr to Claude; the tool already ran\"."
+          },
+          {
+            "id": "b",
+            "text": "Post hooks may not fire at all, so the limit needs a much longer timeout",
+            "correct": false,
+            "says": "Ruled out because the turn-limit case is a different one: \"Hooks may not fire when the agent hits the `max_turns` limit because the session ends before hooks can execute\"."
+          },
+          {
+            "id": "c",
+            "text": "The money has already moved by then, so the control belongs ahead of the call",
+            "correct": true,
+            "says": "A post hook runs after the effect."
+          },
+          {
+            "id": "d",
+            "text": "The matcher cannot see amounts, so the limit should be written into the matcher",
+            "correct": false,
+            "says": "Ruled out because a matcher carries no limit: \"Matchers only match tool names, not file paths or other arguments.\" The amount is read inside the hook, and the fault is the event: \"A control that must prevent an effect therefore belongs in `PreToolUse`\"."
+          }
+        ],
+        "origin": {
+          "path": "course/49-hooks/01-what-a-hook-decides-and-what-it-cannot-undo.md",
+          "section": "Choose the event"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "On Claude Code v2.1.210 or later, a PreToolUse gate in the SDK waits on a slow vendor lookup and exceeds its time limit. What does the model receive, and is the action carried out?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A normal result, and the operation goes ahead",
+            "correct": false,
+            "says": "Ruled out because the tool is not run: \"Claude Code doesn't run the tool call\"."
+          },
+          {
+            "id": "b",
+            "text": "A message that no reply arrived before the deadline, and the operation is withheld",
+            "correct": true,
+            "says": "A timed-out gate is the safe case: nothing runs and the model is told."
+          },
+          {
+            "id": "c",
+            "text": "A rejection from a person, and the whole run stops until someone responds to it",
+            "correct": false,
+            "says": "Ruled out because the model gets a result and the turn goes on: \"Claude receives a tool result stating the hook didn't respond before its timeout\"."
+          },
+          {
+            "id": "d",
+            "text": "Nothing at all, and the turn simply waits until the gate finally gives its answer",
+            "correct": false,
+            "says": "Ruled out because a callback past its timeout is stopped: \"Claude Code cancels it and discards its output\"."
+          }
+        ],
+        "origin": {
+          "path": "course/49-hooks/01-what-a-hook-decides-and-what-it-cannot-undo.md",
+          "section": "Slow, failing and silent hooks"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A second callback was written to use the corrected input that a first callback produces, and it sometimes sees the original. What is the right design?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Register the second one first so that it always runs before the other",
+            "correct": false,
+            "says": "Ruled out because the order of registration does not set the order of completion: \"all matching hooks run in parallel\"."
+          },
+          {
+            "id": "b",
+            "text": "Add a delay to the second one so that the first has time to finish",
+            "correct": false,
+            "says": "Ruled out because a delay guesses at an order that nothing fixes: \"completion order is non-deterministic\"."
+          },
+          {
+            "id": "c",
+            "text": "Return the corrected input from both, so that the last one applies",
+            "correct": false,
+            "says": "Ruled out because the callbacks are not ranked: \"Two hooks cannot be a pipeline.\""
+          },
+          {
+            "id": "d",
+            "text": "Merge both steps into one function, as handlers finish in any order",
+            "correct": true,
+            "says": "Callbacks are not a pipeline."
+          }
+        ],
+        "origin": {
+          "path": "course/49-hooks/01-what-a-hook-decides-and-what-it-cannot-undo.md",
+          "section": "What a PreToolUse hook answers"
+        }
+      }
+    ]
+  }
+}

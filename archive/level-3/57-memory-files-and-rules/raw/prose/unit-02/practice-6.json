@@ -1,0 +1,151 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "57-memory-files-and-rules"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 6,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Memory files and rules",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A project holds `AGENTS.md` for other tools and nothing named `CLAUDE.md`, and Claude follows it. An engineer adds `CLAUDE.local.md` with a sandbox address, and Claude stops following `AGENTS.md`. What explains it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The sandbox address contradicts a rule that the team shares",
+            "correct": false,
+            "says": "Ruled out because presence decides, not content: \"A `CLAUDE.md`, a `.claude/CLAUDE.md` or a `CLAUDE.local.md` in the working directory or any directory above it counts\"."
+          },
+          {
+            "id": "b",
+            "text": "Local notes load first and replace everything after them",
+            "correct": false,
+            "says": "Ruled out because \"All discovered files are concatenated into context rather than overriding each other\", and \"In each folder the local file comes after the shared one\"."
+          },
+          {
+            "id": "c",
+            "text": "A local note ends the fallback that had applied",
+            "correct": true,
+            "says": "The default is that AGENTS.md is read only when no CLAUDE.md file exists in the working directory or above, and the local file counts as one, so the fallback ends."
+          },
+          {
+            "id": "d",
+            "text": "Git-ignored files are read in place of the committed ones",
+            "correct": false,
+            "says": "Ruled out because the file is ignored by git only so that it stays personal, \"which is why that file is ignored by git\", and the ignore setting plays no part in what Claude reads."
+          }
+        ],
+        "origin": {
+          "path": "course/57-memory-files-and-rules/01-where-instructions-live-and-what-loads-when.md",
+          "section": "AGENTS.md is read in one situation"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. Its single `CLAUDE.md` has grown to four hundred lines, and a developer splits it into five files that the root pulls in with `@` references, expecting sessions to start lighter. What results?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The loaded text is unchanged, since imported material still arrives at launch",
+            "correct": true,
+            "says": "An import changes where text is kept and not how much of it is loaded."
+          },
+          {
+            "id": "b",
+            "text": "Context shrinks by four fifths, because each part loads only on demand",
+            "correct": false,
+            "says": "Ruled out because imported files \"are expanded and loaded into context at launch alongside the CLAUDE.md that references them\"."
+          },
+          {
+            "id": "c",
+            "text": "Context shrinks for any session that never touches the split-out areas",
+            "correct": false,
+            "says": "Ruled out because that describes a scoped rule, since \"A path-scoped rule loads on a match, wherever the matching files are\", while an import \"moves text to another file and loads it at launch\"."
+          },
+          {
+            "id": "d",
+            "text": "Claude loads the root alone and fetches the others when it needs them",
+            "correct": false,
+            "says": "Ruled out because an import \"moves text to another file and loads it at launch, so the cost is unchanged\"."
+          }
+        ],
+        "origin": {
+          "path": "course/57-memory-files-and-rules/01-where-instructions-live-and-what-loads-when.md",
+          "section": "Imports keep a file modular and save nothing"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A new rule for component files should apply to `.tsx` sources anywhere in the project and to nothing else. Which `paths` entry does it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "`*.tsx`",
+            "correct": false,
+            "says": "Ruled out because without it the pattern behaves like \"`*.md` matches Markdown files in the project root\", so only files at the top of the project match."
+          },
+          {
+            "id": "b",
+            "text": "`src/components`",
+            "correct": false,
+            "says": "Ruled out because a bare folder name matches nothing: \"matches no file, so the rule never loads\"."
+          },
+          {
+            "id": "c",
+            "text": "`components/**`",
+            "correct": false,
+            "says": "Ruled out because it names a folder and not a type, while \"a glob follows the file's type wherever it sits\"."
+          },
+          {
+            "id": "d",
+            "text": "`**/*.tsx`",
+            "correct": true,
+            "says": "The leading `**/` makes the pattern match the file type at any depth."
+          }
+        ],
+        "origin": {
+          "path": "course/57-memory-files-and-rules/02-path-scoped-rules-size-and-the-practice.md",
+          "section": "Rules that load on a match"
+        }
+      }
+    ]
+  }
+}

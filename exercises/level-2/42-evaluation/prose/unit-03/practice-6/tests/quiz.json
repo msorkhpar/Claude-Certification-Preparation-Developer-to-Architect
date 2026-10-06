@@ -1,0 +1,154 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "42-evaluation"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 6,
+  "title": "Module quiz: Evaluation",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A team writes one criterion, \"replies should be accurate\". Which addition turns it into something an eval can enforce?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A monthly review where the team reads sample replies",
+            "correct": false,
+            "says": "Ruled out because a review is a process and does not make the criterion measurable: \"Nobody can say what number or scale a result would have\"."
+          },
+          {
+            "id": "b",
+            "text": "A target that sets a metric, a threshold and a data set",
+            "correct": true,
+            "says": "A good criterion names \"a metric, a threshold, a data set, and a baseline to beat\", and the four traits ask for \"quantitative metrics or well-defined qualitative scales\"."
+          },
+          {
+            "id": "c",
+            "text": "A longer list that spells out the qualities of a good reply",
+            "correct": false,
+            "says": "Ruled out because a longer list of qualities repeats the problem, since good, accurate and natural are \"wishes until they carry a number or a scale and a data set\"."
+          },
+          {
+            "id": "d",
+            "text": "A ranking that puts accuracy ahead of speed and cost",
+            "correct": false,
+            "says": "Ruled out because the page says \"Most use cases need multidimensional evaluation along several success criteria\", which means a number for each, not one ranking in a sentence."
+          }
+        ],
+        "origin": {
+          "path": "course/42-evaluation/01-success-criteria-and-test-sets.md",
+          "section": "Four traits of a good criterion"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "A ticket-routing prompt is edited, and the team reruns a set in which every case is graded by a script. Which grader fits a case whose output must parse as a JSON object holding a `queue` key?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A pattern check that finds the word queue in the output",
+            "correct": false,
+            "says": "Ruled out because a pattern \"is found anywhere in the output\", so it would pass text that does not parse as one JSON object."
+          },
+          {
+            "id": "b",
+            "text": "An exact match against one stored reference output",
+            "correct": false,
+            "says": "Ruled out because exact match decides \"A categorical answer: a label, a choice\", and a whole reference output would fail on key order or an extra field."
+          },
+          {
+            "id": "c",
+            "text": "A structure check that decodes and compares the value",
+            "correct": true,
+            "says": "The page lists a \"Structure check\" for \"A reply that must parse and carry the right fields\", and says it \"parses the whole output as JSON\"."
+          },
+          {
+            "id": "d",
+            "text": "A similarity score against a reference output",
+            "correct": false,
+            "says": "Ruled out because similarity answers \"Whether two texts say the same thing\", and a queue name has an exact right value."
+          }
+        ],
+        "origin": {
+          "path": "course/42-evaluation/02-code-graded-and-model-graded-evals.md",
+          "section": "Pick the cheapest grader that can tell the difference"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A prompt change scores better overall, and the team wants to be sure the improvement is real before launch. Which pair of checks gives the most trustworthy answer?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A comparison per case, and a second run of the same cases",
+            "correct": false,
+            "says": "Ruled out because rerunning the same cases repeats the tuned set, and \"The score is then a memory test\"."
+          },
+          {
+            "id": "b",
+            "text": "A review of the average, and a run on held-out cases",
+            "correct": false,
+            "says": "Ruled out because a review of the average cannot show a rare failure, and \"An average never excuses a regression\"."
+          },
+          {
+            "id": "c",
+            "text": "A larger set of the same easy cases, and a stricter threshold",
+            "correct": false,
+            "says": "Ruled out because \"Grading only what is easy to grade\" measures a different task, and a threshold on easy cases does not change that."
+          },
+          {
+            "id": "d",
+            "text": "A comparison per case, and a run on held-out cases",
+            "correct": true,
+            "says": "The page says \"Compare per case\" and to \"Keep a held-out slice that the loop never touches and run it at the end\"."
+          }
+        ],
+        "origin": {
+          "path": "course/42-evaluation/03-refining-against-a-set-and-regression-runs.md",
+          "section": "Why it matters"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A case passes in two of three repeated runs. How should the harness treat it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A pass, because two of three runs succeeded",
+            "correct": false,
+            "says": "Ruled out because a case that fails sometimes will fail for some customers, which is why \"a flaky case is a finding\"."
+          },
+          {
+            "id": "b",
+            "text": "A fail, listed as flaky in the report",
+            "correct": true,
+            "says": "The page says to \"pass it only if every run passes\", and that \"A case that passes in some runs and fails in others is flaky\"."
+          },
+          {
+            "id": "c",
+            "text": "A pass, once the failing run is discarded",
+            "correct": false,
+            "says": "Ruled out because discarding the failing run removes the evidence, and the page says to \"pass it only if every run passes\"."
+          },
+          {
+            "id": "d",
+            "text": "A fail, left out of the count of flaky cases",
+            "correct": false,
+            "says": "Ruled out because the criteria \"can say how many flaky cases are tolerated\", which needs the count to include it."
+          }
+        ],
+        "origin": {
+          "path": "course/42-evaluation/02-code-graded-and-model-graded-evals.md",
+          "section": "Non-determinism"
+        }
+      }
+    ]
+  }
+}

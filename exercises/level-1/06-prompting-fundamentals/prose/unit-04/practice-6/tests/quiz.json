@@ -1,0 +1,188 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-1",
+    "06-prompting-fundamentals"
+  ],
+  "variant": "prose",
+  "unit": 4,
+  "ordinal": 6,
+  "title": "Module quiz: Prompting fundamentals",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A classification prompt gets most tickets right but keeps mislabelling sarcastic ones. Which first step fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Swap in a larger model and see whether the sarcastic cases improve",
+            "correct": false,
+            "says": "Ruled out because a larger model is the fix only for \"Correct instructions, correct context, still a capability or speed miss\", which nobody has established."
+          },
+          {
+            "id": "b",
+            "text": "Leave the wording alone and sort the failures against the diagnosis table",
+            "correct": true,
+            "says": "Diagnosis comes before any change: the failures are read against the four causes (page 4), without altering the prompt."
+          },
+          {
+            "id": "c",
+            "text": "Add twenty more examples of sarcasm and rewrite the instructions at the same time",
+            "correct": false,
+            "says": "Ruled out because the method is to \"Change one thing at a time\", and this changes two at once."
+          },
+          {
+            "id": "d",
+            "text": "Rewrite the instructions to name sarcasm outright and see whether the labels settle",
+            "correct": false,
+            "says": "Ruled out because the page puts \"Diagnose first: four causes\" ahead of any edit, and an instruction rewrite is a guess until the cause is known."
+          }
+        ],
+        "origin": {
+          "path": "course/06-prompting-fundamentals/04-diagnosing-a-weak-output.md",
+          "section": "Diagnose first: four causes"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "A team asks for a label and gets free text, and their parser breaks when a reply starts with \"Sure!\". They call Claude Opus 5.5. Which pair of actions best fits the module?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Request longer replies and trim them by length",
+            "correct": false,
+            "says": "Ruled out because the fix for a stray preamble is to \"ask for the answer inside tags, and strip what slips through in code\", not to trim by length."
+          },
+          {
+            "id": "b",
+            "text": "Prefill the reply with an opening brace so it cannot start with chat",
+            "correct": false,
+            "says": "Ruled out because prefilled responses on the last assistant turn \"are no longer supported\" from Claude 4.6 and return a 400 error."
+          },
+          {
+            "id": "c",
+            "text": "State the exact shape up front, then check and clean the output in code",
+            "correct": true,
+            "says": "Specify the format in the prompt and check it in code, and page 2 adds stripping a stray preamble."
+          },
+          {
+            "id": "d",
+            "text": "Remove the parser and rely on the model to answer with the label only",
+            "correct": false,
+            "says": "Ruled out because \"Code that consumes the output must still validate it\"."
+          }
+        ],
+        "origin": {
+          "path": "course/06-prompting-fundamentals/02-structure-examples-reasoning-and-output-format.md",
+          "section": "Say what the output looks like"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A prompt for brainstorming product names returns ten near-identical suggestions. A colleague points out that the team's research prompt, which says to be precise and cite sources, works well. Which change fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Lower the randomness setting so every name is the most probable one",
+            "correct": false,
+            "says": "Ruled out because \"the approach that suits extraction (precision, low variety) works against ideation\", and the most probable name is the least varied; module 1 adds that the models this course uses do not accept sampling settings."
+          },
+          {
+            "id": "b",
+            "text": "Copy the research wording, \"be precise and cite sources\", into this prompt",
+            "correct": false,
+            "says": "Ruled out because an instruction that helps a research prompt \"can be noise in a brainstorm\" (page 3, third trap)."
+          },
+          {
+            "id": "c",
+            "text": "Supply three near-identical sample names so the model sees the target",
+            "correct": false,
+            "says": "Ruled out because examples must \"vary enough that Claude doesn't pick up unintended patterns\", and near-identical samples teach one pattern (page 2)."
+          },
+          {
+            "id": "d",
+            "text": "Ask for many varied options first, then evaluate them in a second pass",
+            "correct": true,
+            "says": "Brainstorming wants breadth first and judgment later, with a second pass to evaluate (page 3, strategy per task type)."
+          }
+        ],
+        "origin": {
+          "path": "course/06-prompting-fundamentals/03-the-prompt-as-a-specification.md",
+          "section": "A strategy per task type"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A drafting prompt produces bland correspondence. The team wants replies in a specific house style. Which addition is most likely to get it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A stronger role line: \"You are the best business writer alive\"",
+            "correct": false,
+            "says": "Ruled out because \"A role is a request, not a credential\", and it names no target to copy."
+          },
+          {
+            "id": "b",
+            "text": "Three to five real past emails, wrapped in example tags",
+            "correct": true,
+            "says": "A handful of real past emails in tags puts the target house voice into the context, which the page says is how examples steer tone and structure (page 2)."
+          },
+          {
+            "id": "c",
+            "text": "A longer list of style adjectives: warm, crisp, confident, human",
+            "correct": false,
+            "says": "Ruled out because \"Stacking adjectives instead of constraints\" is the first trap of page 1."
+          },
+          {
+            "id": "d",
+            "text": "A higher effort setting so Claude thinks harder about tone",
+            "correct": false,
+            "says": "Ruled out because thinking is \"where Claude decides when and how much to think, steered by the effort parameter\", which sets reasoning depth and not voice."
+          }
+        ],
+        "origin": {
+          "path": "course/06-prompting-fundamentals/01-clear-direct-instructions-context-and-roles.md",
+          "section": "Give Claude a role, for what it is"
+        }
+      },
+      {
+        "id": "m5",
+        "stem": "A prompt asks Claude how many units of a product the warehouse holds right now, and it answers with a confident, wrong number. Which change addresses the cause?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Wire in a query against the live database and let the model phrase the result",
+            "correct": true,
+            "says": "The count lives in a system the model cannot see, so the job needs a feature the prompt cannot give: a lookup, with the model only phrasing the result (the diagnosis table's wrong-feature row)."
+          },
+          {
+            "id": "b",
+            "text": "Ask for a confidence score on each count so that doubtful ones can be dropped later",
+            "correct": false,
+            "says": "Ruled out because for a missing feature \"A cleverer prompt does not fix it\", and a score from the same model adds no data."
+          },
+          {
+            "id": "c",
+            "text": "Move to the largest tier, whose knowledge is the most complete",
+            "correct": false,
+            "says": "Ruled out because the wrong-model cause is \"Correct instructions, correct context, still a capability or speed miss\", and no tier knows a private count."
+          },
+          {
+            "id": "d",
+            "text": "Tell Claude to answer only with the numbers it is certain about",
+            "correct": false,
+            "says": "Ruled out because the page says \"Fix the feature, not the phrasing\"."
+          }
+        ],
+        "origin": {
+          "path": "course/06-prompting-fundamentals/04-diagnosing-a-weak-output.md",
+          "section": "Diagnose first: four causes"
+        }
+      }
+    ]
+  }
+}

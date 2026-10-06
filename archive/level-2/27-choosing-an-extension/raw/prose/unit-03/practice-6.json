@@ -1,0 +1,219 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "27-choosing-an-extension"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 6,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Choosing an extension",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A team wants a linter to run after every file edit, with no reliance on Claude remembering. Which feature fits, and why?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A skill, because Claude reads it before each change",
+            "correct": false,
+            "says": "Ruled out because with a skill, \"Claude interprets the instructions; outcome can vary.\""
+          },
+          {
+            "id": "b",
+            "text": "A hook, because it fires on its event and the trigger is guaranteed",
+            "correct": true,
+            "says": "The page says a hook \"Always fires on its event; the trigger is guaranteed\"."
+          },
+          {
+            "id": "c",
+            "text": "A line in the project file, because it is read at the start of a session",
+            "correct": false,
+            "says": "Ruled out because an instruction in the project file \"is a request, not a guarantee\"."
+          },
+          {
+            "id": "d",
+            "text": "An output style, because it applies to the whole session",
+            "correct": false,
+            "says": "Ruled out because \"Claude follows both as instructions, so neither is enforced.\""
+          }
+        ],
+        "origin": {
+          "path": "course/27-choosing-an-extension/02-choosing-between-similar-features-and-combining-them.md",
+          "section": "Hook or skill"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "A team uses the same set of skills, hooks and MCP servers in six repositories. What does the documentation suggest?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Package them as one plugin that each repository installs",
+            "correct": true,
+            "says": "The page says \"A plugin bundles skills, hooks, subagents, and MCP servers into a single installable unit\", for \"the same setup in several repositories, or to share it\"."
+          },
+          {
+            "id": "b",
+            "text": "Copy the files into each repository by hand and keep them in step",
+            "correct": false,
+            "says": "Ruled out because the trigger is \"A second repository needs the same setup\", which calls for a plugin."
+          },
+          {
+            "id": "c",
+            "text": "Put the whole set into one long CLAUDE.md in each repository",
+            "correct": false,
+            "says": "Ruled out because CLAUDE.md is paid for on \"every request\", and the guidance is \"Keep CLAUDE.md under 200 lines.\""
+          },
+          {
+            "id": "d",
+            "text": "Convert every item into a subagent that is spawned for each task",
+            "correct": false,
+            "says": "Ruled out because a subagent is \"an isolated worker with its own context\", not a packaging unit."
+          }
+        ],
+        "origin": {
+          "path": "course/27-choosing-an-extension/01-the-extension-surface-and-what-each-costs.md",
+          "section": "The extension layer"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A workflow that deploys to production must never start unless a person types its name. Which setting does the page give?",
+        "options": [
+          {
+            "id": "a",
+            "text": "`disable-model-invocation: true`, which hides it until you invoke it yourself",
+            "correct": true,
+            "says": "The page says to use `disable-model-invocation: true`: \"This saves context and ensures only you trigger them.\""
+          },
+          {
+            "id": "b",
+            "text": "A longer description, which makes Claude hesitate before it considers using it",
+            "correct": false,
+            "says": "Ruled out because \"If descriptions are vague or overlap, Claude may load the wrong skill or miss one that would help\", which is no control."
+          },
+          {
+            "id": "c",
+            "text": "A line in CLAUDE.md that asks Claude to wait for a person to approve the run",
+            "correct": false,
+            "says": "Ruled out because a line in CLAUDE.md \"is a request, not a guarantee\"."
+          },
+          {
+            "id": "d",
+            "text": "An output style that makes every reply shorter and more formal for the user",
+            "correct": false,
+            "says": "Ruled out because an output style sets \"a voice, length or format wanted in every response\", and says nothing about starting skills."
+          }
+        ],
+        "origin": {
+          "path": "course/27-choosing-an-extension/01-the-extension-surface-and-what-each-costs.md",
+          "section": "What each one costs in context"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A project has an API style guide of 3,000 lines that matters only when endpoints are written. Where does it belong?",
+        "options": [
+          {
+            "id": "a",
+            "text": "In CLAUDE.md, so that it is available in every session",
+            "correct": false,
+            "says": "Ruled out because \"CLAUDE.md is paid for on every request\", and \"Keep CLAUDE.md under 200 lines.\""
+          },
+          {
+            "id": "b",
+            "text": "In an output style, so that it shapes each response",
+            "correct": false,
+            "says": "Ruled out because an output style is \"a voice, length or format wanted in every response\", not a library of facts."
+          },
+          {
+            "id": "c",
+            "text": "In a skill, which loads the full content only when used",
+            "correct": true,
+            "says": "The page says reference material goes to skills, \"which load on demand\", while \"descriptions at start, full content when used\" keeps the cost low."
+          },
+          {
+            "id": "d",
+            "text": "In an MCP server, so that Claude can open it as a connection",
+            "correct": false,
+            "says": "Ruled out because MCP \"connects Claude to external services\", and a local guide is knowledge, not a service: \"MCP for knowledge.\""
+          }
+        ],
+        "origin": {
+          "path": "course/27-choosing-an-extension/01-the-extension-surface-and-what-each-costs.md",
+          "section": "What each one costs in context"
+        }
+      },
+      {
+        "id": "m5",
+        "stem": "A platform team wants a note posted to the team chat whenever any Claude Code session closes, in forty repositories. What fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A chat server for the service, delivered through one plugin",
+            "correct": false,
+            "says": "Ruled out because \"an MCP server only offers tools that Claude may or may not call; nothing fires at the end\"."
+          },
+          {
+            "id": "b",
+            "text": "A script fired by the end-of-work event, delivered through one plugin",
+            "correct": true,
+            "says": "Row 12 gives a hook for \"Post a message to the team channel when a session ends\". A plugin is how the same hook reaches many repositories: \"A plugin bundles skills, hooks, subagents, and MCP servers into a single installable unit\"."
+          },
+          {
+            "id": "c",
+            "text": "A skill with the posting steps, delivered through one plugin",
+            "correct": false,
+            "says": "Ruled out because \"Anything written in text, CLAUDE.md, a skill or an output style, is followed as an instruction\", and an instruction is not an event."
+          },
+          {
+            "id": "d",
+            "text": "A line in each instruction file, copied into every project",
+            "correct": false,
+            "says": "Ruled out because \"a line in the instruction file is a request, not a guarantee\"."
+          }
+        ],
+        "origin": {
+          "path": "course/27-choosing-an-extension/03-choosing-in-practice-scenarios-reasons-and-the-practice.md",
+          "section": "The scenario bank"
+        }
+      }
+    ]
+  }
+}

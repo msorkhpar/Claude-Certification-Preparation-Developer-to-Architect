@@ -1,0 +1,185 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "30-vision-and-documents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 6,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Vision and documents",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A mobile app uploads photos of receipts and the cost per request is higher than expected on a model in the high-resolution tier. Which statement from the module explains it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Receipts can be billed as documents, which carry a flat surcharge per page",
+            "correct": false,
+            "says": "Ruled out because \"Standard API pricing applies with no additional PDF fees.\""
+          },
+          {
+            "id": "b",
+            "text": "A single image can use up to roughly three times more visual tokens there",
+            "correct": true,
+            "says": "The first page says that \"High-resolution images can use up to roughly three times more visual tokens than the same image on a standard-tier model\"."
+          },
+          {
+            "id": "c",
+            "text": "Every image can be charged a fixed amount whatever its size",
+            "correct": false,
+            "says": "Ruled out because \"The price of an image is its token count times the model's input price\", so size matters."
+          },
+          {
+            "id": "d",
+            "text": "The tier can charge for padding rows as separate tokens at a higher price",
+            "correct": false,
+            "says": "Ruled out because \"The padding holds no content\", and the cost is the token count of the image."
+          }
+        ],
+        "origin": {
+          "path": "course/30-vision-and-documents/01-images-limits-and-cost.md",
+          "section": "Visual tokens and what an image costs"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "An agent returns a bounding box for a table on a scanned page, and the box sits slightly off when drawn on the original. The team divided the coordinates by the extent of the padded picture. Which divisor does the module give?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The width and height of the original scan before resizing",
+            "correct": false,
+            "says": "Ruled out because the original size is the factor to multiply by: \"dividing by the resized size and multiplying by the original size\"."
+          },
+          {
+            "id": "b",
+            "text": "The resized width and height",
+            "correct": true,
+            "says": "The first page says: \"Always normalize or rescale by the resized dimensions, not the padded dimensions.\""
+          },
+          {
+            "id": "c",
+            "text": "The next multiple of 28 above the resized width and height",
+            "correct": false,
+            "says": "Ruled out because that is the padded size, and \"The padding holds no content\"."
+          },
+          {
+            "id": "d",
+            "text": "The longest edge the tier allows, 1568 pixels on standard",
+            "correct": false,
+            "says": "Ruled out because \"a 1920×1080 screenshot resizes to 1456×819, not 1568×882.\""
+          }
+        ],
+        "origin": {
+          "path": "course/30-vision-and-documents/01-images-limits-and-cost.md",
+          "section": "The size Claude saw, and why coordinates depend on it"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A pipeline must stay safe if a new image source quietly produces larger pictures that Claude would shrink. Which feature of the API turns that silent change into an error?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A transformations setting that rejects any oversized input outright",
+            "correct": true,
+            "says": "The first page says that setting `\"transformations\": {\"oversized_image\": \"error\"}` makes the API reject an image that would be resized, \"with a `400`, instead of resizing it.\""
+          },
+          {
+            "id": "b",
+            "text": "The beta header that switches on high-resolution processing",
+            "correct": false,
+            "says": "Ruled out because \"High-resolution support is automatic on the listed models and requires no beta header or client-side opt-in.\""
+          },
+          {
+            "id": "c",
+            "text": "Token counting, which refuses any image that would be resized",
+            "correct": false,
+            "says": "Ruled out because \"a successful count doesn't mean the image is within the Messages API's request limits\"."
+          },
+          {
+            "id": "d",
+            "text": "A smaller output limit, which makes resized images fail the call",
+            "correct": false,
+            "says": "Ruled out because the documented behaviour is rejection \"instead of resizing it\", and no output limit is involved."
+          }
+        ],
+        "origin": {
+          "path": "course/30-vision-and-documents/01-images-limits-and-cost.md",
+          "section": "The size Claude saw, and why coordinates depend on it"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A contract workflow answers the same PDF from many requests over a week without re-sending its bytes, and each customer's documents must stay apart from the others. Which combination follows the module?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Send base64 with every request and give each tenant a workspace",
+            "correct": false,
+            "says": "Ruled out because \"The payload grows with each turn\" when base64 is resent."
+          },
+          {
+            "id": "b",
+            "text": "Upload it to the Files API and keep all tenants in one workspace",
+            "correct": false,
+            "says": "Ruled out because \"a multi-tenant application creates a workspace for each tenant\", not one shared by all of them."
+          },
+          {
+            "id": "c",
+            "text": "Upload it to the Files API and give each tenant a workspace",
+            "correct": true,
+            "says": "The pages combine the Files API, where \"the payload stays small\" and an id replaces the bytes, with \"a workspace for each tenant\"."
+          },
+          {
+            "id": "d",
+            "text": "Upload it to the Files API and accept any file id from a client",
+            "correct": false,
+            "says": "Ruled out because the page says \"never accept file IDs from untrusted sources\"."
+          }
+        ],
+        "origin": {
+          "path": "course/30-vision-and-documents/01-images-limits-and-cost.md",
+          "section": "Three ways to send an image"
+        }
+      }
+    ]
+  }
+}

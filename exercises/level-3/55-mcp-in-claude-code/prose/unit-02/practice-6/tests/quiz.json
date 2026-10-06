@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "55-mcp-in-claude-code"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 6,
+  "title": "Module quiz: MCP in Claude Code",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools and several MCP servers. A team's shared `.mcp.json` starts a documentation server with the argument `${CLAUDE_PROJECT_DIR}/tools/docs_server.py`, and on every machine the server fails to start with that text unexpanded in the path. What should the entry say?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The name moved into the `env` map so that the process receives it",
+            "correct": false,
+            "says": "Ruled out because the text in `args` would still have nothing to expand from: \"so `${CLAUDE_PROJECT_DIR}` in a project file has nothing to expand from\"."
+          },
+          {
+            "id": "b",
+            "text": "An absolute location from the lead developer's own checkout, fixed for all",
+            "correct": false,
+            "says": "Ruled out because a personal location fails on every other machine: \"A value that is not secret, such as a base URL or a path, should have a default\"."
+          },
+          {
+            "id": "c",
+            "text": "The same line placed in the user-level file, where the name is set",
+            "correct": false,
+            "says": "Ruled out because moving the entry does not give the variable a value in Claude Code's own environment, and the documented answer is a default: \"The documentation's answer is a default such as `${CLAUDE_PROJECT_DIR:-.}`\"."
+          },
+          {
+            "id": "d",
+            "text": "A fallback after the name, written with a colon and a dash",
+            "correct": true,
+            "says": "The variable is set for the server and not for Claude Code, so a path in `command` or `args` needs a fallback."
+          }
+        ],
+        "origin": {
+          "path": "course/55-mcp-in-claude-code/01-scopes-the-project-file-and-environment-expansion.md",
+          "section": "Environment expansion: credentials by reference"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools and several MCP servers. A CI job runs `claude -p` on a fresh clone, and a pull request has added a server to `.mcp.json` that nobody on the team has seen. What happens when the job starts?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It stays pending until a person approves it in an interactive session",
+            "correct": false,
+            "says": "Ruled out because the prompt needs a person: \"In `claude -p` runs, Agent SDK sessions, and cloud sessions, Claude Code can't show that prompt: it loads project-scoped servers without asking.\""
+          },
+          {
+            "id": "b",
+            "text": "It is skipped, and the job runs without that server",
+            "correct": false,
+            "says": "Ruled out by the same sentence, which says such a run loads project-scoped servers and does not skip them: \"it loads project-scoped servers without asking\"."
+          },
+          {
+            "id": "c",
+            "text": "It loads without asking and is available in that run",
+            "correct": true,
+            "says": "Unattended runs cannot show the approval prompt."
+          },
+          {
+            "id": "d",
+            "text": "It loads only if the repository's own settings file approves it in advance",
+            "correct": false,
+            "says": "Ruled out because \"approvals committed to the project's `.claude/settings.json` are ignored in a folder you have not trusted\"."
+          }
+        ],
+        "origin": {
+          "path": "course/55-mcp-in-claude-code/01-scopes-the-project-file-and-environment-expansion.md",
+          "section": "Who approves a project server"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario S1, a customer support resolution agent. The agent's backend tools come from twelve MCP servers listed in the shared file, and sessions start with crowded context. A developer reads that tools from all servers are available simultaneously and marks all twelve servers `alwaysLoad`. What is the effect?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Startup waits without limit for the servers to connect",
+            "correct": false,
+            "says": "Ruled out because the wait is bounded: \"capped at the standard 5-second connect timeout\"."
+          },
+          {
+            "id": "b",
+            "text": "All their definitions return to the prompt at launch, undoing deferral",
+            "correct": true,
+            "says": "`alwaysLoad` brings every definition into the initial context."
+          },
+          {
+            "id": "c",
+            "text": "Only the tools that the first request needs are loaded, the rest later",
+            "correct": false,
+            "says": "Ruled out because loading only what a request needs is what tool search does, and the flag turns that off: \"Putting it on every server defeats tool search.\""
+          },
+          {
+            "id": "d",
+            "text": "Each tool gets the name of its server added so that names stay unique",
+            "correct": false,
+            "says": "Ruled out because naming already carries the server: \"a tool is called `mcp__<server>__<tool>`\"."
+          }
+        ],
+        "origin": {
+          "path": "course/55-mcp-in-claude-code/02-tools-together-descriptions-resources-and-the-practice.md",
+          "section": "All servers, one set of tools"
+        }
+      }
+    ]
+  }
+}

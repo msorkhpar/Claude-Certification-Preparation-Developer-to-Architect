@@ -1,0 +1,185 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "18-model-choice-cost-and-migration"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Model choice, cost and migration",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A support product sends one payload to several targets, and the same payload suddenly fails on the newest with a 400 about `temperature`. Which design stops the failure at its root?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Catch the 400 and resend the body with the field removed after each failure",
+            "correct": false,
+            "says": "Ruled out because a rejected setting fails every time and a 400 is \"the signal of a rejected parameter\", not something to patch after each failure."
+          },
+          {
+            "id": "b",
+            "text": "Build each request per model, omitting what that model rejects",
+            "correct": true,
+            "says": "The page says to \"Change the request builder together with the id\" and that Haiku 4.5 \"still accepts sampling parameters\", so one body does not fit every model."
+          },
+          {
+            "id": "c",
+            "text": "Fix the parameter at one custom value for every model in the catalog",
+            "correct": false,
+            "says": "Ruled out because the rule is \"Omit temperature, top_p, and top_k, or leave them at their defaults: any other value is rejected\", so one custom value fails on the newest model."
+          },
+          {
+            "id": "d",
+            "text": "Pin the older target for good, so that the payload keeps working there",
+            "correct": false,
+            "says": "Ruled out because a pinned older model still reaches retirement, after which \"Requests to retired models will fail\", so pinning for good only postpones the break"
+          }
+        ],
+        "origin": {
+          "path": "course/18-model-choice-cost-and-migration/03-pinning-ids-and-migrating-safely.md",
+          "section": "Traps"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "A nightly bulk job and a chat feature both use a mid-size model. Finance asks which figure to track per feature. What does the module support?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Tokens counted before sending, summed at the end of each month",
+            "correct": false,
+            "says": "Ruled out because \"The token count is an estimate\" of input only, and output and cache split appear only in usage."
+          },
+          {
+            "id": "b",
+            "text": "Price per million tokens from the list, taken from the pricing page",
+            "correct": false,
+            "says": "Ruled out because the tokenizer difference makes \"the price per token a poor proxy for the price per task\"."
+          },
+          {
+            "id": "c",
+            "text": "Cost per request, priced from usage with the multipliers applied",
+            "correct": true,
+            "says": "The page gives the cost per request as a sum over the usage fields and says \"These multipliers stack with other pricing modifiers such as the Batch API discount and data residency.\""
+          },
+          {
+            "id": "d",
+            "text": "Output tokens only, since they carry the highest unit price",
+            "correct": false,
+            "says": "Ruled out because a usage has \"four input-side fields at three prices\", so output alone is incomplete."
+          }
+        ],
+        "origin": {
+          "path": "course/18-model-choice-cost-and-migration/02-usage-token-counting-and-a-cost-model.md",
+          "section": "The cost model"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A router moves a long conversation to a different target halfway through, and answer quality drops. Which cause does the module name?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The retirement notice reset the cache of the conversation",
+            "correct": false,
+            "says": "Ruled out because the page never ties a retirement notice to a cache, and says only that notice is \"at least 60 days' notice\"."
+          },
+          {
+            "id": "b",
+            "text": "The new model has a different alias that resolves to an old snapshot",
+            "correct": false,
+            "says": "Ruled out because \"Every Claude model ID is a pinned snapshot\" and a dateless id is its own snapshot."
+          },
+          {
+            "id": "c",
+            "text": "The token counting endpoint rejected the longer conversation",
+            "correct": false,
+            "says": "Ruled out because the endpoint rejects inputs such as \"server tools like web search\", not long conversations."
+          },
+          {
+            "id": "d",
+            "text": "The new model reads the earlier turns without the earlier reasoning",
+            "correct": true,
+            "says": "The page quotes \"A router or fallback that moves a conversation from Claude Opus 5.5 to any other model runs those turns without them.\""
+          }
+        ],
+        "origin": {
+          "path": "course/18-model-choice-cost-and-migration/01-matching-a-tier-to-a-workload.md",
+          "section": "Routing: the cheapest model that can do each request"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A plan to move 20 percent of traffic to a replacement model on Monday and the rest at the end of the week is proposed. What should the team add before Monday?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A second evaluation on the vendor's published benchmark suite",
+            "correct": false,
+            "says": "Ruled out because the page's step is an evaluation \"on your own cases\", not a published suite."
+          },
+          {
+            "id": "b",
+            "text": "An evaluation on its own cases, run ahead of the shift",
+            "correct": true,
+            "says": "The page says to evaluate \"on your own cases\" and warns that migrating on the retirement date \"leaves no time to evaluate\"."
+          },
+          {
+            "id": "c",
+            "text": "A new tokenizer, so the counts match across both models",
+            "correct": false,
+            "says": "Ruled out because \"A new tokenizer changes token counts\" and belongs to the model, so the team re-checks budgets and does not install one."
+          },
+          {
+            "id": "d",
+            "text": "A larger `max_tokens` on every request, to leave room for thinking",
+            "correct": false,
+            "says": "Ruled out because the page says \"Re-measure instead of copying numbers\" and gives no blanket increase."
+          }
+        ],
+        "origin": {
+          "path": "course/18-model-choice-cost-and-migration/01-matching-a-tier-to-a-workload.md",
+          "section": "Where the documentation starts you"
+        }
+      }
+    ]
+  }
+}

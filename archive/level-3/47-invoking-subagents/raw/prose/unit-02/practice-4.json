@@ -1,0 +1,151 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "47-invoking-subagents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 4,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Invoking subagents",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A CI coordinator runs in bypassPermissions, and its reviewer definition lists only the tools Read and Grep. A teammate fears that the reviewer can still do anything, because the mode skips prompts. Which limit remains?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Nothing at all",
+            "correct": false,
+            "says": "Ruled out because \"A tool you leave out isn't in the subagent's session at all: Claude works without it, with no permission prompt or error.\""
+          },
+          {
+            "id": "b",
+            "text": "The permission mode in its own definition, which overrides the parent's mode entirely",
+            "correct": false,
+            "says": "Ruled out because a definition cannot loosen a bypass parent or override it: \"A subagent runs in `bypassPermissions` mode only when the parent session itself does.\""
+          },
+          {
+            "id": "c",
+            "text": "Its own capability set",
+            "correct": true,
+            "says": "A tool that is not in the subagent's session cannot be called, whatever the mode."
+          },
+          {
+            "id": "d",
+            "text": "The parent's allowed tools, which cap what the mode may approve",
+            "correct": false,
+            "says": "Ruled out because \"allowed_tools does not constrain bypassPermissions\"."
+          }
+        ],
+        "origin": {
+          "path": "course/47-invoking-subagents/01-the-agent-tool-definitions-and-permissions.md",
+          "section": "The definition"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "The final answer of a coordinator paraphrases a subagent's findings and drops the line numbers that the user needs. Which fix fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Raise the subagent's turn limit by a large margin and rerun it",
+            "correct": false,
+            "says": "Ruled out because the paraphrase happens in the parent, which \"may summarize it in its own response\"."
+          },
+          {
+            "id": "b",
+            "text": "Tell the parent to keep the report verbatim, or read the tool result directly",
+            "correct": true,
+            "says": "The parent may summarize, so the words that matter must be kept by instruction or read from the result."
+          },
+          {
+            "id": "c",
+            "text": "Remove the return-format line from the brief and let it write freely",
+            "correct": false,
+            "says": "Ruled out because the format line decides what comes back: \"The return format tells it what the coordinator will do with the answer.\""
+          },
+          {
+            "id": "d",
+            "text": "Switch the subagent to a larger model with a longer context window",
+            "correct": false,
+            "says": "Ruled out because a larger model does not stop the coordinator from summarizing: \"The parent receives the subagent's final report, but may summarize it in its own response.\""
+          }
+        ],
+        "origin": {
+          "path": "course/47-invoking-subagents/02-context-parallel-subagents-and-the-practice.md",
+          "section": "What a subagent has, and what you must put in the brief"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Six delegates run side by side, and each asks for approval before reading files, which floods the operator. Which design fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Take the Read tool out of the definitions of all six delegates",
+            "correct": false,
+            "says": "Ruled out because a subagent without the tool cannot read: \"A tool you leave out isn't in the subagent's session at all: Claude works without it\"."
+          },
+          {
+            "id": "b",
+            "text": "Set bypassPermissions in each agent definition of the six delegates",
+            "correct": false,
+            "says": "Ruled out because a definition cannot set bypass: \"A subagent runs in `bypassPermissions` mode only when the parent session itself does.\""
+          },
+          {
+            "id": "c",
+            "text": "Run the six one after another instead of side by side",
+            "correct": false,
+            "says": "Ruled out because sequencing independent work costs time: \"independent subtasks finish in the time of the slowest one rather than the sum of all of them\"."
+          },
+          {
+            "id": "d",
+            "text": "Answer those lookups once, in a PreToolUse hook or inherited rules",
+            "correct": true,
+            "says": "A hook or inherited rules answer the repeated requests once, in one place."
+          }
+        ],
+        "origin": {
+          "path": "course/47-invoking-subagents/01-the-agent-tool-definitions-and-permissions.md",
+          "section": "The definition"
+        }
+      }
+    ]
+  }
+}

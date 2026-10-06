@@ -1,0 +1,185 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "36-managed-and-self-hosted-agents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Managed and self-hosted agents",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A hospital group must keep patient files inside its own network but wants Anthropic to run the agent loop. Which setup fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A cloud sandbox with `limited` networking and a few allowed hosts",
+            "correct": false,
+            "says": "Ruled out because \"By default tools run in Anthropic's sandboxes.\", so the files would be processed on Anthropic's side."
+          },
+          {
+            "id": "b",
+            "text": "A self-hosted sandbox whose tools execute on local machines",
+            "correct": true,
+            "says": "The page says \"Self-hosted sandboxes keep the orchestration on Anthropic's side but move tool execution into infrastructure you control\", and the group still owns the image and the egress rules."
+          },
+          {
+            "id": "c",
+            "text": "The Messages API with the files pasted into each prompt",
+            "correct": false,
+            "says": "Ruled out because \"You write the loop on the Messages API.\", and the group wants Anthropic to run the loop."
+          },
+          {
+            "id": "d",
+            "text": "The Agent SDK running in the group's own process",
+            "correct": false,
+            "says": "Ruled out because \"You embed Claude Code's loop with the Agent SDK, in a process you operate.\", so the group, not Anthropic, would run it."
+          }
+        ],
+        "origin": {
+          "path": "course/36-managed-and-self-hosted-agents/01-what-managed-agents-is.md",
+          "section": "Four concepts"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "A developer migrates an Agent SDK service whose `can_use_tool` callback approved reads and refused pushes. What replaces that callback in Managed Agents?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A per-tool permission policy, with confirmations sent as events",
+            "correct": true,
+            "says": "The first page says `permission_mode` and `can_use_tool` \"become a per-tool permission policy\", and a paused call is answered with a `user.tool_confirmation` event."
+          },
+          {
+            "id": "b",
+            "text": "The `ClaudeAgentOptions` object, created again for every run",
+            "correct": false,
+            "says": "Ruled out because the migration \"becomes an agent created once\" from that object."
+          },
+          {
+            "id": "c",
+            "text": "The environment's `networking` field, which approves each command",
+            "correct": false,
+            "says": "Ruled out because `networking` controls the sandbox's outbound traffic, and \"so `networking` does not govern them\" for the search and fetch tools."
+          },
+          {
+            "id": "d",
+            "text": "A model override on the session that removes the tool",
+            "correct": false,
+            "says": "Ruled out because an override \"must list every tool the session should have\", and removing a tool is not an approval step."
+          }
+        ],
+        "origin": {
+          "path": "course/36-managed-and-self-hosted-agents/01-what-managed-agents-is.md",
+          "section": "Moving an existing agent"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A product relays customers' messages to an agent as `user.message` events and sets the toolset to `auto`. What is the risk?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Their text counts as the operator's own intent when a call is judged",
+            "correct": true,
+            "says": "The page says \"If you relay untrusted end-user input in `user.message` events, the server reads that input as your intent too.\""
+          },
+          {
+            "id": "b",
+            "text": "The server ignores `user.message` events once a policy is set",
+            "correct": false,
+            "says": "Ruled out because what you post in `user.message` events \"counts as your intent\", so the server reads it."
+          },
+          {
+            "id": "c",
+            "text": "Every call pauses until a person has confirmed it",
+            "correct": false,
+            "says": "Ruled out because \"`auto` is not a human checkpoint\", and a safe call \"runs before anyone sees it\"."
+          },
+          {
+            "id": "d",
+            "text": "A denied call can be overridden by the client with a confirmation",
+            "correct": false,
+            "says": "Ruled out because a denied call is final: \"your client cannot override the denial.\""
+          }
+        ],
+        "origin": {
+          "path": "course/36-managed-and-self-hosted-agents/02-environments-policies-budgets-and-self-hosting.md",
+          "section": "Permission policies"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A finance team wants to know what one long session's reported cost contains. Which items make up that total?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Model tokens, event-history storage and disk space",
+            "correct": false,
+            "says": "Ruled out because \"The documentation lists these three items and no other.\", and storage and disk are not among them."
+          },
+          {
+            "id": "b",
+            "text": "Model tokens alone, with sandbox time left free",
+            "correct": false,
+            "says": "Ruled out because running time is priced: \"Session running time, at $0.08 per hour\"."
+          },
+          {
+            "id": "c",
+            "text": "Model tokens, web searches and running time",
+            "correct": true,
+            "says": "The page says the total is \"model tokens at each model's list price, web searches at $10 per 1,000\", and \"Session running time, at $0.08 per hour\"."
+          },
+          {
+            "id": "d",
+            "text": "Model tokens and web searches, with running time billed apart",
+            "correct": false,
+            "says": "Ruled out because running time is one of the three items of \"the total is its list cost\", not a separate bill."
+          }
+        ],
+        "origin": {
+          "path": "course/36-managed-and-self-hosted-agents/02-environments-policies-budgets-and-self-hosting.md",
+          "section": "Cost and the session budget"
+        }
+      }
+    ]
+  }
+}

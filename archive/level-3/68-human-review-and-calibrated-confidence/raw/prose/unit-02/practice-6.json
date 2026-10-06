@@ -1,0 +1,151 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "68-human-review-and-calibrated-confidence"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 6,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Human review and calibrated confidence",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario S6, structured data extraction. On a validation set with its right answers known, extractions scored 80 are right 62% of the time, and the goal for automatic acceptance is 90%. What follows?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Lower the cut-off until the share of accepted items reaches the whole validation set",
+            "correct": false,
+            "says": "Ruled out because a lower cut-off lets in the less reliable items, while the page measures the precision of \"every item at or above it\"."
+          },
+          {
+            "id": "b",
+            "text": "Keep 80 as the cut-off, because the model itself reported that score with a great deal of certainty",
+            "correct": false,
+            "says": "Ruled out because \"the model wrote the number, and only a labelled validation set says how often that score is right\"."
+          },
+          {
+            "id": "c",
+            "text": "Place the cut-off at the lowest level whose admitted items reach that bar in these records",
+            "correct": true,
+            "says": "The page says to \"Pick the lowest threshold whose precision reaches the target\", so the cut-off moves up to the lowest score that does."
+          },
+          {
+            "id": "d",
+            "text": "Replace the scores by an average over the document types, then reapply them",
+            "correct": false,
+            "says": "Ruled out because an average over types is the \"aggregate\" that \"hides the weak segment\"."
+          }
+        ],
+        "origin": {
+          "path": "course/68-human-review-and-calibrated-confidence/01-measuring-accuracy-by-segment-and-calibrating-confidence.md",
+          "section": "Calibrating a confidence threshold"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario S6, structured data extraction. One kind of form has only twelve checked samples, all of them extracted correctly, and the team's rule demands at least fifty per kind, while every other kind has hundreds. May that kind be automated?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Yes, because a perfect score is the best a kind can have",
+            "correct": false,
+            "says": "Ruled out because \"A segment that scores 100% on four examples has shown very little\"."
+          },
+          {
+            "id": "b",
+            "text": "No, until further ground-truth records give it enough evidence",
+            "correct": true,
+            "says": "The page requires \"a minimum number of labelled examples as well as a minimum accuracy\"."
+          },
+          {
+            "id": "c",
+            "text": "Yes, once the overall figure is above the goal for the whole set",
+            "correct": false,
+            "says": "Ruled out because \"The overall figure plays no part in the decision\"."
+          },
+          {
+            "id": "d",
+            "text": "No, because a kind with no mistakes cannot be measured at all",
+            "correct": false,
+            "says": "Ruled out because \"a segment with fewer than `min_n` labelled records is `undersampled`\", which is measurable and calls for more records."
+          }
+        ],
+        "origin": {
+          "path": "course/68-human-review-and-calibrated-confidence/01-measuring-accuracy-by-segment-and-calibrating-confidence.md",
+          "section": "A segment needs enough evidence"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario S6, structured data extraction. Two extractions both carry a confidence of 96. One rests on two documents that give different totals, the other on a single clear document. Which one goes to a person?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Whichever the model rates as less certain on a second reading",
+            "correct": false,
+            "says": "Ruled out because \"the model wrote the number, and only a labelled validation set says how often that score is right\"."
+          },
+          {
+            "id": "b",
+            "text": "Both, because 96 is not high enough to skip review",
+            "correct": false,
+            "says": "Ruled out because \"Keep the threshold where the labelled data put it\", and nothing here says 96 falls below it."
+          },
+          {
+            "id": "c",
+            "text": "Neither, because both reached the same confidence",
+            "correct": false,
+            "says": "Ruled out because \"A conflict is a reason for review whatever the score\"."
+          },
+          {
+            "id": "d",
+            "text": "Just the one with contradictory sources",
+            "correct": true,
+            "says": "The page lists \"Two documents give different values for the same field\" as a reason for review."
+          }
+        ],
+        "origin": {
+          "path": "course/68-human-review-and-calibrated-confidence/02-routing-review-checkpoints-and-the-practice.md",
+          "section": "What goes to a person"
+        }
+      }
+    ]
+  }
+}

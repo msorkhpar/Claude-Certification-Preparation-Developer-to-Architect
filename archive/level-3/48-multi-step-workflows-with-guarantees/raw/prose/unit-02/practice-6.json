@@ -1,0 +1,151 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "48-multi-step-workflows-with-guarantees"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 6,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Multi-step workflows with guarantees",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A gate verified customer A earlier in a session. Now someone presents another identity code for customer B, and the check fails. This desk's rule is that a failed check wipes whatever an earlier success had set. What should the gate's state say next?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Customers A and B are both verified at the same time",
+            "correct": false,
+            "says": "Ruled out because the state holds one verified customer, and a failure does not add one: \"set only by a successful verification call\"."
+          },
+          {
+            "id": "b",
+            "text": "Customer A is still verified from the earlier check",
+            "correct": false,
+            "says": "Ruled out because \"a failed verification clears the state, so that an earlier success cannot be reused.\""
+          },
+          {
+            "id": "c",
+            "text": "No one is cleared and every protected step is refused again",
+            "correct": true,
+            "says": "A failed check clears the verified customer."
+          },
+          {
+            "id": "d",
+            "text": "Customer A stays verified until the model confirms which one is meant",
+            "correct": false,
+            "says": "Ruled out because the gate does not consult the model about its own state: \"does not ask the model whether it did\"."
+          }
+        ],
+        "origin": {
+          "path": "course/48-multi-step-workflows-with-guarantees/01-prompt-or-code-where-a-guarantee-lives.md",
+          "section": "Traps"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A policy allows refunds only for items that arrived damaged. The team encodes \"damaged\" as a keyword list in the gate, and many valid claims are refused. Which fix fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Keep extending the keyword list until the valid claims finally pass through it",
+            "correct": false,
+            "says": "Ruled out because \"A design that puts judgement in code ends up with a brittle rule engine\"."
+          },
+          {
+            "id": "b",
+            "text": "Let the model weigh the evidence, and keep steps, amounts and limits as rules",
+            "correct": true,
+            "says": "Judgement is the model's work, and rules with a right answer are the gate's."
+          },
+          {
+            "id": "c",
+            "text": "Move the refund limit and the order of steps into the prompt as well",
+            "correct": false,
+            "says": "Ruled out because \"the thresholds and the order of steps go in the gate\"."
+          },
+          {
+            "id": "d",
+            "text": "Drop the ownership check altogether and send more claims onward",
+            "correct": false,
+            "says": "Ruled out because ownership is a rule with a right answer: \"Everything above it is a rule with a right answer, which code checks the same way every time.\""
+          }
+        ],
+        "origin": {
+          "path": "course/48-multi-step-workflows-with-guarantees/02-prerequisite-chains-limits-hand-offs-and-the-practice.md",
+          "section": "Design the chain from the consequence backwards"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A team tests its refund gate by running five hundred live conversations, counts zero skipped verifications and ships. What is still missing?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A judge model that grades every single conversation for the order of its steps in it",
+            "correct": false,
+            "says": "Ruled out because the gate is tested the way all code is: \"the same inputs, the same outputs\"."
+          },
+          {
+            "id": "b",
+            "text": "A larger live sample of several thousand conversations",
+            "correct": false,
+            "says": "Ruled out because a sample measures a rate, which is the way the model is tested: \"where a failure is a rate and not a bug\"."
+          },
+          {
+            "id": "c",
+            "text": "The same live run with the verification rule written in capitals",
+            "correct": false,
+            "says": "Ruled out because capitals only change the text the model weighs: \"text that the model reads and weighs with everything else in its context\"."
+          },
+          {
+            "id": "d",
+            "text": "Direct checks that make the forbidden call and assert it never hits the backend",
+            "correct": true,
+            "says": "The gate is code, so it is tested with the forbidden call and an assertion on the backend log."
+          }
+        ],
+        "origin": {
+          "path": "course/48-multi-step-workflows-with-guarantees/02-prerequisite-chains-limits-hand-offs-and-the-practice.md",
+          "section": "Deterministic and probabilistic parts in one flow"
+        }
+      }
+    ]
+  }
+}

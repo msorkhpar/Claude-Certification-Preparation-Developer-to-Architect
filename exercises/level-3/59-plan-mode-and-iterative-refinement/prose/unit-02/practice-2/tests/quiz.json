@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "59-plan-mode-and-iterative-refinement"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Module quiz: Plan mode and iterative refinement",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A scheduled job starts Claude Code with `-p` and `--permission-mode plan`. What happens when Claude tries to edit a source file?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It goes ahead, with permission modes skipped",
+            "correct": false,
+            "says": "Ruled out because \"Plan mode keeps its blocks wherever Claude Code runs without an interactive terminal\"."
+          },
+          {
+            "id": "b",
+            "text": "It is refused, with the restriction still in force",
+            "correct": true,
+            "says": "Plan mode keeps its blocks in runs that have no interactive terminal."
+          },
+          {
+            "id": "c",
+            "text": "It goes ahead, with the scheduled run pre-approved",
+            "correct": false,
+            "says": "Ruled out because the exception is narrow: \"in an interactive terminal session where bypass permissions are available the blocks are not enforced\"."
+          },
+          {
+            "id": "d",
+            "text": "It prompts the job's owner by email for approval",
+            "correct": false,
+            "says": "Ruled out because \"Edits stay blocked until you approve the plan\", and a headless run has no approval channel."
+          }
+        ],
+        "origin": {
+          "path": "course/59-plan-mode-and-iterative-refinement/01-plan-mode-or-direct-execution.md",
+          "section": "What plan mode does"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. After a refactor, one report lists a sort order that also breaks pagination, a misspelled label and a null date. How should the three be sent?",
+        "options": [
+          {
+            "id": "a",
+            "text": "All three together in one message",
+            "correct": false,
+            "says": "Ruled out because \"Independent problems, such as a typo in a label and a null date, go one after another\"."
+          },
+          {
+            "id": "b",
+            "text": "Three separate messages, one for each problem",
+            "correct": false,
+            "says": "Ruled out because the sort order and pagination interact, and \"fixing one in isolation can undo the other\"."
+          },
+          {
+            "id": "c",
+            "text": "The label first, then everything else in a second message",
+            "correct": false,
+            "says": "Ruled out because that groups the independent date with the interacting pair, while the example \"groups issues by their interacts_with links\"."
+          },
+          {
+            "id": "d",
+            "text": "The linked pair together, then each other one",
+            "correct": true,
+            "says": "Problems that interact travel together and independent ones go one at a time."
+          }
+        ],
+        "origin": {
+          "path": "course/59-plan-mode-and-iterative-refinement/02-examples-tests-the-interview-and-feedback.md",
+          "section": "One message or several"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. Claude has failed to fix the same bug in three attempts, and each correction added more history to the session. What should the developer do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Send a fourth correction that repeats the earlier ones",
+            "correct": false,
+            "says": "Ruled out because \"after two failed corrections the context is cluttered with failed approaches\", and repeating adds to the clutter."
+          },
+          {
+            "id": "b",
+            "text": "Ask Claude to ignore the earlier attempts in the same thread",
+            "correct": false,
+            "says": "Ruled out because an instruction does not remove history from the context, and \"a clean session with a better prompt does better\"."
+          },
+          {
+            "id": "c",
+            "text": "Clear the context and restart with a better prompt",
+            "correct": true,
+            "says": "After more than two failed corrections the documented fix is to clear the context and write a better first prompt, one that carries the broken checks and the lessons."
+          },
+          {
+            "id": "d",
+            "text": "Switch to plan mode in the same thread",
+            "correct": false,
+            "says": "Ruled out because \"Corrections accumulate in the context\", and a mode switch in the same thread keeps them all."
+          }
+        ],
+        "origin": {
+          "path": "course/59-plan-mode-and-iterative-refinement/02-examples-tests-the-interview-and-feedback.md",
+          "section": "Traps"
+        }
+      }
+    ]
+  }
+}

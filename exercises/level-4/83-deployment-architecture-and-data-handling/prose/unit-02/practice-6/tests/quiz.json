@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-4",
+    "83-deployment-architecture-and-data-handling"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 6,
+  "title": "Module quiz: Deployment architecture and data handling",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario: Marlow Care's service holds data of patients in the United States and in the European Union. It runs a deployment in each region. A European patient's request arrives while the European deployment is down for maintenance. What should the router do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Decline to answer, and let the caller retry once the local site is back",
+            "correct": true,
+            "says": "Serving the user from another region breaks the residency requirement, so with no deployment that keeps the data in the region the answer is none."
+          },
+          {
+            "id": "b",
+            "text": "Send it to the United States deployment, since being available matters more than where the data sits",
+            "correct": false,
+            "says": "Ruled out because \"serving a European user from a United States deployment because it was available is the failure the router exists to prevent\"."
+          },
+          {
+            "id": "c",
+            "text": "Send it to the European deployment that belongs to a different tenant, since the location still matches",
+            "correct": false,
+            "says": "Ruled out because another tenant's deployment breaks the tenant boundary: \"one workspace per tenant\"."
+          },
+          {
+            "id": "d",
+            "text": "Send it to whichever deployment answers the fastest, and record the exception in the audit log",
+            "correct": false,
+            "says": "Ruled out because speed is not a criterion, and the router sends a user's data \"only to a deployment that keeps it in that region\"."
+          }
+        ],
+        "origin": {
+          "path": "course/83-deployment-architecture-and-data-handling/01-where-the-data-goes-platform-region-and-retention.md",
+          "section": "Region: pin it where the platform lets you"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario: Alder Dental needs zero data retention on its Claude API deployment and has chosen a model that requires 30-day retention. What is the finding?",
+        "options": [
+          {
+            "id": "a",
+            "text": "None, because the arrangement is organisation-wide and covers the models that are in use",
+            "correct": false,
+            "says": "Ruled out because the arrangement \"excludes models that need 30-day retention\" so it does not cover every model."
+          },
+          {
+            "id": "b",
+            "text": "That choice cannot meet the target, so only a different one or another arrangement will do",
+            "correct": true,
+            "says": "A model that requires 30-day retention cannot meet a zero-retention requirement."
+          },
+          {
+            "id": "c",
+            "text": "A warning only, since thirty days is short enough to be treated as nothing kept",
+            "correct": false,
+            "says": "Ruled out because the requirement is zero, and the page says the model \"is part of the check\"."
+          },
+          {
+            "id": "d",
+            "text": "None, provided the deployment's audit log is set to expire after thirty days",
+            "correct": false,
+            "says": "Ruled out because \"the model is part of the check and not only the platform\", and the audit log does not change what the provider retains."
+          }
+        ],
+        "origin": {
+          "path": "course/83-deployment-architecture-and-data-handling/01-where-the-data-goes-platform-region-and-retention.md",
+          "section": "Traps"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario: Wren Logistics must keep audit entries for at least 90 days and at most 365. An entry is 400 days old, and counsel has placed it under a legal hold. What does the purge rule do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Purges it, because the ceiling applies to every entry alike",
+            "correct": false,
+            "says": "Ruled out because an entry under a hold \"is never removed, whatever its age\"."
+          },
+          {
+            "id": "b",
+            "text": "Purges the entry and keeps a copy for a further ninety days",
+            "correct": false,
+            "says": "Ruled out because the hold \"keeps the entry itself and not a copy made at purge time\", so nothing is removed first."
+          },
+          {
+            "id": "c",
+            "text": "Retains it, because that order outranks the time limits",
+            "correct": true,
+            "says": "A legal hold keeps an entry whatever its age."
+          },
+          {
+            "id": "d",
+            "text": "Retains it until the next audit closes, then purges it as usual",
+            "correct": false,
+            "says": "Ruled out because no audit date decides: \"A hold ends only when counsel releases it\"."
+          }
+        ],
+        "origin": {
+          "path": "course/83-deployment-architecture-and-data-handling/02-the-identifier-boundary-the-audit-log-and-the-practice.md",
+          "section": "Retention has a floor and a ceiling"
+        }
+      }
+    ]
+  }
+}

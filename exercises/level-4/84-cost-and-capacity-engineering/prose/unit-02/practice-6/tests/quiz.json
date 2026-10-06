@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-4",
+    "84-cost-and-capacity-engineering"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 6,
+  "title": "Module quiz: Cost and capacity engineering",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario: Zephyr Games' team pins its requests to the most expensive model, which the gateway policy does not list as allowed. What does the gateway do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Honours the pin, since the team chose that model deliberately",
+            "correct": false,
+            "says": "Ruled out because \"The gateway uses the pin only when the policy allows that model\"."
+          },
+          {
+            "id": "b",
+            "text": "Blocks the team for breaking the policy until it has been reviewed",
+            "correct": false,
+            "says": "Ruled out because the gateway does not punish: \"Otherwise it uses the route for the task, and the default for a task the table does not know\"."
+          },
+          {
+            "id": "c",
+            "text": "Uses the pin once and warns the platform team afterwards",
+            "correct": false,
+            "says": "Ruled out because there is no allowance for one exception, and the page says \"because a pin is a request and not a right\"."
+          },
+          {
+            "id": "d",
+            "text": "Routes by the table entry for the task, as that choice is a wish",
+            "correct": true,
+            "says": "A pin is honoured only when the policy allows it, and otherwise the table decides."
+          }
+        ],
+        "origin": {
+          "path": "course/84-cost-and-capacity-engineering/02-the-gateway-budgets-and-callers-that-cannot-wait.md",
+          "section": "Four decisions in code"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario: Tallow Insurance's gateway sees a team at exactly 80 percent of its budget, and the next request is estimated to stay under 100 percent. What does admission return?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Allow, since the team has not yet passed its budget and nothing is wrong at this point",
+            "correct": false,
+            "says": "Ruled out because \"Reaching 80 percent warns, and exactly 80 percent warns\"."
+          },
+          {
+            "id": "b",
+            "text": "Warn, since the threshold is reached even though the spend remains inside the limit",
+            "correct": true,
+            "says": "Admission warns at 80 percent, and exactly 80 percent warns."
+          },
+          {
+            "id": "c",
+            "text": "Block, because a team near its budget should not be given any more requests at all",
+            "correct": false,
+            "says": "Ruled out because a request that stays within budget does not block: \"one that brings it exactly to the budget does not\"."
+          },
+          {
+            "id": "d",
+            "text": "Warn only if the same team has also overspent in a previous month of the same year",
+            "correct": false,
+            "says": "Ruled out because admission takes \"Given what a team has spent, its budget and the estimate for one more request\", and not earlier months."
+          }
+        ],
+        "origin": {
+          "path": "course/84-cost-and-capacity-engineering/02-the-gateway-budgets-and-callers-that-cannot-wait.md",
+          "section": "Four decisions in code"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario: Umber Retail's showback holds two usage lines for one team, each worth 0.4 of a cent. What amount in whole cents should be shown?",
+        "options": [
+          {
+            "id": "a",
+            "text": "0, because each line rounds down to nothing when it is taken on its own account",
+            "correct": false,
+            "says": "Ruled out because \"rounding each row first gains or loses cents\"."
+          },
+          {
+            "id": "b",
+            "text": "2, because every line is rounded up so that none of the usage goes unbilled",
+            "correct": false,
+            "says": "Ruled out because rounding up each row gives 2 and is the loss of precision that \"two rows of 0.4 cent are 1 cent together and 0 apart\" shows."
+          },
+          {
+            "id": "c",
+            "text": "1, because rounding happens once after they are summed",
+            "correct": true,
+            "says": "The total is divided by a million and rounded once, so two rows of 0.4 cent are 1 cent."
+          },
+          {
+            "id": "d",
+            "text": "0.8, since fractions of a cent are kept for each team on the final screen",
+            "correct": false,
+            "says": "Ruled out because \"The figure shown to a team is a whole number of cents\"."
+          }
+        ],
+        "origin": {
+          "path": "course/84-cost-and-capacity-engineering/02-the-gateway-budgets-and-callers-that-cannot-wait.md",
+          "section": "Four decisions in code"
+        }
+      }
+    ]
+  }
+}

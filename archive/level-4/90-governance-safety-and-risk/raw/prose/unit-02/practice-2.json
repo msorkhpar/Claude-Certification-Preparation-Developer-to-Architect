@@ -1,0 +1,151 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "90-governance-safety-and-risk"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Governance, safety and risk",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario: Ines's claims assistant keeps its record of each request for a year, and a reviewer notices that the screen that checks incoming requests is allowed to let them through when it is down. Which change does the first page support?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Keep the pass-through and add a monitor that alerts on the gap",
+            "correct": false,
+            "says": "Ruled out because the first page puts the monitor in the layers that watch \"afterwards\", so \"an output control cannot stop a tool call that already happened\"."
+          },
+          {
+            "id": "b",
+            "text": "Keep the pass-through and shorten the retention of the records",
+            "correct": false,
+            "says": "Ruled out because retention does not close the gap: \"A screen that is down and lets a request through is the opening an attacker waits for\"."
+          },
+          {
+            "id": "c",
+            "text": "Hold each high-consequence call until that service replies",
+            "correct": true,
+            "says": "An input control holds a high-consequence call when it fails."
+          },
+          {
+            "id": "d",
+            "text": "Move the screening into the system prompt so that it cannot be down",
+            "correct": false,
+            "says": "Ruled out because \"a line in a prompt is a request, and a control is a step the model cannot skip\"."
+          }
+        ],
+        "origin": {
+          "path": "course/90-governance-safety-and-risk/01-controls-that-fail-closed-and-a-person-before-the-irreversible.md",
+          "section": "Four layers, and what each guards"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario: A review finds that a model system's average accuracy is 94 percent, and that one language group, a small part of the traffic, scores 70 percent. The team says the system passes. What does the second page say about that claim?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A small group cannot be measured, so the average stands",
+            "correct": false,
+            "says": "Ruled out because \"The groups must be defined where they can be measured\", and a language group can be labelled and so reported."
+          },
+          {
+            "id": "b",
+            "text": "A headline figure masks the segment that fails",
+            "correct": true,
+            "says": "The page measures fairness as a gap per group and warns that an average hides one."
+          },
+          {
+            "id": "c",
+            "text": "The group's score is dropped below the needed volume",
+            "correct": false,
+            "says": "Ruled out because \"a headline average hides a failing group exactly as it hides a failing segment\", so dropping the score hides it."
+          },
+          {
+            "id": "d",
+            "text": "The system passes, as its launch test was broad",
+            "correct": false,
+            "says": "Ruled out because \"fairness is a property of outcomes by group\", and a broad launch test is not a gap measure."
+          }
+        ],
+        "origin": {
+          "path": "course/90-governance-safety-and-risk/02-compliance-fairness-transparency-and-the-register.md",
+          "section": "Fairness is a gap you measure"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario: An auditor asks a team to prove that a refund over a set amount was approved by a person. The team has an audit entry for the refund with a request id, an outcome of human and a character count. What do they have?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Nothing, because a record without the content is not admissible",
+            "correct": false,
+            "says": "Ruled out because the design keeps \"proof of what happened\", and the page does not tie proof to stored content."
+          },
+          {
+            "id": "b",
+            "text": "A record that is too thin, since only the text proves what happened",
+            "correct": false,
+            "says": "Ruled out because \"Content that was never stored cannot be breached, subpoenaed by accident or kept past a deletion request\"."
+          },
+          {
+            "id": "c",
+            "text": "A record that holds the refund amount and the approver's name",
+            "correct": false,
+            "says": "Ruled out because the entry holds \"request id, action, consequence, outcome and the size of the text\", which names no amount or approver."
+          },
+          {
+            "id": "d",
+            "text": "Evidence of the step, with no copy of the customer's text kept",
+            "correct": true,
+            "says": "The record shows the step happened without a copy of the data."
+          }
+        ],
+        "origin": {
+          "path": "course/90-governance-safety-and-risk/01-controls-that-fail-closed-and-a-person-before-the-irreversible.md",
+          "section": "The example"
+        }
+      }
+    ]
+  }
+}

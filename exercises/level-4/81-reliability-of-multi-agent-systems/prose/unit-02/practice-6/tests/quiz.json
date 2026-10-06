@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-4",
+    "81-reliability-of-multi-agent-systems"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 6,
+  "title": "Module quiz: Reliability of multi-agent systems",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario: Dovetail Labs sets a breaker threshold of three consecutive failures for each agent. Agent X fails, succeeds, fails, succeeds, and fails again. Agent Y fails three times running. Which breakers are open afterwards?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Only Y's, since X's tally returns to zero whenever a call works",
+            "correct": true,
+            "says": "The count is of consecutive failures, and a success clears it."
+          },
+          {
+            "id": "b",
+            "text": "Both, since each agent has failed at least three times in all across the run",
+            "correct": false,
+            "says": "Ruled out because \"The count is of consecutive failures for one agent, not of all failures in the run\"."
+          },
+          {
+            "id": "c",
+            "text": "Only X's, since it has made the larger number of calls overall in the run",
+            "correct": false,
+            "says": "Ruled out because \"A success resets the count, so scattered failures do not open it\"."
+          },
+          {
+            "id": "d",
+            "text": "Neither, because a breaker opens only after a cooldown has already passed",
+            "correct": false,
+            "says": "Ruled out because the breaker opens \"After a set number of failures in a row\", and the cooldown comes after it opens."
+          }
+        ],
+        "origin": {
+          "path": "course/81-reliability-of-multi-agent-systems/01-safe-retries-and-circuit-breakers.md",
+          "section": "A circuit breaker stops the spending"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario: Larkspur Media's runner wraps every task in a catch-all that records any exception as a failure and carries on. A coding defect makes task seven raise an unexpected error in every run. What is wrong with this design?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Nothing, because carrying on always gives the most complete report that is possible",
+            "correct": false,
+            "says": "Ruled out because \"The runner handles failures it expects\", and anything else is a crash that must not be caught."
+          },
+          {
+            "id": "b",
+            "text": "It should retry the task until the error stops, since all errors are temporary ones",
+            "correct": false,
+            "says": "Ruled out because \"an unlimited retry is a way to spend money while nothing changes\"."
+          },
+          {
+            "id": "c",
+            "text": "It presents a software bug as routine trouble, so the real fault stays hidden",
+            "correct": true,
+            "says": "An unexpected error is a defect, and catching it as a routine failure hides it."
+          },
+          {
+            "id": "d",
+            "text": "It should delete the stored results so that the next run starts again from nothing",
+            "correct": false,
+            "says": "Ruled out because \"the crash still loses nothing finished\", so deleting the stored results destroys what the checkpoint protects."
+          }
+        ],
+        "origin": {
+          "path": "course/81-reliability-of-multi-agent-systems/02-isolation-fallbacks-and-resuming-a-run.md",
+          "section": "A crash is not a failure"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario: Hazel Analytics' plan has tasks a, b, c and d, where d needs b. In the first run b used up its retries, and a and c finished and were saved. What does a second run call?",
+        "options": [
+          {
+            "id": "a",
+            "text": "All four, since a run restarts the whole plan",
+            "correct": false,
+            "says": "Ruled out because \"a second run does only the work that is left\"."
+          },
+          {
+            "id": "b",
+            "text": "Only b, since a skipped task is not retried later",
+            "correct": false,
+            "says": "Ruled out because \"Failures, skips and degraded answers are not stored, because a later run must be free to try them again\"."
+          },
+          {
+            "id": "c",
+            "text": "b, then d, since a and c come from the checkpoint",
+            "correct": true,
+            "says": "The second run does the failed task and the one that was skipped because of it, and takes the rest from the checkpoint."
+          },
+          {
+            "id": "d",
+            "text": "Just d, since b is known to have failed in the earlier run",
+            "correct": false,
+            "says": "Ruled out because d needs b, and the remaining work is \"the task that failed, the tasks that were skipped because of it, and nothing else\"."
+          }
+        ],
+        "origin": {
+          "path": "course/81-reliability-of-multi-agent-systems/02-isolation-fallbacks-and-resuming-a-run.md",
+          "section": "Checkpoint and resume"
+        }
+      }
+    ]
+  }
+}

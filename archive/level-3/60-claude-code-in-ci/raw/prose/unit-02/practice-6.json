@@ -1,0 +1,151 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "60-claude-code-in-ci"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 6,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Claude Code in CI",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests and to suggest tests. A team asks the same session that wrote a change to review it afterwards, and the verdicts are nearly always approvals. Which change fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Ask the same session to think harder before it approves",
+            "correct": false,
+            "says": "Ruled out because the writing session is \"less effective at reviewing its own changes\", and more effort does not remove the bias."
+          },
+          {
+            "id": "b",
+            "text": "Give the session the full history of the change to review against",
+            "correct": false,
+            "says": "Ruled out because a reviewer \"sees only the diff and the criteria you give it, not the reasoning that produced the change\"."
+          },
+          {
+            "id": "c",
+            "text": "Start a separate run that receives only the diff and the criteria",
+            "correct": true,
+            "says": "An independent run sees the change without the reasoning that produced it."
+          },
+          {
+            "id": "d",
+            "text": "Lower the number of turns so that the session decides faster",
+            "correct": false,
+            "says": "Ruled out because \"the independent run is a separate invocation, not a second pass in the same conversation\"."
+          }
+        ],
+        "origin": {
+          "path": "course/60-claude-code-in-ci/02-context-independence-and-the-practice.md",
+          "section": "What the run knows: context, independence and the practice"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests and to suggest tests. A job runs `claude --bare -p`, and its reviews ignore the testing and severity rules that sit in the repository's `CLAUDE.md`. What is the cause and the fix?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The file is too long, so trim it until it fits the prompt",
+            "correct": false,
+            "says": "Ruled out because length is not the issue: \"In a bare run the file is passed explicitly\" and otherwise it is not read at all."
+          },
+          {
+            "id": "b",
+            "text": "The file loads only on a branch's first push, so push once",
+            "correct": false,
+            "says": "Ruled out because \"A CI run does not remember the last one\", and no first-push behaviour exists."
+          },
+          {
+            "id": "c",
+            "text": "The rules lack a `paths` header, so add one to each",
+            "correct": false,
+            "says": "Ruled out because no header is involved, and \"a bare run without it reviews with no criteria at all, and nothing says so\"."
+          },
+          {
+            "id": "d",
+            "text": "The mode skips the file, so pass it in with a flag",
+            "correct": true,
+            "says": "Bare mode skips CLAUDE.md, so the criteria must be passed in by hand, with `--append-system-prompt-file`."
+          }
+        ],
+        "origin": {
+          "path": "course/60-claude-code-in-ci/02-context-independence-and-the-practice.md",
+          "section": "The criteria live in a file"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests and to suggest tests. The policy keeps findings at medium severity or above, disables the style category, and fails the job on high findings. A valid run returns one high style finding and one low bug finding. What does the job do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It passes and posts no comment",
+            "correct": true,
+            "says": "The high finding is dropped with its category and the low one falls below the floor, so nothing is kept."
+          },
+          {
+            "id": "b",
+            "text": "It fails, because a high finding exists",
+            "correct": false,
+            "says": "Ruled out because \"categories the team disabled are dropped\", so the high style finding cannot fail the job."
+          },
+          {
+            "id": "c",
+            "text": "It passes and posts the low bug as a comment",
+            "correct": false,
+            "says": "Ruled out because \"findings below a floor are dropped\", and a low finding is below a medium floor."
+          },
+          {
+            "id": "d",
+            "text": "It fails, because a finding in a disabled category counts as an error",
+            "correct": false,
+            "says": "Ruled out because only \"a kept finding at a failing severity\" fails the job, and a disabled category is dropped before that."
+          }
+        ],
+        "origin": {
+          "path": "course/60-claude-code-in-ci/01-a-headless-run-its-json-and-the-job-status.md",
+          "section": "The gate"
+        }
+      }
+    ]
+  }
+}

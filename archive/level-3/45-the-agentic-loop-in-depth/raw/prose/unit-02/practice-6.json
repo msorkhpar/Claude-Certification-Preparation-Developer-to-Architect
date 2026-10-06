@@ -1,0 +1,151 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "45-the-agentic-loop-in-depth"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 6,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: The agentic loop, in depth",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A team's runs often end with the status `max_turns` because one tool keeps failing, and raising the cap from ten to forty only made each failed run cost four times as much. What should they do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Turn the cap off entirely and let the model decide when a failure is final",
+            "correct": false,
+            "says": "Ruled out because a run needs a backstop: \"A count is added so that a run that does not converge is stopped.\""
+          },
+          {
+            "id": "b",
+            "text": "Raise the cap again and again until the failures stop ending in the cap itself",
+            "correct": false,
+            "says": "Ruled out because the count is not what is wrong: \"The status is a signal to read the conversation, which the practice keeps whole for that reason.\""
+          },
+          {
+            "id": "c",
+            "text": "Read the saved conversation, then repair that helper's description",
+            "correct": true,
+            "says": "The status is a signal about a run that does not converge, and the conversation shows why."
+          },
+          {
+            "id": "d",
+            "text": "Mark such runs as done",
+            "correct": false,
+            "says": "Ruled out because the count \"has its own status\", and reporting `done` for it hides the problem that the fixed loop also hides."
+          }
+        ],
+        "origin": {
+          "path": "course/45-the-agentic-loop-in-depth/01-what-ends-a-run.md",
+          "section": "Anti-pattern two: the count as the loop"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "A loop that follows this module's practice receives a reply whose stop reason asks for a tool, but its content holds only a sentence of text. What should it do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Send an empty user message and call the model once more to see what it does",
+            "correct": false,
+            "says": "Ruled out because the API does not accept it: \"an empty message, which a loop can send by accident when a `tool_use` reply holds no call, is refused.\""
+          },
+          {
+            "id": "b",
+            "text": "Finish with a malformed status and make no further call",
+            "correct": true,
+            "says": "There is nothing to answer, and the practice stops with its own status."
+          },
+          {
+            "id": "c",
+            "text": "Return the sentence to the user as the finished answer",
+            "correct": false,
+            "says": "Ruled out because narration is not an answer: \"Only the reply that ends the turn holds the answer.\""
+          },
+          {
+            "id": "d",
+            "text": "Call the model again with the same messages and hope for a call",
+            "correct": false,
+            "says": "Ruled out because guessing is what the loop avoids: \"A value the loop has never seen must not be guessed at.\""
+          }
+        ],
+        "origin": {
+          "path": "course/45-the-agentic-loop-in-depth/02-results-parallel-calls-context-and-the-practice.md",
+          "section": "What the loop owns when you write it yourself"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A dashboard alerts on every run that ends with a null stop reason and zero cost, and the team suspects a parsing bug. What explains those runs?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A turn limit, which can report a zero cost for the unfinished run of the agent",
+            "correct": false,
+            "says": "Ruled out because a run that the loop ends has a value: \"`stop_reason` carries the value from the last assistant response before the loop ended\"."
+          },
+          {
+            "id": "b",
+            "text": "A refusal by the model, which is reported with a null stop reason at first sight",
+            "correct": false,
+            "says": "Ruled out because a refusal sets the reason: \"Claude declined to respond.\""
+          },
+          {
+            "id": "c",
+            "text": "A normal run that has no stop reason to give",
+            "correct": false,
+            "says": "Ruled out because a normal end carries a value: \"Claude finished its response naturally.\""
+          },
+          {
+            "id": "d",
+            "text": "A crashed session, which closes in an error result whose figures may be blanked",
+            "correct": true,
+            "says": "The documentation describes this result for a crash: \"the final result is an `error_during_execution` whose cost fields may be zeroed and whose `stop_reason` is `null`\"."
+          }
+        ],
+        "origin": {
+          "path": "course/45-the-agentic-loop-in-depth/02-results-parallel-calls-context-and-the-practice.md",
+          "section": "What the Agent SDK does in that position"
+        }
+      }
+    ]
+  }
+}

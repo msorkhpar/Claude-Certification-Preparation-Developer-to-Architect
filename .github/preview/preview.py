@@ -59,13 +59,13 @@ artifact does not run Jekyll.
 
 ⭐ The search is the one exception, because `page.js` loads its files by script, not by a
 link: where a copied `page.js` has a `search-index.js` beside it, that index, the ranking
-library and every piece the index names are copied too, and a page the index names that the
-walk did not reach is refused by name.
+library and every piece the index names are copied too, a page the index names that the walk
+did not reach is copied as a page when the tree holds it, and refused by name when it does not.
 """
 
 from __future__ import annotations
 
-import json
+import ast
 import posixpath
 import re
 import sys
@@ -343,6 +343,26 @@ def _reference(page: str, url: str, sub: dict[str, str]) -> str:
     return urlunsplit(("", "", new, split.query, split.fragment))
 
 
+def _named(tree: Path, index: str) -> dict[str, list[str]]:
+    """The page addresses and piece names the search index at `index` lists, read as literals."""
+    text = (tree / index).read_text(encoding="utf-8")
+    return {kind: ast.literal_eval(names) for kind, names in _SEARCH_LIST.findall(text)}
+
+
+def _searched_pages(tree: Path, files: set[str], pages: dict[str, str]) -> list[str]:
+    """Pages a search index names that the walk has not reached but the tree holds."""
+    more: list[str] = []
+    for bundle in sorted(files):
+        index = posixpath.join(posixpath.dirname(bundle), SEARCH_INDEX)
+        if posixpath.basename(bundle) != SEARCH_BUNDLE or not (tree / index).is_file():
+            continue
+        for page in _named(tree, index).get("pages", []):
+            target = _target(index, page)
+            if target and target not in pages and (tree / target).is_file():
+                more.append(target)
+    return more
+
+
 def _search(tree: Path, files: set[str], pages: dict[str, str]) -> set[str]:
     """Return the search's files beside each copied `page.js` with an index, or refuse by name."""
     found: set[str] = set()
@@ -353,9 +373,7 @@ def _search(tree: Path, files: set[str], pages: dict[str, str]) -> set[str]:
         index = posixpath.join(here, SEARCH_INDEX)
         if not (tree / index).is_file():
             continue
-        named = {kind: json.loads(names) for kind, names in _SEARCH_LIST.findall(
-            (tree / index).read_text(encoding="utf-8")
-        )}
+        named = _named(tree, index)
         for page in named.get("pages", []):
             target = _target(index, page)
             if target not in pages:
@@ -383,7 +401,7 @@ def preview(tree: Path, out: Path) -> Previewed:
     narrated: list[str] = []
     files: set[str] = set()
     queue = [INDEX]
-    while queue:
+    while queue or (queue := _searched_pages(tree, files, pages)):
         page = queue.pop()
         if page in pages:
             continue

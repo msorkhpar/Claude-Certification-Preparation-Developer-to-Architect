@@ -1,0 +1,154 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "38-claude-code-for-developers"
+  ],
+  "variant": "prose",
+  "unit": 3,
+  "ordinal": 6,
+  "title": "Module quiz: Claude Code for developers",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A new repository has no memory file, and a developer needs a useful one by the end of the day. Which sequence fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Pull in a very large template with imports, then keep the main file short",
+            "correct": false,
+            "says": "Ruled out because imports \"don't reduce its context cost, because imported files also load at launch\"."
+          },
+          {
+            "id": "b",
+            "text": "Write every convention by hand, then run `/compact` on that file",
+            "correct": false,
+            "says": "Ruled out because `/compact` is for the conversation: \"use `/context` to see what fills the window and `/compact` to summarise it\"."
+          },
+          {
+            "id": "c",
+            "text": "Run `/init`, then add every convention the team has ever used",
+            "correct": false,
+            "says": "Ruled out because \"Longer files consume more context and reduce adherence\", so adding everything works against the file."
+          },
+          {
+            "id": "d",
+            "text": "Run `/init`, then delete lines Claude would have found anyway",
+            "correct": true,
+            "says": "The page says `/init` \"analyzes your codebase and creates a file with build commands, test instructions, and project conventions it discovers\", then to \"cut what Claude would have found anyway\"."
+          }
+        ],
+        "origin": {
+          "path": "course/38-claude-code-for-developers/02-memory-settings-and-permission-rules.md",
+          "section": "The memory file"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "A nightly script runs `claude -p` and sometimes loops on tool calls for an hour. Which pair of flags bounds it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A turn limit and a spend cap on the run",
+            "correct": true,
+            "says": "The page says \"`--max-turns` limits the number of agentic turns, and `--max-budget-usd` caps the spend.\""
+          },
+          {
+            "id": "b",
+            "text": "A permission mode and a tool list for the run",
+            "correct": false,
+            "says": "Ruled out because \"`--permission-mode dontAsk` runs reads and pre-approved tools\", which decides what may run and not how long."
+          },
+          {
+            "id": "c",
+            "text": "A bare switch and a JSON output format on the run",
+            "correct": false,
+            "says": "Ruled out because \"Use `json` when a script parses the result\", and bare mode only skips discovery, so neither bounds a loop."
+          },
+          {
+            "id": "d",
+            "text": "A resume flag and a fork flag for the next run",
+            "correct": false,
+            "says": "Ruled out because `--resume` reopens a session \"under the same session ID and appends new messages to the existing conversation\", which continues a loop and does not bound it."
+          }
+        ],
+        "origin": {
+          "path": "course/38-claude-code-for-developers/03-commands-headless-runs-and-the-practice.md",
+          "section": "Headless runs"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A team wants the review script to inspect code and change nothing, with no prompt ever shown. Which setup fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "`bypassPermissions`, with the runner as the only boundary",
+            "correct": false,
+            "says": "Ruled out because `bypassPermissions` is for \"Isolated containers and VMs only\", and it runs everything."
+          },
+          {
+            "id": "b",
+            "text": "`auto`, with the classifier left to judge every single call",
+            "correct": false,
+            "says": "Ruled out because auto mode \"reviews actions instead of you\" and runs most calls, not reads alone."
+          },
+          {
+            "id": "c",
+            "text": "`dontAsk`, with `Read` and read-only git patterns listed",
+            "correct": true,
+            "says": "The page says `--permission-mode dontAsk` \"runs reads and pre-approved tools and denies anything that would prompt, which fits a script\", with `Read` and read-only git patterns."
+          },
+          {
+            "id": "d",
+            "text": "`acceptEdits`, with edits approved for the whole checkout",
+            "correct": false,
+            "says": "Ruled out because `acceptEdits` runs \"Reads, file edits, and common filesystem commands\", which is more than reads."
+          }
+        ],
+        "origin": {
+          "path": "course/38-claude-code-for-developers/03-commands-headless-runs-and-the-practice.md",
+          "section": "Headless runs"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A developer in Manual mode is tired of approving each source change, but wants a prompt before every other action. Which mode fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "`plan`, which makes no edits until a plan is approved",
+            "correct": false,
+            "says": "Ruled out because plan mode is where \"Claude reads files and proposes a plan but makes no edits until you approve\", so changes wait for approval."
+          },
+          {
+            "id": "b",
+            "text": "`acceptEdits`, which lets edits and filesystem commands run",
+            "correct": true,
+            "says": "The table gives `acceptEdits` \"Reads, file edits, and common filesystem commands\", and other shell commands still ask."
+          },
+          {
+            "id": "c",
+            "text": "`dontAsk`, which denies each action that would prompt",
+            "correct": false,
+            "says": "Ruled out because `dontAsk` \"runs reads and pre-approved tools and denies anything that would prompt\", so nothing asks."
+          },
+          {
+            "id": "d",
+            "text": "`auto`, where a second model reviews the actions instead",
+            "correct": false,
+            "says": "Ruled out because auto mode runs \"Everything, with background safety checks\", so shell work does not prompt either."
+          }
+        ],
+        "origin": {
+          "path": "course/38-claude-code-for-developers/01-install-the-loop-and-permission-modes.md",
+          "section": "Permission modes"
+        }
+      }
+    ]
+  }
+}

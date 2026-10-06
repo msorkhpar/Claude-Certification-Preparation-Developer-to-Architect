@@ -1,0 +1,151 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-4",
+    "80-end-to-end-and-multi-agent-architecture"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 6,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: End-to-end and multi-agent architecture",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario: Fenwick Bank's design review turns up two problems, one rated medium and one rated high. What outcome does the rubric give?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Revise, because the medium problem is the one that can be repaired most easily",
+            "correct": false,
+            "says": "Ruled out because \"any `high` gives `reject`, otherwise any `medium` gives `revise`\"."
+          },
+          {
+            "id": "b",
+            "text": "Reject, since the worst item governs the result",
+            "correct": true,
+            "says": "The verdict follows the worst finding, and a `high` gives `reject`."
+          },
+          {
+            "id": "c",
+            "text": "Approve, because a medium and a high problem cancel each other out",
+            "correct": false,
+            "says": "Ruled out because \"The verdict follows the worst finding\" and nothing cancels it."
+          },
+          {
+            "id": "d",
+            "text": "Revise, because the two ratings are averaged into one level of severity",
+            "correct": false,
+            "says": "Ruled out because there is no averaging: \"otherwise any `medium` gives `revise`, otherwise `approve`\"."
+          }
+        ],
+        "origin": {
+          "path": "course/80-end-to-end-and-multi-agent-architecture/02-contracts-between-parts-and-the-review.md",
+          "section": "An architecture review as a rubric"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario: Willow Bank's complaint triage design collects a rating from customers for every reply and stores the ratings in a table that nobody reads. How should the review treat the feedback stage?",
+        "options": [
+          {
+            "id": "a",
+            "text": "As present, since a rating is collected for every reply that customers receive",
+            "correct": false,
+            "says": "Ruled out because collecting a rating is logging and not a loop: the stage holds \"Evaluation, logging, human corrections, and the path by which they change the system\"."
+          },
+          {
+            "id": "b",
+            "text": "As absent, since no path leads from those scores to a change in the system",
+            "correct": true,
+            "says": "The stage is defined by \"the path by which they change the system\", and here there is none."
+          },
+          {
+            "id": "c",
+            "text": "As present, once the ratings table is backed up on a regular schedule",
+            "correct": false,
+            "says": "Ruled out because backups protect the table and do not change the system, and the cost of the gap is that \"Nobody learns that it was wrong\"."
+          },
+          {
+            "id": "d",
+            "text": "As absent only if the table holds fewer than a thousand rows of ratings",
+            "correct": false,
+            "says": "Ruled out because the size of a table does not decide the finding, and a pipeline that \"never learns from the result\" goes wrong whatever its volume."
+          }
+        ],
+        "origin": {
+          "path": "course/80-end-to-end-and-multi-agent-architecture/01-the-four-stages-and-the-price-of-a-team.md",
+          "section": "Four stages that every end-to-end design has"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario: Quince Retail runs a returns agent that writes refunds to the ledger without approval, and the auditors require a record of each approval. What does the rubric report?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A medium finding, because the missing approval can be added during later testing",
+            "correct": false,
+            "says": "Ruled out because \"The verdict follows the worst finding\", and the rubric names `high` for this one."
+          },
+          {
+            "id": "b",
+            "text": "No finding, since the agent's answers have already been validated before the write",
+            "correct": false,
+            "says": "Ruled out because the rule fires when \"The design writes without approval and an audit is needed\", whatever was validated."
+          },
+          {
+            "id": "c",
+            "text": "A finding about autonomy, since the path of a return is known in advance",
+            "correct": false,
+            "says": "Ruled out because that finding applies only when \"An agent or a team is used on a path that is already known\"."
+          },
+          {
+            "id": "d",
+            "text": "A high finding, which makes the verdict reject whatever the cost of the design",
+            "correct": true,
+            "says": "A write without approval where an audit is needed is a `high` finding, so the verdict is reject."
+          }
+        ],
+        "origin": {
+          "path": "course/80-end-to-end-and-multi-agent-architecture/02-contracts-between-parts-and-the-review.md",
+          "section": "An architecture review as a rubric"
+        }
+      }
+    ]
+  }
+}

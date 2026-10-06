@@ -1,0 +1,151 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-3",
+    "66-errors-across-agents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 6,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Errors across agents",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario S3, multi-agent research system. One of four research subagents is refused access to a source, and the coordinator cancels the run and tells the user that it failed. Which handling fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Retry the refused one again and again until the door finally opens, then continue",
+            "correct": false,
+            "says": "Ruled out because \"a permission error or an invalid query fails again the same way, and the subagent reports it at once\"."
+          },
+          {
+            "id": "b",
+            "text": "Ask the user to restart the whole run after the source has been fixed",
+            "correct": false,
+            "says": "Ruled out because \"terminating on a single failure throws away the work of the other subagents\"."
+          },
+          {
+            "id": "c",
+            "text": "Fill the closed gap with a plausible summary drawn from the model's own general knowledge",
+            "correct": false,
+            "says": "Ruled out because the plan for a failure with nothing to try is \"Say what is missing, and do not guess\"."
+          },
+          {
+            "id": "d",
+            "text": "Carry on with the other three and log the closed topic as a gap, with a way to reopen it",
+            "correct": true,
+            "says": "Terminating on one failure wastes the other work, and a refusal is recorded as a gap with the way to get access."
+          }
+        ],
+        "origin": {
+          "path": "course/66-errors-across-agents/01-where-a-failure-is-handled-and-what-travels-up.md",
+          "section": "Handle a failure at the lowest layer that can fix it"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario S3, multi-agent research system. A subagent stops at its maxTurns limit after doing good work. What does the parent receive?",
+        "options": [
+          {
+            "id": "a",
+            "text": "An error, with the output discarded and the task started again",
+            "correct": false,
+            "says": "Ruled out because \"the parent receives its output flagged as partial\", and nothing is discarded."
+          },
+          {
+            "id": "b",
+            "text": "Nothing, until the user raises the limit and runs it again",
+            "correct": false,
+            "says": "Ruled out because \"Resuming is cheaper than starting a fresh subagent on the same task when the work so far is good\", and no one has to rerun it."
+          },
+          {
+            "id": "c",
+            "text": "The output flagged as partial, which a later resume continues",
+            "correct": true,
+            "says": "The output comes back marked as partial, and a custom subagent keeps its history so that it can be resumed."
+          },
+          {
+            "id": "d",
+            "text": "The output without a flag, which looks like a finished answer",
+            "correct": false,
+            "says": "Ruled out because the marker exists so that \"Claude knows the run is unfinished\"."
+          }
+        ],
+        "origin": {
+          "path": "course/66-errors-across-agents/02-plans-partial-results-coverage-notes-and-the-practice.md",
+          "section": "Partial results are marked, not hidden and not discarded"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario S3, multi-agent research system. During a run on one subject, a subagent's source stops answering after supplying three of the ten items that were expected. What should the coordinator do with the three?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Discard the three and report the subject as having no findings",
+            "correct": false,
+            "says": "Ruled out because \"Discarding them wastes work the subagent did\"."
+          },
+          {
+            "id": "b",
+            "text": "Present the three to readers as the subject's complete answer",
+            "correct": false,
+            "says": "Ruled out because \"presenting them as the full answer is the silent suppression of page 1 in another form\"."
+          },
+          {
+            "id": "c",
+            "text": "Wait and rerun the lookup until all ten items have arrived",
+            "correct": false,
+            "says": "Ruled out because \"An alternative is tried once, within the bounded rounds of module 46, and a second failure becomes a gap\"."
+          },
+          {
+            "id": "d",
+            "text": "Keep them, flagged as partly evidenced, with the gap stated",
+            "correct": true,
+            "says": "The three results are kept and labelled, with the gap stated."
+          }
+        ],
+        "origin": {
+          "path": "course/66-errors-across-agents/02-plans-partial-results-coverage-notes-and-the-practice.md",
+          "section": "Partial results are marked, not hidden and not discarded"
+        }
+      }
+    ]
+  }
+}

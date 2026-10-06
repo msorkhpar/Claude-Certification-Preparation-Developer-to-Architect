@@ -1,0 +1,185 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "21-message-batches"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 6,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Message Batches",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A nightly job has 180,000 requests and wants the answers by the next evening. Which plan fits the module?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Send one batch and read the results in the order they were sent",
+            "correct": false,
+            "says": "Ruled out because \"Batch results can be returned in any order\"."
+          },
+          {
+            "id": "b",
+            "text": "Split into at least two batches and match each result by its id",
+            "correct": true,
+            "says": "The page says \"A Message Batch is limited to either 100,000 Message requests or 256 MB in size, whichever is reached first\", so 180,000 needs two, and the ids match the results."
+          },
+          {
+            "id": "c",
+            "text": "Send them live with `stream: true` and skip the batch route",
+            "correct": false,
+            "says": "Ruled out because \"it's recommended to stream results back rather than download them all at once\" applies to results, and a batch is the route for work nobody awaits."
+          },
+          {
+            "id": "d",
+            "text": "Send one batch with `speed` fast to finish before the next evening",
+            "correct": false,
+            "says": "Ruled out because the page 1 table marks `speed` as refused, and \"Fast mode tunes synchronous latency\" does not apply in a batch."
+          }
+        ],
+        "origin": {
+          "path": "course/21-message-batches/01-submitting-a-batch-limits-and-price.md",
+          "section": "The limits"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "A team tries to download its output 35 days after the job was created. What do they find?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The record is still viewable, but the files are gone",
+            "correct": true,
+            "says": "The page says \"you may still view the Batch, but its results will no longer be available for download\", after the 29-day window."
+          },
+          {
+            "id": "b",
+            "text": "The downloads are fine, since the 29 days count from the end of processing",
+            "correct": false,
+            "says": "Ruled out because \"Results live for 29 days after `created_at`\", not after the end."
+          },
+          {
+            "id": "c",
+            "text": "The record is deleted, since it expires together with its downloads",
+            "correct": false,
+            "says": "Ruled out because \"you may still view the Batch\" after the window."
+          },
+          {
+            "id": "d",
+            "text": "The downloads cost extra, since they come from an archive",
+            "correct": false,
+            "says": "Ruled out because the page says \"Store what you need within the window.\" and names no archive."
+          }
+        ],
+        "origin": {
+          "path": "course/21-message-batches/02-polling-results-and-retries.md",
+          "section": "Keeping the results"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A batch of 3,000 requests ends with 2,700 succeeded and 300 expired. What is the sound handling?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Resend the timed-out part unchanged and keep the finished answers",
+            "correct": true,
+            "says": "The page's table says an expired request is resubmitted unchanged, and the finished answers stay."
+          },
+          {
+            "id": "b",
+            "text": "Resubmit all 3,000 so the results come from one run",
+            "correct": false,
+            "says": "Ruled out because \"the failure of one request in a batch does not affect the processing of other requests.\""
+          },
+          {
+            "id": "c",
+            "text": "Drop the 300, since an expired request cannot be sent again",
+            "correct": false,
+            "says": "Ruled out because an expired request means \"the 24 hours passed before this request was sent\", so it can go in again."
+          },
+          {
+            "id": "d",
+            "text": "Fix the 300 first, since an expired request is an invalid one",
+            "correct": false,
+            "says": "Ruled out because \"the batch ran out of time first\" is the cause of an expiry, not a bad request."
+          }
+        ],
+        "origin": {
+          "path": "course/21-message-batches/02-polling-results-and-retries.md",
+          "section": "Which failures to retry"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A program sums `input_tokens` over every line of a result file, and the total exceeds the invoice. What is the likely cause?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It counts the discount as a charge, since usage is reported at full rate",
+            "correct": false,
+            "says": "Ruled out because \"All usage is charged at 50% of the standard API prices.\""
+          },
+          {
+            "id": "b",
+            "text": "It counts cached tokens twice, since each entry repeats the prefix",
+            "correct": false,
+            "says": "Ruled out because the page says \"Only the `succeeded` results carry tokens that are billed.\" and names no repeated prefix."
+          },
+          {
+            "id": "c",
+            "text": "It also adds entries for failures and cancellations, none of which are billed",
+            "correct": true,
+            "says": "The page says \"You will not be billed for these requests.\" for the failures, and \"Only the `succeeded` results carry tokens that are billed.\""
+          },
+          {
+            "id": "d",
+            "text": "It counts polling calls, since each poll is billed as a request",
+            "correct": false,
+            "says": "Ruled out because \"Poll the batch by its `id`, with a wait between polls.\" returns a status and no message, so no tokens."
+          }
+        ],
+        "origin": {
+          "path": "course/21-message-batches/02-polling-results-and-retries.md",
+          "section": "The four result types"
+        }
+      }
+    ]
+  }
+}

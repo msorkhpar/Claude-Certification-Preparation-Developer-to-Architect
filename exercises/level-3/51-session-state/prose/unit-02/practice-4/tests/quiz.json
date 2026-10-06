@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "51-session-state"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 4,
+  "title": "Module quiz: Session state",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. An engineer resumes a very large session on a Pro plan in Claude Code after a two-hour break. What should they expect from the first request?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A re-run of the session's tool calls, refreshing their results",
+            "correct": false,
+            "says": "Ruled out because a resume restores the conversation and does not run tools again: a call that was cut off \"doesn't finish or run again when you resume\"."
+          },
+          {
+            "id": "b",
+            "text": "A warm cache that still holds the earlier requests",
+            "correct": false,
+            "says": "Ruled out because \"The session's prompt cache has expired by then, so the next request processes the full history once no matter which of the dialog's options you pick.\""
+          },
+          {
+            "id": "c",
+            "text": "A cache miss, with the full history processed once more",
+            "correct": true,
+            "says": "The prompt cache expires after a long pause, so the next request reads the history once more."
+          },
+          {
+            "id": "d",
+            "text": "A fork of the session, made automatically on resume",
+            "correct": false,
+            "says": "Ruled out because forking is an option you set, and a fork \"creates a new session that starts with a copy of the original's history\", not an automatic step of resuming."
+          }
+        ],
+        "origin": {
+          "path": "course/51-session-state/01-continue-resume-and-fork-what-a-session-keeps.md",
+          "section": "What a resumed session restores, and what it does not"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. A forked agent rewrote several modules in the shared working copy. The team wants that copy exactly as it stood before the run, and wants to keep the fork's conversation. What provides this?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Resuming the original session, which brings its files back",
+            "correct": false,
+            "says": "Ruled out because \"Sessions persist the conversation, not the filesystem\", so a resume restores no files."
+          },
+          {
+            "id": "b",
+            "text": "Deleting the fork's session so its edits are discarded",
+            "correct": false,
+            "says": "Ruled out because \"If a forked agent edits files, those changes are real and visible to any session working in the same directory\", and removing the session does not undo them."
+          },
+          {
+            "id": "c",
+            "text": "Forking again from the original, so the copy starts clean",
+            "correct": false,
+            "says": "Ruled out because forking \"branches the conversation history, not the filesystem\", so the second copy meets the same edited files."
+          },
+          {
+            "id": "d",
+            "text": "Checkpointing, which snapshots the edits and reverts them",
+            "correct": true,
+            "says": "Only a snapshot of the files can return them to an earlier state."
+          }
+        ],
+        "origin": {
+          "path": "course/51-session-state/01-continue-resume-and-fork-what-a-session-keeps.md",
+          "section": "What a session holds"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. A service returns to saved sessions after nightly code changes. It records a digest for each analysed file and sees that 5 of 12 changed. What should it do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Fork the session and keep the stale results in the original",
+            "correct": false,
+            "says": "Ruled out because a fork \"creates a new session that starts with a copy of the original's history\", stale results included."
+          },
+          {
+            "id": "b",
+            "text": "Start a new session and carry the earlier transcript into it",
+            "correct": false,
+            "says": "Ruled out because a transcript carries the stale results with it; a summary carries conclusions \"never the raw tool output that went stale\"."
+          },
+          {
+            "id": "c",
+            "text": "Continue the most recent session in the directory and add no note",
+            "correct": false,
+            "says": "Ruled out because continue takes the most recent session, and with no note the session believes the old files: \"Sessions persist the conversation, not the filesystem\"."
+          },
+          {
+            "id": "d",
+            "text": "Resume the session and name the five stale paths in its first prompt",
+            "correct": true,
+            "says": "Five of twelve is under half, so a resume with a notice naming the paths keeps what is still true."
+          }
+        ],
+        "origin": {
+          "path": "course/51-session-state/01-continue-resume-and-fork-what-a-session-keeps.md",
+          "section": "Continue, resume and fork"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,154 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "33-mcp-advanced"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 6,
+  "title": "Module quiz: MCP advanced",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A tool wants a person's confirmation, but the calling client declared only roots. What must the server avoid?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Returning a normal result saying it could not ask",
+            "correct": false,
+            "says": "Ruled out because the rule bars only an undeclared request, and the practice's server meets this case with a result \"that says the client cannot be asked\"."
+          },
+          {
+            "id": "b",
+            "text": "Sending an elicitation request that the caller never announced",
+            "correct": true,
+            "says": "The first page says \"Servers MUST NOT send an inputRequests that the client has not declared support for in its capabilities.\""
+          },
+          {
+            "id": "c",
+            "text": "Ending the call with an error code naming the missing capability",
+            "correct": false,
+            "says": "Ruled out because a server that needs a capability the call did not declare \"returns a MissingRequiredClientCapabilityError with code -32021\", which is an error code."
+          },
+          {
+            "id": "d",
+            "text": "Signing the state of the call so the client cannot alter it",
+            "correct": false,
+            "says": "Ruled out because \"servers MUST treat requestState as an attacker-controlled input\", so signing it is required, not avoided."
+          }
+        ],
+        "origin": {
+          "path": "course/33-mcp-advanced/01-round-trips-elicitation-and-notifications.md",
+          "section": "What the server owes the state"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Two requests carry the same requestState and arrive within its lifetime, one from the user it was issued to and one from a different user. How should the server treat them?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Reject the second, because the signed payload names its intended principal",
+            "correct": true,
+            "says": "The first page says the state should carry \"the authenticated principal, rejecting state presented by a different principal\"."
+          },
+          {
+            "id": "b",
+            "text": "Reject both, since a state may be presented only once",
+            "correct": false,
+            "says": "Ruled out because these measures \"do not by themselves guarantee single-use\", so the same user can present it again within the lifetime."
+          },
+          {
+            "id": "c",
+            "text": "Accept both, because the expiry is the only check the specification requires",
+            "correct": false,
+            "says": "Ruled out because the server also checks \"an identifier of the originating request\", and the principal."
+          },
+          {
+            "id": "d",
+            "text": "Accept both, because a valid signature proves the state is genuine",
+            "correct": false,
+            "says": "Ruled out because the server must reject \"rejecting state presented by a different principal\" even when the signature is valid."
+          }
+        ],
+        "origin": {
+          "path": "course/33-mcp-advanced/02-streamable-http-state-and-authorization.md",
+          "section": "Module quiz"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A load balancer sends consecutive calls of one client to different instances of an MCP server on the 2026-07-28 revision. What does the protocol need so that this works?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Self-contained requests that carry all their own context",
+            "correct": true,
+            "says": "The first page says the pattern works \"without requiring a shared storage layer across server instances or requiring stateful load balancing\", and the second page that every POST stands alone."
+          },
+          {
+            "id": "b",
+            "text": "A sticky connection that keeps one client on the same instance",
+            "correct": false,
+            "says": "Ruled out because the pattern works \"without requiring a shared storage layer across server instances or requiring stateful load balancing\"."
+          },
+          {
+            "id": "c",
+            "text": "A resumable stream that another instance can pick up by its event id",
+            "correct": false,
+            "says": "Ruled out because \"Resumable streams through `Last-Event-ID` are not supported.\""
+          },
+          {
+            "id": "d",
+            "text": "A session identifier that each instance looks up in a common table",
+            "correct": false,
+            "says": "Ruled out because MCP in this revision \"is stateless and has no protocol-level sessions\"."
+          }
+        ],
+        "origin": {
+          "path": "course/33-mcp-advanced/01-round-trips-elicitation-and-notifications.md",
+          "section": "Multi round-trip requests"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A team plans HTTP-style login for an MCP server that runs as a local child process. What does the specification advise?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Follow the same flow, since authorization is mandatory for every transport",
+            "correct": false,
+            "says": "Ruled out because \"Authorization is OPTIONAL for MCP implementations.\""
+          },
+          {
+            "id": "b",
+            "text": "Use a query-string token, which stdio clients may append to the command",
+            "correct": false,
+            "says": "Ruled out because \"Access tokens MUST NOT be included in the URI query string\"."
+          },
+          {
+            "id": "c",
+            "text": "Skip that flow and read credentials from the environment instead",
+            "correct": true,
+            "says": "The second page quotes the specification: \"Implementations using an STDIO transport SHOULD NOT follow this specification, and instead retrieve credentials from the environment.\""
+          },
+          {
+            "id": "d",
+            "text": "Ask the user for a password through form-mode elicitation on each start",
+            "correct": false,
+            "says": "Ruled out because \"Servers MUST NOT use form mode elicitation to request sensitive information\"."
+          }
+        ],
+        "origin": {
+          "path": "course/33-mcp-advanced/02-streamable-http-state-and-authorization.md",
+          "section": "Authorization"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,154 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-1",
+    "03-claudes-family-and-its-surfaces"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 2,
+  "title": "Module quiz: Claude's family and its surfaces",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A team's research job runs for hours with nobody watching: mostly routine page fetching and note-taking, with a few hard judgment calls. Which design fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Hand it to managed agents with cheap workers and one strong decider",
+            "correct": true,
+            "says": "A job that runs for hours belongs in managed agents, and an orchestrator that hands bulk work to cheaper workers puts most tokens on the cheaper model while a stronger one takes the hard calls."
+          },
+          {
+            "id": "b",
+            "text": "Chat through an app Project, with a person starting each step by hand",
+            "correct": false,
+            "says": "Ruled out because the apps give \"Chat, Projects, artifacts, research, connectors; a person in the loop\", and nobody is watching here."
+          },
+          {
+            "id": "c",
+            "text": "Run the strongest tier through the Messages API on the team's own servers",
+            "correct": false,
+            "says": "Ruled out because the situation table points \"A job runs for hours and should not tie up your servers\" to managed agents."
+          },
+          {
+            "id": "d",
+            "text": "Use the fastest tier for each step, then escalate only when the job fails",
+            "correct": false,
+            "says": "Ruled out because \"the cheapest model for everything under-serves exactly the cases that need depth\"."
+          }
+        ],
+        "origin": {
+          "path": "course/03-claudes-family-and-its-surfaces/02-the-surfaces-one-model-behind-many.md",
+          "section": "The map"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "A feature must call one specific Claude model for two years. In review, someone flags the id hard-coded in the source. What is the most likely concern?",
+        "options": [
+          {
+            "id": "a",
+            "text": "That snapshot has a retirement date, and nothing plans the move",
+            "correct": true,
+            "says": "The table shows retirement dates, and an id with a retirement date needs a migration plan before the date (the third trap)."
+          },
+          {
+            "id": "b",
+            "text": "Dated ids are rejected by the Messages API in favour of aliases",
+            "correct": false,
+            "says": "Ruled out because \"For Haiku 4.5 the dated id is the snapshot and the shorter name is an alias\", so dated ids are accepted."
+          },
+          {
+            "id": "c",
+            "text": "A shorter alias would always follow new releases and should replace it",
+            "correct": false,
+            "says": "Ruled out because the page counts \"including the dateless IDs used from the 4.6 generation on\" among the pinned snapshots, so an alias is no more of a tracker."
+          },
+          {
+            "id": "d",
+            "text": "Hard-coded ids bypass the pinned snapshot, so replies drift between calls",
+            "correct": false,
+            "says": "Ruled out because \"every Claude model id is a pinned snapshot\", so replies do not drift under a fixed id."
+          }
+        ],
+        "origin": {
+          "path": "course/03-claudes-family-and-its-surfaces/01-the-model-family-and-choosing-a-tier.md",
+          "section": "The lineup on 2026-10-02"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A team's helper remembered the conversation when it ran in an app chat. Rebuilt on the Messages API, it answers every message as if it were the first. What is the fix?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Turn on the endpoint's stored-chat setting for the account",
+            "correct": false,
+            "says": "Ruled out because \"The API keeps nothing\", so no account setting stores the chat."
+          },
+          {
+            "id": "b",
+            "text": "Add \"remember our history\" to the system prompt",
+            "correct": false,
+            "says": "Ruled out because \"The API sends only what you put in the request\", and a sentence in the system prompt carries no history."
+          },
+          {
+            "id": "c",
+            "text": "Include the prior exchange in the body of each call",
+            "correct": true,
+            "says": "Ownership of state decides where history lives: \"The API keeps nothing; your code resends history\", so each request must carry the earlier turns (the carry-across section)."
+          },
+          {
+            "id": "d",
+            "text": "Move the helper to a cloud platform that keeps the thread",
+            "correct": false,
+            "says": "Ruled out because the platforms offer \"Same model family; different ids, access and sometimes features\", and \"a cloud platform adds its own identity and permission model\", not a stored thread."
+          }
+        ],
+        "origin": {
+          "path": "course/03-claudes-family-and-its-surfaces/02-the-surfaces-one-model-behind-many.md",
+          "section": "One model, many surfaces: what carries across"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A team calls the same Claude model through the Claude API and through Amazon Bedrock, reusing one config file with a single name string for both. Both platforms list the model as current and access is granted, but Bedrock answers that the name is unknown. What is the most likely cause?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Bedrock runs a different generation of the family, so the name never matched",
+            "correct": false,
+            "says": "Ruled out because the page says \"Same model family; different ids, access and sometimes features\", so the generation is the same and only the id differs."
+          },
+          {
+            "id": "b",
+            "text": "Each vendor gives the family its own id, so the value must differ",
+            "correct": true,
+            "says": "The cloud platforms bullet lists a separate id for each platform, for example anthropic.claude-opus-5-5 on Amazon Bedrock."
+          },
+          {
+            "id": "c",
+            "text": "The account lacks the identity and permission setup that Bedrock requires",
+            "correct": false,
+            "says": "Ruled out because the scenario grants access and the error concerns the name: \"The ids differ, and the platform sets its own dates\"."
+          },
+          {
+            "id": "d",
+            "text": "Bedrock already retired that model, so its name is unknown there",
+            "correct": false,
+            "says": "Ruled out because the scenario says both platforms list the model as current, as the page's example \"anthropic.claude-opus-5-5 on Amazon Bedrock\" shows for a current model."
+          }
+        ],
+        "origin": {
+          "path": "course/03-claudes-family-and-its-surfaces/02-the-surfaces-one-model-behind-many.md",
+          "section": "The map"
+        }
+      }
+    ]
+  }
+}

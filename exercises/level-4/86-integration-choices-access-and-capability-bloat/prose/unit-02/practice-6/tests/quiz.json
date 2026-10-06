@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-4",
+    "86-integration-choices-access-and-capability-bloat"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 6,
+  "title": "Module quiz: Integration choices, access and capability bloat",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A team has 60 tools and turns on the tool search tool. A developer proposes to omit the least-used tools from the request, to save tokens. What does the documentation say?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Send the least-used ones inside the system prompt as plain text",
+            "correct": false,
+            "says": "Ruled out because deferral changes \"what enters the context window\", and text in the prompt would load them all every time."
+          },
+          {
+            "id": "b",
+            "text": "Send only the loaded tools, and keep the rest in the application",
+            "correct": false,
+            "says": "Ruled out because \"You still send every tool's full definition in the `tools` array on every request\"."
+          },
+          {
+            "id": "c",
+            "text": "Send every definition and mark the infrequent ones as deferred",
+            "correct": true,
+            "says": "The search runs on the full set, so every definition is sent and the infrequent ones are marked as deferred."
+          },
+          {
+            "id": "d",
+            "text": "Send every definition with a cache breakpoint on each deferred one",
+            "correct": false,
+            "says": "Ruled out because deferred tools are kept out of the prefix, and \"A deferred tool cannot itself carry a cache breakpoint\"."
+          }
+        ],
+        "origin": {
+          "path": "course/86-integration-choices-access-and-capability-bloat/02-capability-bloat-progressive-discovery-and-the-practice.md",
+          "section": "Capability bloat, progressive discovery and the practice"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "A gateway receives a request whose credential has been revoked and which also names a model that the team may not use. What does it answer, and what does it record?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A refusal for the model, recorded under the team that owned the revoked credential",
+            "correct": false,
+            "says": "Ruled out because \"A request with no credential is refused as unauthenticated even when it also asks for a model it may not have\"."
+          },
+          {
+            "id": "b",
+            "text": "A refusal as unauthenticated, logged under unknown with the verdict but no prompt text",
+            "correct": true,
+            "says": "Who is calling comes first, and the record keeps \"the team (or \"unknown\"), the model and the verdict, and no prompt text\"."
+          },
+          {
+            "id": "c",
+            "text": "An approval with a warning in the log, since a revoked credential is the provider's concern",
+            "correct": false,
+            "says": "Ruled out because \"every decision, the refusals included, leaves a record\"."
+          },
+          {
+            "id": "d",
+            "text": "A refusal that keeps the full prompt in the record, so that an attack can be studied later",
+            "correct": false,
+            "says": "Ruled out because \"a log of content is its own data-protection problem\"."
+          }
+        ],
+        "origin": {
+          "path": "course/86-integration-choices-access-and-capability-bloat/01-which-mechanism-a-gateway-and-whose-rights.md",
+          "section": "A gateway: one place for credentials, limits and records"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A partner company's autonomous research system, built on another framework, must hand sub-tasks to your own autonomous system and collect the results. Which mechanism does the integration use?",
+        "options": [
+          {
+            "id": "a",
+            "text": "An MCP server that exposes your system as one tool of the partner's system",
+            "correct": false,
+            "says": "Ruled out because \"MCP is for agent-to-tool communication\", and the partner's agent is a peer and not a tool."
+          },
+          {
+            "id": "b",
+            "text": "A direct call from the partner's code into the functions of your system",
+            "correct": false,
+            "says": "Ruled out because a direct call suits \"The path is known: the same steps in the same order\", and a delegation between two agents is not that."
+          },
+          {
+            "id": "c",
+            "text": "A subagent that your own framework starts on the partner's behalf",
+            "correct": false,
+            "says": "Ruled out because A2A is \"Not a sub-agent or tool-call protocol\", and a subagent is how an agent delegates inside its own framework, not across two."
+          },
+          {
+            "id": "d",
+            "text": "An agent-to-agent protocol between the two independent parties",
+            "correct": true,
+            "says": "The counterpart is an independent agent with its own owner, which is the agent-to-agent case."
+          }
+        ],
+        "origin": {
+          "path": "course/86-integration-choices-access-and-capability-bloat/01-which-mechanism-a-gateway-and-whose-rights.md",
+          "section": "Which mechanism connects it, what a gateway centralises and whose rights a call uses"
+        }
+      }
+    ]
+  }
+}

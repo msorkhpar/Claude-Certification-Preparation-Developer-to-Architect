@@ -1,0 +1,185 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "40-claude-in-the-software-life-cycle"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 6,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Claude in the software life cycle",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A team wants its own rules about money handling and generated files applied only when pull requests are checked, and not in ordinary sessions. Which file holds them?",
+        "options": [
+          {
+            "id": "a",
+            "text": "`CLAUDE.md`, which every session reads before its first prompt",
+            "correct": false,
+            "says": "Ruled out because `CLAUDE.md` is \"shared project instructions that Claude Code uses for all tasks, not just reviews\"."
+          },
+          {
+            "id": "b",
+            "text": "`REVIEW.md`, read by the agents that examine the diff",
+            "correct": true,
+            "says": "The page says `REVIEW.md` holds \"review-only instructions\", and that you use it \"to say what your team wants flagged, at what severity, and how findings are reported\"."
+          },
+          {
+            "id": "c",
+            "text": "`.claude/settings.json`, which the whole team commits to the repository",
+            "correct": false,
+            "says": "Ruled out because the first page gives that file \"Team permission rules, default model, hooks, plugins\", which are settings and not review instructions."
+          },
+          {
+            "id": "d",
+            "text": "`prompts/CHANGELOG.md`, which lists the prompt versions and their dates",
+            "correct": false,
+            "says": "Ruled out because the changelog explains versions of prompts, and the first page says it must have \"A changelog entry for every change\" and not review rules."
+          }
+        ],
+        "origin": {
+          "path": "course/40-claude-in-the-software-life-cycle/02-ci-code-review-and-repository-events.md",
+          "section": "Code Review, and tuning it"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "A prompt file is at version 1.2.0, and its changelog's newest heading says 1.1.0. What does a reviewer conclude?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The edit is unrecorded, because the record and the number disagree",
+            "correct": true,
+            "says": "The first page says the changelog's \"latest heading equals the file's version\", so a mismatch means a change nobody recorded."
+          },
+          {
+            "id": "b",
+            "text": "The prompt is older than its record, so it should be reverted at once",
+            "correct": false,
+            "says": "Ruled out because the rule is only a heading that is \"whose latest heading equals the file's version\", and it names no age comparison."
+          },
+          {
+            "id": "c",
+            "text": "The number is wrong, because the record always wins out in such a case",
+            "correct": false,
+            "says": "Ruled out because the only rule is \"whose latest heading equals the file's version\", with no winner, so a reviewer asks for the missing entry."
+          },
+          {
+            "id": "d",
+            "text": "Nothing, because the changelog is only for people to read",
+            "correct": false,
+            "says": "Ruled out because the page says \"A reviewer reading the pull request sees what changed and why\", which makes it part of the review."
+          }
+        ],
+        "origin": {
+          "path": "course/40-claude-in-the-software-life-cycle/01-git-committed-configuration-and-versioned-prompts.md",
+          "section": "Versioning prompts and settings"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A job must start only for a new note that names the bot, and a second note on the same issue must not stop work that is running. Which pair of settings fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A guard on the comment body, with `cancel-in-progress` set to false",
+            "correct": true,
+            "says": "The page says to guard the job with `if: contains(github.event.comment.body, '@claude')`, and for an implementation run to \"leave it `false` so that a second comment does not kill work in progress.\""
+          },
+          {
+            "id": "b",
+            "text": "No guard on the comment body, with `cancel-in-progress` set to true",
+            "correct": false,
+            "says": "Ruled out because \"Without the `if`, a runner starts for every comment in the repository\"."
+          },
+          {
+            "id": "c",
+            "text": "A guard on the comment body, with `cancel-in-progress` set to true",
+            "correct": false,
+            "says": "Ruled out because `cancel-in-progress: true` suits a review: \"so a new push replaces the review of an outdated commit\"."
+          },
+          {
+            "id": "d",
+            "text": "No guard on the comment body, with `cancel-in-progress` set to false",
+            "correct": false,
+            "says": "Ruled out because it lacks the guard, and \"Without the `if`, a runner starts for every comment in the repository\"."
+          }
+        ],
+        "origin": {
+          "path": "course/40-claude-in-the-software-life-cycle/02-ci-code-review-and-repository-events.md",
+          "section": "Bounding every run"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A team must choose how to run a nightly dependency review that keeps working when nobody's laptop is on, with no workflow in the repository. Which option fits?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A hook in the settings file that fires after each edit",
+            "correct": false,
+            "says": "Ruled out because hooks are among the things the shared settings file holds, \"Team permission rules, default model, hooks, plugins\", and they run inside a session on a machine, while a routine keeps working \"while your laptop is closed\"."
+          },
+          {
+            "id": "b",
+            "text": "A mention workflow that waits for someone to comment",
+            "correct": false,
+            "says": "Ruled out because \"its job starts only when the comment mentions the bot\", and the job here is nightly."
+          },
+          {
+            "id": "c",
+            "text": "A routine with a scheduled trigger on Anthropic's cloud",
+            "correct": true,
+            "says": "The page says a routine is \"a saved Claude Code configuration\", with a scheduled trigger, and it runs on cloud infrastructure so it keeps working \"while your laptop is closed\"."
+          },
+          {
+            "id": "d",
+            "text": "A subagent in the project folder that starts at midnight",
+            "correct": false,
+            "says": "Ruled out because subagents are files the repository lists as \"Team skills and subagents\", which a session loads when it starts, so nothing starts one at midnight, and only a routine \"is a saved Claude Code configuration\" that runs \"automatically\"."
+          }
+        ],
+        "origin": {
+          "path": "course/40-claude-in-the-software-life-cycle/02-ci-code-review-and-repository-events.md",
+          "section": "Routines and other events"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-4",
+    "89-migration-and-model-upgrades-at-scale"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 6,
+  "title": "Module quiz: Migration and model upgrades at scale",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "The new model costs about a third more per answer and fixes the refund errors. The product owner asks whether to move. Which message fits the architect's role?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Recommend staying on the old model, because a higher cost is reason enough to avoid the whole change",
+            "correct": false,
+            "says": "Ruled out because \"A rise in cost is a number to put before the owner, not a verdict\"."
+          },
+          {
+            "id": "b",
+            "text": "Recommend the move, because the newer model is the one that the vendor has recommended as the replacement",
+            "correct": false,
+            "says": "Ruled out because \"A recommended replacement is a starting point, not a decision\"."
+          },
+          {
+            "id": "c",
+            "text": "State the trade: what improves, what the budget loses, and the date that forces the choice",
+            "correct": true,
+            "says": "The decision is a trade, and the architect states it with its date."
+          },
+          {
+            "id": "d",
+            "text": "Defer the decision until the old model retires, so that the choice is made by the calendar instead",
+            "correct": false,
+            "says": "Ruled out because \"Waiting for the retirement date hands the decision to the calendar, and gives up the rollback\"."
+          }
+        ],
+        "origin": {
+          "path": "course/89-migration-and-model-upgrades-at-scale/02-the-gate-the-roll-out-and-the-way-back.md",
+          "section": "Telling the stakeholders"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "After a migration, the parser reads the wrong field because the first content block of a reply is thinking text. Which step was missed?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Lowering max_tokens so that the thinking is cut off before the text of the reply begins",
+            "correct": false,
+            "says": "Ruled out because \"`max_tokens` covers thinking plus text, and thinking tokens are billed as output tokens\"."
+          },
+          {
+            "id": "b",
+            "text": "Choosing the part of the response by its declared type and not by its position in the list",
+            "correct": true,
+            "says": "A reply may begin with thinking blocks, so the parser reads by type."
+          },
+          {
+            "id": "c",
+            "text": "Turning thinking off by sending the disabled setting, which the new model accepts as before",
+            "correct": false,
+            "says": "Ruled out because the guide lists `thinking: {\"type\": \"disabled\"}` among the \"five settings that return a 400 error\"."
+          },
+          {
+            "id": "d",
+            "text": "Dropping the first block of every reply before parsing, since it always holds only thinking",
+            "correct": false,
+            "says": "Ruled out because \"A reply need not begin with thinking text either, so a rule that always drops the first block loses real text\"."
+          }
+        ],
+        "origin": {
+          "path": "course/89-migration-and-model-upgrades-at-scale/01-the-calendar-the-audit-and-the-settings-a-new-model-changes.md",
+          "section": "Changes that throw nothing"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "On the day the new model went live, the team deleted the old model's id from its configuration to keep it tidy. Two days later errors spike. What did the cleanup take away?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Nothing, since the gate already approved the new model and a rollback is no longer needed",
+            "correct": false,
+            "says": "Ruled out because \"a suite predicts and traffic proves\", and an error found after the old model is gone has no way back."
+          },
+          {
+            "id": "b",
+            "text": "The record of which key called which model, since only the configuration holds it",
+            "correct": false,
+            "says": "Ruled out because the Console export gives \"usage broken down by API key and model\", so the record does not live in the configuration."
+          },
+          {
+            "id": "c",
+            "text": "The new cost baseline, which can only be computed while the old id stays configured",
+            "correct": false,
+            "says": "Ruled out because the baseline is reset by the rule \"Recount tokens and re-baseline cost\" on the replacement, which needs no old id."
+          },
+          {
+            "id": "d",
+            "text": "The way back, which needs the previous one kept in place and tested until its own retirement",
+            "correct": true,
+            "says": "The page says \"the old model is the rollback, and it stays so until its own retirement date\"."
+          }
+        ],
+        "origin": {
+          "path": "course/89-migration-and-model-upgrades-at-scale/02-the-gate-the-roll-out-and-the-way-back.md",
+          "section": "Traps"
+        }
+      }
+    ]
+  }
+}

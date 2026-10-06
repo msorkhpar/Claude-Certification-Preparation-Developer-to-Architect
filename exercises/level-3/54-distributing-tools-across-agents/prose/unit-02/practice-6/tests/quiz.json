@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "54-distributing-tools-across-agents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 6,
+  "title": "Module quiz: Distributing tools across agents",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. The tool that closes a customer's account carries a description that warns the model to use it carefully. What should actually limit it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A longer warning in the description, with an example of when to avoid it",
+            "correct": false,
+            "says": "Ruled out because \"an instruction not to use a tool is a request\"."
+          },
+          {
+            "id": "b",
+            "text": "A required parameter in which the model gives its reason for calling",
+            "correct": false,
+            "says": "Ruled out because a field in which the model states its reason \"is a claim by the model, not a check\"."
+          },
+          {
+            "id": "c",
+            "text": "A prompt rule that forbids the call unless the customer asks for it",
+            "correct": false,
+            "says": "Ruled out because a prompt rule is still \"an instruction not to use a tool\", and \"an instruction not to use a tool is a request\"."
+          },
+          {
+            "id": "d",
+            "text": "Authorisation and scope enforced in code, whatever the caller asks",
+            "correct": true,
+            "says": "A limit that the model cannot talk its way around lives in code."
+          }
+        ],
+        "origin": {
+          "path": "course/54-distributing-tools-across-agents/01-scoped-tool-sets-per-agent.md",
+          "section": "More tools, worse choices"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. Refunds cannot be undone, the policy cap is 500, and every refund needs a person's approval. A call for 450 arrives and nobody has approved it. What should the tool layer return?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A result that runs the refund and logs that the amount is under the cap",
+            "correct": false,
+            "says": "Ruled out because \"An irreversible call needs an approval even when the amount is under the cap\"."
+          },
+          {
+            "id": "b",
+            "text": "A result that runs the refund and notifies a person to review it afterwards",
+            "correct": false,
+            "says": "Ruled out because \"a review after the fact cannot undo an irreversible call\"."
+          },
+          {
+            "id": "c",
+            "text": "A flagged refusal that waits for a human sign-off on this very request",
+            "correct": true,
+            "says": "An irreversible call waits for a person even under the cap."
+          },
+          {
+            "id": "d",
+            "text": "A flagged refusal that sends the case to a person who can raise the cap",
+            "correct": false,
+            "says": "Ruled out because the route to a person who can raise the limit is for an amount above the cap: \"An amount above the cap is refused and sent to a person\", and 450 is under 500."
+          }
+        ],
+        "origin": {
+          "path": "course/54-distributing-tools-across-agents/02-tool-choice-the-call-that-must-happen-caps-and-the-practice.md",
+          "section": "Caps and authorisation on irreversible tools"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario S3, a multi-agent research system. A coordinator delegates to a web search subagent, a document analysis subagent and a synthesis subagent, and it produces a cited report. All subagents hold the same 18 tools, including the one that sends the finished report, and the synthesis subagent has begun running web searches. Which redesign fits best?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Split the list by role, and give the irreversible step one owner behind an approval",
+            "correct": true,
+            "says": "Scoped lists remove the misuse, and the irreversible step has an owner and an approval."
+          },
+          {
+            "id": "b",
+            "text": "Keep one list and add a prompt line for each role naming the tools to use",
+            "correct": false,
+            "says": "Ruled out because a prompt line is a request: \"an instruction not to use a tool is a request, and a tool the agent holds is a tool it can use\"."
+          },
+          {
+            "id": "c",
+            "text": "Cut the shared list to the ten most used tools and keep it the same for every role",
+            "correct": false,
+            "says": "Ruled out because \"an agent outside its specialisation misuses what it holds\"."
+          },
+          {
+            "id": "d",
+            "text": "Route each request through a classifier that enables a subset of the tools",
+            "correct": false,
+            "says": "Ruled out because \"a router adds a component to keep correct\"."
+          }
+        ],
+        "origin": {
+          "path": "course/54-distributing-tools-across-agents/01-scoped-tool-sets-per-agent.md",
+          "section": "More tools, worse choices"
+        }
+      }
+    ]
+  }
+}

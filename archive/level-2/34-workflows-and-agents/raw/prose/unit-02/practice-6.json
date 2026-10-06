@@ -1,0 +1,185 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "34-workflows-and-agents"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 6,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Workflows and agents",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A team swaps a working three-step chain for a framework that hides the prompts, and debugging gets harder. Which advice from the article applies?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Keep the framework, and add a second one to watch it",
+            "correct": false,
+            "says": "Ruled out because frameworks \"often create extra layers of abstraction that can obscure the underlying prompts and responses, making them harder to debug\"."
+          },
+          {
+            "id": "b",
+            "text": "Return to direct LLM API calls, and read any code beneath",
+            "correct": true,
+            "says": "The first page says \"We suggest that developers start by using LLM APIs directly\", and to understand the code under any framework."
+          },
+          {
+            "id": "c",
+            "text": "Move the sequence into an agent so that the model finds the path",
+            "correct": false,
+            "says": "Ruled out because agents are for \"open-ended problems where it's difficult or impossible to predict the required number of steps\", and a fixed sequence is not one."
+          },
+          {
+            "id": "d",
+            "text": "Wrap the framework in one more layer that logs each call",
+            "correct": false,
+            "says": "Ruled out because the article says \"don't hesitate to reduce abstraction layers and build with basic components as you move to production\", not to add one."
+          }
+        ],
+        "origin": {
+          "path": "course/34-workflows-and-agents/01-workflow-or-agent-and-the-first-patterns.md",
+          "section": "Start with the simplest thing"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "A classifier's output comes back as `REFUNDS.`, with capitals and a full stop, but the program's table is keyed by lowercase names. What should the program do before the table lookup?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Normalize the text into a form that matches a known route",
+            "correct": true,
+            "says": "The first page says \"The program normalizes the label, looks it up, and sends anything unknown to a default route.\""
+          },
+          {
+            "id": "b",
+            "text": "Retry the classifier until an output matches a name exactly",
+            "correct": false,
+            "says": "Ruled out because the page sends \"anything unknown to a default route\" and describes no second call to the classifier."
+          },
+          {
+            "id": "c",
+            "text": "Send the output to the default route without a lookup",
+            "correct": false,
+            "says": "Ruled out because the program \"normalizes the label, looks it up\", so a reply that matches after cleaning is not sent straight to the default."
+          },
+          {
+            "id": "d",
+            "text": "Hand the output to a person who picks the route",
+            "correct": false,
+            "says": "Ruled out because \"The failure to design for is a label that matches no route.\", and the program meets it with a default and not with a person."
+          }
+        ],
+        "origin": {
+          "path": "course/34-workflows-and-agents/01-workflow-or-agent-and-the-first-patterns.md",
+          "section": "Routing"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A code review sends one snippet to the model three times in parallel and applies a threshold to the answers. Which variation is this?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Sectioning, where independent subtasks run side by side",
+            "correct": false,
+            "says": "Ruled out because sectioning is \"Breaking a task into independent subtasks run in parallel\", and here one task is repeated."
+          },
+          {
+            "id": "b",
+            "text": "Chaining, where each call processes the output of an earlier one",
+            "correct": false,
+            "says": "Ruled out because chaining is for steps \"where each LLM call processes the output of the previous one\", and these runs do not depend on each other."
+          },
+          {
+            "id": "c",
+            "text": "Routing, where a classifier picks a specialized followup",
+            "correct": false,
+            "says": "Ruled out because \"Routing classifies an input and directs it to a specialized followup task\", and here nothing is classified."
+          },
+          {
+            "id": "d",
+            "text": "Voting, where repeated runs of one task are counted",
+            "correct": true,
+            "says": "The first page defines voting as \"Running the same task multiple times to get diverse outputs\", and says \"a vote is a count and a threshold\"."
+          }
+        ],
+        "origin": {
+          "path": "course/34-workflows-and-agents/01-workflow-or-agent-and-the-first-patterns.md",
+          "section": "Parallelization: sectioning and voting"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A fan-out workflow plans three subtasks and one worker throws an exception. What does the practice's orchestrator do?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Stops the run and reports a failure, since a missing result makes the answer unsafe",
+            "correct": false,
+            "says": "Ruled out because the page says \"one failure must not stop the others\"."
+          },
+          {
+            "id": "b",
+            "text": "Retries the failed worker until it succeeds, and then combines all three",
+            "correct": false,
+            "says": "Ruled out because \"A worker can fail, and one failure must not stop the others\", and the page describes no retry."
+          },
+          {
+            "id": "c",
+            "text": "Marks it failed, runs the others, and reports a partial answer",
+            "correct": true,
+            "says": "The second page says one failure must not stop the others, \"the subtask is marked failed and the rest run\", and a partial result is reported as partial."
+          },
+          {
+            "id": "d",
+            "text": "Drops the failed subtask without a trace and combines the other two as if complete",
+            "correct": false,
+            "says": "Ruled out because the page says \"A partial result is reported as partial\", so the failure is visible."
+          }
+        ],
+        "origin": {
+          "path": "course/34-workflows-and-agents/02-orchestrators-evaluators-agents-and-the-practice.md",
+          "section": "Orchestrator-workers"
+        }
+      }
+    ]
+  }
+}

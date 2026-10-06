@@ -1,0 +1,154 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-2",
+    "28-retrieval"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 6,
+  "title": "Module quiz: Retrieval",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A question returns a fluent answer from the wrong passage, and the team wants to find which stage failed. What should they do first?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Switch to a larger model and read a few more answers",
+            "correct": false,
+            "says": "Ruled out because \"Fluent output hides that\", and a larger model reads the same retrieved passages."
+          },
+          {
+            "id": "b",
+            "text": "Measure recall at k on a set with known source documents",
+            "correct": true,
+            "says": "The page says \"The way to see it is to measure retrieval on its own\", with questions \"whose source documents are known\"."
+          },
+          {
+            "id": "c",
+            "text": "Lengthen the prompt with more rules about citing sources",
+            "correct": false,
+            "says": "Ruled out because the failure sits in what was retrieved: \"the passage with the answer never reached the prompt\"."
+          },
+          {
+            "id": "d",
+            "text": "Raise the temperature to see whether another passage appears",
+            "correct": false,
+            "says": "Ruled out because temperature changes the wording of the answer, and \"A fluent answer can come from the wrong passage\"."
+          }
+        ],
+        "origin": {
+          "path": "course/28-retrieval/02-fusion-reranking-context-and-recall.md",
+          "section": "Why it matters"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "A passage reads \"The company's revenue grew by 3% over the previous quarter\" and matches many unrelated questions. Which fix does the write-up describe?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Prepend a sentence of explanatory context before indexing it",
+            "correct": true,
+            "says": "The page says to prepend \"chunk-specific explanatory context to each chunk before embedding\" and before building the keyword index."
+          },
+          {
+            "id": "b",
+            "text": "Shorten it to a single sentence of three or four words",
+            "correct": false,
+            "says": "Ruled out because the problem is lost surroundings: \"A chunk lifted out of its document can lose its meaning.\""
+          },
+          {
+            "id": "c",
+            "text": "Delete it and rely on the model's own knowledge of the firm",
+            "correct": false,
+            "says": "Ruled out because the fix keeps the chunk: the model is asked \"to write that sentence for each chunk\"."
+          },
+          {
+            "id": "d",
+            "text": "Embed it twice and average the two vectors that result",
+            "correct": false,
+            "says": "Ruled out because the fix is that \"the chunk is indexed as a short sentence of context followed by the text\", and a doubled vector adds no information."
+          }
+        ],
+        "origin": {
+          "path": "course/28-retrieval/02-fusion-reranking-context-and-recall.md",
+          "section": "Contextual retrieval"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A keyword index and an embedding index disagree on the best chunk for a query. Why is a hybrid usually better than either alone?",
+        "options": [
+          {
+            "id": "a",
+            "text": "They miss different questions, so merging the results keeps what each finds",
+            "correct": true,
+            "says": "The page says \"The two indexes fail on different questions, which is why most systems use both.\""
+          },
+          {
+            "id": "b",
+            "text": "Their scores share one scale, which makes adding them a sound choice",
+            "correct": false,
+            "says": "Ruled out because \"the scores cannot be added\" when they sit on different scales."
+          },
+          {
+            "id": "c",
+            "text": "The embedding side handles exact strings well, and the keyword side adds speed",
+            "correct": false,
+            "says": "Ruled out because \"BM25 is exact\", and the embedding \"is weaker with exact strings\"."
+          },
+          {
+            "id": "d",
+            "text": "The merge makes chunking of the documents unnecessary for later stages",
+            "correct": false,
+            "says": "Ruled out because \"A chunk is a window of words\", and the merge works on chunks that already exist."
+          }
+        ],
+        "origin": {
+          "path": "course/28-retrieval/01-chunks-bm25-and-embeddings.md",
+          "section": "Why use both"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A team reads a published failure-rate drop of 67% and promises the same drop to a customer. What is wrong with the promise?",
+        "options": [
+          {
+            "id": "a",
+            "text": "The figure applies only to embeddings, which the customer does not use",
+            "correct": false,
+            "says": "Ruled out because the 67% row is \"Those two, with reranking added\", so it is not embeddings alone."
+          },
+          {
+            "id": "b",
+            "text": "The figure is too small to be useful for any real system that is deployed",
+            "correct": false,
+            "says": "Ruled out because the figures \"show an order of magnitude and a ranking of the techniques\"."
+          },
+          {
+            "id": "c",
+            "text": "The figure comes from the source's datasets, and yours needs measuring",
+            "correct": true,
+            "says": "The page says \"These are the write-up's figures, measured on its datasets\" and \"Measure your own.\""
+          },
+          {
+            "id": "d",
+            "text": "The figure was measured with a retired model that no longer exists",
+            "correct": false,
+            "says": "Ruled out because \"The percentages for contextual retrieval below are Anthropic's measurements on its own datasets\", and the page names no model."
+          }
+        ],
+        "origin": {
+          "path": "course/28-retrieval/02-fusion-reranking-context-and-recall.md",
+          "section": "Contextual retrieval"
+        }
+      }
+    ]
+  }
+}

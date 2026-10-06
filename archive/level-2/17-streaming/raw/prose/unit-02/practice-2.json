@@ -1,0 +1,185 @@
+{
+  "raw_api": 1,
+  "source": "claude-certification-preparation",
+  "address": [
+    "level-2",
+    "17-streaming"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "kind": "practice",
+  "ordinal": 2,
+  "ingested": "2026-10-03",
+  "title": "Module quiz: Streaming",
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check yourself"
+    },
+    {
+      "type": "para",
+      "text": "Questions on what this page has just taught. Choose one answer for each."
+    }
+  ],
+  "video": null,
+  "assets": [],
+  "attachments": [],
+  "counts": {
+    "headings": 1,
+    "paras": 1,
+    "code": 0,
+    "tables": 0,
+    "lists": 0,
+    "images": 0,
+    "videos": 0,
+    "rules": 0,
+    "quotes": 0,
+    "html": 0,
+    "disclosures": 0
+  },
+  "content_sha256": "01381f530bdd3fd2ea9a42929589b34280a234f0332b7b83c66b27688cf7ac41",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "A support app shows a streamed reply that includes a tool call. When may it run the tool?",
+        "options": [
+          {
+            "id": "a",
+            "text": "After the block holding it has stopped and its joined fragments have parsed",
+            "correct": true,
+            "says": "The page says \"do not act on a tool call until its block has stopped and its input has parsed\"."
+          },
+          {
+            "id": "b",
+            "text": "As soon as the tool name appears in the opening event of the block",
+            "correct": false,
+            "says": "Ruled out because \"The input is incomplete until the block stops\"."
+          },
+          {
+            "id": "c",
+            "text": "Whenever the first fragment turns out to be a complete object",
+            "correct": false,
+            "says": "Ruled out because a fragment is not an object: \"the fragment is not an object, and the object that comes is not final until the block ends\"."
+          },
+          {
+            "id": "d",
+            "text": "Before the text, because tool blocks are always listed in front",
+            "correct": false,
+            "says": "Ruled out because \"content lists the blocks in index order\", not by kind."
+          }
+        ],
+        "origin": {
+          "path": "course/17-streaming/02-tool-use-errors-and-when-to-stream.md",
+          "section": "Tool calls in a stream"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Which pair of behaviours does a correct assembler show for an unrecognised event type and for a stream that ends early?",
+        "options": [
+          {
+            "id": "a",
+            "text": "It skips both and returns the content it holds",
+            "correct": false,
+            "says": "Ruled out because a cut stream \"is an incomplete message, not a short one\"."
+          },
+          {
+            "id": "b",
+            "text": "It raises on the first and returns what the second gave",
+            "correct": false,
+            "says": "Ruled out on both halves: the page skips the first, since \"the API may add new event types\" under its versioning policy, and the second \"is an incomplete message, not a short one\", so no result comes from it."
+          },
+          {
+            "id": "c",
+            "text": "It skips the first and raises on the second",
+            "correct": true,
+            "says": "The page says to \"ignore event types you do not know\" and that a stream without `message_stop` \"is an incomplete message, not a short one\"."
+          },
+          {
+            "id": "d",
+            "text": "It raises on both so that nothing is guessed",
+            "correct": false,
+            "says": "Ruled out because the first is skipped: \"ignore event types you do not know\"."
+          }
+        ],
+        "origin": {
+          "path": "course/17-streaming/01-events-and-assembling-a-message.md",
+          "section": "The shape of a stream"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "A team adds streaming to a feature. Which of the problems below does it leave unchanged?",
+        "options": [
+          {
+            "id": "a",
+            "text": "A proxy that drops quiet connections during long generations",
+            "correct": false,
+            "says": "Ruled out because \"Events keep arriving, so a proxy never sees an idle connection\"."
+          },
+          {
+            "id": "b",
+            "text": "The share of the rate limit that each reply uses",
+            "correct": true,
+            "says": "The page says \"Streamed calls count against the same limits as the others\", so the share of the limit is unchanged."
+          },
+          {
+            "id": "c",
+            "text": "A visitor who sees no text during the first seconds",
+            "correct": false,
+            "says": "Ruled out because \"The first words appear at once\"."
+          },
+          {
+            "id": "d",
+            "text": "A very long answer that a plain call would refuse to start",
+            "correct": false,
+            "says": "Ruled out because \"the SDKs refuse a non-streaming request that they expect to take longer than about ten minutes\", which streaming avoids."
+          }
+        ],
+        "origin": {
+          "path": "course/17-streaming/02-tool-use-errors-and-when-to-stream.md",
+          "section": "When to stream"
+        }
+      },
+      {
+        "id": "m4",
+        "stem": "A stream holds a thinking block, a text block and a tool block. In which order does an assembler list them?",
+        "options": [
+          {
+            "id": "a",
+            "text": "By how many fragments each one received",
+            "correct": false,
+            "says": "Ruled out because blocks are \"never sorted by type or by size\", and a fragment count is a size."
+          },
+          {
+            "id": "b",
+            "text": "By the moment at which each one finished",
+            "correct": false,
+            "says": "Ruled out because the order is \"not in the order they stopped\"."
+          },
+          {
+            "id": "c",
+            "text": "With thinking first, text next and tools last",
+            "correct": false,
+            "says": "Ruled out because \"Blocks are never sorted by type\"."
+          },
+          {
+            "id": "d",
+            "text": "By the index that the events give each one",
+            "correct": true,
+            "says": "The page says \"content lists the blocks in index order\"."
+          }
+        ],
+        "origin": {
+          "path": "course/17-streaming/01-events-and-assembling-a-message.md",
+          "section": "The shape of a stream"
+        }
+      }
+    ]
+  }
+}

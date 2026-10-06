@@ -1,0 +1,120 @@
+{
+  "quiz_api": 1,
+  "address": [
+    "level-3",
+    "56-the-built-in-tools"
+  ],
+  "variant": "prose",
+  "unit": 2,
+  "ordinal": 6,
+  "title": "Module quiz: The built-in tools",
+  "exercise": {
+    "provenance": "generated",
+    "trust": "advisory",
+    "kind": "quiz",
+    "questions": [
+      {
+        "id": "m1",
+        "stem": "Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools. The team wants the folder `secrets/` closed to every built-in tool. Which single entry in the settings file does it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "`Edit(secrets/**)` under deny",
+            "correct": false,
+            "says": "Ruled out because \"`Edit(path)` rules govern all built-in tools that write files\", which leaves reading and searching open."
+          },
+          {
+            "id": "b",
+            "text": "`Grep(secrets/**)` under deny",
+            "correct": false,
+            "says": "Ruled out because \"A rule is written under the name of its family\" and the example prints \"Grep as Read\", so the entry that applies is a `Read` rule, and one for Grep alone leaves Read and the writing tools open."
+          },
+          {
+            "id": "c",
+            "text": "`Bash(cat secrets/*)` under deny",
+            "correct": false,
+            "says": "Ruled out because a scoped Bash rule matches calls \"as written\", and other spellings \"fall through to the permission mode\", so it stops neither the search tools nor a different spelling."
+          },
+          {
+            "id": "d",
+            "text": "`Read(secrets/**)` under deny",
+            "correct": true,
+            "says": "A read denial stops reading and searching, and writes at the same path."
+          }
+        ],
+        "origin": {
+          "path": "course/56-the-built-in-tools/02-permissions-exploring-a-codebase-and-the-practice.md",
+          "section": "Which rule covers which tool"
+        }
+      },
+      {
+        "id": "m2",
+        "stem": "Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools. The agent lists TypeScript sources in a very large repository with `**/*.ts` and receives a result carrying a truncation flag. What should it do next?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Narrow the search to the folder that the question concerns",
+            "correct": true,
+            "says": "A capped result is a window, and a narrower request brings the rest into view."
+          },
+          {
+            "id": "b",
+            "text": "Repeat the same request until the results change",
+            "correct": false,
+            "says": "Ruled out because \"Results are sorted by modification time and capped at 100 files\", so the same request returns the same window."
+          },
+          {
+            "id": "c",
+            "text": "Take the returned files as the complete set and proceed",
+            "correct": false,
+            "says": "Ruled out because \"Claude sees a truncation flag in the result and can narrow the pattern\", which says the set is incomplete."
+          },
+          {
+            "id": "d",
+            "text": "Look up each file name through a content search instead",
+            "correct": false,
+            "says": "Ruled out because \"Grep finds lines inside files, and Glob finds the files themselves\", so a content search is the wrong tool for finding files."
+          }
+        ],
+        "origin": {
+          "path": "course/56-the-built-in-tools/01-what-each-tool-is-for-and-how-edit-fails.md",
+          "section": "Six tools, six jobs"
+        }
+      },
+      {
+        "id": "m3",
+        "stem": "Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools. Asked to investigate how authentication works, it reads hundreds of files, and its answers get worse as the run goes on. What fixes it?",
+        "options": [
+          {
+            "id": "a",
+            "text": "Read the whole repository once and write a summary of it",
+            "correct": false,
+            "says": "Ruled out because reading everything is the failure itself: \"The infinite exploration. You ask Claude to 'investigate' something without scoping it. Claude reads hundreds of files, filling the context.\""
+          },
+          {
+            "id": "b",
+            "text": "Raise the turn limit and let the agent finish its reading",
+            "correct": false,
+            "says": "Ruled out because more turns make the run longer and not better: \"Claude's context window fills up fast, and performance degrades as it fills.\""
+          },
+          {
+            "id": "c",
+            "text": "Search for entry points, then follow imports a hop at a time",
+            "correct": true,
+            "says": "The cause is the context filling with files that do not matter, and the remedy is to scope the reading."
+          },
+          {
+            "id": "d",
+            "text": "List every file name in the repository, then open each of them",
+            "correct": false,
+            "says": "Ruled out because opening every file in turn is the same unscoped reading: \"Claude reads hundreds of files, filling the context.\""
+          }
+        ],
+        "origin": {
+          "path": "course/56-the-built-in-tools/02-permissions-exploring-a-codebase-and-the-practice.md",
+          "section": "Exploring an unfamiliar codebase"
+        }
+      }
+    ]
+  }
+}
