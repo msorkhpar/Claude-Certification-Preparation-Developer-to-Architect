@@ -5,6 +5,7 @@ The refund and order tools are scripted: their output is what the stand-in repor
 2026-10-03 against the hooks pages of the Claude Code documentation.
 """
 import asyncio
+import shutil
 import json
 import os
 import subprocess
@@ -19,7 +20,10 @@ import logging
 log = logging.getLogger(__name__)
 
 HERE = Path(__file__).resolve()
-FAKE = str(HERE.parents[3] / "harness" / "fake_claude.py")
+_found = str(HERE.parents[3] / "harness" / "fake_claude.py")
+# The SDK starts the stand-in as a program, so it must be executable: use a copy marked so (the harness folder may be read-only).
+FAKE = shutil.copy(_found, Path(tempfile.mkdtemp(), "fake_claude.py"))
+os.chmod(FAKE, 0o755)
 GUARD = str(HERE.parents[1] / "guard_hook.py")
 log = []
 

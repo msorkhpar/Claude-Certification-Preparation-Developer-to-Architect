@@ -1,4 +1,5 @@
 import asyncio
+import shutil
 import json
 import os
 import sys
@@ -12,7 +13,10 @@ sys.path.insert(0, os.environ.get("SOLUTION_DIR", str(Path(__file__).resolve().p
 from hooks import build_options, command_hook, post_normalise, pre_refund, settings_hooks
 
 HERE = Path(__file__).resolve()
-FAKE = next(str(p) for p in (Path("/w/harness/fake_claude.py"), *(HERE.parents[i] / "harness" / "fake_claude.py" for i in range(min(len(HERE.parents), 8)))) if p.exists())
+_found = next(str(p) for p in (Path("/w/harness/fake_claude.py"), *(HERE.parents[i] / "harness" / "fake_claude.py" for i in range(min(len(HERE.parents), 8)))) if p.exists())
+# The SDK starts the stand-in as a program, so it must be executable: use a copy marked so (the harness folder may be read-only).
+FAKE = shutil.copy(_found, Path(tempfile.mkdtemp(), "fake_claude.py"))
+os.chmod(FAKE, 0o755)
 
 
 def pre(tool_name="process_refund", **tool_input):

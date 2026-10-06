@@ -5,6 +5,7 @@ The session ids come from the script (the stand-in does not store sessions); the
 checked on 2026-10-03 against the "Work with sessions" page of the Claude Code documentation.
 """
 import asyncio
+import shutil
 import json
 import os
 import tempfile
@@ -15,7 +16,10 @@ import logging
 
 log = logging.getLogger(__name__)
 
-FAKE = str(Path(__file__).resolve().parents[3] / "harness" / "fake_claude.py")
+_found = str(Path(__file__).resolve().parents[3] / "harness" / "fake_claude.py")
+# The SDK starts the stand-in as a program, so it must be executable: use a copy marked so (the harness folder may be read-only).
+FAKE = shutil.copy(_found, Path(tempfile.mkdtemp(), "fake_claude.py"))
+os.chmod(FAKE, 0o755)
 DAY = 24 * 3600
 
 

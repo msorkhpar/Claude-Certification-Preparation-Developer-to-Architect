@@ -1,4 +1,5 @@
 import asyncio
+import shutil
 import json
 import os
 import sys
@@ -10,7 +11,10 @@ sys.path.insert(0, os.environ.get("SOLUTION_DIR", str(Path(__file__).resolve().p
 from sessions import build_summary, change_notice, continue_options, first_prompt, plan_session, resolve_name, run_session, session_options
 
 HERE = Path(__file__).resolve()
-FAKE = next(str(p) for p in (Path("/w/harness/fake_claude.py"), *(HERE.parents[i] / "harness" / "fake_claude.py" for i in range(min(len(HERE.parents), 8)))) if p.exists())
+_found = next(str(p) for p in (Path("/w/harness/fake_claude.py"), *(HERE.parents[i] / "harness" / "fake_claude.py" for i in range(min(len(HERE.parents), 8)))) if p.exists())
+# The SDK starts the stand-in as a program, so it must be executable: use a copy marked so (the harness folder may be read-only).
+FAKE = shutil.copy(_found, Path(tempfile.mkdtemp(), "fake_claude.py"))
+os.chmod(FAKE, 0o755)
 
 NOW = 1_800_000_000
 DAY = 24 * 3600

@@ -1,4 +1,5 @@
 import asyncio
+import shutil
 import json
 import os
 import sys
@@ -12,7 +13,10 @@ sys.path.insert(0, os.environ.get("SOLUTION_DIR", str(Path(__file__).resolve().p
 from subagents import build_options, by_subagent, make_brief, merge_findings, package_finding, run_team, spawned
 
 HERE = Path(__file__).resolve()
-FAKE = next(str(p) for p in (Path("/w/harness/fake_claude.py"), *(HERE.parents[i] / "harness" / "fake_claude.py" for i in range(min(len(HERE.parents), 8)))) if p.exists())
+_found = next(str(p) for p in (Path("/w/harness/fake_claude.py"), *(HERE.parents[i] / "harness" / "fake_claude.py" for i in range(min(len(HERE.parents), 8)))) if p.exists())
+# The SDK starts the stand-in as a program, so it must be executable: use a copy marked so (the harness folder may be read-only).
+FAKE = shutil.copy(_found, Path(tempfile.mkdtemp(), "fake_claude.py"))
+os.chmod(FAKE, 0o755)
 
 SPECS = {
     "reviewer": {"description": "Reviews one module for security problems. Use for any review request.", "prompt": "You review code.", "tools": ["Read", "Grep"], "model": "sonnet"},

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { chmodSync, copyFileSync, existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -12,7 +12,11 @@ const { buildOptions, bySubagent, makeBrief, mergeFindings, packageFinding, runT
 const FAKE = (() => {
   const candidates = ["/w/harness/fake_claude.py"];
   for (let d = resolve("."), i = 0; i < 8; i++, d = resolve(d, "..")) candidates.push(join(d, "harness", "fake_claude.py"));
-  return candidates.find((c) => existsSync(c)) as string;
+  // The SDK starts the stand-in as a program, so it must be executable: use a copy marked so (the harness folder may be read-only).
+  const exe = join(mkdtempSync(join(tmpdir(), "fake-claude-")), "fake_claude.py");
+  copyFileSync(candidates.find((c) => existsSync(c)) as string, exe);
+  chmodSync(exe, 0o755);
+  return exe;
 })();
 
 const SPECS = {

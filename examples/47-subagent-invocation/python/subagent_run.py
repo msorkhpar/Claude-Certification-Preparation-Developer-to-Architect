@@ -5,6 +5,7 @@ used. The stand-in puts the messages of the subagent after the call that started
 0.2.163, checked on 2026-10-03 against the Agent SDK pages of the Claude Code documentation.
 """
 import logging
+import shutil
 import asyncio
 import json
 import os
@@ -15,7 +16,10 @@ from claude_agent_sdk import AgentDefinition, AssistantMessage, ClaudeAgentOptio
 
 log = logging.getLogger(__name__)
 
-FAKE = str(Path(__file__).resolve().parents[3] / "harness" / "fake_claude.py")
+_found = str(Path(__file__).resolve().parents[3] / "harness" / "fake_claude.py")
+# The SDK starts the stand-in as a program, so it must be executable: use a copy marked so (the harness folder may be read-only).
+FAKE = shutil.copy(_found, Path(tempfile.mkdtemp(), "fake_claude.py"))
+os.chmod(FAKE, 0o755)
 
 AGENTS = {
     "reviewer": AgentDefinition(description="Reviews one module for security problems. Use for any review request.", prompt="You review code and report findings only.",
