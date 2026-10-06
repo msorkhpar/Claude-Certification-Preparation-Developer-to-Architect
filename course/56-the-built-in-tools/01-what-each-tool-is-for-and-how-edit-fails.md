@@ -551,7 +551,7 @@ These are the wrong answers that the exam's options for this task statement offe
    - **c**: A full read of each folder in turn
    - **d**: A shell loop that opens each file in turn
 
-2. A `routes.yaml` made of ten identical blocks that differ only by position refuses an edit to the third block, because the text to replace appears ten times. So no snippet of reasonable length around the third block is unique. What should the agent do?
+2. A `routes.yaml` holds ten copies of the same block, told apart only by where each one sits. An edit to the third copy is refused because the text to replace appears ten times, and every snippet around it also appears ten times. What should the agent do?
    - **a**: Read it and write the whole thing again with the one alteration
    - **b**: Retry with `replace_all` set, then repair the nine others by hand
    - **c**: Widen the snippet with more surrounding lines until it is unique

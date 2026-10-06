@@ -399,10 +399,10 @@ This module has no practice. Its decisions are judged by the quiz, since the cho
 ## Quiz
 
 1. A conversion routine keeps being read in different ways, and each new version differs from the last. What should the next message contain?
-   - **a**: A longer prose description with more adjectives
-   - **b**: The same description plus a request to be more careful
-   - **c**: Two or three exact inputs paired with the outputs required
-   - **d**: A request to reproduce the previous version with small changes
+   - **a**: A longer prose description that states each rule in turn
+   - **b**: A request to write tests from the version it produced last
+   - **c**: Sample inputs, one an edge case, with their exact outputs
+   - **d**: A fresh session that starts from the same description
 
 2. The requirements of a large feature are unclear, and the developer is present at the keyboard. How should the work start?
    - **a**: Let Claude question them, then record a spec for later
@@ -413,8 +413,8 @@ This module has no practice. Its decisions are judged by the quiz, since the cho
 <details>
 <summary>Answer key</summary>
 
-1. **c**. Exact examples remove the ambiguity that causes inconsistent reading. *a* is ruled out because the guide's remedy for prose that is read in different ways is "concrete input and output examples". *b* is ruled out because care does not say what is wanted, and "each correction is a guess at what was meant". *d* is ruled out because small changes to a version that was misread repeat the misreading, while "the answer is nearly always the one that removes a guess".
-2. **a**. The interview surfaces the requirements before any code, and the spec carries them into a clean session. *b* is ruled out because "do not start with a long prompt that guesses" at what the requirements are. *c* is ruled out because choosing alone skips the documented step: "ask Claude to interview you with AskUserQuestion". *d* is ruled out because repair means repeated correction, and "after two failed corrections the context is cluttered with failed approaches".
+1. **c**. Exact examples remove the ambiguity that causes inconsistent reading. *a* is ruled out because the guide's remedy for prose that is read in different ways is "concrete input and output examples". *b* is ruled out because tests drawn from a misread version encode the misreading, and "A test written from the same misunderstanding as the code verifies nothing". *d* is ruled out because a fresh start should come "with a prompt that holds what you learned", and the same description holds nothing new.
+2. **a**. The interview surfaces the requirements before any code, and the spec carries them into a clean session. *b* is ruled out because "do not start with a long prompt that guesses" at what the requirements are. *c* is ruled out because stating its own assumptions is the fallback when "An unattended run cannot answer questions", and here a person is present to answer. *d* is ruled out because repair means repeated correction, and "after two failed corrections the context is cluttered with failed approaches".
 
 </details>
 
@@ -426,26 +426,26 @@ This quiz covers both pages of the module.
    - **a**: It goes ahead, with permission modes skipped
    - **b**: It is refused, with the restriction still in force
    - **c**: It goes ahead, with the scheduled run pre-approved
-   - **d**: It prompts the job's owner by email for approval
+   - **d**: It is allowed, with plan mode treated as an instruction only
 
-2. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. After a refactor, one report lists a sort order that also breaks pagination, a misspelled label and a null date. How should the three be sent?
-   - **a**: All three together in one message
-   - **b**: Three separate messages, one for each problem
-   - **c**: The label first, then everything else in a second message
-   - **d**: The linked pair together, then each other one
+2. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. After a refactor, one report lists a broken rounding rule, an invoice total that is wrong because of it, a misspelled column header and an unused import. How should the four be sent?
+   - **a**: All four together in one message
+   - **b**: Four separate messages, one for each problem
+   - **c**: The header and the import together, then the other two together
+   - **d**: The linked pair in one message, then each of the others
 
-3. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. Claude has failed to fix the same bug in three attempts, and each correction added more history to the session. What should the developer do?
-   - **a**: Send a fourth correction that repeats the earlier ones
-   - **b**: Ask Claude to ignore the earlier attempts in the same thread
-   - **c**: Clear the context and restart with a better prompt
-   - **d**: Switch to plan mode in the same thread
+3. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. Claude has failed to fix the same bug after three corrections in one session. What should the developer do?
+   - **a**: Send a fourth correction that explains the bug in more detail
+   - **b**: Ask Claude to set aside its earlier attempts and try again
+   - **c**: Clear the context and reprompt with what the attempts showed
+   - **d**: Switch the same session to plan mode for the next attempt
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. Plan mode keeps its blocks in runs that have no interactive terminal. *a* is ruled out because "Plan mode keeps its blocks wherever Claude Code runs without an interactive terminal". *c* is ruled out because the exception is narrow: "in an interactive terminal session where bypass permissions are available the blocks are not enforced". *d* is ruled out because "Edits stay blocked until you approve the plan", and a headless run has no approval channel.
-2. **d**. Problems that interact travel together and independent ones go one at a time. *a* is ruled out because "Independent problems, such as a typo in a label and a null date, go one after another". *b* is ruled out because the sort order and pagination interact, and "fixing one in isolation can undo the other". *c* is ruled out because that groups the independent date with the interacting pair, while the example "groups issues by their interacts_with links".
-3. **c**. After more than two failed corrections the documented fix is to clear the context and write a better first prompt, one that carries the broken checks and the lessons. *a* is ruled out because "after two failed corrections the context is cluttered with failed approaches", and repeating adds to the clutter. *b* is ruled out because an instruction does not remove history from the context, and "a clean session with a better prompt does better". *d* is ruled out because "Corrections accumulate in the context", and a mode switch in the same thread keeps them all.
+1. **b**. Plan mode keeps its blocks in runs that have no interactive terminal. *a* is ruled out because "Plan mode keeps its blocks wherever Claude Code runs without an interactive terminal". *c* is ruled out because "Edits stay blocked until you approve the plan", and scheduling a run approves no plan. *d* is ruled out because the exception is narrow: "in an interactive terminal session where bypass permissions are available the blocks are not enforced", and a `-p` run has no interactive terminal.
+2. **d**. Problems that interact travel together and independent ones go one at a time. *a* is ruled out because "Independent problems, such as a typo in a label and a null date, go one after another". *b* is ruled out because the rounding rule and the total interact, and "fixing one in isolation can undo the other". *c* is ruled out because the header and the import are independent, and sent one after another "each gets a clean result and a clean test run".
+3. **c**. After more than two failed corrections the documented fix is to clear the context and write a better first prompt, one that carries the broken checks and the lessons. *a* is ruled out because "after two failed corrections the context is cluttered with failed approaches", and a fourth correction adds to the clutter. *b* is ruled out because an instruction does not remove history from the context, and "a clean session with a better prompt does better". *d* is ruled out because "Corrections accumulate in the context", and a mode switch in the same session keeps them all.
 
 </details>
 

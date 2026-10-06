@@ -103,11 +103,11 @@ These are the wrong answers that the exam's options for this task statement offe
 
 3. An agent mapped a service of twelve modules on Friday. Over the weekend a developer rewrote two of them. On Monday the team resumes the session. What should the first prompt add?
    - **a**: A request to survey the whole service from scratch
-   - **b**: The paths that differ, with a request to re-read them
-   - **c**: Nothing at all, since the earlier read still holds
+   - **b**: The paths of both edited files, to be read again
+   - **c**: No addition, since the session already holds that analysis
    - **d**: The full text of both changed modules, pasted inline
 
-4. Most of the files an agent analysed last month have since been rewritten, and its transcript is long. Which start is most reliable?
+4. Most of the files an agent analysed last month have since been rewritten, and its transcript is long. How should the next sitting start?
    - **a**: A new run that begins by pasting the earlier tool output
    - **b**: The full old transcript, with a line saying that things have changed
    - **c**: A fork of the transcript, so the original stays untouched
@@ -129,7 +129,7 @@ This quiz covers both pages of the module.
    - **a**: A re-run of the session's tool calls, refreshing their results
    - **b**: A warm cache that still holds the earlier requests
    - **c**: A cache miss, with the full history processed once more
-   - **d**: A fork of the session, made automatically on resume
+   - **d**: A cheap request, provided they choose the summary option
 
 2. Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. A forked agent rewrote several modules in the shared working copy. The team wants that copy exactly as it stood before the run, and wants to keep the fork's conversation. What provides this?
    - **a**: Resuming the original session, which brings its files back
@@ -137,18 +137,18 @@ This quiz covers both pages of the module.
    - **c**: Forking again from the original, so the copy starts clean
    - **d**: Checkpointing, which snapshots the edits and reverts them
 
-3. Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. A service returns to saved sessions after nightly code changes. It records a digest for each analysed file and sees that 5 of 12 changed. What should it do?
+3. Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. A service that follows this module's plan returns to saved sessions after nightly code changes. It records a digest for each analysed file and sees that 5 of 12 changed. What should it do?
    - **a**: Fork the session and keep the stale results in the original
-   - **b**: Start a new session and carry the earlier transcript into it
+   - **b**: Start a new session that opens with a structured summary
    - **c**: Continue the most recent session in the directory and add no note
-   - **d**: Resume the session and name the five stale paths in its first prompt
+   - **d**: Resume the session with a notice naming the five paths
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. The prompt cache expires after a long pause, so the next request reads the history once more. *b* is ruled out because "The session's prompt cache has expired by then, so the next request processes the full history once no matter which of the dialog's options you pick." *a* is ruled out because a resume restores the conversation and does not run tools again: a call that was cut off "doesn't finish or run again when you resume". *d* is ruled out because forking is an option you set, and a fork "creates a new session that starts with a copy of the original's history", not an automatic step of resuming.
+1. **c**. The prompt cache expires after a long pause, so the next request reads the history once more. *b* is ruled out because "after a long pause the prompt cache has expired, so the next request processes all of it again". *a* is ruled out because a resume restores the conversation and does not run tools again: a call that was cut off "doesn't finish or run again when you resume". *d* is ruled out because the expired cache means the next request "processes the full history once no matter which of the dialog's options you pick", the summary included.
 2. **d**. Only a snapshot of the files can return them to an earlier state. *a* is ruled out because "Sessions persist the conversation, not the filesystem", so a resume restores no files. *b* is ruled out because "If a forked agent edits files, those changes are real and visible to any session working in the same directory", and removing the session does not undo them. *c* is ruled out because forking "branches the conversation history, not the filesystem", so the second copy meets the same edited files.
-3. **d**. Five of twelve is under half, so a resume with a notice naming the paths keeps what is still true. *b* is ruled out because a transcript carries the stale results with it; a summary carries conclusions "never the raw tool output that went stale". *c* is ruled out because continue takes the most recent session, and with no note the session believes the old files: "Sessions persist the conversation, not the filesystem". *a* is ruled out because a fork "creates a new session that starts with a copy of the original's history", stale results included.
+3. **d**. Five of twelve is under half, so under the module's plan a resume with a notice naming the paths keeps what is still true. *b* is ruled out because a fresh start "keeps only what you decided was worth writing down", and five of twelve is under the half at which "a notice can correct a few files but cannot correct most of them". *c* is ruled out because continue takes the most recent session, and with no note the session believes the old files: "Sessions persist the conversation, not the filesystem". *a* is ruled out because a fork "creates a new session that starts with a copy of the original's history", stale results included.
 
 </details>
 

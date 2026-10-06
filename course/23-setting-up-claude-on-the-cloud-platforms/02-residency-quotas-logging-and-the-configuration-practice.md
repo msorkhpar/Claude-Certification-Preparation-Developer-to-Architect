@@ -92,29 +92,29 @@ The ARN rule is a shape check only. The `foundation-model` form is the one AWS d
 ## Quiz
 
 1. A project must keep Claude traffic in the EU and use Sonnet 5.5. Which Vertex endpoint setting fits?
-   - **a**: The global value, since it keeps data inside the EU by default for everyone
+   - **a**: The global value, since its dynamic routing gives the most availability
    - **b**: The European multi-area value, since named places serve older names only
    - **c**: A specific region such as europe-west4, since it is the strictest choice
-   - **d**: The us value, since Sonnet 5.5 is served there alone in this case
+   - **d**: Any of the three, since the project's location decides where data stays
 
 2. A team asks AWS for 8 million input tokens per minute on Bedrock. What do the docs say about getting it?
-   - **a**: It is within the self-service range, which reaches ten million
+   - **a**: It needs only a self-service request, since it is above the default
    - **b**: It is within the default, so nothing more is needed
    - **c**: AWS alone decides, since the quota is a Bedrock matter only
-   - **d**: It exceeds the self-service ceiling, so Anthropic must approve it first
+   - **d**: It is above the self-service ceiling, so Anthropic must approve it
 
-3. A compliance team wants a record of prompts and completions for Claude on Google Cloud. What do the pages advise?
+3. A compliance team must be able to investigate misuse of Claude by the project's users on Google Cloud. What do the pages advise?
    - **a**: Rely on Anthropic to hold the prompts for the customer
    - **b**: Switch on request-response logging for at least thirty days
    - **c**: Log the prompts alone, since misuse shows up in what users ask
-   - **d**: Leave the platform's own defaults untouched and set nothing
+   - **d**: Keep request logs for a week, since misuse surfaces within days
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says a specific region serves `claude-sonnet-4-6` only and that the EU needs "the `eu` multi-region endpoint or a `europe-` region", so Sonnet 5.5 takes the multi-region value. *a* is ruled out because "Global endpoints: Dynamic routing for maximum availability" says nothing of keeping data in a geography. *c* is ruled out because "A specific region serves `claude-sonnet-4-6` only". *d* is ruled out because the rules say "Residency `eu` needs the `eu` multi-region endpoint or a `europe-` region".
-2. **d**. The page says "You can request up to 5 million input TPM and 500,000 output TPM without additional Anthropic approval", and 8 million is above it. *b* is ruled out because "Default quota is 2 million input tokens per minute (TPM)." and 8 million is far above that. *c* is ruled out because the approval named is "without additional Anthropic approval", so Anthropic is part of the decision. *a* is ruled out because the self-service ceiling is "You can request up to 5 million input TPM and 500,000 output TPM", not ten million.
-3. **b**. The page says "Enable 30-day request-response logging of your prompt and completion activity to track any model misuse by your users." *a* is ruled out because "Turning on this service does not give Google or Anthropic any access to your content." *c* is ruled out because the page asks for "prompt and completion activity to track any model misuse by your users", not prompts alone. *d* is ruled out because "Anthropic recommends that you log your activity on at least a 30-day rolling basis", so the customer keeps the log.
+1. **b**. The page says a specific region serves `claude-sonnet-4-6` only and that the EU needs "the `eu` multi-region endpoint or a `europe-` region", so Sonnet 5.5 takes the multi-region value. *a* is ruled out because "Global endpoints: Dynamic routing for maximum availability" promises availability only, while residency comes with the multi-region kind, "for data residency with high availability". *c* is ruled out because "A specific region serves `claude-sonnet-4-6` only". *d* is ruled out because "The endpoint decides where a request may be processed."
+2. **d**. The page says "You can request up to 5 million input TPM and 500,000 output TPM without additional Anthropic approval", and 8 million is above it. *b* is ruled out because "Default quota is 2 million input tokens per minute (TPM)." and 8 million is far above that. *c* is ruled out because the approval named is "without additional Anthropic approval", so Anthropic is part of the decision. *a* is ruled out because self-service stops at the ceiling, not at the default: "Above those figures, Anthropic has to approve."
+3. **b**. The page says "Enable 30-day request-response logging of your prompt and completion activity to track any model misuse by your users." *a* is ruled out because "Turning on this service does not give Google or Anthropic any access to your content." *c* is ruled out because the page asks for "prompt and completion activity to track any model misuse by your users", not prompts alone. *d* is ruled out because "Anthropic recommends that you log your activity on at least a 30-day rolling basis", not for a week.
 
 </details>
 
@@ -125,33 +125,33 @@ This quiz covers both pages of the module.
 1. A reviewer finds a single star in the resource field of a policy statement. Which practice rule does it break?
    - **a**: The document must carry the current version string at the top
    - **b**: Each entry must be a model ARN in a documented region, without wildcards
-   - **c**: Every action must be one of the three invoke actions allowed
-   - **d**: The statements must be allow statements and nothing else at all
+   - **c**: No action may hold a wildcard, and each must be one of the invoke actions
+   - **d**: The statements must allow, and none may use NotAction or NotResource
 
 2. A reviewer sees the ready-made aiplatform user bundle attached to the calling service account. What does the practice require instead?
-   - **a**: A custom role whose only permission is predict
+   - **a**: A custom role of the project whose only permission is predict
    - **b**: The same bundle plus a deny for the deploy permission
    - **c**: A basic Editor grant scoped to one endpoint of the project
    - **d**: An organization-level predefined bundle with fewer permissions
 
-3. A quota file asks for 6,000,000 input tokens per minute with anthropic_approval false. What does the review do?
-   - **a**: It fails the request, since 5,000,000 is the unapproved ceiling
-   - **b**: It passes the request, since the default is 2,000,000 already
-   - **c**: It passes the request, since the output figure is under 500,000
-   - **d**: It passes the request once the region has been named in it
+3. A quota file asks for 4,000,000 input and 800,000 output tokens per minute with anthropic_approval false. What does the review do?
+   - **a**: It fails the request, since the second figure is above 500,000
+   - **b**: It fails the request, since 4,000,000 is above the 2,000,000 default
+   - **c**: It passes the request, since the input figure is under 5,000,000
+   - **d**: It passes the request, since output has no quota of its own stated
 
 4. A project with residency us asks for endpoint us-central1 and model claude-opus-5-5. What does the review say?
-   - **a**: It passes, since the global value always satisfies any residency
+   - **a**: It passes, since one region keeps the data most tightly in the us
    - **b**: It passes, since the region begins with the us prefix
    - **c**: It fails, since a named location serves one older name only
-   - **d**: It fails, since the region is spelled in the wrong form
+   - **d**: It fails, since the model id lacks the `anthropic.` prefix
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The rule is "Every resource is a model ARN with a region from the Bedrock region list, the `anthropic.` model id form, and no wildcard." *a* is ruled out because that rule concerns the version: "The policy has the version `2012-10-17`", which a star in a resource does not change. *c* is ruled out because that rule concerns actions: "Every action is one of the three invoke actions". *d* is ruled out because that rule concerns the effect: "only `Allow` statements, and no `NotAction` or `NotResource`".
-2. **a**. The rule is "The Vertex role is a custom role (its `id` starts with `projects/` or `organizations/`, not `roles/`) whose only permission is `aiplatform.endpoints.predict`." *b* is ruled out because the rule asks for a role "whose only permission is `aiplatform.endpoints.predict`", and adding a deny leaves the bundle's extra permissions in place. *c* is ruled out because the rule requires a custom role "whose only permission is `aiplatform.endpoints.predict`". *d* is ruled out because the id "starts with `projects/` or `organizations/`, not `roles/`", and a predefined id starts with `roles/`.
-3. **a**. The rule is "Without Anthropic's approval a quota request is at most 5,000,000 input tokens and 500,000 output tokens per minute." *b* is ruled out because "Default quota is 2 million input tokens per minute (TPM)." is the starting quota, and a request may go higher up to the ceiling. *c* is ruled out because the ceiling covers both figures: "You can request up to 5 million input TPM and 500,000 output TPM". *d* is ruled out because only approval lifts the ceiling: "without additional Anthropic approval".
-4. **c**. The rule is "A specific region serves `claude-sonnet-4-6` only", and the model asked for is newer. *b* is ruled out because the prefix rule, "`us` needs `us` or a `us-` region", is met but is not the only rule. *a* is ruled out because the global value is "Dynamic routing for maximum availability", which says nothing of residency. *d* is ruled out because the spelling is fine: "`us` needs `us` or a `us-` region".
+1. **b**. The rule is "Every resource is a model ARN with a region from the Bedrock region list, the `anthropic.` model id form, and no wildcard." *a* is ruled out because that rule concerns the version: "The policy has the version `2012-10-17`", which a star in a resource does not change. *c* is ruled out because that rule concerns the action field, "no wildcard anywhere in an action", and the star sits in the resource. *d* is ruled out because that rule concerns the effect and the negated fields, "only `Allow` statements, and no `NotAction` or `NotResource`", and a star in a resource is neither.
+2. **a**. The rule is "The Vertex role is a custom role (its `id` starts with `projects/` or `organizations/`, not `roles/`) whose only permission is `aiplatform.endpoints.predict`." *b* is ruled out because the rule asks for a role "whose only permission is `aiplatform.endpoints.predict`", and adding a deny leaves the bundle's extra permissions in place. *c* is ruled out because basic roles "provide access control to your Agent Platform resources at the project level", which a custom role is meant to avoid. *d* is ruled out because the id "starts with `projects/` or `organizations/`, not `roles/`", and a predefined id starts with `roles/`.
+3. **a**. The rule is "Without Anthropic's approval a quota request is at most 5,000,000 input tokens and 500,000 output tokens per minute.", and 800,000 output is above it. *b* is ruled out because the default is only the starting quota, and a team "can request up to 5 million input TPM" on its own. *c* is ruled out because the ceiling has two figures, and either one can fail: "Past 5 million input and 500,000 output tokens per minute, Anthropic has to approve." *d* is ruled out because the self-service figures include "500,000 output TPM without additional Anthropic approval".
+4. **c**. The rule is "A specific region serves `claude-sonnet-4-6` only", and the model asked for is newer. *b* is ruled out because the prefix rule, "`us` needs `us` or a `us-` region", is met but is not the only rule. *a* is ruled out because residency is not the only test: "the docs say specific regions serve older models". *d* is ruled out because "A Vertex model id never carries the `anthropic.` prefix".
 
 </details>

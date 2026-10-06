@@ -811,7 +811,7 @@ The practice is in [`exercises/85-retrieval-pipelines-at-design-level`](../../ex
 1. A team reports a retrieval recall of nine in ten. It counts only the 30 labelled questions that returned something, and 27 of those had the relevant chunk in the top results. Ten more labelled questions came back empty. Which figure follows the page?
    - **a**: 90 percent, since only questions that returned something can be judged
    - **b**: 68 percent, since a search that found nothing still sits in the denominator
-   - **c**: 93 percent, since a search that found nothing counts as a cautious abstention
+   - **c**: 93 percent, since an empty result counts as a cautious abstention
    - **d**: 75 percent, since 30 of the 40 labelled questions were answered
 
 2. In a test of 12 questions, the evidence was retrieved for 8 and the answers were right for 7. Two of the wrong answers had their evidence retrieved. How many of the questions have no retrieved evidence and a wrong answer?

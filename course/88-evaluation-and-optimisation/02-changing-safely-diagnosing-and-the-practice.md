@@ -668,10 +668,10 @@ The practice is in [`exercises/88-evaluation-and-optimisation`](../../exercises/
    - **d**: Extend the test only if the new prompt is behind
 
 2. A new model version matches the current one on overall accuracy in a shadow run. It gains answers in order status and loses answers in refunds, an area the team guards. What does the gate do?
-   - **a**: Ship it to everyone, because the overall totals are equal and the gains in one segment cover the losses in another
+   - **a**: Ship it to everyone, as the gains in order status cover the refund losses
    - **b**: Average the accuracy of the two segments and ship if that average has risen
    - **c**: Ship it to half of the live traffic and watch whether any customers complain
-   - **d**: Hold the change, since the costly segment regressed and improvements elsewhere cannot pay for that
+   - **d**: Hold the change back until that costly segment stops losing cases
 
 <details>
 <summary>Answer key</summary>
@@ -692,22 +692,22 @@ This quiz covers both pages of the module.
    - **d**: Add examples of confident replies to the prompt
 
 2. A team's check for its research agent demands exactly three searches in a fixed order, and it fails runs that reach the right answer by another route. What should the check judge instead?
-   - **a**: Whether the runs repeated the same steps, because identical steps prove reliability
-   - **b**: Whether the outcome is correct, then whether the process was sensible
-   - **c**: The number of tool calls, since fewer calls mean a better agent
-   - **d**: The final text, without any look at how it was reached
+   - **a**: Whether its steps match those of a past run that reached the right answer
+   - **b**: Whether its report is correct, then whether its tool use was sensible
+   - **c**: How few tool calls it made, since an efficient agent is a better one
+   - **d**: Only the final report, since how the agent got there does not matter
 
-3. A team delays building graded examples until it can afford several hundred of them, and early prompt changes are judged by feel. What does the research team's experience suggest?
+3. A team delays building graded examples until it can afford several hundred of them, and early prompt changes are judged by feel. Which step fits best?
    - **a**: Test on the examples written in the prompt
    - **b**: Wait until the full set has been built
-   - **c**: Judge by feel until launch, then measure
-   - **d**: Start now with a small set of real queries
+   - **c**: Have developers invent a few hundred cases
+   - **d**: Start with twenty or so queries from logs
 
 <details>
 <summary>Answer key</summary>
 
 1. **c**. The evidence was never retrieved, so the index and the splitting of documents are the cheapest place to look. *b* is ruled out because "A larger model does not know a document it was never shown". *a* is ruled out because "Sampling settings change how an answer is worded and not what evidence it was given". *d* is ruled out because "Examples teach a format; they do not supply a missing fact".
-2. **b**. "Even with identical starting points, agents might take completely different valid paths to reach their goal", so the rule is "Check that the result is right, then check that the process was reasonable". *a* is ruled out because "an eval that checks for a prescribed sequence of steps fails correct runs". *c* is ruled out because tool efficiency is only one of "five criteria (factual accuracy, citation accuracy, completeness, source quality and tool efficiency)". *d* is ruled out because the rule is to "check that the process was reasonable" after the result.
-3. **d**. Early changes are large, so a small set shows them. *b* is ruled out because "We often hear that AI developer teams delay creating evals because they believe that only large evals with hundreds of test cases are useful", which the team found untrue. *c* is ruled out because "every week without an eval is a week of judging by feel". *a* is ruled out because the set should "mirror your real-world task distribution", and "The examples written into a prompt are not that distribution".
+2. **b**. "Even with identical starting points, agents might take completely different valid paths to reach their goal", so the check judges the report first and the tool use after it. *a* is ruled out because "an eval that checks for a prescribed sequence of steps fails correct runs". *c* is ruled out because tool efficiency is only one of "five criteria (factual accuracy, citation accuracy, completeness, source quality and tool efficiency)". *d* is ruled out because once the answer is right, the next step is to "check that the process was reasonable".
+3. **d**. Early changes are large, so a small set of real queries shows them now, and it grows later. *b* is ruled out because "We often hear that AI developer teams delay creating evals because they believe that only large evals with hundreds of test cases are useful", which the team found untrue. *c* is ruled out because the set "is built from the traffic and not from the developers' imagination". *a* is ruled out because the set should "mirror your real-world task distribution", and "The examples written into a prompt are not that distribution".
 
 </details>

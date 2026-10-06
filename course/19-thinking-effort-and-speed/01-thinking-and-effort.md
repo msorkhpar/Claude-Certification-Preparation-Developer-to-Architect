@@ -359,8 +359,8 @@ the TypeScript tab the same lines are formatted with JSON quoting; the numbers a
 ## Quiz
 
 1. A team wants to cut the cost of a workload on Claude Opus 5.5 that currently thinks a lot. A developer proposes setting
-   `thinking` to `disabled`. What does the page say?
-   - **a**: The request returns a 400, so remove the output cap instead
+   `thinking` to `disabled`. What happens, and what should the team do?
+   - **a**: The request returns a 400, so send a manual budget instead
    - **b**: The request succeeds, and thinking stops for that call alone
    - **c**: The request succeeds, and thinking falls to its lowest setting
    - **d**: The request returns a 400, so lower the effort level instead
@@ -369,20 +369,20 @@ the TypeScript tab the same lines are formatted with JSON quoting; the numbers a
    billed as output?
    - **a**: All 1,900 tokens, since thinking is charged even when it is not shown
    - **b**: Only 250 tokens, since the thinking was hidden by the default display
-   - **c**: Only 1,650 tokens, since the answer is covered by the input price
+   - **c**: Only 250 tokens, since the thinking is charged at the input rate
    - **d**: About 80 tokens, since billing follows the words that are returned
 
-3. A request on Claude Haiku 4.5 puts `low` under `output_config` to save money. What does the page back?
-   - **a**: Haiku 4.5 takes the setting only together with a manual budget
-   - **b**: Haiku 4.5 treats `low` as its default, so the setting changes nothing
-   - **c**: That model has no such control, so the setting buys no saving
-   - **d**: Haiku 4.5 applies the setting to tool calls and ignores thinking
+3. A request on Claude Haiku 4.5 puts `low` under `output_config` to save money. What should the team expect?
+   - **a**: The model takes the setting only together with a manual budget
+   - **b**: The model treats `low` as its default, so the setting changes nothing
+   - **c**: The model lacks that control, so the setting buys no saving
+   - **d**: The model applies the setting to tool calls and ignores thinking
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The model table shows "400 error" for `disabled` on Opus 5.5, and the page says to "lower effort first" to cut cost. *b* is ruled out because "Fable 5.1 and Opus 5.5 always think adaptively and cannot be told otherwise". *c* is ruled out because the lowest setting named is Sonnet 5.5's, "up-front thinking off at high effort or below", and Opus 5.5 has no such setting. *a* is ruled out because "`max_tokens` is a strict limit" on spend and does not change how much the model thinks.
-2. **a**. The page says "You are billed for the full thinking process, not the thinking content visible in the response." *b* is ruled out because the thinking tokens are "billed as output tokens", whether the display shows them or not. *c* is ruled out because the page bills "the full thinking process, not the thinking content visible in the response", so the answer is not the only part charged. *d* is ruled out because the page says the visible text understates the bill: "So the visible text understates the bill."
-3. **c**. The page says "Haiku 4.5 does not support effort", and the table of effort support lists the other three models. *b* is ruled out because the default row names only Opus 5.5 and the models that support effort: "The default is high on every model that supports effort except Opus 5.5". *a* is ruled out because the manual budget belongs to the thinking setting, and the page puts effort "in output_config, not inside thinking". *d* is ruled out because the page says effort "works with or without thinking" on models that support it.
+1. **d**. The model table shows "400 error" for `disabled` on Opus 5.5, and the page says to "lower effort first" to cut cost. *b* is ruled out because "Fable 5.1 and Opus 5.5 always think adaptively and cannot be told otherwise". *c* is ruled out because the lowest setting named is Sonnet 5.5's, "up-front thinking off at high effort or below", and Opus 5.5 has no such setting. *a* is ruled out because "`disabled` and a manual budget return a 400 on the always-on models", so the budget fails the same way.
+2. **a**. The page says "You are billed for the full thinking process, not the thinking content visible in the response." *b* is ruled out because the thinking tokens are "billed as output tokens", whether the display shows them or not. *c* is ruled out because "Thinking tokens are output tokens", so the 1,650 are not priced as input. *d* is ruled out because the page says the visible text understates the bill: "So the visible text understates the bill."
+3. **c**. Effort is a control Haiku 4.5 does not have: the five levels are "supported on Fable 5.1, Opus 5.5 and Sonnet 5.5", and "Haiku 4.5 does not support effort", so a `low` value there cannot cut the bill. *b* is ruled out because the default row names only Opus 5.5 and the models that support effort: "The default is high on every model that supports effort except Opus 5.5". *a* is ruled out because the manual budget belongs to the thinking setting, and the page puts effort "in output_config, not inside thinking". *d* is ruled out because, where effort exists, it affects "all tokens in the response", thinking included, and Haiku 4.5 has no effort to apply.
 
 </details>

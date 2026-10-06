@@ -599,7 +599,7 @@ log record keeps: input_tokens, model, output_tokens, status, tool, trace; with 
 2. In one trace, the orchestrator, a researcher agent and a download tool all show an error. The orchestrator's message says the research step failed. Where does the failure originate?
    - **a**: In the orchestrator, because it is the first component the user's request reached
    - **b**: In the researcher, because it is the first agent below the orchestrator to show an error
-   - **c**: In the deepest span that broke, the call at the bottom of the chain
+   - **c**: In the fetching call, because no other broken span sits beneath it in the chain
    - **d**: In the planning model call, because a poor plan would send the researcher to a bad source
 
 <details>

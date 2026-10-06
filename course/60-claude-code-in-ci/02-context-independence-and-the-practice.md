@@ -790,16 +790,16 @@ The practice is in [`exercises/60-claude-code-in-ci`](../../exercises/60-claude-
    - **d**: Run the review inside the session that wrote the change
 
 2. A job that drafts additional checks keeps proposing situations that are already exercised. What belongs in its prompt?
-   - **a**: A request for many more checks so that coverage becomes certain
+   - **a**: The earlier review findings, plus a request to report only new ones
    - **b**: The production code alone, to keep the whole prompt short
-   - **c**: A lower turn limit, so that fewer proposals come back at all
+   - **c**: A note to be conservative, so that only important checks come back
    - **d**: The test files that exist, plus a request to skip covered cases
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. A run has no memory of the last one, so what was reported must be in the prompt. *a* is ruled out because "A CI run does not remember the last one", and a longer loop does not change that. *c* is ruled out because such wording does not change what a reviewer reports, since vague instructions "leave the threshold unstated". *d* is ruled out because the writing session is "less effective at reviewing its own changes" and still would not know what was said on earlier pushes.
-2. **d**. The remedy is to show the run what the suite already covers. *a* is ruled out because more proposals add duplicates, while the aim is "so that suggestions do not duplicate covered scenarios". *b* is ruled out because without the tests the run cannot see what is covered: "put the existing tests in the prompt". *c* is ruled out because a record of earlier work carried by the prompt "is the only state the pipeline has", and a turn limit adds none.
+2. **d**. The remedy is to show the run what the suite already covers. *a* is ruled out because earlier findings serve a different run, "the review that follows new commits", and they do not show which scenarios the tests cover. *b* is ruled out because without the tests the run cannot see what is covered: "put the existing tests in the prompt". *c* is ruled out because a call for caution does not say what is covered, and such wording fails "because they leave the threshold unstated".
 
 </details>
 
@@ -808,28 +808,28 @@ The practice is in [`exercises/60-claude-code-in-ci`](../../exercises/60-claude-
 This quiz covers all three pages of the module.
 
 1. Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests and to suggest tests. A team asks the same session that wrote a change to review it afterwards, and the verdicts are nearly always approvals. Which change fits?
-   - **a**: Ask the same session to think harder before it approves
+   - **a**: Tell the session to find at least three problems before it approves
    - **b**: Give the session the full history of the change to review against
-   - **c**: Start a separate run that receives only the diff and the criteria
-   - **d**: Lower the number of turns so that the session decides faster
+   - **c**: Move that step to its own job that starts from a fresh context
+   - **d**: Ask the same session for a second pass over the diff before approving
 
 2. Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests and to suggest tests. A job runs `claude --bare -p`, and its reviews ignore the testing and severity rules that sit in the repository's `CLAUDE.md`. What is the cause and the fix?
    - **a**: The file is too long, so trim it until it fits the prompt
-   - **b**: The file loads only on a branch's first push, so push once
+   - **b**: The rules are too vague, so add an example at each level
    - **c**: The rules lack a `paths` header, so add one to each
    - **d**: The mode skips the file, so pass it in with a flag
 
 3. Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests and to suggest tests. The policy keeps findings at medium severity or above, disables the style category, and fails the job on high findings. A valid run returns one high style finding and one low bug finding. What does the job do?
-   - **a**: It passes and posts no comment
+   - **a**: It passes and leaves no comment on the change
    - **b**: It fails, because a high finding exists
    - **c**: It passes and posts the low bug as a comment
-   - **d**: It fails, because a finding in a disabled category counts as an error
+   - **d**: It fails, because a disabled category counts as an error
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. An independent run sees the change without the reasoning that produced it. *a* is ruled out because the writing session is "less effective at reviewing its own changes", and more effort does not remove the bias. *b* is ruled out because a reviewer "sees only the diff and the criteria you give it, not the reasoning that produced the change". *d* is ruled out because "the independent run is a separate invocation, not a second pass in the same conversation".
-2. **d**. Bare mode skips CLAUDE.md, so the criteria must be passed in by hand, with `--append-system-prompt-file`. *a* is ruled out because length is not the issue: "In a bare run the file is passed explicitly" and otherwise it is not read at all. *b* is ruled out because "A CI run does not remember the last one", and no first-push behaviour exists. *c* is ruled out because no header is involved, and "a bare run without it reviews with no criteria at all, and nothing says so".
+1. **c**. An independent run sees the change without the reasoning that produced it. *a* is ruled out because a quota invents problems, since "a reviewer asked to find gaps will usually report some", and the session stays biased. *b* is ruled out because more history adds to the bias: "A session that wrote a change carries its reasoning". *d* is ruled out because "the independent run is a separate invocation, not a second pass in the same conversation".
+2. **d**. Bare mode skips CLAUDE.md, so the criteria must be passed in by hand, with `--append-system-prompt-file`. *a* is ruled out because length is not the issue: "In a bare run the file is passed explicitly" and otherwise it is not read at all. *b* is ruled out because the rules never arrive, so their wording cannot matter: "a bare run without it reviews with no criteria at all, and nothing says so". *c* is ruled out because no header can help when a bare run loads "no hooks, skills, MCP servers, memory or CLAUDE.md".
 3. **a**. The high finding is dropped with its category and the low one falls below the floor, so nothing is kept. *b* is ruled out because "categories the team disabled are dropped", so the high style finding cannot fail the job. *c* is ruled out because "findings below a floor are dropped", and a low finding is below a medium floor. *d* is ruled out because only "a kept finding at a failing severity" fails the job, and a disabled category is dropped before that.
 
 </details>

@@ -71,11 +71,11 @@ These are the wrong answers that the exam's options for this task statement offe
 
 ## Quiz
 
-3. A `search_orders` tool returns every match, sometimes thousands of rows, and fills the context before the agent can act. What change helps most?
-   - **a**: Send all the rows and ask the model to skip the extras
-   - **b**: Serve one page, a cursor and a note on narrowing
-   - **c**: Cut the list at a fixed length and add no message
-   - **d**: Move to a larger context window and send the full list
+3. A `search_orders` tool returns every match, sometimes thousands of rows, and the agent runs out of context before it can answer. What change helps most?
+   - **a**: Send every row in a compact format and let the model skip the extras
+   - **b**: Serve a bounded page with a cursor and a note on how to continue
+   - **c**: Keep only the first fifty rows, sorted with the newest first
+   - **d**: Move the agent to a model with a larger context window
 
 4. A `find_documents` tool answers with the sentence "Found these documents: Maintenance Schedule, Lab Access Plan." The next tool, `read_document`, requires an exact handle for one document, and the agent keeps making them up. What change fits best?
    - **a**: Return each hit with a stable identifier and the fields the following step needs
@@ -86,7 +86,7 @@ These are the wrong answers that the exam's options for this task statement offe
 <details>
 <summary>Answer key</summary>
 
-3. **b**. A page with a cursor bounds the result, and the note tells the agent how to go on. *a* is ruled out because "Bloated responses waste context and make it harder for Claude to extract what matters." *c* is ruled out because "If you choose to truncate responses, be sure to steer agents with helpful instructions." *d* is ruled out because the article expects "the need for context-efficient tools to remain".
+3. **b**. A page with a cursor bounds the result, and the note tells the agent how to go on. *a* is ruled out because "Bloated responses waste context and make it harder for Claude to extract what matters." *c* is ruled out because "A list that silently stops at fifty looks complete to a model", so the agent would answer from part of the matches. *d* is ruled out because the article expects "the need for context-efficient tools to remain".
 4. **a**. The tool should hand the next step a real identifier, in a result trimmed to what that step needs. *b* is ruled out because the documentation asks the tool to "Return semantic, stable identifiers (for example, slugs or UUIDs) rather than opaque internal references", not the model to reconstruct them. *c* is ruled out because a result should "include only the fields Claude needs to reason about its next step". *d* is ruled out because more prose adds length and no handle: "Bloated responses waste context and make it harder for Claude to extract what matters."
 
 </details>
@@ -95,30 +95,30 @@ These are the wrong answers that the exam's options for this task statement offe
 
 This quiz covers both pages of the module.
 
-1. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that look up customers and orders, issue refunds and escalate to a person. Over a week of logs it repeatedly picks a tool that is unable to serve the request, although the system prompt was reworded three times. What does this indicate?
-   - **a**: The list is too short and needs more tools to cover the cases
-   - **b**: The prompt needs more instructions about the tools to steer the choice
+1. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with four tools: `get_customer`, `lookup_order`, `process_refund` and `escalate_to_human`. Over a week of logs it sends many plain refund requests to `escalate_to_human`, and three rewrites of the system prompt have not changed that. What does this most likely indicate?
+   - **a**: The set holds too many tools for the model to choose among reliably
+   - **b**: The prompt still needs a sharper rule about which tool to prefer
    - **c**: The descriptions fail to separate the options and need a redesign
-   - **d**: The services behind the tools differ, which makes selection unstable
+   - **d**: The prompt lacks worked examples of refund requests for the model
 
 2. Scenario S3, a multi-agent research system. A coordinator delegates to a web search agent and a document agent, and the cited reports mix up their sources. Both agents hold tools named `analyze_content` and `analyze_document` whose descriptions are nearly the same. Which change fits best?
-   - **a**: Give both agents the same pair and add a rule to prefer the first
+   - **a**: Keep both names and add a prompt rule to use the first for web pages
    - **b**: Rename one for fetched pages and narrow its text to those pages
-   - **c**: Drop the descriptions and let the names alone decide the choice
+   - **c**: Merge the pair into one `analyze` tool with a `source` parameter
    - **d**: Add a parameter where each agent explains its reasoning
 
 3. Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. It uses one MCP server with eight tools whose schemas take about 3% of the context window, and the team sets `ENABLE_TOOL_SEARCH=auto`. What does the SDK do?
    - **a**: Loads all of them at the start, as they are under the activation level
    - **b**: Defers all eight and loads them on demand, since the mode is enabled
-   - **c**: Defers the three least used tools and keeps the rest loaded at the start
+   - **c**: Loads all eight, then defers them once the conversation passes 10%
    - **d**: Defers all but the tools that the first prompt happens to name
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. Repeated wrong selection means the tools cannot be told apart from their texts, which is a design fault. *b* is ruled out because more instructions can pull the wrong way: an instruction "contains a keyword that now pulls every order question toward" one tool, over the descriptions. *a* is ruled out because the article warns that "Too many tools or overlapping tools can also distract agents from pursuing efficient strategies." *d* is ruled out because where a tool is served is not a selection fault: the choice runs on "a name, a description and a schema".
-2. **b**. A web-specific name and description removes the overlap at its source. *a* is ruled out because the overlap stays in the texts the model chooses from, and the page says "Fix the text the model chooses from." *c* is ruled out because the description is where the model learns "When it should be used (and when it shouldn't)". *d* is ruled out because "A parameter that asks for the model's thinking or step-by-step reasoning may lead to a `reasoning_extraction` refusal."
-3. **a**. Under `auto` the point is 10% of the window, and below it everything loads at the start. *b* is ruled out because "Below that, the SDK loads every tool definition into context upfront." *c* is ruled out because the rule gives no partial deferral, and "Below that, the SDK loads every tool definition into context upfront." *d* is ruled out because the choice turns on the size of the definitions, not on the prompt: "When the total reaches 10% of the window, tool search activates."
+1. **c**. Repeated wrong selection that survives prompt rewrites means the tools cannot be told apart from their texts, which is a design fault. *b* is ruled out because the fault is in the surface, and "rewording the system prompt for the fourth time will not change that". *a* is ruled out because four tools are far below the scale at which "Tool selection accuracy degrades with more than 30-50 tools loaded at once." *d* is ruled out because examples in the prompt "leave the descriptions as thin as they were", and the refund and escalation texts still read alike.
+2. **b**. A web-specific name and description removes the overlap at its source. *a* is ruled out because the overlap stays in the descriptions, and the page says to "keep the prompt free of tool-specific triggers". *c* is ruled out because a merged tool "hides two contracts behind one name", while a fetched page and an uploaded document are different jobs. *d* is ruled out because "A parameter that asks for the model's thinking or step-by-step reasoning may lead to a `reasoning_extraction` refusal."
+3. **a**. Under `auto` the point is 10% of the window, and below it everything loads at the start. *b* is ruled out because "Below that, the SDK loads every tool definition into context upfront." *c* is ruled out because the SDK "counts the tokens of the definitions that can be deferred against the context window", not the length of the conversation. *d* is ruled out because the choice turns on the size of the definitions, not on the prompt: "When the total reaches 10% of the window, tool search activates."
 
 </details>
 

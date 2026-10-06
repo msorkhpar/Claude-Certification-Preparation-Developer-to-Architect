@@ -28,7 +28,7 @@
       "options": {
         "a": "In the orchestrator, because it is the first component the user's request reached",
         "b": "In the researcher, because it is the first agent below the orchestrator to show an error",
-        "c": "In the deepest span that broke, the call at the bottom of the chain",
+        "c": "In the fetching call, because no other broken span sits beneath it in the chain",
         "d": "In the planning model call, because a poor plan would send the researcher to a bad source"
       },
       "key": "c",
@@ -43,10 +43,10 @@
       "id": "02-drift-alerts-and-the-practice#q1",
       "page": "02-drift-alerts-and-the-practice.md",
       "scope": "page",
-      "stem": "After a change of model, the error rate and the latency look the same. Yet tokens per answer are up by 40 percent and retrieval hits are down by 40 percent, and nobody was told. Which practice would have caught it?",
+      "stem": "After a change of model, the error rate and the latency look the same. Yet tokens per answer are up by 40 percent and cost per answer by more than a third, and nobody was told. Which practice would have caught it?",
       "options": {
         "a": "Page the on-call engineer when the error rate passes a fixed ceiling, which covers every failure",
-        "b": "Hold a stored baseline for each metric and flag any move beyond a tolerance, rising or falling",
+        "b": "Compare each layer's figures with those saved before the switch and flag a shift past a set margin",
         "c": "Read a sample of the conversations each week and note anything that looks odd to the reader",
         "d": "Watch only the metrics that moved down, since a rise just means that the product is used more"
       },
@@ -85,12 +85,12 @@
       "options": {
         "a": "It captures the prompts of everyone who clones the repository, starting with the first session",
         "b": "It captures the prompts only in sessions where each developer has also enabled tracing",
-        "c": "It ignores them, since the exporter variables come from managed or per-user configuration",
+        "c": "It ignores the setting, and nothing typed in any session is captured because of it",
         "d": "It applies the setting but redacts the prompts anyway, because redaction cannot be changed"
       },
       "key": "c",
       "explanation": {
-        "c": "Claude Code ignores the exporter variables in a repository's settings.",
+        "c": "Claude Code ignores the exporter variables in a repository's settings, so the file captures nothing.",
         "a": "Ruled out because \"a repository can't use them to turn telemetry on\".",
         "b": "Ruled out because \"a repository cannot turn any of it on\", whether or not a developer enables tracing.",
         "d": "Ruled out because \"each is opened by a separate variable\", so redaction can be changed, just not from a repository."
@@ -103,7 +103,7 @@
       "stem": "A complaint must be followed through the gateway, the orchestrator, two subagents and a tool, each logging in its own format. The records cannot be joined into one story. What was missing?",
       "options": {
         "a": "A common timestamp format across the services, so that the records can be sorted into a single list",
-        "b": "A single identifier taken at the edge, passed to every service and kept beside whatever they write",
+        "b": "A request id that the entry point assigns and every later service writes into each of its log lines",
         "c": "A longer retention period for the logs, so that all of the records are still there when somebody needs them",
         "d": "One central log store that every service writes to, in place of the separate stores that each of them has now"
       },

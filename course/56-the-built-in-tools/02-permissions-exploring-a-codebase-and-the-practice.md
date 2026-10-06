@@ -99,7 +99,7 @@ These are the wrong answers that the exam's options for this task statement offe
 <summary>Answer key</summary>
 
 1. **a**. A read denial covers the tools that change content at the same path. *b* is ruled out because "A `Read(...)` deny rule also blocks the Edit and Write tools on the same path, including creating a new file there". *c* is ruled out because a deny is checked before anything else: "Deny is checked before ask and allow". *d* is ruled out because "If a deny rule matches, the tool is blocked, even in `bypassPermissions` mode."
-2. **c**. On macOS, Linux and WSL the default set has no Grep, and its job is done through the shell tool. *a* is ruled out because the tool names are "the exact strings you use in permission rules, subagent tool lists, and hook matchers". *b* is ruled out because "the searches reach your hooks and permission rules as `Bash` calls". *d* is ruled out because "Hook `matcher` fields use bare tool names, not the parenthesized rule format."
+2. **c**. On macOS, Linux and WSL the default set has no Grep, and its job is done through the shell tool. *a* is ruled out because the tool names are "the exact strings you use in permission rules, subagent tool lists, and hook matchers". *b* is ruled out because "A matcher of `Grep` sees Grep calls" whenever the session has the tool; the silence comes from a default set that has none. *d* is ruled out because "Hook `matcher` fields use bare tool names, not the parenthesized rule format."
 
 </details>
 
@@ -107,30 +107,30 @@ These are the wrong answers that the exam's options for this task statement offe
 
 This quiz covers both pages of the module.
 
-1. Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools. The team wants the folder `secrets/` closed to every built-in tool. Which single entry in the settings file does it?
+1. Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools. The team wants the folder `secrets/` closed to `Read`, `Grep`, `Glob`, `Edit` and `Write` alike. Which single entry in the settings file does it?
    - **a**: `Edit(secrets/**)` under deny
    - **b**: `Grep(secrets/**)` under deny
    - **c**: `Bash(cat secrets/*)` under deny
    - **d**: `Read(secrets/**)` under deny
 
-2. Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools. The agent lists TypeScript sources in a very large repository with `**/*.ts` and receives a result carrying a truncation flag. What should it do next?
-   - **a**: Narrow the search to the folder that the question concerns
-   - **b**: Repeat the same request until the results change
+2. Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools. Asked for the TypeScript sources under `services/billing/`, the agent lists `**/*.ts` across a very large repository and receives a result carrying a truncation flag. What should it do next?
+   - **a**: Rerun Glob with `services/billing/**/*.ts` as the pattern
+   - **b**: Read the `services/billing/` folder to get its full listing
    - **c**: Take the returned files as the complete set and proceed
    - **d**: Look up each file name through a content search instead
 
 3. Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools. Asked to investigate how authentication works, it reads hundreds of files, and its answers get worse as the run goes on. What fixes it?
-   - **a**: Read the whole repository once and write a summary of it
+   - **a**: Grep in `content` mode for `auth` across the whole repository
    - **b**: Raise the turn limit and let the agent finish its reading
-   - **c**: Search for entry points, then follow imports a hop at a time
-   - **d**: List every file name in the repository, then open each of them
+   - **c**: Grep for the login route, then open its imports one by one
+   - **d**: Glob for files named `*auth*`, then read each one it returns
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. A read denial stops reading and searching, and writes at the same path. *a* is ruled out because "`Edit(path)` rules govern all built-in tools that write files", which leaves reading and searching open. *b* is ruled out because "A rule is written under the name of its family" and the example prints "Grep as Read", so the entry that applies is a `Read` rule, and one for Grep alone leaves Read and the writing tools open. *c* is ruled out because a scoped Bash rule matches calls "as written", and other spellings "fall through to the permission mode", so it stops neither the search tools nor a different spelling.
-2. **a**. A capped result is a window, and a narrower request brings the rest into view. *b* is ruled out because "Results are sorted by modification time and capped at 100 files", so the same request returns the same window. *c* is ruled out because "Claude sees a truncation flag in the result and can narrow the pattern", which says the set is incomplete. *d* is ruled out because "Grep finds lines inside files, and Glob finds the files themselves", so a content search is the wrong tool for finding files.
-3. **c**. The cause is the context filling with files that do not matter, and the remedy is to scope the reading. *a* is ruled out because reading everything is the failure itself: "The infinite exploration. You ask Claude to 'investigate' something without scoping it. Claude reads hundreds of files, filling the context." *b* is ruled out because more turns make the run longer and not better: "Claude's context window fills up fast, and performance degrades as it fills." *d* is ruled out because opening every file in turn is the same unscoped reading: "Claude reads hundreds of files, filling the context."
+1. **d**. A read denial stops reading and searching, and writes at the same path. *a* is ruled out because "`Edit(path)` rules govern all built-in tools that write files", which leaves reading and searching open. *b* is ruled out because "A rule is written under the name of its family" and the example prints "Grep as Read", so the entry that applies is a `Read` rule, and one for Grep alone leaves Read and the writing tools open. *c* is ruled out because a scoped Bash rule "leaves `Bash` available and denies calls that match it", and it applies to no file tool, so Read, Grep, Glob, Edit and Write stay open.
+2. **a**. A capped result is a window, and a pattern scoped to the folder in question brings the files that matter into view. *b* is ruled out because Read "Reads files, not directories", so a folder cannot be listed with it. *c* is ruled out because "A Glob result is a window, not a census", so the returned files are not the complete set. *d* is ruled out because "Grep finds lines inside files, and Glob finds the files themselves", so a content search is the wrong tool for finding files.
+3. **c**. The cause is the context filling with files that do not matter, and the remedy is to scope the reading. *a* is ruled out because every matching line across the repository floods the context, and the page's order is "asking for file paths first": "Start with paths when you only need to know where to look". *b* is ruled out because more turns make the run longer and not better: "Claude's context window fills up fast, and performance degrades as it fills." *d* is ruled out because the code that handles authentication lives in files with other names: "Do not use filename search to find code references inside files."
 
 </details>
 

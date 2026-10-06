@@ -642,23 +642,23 @@ two usage patterns are the whole diagnosis: writes without reads mean the prefix
 
 2. A team marks a 1,500-token system prompt with `cache_control` on Claude Haiku 4.5 and sees both cache fields at 0, with no
    error. What explains it?
-   - **a**: The text is under that model's 4,096 minimum, so it was handled as ordinary input
-   - **b**: The text is over that model's minimum, so the API is quietly returning stored answers
+   - **a**: The text is under that model's minimum, so it was handled as ordinary input
+   - **b**: The write was counted inside `input_tokens`, so the two cache fields stayed empty
    - **c**: The marker was ignored because system prompts are outside what the cache can hold
-   - **d**: The five-minute lifetime had lapsed before the first request was even sent
+   - **d**: The first call writes without reporting it, so both fields stay at zero until a read
 
-3. A request puts a block with the current clock reading ahead of a large stable policy, with the marker on the policy. Every
-   call writes everything and never reads. Why?
+3. A request puts a block with the current clock reading ahead of a large stable policy, with the marker on the policy. Calls
+   arrive a minute apart, and every call writes everything and never reads. Why?
    - **a**: The clock block counts as a second marker, which triggers a fresh write on each turn
-   - **b**: The hash covers the marked block, so the policy is compared by itself and the clock is ignored
+   - **b**: The entry lapses between calls, so the default lifetime is too short for this traffic
    - **c**: All content before the boundary feeds the hash, so a changing line gives a new one
    - **d**: The hash is rebuilt from the user question, which differs on each turn of the chat
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The page gives "total_input_tokens = cache_read_input_tokens + cache_creation_input_tokens + input_tokens", so 8,000 + 0 + 40. *b* is ruled out because the page sum adds a third term, and "total_input_tokens = cache_read_input_tokens + cache_creation_input_tokens + input_tokens" includes the 40. *c* is ruled out because that field holds only "tokens after the last breakpoint, which are not cached". *a* is ruled out because the sum "total_input_tokens = cache_read_input_tokens + cache_creation_input_tokens + input_tokens" has no subtraction.
-2. **a**. The page says "Any requests to cache fewer than this number of tokens will be processed without caching" and gives 4,096 for Claude Haiku 4.5. *b* is ruled out because 1,500 is below the minimum, and "the prompt was not cached" is what two zeros mean. *c* is ruled out because the page's hierarchy runs "up to and including the block designated with" the marker, and a system block can be that block. *d* is ruled out because "Row 1 writes the 600 tokens" on a first request, so there is no earlier entry to lapse.
-3. **c**. The page says "The cache key is a hash of everything from the start of the request up to the marked block", so a changing block before it gives a new key. *b* is ruled out because that same sentence says the key is "a hash of everything from the start of the request", not of one block. *a* is ruled out because "Explicit breakpoints put `cache_control` on individual blocks", and the clock block carries none, so it is no second marker. *d* is ruled out because "Row 2, a minute later, reads them and pays for only the new question".
+1. **d**. The page gives "total_input_tokens = cache_read_input_tokens + cache_creation_input_tokens + input_tokens", so 8,000 + 0 + 40. *b* is ruled out because the read field is not the whole prompt: the page's example has "100,000 cached tokens read, none written and 50 after the breakpoint, for 100,050 in all". *c* is ruled out because, for `input_tokens`, "It counts only what follows the last breakpoint". *a* is ruled out because the page says to "Add the read and write fields to get the total", so the 40 is added, not taken away.
+2. **a**. The page says "Any requests to cache fewer than this number of tokens will be processed without caching" and gives 4,096 for Claude Haiku 4.5. *b* is ruled out because writes have their own field, `cache_creation_input_tokens`, for "tokens written to the cache by this request", while `input_tokens` holds "tokens after the last breakpoint, which are not cached". *c* is ruled out because the page's hierarchy runs "up to and including the block designated with" the marker, and a system block can be that block. *d* is ruled out because a first call reports its write: "Row 1 writes the 600 tokens", and two zeros mean "the prompt was not cached".
+3. **c**. The page says "The cache key is a hash of everything from the start of the request up to the marked block", so a changing block before it gives a new key. *b* is ruled out because a lapse needs a long gap, as in "Row 3 comes six minutes later: the five-minute entry has lapsed", and these calls are a minute apart. *a* is ruled out because "Explicit breakpoints put `cache_control` on individual blocks", and the clock block carries none, so it is no second marker. *d* is ruled out because "Row 2, a minute later, reads them and pays for only the new question".
 
 </details>

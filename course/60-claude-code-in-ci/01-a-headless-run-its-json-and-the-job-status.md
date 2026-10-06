@@ -800,11 +800,11 @@ wrong shape: exit 1, 0 comment(s), schema $.findings[0].line: is required
 1. A CI step runs Claude Code unattended, and each issue it reports must be posted as an inline note. Which flags make the reply usable for that?
    - **a**: `--output-format text` with a prompt asking for a bulleted list
    - **b**: `--max-turns` with a high limit so that the list is complete
-   - **c**: `--output-format json` with `--json-schema`
-   - **d**: `--bare` alone, which formats replies for scripts
+   - **c**: `--output-format json` with a `--json-schema` for each finding's location
+   - **d**: `--bare` alone, which shapes every reply for a script to read
 
 2. A review run ends with the subtype `success`, yet the object holds no `structured_output`. What should the job do?
-   - **a**: Fail, because no valid answer exists
+   - **a**: Fail, since there is no answer to check
    - **b**: Pass, since the run reports success
    - **c**: Retry the same request until a value appears
    - **d**: Pass, with a note that nothing was reported

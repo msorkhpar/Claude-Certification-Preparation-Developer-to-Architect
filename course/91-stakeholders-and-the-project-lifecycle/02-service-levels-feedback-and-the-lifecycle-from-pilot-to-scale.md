@@ -387,20 +387,20 @@ The practice is in [`exercises/91-stakeholders-and-the-project-lifecycle`](../..
 1. Scenario: Ola's team reports its latency service level, a ceiling of 2000 ms at the 95th percentile. The week's measured figure is exactly 2000 ms. How does the report read?
    - **a**: Missed by 0 ms, since the measure has reached the limit
    - **b**: Met, since a value at the limit counts as inside it
-   - **c**: Met, but with the ceiling raised to 2100 ms for the week
-   - **d**: Undecided until a second week of measurements arrives
+   - **c**: At risk, since a figure on the ceiling is neither met nor missed
+   - **d**: Missed, since one answer in twenty took longer than 2000 ms
 
 2. Scenario: Vera is writing the pilot table for a billing assistant and offers the stop trigger "if the quality is worse than we hoped". What is wrong with it?
    - **a**: It should name the reviewer who decides when quality is poor enough
    - **b**: It states a quality aim, which belongs to the sponsor and not the pilot
-   - **c**: It should come after the roll-out so that the data exists to judge it
-   - **d**: It holds no number, so reaching it is a matter of opinion
+   - **c**: It names quality, which a pilot has no data to judge before launch
+   - **d**: It holds no number, so whether it was reached is a matter of opinion
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. A service level is met at its limit exactly. *a* is ruled out because "A latency of 2000 ms against a ceiling of 2000 ms is met". *c* is ruled out because the ceiling is the target, and "Met at the limit exactly" leaves no reason to raise it. *d* is ruled out because "Met at the limit exactly" settles the case without a second week.
-2. **d**. A trigger needs a number to be reached. *a* is ruled out because a trigger worded as "if it goes wrong" "is not a trigger", whoever decides. *c* is ruled out because the record lists each assumption "with a test and a stop trigger that has a number in it" before the pilot runs. *b* is ruled out because "the stop trigger is the pilot's own", so the aim may be the sponsor's while the trigger is not.
+1. **b**. A service level is met at its limit exactly. *a* is ruled out because "A latency of 2000 ms against a ceiling of 2000 ms is met". *c* is ruled out because "a service level is met at its limit exactly and missed beyond it", which leaves no third state. *d* is ruled out because the ceiling is the "95th percentile of at most 2000 ms", so the slowest one in twenty may lie above it.
+2. **d**. A trigger needs a number to be reached. *a* is ruled out because a trigger worded as "if it goes wrong" "is not a trigger", whoever decides. *c* is ruled out because the pilot's own test is to "sample production disputes and score them by segment", with a trigger on credit accuracy. *b* is ruled out because "the stop trigger is the pilot's own", so the aim may be the sponsor's while the trigger is not.
 
 </details>
 
@@ -409,28 +409,28 @@ The practice is in [`exercises/91-stakeholders-and-the-project-lifecycle`](../..
 This quiz covers both pages of the module.
 
 1. Scenario: Noor tells a sponsor that an assistant is "98 percent accurate overall". The system answers three kinds of dispute, and the one that costs 250 per error is right 63 times in 100. What should the record say to the sponsor?
-   - **a**: That the costly kind is excluded from the figure because it is handled in another system
+   - **a**: That the costly kind will reach 98 percent by launch, so the figure still holds
    - **b**: That the overall figure stands, since the costly kind is a small share of the traffic
-   - **c**: That a person decides each of those until the measured result improves
+   - **c**: That results go by segment, with a person deciding each of those until they improve
    - **d**: That the figure will be re-measured once per quarter, with the same overall method
 
 2. Scenario: Lars hands a finished assistant to an operations team with an architecture diagram and a list of settings. The first alert fires on a Saturday and nobody knows who should act on it. Which part of the hand-off was missing?
    - **a**: A longer pilot, so that more alerts would have fired before the launch
-   - **b**: A named owner for the service and a runbook that tells staff what to do
+   - **b**: A runbook kept by a named service owner, saying who responds and how
    - **c**: A monthly report to the sponsor listing the alerts of the previous period
    - **d**: A second diagram showing the alert thresholds drawn on the architecture
 
 3. Scenario: A reviewer corrects forty answers in a week, and the notes of the sponsor review record them. Nothing else changes, and the same errors appear the next week. Which step would have closed the loop?
    - **a**: Sending the notes to the engineers with a request to read them before the next release
-   - **b**: Asking the reviewers to correct the same answers a second time for the record
+   - **b**: Counting the corrections per 100 disputes and comparing the count with a baseline
    - **c**: Moving the review from weekly to daily so that the notes are fresher
    - **d**: Turning each fix into a labelled evaluation case that each later release is run against
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. The promise is made per segment, and a person decides the costly one. *b* is ruled out because "an average hides the segments that cost the most", whatever the traffic share. *a* is ruled out because the page says to "Promise what you measure and measure what you promise", and excluding a segment breaks both. *d* is ruled out because "a promise is made once and kept for as long as the system runs", so re-measuring the same overall figure repeats the same blind spot.
-2. **b**. The record names an owner and a runbook for each alert. *a* is ruled out because "a diagram without the runbook leaves the first incident to the person who happens to remember", and a longer pilot adds no owner. *c* is ruled out because "The people who run the system are not the people who built it", and a report to the sponsor does not reach them on a Saturday. *d* is ruled out because "Implementation guidance is part of the hand-off and not an extra", and a second diagram adds none.
-3. **d**. A loop is closed when a change goes back out through the gate. *b* is ruled out because "A stakeholder review that produces notes and no cases has not closed anything". *c* is ruled out because the review is "A regular review of the segments, the saving and the open risks", and its speed adds no case. *a* is ruled out because a loop closes only when "the person who raised the problem is told what happened" after a change has gone through the gate.
+1. **c**. The promise is made per segment, and a person decides the costly one. *b* is ruled out because "an average hides the segments that cost the most", whatever the traffic share. *a* is ruled out because the page says to "Promise what you measure and measure what you promise", and a future figure is not yet measured. *d* is ruled out because a promise "is made in the unit that is measured", which here is the segment, so re-measuring the same overall figure repeats the same blind spot.
+2. **b**. The record names an owner and a runbook for each alert. *a* is ruled out because "the people who run the system need an owner, a runbook, monitors and a rollback on day one", and a longer pilot adds none of them. *c* is ruled out because an alert goes to "the owner of the runbook that explains each alert", and a monthly report to the sponsor arrives weeks after the Saturday. *d* is ruled out because "a diagram without the runbook leaves the first incident to the person who happens to remember", and a second diagram is still a diagram.
+3. **d**. A correction kept as a labelled evaluation case is run against every later release, so the same error cannot return unseen. *b* is ruled out because a count against a baseline is a signal, while the reviewer's fix must become a case "so the same failure is tested after every change". *c* is ruled out because "A loop is closed when a change goes back out through the gate of module 89", and a fresher review sends no change. *a* is ruled out because "A stakeholder review that produces notes and no cases has not closed anything", and notes sent on are still notes.
 
 </details>

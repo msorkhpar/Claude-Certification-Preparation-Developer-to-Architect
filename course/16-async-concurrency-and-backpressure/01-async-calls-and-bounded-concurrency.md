@@ -399,8 +399,8 @@ real latency, compute the bound from the limit you must stay under, and leave he
    endpoint, including those that never ask the model anything, becomes slow together. What is the cause?
    - **a**: A blocking wait holds the event loop, so other tasks cannot run until it returns
    - **b**: All handlers share one client, so each model call queues behind the others
-   - **c**: An event loop serves one request at a time, so async handlers cannot overlap
-   - **d**: Each model call keeps a processor busy, so the server runs short of CPU time
+   - **c**: An event loop can serve only one request at a time, so async handlers cannot overlap
+   - **d**: Each model call keeps a processor busy, so the whole server runs short of CPU time
 
 2. A nightly job starts one call for each of 8,000 tickets at once with a bare gather. It sees a wave of 429 errors and
    loses the labels of the tickets that succeeded because the gather raised. Which change is best?

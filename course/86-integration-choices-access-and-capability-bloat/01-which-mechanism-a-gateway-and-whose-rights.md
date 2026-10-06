@@ -630,7 +630,7 @@ For this page, read the last three blocks. The four situations give a custom too
 2. A support agent runs under one service account that may issue refunds, and supervisors legitimately use the same agent for them. A clerk who may only read tickets asks it for a refund, and it is paid. What closes the gap?
    - **a**: Take the refund tool out of the agent's configuration for every user
    - **b**: Record each refund so that the clerk's request can be found later
-   - **c**: Allow the call only if the asker also holds that scope
+   - **c**: Make each call also require the matching scope of the user who asked
    - **d**: Add a line to the system prompt telling clerks not to ask for refunds
 
 <details>

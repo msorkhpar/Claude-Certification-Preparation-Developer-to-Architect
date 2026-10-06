@@ -569,7 +569,7 @@ The practice is in [`exercises/93-professional-capstone`](../../exercises/93-pro
 
 1. Scenario: Larch Mutual's assistant answers a coverage question with a limit of 3,000, and the current policy says 5,000. Latency and the model version have not changed since the documents were refreshed. Where does the investigation start?
    - **a**: The retrieval step, to see whether a stale chunk was returned
-   - **b**: The model, to see whether its weights were updated by the vendor
+   - **b**: The system prompt, to see whether its wording on limits was changed
    - **c**: The sampling temperature, to see whether it was lowered by a release
    - **d**: The context window, to see whether the prompt was cut short
 
@@ -577,12 +577,12 @@ The practice is in [`exercises/93-professional-capstone`](../../exercises/93-pro
    - **a**: Release it, because the gains outnumber the losses
    - **b**: Release it, with a note asking the owner to review the lost case
    - **c**: Refuse it, naming the area where the damage fell
-   - **d**: Refuse it, because every loss blocks every change
+   - **d**: Refuse it, because any lost answer outweighs the gains
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. A confident wrong answer after a refresh points to stale evidence. *b* is ruled out because the stem leaves the model version unchanged, and the page says "check the version of the evidence before the model". *c* is ruled out because "Fix the wrong answer in the prompt; the model got it wrong" is the tempting lever the exam rejects, and a temperature change would not return the exact old figure. *d* is ruled out because the stale index holds the chunk "Water damage is covered up to 3,000 per claim.", the very figure the assistant gave, which a cut-short prompt would not produce.
-2. **c**. A loss in a protected segment is a veto whatever the gains. *a* is ruled out because "a loss in a protected segment is a veto whatever the gains elsewhere". *b* is ruled out because the gate returns a decision and not a note, and the page says it "says no-go and names the segment". *d* is ruled out because the gate's rule is that "the losses do not outnumber the gains" for a loss outside a protected segment, so not every loss blocks a change.
+1. **a**. A confident wrong answer after a refresh points to stale evidence. *b* is ruled out because the page rejects "Fix the wrong answer in the prompt" as a first move, since a wrong answer after a document refresh points to the evidence before the wording. *c* is ruled out because the page says to "check the version of the evidence before the model", and a temperature change would not return the exact old figure. *d* is ruled out because the stale index holds the chunk "Water damage is covered up to 3,000 per claim.", the very figure the assistant gave, which a cut-short prompt would not produce.
+2. **c**. A loss in a protected segment is a veto whatever the gains. *a* is ruled out because "a loss in a protected segment is a veto whatever the gains elsewhere". *b* is ruled out because the gate returns a decision and not a note, and the page says it "says no-go and names the segment". *d* is ruled out because the gate's rule is that "the losses do not outnumber the gains" for a loss outside a protected segment, so such a loss does not outweigh the gains on its own.
 
 </details>

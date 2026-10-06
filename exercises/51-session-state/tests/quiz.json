@@ -10,32 +10,32 @@
         "a": "`resume` with the saved id and `fork_session` enabled",
         "b": "`continue_conversation` alone, which branches the latest run",
         "c": "`resume` with the saved id, once for each approach",
-        "d": "A new run whose first prompt only names the Monday thread"
+        "d": "A new run for each approach, opened with a summary of Monday"
       },
       "key": "a",
       "explanation": {
         "a": "Fork is an option set together with a resume id, so it branches a copy and leaves the original usable.",
         "b": "Ruled out because \"**Continue** finds the most recent session in the current directory\", so it adds to that session and branches nothing.",
         "c": "Ruled out because \"Continue and resume both pick up an existing session and add to it\", which puts both approaches into one history.",
-        "d": "Ruled out because a name carries none of the analysis, and the guide says to \"Capture the results you need (analysis output, decisions, file diffs) as application state and pass them into a fresh session's prompt.\""
+        "d": "Ruled out because a summary carries only what was written down, and \"whatever the summary leaves out is no longer in Claude's context\", while a fork starts from a copy of the whole baseline."
       }
     },
     {
       "id": "01-continue-resume-and-fork-what-a-session-keeps#q2",
       "page": "01-continue-resume-and-fork-what-a-session-keeps.md",
       "scope": "page",
-      "stem": "A multi-user app keeps one conversation per customer. After a restart it must return each customer to the right earlier conversation, not just the latest one. What does the code store for each customer?",
+      "stem": "A support service keeps one agent conversation per customer, all started from the same working directory. After a restart, each returning customer must get their own earlier conversation back. What does the service store for each customer?",
       "options": {
-        "a": "A `continue` flag, with one working directory for each customer",
-        "b": "A display name for each customer, passed to `resume` in the SDK",
-        "c": "The session id from the last result message",
+        "a": "A `continue` flag, set when their last run ended",
+        "b": "A display name, passed to the SDK's `resume` option",
+        "c": "The session id taken from their last result message",
         "d": "A fork of the first session, created for each customer"
       },
       "key": "c",
       "explanation": {
         "c": "Resume needs a specific id, and the result carries it on every result.",
         "b": "Ruled out because \"Resume takes a specific session ID\", not a display name; the guide's `--resume <session-name>` is a command-line form, and the SDK guide passes an id.",
-        "a": "Ruled out because \"**Continue** finds the most recent session in the current directory\", so a customer would get the latest conversation only and never an earlier one.",
+        "a": "Ruled out because \"**Continue** finds the most recent session in the current directory\", and with every customer in one directory that is whichever conversation ran last.",
         "d": "Ruled out because \"Fork is different: it creates a new session that starts with a copy of the original's history\", which is a second conversation and not a return to the first."
       }
     },
@@ -46,8 +46,8 @@
       "stem": "An agent mapped a service of twelve modules on Friday. Over the weekend a developer rewrote two of them. On Monday the team resumes the session. What should the first prompt add?",
       "options": {
         "a": "A request to survey the whole service from scratch",
-        "b": "The paths that differ, with a request to re-read them",
-        "c": "Nothing at all, since the earlier read still holds",
+        "b": "The paths of both edited files, to be read again",
+        "c": "No addition, since the session already holds that analysis",
         "d": "The full text of both changed modules, pasted inline"
       },
       "key": "b",
@@ -62,7 +62,7 @@
       "id": "02-stale-results-the-notice-the-summary-and-the-practice#q2",
       "page": "02-stale-results-the-notice-the-summary-and-the-practice.md",
       "scope": "page",
-      "stem": "Most of the files an agent analysed last month have since been rewritten, and its transcript is long. Which start is most reliable?",
+      "stem": "Most of the files an agent analysed last month have since been rewritten, and its transcript is long. How should the next sitting start?",
       "options": {
         "a": "A new run that begins by pasting the earlier tool output",
         "b": "The full old transcript, with a line saying that things have changed",
@@ -86,14 +86,14 @@
         "a": "A re-run of the session's tool calls, refreshing their results",
         "b": "A warm cache that still holds the earlier requests",
         "c": "A cache miss, with the full history processed once more",
-        "d": "A fork of the session, made automatically on resume"
+        "d": "A cheap request, provided they choose the summary option"
       },
       "key": "c",
       "explanation": {
         "c": "The prompt cache expires after a long pause, so the next request reads the history once more.",
-        "b": "Ruled out because \"The session's prompt cache has expired by then, so the next request processes the full history once no matter which of the dialog's options you pick.\"",
+        "b": "Ruled out because \"after a long pause the prompt cache has expired, so the next request processes all of it again\".",
         "a": "Ruled out because a resume restores the conversation and does not run tools again: a call that was cut off \"doesn't finish or run again when you resume\".",
-        "d": "Ruled out because forking is an option you set, and a fork \"creates a new session that starts with a copy of the original's history\", not an automatic step of resuming."
+        "d": "Ruled out because the expired cache means the next request \"processes the full history once no matter which of the dialog's options you pick\", the summary included."
       }
     },
     {
@@ -119,17 +119,17 @@
       "id": "02-stale-results-the-notice-the-summary-and-the-practice#m3",
       "page": "02-stale-results-the-notice-the-summary-and-the-practice.md",
       "scope": "module",
-      "stem": "Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. A service returns to saved sessions after nightly code changes. It records a digest for each analysed file and sees that 5 of 12 changed. What should it do?",
+      "stem": "Scenario S4, developer productivity with Claude. The agent is built on the Claude Agent SDK and helps engineers explore unfamiliar codebases and understand legacy systems. A service that follows this module's plan returns to saved sessions after nightly code changes. It records a digest for each analysed file and sees that 5 of 12 changed. What should it do?",
       "options": {
         "a": "Fork the session and keep the stale results in the original",
-        "b": "Start a new session and carry the earlier transcript into it",
+        "b": "Start a new session that opens with a structured summary",
         "c": "Continue the most recent session in the directory and add no note",
-        "d": "Resume the session and name the five stale paths in its first prompt"
+        "d": "Resume the session with a notice naming the five paths"
       },
       "key": "d",
       "explanation": {
-        "d": "Five of twelve is under half, so a resume with a notice naming the paths keeps what is still true.",
-        "b": "Ruled out because a transcript carries the stale results with it; a summary carries conclusions \"never the raw tool output that went stale\".",
+        "d": "Five of twelve is under half, so under the module's plan a resume with a notice naming the paths keeps what is still true.",
+        "b": "Ruled out because a fresh start \"keeps only what you decided was worth writing down\", and five of twelve is under the half at which \"a notice can correct a few files but cannot correct most of them\".",
         "c": "Ruled out because continue takes the most recent session, and with no note the session believes the old files: \"Sessions persist the conversation, not the filesystem\".",
         "a": "Ruled out because a fork \"creates a new session that starts with a copy of the original's history\", stale results included."
       }

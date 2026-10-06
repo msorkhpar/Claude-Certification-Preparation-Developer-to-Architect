@@ -7,7 +7,7 @@
       "scope": "page",
       "stem": "A deprecation table lists one of a company's models with a retirement of \"not sooner than\" a date nine weeks away. How should the team treat that entry?",
       "options": {
-        "a": "Plan against it as the earliest cut-off and begin early, since it slips later, not earlier",
+        "a": "Plan against it as the earliest cut-off and begin early, since any slip would push it later",
         "b": "Wait for the vendor to confirm a final cut-off before spending any effort on the move",
         "c": "Treat it as a fixed cut-off that cannot move, and schedule the whole migration to end on that day",
         "d": "Ignore it until the status changes to retired, because nothing breaks before that point"
@@ -17,23 +17,23 @@
         "a": "The table can say \"not sooner than\" for a model that is still active, which marks a date that may move later.",
         "b": "Ruled out because \"is never a date to wait for\".",
         "c": "Ruled out because \"marks a date that may move later\".",
-        "d": "Ruled out because \"Deprecated models are likely to be less reliable than active models\", so nothing is safe until the retired state."
+        "d": "Ruled out because the move takes time before anything breaks, and \"a migration of forty applications can take longer than that\"."
       }
     },
     {
       "id": "01-the-calendar-the-audit-and-the-settings-a-new-model-changes#q2",
       "page": "01-the-calendar-the-audit-and-the-settings-a-new-model-changes.md",
       "scope": "page",
-      "stem": "A model's entry in the documentation carries the status legacy. What does that status say?",
+      "stem": "A team tested a model last year and now finds it listed as legacy in the documentation. What should they conclude?",
       "options": {
         "a": "It has a retirement date and will fail on that day, so requests must already be moved",
-        "b": "It is the recommended choice for new work, since only deprecated models are withdrawn",
-        "c": "It stops receiving updates and heads toward deprecation, so plan the move before any date is set",
+        "b": "It can still be the recommended choice for new work, since only deprecated models are withdrawn",
+        "c": "It gets no more updates and may later be deprecated, so plan the move before a date is set",
         "d": "It has been retired already, so every request that names it comes back as a failure"
       },
       "key": "c",
       "explanation": {
-        "c": "Legacy means \"The model will no longer receive updates and may be deprecated in the future.\"",
+        "c": "Legacy means \"The model will no longer receive updates and may be deprecated in the future\", so the plan starts before any retirement date exists.",
         "a": "Ruled out because deprecated is the state where Anthropic \"provides a recommended replacement and assigns a retirement date\".",
         "b": "Ruled out because active is the state where \"The model is fully supported and recommended for use\".",
         "d": "Ruled out because \"Requests to retired models will fail\" describes the retired state, not legacy."
@@ -48,30 +48,30 @@
         "a": "Advance to 25 percent, since a clean record needs no further evidence",
         "b": "Hold where it is, since a sample this small shows nothing yet",
         "c": "Roll back to zero, since too few requests counts as a failed stage",
-        "d": "Declare the roll-out complete, since no error has been seen so far"
+        "d": "Move all traffic over, since the gate already passed on the suite"
       },
       "key": "b",
       "explanation": {
         "b": "A stage with fewer requests than the minimum says nothing yet, so the rule is to hold at the stage.",
         "a": "Ruled out because \"A stage with fewer requests than the minimum (1,000 in the example) says nothing yet\".",
         "c": "Ruled out because the share goes back to zero only when errors pass the limit: \"Over it, the share goes back to zero\".",
-        "d": "Ruled out because a roll-out ends with \"One stage up, and `complete` at 100 percent\"."
+        "d": "Ruled out because \"Passing a suite is a prediction about traffic, and traffic is where it is tested\"."
       }
     },
     {
       "id": "02-the-gate-the-roll-out-and-the-way-back#q2",
       "page": "02-the-gate-the-roll-out-and-the-way-back.md",
       "scope": "page",
-      "stem": "A staged roll-out is at 25 percent of requests when the error rate passes its limit. What happens next?",
+      "stem": "A staged roll-out at 25 percent of requests has served 50,000 requests with 400 errors, and the limit is 5 errors per thousand. What happens next?",
       "options": {
         "a": "Drop to 5 percent and keep the roll-out running, to gather more evidence from a smaller share",
-        "b": "Hold at 25 percent and investigate, leaving those customers on the new model while the errors continue to arrive",
+        "b": "Hold at 25 percent and investigate the errors before choosing which way to move",
         "c": "Advance to 100 percent so that the failure shows up clearly in the data of the whole base",
-        "d": "Send all traffic back to the previous model, which stays available until its own retirement"
+        "d": "Set the share back to zero so that all traffic goes to the previous model again"
       },
       "key": "d",
       "explanation": {
-        "d": "The limit is passed, so the share goes back to zero and the previous model, still configured, takes the traffic.",
+        "d": "400 errors in 50,000 requests is 8 per thousand, over the limit, so the share goes back to zero and the previous model, still configured, takes the traffic.",
         "b": "Ruled out because \"Holding at the stage while errors continue leaves the share of customers who see them where it is\".",
         "c": "Ruled out because \"Advancing to 100 percent to see the failure in the full data makes every customer the sample\".",
         "a": "Ruled out because \"Reducing to a smaller share keeps part of the damage on the path\"."
@@ -85,7 +85,7 @@
       "options": {
         "a": "Recommend staying on the old model, because a higher cost is reason enough to avoid the whole change",
         "b": "Recommend the move, because the newer model is the one that the vendor has recommended as the replacement",
-        "c": "State the trade: what improves, what the budget loses, and the date that forces the choice",
+        "c": "Lay out the accuracy gain, the extra spend and the date that forces the choice, for them to weigh",
         "d": "Defer the decision until the old model retires, so that the choice is made by the calendar instead"
       },
       "key": "c",
@@ -103,14 +103,14 @@
       "stem": "After a migration, the parser reads the wrong field because the first content block of a reply is thinking text. Which step was missed?",
       "options": {
         "a": "Lowering max_tokens so that the thinking is cut off before the text of the reply begins",
-        "b": "Choosing the part of the response by its declared type and not by its position in the list",
+        "b": "Selecting what to process by its declared type, so a leading reasoning part is skipped",
         "c": "Turning thinking off by sending the disabled setting, which the new model accepts as before",
         "d": "Dropping the first block of every reply before parsing, since it always holds only thinking"
       },
       "key": "b",
       "explanation": {
         "b": "A reply may begin with thinking blocks, so the parser reads by type.",
-        "a": "Ruled out because \"`max_tokens` covers thinking plus text, and thinking tokens are billed as output tokens\".",
+        "a": "Ruled out because \"`max_tokens` covers thinking plus text, and thinking tokens are billed as output tokens\", so a lower limit cuts the text as well.",
         "c": "Ruled out because the guide lists `thinking: {\"type\": \"disabled\"}` among the \"five settings that return a 400 error\".",
         "d": "Ruled out because \"A reply need not begin with thinking text either, so a rule that always drops the first block loses real text\"."
       }

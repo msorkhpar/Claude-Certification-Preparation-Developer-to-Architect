@@ -122,28 +122,28 @@ raising, and a test that expects an exception there fails.
    favour?
    - **a**: The default TTL, since each reuse refreshes the entry free of charge and keeps it alive
    - **b**: The one-hour TTL, since the gap is past the default but within the hour
-   - **c**: Neither TTL, since an entry survives through frequent use alone
-   - **d**: Both TTLs together, since each request has to carry the pair of settings
+   - **c**: No cache at all, since a write at twice the base price never pays back here
+   - **d**: The default TTL, with a pre-warm call sent a minute before each reuse
 
 2. A conversation adds 25 blocks between two requests, with one breakpoint on the final block. The second request misses the
    earlier write. What fixes it?
-   - **a**: A label on the request, so the older entry is found by name
+   - **a**: Automatic caching in place of the marker, so the breakpoint tracks the chat
    - **b**: A longer TTL on the last marker, so the older entry survives until the next request
    - **c**: A larger `max_tokens`, so the search can reach further back through the blocks
-   - **d**: A further marker near the older spot, so a fresh entry builds up there
+   - **d**: A further marker near the older spot, so a search begins within reach of that entry
 
 3. A team adds an image to the fifth message of a long conversation. Which parts of the cache are invalidated?
-   - **a**: Only the tool list, while the instructions and the dialogue stay intact
+   - **a**: The tool list, the instructions and the dialogue, since all three share one hash
    - **b**: Only the dialogue blocks, while the tool list and instructions stay intact
    - **c**: The instructions and the dialogue, while the tool list stays intact
-   - **d**: Nothing, since pictures sit outside the cached text
+   - **d**: Nothing, since pictures sit outside the cached text and leave the hash alone
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page recommends the one-hour TTL for prompts used "less frequently than 5 minutes, but more frequently than every hour". *a* is ruled out because the entry is "refreshed for no additional cost each time the cached content is used", and a 40-minute gap lets the default entry lapse first. *c* is ruled out because the one-hour TTL exists for "less frequently than 5 minutes, but more frequently than every hour". *d* is ruled out because "You can use both 1-hour and 5-minute cache controls in the same request" is allowed, not required.
-2. **d**. The page says a second breakpoint near the older position starts a second lookback window there, since "You can define up to 4 cache breakpoints". *b* is ruled out because the miss comes from the window: "It checks at most 20 positions", and a longer TTL does not widen it. *c* is ruled out because the search "walks backward one block at a time", and `max_tokens` governs the reply. *a* is ruled out because the search is "looking for an entry an earlier request wrote", by hash, not by a label.
-3. **b**. The page says "Adding/removing images anywhere in the prompt affects message blocks", and the table shows ✓ for tools and system. *a* is ruled out because "Changes at each level invalidate that level and all subsequent levels", and tools come first. *c* is ruled out because that pattern belongs to "Enabling/disabling web search modifies the system prompt", not to images. *d* is ruled out because "Adding/removing images anywhere in the prompt affects message blocks".
+1. **b**. The page recommends the one-hour TTL for prompts used "less frequently than 5 minutes, but more frequently than every hour". *a* is ruled out because the entry is "refreshed for no additional cost each time the cached content is used", and a 40-minute gap lets the default entry lapse first. *c* is ruled out because "A one-hour entry needs a third request to pay for itself", and a prefix reused around the clock gets far more than three. *d* is ruled out because each pre-warm is a fresh write, and "5-minute cache write tokens are 1.25 times the base input tokens price", while an entry kept in use costs nothing to refresh.
+2. **d**. The page says a second breakpoint near the older position starts a second lookback window there, since "You can define up to 4 cache breakpoints". *b* is ruled out because the miss comes from the window: "It checks at most 20 positions", and a longer TTL does not widen it. *c* is ruled out because the search "walks backward one block at a time", and `max_tokens` governs the reply. *a* is ruled out because a breakpoint that follows the end of the chat still sits on the final block, and "A growing conversation that adds more than 20 blocks between two requests walks past its last write and misses".
+3. **b**. The page says "Adding/removing images anywhere in the prompt affects message blocks", and the table shows ✓ for tools and system. *a* is ruled out because "Changes at each level invalidate that level and all subsequent levels", and an image in a message changes the messages level, which comes after tools and system. *c* is ruled out because that pattern belongs to "Enabling/disabling web search modifies the system prompt", not to images. *d* is ruled out because adding an image mid-conversation is a trap on the page: "Either empties the messages cache".
 
 </details>
 
@@ -151,11 +151,11 @@ raising, and a test that expects an exception there fails.
 
 This quiz covers both pages of the module.
 
-1. A service fires ten calls together, all sharing a 30,000-token prefix, against a cold cache. What does the module predict?
-   - **a**: One writes and nine read, since all ten share the same hash and the same prefix
+1. A service fires six calls together, all sharing a 30,000-token prefix, against a cold cache. What does the module predict?
+   - **a**: One writes and five read, since all six share the same hash and the same prefix
    - **b**: Each one writes, since the entry appears only once a first reply starts
-   - **c**: All read, since the entry is created the moment a request arrives
-   - **d**: One writes and nine fail, since an entry allows a single writer
+   - **c**: None writes, since only a pre-warm call with `max_tokens` of 0 can fill a cold cache
+   - **d**: One writes and five fail, since an entry allows a single writer
 
 2. A prefix is sent twice within five minutes on a model that reads at 0.1 times the base price. How does the spend on the pair
    compare with two ordinary sends?
@@ -172,18 +172,18 @@ This quiz covers both pages of the module.
    - **d**: It violates a one-TTL rule, since a request carries one lifetime
 
 4. A 600-token system prompt is marked on a model whose minimum is 512, and usage shows a write on every call and no reads. The
-   prompt begins with the clock reading. What should the team do?
+   prompt is a template whose opening lines are filled in with each caller's details. What should the team do?
    - **a**: Pad the prompt so it clears the floor by a wider margin and stays well above it
    - **b**: Raise the TTL to an hour so the entry survives between uses and keeps being read
-   - **c**: Shift that line to the end and set the boundary where unchanging text stops
+   - **c**: Move the varying values past the boundary so everything ahead of it stays fixed
    - **d**: Switch to a larger number of explicit markers so more segments are cached separately
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says a cache entry "only becomes available after the first response begins", so all ten write. *a* is ruled out because the entry "only becomes available after the first response begins", so the others have nothing to read. *c* is ruled out because the same sentence says it is available only "after the first response begins". *d* is ruled out because the advice is "wait for the first response before sending subsequent requests", not that extra requests fail.
+1. **b**. The page says a cache entry "only becomes available after the first response begins", so all six write. *a* is ruled out because a shared hash is not enough: "If you need cache hits for parallel requests, wait for the first response before sending subsequent requests". *c* is ruled out because an ordinary first request writes without any pre-warm, as in "Row 1 writes the 600 tokens". *d* is ruled out because the extra requests write rather than fail: "ten parallel requests write ten times".
 2. **a**. A five-minute write at 1.25 plus a read at 0.1 gives 1.35 against 2, about two thirds. *b* is ruled out because the first send alone costs more than that: "5-minute cache write tokens are 1.25 times the base input tokens price". *c* is ruled out because that figure is the one-hour case, from "1-hour cache write tokens are 2 times the base input tokens price". *d* is ruled out because the second send is a read: "Cache read tokens are 0.1 times the base input tokens price".
 3. **a**. The page says "Cache entries with longer TTL must appear before shorter TTLs". *b* is ruled out because the writes are billed differently: "1-hour cache write tokens are 2 times the base input tokens price". *c* is ruled out because "The usage object then splits the writes" by lifetime, so both can be written. *d* is ruled out because "You can use both 1-hour and 5-minute cache controls in the same request" when ordered correctly.
-4. **c**. The planner puts "a volatile block moves to the very end of the request", after the last breakpoint. *b* is ruled out because "Changes at each level invalidate that level and all subsequent levels", whatever the TTL. *a* is ruled out because padding only helps a prefix that falls short, since "A prefix shorter than the model's minimum is not cached", and writes on every call show that this prompt is cached and is not short. *d* is ruled out because "You can define up to 4 cache breakpoints", yet an earlier changing block still changes the hash.
+4. **c**. The page reads this pattern as "writes without reads mean the prefix keeps changing", and the filled-in opening lines are what changes, so they go "after the last breakpoint". *b* is ruled out because "Changes at each level invalidate that level and all subsequent levels", whatever the TTL. *a* is ruled out because padding only helps a prefix that falls short, since "A prefix shorter than the model's minimum is not cached", and writes on every call show that this prompt is cached and is not short. *d* is ruled out because "You can define up to 4 cache breakpoints", yet an earlier changing block still changes the hash.
 
 </details>

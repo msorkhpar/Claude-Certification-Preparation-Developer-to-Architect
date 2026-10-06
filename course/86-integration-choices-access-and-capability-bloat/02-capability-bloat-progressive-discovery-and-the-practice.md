@@ -627,7 +627,7 @@ The practice is in [`exercises/86-integration-choices-access-and-capability-bloa
 
 ## Quiz
 
-1. A support agent can read tickets, draft replies, pay customers back and permanently close user profiles. Staff only ever read tickets and draft replies. Applying least privilege, which change reduces risk most?
+1. A support agent can read tickets, draft replies, pay customers back and permanently close user profiles. Staff only ever read tickets and draft replies. Which change reduces the risk most?
    - **a**: Record every repayment and closure so that misuse can be audited later
    - **b**: Remove the repayment and closure capabilities from its configuration
    - **c**: Keep every capability but ask for a confirmation before each repayment and closure
@@ -637,7 +637,7 @@ The practice is in [`exercises/86-integration-choices-access-and-capability-bloa
    - **a**: Shorten every description so that the definitions take fewer tokens
    - **b**: Merge the capabilities into a few multi-purpose ones that take a mode argument
    - **c**: Move to a larger model so that more definitions fit in the window
-   - **d**: Defer most definitions behind a search tool and keep the few most used loaded
+   - **d**: Defer the rarely used definitions so that a search tool finds them on demand
 
 <details>
 <summary>Answer key</summary>
@@ -651,16 +651,16 @@ The practice is in [`exercises/86-integration-choices-access-and-capability-bloa
 
 This quiz covers both pages of the module.
 
-1. A team has 60 tools and turns on the tool search tool. A developer proposes to omit the least-used tools from the request, to save tokens. What does the documentation say?
-   - **a**: Send the least-used ones inside the system prompt as plain text
+1. A team has 60 tools and turns on the tool search tool. A developer proposes to omit the least-used tools from the request, to save tokens. What should each request carry?
+   - **a**: Send the least-used definitions once, on the first request only
    - **b**: Send only the loaded tools, and keep the rest in the application
    - **c**: Send every definition and mark the infrequent ones as deferred
    - **d**: Send every definition with a cache breakpoint on each deferred one
 
 2. A gateway receives a request whose credential has been revoked and which also names a model that the team may not use. What does it answer, and what does it record?
    - **a**: A refusal for the model, recorded under the team that owned the revoked credential
-   - **b**: A refusal as unauthenticated, logged under unknown with the verdict but no prompt text
-   - **c**: An approval with a warning in the log, since a revoked credential is the provider's concern
+   - **b**: A refusal as unauthenticated, logged under unknown together with its verdict
+   - **c**: A refusal as unauthenticated, with no record kept because the caller is unknown
    - **d**: A refusal that keeps the full prompt in the record, so that an attack can be studied later
 
 3. A partner company's autonomous research system, built on another framework, must hand sub-tasks to your own autonomous system and collect the results. Which mechanism does the integration use?
@@ -672,8 +672,8 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **c**. The search runs on the full set, so every definition is sent and the infrequent ones are marked as deferred. *b* is ruled out because "You still send every tool's full definition in the `tools` array on every request". *a* is ruled out because deferral changes "what enters the context window", and text in the prompt would load them all every time. *d* is ruled out because deferred tools are kept out of the prefix, and "A deferred tool cannot itself carry a cache breakpoint".
-2. **b**. Who is calling comes first, and the record keeps "the team (or "unknown"), the model and the verdict, and no prompt text". *a* is ruled out because "A request with no credential is refused as unauthenticated even when it also asks for a model it may not have". *c* is ruled out because "every decision, the refusals included, leaves a record". *d* is ruled out because "a log of content is its own data-protection problem".
+1. **c**. The search runs on the full set, so every definition is sent and the infrequent ones are marked as deferred. *b* is ruled out because the deferred ones are sent too, "because the API needs them to run the search". *a* is ruled out because "You still send every tool's full definition in the `tools` array on every request", not only on the first. *d* is ruled out because deferred tools are kept out of the prefix, and "A deferred tool cannot itself carry a cache breakpoint".
+2. **b**. Who is calling comes first, and the record keeps "the team (or "unknown"), the model and the verdict, and no prompt text". *a* is ruled out because "A request with no credential is refused as unauthenticated even when it also asks for a model it may not have". *c* is ruled out because "every decision, the refusals included, leaves a record", and "a log of denials is how an attack is seen". *d* is ruled out because "a log of content is its own data-protection problem".
 3. **d**. The counterpart is an independent agent with its own owner, which is the agent-to-agent case. *a* is ruled out because "MCP is for agent-to-tool communication", and the partner's agent is a peer and not a tool. *b* is ruled out because a direct call suits "The path is known: the same steps in the same order", and a delegation between two agents is not that. *c* is ruled out because A2A is "Not a sub-agent or tool-call protocol", and a subagent is how an agent delegates inside its own framework, not across two.
 
 </details>

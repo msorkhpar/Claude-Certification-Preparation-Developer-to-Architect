@@ -418,9 +418,9 @@ naming: reviewed 3, precision 0.0, switch off: False
 
 1. A review prompt says 'only report high-confidence issues', yet developers still dismiss most remarks about naming and layout. What fixes it?
    - **a**: Phrase the confidence threshold in stricter words
-   - **b**: Ask the reviewer to explain each remark at much greater length
-   - **c**: Send fewer files to each review run
-   - **d**: Spell out which patterns to flag and which to leave alone
+   - **b**: Require a written justification for each remark before it posts
+   - **c**: Send fewer files to each run so every remark gets more care
+   - **d**: Add a skip list for style nits beside the bug patterns to flag
 
 2. One category of findings was dismissed in two thirds of its first twenty reviews, and developers have begun skipping the other remarks too. What does the guide recommend for that category?
    - **a**: Pause it while its prompt and examples improve
@@ -431,7 +431,7 @@ naming: reviewed 3, precision 0.0, switch off: False
 <details>
 <summary>Answer key</summary>
 
-1. **d**. Naming the patterns to report and to skip is what changes the output. *a* is ruled out because stricter wording of the same attitude still names no pattern, and such instructions "fail to improve precision". *b* is ruled out because a longer explanation leaves the categories unmentioned: "Most false positives are in the categories the prompt never mentioned". *c* is ruled out because a smaller review changes the volume only, while a pattern is something "a reviewer can check a line against it".
+1. **d**. Naming and layout are minor style, so they go on the skip list, and naming the patterns to report and to skip is what changes the output. *a* is ruled out because stricter wording of the same attitude still names no pattern, and such instructions "fail to improve precision". *b* is ruled out because a justification can be written for a style remark too, and the categories stay unmentioned: "Most false positives are in the categories the prompt never mentioned". *c* is ruled out because a smaller review changes the volume only, while the style remarks "stop only when the prompt says to skip them".
 2. **a**. Disabling a high false-positive category while its prompt is improved restores trust in the rest. *b* is ruled out because "Deleting the category from the criteria loses the examples that the next attempt needs". *c* is ruled out because the remarks would still be posted and dismissed, since "each dismissed comment lowers trust in the accepted ones". *d* is ruled out because "self-reported confidence is another vague instruction".
 
 </details>

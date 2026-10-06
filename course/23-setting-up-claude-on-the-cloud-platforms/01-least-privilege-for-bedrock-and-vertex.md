@@ -415,23 +415,23 @@ is easy to test, which is the idea of this module's practice.
    - **c**: Replace the wildcard with a deny statement for every other model
    - **d**: List the one invoke action and name the single model's ARN
 
-2. A service account must only call a Claude endpoint on Google Cloud. The team compares a ready-made grant bundle with one it authors. What does the page favour?
-   - **a**: The tailored role with just the predict permission
-   - **b**: A predefined role, since the platform maintains it for the team
-   - **c**: A basic role such as Editor, since it covers every service at once
-   - **d**: No role at all, since a service account works without any grant
+2. A service account holds a custom role with only aiplatform.endpoints.predict on a Claude endpoint. A script running as that account tries to change how the endpoint is deployed. What should the team expect?
+   - **a**: It is refused, since the grant covers calling the model and no more
+   - **b**: It goes through, since a role on an endpoint covers all of it
+   - **c**: It goes through, since the account sits in the endpoint's project
+   - **d**: It is refused, since custom roles cannot be bound to an endpoint
 
-3. A team adds the deploy permission to its invoker role just in case. What does the Google page warn?
-   - **a**: It blocks the predict permission until the deploy one is removed
-   - **b**: It makes every prediction slower on the endpoint that holds it
-   - **c**: It opens a route to exporting other models held in the project
-   - **d**: It has no effect at all, because deploy only adds serving capacity
+3. A team adds the deploy permission to its invoker role just in case. How should a reviewer judge the change?
+   - **a**: Remove it, since it replaces predict and the calls to Claude will fail
+   - **b**: Accept it, since the predefined user role carries the same permission
+   - **c**: Remove it, since the account could export other models in the project
+   - **d**: Accept it, since a deploy grant only adds serving capacity to the endpoint
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The page says to "grant only the permissions required to perform a task", by "defining the actions that can be taken on specific resources". *b* is ruled out because a wildcard action still grants more than "the permissions required to perform a task". *c* is ruled out because "By default, users and roles don't have permission to create or modify Amazon Bedrock resources", so a policy should add what is needed and not rely on denies. *a* is ruled out because conditions come after the basics: "defining the actions that can be taken on specific resources under specific conditions".
-2. **a**. The page says "custom roles are recommended because you create them, so you can limit their access to only the permissions that are required". *b* is ruled out because "Predefined roles often contain more permissions than you need." *c* is ruled out because basic roles "provide access control to your Agent Platform resources at the project level, and are common to all Google Cloud services", which is broad. *d* is ruled out because "You grant access by assigning IAM roles to principals."
-3. **c**. The page warns that the deploy permission "might allow a user to export other deployed or deployable models from the project". *b* is ruled out because the predict permission "grants the service account the ability to call the endpoint for predictions", and the page says nothing of speed. *a* is ruled out because the same sentence shows the predict permission grants "the ability to call the endpoint for predictions" on its own. *d* is ruled out because the warning is that it "might allow a user to export other deployed or deployable models from the project".
+1. **d**. The page says to "grant only the permissions required to perform a task", by "defining the actions that can be taken on specific resources". *b* is ruled out because a wildcard action still grants more than "the permissions required to perform a task". *c* is ruled out because "By default, users and roles don't have permission to create or modify Amazon Bedrock resources", so a policy should add what is needed and not rely on denies. *a* is ruled out because conditions are a refinement on top of a narrow policy: "Both come after the basics: the right action on the right resource".
+2. **a**. The page says the predict role "grants the service account the ability to call the endpoint for predictions", and nothing beyond that. *b* is ruled out because the same grant comes "but not the ability of controlling the endpoint". *c* is ruled out because membership grants nothing by itself: "You grant access by assigning IAM roles to principals." *d* is ruled out because the page says to "assign the role to a service account on an endpoint".
+3. **c**. The page warns that the deploy permission "might allow a user to export other deployed or deployable models from the project". *b* is ruled out because a predefined role is no model to copy: "Predefined roles often contain more permissions than you need." *a* is ruled out because custom "roles hold exactly the permissions you list", so predict stays beside deploy. *d* is ruled out because the page concludes "so an invoker role should not carry it".
 
 </details>

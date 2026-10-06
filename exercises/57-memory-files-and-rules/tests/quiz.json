@@ -15,9 +15,9 @@
       "key": "b",
       "explanation": {
         "b": "The local file is personal to one project and is kept out of version control.",
-        "a": "Ruled out because \"A personal note about one project, such as a sandbox address, belongs in the local file\", and a committed file would share it.",
+        "a": "Ruled out because a committed file is how a rule reaches the team, as in \"the fix is to move the rule into the project file and commit it\", so the reminder would reach every teammate.",
         "c": "Ruled out because that file reaches \"You, in every project\", and the reminder concerns one repository.",
-        "d": "Ruled out because that layer reaches \"Everyone on the machine, and individual settings cannot exclude it\", so it is not a private note."
+        "d": "Ruled out because that layer reaches \"Everyone on the machine, and individual settings cannot exclude it\", whatever the project, so it is not a note for one repository."
       }
     },
     {
@@ -64,16 +64,16 @@
       "scope": "page",
       "stem": "A rule meant for infrastructure code loads in every session instead. What is the most likely cause?",
       "options": {
-        "a": "The rules folder sits below the working directory",
-        "b": "Infrastructure files are always opened at the start of a session",
-        "c": "Its frontmatter is invalid YAML, so the scoping is dropped",
+        "a": "Its glob begins with `**/`, which reaches into every folder",
+        "b": "Every rule loads at launch whatever its `paths` entry says",
+        "c": "The YAML in its frontmatter does not parse as written",
         "d": "The rule's file name does not match the folder it governs"
       },
       "key": "c",
       "explanation": {
         "c": "When the frontmatter does not parse, the rule is treated as unscoped.",
-        "a": "Ruled out because \"Every Markdown file under .claude/rules/ is a rule\", wherever the session starts.",
-        "b": "Ruled out because a scoped rule loads when Claude uses Read, Write or Edit on a matching file, \"not on every tool use\".",
+        "a": "Ruled out because a leading `**/` only lets the glob match at any depth, while \"matching is by file, and the trigger is a Read, Write or Edit of a matching file\".",
+        "b": "Ruled out because a rule with a `paths` list that parses is scoped: \"it loads only when Claude works with a file that matches\".",
         "d": "Ruled out because the file name plays no part, since `paths` \"is the only field Claude Code reads in a rule\"."
       }
     },
@@ -85,53 +85,53 @@
       "options": {
         "a": "The sandbox address contradicts a rule that the team shares",
         "b": "Local notes load first and replace everything after them",
-        "c": "A local note ends the fallback that had applied",
+        "c": "A local file counts as a memory file that rules out `AGENTS.md`",
         "d": "Git-ignored files are read in place of the committed ones"
       },
       "key": "c",
       "explanation": {
         "c": "The default is that AGENTS.md is read only when no CLAUDE.md file exists in the working directory or above, and the local file counts as one, so the fallback ends.",
-        "a": "Ruled out because presence decides, not content: \"A `CLAUDE.md`, a `.claude/CLAUDE.md` or a `CLAUDE.local.md` in the working directory or any directory above it counts\".",
-        "b": "Ruled out because \"All discovered files are concatenated into context rather than overriding each other\", and \"In each folder the local file comes after the shared one\".",
-        "d": "Ruled out because the file is ignored by git only so that it stays personal, \"which is why that file is ignored by git\", and the ignore setting plays no part in what Claude reads."
+        "a": "Ruled out because a conflict matters only for the same behaviour, where \"Claude may pick one arbitrarily\", and a sandbox address shares no behaviour with the other file, while its presence alone counts: \"A `CLAUDE.md`, a `.claude/CLAUDE.md` or a `CLAUDE.local.md` in the working directory or any directory above it counts\".",
+        "b": "Ruled out because \"All discovered files are concatenated into context rather than overriding each other\", so no file replaces the ones after it.",
+        "d": "Ruled out because a git-ignored file is read beside the committed one and not instead of it: \"In each folder the local file comes after the shared one\"."
       }
     },
     {
       "id": "02-path-scoped-rules-size-and-the-practice#m2",
       "page": "02-path-scoped-rules-size-and-the-practice.md",
       "scope": "module",
-      "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. Its single `CLAUDE.md` has grown to four hundred lines, and a developer splits it into five files that the root pulls in with `@` references, expecting sessions to start lighter. What results?",
+      "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A developer moves the sections of a four-hundred-line `CLAUDE.md` into five files in the repository and lists each one in the root file as an `@` path formatted as inline code. After a restart, `/context` shows the root file and none of the five. What explains it?",
       "options": {
-        "a": "The loaded text is unchanged, since imported material still arrives at launch",
-        "b": "Context shrinks by four fifths, because each part loads only on demand",
-        "c": "Context shrinks for any session that never touches the split-out areas",
-        "d": "Claude loads the root alone and fetches the others when it needs them"
+        "a": "Import parsing passes over anything set between backticks",
+        "b": "Imported files wait until Claude reads inside their folder",
+        "c": "Five imports in one file go past the limit on import depth",
+        "d": "Each imported file waits for approval the first time it loads"
       },
       "key": "a",
       "explanation": {
-        "a": "An import changes where text is kept and not how much of it is loaded.",
-        "b": "Ruled out because imported files \"are expanded and loaded into context at launch alongside the CLAUDE.md that references them\".",
-        "c": "Ruled out because that describes a scoped rule, since \"A path-scoped rule loads on a match, wherever the matching files are\", while an import \"moves text to another file and loads it at launch\".",
-        "d": "Ruled out because an import \"moves text to another file and loads it at launch, so the cost is unchanged\"."
+        "a": "A path between backticks is a mention and not an import, so the five files were never pulled in.",
+        "b": "Ruled out because imported files \"are expanded and loaded into context at launch alongside the CLAUDE.md that references them\", whatever Claude reads later.",
+        "c": "Ruled out because the limit applies to chains, since imports can import others \"with a maximum depth of four hops\", and each of the five is one hop from the root.",
+        "d": "Ruled out because the approval dialog is for \"Imports that point outside the project\", and these files sit inside the repository."
       }
     },
     {
       "id": "02-path-scoped-rules-size-and-the-practice#m3",
       "page": "02-path-scoped-rules-size-and-the-practice.md",
       "scope": "module",
-      "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A new rule for component files should apply to `.tsx` sources anywhere in the project and to nothing else. Which `paths` entry does it?",
+      "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A new rule should apply to every `.ts` and `.tsx` source at any depth under `src/`, and to nothing outside that folder or of another type. Which `paths` entry does it?",
       "options": {
-        "a": "`*.tsx`",
-        "b": "`src/components`",
-        "c": "`components/**`",
-        "d": "`**/*.tsx`"
+        "a": "`src/*.{ts,tsx}`",
+        "b": "`src/**/*.tsx`",
+        "c": "`**/*.{ts,tsx}`",
+        "d": "`src/**/*.{ts,tsx}`"
       },
       "key": "d",
       "explanation": {
-        "d": "The leading `**/` makes the pattern match the file type at any depth.",
-        "a": "Ruled out because without it the pattern behaves like \"`*.md` matches Markdown files in the project root\", so only files at the top of the project match.",
-        "b": "Ruled out because a bare folder name matches nothing: \"matches no file, so the rule never loads\".",
-        "c": "Ruled out because it names a folder and not a type, while \"a glob follows the file's type wherever it sits\"."
+        "d": "The folder prefix keeps the rule inside `src/`, the `**/` reaches any depth below it, and the brace group covers both extensions.",
+        "a": "Ruled out because a single `*` stays in one folder, as \"`*.md` matches Markdown files in the project root\", so only files directly in `src/` would match.",
+        "b": "Ruled out because it names one extension, while covering both takes a brace group, as `src/**/*.{ts,tsx}` \"matches a set, with brace groups expanded\".",
+        "c": "Ruled out because \"`**/*.ts` matches TypeScript files in any directory\", so sources outside `src/` would match too."
       }
     }
   ]

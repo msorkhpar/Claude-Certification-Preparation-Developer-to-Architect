@@ -5,19 +5,19 @@
       "id": "01-one-messages-api-three-front-doors#q1",
       "page": "01-one-messages-api-three-front-doors.md",
       "scope": "page",
-      "stem": "A team moves a working direct-API request to Google Cloud and keeps the body unchanged. It is refused. Which changes does the page require?",
+      "stem": "A team moves a working direct-API request to Google Cloud, swaps the API key for a Google access token and keeps the body unchanged. It is refused. Which changes does the page require?",
       "options": {
-        "a": "Add an `anthropic-version` header and remove nothing else from the body",
-        "b": "Keep the model in the payload and send the version as a request header",
+        "a": "Prefix the model with the provider name and keep the version as a header",
+        "b": "Keep the model in the payload and move the version into the payload too",
         "c": "Move both the model and the version into the query string of the address",
         "d": "Name the model in the address and carry the version in the payload"
       },
       "key": "d",
       "explanation": {
         "d": "The page says \"`model` is not passed in the request body\" and that it \"is specified in the Google Cloud endpoint URL\", while `anthropic_version` goes \"in the request body\".",
-        "b": "Ruled out because \"`model` is not passed in the request body\", and the version is \"rather than as a header\".",
-        "c": "Ruled out because the model \"is specified in the Google Cloud endpoint URL\", which is the address path, not a query string.",
-        "a": "Ruled out because the version is passed \"rather than as a header\"."
+        "b": "Ruled out because moving the version is right but the model must leave the body: \"Vertex wants the model in the URL\".",
+        "c": "Ruled out because the model sits in the address path, \"before `:rawPredict`\", and \"The version is the body field\" `anthropic_version`, not a query parameter.",
+        "a": "Ruled out because \"The model id there is the plain name\", with no prefix, and the version is passed \"rather than as a header\"."
       }
     },
     {
@@ -26,16 +26,16 @@
       "scope": "page",
       "stem": "A developer calls Claude Opus 5.5 through Bedrock with the identifier `claude-opus-5-5` and gets an error. What fixes it?",
       "options": {
-        "a": "Add the provider prefix so the name starts with anthropic",
-        "b": "Use the dated name that the direct API shows, with no prefix at all",
-        "c": "Use the Vertex form of the name, with an at sign and a date after it",
-        "d": "Send the name in a request header called x-model instead of the body"
+        "a": "Keep the id in the body and put the anthropic. prefix in front of it",
+        "b": "Use the dated id that the direct API lists for this same model",
+        "c": "Use the Google Cloud form of the id, with an at sign and a date",
+        "d": "Move the id into the endpoint address and leave it out of the body"
       },
       "key": "a",
       "explanation": {
-        "a": "The page says \"Model IDs in Claude in Amazon Bedrock carry an `anthropic.` provider prefix\".",
-        "b": "Ruled out because the Bedrock ids \"carry an `anthropic.` provider prefix\" and are not the direct API names.",
-        "c": "Ruled out because the at-sign form belongs to Google Cloud, where \"`model` is not passed in the request body\".",
+        "a": "The page says \"Model IDs in Claude in Amazon Bedrock carry an `anthropic.` provider prefix\", and the model stays in the body.",
+        "b": "Ruled out because the id gains a prefix, not a date: \"so `claude-opus-5-5` becomes `anthropic.claude-opus-5-5`\".",
+        "c": "Ruled out because the at-sign form is the Google Cloud one, \"with a dated form for some models\", and there the model sits in the URL.",
         "d": "Ruled out because the model stays in the body on Bedrock, \"the same request body shape as Anthropic's first-party API\"."
       }
     },
@@ -45,7 +45,7 @@
       "scope": "page",
       "stem": "A security team wants no long-lived keys on developer laptops when calling Claude through Bedrock. Which path does the page favour?",
       "options": {
-        "a": "A single shared access key stored with the source code of the project",
+        "a": "An Anthropic API key per developer, rotated by the security team monthly",
         "b": "Bearer tokens kept in each laptop's configuration file for daily use",
         "c": "A provisioned service role that the platform assumes for the caller",
         "d": "An assumed role with a session that lasts for a full working week"
@@ -54,7 +54,7 @@
       "explanation": {
         "c": "The page marks the service role as the recommended path: \"Use a Bedrock service role with AWS-managed keys for the most secure, long-lived access\".",
         "b": "Ruled out because bearer tokens are \"(12-hour maximum, least preferred)\".",
-        "a": "Ruled out because the service role is the path \"for the most secure, long-lived access\", with \"AWS-managed keys\" and no shared key in the source.",
+        "a": "Ruled out because \"Neither platform needs an Anthropic API key\", however often it is rotated.",
         "d": "Ruled out because an assumed role has \"a 12-hour maximum session\", not a week."
       }
     },
@@ -62,18 +62,18 @@
       "id": "02-what-each-platform-lacks-where-it-runs-and-what-it-costs#q1",
       "page": "02-what-each-platform-lacks-where-it-runs-and-what-it-costs.md",
       "scope": "page",
-      "stem": "A team on Amazon Bedrock plans nightly bulk jobs through the Message Batches API at half price. What do the docs say?",
+      "stem": "A team on Amazon Bedrock plans nightly bulk jobs through the Message Batches API at half price. What should it budget?",
       "options": {
-        "a": "The endpoint works there, at the same half price as the direct API itself",
-        "b": "That endpoint is not offered there, so the discount route is unavailable",
-        "c": "The endpoint works there, but at a ten percent premium for the region",
-        "d": "The endpoint works there once the Files API has been enabled first"
+        "a": "Batch jobs on Bedrock, at the same half price as on the direct API",
+        "b": "Ordinary one-by-one calls, at the usual per-token rate with no discount",
+        "c": "Batch jobs on Bedrock, at half price plus a ten percent regional premium",
+        "d": "Batch jobs on Bedrock, with the inputs uploaded through the Files API"
       },
       "key": "b",
       "explanation": {
-        "b": "The Bedrock page lists \"API endpoints (Message Batches, Models, Admin, Compliance, Usage and Cost)\" under features not supported.",
-        "a": "Ruled out because that same list names \"API endpoints (Message Batches, Models, Admin, Compliance, Usage and Cost)\" as missing.",
-        "c": "Ruled out because the premium belongs to regional routing: \"Regional endpoints carry a 10% pricing premium over global endpoints.\"",
+        "b": "The Bedrock page lists \"API endpoints (Message Batches, Models, Admin, Compliance, Usage and Cost)\" under features not supported, and the discount \"belongs to the Message Batches API\".",
+        "a": "Ruled out because \"Bedrock has no such endpoint on this integration\".",
+        "c": "Ruled out because the premium belongs to regional routing, \"Regional endpoints carry a 10% pricing premium over global endpoints.\", and there is no batch endpoint to apply it to.",
         "d": "Ruled out because the Files API is itself on the list: \"URL sources for images and documents, Files API\"."
       }
     },
@@ -81,57 +81,57 @@
       "id": "02-what-each-platform-lacks-where-it-runs-and-what-it-costs#q2",
       "page": "02-what-each-platform-lacks-where-it-runs-and-what-it-costs.md",
       "scope": "page",
-      "stem": "A company needs single-region data residency for Claude on Google Cloud and also wants provisioned throughput. Which type of address fits?",
+      "stem": "A company must keep its Claude traffic on Google Cloud inside one named region and also wants provisioned throughput. Which type of address fits?",
       "options": {
-        "a": "Any kind, since the premium buys residency on all three of them",
+        "a": "A regional kind for residency, with the global kind for throughput",
         "b": "The global kind, since it routes to wherever capacity is free today",
         "c": "The multi-region kind, since it supports provisioned throughput as well",
-        "d": "The regional kind, which is required for both aims and costs 10% more"
+        "d": "The regional kind, since it serves both of the needs at a 10% premium"
       },
       "key": "d",
       "explanation": {
         "d": "The page says regional endpoints are \"Required for single-region data residency, strict compliance mandates, or provisioned throughput\", at the premium.",
-        "b": "Ruled out because the global kind \"only supports pay-as-you-go traffic (provisioned throughput requires regional endpoints)\".",
+        "b": "Ruled out because the global kind will \"Dynamically route requests to regions with available capacity\", so traffic leaves the one region.",
         "c": "Ruled out because the multi-region kind also \"supports pay-as-you-go traffic only\".",
-        "a": "Ruled out because \"Global endpoints: Dynamic routing for maximum availability\", with \"No pricing premium\" and no residency choice."
+        "a": "Ruled out because the global kind \"only supports pay-as-you-go traffic (provisioned throughput requires regional endpoints)\", so the reserved capacity cannot sit there."
       }
     },
     {
       "id": "02-what-each-platform-lacks-where-it-runs-and-what-it-costs#q3",
       "page": "02-what-each-platform-lacks-where-it-runs-and-what-it-costs.md",
       "scope": "page",
-      "stem": "A team must pick between the two cloud platforms and needs structured outputs and web search from it. What do the pages show?",
+      "stem": "A team must pick between the two partner platforms and needs structured outputs and web search from it. What do the pages show?",
       "options": {
-        "a": "AWS offers web search but not structured outputs, while Google's service lacks web search",
-        "b": "AWS lacks both, while Google's service offers both",
-        "c": "Both platforms offer both features without any exception at all",
-        "d": "Google's service offers structured outputs but lacks web search"
+        "a": "Bedrock offers web search only, while Google Cloud offers both of them",
+        "b": "Bedrock offers neither one, while Google Cloud offers both of them",
+        "c": "Both offer the two features, since each takes the same request body",
+        "d": "Google Cloud offers structured outputs only, while Bedrock offers both"
       },
       "key": "b",
       "explanation": {
-        "b": "The Bedrock list has \"Server-side tools (code execution, web search, web fetch, advisor)\" and structured outputs among the gaps, and the Google Cloud page lists \"Structured outputs\" and the \"Web search tool\" among its supported feature highlights.",
+        "b": "The page says \"Web search and structured outputs are on Google Cloud and not on Bedrock.\"",
         "a": "Ruled out because Bedrock's list has \"Server-side tools (code execution, web search, web fetch, advisor)\" as missing.",
-        "c": "is ruled out for the same reason: Bedrock lacks \"Server-side tools (code execution, web search, web fetch, advisor)\".",
-        "d": "Ruled out because the Google Cloud page lists them \"among its supported feature highlights\"."
+        "c": "Ruled out because a shared body does not mean shared features: Google Cloud \"does offer more than Bedrock in two places\".",
+        "d": "Ruled out because the Google Cloud page lists both \"among its supported feature highlights\", and Bedrock lists structured outputs under its gaps."
       }
     },
     {
       "id": "02-what-each-platform-lacks-where-it-runs-and-what-it-costs#m1",
       "page": "02-what-each-platform-lacks-where-it-runs-and-what-it-costs.md",
       "scope": "module",
-      "stem": "A team sends the same traffic through a global endpoint and then a regional endpoint on Bedrock. How do the prices compare?",
+      "stem": "A team moves its Bedrock traffic from the global endpoint to a regional one for data residency. The same tokens cost 1,000 dollars a month before. What should it budget now?",
       "options": {
-        "a": "The two routes cost the same, since the models behind them are identical",
-        "b": "The specific-region route costs ten percent more than the dynamic one",
-        "c": "The dynamic route costs ten percent more, since it covers more locations",
-        "d": "The specific-region route costs half as much, since it uses idle capacity"
+        "a": "About 1,000, since the same models serve both of the routes",
+        "b": "About 1,100, since that route is priced above the dynamic one",
+        "c": "About 900, since the global route was the one with the premium",
+        "d": "About 500, since that route runs on spare capacity at half price"
       },
       "key": "b",
       "explanation": {
-        "b": "The page says \"Regional endpoints carry a 10% pricing premium over global endpoints.\"",
-        "a": "Ruled out because the same sentence prices the two kinds differently: \"Regional endpoints carry a 10% pricing premium over global endpoints.\"",
+        "b": "The page says \"Regional endpoints carry a 10% pricing premium over global endpoints.\", so 1,000 becomes about 1,100.",
+        "a": "Ruled out because \"Bedrock has the same idea with different words\" as Google Cloud, where regional endpoints \"include a 10% pricing premium over global endpoints\".",
         "c": "Ruled out because a global endpoint gives \"dynamic routing across all available regions for maximum availability\" with no premium.",
-        "d": "Ruled out because the regional kind is the one with the premium, \"10% pricing premium over global endpoints\"."
+        "d": "Ruled out because half price is a different route: \"the 50 percent discount of module 21 belongs to the Message Batches API\"."
       }
     },
     {
@@ -148,7 +148,7 @@
       "key": "a",
       "explanation": {
         "a": "The page's comment is \"Specific regional endpoints support Claude Sonnet 4.6 and earlier; newer models use the global or multi-region endpoints\", and the practice says a specific region serves `claude-sonnet-4-6` only.",
-        "b": "Ruled out because \"Specific regional endpoints support Claude Sonnet 4.6 and earlier\".",
+        "b": "Ruled out because \"the specific regional endpoints serve only older models\".",
         "c": "Ruled out because the practice states \"An unsupported model and endpoint pair is a `PlatformError`\".",
         "d": "Ruled out because \"a specific region serves `claude-sonnet-4-6` only\", so the model is known and the endpoint is the fault."
       }
@@ -157,19 +157,19 @@
       "id": "02-what-each-platform-lacks-where-it-runs-and-what-it-costs#m3",
       "page": "02-what-each-platform-lacks-where-it-runs-and-what-it-costs.md",
       "scope": "module",
-      "stem": "A team wants the faster output option for its streamed chat, running on Opus 5.5 through AWS. What do the docs say?",
+      "stem": "A team wants the faster output mode for its streamed chat on Opus 5.5 and may call Claude from any platform. Where can it get it?",
       "options": {
-        "a": "The speed mode is limited to Anthropic's own endpoint",
-        "b": "It works the same on AWS, at the same twice-standard rate",
-        "c": "It works on AWS for the Haiku tier alone, at the standard rate",
-        "d": "It works on AWS once the beta header has been sent in the call"
+        "a": "The direct API, since the option is offered on that door alone",
+        "b": "Google Cloud, since it offers more features than Bedrock does",
+        "c": "Claude Platform on AWS, since Anthropic itself operates that door",
+        "d": "Bedrock or Google Cloud, once a beta header is sent with the call"
       },
       "key": "a",
       "explanation": {
         "a": "The page says fast mode \"is available on the Claude API (first-party) only\".",
-        "b": "Ruled out because fast mode \"is not available on Claude Platform on AWS or partner-operated cloud platforms\".",
-        "c": "Ruled out because the same sentence has no exception by tier: \"is available on the Claude API (first-party) only\".",
-        "d": "Ruled out because a header does not change that: \"it is not available on Claude Platform on AWS or partner-operated cloud platforms\"."
+        "b": "Ruled out because \"One more gap spans the partner platforms\", and Google Cloud is one of them.",
+        "c": "Ruled out because fast mode \"is not available on Claude Platform on AWS\", although Anthropic operates it.",
+        "d": "Ruled out because a header does not change that: \"not available on Claude Platform on AWS or partner-operated cloud platforms\"."
       }
     },
     {

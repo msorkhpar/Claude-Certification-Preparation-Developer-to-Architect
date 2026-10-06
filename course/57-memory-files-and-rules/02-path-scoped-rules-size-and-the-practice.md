@@ -710,16 +710,16 @@ The practice is in [`exercises/57-memory-files-and-rules`](../../exercises/57-me
    - **d**: A section for each project in the personal memory file
 
 2. A rule meant for infrastructure code loads in every session instead. What is the most likely cause?
-   - **a**: The rules folder sits below the working directory
-   - **b**: Infrastructure files are always opened at the start of a session
-   - **c**: Its frontmatter is invalid YAML, so the scoping is dropped
+   - **a**: Its glob begins with `**/`, which reaches into every folder
+   - **b**: Every rule loads at launch whatever its `paths` entry says
+   - **c**: The YAML in its frontmatter does not parse as written
    - **d**: The rule's file name does not match the folder it governs
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. One glob follows the type across folders, and the rule loads when a matching file is read or edited. *b* is ruled out because the guide's reason for the glob is "test files spread throughout a codebase", and a copy in each folder would have to be kept in step. *c* is ruled out because an import "moves text to another file and loads it at launch", so the conventions would reach every task. *d* is ruled out because personal rules "apply to every project on your machine", so they neither scope to test files nor reach the team.
-2. **c**. When the frontmatter does not parse, the rule is treated as unscoped. *a* is ruled out because "Every Markdown file under .claude/rules/ is a rule", wherever the session starts. *b* is ruled out because a scoped rule loads when Claude uses Read, Write or Edit on a matching file, "not on every tool use". *d* is ruled out because the file name plays no part, since `paths` "is the only field Claude Code reads in a rule".
+2. **c**. When the frontmatter does not parse, the rule is treated as unscoped. *a* is ruled out because a leading `**/` only lets the glob match at any depth, while "matching is by file, and the trigger is a Read, Write or Edit of a matching file". *b* is ruled out because a rule with a `paths` list that parses is scoped: "it loads only when Claude works with a file that matches". *d* is ruled out because the file name plays no part, since `paths` "is the only field Claude Code reads in a rule".
 
 </details>
 
@@ -730,27 +730,27 @@ This quiz covers both pages of the module.
 1. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A project holds `AGENTS.md` for other tools and nothing named `CLAUDE.md`, and Claude follows it. An engineer adds `CLAUDE.local.md` with a sandbox address, and Claude stops following `AGENTS.md`. What explains it?
    - **a**: The sandbox address contradicts a rule that the team shares
    - **b**: Local notes load first and replace everything after them
-   - **c**: A local note ends the fallback that had applied
+   - **c**: A local file counts as a memory file that rules out `AGENTS.md`
    - **d**: Git-ignored files are read in place of the committed ones
 
-2. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. Its single `CLAUDE.md` has grown to four hundred lines, and a developer splits it into five files that the root pulls in with `@` references, expecting sessions to start lighter. What results?
-   - **a**: The loaded text is unchanged, since imported material still arrives at launch
-   - **b**: Context shrinks by four fifths, because each part loads only on demand
-   - **c**: Context shrinks for any session that never touches the split-out areas
-   - **d**: Claude loads the root alone and fetches the others when it needs them
+2. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A developer moves the sections of a four-hundred-line `CLAUDE.md` into five files in the repository and lists each one in the root file as an `@` path formatted as inline code. After a restart, `/context` shows the root file and none of the five. What explains it?
+   - **a**: Import parsing passes over anything set between backticks
+   - **b**: Imported files wait until Claude reads inside their folder
+   - **c**: Five imports in one file go past the limit on import depth
+   - **d**: Each imported file waits for approval the first time it loads
 
-3. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A new rule for component files should apply to `.tsx` sources anywhere in the project and to nothing else. Which `paths` entry does it?
-   - **a**: `*.tsx`
-   - **b**: `src/components`
-   - **c**: `components/**`
-   - **d**: `**/*.tsx`
+3. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A new rule should apply to every `.ts` and `.tsx` source at any depth under `src/`, and to nothing outside that folder or of another type. Which `paths` entry does it?
+   - **a**: `src/*.{ts,tsx}`
+   - **b**: `src/**/*.tsx`
+   - **c**: `**/*.{ts,tsx}`
+   - **d**: `src/**/*.{ts,tsx}`
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. The default is that AGENTS.md is read only when no CLAUDE.md file exists in the working directory or above, and the local file counts as one, so the fallback ends. *a* is ruled out because presence decides, not content: "A `CLAUDE.md`, a `.claude/CLAUDE.md` or a `CLAUDE.local.md` in the working directory or any directory above it counts". *b* is ruled out because "All discovered files are concatenated into context rather than overriding each other", and "In each folder the local file comes after the shared one". *d* is ruled out because the file is ignored by git only so that it stays personal, "which is why that file is ignored by git", and the ignore setting plays no part in what Claude reads.
-2. **a**. An import changes where text is kept and not how much of it is loaded. *b* is ruled out because imported files "are expanded and loaded into context at launch alongside the CLAUDE.md that references them". *c* is ruled out because that describes a scoped rule, since "A path-scoped rule loads on a match, wherever the matching files are", while an import "moves text to another file and loads it at launch". *d* is ruled out because an import "moves text to another file and loads it at launch, so the cost is unchanged".
-3. **d**. The leading `**/` makes the pattern match the file type at any depth. *a* is ruled out because without it the pattern behaves like "`*.md` matches Markdown files in the project root", so only files at the top of the project match. *b* is ruled out because a bare folder name matches nothing: "matches no file, so the rule never loads". *c* is ruled out because it names a folder and not a type, while "a glob follows the file's type wherever it sits".
+1. **c**. The default is that AGENTS.md is read only when no CLAUDE.md file exists in the working directory or above, and the local file counts as one, so the fallback ends. *a* is ruled out because a conflict matters only for the same behaviour, where "Claude may pick one arbitrarily", and a sandbox address shares no behaviour with the other file, while its presence alone counts: "A `CLAUDE.md`, a `.claude/CLAUDE.md` or a `CLAUDE.local.md` in the working directory or any directory above it counts". *b* is ruled out because "All discovered files are concatenated into context rather than overriding each other", so no file replaces the ones after it. *d* is ruled out because a git-ignored file is read beside the committed one and not instead of it: "In each folder the local file comes after the shared one".
+2. **a**. A path between backticks is a mention and not an import, so the five files were never pulled in. *b* is ruled out because imported files "are expanded and loaded into context at launch alongside the CLAUDE.md that references them", whatever Claude reads later. *c* is ruled out because the limit applies to chains, since imports can import others "with a maximum depth of four hops", and each of the five is one hop from the root. *d* is ruled out because the approval dialog is for "Imports that point outside the project", and these files sit inside the repository.
+3. **d**. The folder prefix keeps the rule inside `src/`, the `**/` reaches any depth below it, and the brace group covers both extensions. *a* is ruled out because a single `*` stays in one folder, as "`*.md` matches Markdown files in the project root", so only files directly in `src/` would match. *b* is ruled out because it names one extension, while covering both takes a brace group, as `src/**/*.{ts,tsx}` "matches a set, with brace groups expanded". *c* is ruled out because "`**/*.ts` matches TypeScript files in any directory", so sources outside `src/` would match too.
 
 </details>
 

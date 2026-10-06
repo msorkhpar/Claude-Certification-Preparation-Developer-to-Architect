@@ -595,21 +595,21 @@ The practice is in [`exercises/93-professional-capstone`](../../exercises/93-pro
 
 1. Scenario: A review of a pilot finds one medium finding, a missing owner, and two low findings, a small evaluation set and an unstated accuracy. There is no high finding. What does the review conclude?
    - **a**: Approve it, since no finding is serious enough to stop the pilot
-   - **b**: Return it for revision, since the ladder calls for one here
-   - **c**: Reject it, since the findings differ in kind and several are present
-   - **d**: Approve it, since the two low findings outnumber the medium one
+   - **b**: Revise it, since no one is accountable for the service yet
+   - **c**: Reject it, since three findings together are too many to approve
+   - **d**: Approve it, since two of its three findings are only low ones
 
 2. Scenario: A reviewer proposes to write the findings grouped by domain, P1 first, because the course is organised in that order. What is the objection?
-   - **a**: The sponsor reads the domains in another order, so the list would confuse
+   - **a**: The sponsor would have to read every finding to reach the verdict
    - **b**: Two reviewers would still produce different lists from the same design
-   - **c**: The domains do not match the rules that the review applies
-   - **d**: The blocking items would be buried among the milder ones
+   - **c**: A finding that spans two domains would be listed twice in the review
+   - **d**: A rejecting P5 item could fall below P1 items that ask for revision
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. With no high finding and a medium one, the review asks for a revision. *a* is ruled out because "revise if none is high and any is medium", so a medium finding stops an approval. *c* is ruled out because "reject if any finding is high" and none is. *d* is ruled out because "A fixed ladder keeps a pile of small findings from becoming a rejection", and by the same ladder a pile of small findings cannot outweigh a medium one.
-2. **d**. A list ordered only by domain hides the blocking items. *a* is ruled out because the order is chosen for the reader of the findings, and the page says "The sponsor stops at the verdict and the scorecard". *b* is ruled out because "Two reviewers must produce the same list", and a fixed order by domain and rule id also gives the same list. *c* is ruled out because the page says of the rules "Each is a fact about the design or a number with a threshold", and the table gives every one a domain from P1 to P7.
+1. **b**. With no high finding and a medium one, the review asks for a revision. *a* is ruled out because "revise if none is high and any is medium", so a medium finding stops an approval. *c* is ruled out because "A fixed ladder keeps a pile of small findings from becoming a rejection", and a rejection needs a high finding, which is absent. *d* is ruled out because the ladder approves "a design with only low findings", and this one also has a medium finding.
+2. **d**. A list ordered only by domain puts severity second, so a high finding in a later domain falls below milder ones in earlier domains. *a* is ruled out because the review is written with "the verdict first, then the scorecard, then the findings in their order", so the sponsor reaches the verdict before any finding. *b* is ruled out because "Two reviewers must produce the same list", and a fixed order by domain and rule id also gives the same list. *c* is ruled out because "Each finding is a severity, a domain and a rule", so a finding sits under one domain and is listed once.
 
 </details>
 
@@ -626,11 +626,11 @@ This quiz covers both pages of the module.
 2. Scenario: A review is run on two proposals that differ in one number: the first has an evaluation set of 20 cases and the second has 19. What differs in the outcome?
    - **a**: Both are flagged, and the thinner suite more severely
    - **b**: Only the thinner suite is flagged, with a low item under P4
-   - **c**: Neither is flagged, since the threshold is only a guide
-   - **d**: Only the fuller suite is flagged, with a medium item under P4
+   - **c**: Neither is flagged, since one case short is within the tolerance
+   - **d**: Both are flagged, each with the same low item under P4
 
 3. Scenario: A pipeline sends customer email addresses to the model in the prompt, and the audit log stores every prompt. Which description of the result fits?
-   - **a**: Two blocking items, so the pipeline is rejected twice over
+   - **a**: Two blocking items, each enough on its own to reject it
    - **b**: Two items that ask for revision and nothing that blocks
    - **c**: One minor item that is only recorded and one that blocks
    - **d**: One blocking item and one revision item, with none minor

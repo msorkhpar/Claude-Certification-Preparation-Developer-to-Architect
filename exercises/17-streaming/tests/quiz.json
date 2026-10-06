@@ -5,19 +5,19 @@
       "id": "01-events-and-assembling-a-message#q1",
       "page": "01-events-and-assembling-a-message.md",
       "scope": "page",
-      "stem": "A handler adds up the output token count of every `message_delta` it receives and reports three times the real cost. What does the page say it should do instead?",
+      "stem": "A handler adds up the output token count of every `message_delta` it receives and reports three times the real cost. What should it do instead?",
       "options": {
-        "a": "Overwrite the earlier figure, since each event restates the running tally",
+        "a": "Keep only the figure from the latest event and discard the earlier ones",
         "b": "Take the input count from the final event and the output count from the first",
         "c": "Sum them all and then subtract the figure that the opening event gave",
         "d": "Drop the field and measure the pieces of text that arrived in the stream"
       },
       "key": "a",
       "explanation": {
-        "a": "The page says \"The output count in message_delta is cumulative: replace the stored one, do not add to it\".",
-        "b": "Ruled out because \"the output count comes from the last message_delta\" and the input count from `message_start`.",
-        "c": "Ruled out because the page says \"do not add to it\".",
-        "d": "Ruled out because usage is read from the events: \"Input tokens come from message_start\"."
+        "a": "Each event restates the total so far, so the latest figure is the whole output count: \"The output count in message_delta is cumulative: replace the stored one, do not add to it\".",
+        "b": "Ruled out because \"Input tokens come from message_start\", not from the final event.",
+        "c": "Ruled out because \"A client that sums them reports a multiple of the real cost\", and taking away the opening figure still leaves that multiple.",
+        "d": "Ruled out because the page reads usage from the events: \"the output count comes from the last message_delta\"."
       }
     },
     {
@@ -36,7 +36,7 @@
         "c": "The page says \"Raise, so that the caller can decide\" when a stream just stopped, because it \"is an incomplete message, not a short one\".",
         "a": "Ruled out because the fragments \"are not valid JSON until the block ends\".",
         "b": "Ruled out because \"A fragment of tool input is a piece of text, not an object\".",
-        "d": "Ruled out because the page says \"an incomplete message, not a short one\"."
+        "d": "Ruled out because \"Without message_stop there is no stop reason and the content may end in the middle of a word\"."
       }
     },
     {
@@ -46,14 +46,14 @@
       "stem": "A client prints text as it arrives. Midway, an `error` event with `overloaded_error` appears although the HTTP status was 200. What is the right handling?",
       "options": {
         "a": "Keep the partial text as the final answer and finish the turn without more work",
-        "b": "Treat the call as failed, drop the partial output and send the whole request again",
+        "b": "Count the reply as failed and send the full request again from its start",
         "c": "Ignore the event, since the status line already reported that the call went well",
         "d": "Resume the stream from the last received byte once the service has recovered"
       },
       "key": "b",
       "explanation": {
-        "b": "The page says \"discard the partial output first and retry the whole request\".",
-        "a": "Ruled out because the partial text is the loss: \"the user may already have read the partial text\" and the answer is cut short, so it is not final.",
+        "b": "The 200 does not make the stream a success, and a stream cannot be picked up where it broke, so the page says to \"discard the partial output first and retry the whole request\".",
+        "a": "Ruled out because \"an error event or an early end is a failure\", so the partial text is not a final answer.",
         "c": "Ruled out because \"A status check alone cannot tell you a stream succeeded\".",
         "d": "Ruled out because a stream that failed midway \"cannot be resumed from the last byte\"."
       }
@@ -62,38 +62,38 @@
       "id": "02-tool-use-errors-and-when-to-stream#q2",
       "page": "02-tool-use-errors-and-when-to-stream.md",
       "scope": "page",
-      "stem": "A team streams a long report only because they believe it lowers the bill. According to the page, what is the better reason to stream?",
+      "stem": "A team streams a long report only because they believe it lowers the bill. What does streaming actually give them?",
       "options": {
-        "a": "Fewer errors, since a started call cannot fail after its first byte",
-        "b": "A lower price for each of the output tokens",
+        "a": "Protection from failures once the first byte has arrived",
+        "b": "Tool calls that can run while their input is still arriving",
         "c": "An exemption from the limits that apply to other calls",
         "d": "Readers see words while the rest is still being written"
       },
       "key": "d",
       "explanation": {
         "d": "The page's first case is \"A person is waiting for a long answer\", and \"The first words appear at once\".",
-        "b": "Ruled out because \"Streaming changes when the bytes arrive, not what the tokens cost\".",
+        "b": "Ruled out because the page says \"do not act on a tool call until its block has stopped and its input has parsed\".",
         "c": "Ruled out because \"Streamed calls count against the same limits as the others\".",
-        "a": "Ruled out because \"That is why an error can arrive after the 200 status line\"."
+        "a": "Ruled out because \"A stream that began with 200 can still end in an error event\"."
       }
     },
     {
       "id": "02-tool-use-errors-and-when-to-stream#m1",
       "page": "02-tool-use-errors-and-when-to-stream.md",
       "scope": "module",
-      "stem": "A support app shows a streamed reply that includes a tool call. When may it run the tool?",
+      "stem": "A support app runs its tool as soon as `content_block_start` names it, and the tool keeps receiving an empty input. What change fixes it?",
       "options": {
-        "a": "After the block holding it has stopped and its joined fragments have parsed",
-        "b": "As soon as the tool name appears in the opening event of the block",
-        "c": "Whenever the first fragment turns out to be a complete object",
-        "d": "Before the text, because tool blocks are always listed in front"
+        "a": "Parse the joined fragments once the block's `content_block_stop` arrives",
+        "b": "Make each field required so the block's opening event carries them",
+        "c": "Parse each `input_json_delta` fragment as it arrives and merge the objects",
+        "d": "Fill the empty fields with defaults taken from the tool's input schema"
       },
       "key": "a",
       "explanation": {
-        "a": "The page says \"do not act on a tool call until its block has stopped and its input has parsed\".",
-        "b": "Ruled out because \"The input is incomplete until the block stops\".",
-        "c": "Ruled out because a fragment is not an object: \"the fragment is not an object, and the object that comes is not final until the block ends\".",
-        "d": "Ruled out because \"content lists the blocks in index order\", not by kind."
+        "a": "The input is not in the opening event at all: \"the fragments are joined and parsed once, after the block stops\".",
+        "b": "is ruled out because, whatever the schema says, \"A tool_use block starts with its id and name and an empty input\".",
+        "c": "Ruled out because \"the fragment is not an object, and the object that comes is not final until the block ends\".",
+        "d": "Ruled out because the tool would still run on what the stream has not yet delivered, and \"Running a tool on a partial input\" is the mistake the page names."
       }
     },
     {
@@ -109,10 +109,10 @@
       },
       "key": "c",
       "explanation": {
-        "c": "The page says to \"ignore event types you do not know\" and that a stream without `message_stop` \"is an incomplete message, not a short one\".",
-        "b": "is ruled out on both halves: the page skips the first, since \"the API may add new event types\" under its versioning policy, and the second \"is an incomplete message, not a short one\", so no result comes from it.",
-        "a": "Ruled out because a cut stream \"is an incomplete message, not a short one\".",
-        "d": "Ruled out because the first is skipped: \"ignore event types you do not know\"."
+        "c": "New event types are expected, since \"the API may add new event types\", while \"A stream that ends without message_stop is an incomplete message\".",
+        "b": "is ruled out on both halves: an unknown type is not an error, and \"Without message_stop there is no stop reason\", so the second gives no result to return.",
+        "a": "Ruled out because a cut stream must fail: \"Raise, so that the caller can decide\".",
+        "d": "Ruled out because the page says to \"ignore event types you do not know\"."
       }
     },
     {

@@ -397,10 +397,10 @@ The practice is in [`exercises/90-governance-safety-and-risk`](../../exercises/9
    - **a**: Delete the entries of that customer from the log
    - **b**: Remove the vault rows that tie them to anything in the log
    - **c**: Replace the tokens in that customer's entries with new tokens
-   - **d**: Encrypt that customer's entries with a key that is then kept
+   - **d**: Mark that customer's entries as deleted and hide them from reports
 
 2. Scenario: Tomas must set how long a support assistant keeps its audit records. Tomas's design has a shortest period, a longest period and a number of days between them. A court order then opens a case that covers a set of those records. What happens to those records?
-   - **a**: They are deleted at once because the court may inspect any copy
+   - **a**: They are trimmed to the floor, since every extra month is exposure
    - **b**: They follow the same schedule and the case uses what is left
    - **c**: They are moved to a table with no limit on their retention
    - **d**: They are held past the ceiling until the matter is settled
@@ -408,8 +408,8 @@ The practice is in [`exercises/90-governance-safety-and-risk`](../../exercises/9
 <details>
 <summary>Answer key</summary>
 
-1. **b**. Removing the vault rows leaves the entries and unlinks them from the person. *a* is ruled out because "Deleting every audit entry would destroy the proof". *c* is ruled out because "keeping both leaves the person identifiable", and new tokens in the entries leave the vault map in place. *d* is ruled out because the design removes "the map: the vault entries for that person go", and encryption keeps a key that can link them again.
-2. **d**. A legal hold is the one thing that outranks the ceiling, and the records are released when it ends. *a* is ruled out because the hold keeps records, as "the records in scope are kept past it". *c* is ruled out because "they are released when the hold ends", and an unlimited table keeps them after the case. *b* is ruled out because "A legal hold is the one thing that outranks the ceiling", so the ordinary schedule does not apply.
+1. **b**. Removing the vault rows leaves the entries and unlinks them from the person. *a* is ruled out because "Deleting every audit entry would destroy the proof". *c* is ruled out because the design removes "the map: the vault entries for that person go", and new tokens in the entries leave that person's vault rows in place. *d* is ruled out because "keeping both leaves the person identifiable", and hidden entries still sit beside the vault map.
+2. **d**. A legal hold is the one thing that outranks the ceiling, and the records are released when it ends. *a* is ruled out because the hold keeps records longer, as "the records in scope are kept past it". *c* is ruled out because "they are released when the hold ends", and an unlimited table keeps them after the case. *b* is ruled out because "A legal hold is the one thing that outranks the ceiling", so the ordinary schedule does not apply.
 
 </details>
 
@@ -417,20 +417,20 @@ The practice is in [`exercises/90-governance-safety-and-risk`](../../exercises/9
 
 This quiz covers both pages of the module.
 
-1. Scenario: Ines's claims assistant keeps its record of each request for a year, and a reviewer notices that the screen that checks incoming requests is allowed to let them through when it is down. Which change does the first page support?
-   - **a**: Keep the pass-through and add a monitor that alerts on the gap
-   - **b**: Keep the pass-through and shorten the retention of the records
-   - **c**: Hold each high-consequence call until that service replies
-   - **d**: Move the screening into the system prompt so that it cannot be down
+1. Scenario: Ines reviews the risk register of a claims assistant. It has four rows, one for each of the four risks, each with an owner, and the prompt-injection row names a source filter that no part of the system implements. What should the review conclude about that row?
+   - **a**: It passes, because the row names an owner who answers for it
+   - **b**: It passes, because its residual column rates the risk as medium
+   - **c**: It fails until that check is built as a control on a layer
+   - **d**: It fails until the system prompt tells the model to filter input
 
-2. Scenario: A review finds that a model system's average accuracy is 94 percent, and that one language group, a small part of the traffic, scores 70 percent. The team says the system passes. What does the second page say about that claim?
-   - **a**: A small group cannot be measured, so the average stands
-   - **b**: A headline figure masks the segment that fails
-   - **c**: The group's score is dropped below the needed volume
-   - **d**: The system passes, as its launch test was broad
+2. Scenario: A review finds that a model system's average accuracy is 94 percent, and that one language group, a small part of the traffic, scores 70 percent. The team says the system passes. How should the reviewer answer that claim?
+   - **a**: Accept it, since a group that small cannot be measured reliably
+   - **b**: Reject it, since the 24-point gap between segments is the failure
+   - **c**: Reject it until the overall accuracy rises well above 94 percent
+   - **d**: Accept it, since the launch test covered the traffic broadly
 
 3. Scenario: An auditor asks a team to prove that a refund over a set amount was approved by a person. The team has an audit entry for the refund with a request id, an outcome of human and a character count. What do they have?
-   - **a**: Nothing, because a record without the content is not admissible
+   - **a**: Too little, since the entry leaves out the model's confidence score
    - **b**: A record that is too thin, since only the text proves what happened
    - **c**: A record that holds the refund amount and the approver's name
    - **d**: Evidence of the step, with no copy of the customer's text kept
@@ -438,8 +438,8 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **c**. An input control holds a high-consequence call when it fails. *b* is ruled out because retention does not close the gap: "A screen that is down and lets a request through is the opening an attacker waits for". *a* is ruled out because the first page puts the monitor in the layers that watch "afterwards", so "an output control cannot stop a tool call that already happened". *d* is ruled out because "a line in a prompt is a request, and a control is a step the model cannot skip".
-2. **b**. The page measures fairness as a gap per group and warns that an average hides one. *a* is ruled out because "The groups must be defined where they can be measured", and a language group can be labelled and so reported. *c* is ruled out because "a headline average hides a failing group exactly as it hides a failing segment", so dropping the score hides it. *d* is ruled out because "fairness is a property of outcomes by group", and a broad launch test is not a gap measure.
-3. **d**. The record shows the step happened without a copy of the data. *b* is ruled out because "Content that was never stored cannot be breached, subpoenaed by accident or kept past a deletion request". *c* is ruled out because the entry holds "request id, action, consequence, outcome and the size of the text", which names no amount or approver. *a* is ruled out because the design keeps "proof of what happened", and the page does not tie proof to stored content.
+1. **c**. Every control in the register must be a real control in the design, with a layer and a failure mode, so a filter that exists only on paper fails the row. *b* is ruled out because a residual comes on top of a control, as each failure mode "gets a control, an owner and a stated residual". *a* is ruled out because an owner does not create the control, and "a row with a control that does not exist is a wish". *d* is ruled out because "a line in a prompt is a request, and a control is a step the model cannot skip".
+2. **b**. Fairness is measured as a gap between groups, and a gap of 24 points fails whatever the overall figure says. *a* is ruled out because "The groups must be defined where they can be measured", and a language group can be labelled and so reported. *c* is ruled out because "a headline average hides a failing group exactly as it hides a failing segment", so a higher average can still hide the group at 70. *d* is ruled out because "fairness is a property of outcomes by group", and a broad launch test is not a gap measure.
+3. **d**. The record shows the step happened without a copy of the data. *b* is ruled out because the team that "kept a record of identifiers, sizes and outcomes" is the one of which the page says "it proves what happened", with no text stored. *c* is ruled out because the entry holds "request id, action, consequence, outcome and the size of the text", which names no amount or approver. *a* is ruled out because "confidence is not evidence", so a score would add nothing to the proof that a person approved.
 
 </details>

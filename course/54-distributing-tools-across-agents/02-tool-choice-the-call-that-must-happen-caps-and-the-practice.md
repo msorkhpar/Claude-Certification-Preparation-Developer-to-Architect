@@ -500,7 +500,7 @@ These are the wrong answers that the exam's options for this task statement offe
    - **c**: Only the system prompt is processed again, because it sits above the messages
    - **d**: The whole cached prefix is processed again, since the definitions differ
 
-2. A loop on a model that rejects forced tool use offers one tool with automatic choice, and a reply comes back as plain text with no tool call. What should the loop do?
+2. In this module's example, a loop on Claude Sonnet 5.5 offers the one required tool with `auto`, and a reply comes back as plain text with no tool call. What should the loop do?
    - **a**: Accept the text as the answer and go on to the next step
    - **b**: Resend the request with `any` as the choice and expect a call
    - **c**: Count it as a miss and ask once more before escalating
@@ -518,29 +518,29 @@ These are the wrong answers that the exam's options for this task statement offe
 
 This quiz covers both pages of the module.
 
-1. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. The tool that closes a customer's account carries a description that warns the model to use it carefully. What should actually limit it?
-   - **a**: A longer warning in the description, with an example of when to avoid it
-   - **b**: A required parameter in which the model gives its reason for calling
-   - **c**: A prompt rule that forbids the call unless the customer asks for it
-   - **d**: Authorisation and scope enforced in code, whatever the caller asks
+1. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. The tool that closes a customer's account carries a description that asks the model to use it with care. What should restrict it?
+   - **a**: A longer note in its description, with an example of when not to call it
+   - **b**: A required parameter in which the model states its reason for each call
+   - **c**: A system prompt rule that forbids the call unless the customer asks for it
+   - **d**: A server-side check of ownership and a human approval before it runs
 
-2. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. Refunds cannot be undone, the policy cap is 500, and every refund needs a person's approval. A call for 450 arrives and nobody has approved it. What should the tool layer return?
+2. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. Refunds cannot be undone, and this module's tool layer caps them at 500. A call for 450 arrives and nobody has approved it. What should the tool layer return?
    - **a**: A result that runs the refund and logs that the amount is under the cap
    - **b**: A result that runs the refund and notifies a person to review it afterwards
-   - **c**: A flagged refusal that waits for a human sign-off on this very request
+   - **c**: A flagged refusal that stays on hold until a human signs off on this one
    - **d**: A flagged refusal that sends the case to a person who can raise the cap
 
 3. Scenario S3, a multi-agent research system. A coordinator delegates to a web search subagent, a document analysis subagent and a synthesis subagent, and it produces a cited report. All subagents hold the same 18 tools, including the one that sends the finished report, and the synthesis subagent has begun running web searches. Which redesign fits best?
-   - **a**: Split the list by role, and give the irreversible step one owner behind an approval
-   - **b**: Keep one list and add a prompt line for each role naming the tools to use
-   - **c**: Cut the shared list to the ten most used tools and keep it the same for every role
-   - **d**: Route each request through a classifier that enables a subset of the tools
+   - **a**: Split the list by role, and give the irreversible step one owner and an approval
+   - **b**: Keep one list, and add a prompt line for each role naming the tools it may use
+   - **c**: Cut the shared list to the ten most used tools, and give it to every role alike
+   - **d**: Keep the 18 tools, and route each request through a classifier that picks a subset
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. A limit that the model cannot talk its way around lives in code. *a* is ruled out because "an instruction not to use a tool is a request". *b* is ruled out because a field in which the model states its reason "is a claim by the model, not a check". *c* is ruled out because a prompt rule is still "an instruction not to use a tool", and "an instruction not to use a tool is a request".
-2. **c**. An irreversible call waits for a person even under the cap. *a* is ruled out because "An irreversible call needs an approval even when the amount is under the cap". *b* is ruled out because "a review after the fact cannot undo an irreversible call". *d* is ruled out because the route to a person who can raise the limit is for an amount above the cap: "An amount above the cap is refused and sent to a person", and 450 is under 500.
+1. **d**. Closing an account cannot be undone, so the tool layer compares the call with the verified customer and holds it for an approval, which no wording from the model can get around. *a* is ruled out because "A note in the tool's description that asks for care is an instruction". *b* is ruled out because a field in which the model states its reason "is a claim by the model, not a check". *c* is ruled out because a prompt rule is still "an instruction not to use a tool", and "an instruction not to use a tool is a request".
+2. **c**. A refund cannot be undone, so it waits for a person's approval even under the cap. *a* is ruled out because "An irreversible call needs an approval even when the amount is under the cap". *b* is ruled out because "a review after the fact cannot undo an irreversible call". *d* is ruled out because the route to a person who can raise the limit is for an amount above the cap: "An amount above the cap is refused and sent to a person", and 450 is under 500.
 3. **a**. Scoped lists remove the misuse, and the irreversible step has an owner and an approval. *b* is ruled out because a prompt line is a request: "an instruction not to use a tool is a request, and a tool the agent holds is a tool it can use". *c* is ruled out because "an agent outside its specialisation misuses what it holds". *d* is ruled out because "a router adds a component to keep correct".
 
 </details>

@@ -405,22 +405,22 @@ The practice is in [`exercises/90-governance-safety-and-risk`](../../exercises/9
 
 ## Quiz
 
-1. Scenario: Dana runs the refund flow of a claims assistant. The service that screens incoming requests stops answering, and the code must choose between two behaviours for a request that asks for a refund. Which one fits the design rules on this page?
+1. Scenario: Dana runs the refund flow of a claims assistant. The service that screens incoming requests stops answering, and the code must decide what to do with a request that asks for a refund. Which behaviour fits the design rules on this page?
    - **a**: Hold it and tell the caller that the check is unavailable
    - **b**: Let the request pass and flag it for a person to look at tomorrow
-   - **c**: Run the request once more through the model's own safety training
+   - **c**: Send it to the model alone, which is trained to refuse such requests
    - **d**: Let the request pass because the later approval step will catch it
 
 2. Scenario: Ravi reviews a design in which a model must "always ask a person before closing an account", a rule written in the system prompt. What is the main weakness of that design?
-   - **a**: The sentence is too short for the model to follow it reliably under load
+   - **a**: The sentence is too short for the model to follow it reliably
    - **b**: The rule should sit in the user turn so that the model reads it last
    - **c**: Nothing forces the step to happen, because an instruction only asks
-   - **d**: The sentence repeats a rule the platform already applies to every account
+   - **d**: It sends every closure to a person rather than only the unsure ones
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. A refund is a high-consequence action and the screen is an input control, so the design holds. *b* is ruled out because "A screen that is down and lets a request through is the opening an attacker waits for". *c* is ruled out because the layers "answer different attackers and different mistakes", and the model's own training is not the missing screen. *d* is ruled out because "an output control cannot stop a tool call that already happened", and a later step does not repair a gap on an earlier layer.
-2. **c**. A line in a prompt is a request and a control is a step the model cannot skip. *a* is ruled out because the page grants that "the model usually follows it", so reliability of following is not the weakness. *b* is ruled out because the sentence stays "a request to the model and not a control" wherever it sits. *d* is ruled out because "Every control has a failure mode of its own, and the design must say it", and no platform rule is assumed to hold it.
+1. **a**. A refund is a high-consequence action and the screen is an input control, so the design holds. *b* is ruled out because "A screen that is down and lets a request through is the opening an attacker waits for". *c* is ruled out because a control works "independent of the model's own judgement", and the model's training is not the missing screen. *d* is ruled out because "a control holds whenever the action it guards is high-consequence", so the screen holds whatever steps come after it.
+2. **c**. A line in a prompt is a request and a control is a step the model cannot skip. *a* is ruled out because the page grants that "the model usually follows it", so reliability of following is not the weakness. *b* is ruled out because the sentence stays "a request to the model and not a control" wherever it sits. *d* is ruled out because "a high-consequence action goes to `human` whatever the confidence", so a person on every closure is the intended design.
 
 </details>

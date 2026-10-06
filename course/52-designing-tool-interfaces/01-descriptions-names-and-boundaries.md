@@ -581,17 +581,17 @@ These are the wrong answers that the exam's options for this task statement offe
    - **c**: Put a layer before each turn that picks the tool by keywords and id patterns
    - **d**: Merge both into a single `lookup_entity` tool that works out which backend to ask
 
-2. Since the team added the sentence "Always check the customer's account first." to an agent's prompt, it calls `get_customer` before every order question, although the `lookup_order` description is clear. Which change most directly removes the unwanted pull?
+2. Since the team added the sentence "Always check the customer's account first." to an agent's prompt, it calls `get_customer` before every order question, although the `lookup_order` description is clear. Which change addresses the cause?
    - **a**: Add a third tool that wraps both lookups behind one name
    - **b**: Add a routing layer in front of the model for order questions
-   - **c**: Reword that rule to drop its tool-specific trigger
+   - **c**: Recast that instruction so it stops steering to one lookup
    - **d**: Lengthen the `lookup_order` description with more examples
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. The cause is thin descriptions, and the first fix is to make each say what it takes and where it stops. *b* is ruled out because worked examples in the prompt "leave the descriptions as thin as they were" and cost tokens on every request. *c* is ruled out because "a routing layer bypasses the model's own reading of the request" and is a component to build. *d* is ruled out because merging "is a legitimate design but a larger change than a first step needs".
-2. **c**. The keyword in the rule pulls the choice, so the rule is what to change. *b* is ruled out because a routing layer "bypasses the model's own reading of the request" and leaves the prompt as it was. *a* is ruled out because a wrapper adds a third name to choose from, and "More tools don't always lead to better outcomes." *d* is ruled out because the keyword pulls every order question toward `get_customer` "however clear the description of `lookup_order` is"; more text on the other side does not remove the pull.
+2. **c**. The keyword in the instruction pulls the choice toward one tool, so the instruction is what to change. *b* is ruled out because a routing layer "bypasses the model's own reading of the request" and leaves the prompt as it was. *a* is ruled out because a wrapper adds a third name to choose from, and "More tools don't always lead to better outcomes." *d* is ruled out because the keyword pulls every order question toward `get_customer` "however clear the description of `lookup_order` is"; more text on the other side does not remove the pull.
 
 </details>
 

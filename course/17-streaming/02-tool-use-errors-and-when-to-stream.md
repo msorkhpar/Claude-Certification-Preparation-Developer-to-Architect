@@ -75,22 +75,22 @@ code.
 1. A client prints text as it arrives. Midway, an `error` event with `overloaded_error` appears although the HTTP status
    was 200. What is the right handling?
    - **a**: Keep the partial text as the final answer and finish the turn without more work
-   - **b**: Treat the call as failed, drop the partial output and send the whole request again
+   - **b**: Count the reply as failed and send the full request again from its start
    - **c**: Ignore the event, since the status line already reported that the call went well
    - **d**: Resume the stream from the last received byte once the service has recovered
 
-2. A team streams a long report only because they believe it lowers the bill. According to the page, what is the better
-   reason to stream?
-   - **a**: Fewer errors, since a started call cannot fail after its first byte
-   - **b**: A lower price for each of the output tokens
+2. A team streams a long report only because they believe it lowers the bill. What does streaming actually give
+   them?
+   - **a**: Protection from failures once the first byte has arrived
+   - **b**: Tool calls that can run while their input is still arriving
    - **c**: An exemption from the limits that apply to other calls
    - **d**: Readers see words while the rest is still being written
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says "discard the partial output first and retry the whole request". *a* is ruled out because the partial text is the loss: "the user may already have read the partial text" and the answer is cut short, so it is not final. *c* is ruled out because "A status check alone cannot tell you a stream succeeded". *d* is ruled out because a stream that failed midway "cannot be resumed from the last byte".
-2. **d**. The page's first case is "A person is waiting for a long answer", and "The first words appear at once". *b* is ruled out because "Streaming changes when the bytes arrive, not what the tokens cost". *c* is ruled out because "Streamed calls count against the same limits as the others". *a* is ruled out because "That is why an error can arrive after the 200 status line".
+1. **b**. The 200 does not make the stream a success, and a stream cannot be picked up where it broke, so the page says to "discard the partial output first and retry the whole request". *a* is ruled out because "an error event or an early end is a failure", so the partial text is not a final answer. *c* is ruled out because "A status check alone cannot tell you a stream succeeded". *d* is ruled out because a stream that failed midway "cannot be resumed from the last byte".
+2. **d**. The page's first case is "A person is waiting for a long answer", and "The first words appear at once". *b* is ruled out because the page says "do not act on a tool call until its block has stopped and its input has parsed". *c* is ruled out because "Streamed calls count against the same limits as the others". *a* is ruled out because "A stream that began with 200 can still end in an error event".
 
 </details>
 
@@ -98,11 +98,12 @@ code.
 
 This quiz covers both pages of the module.
 
-1. A support app shows a streamed reply that includes a tool call. When may it run the tool?
-   - **a**: After the block holding it has stopped and its joined fragments have parsed
-   - **b**: As soon as the tool name appears in the opening event of the block
-   - **c**: Whenever the first fragment turns out to be a complete object
-   - **d**: Before the text, because tool blocks are always listed in front
+1. A support app runs its tool as soon as `content_block_start` names it, and the tool keeps receiving an empty input.
+   What change fixes it?
+   - **a**: Parse the joined fragments once the block's `content_block_stop` arrives
+   - **b**: Make each field required so the block's opening event carries them
+   - **c**: Parse each `input_json_delta` fragment as it arrives and merge the objects
+   - **d**: Fill the empty fields with defaults taken from the tool's input schema
 
 2. Which pair of behaviours does a correct assembler show for an unrecognised event type and for a stream that ends early?
    - **a**: It skips both and returns the content it holds
@@ -125,8 +126,8 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The page says "do not act on a tool call until its block has stopped and its input has parsed". *b* is ruled out because "The input is incomplete until the block stops". *c* is ruled out because a fragment is not an object: "the fragment is not an object, and the object that comes is not final until the block ends". *d* is ruled out because "content lists the blocks in index order", not by kind.
-2. **c**. The page says to "ignore event types you do not know" and that a stream without `message_stop` "is an incomplete message, not a short one". *b* is ruled out on both halves: the page skips the first, since "the API may add new event types" under its versioning policy, and the second "is an incomplete message, not a short one", so no result comes from it. *a* is ruled out because a cut stream "is an incomplete message, not a short one". *d* is ruled out because the first is skipped: "ignore event types you do not know".
+1. **a**. The input is not in the opening event at all: "the fragments are joined and parsed once, after the block stops". *b* is ruled out because, whatever the schema says, "A tool_use block starts with its id and name and an empty input". *c* is ruled out because "the fragment is not an object, and the object that comes is not final until the block ends". *d* is ruled out because the tool would still run on what the stream has not yet delivered, and "Running a tool on a partial input" is the mistake the page names.
+2. **c**. New event types are expected, since "the API may add new event types", while "A stream that ends without message_stop is an incomplete message". *b* is ruled out on both halves: an unknown type is not an error, and "Without message_stop there is no stop reason", so the second gives no result to return. *a* is ruled out because a cut stream must fail: "Raise, so that the caller can decide". *d* is ruled out because the page says to "ignore event types you do not know".
 3. **b**. The page says "Streamed calls count against the same limits as the others", so the share of the limit is unchanged. *a* is ruled out because "Events keep arriving, so a proxy never sees an idle connection". *c* is ruled out because "The first words appear at once". *d* is ruled out because "the SDKs refuse a non-streaming request that they expect to take longer than about ten minutes", which streaming avoids.
 4. **d**. The page says "content lists the blocks in index order". *b* is ruled out because the order is "not in the order they stopped". *c* is ruled out because "Blocks are never sorted by type". *a* is ruled out because blocks are "never sorted by type or by size", and a fragment count is a size.
 

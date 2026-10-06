@@ -695,19 +695,19 @@ The practice is in [`exercises/89-migration-and-model-upgrades-at-scale`](../../
    - **a**: Advance to 25 percent, since a clean record needs no further evidence
    - **b**: Hold where it is, since a sample this small shows nothing yet
    - **c**: Roll back to zero, since too few requests counts as a failed stage
-   - **d**: Declare the roll-out complete, since no error has been seen so far
+   - **d**: Move all traffic over, since the gate already passed on the suite
 
-2. A staged roll-out is at 25 percent of requests when the error rate passes its limit. What happens next?
+2. A staged roll-out at 25 percent of requests has served 50,000 requests with 400 errors, and the limit is 5 errors per thousand. What happens next?
    - **a**: Drop to 5 percent and keep the roll-out running, to gather more evidence from a smaller share
-   - **b**: Hold at 25 percent and investigate, leaving those customers on the new model while the errors continue to arrive
+   - **b**: Hold at 25 percent and investigate the errors before choosing which way to move
    - **c**: Advance to 100 percent so that the failure shows up clearly in the data of the whole base
-   - **d**: Send all traffic back to the previous model, which stays available until its own retirement
+   - **d**: Set the share back to zero so that all traffic goes to the previous model again
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. A stage with fewer requests than the minimum says nothing yet, so the rule is to hold at the stage. *a* is ruled out because "A stage with fewer requests than the minimum (1,000 in the example) says nothing yet". *c* is ruled out because the share goes back to zero only when errors pass the limit: "Over it, the share goes back to zero". *d* is ruled out because a roll-out ends with "One stage up, and `complete` at 100 percent".
-2. **d**. The limit is passed, so the share goes back to zero and the previous model, still configured, takes the traffic. *b* is ruled out because "Holding at the stage while errors continue leaves the share of customers who see them where it is". *c* is ruled out because "Advancing to 100 percent to see the failure in the full data makes every customer the sample". *a* is ruled out because "Reducing to a smaller share keeps part of the damage on the path".
+1. **b**. A stage with fewer requests than the minimum says nothing yet, so the rule is to hold at the stage. *a* is ruled out because "A stage with fewer requests than the minimum (1,000 in the example) says nothing yet". *c* is ruled out because the share goes back to zero only when errors pass the limit: "Over it, the share goes back to zero". *d* is ruled out because "Passing a suite is a prediction about traffic, and traffic is where it is tested".
+2. **d**. 400 errors in 50,000 requests is 8 per thousand, over the limit, so the share goes back to zero and the previous model, still configured, takes the traffic. *b* is ruled out because "Holding at the stage while errors continue leaves the share of customers who see them where it is". *c* is ruled out because "Advancing to 100 percent to see the failure in the full data makes every customer the sample". *a* is ruled out because "Reducing to a smaller share keeps part of the damage on the path".
 
 </details>
 
@@ -718,12 +718,12 @@ This quiz covers both pages of the module.
 1. The new model costs about a third more per answer and fixes the refund errors. The product owner asks whether to move. Which message fits the architect's role?
    - **a**: Recommend staying on the old model, because a higher cost is reason enough to avoid the whole change
    - **b**: Recommend the move, because the newer model is the one that the vendor has recommended as the replacement
-   - **c**: State the trade: what improves, what the budget loses, and the date that forces the choice
+   - **c**: Lay out the accuracy gain, the extra spend and the date that forces the choice, for them to weigh
    - **d**: Defer the decision until the old model retires, so that the choice is made by the calendar instead
 
 2. After a migration, the parser reads the wrong field because the first content block of a reply is thinking text. Which step was missed?
    - **a**: Lowering max_tokens so that the thinking is cut off before the text of the reply begins
-   - **b**: Choosing the part of the response by its declared type and not by its position in the list
+   - **b**: Selecting what to process by its declared type, so a leading reasoning part is skipped
    - **c**: Turning thinking off by sending the disabled setting, which the new model accepts as before
    - **d**: Dropping the first block of every reply before parsing, since it always holds only thinking
 
@@ -737,7 +737,7 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **c**. The decision is a trade, and the architect states it with its date. *b* is ruled out because "A recommended replacement is a starting point, not a decision". *a* is ruled out because "A rise in cost is a number to put before the owner, not a verdict". *d* is ruled out because "Waiting for the retirement date hands the decision to the calendar, and gives up the rollback".
-2. **b**. A reply may begin with thinking blocks, so the parser reads by type. *a* is ruled out because "`max_tokens` covers thinking plus text, and thinking tokens are billed as output tokens". *c* is ruled out because the guide lists `thinking: {"type": "disabled"}` among the "five settings that return a 400 error". *d* is ruled out because "A reply need not begin with thinking text either, so a rule that always drops the first block loses real text".
+2. **b**. A reply may begin with thinking blocks, so the parser reads by type. *a* is ruled out because "`max_tokens` covers thinking plus text, and thinking tokens are billed as output tokens", so a lower limit cuts the text as well. *c* is ruled out because the guide lists `thinking: {"type": "disabled"}` among the "five settings that return a 400 error". *d* is ruled out because "A reply need not begin with thinking text either, so a rule that always drops the first block loses real text".
 3. **d**. The page says "the old model is the rollback, and it stays so until its own retirement date". *a* is ruled out because "a suite predicts and traffic proves", and an error found after the old model is gone has no way back. *b* is ruled out because the Console export gives "usage broken down by API key and model", so the record does not live in the configuration. *c* is ruled out because the baseline is reset by the rule "Recount tokens and re-baseline cost" on the replacement, which needs no old id.
 
 </details>

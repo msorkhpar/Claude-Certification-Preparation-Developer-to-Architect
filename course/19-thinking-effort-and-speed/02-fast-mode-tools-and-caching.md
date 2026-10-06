@@ -122,20 +122,21 @@ effort. Each setting is valid alone, and the pair returns a 400.
 ## Quiz
 
 1. A chat feature on Opus 5.5 streams long answers to people watching the text appear, and the team wants it to arrive sooner without a change of tier or effort.
-   Which option does the page support?
-   - **a**: Fast mode, at the standard price and on every cloud platform
+   Which option fits?
+   - **a**: Fast mode, at the standard price, since the model itself is unchanged
    - **b**: Fast mode, at twice the standard price, on the first-party API
-   - **c**: A lower effort level, with a reduced price and shorter replies
-   - **d**: A batch, at half the price and with the replies delivered sooner
+   - **c**: Fast mode, at twice the price, for a shorter wait before the first word
+   - **d**: Fast mode, at twice the price, through Bedrock or Google Cloud
 
-2. A tool loop runs four calls for one user question. The team sets reasoning on for the first call and off for the last
-   three to save tokens. What happens?
+2. A tool loop runs four calls for one user question. The team leaves reasoning off for the first call and turns it on for
+   the last three to handle a harder step. What happens?
    - **a**: The API treats each call as its own turn and accepts the new setting
    - **b**: The API returns a 400 for the first changed request and stops the loop
-   - **c**: The API keeps the first setting for the whole turn and ignores the rest
-   - **d**: The API silently disables thinking on the altered steps, without error
+   - **c**: The API thinks on the later calls but leaves the thinking text out
+   - **d**: The API serves the later rounds without thinking or any error
 
-3. A team lowers the effort for later turns of a long conversation that relies on a cached document. What follows?
+3. A team lowers the top-level effort for later turns of a long conversation whose first user turn holds a cached
+   document. What follows?
    - **a**: The stored tools and system are invalidated, but the messages stay valid
    - **b**: The stored messages are invalidated, so the text is written again
    - **c**: The cache stays valid, because effort is applied after the prefix
@@ -144,9 +145,9 @@ effort. Each setting is valid alone, and the pair returns a 400.
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says fast mode "is available on the Claude API (first-party) only" and prices it at twice the standard rate. *a* is ruled out because "it is not available on Claude Platform on AWS or partner-operated cloud platforms". *c* is ruled out because the table gives "fast mode (Opus only)" to streaming, and gives lowering the effort to "Too slow to finish". *d* is ruled out because "Fast mode is not available with the Batch API."
-2. **d**. The page says the API does not error: it "silently disables thinking for that request". *b* is ruled out by that same sentence, since the stated behaviour is "silently disables thinking for that request" and not a 400. *c* is ruled out because the changed request is the one that loses thinking: "silently disables thinking for that request". *a* is ruled out because "A tool-use loop is one assistant turn."
-3. **b**. The page says changing the thinking mode or the effort "always discards the cached messages". *a* is ruled out because the messages are the part that "always discards the cached messages" names, while tools and system are model-specific. *c* is ruled out because the resolved configuration "is rendered into the prompt", so it is not applied after the prefix. *d* is ruled out because the messages are discarded on any change: "always discards the cached messages".
+1. **b**. Long streamed answers gain from higher output speed, and fast mode on Opus 5.5 "is available on the Claude API (first-party) only", at twice the standard rate. *a* is ruled out because, though the model is the same, "On Opus 5.5 fast mode is $8 input and $40 output per million tokens", twice the standard rate. *c* is ruled out because "Speed benefits are focused on output tokens per second (OTPS), not time to first token (TTFT)." *d* is ruled out because "Bedrock and Google Cloud do not have it".
+2. **d**. The four calls are one turn in one thinking mode, and a request that changes the mode in mid-turn loses its thinking: the API "silently disables thinking for that request". *b* is ruled out because "If a request changes the thinking mode in mid-turn, the API does not error". *c* is ruled out because the thinking is not hidden but switched off: "it silently turns thinking off for that request". *a* is ruled out because "A tool-use loop is one assistant turn."
+3. **b**. A top-level effort change in mid-conversation "restarts the cache for the messages", so the saving "is paid back as cache writes". *a* is ruled out because the effort change "always discards the cached messages", while tools and system are model-specific. *c* is ruled out because the resolved configuration "is rendered into the prompt", so it is not applied after the prefix. *d* is ruled out because the rule covers any change, down as well as up: "Changing the thinking mode or the effort always discards" the cached messages.
 
 </details>
 
@@ -155,15 +156,15 @@ effort. Each setting is valid alone, and the pair returns a 400.
 This quiz covers both pages of the module.
 
 1. An agent on Sonnet 5.5 runs at `xhigh` effort, and a developer adds `between_tools` to stop up-front thinking. The request
-   fails. Which statement matches the module?
-   - **a**: The option is valid on Sonnet 5.5 at any effort level
-   - **b**: Each option is valid alone, but the pair is refused
-   - **c**: The option exists only on Opus models, so any use fails
-   - **d**: The option works only if a manual budget is also sent
+   fails. What should the developer change?
+   - **a**: Keep `xhigh` and send `disabled` to turn the up-front thinking off
+   - **b**: Keep `between_tools` and drop to `high` or a lower level
+   - **c**: Move the request to Opus 5.5, which takes the option at `xhigh`
+   - **d**: Keep `xhigh` and add a manual budget beside `between_tools`
 
-2. A helpdesk bot prints replies live for agents and also runs overnight bulk jobs. Management wants the speed option on all of
-   it. What does the module say?
-   - **a**: It suits only the watched output, since batches exclude it
+2. A helpdesk bot prints replies live for agents and also sends overnight jobs through the Batch API. Management wants the
+   speed option on all of it. What should the team tell management?
+   - **a**: It suits only the watched output, since the bulk path excludes it
    - **b**: It suits neither, since it only lowers time to first token
    - **c**: It suits neither, because only the cloud platforms offer it
    - **d**: It suits both, at the standard price for the bulk jobs
@@ -173,20 +174,20 @@ This quiz covers both pages of the module.
    - **a**: It derives each field from the chosen tier and refuses bad pairs
    - **b**: It sends one body to every tier and retries whenever the API objects
    - **c**: It picks the lowest common field and drops the rest silently
-   - **d**: It reads each field from the reply to an earlier call
+   - **d**: It passes each field from the caller through to the API unchanged
 
 4. A cost-conscious team wants cheaper answers on Opus 5.5 without losing the cache of a long conversation. Which plan fits?
-   - **a**: Switch to fast mode for the cached turns and standard for the rest
-   - **b**: Change the top-level effort on every second turn and restore it afterward
-   - **c**: Choose the effort level once, before the first turn, and keep it
-   - **d**: Disable thinking after the first answer to cut the output
+   - **a**: Move to a smaller tier halfway through, once the context is cached
+   - **b**: Lower the top-level effort only on the turns that look simple
+   - **c**: Set a lower effort before the first turn and keep it throughout
+   - **d**: Turn thinking off after the first answer to cut the output tokens
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says "Each setting is valid alone, and the pair returns a 400". *a* is ruled out because the mode "needs high effort or below". *c* is ruled out because the table says "skips thinking up front is Sonnet only". *d* is ruled out because the only budget rule is "A manual budget is at least 1,024", which has no link to this mode.
-2. **a**. The page says "Fast mode is not available with the Batch API." and the speed gain is for output people watch. *b* is ruled out because "Speed benefits are focused on output tokens per second (OTPS), not time to first token (TTFT)." *c* is ruled out because fast mode "is available on the Claude API (first-party) only". *d* is ruled out because fast mode carries a premium and "Fast mode is not available with the Batch API."
-3. **a**. The practice "turns what an application wants into request parameters for one model" and raises an error for the invalid pairs. *b* is ruled out because the same sentence says it builds "request parameters for one model", not one shared body. *c* is ruled out because the page warns the API "silently disables thinking for that request", which a silent drop would hide. *d* is ruled out because "The rules are the tables of this module", not a reply.
-4. **c**. The page says to choose once per conversation and put what varies after the cached prefix. *b* is ruled out because "always discards the cached messages". *a* is ruled out because the table row "Speed setting (fast or standard)" shows system and messages invalidated. *d* is ruled out because "Changing the thinking mode or the effort" is on the invalidation list.
+1. **b**. The mode is valid on Sonnet 5.5 only below the top two levels: "it works at low, medium and high effort and returns a 400 at xhigh and max". *a* is ruled out because "disabled and a manual budget return a 400 on the always-on models". *c* is ruled out because "Fable 5.1 and Opus 5.5 always think adaptively and cannot be told otherwise". *d* is ruled out because the manual budget belongs to the old kind of model: "Haiku 4.5 is the old kind: no thinking unless you ask, and then only the manual budget".
+2. **a**. The page says "Fast mode is not available with the Batch API." and the speed gain is for output people watch. *b* is ruled out because "Speed benefits are focused on output tokens per second (OTPS), not time to first token (TTFT)." *c* is ruled out because fast mode "is available on the Claude API (first-party) only". *d* is ruled out because fast mode is never at the standard price: it costs "twice the standard $4 and $20".
+3. **a**. The practice "turns what an application wants into request parameters for one model" and raises an error for the invalid pairs. *b* is ruled out because the course's rule is "Build the thinking setting from the model, as the practice does", not one body and a retry. *c* is ruled out because the practice raises `RejectedRequest` "for what the API would answer with a 400" instead of dropping a field. *d* is ruled out because "The rules are the tables of this module", and a pass-through applies none of them.
+4. **c**. Lowering the effort is the lever for a bill with quality headroom, and its cost is a cache restart only when it is changed mid-conversation, so the level is set before the first turn and held. *b* is ruled out because a top-level effort change "always discards the cached messages". *a* is ruled out because the design rule is to "pick the model, the thinking mode, the effort and the speed once per conversation". *d* is ruled out because "Fable 5.1 and Opus 5.5 always think adaptively and cannot be told otherwise".
 
 </details>

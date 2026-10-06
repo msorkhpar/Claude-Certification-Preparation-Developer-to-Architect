@@ -583,8 +583,8 @@ or build file. The starter fails every test.
 ## Quiz
 
 1. A handler adds up the output token count of every `message_delta` it receives and reports three times the real cost.
-   What does the page say it should do instead?
-   - **a**: Overwrite the earlier figure, since each event restates the running tally
+   What should it do instead?
+   - **a**: Keep only the figure from the latest event and discard the earlier ones
    - **b**: Take the input count from the final event and the output count from the first
    - **c**: Sum them all and then subtract the figure that the opening event gave
    - **d**: Drop the field and measure the pieces of text that arrived in the stream
@@ -598,7 +598,7 @@ or build file. The starter fails every test.
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The page says "The output count in message_delta is cumulative: replace the stored one, do not add to it". *b* is ruled out because "the output count comes from the last message_delta" and the input count from `message_start`. *c* is ruled out because the page says "do not add to it". *d* is ruled out because usage is read from the events: "Input tokens come from message_start".
-2. **c**. The page says "Raise, so that the caller can decide" when a stream just stopped, because it "is an incomplete message, not a short one". *a* is ruled out because the fragments "are not valid JSON until the block ends". *b* is ruled out because "A fragment of tool input is a piece of text, not an object". *d* is ruled out because the page says "an incomplete message, not a short one".
+1. **a**. Each event restates the total so far, so the latest figure is the whole output count: "The output count in message_delta is cumulative: replace the stored one, do not add to it". *b* is ruled out because "Input tokens come from message_start", not from the final event. *c* is ruled out because "A client that sums them reports a multiple of the real cost", and taking away the opening figure still leaves that multiple. *d* is ruled out because the page reads usage from the events: "the output count comes from the last message_delta".
+2. **c**. The page says "Raise, so that the caller can decide" when a stream just stopped, because it "is an incomplete message, not a short one". *a* is ruled out because the fragments "are not valid JSON until the block ends". *b* is ruled out because "A fragment of tool input is a piece of text, not an object". *d* is ruled out because "Without message_stop there is no stop reason and the content may end in the middle of a word".
 
 </details>

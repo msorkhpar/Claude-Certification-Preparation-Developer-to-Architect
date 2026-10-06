@@ -525,21 +525,21 @@ The practice is in [`exercises/92-enabling-teams-and-operations`](../../exercise
 ## Quiz
 
 1. Scenario: Dmitri's company wants developers limited to two approved models. The platform team sets `model` to the first of them in the managed file and tells the developers to use only those two. What happens when a developer picks another model?
-   - **a**: It is allowed, since only a list restricts a choice
+   - **a**: It is allowed, since only a list in the policy restricts such a choice
    - **b**: The choice is refused, because the managed file outranks the developer's own picks
    - **c**: The pick is refused for the session and restored after the next restart
    - **d**: The pick stands only if the project file also names that model
 
 2. Scenario: Amara adds `allowManagedHooksOnly: true` to the shared project file that Amara's team commits, expecting every developer to be limited to the hooks of the organisation. What is the effect?
-   - **a**: Hooks from the project run, since the team's file is read after the user file
+   - **a**: Only the organisation's hooks run, since the team's file outranks the user file
    - **b**: Every hook is switched off in the project until the managed file confirms it
-   - **c**: Nothing happens, since only the top tier reads that key
+   - **c**: Nothing changes for anyone, since only the top tier reads that key
    - **d**: Only the hooks of the project run, since the team's choice is the closest
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. A managed `model` is a default, and the lock is the list. *b* is ruled out because "A managed `model` is a **default**: a developer can still pick another model". *c* is ruled out because "a default is overridden at once", so no refusal appears that a restart could lift. *d* is ruled out because "a managed list applies as it is: a project file's list cannot widen it", and nothing here makes a project file's model decide.
-2. **c**. A lower file that sets a managed-only key has no effect. *a* is ruled out because "A lower file that sets one of these has **no effect**". *b* is ruled out because the page describes "a lock written in the shared project file looks like policy and does nothing", not a switch that waits for confirmation. *d* is ruled out because "Some keys are read only from managed settings, because their purpose is to be out of a developer's reach".
+1. **a**. A managed `model` is a default, and the lock is the list. *b* is ruled out because "A managed `model` is a **default**: a developer can still pick another model". *c* is ruled out because "Neither choice is temporary", and a default refuses nothing that a restart could lift. *d* is ruled out because "a default is overridden at once", whatever the project file names.
+2. **c**. A lower file that sets a managed-only key has no effect. *a* is ruled out because "a lock written in the shared project file looks like policy and does nothing", whatever the order of the files below the managed level. *b* is ruled out because "A lower file that sets one of these has **no effect**", so no hook is switched off and nothing waits for confirmation. *d* is ruled out because "Some keys are read only from managed settings, because their purpose is to be out of a developer's reach".
 
 </details>

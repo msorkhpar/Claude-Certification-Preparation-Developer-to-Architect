@@ -508,13 +508,13 @@ The practice is in [`exercises/92-enabling-teams-and-operations`](../../exercise
 
 ## Quiz
 
-1. Scenario: Yusuf's organisation limit is 20000 a month and covers three groups. Yusuf proposes limits of 7000, 8000 and 6000 for them. What does the page say about that proposal?
+1. Scenario: Yusuf's organisation limit is 20000 a month and covers three groups. Yusuf proposes limits of 7000, 8000 and 6000 for them. Under this module's rule for spend limits, how should that proposal be judged?
    - **a**: It is sound, because the organisation limit stops any overspend by the groups
    - **b**: It breaks the arithmetic, since the parts could together exceed the whole
    - **c**: It is sound, because unused budget of one group is lent to the others
    - **d**: It is inconsistent, since each group must have the same limit as the others
 
-2. Scenario: A platform team wants to show leadership that Claude Code is working. It sets a target of more accepted lines per developer each month and starts the rollout on Monday. What is the main weakness of the plan?
+2. Scenario: A platform team wants to show leadership that Claude Code is working. It sets a target of more accepted lines per developer each month and starts the rollout on Monday. By the measures this module teaches, what is the main weakness of the plan?
    - **a**: Accepted lines are not shown on the dashboard and cannot be tracked
    - **b**: Developers accept fewer lines as they learn, so the figure falls over time
    - **c**: A monthly target is too coarse to reflect how developers actually work
@@ -523,7 +523,7 @@ The practice is in [`exercises/92-enabling-teams-and-operations`](../../exercise
 <details>
 <summary>Answer key</summary>
 
-1. **b**. Seven thousand, eight thousand and six thousand add up to 21000, which is more than 20000. *a* is ruled out because "so the organisation limit would decide before the group limits did and nobody would know which one they were under". *c* is ruled out because the page requires that "The group limits add up to the organisation limit and no more", and says nothing about lending. *d* is ruled out because the page's own example has "three groups with 6000, 8000 and 6000 against an organisation limit of 20000", so equal limits are not required.
+1. **b**. Seven thousand, eight thousand and six thousand add up to 21000, which is more than 20000. *a* is ruled out because "so the organisation limit would decide before the group limits did and nobody would know which one they were under". *c* is ruled out because "Both are checked as a boundary: a total of exactly 20000 passes and 20001 does not", so a total of 21000 fails whatever happens to unused budget. *d* is ruled out because the page's own example has "three groups with 6000, 8000 and 6000 against an organisation limit of 20000", so equal limits are not required.
 2. **d**. Lines accepted measure activity. *a* is ruled out because "The dashboard counts lines accepted as a usage metric". *c* is ruled out because the page's objection is "A target on an activity invites the activity", not the length of the period. *b* is ruled out because the page gives no such trend and rests on the point that "lines accepted can be raised by accepting more lines".
 
 </details>
@@ -532,29 +532,29 @@ The practice is in [`exercises/92-enabling-teams-and-operations`](../../exercise
 
 This quiz covers both pages of the module.
 
-1. Scenario: A developer reports that the managed policy "does nothing" for the allowlist of MCP servers on their laptop. The organisation's allowlist, and the key that makes it the only list, are both in the shared project file of the repository. Which fact explains it?
-   - **a**: Lists in settings files merge, so their own list has been added to the policy
-   - **b**: The command line always outranks the managed file, so the list is overridden
-   - **c**: Settings of that kind are honoured at the top tier alone and inert below it
-   - **d**: The shared project file is read first, so the policy file replaced it
+1. Scenario: An organisation's managed settings name its approved MCP servers in `allowedMcpServers` and set no other key for servers. A developer's laptop still uses a server that appears only in their own user file. Which fact explains it?
+   - **a**: The user file outranks the managed file for any server it names
+   - **b**: An allowlist alone blocks nothing, since only a deny entry stops a server
+   - **c**: The two allowlists combined, since nothing locks them to one source
+   - **d**: The user file was read last, so its entries replaced the managed ones
 
-2. Scenario: A security lead asks for a way to refuse the options that bring in a plugin, an agent or an MCP server for one run only. Which key does that, and where is it set?
-   - **a**: `strictKnownMarketplaces`, in the shared project file
-   - **b**: `disableSideloadFlags`, in managed settings
-   - **c**: `allowManagedHooksOnly`, in the user file
-   - **d**: `availableModels`, in managed settings
+2. Scenario: A company's managed plugin allowlist names only its own marketplace, yet some developers still try unreviewed plugins by starting a session with an option that pulls one in from a local folder. Which managed key closes that gap?
+   - **a**: `strictKnownMarketplaces`
+   - **b**: `disableSideloadFlags`
+   - **c**: `allowManagedHooksOnly`
+   - **d**: `allowManagedMcpServersOnly`
 
-3. Scenario: Before starting a rollout, a team records four weeks of the time to merge for pull requests. Why four weeks, and what does the record allow later?
+3. Scenario: Following this module's rollout plan, a team records four weeks of the time to merge for pull requests before the rollout starts. Why four weeks, and what does the record allow later?
    - **a**: Because usage credits reset every four weeks and the data must match
    - **b**: Because the dashboard keeps only four weeks, so older data is lost
-   - **c**: To show leadership how many lines developers write without the tool
-   - **d**: Because a release cycle fits inside it, so any shift is judged against it
+   - **c**: Because a month evens out weekly noise, so no outcome target is needed
+   - **d**: Because it spans a release cycle, so any shift is measured against it
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. A key that only managed settings read has no effect elsewhere. *b* is ruled out because the page orders the levels "highest first" with managed settings above the command line, and "no user, project or local value overrides it". *a* is ruled out because the page says managed-only keys are not merged: "A lower file that sets one of these has **no effect**". *d* is ruled out because "Some keys are read only from managed settings, because their purpose is to be out of a developer's reach".
-2. **b**. That key rejects the flags that sideload plugins, agents and MCP servers. *a* is ruled out because "An empty list blocks every source, the official one included", and the allowlist does not stop sideloading. *c* is ruled out because "only managed hooks run" is what that key does. *d* is ruled out because "The **lock** is `availableModels`, a list" and concerns the model choice.
-3. **d**. A baseline with a release cycle in it lets a later change be measured. *b* is ruled out because the page says "enough to include a release cycle and a quiet week", not a limit of the dashboard. *c* is ruled out because "Lines and suggestions accepted are reported and not targeted". *a* is ruled out because "A target on an outcome needs a baseline", and usage credits play no part in it.
+1. **c**. Without `allowManagedMcpServersOnly`, a list combines across files, so the developer's own entry widens the managed allowlist. *b* is ruled out because "only the managed `allowedMcpServers` list applies and a developer's own list cannot widen it" once the lock is on, so the allowlist does restrict. *a* is ruled out because "no user, project or local value overrides it" for the managed level. *d* is ruled out because a list "is combined across files and not replaced".
+2. **b**. A plugin loaded from a folder for one session comes in through a sideload flag, and that key rejects those flags. *a* is ruled out because "the allowlist does not stop a developer from loading a plugin from a folder for one run with a command-line flag". *c* is ruled out because "only managed hooks run" is all that key does, and the plugin's skills and agents still load. *d* is ruled out because "only the managed `allowedMcpServers` list applies", which governs servers and leaves the plugin's skills and agents loaded.
+3. **d**. A baseline with a release cycle in it lets a later change be measured. *b* is ruled out because the page says "enough to include a release cycle and a quiet week", not a limit of the dashboard. *c* is ruled out because the plan "states two outcome targets: the share of merged pull requests with assistance, and the time to merge". *a* is ruled out because "the baseline of four weeks and the way the limits add up are this course's design values", not a cycle of usage credits.
 
 </details>

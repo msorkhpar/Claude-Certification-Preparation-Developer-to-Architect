@@ -7,7 +7,7 @@
       "scope": "page",
       "stem": "Scenario: Priya compares four designs for a call-centre assistant. Two of them meet every service level, one at 90,000 a month and one at 140,000. A third costs 40,000 but misses the latency target. Which does the record recommend?",
       "options": {
-        "a": "The cheaper of the two that qualify, since price decides among them",
+        "a": "The 90,000 option, because among the options that qualify, the lower price decides",
         "b": "The 140,000 design, because the larger budget leaves room to grow beyond the target",
         "c": "The 40,000 design, because it is the cheapest of the four and the target can be tuned later",
         "d": "Both of the designs that meet every level, so that the sponsor can pick the one preferred"
@@ -16,7 +16,7 @@
       "explanation": {
         "a": "A design must qualify first, and among those that do, the cheapest is recommended.",
         "c": "Ruled out because \"An option that misses a service level is not a candidate, however cheap\".",
-        "b": "Ruled out because \"the newest\" and \"the most capable\" are not criteria, as \"the cheapest one that meets the service levels\" is.",
+        "b": "Ruled out because \"capability beyond the requirement is cost without a requirement behind it\", and room to grow beyond the target is exactly that.",
         "d": "Ruled out because \"Two recommended options push the choice back to the reader\"."
       }
     },
@@ -28,14 +28,14 @@
       "options": {
         "a": "The derivation of the break-even, which is the reason for every later number",
         "b": "The table by segment, so the sponsor sees the accuracy figures before anything else",
-        "c": "A short summary in plain words, covering the cost, the risk and the decision requested",
+        "c": "A plain paragraph on the cost against today's, the main risk and the approval sought",
         "d": "The list of the model's settings, so the sponsor can confirm the configuration"
       },
       "key": "c",
       "explanation": {
         "c": "The sponsor stops reading early, so the summary comes first and ends in the decision.",
-        "b": "Ruled out because the table by segment belongs with \"the numbers that produced it\" for the engineer.",
-        "a": "Ruled out because \"The summary is first because the sponsor stops reading early\".",
+        "b": "Ruled out because the engineer's part lists \"the table by segment, the service levels with their owners\", after the summary.",
+        "a": "Ruled out because the engineer's part holds \"the numbers that produced it: the break-even accuracy\".",
         "d": "Ruled out because the sponsor's summary has \"no percentages of percentages, no model names\"."
       }
     },
@@ -47,15 +47,15 @@
       "options": {
         "a": "Missed by 0 ms, since the measure has reached the limit",
         "b": "Met, since a value at the limit counts as inside it",
-        "c": "Met, but with the ceiling raised to 2100 ms for the week",
-        "d": "Undecided until a second week of measurements arrives"
+        "c": "At risk, since a figure on the ceiling is neither met nor missed",
+        "d": "Missed, since one answer in twenty took longer than 2000 ms"
       },
       "key": "b",
       "explanation": {
         "b": "A service level is met at its limit exactly.",
         "a": "Ruled out because \"A latency of 2000 ms against a ceiling of 2000 ms is met\".",
-        "c": "Ruled out because the ceiling is the target, and \"Met at the limit exactly\" leaves no reason to raise it.",
-        "d": "Ruled out because \"Met at the limit exactly\" settles the case without a second week."
+        "c": "Ruled out because \"a service level is met at its limit exactly and missed beyond it\", which leaves no third state.",
+        "d": "Ruled out because the ceiling is the \"95th percentile of at most 2000 ms\", so the slowest one in twenty may lie above it."
       }
     },
     {
@@ -66,14 +66,14 @@
       "options": {
         "a": "It should name the reviewer who decides when quality is poor enough",
         "b": "It states a quality aim, which belongs to the sponsor and not the pilot",
-        "c": "It should come after the roll-out so that the data exists to judge it",
-        "d": "It holds no number, so reaching it is a matter of opinion"
+        "c": "It names quality, which a pilot has no data to judge before launch",
+        "d": "It holds no number, so whether it was reached is a matter of opinion"
       },
       "key": "d",
       "explanation": {
         "d": "A trigger needs a number to be reached.",
         "a": "Ruled out because a trigger worded as \"if it goes wrong\" \"is not a trigger\", whoever decides.",
-        "c": "Ruled out because the record lists each assumption \"with a test and a stop trigger that has a number in it\" before the pilot runs.",
+        "c": "Ruled out because the pilot's own test is to \"sample production disputes and score them by segment\", with a trigger on credit accuracy.",
         "b": "Ruled out because \"the stop trigger is the pilot's own\", so the aim may be the sponsor's while the trigger is not."
       }
     },
@@ -83,17 +83,17 @@
       "scope": "module",
       "stem": "Scenario: Noor tells a sponsor that an assistant is \"98 percent accurate overall\". The system answers three kinds of dispute, and the one that costs 250 per error is right 63 times in 100. What should the record say to the sponsor?",
       "options": {
-        "a": "That the costly kind is excluded from the figure because it is handled in another system",
+        "a": "That the costly kind will reach 98 percent by launch, so the figure still holds",
         "b": "That the overall figure stands, since the costly kind is a small share of the traffic",
-        "c": "That a person decides each of those until the measured result improves",
+        "c": "That results go by segment, with a person deciding each of those until they improve",
         "d": "That the figure will be re-measured once per quarter, with the same overall method"
       },
       "key": "c",
       "explanation": {
         "c": "The promise is made per segment, and a person decides the costly one.",
         "b": "Ruled out because \"an average hides the segments that cost the most\", whatever the traffic share.",
-        "a": "Ruled out because the page says to \"Promise what you measure and measure what you promise\", and excluding a segment breaks both.",
-        "d": "Ruled out because \"a promise is made once and kept for as long as the system runs\", so re-measuring the same overall figure repeats the same blind spot."
+        "a": "Ruled out because the page says to \"Promise what you measure and measure what you promise\", and a future figure is not yet measured.",
+        "d": "Ruled out because a promise \"is made in the unit that is measured\", which here is the segment, so re-measuring the same overall figure repeats the same blind spot."
       }
     },
     {
@@ -103,16 +103,16 @@
       "stem": "Scenario: Lars hands a finished assistant to an operations team with an architecture diagram and a list of settings. The first alert fires on a Saturday and nobody knows who should act on it. Which part of the hand-off was missing?",
       "options": {
         "a": "A longer pilot, so that more alerts would have fired before the launch",
-        "b": "A named owner for the service and a runbook that tells staff what to do",
+        "b": "A runbook kept by a named service owner, saying who responds and how",
         "c": "A monthly report to the sponsor listing the alerts of the previous period",
         "d": "A second diagram showing the alert thresholds drawn on the architecture"
       },
       "key": "b",
       "explanation": {
         "b": "The record names an owner and a runbook for each alert.",
-        "a": "Ruled out because \"a diagram without the runbook leaves the first incident to the person who happens to remember\", and a longer pilot adds no owner.",
-        "c": "Ruled out because \"The people who run the system are not the people who built it\", and a report to the sponsor does not reach them on a Saturday.",
-        "d": "Ruled out because \"Implementation guidance is part of the hand-off and not an extra\", and a second diagram adds none."
+        "a": "Ruled out because \"the people who run the system need an owner, a runbook, monitors and a rollback on day one\", and a longer pilot adds none of them.",
+        "c": "Ruled out because an alert goes to \"the owner of the runbook that explains each alert\", and a monthly report to the sponsor arrives weeks after the Saturday.",
+        "d": "Ruled out because \"a diagram without the runbook leaves the first incident to the person who happens to remember\", and a second diagram is still a diagram."
       }
     },
     {
@@ -122,16 +122,16 @@
       "stem": "Scenario: A reviewer corrects forty answers in a week, and the notes of the sponsor review record them. Nothing else changes, and the same errors appear the next week. Which step would have closed the loop?",
       "options": {
         "a": "Sending the notes to the engineers with a request to read them before the next release",
-        "b": "Asking the reviewers to correct the same answers a second time for the record",
+        "b": "Counting the corrections per 100 disputes and comparing the count with a baseline",
         "c": "Moving the review from weekly to daily so that the notes are fresher",
         "d": "Turning each fix into a labelled evaluation case that each later release is run against"
       },
       "key": "d",
       "explanation": {
-        "d": "A loop is closed when a change goes back out through the gate.",
-        "b": "Ruled out because \"A stakeholder review that produces notes and no cases has not closed anything\".",
-        "c": "Ruled out because the review is \"A regular review of the segments, the saving and the open risks\", and its speed adds no case.",
-        "a": "Ruled out because a loop closes only when \"the person who raised the problem is told what happened\" after a change has gone through the gate."
+        "d": "A correction kept as a labelled evaluation case is run against every later release, so the same error cannot return unseen.",
+        "b": "Ruled out because a count against a baseline is a signal, while the reviewer's fix must become a case \"so the same failure is tested after every change\".",
+        "c": "Ruled out because \"A loop is closed when a change goes back out through the gate of module 89\", and a fresher review sends no change.",
+        "a": "Ruled out because \"A stakeholder review that produces notes and no cases has not closed anything\", and notes sent on are still notes."
       }
     }
   ]

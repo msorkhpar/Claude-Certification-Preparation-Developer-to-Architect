@@ -29,33 +29,33 @@
         "a": "Its context window is smaller than what is sent",
         "b": "Its latency is the highest of all the models in the table",
         "c": "Its tokenizer is older than the tokenizers of the others",
-        "d": "Its output price is higher than its own input price"
+        "d": "Its max output is the lowest of the models in the table"
       },
       "key": "a",
       "explanation": {
         "a": "The page says \"a 300,000-token input rules Haiku 4.5 out whatever its price\", because the input must fit the context window.",
         "b": "Ruled out because the latency column is relative and \"depends on prompt length, output length, and thinking effort\".",
         "c": "Ruled out because \"A tokenizer change moves the count\" and does not block an input.",
-        "d": "Ruled out because the page states \"Output costs five times input on every row\", which is a cost fact and not a limit."
+        "d": "Ruled out because max output decides a long answer, as in \"a 100,000-token report rules Haiku 4.5 out too\", and this answer is short."
       }
     },
     {
       "id": "01-matching-a-tier-to-a-workload#q3",
       "page": "01-matching-a-tier-to-a-workload.md",
       "scope": "page",
-      "stem": "A model lists a price 20% lower per token than its predecessor, but its tokenizer produces about 30% more tokens for the same text. What does the page's reasoning give for the cost of one task?",
+      "stem": "A model lists a price 10% lower per token than its predecessor, but its tokenizer produces about 30% more tokens for the same text. What does the page's reasoning give for the cost of one task?",
       "options": {
-        "a": "It stays equal, because a tokenizer change moves only the output side",
-        "b": "It falls by about 20%, because the lower rate applies to the whole bill",
-        "c": "It rises by about 4%, because 0.8 x 1.3 is 1.04",
-        "d": "It falls by about 10%, because the two changes average out"
+        "a": "It stays level, since the tokenizer change touches only output",
+        "b": "It falls by about 10%, since the lower rate cuts the whole bill",
+        "c": "It rises by about 17%, since 0.9 times 1.3 comes to about 1.17",
+        "d": "It rises by about 20%, since 30% more minus 10% off is 20%"
       },
       "key": "c",
       "explanation": {
-        "c": "The page says the newer tokenizer \"produces approximately 30% more tokens for the same text\", so 0.8 times 1.3 is 1.04 times the cost per task.",
+        "c": "The page multiplies rate by count, as in \"costs 0.8 x 1.3 = 1.04 times as much per task\", so 0.9 times 1.3 gives 1.17 times the cost per task.",
         "b": "Ruled out because the two facts \"make the price per token a poor proxy for the price per task\".",
-        "a": "Ruled out because \"A tokenizer change moves the count.\"",
-        "d": "Ruled out because the page says to \"compare cost per task on a sample, not per million tokens\", and the two factors multiply rather than average."
+        "a": "Ruled out because \"The same document costs more tokens on a newer model\", input included.",
+        "d": "Ruled out because the page multiplies the factors and does not add the percentages: the real pair \"costs 2/3 x 1.3, about 0.87 times as much\", where adding would give about 0.97."
       }
     },
     {
@@ -64,17 +64,17 @@
       "scope": "page",
       "stem": "A response reports 120 `input_tokens`, 4,000 `cache_creation_input_tokens` and 340 `output_tokens`. A team adds them up as 460 tokens in and out. What does the page say they missed?",
       "options": {
-        "a": "The output tokens are priced from the cache multiplier",
+        "a": "The thinking inside the output is billed at the input price",
         "b": "The cache write has its own price above the base input price",
         "c": "The count in `input_tokens` already includes the written tokens",
-        "d": "The batch discount applies to cache writes before anything else"
+        "d": "The 4,000 tokens are cache reads billed at a tenth of input"
       },
       "key": "b",
       "explanation": {
         "b": "The page prices a 5-minute cache write at \"1.25 times input\", so 4,000 written tokens are not ordinary input.",
-        "a": "Ruled out because output tokens are \"Tokens generated, thinking included\" and the table prices them at the output price, while the cache multipliers apply to input.",
+        "a": "Ruled out because output tokens are \"Tokens generated, thinking included\", all priced at the output price.",
         "c": "Ruled out because `input_tokens` is \"Input tokens that were not read from or written to a cache\".",
-        "d": "Ruled out because the batch discount is \"50 percent on input and output\" and halves the sum, and it is not an ordering of charges."
+        "d": "Ruled out because `cache_creation_input_tokens` are \"Tokens written to the cache\", while a tenth of input is the price of \"Tokens read from the cache\"."
       }
     },
     {
@@ -83,36 +83,36 @@
       "scope": "page",
       "stem": "Before sending a long prompt, an application wants to know whether it fits a budget. Which tool does the page back, and with what caveat?",
       "options": {
-        "a": "The pricing page, whose figures give the token count of any prompt",
+        "a": "A fixed ratio of characters per token, allowing some drift by model",
         "b": "A trial request with a tiny `max_tokens`, whose usage is exact and free of charge",
-        "c": "The `input_tokens` of the previous response, which always predicts the next one",
-        "d": "The token counting endpoint, whose figure is an estimate and is free to request"
+        "c": "The `usage` of an earlier call on a similar prompt, read as exact",
+        "d": "The token counting endpoint, allowing a small gap from the billed input"
       },
       "key": "d",
       "explanation": {
-        "d": "The page says \"The token count is an estimate\" and \"Token counting is free to use but subject to requests per minute rate limits based on your usage tier.\"",
+        "d": "The page says \"The token count is an estimate\" and \"the real count may differ by a small amount\", while \"Token counting is free to use but subject to requests per minute rate limits based on your usage tier.\"",
         "b": "Ruled out because a trial request is a billed Messages call (the page calls counting \"free to use\"), while the page offers counting as a separate call with \"separate and independent rate limits\".",
-        "c": "Ruled out because the page says \"to decide before paying\" with counting on the new prompt, and an earlier response predicts nothing about it.",
-        "a": "Ruled out because the pricing page gives prices per million tokens, while the endpoint \"takes the same structured input as a Messages request\" and counts it."
+        "c": "Ruled out because `usage` reports a call already made on another input, while the page counts the new prompt itself \"to decide before paying\".",
+        "a": "Ruled out because the endpoint \"takes the same structured input as a Messages request\", tools, images and documents included, which a character ratio cannot see."
       }
     },
     {
       "id": "02-usage-token-counting-and-a-cost-model#q3",
       "page": "02-usage-token-counting-and-a-cost-model.md",
       "scope": "page",
-      "stem": "A router must pick between two models whose costs for a cache-heavy request are equal. What does the practice's rule do?",
+      "stem": "In this module's practice, a request made only of cache reads costs the same on a model at $2 with a 0.1 read rate and on one at $4 with 0.05. What does the router return?",
       "options": {
-        "a": "It takes the first model in the catalog, since order is the only signal left",
-        "b": "It takes the lower tier, so the answer does not depend on the catalog",
-        "c": "It takes the larger window, since room is worth keeping in reserve",
-        "d": "It takes the higher tier, since quality is worth the extra spend"
+        "a": "The one listed first, since order is the last signal left",
+        "b": "Sonnet 5.5, in whichever order the catalog lists the two",
+        "c": "The one with the larger window, kept as spare room",
+        "d": "Opus 5.5, since quality is worth having at equal spend"
       },
       "key": "b",
       "explanation": {
-        "b": "The practice's rule is \"A cost tie goes to the lower tier\", and the order of the catalog never matters.",
+        "b": "Case `e6` is \"built on a real tie\", the $2 model being Sonnet 5.5, and the practice sends a tie down a tier \"and the order of the catalog never matters\".",
         "a": "Ruled out because a router that breaks ties by list order gives \"an answer that depends on how the catalog was written\".",
-        "c": "Ruled out because the rule is \"A cost tie goes to the lower tier\" and never ranks windows once the limits are met.",
-        "d": "Ruled out because the statement says \"goes to the lower tier\"."
+        "c": "Ruled out because the window is a filter, a model needs only \"a context window that holds the task's input\", and the rule never ranks windows.",
+        "d": "Ruled out because \"A cost tie goes to the lower tier\", and Opus 5.5 is the higher one."
       }
     },
     {
@@ -124,32 +124,32 @@
         "a": "Drop the settings that the new target rejects, and build per target",
         "b": "Raise `max_tokens`, since a budget needs more room under the new id",
         "c": "Add retries, since a 400 on a fresh deployment is often transient",
-        "d": "Keep the old id and pin the new one on a second key"
+        "d": "Set thinking to type `disabled`, so that no budget is sent"
       },
       "key": "a",
       "explanation": {
         "a": "The page says an item that is \"rejected\" returns a 400 error and that the guide lists what to remove: a manual `budget_tokens` is rejected on Opus 5.5.",
         "b": "Ruled out because \"Sending thinking of type disabled, or a manual budget_tokens, is rejected\", whatever the room.",
         "c": "Ruled out because a rejected setting fails every time, and a rising 400 rate is \"the signal of a rejected parameter\".",
-        "d": "Ruled out because the page says to make the request builder per model and \"Change the request builder together with the id\"."
+        "d": "Ruled out because on Opus 5.5 \"Thinking is adaptive and always on\", and a `disabled` type is rejected too."
       }
     },
     {
       "id": "03-pinning-ids-and-migrating-safely#q2",
       "page": "03-pinning-ids-and-migrating-safely.md",
       "scope": "page",
-      "stem": "A deprecated id is still called by a nightly job that nobody remembers. How does the page say to find it?",
+      "stem": "A deprecated id is still called by a nightly job that nobody remembers. How can the team find it?",
       "options": {
-        "a": "Export the Console usage as a CSV and read it by key and model",
+        "a": "Export usage per API key and model, which names the key behind it",
         "b": "Wait for the retirement email, which names each calling application",
-        "c": "Ask the model for its own version in a test prompt",
+        "c": "Watch the 400 rate, which climbs each time that id is called",
         "d": "Check the alias list, which names every application that resolves it"
       },
       "key": "a",
       "explanation": {
-        "a": "The page says \"usage broken down by API key and model\" shows which key still calls which model.",
+        "a": "The Usage page exports a CSV, and \"usage broken down by API key and model\" shows which key still calls which model.",
         "b": "Ruled out because the notice is about dates, \"providing at least 60 days' notice before model retirement for publicly released models\", and names no callers.",
-        "c": "Ruled out because the page's own method is the export that shows \"usage broken down by API key and model\", while a prompt returns text and no record of calls.",
+        "c": "Ruled out because a deprecated model \"is still functional but no longer recommended\", so its calls succeed and raise no 400.",
         "d": "Ruled out because an alias is \"a convenience pointer that resolves to the dated ID\" and holds no list of callers."
       }
     },
@@ -157,18 +157,18 @@
       "id": "03-pinning-ids-and-migrating-safely#q3",
       "page": "03-pinning-ids-and-migrating-safely.md",
       "scope": "page",
-      "stem": "The same team runs on the Claude API and on a cloud service. One model has a published retirement day. What does the page say about the same model there?",
+      "stem": "A team calls one model on the Claude API and on Amazon Bedrock, and the model has a published retirement day. What happens to the Bedrock traffic?",
       "options": {
-        "a": "It stops sixty days earlier, to give notice to its customers",
-        "b": "It stops on the same date, because the model id is identical",
-        "c": "The partner that operates it sets its own schedule",
-        "d": "It becomes an alias of the replacement on the date"
+        "a": "Its date is the API date plus the 60-day notice period",
+        "b": "It ends on that day too, since the id names the same model",
+        "c": "It keeps a separate date, set by the partner that runs it",
+        "d": "It turns into an alias of the replacement model on that day"
       },
       "key": "c",
       "explanation": {
         "c": "The page says \"Partner-operated platforms (Amazon Bedrock and Google Cloud) set their own retirement schedules\".",
-        "b": "Ruled out because the dates listed apply to \"the Claude API, Claude Platform on AWS and Microsoft Foundry\".",
-        "a": "Ruled out because the only fixed period on the page is \"at least 60 days' notice\", counted before retirement on the operator's own schedule.",
+        "b": "Ruled out because the listed dates apply to \"the Claude API, Claude Platform on AWS and Microsoft Foundry\", and Bedrock is not among them.",
+        "a": "Ruled out because the page's period is \"at least 60 days' notice before model retirement\", a warning ahead of a date and not time added after it.",
         "d": "Ruled out because the page names no aliasing on retirement: \"Requests to retired models will fail.\""
       }
     },
@@ -176,19 +176,19 @@
       "id": "03-pinning-ids-and-migrating-safely#m1",
       "page": "03-pinning-ids-and-migrating-safely.md",
       "scope": "module",
-      "stem": "A support product sends one payload to several targets, and the same payload suddenly fails on the newest with a 400 about `temperature`. Which design stops the failure at its root?",
+      "stem": "A support product sends one request body, with `temperature` set to 0.2, to Haiku 4.5 and to Sonnet 5.5. Haiku answers and Sonnet returns a 400. What explains the difference?",
       "options": {
-        "a": "Catch the 400 and resend the body with the field removed after each failure",
-        "b": "Build each request per model, omitting what that model rejects",
-        "c": "Fix the parameter at one custom value for every model in the catalog",
-        "d": "Pin the older target for good, so that the payload keeps working there"
+        "a": "The newer model has been retired, so every call to it fails",
+        "b": "The newer model refuses sampling values the older one accepts",
+        "c": "The newer id is an alias that resolves to an older snapshot",
+        "d": "The body overflows the newer model's window but fits the older"
       },
       "key": "b",
       "explanation": {
-        "b": "The page says to \"Change the request builder together with the id\" and that Haiku 4.5 \"still accepts sampling parameters\", so one body does not fit every model.",
-        "a": "Ruled out because a rejected setting fails every time and a 400 is \"the signal of a rejected parameter\", not something to patch after each failure.",
-        "c": "Ruled out because the rule is \"Omit temperature, top_p, and top_k, or leave them at their defaults: any other value is rejected\", so one custom value fails on the newest model.",
-        "d": "Ruled out because a pinned older model still reaches retirement, after which \"Requests to retired models will fail\", so pinning for good only postpones the break"
+        "b": "The Sonnet 5.5 guide \"returns the same list of 400-error settings\", sampling parameters among them, while \"Claude Haiku 4.5 predates these rules and still accepts sampling parameters\".",
+        "a": "Ruled out because Sonnet 5.5 is listed \"as the recommended replacement\" for a deprecated model, not as a retired one.",
+        "c": "Ruled out because \"Every Claude model ID is a pinned snapshot, including the dateless IDs used from the 4.6 generation on.\"",
+        "d": "Ruled out because Haiku 4.5 has the smaller window, as \"a 300,000-token input rules Haiku 4.5 out whatever its price\", so a body that fits Haiku also fits Sonnet 5.5."
       }
     },
     {
@@ -216,17 +216,17 @@
       "scope": "module",
       "stem": "A router moves a long conversation to a different target halfway through, and answer quality drops. Which cause does the module name?",
       "options": {
-        "a": "The retirement notice reset the cache of the conversation",
+        "a": "The old model's cache stays behind, so the new one loses the history",
         "b": "The new model has a different alias that resolves to an old snapshot",
         "c": "The token counting endpoint rejected the longer conversation",
-        "d": "The new model reads the earlier turns without the earlier reasoning"
+        "d": "The new model sees the past turns but not the thinking behind them"
       },
       "key": "d",
       "explanation": {
         "d": "The page quotes \"A router or fallback that moves a conversation from Claude Opus 5.5 to any other model runs those turns without them.\"",
         "b": "Ruled out because \"Every Claude model ID is a pinned snapshot\" and a dateless id is its own snapshot.",
         "c": "Ruled out because the endpoint rejects inputs such as \"server tools like web search\", not long conversations.",
-        "a": "Ruled out because the page never ties a retirement notice to a cache, and says only that notice is \"at least 60 days' notice\"."
+        "a": "Ruled out because a cache changes only the price of input, and \"the total input is the sum of the three input fields\" whether read from a cache or not."
       }
     },
     {
@@ -237,14 +237,14 @@
       "options": {
         "a": "A second evaluation on the vendor's published benchmark suite",
         "b": "An evaluation on its own cases, run ahead of the shift",
-        "c": "A new tokenizer, so the counts match across both models",
+        "c": "The old model's effort level, carried over so behaviour matches",
         "d": "A larger `max_tokens` on every request, to leave room for thinking"
       },
       "key": "b",
       "explanation": {
         "b": "The page says to evaluate \"on your own cases\" and warns that migrating on the retirement date \"leaves no time to evaluate\".",
         "a": "Ruled out because the page's step is an evaluation \"on your own cases\", not a published suite.",
-        "c": "Ruled out because \"A new tokenizer changes token counts\" and belongs to the model, so the team re-checks budgets and does not install one.",
+        "c": "Ruled out because the Effort page says to \"Run an effort sweep on your own evals rather than carrying settings over from an earlier model\".",
         "d": "Ruled out because the page says \"Re-measure instead of copying numbers\" and gives no blanket increase."
       }
     }

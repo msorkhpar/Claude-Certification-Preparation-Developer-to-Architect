@@ -28,7 +28,7 @@
       "options": {
         "a": "In plan mode, with a plan approved before any bug fix",
         "b": "In plan mode, with the division reviewed as a risky operation",
-        "c": "After an interview about the feature that owns the function",
+        "c": "Directly, then leave the empty-list case to code review",
         "d": "Directly, then confirm with a test of that edge case"
       },
       "key": "d",
@@ -36,7 +36,7 @@
         "d": "One file with a clear trace is the guide's example of direct execution.",
         "a": "Ruled out because \"Plan mode is useful, but also adds overhead\", and a small clear fix does not repay it.",
         "b": "Ruled out because \"Two signals decide it: the number of files and the number of valid approaches\", and risk is neither.",
-        "c": "Ruled out because an interview suits a large unclear feature, and here \"If you could describe the diff in one sentence, skip the plan\"."
+        "c": "Ruled out because \"a one-function fix with a clear trace is executed directly and checked by its tests\", and a later code review is no test of the empty list."
       }
     },
     {
@@ -45,17 +45,17 @@
       "scope": "page",
       "stem": "A conversion routine keeps being read in different ways, and each new version differs from the last. What should the next message contain?",
       "options": {
-        "a": "A longer prose description with more adjectives",
-        "b": "The same description plus a request to be more careful",
-        "c": "Two or three exact inputs paired with the outputs required",
-        "d": "A request to reproduce the previous version with small changes"
+        "a": "A longer prose description that states each rule in turn",
+        "b": "A request to write tests from the version it produced last",
+        "c": "Sample inputs, one an edge case, with their exact outputs",
+        "d": "A fresh session that starts from the same description"
       },
       "key": "c",
       "explanation": {
         "c": "Exact examples remove the ambiguity that causes inconsistent reading.",
         "a": "Ruled out because the guide's remedy for prose that is read in different ways is \"concrete input and output examples\".",
-        "b": "Ruled out because care does not say what is wanted, and \"each correction is a guess at what was meant\".",
-        "d": "Ruled out because small changes to a version that was misread repeat the misreading, while \"the answer is nearly always the one that removes a guess\"."
+        "b": "Ruled out because tests drawn from a misread version encode the misreading, and \"A test written from the same misunderstanding as the code verifies nothing\".",
+        "d": "Ruled out because a fresh start should come \"with a prompt that holds what you learned\", and the same description holds nothing new."
       }
     },
     {
@@ -73,7 +73,7 @@
       "explanation": {
         "a": "The interview surfaces the requirements before any code, and the spec carries them into a clean session.",
         "b": "Ruled out because \"do not start with a long prompt that guesses\" at what the requirements are.",
-        "c": "Ruled out because choosing alone skips the documented step: \"ask Claude to interview you with AskUserQuestion\".",
+        "c": "Ruled out because stating its own assumptions is the fallback when \"An unattended run cannot answer questions\", and here a person is present to answer.",
         "d": "Ruled out because repair means repeated correction, and \"after two failed corrections the context is cluttered with failed approaches\"."
       }
     },
@@ -86,52 +86,52 @@
         "a": "It goes ahead, with permission modes skipped",
         "b": "It is refused, with the restriction still in force",
         "c": "It goes ahead, with the scheduled run pre-approved",
-        "d": "It prompts the job's owner by email for approval"
+        "d": "It is allowed, with plan mode treated as an instruction only"
       },
       "key": "b",
       "explanation": {
         "b": "Plan mode keeps its blocks in runs that have no interactive terminal.",
         "a": "Ruled out because \"Plan mode keeps its blocks wherever Claude Code runs without an interactive terminal\".",
-        "c": "Ruled out because the exception is narrow: \"in an interactive terminal session where bypass permissions are available the blocks are not enforced\".",
-        "d": "Ruled out because \"Edits stay blocked until you approve the plan\", and a headless run has no approval channel."
+        "c": "Ruled out because \"Edits stay blocked until you approve the plan\", and scheduling a run approves no plan.",
+        "d": "Ruled out because the exception is narrow: \"in an interactive terminal session where bypass permissions are available the blocks are not enforced\", and a `-p` run has no interactive terminal."
       }
     },
     {
       "id": "02-examples-tests-the-interview-and-feedback#m2",
       "page": "02-examples-tests-the-interview-and-feedback.md",
       "scope": "module",
-      "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. After a refactor, one report lists a sort order that also breaks pagination, a misspelled label and a null date. How should the three be sent?",
+      "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. After a refactor, one report lists a broken rounding rule, an invoice total that is wrong because of it, a misspelled column header and an unused import. How should the four be sent?",
       "options": {
-        "a": "All three together in one message",
-        "b": "Three separate messages, one for each problem",
-        "c": "The label first, then everything else in a second message",
-        "d": "The linked pair together, then each other one"
+        "a": "All four together in one message",
+        "b": "Four separate messages, one for each problem",
+        "c": "The header and the import together, then the other two together",
+        "d": "The linked pair in one message, then each of the others"
       },
       "key": "d",
       "explanation": {
         "d": "Problems that interact travel together and independent ones go one at a time.",
         "a": "Ruled out because \"Independent problems, such as a typo in a label and a null date, go one after another\".",
-        "b": "Ruled out because the sort order and pagination interact, and \"fixing one in isolation can undo the other\".",
-        "c": "Ruled out because that groups the independent date with the interacting pair, while the example \"groups issues by their interacts_with links\"."
+        "b": "Ruled out because the rounding rule and the total interact, and \"fixing one in isolation can undo the other\".",
+        "c": "Ruled out because the header and the import are independent, and sent one after another \"each gets a clean result and a clean test run\"."
       }
     },
     {
       "id": "02-examples-tests-the-interview-and-feedback#m3",
       "page": "02-examples-tests-the-interview-and-feedback.md",
       "scope": "module",
-      "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. Claude has failed to fix the same bug in three attempts, and each correction added more history to the session. What should the developer do?",
+      "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. Claude has failed to fix the same bug after three corrections in one session. What should the developer do?",
       "options": {
-        "a": "Send a fourth correction that repeats the earlier ones",
-        "b": "Ask Claude to ignore the earlier attempts in the same thread",
-        "c": "Clear the context and restart with a better prompt",
-        "d": "Switch to plan mode in the same thread"
+        "a": "Send a fourth correction that explains the bug in more detail",
+        "b": "Ask Claude to set aside its earlier attempts and try again",
+        "c": "Clear the context and reprompt with what the attempts showed",
+        "d": "Switch the same session to plan mode for the next attempt"
       },
       "key": "c",
       "explanation": {
         "c": "After more than two failed corrections the documented fix is to clear the context and write a better first prompt, one that carries the broken checks and the lessons.",
-        "a": "Ruled out because \"after two failed corrections the context is cluttered with failed approaches\", and repeating adds to the clutter.",
+        "a": "Ruled out because \"after two failed corrections the context is cluttered with failed approaches\", and a fourth correction adds to the clutter.",
         "b": "Ruled out because an instruction does not remove history from the context, and \"a clean session with a better prompt does better\".",
-        "d": "Ruled out because \"Corrections accumulate in the context\", and a mode switch in the same thread keeps them all."
+        "d": "Ruled out because \"Corrections accumulate in the context\", and a mode switch in the same session keeps them all."
       }
     }
   ]

@@ -692,21 +692,21 @@ roll-out at 100% with 50000 requests and 10 errors: complete
 ## Quiz
 
 1. A deprecation table lists one of a company's models with a retirement of "not sooner than" a date nine weeks away. How should the team treat that entry?
-   - **a**: Plan against it as the earliest cut-off and begin early, since it slips later, not earlier
+   - **a**: Plan against it as the earliest cut-off and begin early, since any slip would push it later
    - **b**: Wait for the vendor to confirm a final cut-off before spending any effort on the move
    - **c**: Treat it as a fixed cut-off that cannot move, and schedule the whole migration to end on that day
    - **d**: Ignore it until the status changes to retired, because nothing breaks before that point
 
-2. A model's entry in the documentation carries the status legacy. What does that status say?
+2. A team tested a model last year and now finds it listed as legacy in the documentation. What should they conclude?
    - **a**: It has a retirement date and will fail on that day, so requests must already be moved
-   - **b**: It is the recommended choice for new work, since only deprecated models are withdrawn
-   - **c**: It stops receiving updates and heads toward deprecation, so plan the move before any date is set
+   - **b**: It can still be the recommended choice for new work, since only deprecated models are withdrawn
+   - **c**: It gets no more updates and may later be deprecated, so plan the move before a date is set
    - **d**: It has been retired already, so every request that names it comes back as a failure
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The table can say "not sooner than" for a model that is still active, which marks a date that may move later. *b* is ruled out because "is never a date to wait for". *c* is ruled out because "marks a date that may move later". *d* is ruled out because "Deprecated models are likely to be less reliable than active models", so nothing is safe until the retired state.
-2. **c**. Legacy means "The model will no longer receive updates and may be deprecated in the future." *a* is ruled out because deprecated is the state where Anthropic "provides a recommended replacement and assigns a retirement date". *b* is ruled out because active is the state where "The model is fully supported and recommended for use". *d* is ruled out because "Requests to retired models will fail" describes the retired state, not legacy.
+1. **a**. The table can say "not sooner than" for a model that is still active, which marks a date that may move later. *b* is ruled out because "is never a date to wait for". *c* is ruled out because "marks a date that may move later". *d* is ruled out because the move takes time before anything breaks, and "a migration of forty applications can take longer than that".
+2. **c**. Legacy means "The model will no longer receive updates and may be deprecated in the future", so the plan starts before any retirement date exists. *a* is ruled out because deprecated is the state where Anthropic "provides a recommended replacement and assigns a retirement date". *b* is ruled out because active is the state where "The model is fully supported and recommended for use". *d* is ruled out because "Requests to retired models will fail" describes the retired state, not legacy.
 
 </details>

@@ -416,29 +416,30 @@ $4 and 0.05. A router that breaks ties by list order gives an answer that depend
 
 1. A response reports 120 `input_tokens`, 4,000 `cache_creation_input_tokens` and 340 `output_tokens`. A team adds them up as
    460 tokens in and out. What does the page say they missed?
-   - **a**: The output tokens are priced from the cache multiplier
+   - **a**: The thinking inside the output is billed at the input price
    - **b**: The cache write has its own price above the base input price
    - **c**: The count in `input_tokens` already includes the written tokens
-   - **d**: The batch discount applies to cache writes before anything else
+   - **d**: The 4,000 tokens are cache reads billed at a tenth of input
 
 2. Before sending a long prompt, an application wants to know whether it fits a budget. Which tool does the page back, and with
    what caveat?
-   - **a**: The pricing page, whose figures give the token count of any prompt
+   - **a**: A fixed ratio of characters per token, allowing some drift by model
    - **b**: A trial request with a tiny `max_tokens`, whose usage is exact and free of charge
-   - **c**: The `input_tokens` of the previous response, which always predicts the next one
-   - **d**: The token counting endpoint, whose figure is an estimate and is free to request
+   - **c**: The `usage` of an earlier call on a similar prompt, read as exact
+   - **d**: The token counting endpoint, allowing a small gap from the billed input
 
-3. A router must pick between two models whose costs for a cache-heavy request are equal. What does the practice's rule do?
-   - **a**: It takes the first model in the catalog, since order is the only signal left
-   - **b**: It takes the lower tier, so the answer does not depend on the catalog
-   - **c**: It takes the larger window, since room is worth keeping in reserve
-   - **d**: It takes the higher tier, since quality is worth the extra spend
+3. In this module's practice, a request made only of cache reads costs the same on a model at $2 with a 0.1 read rate and on
+   one at $4 with 0.05. What does the router return?
+   - **a**: The one listed first, since order is the last signal left
+   - **b**: Sonnet 5.5, in whichever order the catalog lists the two
+   - **c**: The one with the larger window, kept as spare room
+   - **d**: Opus 5.5, since quality is worth having at equal spend
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page prices a 5-minute cache write at "1.25 times input", so 4,000 written tokens are not ordinary input. *a* is ruled out because output tokens are "Tokens generated, thinking included" and the table prices them at the output price, while the cache multipliers apply to input. *c* is ruled out because `input_tokens` is "Input tokens that were not read from or written to a cache". *d* is ruled out because the batch discount is "50 percent on input and output" and halves the sum, and it is not an ordering of charges.
-2. **d**. The page says "The token count is an estimate" and "Token counting is free to use but subject to requests per minute rate limits based on your usage tier." *b* is ruled out because a trial request is a billed Messages call (the page calls counting "free to use"), while the page offers counting as a separate call with "separate and independent rate limits". *c* is ruled out because the page says "to decide before paying" with counting on the new prompt, and an earlier response predicts nothing about it. *a* is ruled out because the pricing page gives prices per million tokens, while the endpoint "takes the same structured input as a Messages request" and counts it.
-3. **b**. The practice's rule is "A cost tie goes to the lower tier", and the order of the catalog never matters. *a* is ruled out because a router that breaks ties by list order gives "an answer that depends on how the catalog was written". *c* is ruled out because the rule is "A cost tie goes to the lower tier" and never ranks windows once the limits are met. *d* is ruled out because the statement says "goes to the lower tier".
+1. **b**. The page prices a 5-minute cache write at "1.25 times input", so 4,000 written tokens are not ordinary input. *a* is ruled out because output tokens are "Tokens generated, thinking included", all priced at the output price. *c* is ruled out because `input_tokens` is "Input tokens that were not read from or written to a cache". *d* is ruled out because `cache_creation_input_tokens` are "Tokens written to the cache", while a tenth of input is the price of "Tokens read from the cache".
+2. **d**. The page says "The token count is an estimate" and "the real count may differ by a small amount", while "Token counting is free to use but subject to requests per minute rate limits based on your usage tier." *b* is ruled out because a trial request is a billed Messages call (the page calls counting "free to use"), while the page offers counting as a separate call with "separate and independent rate limits". *c* is ruled out because `usage` reports a call already made on another input, while the page counts the new prompt itself "to decide before paying". *a* is ruled out because the endpoint "takes the same structured input as a Messages request", tools, images and documents included, which a character ratio cannot see.
+3. **b**. Case `e6` is "built on a real tie", the $2 model being Sonnet 5.5, and the practice sends a tie down a tier "and the order of the catalog never matters". *a* is ruled out because a router that breaks ties by list order gives "an answer that depends on how the catalog was written". *c* is ruled out because the window is a filter, a model needs only "a context window that holds the task's input", and the rule never ranks windows. *d* is ruled out because "A cost tie goes to the lower tier", and Opus 5.5 is the higher one.
 
 </details>

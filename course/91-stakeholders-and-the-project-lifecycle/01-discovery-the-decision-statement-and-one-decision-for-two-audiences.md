@@ -390,7 +390,7 @@ The practice is in [`exercises/91-stakeholders-and-the-project-lifecycle`](../..
 ## Quiz
 
 1. Scenario: Priya compares four designs for a call-centre assistant. Two of them meet every service level, one at 90,000 a month and one at 140,000. A third costs 40,000 but misses the latency target. Which does the record recommend?
-   - **a**: The cheaper of the two that qualify, since price decides among them
+   - **a**: The 90,000 option, because among the options that qualify, the lower price decides
    - **b**: The 140,000 design, because the larger budget leaves room to grow beyond the target
    - **c**: The 40,000 design, because it is the cheapest of the four and the target can be tuned later
    - **d**: Both of the designs that meet every level, so that the sponsor can pick the one preferred
@@ -398,13 +398,13 @@ The practice is in [`exercises/91-stakeholders-and-the-project-lifecycle`](../..
 2. Scenario: Hugo must brief a sponsor who will decide in one meeting on whether a pilot goes ahead. Hugo's draft is six pages of tables, ending with the break-even derivation. What should the first page of the record hold?
    - **a**: The derivation of the break-even, which is the reason for every later number
    - **b**: The table by segment, so the sponsor sees the accuracy figures before anything else
-   - **c**: A short summary in plain words, covering the cost, the risk and the decision requested
+   - **c**: A plain paragraph on the cost against today's, the main risk and the approval sought
    - **d**: The list of the model's settings, so the sponsor can confirm the configuration
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. A design must qualify first, and among those that do, the cheapest is recommended. *c* is ruled out because "An option that misses a service level is not a candidate, however cheap". *b* is ruled out because "the newest" and "the most capable" are not criteria, as "the cheapest one that meets the service levels" is. *d* is ruled out because "Two recommended options push the choice back to the reader".
-2. **c**. The sponsor stops reading early, so the summary comes first and ends in the decision. *b* is ruled out because the table by segment belongs with "the numbers that produced it" for the engineer. *a* is ruled out because "The summary is first because the sponsor stops reading early". *d* is ruled out because the sponsor's summary has "no percentages of percentages, no model names".
+1. **a**. A design must qualify first, and among those that do, the cheapest is recommended. *c* is ruled out because "An option that misses a service level is not a candidate, however cheap". *b* is ruled out because "capability beyond the requirement is cost without a requirement behind it", and room to grow beyond the target is exactly that. *d* is ruled out because "Two recommended options push the choice back to the reader".
+2. **c**. The sponsor stops reading early, so the summary comes first and ends in the decision. *b* is ruled out because the engineer's part lists "the table by segment, the service levels with their owners", after the summary. *a* is ruled out because the engineer's part holds "the numbers that produced it: the break-even accuracy". *d* is ruled out because the sponsor's summary has "no percentages of percentages, no model names".
 
 </details>

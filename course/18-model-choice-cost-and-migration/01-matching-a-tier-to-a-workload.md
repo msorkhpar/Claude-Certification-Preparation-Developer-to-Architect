@@ -109,20 +109,20 @@ earlier turns without the earlier reasoning, and should test for it.
    - **a**: Its context window is smaller than what is sent
    - **b**: Its latency is the highest of all the models in the table
    - **c**: Its tokenizer is older than the tokenizers of the others
-   - **d**: Its output price is higher than its own input price
+   - **d**: Its max output is the lowest of the models in the table
 
-3. A model lists a price 20% lower per token than its predecessor, but its tokenizer produces about 30% more tokens for the
+3. A model lists a price 10% lower per token than its predecessor, but its tokenizer produces about 30% more tokens for the
    same text. What does the page's reasoning give for the cost of one task?
-   - **a**: It stays equal, because a tokenizer change moves only the output side
-   - **b**: It falls by about 20%, because the lower rate applies to the whole bill
-   - **c**: It rises by about 4%, because 0.8 x 1.3 is 1.04
-   - **d**: It falls by about 10%, because the two changes average out
+   - **a**: It stays level, since the tokenizer change touches only output
+   - **b**: It falls by about 10%, since the lower rate cuts the whole bill
+   - **c**: It rises by about 17%, since 0.9 times 1.3 comes to about 1.17
+   - **d**: It rises by about 20%, since 30% more minus 10% off is 20%
 
 <details>
 <summary>Answer key</summary>
 
 1. **d**. The page's method is to move down "until quality drops, and keep the last tier that held", and the tests show nothing is lost at the cheapest tier. *b* is ruled out because a tier above Opus is "earned by failing an evaluation, not assumed". *c* is ruled out because the method keeps "the cheapest tier that passes", not a tier in the middle. *a* is ruled out because "A newer model can be cheaper than the one it replaces, and the reverse can happen".
-2. **a**. The page says "a 300,000-token input rules Haiku 4.5 out whatever its price", because the input must fit the context window. *b* is ruled out because the latency column is relative and "depends on prompt length, output length, and thinking effort". *c* is ruled out because "A tokenizer change moves the count" and does not block an input. *d* is ruled out because the page states "Output costs five times input on every row", which is a cost fact and not a limit.
-3. **c**. The page says the newer tokenizer "produces approximately 30% more tokens for the same text", so 0.8 times 1.3 is 1.04 times the cost per task. *b* is ruled out because the two facts "make the price per token a poor proxy for the price per task". *a* is ruled out because "A tokenizer change moves the count." *d* is ruled out because the page says to "compare cost per task on a sample, not per million tokens", and the two factors multiply rather than average.
+2. **a**. The page says "a 300,000-token input rules Haiku 4.5 out whatever its price", because the input must fit the context window. *b* is ruled out because the latency column is relative and "depends on prompt length, output length, and thinking effort". *c* is ruled out because "A tokenizer change moves the count" and does not block an input. *d* is ruled out because max output decides a long answer, as in "a 100,000-token report rules Haiku 4.5 out too", and this answer is short.
+3. **c**. The page multiplies rate by count, as in "costs 0.8 x 1.3 = 1.04 times as much per task", so 0.9 times 1.3 gives 1.17 times the cost per task. *b* is ruled out because the two facts "make the price per token a poor proxy for the price per task". *a* is ruled out because "The same document costs more tokens on a newer model", input included. *d* is ruled out because the page multiplies the factors and does not add the percentages: the real pair "costs 2/3 x 1.3, about 0.87 times as much", where adding would give about 0.97.
 
 </details>

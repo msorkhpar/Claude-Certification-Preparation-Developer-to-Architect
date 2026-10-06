@@ -583,9 +583,9 @@ The practice is in [`exercises/87-observability-at-scale`](../../exercises/87-ob
 
 ## Quiz
 
-1. After a change of model, the error rate and the latency look the same. Yet tokens per answer are up by 40 percent and retrieval hits are down by 40 percent, and nobody was told. Which practice would have caught it?
+1. After a change of model, the error rate and the latency look the same. Yet tokens per answer are up by 40 percent and cost per answer by more than a third, and nobody was told. Which practice would have caught it?
    - **a**: Page the on-call engineer when the error rate passes a fixed ceiling, which covers every failure
-   - **b**: Hold a stored baseline for each metric and flag any move beyond a tolerance, rising or falling
+   - **b**: Compare each layer's figures with those saved before the switch and flag a shift past a set margin
    - **c**: Read a sample of the conversations each week and note anything that looks odd to the reader
    - **d**: Watch only the metrics that moved down, since a rise just means that the product is used more
 
@@ -610,12 +610,12 @@ This quiz covers both pages of the module.
 1. A project commits a settings file in its repository that turns on prompt logging for telemetry, so that a reviewer can read developers' prompts. What does Claude Code do with it?
    - **a**: It captures the prompts of everyone who clones the repository, starting with the first session
    - **b**: It captures the prompts only in sessions where each developer has also enabled tracing
-   - **c**: It ignores them, since the exporter variables come from managed or per-user configuration
+   - **c**: It ignores the setting, and nothing typed in any session is captured because of it
    - **d**: It applies the setting but redacts the prompts anyway, because redaction cannot be changed
 
 2. A complaint must be followed through the gateway, the orchestrator, two subagents and a tool, each logging in its own format. The records cannot be joined into one story. What was missing?
    - **a**: A common timestamp format across the services, so that the records can be sorted into a single list
-   - **b**: A single identifier taken at the edge, passed to every service and kept beside whatever they write
+   - **b**: A request id that the entry point assigns and every later service writes into each of its log lines
    - **c**: A longer retention period for the logs, so that all of the records are still there when somebody needs them
    - **d**: One central log store that every service writes to, in place of the separate stores that each of them has now
 
@@ -628,7 +628,7 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **c**. Claude Code ignores the exporter variables in a repository's settings. *a* is ruled out because "a repository can't use them to turn telemetry on". *b* is ruled out because "a repository cannot turn any of it on", whether or not a developer enables tracing. *d* is ruled out because "each is opened by a separate variable", so redaction can be changed, just not from a repository.
+1. **c**. Claude Code ignores the exporter variables in a repository's settings, so the file captures nothing. *a* is ruled out because "a repository can't use them to turn telemetry on". *b* is ruled out because "a repository cannot turn any of it on", whether or not a developer enables tracing. *d* is ruled out because "each is opened by a separate variable", so redaction can be changed, just not from a repository.
 2. **b**. A shared identifier, taken at the edge and written everywhere, joins the records. *a* is ruled out because "Time alone cannot join records: two requests at the same millisecond look the same". *c* is ruled out because "keeping records longer keeps the same unjoinable records longer". *d* is ruled out because "A central store collects the records and still does not say which belong together".
 3. **d**. The id is high-cardinality, so it belongs on the traces and events, which are meant for single occurrences. *a* is ruled out because "Moving to a larger store pays for the series and leaves their count growing". *c* is ruled out because "a random sample of metric points gives a wrong rate: metrics are counts, and a missing count is a wrong count". *b* is ruled out because "Dropping the id from everything gives up the ability to look at one conversation, which the traces exist for".
 

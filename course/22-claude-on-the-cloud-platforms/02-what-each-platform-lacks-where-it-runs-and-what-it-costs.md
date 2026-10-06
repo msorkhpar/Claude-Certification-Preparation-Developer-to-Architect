@@ -121,31 +121,31 @@ Vertex request damages the next call that reuses it.
 
 ## Quiz
 
-1. A team on Amazon Bedrock plans nightly bulk jobs through the Message Batches API at half price. What do the docs say?
-   - **a**: The endpoint works there, at the same half price as the direct API itself
-   - **b**: That endpoint is not offered there, so the discount route is unavailable
-   - **c**: The endpoint works there, but at a ten percent premium for the region
-   - **d**: The endpoint works there once the Files API has been enabled first
+1. A team on Amazon Bedrock plans nightly bulk jobs through the Message Batches API at half price. What should it budget?
+   - **a**: Batch jobs on Bedrock, at the same half price as on the direct API
+   - **b**: Ordinary one-by-one calls, at the usual per-token rate with no discount
+   - **c**: Batch jobs on Bedrock, at half price plus a ten percent regional premium
+   - **d**: Batch jobs on Bedrock, with the inputs uploaded through the Files API
 
-2. A company needs single-region data residency for Claude on Google Cloud and also wants provisioned throughput. Which type of
-   address fits?
-   - **a**: Any kind, since the premium buys residency on all three of them
+2. A company must keep its Claude traffic on Google Cloud inside one named region and also wants provisioned throughput. Which
+   type of address fits?
+   - **a**: A regional kind for residency, with the global kind for throughput
    - **b**: The global kind, since it routes to wherever capacity is free today
    - **c**: The multi-region kind, since it supports provisioned throughput as well
-   - **d**: The regional kind, which is required for both aims and costs 10% more
+   - **d**: The regional kind, since it serves both of the needs at a 10% premium
 
-3. A team must pick between the two cloud platforms and needs structured outputs and web search from it. What do the pages show?
-   - **a**: AWS offers web search but not structured outputs, while Google's service lacks web search
-   - **b**: AWS lacks both, while Google's service offers both
-   - **c**: Both platforms offer both features without any exception at all
-   - **d**: Google's service offers structured outputs but lacks web search
+3. A team must pick between the two partner platforms and needs structured outputs and web search from it. What do the pages show?
+   - **a**: Bedrock offers web search only, while Google Cloud offers both of them
+   - **b**: Bedrock offers neither one, while Google Cloud offers both of them
+   - **c**: Both offer the two features, since each takes the same request body
+   - **d**: Google Cloud offers structured outputs only, while Bedrock offers both
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The Bedrock page lists "API endpoints (Message Batches, Models, Admin, Compliance, Usage and Cost)" under features not supported. *a* is ruled out because that same list names "API endpoints (Message Batches, Models, Admin, Compliance, Usage and Cost)" as missing. *c* is ruled out because the premium belongs to regional routing: "Regional endpoints carry a 10% pricing premium over global endpoints." *d* is ruled out because the Files API is itself on the list: "URL sources for images and documents, Files API".
-2. **d**. The page says regional endpoints are "Required for single-region data residency, strict compliance mandates, or provisioned throughput", at the premium. *b* is ruled out because the global kind "only supports pay-as-you-go traffic (provisioned throughput requires regional endpoints)". *c* is ruled out because the multi-region kind also "supports pay-as-you-go traffic only". *a* is ruled out because "Global endpoints: Dynamic routing for maximum availability", with "No pricing premium" and no residency choice.
-3. **b**. The Bedrock list has "Server-side tools (code execution, web search, web fetch, advisor)" and structured outputs among the gaps, and the Google Cloud page lists "Structured outputs" and the "Web search tool" among its supported feature highlights. *a* is ruled out because Bedrock's list has "Server-side tools (code execution, web search, web fetch, advisor)" as missing. *c* is ruled out for the same reason: Bedrock lacks "Server-side tools (code execution, web search, web fetch, advisor)". *d* is ruled out because the Google Cloud page lists them "among its supported feature highlights".
+1. **b**. The Bedrock page lists "API endpoints (Message Batches, Models, Admin, Compliance, Usage and Cost)" under features not supported, and the discount "belongs to the Message Batches API". *a* is ruled out because "Bedrock has no such endpoint on this integration". *c* is ruled out because the premium belongs to regional routing, "Regional endpoints carry a 10% pricing premium over global endpoints.", and there is no batch endpoint to apply it to. *d* is ruled out because the Files API is itself on the list: "URL sources for images and documents, Files API".
+2. **d**. The page says regional endpoints are "Required for single-region data residency, strict compliance mandates, or provisioned throughput", at the premium. *b* is ruled out because the global kind will "Dynamically route requests to regions with available capacity", so traffic leaves the one region. *c* is ruled out because the multi-region kind also "supports pay-as-you-go traffic only". *a* is ruled out because the global kind "only supports pay-as-you-go traffic (provisioned throughput requires regional endpoints)", so the reserved capacity cannot sit there.
+3. **b**. The page says "Web search and structured outputs are on Google Cloud and not on Bedrock." *a* is ruled out because Bedrock's list has "Server-side tools (code execution, web search, web fetch, advisor)" as missing. *c* is ruled out because a shared body does not mean shared features: Google Cloud "does offer more than Bedrock in two places". *d* is ruled out because the Google Cloud page lists both "among its supported feature highlights", and Bedrock lists structured outputs under its gaps.
 
 </details>
 
@@ -153,11 +153,12 @@ Vertex request damages the next call that reuses it.
 
 This quiz covers both pages of the module.
 
-1. A team sends the same traffic through a global endpoint and then a regional endpoint on Bedrock. How do the prices compare?
-   - **a**: The two routes cost the same, since the models behind them are identical
-   - **b**: The specific-region route costs ten percent more than the dynamic one
-   - **c**: The dynamic route costs ten percent more, since it covers more locations
-   - **d**: The specific-region route costs half as much, since it uses idle capacity
+1. A team moves its Bedrock traffic from the global endpoint to a regional one for data residency. The same tokens cost 1,000
+   dollars a month before. What should it budget now?
+   - **a**: About 1,000, since the same models serve both of the routes
+   - **b**: About 1,100, since that route is priced above the dynamic one
+   - **c**: About 900, since the global route was the one with the premium
+   - **d**: About 500, since that route runs on spare capacity at half price
 
 2. build_request is called for Vertex with claude-opus-5-5 and a single named region. What happens?
    - **a**: It raises PlatformError for the endpoint field, as newer models use other routes
@@ -165,11 +166,12 @@ This quiz covers both pages of the module.
    - **c**: It falls back to the worldwide host without complaint and returns the request
    - **d**: It raises PlatformError for the model field, as that model id is not known
 
-3. A team wants the faster output option for its streamed chat, running on Opus 5.5 through AWS. What do the docs say?
-   - **a**: The speed mode is limited to Anthropic's own endpoint
-   - **b**: It works the same on AWS, at the same twice-standard rate
-   - **c**: It works on AWS for the Haiku tier alone, at the standard rate
-   - **d**: It works on AWS once the beta header has been sent in the call
+3. A team wants the faster output mode for its streamed chat on Opus 5.5 and may call Claude from any platform. Where can
+   it get it?
+   - **a**: The direct API, since the option is offered on that door alone
+   - **b**: Google Cloud, since it offers more features than Bedrock does
+   - **c**: Claude Platform on AWS, since Anthropic itself operates that door
+   - **d**: Bedrock or Google Cloud, once a beta header is sent with the call
 
 4. A team's Bedrock traffic needs 4 million input tokens per minute. What do the docs say?
    - **a**: It sits beyond every limit, so a second account is needed
@@ -180,9 +182,9 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says "Regional endpoints carry a 10% pricing premium over global endpoints." *a* is ruled out because the same sentence prices the two kinds differently: "Regional endpoints carry a 10% pricing premium over global endpoints." *c* is ruled out because a global endpoint gives "dynamic routing across all available regions for maximum availability" with no premium. *d* is ruled out because the regional kind is the one with the premium, "10% pricing premium over global endpoints".
-2. **a**. The page's comment is "Specific regional endpoints support Claude Sonnet 4.6 and earlier; newer models use the global or multi-region endpoints", and the practice says a specific region serves `claude-sonnet-4-6` only. *b* is ruled out because "Specific regional endpoints support Claude Sonnet 4.6 and earlier". *c* is ruled out because the practice states "An unsupported model and endpoint pair is a `PlatformError`". *d* is ruled out because "a specific region serves `claude-sonnet-4-6` only", so the model is known and the endpoint is the fault.
-3. **a**. The page says fast mode "is available on the Claude API (first-party) only". *b* is ruled out because fast mode "is not available on Claude Platform on AWS or partner-operated cloud platforms". *c* is ruled out because the same sentence has no exception by tier: "is available on the Claude API (first-party) only". *d* is ruled out because a header does not change that: "it is not available on Claude Platform on AWS or partner-operated cloud platforms".
+1. **b**. The page says "Regional endpoints carry a 10% pricing premium over global endpoints.", so 1,000 becomes about 1,100. *a* is ruled out because "Bedrock has the same idea with different words" as Google Cloud, where regional endpoints "include a 10% pricing premium over global endpoints". *c* is ruled out because a global endpoint gives "dynamic routing across all available regions for maximum availability" with no premium. *d* is ruled out because half price is a different route: "the 50 percent discount of module 21 belongs to the Message Batches API".
+2. **a**. The page's comment is "Specific regional endpoints support Claude Sonnet 4.6 and earlier; newer models use the global or multi-region endpoints", and the practice says a specific region serves `claude-sonnet-4-6` only. *b* is ruled out because "the specific regional endpoints serve only older models". *c* is ruled out because the practice states "An unsupported model and endpoint pair is a `PlatformError`". *d* is ruled out because "a specific region serves `claude-sonnet-4-6` only", so the model is known and the endpoint is the fault.
+3. **a**. The page says fast mode "is available on the Claude API (first-party) only". *b* is ruled out because "One more gap spans the partner platforms", and Google Cloud is one of them. *c* is ruled out because fast mode "is not available on Claude Platform on AWS", although Anthropic operates it. *d* is ruled out because a header does not change that: "not available on Claude Platform on AWS or partner-operated cloud platforms".
 4. **c**. The page gives "Default quota is 2 million input tokens per minute (TPM)." and "You can request up to 5 million input TPM and 500,000 output TPM without additional Anthropic approval." *b* is ruled out because "Default quota is 2 million input tokens per minute (TPM)." and 4 million exceeds it. *a* is ruled out because "You can request up to 5 million input TPM" covers 4 million. *d* is ruled out because "AWS enforces requests-per-minute (RPM) limits on the Bedrock side".
 
 </details>

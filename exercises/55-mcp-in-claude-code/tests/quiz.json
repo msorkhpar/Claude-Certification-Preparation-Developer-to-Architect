@@ -24,11 +24,11 @@
       "id": "01-scopes-the-project-file-and-environment-expansion#q2",
       "page": "01-scopes-the-project-file-and-environment-expansion.md",
       "scope": "page",
-      "stem": "A developer needs an integration that signs in with a personal account's token. It should exist in this repository only, and the token must never reach teammates through version control. Where should it be registered?",
+      "stem": "A developer needs an integration that signs in with a personal account's token. It should exist in this repository only, and the token must never reach teammates through version control. Given the three options the current product offers, where should it be registered?",
       "options": {
         "a": "Local scope, the default for a newly added server",
         "b": "Project scope, kept in the shared `.mcp.json` file",
-        "c": "User scope, which loads the server in every project",
+        "c": "User scope, which loads it in all your other projects too",
         "d": "The local settings file, kept inside the repository"
       },
       "key": "a",
@@ -43,7 +43,7 @@
       "id": "02-tools-together-descriptions-resources-and-the-practice#q1",
       "page": "02-tools-together-descriptions-resources-and-the-practice.md",
       "scope": "page",
-      "stem": "An agent keeps answering documentation questions with Grep on the checkout, although the team's documentation server has a search tool whose description reads `Searches docs`. What is the best fix?",
+      "stem": "An agent keeps answering questions about the team's runbooks with Grep over a stale copy in the checkout, although an operations server has a search tool whose description reads `Searches runbooks`. What is the best fix?",
       "options": {
         "a": "Make the documentation server load at the start of each session",
         "b": "Open its text with when to prefer it over pattern matching",
@@ -62,12 +62,12 @@
       "id": "02-tools-together-descriptions-resources-and-the-practice#q2",
       "page": "02-tools-together-descriptions-resources-and-the-practice.md",
       "scope": "page",
-      "stem": "A support agent calls three listing tools before each database question, only to learn which tables exist. Which change cuts those calls?",
+      "stem": "A support agent calls three listing tools before each answer, only to learn what the documentation site contains. Which change cuts those calls?",
       "options": {
-        "a": "Expose the schemas as a resource mentioned in the prompt",
-        "b": "Raise the output limit on the listing tools to return more rows",
+        "a": "Expose the page tree as a resource mentioned in the prompt",
+        "b": "Raise the output limit on the listing tools to return more entries",
         "c": "Mark the listing tools read-only and let them run side by side",
-        "d": "Move the database server into the user scope to load everywhere"
+        "d": "Move the docs server into the user scope to load everywhere"
       },
       "key": "a",
       "explanation": {
@@ -92,7 +92,7 @@
       "explanation": {
         "c": "A permission rule can allow or deny a tool by name, so one tool that does everything leaves nothing to scope.",
         "a": "Ruled out because an oversized result is kept: \"Claude Code saves it to a file and replaces it in the conversation with a message that names the file path\".",
-        "b": "Ruled out because truncation is handled by wording: \"put critical details near the start\".",
+        "b": "Ruled out because a cut keeps the start of the text, which wording protects: \"written with the decisive sentence first so that a truncation cannot remove it\".",
         "d": "Ruled out because a definition is found by the model and not by a person: \"a definition is loaded when Claude needs it\"."
       }
     },
@@ -112,7 +112,7 @@
         "d": "The variable is set for the server and not for Claude Code, so a path in `command` or `args` needs a fallback.",
         "a": "Ruled out because the text in `args` would still have nothing to expand from: \"so `${CLAUDE_PROJECT_DIR}` in a project file has nothing to expand from\".",
         "b": "Ruled out because a personal location fails on every other machine: \"A value that is not secret, such as a base URL or a path, should have a default\".",
-        "c": "Ruled out because moving the entry does not give the variable a value in Claude Code's own environment, and the documented answer is a default: \"The documentation's answer is a default such as `${CLAUDE_PROJECT_DIR:-.}`\"."
+        "c": "Ruled out because no file gives the variable a value for Claude Code, which sets it only \"in the spawned server's environment to the project root\"."
       }
     },
     {
@@ -122,15 +122,15 @@
       "stem": "Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools and several MCP servers. A CI job runs `claude -p` on a fresh clone, and a pull request has added a server to `.mcp.json` that nobody on the team has seen. What happens when the job starts?",
       "options": {
         "a": "It stays pending until a person approves it in an interactive session",
-        "b": "It is skipped, and the job runs without that server",
-        "c": "It loads without asking and is available in that run",
+        "b": "It is kept out, as unreviewed servers go to `disabledMcpjsonServers`",
+        "c": "It connects with no prompt, and Claude is given what it offers",
         "d": "It loads only if the repository's own settings file approves it in advance"
       },
       "key": "c",
       "explanation": {
         "c": "Unattended runs cannot show the approval prompt.",
         "a": "Ruled out because the prompt needs a person: \"In `claude -p` runs, Agent SDK sessions, and cloud sessions, Claude Code can't show that prompt: it loads project-scoped servers without asking.\"",
-        "b": "is ruled out by the same sentence, which says such a run loads project-scoped servers and does not skip them: \"it loads project-scoped servers without asking\".",
+        "b": "Ruled out because that list holds only what someone writes into it: \"To keep a server out anyway, list it in `disabledMcpjsonServers`\".",
         "d": "Ruled out because \"approvals committed to the project's `.claude/settings.json` are ignored in a folder you have not trusted\"."
       }
     },
@@ -138,19 +138,19 @@
       "id": "02-tools-together-descriptions-resources-and-the-practice#m3",
       "page": "02-tools-together-descriptions-resources-and-the-practice.md",
       "scope": "module",
-      "stem": "Scenario S1, a customer support resolution agent. The agent's backend tools come from twelve MCP servers listed in the shared file, and sessions start with crowded context. A developer reads that tools from all servers are available simultaneously and marks all twelve servers `alwaysLoad`. What is the effect?",
+      "stem": "Scenario S1, a customer support resolution agent. The agent's backend tools come from twelve MCP servers listed in the shared file. A developer reads that tools from all servers are available simultaneously and marks all twelve servers `alwaysLoad`. What is the effect?",
       "options": {
         "a": "Startup waits without limit for the servers to connect",
         "b": "All their definitions return to the prompt at launch, undoing deferral",
         "c": "Only the tools that the first request needs are loaded, the rest later",
-        "d": "Each tool gets the name of its server added so that names stay unique"
+        "d": "Their tool lists are fixed at launch and no longer refresh"
       },
       "key": "b",
       "explanation": {
         "b": "`alwaysLoad` brings every definition into the initial context.",
         "a": "Ruled out because the wait is bounded: \"capped at the standard 5-second connect timeout\".",
         "c": "Ruled out because loading only what a request needs is what tool search does, and the flag turns that off: \"Putting it on every server defeats tool search.\"",
-        "d": "Ruled out because naming already carries the server: \"a tool is called `mcp__<server>__<tool>`\"."
+        "d": "Ruled out because a connected server's list still changes: \"Servers can change their tool lists while connected\"."
       }
     }
   ]

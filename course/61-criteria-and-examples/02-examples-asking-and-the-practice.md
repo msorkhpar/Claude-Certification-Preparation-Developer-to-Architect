@@ -413,22 +413,22 @@ The practice is in [`exercises/61-criteria-and-examples`](../../exercises/61-cri
 ## Quiz
 
 1. A review prompt handles clear bugs well but keeps marking a null access that is already protected as risky. What should be added?
-   - **a**: Ten more samples of obvious bugs to reinforce the pattern
-   - **b**: A line asking the reviewer to be more careful with null values
-   - **c**: A flagged sample and a skipped sample side by side, each with its reason
-   - **d**: A second pass in which the reviewer rates its own confidence in every remark
+   - **a**: Four flagged samples of obvious defects, each explained
+   - **b**: A line asking the reviewer to take more care over nulls
+   - **c**: One flagged sample and one skipped sample, each explained
+   - **d**: A few typical samples taken from recent changes in the codebase
 
 2. A review job in CI receives a request with no reviewer named, and the project holds no default reviewer. What should the run do?
    - **a**: Ask the author who the reviewer should be, and wait
    - **b**: Stop with a plain failure that lists the absent field
-   - **c**: Pick a reviewer at random and say nothing about it
+   - **c**: Name the author as reviewer and state that assumption
    - **d**: Carry on without a reviewer and omit it from the output
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. An acceptable pattern shown next to a finding, with reasons, settles the borderline case. *a* is ruled out because "examples earn their place on the ambiguous ones", and obvious bugs are already handled. *b* is ruled out because "Rules do not settle a case that looks like two rules at once", and an instruction to be careful names no pattern. *d* is ruled out because a rating of its own confidence adds no case to learn from, and examples "are chosen where the reviewer is unsure".
-2. **b**. An unattended run cannot ask, and a required field with no default cannot be assumed. *a* is ruled out because "Asking in CI produces a job that waits for a person who is not there". *c* is ruled out because a guess is allowed only as a stated assumption where a default exists: "it proceeds on stated assumptions where a default exists". *d* is ruled out because a run with nothing to assume "stops with a clear failure where a required field has none", and dropping the field hides the problem.
+1. **c**. An acceptable pattern shown next to a finding, with reasons, settles the borderline case. *a* is ruled out because "A set whose every example is a finding teaches the reviewer to report everything", including the guarded look-alike. *b* is ruled out because "Rules do not settle a case that looks like two rules at once", and an instruction to be careful names no pattern. *d* is ruled out because "Few-shot examples are not a sample of typical cases", which the criteria already handle.
+2. **b**. An unattended run cannot ask, and a required field with no default cannot be assumed. *a* is ruled out because "Asking in CI produces a job that waits for a person who is not there". *c* is ruled out because an assumption is allowed only where the project supplies a default: "it proceeds on stated assumptions where a default exists". *d* is ruled out because a run with nothing to assume "stops with a clear failure where a required field has none", and dropping the field hides the problem.
 
 </details>
 
@@ -437,29 +437,29 @@ The practice is in [`exercises/61-criteria-and-examples`](../../exercises/61-cri
 This quiz covers both pages of the module.
 
 1. Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests. The labels for how bad a finding is are free text, and the gate cannot compare them with its floor. Which change fixes it?
-   - **a**: Ask for stronger adjectives on urgent findings
-   - **b**: Let the gate guess each level from the issue's words
-   - **c**: Close the field to a fixed list, with a sample per level
-   - **d**: Drop the floor and accept every label as written
+   - **a**: Ask for stronger adjectives on the most urgent findings
+   - **b**: Let the gate map each label to a level by its keywords
+   - **c**: Use a closed list of levels, each with a worked sample
+   - **d**: Drop the floor and let every label through as written
 
 2. Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests. One group of findings has 40 percent precision. Its dismissals all trace to line-length remarks, while its other remarks are always accepted. What fits?
    - **a**: Disable the whole group until every remark in it improves
-   - **b**: Adjust the criteria for that one pattern
-   - **c**: Delete the group's criteria and start over with none
+   - **b**: Put that one pattern on the skip list and keep the rest
+   - **c**: Delete the group's criteria and rewrite them from scratch
    - **d**: Leave the group unchanged while more reviews accumulate
 
-3. Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests. A review run starts from a request whose branch name is blank, and the project defines `main` as the default. What should it do?
-   - **a**: Ask the author which branch is meant, then wait
-   - **b**: Stop with a failure naming the required field
-   - **c**: Continue with the fallback and note it in the output
-   - **d**: Choose a branch at random and leave it unmentioned
+3. Scenario S5, Claude Code for continuous integration. A team runs Claude Code in CI to review pull requests. Before pushing, a developer starts the same review in a terminal session with neither a branch nor a reviewer given; the project defines `main` as the default branch and has no default reviewer. What should the session do?
+   - **a**: Fail at once with a message listing both absent fields
+   - **b**: Ask about both missing fields before any work begins
+   - **c**: Ask whom to assign and state that it assumes `main`
+   - **d**: Take `main`, leave the reviewer slot blank, and proceed
 
 <details>
 <summary>Answer key</summary>
 
 1. **c**. A level with a code sample has a boundary, and a closed list can be compared with a floor. *a* is ruled out because "A definition with a code example gives the reviewer a case to compare with", and adjectives give none. *b* is ruled out because the gate needs a value it can compute with: "an open, free-text severity cannot be computed with". *d* is ruled out because the gate "drops findings below a floor and fails the job at a severity", and without a floor it has no policy.
-2. **b**. The recorded pattern shows where the dismissals come from, so only that part is adjusted. *a* is ruled out because "The fix is then to adjust the criteria for the one pattern and not to disable the category". *c* is ruled out because "Deleting the category from the criteria loses the examples that the next attempt needs". *d* is ruled out because leaving the group unchanged keeps the noise, which has a cost, since "each dismissed comment lowers trust in the accepted ones".
-3. **c**. A run that cannot ask proceeds on a stated assumption where a default exists. *a* is ruled out because "Asking in CI produces a job that waits for a person who is not there". *b* is ruled out because it stops only without a default: "it proceeds on stated assumptions where a default exists". *d* is ruled out because a silent guess omits the step the page requires, which is "to state the assumptions made for the rest".
+2. **b**. The recorded pattern shows where the dismissals come from, and line length is minor style, so only that pattern is put on the skip list. *a* is ruled out because "The fix is then to adjust the criteria for the one pattern and not to disable the category". *c* is ruled out because "Deleting the category from the criteria loses the examples that the next attempt needs". *d* is ruled out because leaving the group unchanged keeps the noise, which has a cost, since "each dismissed comment lowers trust in the accepted ones".
+3. **c**. A developer at the keyboard can answer, so the session asks only about the field with no default and states the assumption it makes for the other. *a* is ruled out because failing is the move for a run where nobody can answer: "In an unattended run (CI) nobody can answer". *b* is ruled out because the branch has a default, so it is assumed and stated rather than asked: "to state the assumptions made for the rest". *d* is ruled out because the reviewer has no default to fall back on, and "the right move is to ask only what cannot be assumed".
 
 </details>
 

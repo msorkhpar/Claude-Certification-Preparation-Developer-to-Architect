@@ -369,22 +369,22 @@ in the body and the version in the header. The Vertex row shows no version heade
 
 ## Quiz
 
-1. A team moves a working direct-API request to Google Cloud and keeps the body unchanged. It is refused. Which changes does the
-   page require?
-   - **a**: Add an `anthropic-version` header and remove nothing else from the body
-   - **b**: Keep the model in the payload and send the version as a request header
+1. A team moves a working direct-API request to Google Cloud, swaps the API key for a Google access token and keeps the body
+   unchanged. It is refused. Which changes does the page require?
+   - **a**: Prefix the model with the provider name and keep the version as a header
+   - **b**: Keep the model in the payload and move the version into the payload too
    - **c**: Move both the model and the version into the query string of the address
    - **d**: Name the model in the address and carry the version in the payload
 
 2. A developer calls Claude Opus 5.5 through Bedrock with the identifier `claude-opus-5-5` and gets an error. What fixes it?
-   - **a**: Add the provider prefix so the name starts with anthropic
-   - **b**: Use the dated name that the direct API shows, with no prefix at all
-   - **c**: Use the Vertex form of the name, with an at sign and a date after it
-   - **d**: Send the name in a request header called x-model instead of the body
+   - **a**: Keep the id in the body and put the anthropic. prefix in front of it
+   - **b**: Use the dated id that the direct API lists for this same model
+   - **c**: Use the Google Cloud form of the id, with an at sign and a date
+   - **d**: Move the id into the endpoint address and leave it out of the body
 
 3. A security team wants no long-lived keys on developer laptops when calling Claude through Bedrock. Which path does the page
    favour?
-   - **a**: A single shared access key stored with the source code of the project
+   - **a**: An Anthropic API key per developer, rotated by the security team monthly
    - **b**: Bearer tokens kept in each laptop's configuration file for daily use
    - **c**: A provisioned service role that the platform assumes for the caller
    - **d**: An assumed role with a session that lasts for a full working week
@@ -392,8 +392,8 @@ in the body and the version in the header. The Vertex row shows no version heade
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The page says "`model` is not passed in the request body" and that it "is specified in the Google Cloud endpoint URL", while `anthropic_version` goes "in the request body". *b* is ruled out because "`model` is not passed in the request body", and the version is "rather than as a header". *c* is ruled out because the model "is specified in the Google Cloud endpoint URL", which is the address path, not a query string. *a* is ruled out because the version is passed "rather than as a header".
-2. **a**. The page says "Model IDs in Claude in Amazon Bedrock carry an `anthropic.` provider prefix". *b* is ruled out because the Bedrock ids "carry an `anthropic.` provider prefix" and are not the direct API names. *c* is ruled out because the at-sign form belongs to Google Cloud, where "`model` is not passed in the request body". *d* is ruled out because the model stays in the body on Bedrock, "the same request body shape as Anthropic's first-party API".
-3. **c**. The page marks the service role as the recommended path: "Use a Bedrock service role with AWS-managed keys for the most secure, long-lived access". *b* is ruled out because bearer tokens are "(12-hour maximum, least preferred)". *a* is ruled out because the service role is the path "for the most secure, long-lived access", with "AWS-managed keys" and no shared key in the source. *d* is ruled out because an assumed role has "a 12-hour maximum session", not a week.
+1. **d**. The page says "`model` is not passed in the request body" and that it "is specified in the Google Cloud endpoint URL", while `anthropic_version` goes "in the request body". *b* is ruled out because moving the version is right but the model must leave the body: "Vertex wants the model in the URL". *c* is ruled out because the model sits in the address path, "before `:rawPredict`", and "The version is the body field" `anthropic_version`, not a query parameter. *a* is ruled out because "The model id there is the plain name", with no prefix, and the version is passed "rather than as a header".
+2. **a**. The page says "Model IDs in Claude in Amazon Bedrock carry an `anthropic.` provider prefix", and the model stays in the body. *b* is ruled out because the id gains a prefix, not a date: "so `claude-opus-5-5` becomes `anthropic.claude-opus-5-5`". *c* is ruled out because the at-sign form is the Google Cloud one, "with a dated form for some models", and there the model sits in the URL. *d* is ruled out because the model stays in the body on Bedrock, "the same request body shape as Anthropic's first-party API".
+3. **c**. The page marks the service role as the recommended path: "Use a Bedrock service role with AWS-managed keys for the most secure, long-lived access". *b* is ruled out because bearer tokens are "(12-hour maximum, least preferred)". *a* is ruled out because "Neither platform needs an Anthropic API key", however often it is rotated. *d* is ruled out because an assumed role has "a 12-hour maximum session", not a week.
 
 </details>

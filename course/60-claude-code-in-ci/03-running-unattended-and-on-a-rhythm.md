@@ -203,29 +203,29 @@ The practice is in [`exercises/60-claude-code-in-ci/unit-02`](../../exercises/60
 
 ## Quiz
 
-1. A team needs a nightly triage of its issue tracker to run while every laptop is shut. Which setup fits?
-   - **a**: A fixed loop started by an engineer before leaving for the day
-   - **b**: A routine, set up once with a schedule trigger in the cloud
+1. A team wants a digest of the week's merged pull requests, ready every Monday at six, before anyone has opened a laptop. Which setup fits?
+   - **a**: A fixed loop started by an engineer on Friday evening
+   - **b**: A routine with a schedule trigger set on the repository
    - **c**: A desktop task on the laptop of one engineer on the team
-   - **d**: A monitor that watches the tracker through the whole night
+   - **d**: A monitor in a background session that watches for merges
 
-2. A migration has dozens of failing call sites. An engineer wants Claude to keep working without being prompted until the build is clean and the checks pass, and then to stop. Which fits?
-   - **a**: A goal that a separate model evaluates after every turn
-   - **b**: A fixed loop that sends the same prompt every ten minutes
-   - **c**: A monitor that streams the compiler output into the chat
-   - **d**: A routine that starts a fresh cloud session each hour
+2. A migration has dozens of failing call sites. An engineer wants Claude to keep fixing them in the open session, however long that takes, and to stop by itself once `npm test` exits 0. Which fits?
+   - **a**: A goal set with a passing `npm test` run as its condition
+   - **b**: A fixed loop that re-sends the fix prompt every ten minutes
+   - **c**: A monitor that streams compiler output until the build passes
+   - **d**: A routine that runs the fix every hour until the tests pass
 
 3. An engineer starts `/loop 20m /verify`. At the first fire Claude replied in general terms and nothing was exercised. What is the cause?
    - **a**: Twenty minutes is too short an interval for a loop to launch a skill
    - **b**: That skill blocks model invocation, which a scheduled run requires
    - **c**: A loop re-runs plain prompts and never starts a bundled skill
-   - **d**: The loop lost its task when the session was not restored
+   - **d**: The fire landed while Claude was mid-response and was cut short
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says routines "keep working when your laptop is closed", and a routine can carry a schedule trigger and connectors. *a* is ruled out because "Tasks only fire while Claude Code is running and idle." *c* is ruled out because a desktop task "only fires while the app is open and your computer is awake", and every laptop is shut. *d* is ruled out because a watch has "5 minutes by default, at most 30 minutes" and cannot last a night.
+1. **b**. The page says routines "keep working when your laptop is closed", and a routine can carry a schedule trigger and its repositories. *a* is ruled out because "Tasks only fire while Claude Code is running and idle." *c* is ruled out because a desktop task "only fires while the app is open and your computer is awake", and no laptop is open at six. *d* is ruled out because a watch has "5 minutes by default, at most 30 minutes", and a background session runs on a machine and will "stop if it shuts down".
 2. **a**. The page says that after each turn "a model checks whether the condition holds" and that the goal clears when it is met. *b* is ruled out because a loop's next turn starts when "a time interval elapses" and not when a check holds. *c* is ruled out because Monitor only "feeds each output line back to Claude" and has a deadline, so it neither continues the work nor stops on a condition. *d* is ruled out because "Routines execute on Anthropic-managed cloud infrastructure" and each run starts from a fresh clone, so they never continue the engineer's own session.
-3. **b**. The page says that skills marked `disable-model-invocation: true`, the bundled `/verify` among them, reach Claude as plain text, because "A scheduled fire only runs skills that Claude is allowed to invoke on its own." *a* is ruled out because "Any interval from one minute upwards is allowed", and 20 minutes is well above it. *c* is ruled out because a loop can run "A prompt, or a skill", for example `/review-pr 1234`, which Claude may invoke on its own. *d* is ruled out because loops on a fixed interval "keep running until you cancel them", and nothing in the session ended here.
+3. **b**. The page says that skills marked `disable-model-invocation: true`, the bundled `/verify` among them, reach Claude as plain text, because "A scheduled fire only runs skills that Claude is allowed to invoke on its own." *a* is ruled out because "Any interval from one minute upwards is allowed", and 20 minutes is well above it. *c* is ruled out because a loop can run "A prompt, or a skill", for example `/review-pr 1234`, which Claude may invoke on its own. *d* is ruled out because a due prompt "fires between your turns, not while Claude is mid-response", so no turn was cut short.
 
 </details>

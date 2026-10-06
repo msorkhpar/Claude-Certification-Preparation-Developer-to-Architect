@@ -722,7 +722,7 @@ These are the wrong answers that the exam's options for this task statement offe
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The local file is personal to one project and is kept out of version control. *a* is ruled out because "A personal note about one project, such as a sandbox address, belongs in the local file", and a committed file would share it. *c* is ruled out because that file reaches "You, in every project", and the reminder concerns one repository. *d* is ruled out because that layer reaches "Everyone on the machine, and individual settings cannot exclude it", so it is not a private note.
+1. **b**. The local file is personal to one project and is kept out of version control. *a* is ruled out because a committed file is how a rule reaches the team, as in "the fix is to move the rule into the project file and commit it", so the reminder would reach every teammate. *c* is ruled out because that file reaches "You, in every project", and the reminder concerns one repository. *d* is ruled out because that layer reaches "Everyone on the machine, and individual settings cannot exclude it", whatever the project, so it is not a note for one repository.
 2. **d**. A file below the starting directory loads on demand. *a* is ruled out because the files that load first are the ones "above the working directory are loaded at launch", and this one is below it. *b* is ruled out because a lower file loads "on demand when Claude reads files in those directories", with no restart. *c* is ruled out because the memory command "lists your CLAUDE.md, CLAUDE.local.md, and other memory file locations" and loads nothing.
 
 </details>

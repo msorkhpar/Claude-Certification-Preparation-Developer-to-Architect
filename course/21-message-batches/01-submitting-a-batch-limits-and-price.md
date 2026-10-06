@@ -108,11 +108,11 @@ The page's own list of when a batch fits starts with "Immediate responses are no
 
 ## Quiz
 
-1. A team has 40,000 classification requests, none needed before tomorrow, on Claude Sonnet 5.5. What does the page support?
+1. A team has 40,000 classification requests, none needed before tomorrow, on Claude Sonnet 5.5. Which plan should they choose?
    - **a**: Send them as a batch with `stream: true`, so results arrive as they finish
    - **b**: Send them as a batch at the standard price, since a batch only helps throughput
    - **c**: Send them one by one, since a batch cannot take more than a few hundred
-   - **d**: Send them as a batch, at 50% of the standard price, and read the results later
+   - **d**: Send them as one batch at half the token price and read the file later
 
 2. A batch request body copied from a live endpoint contains `speed` set to fast. What is the outcome for that request?
    - **a**: A validation error comes back, since that parameter is unsupported here

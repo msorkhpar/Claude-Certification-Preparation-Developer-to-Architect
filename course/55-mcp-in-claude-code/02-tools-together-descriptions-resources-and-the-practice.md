@@ -63,17 +63,17 @@ These are the wrong answers that the exam's options for this task statement offe
 
 ## Quiz
 
-1. An agent keeps answering documentation questions with Grep on the checkout, although the team's documentation server has a search tool whose description reads `Searches docs`. What is the best fix?
+1. An agent keeps answering questions about the team's runbooks with Grep over a stale copy in the checkout, although an operations server has a search tool whose description reads `Searches runbooks`. What is the best fix?
    - **a**: Make the documentation server load at the start of each session
    - **b**: Open its text with when to prefer it over pattern matching
    - **c**: Remove the competing tool from the agent's list of tools
    - **d**: Lengthen the text until it covers every detail of the tool
 
-2. A support agent calls three listing tools before each database question, only to learn which tables exist. Which change cuts those calls?
-   - **a**: Expose the schemas as a resource mentioned in the prompt
-   - **b**: Raise the output limit on the listing tools to return more rows
+2. A support agent calls three listing tools before each answer, only to learn what the documentation site contains. Which change cuts those calls?
+   - **a**: Expose the page tree as a resource mentioned in the prompt
+   - **b**: Raise the output limit on the listing tools to return more entries
    - **c**: Mark the listing tools read-only and let them run side by side
-   - **d**: Move the database server into the user scope to load everywhere
+   - **d**: Move the docs server into the user scope to load everywhere
 
 3. A team gives the agent its whole orders database through one MCP tool that runs any SQL it is given, and the job is to report on open orders. What is the architectural concern?
    - **a**: An oversized result is lost, and the agent never sees any of the rows
@@ -86,7 +86,7 @@ These are the wrong answers that the exam's options for this task statement offe
 
 1. **b**. The description is what the model chooses by, so it must say when to prefer the tool, with the point first and the boundary against the competing tool near the start. *a* is ruled out because loading at the start only makes the definition visible: "makes the definition visible and does not say when to prefer it". *c* is ruled out because "Removing Grep is a blunt answer, because the agent then cannot search the code in the checkout". *d* is ruled out because "Claude Code truncates each tool description and each server's instructions at 2,048 characters by default".
 2. **a**. A catalog is wanted before work starts, and a resource can be attached to the prompt so that no discovery calls are needed. *b* is ruled out because "The limit concerns the size of one result and does nothing for the number of calls". *c* is ruled out because a hint "does not change this: it describes the tool to a client and does not tell the model what exists". *d* is ruled out because "it decides where a server loads and not what it exposes".
-3. **c**. A permission rule can allow or deny a tool by name, so one tool that does everything leaves nothing to scope. *a* is ruled out because an oversized result is kept: "Claude Code saves it to a file and replaces it in the conversation with a message that names the file path". *b* is ruled out because truncation is handled by wording: "put critical details near the start". *d* is ruled out because a definition is found by the model and not by a person: "a definition is loaded when Claude needs it".
+3. **c**. A permission rule can allow or deny a tool by name, so one tool that does everything leaves nothing to scope. *a* is ruled out because an oversized result is kept: "Claude Code saves it to a file and replaces it in the conversation with a message that names the file path". *b* is ruled out because a cut keeps the start of the text, which wording protects: "written with the decisive sentence first so that a truncation cannot remove it". *d* is ruled out because a definition is found by the model and not by a person: "a definition is loaded when Claude needs it".
 
 </details>
 
@@ -102,22 +102,22 @@ This quiz covers both pages of the module.
 
 2. Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools and several MCP servers. A CI job runs `claude -p` on a fresh clone, and a pull request has added a server to `.mcp.json` that nobody on the team has seen. What happens when the job starts?
    - **a**: It stays pending until a person approves it in an interactive session
-   - **b**: It is skipped, and the job runs without that server
-   - **c**: It loads without asking and is available in that run
+   - **b**: It is kept out, as unreviewed servers go to `disabledMcpjsonServers`
+   - **c**: It connects with no prompt, and Claude is given what it offers
    - **d**: It loads only if the repository's own settings file approves it in advance
 
-3. Scenario S1, a customer support resolution agent. The agent's backend tools come from twelve MCP servers listed in the shared file, and sessions start with crowded context. A developer reads that tools from all servers are available simultaneously and marks all twelve servers `alwaysLoad`. What is the effect?
+3. Scenario S1, a customer support resolution agent. The agent's backend tools come from twelve MCP servers listed in the shared file. A developer reads that tools from all servers are available simultaneously and marks all twelve servers `alwaysLoad`. What is the effect?
    - **a**: Startup waits without limit for the servers to connect
    - **b**: All their definitions return to the prompt at launch, undoing deferral
    - **c**: Only the tools that the first request needs are loaded, the rest later
-   - **d**: Each tool gets the name of its server added so that names stay unique
+   - **d**: Their tool lists are fixed at launch and no longer refresh
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The variable is set for the server and not for Claude Code, so a path in `command` or `args` needs a fallback. *a* is ruled out because the text in `args` would still have nothing to expand from: "so `${CLAUDE_PROJECT_DIR}` in a project file has nothing to expand from". *b* is ruled out because a personal location fails on every other machine: "A value that is not secret, such as a base URL or a path, should have a default". *c* is ruled out because moving the entry does not give the variable a value in Claude Code's own environment, and the documented answer is a default: "The documentation's answer is a default such as `${CLAUDE_PROJECT_DIR:-.}`".
-2. **c**. Unattended runs cannot show the approval prompt. *a* is ruled out because the prompt needs a person: "In `claude -p` runs, Agent SDK sessions, and cloud sessions, Claude Code can't show that prompt: it loads project-scoped servers without asking." *b* is ruled out by the same sentence, which says such a run loads project-scoped servers and does not skip them: "it loads project-scoped servers without asking". *d* is ruled out because "approvals committed to the project's `.claude/settings.json` are ignored in a folder you have not trusted".
-3. **b**. `alwaysLoad` brings every definition into the initial context. *a* is ruled out because the wait is bounded: "capped at the standard 5-second connect timeout". *c* is ruled out because loading only what a request needs is what tool search does, and the flag turns that off: "Putting it on every server defeats tool search." *d* is ruled out because naming already carries the server: "a tool is called `mcp__<server>__<tool>`".
+1. **d**. The variable is set for the server and not for Claude Code, so a path in `command` or `args` needs a fallback. *a* is ruled out because the text in `args` would still have nothing to expand from: "so `${CLAUDE_PROJECT_DIR}` in a project file has nothing to expand from". *b* is ruled out because a personal location fails on every other machine: "A value that is not secret, such as a base URL or a path, should have a default". *c* is ruled out because no file gives the variable a value for Claude Code, which sets it only "in the spawned server's environment to the project root".
+2. **c**. Unattended runs cannot show the approval prompt. *a* is ruled out because the prompt needs a person: "In `claude -p` runs, Agent SDK sessions, and cloud sessions, Claude Code can't show that prompt: it loads project-scoped servers without asking." *b* is ruled out because that list holds only what someone writes into it: "To keep a server out anyway, list it in `disabledMcpjsonServers`". *d* is ruled out because "approvals committed to the project's `.claude/settings.json` are ignored in a folder you have not trusted".
+3. **b**. `alwaysLoad` brings every definition into the initial context. *a* is ruled out because the wait is bounded: "capped at the standard 5-second connect timeout". *c* is ruled out because loading only what a request needs is what tool search does, and the flag turns that off: "Putting it on every server defeats tool search." *d* is ruled out because a connected server's list still changes: "Servers can change their tool lists while connected".
 
 </details>
 

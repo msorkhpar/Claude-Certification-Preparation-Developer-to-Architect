@@ -24,16 +24,16 @@
       "id": "01-descriptions-names-and-boundaries#q2",
       "page": "01-descriptions-names-and-boundaries.md",
       "scope": "page",
-      "stem": "Since the team added the sentence \"Always check the customer's account first.\" to an agent's prompt, it calls `get_customer` before every order question, although the `lookup_order` description is clear. Which change most directly removes the unwanted pull?",
+      "stem": "Since the team added the sentence \"Always check the customer's account first.\" to an agent's prompt, it calls `get_customer` before every order question, although the `lookup_order` description is clear. Which change addresses the cause?",
       "options": {
         "a": "Add a third tool that wraps both lookups behind one name",
         "b": "Add a routing layer in front of the model for order questions",
-        "c": "Reword that rule to drop its tool-specific trigger",
+        "c": "Recast that instruction so it stops steering to one lookup",
         "d": "Lengthen the `lookup_order` description with more examples"
       },
       "key": "c",
       "explanation": {
-        "c": "The keyword in the rule pulls the choice, so the rule is what to change.",
+        "c": "The keyword in the instruction pulls the choice toward one tool, so the instruction is what to change.",
         "b": "Ruled out because a routing layer \"bypasses the model's own reading of the request\" and leaves the prompt as it was.",
         "a": "Ruled out because a wrapper adds a third name to choose from, and \"More tools don't always lead to better outcomes.\"",
         "d": "Ruled out because the keyword pulls every order question toward `get_customer` \"however clear the description of `lookup_order` is\"; more text on the other side does not remove the pull."
@@ -43,18 +43,18 @@
       "id": "02-results-annotations-large-tool-sets-and-the-practice#q1",
       "page": "02-results-annotations-large-tool-sets-and-the-practice.md",
       "scope": "page",
-      "stem": "A `search_orders` tool returns every match, sometimes thousands of rows, and fills the context before the agent can act. What change helps most?",
+      "stem": "A `search_orders` tool returns every match, sometimes thousands of rows, and the agent runs out of context before it can answer. What change helps most?",
       "options": {
-        "a": "Send all the rows and ask the model to skip the extras",
-        "b": "Serve one page, a cursor and a note on narrowing",
-        "c": "Cut the list at a fixed length and add no message",
-        "d": "Move to a larger context window and send the full list"
+        "a": "Send every row in a compact format and let the model skip the extras",
+        "b": "Serve a bounded page with a cursor and a note on how to continue",
+        "c": "Keep only the first fifty rows, sorted with the newest first",
+        "d": "Move the agent to a model with a larger context window"
       },
       "key": "b",
       "explanation": {
         "b": "A page with a cursor bounds the result, and the note tells the agent how to go on.",
         "a": "Ruled out because \"Bloated responses waste context and make it harder for Claude to extract what matters.\"",
-        "c": "Ruled out because \"If you choose to truncate responses, be sure to steer agents with helpful instructions.\"",
+        "c": "Ruled out because \"A list that silently stops at fifty looks complete to a model\", so the agent would answer from part of the matches.",
         "d": "Ruled out because the article expects \"the need for context-efficient tools to remain\"."
       }
     },
@@ -81,19 +81,19 @@
       "id": "02-results-annotations-large-tool-sets-and-the-practice#m1",
       "page": "02-results-annotations-large-tool-sets-and-the-practice.md",
       "scope": "module",
-      "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that look up customers and orders, issue refunds and escalate to a person. Over a week of logs it repeatedly picks a tool that is unable to serve the request, although the system prompt was reworded three times. What does this indicate?",
+      "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with four tools: `get_customer`, `lookup_order`, `process_refund` and `escalate_to_human`. Over a week of logs it sends many plain refund requests to `escalate_to_human`, and three rewrites of the system prompt have not changed that. What does this most likely indicate?",
       "options": {
-        "a": "The list is too short and needs more tools to cover the cases",
-        "b": "The prompt needs more instructions about the tools to steer the choice",
+        "a": "The set holds too many tools for the model to choose among reliably",
+        "b": "The prompt still needs a sharper rule about which tool to prefer",
         "c": "The descriptions fail to separate the options and need a redesign",
-        "d": "The services behind the tools differ, which makes selection unstable"
+        "d": "The prompt lacks worked examples of refund requests for the model"
       },
       "key": "c",
       "explanation": {
-        "c": "Repeated wrong selection means the tools cannot be told apart from their texts, which is a design fault.",
-        "b": "Ruled out because more instructions can pull the wrong way: an instruction \"contains a keyword that now pulls every order question toward\" one tool, over the descriptions.",
-        "a": "Ruled out because the article warns that \"Too many tools or overlapping tools can also distract agents from pursuing efficient strategies.\"",
-        "d": "Ruled out because where a tool is served is not a selection fault: the choice runs on \"a name, a description and a schema\"."
+        "c": "Repeated wrong selection that survives prompt rewrites means the tools cannot be told apart from their texts, which is a design fault.",
+        "b": "Ruled out because the fault is in the surface, and \"rewording the system prompt for the fourth time will not change that\".",
+        "a": "Ruled out because four tools are far below the scale at which \"Tool selection accuracy degrades with more than 30-50 tools loaded at once.\"",
+        "d": "Ruled out because examples in the prompt \"leave the descriptions as thin as they were\", and the refund and escalation texts still read alike."
       }
     },
     {
@@ -102,16 +102,16 @@
       "scope": "module",
       "stem": "Scenario S3, a multi-agent research system. A coordinator delegates to a web search agent and a document agent, and the cited reports mix up their sources. Both agents hold tools named `analyze_content` and `analyze_document` whose descriptions are nearly the same. Which change fits best?",
       "options": {
-        "a": "Give both agents the same pair and add a rule to prefer the first",
+        "a": "Keep both names and add a prompt rule to use the first for web pages",
         "b": "Rename one for fetched pages and narrow its text to those pages",
-        "c": "Drop the descriptions and let the names alone decide the choice",
+        "c": "Merge the pair into one `analyze` tool with a `source` parameter",
         "d": "Add a parameter where each agent explains its reasoning"
       },
       "key": "b",
       "explanation": {
         "b": "A web-specific name and description removes the overlap at its source.",
-        "a": "Ruled out because the overlap stays in the texts the model chooses from, and the page says \"Fix the text the model chooses from.\"",
-        "c": "Ruled out because the description is where the model learns \"When it should be used (and when it shouldn't)\".",
+        "a": "Ruled out because the overlap stays in the descriptions, and the page says to \"keep the prompt free of tool-specific triggers\".",
+        "c": "Ruled out because a merged tool \"hides two contracts behind one name\", while a fetched page and an uploaded document are different jobs.",
         "d": "Ruled out because \"A parameter that asks for the model's thinking or step-by-step reasoning may lead to a `reasoning_extraction` refusal.\""
       }
     },
@@ -123,14 +123,14 @@
       "options": {
         "a": "Loads all of them at the start, as they are under the activation level",
         "b": "Defers all eight and loads them on demand, since the mode is enabled",
-        "c": "Defers the three least used tools and keeps the rest loaded at the start",
+        "c": "Loads all eight, then defers them once the conversation passes 10%",
         "d": "Defers all but the tools that the first prompt happens to name"
       },
       "key": "a",
       "explanation": {
         "a": "Under `auto` the point is 10% of the window, and below it everything loads at the start.",
         "b": "Ruled out because \"Below that, the SDK loads every tool definition into context upfront.\"",
-        "c": "Ruled out because the rule gives no partial deferral, and \"Below that, the SDK loads every tool definition into context upfront.\"",
+        "c": "Ruled out because the SDK \"counts the tokens of the definitions that can be deferred against the context window\", not the length of the conversation.",
         "d": "Ruled out because the choice turns on the size of the definitions, not on the prompt: \"When the total reaches 10% of the window, tool search activates.\""
       }
     }

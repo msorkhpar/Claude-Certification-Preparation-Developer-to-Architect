@@ -7,7 +7,7 @@
       "scope": "page",
       "stem": "Scenario: Dmitri's company wants developers limited to two approved models. The platform team sets `model` to the first of them in the managed file and tells the developers to use only those two. What happens when a developer picks another model?",
       "options": {
-        "a": "It is allowed, since only a list restricts a choice",
+        "a": "It is allowed, since only a list in the policy restricts such a choice",
         "b": "The choice is refused, because the managed file outranks the developer's own picks",
         "c": "The pick is refused for the session and restored after the next restart",
         "d": "The pick stands only if the project file also names that model"
@@ -16,8 +16,8 @@
       "explanation": {
         "a": "A managed `model` is a default, and the lock is the list.",
         "b": "Ruled out because \"A managed `model` is a **default**: a developer can still pick another model\".",
-        "c": "Ruled out because \"a default is overridden at once\", so no refusal appears that a restart could lift.",
-        "d": "Ruled out because \"a managed list applies as it is: a project file's list cannot widen it\", and nothing here makes a project file's model decide."
+        "c": "Ruled out because \"Neither choice is temporary\", and a default refuses nothing that a restart could lift.",
+        "d": "Ruled out because \"a default is overridden at once\", whatever the project file names."
       }
     },
     {
@@ -26,16 +26,16 @@
       "scope": "page",
       "stem": "Scenario: Amara adds `allowManagedHooksOnly: true` to the shared project file that Amara's team commits, expecting every developer to be limited to the hooks of the organisation. What is the effect?",
       "options": {
-        "a": "Hooks from the project run, since the team's file is read after the user file",
+        "a": "Only the organisation's hooks run, since the team's file outranks the user file",
         "b": "Every hook is switched off in the project until the managed file confirms it",
-        "c": "Nothing happens, since only the top tier reads that key",
+        "c": "Nothing changes for anyone, since only the top tier reads that key",
         "d": "Only the hooks of the project run, since the team's choice is the closest"
       },
       "key": "c",
       "explanation": {
         "c": "A lower file that sets a managed-only key has no effect.",
-        "a": "Ruled out because \"A lower file that sets one of these has **no effect**\".",
-        "b": "Ruled out because the page describes \"a lock written in the shared project file looks like policy and does nothing\", not a switch that waits for confirmation.",
+        "a": "Ruled out because \"a lock written in the shared project file looks like policy and does nothing\", whatever the order of the files below the managed level.",
+        "b": "Ruled out because \"A lower file that sets one of these has **no effect**\", so no hook is switched off and nothing waits for confirmation.",
         "d": "Ruled out because \"Some keys are read only from managed settings, because their purpose is to be out of a developer's reach\"."
       }
     },
@@ -43,7 +43,7 @@
       "id": "02-rolling-out-plugins-servers-spend-and-adoption#q1",
       "page": "02-rolling-out-plugins-servers-spend-and-adoption.md",
       "scope": "page",
-      "stem": "Scenario: Yusuf's organisation limit is 20000 a month and covers three groups. Yusuf proposes limits of 7000, 8000 and 6000 for them. What does the page say about that proposal?",
+      "stem": "Scenario: Yusuf's organisation limit is 20000 a month and covers three groups. Yusuf proposes limits of 7000, 8000 and 6000 for them. Under this module's rule for spend limits, how should that proposal be judged?",
       "options": {
         "a": "It is sound, because the organisation limit stops any overspend by the groups",
         "b": "It breaks the arithmetic, since the parts could together exceed the whole",
@@ -54,7 +54,7 @@
       "explanation": {
         "b": "Seven thousand, eight thousand and six thousand add up to 21000, which is more than 20000.",
         "a": "Ruled out because \"so the organisation limit would decide before the group limits did and nobody would know which one they were under\".",
-        "c": "Ruled out because the page requires that \"The group limits add up to the organisation limit and no more\", and says nothing about lending.",
+        "c": "Ruled out because \"Both are checked as a boundary: a total of exactly 20000 passes and 20001 does not\", so a total of 21000 fails whatever happens to unused budget.",
         "d": "Ruled out because the page's own example has \"three groups with 6000, 8000 and 6000 against an organisation limit of 20000\", so equal limits are not required."
       }
     },
@@ -62,7 +62,7 @@
       "id": "02-rolling-out-plugins-servers-spend-and-adoption#q2",
       "page": "02-rolling-out-plugins-servers-spend-and-adoption.md",
       "scope": "page",
-      "stem": "Scenario: A platform team wants to show leadership that Claude Code is working. It sets a target of more accepted lines per developer each month and starts the rollout on Monday. What is the main weakness of the plan?",
+      "stem": "Scenario: A platform team wants to show leadership that Claude Code is working. It sets a target of more accepted lines per developer each month and starts the rollout on Monday. By the measures this module teaches, what is the main weakness of the plan?",
       "options": {
         "a": "Accepted lines are not shown on the dashboard and cannot be tracked",
         "b": "Developers accept fewer lines as they learn, so the figure falls over time",
@@ -81,57 +81,57 @@
       "id": "02-rolling-out-plugins-servers-spend-and-adoption#m1",
       "page": "02-rolling-out-plugins-servers-spend-and-adoption.md",
       "scope": "module",
-      "stem": "Scenario: A developer reports that the managed policy \"does nothing\" for the allowlist of MCP servers on their laptop. The organisation's allowlist, and the key that makes it the only list, are both in the shared project file of the repository. Which fact explains it?",
+      "stem": "Scenario: An organisation's managed settings name its approved MCP servers in `allowedMcpServers` and set no other key for servers. A developer's laptop still uses a server that appears only in their own user file. Which fact explains it?",
       "options": {
-        "a": "Lists in settings files merge, so their own list has been added to the policy",
-        "b": "The command line always outranks the managed file, so the list is overridden",
-        "c": "Settings of that kind are honoured at the top tier alone and inert below it",
-        "d": "The shared project file is read first, so the policy file replaced it"
+        "a": "The user file outranks the managed file for any server it names",
+        "b": "An allowlist alone blocks nothing, since only a deny entry stops a server",
+        "c": "The two allowlists combined, since nothing locks them to one source",
+        "d": "The user file was read last, so its entries replaced the managed ones"
       },
       "key": "c",
       "explanation": {
-        "c": "A key that only managed settings read has no effect elsewhere.",
-        "b": "Ruled out because the page orders the levels \"highest first\" with managed settings above the command line, and \"no user, project or local value overrides it\".",
-        "a": "Ruled out because the page says managed-only keys are not merged: \"A lower file that sets one of these has **no effect**\".",
-        "d": "Ruled out because \"Some keys are read only from managed settings, because their purpose is to be out of a developer's reach\"."
+        "c": "Without `allowManagedMcpServersOnly`, a list combines across files, so the developer's own entry widens the managed allowlist.",
+        "b": "Ruled out because \"only the managed `allowedMcpServers` list applies and a developer's own list cannot widen it\" once the lock is on, so the allowlist does restrict.",
+        "a": "Ruled out because \"no user, project or local value overrides it\" for the managed level.",
+        "d": "Ruled out because a list \"is combined across files and not replaced\"."
       }
     },
     {
       "id": "02-rolling-out-plugins-servers-spend-and-adoption#m2",
       "page": "02-rolling-out-plugins-servers-spend-and-adoption.md",
       "scope": "module",
-      "stem": "Scenario: A security lead asks for a way to refuse the options that bring in a plugin, an agent or an MCP server for one run only. Which key does that, and where is it set?",
+      "stem": "Scenario: A company's managed plugin allowlist names only its own marketplace, yet some developers still try unreviewed plugins by starting a session with an option that pulls one in from a local folder. Which managed key closes that gap?",
       "options": {
-        "a": "`strictKnownMarketplaces`, in the shared project file",
-        "b": "`disableSideloadFlags`, in managed settings",
-        "c": "`allowManagedHooksOnly`, in the user file",
-        "d": "`availableModels`, in managed settings"
+        "a": "`strictKnownMarketplaces`",
+        "b": "`disableSideloadFlags`",
+        "c": "`allowManagedHooksOnly`",
+        "d": "`allowManagedMcpServersOnly`"
       },
       "key": "b",
       "explanation": {
-        "b": "That key rejects the flags that sideload plugins, agents and MCP servers.",
-        "a": "Ruled out because \"An empty list blocks every source, the official one included\", and the allowlist does not stop sideloading.",
-        "c": "Ruled out because \"only managed hooks run\" is what that key does.",
-        "d": "Ruled out because \"The **lock** is `availableModels`, a list\" and concerns the model choice."
+        "b": "A plugin loaded from a folder for one session comes in through a sideload flag, and that key rejects those flags.",
+        "a": "Ruled out because \"the allowlist does not stop a developer from loading a plugin from a folder for one run with a command-line flag\".",
+        "c": "Ruled out because \"only managed hooks run\" is all that key does, and the plugin's skills and agents still load.",
+        "d": "Ruled out because \"only the managed `allowedMcpServers` list applies\", which governs servers and leaves the plugin's skills and agents loaded."
       }
     },
     {
       "id": "02-rolling-out-plugins-servers-spend-and-adoption#m3",
       "page": "02-rolling-out-plugins-servers-spend-and-adoption.md",
       "scope": "module",
-      "stem": "Scenario: Before starting a rollout, a team records four weeks of the time to merge for pull requests. Why four weeks, and what does the record allow later?",
+      "stem": "Scenario: Following this module's rollout plan, a team records four weeks of the time to merge for pull requests before the rollout starts. Why four weeks, and what does the record allow later?",
       "options": {
         "a": "Because usage credits reset every four weeks and the data must match",
         "b": "Because the dashboard keeps only four weeks, so older data is lost",
-        "c": "To show leadership how many lines developers write without the tool",
-        "d": "Because a release cycle fits inside it, so any shift is judged against it"
+        "c": "Because a month evens out weekly noise, so no outcome target is needed",
+        "d": "Because it spans a release cycle, so any shift is measured against it"
       },
       "key": "d",
       "explanation": {
         "d": "A baseline with a release cycle in it lets a later change be measured.",
         "b": "Ruled out because the page says \"enough to include a release cycle and a quiet week\", not a limit of the dashboard.",
-        "c": "Ruled out because \"Lines and suggestions accepted are reported and not targeted\".",
-        "a": "Ruled out because \"A target on an outcome needs a baseline\", and usage credits play no part in it."
+        "c": "Ruled out because the plan \"states two outcome targets: the share of merged pull requests with assistance, and the time to merge\".",
+        "a": "Ruled out because \"the baseline of four weeks and the way the limits add up are this course's design values\", not a cycle of usage credits."
       }
     }
   ]
