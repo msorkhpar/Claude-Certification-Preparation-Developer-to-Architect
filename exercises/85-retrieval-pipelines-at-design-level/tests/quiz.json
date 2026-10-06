@@ -8,7 +8,7 @@
       "stem": "A returns policy states a rule and, two lines later, its exception. The pipeline indexes windows of fixed length, and the assistant gives the rule without the exception. Which change addresses the cause?",
       "options": {
         "a": "Break the text at section boundaries so related sentences stay together",
-        "b": "Shrink each window so that every single sentence is indexed entirely on its own",
+        "b": "Shrink each window so that each piece of the policy is scored more precisely",
         "c": "Return more windows for each question so that both halves can arrive together",
         "d": "Swap the keyword index for an embedding index to match the meaning of the text"
       },
@@ -26,7 +26,7 @@
       "scope": "page",
       "stem": "A platform serves several customers from one index. An employee of one customer, cleared for two contracts, asks a question that matches fifty passages across all customers, yet the application returns a single result. Which fault explains the single result?",
       "options": {
-        "a": "It keeps one index for every customer instead of one index for each",
+        "a": "It shares one index across customers instead of keeping one per customer",
         "b": "It lets the system prompt ask the model to ignore the other tenants",
         "c": "It trims the list to the person's rights after taking the best few",
         "d": "It stores each contract twice, so that duplicate passages fill the list"
@@ -34,7 +34,7 @@
       "key": "c",
       "explanation": {
         "c": "The filter ran after the cut, so passages the person may not see took the top places and were removed afterwards.",
-        "a": "Ruled out because \"Chunks carry metadata: the document, its owner or tenant, its version, its date\" and that is how one index serves many customers.",
+        "a": "Ruled out because with the filter before ranking \"a chunk the reader may not see is never a candidate\", so one shared index can still fill the list with visible passages.",
         "b": "Ruled out because the shortfall arises \"because the top places went to chunks that were then removed\", and a prompt instruction has no part in it.",
         "d": "Ruled out because a reader gets \"fewer than k results although many visible chunks matched\", which is the signature of a late filter and not of duplicates."
       }
@@ -46,35 +46,35 @@
       "stem": "A team reports a retrieval recall of nine in ten. It counts only the 30 labelled questions that returned something, and 27 of those had the relevant chunk in the top results. Ten more labelled questions came back empty. Which figure follows the page?",
       "options": {
         "a": "90 percent, since only questions that returned something can be judged",
-        "b": "68 percent, since a blank query still belongs in the denominator",
-        "c": "100 percent, since every result that was returned held the relevant chunk",
+        "b": "68 percent, since a search that found nothing still sits in the denominator",
+        "c": "93 percent, since a search that found nothing counts as a cautious abstention",
         "d": "75 percent, since 30 of the 40 labelled questions were answered"
       },
       "key": "b",
       "explanation": {
-        "b": "The page says \"the denominator is every labelled question\", so 27 of 40 is about 68 percent.",
-        "a": "Ruled out because \"A question with no results counts as a miss in recall over the labelled set\".",
-        "c": "Ruled out because only 27 of the 30 returned results held the relevant chunk, and \"the denominator is every labelled question\" in any case.",
-        "d": "Ruled out because \"and so does a question that was never answered\": answered questions are not the denominator."
+        "b": "The 27 hits are counted over all 40 labelled questions, the ten empty ones included, which gives 67.5 percent, about 68.",
+        "a": "Ruled out because \"the denominator is every labelled question\", not only the questions that returned something.",
+        "c": "Ruled out because \"A question with no results counts as a miss in recall over the labelled set\", never as a success.",
+        "d": "Ruled out because the measure is \"the percentage of relevant documents that fail to be retrieved within the top 20 chunks\", so the 3 questions that returned results without the relevant chunk are misses although they were answered."
       }
     },
     {
       "id": "02-freshness-measurement-and-the-practice#q2",
       "page": "02-freshness-measurement-and-the-practice.md",
       "scope": "page",
-      "stem": "In a test of 8 questions, the evidence was retrieved for 5 and the answers were right for 5. One answer was wrong although its evidence was retrieved, and one was right although its evidence was not. How many of the questions have no retrieved evidence and a wrong answer?",
+      "stem": "In a test of 12 questions, the evidence was retrieved for 8 and the answers were right for 7. Two of the wrong answers had their evidence retrieved. How many of the questions have no retrieved evidence and a wrong answer?",
       "options": {
-        "a": "Five",
-        "b": "One",
-        "c": "Three",
-        "d": "Two"
+        "a": "5",
+        "b": "2",
+        "c": "4",
+        "d": "3"
       },
       "key": "d",
       "explanation": {
-        "d": "The outcomes are 4 ok, 1 generation, 2 retrieval and 1 unsupported, so two questions had no evidence and a wrong answer.",
-        "b": "Ruled out because the wrong answer that had its evidence is one where \"The evidence was retrieved and the answer is wrong\", a generation failure.",
-        "c": "Ruled out because the right answer without evidence is one where \"The answer is right although the evidence was not retrieved\", a defect but not a retrieval failure by definition.",
-        "a": "Ruled out because five is the number of questions whose evidence was retrieved (\"the evidence was retrieved for 5\"), the opposite count."
+        "d": "Of the 8 with evidence, 2 had wrong answers, so 6 are ok; of the 7 right answers, 6 are ok and 1 is unsupported; that leaves 12 - 6 - 2 - 1 = 3 questions with no evidence and a wrong answer.",
+        "a": "Ruled out because five counts every wrong answer, and \"An end-to-end score of right and wrong answers cannot say where to work\": two of those five had their evidence.",
+        "b": "Ruled out because two is the count of answers where \"The evidence was retrieved and the answer is wrong\", a generation failure.",
+        "c": "Ruled out because four counts every question without evidence, and one of them is the case where \"The answer is right although the evidence was not retrieved\", a defect but not a retrieval failure."
       }
     },
     {
@@ -105,14 +105,14 @@
         "a": "The prompt alone, since one answer was wrong although its evidence was retrieved",
         "b": "The cut, the index and the freshness, since three problem cases lack evidence",
         "c": "Nowhere in particular, since five of the eight answers are right",
-        "d": "The unsupported case first, since a right answer needs no work at all"
+        "d": "The labelled set first, since one answer was right without the evidence it names"
       },
       "key": "b",
       "explanation": {
         "b": "The table sends retrieval outcomes to \"The cut, the context, the index, the freshness\".",
         "a": "Ruled out because \"the pipeline has two retrieval failures and one generation failure\".",
         "c": "Ruled out because \"Counting only correct answers hides all three\".",
-        "d": "Ruled out because the table sends it to \"Retrieval, because the answer rests on the model's memory or on luck\"."
+        "d": "Ruled out because the table sends a right answer without its evidence to \"Retrieval, because the answer rests on the model's memory or on luck\", not to the labels."
       }
     },
     {
@@ -124,7 +124,7 @@
         "a": "Whether the keyword index outweighs the embedding index when the query holds a code",
         "b": "Whether the model follows the prompt when the evidence is present in its context",
         "c": "Whether the labelled set holds enough questions about each topic of the support area",
-        "d": "Whether the passage that was returned still matches what its source says now"
+        "d": "Whether a returned passage was made from the current version of its source"
       },
       "key": "d",
       "explanation": {

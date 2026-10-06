@@ -118,24 +118,24 @@ fails this one, and in production it is the version that runs out of memory on t
 ## Quiz
 
 1. A team's client sends bursts of requests at the start of every minute and gets 429 errors, although the daily total is
-   far below the limit. Why does the page say this happens?
-   - **a**: Capacity is restored at the start of each minute, so late requests are refused
-   - **b**: Capacity refills steadily, so a sudden spike drains the allowance
+   far below the limit. What explains the refusals?
+   - **a**: Cached prompt reads count toward the input limit, so each burst exceeds it
+   - **b**: Capacity comes back gradually, so a spike uses it up before it is restored
    - **c**: The provider counts the `max_tokens` setting of each request toward output tokens
    - **d**: Capacity is shared with other organisations, so peaks collide with theirs
 
 2. A job reads a very large file and starts one call per row before it processes any result, and the
    process runs out of memory. Which design is best?
-   - **a**: Add retries so that the rows that failed to start are begun again later
+   - **a**: Bound the queue between the model calls and the stage that stores the results
    - **b**: Read all the rows first but start the calls in groups of a hundred rows
    - **c**: Compress the rows in memory so that more of them fit before the calls start
-   - **d**: Pull the next item only when a worker is free, under a fixed bound on parallel work
+   - **d**: Have a fixed number of workers each pull the next item once they finish one
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says the limit is "a bucket that refills continuously, not a counter that resets on the minute", so a spike drains it. *a* is ruled out because the bucket "refills continuously, not a counter that resets on the minute". *c* is ruled out because the `max_tokens` setting "does not factor into OTPM rate limit calculations". *d* is ruled out because the limits are set per organisation: "per organisation and per model class".
-2. **d**. The page's mechanism is "take the next item only when there is room for it", with a worker pool that has "at most limit workers". *b* is ruled out because "reading them all first puts the file in memory", and groups do not change that. *c* is ruled out because compression keeps every row in memory and leaves "starts every call at once" in place. *a* is ruled out because "retrying a burst you could have avoided spends the time and the quota twice".
+1. **b**. The page says the limit is "a bucket that refills continuously, not a counter that resets on the minute", so a spike drains it. *a* is ruled out because "only uncached input counts toward ITPM" for most models, and cache reads are not counted. *c* is ruled out because the `max_tokens` setting "does not factor into OTPM rate limit calculations". *d* is ruled out because the limits are set per organisation: "per organisation and per model class".
+2. **d**. The page's mechanism is "take the next item only when there is room for it", with a worker pool that has "at most limit workers". *b* is ruled out because "reading them all first puts the file in memory", and groups do not change that. *c* is ruled out because compression keeps every row in memory and leaves "starts every call at once" in place. *a* is ruled out because a queue after the model stage leaves the reader unbounded: "the producer then never waits for the consumer".
 
 </details>
 
@@ -144,35 +144,35 @@ fails this one, and in production it is the version that runs out of memory on t
 This quiz covers both pages of the module.
 
 1. Twelve tickets are sent together, and the provider refuses one with a 429. The team wants fewer refusals. What comes first?
-   - **a**: Cap the parallel work with a semaphore, then pace what remains
+   - **a**: Put a semaphore in front of the calls so that only a few are in flight
    - **b**: Raise the retry count so that each refusal is repeated sooner than before
    - **c**: Send the work through more clients so that each one carries fewer calls
-   - **d**: Raise the timeout on every request so that slow calls are not abandoned
+   - **d**: Honour the retry-after header on each 429 before the next request goes out
 
 2. A pipeline's first stage outpaces the stage behind it, and memory grows during long runs. Which fix is best?
    - **a**: Give the process more memory so that the buffer can hold the whole run
-   - **b**: Add a second producer so that the buffer fills twice as fast as before
+   - **b**: Run more workers in the first stage so that it finishes its share sooner
    - **c**: Limit the buffer between the two so that a full one slows the producer
-   - **d**: Retry the slow writes so that fewer of them fail during the long run
+   - **d**: Spill the buffer to disk so that the growing backlog no longer fills memory
 
 3. Each call takes two seconds, and the account may send ten requests a second. About how many calls run at once at that rate?
    - **a**: Five, found by dividing the latency by the throughput of the account
-   - **b**: Twenty, found by multiplying throughput by latency
+   - **b**: Twenty, found by multiplying the allowed throughput by the latency
    - **c**: Ten, the same as the sends that the account is allowed each second
    - **d**: Two, the duration of a single call measured in whole seconds
 
-4. One ticket in a gathered batch fails with a bad request while the others succeed. What does the page's rule produce?
+4. One ticket in a gathered batch fails with a bad request while the others succeed. Under this module's rule for independent work, what does the caller get back?
    - **a**: Only the successes, listed in the order in which they finished running
    - **b**: Cancelled siblings and the first error raised to the caller of the batch
-   - **c**: A repeat of the failing item that continues until it finally succeeds
+   - **c**: The successes in input order, with no entry kept for the failed ticket
    - **d**: An error record in its slot, with every other answer kept in order
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The page's order is "Bound and pace first; retry last". *b* is ruled out because "retrying a burst you could have avoided spends the time and the quota twice". *c* is ruled out because the page says "Don't create more than one client in the same application", since each has its own pools. *d* is ruled out because the bound is what "protects the connection pool and the rate limit", and a timeout does not bound the burst.
-2. **c**. The page says "bound the queue between them: a full queue makes the model stage wait". *b* is ruled out because "a fast producer and a slow consumer meet in an unbounded buffer". *a* is ruled out because "the buffer is your memory". *d* is ruled out because retries only repeat load, and "spends the time and the quota twice".
+1. **a**. The page's order is "Bound and pace first; retry last", and the bound "needs no knowledge of the limits and removes the worst bursts". *b* is ruled out because "retrying a burst you could have avoided spends the time and the quota twice". *c* is ruled out because the page says "Don't create more than one client in the same application", since each has its own pools. *d* is ruled out because retry with back-off on a 429 "is the last line, not the first".
+2. **c**. The page says "bound the queue between them: a full queue makes the model stage wait". *b* is ruled out because a faster first stage only widens the gap: "a fast producer and a slow consumer meet in an unbounded buffer". *a* is ruled out because "the buffer is your memory". *d* is ruled out because the slow stage "must slow the stage in front of it instead of letting work pile up", on disk or in memory.
 3. **b**. The page's relation is "requests in flight equal the rate times the call duration", so ten times two gives twenty. *a* is ruled out because "requests in flight equal the rate times" the duration, with no division. *c* is ruled out because the page says "Use the limit and your measured latency". *d* is ruled out because "equal the rate times the call duration" keeps the rate in the product.
-4. **d**. The pool "returns one outcome per item in input order" and "lets one failure stand alone". *b* is ruled out because that is what a bare gather does, and "rejects on the first rejection" loses the rest. *c* is ruled out because the pool "lets one failure stand alone" and does not loop on it. *a* is ruled out because the pool "returns one outcome per item in input order".
+4. **d**. The pool "returns one outcome per item in input order" and "lets one failure stand alone". *b* is ruled out because that is what a bare gather does, and "rejects on the first rejection" loses the rest. *c* is ruled out because the failure keeps its place, as in a list "in which a failure is an exception object in its slot". *a* is ruled out because the pool "returns one outcome per item in input order".
 
 </details>

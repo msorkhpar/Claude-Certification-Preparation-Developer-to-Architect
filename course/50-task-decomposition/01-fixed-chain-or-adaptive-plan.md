@@ -450,16 +450,16 @@ The exam's answer options for this task statement follow a pattern. These are th
    - **c**: Split the change into two halves of seven files and review each half in one request
    - **d**: Keep the single request and add an instruction to treat every file with equal care
 
-2. A team must add tests to a large legacy codebase that it does not know. Which order of work does the exam expect?
+2. A team must add tests to a large legacy codebase that it does not know. Which way of working fits this task best?
    - **a**: List the directories, give each one a test task, then run the tasks in order
    - **b**: Write the whole test plan first, order it by file size, then run it to its end
-   - **c**: Map the structure and rank by impact, then re-plan as dependencies appear
+   - **c**: Survey the modules, start where breakage hurts most, then let results steer
    - **d**: Take the largest files first, write tests for them, then continue down the list
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. Each file gets a full review in its own context, and a second pass sees the relations. *b* is ruled out because repetition keeps what causes the problem: "A request that holds a dozen files spends that budget on text before the review begins". *c* is ruled out because halves keep the dilution and still hide the relations between the halves: "The exam calls the effect attention dilution". *d* is ruled out because an instruction does not change what fills the context: "LLM performance degrades as context fills".
-2. **c**. An open-ended task is mapped first and planned from what is found. *a* is ruled out because a fixed order cannot follow the findings: "a pipeline that marches through steps that no longer make sense". *b* is ruled out because a plan made before any ground truth is a guess: "the plan is made before any ground truth exists". *d* is ruled out because size is not impact: the task is "mapped first, then the high-impact areas are found".
+1. **a**. Each file gets a full review in its own context, and a second pass sees the relations. *b* is ruled out because repetition keeps what causes the problem: "A request that holds a dozen files spends that budget on text before the review begins". *c* is ruled out because files that call each other across the halves are never seen together: "need a pass that sees the relations". *d* is ruled out because an instruction does not change what fills the context: "LLM performance degrades as context fills".
+2. **c**. An unknown codebase is mapped first, effort goes where it matters most, and each next subtask is planned from what is found. *a* is ruled out because a fixed order cannot follow the findings: "a pipeline that marches through steps that no longer make sense". *b* is ruled out because a plan made before any ground truth is a guess: "the plan is made before any ground truth exists". *d* is ruled out because size is not impact: the task is "mapped first, then the high-impact areas are found".
 
 </details>

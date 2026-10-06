@@ -17,7 +17,7 @@ that level.
 | 5 | 62 to 77, then the Architect mocks and pool (module 78, pages 03, 04 and 05) | waits for batch 4 |
 | 6 | 79 to 93, then the Professional mock exams (module 94, pages 03 and 04) | running |
 
-The State column is updated at every snapshot. To see what is done for a module, compare it with the base:
+The State column is updated when a batch completes; between those, `snapshot.py` pushes the consistent modules about every 20 minutes. To see what is done for a module, compare it with the base:
 `python3 docs/process/quiz-pass/check_invariants.py . c32f09b <prefix>` lists the changed items. A module with no
 changed items is either not started or had nothing weak: check `git log -- course/<module>`.
 

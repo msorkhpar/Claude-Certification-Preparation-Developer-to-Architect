@@ -398,21 +398,21 @@ real latency, compute the bound from the limit you must stay under, and leave he
 1. A web service handles each request in an async function that calls the synchronous SDK client, and under load every
    endpoint, including those that never ask the model anything, becomes slow together. What is the cause?
    - **a**: A blocking wait holds the event loop, so other tasks cannot run until it returns
-   - **b**: The model slows down for every caller whenever one caller is waiting for a reply from it
-   - **c**: The client retries too many times, and those retries delay the unrelated endpoints as well
-   - **d**: The async function needs a larger connection pool for each endpoint that it serves
+   - **b**: All handlers share one client, so each model call queues behind the others
+   - **c**: An event loop serves one request at a time, so async handlers cannot overlap
+   - **d**: Each model call keeps a processor busy, so the server runs short of CPU time
 
 2. A nightly job starts one call for each of 8,000 tickets at once with a bare gather. It sees a wave of 429 errors and
    loses the labels of the tickets that succeeded because the gather raised. Which change is best?
    - **a**: Split the tickets into two gathers of 4,000 and run them in turn, one after the other
-   - **b**: Rerun the whole gather until it comes back without raising an exception at all
+   - **b**: Keep the bare gather, and retry each 429 at once inside the task that got it
    - **c**: Cap the work in flight, and record each outcome in its slot, failures included
-   - **d**: Lower the timeout on each request so that the failing calls give up much sooner
+   - **d**: Lower each request's timeout, and catch what the gather raises to keep its labels
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The page says a call that waits "without yielding stops the loop, and every other task waits with it". *b* is ruled out because "one thread with an event loop overlaps thousands of waits", so callers do not hold each other up at the model. *c* is ruled out because the page names the cause as "an async web handler that calls the synchronous client", not the retry count. *d* is ruled out because a bigger pool does not make a waiting call yield: "a call that waits without yielding stops the loop".
-2. **c**. The page asks to "bound the calls in flight" and to "collect every outcome, in input order, and decide about the failures afterwards". *b* is ruled out because a bare gather over a queue "turns a batch into a burst", and a rerun repeats the burst. *a* is ruled out because two gathers of 4,000 are still two bursts, and in the page's words "Promise.all and a bare gather give up on the others when one fails", so each half repeats the loss. *d* is ruled out because "the bound costs a little latency and protects the connection pool and the rate limit", and a shorter timeout does neither.
+1. **a**. The page says a call that waits "without yielding stops the loop, and every other task waits with it". *b* is ruled out because one shared client is the advice, not the fault: each client has "a connection pool and thread pools that are better shared between requests". *c* is ruled out because "one thread with an event loop overlaps thousands of waits", as long as each wait yields. *d* is ruled out because a waiting call does no computing: the program "waits for the reply while the CPU is idle".
+2. **c**. The page asks to "bound the calls in flight" and to "collect every outcome, in input order, and decide about the failures afterwards". *b* is ruled out because a bare gather over a queue "turns a batch into a burst", and an instant retry adds to that burst. *a* is ruled out because two gathers of 4,000 are still two bursts, and in the page's words "Promise.all and a bare gather give up on the others when one fails", so each half repeats the loss. *d* is ruled out because, once a bare gather raises, "the results of the others are not returned to you", and a shorter timeout does not bound the burst.
 
 </details>

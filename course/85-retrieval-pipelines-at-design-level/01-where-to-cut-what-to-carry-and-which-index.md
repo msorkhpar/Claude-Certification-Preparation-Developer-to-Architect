@@ -809,12 +809,12 @@ Read the output as four findings. The fixed cut finds no chunk with the whole ru
 
 1. A returns policy states a rule and, two lines later, its exception. The pipeline indexes windows of fixed length, and the assistant gives the rule without the exception. Which change addresses the cause?
    - **a**: Break the text at section boundaries so related sentences stay together
-   - **b**: Shrink each window so that every single sentence is indexed entirely on its own
+   - **b**: Shrink each window so that each piece of the policy is scored more precisely
    - **c**: Return more windows for each question so that both halves can arrive together
    - **d**: Swap the keyword index for an embedding index to match the meaning of the text
 
 2. A platform serves several customers from one index. An employee of one customer, cleared for two contracts, asks a question that matches fifty passages across all customers, yet the application returns a single result. Which fault explains the single result?
-   - **a**: It keeps one index for every customer instead of one index for each
+   - **a**: It shares one index across customers instead of keeping one per customer
    - **b**: It lets the system prompt ask the model to ignore the other tenants
    - **c**: It trims the list to the person's rights after taking the best few
    - **d**: It stores each contract twice, so that duplicate passages fill the list
@@ -823,6 +823,6 @@ Read the output as four findings. The fixed cut finds no chunk with the whole ru
 <summary>Answer key</summary>
 
 1. **a**. The cut ignored the structure of the data, and a heading is a joint at which a rule and its exception stay together. *b* is ruled out because "A smaller window cuts in more places and separates more sentences from their neighbours". *c* is ruled out because returning more chunks "does not help either, because no chunk holds the whole rule". *d* is ruled out because changing the index "changes how the pieces are scored, not where they were cut".
-2. **c**. The filter ran after the cut, so passages the person may not see took the top places and were removed afterwards. *a* is ruled out because "Chunks carry metadata: the document, its owner or tenant, its version, its date" and that is how one index serves many customers. *b* is ruled out because the shortfall arises "because the top places went to chunks that were then removed", and a prompt instruction has no part in it. *d* is ruled out because a reader gets "fewer than k results although many visible chunks matched", which is the signature of a late filter and not of duplicates.
+2. **c**. The filter ran after the cut, so passages the person may not see took the top places and were removed afterwards. *a* is ruled out because with the filter before ranking "a chunk the reader may not see is never a candidate", so one shared index can still fill the list with visible passages. *b* is ruled out because the shortfall arises "because the top places went to chunks that were then removed", and a prompt instruction has no part in it. *d* is ruled out because a reader gets "fewer than k results although many visible chunks matched", which is the signature of a late filter and not of duplicates.
 
 </details>

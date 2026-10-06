@@ -810,21 +810,21 @@ The practice is in [`exercises/85-retrieval-pipelines-at-design-level`](../../ex
 
 1. A team reports a retrieval recall of nine in ten. It counts only the 30 labelled questions that returned something, and 27 of those had the relevant chunk in the top results. Ten more labelled questions came back empty. Which figure follows the page?
    - **a**: 90 percent, since only questions that returned something can be judged
-   - **b**: 68 percent, since a blank query still belongs in the denominator
-   - **c**: 100 percent, since every result that was returned held the relevant chunk
+   - **b**: 68 percent, since a search that found nothing still sits in the denominator
+   - **c**: 93 percent, since a search that found nothing counts as a cautious abstention
    - **d**: 75 percent, since 30 of the 40 labelled questions were answered
 
-2. In a test of 8 questions, the evidence was retrieved for 5 and the answers were right for 5. One answer was wrong although its evidence was retrieved, and one was right although its evidence was not. How many of the questions have no retrieved evidence and a wrong answer?
-   - **a**: Five
-   - **b**: One
-   - **c**: Three
-   - **d**: Two
+2. In a test of 12 questions, the evidence was retrieved for 8 and the answers were right for 7. Two of the wrong answers had their evidence retrieved. How many of the questions have no retrieved evidence and a wrong answer?
+   - **a**: 5
+   - **b**: 2
+   - **c**: 4
+   - **d**: 3
 
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says "the denominator is every labelled question", so 27 of 40 is about 68 percent. *a* is ruled out because "A question with no results counts as a miss in recall over the labelled set". *c* is ruled out because only 27 of the 30 returned results held the relevant chunk, and "the denominator is every labelled question" in any case. *d* is ruled out because "and so does a question that was never answered": answered questions are not the denominator.
-2. **d**. The outcomes are 4 ok, 1 generation, 2 retrieval and 1 unsupported, so two questions had no evidence and a wrong answer. *b* is ruled out because the wrong answer that had its evidence is one where "The evidence was retrieved and the answer is wrong", a generation failure. *c* is ruled out because the right answer without evidence is one where "The answer is right although the evidence was not retrieved", a defect but not a retrieval failure by definition. *a* is ruled out because five is the number of questions whose evidence was retrieved ("the evidence was retrieved for 5"), the opposite count.
+1. **b**. The 27 hits are counted over all 40 labelled questions, the ten empty ones included, which gives 67.5 percent, about 68. *a* is ruled out because "the denominator is every labelled question", not only the questions that returned something. *c* is ruled out because "A question with no results counts as a miss in recall over the labelled set", never as a success. *d* is ruled out because the measure is "the percentage of relevant documents that fail to be retrieved within the top 20 chunks", so the 3 questions that returned results without the relevant chunk are misses although they were answered.
+2. **d**. Of the 8 with evidence, 2 had wrong answers, so 6 are ok; of the 7 right answers, 6 are ok and 1 is unsupported; that leaves 12 - 6 - 2 - 1 = 3 questions with no evidence and a wrong answer. *a* is ruled out because five counts every wrong answer, and "An end-to-end score of right and wrong answers cannot say where to work": two of those five had their evidence. *b* is ruled out because two is the count of answers where "The evidence was retrieved and the answer is wrong", a generation failure. *c* is ruled out because four counts every question without evidence, and one of them is the case where "The answer is right although the evidence was not retrieved", a defect but not a retrieval failure.
 
 </details>
 
@@ -842,19 +842,19 @@ This quiz covers both pages of the module.
    - **a**: The prompt alone, since one answer was wrong although its evidence was retrieved
    - **b**: The cut, the index and the freshness, since three problem cases lack evidence
    - **c**: Nowhere in particular, since five of the eight answers are right
-   - **d**: The unsupported case first, since a right answer needs no work at all
+   - **d**: The labelled set first, since one answer was right without the evidence it names
 
 3. A team re-indexes by adding the chunks of every changed document. Recall on its labelled questions stays high, yet users keep reporting outdated answers. What does the team's measurement miss?
    - **a**: Whether the keyword index outweighs the embedding index when the query holds a code
    - **b**: Whether the model follows the prompt when the evidence is present in its context
    - **c**: Whether the labelled set holds enough questions about each topic of the support area
-   - **d**: Whether the passage that was returned still matches what its source says now
+   - **d**: Whether a returned passage was made from the current version of its source
 
 <details>
 <summary>Answer key</summary>
 
 1. **c**. Frequent changes, citations and per-client access are retrieval's case, and a changed document must lose its old chunks. *a* is ruled out because in the table the weights are weak when "Facts change, a source must be shown or a reader's access must be respected", which describes this firm. *b* is ruled out because the prompt suits a corpus that is "small, shared by every request and edited rarely", and these agreements are revised weekly and read under access rules. *d* is ruled out because "A re-index that runs less often than the documents change leaves old text in the index between runs", and a quarterly rebuild leaves it for months.
-2. **b**. The table sends retrieval outcomes to "The cut, the context, the index, the freshness". *a* is ruled out because "the pipeline has two retrieval failures and one generation failure". *c* is ruled out because "Counting only correct answers hides all three". *d* is ruled out because the table sends it to "Retrieval, because the answer rests on the model's memory or on luck".
+2. **b**. The table sends retrieval outcomes to "The cut, the context, the index, the freshness". *a* is ruled out because "the pipeline has two retrieval failures and one generation failure". *c* is ruled out because "Counting only correct answers hides all three". *d* is ruled out because the table sends a right answer without its evidence to "Retrieval, because the answer rests on the model's memory or on luck", not to the labels.
 3. **d**. Recall by chunk id counts an old chunk with the right id as a hit, so staleness needs a check against the source. *b* is ruled out because "the only thing that changed is what retrieval can return", so the old text is already in the evidence before the prompt is read. *c* is ruled out because the problem is what the metric counts, as "an old chunk with the right id still counts as a hit", and more questions would count the same way. *a* is ruled out because the weighting of codes decides ranking among current chunks, since "a question that names an identifier is the case where the keyword index is right", and it does not decide whether an old chunk is returned.
 
 </details>

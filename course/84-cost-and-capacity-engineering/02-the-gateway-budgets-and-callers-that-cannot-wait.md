@@ -55,22 +55,22 @@ These are the wrong answers the exam's options for this domain offer, each with 
 ## Quiz
 
 1. Scenario: Oriel Telecom's legacy billing system can call only synchronous endpoints and times out after two seconds, but the task needs long reasoning that takes about twenty. What design fits best?
-   - **a**: Cut the reasoning short, so that the answer arrives before the legacy timeout expires
-   - **b**: Ask the platform team to raise the legacy timeout to thirty seconds for this one job
-   - **c**: Accept the job, hand back a ticket number at once, and deliver the outcome afterwards
-   - **d**: Move the task to the smallest available model, which answers quickly enough to fit
+   - **a**: Cut the reasoning short so that the reply comes back inside the two seconds
+   - **b**: Raise the legacy timeout to thirty seconds so that the long call can complete
+   - **c**: Return a job identifier at once so that the result is fetched afterwards
+   - **d**: Switch to the smallest model so that a quick reply lands before the cut-off
 
 2. Scenario: Pylon Software's four teams each hold a separate key, and finance cannot say which team spent what. The platform team proposes an internal gateway. What will the gateway achieve by itself?
    - **a**: A smaller token bill for each team, since every request now passes one central point
-   - **b**: One place for credentials, routes, budgets and usage records, since all traffic passes it
-   - **c**: Faster answers on every call, since the gateway adds capacity of its own to the model
-   - **d**: Better answers on every call, since the gateway rewrites the prompts it forwards
+   - **b**: A cost view per product group, since the credential and usage now sit at one point
+   - **c**: Lower latency on every call, since retries and limits now run in one shared place
+   - **d**: No further need for prompt caching, since budgets now cap what each team spends
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. Accept-and-poll decouples submission from delivery, so the limit and the work coexist. *a* is ruled out because "truncating the work sacrifices the task". *b* is ruled out because the timeout "is often not yours to change", and raising it moves the problem into a system nobody owns. *d* is ruled out because "A faster model may not exist for the quality needed".
-2. **b**. A gateway is a control point for credentials, routing, budgets and usage records. *a* is ruled out because the savings "come from caching, the choice of model and batching" and not from the gateway. *c* is ruled out because a gateway does not "Make a model faster" and adds no capacity of its own. *d* is ruled out because it does not "Remove the need to evaluate a model for a task", and it does not rewrite prompts.
+1. **c**. Accept-and-poll decouples submission from delivery: each call the legacy system makes returns quickly, and the twenty seconds of work run behind the scenes. *a* is ruled out because "Truncating the reasoning to fit two seconds sacrifices the task". *b* is ruled out because the timeout "is often not yours to change", and raising it moves the problem into a system nobody owns. *d* is ruled out because "A faster model may not exist for the quality needed".
+2. **b**. A gateway is a control point: it holds the credential and records usage once, which is what lets finance see who spent what. *a* is ruled out because the savings "come from caching, the choice of model and batching" and not from the gateway. *c* is ruled out because a gateway "does not by itself cut the token bill or guarantee lower latency". *d* is ruled out because a gateway does not "Replace caching, model choice or batching", whatever budgets it enforces.
 
 </details>
 
@@ -82,26 +82,26 @@ This quiz covers both pages of the module.
    - **a**: Honours the pin, since the team chose that model deliberately
    - **b**: Blocks the team for breaking the policy until it has been reviewed
    - **c**: Uses the pin once and warns the platform team afterwards
-   - **d**: Routes by the table entry for the task, as that choice is a wish
+   - **d**: Follows the routing table's entry for that task in its place
 
 2. Scenario: Tallow Insurance's gateway sees a team at exactly 80 percent of its budget, and the next request is estimated to stay under 100 percent. What does admission return?
-   - **a**: Allow, since the team has not yet passed its budget and nothing is wrong at this point
-   - **b**: Warn, since the threshold is reached even though the spend remains inside the limit
-   - **c**: Block, because a team near its budget should not be given any more requests at all
-   - **d**: Warn only if the same team has also overspent in a previous month of the same year
+   - **a**: Allow, since the request keeps the team's spend below its budget
+   - **b**: Warn, since the spend to date now stands at the alert threshold
+   - **c**: Block, since a team past the warning line is stopped before it overspends
+   - **d**: Degrade, since a team near its budget is moved onto a cheaper model
 
-3. Scenario: Umber Retail's showback holds two usage lines for one team, each worth 0.4 of a cent. What amount in whole cents should be shown?
-   - **a**: 0, because each line rounds down to nothing when it is taken on its own account
-   - **b**: 2, because every line is rounded up so that none of the usage goes unbilled
-   - **c**: 1, because rounding happens once after they are summed
-   - **d**: 0.8, since fractions of a cent are kept for each team on the final screen
+3. Scenario: Umber Retail's showback holds three usage lines for one team, each worth 0.3 of a cent. What amount should be shown to the team?
+   - **a**: 0, because each line rounds down to nothing when it is taken on its own
+   - **b**: 3, because each line is rounded up so that none of the usage goes unbilled
+   - **c**: 1, because the values are added first and the total is rounded at the end
+   - **d**: 0.9, because fractions of a cent are kept for each team on the screen
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. A pin is honoured only when the policy allows it, and otherwise the table decides. *a* is ruled out because "The gateway uses the pin only when the policy allows that model". *b* is ruled out because the gateway does not punish: "Otherwise it uses the route for the task, and the default for a task the table does not know". *c* is ruled out because there is no allowance for one exception, and the page says "because a pin is a request and not a right".
-2. **b**. Admission warns at 80 percent, and exactly 80 percent warns. *a* is ruled out because "Reaching 80 percent warns, and exactly 80 percent warns". *c* is ruled out because a request that stays within budget does not block: "one that brings it exactly to the budget does not". *d* is ruled out because admission takes "Given what a team has spent, its budget and the estimate for one more request", and not earlier months.
-3. **c**. The total is divided by a million and rounded once, so two rows of 0.4 cent are 1 cent. *a* is ruled out because "rounding each row first gains or loses cents". *b* is ruled out because rounding up each row gives 2 and is the loss of precision that "two rows of 0.4 cent are 1 cent together and 0 apart" shows. *d* is ruled out because "The figure shown to a team is a whole number of cents".
+1. **d**. A pin is honoured only when the policy allows it, and otherwise the table decides. *a* is ruled out because "a pin is a request and not a right". *b* is ruled out because the gateway does not punish: "Otherwise it uses the route for the task, and the default for a task the table does not know". *c* is ruled out because there is no allowance for one exception: "The gateway uses the pin only when the policy allows that model".
+2. **b**. The warning edge is inclusive, so a spend of exactly 80 percent warns while the request still runs. *a* is ruled out because staying under the budget is not the only test: "Reaching 80 percent warns, and exactly 80 percent warns". *c* is ruled out because a request that stays within budget does not block, and "the first two steps leave its work running". *d* is ruled out because degrading is a routing step, and admission has three answers only: "the gateway returns `allow`, `warn` or `block`".
+3. **c**. The total is divided by a million and rounded once, so three rows of 0.3 cent are 0.9 cent together and 1 cent shown. *a* is ruled out because "rounding each row first gains or loses cents", as "two rows of 0.4 cent are 1 cent together and 0 apart" shows. *b* is ruled out because nothing is rounded line by line: the total is "divided by a million and rounded once, at the end". *d* is ruled out because "The figure shown to a team is a whole number of cents".
 
 </details>
 
