@@ -104,8 +104,7 @@ course/            the lessons, one markdown file per unit, and corpus.json
 examples/          one project per example, with tests and its recorded exchanges
 exercises/         the authored practices: statement, starter, tests, reference solution
 harness/           the stand-in for the API: replay, script, optional live
-docs/              what the course is and how it is built
-docs/process/      the board and the working notes (not part of the learner release)
+docs/              what the course is, what it covers and what it was checked on
 ```
 
 ## Principles

@@ -135,5 +135,5 @@ evaluation and observability.
 
 ## How a page uses this map
 
-Every page states the exam codes it serves in its header. The coverage check (`tools/check_coverage.py`)
+Every page states the exam codes it serves in its header. The course's coverage check
 fails if a topic above has no page, or a page names a code that is not here.

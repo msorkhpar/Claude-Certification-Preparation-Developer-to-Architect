@@ -156,7 +156,7 @@ An example that exists in several languages is one block with a tab per language
 - Each language's code fence is followed by a `text` fence with that program's real output. The build's
   tests assert that the outputs are the same, or state the difference.
 - `tabs:` lists the languages the example exists in; it follows the `files` map of the example's
-  `example.json`, and `tools/check_examples.py --fill` writes the block from the sources and the recorded outputs.
+  `example.json`, and the build writes the block from the sources and the recorded outputs.
   Where a language is missing (the Agent SDK has no Java or Kotlin edition), the page says in one line what a
   reader of that language does instead.
 - A block that is a library file, not a program, has no output fence.
@@ -181,7 +181,7 @@ only. Material adapted under a licence that permits copying carries its credit l
 A quiz closes a page: a `## Quiz` heading, each question with its four options `a` to `d`, and a folded
 `<details>` element that holds the answer key and the reason for every option. The last page of a module
 closes with a `## Module quiz`. The same questions, keys and explanations are in
-`exercises/<module>/tests/quiz.json`, and `tools/check_quiz.py` checks that the page and the file agree.
+`exercises/<module>/tests/quiz.json`, and the course's quiz check verifies that the page and the file agree.
 
 ### Mock exams
 
@@ -189,12 +189,12 @@ A mock exam is a page whose last section is a `## Mock exam` heading, in the sam
 four options `a` to `d`, then a folded `<details>` key that explains every option. It covers a whole level, so its
 questions are checked against the prose of every page of the level (an explanation's quoted phrase may come from any page of
 Level 1) and against every page and module question, which it must not repeat. Its ids in `quiz.json` are `<page>#x<n>` and
-its scope is `level`. Everything else about a quiz holds: `tools/check_quiz.py` applies the same rules.
+its scope is `level`. Everything else about a quiz holds: the quiz check applies the same rules.
 
 ### Flashcards and the review bank
 
 Two plain JSON files in `exercises/<module>/` carry a level's revision aids; Level 1 has them in
-`exercises/11-exam-readiness-1/`, Level 2 in `exercises/44-exam-readiness-2/` and Level 3 in `exercises/78-exam-readiness-3/`. `tools/check_revision.py` checks both, and `tools/test_check_revision.py` plants defects to
+`exercises/11-exam-readiness-1/`, Level 2 in `exercises/44-exam-readiness-2/` and Level 3 in `exercises/78-exam-readiness-3/`. The course's revision check verifies both, and its own tests plant defects to
 prove the checker catches them.
 
 `flashcards.json`:
