@@ -112,22 +112,22 @@ A short chain of questions covers most scenarios:
    - **d**: An output style that tells Claude to refuse
 
 2. A research task reads dozens of files and only the conclusions matter to the main conversation. Which feature fits?
-   - **a**: A line in CLAUDE.md, which is loaded in full at the launch of each session
-   - **b**: A skill, which adds everything that it reads to the main window as well
-   - **c**: A hook, which runs a script once per session when the work starts
-   - **d**: A subagent, which works in its own window and hands back only a summary
+   - **a**: A dynamic workflow, whose script runs many workers in the background
+   - **b**: A skill, which holds the research steps for Claude to follow
+   - **c**: An output style, which keeps every reply down to the conclusions
+   - **d**: A subagent, which works in its own window and returns a summary
 
-3. A team connects Claude to its database and wants the model to use the tables and queries well. What does the page suggest?
-   - **a**: Only an MCP server, since it provides everything that the work needs
-   - **b**: MCP for access, and a skill for the schema and patterns
-   - **c**: Only a skill, since a skill can run the queries itself
-   - **d**: A plugin, because plugins replace both of them
+3. A team wants Claude to query its database, and to know the table layout and the team's query habits when the work touches data. What should it set up?
+   - **a**: An MCP server for access, with the schema kept in CLAUDE.md
+   - **b**: An MCP server for access, and a skill for schema and patterns
+   - **c**: A skill holding the schema, which also runs the queries itself
+   - **d**: A hook that runs each query, with the schema in a skill
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. The page says "A `PreToolUse` hook that blocks the edit is enforcement." *a* is ruled out because such an instruction "is a request, not a guarantee". *c* is ruled out because with a skill, "Claude interprets the instructions; outcome can vary." *d* is ruled out because "Claude follows both as instructions, so neither is enforced."
-2. **d**. The page says to use a subagent "when you need context isolation or when your context window is getting full". *b* is ruled out because a skill "adds to your main window". *c* is ruled out because a hook is for "when the action must happen the same way every time and doesn't need Claude to think". *a* is ruled out because the page says "Put it in CLAUDE.md if Claude should always know it", and conclusions of one task are not such a rule.
-3. **b**. The page says "These solve different problems and work well together", with MCP for the connection and a skill that "can hold the team's database schema and query patterns". *a* is ruled out because MCP provides "Tools and data access", not knowledge of the schema and patterns. *c* is ruled out because a skill provides "Knowledge, workflows, reference material", and the connection to the external system comes from MCP. *d* is ruled out because "Each extension solves a different problem", and a plugin only packages them.
+2. **d**. The page says to use a subagent "when you need context isolation or when your context window is getting full". *b* is ruled out because a skill "adds to your main window", so the files it reads would land in the main conversation. *c* is ruled out because "an output style sets how Claude responds", and the reading would still fill the main window. *a* is ruled out because a dynamic workflow is for a job that "outgrows a handful of subagents", and one research task does not.
+3. **b**. The page says "These solve different problems and work well together", with MCP for the connection and a skill that "can hold the team's database schema and query patterns". *a* is ruled out because the page says "Put it in a skill if it's reference material Claude needs sometimes", and the schema matters only when the work touches data. *c* is ruled out because a skill provides "Knowledge, workflows, reference material", and the connection to the external system comes from MCP. *d* is ruled out because a hook is for "when the action must happen the same way every time and doesn't need Claude to think", and choosing a query needs judgment.
 
 </details>

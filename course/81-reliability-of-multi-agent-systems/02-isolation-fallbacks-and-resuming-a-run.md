@@ -55,11 +55,11 @@ These are the wrong answers the exam's options for this domain offer, each with 
 
 ## Quiz
 
-1. Scenario: Elm Biotech's plan has five tasks: a, b, c, d and e. Task b breaks for good, d needs b, and c and e need neither. What should the runner report?
+1. Scenario: Elm Biotech's plan has five tasks: a, b, c, d and e. Task a completes first, then b breaks for good; d depends on b, and c and e depend on neither. What should the runner report?
    - **a**: a, c and e done, b failed, d skipped because of b, with each reason stated
-   - **b**: The whole run counts as failed, since one broken part makes the rest untrustworthy for the reader
-   - **c**: Task a done, with the later tasks left unreported until someone has repaired the broken one
-   - **d**: Five tasks done, with d computed from a plausible guess at what b would have returned
+   - **b**: a, c and e done, with b and d both listed as failed, each with its reason given
+   - **c**: a, c, d and e done, with b alone listed as failed and the reason for it stated
+   - **d**: a done and b failed, with c, d and e held back until someone has repaired b
 
 2. Scenario: Rowan Insights' search agent fails, and a cheaper backup agent answers the task. The runner keeps the backup's answer. What should it do with that result?
    - **a**: Write it to the store of finished work, so that a later run does not repeat the same effort
@@ -70,7 +70,7 @@ These are the wrong answers the exam's options for this domain offer, each with 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. Only the task that needed b is affected, and the report lists what is done, what failed and what was skipped. *b* is ruled out because the failure is isolated: "it ends only its own branch". *c* is ruled out because the report names "what is done, what failed and why, and what was skipped because of it", and silence about d hides a gap. *d* is ruled out because a task whose input failed is skipped "with a reason that names the failed one", and is not fed a guess.
+1. **a**. Only the task that needed b is affected, and the report lists what is done, what failed and what was skipped. *b* is ruled out because d did not fail on its own, and the report keeps apart "what failed and why, and what was skipped because of it". *c* is ruled out because d needs b and cannot be done, so the runner marks it skipped "with a reason that names the failed one". *d* is ruled out because c and e need neither, and the runner "carries on with the independent tasks".
 2. **b**. A degraded result is used and flagged, and it is not stored, so a later run can try the primary again. *a* is ruled out because a stored answer makes the task look done: "the weaker answer would become permanent by accident". *c* is ruled out because the fallback "keeps the run moving", and discarding it loses the point of having one. *d* is ruled out because the task is listed as degraded "so that the report and the caller know the answer is weaker than planned".
 
 </details>

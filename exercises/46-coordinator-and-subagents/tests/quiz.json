@@ -24,18 +24,18 @@
       "id": "01-hub-and-spoke-and-what-the-coordinator-owns#q2",
       "page": "01-hub-and-spoke-and-what-the-coordinator-owns.md",
       "scope": "page",
-      "stem": "A team plans a multi-agent design for a feature whose planning, coding and verifying steps all draw on the same evolving sources, with the user steering between steps. Which choice fits best?",
+      "stem": "A team plans a multi-agent design for a feature built in three steps. Each step needs what the step before it found, and the user redirects the work after every step. Which choice fits best?",
       "options": {
-        "a": "Run the three steps as parallel subagents to cut the total waiting time",
+        "a": "Chain three fixed prompts that run end to end without a pause",
         "b": "Give each step to its own subagent",
         "c": "Stay in one conversation throughout",
         "d": "Add a coordinator that merges what the three step-agents produce at the end"
       },
       "key": "c",
       "explanation": {
-        "c": "The steps depend on one shared context and on steering, which a team cannot give.",
+        "c": "Each step builds on the last and the user steers between them, so the work keeps one context and stays open to the user.",
         "b": "Ruled out because the documentation lists this case for the main conversation: \"multiple phases share significant context, such as planning, implementation, and testing\".",
-        "a": "Ruled out because a delegate loses time: a subagent that is not a fork \"starts fresh and may need time to gather context\".",
+        "a": "Ruled out because a fixed chain leaves no room for the user's redirection, and the task \"needs frequent back-and-forth or iterative refinement\".",
         "d": "Ruled out because the dependencies are the problem: \"some domains that require all agents to share the same context or involve many dependencies between agents are not a good fit\"."
       }
     },
@@ -72,7 +72,7 @@
       "key": "d",
       "explanation": {
         "d": "The review names the gaps, only they are sent out again, and the rounds are capped.",
-        "b": "Ruled out because every wave is paid for: \"multi-agent systems require tasks where the value of the task is high enough to pay for the increased performance.\"",
+        "b": "Ruled out because no first wave, however large, can aim at gaps that the review names only afterwards: \"Send out the gaps and nothing else.\"",
         "c": "Ruled out because \"a gap is found by the review and closed by a subagent, never invented by the synthesis.\"",
         "a": "Ruled out because a cap does not stop the repeats: \"the first-round findings are already in hand\"."
       }
@@ -85,7 +85,7 @@
       "options": {
         "a": "The coordinator ran too few rounds of review after the first answers",
         "b": "The context of one subagent leaked into another during the run",
-        "c": "The briefs did not divide the scope or name what each part excludes",
+        "c": "The briefs did not say what ground each one had to leave out",
         "d": "The subagents ran on a smaller model than the coordinator uses"
       },
       "key": "c",
@@ -93,7 +93,7 @@
         "c": "Overlap comes from the brief, because the subagents cannot see each other.",
         "b": "Ruled out because nothing crosses between subagents: \"A subagent does not know the user's original question, the plan, the other subagents\".",
         "a": "Ruled out because review cannot undo duplicate work already paid for, and the page puts the cause in the briefs: \"Without detailed task descriptions, agents duplicate work, leave gaps, or fail to find necessary information.\"",
-        "d": "Ruled out because a larger model cannot see its siblings either: \"Overlap is avoided by exclusion written into the brief\"."
+        "d": "Ruled out because no model of any size sees the other briefs, and the page warns against \"hoping that the model will see what its siblings are doing, because it cannot\"."
       }
     },
     {
@@ -110,28 +110,28 @@
       "key": "b",
       "explanation": {
         "b": "The effort should follow the question: \"Simple fact-finding requires just 1 agent with 3-10 tool calls\".",
-        "a": "Ruled out because the cost of the team comes from running it: \"agents typically use about 4× more tokens than chat interactions, and multi-agent systems use about 15× more tokens than chats\".",
+        "a": "Ruled out because a lower limit still starts the whole team for the plain fact: \"A fixed team runs on every query and costs most on the simplest\".",
         "c": "Ruled out because sharing does not shrink the team's work and undoes the isolation: \"it removes the isolation that keeps the context small\".",
-        "d": "Ruled out because a long report does not make a team worth its cost: \"the value of the task is high enough to pay for the increased performance\"."
+        "d": "Ruled out because the length of a report is not the difficulty of the question, and \"the coordinator chooses which subagents to invoke from the complexity of the query\"."
       }
     },
     {
       "id": "02-review-iteration-failures-and-the-practice#m3",
       "page": "02-review-iteration-failures-and-the-practice.md",
       "scope": "module",
-      "stem": "Scenario S3, a multi-agent research system. A coordinator splits each research question across search, analysis and synthesis subagents and returns a cited report. Specialist agents hand forty-page drafts up through the coordinator, and cost rises while details get lost in the summaries. Which architecture change fits best?",
+      "stem": "Scenario S3, a multi-agent research system. A coordinator splits each research question across search, analysis and synthesis subagents and returns a cited report. Specialist agents hand forty-page drafts up through the coordinator, and the cost of each run climbs with every handoff. Which architecture change fits best?",
       "options": {
-        "a": "Cap the turns of each specialist",
-        "b": "Ask the coordinator to condense every draft before the next specialist starts work",
+        "a": "Ask each specialist to hand up a much shorter draft instead",
+        "b": "Have the coordinator condense each draft before relaying it",
         "c": "Hand each specialist the coordinator's whole conversation",
-        "d": "Keep each output in an outside store and forward only a short pointer"
+        "d": "Keep each output in an outside store and pass on only a pointer"
       },
       "key": "d",
       "explanation": {
         "d": "A reference keeps the output out of the lead's window and out of its summaries.",
-        "b": "Ruled out because condensing loses detail: \"This prevents information loss during multi-stage processing\".",
+        "b": "Ruled out because a lead that summarizes what it relays \"loses detail at every summary\".",
         "c": "Ruled out because copying through conversation history is the cost: \"reduces token overhead from copying large outputs through conversation history\".",
-        "a": "Ruled out because a cap on turns does not change where the outputs travel, and the lead still reads each one: \"Rather than requiring subagents to communicate everything through the lead agent\"."
+        "a": "Ruled out because a shorter draft still travels the same route and the lead still reads each one: \"Rather than requiring subagents to communicate everything through the lead agent\"."
       }
     }
   ]

@@ -709,17 +709,17 @@ The practice is in [`exercises/57-memory-files-and-rules`](../../exercises/57-me
    - **c**: An import of the conventions from the project root file
    - **d**: A section for each project in the personal memory file
 
-2. A rule meant for infrastructure code loads in every session instead. What is the most likely cause?
-   - **a**: Its glob begins with `**/`, which reaches into every folder
-   - **b**: Every rule loads at launch whatever its `paths` entry says
-   - **c**: The YAML in its frontmatter does not parse as written
+2. A rule meant for infrastructure code loads in every session, even in sessions that open no Terraform file. What is the most likely cause?
+   - **a**: Its glob `**/*.tf` opens with a part that spans every folder
+   - **b**: Any read of any file sets off every rule that has `paths`
+   - **c**: Its `paths` line has a quotation mark that is never closed
    - **d**: The rule's file name does not match the folder it governs
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. One glob follows the type across folders, and the rule loads when a matching file is read or edited. *b* is ruled out because the guide's reason for the glob is "test files spread throughout a codebase", and a copy in each folder would have to be kept in step. *c* is ruled out because an import "moves text to another file and loads it at launch", so the conventions would reach every task. *d* is ruled out because personal rules "apply to every project on your machine", so they neither scope to test files nor reach the team.
-2. **c**. When the frontmatter does not parse, the rule is treated as unscoped. *a* is ruled out because a leading `**/` only lets the glob match at any depth, while "matching is by file, and the trigger is a Read, Write or Edit of a matching file". *b* is ruled out because a rule with a `paths` list that parses is scoped: "it loads only when Claude works with a file that matches". *d* is ruled out because the file name plays no part, since `paths` "is the only field Claude Code reads in a rule".
+2. **c**. An unclosed quotation mark stops the YAML from parsing, and then "Claude Code ignores the frontmatter and loads the rule as if it had no `paths`", so it is in every session. *a* is ruled out because a leading `**/` only lets the glob match at any depth and keeps the extension, as "`**/*.ts` matches TypeScript files in any directory", so the rule still waits for a Terraform file. *b* is ruled out because a read of an unrelated file does not count, since "matching is by file, and the trigger is a Read, Write or Edit of a matching file". *d* is ruled out because the file name plays no part, since `paths` "is the only field Claude Code reads in a rule".
 
 </details>
 
@@ -730,7 +730,7 @@ This quiz covers both pages of the module.
 1. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A project holds `AGENTS.md` for other tools and nothing named `CLAUDE.md`, and Claude follows it. An engineer adds `CLAUDE.local.md` with a sandbox address, and Claude stops following `AGENTS.md`. What explains it?
    - **a**: The sandbox address contradicts a rule that the team shares
    - **b**: Local notes load first and replace everything after them
-   - **c**: A local file counts as a memory file that rules out `AGENTS.md`
+   - **c**: The local file's presence turns off the earlier fallback
    - **d**: Git-ignored files are read in place of the committed ones
 
 2. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A developer moves the sections of a four-hundred-line `CLAUDE.md` into five files in the repository and lists each one in the root file as an `@` path formatted as inline code. After a restart, `/context` shows the root file and none of the five. What explains it?
@@ -741,7 +741,7 @@ This quiz covers both pages of the module.
 
 3. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A new rule should apply to every `.ts` and `.tsx` source at any depth under `src/`, and to nothing outside that folder or of another type. Which `paths` entry does it?
    - **a**: `src/*.{ts,tsx}`
-   - **b**: `src/**/*.tsx`
+   - **b**: `src/**/*.{ts,tsx,js}`
    - **c**: `**/*.{ts,tsx}`
    - **d**: `src/**/*.{ts,tsx}`
 
@@ -750,7 +750,7 @@ This quiz covers both pages of the module.
 
 1. **c**. The default is that AGENTS.md is read only when no CLAUDE.md file exists in the working directory or above, and the local file counts as one, so the fallback ends. *a* is ruled out because a conflict matters only for the same behaviour, where "Claude may pick one arbitrarily", and a sandbox address shares no behaviour with the other file, while its presence alone counts: "A `CLAUDE.md`, a `.claude/CLAUDE.md` or a `CLAUDE.local.md` in the working directory or any directory above it counts". *b* is ruled out because "All discovered files are concatenated into context rather than overriding each other", so no file replaces the ones after it. *d* is ruled out because a git-ignored file is read beside the committed one and not instead of it: "In each folder the local file comes after the shared one".
 2. **a**. A path between backticks is a mention and not an import, so the five files were never pulled in. *b* is ruled out because imported files "are expanded and loaded into context at launch alongside the CLAUDE.md that references them", whatever Claude reads later. *c* is ruled out because the limit applies to chains, since imports can import others "with a maximum depth of four hops", and each of the five is one hop from the root. *d* is ruled out because the approval dialog is for "Imports that point outside the project", and these files sit inside the repository.
-3. **d**. The folder prefix keeps the rule inside `src/`, the `**/` reaches any depth below it, and the brace group covers both extensions. *a* is ruled out because a single `*` stays in one folder, as "`*.md` matches Markdown files in the project root", so only files directly in `src/` would match. *b* is ruled out because it names one extension, while covering both takes a brace group, as `src/**/*.{ts,tsx}` "matches a set, with brace groups expanded". *c* is ruled out because "`**/*.ts` matches TypeScript files in any directory", so sources outside `src/` would match too.
+3. **d**. The folder prefix keeps the rule inside `src/`, the `**/` reaches any depth below it, and the brace group covers both extensions. *a* is ruled out because a single `*` stays in one folder, as "`*.md` matches Markdown files in the project root", so only files directly in `src/` would match. *b* is ruled out because the pattern "matches a set, with brace groups expanded", so the extra `js` entry lets JavaScript files inside `src/` match too. *c* is ruled out because "`**/*.ts` matches TypeScript files in any directory", so sources outside `src/` would match too.
 
 </details>
 

@@ -46,16 +46,16 @@
       "stem": "Scenario: Osprey Support needs ticket tagging answered within 800 ms. Candidates A and B are capable enough and fast enough, and B costs less per output token. Candidate C costs less still, but it takes 1,400 ms. Which candidate should the plan pick?",
       "options": {
         "a": "C, since the lowest price decides the matter once capability has been established",
-        "b": "B, since it is the cheaper of the two that meet the time limit",
-        "c": "A, since the dearer option is the safer one for a first release to customers",
-        "d": "Whichever the team used last, because consistency across workloads outweighs the saving"
+        "b": "B, since C drops out on latency and B is the cheaper of the two models that remain",
+        "c": "A, since the dearer of the two capable models is the safer pick for live tagging",
+        "d": "A or B alike, since price cannot make a model wrong once both are within the limit"
       },
       "key": "b",
       "explanation": {
         "b": "Latency rules C out, and price ranks the models that remain.",
         "a": "Ruled out because C fails the limit, and price \"can only rank models that are already right\".",
         "c": "Ruled out because the rule is to choose \"among the models whose tier is at least the workload's and whose latency is within the limit\" and take the cheapest, with no bonus for the dearer one.",
-        "d": "Ruled out because the choice is \"a design choice per workload\", not one habit applied to all."
+        "d": "Ruled out because price still ranks the two that remain, and the rule is to \"take the cheapest, and break a tie by name so that the choice is repeatable\"."
       }
     },
     {
@@ -84,16 +84,16 @@
       "stem": "Scenario: Plover Insurance's assembler receives a dynamic module with the placeholder {claim_id}, and the caller supplies no value for it. What should the assembler do?",
       "options": {
         "a": "Send the request, leaving the placeholder in its text",
-        "b": "Refuse to build the request, naming the absent item",
+        "b": "Stop with an error, so that no request goes out to the model",
         "c": "Send it, replacing the placeholder with an empty string",
-        "d": "Fill the gap with a guess, drawn from the caller's previous call"
+        "d": "Fill the gap with a default value that the module's author set"
       },
       "key": "b",
       "explanation": {
-        "b": "A missing value is a defect in the caller, so the assembler refuses and names it.",
+        "b": "A missing value is a defect in the caller, so the assembler stops with an error and sends nothing.",
         "a": "Ruled out because \"A request that goes out with `{customer}` in its text\" is sent with a gap that nobody checks.",
         "c": "Ruled out because a blank is the same silent defect, and \"A missing variable is an error\".",
-        "d": "Ruled out because a guess invents data nobody supplied, and a request with a gap \"is a defect that no model will report\"."
+        "d": "Ruled out because a default hides the missing value from everyone, and a request with a gap \"is a defect that no model will report\"."
       }
     },
     {
@@ -121,17 +121,17 @@
       "scope": "module",
       "stem": "Scenario: Avocet Travel builds a request from four pieces: the house rules, the fare policy, the traveller's current question and the traveller's earlier chat. Which arrangement fits best?",
       "options": {
-        "a": "All four as static modules, so that they are cached together",
-        "b": "Standing guidance and past messages as static modules, the new query as a dynamic one",
-        "c": "Standing guidance as static modules, the new query and past messages as dynamic ones",
-        "d": "All four as dynamic modules, so that any piece is edited freely"
+        "a": "The conduct guide, pricing terms, latest query and prior messages all as static modules",
+        "b": "The conduct guide and latest query as static modules, the pricing terms and prior messages as dynamic ones",
+        "c": "The conduct guide and pricing terms as static modules, the latest query and prior messages as dynamic ones",
+        "d": "Only the pricing terms as a static module, the conduct guide, latest query and prior messages as dynamic ones"
       },
       "key": "c",
       "explanation": {
         "c": "The rules and the policy are the same for every traveller, so they go first as static modules, and the question and the chat follow as dynamic ones, so that the stable prefix can be cached.",
-        "a": "Ruled out because \"A static module whose text holds a `{variable}` is refused\", and the question changes on every request.",
-        "b": "Ruled out because the earlier chat belongs to one traveller, and a dynamic module is one that \"changes with the customer, the question or the history\".",
-        "d": "Ruled out because the cache works on \"the request from its start up to a marked breakpoint\", so with no static modules there is nothing to cache."
+        "a": "Ruled out because \"Two requests share a cache entry only when everything up to the breakpoint is identical\", and the question and the chat differ on every request, so no entry would ever match.",
+        "b": "Ruled out because the question changes on every request, and a dynamic module is one that \"changes with the customer, the question or the history\".",
+        "d": "Ruled out because the house rules are the same for every traveller, and a static module is one that is \"the same on every request\"."
       }
     }
   ]

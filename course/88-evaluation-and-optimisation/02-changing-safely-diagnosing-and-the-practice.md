@@ -692,22 +692,22 @@ This quiz covers both pages of the module.
    - **d**: Add examples of confident replies to the prompt
 
 2. A team's check for its research agent demands exactly three searches in a fixed order, and it fails runs that reach the right answer by another route. What should the check judge instead?
-   - **a**: Whether its steps match those of a past run that reached the right answer
-   - **b**: Whether its report is correct, then whether its tool use was sensible
-   - **c**: How few tool calls it made, since an efficient agent is a better one
-   - **d**: Only the final report, since how the agent got there does not matter
+   - **a**: Whether its report matches a stored reference report word for word
+   - **b**: Whether the report is accurate, then whether the tool use was sound
+   - **c**: How few tool calls it made, and then whether its report is accurate
+   - **d**: Whether the sources it cites sit near the top of the search results
 
 3. A team delays building graded examples until it can afford several hundred of them, and early prompt changes are judged by feel. Which step fits best?
    - **a**: Test on the examples written in the prompt
-   - **b**: Wait until the full set has been built
+   - **b**: Begin with the cases that are simplest to grade
    - **c**: Have developers invent a few hundred cases
-   - **d**: Start with twenty or so queries from logs
+   - **d**: Pull a small sample of real queries from logs
 
 <details>
 <summary>Answer key</summary>
 
 1. **c**. The evidence was never retrieved, so the index and the splitting of documents are the cheapest place to look. *b* is ruled out because "A larger model does not know a document it was never shown". *a* is ruled out because "Sampling settings change how an answer is worded and not what evidence it was given". *d* is ruled out because "Examples teach a format; they do not supply a missing fact".
-2. **b**. "Even with identical starting points, agents might take completely different valid paths to reach their goal", so the check judges the report first and the tool use after it. *a* is ruled out because "an eval that checks for a prescribed sequence of steps fails correct runs". *c* is ruled out because tool efficiency is only one of "five criteria (factual accuracy, citation accuracy, completeness, source quality and tool efficiency)". *d* is ruled out because once the answer is right, the next step is to "check that the process was reasonable".
-3. **d**. Early changes are large, so a small set of real queries shows them now, and it grows later. *b* is ruled out because "We often hear that AI developer teams delay creating evals because they believe that only large evals with hundreds of test cases are useful", which the team found untrue. *c* is ruled out because the set "is built from the traffic and not from the developers' imagination". *a* is ruled out because the set should "mirror your real-world task distribution", and "The examples written into a prompt are not that distribution".
+2. **b**. "Even with identical starting points, agents might take completely different valid paths to reach their goal", so the check judges the report first and the tool use after it. *a* is ruled out because "Exact match suits answers with one correct form and rejects a correct report that is worded differently". *c* is ruled out because tool efficiency is only one of "five criteria (factual accuracy, citation accuracy, completeness, source quality and tool efficiency)", and the order is "Check that the result is right, then check that the process was reasonable". *d* is ruled out because early agents "consistently chose SEO-optimized content farms over authoritative but less highly-ranked sources", so a high rank does not make a good source.
+3. **d**. Early changes are large, so a small sample of real usage shows them now, and "Waiting for hundreds of cases delays the feedback that matters most early". *b* is ruled out because the set keeps the proportions of the traffic, and the page says to "Add the awkward cases on purpose". *c* is ruled out because the set "is built from the traffic and not from the developers' imagination". *a* is ruled out because the set should "mirror your real-world task distribution", and "The examples written into a prompt are not that distribution".
 
 </details>

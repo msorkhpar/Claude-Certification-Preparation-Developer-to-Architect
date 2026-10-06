@@ -595,7 +595,7 @@ The practice is in [`exercises/93-professional-capstone`](../../exercises/93-pro
 
 1. Scenario: A review of a pilot finds one medium finding, a missing owner, and two low findings, a small evaluation set and an unstated accuracy. There is no high finding. What does the review conclude?
    - **a**: Approve it, since no finding is serious enough to stop the pilot
-   - **b**: Revise it, since no one is accountable for the service yet
+   - **b**: Revise it, since its worst flaw weakens but does not block it
    - **c**: Reject it, since three findings together are too many to approve
    - **d**: Approve it, since two of its three findings are only low ones
 
@@ -623,7 +623,7 @@ This quiz covers both pages of the module.
    - **c**: Two medium items under P1, so it goes back for revision
    - **d**: Two low items under P1, so it is approved
 
-2. Scenario: A review is run on two proposals that differ in one number: the first has an evaluation set of 20 cases and the second has 19. What differs in the outcome?
+2. Scenario: A review is run on two proposals that differ in one number: the first has an evaluation set of 20 cases and the second has 19. What does the review record for each?
    - **a**: Both are flagged, and the thinner suite more severely
    - **b**: Only the thinner suite is flagged, with a low item under P4
    - **c**: Neither is flagged, since one case short is within the tolerance
@@ -639,7 +639,7 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **c**. The path is known, so the team is unneeded, and a value of ten is below fifteen, which makes two medium rules fire. *a* is ruled out because the first page's cost rule gives a second item: "A team of agents would cost about 15 times a chat". *b* is ruled out because "reject if any finding is high", and neither rule is high. *d* is ruled out because the rule table lists "an agent or a team is used where the path is known" as medium and not low.
-2. **b**. The edge is met at 20 and missed at 19, and the rule is low. *a* is ruled out because the table lists the rule as low for "fewer than 20 evaluation cases", whatever the shortfall. *c* is ruled out because "One step past any of them is a finding". *d* is ruled out because "an evaluation set of exactly 20 cases passes", so the fuller suite has no finding.
+2. **b**. The edge is met at 20 and missed at 19, and the rule is low. *a* is ruled out because "an evaluation set of exactly 20 cases passes", so the fuller suite is not flagged, and the table lists the rule as low for "fewer than 20 evaluation cases", whatever the shortfall. *c* is ruled out because "One step past any of them is a finding". *d* is ruled out because "an evaluation set of exactly 20 cases passes", so the fuller suite has no finding.
 3. **d**. Identifiers reaching the model is high and the audit log keeping content is medium, both in P5. *a* is ruled out because the table lists "the audit log stores content" as medium, which asks for revision. *b* is ruled out because the table lists "identifiers go to the model" as high, which blocks. *c* is ruled out because the low bullet reads "It is recorded and does not hold the design back", and neither flaw is low.
 
 </details>

@@ -123,8 +123,8 @@ These are the wrong answers that the exam's options for this task statement offe
 4. A team commits a git-push guard to the project's `.claude/settings.json`. Its batch service runs the SDK with `setting_sources=[]` and a callback hook for refunds. A push attempt from the service is not blocked. Why?
    - **a**: The callback hook overrides every command hook that the settings define
    - **b**: Command hooks are meant for interactive sessions of Claude Code only
-   - **c**: The guard sits in the project file, while a service reads the user's file instead
-   - **d**: Nothing reads that checked-in file here, so its shell commands are skipped
+   - **c**: The guard is in the project file, but the service reads the user file
+   - **d**: Nothing reads the shared checked-in settings file in that deployment
 
 <details>
 <summary>Answer key</summary>
@@ -141,8 +141,8 @@ This quiz covers both pages of the module.
 1. A team checks the refund limit in a PostToolUse hook and, when a refund is above the limit, the hook exits with code 2. Large refunds still happen. What is the cause, and the fix?
    - **a**: Exit 2 does not block in the SDK, so the hook must return a denial
    - **b**: Post hooks may not fire at all, so the limit needs a much longer timeout
-   - **c**: The money has already moved by then, so the control belongs ahead of the call
-   - **d**: The hook must return replacement output, so the model never sees the refund
+   - **c**: The money has moved by then, so the control belongs ahead of the call
+   - **d**: The hook gave no replacement result, so it must return a corrected output
 
 2. On Claude Code v2.1.210 or later, a PreToolUse gate in the SDK waits on a slow vendor lookup and exceeds its time limit. What does the model receive, and is the action carried out?
    - **a**: A normal tool result, since a silent hook counts as raising no objection
@@ -154,13 +154,13 @@ This quiz covers both pages of the module.
    - **a**: Register the first one earlier so that it always runs before the other
    - **b**: Add a delay to the second one so that the first has time to finish
    - **c**: Return the corrected input from both, so that the last one applies
-   - **d**: Merge both steps into one function, as handlers finish in any order
+   - **d**: Merge both steps into one function, so that the order no longer matters
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. A post hook runs after the effect. *a* is ruled out because exit 2 reports back and cannot stop what has run: for `PostToolUse` it "Shows stderr to Claude; the tool already ran". *b* is ruled out because the turn-limit case is a different one: "Hooks may not fire when the agent hits the `max_turns` limit because the session ends before hooks can execute". *d* is ruled out because changing what the model reads does not undo the effect: "The refund exists whatever the model is shown."
+1. **c**. A post hook runs after the effect. *a* is ruled out because exit 2 reports back and cannot stop what has run: for `PostToolUse` it "Shows stderr to Claude; the tool already ran". *b* is ruled out because the turn-limit case is a different one: "Hooks may not fire when the agent hits the `max_turns` limit because the session ends before hooks can execute". *d* is ruled out because a corrected output changes only what the model reads, not the effect: "The refund exists whatever the model is shown."
 2. **b**. A timed-out gate is the safe case: nothing runs and the model is told. *a* is ruled out because the tool is not run: "Claude Code doesn't run the tool call". *c* is ruled out because the model gets a result and the turn goes on: "Claude receives a tool result stating the hook didn't respond before its timeout". *d* is ruled out because a callback past its timeout is stopped: "Claude Code cancels it and discards its output".
-3. **d**. Callbacks are not a pipeline. *a* is ruled out because the order of registration does not set the order of completion: "all matching hooks run in parallel". *b* is ruled out because a delay still relies on an order, and the advice is to act "rather than relying on another hook having run first". *c* is ruled out because there is no fixed last one: "completion order is non-deterministic".
+3. **d**. Callbacks are not a pipeline. *a* is ruled out because the order of registration does not set the order of completion: "all matching hooks run in parallel". *b* is ruled out because a delay still chains the two callbacks, and "Two hooks cannot be a pipeline." *c* is ruled out because there is no fixed last one: "completion order is non-deterministic".
 
 </details>

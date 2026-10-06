@@ -90,8 +90,8 @@ These are the wrong answers that the exam's options for this task statement offe
    - **d**: It proceeds, since the working directory counts as trusted
 
 2. A team's audit hook has the matcher `Grep` and logs nothing in a default Linux session, though the agent searches constantly. What explains it?
-   - **a**: Hook matchers apply only to tools that come from MCP servers
-   - **b**: Hooks cannot observe the search tools on any platform
+   - **a**: Hooks see searches under the Read family, so the matcher must say Read
+   - **b**: Hooks fire only for tools that change files, so searches go unlogged
    - **c**: Its lookups run through the shell tool, so only a Bash entry sees them
    - **d**: A matcher takes the parenthesised rule form, so a bare tool name never fires
 
@@ -99,7 +99,7 @@ These are the wrong answers that the exam's options for this task statement offe
 <summary>Answer key</summary>
 
 1. **a**. A read denial covers the tools that change content at the same path. *b* is ruled out because "A `Read(...)` deny rule also blocks the Edit and Write tools on the same path, including creating a new file there". *c* is ruled out because a deny is checked before anything else: "Deny is checked before ask and allow". *d* is ruled out because "If a deny rule matches, the tool is blocked, even in `bypassPermissions` mode."
-2. **c**. On macOS, Linux and WSL the default set has no Grep, and its job is done through the shell tool. *a* is ruled out because the tool names are "the exact strings you use in permission rules, subagent tool lists, and hook matchers". *b* is ruled out because "A matcher of `Grep` sees Grep calls" whenever the session has the tool; the silence comes from a default set that has none. *d* is ruled out because "Hook `matcher` fields use bare tool names, not the parenthesized rule format."
+2. **c**. On macOS, Linux and WSL the default set has no Grep, and its job is done through the shell tool. *a* is ruled out because the family name belongs to permission rules, while the tool names are "the exact strings you use in permission rules, subagent tool lists, and hook matchers", so a Grep call is matched as `Grep`. *b* is ruled out because a search tool is matched like any other: "A matcher of `Grep` sees Grep calls" whenever the session has the tool, and the silence comes from a default set that has none. *d* is ruled out because "Hook `matcher` fields use bare tool names, not the parenthesized rule format."
 
 </details>
 
@@ -107,11 +107,11 @@ These are the wrong answers that the exam's options for this task statement offe
 
 This quiz covers both pages of the module.
 
-1. Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools. The team wants the folder `secrets/` closed to `Read`, `Grep`, `Glob`, `Edit` and `Write` alike. Which single entry in the settings file does it?
-   - **a**: `Edit(secrets/**)` under deny
-   - **b**: `Grep(secrets/**)` under deny
-   - **c**: `Bash(cat secrets/*)` under deny
-   - **d**: `Read(secrets/**)` under deny
+1. Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools. It keeps its findings in `notes/`, where it must create files, change them and read them back, all without a prompt. Which single entry in the settings file does it?
+   - **a**: `Write(notes/**)` under allow
+   - **b**: `Read(notes/**)` under allow
+   - **c**: `Bash(tee notes/*)` under allow
+   - **d**: `Edit(notes/**)` under allow
 
 2. Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools. Asked for the TypeScript sources under `services/billing/`, the agent lists `**/*.ts` across a very large repository and receives a result carrying a truncation flag. What should it do next?
    - **a**: Rerun Glob with `services/billing/**/*.ts` as the pattern
@@ -128,7 +128,7 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **d**. A read denial stops reading and searching, and writes at the same path. *a* is ruled out because "`Edit(path)` rules govern all built-in tools that write files", which leaves reading and searching open. *b* is ruled out because "A rule is written under the name of its family" and the example prints "Grep as Read", so the entry that applies is a `Read` rule, and one for Grep alone leaves Read and the writing tools open. *c* is ruled out because a scoped Bash rule "leaves `Bash` available and denies calls that match it", and it applies to no file tool, so Read, Grep, Glob, Edit and Write stay open.
+1. **d**. One allow under the writing family approves both Edit and Write in the folder, and "An `Edit(...)` allow rule also grants read access to the same path", so reading the notes back needs no second entry. *a* is ruled out because "a `Write(path)` rule is never matched by the file permission checks", so creating a note still prompts. *b* is ruled out because "`Edit(path)` rules govern all built-in tools that write files", so a `Read` allow leaves every create and change to prompt. *c* is ruled out because "Bash rules are matched as written" and reach only Bash calls, so the Edit and Write calls that make the notes still prompt.
 2. **a**. A capped result is a window, and a pattern scoped to the folder in question brings the files that matter into view. *b* is ruled out because Read "Reads files, not directories", so a folder cannot be listed with it. *c* is ruled out because "A Glob result is a window, not a census", so the returned files are not the complete set. *d* is ruled out because "Grep finds lines inside files, and Glob finds the files themselves", so a content search is the wrong tool for finding files.
 3. **c**. The cause is the context filling with files that do not matter, and the remedy is to scope the reading. *a* is ruled out because every matching line across the repository floods the context, and the page's order is "asking for file paths first": "Start with paths when you only need to know where to look". *b* is ruled out because more turns make the run longer and not better: "Claude's context window fills up fast, and performance degrades as it fills." *d* is ruled out because the code that handles authentication lives in files with other names: "Do not use filename search to find code references inside files."
 

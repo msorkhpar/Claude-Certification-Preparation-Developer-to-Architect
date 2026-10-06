@@ -119,19 +119,19 @@
       "id": "02-context-parallel-subagents-and-the-practice#m3",
       "page": "02-context-parallel-subagents-and-the-practice.md",
       "scope": "module",
-      "stem": "Six delegates run side by side, and each asks for approval before reading files, which floods the operator. Which design fits best?",
+      "stem": "Six delegates run side by side, and each must inspect files to do its job. Each asks for approval before opening a file, which floods the operator. Which design fits best?",
       "options": {
         "a": "Take the Read tool out of the definitions of all six delegates",
         "b": "Set bypassPermissions in each agent definition of the six delegates",
-        "c": "Run the six one after another instead of side by side",
-        "d": "Add an allow rule on the parent that every subagent inherits"
+        "c": "Run the parent session in bypassPermissions for this job",
+        "d": "Add an allow rule for reads on the parent session"
       },
       "key": "d",
       "explanation": {
         "d": "Permission rules set on the parent reach every subagent, so one allow rule answers all six requests: subagents \"inherit from the parent conversation\".",
         "b": "Ruled out because a definition cannot set bypass: \"A subagent runs in `bypassPermissions` mode only when the parent session itself does.\"",
-        "c": "Ruled out because sequencing independent work costs time: \"independent subtasks finish in the time of the slowest one rather than the sum of all of them\".",
-        "a": "Ruled out because a subagent without the tool cannot read: \"A tool you leave out isn't in the subagent's session at all: Claude works without it\"."
+        "c": "Ruled out because it lifts every check for every delegate, not only the read prompts: \"inheriting `bypassPermissions` grants them full, autonomous system access\".",
+        "a": "Ruled out because the delegates need the files, and a subagent without the tool cannot read them: \"A tool you leave out isn't in the subagent's session at all: Claude works without it\"."
       }
     }
   ]

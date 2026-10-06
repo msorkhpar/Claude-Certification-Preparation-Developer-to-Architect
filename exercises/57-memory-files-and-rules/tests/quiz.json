@@ -7,10 +7,10 @@
       "scope": "page",
       "stem": "An engineer wants a reminder about a private test server to guide Claude in one repository on their own machine, and never to reach teammates. Where does it go?",
       "options": {
-        "a": "The committed instruction file, under a heading for personal items",
+        "a": "The committed instruction file under a heading for personal items",
         "b": "A git-ignored local note beside the root instruction file",
-        "c": "The personal file in the home folder, applying to every project",
-        "d": "The organisation policy file, which only that engineer edits"
+        "c": "The personal file in the home folder for every project",
+        "d": "The organisation policy file that only that engineer edits"
       },
       "key": "b",
       "explanation": {
@@ -62,18 +62,18 @@
       "id": "02-path-scoped-rules-size-and-the-practice#q2",
       "page": "02-path-scoped-rules-size-and-the-practice.md",
       "scope": "page",
-      "stem": "A rule meant for infrastructure code loads in every session instead. What is the most likely cause?",
+      "stem": "A rule meant for infrastructure code loads in every session, even in sessions that open no Terraform file. What is the most likely cause?",
       "options": {
-        "a": "Its glob begins with `**/`, which reaches into every folder",
-        "b": "Every rule loads at launch whatever its `paths` entry says",
-        "c": "The YAML in its frontmatter does not parse as written",
+        "a": "Its glob `**/*.tf` opens with a part that spans every folder",
+        "b": "Any read of any file sets off every rule that has `paths`",
+        "c": "Its `paths` line has a quotation mark that is never closed",
         "d": "The rule's file name does not match the folder it governs"
       },
       "key": "c",
       "explanation": {
-        "c": "When the frontmatter does not parse, the rule is treated as unscoped.",
-        "a": "Ruled out because a leading `**/` only lets the glob match at any depth, while \"matching is by file, and the trigger is a Read, Write or Edit of a matching file\".",
-        "b": "Ruled out because a rule with a `paths` list that parses is scoped: \"it loads only when Claude works with a file that matches\".",
+        "c": "An unclosed quotation mark stops the YAML from parsing, and then \"Claude Code ignores the frontmatter and loads the rule as if it had no `paths`\", so it is in every session.",
+        "a": "Ruled out because a leading `**/` only lets the glob match at any depth and keeps the extension, as \"`**/*.ts` matches TypeScript files in any directory\", so the rule still waits for a Terraform file.",
+        "b": "Ruled out because a read of an unrelated file does not count, since \"matching is by file, and the trigger is a Read, Write or Edit of a matching file\".",
         "d": "Ruled out because the file name plays no part, since `paths` \"is the only field Claude Code reads in a rule\"."
       }
     },
@@ -85,7 +85,7 @@
       "options": {
         "a": "The sandbox address contradicts a rule that the team shares",
         "b": "Local notes load first and replace everything after them",
-        "c": "A local file counts as a memory file that rules out `AGENTS.md`",
+        "c": "The local file's presence turns off the earlier fallback",
         "d": "Git-ignored files are read in place of the committed ones"
       },
       "key": "c",
@@ -122,7 +122,7 @@
       "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A new rule should apply to every `.ts` and `.tsx` source at any depth under `src/`, and to nothing outside that folder or of another type. Which `paths` entry does it?",
       "options": {
         "a": "`src/*.{ts,tsx}`",
-        "b": "`src/**/*.tsx`",
+        "b": "`src/**/*.{ts,tsx,js}`",
         "c": "`**/*.{ts,tsx}`",
         "d": "`src/**/*.{ts,tsx}`"
       },
@@ -130,7 +130,7 @@
       "explanation": {
         "d": "The folder prefix keeps the rule inside `src/`, the `**/` reaches any depth below it, and the brace group covers both extensions.",
         "a": "Ruled out because a single `*` stays in one folder, as \"`*.md` matches Markdown files in the project root\", so only files directly in `src/` would match.",
-        "b": "Ruled out because it names one extension, while covering both takes a brace group, as `src/**/*.{ts,tsx}` \"matches a set, with brace groups expanded\".",
+        "b": "Ruled out because the pattern \"matches a set, with brace groups expanded\", so the extra `js` entry lets JavaScript files inside `src/` match too.",
         "c": "Ruled out because \"`**/*.ts` matches TypeScript files in any directory\", so sources outside `src/` would match too."
       }
     }

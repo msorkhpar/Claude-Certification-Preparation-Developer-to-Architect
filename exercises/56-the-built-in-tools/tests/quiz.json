@@ -24,7 +24,7 @@
       "id": "01-what-each-tool-is-for-and-how-edit-fails#q2",
       "page": "01-what-each-tool-is-for-and-how-edit-fails.md",
       "scope": "page",
-      "stem": "A `routes.yaml` holds ten copies of the same block, told apart only by where each one sits. An edit to the third copy is refused because the text to replace appears ten times, and every snippet around it also appears ten times. What should the agent do?",
+      "stem": "A `routes.yaml` holds ten copies of the same block, told apart only by where each one sits. An edit to the third copy is refused because the text to replace appears ten times. The agent retried with more surrounding lines, and that wider snippet also appears ten times. What should the agent do?",
       "options": {
         "a": "Read it and write the whole thing again with the one alteration",
         "b": "Retry with `replace_all` set, then repair the nine others by hand",
@@ -35,8 +35,8 @@
       "explanation": {
         "a": "The guide keys Read plus Write as the fallback for a non-unique Edit, and here no unique anchor exists. The product's documented remedies are a longer unique string or `replace_all`; Read plus Write is the guide's route when neither applies, and it is where this case lands.",
         "b": "Ruled out because \"`replace_all` changes every occurrence, which is right for a rename and wrong when only one of three similar lines should change.\"",
-        "c": "Ruled out because the page names this very case as the one for the fallback: \"for example when a file is made of repeated blocks that differ only by position\".",
-        "d": "Ruled out because \"Grep finds lines inside files\" and does not change them, so the retried edit would be refused again."
+        "c": "Ruled out because the wider snippet already failed, as every stretch of text around the third copy appears ten times, and that is the case the page keeps for the fallback: \"Use it only when no unique text exists\".",
+        "d": "Ruled out because finding the block leaves the text to replace as it was, and \"`old_string` must appear exactly once\", so the unchanged retry meets the same refusal."
       }
     },
     {
@@ -64,16 +64,16 @@
       "scope": "page",
       "stem": "A team's audit hook has the matcher `Grep` and logs nothing in a default Linux session, though the agent searches constantly. What explains it?",
       "options": {
-        "a": "Hook matchers apply only to tools that come from MCP servers",
-        "b": "Hooks cannot observe the search tools on any platform",
+        "a": "Hooks see searches under the Read family, so the matcher must say Read",
+        "b": "Hooks fire only for tools that change files, so searches go unlogged",
         "c": "Its lookups run through the shell tool, so only a Bash entry sees them",
         "d": "A matcher takes the parenthesised rule form, so a bare tool name never fires"
       },
       "key": "c",
       "explanation": {
         "c": "On macOS, Linux and WSL the default set has no Grep, and its job is done through the shell tool.",
-        "a": "Ruled out because the tool names are \"the exact strings you use in permission rules, subagent tool lists, and hook matchers\".",
-        "b": "Ruled out because \"A matcher of `Grep` sees Grep calls\" whenever the session has the tool; the silence comes from a default set that has none.",
+        "a": "Ruled out because the family name belongs to permission rules, while the tool names are \"the exact strings you use in permission rules, subagent tool lists, and hook matchers\", so a Grep call is matched as `Grep`.",
+        "b": "Ruled out because a search tool is matched like any other: \"A matcher of `Grep` sees Grep calls\" whenever the session has the tool, and the silence comes from a default set that has none.",
         "d": "Ruled out because \"Hook `matcher` fields use bare tool names, not the parenthesized rule format.\""
       }
     },
@@ -81,19 +81,19 @@
       "id": "02-permissions-exploring-a-codebase-and-the-practice#m1",
       "page": "02-permissions-exploring-a-codebase-and-the-practice.md",
       "scope": "module",
-      "stem": "Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools. The team wants the folder `secrets/` closed to `Read`, `Grep`, `Glob`, `Edit` and `Write` alike. Which single entry in the settings file does it?",
+      "stem": "Scenario S4, a developer-productivity agent. The agent explores unfamiliar codebases with the built-in tools. It keeps its findings in `notes/`, where it must create files, change them and read them back, all without a prompt. Which single entry in the settings file does it?",
       "options": {
-        "a": "`Edit(secrets/**)` under deny",
-        "b": "`Grep(secrets/**)` under deny",
-        "c": "`Bash(cat secrets/*)` under deny",
-        "d": "`Read(secrets/**)` under deny"
+        "a": "`Write(notes/**)` under allow",
+        "b": "`Read(notes/**)` under allow",
+        "c": "`Bash(tee notes/*)` under allow",
+        "d": "`Edit(notes/**)` under allow"
       },
       "key": "d",
       "explanation": {
-        "d": "A read denial stops reading and searching, and writes at the same path.",
-        "a": "Ruled out because \"`Edit(path)` rules govern all built-in tools that write files\", which leaves reading and searching open.",
-        "b": "Ruled out because \"A rule is written under the name of its family\" and the example prints \"Grep as Read\", so the entry that applies is a `Read` rule, and one for Grep alone leaves Read and the writing tools open.",
-        "c": "Ruled out because a scoped Bash rule \"leaves `Bash` available and denies calls that match it\", and it applies to no file tool, so Read, Grep, Glob, Edit and Write stay open."
+        "d": "One allow under the writing family approves both Edit and Write in the folder, and \"An `Edit(...)` allow rule also grants read access to the same path\", so reading the notes back needs no second entry.",
+        "a": "Ruled out because \"a `Write(path)` rule is never matched by the file permission checks\", so creating a note still prompts.",
+        "b": "Ruled out because \"`Edit(path)` rules govern all built-in tools that write files\", so a `Read` allow leaves every create and change to prompt.",
+        "c": "Ruled out because \"Bash rules are matched as written\" and reach only Bash calls, so the Edit and Write calls that make the notes still prompt."
       }
     },
     {

@@ -551,7 +551,7 @@ These are the wrong answers that the exam's options for this task statement offe
    - **c**: A full read of each folder in turn
    - **d**: A shell loop that opens each file in turn
 
-2. A `routes.yaml` holds ten copies of the same block, told apart only by where each one sits. An edit to the third copy is refused because the text to replace appears ten times, and every snippet around it also appears ten times. What should the agent do?
+2. A `routes.yaml` holds ten copies of the same block, told apart only by where each one sits. An edit to the third copy is refused because the text to replace appears ten times. The agent retried with more surrounding lines, and that wider snippet also appears ten times. What should the agent do?
    - **a**: Read it and write the whole thing again with the one alteration
    - **b**: Retry with `replace_all` set, then repair the nine others by hand
    - **c**: Widen the snippet with more surrounding lines until it is unique
@@ -561,6 +561,6 @@ These are the wrong answers that the exam's options for this task statement offe
 <summary>Answer key</summary>
 
 1. **b**. The job is matching names, which is what a name pattern search is for. *a* is ruled out because a content search finds lines inside files: "Grep finds lines inside files" and not the names that match a pattern. *c* is ruled out because a folder cannot be read: the table's "Reads files, not directories". *d* is ruled out because opening every file spends the context on files that do not matter: "it spends the context on files that do not matter".
-2. **a**. The guide keys Read plus Write as the fallback for a non-unique Edit, and here no unique anchor exists. The product's documented remedies are a longer unique string or `replace_all`; Read plus Write is the guide's route when neither applies, and it is where this case lands. *b* is ruled out because "`replace_all` changes every occurrence, which is right for a rename and wrong when only one of three similar lines should change." *c* is ruled out because the page names this very case as the one for the fallback: "for example when a file is made of repeated blocks that differ only by position". *d* is ruled out because "Grep finds lines inside files" and does not change them, so the retried edit would be refused again.
+2. **a**. The guide keys Read plus Write as the fallback for a non-unique Edit, and here no unique anchor exists. The product's documented remedies are a longer unique string or `replace_all`; Read plus Write is the guide's route when neither applies, and it is where this case lands. *b* is ruled out because "`replace_all` changes every occurrence, which is right for a rename and wrong when only one of three similar lines should change." *c* is ruled out because the wider snippet already failed, as every stretch of text around the third copy appears ten times, and that is the case the page keeps for the fallback: "Use it only when no unique text exists". *d* is ruled out because finding the block leaves the text to replace as it was, and "`old_string` must appear exactly once", so the unchanged retry meets the same refusal.
 
 </details>

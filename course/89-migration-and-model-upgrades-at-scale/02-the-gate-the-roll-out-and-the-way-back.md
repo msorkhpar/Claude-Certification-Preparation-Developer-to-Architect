@@ -691,11 +691,11 @@ The practice is in [`exercises/89-migration-and-model-upgrades-at-scale`](../../
 
 ## Quiz
 
-1. A staged roll-out sits at 5 percent of traffic. Only 300 requests have been counted, with no errors, and the minimum is 1,000. What is the next step?
-   - **a**: Advance to 25 percent, since a clean record needs no further evidence
-   - **b**: Hold where it is, since a sample this small shows nothing yet
-   - **c**: Roll back to zero, since too few requests counts as a failed stage
-   - **d**: Move all traffic over, since the gate already passed on the suite
+1. In this module's example, a staged roll-out sits at 5 percent of traffic, with a minimum of 1,000 requests per stage and a limit of 5 errors per thousand. The stage has served 300 requests with no errors. What is the next step?
+   - **a**: Advance to 25 percent, since a stage that shows no errors at all has proved itself healthy
+   - **b**: Hold the share and keep counting, since it has too little evidence yet to be judged either way
+   - **c**: Roll back to zero, since a stage short of its request count is treated as a failure
+   - **d**: Move all traffic to the new model, since the gate already passed on the regression suite
 
 2. A staged roll-out at 25 percent of requests has served 50,000 requests with 400 errors, and the limit is 5 errors per thousand. What happens next?
    - **a**: Drop to 5 percent and keep the roll-out running, to gather more evidence from a smaller share
@@ -706,7 +706,7 @@ The practice is in [`exercises/89-migration-and-model-upgrades-at-scale`](../../
 <details>
 <summary>Answer key</summary>
 
-1. **b**. A stage with fewer requests than the minimum says nothing yet, so the rule is to hold at the stage. *a* is ruled out because "A stage with fewer requests than the minimum (1,000 in the example) says nothing yet". *c* is ruled out because the share goes back to zero only when errors pass the limit: "Over it, the share goes back to zero". *d* is ruled out because "Passing a suite is a prediction about traffic, and traffic is where it is tested".
+1. **b**. 300 is below the example's minimum of 1,000, and a stage with fewer requests than the minimum says nothing yet, so the rule is to hold at the stage. *a* is ruled out because "A stage with fewer requests than the minimum (1,000 in the example) says nothing yet". *c* is ruled out because the share goes back to zero only when errors pass the limit: "Over it, the share goes back to zero". *d* is ruled out because "Passing a suite is a prediction about traffic, and traffic is where it is tested".
 2. **d**. 400 errors in 50,000 requests is 8 per thousand, over the limit, so the share goes back to zero and the previous model, still configured, takes the traffic. *b* is ruled out because "Holding at the stage while errors continue leaves the share of customers who see them where it is". *c* is ruled out because "Advancing to 100 percent to see the failure in the full data makes every customer the sample". *a* is ruled out because "Reducing to a smaller share keeps part of the damage on the path".
 
 </details>
@@ -716,10 +716,10 @@ The practice is in [`exercises/89-migration-and-model-upgrades-at-scale`](../../
 This quiz covers both pages of the module.
 
 1. The new model costs about a third more per answer and fixes the refund errors. The product owner asks whether to move. Which message fits the architect's role?
-   - **a**: Recommend staying on the old model, because a higher cost is reason enough to avoid the whole change
-   - **b**: Recommend the move, because the newer model is the one that the vendor has recommended as the replacement
-   - **c**: Lay out the accuracy gain, the extra spend and the date that forces the choice, for them to weigh
-   - **d**: Defer the decision until the old model retires, so that the choice is made by the calendar instead
+   - **a**: Recommend staying on the old model, because a third more per answer outweighs the refund fix
+   - **b**: Recommend the move, because the vendor has named the newer model as the replacement to use
+   - **c**: Ask them to choose between the better accuracy and the higher bill, because staying has an end too
+   - **d**: Defer the decision until the retirement date nears, because more evidence on cost arrives by then
 
 2. After a migration, the parser reads the wrong field because the first content block of a reply is thinking text. Which step was missed?
    - **a**: Lowering max_tokens so that the thinking is cut off before the text of the reply begins
@@ -729,15 +729,15 @@ This quiz covers both pages of the module.
 
 3. On the day the new model went live, the team deleted the old model's id from its configuration to keep it tidy. Two days later errors spike. What did the cleanup take away?
    - **a**: Nothing, since the gate already approved the new model and a rollback is no longer needed
-   - **b**: The record of which key called which model, since only the configuration holds it
-   - **c**: The new cost baseline, which can only be computed while the old id stays configured
-   - **d**: The way back, which needs the previous one kept in place and tested until its own retirement
+   - **b**: The usage audit, which can only be run while the old model id is still configured
+   - **c**: The retirement alert, which is raised from the model id held in the configuration
+   - **d**: The way back, since traffic can no longer be sent to the version that served it before
 
 <details>
 <summary>Answer key</summary>
 
-1. **c**. The decision is a trade, and the architect states it with its date. *b* is ruled out because "A recommended replacement is a starting point, not a decision". *a* is ruled out because "A rise in cost is a number to put before the owner, not a verdict". *d* is ruled out because "Waiting for the retirement date hands the decision to the calendar, and gives up the rollback".
+1. **c**. The decision is a trade the owner makes, and the architect states it with its date, since "staying has a date that ends it". *b* is ruled out because "A recommended replacement is a starting point, not a decision". *a* is ruled out because "A rise in cost is a number to put before the owner, not a verdict". *d* is ruled out because "Waiting for the retirement date hands the decision to the calendar, and gives up the rollback".
 2. **b**. A reply may begin with thinking blocks, so the parser reads by type. *a* is ruled out because "`max_tokens` covers thinking plus text, and thinking tokens are billed as output tokens", so a lower limit cuts the text as well. *c* is ruled out because the guide lists `thinking: {"type": "disabled"}` among the "five settings that return a 400 error". *d* is ruled out because "A reply need not begin with thinking text either, so a rule that always drops the first block loses real text".
-3. **d**. The page says "the old model is the rollback, and it stays so until its own retirement date". *a* is ruled out because "a suite predicts and traffic proves", and an error found after the old model is gone has no way back. *b* is ruled out because the Console export gives "usage broken down by API key and model", so the record does not live in the configuration. *c* is ruled out because the baseline is reset by the rule "Recount tokens and re-baseline cost" on the replacement, which needs no old id.
+3. **d**. The page says "the old model is the rollback, and it stays so until its own retirement date". *a* is ruled out because "a suite predicts and traffic proves", and an error found after the old model is gone has no way back. *b* is ruled out because the audit is a Console export that shows "usage broken down by API key and model", so it does not depend on the configuration. *c* is ruled out because the calendar sits next to the audit "so that an alert is raised from the date", not from the configuration.
 
 </details>

@@ -573,16 +573,16 @@ The practice is in [`exercises/93-professional-capstone`](../../exercises/93-pro
    - **c**: The sampling temperature, to see whether it was lowered by a release
    - **d**: The context window, to see whether the prompt was cut short
 
-2. Scenario: A change to the retrieval step gains three answers in a minor segment and loses one in the segment where an error costs 250. The totals favour the change. What does the gate return?
+2. Scenario: A change to the retrieval step gains three answers in a minor segment and loses one in the segment where an error costs 250. The totals favour the change. What does the gate return, and why?
    - **a**: Release it, because the gains outnumber the losses
-   - **b**: Release it, with a note asking the owner to review the lost case
-   - **c**: Refuse it, naming the area where the damage fell
+   - **b**: Release it, because the owner can review the lost case later
+   - **c**: Refuse it, because the lost case falls in a guarded area
    - **d**: Refuse it, because any lost answer outweighs the gains
 
 <details>
 <summary>Answer key</summary>
 
 1. **a**. A confident wrong answer after a refresh points to stale evidence. *b* is ruled out because the page rejects "Fix the wrong answer in the prompt" as a first move, since a wrong answer after a document refresh points to the evidence before the wording. *c* is ruled out because the page says to "check the version of the evidence before the model", and a temperature change would not return the exact old figure. *d* is ruled out because the stale index holds the chunk "Water damage is covered up to 3,000 per claim.", the very figure the assistant gave, which a cut-short prompt would not produce.
-2. **c**. A loss in a protected segment is a veto whatever the gains. *a* is ruled out because "a loss in a protected segment is a veto whatever the gains elsewhere". *b* is ruled out because the gate returns a decision and not a note, and the page says it "says no-go and names the segment". *d* is ruled out because the gate's rule is that "the losses do not outnumber the gains" for a loss outside a protected segment, so such a loss does not outweigh the gains on its own.
+2. **c**. The segment where an error costs 250 is the one the gate protects, and a loss there is a veto whatever the gains. *a* is ruled out because "a loss in a protected segment is a veto whatever the gains elsewhere". *b* is ruled out because the gate does not leave the lost case to a later review: it "says no-go and names the segment". *d* is ruled out because the gate's rule is that "the losses do not outnumber the gains" for a loss outside a protected segment, so such a loss does not outweigh the gains on its own.
 
 </details>

@@ -499,8 +499,8 @@ These are the wrong answers that the exam's options for this task statement offe
    - **c**: Name a stronger model for the subagent in its definition file
    - **d**: Add a line telling the subagent to ask the coordinator whenever it is unsure
 
-2. A team plans a multi-agent design for a feature whose planning, coding and verifying steps all draw on the same evolving sources, with the user steering between steps. Which choice fits best?
-   - **a**: Run the three steps as parallel subagents to cut the total waiting time
+2. A team plans a multi-agent design for a feature built in three steps. Each step needs what the step before it found, and the user redirects the work after every step. Which choice fits best?
+   - **a**: Chain three fixed prompts that run end to end without a pause
    - **b**: Give each step to its own subagent
    - **c**: Stay in one conversation throughout
    - **d**: Add a coordinator that merges what the three step-agents produce at the end
@@ -509,6 +509,6 @@ These are the wrong answers that the exam's options for this task statement offe
 <summary>Answer key</summary>
 
 1. **a**. The subagent's context starts fresh, so the brief is the only channel for facts the coordinator already found. *b* is ruled out because nothing is inherited: "The only content you pass from parent to subagent is the Agent tool's prompt string". *c* is ruled out because a stronger model still lacks the facts: "If a fact is not in the brief, the subagent does not have it". *d* is ruled out because the subagent cannot converse with its parent while it runs: "only its final message returns to the parent".
-2. **c**. The steps depend on one shared context and on steering, which a team cannot give. *b* is ruled out because the documentation lists this case for the main conversation: "multiple phases share significant context, such as planning, implementation, and testing". *a* is ruled out because a delegate loses time: a subagent that is not a fork "starts fresh and may need time to gather context". *d* is ruled out because the dependencies are the problem: "some domains that require all agents to share the same context or involve many dependencies between agents are not a good fit".
+2. **c**. Each step builds on the last and the user steers between them, so the work keeps one context and stays open to the user. *b* is ruled out because the documentation lists this case for the main conversation: "multiple phases share significant context, such as planning, implementation, and testing". *a* is ruled out because a fixed chain leaves no room for the user's redirection, and the task "needs frequent back-and-forth or iterative refinement". *d* is ruled out because the dependencies are the problem: "some domains that require all agents to share the same context or involve many dependencies between agents are not a good fit".
 
 </details>

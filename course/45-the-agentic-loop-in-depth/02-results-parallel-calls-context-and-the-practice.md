@@ -62,7 +62,7 @@ These are the wrong answers that the exam's options for this task statement offe
 
 3. A custom tool `deduct_stock` writes to inventory, and a custom tool `notify_warehouse` reads the new level. The model asks for both in one turn, and the developer marks only `notify_warehouse` as read-only to save time. What should the team conclude?
    - **a**: That the write finishes first, since state-changing tools always run ahead of any readers
-   - **b**: That no order between them is promised, so the notification belongs in a later round
+   - **b**: That no order between them is promised, since the notifier is now free to run in parallel
    - **c**: That both run in the order requested, since every custom tool runs one after another here
    - **d**: That the reader waits, since the SDK works out the dependency from the tool names
 
@@ -76,7 +76,7 @@ These are the wrong answers that the exam's options for this task statement offe
 <details>
 <summary>Answer key</summary>
 
-3. **b**. The page says to put a dependency in two turns, because the model decides what to ask for in one turn and the SDK promises no order between the calls it makes together. *a* is ruled out because the documented rule is about conflicts among tools that change state: "Tools that modify state (like Edit, Write, and Bash) run sequentially to avoid conflicts." *c* is ruled out because a tool marked read-only is allowed to run alongside others: "To enable parallel execution for a custom tool, set readOnlyHint in its annotations." *d* is ruled out because the SDK does not read names for dependencies: "a dependency belongs in two turns."
+3. **b**. Marking the reader read-only lets it run alongside the write, so it may read the old level, and the page's remedy is to split the calls: "a dependency belongs in two turns." *a* is ruled out because the documented rule only keeps state-changing tools from clashing with one another, and says nothing of holding readers back: "Tools that modify state (like Edit, Write, and Bash) run sequentially to avoid conflicts." *c* is ruled out because a tool marked read-only is allowed to run alongside others: "To enable parallel execution for a custom tool, set readOnlyHint in its annotations." *d* is ruled out because the SDK leaves the order to the tool's author, not to its name: "Do not write a tool that depends on another tool from the same turn having finished first unless you know it runs sequentially".
 4. **c**. The `usage` figure counts the main loop only, so subagent work is missing, and the page names the field for the whole tree. *a* is ruled out because the SDK already provides that accounting: "Use `modelUsage`, or `model_usage` in Python, for whole-tree token and cost accounting." *b* is ruled out because the figure is incomplete by design: "A run that delegated to subagents has spent more than `usage` says." *d* is ruled out because zeroed figures belong to a crash and not to a cut-off: "the final result is an `error_during_execution` whose cost fields may be zeroed".
 
 </details>

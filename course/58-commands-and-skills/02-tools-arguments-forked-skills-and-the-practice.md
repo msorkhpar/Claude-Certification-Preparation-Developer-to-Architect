@@ -778,17 +778,17 @@ The practice is in [`exercises/58-commands-and-skills`](../../exercises/58-comma
    - **c**: Editing runs without any prompt because the skill vouches for it
    - **d**: Changing files remains allowed under the usual permission settings
 
-2. A skill's text says only 'Use these naming conventions for new endpoints', and its header sets `context: fork`. What does the isolated helper do?
-   - **a**: It reads the whole conversation and applies the conventions to it
-   - **b**: It finishes with nothing to work on and little to report
-   - **c**: It asks the user which endpoint the conventions concern
-   - **d**: It loads the conventions into the main conversation for later turns
+2. A skill's text says only 'Use these naming conventions for new endpoints', and its header sets `context: fork`. What comes of invoking it?
+   - **a**: It forks the conversation so far and applies the conventions to it
+   - **b**: It starts a subagent that has no task and returns nothing of use
+   - **c**: It has a subagent apply the conventions to the project's endpoint files
+   - **d**: It adds the conventions to the main conversation for later turns
 
 <details>
 <summary>Answer key</summary>
 
 1. **d**. The field pre-approves and restricts nothing. *a* is ruled out because removal belongs to the other field, which removes tools "from Claude's available pool while this skill is active". *b* is ruled out because the field "does not restrict which tools are available: every tool remains callable". *c* is ruled out because "your permission settings still govern tools that are not listed".
-2. **b**. A forked skill's body is its prompt, and conventions without a task leave the helper with no endpoint to work on, so the run produces nothing of use. *a* is ruled out because the helper "doesn't see your conversation history", so earlier endpoints are not in its view. *c* is ruled out because the helper starts from the skill text alone, which "gives it the skill content as its prompt", and "the skill's instructions have to stand on their own" with no one to ask. *d* is ruled out because the setting "starts a new subagent of the type named in" the agent field, so the conventions go to the helper and not into the main conversation.
+2. **b**. The setting hands the body to a new subagent, which "gives it the skill content as its prompt", and conventions alone name no endpoint or job, so the subagent has nothing to carry out. *a* is ruled out because the name misleads and "this is not a fork of the conversation": the subagent "doesn't see your conversation history". *c* is ruled out because the setting "only makes sense for skills with explicit instructions", and a line of conventions names no files to change. *d* is ruled out because the setting "starts a new subagent of the type named in" the agent field, so the conventions go to that subagent and not into the main conversation.
 
 </details>
 
@@ -809,9 +809,9 @@ This quiz covers both pages of the module.
    - **d**: `disallowed-tools: Edit(src/**)`
 
 3. Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A command text reads 'Summarise the commits by $ARGUMENTS since yesterday', and a developer runs `/standup ana`. What does Claude receive?
-   - **a**: The sentence unchanged, with the name in a separate note
+   - **a**: The sentence with `$ARGUMENTS` left as is, as no name was declared
    - **b**: The sentence with a blank where the name belongs
-   - **c**: The sentence with the name filled in and a line `ARGUMENTS: ana` after it
+   - **c**: The sentence unchanged, followed by a line `ARGUMENTS: ana`
    - **d**: The sentence with the name filled in and nothing appended
 
 <details>
@@ -819,7 +819,7 @@ This quiz covers both pages of the module.
 
 1. **c**. It hides the skill from the person and leaves it available to Claude, which suits background knowledge. *a* is ruled out because it does the opposite, so that only the person starts it and "the full skill loads only when you invoke it". *b* is ruled out because the hint "only shows the expected shape in autocomplete", so the skill stays in the menu for the developers to pick. *d* is ruled out because `context: fork` "only makes sense for skills with explicit instructions", so a fork would run a background note as a task with nothing to do.
 2. **b**. A bare name in the removal field takes the tool out of the pool while the skill is active. *a* is ruled out because that field controls who starts the skill and "keeps the model from deciding by itself that the time has come", not which tools it has. *c* is ruled out because a fork isolates the conversation, since "The subagent doesn't see your conversation history", and a restriction calls for `disallowed-tools` "or deny rules for a restriction". *d* is ruled out because "only a bare name removes a tool", so the scoped entry leaves editing in place.
-3. **d**. The placeholder received the input, so it is substituted and nothing is added. *a* is ruled out because the placeholder takes "All arguments, as typed" and is replaced in the text. *b* is ruled out because a blank arises only for a named placeholder without an argument, since an indexed one "stays in the content unchanged", and here the input is given. *c* is ruled out because the extra line appears only when "no placeholder receives them", and this one did.
+3. **d**. The placeholder received the input, so it is substituted and nothing is added. *a* is ruled out because `$ARGUMENTS` needs no declaration and takes "All arguments, as typed", so it is replaced in the text. *b* is ruled out because a blank arises only for a named placeholder without an argument, since an indexed one "stays in the content unchanged", and here the input is given. *c* is ruled out because the extra line appears only when "no placeholder receives them", and `$ARGUMENTS` is a placeholder that received the name.
 
 </details>
 

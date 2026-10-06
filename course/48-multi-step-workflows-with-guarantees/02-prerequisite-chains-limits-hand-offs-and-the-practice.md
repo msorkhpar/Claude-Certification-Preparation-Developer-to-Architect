@@ -89,7 +89,7 @@ These are the wrong answers that the exam's options for this task statement offe
 ## Quiz
 
 3. A refund gate becomes stricter after three failed identity checks: it now refuses every protected step. A locked-out customer's chat loops until the turn limit. What went wrong?
-   - **a**: The lock should have waited for ten failures instead of three
+   - **a**: The desk should have had no lock, so the customer could keep trying
    - **b**: Escalation should have stayed callable whatever the desk's state
    - **c**: The turn limit should have been cut to end the loop sooner
    - **d**: The model should have been asked to hand the case over on its own
@@ -103,7 +103,7 @@ These are the wrong answers that the exam's options for this task statement offe
 <details>
 <summary>Answer key</summary>
 
-3. **b**. An escape route must not sit behind a prerequisite that may be what failed. *a* is ruled out because a later lock leaves the same dead end, and three is already lenient: "a successful check resets the count, so ordinary typing mistakes do not lock anyone out". *c* is ruled out because a lower limit only shortens a dead end: "An agent that cannot verify identity and is also barred from escalating is a dead end that loops until the turn limit". *d* is ruled out because asking does not open a route: handing over is a tool call, and it only works when "one tool outside the gate, `escalate`, which is always allowed" exists.
+3. **b**. An escape route must not sit behind a prerequisite that may be what failed. *a* is ruled out because removing the lock opens a worse hole: "without it, a person who is guessing at an identity code, or a model that is being led to guess, gets unlimited tries". *c* is ruled out because a lower limit only shortens a dead end: "An agent that cannot verify identity and is also barred from escalating is a dead end that loops until the turn limit". *d* is ruled out because asking does not open a route: handing over is a tool call, and it only works when "one tool outside the gate, `escalate`, which is always allowed" exists.
 4. **d**. The gate holds the facts, and a record answers the reviewer's questions in a fixed place. *b* is ruled out because "A summary written by the model can leave out what went wrong." *c* is ruled out because a record carries only what is needed: "identifiers and amounts, not the whole order contents". *a* is ruled out because the model is again choosing what the reviewer sees: "The gate's state is the source for what was verified, looked up and refunded; the model's account of them is not."
 
 </details>
@@ -120,7 +120,7 @@ This quiz covers both pages of the module.
 
 2. Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A policy allows refunds only for items that arrived damaged. The team encodes "damaged" as a keyword list in the gate, and many valid claims are refused. Which fix fits best?
    - **a**: Keep extending the keyword list until the valid claims finally pass through it
-   - **b**: Let the model weigh the evidence, and keep steps, amounts and limits as rules
+   - **b**: Have the model judge coverage from what each message describes
    - **c**: Move the refund limit and the order of steps into the prompt as well
    - **d**: Send damage claims to a person for review instead of the gate
 
@@ -134,7 +134,7 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **c**. A failed check clears the verified customer. *b* is ruled out because "a failed verification clears the state, so that an earlier success cannot be reused." *a* is ruled out because the state holds one verified customer, and a failure does not add one: "set only by a successful verification call". *d* is ruled out because the gate does not consult the model about its own state: "does not ask the model whether it did".
-2. **b**. Judgement is the model's work, and rules with a right answer are the gate's. *a* is ruled out because "A design that puts judgement in code ends up with a brittle rule engine". *c* is ruled out because "the thresholds and the order of steps go in the gate". *d* is ruled out because whether a claim is covered is the model's call below the limit: "reading the customer's message, deciding whether the complaint is covered".
+2. **b**. Judgement is the model's work, and rules with a right answer are the gate's. *a* is ruled out because "A design that puts judgement in code ends up with a brittle rule engine". *c* is ruled out because "the thresholds and the order of steps go in the gate". *d* is ruled out because a person decides only above the limit, and below it the call is the model's: "Whether a complaint deserves a refund belongs to the model and, above the limit, to a person."
 3. **d**. The gate is code, so it is tested with the forbidden call and an assertion on the backend log. *b* is ruled out because a sample measures a rate, which is the way the model is tested: "where a failure is a rate and not a bug". *c* is ruled out because an evaluation set measures the model, not the gate: "A team that tests the gate with a model, or the model with unit tests, has mixed up the two." *a* is ruled out because the gate is tested the way all code is: "the same inputs, the same outputs".
 
 </details>

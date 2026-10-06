@@ -29,33 +29,33 @@
         "a": "A breaker that trips after repeated errors in a row and refuses calls for a pause",
         "b": "A larger retry count for each task, so the backend has more chances to come back",
         "c": "A faster model for the search agent, so that every failed call ends sooner",
-        "d": "A rule that restarts the whole run from the first task whenever any task has failed"
+        "d": "A failure tally shared across the whole run that halts all agents once it runs high"
       },
       "key": "a",
       "explanation": {
         "a": "A breaker refuses calls at once while it is open and probes once after the cooldown.",
-        "b": "Ruled out because \"an unlimited retry is a way to spend money while nothing changes\" and a larger count is the same mistake.",
+        "b": "Ruled out because each extra try adds one more wasted call for every task, and \"an outage can last longer than any budget\".",
         "c": "Ruled out because the waste is the count of calls, \"a hundred and fifty wasted calls\", which speed leaves in place.",
-        "d": "Ruled out because a restart makes the same calls again, where with the breaker open \"the rest of the plan goes on\"."
+        "d": "Ruled out because the count belongs to one agent, and \"an agent that is healthy must not be cut off by a failing neighbour\"."
       }
     },
     {
       "id": "02-isolation-fallbacks-and-resuming-a-run#q1",
       "page": "02-isolation-fallbacks-and-resuming-a-run.md",
       "scope": "page",
-      "stem": "Scenario: Elm Biotech's plan has five tasks: a, b, c, d and e. Task b breaks for good, d needs b, and c and e need neither. What should the runner report?",
+      "stem": "Scenario: Elm Biotech's plan has five tasks: a, b, c, d and e. Task a completes first, then b breaks for good; d depends on b, and c and e depend on neither. What should the runner report?",
       "options": {
         "a": "a, c and e done, b failed, d skipped because of b, with each reason stated",
-        "b": "The whole run counts as failed, since one broken part makes the rest untrustworthy for the reader",
-        "c": "Task a done, with the later tasks left unreported until someone has repaired the broken one",
-        "d": "Five tasks done, with d computed from a plausible guess at what b would have returned"
+        "b": "a, c and e done, with b and d both listed as failed, each with its reason given",
+        "c": "a, c, d and e done, with b alone listed as failed and the reason for it stated",
+        "d": "a done and b failed, with c, d and e held back until someone has repaired b"
       },
       "key": "a",
       "explanation": {
         "a": "Only the task that needed b is affected, and the report lists what is done, what failed and what was skipped.",
-        "b": "Ruled out because the failure is isolated: \"it ends only its own branch\".",
-        "c": "Ruled out because the report names \"what is done, what failed and why, and what was skipped because of it\", and silence about d hides a gap.",
-        "d": "Ruled out because a task whose input failed is skipped \"with a reason that names the failed one\", and is not fed a guess."
+        "b": "Ruled out because d did not fail on its own, and the report keeps apart \"what failed and why, and what was skipped because of it\".",
+        "c": "Ruled out because d needs b and cannot be done, so the runner marks it skipped \"with a reason that names the failed one\".",
+        "d": "Ruled out because c and e need neither, and the runner \"carries on with the independent tasks\"."
       }
     },
     {

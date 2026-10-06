@@ -659,11 +659,11 @@ model for 90% accuracy within 2000 ms: medium; for 94% within 2000 ms: none
 
 ## Quiz
 
-1. Two versions of a support assistant both score 92 percent on the evaluation set. One of them gets refund answers wrong far more often, and a wrong refund answer costs twenty times a wrong status answer. What should the report show?
-   - **a**: Accuracy by type of case, with each mistake priced
-   - **b**: The overall accuracy alone, as the two scores are equal
-   - **c**: The cost per answered case, so the cheaper version breaks the tie
-   - **d**: The size of the set, as a larger set makes the score fair
+1. Two versions of a support assistant both score 92 percent on the evaluation set. One of them gets refund answers wrong far more often, and a wrong refund answer is far dearer than a wrong status answer. What should the report show?
+   - **a**: The accuracy and the cost of errors for each kind of question
+   - **b**: The overall accuracy of each version across the whole set
+   - **c**: The cost per answered case for each of the two versions
+   - **d**: The number of cases in the set behind each of the scores
 
 2. A team grades a research assistant's free-form reports only with exact-match checks, and the score barely moves when the quality of the reports visibly changes. Which addition fits best?
    - **a**: A longer answer key, so that more phrasings of each answer count as a match

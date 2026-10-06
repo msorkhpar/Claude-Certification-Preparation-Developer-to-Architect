@@ -411,14 +411,14 @@ messages: [['sort-order', 'pagination'], ['typo-in-label'], ['null-date']]
 2. A stack trace points at one function that divides by zero when a list is empty. How should the fix be handled?
    - **a**: In plan mode, with a plan approved before any bug fix
    - **b**: In plan mode, with the division reviewed as a risky operation
-   - **c**: Directly, then leave the empty-list case to code review
+   - **c**: Directly, then record in a plan why the fix is safe
    - **d**: Directly, then confirm with a test of that edge case
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. Many files and several valid approaches both argue for planning first. *a* is ruled out because the table says of a many-file change that "a wrong pattern is repeated everywhere", so the first files would commit the whole codebase. *c* is ruled out because the documented workflow "separates research from implementation so that the work solves the right problem", which a late plan cannot do. *d* is ruled out because "Importance is not a signal", and the signals are scope and the number of approaches.
-2. **d**. One file with a clear trace is the guide's example of direct execution. *a* is ruled out because "Plan mode is useful, but also adds overhead", and a small clear fix does not repay it. *b* is ruled out because "Two signals decide it: the number of files and the number of valid approaches", and risk is neither. *c* is ruled out because "a one-function fix with a clear trace is executed directly and checked by its tests", and a later code review is no test of the empty list.
+2. **d**. One file with a clear trace is the guide's example of direct execution. *a* is ruled out because "Plan mode is useful, but also adds overhead", and a small clear fix does not repay it. *b* is ruled out because "Two signals decide it: the number of files and the number of valid approaches", and risk is neither. *c* is ruled out because "If you could describe the diff in one sentence, skip the plan", and this fix fits in one sentence, so a plan written afterwards is overhead that informs no decision.
 
 </details>
 

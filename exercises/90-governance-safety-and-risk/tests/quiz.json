@@ -28,7 +28,7 @@
       "options": {
         "a": "The sentence is too short for the model to follow it reliably",
         "b": "The rule should sit in the user turn so that the model reads it last",
-        "c": "Nothing forces the step to happen, because an instruction only asks",
+        "c": "No separate step enforces it, so nothing stops it being skipped",
         "d": "It sends every closure to a person rather than only the unsure ones"
       },
       "key": "c",
@@ -47,14 +47,14 @@
       "options": {
         "a": "Delete the entries of that customer from the log",
         "b": "Remove the vault rows that tie them to anything in the log",
-        "c": "Replace the tokens in that customer's entries with new tokens",
+        "c": "Move that customer's vault rows into a separate archive table",
         "d": "Mark that customer's entries as deleted and hide them from reports"
       },
       "key": "b",
       "explanation": {
         "b": "Removing the vault rows leaves the entries and unlinks them from the person.",
-        "a": "Ruled out because \"Deleting every audit entry would destroy the proof\".",
-        "c": "Ruled out because the design removes \"the map: the vault entries for that person go\", and new tokens in the entries leave that person's vault rows in place.",
+        "a": "Ruled out because \"the audit entries hold tokens and the proof is worth keeping\", so the customer's entries stay and only their link to the customer goes.",
+        "c": "Ruled out because \"the vault entries for that person go\", and an archive table still maps those tokens to the customer.",
         "d": "Ruled out because \"keeping both leaves the person identifiable\", and hidden entries still sit beside the vault map."
       }
     },
@@ -102,15 +102,15 @@
       "scope": "module",
       "stem": "Scenario: A review finds that a model system's average accuracy is 94 percent, and that one language group, a small part of the traffic, scores 70 percent. The team says the system passes. How should the reviewer answer that claim?",
       "options": {
-        "a": "Accept it, since a group that small cannot be measured reliably",
-        "b": "Reject it, since the 24-point gap between segments is the failure",
+        "a": "Accept it, since a language group is not a segment that is reported",
+        "b": "Reject it, since the measure to judge is the gap between segments",
         "c": "Reject it until the overall accuracy rises well above 94 percent",
         "d": "Accept it, since the launch test covered the traffic broadly"
       },
       "key": "b",
       "explanation": {
-        "b": "Fairness is measured as a gap between groups, and a gap of 24 points fails whatever the overall figure says.",
-        "a": "Ruled out because \"The groups must be defined where they can be measured\", and a language group can be labelled and so reported.",
+        "b": "Fairness is the same metric computed per group, with the gap between the best and the worst group shown, and a group at 70 beside an average of 94 is a gap the average does not show.",
+        "a": "Ruled out because \"a segment you cannot label cannot be reported\", and this group was labelled, since it was scored at 70 percent.",
         "c": "Ruled out because \"a headline average hides a failing group exactly as it hides a failing segment\", so a higher average can still hide the group at 70.",
         "d": "Ruled out because \"fairness is a property of outcomes by group\", and a broad launch test is not a gap measure."
       }
@@ -119,19 +119,19 @@
       "id": "02-compliance-fairness-transparency-and-the-register#m3",
       "page": "02-compliance-fairness-transparency-and-the-register.md",
       "scope": "module",
-      "stem": "Scenario: An auditor asks a team to prove that a refund over a set amount was approved by a person. The team has an audit entry for the refund with a request id, an outcome of human and a character count. What do they have?",
+      "stem": "Scenario: An auditor asks a team to show that a refund paid 200 days ago was put in front of a person. The team's audit entry for it holds the request id, the action, the consequence high, the outcome human and a character count. The team keeps entries for 365 days, above a floor of 90. What should the team tell the auditor?",
       "options": {
-        "a": "Too little, since the entry leaves out the model's confidence score",
-        "b": "A record that is too thin, since only the text proves what happened",
-        "c": "A record that holds the refund amount and the approver's name",
-        "d": "Evidence of the step, with no copy of the customer's text kept"
+        "a": "That it falls short, since it leaves out the model's confidence score",
+        "b": "That it has expired, since it is older than the 90-day floor",
+        "c": "That it cannot be shared, since it would expose the customer",
+        "d": "That it proves the step, since the routing result is logged"
       },
       "key": "d",
       "explanation": {
-        "d": "The record shows the step happened without a copy of the data.",
-        "b": "Ruled out because the team that \"kept a record of identifiers, sizes and outcomes\" is the one of which the page says \"it proves what happened\", with no text stored.",
-        "c": "Ruled out because the entry holds \"request id, action, consequence, outcome and the size of the text\", which names no amount or approver.",
-        "a": "Ruled out because \"confidence is not evidence\", so a score would add nothing to the proof that a person approved."
+        "d": "A high-consequence action is routed to a person, and the outcome field records that route for this refund, with no text needed to show it.",
+        "b": "Ruled out because the floor is \"the shortest period kept, so that an incident found late can still be examined\", and an entry of 200 days is still inside a window of 365.",
+        "c": "Ruled out because the entry holds \"request id, action, consequence, outcome and the size of the text\", none of which names the customer.",
+        "a": "Ruled out because \"a high-consequence action goes to `human` whatever the confidence\", so a score adds nothing to the proof of the route."
       }
     }
   ]

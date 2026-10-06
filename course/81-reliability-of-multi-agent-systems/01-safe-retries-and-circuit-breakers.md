@@ -508,12 +508,12 @@ These are the wrong answers the exam's options for this domain offer, each with 
    - **a**: A breaker that trips after repeated errors in a row and refuses calls for a pause
    - **b**: A larger retry count for each task, so the backend has more chances to come back
    - **c**: A faster model for the search agent, so that every failed call ends sooner
-   - **d**: A rule that restarts the whole run from the first task whenever any task has failed
+   - **d**: A failure tally shared across the whole run that halts all agents once it runs high
 
 <details>
 <summary>Answer key</summary>
 
 1. **d**. The key and the effect are recorded in one step, so neither can exist without the other. *a* is ruled out because "The tool keeps the keys it has seen", and deleting keys breaks the recognition of repeats. *b* is ruled out because "a control that must hold is enforced in code outside the model". *c* is ruled out because it only reverses the gap: "a crash between the two leaves an effect with no key, or a key with no effect".
-2. **a**. A breaker refuses calls at once while it is open and probes once after the cooldown. *b* is ruled out because "an unlimited retry is a way to spend money while nothing changes" and a larger count is the same mistake. *c* is ruled out because the waste is the count of calls, "a hundred and fifty wasted calls", which speed leaves in place. *d* is ruled out because a restart makes the same calls again, where with the breaker open "the rest of the plan goes on".
+2. **a**. A breaker refuses calls at once while it is open and probes once after the cooldown. *b* is ruled out because each extra try adds one more wasted call for every task, and "an outage can last longer than any budget". *c* is ruled out because the waste is the count of calls, "a hundred and fifty wasted calls", which speed leaves in place. *d* is ruled out because the count belongs to one agent, and "an agent that is healthy must not be cut off by a failing neighbour".
 
 </details>

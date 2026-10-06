@@ -62,19 +62,19 @@
       "id": "02-tools-arguments-forked-skills-and-the-practice#q2",
       "page": "02-tools-arguments-forked-skills-and-the-practice.md",
       "scope": "page",
-      "stem": "A skill's text says only 'Use these naming conventions for new endpoints', and its header sets `context: fork`. What does the isolated helper do?",
+      "stem": "A skill's text says only 'Use these naming conventions for new endpoints', and its header sets `context: fork`. What comes of invoking it?",
       "options": {
-        "a": "It reads the whole conversation and applies the conventions to it",
-        "b": "It finishes with nothing to work on and little to report",
-        "c": "It asks the user which endpoint the conventions concern",
-        "d": "It loads the conventions into the main conversation for later turns"
+        "a": "It forks the conversation so far and applies the conventions to it",
+        "b": "It starts a subagent that has no task and returns nothing of use",
+        "c": "It has a subagent apply the conventions to the project's endpoint files",
+        "d": "It adds the conventions to the main conversation for later turns"
       },
       "key": "b",
       "explanation": {
-        "b": "A forked skill's body is its prompt, and conventions without a task leave the helper with no endpoint to work on, so the run produces nothing of use.",
-        "a": "Ruled out because the helper \"doesn't see your conversation history\", so earlier endpoints are not in its view.",
-        "c": "Ruled out because the helper starts from the skill text alone, which \"gives it the skill content as its prompt\", and \"the skill's instructions have to stand on their own\" with no one to ask.",
-        "d": "Ruled out because the setting \"starts a new subagent of the type named in\" the agent field, so the conventions go to the helper and not into the main conversation."
+        "b": "The setting hands the body to a new subagent, which \"gives it the skill content as its prompt\", and conventions alone name no endpoint or job, so the subagent has nothing to carry out.",
+        "a": "Ruled out because the name misleads and \"this is not a fork of the conversation\": the subagent \"doesn't see your conversation history\".",
+        "c": "Ruled out because the setting \"only makes sense for skills with explicit instructions\", and a line of conventions names no files to change.",
+        "d": "Ruled out because the setting \"starts a new subagent of the type named in\" the agent field, so the conventions go to that subagent and not into the main conversation."
       }
     },
     {
@@ -121,17 +121,17 @@
       "scope": "module",
       "stem": "Scenario S2, code generation with Claude Code. A team uses Claude Code for refactoring and tests. A command text reads 'Summarise the commits by $ARGUMENTS since yesterday', and a developer runs `/standup ana`. What does Claude receive?",
       "options": {
-        "a": "The sentence unchanged, with the name in a separate note",
+        "a": "The sentence with `$ARGUMENTS` left as is, as no name was declared",
         "b": "The sentence with a blank where the name belongs",
-        "c": "The sentence with the name filled in and a line `ARGUMENTS: ana` after it",
+        "c": "The sentence unchanged, followed by a line `ARGUMENTS: ana`",
         "d": "The sentence with the name filled in and nothing appended"
       },
       "key": "d",
       "explanation": {
         "d": "The placeholder received the input, so it is substituted and nothing is added.",
-        "a": "Ruled out because the placeholder takes \"All arguments, as typed\" and is replaced in the text.",
+        "a": "Ruled out because `$ARGUMENTS` needs no declaration and takes \"All arguments, as typed\", so it is replaced in the text.",
         "b": "Ruled out because a blank arises only for a named placeholder without an argument, since an indexed one \"stays in the content unchanged\", and here the input is given.",
-        "c": "Ruled out because the extra line appears only when \"no placeholder receives them\", and this one did."
+        "c": "Ruled out because the extra line appears only when \"no placeholder receives them\", and `$ARGUMENTS` is a placeholder that received the name."
       }
     }
   ]

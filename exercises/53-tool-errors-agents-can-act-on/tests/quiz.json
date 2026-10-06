@@ -122,15 +122,15 @@
       "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A wrapper retries any failed tool call twice; it rescues lookups when the order service is busy, but customers are being refunded twice after timeouts. Which change to the wrapper is best?",
       "options": {
         "a": "Retry only transient failures, and count every timeout as transient",
-        "b": "Retry five times instead of twice, with a longer wait between attempts",
+        "b": "Retry five times instead of twice, and double the wait between attempts",
         "c": "Retry no writes, and report a timed out write to the customer as failed",
-        "d": "Retry only reads and writes that carry an idempotency key"
+        "d": "Retry only reads, and writes sent with a key that the receiver honours"
       },
       "key": "d",
       "explanation": {
         "d": "\"A retry is safe when repeating the call cannot do harm\", which holds for a read and for a write whose key makes the service \"perform the action once however often it receives the key\".",
         "a": "Ruled out because a timed out write is an unknown outcome, not a transient failure: \"The third row is the one that a loop must not fold into the second\".",
-        "b": "Ruled out because more attempts multiply the duplicates: \"a refund sent twice refunds twice\".",
+        "b": "Ruled out because more attempts and longer waits only multiply the duplicates: \"a refund sent twice refunds twice\".",
         "c": "Ruled out because the refund may have gone through: \"the money may have moved, and the agent will say the opposite of what happened\"."
       }
     }

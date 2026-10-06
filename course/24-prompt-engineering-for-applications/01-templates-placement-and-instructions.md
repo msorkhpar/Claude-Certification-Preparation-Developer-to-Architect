@@ -127,28 +127,28 @@ prompt, since the documentation says that Sonnet "might also infer a reasonable 
 ## Quiz
 
 1. A support tool inserts each customer message into a template. One customer's message contains the literal string `{{refund_limit}}`, which is also a variable of the template. What must the filling code do?
-   - **a**: Escape the braces first, then rebuild the whole template from its original source
+   - **a**: Run one replace call per variable name, in turn, over the whole text
    - **b**: Rescan the filled template until no placeholder remains anywhere in the output
    - **c**: Delete curly braces from every incoming customer message before filling anything
    - **d**: Substitute every placeholder in one pass and keep what was typed untouched
 
-2. A team keeps adding one sentence to the system prompt after every complaint, and answers to the original tasks now get worse. Which explanation fits the page?
-   - **a**: Rules that matter become a small share of the text and compete
+2. A team keeps adding one sentence to the system prompt after every complaint, and answers to the original tasks now get worse. What best explains the drop?
+   - **a**: The few vital rules are outweighed by the many lines added since
    - **b**: The model stops reading everything that follows the first paragraph
-   - **c**: The API refuses any system prompt that grows beyond a fixed size
+   - **c**: Conditional complaint rules outrank the general rules for the tasks
    - **d**: Each newer rule cancels the older ones, so the earlier rules are lost
 
 3. A nightly job classifies thousands of ambiguous tickets with nobody watching. What should the prompt tell the model to do when a ticket allows two readings?
    - **a**: Ask the sender which meaning was intended before assigning any label
-   - **b**: Stop the whole run for every ticket and wait until a person gives an answer
-   - **c**: Choose the more probable meaning and record that choice with the label
+   - **b**: Give the ticket both labels so a reviewer can pick the right one later
+   - **c**: Label by the likelier meaning and note which meaning the label assumes
    - **d**: Return an empty label for the ticket so that no guess is ever made
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The page says to "Replace every `{{name}}` once, from left to right, and never scan the result again", so data stays data. *b* is ruled out because "never scan the result again" is the rule that keeps a customer's placeholder from being read as a template. *c* is ruled out because the page's fix is a single pass, and a value "must come out as those characters", not as edited text. *a* is ruled out because the page asks only to "Fill in one pass", with no step that rebuilds the template.
-2. **a**. The page says the rules that matter are "a small share of the text" when a prompt "grows by accretion". *b* is ruled out because the mechanism described is that the model "weighs them against the thirty that do not", not that it stops reading. *c* is ruled out because the effect described is a change in behaviour: "If you find the model thinking more often than you'd like". *d* is ruled out because the page's advice "Say a rule once, in one place, so that two lines cannot disagree" shows rules competing, not newer ones cancelling older ones.
-3. **c**. The page says that "A nightly batch has nobody to answer, so the prompt should tell the model to choose the likeliest reading and write the assumption in the output". *a* is ruled out because an interactive assistant "can ask, but one question at a time", which needs someone to answer. *b* is ruled out because "A nightly batch has nobody to answer", so waiting would never end. *d* is ruled out because the documented behaviour is to "state the assumption you made" and not to withhold a result.
+1. **d**. The page says to "Replace every `{{name}}` once, from left to right, and never scan the result again", so data stays data. *b* is ruled out because "never scan the result again" is the rule that keeps a customer's placeholder from being read as a template. *c* is ruled out because the page's fix is a single pass, and a value "must come out as those characters", not as edited text. *a* is ruled out because replacing name after name lets a later call reach the customer's text, and "A value that contains a placeholder is read again as a template."
+2. **a**. The page says the rules that matter are "a small share of the text" when a prompt "grows by accretion". *b* is ruled out because the mechanism described is that the model "weighs them against the thirty that do not", not that it stops reading. *c* is ruled out because a conditional is "Silent on every case not listed", so the complaint rules have no say over the original tasks. *d* is ruled out because the page says that "the rules compete and the cost of every request rises", which is competition, not newer rules cancelling older ones.
+3. **c**. The page says the prompt should "tell the model to choose the likeliest reading and write the assumption in the output, where a reviewer can find it". *a* is ruled out because "A nightly batch has nobody to answer", so the question would go unanswered. *b* is ruled out because the model is asked to "make routine judgment calls yourself", and two labels leave the call to someone else. *d* is ruled out because the documented behaviour is to "state the assumption you made" and not to withhold a result.
 
 </details>

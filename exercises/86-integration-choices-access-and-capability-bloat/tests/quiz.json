@@ -104,14 +104,14 @@
       "options": {
         "a": "A refusal for the model, recorded under the team that owned the revoked credential",
         "b": "A refusal as unauthenticated, logged under unknown together with its verdict",
-        "c": "A refusal as unauthenticated, with no record kept because the caller is unknown",
-        "d": "A refusal that keeps the full prompt in the record, so that an attack can be studied later"
+        "c": "A refusal for the request rate, recorded under the provider account all traffic uses",
+        "d": "A refusal that keeps the full prompt so that an attack can be studied later"
       },
       "key": "b",
       "explanation": {
         "b": "Who is calling comes first, and the record keeps \"the team (or \"unknown\"), the model and the verdict, and no prompt text\".",
         "a": "Ruled out because \"A request with no credential is refused as unauthenticated even when it also asks for a model it may not have\".",
-        "c": "Ruled out because \"every decision, the refusals included, leaves a record\", and \"a log of denials is how an attack is seen\".",
+        "c": "Ruled out because the rate is checked only after the team is known, \"because every later rule is a rule about a team\", and a caller with no team has no rate to exceed.",
         "d": "Ruled out because \"a log of content is its own data-protection problem\"."
       }
     },

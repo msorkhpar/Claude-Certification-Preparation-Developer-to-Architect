@@ -516,8 +516,8 @@ Java and Kotlin readers: the practice on the third page builds this loop in your
 1. A handler for a database lookup throws because the row does not exist. What should the loop do?
    - **a**: End the conversation and return the exception to the caller
    - **b**: Send a result flagged as an error whose message says what to try
-   - **c**: Return an empty string so the model reads the call as complete
-   - **d**: Run the same call again until the row appears, without telling the model
+   - **c**: Return an empty string, so the loop can carry on with the turn
+   - **d**: Retry the lookup inside the handler until the row turns up
 
 2. The assistant turn holds two `tool_use` blocks. How does the next request carry the outputs?
    - **a**: Two user messages, one result in each, in the order of the calls
@@ -525,7 +525,7 @@ Java and Kotlin readers: the practice on the third page builds this loop in your
    - **c**: One user message that opens with a sentence and then lists the results
    - **d**: One user message with both results first and any text after them
 
-3. A reply arrives with `stop_reason` of `pause_turn`. What does the page say to do?
+3. A request that enables a server tool gets a reply with `stop_reason` of `pause_turn`. What should the loop do next?
    - **a**: Treat the reply as a refusal and stop the loop with that status
    - **b**: Pass the assistant content back untouched, and call once more
    - **c**: Run the missing tool and return its output in a `tool_result` block
@@ -534,7 +534,7 @@ Java and Kotlin readers: the practice on the third page builds this loop in your
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The page says "Write instructive error messages", with "what went wrong and what Claude should try next". *a* is ruled out because the loop is to "continue the conversation forward with a `tool_result` that indicates the error", not to end it. *c* is ruled out because "An exception that becomes an empty string tells the model the call worked." *d* is ruled out because the model must be told of the failure: "Claude will then incorporate this error into its response to the user."
+1. **b**. The page says "Write instructive error messages", with "what went wrong and what Claude should try next". *a* is ruled out because the loop is to "continue the conversation forward with a `tool_result` that indicates the error", not to end it. *c* is ruled out because "An exception that becomes an empty string tells the model the call worked." *d* is ruled out because the row does not exist, and when the handler throws "the loop catches it and sends the message back with `"is_error": true`", so the model learns of the failure at once.
 2. **d**. The page says "In the user message containing tool results, the tool_result blocks must come FIRST in the content array." *a* is ruled out because the trap is "Sending results one message at a time", and the rule is to "Return every result together in the next user message". *c* is ruled out because a sentence before the first result "will cause a 400 error". *b* is ruled out because results are sent by the user: "a user message with the `tool_result` blocks".
 3. **b**. The page says to send "the assistant response back as it is, keep the same `tools` array". *a* is ruled out because the table gives a refusal its own reaction: "status `refused`; the same request is not repeated". *c* is ruled out because a paused turn "is different from `tool_use`, which requires `tool_result` blocks". *d* is ruled out because a raised limit belongs to a cut-off reply: "a cut-off `tool_use` block needs a higher `max_tokens`".
 

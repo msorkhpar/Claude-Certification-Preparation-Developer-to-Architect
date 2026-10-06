@@ -591,7 +591,7 @@ log record keeps: input_tokens, model, output_tokens, status, tool, trace; with 
 ## Quiz
 
 1. A platform handles two million conversations a day and cannot afford to store every trace. Users report wrong answers that the dashboards do not show. Which rule fits best?
-   - **a**: Keep all failures, slow calls and complaints, and sample the rest by id
+   - **a**: Keep failures, slow calls and complaints, and sample the rest by id so services agree
    - **b**: Raise the random share from one percent to five, and review that larger share each week
    - **c**: Keep only the requests of the largest customers, because their heavy usage dominates
    - **d**: Store metrics only, and rely on the daily error count, since that costs almost nothing

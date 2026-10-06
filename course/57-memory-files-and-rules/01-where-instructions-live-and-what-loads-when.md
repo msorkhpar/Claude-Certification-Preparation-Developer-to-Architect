@@ -708,10 +708,10 @@ These are the wrong answers that the exam's options for this task statement offe
 ## Quiz
 
 1. An engineer wants a reminder about a private test server to guide Claude in one repository on their own machine, and never to reach teammates. Where does it go?
-   - **a**: The committed instruction file, under a heading for personal items
+   - **a**: The committed instruction file under a heading for personal items
    - **b**: A git-ignored local note beside the root instruction file
-   - **c**: The personal file in the home folder, applying to every project
-   - **d**: The organisation policy file, which only that engineer edits
+   - **c**: The personal file in the home folder for every project
+   - **d**: The organisation policy file that only that engineer edits
 
 2. A session starts at the top of a project, and an instruction file sits two levels down in `web/ui/`. When do its lines reach the model?
    - **a**: At launch, together with the root file

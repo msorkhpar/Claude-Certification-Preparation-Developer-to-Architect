@@ -43,9 +43,9 @@
       "id": "02-contracts-between-parts-and-the-review#q1",
       "page": "02-contracts-between-parts-and-the-review.md",
       "scope": "page",
-      "stem": "Scenario: At Alder Freight an intake service and a pricing service each pass every one of their own tests. In production about one request in fifty stalls between them, and always for shipments with no matching tariff. What does this most likely indicate?",
+      "stem": "Scenario: At Alder Freight an intake service and a pricing service each pass every one of their own tests, and those tests include shipments with no matching tariff. In production about one request in fifty stalls between them, and always for such a shipment. What does this most likely indicate?",
       "options": {
-        "a": "A pricing model too weak to cope with the unusual shipments it receives",
+        "a": "A language model in the pricing service too weak for unusual shipments",
         "b": "An unwritten rule for how the two parts treat a lookup that finds nothing",
         "c": "A transient network fault that an automatic retry would clear on the next attempt",
         "d": "A defect inside the intake service that its own tests have never covered"
@@ -53,9 +53,9 @@
       "key": "b",
       "explanation": {
         "b": "Both parts pass their own checks, so the gap is what neither contract says about the empty case.",
-        "a": "Ruled out because a bigger model \"only changes how the same ambiguity is worded\".",
+        "a": "Ruled out because the strength of the model is not in question when \"both parts pass their own checks, so the defect is the contract between them\".",
         "c": "Ruled out because a failure that follows an input pattern \"is deterministic, and a retry repeats it\".",
-        "d": "Ruled out because each service passes its own tests, and of such a pair the page says \"Neither is wrong by its own rules.\""
+        "d": "Ruled out because the intake service's own tests already cover the no-tariff case, and \"When components that each work correctly fail together, the cause is almost always an under-specified contract\"."
       }
     },
     {
@@ -83,15 +83,15 @@
       "scope": "module",
       "stem": "Scenario: Fenwick Bank's design review turns up two problems, one rated medium and one rated high. What outcome does the rubric give?",
       "options": {
-        "a": "Revise, because the medium problem is the one that can be repaired most easily",
-        "b": "Reject, since the more severe of the two findings decides the whole verdict",
+        "a": "Revise, since a design is rejected only when two of its findings are high",
+        "b": "Reject, since one severe finding is enough on its own to block approval",
         "c": "Revise, leaving the price to decide whether it beats the other designs",
         "d": "Revise, because the two ratings are averaged into one level of severity"
       },
       "key": "b",
       "explanation": {
-        "b": "The verdict follows the worst finding, and a `high` gives `reject`.",
-        "a": "Ruled out because \"any `high` gives `reject`, otherwise any `medium` gives `revise`\".",
+        "b": "One high finding settles the verdict, and the medium finding beside it does not soften it, so the outcome is `reject`.",
+        "a": "Ruled out because no count of findings is needed: \"any `high` gives `reject`\".",
         "c": "Ruled out because \"Price enters last, and only among the designs that were not rejected\".",
         "d": "Ruled out because there is no averaging: \"The verdict follows the worst finding\"."
       }
@@ -110,7 +110,7 @@
       "key": "b",
       "explanation": {
         "b": "The stage is defined by \"the path by which they change the system\", and here there is none.",
-        "a": "Ruled out because collecting a rating is logging and not a loop: the stage holds \"Evaluation, logging, human corrections, and the path by which they change the system\".",
+        "a": "Ruled out because collecting a rating changes nothing, and the stage counts as missing when \"Nobody learns that it was wrong\".",
         "c": "Ruled out because the rubric lists `no-feedback` as high, and \"any `high` gives `reject`\".",
         "d": "Ruled out because ratings that sit unread are not a loop, and a pipeline that \"never learns from the result, goes wrong silently and stays wrong\"."
       }
@@ -121,15 +121,15 @@
       "scope": "module",
       "stem": "Scenario: Quince Retail runs a returns agent that writes refunds to the ledger without approval, and the auditors require a record of each approval. What does the rubric report?",
       "options": {
-        "a": "A medium finding, so the verdict is revise until an approval step is added",
+        "a": "A medium finding, because the refunds can be checked after the fact",
         "b": "No finding, since the agent's answers have already been validated before the write",
         "c": "An autonomy finding, since the agent acts with no person in the loop",
-        "d": "A high finding, which makes the verdict reject whatever the cost of the design"
+        "d": "A high finding, because money goes out unsigned where sign-off is mandatory"
       },
       "key": "d",
       "explanation": {
         "d": "A write without approval where an audit is needed is a `high` finding, so the verdict is reject.",
-        "a": "Ruled out because \"The verdict follows the worst finding\", and the rubric names `high` for this one.",
+        "a": "Ruled out because a later check is not an approval, and \"a design with a missing stage or an unapproved write is rejected first\", which only a `high` finding does.",
         "b": "Ruled out because the rule fires when \"The design writes without approval and an audit is needed\", whatever was validated.",
         "c": "Ruled out because the autonomy finding is about need, not oversight, and applies only when \"An agent or a team is used on a path that is already known\"."
       }

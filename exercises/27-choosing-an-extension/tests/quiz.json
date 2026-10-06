@@ -5,11 +5,11 @@
       "id": "01-the-extension-surface-and-what-each-costs#q1",
       "page": "01-the-extension-surface-and-what-each-costs.md",
       "scope": "page",
-      "stem": "A team keeps pasting the same release checklist into the chat. Which feature does the documentation's trigger table name?",
+      "stem": "A team keeps pasting the same release checklist into the chat before each release. Where should the checklist be kept?",
       "options": {
         "a": "A line in the persistent project file, loaded in every session",
         "b": "A hook that fires on every edit",
-        "c": "An output style that sets the tone of each reply",
+        "c": "An MCP server that serves the checklist on request",
         "d": "A skill, which holds the procedure and loads when invoked"
       },
       "key": "d",
@@ -17,42 +17,42 @@
         "d": "The trigger table says \"You paste the same playbook into chat for the third time\" calls for a skill.",
         "a": "Ruled out because that file is \"Persistent context loaded every conversation\", not a procedure kept for the moment it is needed.",
         "b": "Ruled out because a hook fits \"automation that must run on every matching event\", not a procedure to read and follow.",
-        "c": "Ruled out because an output style is for \"a voice, length or format wanted in every response\"."
+        "c": "Ruled out because \"MCP gives access to a system; if the need is knowledge or a procedure, a skill is the lighter choice.\""
       }
     },
     {
       "id": "01-the-extension-surface-and-what-each-costs#q2",
       "page": "01-the-extension-surface-and-what-each-costs.md",
       "scope": "page",
-      "stem": "A repository's CLAUDE.md has grown to 600 lines of endpoint documentation. What does the page advise?",
+      "stem": "A project has forty skills, and three MCP servers that offer sixty tools. A session opens and no task has been given yet. What has each group added to its context so far?",
       "options": {
-        "a": "Move the detail into skills, which load only when needed",
-        "b": "Keep it where it is, because the file is read once per session",
-        "c": "Turn the whole file into one subagent definition",
-        "d": "Replace it with a hook that prints the reference on every request"
+        "a": "Descriptions from the first, and only names from the second",
+        "b": "Full text from the first, and full schemas from the second",
+        "c": "Descriptions from the first, and full schemas from the second",
+        "d": "Full text from the first, and only names from the second"
       },
       "key": "a",
       "explanation": {
-        "a": "The page says \"Keep CLAUDE.md under 200 lines.\" and that reference material goes to skills, \"which load on demand\".",
-        "b": "Ruled out because \"CLAUDE.md is paid for on every request\", not once per session.",
-        "c": "Ruled out because a subagent is for \"context isolation, parallel tasks, specialized workers\", not for reference text.",
-        "d": "Ruled out because a hook \"costs nothing in context unless its output is added as messages\", and one that prints the reference would add it to every event."
+        "a": "The cost table loads skill \"descriptions at start, full content when used\", and for MCP servers \"tool names; full schemas on demand\".",
+        "b": "Ruled out because an MCP server costs \"low until a tool is used\", which sixty full schemas would not be.",
+        "c": "Ruled out because \"Tool search is on by default, so idle MCP tools consume minimal context.\"",
+        "d": "Ruled out because \"Reference material belongs in a skill, which loads on demand\", not at the start of a session."
       }
     },
     {
       "id": "01-the-extension-surface-and-what-each-costs#q3",
       "page": "01-the-extension-surface-and-what-each-costs.md",
       "scope": "page",
-      "stem": "Which feature costs no context unless its output is added to the conversation?",
+      "stem": "Each edit should leave a line in an audit file, and the context window is already tight. Which feature adds the least to each request?",
       "options": {
-        "a": "A skill whose description is loaded at the start of each session",
-        "b": "An output style that applies to the whole session",
-        "c": "A hook, which runs externally",
-        "d": "A CLAUDE.md file with imports"
+        "a": "A skill with the logging steps and a short description",
+        "b": "An output style that tells Claude to log every change",
+        "c": "A hook whose script runs outside the conversation",
+        "d": "A CLAUDE.md section that holds the logging rules"
       },
       "key": "c",
       "explanation": {
-        "c": "The table says a hook loads \"nothing, since they run externally\" and costs \"zero, unless the hook returns context\".",
+        "c": "The table says a hook loads \"nothing, since they run externally\" and costs \"zero, unless the hook returns context\", \"which makes it the right place for a linter run or a log line\".",
         "a": "Ruled out because for a skill the \"descriptions are in every request\".",
         "b": "Ruled out because an output style loads \"the active style's full instructions\" with a cost on \"every request\".",
         "d": "Ruled out because \"CLAUDE.md is paid for on every request\", with its full content loaded at session start."
@@ -83,36 +83,36 @@
       "scope": "page",
       "stem": "A research task reads dozens of files and only the conclusions matter to the main conversation. Which feature fits?",
       "options": {
-        "a": "A line in CLAUDE.md, which is loaded in full at the launch of each session",
-        "b": "A skill, which adds everything that it reads to the main window as well",
-        "c": "A hook, which runs a script once per session when the work starts",
-        "d": "A subagent, which works in its own window and hands back only a summary"
+        "a": "A dynamic workflow, whose script runs many workers in the background",
+        "b": "A skill, which holds the research steps for Claude to follow",
+        "c": "An output style, which keeps every reply down to the conclusions",
+        "d": "A subagent, which works in its own window and returns a summary"
       },
       "key": "d",
       "explanation": {
         "d": "The page says to use a subagent \"when you need context isolation or when your context window is getting full\".",
-        "b": "Ruled out because a skill \"adds to your main window\".",
-        "c": "Ruled out because a hook is for \"when the action must happen the same way every time and doesn't need Claude to think\".",
-        "a": "Ruled out because the page says \"Put it in CLAUDE.md if Claude should always know it\", and conclusions of one task are not such a rule."
+        "b": "Ruled out because a skill \"adds to your main window\", so the files it reads would land in the main conversation.",
+        "c": "Ruled out because \"an output style sets how Claude responds\", and the reading would still fill the main window.",
+        "a": "Ruled out because a dynamic workflow is for a job that \"outgrows a handful of subagents\", and one research task does not."
       }
     },
     {
       "id": "02-choosing-between-similar-features-and-combining-them#q3",
       "page": "02-choosing-between-similar-features-and-combining-them.md",
       "scope": "page",
-      "stem": "A team connects Claude to its database and wants the model to use the tables and queries well. What does the page suggest?",
+      "stem": "A team wants Claude to query its database, and to know the table layout and the team's query habits when the work touches data. What should it set up?",
       "options": {
-        "a": "Only an MCP server, since it provides everything that the work needs",
-        "b": "MCP for access, and a skill for the schema and patterns",
-        "c": "Only a skill, since a skill can run the queries itself",
-        "d": "A plugin, because plugins replace both of them"
+        "a": "An MCP server for access, with the schema kept in CLAUDE.md",
+        "b": "An MCP server for access, and a skill for schema and patterns",
+        "c": "A skill holding the schema, which also runs the queries itself",
+        "d": "A hook that runs each query, with the schema in a skill"
       },
       "key": "b",
       "explanation": {
         "b": "The page says \"These solve different problems and work well together\", with MCP for the connection and a skill that \"can hold the team's database schema and query patterns\".",
-        "a": "Ruled out because MCP provides \"Tools and data access\", not knowledge of the schema and patterns.",
+        "a": "Ruled out because the page says \"Put it in a skill if it's reference material Claude needs sometimes\", and the schema matters only when the work touches data.",
         "c": "Ruled out because a skill provides \"Knowledge, workflows, reference material\", and the connection to the external system comes from MCP.",
-        "d": "Ruled out because \"Each extension solves a different problem\", and a plugin only packages them."
+        "d": "Ruled out because a hook is for \"when the action must happen the same way every time and doesn't need Claude to think\", and choosing a query needs judgment."
       }
     },
     {
@@ -142,14 +142,14 @@
       "options": {
         "a": "In a plugin shared by the six",
         "b": "In an instruction file kept in each project",
-        "c": "In an MCP server that stores the style guide",
+        "c": "In an output style that each engineer picks",
         "d": "In a skill whose description mentions commits"
       },
       "key": "b",
       "explanation": {
         "b": "The page says an instruction file is the answer for a convention that is \"always-known\", and row 14 gives it for six repositories.",
         "a": "Ruled out because \"a plugin cannot carry it, since its instruction file is not loaded as context\".",
-        "c": "Ruled out because \"MCP is how a session reaches a system that is not on the machine\", and a style guide is not such a system.",
+        "c": "Ruled out because an output style is one person's own setting, and \"none of them is shared project knowledge\".",
         "d": "Ruled out because \"a skill is loaded only if its description matches the task, so the mistake can repeat\"."
       }
     },
@@ -157,11 +157,11 @@
       "id": "03-choosing-in-practice-scenarios-reasons-and-the-practice#q3",
       "page": "03-choosing-in-practice-scenarios-reasons-and-the-practice.md",
       "scope": "page",
-      "stem": "An application that calls the Messages API must let Claude read a calendar service. The vendor offers an MCP endpoint for it, and the team wants no login of its own to maintain. Which choice does the page give?",
+      "stem": "An application that calls the Messages API must let Claude read a calendar. The vendor hosts an MCP server for it, and the team wants no login of its own to maintain. What should the application use?",
       "options": {
         "a": "A skill describing the calendar's operations",
         "b": "A tool the team defines, with its own schema and code",
-        "c": "The connector, aimed at the hosted offer",
+        "c": "The connector, set up with that remote endpoint",
         "d": "A hook that calls the calendar before each request"
       },
       "key": "c",
@@ -176,10 +176,10 @@
       "id": "03-choosing-in-practice-scenarios-reasons-and-the-practice#m1",
       "page": "03-choosing-in-practice-scenarios-reasons-and-the-practice.md",
       "scope": "module",
-      "stem": "A team wants a linter to run after every file edit, with no reliance on Claude remembering. Which feature fits, and why?",
+      "stem": "A team wants a linter to run after every file edit, in every session. Which feature fits, and why?",
       "options": {
         "a": "A skill, because Claude reads it before each change",
-        "b": "A hook, because it fires on its event and the trigger is guaranteed",
+        "b": "A hook, because the matching event fires it each time",
         "c": "A line in the project file, because it is read at the start of a session",
         "d": "An output style, because it applies to the whole session"
       },
@@ -195,38 +195,38 @@
       "id": "03-choosing-in-practice-scenarios-reasons-and-the-practice#m2",
       "page": "03-choosing-in-practice-scenarios-reasons-and-the-practice.md",
       "scope": "module",
-      "stem": "A team uses the same set of skills, hooks and MCP servers in six repositories. What does the documentation suggest?",
+      "stem": "A team uses the same set of skills, hooks and MCP servers in six repositories. What should the team do?",
       "options": {
         "a": "Package them as one plugin that each repository installs",
         "b": "Copy the files into each repository by hand and keep them in step",
         "c": "Put the whole set into one long CLAUDE.md in each repository",
-        "d": "Convert every item into a subagent that is spawned for each task"
+        "d": "Describe the set in one skill that each repository loads on demand"
       },
       "key": "a",
       "explanation": {
         "a": "The page says \"A plugin bundles skills, hooks, subagents, and MCP servers into a single installable unit\", for \"the same setup in several repositories, or to share it\".",
         "b": "Ruled out because the trigger is \"A second repository needs the same setup\", which calls for a plugin.",
         "c": "Ruled out because CLAUDE.md is paid for on \"every request\", and the guidance is \"Keep CLAUDE.md under 200 lines.\"",
-        "d": "Ruled out because a subagent is \"an isolated worker with its own context\", not a packaging unit."
+        "d": "Ruled out because a skill provides \"Knowledge, workflows, reference material\", and cannot carry hooks or servers."
       }
     },
     {
       "id": "03-choosing-in-practice-scenarios-reasons-and-the-practice#m3",
       "page": "03-choosing-in-practice-scenarios-reasons-and-the-practice.md",
       "scope": "module",
-      "stem": "A workflow that deploys to production must never start unless a person types its name. Which setting does the page give?",
+      "stem": "A workflow pushes to production, and the team wants it to start only when someone types `/deploy`. What should they change?",
       "options": {
-        "a": "`disable-model-invocation: true`, which hides it until you invoke it yourself",
-        "b": "A longer description, which makes Claude hesitate before it considers using it",
-        "c": "A line in CLAUDE.md that asks Claude to wait for a person to approve the run",
-        "d": "An output style that makes every reply shorter and more formal for the user"
+        "a": "Set `disable-model-invocation: true` in its definition",
+        "b": "Set `context: fork` so that it runs in its own window",
+        "c": "Add a CLAUDE.md line asking Claude to wait for a person",
+        "d": "Give it a vague description that no task will match"
       },
       "key": "a",
       "explanation": {
         "a": "The page says to use `disable-model-invocation: true`: \"This saves context and ensures only you trigger them.\"",
-        "b": "Ruled out because \"If descriptions are vague or overlap, Claude may load the wrong skill or miss one that would help\", which is no control.",
+        "b": "Ruled out because a skill can run \"in isolated context with `context: fork`\", which changes where it runs, not who starts it.",
         "c": "Ruled out because a line in CLAUDE.md \"is a request, not a guarantee\".",
-        "d": "Ruled out because an output style sets \"a voice, length or format wanted in every response\", and says nothing about starting skills."
+        "d": "Ruled out because \"If descriptions are vague or overlap, Claude may load the wrong skill or miss one that would help\", so a vague one can still be loaded."
       }
     },
     {

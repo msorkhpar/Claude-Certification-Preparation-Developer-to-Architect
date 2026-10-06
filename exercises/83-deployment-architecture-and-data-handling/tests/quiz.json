@@ -24,19 +24,19 @@
       "id": "01-where-the-data-goes-platform-region-and-retention#q2",
       "page": "01-where-the-data-goes-platform-region-and-retention.md",
       "scope": "page",
-      "stem": "Scenario: Harrow Insurance runs Claude on Amazon Bedrock and writes in its design that \"zero data retention is enabled with Anthropic\". What is the problem?",
+      "stem": "Scenario: Harrow Insurance runs Claude on Amazon Bedrock and writes in its design that \"zero data retention is enabled with Anthropic\". What should the architect conclude about this claim?",
       "options": {
         "a": "The statement is correct, since every platform shares one retention arrangement with the model maker",
         "b": "The statement holds, provided the company has also signed a business associate agreement with Anthropic",
         "c": "The statement is wrong, since the arrangement is the model maker's and the cloud provider is the processor",
-        "d": "The statement is correct, but it must be repeated for each separate model that the company uses in production"
+        "d": "The statement is wrong, since zero data retention is enabled for each model and not for the whole organisation"
       },
       "key": "c",
       "explanation": {
         "c": "Zero data retention is an arrangement with Anthropic, and on Bedrock the cloud provider is the processor.",
         "a": "Ruled out because \"Their retention, compliance and region rules are the provider's\", so no arrangement is shared.",
         "b": "Ruled out because that agreement is a separate arrangement, and \"On Amazon Bedrock or Google Cloud, zero data retention is not Anthropic's arrangement to give\".",
-        "d": "Ruled out because the model is a separate rule (\"A model that requires 30-day retention cannot satisfy a zero-retention requirement\") and does not change who the processor is."
+        "d": "Ruled out because the arrangement is not switched on model by model: \"it is enabled per organisation, so each new organisation needs its own\", and on Bedrock it is still not Anthropic's to enable."
       }
     },
     {
@@ -103,7 +103,7 @@
       "stem": "Scenario: Alder Dental needs zero data retention on its Claude API deployment and has chosen a model that requires 30-day retention. What is the finding?",
       "options": {
         "a": "None, because the arrangement is organisation-wide and covers the models that are in use",
-        "b": "A failed check, because the arrangement excludes anything that must keep content for thirty days",
+        "b": "A failed check, because that arrangement does not cover the one they have picked",
         "c": "A minor warning, since thirty days is short enough to be treated as nothing kept",
         "d": "None, provided the deployment's audit log is set to expire after thirty days"
       },
@@ -111,8 +111,8 @@
       "explanation": {
         "b": "A model that requires 30-day retention cannot meet a zero-retention requirement.",
         "a": "Ruled out because the arrangement \"excludes models that need 30-day retention\" so it does not cover every model.",
-        "c": "Ruled out because the requirement is zero, and the page says the model \"is part of the check\".",
-        "d": "Ruled out because \"the model is part of the check and not only the platform\", and the audit log does not change what the provider retains."
+        "c": "Ruled out because the requirement is zero, not short, and \"A model that requires 30-day retention cannot satisfy a zero-retention requirement\".",
+        "d": "Ruled out because the arrangement means \"Anthropic does not store prompts or responses at rest\", which the deployment's own audit log does not change, and \"the model is part of the check and not only the platform\"."
       }
     },
     {

@@ -414,7 +414,7 @@ The practice is in [`exercises/90-governance-safety-and-risk`](../../exercises/9
 2. Scenario: Ravi reviews a design in which a model must "always ask a person before closing an account", a rule written in the system prompt. What is the main weakness of that design?
    - **a**: The sentence is too short for the model to follow it reliably
    - **b**: The rule should sit in the user turn so that the model reads it last
-   - **c**: Nothing forces the step to happen, because an instruction only asks
+   - **c**: No separate step enforces it, so nothing stops it being skipped
    - **d**: It sends every closure to a person rather than only the unsure ones
 
 <details>

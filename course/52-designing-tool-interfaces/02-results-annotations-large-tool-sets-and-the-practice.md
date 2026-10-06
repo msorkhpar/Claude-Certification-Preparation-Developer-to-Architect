@@ -71,10 +71,10 @@ These are the wrong answers that the exam's options for this task statement offe
 
 ## Quiz
 
-3. A `search_orders` tool returns every match, sometimes thousands of rows, and the agent runs out of context before it can answer. What change helps most?
-   - **a**: Send every row in a compact format and let the model skip the extras
+3. A `search_orders` tool returns every match, sometimes thousands of rows, and the agent runs out of context before it can answer questions about all the orders. What change helps most?
+   - **a**: Send every row and tell the model to ignore the ones it does not need
    - **b**: Serve a bounded page with a cursor and a note on how to continue
-   - **c**: Keep only the first fifty rows, sorted with the newest first
+   - **c**: Keep only the first fifty rows and return them with no word about the rest
    - **d**: Move the agent to a model with a larger context window
 
 4. A `find_documents` tool answers with the sentence "Found these documents: Maintenance Schedule, Lab Access Plan." The next tool, `read_document`, requires an exact handle for one document, and the agent keeps making them up. What change fits best?
@@ -86,7 +86,7 @@ These are the wrong answers that the exam's options for this task statement offe
 <details>
 <summary>Answer key</summary>
 
-3. **b**. A page with a cursor bounds the result, and the note tells the agent how to go on. *a* is ruled out because "Bloated responses waste context and make it harder for Claude to extract what matters." *c* is ruled out because "A list that silently stops at fifty looks complete to a model", so the agent would answer from part of the matches. *d* is ruled out because the article expects "the need for context-efficient tools to remain".
+3. **b**. A page with a cursor bounds the result, and the note tells the agent how to go on. *a* is ruled out because "Bloated responses waste context and make it harder for Claude to extract what matters." *c* is ruled out because "A list that silently stops at fifty looks complete to a model", so the agent would answer about all the orders from fifty of them. *d* is ruled out because the article expects "the need for context-efficient tools to remain".
 4. **a**. The tool should hand the next step a real identifier, in a result trimmed to what that step needs. *b* is ruled out because the documentation asks the tool to "Return semantic, stable identifiers (for example, slugs or UUIDs) rather than opaque internal references", not the model to reconstruct them. *c* is ruled out because a result should "include only the fields Claude needs to reason about its next step". *d* is ruled out because more prose adds length and no handle: "Bloated responses waste context and make it harder for Claude to extract what matters."
 
 </details>

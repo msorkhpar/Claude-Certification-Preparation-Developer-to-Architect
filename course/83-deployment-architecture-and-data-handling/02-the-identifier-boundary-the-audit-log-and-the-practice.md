@@ -359,7 +359,7 @@ This quiz covers both pages of the module.
 
 2. Scenario: Alder Dental needs zero data retention on its Claude API deployment and has chosen a model that requires 30-day retention. What is the finding?
    - **a**: None, because the arrangement is organisation-wide and covers the models that are in use
-   - **b**: A failed check, because the arrangement excludes anything that must keep content for thirty days
+   - **b**: A failed check, because that arrangement does not cover the one they have picked
    - **c**: A minor warning, since thirty days is short enough to be treated as nothing kept
    - **d**: None, provided the deployment's audit log is set to expire after thirty days
 
@@ -373,7 +373,7 @@ This quiz covers both pages of the module.
 <summary>Answer key</summary>
 
 1. **a**. Serving the user from another region breaks the residency requirement, so with no deployment that keeps the data in the region the answer is none. *b* is ruled out because "serving a European user from a United States deployment because it was available is the failure the router exists to prevent". *c* is ruled out because tokenising does not change where the request is processed, and "a user's data goes only to a deployment that keeps it in the user's region". *d* is ruled out because speed is not a criterion, and the router sends a user's data "only to a deployment that keeps it in that region".
-2. **b**. A model that requires 30-day retention cannot meet a zero-retention requirement. *a* is ruled out because the arrangement "excludes models that need 30-day retention" so it does not cover every model. *c* is ruled out because the requirement is zero, and the page says the model "is part of the check". *d* is ruled out because "the model is part of the check and not only the platform", and the audit log does not change what the provider retains.
+2. **b**. A model that requires 30-day retention cannot meet a zero-retention requirement. *a* is ruled out because the arrangement "excludes models that need 30-day retention" so it does not cover every model. *c* is ruled out because the requirement is zero, not short, and "A model that requires 30-day retention cannot satisfy a zero-retention requirement". *d* is ruled out because the arrangement means "Anthropic does not store prompts or responses at rest", which the deployment's own audit log does not change, and "the model is part of the check and not only the platform".
 3. **c**. A legal hold keeps an entry whatever its age. *a* is ruled out because an entry under a hold "is never removed, whatever its age". *b* is ruled out because the hold "keeps the entry itself and not a copy made at purge time", so nothing is removed first. *d* is ruled out because no audit date decides: "A hold ends only when counsel releases it".
 
 </details>

@@ -5,17 +5,17 @@
       "id": "01-getting-json-schemas-structured-outputs-and-strict-tools#q1",
       "page": "01-getting-json-schemas-structured-outputs-and-strict-tools.md",
       "scope": "page",
-      "stem": "A team wants every reply from Claude Sonnet 5.5 to be a record in a fixed JSON shape. What does the documentation recommend?",
+      "stem": "A team moves an invoice extractor to Claude Sonnet 5.5. The old code set `tool_choice` to an invoice tool and read the call's `input`. What should the request use now?",
       "options": {
-        "a": "A tool choice of any, so that some tool is always called",
-        "b": "A forced tool whose schema is the record, chosen with the name field",
-        "c": "A prompt that shows the record and asks the model to copy the shape",
-        "d": "Structured outputs with the schema in the output configuration"
+        "a": "A tool choice of `any`, so that the invoice tool is still always called",
+        "b": "The invoice tool with `strict: true` and a tool choice of `auto`",
+        "c": "A prompt that shows the invoice record and asks for the same shape",
+        "d": "Structured outputs, with the record's schema in `output_config.format`"
       },
       "key": "d",
       "explanation": {
-        "d": "The page says to use structured outputs \"when you need a response in a fixed JSON shape\".",
-        "b": "Ruled out because `any` and `tool` \"return a 400 error\" on Claude Sonnet 5.5.",
+        "d": "A forced tool no longer works on this model, and the documentation's advice is structured outputs \"when you need a response in a fixed JSON shape\".",
+        "b": "Ruled out because the task returns a record, and \"A task that must return a record, such as an invoice, uses structured outputs\".",
         "c": "Ruled out because a prompt gives \"no guarantee; the program must parse defensively\".",
         "a": "Ruled out because `any` is one of the values that \"return a 400 error\" on this model."
       }
@@ -29,14 +29,14 @@
         "a": "It fails with a 400 error that comes with details of the unsupported item",
         "b": "The reply is checked against the limit and retried for the caller",
         "c": "The limit is read as a hint and the call goes on as usual",
-        "d": "The constraint is applied only when the field is a whole number"
+        "d": "The total is kept at 0 or above while the reply is generated"
       },
       "key": "a",
       "explanation": {
         "a": "The page says \"If you use an unsupported feature, you'll receive a 400 error with details.\"",
         "b": "Ruled out because \"a helper that validates responses still enforces every constraint in your code\", so the check is the program's job.",
         "c": "Ruled out because \"If you use an unsupported feature\" the outcome is an error, with no hint read.",
-        "d": "Ruled out because the numerical constraints are listed as unsupported with no exception: \"Numerical constraints (such as `minimum`, `maximum`, `multipleOf`)\"."
+        "d": "Ruled out because the API does not enforce the limit: it does not support \"Numerical constraints (such as `minimum`, `maximum`, `multipleOf`)\"."
       }
     },
     {
@@ -48,52 +48,52 @@
         "a": "It becomes whole once the call is repeated with more tokens",
         "b": "It keeps the shape, because the status code says success",
         "c": "The model's decline takes the place of the promised shape",
-        "d": "It is always an empty object, which signals the refusal"
+        "d": "It is a malformed record that a re-prompt can repair"
       },
       "key": "c",
       "explanation": {
         "c": "The page says \"The output may not match your schema because the refusal message takes precedence over schema constraints.\"",
         "b": "Ruled out because a refusal has \"a 200 status code and billed tokens\" and still breaks the shape.",
         "a": "Ruled out because the remedy of more tokens belongs to `max_tokens`: \"Retry with a higher `max_tokens` value to get the complete structured output.\"",
-        "d": "Ruled out because the page names no such body, only that the output \"may not match your schema\"."
+        "d": "Ruled out because \"A refusal is a result to report, not a malformed reply to repeat\"."
       }
     },
     {
       "id": "02-defensive-parsing-validation-and-the-re-prompt#q1",
       "page": "02-defensive-parsing-validation-and-the-re-prompt.md",
       "scope": "page",
-      "stem": "A reply arrives as a friendly sentence, then JSON inside a code block, then a closing remark. Which reading order does the page give?",
+      "stem": "A reply arrives as a friendly sentence, then JSON inside a code block, then a closing remark. What should the extractor do with it?",
       "options": {
-        "a": "Reject the whole reply, since extra words around the data are not allowed",
-        "b": "The first fence's body, else the span from the first brace to the last",
-        "c": "Strip only the leading sentence, then parse whatever text is left over",
-        "d": "Parse the last line alone, since data tends to follow the prose in a reply"
+        "a": "Ask the model again for bare JSON, without the words around it",
+        "b": "Parse only what the fence holds and leave the prose around it",
+        "c": "Strip the leading sentence and parse all of the text that follows",
+        "d": "Raise a parse error, since the reply as a whole is not valid JSON"
       },
       "key": "b",
       "explanation": {
-        "b": "The page's steps are to take the first fence's body, then \"the span from the first `{` to the last `}`\".",
-        "a": "Ruled out because the reader \"repairs a harmless habit\" of wrapping the data in words.",
-        "c": "Ruled out because the steps start from the fence or the braces: \"If the text has a code fence, take the body of the first fence\".",
-        "d": "Ruled out because the steps name no position for the data, only \"Take the span from the first `{` to the last `}`\"."
+        "b": "The reply has a fence, and the reader's first step is \"If the text has a code fence, take the body of the first fence\".",
+        "a": "Ruled out because the reader \"repairs a harmless habit\", and only \"text with no JSON is retried\".",
+        "c": "Ruled out because the closing remark would reach the parser, while even without a fence the reader keeps only \"the span from the first `{` to the last `}`\".",
+        "d": "Ruled out because a parse error comes only \"If there is no such span, or it is not valid JSON\", and this reply has one."
       }
     },
     {
       "id": "02-defensive-parsing-validation-and-the-re-prompt#q2",
       "page": "02-defensive-parsing-validation-and-the-re-prompt.md",
       "scope": "page",
-      "stem": "A validator meets `true` where the schema wants an integer quantity. What does the page decide?",
+      "stem": "A validator meets `true` for `qty`, which the schema declares an integer of at least 1. What does the problem list hold for `qty`?",
       "options": {
-        "a": "Accept it, since in many languages a truthy value counts as the number one",
-        "b": "Convert it to 1 and go on with the remaining checks of the field",
-        "c": "Report a separate problem for every constraint that the field carries in the schema",
-        "d": "A single problem is reported for the value, and its other checks are skipped"
+        "a": "None, since in Python `True` is an `int` and equals 1",
+        "b": "None, once it is converted to 1 and passes the minimum",
+        "c": "Two, one for the wrong type and one for the minimum",
+        "d": "One, for the wrong type, with the minimum skipped"
       },
       "key": "d",
       "explanation": {
-        "d": "The page says \"A wrong type stops the checks of that value.\" and \"`true` is not a quantity\".",
-        "a": "Ruled out because \"A boolean is never a number or an integer\".",
-        "b": "Ruled out because the reader \"does not repair a broken value\", and the same holds for a value.",
-        "c": "Ruled out because \"A wrong type stops the checks of that value\", so no further problem is added."
+        "d": "The page's own case is that \"`true` for a `qty` of type `integer` is one problem\", and the type comes before the minimum.",
+        "a": "Ruled out because \"A boolean is never a number or an integer\", whatever Python's types say.",
+        "b": "Ruled out because nothing is converted: \"the schema's meaning decides: `true` is not a quantity\".",
+        "c": "Ruled out because \"A wrong type stops the checks of that value\", so the minimum adds no second problem."
       }
     },
     {
@@ -104,7 +104,7 @@
       "options": {
         "a": "A reply with a valid body but a total of zero, which breaks the minimum",
         "b": "A reply that was cut off because it ran into the token limit",
-        "c": "A reply whose JSON is wrapped in a code fence with prose around it",
+        "c": "A reply that holds only prose, with no JSON anywhere in it",
         "d": "A reply that quotes a sentence which the document never contained"
       },
       "key": "b",
@@ -112,45 +112,45 @@
         "b": "The page says a reply at the limit has the action \"Raise `max_tokens` or continue the response\", and that \"Asking again with an error list cannot fix either\".",
         "a": "Ruled out because the validator \"returns a list of problems, each with a path\", and the next call uses it.",
         "d": "Ruled out because a failed check leads to a repair: \"the next call needs the whole conversation\".",
-        "c": "Ruled out because \"If the text has a code fence, take the body of the first fence\", so the reply is read and not rejected."
+        "c": "Ruled out because a reply with no JSON fails the parse, and \"When the reply fails, the next call needs the whole conversation\"."
       }
     },
     {
       "id": "02-defensive-parsing-validation-and-the-re-prompt#m1",
       "page": "02-defensive-parsing-validation-and-the-re-prompt.md",
       "scope": "module",
-      "stem": "An invoice extractor runs on a model that supports structured outputs. The reply has the right fields and types, yet the cited sentence is one the document never contained. Who catches it?",
+      "stem": "An invoice extractor runs on a model that supports structured outputs. The reply has the right fields and types, yet the cited sentence is one the document never contained. Which change catches such replies?",
       "options": {
-        "a": "The API, because the schema lists the evidence field as a string type",
-        "b": "Only the program, by searching the source text for that exact wording",
-        "c": "The grammar cache, which compares each reply with the earlier replies",
-        "d": "The stop reason, which flags every invented sentence at the end of the reply"
+        "a": "Describe the evidence field in the schema as an exact quotation from the document",
+        "b": "Look up the evidence string in the source text and reject it when absent",
+        "c": "Accept the evidence when it closely matches some sentence of the document",
+        "d": "Read `stop_reason` first and re-prompt whenever it is not `end_turn`"
       },
       "key": "b",
       "explanation": {
         "b": "The page says \"If the string is not in the document, the model made it up or changed it\", and the check \"needs no model\".",
-        "a": "Ruled out because \"A schema cannot say that a number is at least 0, that a quotation occurs in the document\".",
-        "c": "Ruled out because the cache only holds a compiled grammar: \"Compiled grammars are cached for 24 hours from last use\".",
-        "d": "Ruled out because \"The loop reads `stop_reason` before the body\", and it reports why generation ended, not whether the text is true."
+        "a": "Ruled out because a description is still part of the schema, and \"A schema cannot say that a number is at least 0, that a quotation occurs in the document\".",
+        "c": "Ruled out because \"a looser match would accept a quotation with a changed number\".",
+        "d": "Ruled out because this reply completes normally, and \"A reply that ends with `end_turn` goes on to the parse\"."
       }
     },
     {
       "id": "02-defensive-parsing-validation-and-the-re-prompt#m2",
       "page": "02-defensive-parsing-validation-and-the-re-prompt.md",
       "scope": "module",
-      "stem": "A team's code retries every failed reply up to five times. A document triggers a `refusal`. What is the right change?",
+      "stem": "A team's extractor retries every failed reply up to five times. A document triggers a `refusal`. Following this module's loop, what is the right change?",
       "options": {
-        "a": "Stop there and report it, rather than repeating the same request",
+        "a": "End the attempts there and hand the status back to the caller",
         "b": "Add the refusal text to the next prompt, for the model to explain itself",
-        "c": "Switch to a forced tool, which accepts every document without objection",
+        "c": "Treat it like a cut-off reply and raise `max_tokens` before retrying",
         "d": "Raise the attempts to ten, so that one of the later calls gets past it"
       },
       "key": "a",
       "explanation": {
-        "a": "The page says that \"a refusal is a decision, not a malformed answer\", so the loop reports it; the documented fallback model is a different request, not a repeat.",
+        "a": "The page says that \"a refusal is a decision, not a malformed answer\", and \"this course's loop stops and reports\"; the documented fallback model is a different request, not a repeat.",
         "d": "Ruled out because \"The same request gets the same decision, and each call is billed.\"",
         "b": "Ruled out because \"Asking again with an error list cannot fix either\".",
-        "c": "Ruled out because on some models `any` and `tool` \"return a 400 error\", and no tool choice overrides a refusal."
+        "c": "Ruled out because a larger limit is the remedy for the other stop reason: \"a cut-off reply needs a larger limit\"."
       }
     },
     {
@@ -167,7 +167,7 @@
       "key": "a",
       "explanation": {
         "a": "The page says \"Compare enum values case-insensitively, and avoid enum values that differ only in capitalization.\"",
-        "b": "Ruled out because the response completes normally, \"with no error and no special `stop_reason`\", and the difference is only in capital letters.",
+        "b": "Ruled out because the difference is only in capital letters, and \"The example's `normalise_enum` maps `Eur` back to `EUR` before it validates\".",
         "c": "is ruled out for the same reason, since the response is \"with no error and no special `stop_reason`\".",
         "d": "Ruled out because \"A refusal is a result to report\", and it is marked by its stop reason, which this reply lacks."
       }

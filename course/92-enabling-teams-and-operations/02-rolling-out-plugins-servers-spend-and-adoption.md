@@ -516,15 +516,15 @@ The practice is in [`exercises/92-enabling-teams-and-operations`](../../exercise
 
 2. Scenario: A platform team wants to show leadership that Claude Code is working. It sets a target of more accepted lines per developer each month and starts the rollout on Monday. By the measures this module teaches, what is the main weakness of the plan?
    - **a**: Accepted lines are not shown on the dashboard and cannot be tracked
-   - **b**: Developers accept fewer lines as they learn, so the figure falls over time
-   - **c**: A monthly target is too coarse to reflect how developers actually work
-   - **d**: Activity rises without any gain, so the figure proves nothing
+   - **b**: Accepted lines need the GitHub app, which the plan has not set up
+   - **c**: It counts accepted lines where daily active users would show real use
+   - **d**: Engineers meet it by keeping more suggested edits while merges stay as slow
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. Seven thousand, eight thousand and six thousand add up to 21000, which is more than 20000. *a* is ruled out because "so the organisation limit would decide before the group limits did and nobody would know which one they were under". *c* is ruled out because "Both are checked as a boundary: a total of exactly 20000 passes and 20001 does not", so a total of 21000 fails whatever happens to unused budget. *d* is ruled out because the page's own example has "three groups with 6000, 8000 and 6000 against an organisation limit of 20000", so equal limits are not required.
-2. **d**. Lines accepted measure activity. *a* is ruled out because "The dashboard counts lines accepted as a usage metric". *c* is ruled out because the page's objection is "A target on an activity invites the activity", not the length of the period. *b* is ruled out because the page gives no such trend and rests on the point that "lines accepted can be raised by accepting more lines".
+2. **d**. A target on an activity rewards the activity itself, so it can be met while pull requests merge no sooner, and nothing measured shows a result. *a* is ruled out because "The dashboard counts lines accepted as a usage metric". *c* is ruled out because the page lists "lines accepted, suggestions accepted, daily active users, sessions" together as usage metrics that measure activity, so daily active users show no more of a result. *b* is ruled out because the app is needed for "Contribution metrics (merged pull requests with assistance)", and lines accepted are not among them.
 
 </details>
 
@@ -532,9 +532,9 @@ The practice is in [`exercises/92-enabling-teams-and-operations`](../../exercise
 
 This quiz covers both pages of the module.
 
-1. Scenario: An organisation's managed settings name its approved MCP servers in `allowedMcpServers` and set no other key for servers. A developer's laptop still uses a server that appears only in their own user file. Which fact explains it?
+1. Scenario: An organisation's managed settings name its approved MCP servers in `allowedMcpServers`. A developer's laptop still uses a server that appears only in their own user file. Which fact explains it?
    - **a**: The user file outranks the managed file for any server it names
-   - **b**: An allowlist alone blocks nothing, since only a deny entry stops a server
+   - **b**: Managed settings take no server keys, so the managed list was ignored
    - **c**: The two allowlists combined, since nothing locks them to one source
    - **d**: The user file was read last, so its entries replaced the managed ones
 
@@ -553,7 +553,7 @@ This quiz covers both pages of the module.
 <details>
 <summary>Answer key</summary>
 
-1. **c**. Without `allowManagedMcpServersOnly`, a list combines across files, so the developer's own entry widens the managed allowlist. *b* is ruled out because "only the managed `allowedMcpServers` list applies and a developer's own list cannot widen it" once the lock is on, so the allowlist does restrict. *a* is ruled out because "no user, project or local value overrides it" for the managed level. *d* is ruled out because a list "is combined across files and not replaced".
+1. **c**. Without `allowManagedMcpServersOnly`, a list combines across files, so the developer's own entry widens the managed allowlist. *b* is ruled out because the administrator "can restrict MCP servers to a managed allowlist", so the managed list is read and applies alongside the developer's own. *a* is ruled out because "no user, project or local value overrides it" for the managed level. *d* is ruled out because a list "is combined across files and not replaced".
 2. **b**. A plugin loaded from a folder for one session comes in through a sideload flag, and that key rejects those flags. *a* is ruled out because "the allowlist does not stop a developer from loading a plugin from a folder for one run with a command-line flag". *c* is ruled out because "only managed hooks run" is all that key does, and the plugin's skills and agents still load. *d* is ruled out because "only the managed `allowedMcpServers` list applies", which governs servers and leaves the plugin's skills and agents loaded.
 3. **d**. A baseline with a release cycle in it lets a later change be measured. *b* is ruled out because the page says "enough to include a release cycle and a quiet week", not a limit of the dashboard. *c* is ruled out because the plan "states two outcome targets: the share of merged pull requests with assistance, and the time to merge". *a* is ruled out because "the baseline of four weeks and the way the limits add up are this course's design values", not a cycle of usage credits.
 

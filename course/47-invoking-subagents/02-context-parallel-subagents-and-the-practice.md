@@ -126,17 +126,17 @@ This quiz covers both pages of the module.
    - **c**: Ask in the brief for line numbers on every finding the subagent returns
    - **d**: Switch the subagent to a larger model with a longer context window
 
-3. Six delegates run side by side, and each asks for approval before reading files, which floods the operator. Which design fits best?
+3. Six delegates run side by side, and each must inspect files to do its job. Each asks for approval before opening a file, which floods the operator. Which design fits best?
    - **a**: Take the Read tool out of the definitions of all six delegates
    - **b**: Set bypassPermissions in each agent definition of the six delegates
-   - **c**: Run the six one after another instead of side by side
-   - **d**: Add an allow rule on the parent that every subagent inherits
+   - **c**: Run the parent session in bypassPermissions for this job
+   - **d**: Add an allow rule for reads on the parent session
 
 <details>
 <summary>Answer key</summary>
 
 1. **c**. A tool that is not in the subagent's session cannot be called, whatever the mode. *b* is ruled out because a definition's mode applies only under a narrower parent: "A subagent runs in the parent session's permission mode unless you set `permissionMode` on its `AgentDefinition` and the parent session is in `default`, `dontAsk`, or `plan` mode." *a* is ruled out because the mode only approves calls to tools the subagent has: "A tool you leave out isn't in the subagent's session at all: Claude works without it, with no permission prompt or error." *d* is ruled out because "allowed_tools does not constrain bypassPermissions".
 2. **b**. The parent may summarize, so an instruction in the prompt of the main `query()` call is what keeps the subagent's words. *a* is ruled out because the paraphrase happens in the parent, which "may summarize it in its own response". *c* is ruled out because the subagent's report already held the line numbers, and the loss happens later, since "the coordinator may summarize". *d* is ruled out because a larger model does not stop the coordinator from summarizing: "The parent receives the subagent's final report, but may summarize it in its own response."
-3. **d**. Permission rules set on the parent reach every subagent, so one allow rule answers all six requests: subagents "inherit from the parent conversation". *b* is ruled out because a definition cannot set bypass: "A subagent runs in `bypassPermissions` mode only when the parent session itself does." *c* is ruled out because sequencing independent work costs time: "independent subtasks finish in the time of the slowest one rather than the sum of all of them". *a* is ruled out because a subagent without the tool cannot read: "A tool you leave out isn't in the subagent's session at all: Claude works without it".
+3. **d**. Permission rules set on the parent reach every subagent, so one allow rule answers all six requests: subagents "inherit from the parent conversation". *b* is ruled out because a definition cannot set bypass: "A subagent runs in `bypassPermissions` mode only when the parent session itself does." *c* is ruled out because it lifts every check for every delegate, not only the read prompts: "inheriting `bypassPermissions` grants them full, autonomous system access". *a* is ruled out because the delegates need the files, and a subagent without the tool cannot read them: "A tool you leave out isn't in the subagent's session at all: Claude works without it".
 
 </details>

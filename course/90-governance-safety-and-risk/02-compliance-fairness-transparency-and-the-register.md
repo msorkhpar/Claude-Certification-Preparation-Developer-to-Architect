@@ -396,7 +396,7 @@ The practice is in [`exercises/90-governance-safety-and-risk`](../../exercises/9
 1. Scenario: Mira is asked to honour a deletion request from a customer whose requests appear in the audit entries of a claims assistant. Those entries hold tokens, and one table maps each token to a person. What does the design do?
    - **a**: Delete the entries of that customer from the log
    - **b**: Remove the vault rows that tie them to anything in the log
-   - **c**: Replace the tokens in that customer's entries with new tokens
+   - **c**: Move that customer's vault rows into a separate archive table
    - **d**: Mark that customer's entries as deleted and hide them from reports
 
 2. Scenario: Tomas must set how long a support assistant keeps its audit records. Tomas's design has a shortest period, a longest period and a number of days between them. A court order then opens a case that covers a set of those records. What happens to those records?
@@ -408,7 +408,7 @@ The practice is in [`exercises/90-governance-safety-and-risk`](../../exercises/9
 <details>
 <summary>Answer key</summary>
 
-1. **b**. Removing the vault rows leaves the entries and unlinks them from the person. *a* is ruled out because "Deleting every audit entry would destroy the proof". *c* is ruled out because the design removes "the map: the vault entries for that person go", and new tokens in the entries leave that person's vault rows in place. *d* is ruled out because "keeping both leaves the person identifiable", and hidden entries still sit beside the vault map.
+1. **b**. Removing the vault rows leaves the entries and unlinks them from the person. *a* is ruled out because "the audit entries hold tokens and the proof is worth keeping", so the customer's entries stay and only their link to the customer goes. *c* is ruled out because "the vault entries for that person go", and an archive table still maps those tokens to the customer. *d* is ruled out because "keeping both leaves the person identifiable", and hidden entries still sit beside the vault map.
 2. **d**. A legal hold is the one thing that outranks the ceiling, and the records are released when it ends. *a* is ruled out because the hold keeps records longer, as "the records in scope are kept past it". *c* is ruled out because "they are released when the hold ends", and an unlimited table keeps them after the case. *b* is ruled out because "A legal hold is the one thing that outranks the ceiling", so the ordinary schedule does not apply.
 
 </details>
@@ -424,22 +424,22 @@ This quiz covers both pages of the module.
    - **d**: It fails until the system prompt tells the model to filter input
 
 2. Scenario: A review finds that a model system's average accuracy is 94 percent, and that one language group, a small part of the traffic, scores 70 percent. The team says the system passes. How should the reviewer answer that claim?
-   - **a**: Accept it, since a group that small cannot be measured reliably
-   - **b**: Reject it, since the 24-point gap between segments is the failure
+   - **a**: Accept it, since a language group is not a segment that is reported
+   - **b**: Reject it, since the measure to judge is the gap between segments
    - **c**: Reject it until the overall accuracy rises well above 94 percent
    - **d**: Accept it, since the launch test covered the traffic broadly
 
-3. Scenario: An auditor asks a team to prove that a refund over a set amount was approved by a person. The team has an audit entry for the refund with a request id, an outcome of human and a character count. What do they have?
-   - **a**: Too little, since the entry leaves out the model's confidence score
-   - **b**: A record that is too thin, since only the text proves what happened
-   - **c**: A record that holds the refund amount and the approver's name
-   - **d**: Evidence of the step, with no copy of the customer's text kept
+3. Scenario: An auditor asks a team to show that a refund paid 200 days ago was put in front of a person. The team's audit entry for it holds the request id, the action, the consequence high, the outcome human and a character count. The team keeps entries for 365 days, above a floor of 90. What should the team tell the auditor?
+   - **a**: That it falls short, since it leaves out the model's confidence score
+   - **b**: That it has expired, since it is older than the 90-day floor
+   - **c**: That it cannot be shared, since it would expose the customer
+   - **d**: That it proves the step, since the routing result is logged
 
 <details>
 <summary>Answer key</summary>
 
 1. **c**. Every control in the register must be a real control in the design, with a layer and a failure mode, so a filter that exists only on paper fails the row. *b* is ruled out because a residual comes on top of a control, as each failure mode "gets a control, an owner and a stated residual". *a* is ruled out because an owner does not create the control, and "a row with a control that does not exist is a wish". *d* is ruled out because "a line in a prompt is a request, and a control is a step the model cannot skip".
-2. **b**. Fairness is measured as a gap between groups, and a gap of 24 points fails whatever the overall figure says. *a* is ruled out because "The groups must be defined where they can be measured", and a language group can be labelled and so reported. *c* is ruled out because "a headline average hides a failing group exactly as it hides a failing segment", so a higher average can still hide the group at 70. *d* is ruled out because "fairness is a property of outcomes by group", and a broad launch test is not a gap measure.
-3. **d**. The record shows the step happened without a copy of the data. *b* is ruled out because the team that "kept a record of identifiers, sizes and outcomes" is the one of which the page says "it proves what happened", with no text stored. *c* is ruled out because the entry holds "request id, action, consequence, outcome and the size of the text", which names no amount or approver. *a* is ruled out because "confidence is not evidence", so a score would add nothing to the proof that a person approved.
+2. **b**. Fairness is the same metric computed per group, with the gap between the best and the worst group shown, and a group at 70 beside an average of 94 is a gap the average does not show. *a* is ruled out because "a segment you cannot label cannot be reported", and this group was labelled, since it was scored at 70 percent. *c* is ruled out because "a headline average hides a failing group exactly as it hides a failing segment", so a higher average can still hide the group at 70. *d* is ruled out because "fairness is a property of outcomes by group", and a broad launch test is not a gap measure.
+3. **d**. A high-consequence action is routed to a person, and the outcome field records that route for this refund, with no text needed to show it. *b* is ruled out because the floor is "the shortest period kept, so that an incident found late can still be examined", and an entry of 200 days is still inside a window of 365. *c* is ruled out because the entry holds "request id, action, consequence, outcome and the size of the text", none of which names the customer. *a* is ruled out because "a high-consequence action goes to `human` whatever the confidence", so a score adds nothing to the proof of the route.
 
 </details>

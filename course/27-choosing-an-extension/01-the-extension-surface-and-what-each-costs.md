@@ -105,29 +105,29 @@ their matching events regardless of source."
 
 ## Quiz
 
-1. A team keeps pasting the same release checklist into the chat. Which feature does the documentation's trigger table name?
+1. A team keeps pasting the same release checklist into the chat before each release. Where should the checklist be kept?
    - **a**: A line in the persistent project file, loaded in every session
    - **b**: A hook that fires on every edit
-   - **c**: An output style that sets the tone of each reply
+   - **c**: An MCP server that serves the checklist on request
    - **d**: A skill, which holds the procedure and loads when invoked
 
-2. A repository's CLAUDE.md has grown to 600 lines of endpoint documentation. What does the page advise?
-   - **a**: Move the detail into skills, which load only when needed
-   - **b**: Keep it where it is, because the file is read once per session
-   - **c**: Turn the whole file into one subagent definition
-   - **d**: Replace it with a hook that prints the reference on every request
+2. A project has forty skills, and three MCP servers that offer sixty tools. A session opens and no task has been given yet. What has each group added to its context so far?
+   - **a**: Descriptions from the first, and only names from the second
+   - **b**: Full text from the first, and full schemas from the second
+   - **c**: Descriptions from the first, and full schemas from the second
+   - **d**: Full text from the first, and only names from the second
 
-3. Which feature costs no context unless its output is added to the conversation?
-   - **a**: A skill whose description is loaded at the start of each session
-   - **b**: An output style that applies to the whole session
-   - **c**: A hook, which runs externally
-   - **d**: A CLAUDE.md file with imports
+3. Each edit should leave a line in an audit file, and the context window is already tight. Which feature adds the least to each request?
+   - **a**: A skill with the logging steps and a short description
+   - **b**: An output style that tells Claude to log every change
+   - **c**: A hook whose script runs outside the conversation
+   - **d**: A CLAUDE.md section that holds the logging rules
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The trigger table says "You paste the same playbook into chat for the third time" calls for a skill. *a* is ruled out because that file is "Persistent context loaded every conversation", not a procedure kept for the moment it is needed. *b* is ruled out because a hook fits "automation that must run on every matching event", not a procedure to read and follow. *c* is ruled out because an output style is for "a voice, length or format wanted in every response".
-2. **a**. The page says "Keep CLAUDE.md under 200 lines." and that reference material goes to skills, "which load on demand". *b* is ruled out because "CLAUDE.md is paid for on every request", not once per session. *c* is ruled out because a subagent is for "context isolation, parallel tasks, specialized workers", not for reference text. *d* is ruled out because a hook "costs nothing in context unless its output is added as messages", and one that prints the reference would add it to every event.
-3. **c**. The table says a hook loads "nothing, since they run externally" and costs "zero, unless the hook returns context". *a* is ruled out because for a skill the "descriptions are in every request". *b* is ruled out because an output style loads "the active style's full instructions" with a cost on "every request". *d* is ruled out because "CLAUDE.md is paid for on every request", with its full content loaded at session start.
+1. **d**. The trigger table says "You paste the same playbook into chat for the third time" calls for a skill. *a* is ruled out because that file is "Persistent context loaded every conversation", not a procedure kept for the moment it is needed. *b* is ruled out because a hook fits "automation that must run on every matching event", not a procedure to read and follow. *c* is ruled out because "MCP gives access to a system; if the need is knowledge or a procedure, a skill is the lighter choice."
+2. **a**. The cost table loads skill "descriptions at start, full content when used", and for MCP servers "tool names; full schemas on demand". *b* is ruled out because an MCP server costs "low until a tool is used", which sixty full schemas would not be. *c* is ruled out because "Tool search is on by default, so idle MCP tools consume minimal context." *d* is ruled out because "Reference material belongs in a skill, which loads on demand", not at the start of a session.
+3. **c**. The table says a hook loads "nothing, since they run externally" and costs "zero, unless the hook returns context", "which makes it the right place for a linter run or a log line". *a* is ruled out because for a skill the "descriptions are in every request". *b* is ruled out because an output style loads "the active style's full instructions" with a cost on "every request". *d* is ruled out because "CLAUDE.md is paid for on every request", with its full content loaded at session start.
 
 </details>

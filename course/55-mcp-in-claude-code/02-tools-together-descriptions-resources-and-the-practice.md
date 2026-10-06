@@ -64,7 +64,7 @@ These are the wrong answers that the exam's options for this task statement offe
 ## Quiz
 
 1. An agent keeps answering questions about the team's runbooks with Grep over a stale copy in the checkout, although an operations server has a search tool whose description reads `Searches runbooks`. What is the best fix?
-   - **a**: Make the documentation server load at the start of each session
+   - **a**: Make the operations server load at the start of each session
    - **b**: Open its text with when to prefer it over pattern matching
    - **c**: Remove the competing tool from the agent's list of tools
    - **d**: Lengthen the text until it covers every detail of the tool
@@ -76,17 +76,17 @@ These are the wrong answers that the exam's options for this task statement offe
    - **d**: Move the docs server into the user scope to load everywhere
 
 3. A team gives the agent its whole orders database through one MCP tool that runs any SQL it is given, and the job is to report on open orders. What is the architectural concern?
-   - **a**: An oversized result is lost, and the agent never sees any of the rows
-   - **b**: The description is cut at the limit, and the agent cannot use it
+   - **a**: A large result set overflows, with the excess rows silently dropped
+   - **b**: The description is cut at the limit, with its main point lost
    - **c**: Access stays all-or-nothing, with no permission rule to scope it
-   - **d**: Tool search hides the definition, and the agent cannot find it
+   - **d**: Tool search defers the definition, with the tool left out of reach
 
 <details>
 <summary>Answer key</summary>
 
 1. **b**. The description is what the model chooses by, so it must say when to prefer the tool, with the point first and the boundary against the competing tool near the start. *a* is ruled out because loading at the start only makes the definition visible: "makes the definition visible and does not say when to prefer it". *c* is ruled out because "Removing Grep is a blunt answer, because the agent then cannot search the code in the checkout". *d* is ruled out because "Claude Code truncates each tool description and each server's instructions at 2,048 characters by default".
 2. **a**. A catalog is wanted before work starts, and a resource can be attached to the prompt so that no discovery calls are needed. *b* is ruled out because "The limit concerns the size of one result and does nothing for the number of calls". *c* is ruled out because a hint "does not change this: it describes the tool to a client and does not tell the model what exists". *d* is ruled out because "it decides where a server loads and not what it exposes".
-3. **c**. A permission rule can allow or deny a tool by name, so one tool that does everything leaves nothing to scope. *a* is ruled out because an oversized result is kept: "Claude Code saves it to a file and replaces it in the conversation with a message that names the file path". *b* is ruled out because a cut keeps the start of the text, which wording protects: "written with the decisive sentence first so that a truncation cannot remove it". *d* is ruled out because a definition is found by the model and not by a person: "a definition is loaded when Claude needs it".
+3. **c**. A permission rule can allow or deny a tool by name, so one tool that does everything leaves nothing to scope. *a* is ruled out because an oversized result is kept: "Claude Code saves it to a file and replaces it in the conversation with a message that names the file path". *b* is ruled out because a cut keeps the start of the text, which wording protects: "written with the decisive sentence first so that a truncation cannot remove it". *d* is ruled out because a deferred definition is still brought in on demand: "a definition is loaded when Claude needs it".
 
 </details>
 

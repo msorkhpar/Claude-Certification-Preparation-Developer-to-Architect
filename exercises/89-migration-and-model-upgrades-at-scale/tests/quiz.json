@@ -24,18 +24,18 @@
       "id": "01-the-calendar-the-audit-and-the-settings-a-new-model-changes#q2",
       "page": "01-the-calendar-the-audit-and-the-settings-a-new-model-changes.md",
       "scope": "page",
-      "stem": "A team tested a model last year and now finds it listed as legacy in the documentation. What should they conclude?",
+      "stem": "A model that several of a team's applications call is listed as legacy, with no retirement scheduled for it yet. The team asks whether its migration plan can wait. What should they decide?",
       "options": {
-        "a": "It has a retirement date and will fail on that day, so requests must already be moved",
-        "b": "It can still be the recommended choice for new work, since only deprecated models are withdrawn",
-        "c": "It gets no more updates and may later be deprecated, so plan the move before a date is set",
-        "d": "It has been retired already, so every request that names it comes back as a failure"
+        "a": "Switch to the named replacement today, since a legacy listing comes with a successor and a date",
+        "b": "Let the plan wait for a retirement date, since the 60-day notice leaves time to move then",
+        "c": "Begin the move early, since updates have stopped and any later cut-off comes with finite notice",
+        "d": "Reroute every call at once, since legacy is the state in which requests to the model fail"
       },
       "key": "c",
       "explanation": {
-        "c": "Legacy means \"The model will no longer receive updates and may be deprecated in the future\", so the plan starts before any retirement date exists.",
-        "a": "Ruled out because deprecated is the state where Anthropic \"provides a recommended replacement and assigns a retirement date\".",
-        "b": "Ruled out because active is the state where \"The model is fully supported and recommended for use\".",
+        "c": "Legacy means \"The model will no longer receive updates and may be deprecated in the future\", and once a date is set \"There is notice, and it is finite\", so the plan starts before any retirement date exists.",
+        "a": "Ruled out because the successor and the date belong to the deprecated state, where \"Anthropic provides a recommended replacement and assigns a retirement date\".",
+        "b": "Ruled out because \"Sixty days is the shortest warning, and a migration of forty applications can take longer than that\".",
         "d": "Ruled out because \"Requests to retired models will fail\" describes the retired state, not legacy."
       }
     },
@@ -43,16 +43,16 @@
       "id": "02-the-gate-the-roll-out-and-the-way-back#q1",
       "page": "02-the-gate-the-roll-out-and-the-way-back.md",
       "scope": "page",
-      "stem": "A staged roll-out sits at 5 percent of traffic. Only 300 requests have been counted, with no errors, and the minimum is 1,000. What is the next step?",
+      "stem": "In this module's example, a staged roll-out sits at 5 percent of traffic, with a minimum of 1,000 requests per stage and a limit of 5 errors per thousand. The stage has served 300 requests with no errors. What is the next step?",
       "options": {
-        "a": "Advance to 25 percent, since a clean record needs no further evidence",
-        "b": "Hold where it is, since a sample this small shows nothing yet",
-        "c": "Roll back to zero, since too few requests counts as a failed stage",
-        "d": "Move all traffic over, since the gate already passed on the suite"
+        "a": "Advance to 25 percent, since a stage that shows no errors at all has proved itself healthy",
+        "b": "Hold the share and keep counting, since it has too little evidence yet to be judged either way",
+        "c": "Roll back to zero, since a stage short of its request count is treated as a failure",
+        "d": "Move all traffic to the new model, since the gate already passed on the regression suite"
       },
       "key": "b",
       "explanation": {
-        "b": "A stage with fewer requests than the minimum says nothing yet, so the rule is to hold at the stage.",
+        "b": "300 is below the example's minimum of 1,000, and a stage with fewer requests than the minimum says nothing yet, so the rule is to hold at the stage.",
         "a": "Ruled out because \"A stage with fewer requests than the minimum (1,000 in the example) says nothing yet\".",
         "c": "Ruled out because the share goes back to zero only when errors pass the limit: \"Over it, the share goes back to zero\".",
         "d": "Ruled out because \"Passing a suite is a prediction about traffic, and traffic is where it is tested\"."
@@ -83,14 +83,14 @@
       "scope": "module",
       "stem": "The new model costs about a third more per answer and fixes the refund errors. The product owner asks whether to move. Which message fits the architect's role?",
       "options": {
-        "a": "Recommend staying on the old model, because a higher cost is reason enough to avoid the whole change",
-        "b": "Recommend the move, because the newer model is the one that the vendor has recommended as the replacement",
-        "c": "Lay out the accuracy gain, the extra spend and the date that forces the choice, for them to weigh",
-        "d": "Defer the decision until the old model retires, so that the choice is made by the calendar instead"
+        "a": "Recommend staying on the old model, because a third more per answer outweighs the refund fix",
+        "b": "Recommend the move, because the vendor has named the newer model as the replacement to use",
+        "c": "Ask them to choose between the better accuracy and the higher bill, because staying has an end too",
+        "d": "Defer the decision until the retirement date nears, because more evidence on cost arrives by then"
       },
       "key": "c",
       "explanation": {
-        "c": "The decision is a trade, and the architect states it with its date.",
+        "c": "The decision is a trade the owner makes, and the architect states it with its date, since \"staying has a date that ends it\".",
         "b": "Ruled out because \"A recommended replacement is a starting point, not a decision\".",
         "a": "Ruled out because \"A rise in cost is a number to put before the owner, not a verdict\".",
         "d": "Ruled out because \"Waiting for the retirement date hands the decision to the calendar, and gives up the rollback\"."
@@ -122,16 +122,16 @@
       "stem": "On the day the new model went live, the team deleted the old model's id from its configuration to keep it tidy. Two days later errors spike. What did the cleanup take away?",
       "options": {
         "a": "Nothing, since the gate already approved the new model and a rollback is no longer needed",
-        "b": "The record of which key called which model, since only the configuration holds it",
-        "c": "The new cost baseline, which can only be computed while the old id stays configured",
-        "d": "The way back, which needs the previous one kept in place and tested until its own retirement"
+        "b": "The usage audit, which can only be run while the old model id is still configured",
+        "c": "The retirement alert, which is raised from the model id held in the configuration",
+        "d": "The way back, since traffic can no longer be sent to the version that served it before"
       },
       "key": "d",
       "explanation": {
         "d": "The page says \"the old model is the rollback, and it stays so until its own retirement date\".",
         "a": "Ruled out because \"a suite predicts and traffic proves\", and an error found after the old model is gone has no way back.",
-        "b": "Ruled out because the Console export gives \"usage broken down by API key and model\", so the record does not live in the configuration.",
-        "c": "Ruled out because the baseline is reset by the rule \"Recount tokens and re-baseline cost\" on the replacement, which needs no old id."
+        "b": "Ruled out because the audit is a Console export that shows \"usage broken down by API key and model\", so it does not depend on the configuration.",
+        "c": "Ruled out because the calendar sits next to the audit \"so that an alert is raised from the date\", not from the configuration."
       }
     }
   ]

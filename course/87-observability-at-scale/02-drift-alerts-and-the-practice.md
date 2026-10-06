@@ -585,9 +585,9 @@ The practice is in [`exercises/87-observability-at-scale`](../../exercises/87-ob
 
 1. After a change of model, the error rate and the latency look the same. Yet tokens per answer are up by 40 percent and cost per answer by more than a third, and nobody was told. Which practice would have caught it?
    - **a**: Page the on-call engineer when the error rate passes a fixed ceiling, which covers every failure
-   - **b**: Compare each layer's figures with those saved before the switch and flag a shift past a set margin
+   - **b**: Compare each layer's figures with values stored earlier and flag a shift past a set margin
    - **c**: Read a sample of the conversations each week and note anything that looks odd to the reader
-   - **d**: Watch only the metrics that moved down, since a rise just means that the product is used more
+   - **d**: Track the daily totals of tokens and cost, and read a rise in them as more use of the product
 
 2. A team pages its on-call engineer whenever a single minute of tool errors passes the threshold. The pages come nightly and are mostly noise. Which change fits?
    - **a**: Raise the threshold until the nightly pages stop coming

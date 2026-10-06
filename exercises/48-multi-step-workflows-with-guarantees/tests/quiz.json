@@ -45,7 +45,7 @@
       "scope": "page",
       "stem": "A refund gate becomes stricter after three failed identity checks: it now refuses every protected step. A locked-out customer's chat loops until the turn limit. What went wrong?",
       "options": {
-        "a": "The lock should have waited for ten failures instead of three",
+        "a": "The desk should have had no lock, so the customer could keep trying",
         "b": "Escalation should have stayed callable whatever the desk's state",
         "c": "The turn limit should have been cut to end the loop sooner",
         "d": "The model should have been asked to hand the case over on its own"
@@ -53,7 +53,7 @@
       "key": "b",
       "explanation": {
         "b": "An escape route must not sit behind a prerequisite that may be what failed.",
-        "a": "Ruled out because a later lock leaves the same dead end, and three is already lenient: \"a successful check resets the count, so ordinary typing mistakes do not lock anyone out\".",
+        "a": "Ruled out because removing the lock opens a worse hole: \"without it, a person who is guessing at an identity code, or a model that is being led to guess, gets unlimited tries\".",
         "c": "Ruled out because a lower limit only shortens a dead end: \"An agent that cannot verify identity and is also barred from escalating is a dead end that loops until the turn limit\".",
         "d": "Ruled out because asking does not open a route: handing over is a tool call, and it only works when \"one tool outside the gate, `escalate`, which is always allowed\" exists."
       }
@@ -103,7 +103,7 @@
       "stem": "Scenario S1, a customer support resolution agent. The agent handles returns, billing disputes and account problems with tools that verify identity, look up orders and issue refunds, and it escalates to a person when it cannot resolve a case. A policy allows refunds only for items that arrived damaged. The team encodes \"damaged\" as a keyword list in the gate, and many valid claims are refused. Which fix fits best?",
       "options": {
         "a": "Keep extending the keyword list until the valid claims finally pass through it",
-        "b": "Let the model weigh the evidence, and keep steps, amounts and limits as rules",
+        "b": "Have the model judge coverage from what each message describes",
         "c": "Move the refund limit and the order of steps into the prompt as well",
         "d": "Send damage claims to a person for review instead of the gate"
       },
@@ -112,7 +112,7 @@
         "b": "Judgement is the model's work, and rules with a right answer are the gate's.",
         "a": "Ruled out because \"A design that puts judgement in code ends up with a brittle rule engine\".",
         "c": "Ruled out because \"the thresholds and the order of steps go in the gate\".",
-        "d": "Ruled out because whether a claim is covered is the model's call below the limit: \"reading the customer's message, deciding whether the complaint is covered\"."
+        "d": "Ruled out because a person decides only above the limit, and below it the call is the model's: \"Whether a complaint deserves a refund belongs to the model and, above the limit, to a person.\""
       }
     },
     {

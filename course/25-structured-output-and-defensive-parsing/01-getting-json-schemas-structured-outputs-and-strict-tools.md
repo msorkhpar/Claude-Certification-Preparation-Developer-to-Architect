@@ -636,29 +636,29 @@ Java and Kotlin readers: the practice of the next page implements the parser and
 
 ## Quiz
 
-1. A team wants every reply from Claude Sonnet 5.5 to be a record in a fixed JSON shape. What does the documentation recommend?
-   - **a**: A tool choice of any, so that some tool is always called
-   - **b**: A forced tool whose schema is the record, chosen with the name field
-   - **c**: A prompt that shows the record and asks the model to copy the shape
-   - **d**: Structured outputs with the schema in the output configuration
+1. A team moves an invoice extractor to Claude Sonnet 5.5. The old code set `tool_choice` to an invoice tool and read the call's `input`. What should the request use now?
+   - **a**: A tool choice of `any`, so that the invoice tool is still always called
+   - **b**: The invoice tool with `strict: true` and a tool choice of `auto`
+   - **c**: A prompt that shows the invoice record and asks for the same shape
+   - **d**: Structured outputs, with the record's schema in `output_config.format`
 
 2. The schema says a field named `total` has a `minimum` of 0, and the request is sent with that schema unchanged. What happens?
    - **a**: It fails with a 400 error that comes with details of the unsupported item
    - **b**: The reply is checked against the limit and retried for the caller
    - **c**: The limit is read as a hint and the call goes on as usual
-   - **d**: The constraint is applied only when the field is a whole number
+   - **d**: The total is kept at 0 or above while the reply is generated
 
 3. A reply arrives with a 200 status and `stop_reason` of `refusal`. What should the program assume about the body?
    - **a**: It becomes whole once the call is repeated with more tokens
    - **b**: It keeps the shape, because the status code says success
    - **c**: The model's decline takes the place of the promised shape
-   - **d**: It is always an empty object, which signals the refusal
+   - **d**: It is a malformed record that a re-prompt can repair
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The page says to use structured outputs "when you need a response in a fixed JSON shape". *b* is ruled out because `any` and `tool` "return a 400 error" on Claude Sonnet 5.5. *c* is ruled out because a prompt gives "no guarantee; the program must parse defensively". *a* is ruled out because `any` is one of the values that "return a 400 error" on this model.
-2. **a**. The page says "If you use an unsupported feature, you'll receive a 400 error with details." *b* is ruled out because "a helper that validates responses still enforces every constraint in your code", so the check is the program's job. *c* is ruled out because "If you use an unsupported feature" the outcome is an error, with no hint read. *d* is ruled out because the numerical constraints are listed as unsupported with no exception: "Numerical constraints (such as `minimum`, `maximum`, `multipleOf`)".
-3. **c**. The page says "The output may not match your schema because the refusal message takes precedence over schema constraints." *b* is ruled out because a refusal has "a 200 status code and billed tokens" and still breaks the shape. *a* is ruled out because the remedy of more tokens belongs to `max_tokens`: "Retry with a higher `max_tokens` value to get the complete structured output." *d* is ruled out because the page names no such body, only that the output "may not match your schema".
+1. **d**. A forced tool no longer works on this model, and the documentation's advice is structured outputs "when you need a response in a fixed JSON shape". *b* is ruled out because the task returns a record, and "A task that must return a record, such as an invoice, uses structured outputs". *c* is ruled out because a prompt gives "no guarantee; the program must parse defensively". *a* is ruled out because `any` is one of the values that "return a 400 error" on this model.
+2. **a**. The page says "If you use an unsupported feature, you'll receive a 400 error with details." *b* is ruled out because "a helper that validates responses still enforces every constraint in your code", so the check is the program's job. *c* is ruled out because "If you use an unsupported feature" the outcome is an error, with no hint read. *d* is ruled out because the API does not enforce the limit: it does not support "Numerical constraints (such as `minimum`, `maximum`, `multipleOf`)".
+3. **c**. The page says "The output may not match your schema because the refusal message takes precedence over schema constraints." *b* is ruled out because a refusal has "a 200 status code and billed tokens" and still breaks the shape. *a* is ruled out because the remedy of more tokens belongs to `max_tokens`: "Retry with a higher `max_tokens` value to get the complete structured output." *d* is ruled out because "A refusal is a result to report, not a malformed reply to repeat".
 
 </details>

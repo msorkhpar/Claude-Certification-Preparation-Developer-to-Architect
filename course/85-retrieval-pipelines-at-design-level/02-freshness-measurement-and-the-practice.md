@@ -810,7 +810,7 @@ The practice is in [`exercises/85-retrieval-pipelines-at-design-level`](../../ex
 
 1. A team reports a retrieval recall of nine in ten. It counts only the 30 labelled questions that returned something, and 27 of those had the relevant chunk in the top results. Ten more labelled questions came back empty. Which figure follows the page?
    - **a**: 90 percent, since only questions that returned something can be judged
-   - **b**: 68 percent, since a search that found nothing still sits in the denominator
+   - **b**: 68 percent, since a blank search is part of the total
    - **c**: 93 percent, since an empty result counts as a cautious abstention
    - **d**: 75 percent, since 30 of the 40 labelled questions were answered
 
@@ -823,8 +823,8 @@ The practice is in [`exercises/85-retrieval-pipelines-at-design-level`](../../ex
 <details>
 <summary>Answer key</summary>
 
-1. **b**. The 27 hits are counted over all 40 labelled questions, the ten empty ones included, which gives 67.5 percent, about 68. *a* is ruled out because "the denominator is every labelled question", not only the questions that returned something. *c* is ruled out because "A question with no results counts as a miss in recall over the labelled set", never as a success. *d* is ruled out because the measure is "the percentage of relevant documents that fail to be retrieved within the top 20 chunks", so the 3 questions that returned results without the relevant chunk are misses although they were answered.
-2. **d**. Of the 8 with evidence, 2 had wrong answers, so 6 are ok; of the 7 right answers, 6 are ok and 1 is unsupported; that leaves 12 - 6 - 2 - 1 = 3 questions with no evidence and a wrong answer. *a* is ruled out because five counts every wrong answer, and "An end-to-end score of right and wrong answers cannot say where to work": two of those five had their evidence. *b* is ruled out because two is the count of answers where "The evidence was retrieved and the answer is wrong", a generation failure. *c* is ruled out because four counts every question without evidence, and one of them is the case where "The answer is right although the evidence was not retrieved", a defect but not a retrieval failure.
+1. **b**. The 27 hits are counted over all 40 labelled questions, the ten empty ones included, which gives 67.5 percent, about 68. *a* is ruled out because "the denominator is every labelled question", not only the questions that returned something. *c* is ruled out because "A question with no results counts as a miss in recall over the labelled set", never as a success. *d* is ruled out because the failure rate is "the percentage of relevant documents that fail to be retrieved within the top 20 chunks", so the 3 questions that returned results without the relevant chunk are misses although they were answered.
+2. **d**. Of the 8 with evidence, 2 had wrong answers, so 6 are ok; of the 7 right answers, 6 are ok and 1 is unsupported; that leaves 12 - 6 - 2 - 1 = 3 questions with no evidence and a wrong answer. *a* is ruled out because five counts every wrong answer, including the two whose evidence was retrieved, while retrieval's row reads "The evidence was not retrieved and the answer is wrong". *b* is ruled out because two is the count of answers where "The evidence was retrieved and the answer is wrong", a generation failure. *c* is ruled out because four counts every question without evidence, and one of them is the case where "The answer is right although the evidence was not retrieved", a defect but not a retrieval failure.
 
 </details>
 

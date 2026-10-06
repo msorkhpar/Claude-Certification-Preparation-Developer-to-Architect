@@ -126,27 +126,27 @@ accepts a forced choice, set `tool_choice`; otherwise prompt for it.
 
 1. A team wants Claude Opus 5.5 to call a function that they wrote. Who executes it?
    - **a**: Anthropic's servers, after the tool is named in the request
-   - **b**: The SDK client, without any involvement from their program at all
+   - **b**: The API, from the code that the team attached to the tool definition
    - **c**: The model, inside the reply that it is generating for the user
    - **d**: Their program, after it reads the `tool_use` block in the reply
 
 2. Which description follows the documentation's advice for a tool named `get_stock_price`?
    - **a**: Returns the latest USD quote for a listed ticker, for current quotes only and never for history
-   - **b**: A general finance tool that the model may call for anything about companies, markets, prices or news anywhere in the world
+   - **b**: Returns the full quote record for a ticker, history included, so the model can pick what it needs
    - **c**: Gets the stock price for a ticker symbol, so the model can call it whenever any ticker is named in a message
-   - **d**: Price lookup tool, which the model should call on every single message that it receives from any user of the application
+   - **d**: Returns the latest quote for a ticker, and asks for the model's full reasoning in a `thoughts` field
 
 3. A request to Claude Sonnet 5.5 sets `tool_choice` to `{"type": "any"}`. What is the outcome?
    - **a**: A reply that explains the plan and then calls a tool
    - **b**: A call to the first tool in the list, whatever the user said
-   - **c**: A 400 error, because the model does not support that value
+   - **c**: A 400 error from the API, with no tool chosen and no reply text
    - **d**: A silent fall back to `auto`, with a warning in the response header
 
 <details>
 <summary>Answer key</summary>
 
-1. **d**. The page says a client tool call ends with `stop_reason: "tool_use"` and "your code drives a loop". *a* is ruled out because Anthropic's servers run only the server tools, where "you never construct a `tool_result` block". *c* is ruled out because "The model never executes anything on its own." *b* is ruled out because Claude "never sees your implementation", and the SDK has no handler for an operation that only the program defines.
-2. **a**. The page asks for a description that explains what the tool does, when to use it and when not to, and what it does not return, and this one says what it does, when to use it, and that history is not returned. *c* is ruled out because a short description is the pattern to avoid: "Provide extremely detailed descriptions." *b* is ruled out because it never says "what the tool does not return". *d* is ruled out because the page asks for "when to use it and when not to", not for a call on every message.
+1. **d**. The page says a client tool call ends with `stop_reason: "tool_use"` and "your code drives a loop". *a* is ruled out because Anthropic's servers run only the server tools, where "you never construct a `tool_result` block". *c* is ruled out because "The model never executes anything on its own." *b* is ruled out because a tool definition carries no code: Claude "only sees the schema you provided and the result you returned".
+2. **a**. The page asks for a description that explains what the tool does, when to use it and when not to, and what it does not return, and this one says what it does, when to use it, and that history is not returned. *c* is ruled out because a short description is the pattern to avoid: "Provide extremely detailed descriptions." *b* is ruled out because a tool should return "only the fields the model needs for its next step, since bloated results waste context". *d* is ruled out because a parameter that asks for the model's thinking "may lead to a `reasoning_extraction` refusal".
 3. **c**. The page says that for Claude Opus 5.5, Claude Sonnet 5.5, Claude Fable 5.1 and Claude Mythos 5.1, "`any` and `tool` return a 400 error". *b* is ruled out because `any` "doesn't force a particular tool", and the request is rejected before any tool is chosen. *a* is ruled out because for the values that work, "the API prefills the assistant message to force a tool to be used", so no explanation comes first. *d* is ruled out because the page's advice is to choose it yourself: "Use `auto` with strict tools or structured outputs."
 
 </details>

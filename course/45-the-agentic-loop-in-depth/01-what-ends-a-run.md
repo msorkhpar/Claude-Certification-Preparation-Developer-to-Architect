@@ -593,15 +593,15 @@ These are the wrong answers that the exam's options for this task statement offe
    - **c**: Search the text for more completion phrases, such as "finished" and "complete"
    - **d**: Call the model a fixed number of times, large enough for the longest case
 
-2. An insurance agent stops after ten model calls and files every run that reaches that cap as cut off. Auditors find complete answers filed this way whenever a case needed exactly ten calls. Which change fits best?
-   - **a**: Raise the cap by one for these particular cases
-   - **b**: Drop the cap and let every run continue
-   - **c**: Compare the tally with the limit before each new request
-   - **d**: Report `done` for any run whose last reply holds some text
+2. A research agent calls the model five times and returns whatever the fifth reply holds, with the status `done`. Its tests use short tasks and pass, but in production some long tasks come back `done` with an empty answer. Which change fits best?
+   - **a**: Raise the number of calls to twenty, so that the longest known task still fits
+   - **b**: Report `done` only when the fifth reply holds text, and `failed` when it is empty
+   - **c**: End once a response requests no tool, and keep a higher cap that reports apart
+   - **d**: Tell the model in the prompt to finish within five replies, however long the task
 
 <details>
 <summary>Answer key</summary>
 
-1. **a**. The model ends its turn by not asking for a tool, and the stop reason reports exactly that, so a reply that holds a tool call is not the end whatever its text says. *b* is ruled out because a closing phrase in the prompt keeps the control flow in the text: a control flow that needs a particular word "moves the loop's logic into the prompt, where nobody tests it." *c* is ruled out because more phrases do not make the text a protocol: "It changes with the model, the prompt, the language and the day." *d* is ruled out because a fixed count is the second anti-pattern: "A task that needs six steps is cut off in the middle".
-2. **c**. The page says the count "is checked before the next call, so that a reply that ends the turn on the very last allowed call is still `done`". *a* is ruled out because the page says to leave the number alone: "When the status `max_turns` shows up often, the count is not the thing to change." *b* is ruled out because a run that never converges needs something to stop it: "A count is added so that a run that does not converge is stopped." *d* is ruled out because text alone does not show an ending: "the text in front of a `tool_use` block is narration, and only the reply that ends the turn holds the answer."
+1. **a**. The model ends its turn by not asking for a tool, and the stop reason reports exactly that, so a reply that holds a tool call is not the end whatever its text says. *b* is ruled out because a closing phrase, wherever the prompt puts it, is still a signal in the text: "A well-built loop never asks the model to hand back control in a second channel, such as a magic word, a count or a flag in the text." *c* is ruled out because more phrases do not make the text a protocol: "It changes with the model, the prompt, the language and the day." *d* is ruled out because a count, however large, is still the second anti-pattern: "The exam rejects a count as the primary stopper".
+2. **c**. The model ends the run by asking for no tool, and the count stays a generous backstop whose own status tells the caller the run was cut off: "A count is added so that a run that does not converge is stopped." *a* is ruled out because a larger count is still the thing that ends the run: "The exam rejects a count as the primary stopper". *b* is ruled out because text in the last reply does not show the work is finished: "the text in front of a `tool_use` block is narration, and only the reply that ends the turn holds the answer." *d* is ruled out because a prompt does not shorten a task that needs more calls: "A task that needs six steps is cut off in the middle".
 </details>
